@@ -38,6 +38,7 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   virtual bool SetName(const std::string &who); //loj: 11/19/04 - added
    
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
@@ -95,6 +96,7 @@ protected:
    bool mDrawWireFrame;
    bool mDrawTarget;
    bool mOverlapPlot;
+   std::string mOldName;
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;

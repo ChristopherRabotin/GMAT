@@ -39,9 +39,10 @@
 #include "Rvector.hpp"
 #include "MessageInterface.hpp"    // for ShowMessage()
 
-#define DEBUG_PLOTIF_GL 0
-#define DEBUG_PLOTIF_XY 0
-#define DEBUG_PLOTIF_XY_UPDATE 0
+//#define DEBUG_PLOTIF_GL 1
+//#define DEBUG_PLOTIF_XY 1
+//#define DEBUG_PLOTIF_XY_UPDATE 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 //  static data
@@ -66,8 +67,8 @@ PlotInterface::~PlotInterface()
 }
 
 //------------------------------------------------------------------------------
-//  bool CreateGlPlotWindow(const std::string &plotName, bool drawWireFrame = flase,
-//                          bool overlapPlot = false)
+//  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
+//                          bool drawWireFrame = flase, bool overlapPlot = false)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -76,6 +77,7 @@ PlotInterface::~PlotInterface()
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
+                                       const std::string &oldName,
                                        bool drawWireFrame, bool overlapPlot)
 {    
 #if defined __CONSOLE_APP__
@@ -118,6 +120,14 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
 
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
+         createNewFrame = false;
+         break;
+      }
+      else if (currPlotName.IsSameAs(oldName.c_str()))
+      {
+         // change plot name (loj: 11/19/04 - added)
+         ((MdiChildTrajFrame*)MdiGlPlot::mdiChildren[i])->
+            SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
       }
@@ -227,9 +237,10 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 }
 
 //------------------------------------------------------------------------------
-//  bool UpdateGlSpacecraft(const std::string &plotName, const Real &time,
-//                          const RealArray &posX, const RealArray &posY,
-//                          const RealArray &posZ,
+//  bool UpdateGlSpacecraft(const std::string &plotName,
+//                          const std::string &oldName,
+//                          const Real &time, const RealArray &posX,
+//                          const RealArray &posY, const RealArray &posZ,
 //                          const UnsignedIntArray &orbitColor,
 //                          const UnsignedIntArray &targetColor,
 //                          bool updateCanvas, bool drawWireFrame = false)
@@ -239,6 +250,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
+                                       const std::string &oldName,
                                        const Real &time, const RealArray &posX,
                                        const RealArray &posY, const RealArray &posZ,
                                        const UnsignedIntArray &color,
@@ -253,7 +265,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 
    if (MdiGlPlot::mdiParentGlFrame == NULL)
    {
-      if (!CreateGlPlotWindow(plotName, drawWireFrame))
+      if (!CreateGlPlotWindow(plotName, oldName, drawWireFrame))
          return false;
    }
    
@@ -263,7 +275,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
             
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->UpdateSpacecraft(time, posX, posY, posZ, color, updateCanvas); //loj: 8/5/04 color
+         frame->UpdateSpacecraft(time, posX, posY, posZ, color, updateCanvas);
          updated = true;
       }
    }
@@ -276,6 +288,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 
 //------------------------------------------------------------------------------
 //  bool CreateXyPlotWindow(const std::string &plotName,
+//                          const std::string &oldName,
 //                          const std::string &plotTitle,
 //                          const std::string &xAxisTitle,
 //                          const std::string &yAxisTitle,
@@ -288,6 +301,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
+                                       const std::string &oldName,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle,
@@ -335,8 +349,21 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
          createNewFrame = false;
          break;
       }
+      else if (currPlotName.IsSameAs(oldName.c_str()))
+      {
+#if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("PlotInterface::CreateXyPlotWindow() currPlotName=%s, oldName=%s\n",
+             currPlotName.c_str(), oldName.c_str());
+#endif
+         // change plot name (loj: 11/19/04 - added)
+         ((MdiChildXyFrame*)MdiXyPlot::mdiChildren[i])->
+            SetPlotName(wxString(plotName.c_str()));
+         createNewFrame = false;
+         break;
+      }
    }
-    
+   
    //-------------------------------------------------------
    // create MDI child XY frame
    //-------------------------------------------------------
@@ -458,13 +485,15 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
 }
 
 //------------------------------------------------------------------------------
-// bool DeleteAllXyPlotCurves(const std::string &plotName)
+// bool DeleteAllXyPlotCurves(const std::string &plotName,
+//                            const std::string &oldName)
 //------------------------------------------------------------------------------
 /*
  * Deletes all plot curves in XY plow window.
  */
 //------------------------------------------------------------------------------
-bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName)
+bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName,
+                                          const std::string &oldName)
 {
 #if defined __CONSOLE_APP__
    return true;
@@ -480,8 +509,11 @@ bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName)
    for (int i=0; i<MdiXyPlot::numChildren; i++)
    {
       MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
-      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()) ||
+          frame->GetPlotName().IsSameAs(oldName.c_str()))
+      {
          frame->DeleteAllPlotCurves();
+      }
    }
 
    return true;
@@ -649,7 +681,7 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
 }
 
 //------------------------------------------------------------------------------
-// bool UpdateXyPlot(const std::string &plotName,
+// bool UpdateXyPlot(const std::string &plotName, const std::string &oldName,
 //                   const Real &xval, const Rvector &yvals,
 //                   const std::string &plotTitle,
 //                   const std::string &xAxisTitle,
@@ -665,11 +697,12 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateXyPlot(const std::string &plotName,
+                                 const std::string &oldName,
                                  const Real &xval, const Rvector &yvals,
                                  const std::string &plotTitle,
                                  const std::string &xAxisTitle,
                                  const std::string &yAxisTitle,
-                                 bool updateCanvas, bool drawGrid) //loj: 7/20/04 added drawGrid
+                                 bool updateCanvas, bool drawGrid)
 {
 #if defined __CONSOLE_APP__
    return true;
@@ -683,7 +716,8 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
       //wxLogWarning("MdiParentXyFrame was not created. "
       //             "Creating a new MDI parent/child frame...");
       //wxLog::FlushActive();
-      CreateXyPlotWindow(plotName, plotTitle, xAxisTitle, yAxisTitle, drawGrid);
+      CreateXyPlotWindow(plotName, oldName, plotTitle, xAxisTitle, yAxisTitle,
+                         drawGrid);
 #if DEBUG_PLOTIF_XY_UPDATE
       MessageInterface::ShowMessage
          ("PlotInterface::UpdateXyPlot()" + plotName + " " +

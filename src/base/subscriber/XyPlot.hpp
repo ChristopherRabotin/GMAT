@@ -37,6 +37,7 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   virtual bool SetName(const std::string &who); //loj: 11/19/04 - added
    
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
@@ -97,7 +98,8 @@ protected:
    std::string mXParamName;
    StringArray mYParamNames;
    StringArray mAllParamNames;
-   
+
+   std::string mOldName;
    std::string mPlotTitle;
    std::string mXAxisTitle;
    std::string mYAxisTitle;

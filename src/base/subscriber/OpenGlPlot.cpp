@@ -85,6 +85,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    mDrawWireFrame = false;
    mDrawTarget = false;
    mOverlapPlot = false;
+   mOldName = instanceName;
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
    mNumData = 0;
@@ -108,6 +109,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    mDrawWireFrame = ogl.mDrawWireFrame;
    mDrawTarget = ogl.mDrawTarget;
    mOverlapPlot = ogl.mOverlapPlot;
+   mOldName = instanceName;
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
    mScCount = ogl.mScCount;
@@ -152,8 +154,10 @@ bool OpenGlPlot::Initialize()
 #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
 #endif
-         return PlotInterface::CreateGlPlotWindow(instanceName, mDrawWireFrame,
-                                                  mOverlapPlot);
+
+         return PlotInterface::CreateGlPlotWindow
+            (instanceName, mOldName, mDrawWireFrame, mOverlapPlot);
+         
       }
       else
       {
@@ -245,6 +249,27 @@ GmatBase* OpenGlPlot::Clone(void) const
    return (new OpenGlPlot(*this));
 }
 
+//loj: 11/19/04 - added
+//------------------------------------------------------------------------------
+// bool SetName(const std::string &who)
+//------------------------------------------------------------------------------
+/**
+ * Set the name for this instance.
+ *
+ * @see GmatBase
+ *
+ */
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetName(const std::string &who)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage("OpenGlPlot::SetName() newName=%s\n", who.c_str());
+#endif
+   
+   mOldName = instanceName;
+   return GmatBase::SetName(who);
+}
+
 //------------------------------------------------------------------------------
 // virtual bool TakeAction(const std::string &action,  
 //                         const std::string &actionData = "");
@@ -292,46 +317,42 @@ bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
 #endif
    
-   if (type == Gmat::SPACECRAFT)
+   if (type != Gmat::SPACECRAFT)
+      return true;
+
+   // for spacecraft name
+   for (int i=0; i<mScCount; i++)
+      if (mScNameArray[i] == oldName)
+         mScNameArray[i] = newName;
+   
+   //----------------------------------------------------
+   // Since spacecraft name is used as key for spacecraft
+   // color map, I can't change the key name, so it is
+   // removed and inserted with new name
+   //----------------------------------------------------
+   std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
+   orbColorPos = mOrbitColorMap.find(oldName);
+   targColorPos = mTargetColorMap.find(oldName);
+   
+   if (orbColorPos != mOrbitColorMap.end() &&
+       targColorPos != mTargetColorMap.end())
    {
-      // for spacecraft name
-      for (int i=0; i<mScCount; i++)
-      {
-         if (mScNameArray[i] == oldName)
-         {
-            mScNameArray[i] = newName;
-         }
-      }
-
-      //----------------------------------------------------
-      // Since spacecraft name is used as key for spacecraft
-      // color map, I can't change the key name, so it is
-      // removed and insert back
-      //----------------------------------------------------
-      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
-      orbColorPos = mOrbitColorMap.find(oldName);
-      targColorPos = mTargetColorMap.find(oldName);
-
-      if (orbColorPos != mOrbitColorMap.end() &&
-          targColorPos != mTargetColorMap.end())
-      {
-         // add new spacecraft name key and delete old
-         mOrbitColorMap[newName] = mOrbitColorMap[oldName];
-         mTargetColorMap[newName] = mTargetColorMap[oldName];
-         mOrbitColorMap.erase(orbColorPos);
-         mTargetColorMap.erase(targColorPos);
-
+      // add new spacecraft name key and delete old
+      mOrbitColorMap[newName] = mOrbitColorMap[oldName];
+      mTargetColorMap[newName] = mTargetColorMap[oldName];
+      mOrbitColorMap.erase(orbColorPos);
+      mTargetColorMap.erase(targColorPos);
+      
 #if DEBUG_RENAME
-         MessageInterface::ShowMessage("---After rename\n");
-         for (orbColorPos = mOrbitColorMap.begin();
-              orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
-         {
-            MessageInterface::ShowMessage
-               ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
-         }
-#endif
-         return true;
+      MessageInterface::ShowMessage("---After rename\n");
+      for (orbColorPos = mOrbitColorMap.begin();
+           orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
+      {
+         MessageInterface::ShowMessage
+            ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
       }
+#endif
+      return true;
    }
    
    return false;
@@ -913,14 +934,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             {
                //loj: 7/13/04 used new method taking arrays
                PlotInterface::
-                  UpdateGlSpacecraft(instanceName,
+                  UpdateGlSpacecraft(instanceName, mOldName,
                                      dat[0], mScXArray, mScYArray, mScZArray,
                                      mTargetColorArray, update, mDrawWireFrame);
             }
             else
             {
                PlotInterface::
-                  UpdateGlSpacecraft(instanceName,
+                  UpdateGlSpacecraft(instanceName, mOldName,
                                      dat[0], mScXArray, mScYArray, mScZArray,
                                      mOrbitColorArray, update, mDrawWireFrame);
             }

@@ -91,6 +91,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
    if (firstYParam != NULL)
       AddYParameter(firstYParam->GetName(), mNumYParams);
 
+   mOldName = instanceName;
    mPlotTitle = plotTitle;
    mXAxisTitle = xAxisTitle;
    mYAxisTitle = yAxisTitle;
@@ -111,20 +112,21 @@ XyPlot::XyPlot(const XyPlot &copy) :
    
    mNumXParams = copy.mNumXParams;
    mNumYParams = copy.mNumYParams;
-
+   
    mXParamName = copy.mXParamName;
    mYParamNames = copy.mYParamNames;
-    
+   
+   mOldName = copy.mOldName;
    mPlotTitle = copy.mPlotTitle;
    mXAxisTitle = copy.mXAxisTitle;
    mYAxisTitle = copy.mYAxisTitle;
    mDrawGrid = copy.mDrawGrid;
    mDrawTarget = copy.mDrawTarget;
    mIsXyPlotWindowSet = copy.mIsXyPlotWindowSet;
-    
+   
    mDataCollectFrequency = copy.mDataCollectFrequency;
    mUpdatePlotFrequency = copy.mUpdatePlotFrequency;
-    
+   
    mNumDataPoints = copy.mNumDataPoints;
    mNumCollected = copy.mNumCollected;
 }
@@ -200,7 +202,7 @@ bool XyPlot::Initialize()
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
              "XyPlot::Initialize() XYPlot will not be shown.\n"
-             "The first parameter selected for X Axis or Y Axis are NULL\n");
+             "The first parameter selected for X Axis or Y Axis is NULL\n");
          return false;
       }
    }
@@ -223,7 +225,7 @@ bool XyPlot::Initialize()
 #if DEBUG_XYPLOT_INIT
       MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
 #endif
-      PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
+      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotTitle,
                                         mXAxisTitle, mYAxisTitle, mDrawGrid);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
@@ -289,6 +291,27 @@ bool XyPlot::Initialize()
 GmatBase* XyPlot::Clone(void) const
 {
    return (new XyPlot(*this));
+}
+
+//loj: 11/19/04 - added
+//------------------------------------------------------------------------------
+// bool SetName(const std::string &who)
+//------------------------------------------------------------------------------
+/**
+ * Set the name for this instance.
+ *
+ * @see GmatBase
+ *
+ */
+//------------------------------------------------------------------------------
+bool XyPlot::SetName(const std::string &who)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage("XyPlot::SetName() newName=%s\n", who.c_str());
+#endif
+   
+   mOldName = instanceName;
+   return GmatBase::SetName(who);
 }
 
 //------------------------------------------------------------------------------
@@ -837,7 +860,7 @@ bool XyPlot::RemoveYParameter(const std::string &name)
 void XyPlot::DeletePlotCurves()
 {
    // delete exiting curves
-   PlotInterface::DeleteAllXyPlotCurves(instanceName);
+   PlotInterface::DeleteAllXyPlotCurves(instanceName, mOldName);
 }
 
 
@@ -909,7 +932,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                //MessageInterface::ShowMessage
                //   ("XyPlot::Distribute() calling PlotInterface::UpdateXyPlot()\n");
                
-               return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
+               return PlotInterface::UpdateXyPlot(instanceName, mOldName, xval, yvals,
                                                   mPlotTitle, mXAxisTitle, mYAxisTitle,
                                                   update, mDrawGrid);
                if (update)
