@@ -276,7 +276,7 @@ bool XyPlot::Initialize()
       // Create XyPlotWindow, if not exist
       //MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
       PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
-                                        mXAxisTitle, mYAxisTitle);
+                                        mXAxisTitle, mYAxisTitle, mDrawGrid);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle); //loj: 7/13/04 added
       mIsXyPlotWindowSet = true; //loj: 5/12/04 Do I need this flag?
@@ -750,7 +750,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                
                return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
                                                   mPlotTitle, mXAxisTitle, mYAxisTitle,
-                                                  update);
+                                                  update, mDrawGrid);
                if (update)
                   mNumCollected = 0;
             }

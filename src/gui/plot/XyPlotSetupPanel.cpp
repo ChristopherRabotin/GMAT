@@ -35,7 +35,7 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-    
+   
    EVT_BUTTON(ADD_X, XyPlotSetupPanel::OnAddX)
    EVT_BUTTON(ADD_Y, XyPlotSetupPanel::OnAddY)
    EVT_BUTTON(REMOVE_X, XyPlotSetupPanel::OnRemoveX)
@@ -43,7 +43,8 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
    EVT_BUTTON(CLEAR_Y, XyPlotSetupPanel::OnClearY)
    EVT_BUTTON(LINE_COLOR_BUTTON, XyPlotSetupPanel::OnLineColorClick)
    EVT_LISTBOX(Y_SEL_LISTBOX, XyPlotSetupPanel::OnSelectY)
-   EVT_CHECKBOX(PLOT_CHECKBOX, XyPlotSetupPanel::OnPlotCheckBoxChange)
+   EVT_CHECKBOX(SHOW_PLOT_CHECKBOX, XyPlotSetupPanel::OnShowPlotCheckBoxChange)
+   EVT_CHECKBOX(SHOW_GRID_CHECKBOX, XyPlotSetupPanel::OnShowGridCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -195,9 +196,17 @@ void XyPlotSetupPanel::OnSelectY(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnPlotCheckBoxChange(wxCommandEvent& event)
+// void OnShowPlotCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void XyPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
+void XyPlotSetupPanel::OnShowPlotCheckBoxChange(wxCommandEvent& event)
+{
+   theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnShowGridCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnShowGridCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
 }
@@ -253,20 +262,24 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    // plot option
    //------------------------------------------------------
-   plotCheckBox =
-      new wxCheckBox(this, PLOT_CHECKBOX, wxT("Show Plot"),
+   showPlotCheckBox =
+      new wxCheckBox(this, SHOW_PLOT_CHECKBOX, wxT("Show Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
-            
+   showGridCheckBox =
+      new wxCheckBox(this, SHOW_GRID_CHECKBOX, wxT("Show Grid"),
+                     wxDefaultPosition, wxSize(100, -1), 0);
+   
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   plotOptionBoxSizer->Add(plotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-        
+   plotOptionBoxSizer->Add(showPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(showGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
    //------------------------------------------------------
    // X box label (1st column)
    //------------------------------------------------------
    wxStaticText *titleXText =
       new wxStaticText(this, -1, wxT("Selected X"),
                        wxDefaultPosition, wxSize(80,-1), 0);
-    
+   
    xSelectedListBox =
       new wxListBox(this, LISTBOX, wxDefaultPosition,
                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
@@ -274,10 +287,10 @@ void XyPlotSetupPanel::Create()
    wxBoxSizer *xSelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
    xSelelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, bsize);
    xSelelectedBoxSizer->Add(xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-            
-    //------------------------------------------------------
-    // add, remove X buttons (2nd column)
-    //------------------------------------------------------
+   
+   //------------------------------------------------------
+   // add, remove X buttons (2nd column)
+   //------------------------------------------------------
    addXButton = new wxButton(this, ADD_X, wxT("<--"),
                              wxDefaultPosition, wxSize(20,20), 0);
 
@@ -392,8 +405,9 @@ void XyPlotSetupPanel::LoadData()
    {
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
     
-      plotCheckBox->SetValue(mSubscriber->IsActive());
-    
+      showPlotCheckBox->SetValue(mSubscriber->IsActive());
+      showGridCheckBox->SetValue(mSubscriber->GetBooleanParameter("DrawGrid"));
+      
       // get X parameter
       wxString *xParamNames = new wxString[1];
       xParamNames[0] = mSubscriber->GetStringParameter("IndVar").c_str();
@@ -465,12 +479,13 @@ void XyPlotSetupPanel::SaveData()
 {
    // save data to core engine
     
-   mSubscriber->Activate(plotCheckBox->IsChecked());
-
+   mSubscriber->Activate(showPlotCheckBox->IsChecked());
+   mSubscriber->SetBooleanParameter("DrawGrid", showGridCheckBox->IsChecked());
+   
    // set X parameter
    if (mXParamChanged)
    {
-      if (xSelectedListBox->GetCount() == 0 && plotCheckBox->IsChecked())
+      if (xSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
          mSubscriber->Activate(false);
@@ -494,7 +509,7 @@ void XyPlotSetupPanel::SaveData()
       int numYParams = ySelectedListBox->GetCount();
 
       mNumYParams = numYParams;
-      if (mNumYParams == 0 && plotCheckBox->IsChecked())
+      if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
          mSubscriber->Activate(false);

@@ -35,6 +35,8 @@ class MdiChildXyFrame: public wxMDIChildFrame
 public:
    wxPlotWindow   *mXyPlot;
    wxTextCtrl     *mLogTextCtrl;
+   wxMenu         *mViewOptionMenu;
+   
    bool mIsMainFrame;
         
    MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
@@ -62,11 +64,13 @@ public:
    wxString GetXAxisTitle() {return mXAxisTitle;}
    wxString GetYAxisTitle() {return mYAxisTitle;}
    int GetCurveCount() {return mXyPlot->GetCount();}
-    
+   bool GetShowGrid() {return mXyPlot->GetShowGrid();}
+   
    // setter
    void SetPlotName(const wxString &str) {mPlotName = str;}
    void SetXAxisTitle(const wxString &str) {mXAxisTitle = str;}
    void SetYAxisTitle(const wxString &str) {mYAxisTitle = str;}
+   void SetShowGrid(bool show);
    
    // menu events
    void OnClearPlot(wxCommandEvent& event);
@@ -96,5 +100,5 @@ protected:
    bool mHasFirstXSet[MAX_NUM_CURVE];
     
    DECLARE_EVENT_TABLE()
-      };
+};
 #endif

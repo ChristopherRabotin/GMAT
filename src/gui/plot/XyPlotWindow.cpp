@@ -410,6 +410,139 @@ void wxPlotArea::DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
    }
 }
 
+//loj: 7/20/04 added
+//------------------------------------------------------------------------------
+// void wxPlotArea::DrawGrid(wxDC *dc)
+//------------------------------------------------------------------------------
+void wxPlotArea::DrawGrid(wxDC *dc)
+{
+   //------------------------------------------------------------
+   // draw horizontal lines (Reused wxPlotYAxisArea::OnPaint())
+   //------------------------------------------------------------
+   int view_x;
+   int view_y;
+   m_owner->GetViewStart( &view_x, &view_y );
+   view_x *= wxPLOT_SCROLL_STEP;
+   view_y *= wxPLOT_SCROLL_STEP;
+      
+   wxPlotCurve *curve = m_owner->GetCurrent();
+  
+   if (!curve) return;
+    
+   int client_width;
+   int client_height;
+   GetClientSize( &client_width, &client_height);
+   
+   double yRange = curve->GetEndY() - curve->GetStartY();
+   double yOffset = ((double) curve->GetOffsetY() / (double)client_height ) * yRange;
+   double yStart = curve->GetStartY() - yOffset;
+   double yEnd = curve->GetEndY() - yOffset;
+   
+   int int_log_yRange = (int)floor( log10( yRange ) );
+   double yStep = 1.0;
+   if (int_log_yRange > 0)
+   {
+      for (int i = 0; i < int_log_yRange; i++)
+         yStep *= 10; 
+   }
+   if (int_log_yRange < 0)
+   {
+      for (int i = 0; i < -int_log_yRange; i++)
+         yStep /= 10; 
+   }
+   
+   double yLower = ceil(yStart / yStep) * yStep;
+   double yUpper = floor(yEnd / yStep) * yStep;
+   
+   // if too few values, shrink size
+   if ((yRange/yStep) < 4)
+   {
+      yStep /= 2;
+      if (yLower-yStep > yStart) yLower -= yStep;
+      if (yUpper+yStep < yEnd) yUpper += yStep;
+   }
+   
+   // if still too few, again
+   if ((yRange/yStep) < 4)
+   {
+      yStep /= 2;
+      if (yLower-yStep > yStart) yLower -= yStep;
+      if (yUpper+yStep < yEnd) yUpper += yStep;
+   }
+
+   dc->SetPen( *wxBLACK_PEN );
+   
+   double yCurrent = yLower;
+   while (yCurrent < yUpper+(yStep/2))
+   {
+      int y = (int)((curve->GetEndY()-yCurrent) / yRange * (double)client_height) - 1;
+      y -= curve->GetOffsetY();
+      if ((y > 10) && (y < client_height-7))
+      {
+         dc->DrawLine(0, y, client_width, y );
+      }
+      yCurrent += yStep;
+   }
+   
+   //------------------------------------------------------------
+   // draw vertical lines (Reused wxPlotXAxisArea::OnPaint())
+   //------------------------------------------------------------
+   double zoom = m_owner->GetZoom();    
+   double ups = m_owner->GetUnitsPerValue() / zoom;
+    
+   double xStart = view_x * ups;
+   double xEnd = (view_x + client_width) * ups;
+   double xRange = xEnd - xStart;
+  
+   int int_log_xRange = (int)floor( log10( xRange ) );
+   double xStep = 1.0;
+   
+   if (int_log_xRange > 0)
+   {
+      for (int i = 0; i < int_log_xRange; i++)
+         xStep *= 10; 
+   }
+        
+   if (int_log_xRange < 0)
+   {
+      for (int i = 0; i < -int_log_xRange; i++)
+         xStep /= 10; 
+   }
+   
+   double xLower = ceil(xStart / xStep) * xStep;
+   double xUpper = floor(xEnd / xStep) * xStep;
+   
+   // if too few values, shrink size
+   if ((xRange/xStep) < 4)
+   {
+      xStep /= 2;
+      if (xLower-xStep > xStart) xLower -= xStep;
+      if (xUpper+xStep < xEnd) xUpper += xStep;
+   }
+    
+   // if still too few, again
+   if ((xRange/xStep) < 4)
+   {
+      xStep /= 2;
+      if (xLower-xStep > xStart) xLower -= xStep;
+      if (xUpper+xStep < xEnd) xUpper += xStep;
+   }
+   
+   double xCurrent = xLower;
+   while (xCurrent < xUpper+(xStep/2))
+   {
+      //loj: why I need to change - 1 to - 2 to line up with X-axis tick
+      int x = (int)ceil((xCurrent-xStart) / xRange * (double)client_width) - 2;
+      //if ((x > 4) && (x < client_width-25))
+      if ((x > 0) && (x < client_width))
+      {
+         dc->DrawLine( x, 0, x, client_height );
+      }
+
+      xCurrent += xStep;
+   }
+}
+
 //------------------------------------------------------------------------------
 // void DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, int to )
 //------------------------------------------------------------------------------
@@ -419,7 +552,7 @@ void wxPlotArea::DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, in
    int view_y;
    m_owner->GetViewStart( &view_x, &view_y );
    view_x *= wxPLOT_SCROLL_STEP;
-    
+   
    if (from == -1)
       from = view_x;
 
@@ -485,7 +618,7 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
    view_y *= wxPLOT_SCROLL_STEP;
 
    wxPaintDC dc( this );
-   m_owner->PrepareDC( dc );
+   //m_owner->PrepareDC( dc ); //loj: we want to draw grid first
 
    wxRegionIterator upd( GetUpdateRegion() );
     
@@ -498,15 +631,31 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
       update_x += view_x;
       update_y += view_y;
         
-      /*
-        if (m_owner->m_current)
-        {
-            dc.SetPen( *wxLIGHT_GREY_PEN );
-            int base_line = client_height - m_owner->m_current->GetOffsetY();
-            dc.DrawLine( update_x-1, base_line-1, update_x+update_width+2, base_line-1 );
-        }
-      */
-        
+      //loj: why the following block was commented out and what does it do?
+      //-------------------------------------------------------------
+      //if (m_owner->m_current)
+      //{
+      //   int client_width;
+      //   int client_height;
+      //   GetClientSize( &client_width, &client_height);
+      //   dc.SetPen( *wxLIGHT_GREY_PEN );
+      //   int base_line = client_height - m_owner->m_current->GetOffsetY();
+      //   dc.DrawLine( update_x-1, base_line-1, update_x+update_width+2, base_line-1 );
+      //}
+      //-------------------------------------------------------------
+      
+      //------------------------------------------------------------
+      // draw grid
+      //------------------------------------------------------------
+      if (m_owner->GetShowGrid())
+         DrawGrid(&dc);
+
+      //loj: now prepare dc for scrolled image
+      m_owner->PrepareDC( dc );
+
+      //------------------------------------------------------------
+      // draw curves
+      //------------------------------------------------------------
       wxNode *node = m_owner->m_curves.First();
       while (node)
       {
@@ -527,19 +676,19 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
             dc.SetPen(curve->GetPenNormal());
                 
          DrawCurve( &dc, curve, update_x-1, update_x + update_width + 2 );
-
          node = node->Next();
       }
       
+      //------------------------------------------------------------
+      // draw on-off curves
+      //------------------------------------------------------------
       dc.SetPen( *wxRED_PEN );
       
       node = m_owner->m_onOffCurves.First();
       while (node)
       {
          wxPlotOnOffCurve *curve = (wxPlotOnOffCurve*) node->Data();
-            
          DrawOnOffCurve( &dc, curve, update_x-1, update_x+update_width+2 );
-            
          node = node->Next();
       }
       
@@ -856,6 +1005,8 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
    m_enlargeAroundWindowCentre = FALSE;
    m_scrollOnThumbRelease = FALSE;
 
+   mShowGrid = false;
+   
    wxBoxSizer *mainSizer = new wxBoxSizer( wxVERTICAL );
 
    //-------------------------------------------------------
@@ -1152,7 +1303,9 @@ void wxPlotWindow::Move( wxPlotCurve* curve, int pixels_up )
     
    curve->SetOffsetY( curve->GetOffsetY() + pixels_up );
     
-   m_area->Refresh( FALSE );
+   //m_area->Refresh( FALSE );
+   //loj: 7/19/04 set to true; grid will not be updated otherwise
+   m_area->Refresh( TRUE );
     
    RedrawYAxis();
 }
@@ -1174,7 +1327,6 @@ void wxPlotWindow::OnMoveUp( wxCommandEvent& WXUNUSED(event) )
       Move(curve, 25);
       node = node->Next();
    }
-    
 }
 
 //------------------------------------------------------------------------------
@@ -1227,6 +1379,8 @@ void wxPlotWindow::Enlarge( wxPlotCurve *curve, double factor )
       curve->SetEndY( (curve->GetEndY() - offset)/factor + new_offset );
    }
     
+   //m_area->Refresh( FALSE );
+   //loj: 7/19/04 set to true; grid will not be updated otherwise
    m_area->Refresh( FALSE );
    RedrawYAxis();
 }
@@ -1387,6 +1541,26 @@ void wxPlotWindow::SetPlotTitle(const wxString &title)
    mPlotTitle = title;
    mTitleText->SetLabel(title);
    mTopPanelSizer->Fit(mTitleText);
+}
+
+//loj: 7/19/04 added
+//------------------------------------------------------------------------------
+// bool wxPlotWindow::GetShowGrid()
+//------------------------------------------------------------------------------
+bool wxPlotWindow::GetShowGrid()
+{
+   return mShowGrid;
+}
+
+//------------------------------------------------------------------------------
+// void wxPlotWindow::SetShowGrid(bool show)
+//------------------------------------------------------------------------------
+void wxPlotWindow::SetShowGrid(bool show)
+{
+   mShowGrid = show;
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::ShowGrid() mShowGrid=%d\n");
+#endif
 }
 
 //loj: 7/14/04 added

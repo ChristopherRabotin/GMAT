@@ -27,7 +27,8 @@ class PlotInterface
 
 public:
    // for OpenGL Plot
-   static bool CreateGlPlotWindow(const std::string &plotName);
+   static bool CreateGlPlotWindow(const std::string &plotName,
+                                  bool drawWireFrame = false);
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    
@@ -37,13 +38,14 @@ public:
                                   const RealArray &posY, const RealArray &posZ,
                                   const UnsignedIntArray &orbitColor,
                                   const UnsignedIntArray &targetColor,
-                                  bool updateCanvas, bool drawWireFrame);
+                                  bool updateCanvas, bool drawWireFrame = false);
 
    // for XY plot
    static bool CreateXyPlotWindow(const std::string &plotName,
                                   const std::string &plotTitle,
                                   const std::string &xAxisTitle,
-                                  const std::string &yAxisTitle);
+                                  const std::string &yAxisTitle,
+                                  bool drawGrid = false);
    static bool DeleteXyPlot(bool hideFrame);
    static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                               int yOffset, Real yMin, Real yMax,
@@ -61,7 +63,7 @@ public:
                             const std::string &plotTitle,
                             const std::string &xAxisTitle,
                             const std::string &yAxisTitle,
-                            bool updateCanvas);
+                            bool updateCanvas, bool drawGrid); //loj: 7/20/04 added drawGrid
                              
     
 private:

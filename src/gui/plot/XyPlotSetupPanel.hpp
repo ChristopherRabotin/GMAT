@@ -56,7 +56,8 @@ protected:
    wxButton *removeYButton;
    wxButton *mLineColorButton;
    
-   wxCheckBox *plotCheckBox;
+   wxCheckBox *showPlotCheckBox;
+   wxCheckBox *showGridCheckBox;
    wxComboBox *scComboBox;
    
    wxFlexGridSizer *mFlexGridSizer;
@@ -68,7 +69,8 @@ protected:
    void OnRemoveY(wxCommandEvent& event);
    void OnClearY(wxCommandEvent& event);
    void OnSelectY(wxCommandEvent& event);
-   void OnPlotCheckBoxChange(wxCommandEvent& event);
+   void OnShowPlotCheckBoxChange(wxCommandEvent& event);
+   void OnShowGridCheckBoxChange(wxCommandEvent& event);
    void OnLineColorClick(wxCommandEvent& event);
 
    // methods inherited from GmatPanel
@@ -89,7 +91,8 @@ protected:
       REMOVE_X,
       REMOVE_Y,
       CLEAR_Y,
-      PLOT_CHECKBOX,
+      SHOW_PLOT_CHECKBOX,
+      SHOW_GRID_CHECKBOX,
       LINE_COLOR_BUTTON,
    };
    

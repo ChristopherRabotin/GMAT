@@ -66,7 +66,7 @@ PlotInterface::~PlotInterface()
 }
 
 //------------------------------------------------------------------------------
-//  bool CreateGlPlotWindow(const std::string &plotName)
+//  bool CreateGlPlotWindow(const std::string &plotName, bool drawWireFrame)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -74,7 +74,8 @@ PlotInterface::~PlotInterface()
  * @param <plotName> plot name
  */
 //------------------------------------------------------------------------------
-bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
+bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
+                                       bool drawWireFrame)
 {    
 #if defined __CONSOLE_APP__
    return true;
@@ -104,7 +105,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
       MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
 #endif
    }
-    
+   
    //-------------------------------------------------------
    // check if new MDI child frame is needed
    //-------------------------------------------------------
@@ -146,7 +147,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
          return false;
       }
    }
-       
+
+   MdiGlPlot::mdiParentGlFrame->mainSubframe->SetDrawWireFrame(drawWireFrame);
    MdiGlPlot::mdiParentGlFrame->Show(true);
    MdiGlPlot::mdiParentGlFrame->UpdateUI();
 
@@ -226,7 +228,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 //                          const RealArray &posZ,
 //                          const UnsignedIntArray &orbitColor,
 //                          const UnsignedIntArray &targetColor,
-//                          bool updateCanvas, bool drawWireFrame)
+//                          bool updateCanvas, bool drawWireFrame = false)
 //------------------------------------------------------------------------------
 /*
  * Buffers data and updates OpenGL plow window if updateCanvas is true
@@ -248,7 +250,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 
    if (MdiGlPlot::mdiParentGlFrame == NULL)
    {
-      if (!CreateGlPlotWindow(plotName))
+      if (!CreateGlPlotWindow(plotName, drawWireFrame))
          return false;
    }
    
@@ -259,7 +261,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
          frame->UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
-                                 updateCanvas, drawWireFrame);
+                                 updateCanvas);
          updated = true;
       }
    }
@@ -274,7 +276,8 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 //  bool CreateXyPlotWindow(const std::string &plotName,
 //                          const std::string &plotTitle,
 //                          const std::string &xAxisTitle,
-//                          const std::string &yAxisTitle)
+//                          const std::string &yAxisTitle,
+//                          bool drawGrid = false)
 //------------------------------------------------------------------------------
 /*
  * Creates XyPlot window.
@@ -285,7 +288,8 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &plotTitle,
                                        const std::string &xAxisTitle,
-                                       const std::string &yAxisTitle)
+                                       const std::string &yAxisTitle,
+                                       bool drawGrid)
 {    
 #if defined __CONSOLE_APP__
    return true;
@@ -359,10 +363,11 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
 
       MdiXyPlot::mdiParentXyFrame->mainSubframe->RedrawCurve();
    }
-   
+
+   MdiXyPlot::mdiParentXyFrame->mainSubframe->SetShowGrid(drawGrid); //loj: 7/20/04 added
    MdiXyPlot::mdiParentXyFrame->Show(true);
    MdiXyPlot::mdiParentXyFrame->Raise();
-    
+   
    return true;
 #endif
 }
@@ -640,7 +645,8 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
 //                   const Real &xval, const Rvector &yvals,
 //                   const std::string &plotTitle,
 //                   const std::string &xAxisTitle,
-//                   const std::string &yAxisTitle, bool updateCanvas)
+//                   const std::string &yAxisTitle, bool updateCanvas,
+//                   bool drawGrid)
 //------------------------------------------------------------------------------
 /*
  * Updates XY plot curve.
@@ -655,7 +661,7 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
                                  const std::string &plotTitle,
                                  const std::string &xAxisTitle,
                                  const std::string &yAxisTitle,
-                                 bool updateCanvas)
+                                 bool updateCanvas, bool drawGrid) //loj: 7/20/04 added drawGrid
 {
 #if defined __CONSOLE_APP__
    return true;
@@ -669,7 +675,7 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
       //wxLogWarning("MdiParentXyFrame was not created. "
       //             "Creating a new MDI parent/child frame...");
       //wxLog::FlushActive();
-      CreateXyPlotWindow(plotName, plotTitle, xAxisTitle, yAxisTitle);
+      CreateXyPlotWindow(plotName, plotTitle, xAxisTitle, yAxisTitle, drawGrid);
 #if DEBUG_PLOTIF_XY_UPDATE
       MessageInterface::ShowMessage
          ("PlotInterface::UpdateXyPlot()" + plotName + " " +

@@ -53,12 +53,12 @@ BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
 //                 const wxString& xAxisTitle, const wxString& yAxisTitle,
 //                 const wxPoint& pos, const wxSize& size, const long style)
 //------------------------------------------------------------------------------
-   MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
-                                    const wxString &plotName, const wxString& plotTitle,
-                                    const wxString& xAxisTitle, const wxString& yAxisTitle,
-                                    const wxPoint& pos, const wxSize& size, const long style)
-      : wxMDIChildFrame(parent, -1, plotName, pos, size,
-                        style | wxNO_FULL_REPAINT_ON_RESIZE)
+MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
+                                 const wxString &plotName, const wxString& plotTitle,
+                                 const wxString& xAxisTitle, const wxString& yAxisTitle,
+                                 const wxPoint& pos, const wxSize& size, const long style)
+   : wxMDIChildFrame(parent, -1, plotName, pos, size,
+                     style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mXyPlot = (wxPlotWindow *) NULL;
    mIsMainFrame = isMainFrame;
@@ -106,19 +106,19 @@ BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
    viewMenu->AppendSeparator();
 
    // View Option submenu
-   wxMenu *viewOptionMenu = new wxMenu;
+   mViewOptionMenu = new wxMenu;
    wxMenuItem *item =
       new wxMenuItem(viewMenu, GmatPlot::MDI_XY_VIEW_OPTION, _T("Option"),
-                     _T("view options"), wxITEM_NORMAL, viewOptionMenu);
-   viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
-                          _T("Draw Grids"),
-                          _T("Draw Grids"), wxITEM_CHECK);
-   viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
+                     _T("view options"), wxITEM_NORMAL, mViewOptionMenu);
+   mViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
+                          _T("Draw Grid"),
+                          _T("Draw Grid"), wxITEM_CHECK);
+   mViewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
                           _T("Draw dotted line"),
                           _T("Draw dotted line"), wxITEM_CHECK);
 
-   viewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
-        
+   mViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
+   
    viewMenu->Append(item);
 
    // Help menu
@@ -498,6 +498,22 @@ void MdiChildXyFrame::RedrawCurve()
 }
 
 //------------------------------------------------------------------------------
+// void SetShowGrid(bool show)
+//------------------------------------------------------------------------------
+/*
+ * Sets show grid menu option
+ */
+//------------------------------------------------------------------------------
+void MdiChildXyFrame::SetShowGrid(bool show)
+{
+   if (mXyPlot)
+   {
+      mViewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_GRID, show);
+      mXyPlot->SetShowGrid(show);
+   }
+}
+
+//------------------------------------------------------------------------------
 // void OnQuit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -556,8 +572,12 @@ void MdiChildXyFrame::OnShowDefaultView(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnDrawGrid(wxCommandEvent& event)
 {
-   //if (mXyPlot)
-   //   mXyPlot->DrawGrid(event.IsChecked());
+   //loj: 7/20/04 added
+   if (mXyPlot)
+   {
+      mXyPlot->SetShowGrid(event.IsChecked());
+      mXyPlot->RedrawPlotArea();
+   }
 }
 
 //------------------------------------------------------------------------------
