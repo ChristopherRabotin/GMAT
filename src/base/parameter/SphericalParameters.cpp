@@ -147,6 +147,8 @@ GmatBase* SphRMag::Clone(void) const
 SphRA::SphRA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -252,6 +254,8 @@ GmatBase* SphRA::Clone(void) const
 SphDec::SphDec(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "DEC", obj, "Sph. Declination", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -460,6 +464,8 @@ GmatBase* SphVMag::Clone(void) const
 SphRAV::SphRAV(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -565,6 +571,8 @@ GmatBase* SphRAV::Clone(void) const
 SphDecV::SphDecV(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "DECV", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------

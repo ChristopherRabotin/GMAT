@@ -98,30 +98,6 @@ OrbitRvec6::~OrbitRvec6()
 // methods inherited from Parameter
 //-------------------------------------
 
-//  //------------------------------------------------------------------------------
-//  // virtual Rvector6 GetRvector6() const
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return newly evaluated value of parameter.
-//   */
-//  //------------------------------------------------------------------------------
-//  Rvector6 OrbitRvec6::GetRvector6() const
-//  {
-//     return mRvec6Value;
-//  }
-
-//  //------------------------------------------------------------------------------
-//  // virtual void SetRvector6(const Rvector6 &val)
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @Sets Rvector6 value of parameter.
-//   */
-//  //------------------------------------------------------------------------------
-//  void OrbitRvec6::SetRvector6(const Rvector6 &val)
-//  {
-//     mRvec6Value = val;
-//  }
-
 //------------------------------------------------------------------------------
 // virtual Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
@@ -156,10 +132,10 @@ Integer OrbitRvec6::GetNumRefObjects() const
 //------------------------------------------------------------------------------
 void OrbitRvec6::SetSolarSystem(SolarSystem *ss)
 {
-#if DEBUG_ORBITRVEC6
+   #if DEBUG_ORBITRVEC6
    MessageInterface::ShowMessage
       ("OrbitRvec6::SetSolarSystem() ss=%s", ss->GetTypeName().c_str());
-#endif
+   #endif
    
    if (OrbitData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
       OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
@@ -178,12 +154,12 @@ void OrbitRvec6::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void OrbitRvec6::SetInternalCoordSystem(CoordinateSystem *cs)
 {
-   //#if DEBUG_ORBITREAL
+   #if DEBUG_ORBITREAL
    MessageInterface::ShowMessage
-      ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
+      ("OrbitRvec6::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
        this->GetName().c_str());
-   //#endif
-
+   #endif
+   
    OrbitData::SetInternalCoordSys(cs);
 }
 

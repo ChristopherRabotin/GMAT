@@ -255,6 +255,8 @@ GmatBase* KepEcc::Clone(void) const
 KepInc::KepInc(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -361,6 +363,8 @@ GmatBase* KepInc::Clone(void) const
 KepAOP::KepAOP(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -466,6 +470,8 @@ GmatBase* KepAOP::Clone(void) const
 KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RAAN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -571,6 +577,8 @@ GmatBase* KepRAAN::Clone(void) const
 KepRADN::KepRADN(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------

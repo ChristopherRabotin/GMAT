@@ -46,6 +46,8 @@
 CartX::CartX(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::RED32;
 }
 
@@ -152,6 +154,8 @@ GmatBase* CartX::Clone(void) const
 CartY::CartY(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::GREEN32;
 }
 
@@ -258,6 +262,8 @@ GmatBase* CartY::Clone(void) const
 CartZ::CartZ(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::BLUE32;
 }
 
@@ -364,6 +370,8 @@ GmatBase* CartZ::Clone(void) const
 CartVx::CartVx(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::RED32;
 }
 
@@ -469,6 +477,8 @@ GmatBase* CartVx::Clone(void) const
 CartVy::CartVy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::GREEN32;
 }
 
@@ -575,6 +585,8 @@ GmatBase* CartVy::Clone(void) const
 CartVz::CartVz(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::BLUE32;
 }
 
@@ -684,6 +696,8 @@ CartState::CartState(const std::string &name, GmatBase *obj)
                 "Km/s", GmatParam::COORD_SYS)
 {
    // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mIsPlottable = false;
 }
 

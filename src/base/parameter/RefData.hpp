@@ -70,6 +70,8 @@ protected:
 
    bool HasObjectType(const std::string &type) const;
    GmatBase* FindFirstObject(const std::string &type) const;
+   GmatBase* FindFirstObject(const Gmat::ObjectType type) const;
+   std::string FindFirstObjectName(const Gmat::ObjectType type) const;
    
    virtual void InitializeRefObjects();
    virtual bool IsValidObjectType(Gmat::ObjectType type) = 0;
