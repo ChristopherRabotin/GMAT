@@ -4,7 +4,7 @@
 // GMAT: Goddard Mission Analysis Tool
 //
 // Author: Allison Greene
-// Created: 2004/05/11
+// Created: 2004/05/17
 /**
  * This class contains the Conditional Statement Setup window.
  */
@@ -31,9 +31,11 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-ConditionalStatementPanel::ConditionalStatementPanel( wxWindow *parent)
+ConditionalStatementPanel::ConditionalStatementPanel( wxWindow *parent, 
+                           const wxString &condition)
     : GmatPanel(parent)
 {
+   conditionStatement = condition;
    Create();
    Show();
 }
@@ -55,13 +57,13 @@ void ConditionalStatementPanel::Setup( wxWindow *parent)
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
 
     conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
-                     wxSize(450,250), wxWANTS_CHARS );
+                     wxSize(454,238), wxWANTS_CHARS );
     conditionGrid->CreateGrid( 10, 4, wxGrid::wxGridSelectCells );
     conditionGrid->SetRowLabelSize(0);
     conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
     conditionGrid->EnableEditing(false);
         
-    conditionGrid->SetColLabelValue(0, _T("IF"));
+    conditionGrid->SetColLabelValue(0, _T(""));
     conditionGrid->SetColSize(0, 60);
     conditionGrid->SetColLabelValue(1, _T("LHS"));
     conditionGrid->SetColSize(1, 165);
@@ -69,7 +71,8 @@ void ConditionalStatementPanel::Setup( wxWindow *parent)
     conditionGrid->SetColSize(2, 60);
     conditionGrid->SetColLabelValue(3, _T("RHS"));
     conditionGrid->SetColSize(3, 165);
-    
+    conditionGrid->SetCellValue(0, 0, conditionStatement);
+        
     item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
 
     theMiddleSizer->Add(item0, 0, wxGROW, 5);
@@ -124,7 +127,7 @@ void ConditionalStatementPanel::OnCellRightClick(wxGridEvent& event)
             {
                wxT("AND"),
                wxT("OR"),
-               wxT("END IF")
+               wxT("END")
             };
          
             wxSingleChoiceDialog dialog(this, _T("Condition: \n"),
@@ -159,7 +162,7 @@ void ConditionalStatementPanel::OnCellRightClick(wxGridEvent& event)
          };
          
          wxSingleChoiceDialog dialog(this, _T("Condition: \n"),
-                                        _T("IfConditionDialog"), 6, strArray);
+                                        _T("WhileConditionDialog"), 6, strArray);
          dialog.SetSelection(0);
 
          if (dialog.ShowModal() == wxID_OK)
@@ -179,60 +182,6 @@ void ConditionalStatementPanel::OnCellRightClick(wxGridEvent& event)
       {
          // error
       }  
-
-//            StringArray &list =
-//                theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
-//            int size = list.size();
-//            wxString *choices = new wxString[size];
-//        
-//            for (int i=0; i<size; i++)
-//            {
-//                choices[i] = list[i].c_str();
-//            }
-//        
-//            wxSingleChoiceDialog dialog(this, _T("Available Propagator: \n"),
-//                                        _T("PropagtorSelectDialog"), size, choices);
-//            dialog.SetSelection(0);
-//
-//            if (dialog.ShowModal() == wxID_OK)
-//            {
-//                if (dialog.GetStringSelection() != propGrid->GetCellValue(row, col))
-//                {
-//                    propGrid->SetCellValue(row, col, dialog.GetStringSelection());
-//                    tempProp[row].isChanged = true;
-//                    tempProp[row].propName = dialog.GetStringSelection(); // waw added 03/31/04
-//                    theApplyButton->Enable(true);
-//                }
-//            }
-//        }
-//        // select spacecraft
-//        else if (col == 1)
-//        {
-//            StringArray &list =
-//                theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-//            int size = list.size();
-//            wxString *choices = new wxString[size];
-//        
-//            for (int i=0; i<size; i++)
-//            {
-//                choices[i] = list[i].c_str();
-//            }
-//        
-//            wxSingleChoiceDialog dialog(this, _T("Available Spacecraft: \n"),
-//                                        _T("SpacecraftSelectDialog"), size, choices);
-//            dialog.SetSelection(0);
-//
-//            if (dialog.ShowModal() == wxID_OK)
-//            {
-//                if (dialog.GetStringSelection() != propGrid->GetCellValue(row, col))
-//                {
-//                    propGrid->SetCellValue(row, col, dialog.GetStringSelection());
-//                    tempProp[row].isChanged = true;
-//                    tempProp[row].scNames = dialog.GetStringSelection(); // waw added 03/31/04
-//                    theApplyButton->Enable(true);
-//                }
-//            }
-//        }
     }       
 }
 

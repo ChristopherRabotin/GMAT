@@ -25,10 +25,11 @@ class ConditionalStatementPanel : public GmatPanel
 {
 public:
     // constructors
-    ConditionalStatementPanel( wxWindow *parent);
+    ConditionalStatementPanel( wxWindow *parent, const wxString &condition);
     ~ConditionalStatementPanel();  
 
 private:
+    wxString conditionStatement;
     wxGrid *conditionGrid;
 
     // methods inherited from GmatPanel
