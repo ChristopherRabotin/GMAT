@@ -37,14 +37,14 @@ namespace GmatColor
    const UnsignedInt LIME32     = 0x0000ff00;
    const UnsignedInt FUCHSIA32  = 0x00ff00ff;
 
-   const UnsignedInt L_BLUE32   = 14399415;
-   const UnsignedInt L_GRAY32   = 14737632;
-   const UnsignedInt L_BROWN32  =  1743054;
-   const UnsignedInt D_BROWN32  =  1792139;
-   const UnsignedInt BEIGE32    = 11924221;
-   const UnsignedInt PINK32     = 14268074;
-   const UnsignedInt ORANGE32   =  4227327;
-   const UnsignedInt TEAL32     =  8421440;
+   const UnsignedInt L_BLUE32   = 0x00dbb767; //14399415;
+   const UnsignedInt L_GRAY32   = 0x00e0e0e0; //14737632;
+   const UnsignedInt L_BROWN32  = 0x001a98ce; //01743054;
+   const UnsignedInt D_BROWN32  = 0x001b588b; //01792139;
+   const UnsignedInt BEIGE32    = 0x00b5f2fd; //11924221;
+   const UnsignedInt PINK32     = 0x00d9b6aa; //14268074;
+   const UnsignedInt ORANGE32   = 0x004080ff; //04227327;
+   const UnsignedInt TEAL32     = 0x00808040; //08421440;
 };
 
 #endif // ColorTypes_hpp
