@@ -11,6 +11,8 @@
 //
 // Author:  Joey Gurganus
 // Created: 2004/01/30
+// Modified: 2004/08/10 W. Shoan - made a subclass of GmatCommand; modified
+//           code accordingly
 //
 /**
  * Definition for the Else command class
@@ -27,7 +29,7 @@
  */
 //------------------------------------------------------------------------------
 ElseCommand::ElseCommand(void) :
-    BranchCommand      ("Else")
+    GmatCommand      ("Else")
 {
 }
 
@@ -53,7 +55,7 @@ ElseCommand::~ElseCommand(void)
  */
 //------------------------------------------------------------------------------
 ElseCommand::ElseCommand(const ElseCommand& ic) :
-    BranchCommand   (ic)
+    GmatCommand   (ic)
 {
 }
 
@@ -71,7 +73,8 @@ ElseCommand& ElseCommand::operator=(const ElseCommand& ic)
 {
     if (this == &ic)
         return *this;
-    
+
+    GmatCommand::operator=(ic);
     return *this;
 }
 
@@ -92,15 +95,15 @@ ElseCommand& ElseCommand::operator=(const ElseCommand& ic)
 //------------------------------------------------------------------------------
 bool ElseCommand::Append(GmatCommand *cmd)
 {
-    if (!BranchCommand::Append(cmd))
-        return false;
+    //if (!BranchCommand::Append(cmd))
+    //    return false;
 
     // Check for the end of "Else" branch, point that end back to this command
     if (cmd->GetTypeName() == "EndIf")
     {
        cmd->Append(this);
        // Targeter loop is complete; -1 points us back to the main sequence. 
-       branchToFill = -1;
+    //   branchToFill = -1;
     }
 
     return true;
@@ -117,7 +120,7 @@ bool ElseCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool ElseCommand::Initialize(void)
 {
-    bool retval = BranchCommand::Initialize();
+    bool retval = GmatCommand::Initialize();
 
     // if specific initialization goes here:
     
@@ -143,8 +146,8 @@ bool ElseCommand::Execute(void)
 {
     bool retval = true;
 
-    commandComplete = true;
-    BranchCommand::Execute();
+    //commandComplete = true;
+    //GmatCommand::Execute();
    
     return retval;
 }

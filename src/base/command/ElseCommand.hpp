@@ -40,7 +40,7 @@
  *     ELSE statement. 
  *
  */
-class ElseCommand : public BranchCommand
+class ElseCommand : public GmatCommand
 {
 public:
     ElseCommand(void);
@@ -54,14 +54,14 @@ public:
     
     // Methods used to run the command
     virtual bool        Initialize(void);
-    virtual bool        Execute(void);
+    virtual bool        Execute(void);  // do I even need this?
 
     // inherited from GmatBase
     virtual GmatBase* Clone(void) const;
 
     
 protected:
-    Integer             numberOfConditions; 
+    //Integer             numberOfConditions; add later for ElseIf
     
 };
 #endif  // ElseCommand_hpp
