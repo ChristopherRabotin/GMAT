@@ -847,7 +847,7 @@ void TrajPlotCanvas::DrawEarthTrajectory()
    {
       for (int i=1; i<mNumData; i++)
       {
-         if (mTime[i] >= mTime[i-1])
+         if (mTime[i] > mTime[i-1]) //loj: 11/03/04 changed from >=
          {
             glVertex3fv(mTempEarthPos[i-1]);
             glVertex3fv(mTempEarthPos[i]);
@@ -1012,7 +1012,7 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
       // Draw spacecraft trajectory line based on points
       for (int i=1; i<mNumData; i++)
       {
-         if (mTime[i] >= mTime[i-1])
+         if (mTime[i] > mTime[i-1]) //loj: 11/03/04 changed from >=
          {
             *sIntColor = mScTrajColor[sc][i];
             glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
@@ -1022,7 +1022,7 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
          }
       }
    }
-
+   
    glEnd();
    glPopMatrix();
 
