@@ -341,7 +341,7 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
                     int boxDataNumber = i+lineNumber*boxCount;
 //                    MessageInterface::ShowMessage("Box data number %d\n", boxDataNumber);
                     
-                    if (boxDataNumber < boxData.size())
+                    if (boxDataNumber < (int)boxData.size())
                     {
                       if (boxData[boxDataNumber])
                       {
