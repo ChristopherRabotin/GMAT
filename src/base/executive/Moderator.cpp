@@ -360,8 +360,8 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
-    MessageInterface::ShowMessage("Moderator::CreatePropagator() type = %s, name = %s\n",
-                                  type.c_str(), name.c_str());
+    //MessageInterface::ShowMessage("Moderator::CreatePropagator() type = %s, name = %s\n",
+    //                              type.c_str(), name.c_str());
     
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
@@ -639,12 +639,12 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
-    MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
-                                  "name = %s\n", type.c_str(), name.c_str());
+    //MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
+    //                              "name = %s\n", type.c_str(), name.c_str());
     
     StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
-    MessageInterface::ShowMessage("Moderator::CreateStopCondition() *stopCond type = %s\n",
-                                  stopCond->GetTypeName().c_str());
+    //MessageInterface::ShowMessage("Moderator::CreateStopCondition() *stopCond type = %s\n",
+    //                              stopCond->GetTypeName().c_str());
     
     if (stopCond ==  NULL)
     {
@@ -741,6 +741,10 @@ Solver* Moderator::GetSolver(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
+    //MessageInterface::ShowMessage("====================\n");
+    //MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
+    //                              name.c_str());
+    
     // assumes "RungeKutta89" is the default propagator
     std::string propName = name + "RKV89";
     Propagator *prop = CreatePropagator("RungeKutta89", propName);
@@ -749,22 +753,23 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
     std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
     ForceModel *fm = CreateForceModel(fmName);
 
-    // create PropSetup
-    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
-
     // create PointMass force and add to Force
     //loj: 3/15/04 do not configure force, force model has linked list of force
     //loj: 3/25/04 PointMassForce will create default body of Earth
     PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
 
-    //loj: 3/15/ 04 always add to force model before propSetup::SetForceModel()
+    //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
     // because PropSetup::Initialize() needs at least 1 force
     fm->AddForce(earthGrav);
     
+    // create PropSetup
+    // PropSetup creates default Integrator, ForceModel with PointMassForce
+    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+
     if (prop)
     {
-        propSetup->SetPropagator(prop);
         propSetup->SetUseDrag(false);   // turn off internal drag
+        propSetup->SetPropagator(prop);
     }
     
     if (fm)
@@ -1455,15 +1460,15 @@ void Moderator::CreateDefaultMission()
     {
         // SolarSystem
         theDefaultSolarSystem = new SolarSystem("DefaultSS");
-        MessageInterface::ShowMessage("default SolarSystem created\n");
+        //MessageInterface::ShowMessage("-->default SolarSystem created\n");
 
         // Spacecraft
         Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
-        MessageInterface::ShowMessage("default Spacecraft created\n");
+        //MessageInterface::ShowMessage("-->default Spacecraft created\n");
 
         // PropSetup
         PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
-        MessageInterface::ShowMessage("default PropSetup created\n");
+        //MessageInterface::ShowMessage("-->default PropSetup created\n");
 
         // Parameters
         Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
@@ -1474,7 +1479,7 @@ void Moderator::CreateDefaultMission()
         Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
         Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
         Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
-        MessageInterface::ShowMessage("default parameters created\n");
+        //MessageInterface::ShowMessage("-->default parameters created\n");
     
         //Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
         //Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
@@ -1516,7 +1521,7 @@ void Moderator::CreateDefaultMission()
         stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
         stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
         stopCond->SetRealParameter("Goal", 8640.0);
-        MessageInterface::ShowMessage("default StopCondition created\n");
+        //MessageInterface::ShowMessage("-->default StopCondition created\n");
 
         // Subscribers
         // ReportFile
@@ -1533,7 +1538,7 @@ void Moderator::CreateDefaultMission()
         // OpenGlPlot
         sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
         sub->Activate(true);
-        MessageInterface::ShowMessage("default Subscribers created\n");
+        //MessageInterface::ShowMessage("-->default Subscribers created\n");
 
         // Propagate Command
         GmatCommand *propCommand = CreateCommand("Propagate");
@@ -1542,7 +1547,7 @@ void Moderator::CreateDefaultMission()
         propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
         propCommand->SetSolarSystem(theDefaultSolarSystem);
 
-        MessageInterface::ShowMessage("default Propagate command created\n");
+        //MessageInterface::ShowMessage("-->default Propagate command created\n");
         // Add propagate command
         AppendCommand(propCommand);
 

@@ -557,13 +557,14 @@ bool BaseStopCondition::Validate()
         }
     }
 
-    if (!valid)
-    {
-        MessageInterface::ShowMessage
-            ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, mEpochParam=%d, "
-             "mStopParam=%d, mEccParam=%d mInterpolator=%d\n",
-             mUseInternalEpoch, mEpochParam, mStopParam, mEccParam, mInterpolator);
-    }
+    //loj: 3/30/04 comment out
+//      if (!valid)
+//      {
+//          MessageInterface::ShowMessage
+//              ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, mEpochParam=%d, "
+//               "mStopParam=%d, mInterpolator=%d\n",
+//               mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator);
+//      }
     
     return valid;
 }
