@@ -202,6 +202,7 @@ bool For::Execute(void)
    {
       commandComplete  = true;
       commandExecuting = false;
+      currentValue     = UNINITIALIZED_VALUE;  // start the loop over
    }
      
    return retval;
