@@ -19,6 +19,7 @@
 #include "gmatdefs.hpp" //put this one after GUI includes
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
+#include "RealUtilities.hpp"
 
 #include <stdlib.h>
 
@@ -69,8 +70,7 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
 void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    //loj: Need to get spacecraft name somehow when spacecraft name is clicked
-    //loj: use "DefaultSC" for testing only
+
     theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
     
     if (theSpacecraft != NULL)
@@ -130,10 +130,6 @@ void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
 void SpacecraftPanel::CreateOrbit(wxWindow *parent)
 {
-    //loj: since Spacecraft class is not complete,
-    //loj: use theSpacecraft->GetRealParameter(0) for epoch
-    //loj: use theSpacecraft->GetRealParameter(1) for state[0], etc
-
     orbitPanel = new wxPanel(parent);
 
     wxFlexGridSizer *orbitSizer = new wxFlexGridSizer(1, 0, 0 );
@@ -288,42 +284,42 @@ void SpacecraftPanel::AddElements(wxWindow *parent)
 
     description1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor1     "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description1, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl1 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl1 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl1, 0, wxALIGN_CENTER|wxALL, 5 );
     label1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label1"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label1, 0, wxALIGN_CENTER|wxALL, 5 );
 
     description2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor2    "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description2, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl2 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl2 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl2, 0, wxALIGN_CENTER|wxALL, 5 );
     label2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label2"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label2, 0, wxALIGN_CENTER|wxALL, 5 );
     
     description3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor3    "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description3, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl3 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl3 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl3, 0, wxALIGN_CENTER|wxALL, 5 );
     label3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label3"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label3, 0, wxALIGN_CENTER|wxALL, 5 );
     
     description4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor4    "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description4, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl4 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl4 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl4, 0, wxALIGN_CENTER|wxALL, 5 );
     label4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label4"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label4, 0, wxALIGN_CENTER|wxALL, 5 );
     
     description5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor5    "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description5, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl5 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl5 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl5, 0, wxALIGN_CENTER|wxALL, 5 );
     label5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label5"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label5, 0, wxALIGN_CENTER|wxALL, 5 );
     
     description6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor6    "), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( description6, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl6 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    textCtrl6 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     item3->Add( textCtrl6, 0, wxALIGN_CENTER|wxALL, 5 );
     label6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label6"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( label6, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -374,7 +370,7 @@ void SpacecraftPanel::OnKepElements()
     
     // create cartesian object
     Cartesian *cartesian = new Cartesian(el1, el2, el3, el4, el5, el6);
-    // convert into keplerian values
+    // convert into keplerian values, all units are in radians
     Keplerian keplerian = ToKeplerian(*cartesian, GmatPhysicalConst::mu);
 
     // create a keplerian object
@@ -386,30 +382,30 @@ void SpacecraftPanel::OnKepElements()
     Radians kepEl3 = kepObj->GetInclination();
     Radians kepEl4 = kepObj->GetRAAscendingNode();
     Radians kepEl5 = kepObj->GetArgumentOfPeriapsis();
-    Radians kepEl6 = kepObj->GetMeanAnomaly();
+    Radians kepEl6 = kepObj->GetTrueAnomaly();
 
     wxString element1;
-    element1.Printf("%f", kepEl1);
+    element1.Printf("%.12f", kepEl1);
     textCtrl1->SetValue(element1);
     
     wxString element2;
-    element2.Printf("%f", kepEl2);
+    element2.Printf("%.12f", kepEl2);
     textCtrl2->SetValue(element2);
     
     wxString element3;
-    element3.Printf("%f", kepEl3);
+    element3.Printf("%.12f", kepEl3 * GmatMathUtil::DEG_PER_RAD);
     textCtrl3->SetValue(element3);
     
     wxString element4;
-    element4.Printf("%f", kepEl4);
+    element4.Printf("%.12f", kepEl4 * GmatMathUtil::DEG_PER_RAD);
     textCtrl4->SetValue(element4);
     
     wxString element5;
-    element5.Printf("%f", kepEl5);
+    element5.Printf("%.12f", kepEl5 * GmatMathUtil::DEG_PER_RAD);
     textCtrl5->SetValue(element5);
     
     wxString element6;
-    element6.Printf("%f", kepEl6);
+    element6.Printf("%.12f", kepEl6 * GmatMathUtil::DEG_PER_RAD);
     textCtrl6->SetValue(element6);
   
 }
@@ -442,10 +438,11 @@ void SpacecraftPanel::OnCartElements()
     // get current cartesian values
     Real el1 = atof(textCtrl1->GetValue());
     Real el2 = atof(textCtrl2->GetValue());
-    Real el3 = atof(textCtrl3->GetValue());
-    Real el4 = atof(textCtrl4->GetValue());
-    Real el5 = atof(textCtrl5->GetValue());
-    Real el6 = atof(textCtrl6->GetValue()); 
+    Real el3 = atof(textCtrl3->GetValue()) * GmatMathUtil::RAD_PER_DEG;
+    Real el4 = atof(textCtrl4->GetValue()) * GmatMathUtil::RAD_PER_DEG;
+    Real el5 = atof(textCtrl5->GetValue()) * GmatMathUtil::RAD_PER_DEG;
+    Real ta  = atof(textCtrl6->GetValue()) * GmatMathUtil::RAD_PER_DEG;
+    Real el6 = TrueToMeanAnomaly(ta, el2); // Keplerian() expects mean anomaly
     
     // create keplerian object
     Keplerian *keplerian = new Keplerian(el1, el2, el3, el4, el5, el6);
@@ -464,27 +461,27 @@ void SpacecraftPanel::OnCartElements()
     Real cartEl6 = cartObj->GetVelocity(2);
 
     wxString element1;
-    element1.Printf("%f", cartEl1);
+    element1.Printf("%.12f", cartEl1);
     textCtrl1->SetValue(element1);
     
     wxString element2;
-    element2.Printf("%f", cartEl2);
+    element2.Printf("%.12f", cartEl2);
     textCtrl2->SetValue(element2);
     
     wxString element3;
-    element3.Printf("%f", cartEl3);
+    element3.Printf("%.12f", cartEl3);
     textCtrl3->SetValue(element3);
     
     wxString element4;
-    element4.Printf("%f", cartEl4);
+    element4.Printf("%.12f", cartEl4);
     textCtrl4->SetValue(element4);
     
     wxString element5;
-    element5.Printf("%f", cartEl5);
+    element5.Printf("%.12f", cartEl5);
     textCtrl5->SetValue(element5);
     
     wxString element6;
-    element6.Printf("%f", cartEl6);
+    element6.Printf("%.12f", cartEl6);
     textCtrl6->SetValue(element6);
 }
 
@@ -497,6 +494,10 @@ void SpacecraftPanel::OnCartElements()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::UpdateValues()
 {
+    //loj: since Spacecraft class is not complete,
+    //loj: use theSpacecraft->GetRealParameter(0) for epoch
+    //loj: use theSpacecraft->GetRealParameter(1) for state[0], etc
+
     // default values for now
     // do this first, otherwise on state change will
     // change the element value
@@ -504,6 +505,14 @@ void SpacecraftPanel::UpdateValues()
     OnStateChange();
     dateCB->SetSelection(2);
 
+    //loj: get element type first
+    //loj: if element type is Cartesian, the combobox should show Cartesian
+    //loj: if Keplerian, the combobox should show Keplerian, etc
+    //loj: copy actual element type and elements to diaplay member data.
+    //loj: when combobox changes, use display data to convert and display
+    //loj: do not readback from the elements field unless user enters the new value
+    
+    // get elements
     Real epoch = theSpacecraft->GetRealParameter(0);
     Real element1 = theSpacecraft->GetRealParameter(1);
     Real element2 = theSpacecraft->GetRealParameter(2);
@@ -517,27 +526,27 @@ void SpacecraftPanel::UpdateValues()
     epochValue->SetValue(epochStr);
     
     wxString el1;
-    el1.Printf("%f", element1);
+    el1.Printf("%.12f", element1);
     textCtrl1->SetValue(el1);
     
     wxString el2;
-    el2.Printf("%f", element2);
+    el2.Printf("%.12f", element2);
     textCtrl2->SetValue(el2);
 
     wxString el3;
-    el3.Printf("%f", element3);
+    el3.Printf("%.12f", element3);
     textCtrl3->SetValue(el3);
 
     wxString el4;
-    el4.Printf("%f", element4);
+    el4.Printf("%.12f", element4);
     textCtrl4->SetValue(el4);
 
     wxString el5;
-    el5.Printf("%f", element5);
+    el5.Printf("%.12f", element5);
     textCtrl5->SetValue(el5);
 
     wxString el6;
-    el6.Printf("%f", element6);
+    el6.Printf("%.12f", element6);
     textCtrl6->SetValue(el6);  
     
 }
@@ -581,6 +590,8 @@ void SpacecraftPanel::OnCancel()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::OnApply()
 {
+    //loj: used display member data to save to Spacecraft, instead of reading the field again
+    
     wxString epochStr = epochValue->GetValue();
     wxString el1 = textCtrl1->GetValue();
     wxString el2 = textCtrl2->GetValue();
