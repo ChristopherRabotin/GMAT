@@ -22,6 +22,7 @@
 #ifndef SOLARSYSTEM_HPP
 #define SOLARSYSTEM_HPP
 
+#include "gmatdefs.hpp"
 /**
  * Shell for the solar system
  */
@@ -32,6 +33,11 @@ class SolarSystem
 		SolarSystem();
 		// class destructor
 		~SolarSystem();
+
+      StringArray GetBodiesInUse();
+
+protected:
+      StringArray bodiesInUse;
 };
 
 #endif // SOLARSYSTEM_HPP
