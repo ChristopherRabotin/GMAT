@@ -30,9 +30,10 @@ const Gmat::ParameterType
    {
       Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
       Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE, Gmat::STRING_TYPE,
-      Gmat::STRING_TYPE, Gmat::STRING_TYPE, Gmat::REAL_TYPE, Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
-      Gmat::STRINGARRAY_TYPE,  Gmat::STRINGARRAY_TYPE, Gmat::REAL_TYPE 
+      Gmat::STRING_TYPE, Gmat::STRING_TYPE, Gmat::STRING_TYPE, Gmat::REAL_TYPE,
+      Gmat::STRING_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
+      Gmat::REAL_TYPE, Gmat::STRINGARRAY_TYPE,  Gmat::STRINGARRAY_TYPE,
+      Gmat::REAL_TYPE
    };
 
 //-------------------------------------
@@ -103,6 +104,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //    epoch          (a.epoch),
     dateFormat     (a.dateFormat),
     stateType      (a.stateType),
+    anomalyType    (a.anomalyType),
     refBody        (a.refBody),
     refFrame       (a.refFrame),
     refPlane       (a.refPlane),
@@ -168,6 +170,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 //    epoch = a.epoch;
     dateFormat = a.dateFormat;
     stateType = a.stateType;
+    anomalyType = a.anomalyType;
     refBody = a.refBody;
     refFrame = a.refFrame;
     refPlane = a.refPlane;
@@ -402,10 +405,12 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
     if (str == "DateFormat") return DATE_FORMAT_ID;
 
-    if (str == "Element1" || str == "X" || str == "SMA" || str == "RMAG")  
+    if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
+        str == "RMAG")  
        return ELEMENT1_ID;
 
-    if (str == "Element2" || str == "Y" || str == "ECC" || str == "RA") 
+    if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
+        str == "RA") 
        return ELEMENT2_ID;
 
     if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
@@ -423,6 +428,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
        return ELEMENT6_ID;
 
     if (str == "StateType") return STATE_TYPE_ID;
+    if (str == "AnomalyType") return ANOMALY_ID; 
     if (str == "ReferenceBody") return BODY_ID;
     if (str == "ReferenceFrame") return FRAME_ID;
     if (str == "PrincipalPlane") return PLANE_ID;
@@ -469,6 +475,7 @@ std::string Spacecraft::GetParameterText(const Integer id) const
         return GetElementName(id);
 
     if (id == STATE_TYPE_ID) return "StateType";
+    if (id == ANOMALY_ID) return "AnomalyType";
     if (id == BODY_ID) return "ReferenceBody";
     if (id == FRAME_ID) return "ReferenceFrame";
     if (id == PLANE_ID) return "PrincipalPlane";
@@ -482,7 +489,6 @@ std::string Spacecraft::GetParameterText(const Integer id) const
     if (id == DRAG_AREA_ID) return "DragArea";
 
     if (id == SRP_AREA_ID) return "SRPArea";
-
 
     // Added for hardware support 9/13/04, djc
     if (id == FUEL_TANK_ID) return "Tanks";
@@ -651,7 +657,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == ELEMENT3_ID) return SetRealParameter("INC",value); 
        if (id == ELEMENT4_ID) return SetRealParameter("RAAN",value); 
        if (id == ELEMENT5_ID) return SetRealParameter("AOP",value); 
-       if (id == ELEMENT6_ID) return SetRealParameter("TA",value); 
+       if (id == ELEMENT6_ID) return SetRealParameter(anomalyType,value);
     }
     else if (displayCoordType == "SphericalAZFPA" 
              || displayCoordType == "SphericalRADEC")
@@ -833,7 +839,8 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[4] = value;
     }
 
-    if (label == "VZ" || label == "TA" || label == "FPA" || label == "DECV")  
+    if (label == "VZ" || label == "TA" || label == "MA" || label == "EA" ||
+        label == "FPA" || label == "DECV")  
     {
        displayState[5] = value;
 
@@ -842,7 +849,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        // StateType does not mix with other types.
        hasElements[5] = true;
        // incase StateType is not specified
-       if (label == "TA")
+       if (label == "TA" || label == "MA" || label == "EA")
        { 
           if (displayCoordType != "Keplerian" 
                         && displayCoordType != "ModifiedKeplerian")
@@ -871,6 +878,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
     return SpaceObject::SetRealParameter(label, value);
 }
+
 //---------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //---------------------------------------------------------------------------
@@ -889,6 +897,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if (id == STATE_TYPE_ID)
        return stateType; 
+
+    if (id == ANOMALY_ID)
+       return anomalyType; 
     
     if (id == BODY_ID)
        return refBody; 
@@ -902,6 +913,21 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     return SpaceObject::GetStringParameter(id);
 }
 
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The label for the parameter.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+std::string Spacecraft::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
 
 // Added 11/15/04 to handle tanks and thrusters
 //---------------------------------------------------------------------------
@@ -938,8 +964,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != BODY_ID 
-        && id != FRAME_ID && id != PLANE_ID 
+    if (id != DATE_FORMAT_ID && id != STATE_TYPE_ID && id != ANOMALY_ID
+        && id != BODY_ID && id != FRAME_ID && id != PLANE_ID 
         && id != FUEL_TANK_ID && id != THRUSTER_ID)
        return SpaceObject::SetStringParameter(id, value);
 
@@ -965,6 +991,16 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
   
 //       stateType = value;
        displayCoordType = value;   //ag: so reading from a script displays properly in GUI
+    }
+    else if (id == ANOMALY_ID)
+    {
+       // Check for invalid input then return unknown value from GmatBase 
+       if (value != "TA" && value != "MA" && value != "EA") 
+       {   
+          return GmatBase::SetStringParameter(id, value);
+       }
+       anomalyType = value;
+       // @todo:  need to figure out if it needs displayAnomalyType???
     }
     else if (id == BODY_ID)
     {
@@ -1002,6 +1038,29 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     return true;
 }
 
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+bool Spacecraft::SetStringParameter(const std::string &label, 
+                                    const std::string &value)
+{
+#if DEBUG_SPACECRAFT
+    std::cout << "\nSpacecraft::SetStringParameter(\"" << label
+              << "\", \"" << value << "\") enters...\n"; 
+    Integer id = GetParameterID(label);
+    std::cout << "\nGetParameterText: " << GetParameterText(id);
+    std::cout << "\nSpacecraft::SetStringParameter exits sooner\n"; 
+#endif
+    return SetStringParameter(GetParameterID(label),value);
+}
 
 //---------------------------------------------------------------------------
 //  bool TakeAction(const std::string &action, const std::string &actionData)
@@ -1639,6 +1698,19 @@ std::string Spacecraft::GetElementName(const Integer id) const
        if (id == ELEMENT6_ID) 
        {
            // @todo will add subType to check with MA, TA, EA
+           return("TA");  
+       }
+    }
+    else if (localCoordType == "ModifiedKeplerian")
+    {
+       if (id == ELEMENT1_ID) return("RadPer");  
+       if (id == ELEMENT2_ID) return("RadApo");  
+       if (id == ELEMENT3_ID) return("INC");  
+       if (id == ELEMENT4_ID) return("RAAN");  
+       if (id == ELEMENT5_ID) return("AOP");  
+       if (id == ELEMENT6_ID) 
+       {
+           // @todo will add anomalyType to check with MA, TA, EA
            return("TA");  
        }
     }
