@@ -36,7 +36,6 @@
 class AtmosphereModel : public GmatBase
 {
 public:
-
     AtmosphereModel(const std::string &typeStr);
     virtual ~AtmosphereModel();
     
@@ -58,9 +57,14 @@ public:
     void                    SetSunVector(Real *sv);
     void                    SetCentralBodyVector(Real *cv);
     
+    // waw: Added 06/29/04
+    void                    SetSolarFluxFile(std::string file);
+    
 protected:
     /// Solar flux binary file reader
     SolarFluxFileReader *fileReader;
+    /// Solar flux file name 
+    std::string fileName;  // waw: Added 06/29/04
     /// Vector from the central body to the sun
     Real                    *sunVector;
     /// Name of the central body
@@ -74,7 +78,8 @@ protected:
     AtmosphereModel(const AtmosphereModel& am);
 
 private:  
-    AtmosphereModel&        operator=(const AtmosphereModel& am);
+    AtmosphereModel& operator=(const AtmosphereModel& am);
+    
 };
 
 #endif // AtmosphereModel_hpp
