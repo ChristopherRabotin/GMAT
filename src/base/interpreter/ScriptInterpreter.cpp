@@ -316,12 +316,21 @@ bool ScriptInterpreter::Parse(void)
                       }
                       else {
                          // Treat it as a ModJulian format epoch
-                         unsigned int start = line.find("=") + 1;
+                         unsigned int start = line.find("=") + 1, stop;
                          const char* linestr = line.c_str();
+                         std::string displayEp;
                          while (linestr[start] == ' ')
                             ++start;
+                         stop = start;
+                         while ((linestr[stop] != ' ') &&
+                                (linestr[stop] != '%') &&
+                                (linestr[stop] != ';') &&
+                                (stop < strlen(linestr)))
+                            ++stop;
+                         displayEp = line.substr(start, stop-start);
                          ((Spacecraft*)obj)->SetDisplayDateFormat("TAIModJulian");
-                         ((Spacecraft*)obj)->SetDisplayEpoch(&(linestr[start]));
+                         ((Spacecraft*)obj)->SetDisplayEpoch(displayEp.c_str());
+                         
                          // Force the epoch into the spacecraft data
                          ((Spacecraft*)obj)->SaveDisplay();
                          // obj->SetRealParameter(objParm, &(linestr[start]));
