@@ -19,7 +19,7 @@
 
 
 #include "DifferentialCorrector.hpp"
-#include "Rmatrix.cpp"
+#include "Rmatrix.hpp"
 
 
 DifferentialCorrector::DifferentialCorrector(std::string name) :
