@@ -272,8 +272,8 @@ void PropagationConfigPanel::SaveData()
          thePMF->SetBooleanParameter(paramId, false);
          pmForceList[i]->pmf = thePMF;
          newFm->AddForce(thePMF);
-          MessageInterface::ShowMessage("Saving secondary body: %s\n",
-                pmForceList[i]->bodyName.c_str());
+//          MessageInterface::ShowMessage("Saving secondary body: %s\n",
+//                pmForceList[i]->bodyName.c_str());
       }
       // Primary bodies
       for (unsigned int i=0; i<forceList.size(); i++)
@@ -286,8 +286,8 @@ void PropagationConfigPanel::SaveData()
             thePMF->SetBooleanParameter(paramId, true);
             forceList[i]->pmf = thePMF;
             newFm->AddForce(thePMF);
-            MessageInterface::ShowMessage("Saving primary body: %s \n",
-                forceList[i]->bodyName.c_str());
+//            MessageInterface::ShowMessage("Saving primary body: %s \n",
+//                forceList[i]->bodyName.c_str());
          }
          else
          {
@@ -471,8 +471,7 @@ void PropagationConfigPanel::Initialize()
       theForceModel = thePropSetup->GetForceModel();
       numOfForces   = thePropSetup->GetNumForces();
          
-      PhysicalModel *force;      
-      
+      PhysicalModel *force;     
       Integer paramId;
       bool isPrimaryBody = false;
       std::string bodyName;
@@ -482,22 +481,22 @@ void PropagationConfigPanel::Initialize()
       {
          force = theForceModel->GetForce(i);
          paramId = force->GetParameterID("PrimaryBody");
-         isPrimaryBody = force->GetBooleanParameter(paramId);
             
          if (force->GetTypeName() == "PointMassForce")
          {
             thePMF = (PointMassForce *)force;
+            isPrimaryBody = thePMF->GetBooleanParameter(paramId);
             bodyName = thePMF->GetStringParameter("BodyName");
             
             if (isPrimaryBody)
             {
                primaryBodiesArray.Add(bodyName.c_str());
-               MessageInterface::ShowMessage("Pri body: %s\n", bodyName.c_str());
+//               MessageInterface::ShowMessage("Pri body: %s\n", bodyName.c_str());
             }
             else
             {
                secondaryBodiesArray.Add(bodyName.c_str());    
-               MessageInterface::ShowMessage("Sec body: %s\n", bodyName.c_str());   
+//               MessageInterface::ShowMessage("Sec body: %s\n", bodyName.c_str());   
             }       
             
             currentBodyId = FindBody(bodyName, gravModelArray[POINT_MASS]);
@@ -1702,7 +1701,6 @@ void PropagationConfigPanel::OnPMEditButton()
          return;
 
       pmForceList.clear();
-      secondaryBodiesArray.Clear();
       pmEditTextCtrl->Clear();
             
       //-------------------------------------
@@ -1724,6 +1722,7 @@ void PropagationConfigPanel::OnPMEditButton()
       //--------------------------
       // Add bodies to pmForceList
       //--------------------------
+      secondaryBodiesArray.Clear();
       for (Integer i=0; i < (Integer)names.GetCount(); i++)
       {
          bodyName = names[i].c_str();
