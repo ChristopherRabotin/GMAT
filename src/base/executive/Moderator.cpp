@@ -24,6 +24,7 @@
 #define DEBUG_SETUP_RUN 0
 #define DEBUG_CREATE_RESOURCE 0
 #define DEBUG_PLANETARY_FILE 0
+#define DEGUB_MULTI_STOP 0
 
 //---------------------------------
 // static data
@@ -1924,11 +1925,11 @@ void Moderator::CreateDefaultMission()
       }
     
       // StopCondition
-      StopCondition *stopCond =
+      StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
-      stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
-      stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
-      stopCond->SetRealParameter("Goal", 8640.0);
+      stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+      stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
+      stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
       //MessageInterface::ShowMessage("-->default StopCondition created\n");
 
       // Subscribers
@@ -1945,16 +1946,32 @@ void Moderator::CreateDefaultMission()
     
       // OpenGlPlot
       sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
-      sub->SetStringParameter("Add", "DefaultSC"); //loj: 6/2/04 added
+      sub->SetStringParameter("Add", "DefaultSC");
       sub->Activate(true);
       //MessageInterface::ShowMessage("-->default Subscribers created\n");
 
       // Propagate Command
       GmatCommand *propCommand = CreateCommand("Propagate");
       propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
-      propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
-      propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
+      propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);
+      //loj: 6/25/04 use new method SetRefObject()
+      //propCommand->SetRefObject(stopOnElapsedSecs, Gmat::STOP_CONDITION);
+      propCommand->SetRefObject(stopOnElapsedSecs, Gmat::STOP_CONDITION, "", 0);
       propCommand->SetSolarSystem(theDefaultSolarSystem);
+
+#if DEBUG_MULTI_STOP
+      //----------------------------------------------------
+      //just for testing multiple stopping condition
+      //----- StopCondition 2
+      StopCondition *stopOnX =
+         CreateStopCondition("StopCondition", "StopOnDefaultSC.X");
+      stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+      stopOnX->SetStringParameter("StopVar", "DefaultSC.X");
+      stopOnX->SetRealParameter("Goal", 5000.0);
+      propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
+      //----------------------------------------------------
+#endif
+      
 
       //MessageInterface::ShowMessage("-->default Propagate command created\n");
       // Add propagate command
