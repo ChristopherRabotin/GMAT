@@ -121,6 +121,13 @@ protected:
     
     /// Temporary parameter used to stop on time
     Real                    secondsToProp;
+	/// ID for the temporary parameter
+    const Integer           secondsToPropID;
+    
+    // Accessors
+    virtual Real        GetRealParameter(const Integer id) const;
+    virtual Real        SetRealParameter(const Integer id,
+                                         const Real value);
     
 private:
     

@@ -38,10 +38,11 @@ Propagate::Propagate(void) :
     interruptCheckFrequencyID   (parameterCount+1),
     satNameID                   (parameterCount+2),
     propNameID                  (parameterCount+3),
-    secondsToProp               (8640.0)
+    secondsToProp               (8640.0),
+    secondsToPropID				(parameterCount+4)
 {
     // Increase the number of parms by the 2 new ones
-    parameterCount += 4;
+    parameterCount += 5;
 }
 
 
@@ -78,7 +79,8 @@ Propagate::Propagate(const Propagate &p) :
     interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
     satNameID                   (p.satNameID),
     propNameID                  (p.propNameID),
-    secondsToProp               (p.secondsToProp)
+    secondsToProp               (p.secondsToProp),
+    secondsToPropID				(p.secondsToPropID)
 {
     // Increase the number of parms by the 2 new ones
     parameterCount = p.parameterCount;
@@ -178,6 +180,9 @@ std::string Propagate::GetParameterText(const Integer id) const
     
     if (id == stopWhenID)
         return "StoppingConditions";
+        
+    if (id == secondsToPropID)
+        return "ElapsedSeconds";
 
     return GmatCommand::GetParameterText(id);
 }
@@ -197,6 +202,9 @@ Integer Propagate::GetParameterID(const std::string &str) const
     if (str == "Propagator")
         return propNameID;
     
+    if (str == "ElapsedSeconds")
+        return secondsToPropID;
+    
     return GmatCommand::GetParameterID(str);
 }
 
@@ -214,6 +222,9 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
     
     if (id == propNameID)
         return Gmat::STRING_TYPE;
+    
+    if (id == secondsToPropID)
+        return Gmat::REAL_TYPE;
     
     return GmatCommand::GetParameterType(id);
 }
@@ -233,9 +244,31 @@ std::string Propagate::GetParameterTypeString(const Integer id) const
     if (id == propNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
 
+    if (id == secondsToPropID)
+        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
+
     return GmatCommand::GetParameterTypeString(id);
 }
 
+// Temporary method -- remove once StopConditions are hooked up
+Real Propagate::GetRealParameter(const Integer id) const
+{
+    if (id == secondsToPropID)
+    	return secondsToProp;
+    	
+    return GmatCommand::GetRealParameter(id);
+}
+
+// Temporary method -- remove once StopConditions are hooked up
+Real Propagate::SetRealParameter(const Integer id, const Real value)
+{
+    if (id == secondsToPropID) {
+    	secondsToProp = value;
+    	return secondsToProp;
+    }
+    	
+    return GmatCommand::SetRealParameter(id, value);
+}
 
 Integer Propagate::GetIntegerParameter(const Integer id) const
 {
