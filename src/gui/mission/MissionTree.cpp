@@ -296,7 +296,22 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
 {
    wxString cmdTypeName = cmd->GetTypeName().c_str();
    
-   if (cmdTypeName == "Propagate")
+   // Moved BeginScript to the top so it can catch all of the commands between
+   // it and the EndScript
+   if ((cmdTypeName == "BeginScript") || inScriptEvent)
+   {
+      if (!inScriptEvent) {
+         mNewTreeId = AppendCommand(parent, GmatTree::MISSION_ICON_FILE,
+            GmatTree::SCRIPT_COMMAND, cmd, &mNumScriptEvent,
+            mNumScriptEvent);
+         inScriptEvent = true;
+
+         Expand(parent);
+      }
+      if (cmdTypeName == "EndScript")
+         inScriptEvent = false;
+   }
+   else if (cmdTypeName == "Propagate")
    {
       mNewTreeId = 
          AppendCommand(parent, GmatTree::MISSION_ICON_PROPAGATE_EVENT,
@@ -439,14 +454,6 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "NoOp")
    {
 
-   }
-   else if (cmdTypeName == "BeginScript")
-   {
-      mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SCRIPT_COMMAND,
-                       cmd, &mNumScriptEvent, mNumScriptEvent);
-      inScriptEvent = true;
-      Expand(parent);
    }
    else
    {

@@ -89,11 +89,25 @@ void ScriptEventPanel::LoadData()
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
 
-   wxString scriptText = theCommand->GetGeneratingString().c_str();
+//   GmatCommand *current = theCommand;
+   std::stringstream text;
+//   if (current->GetTypeName() == "BeginScript") {
+//      do {
+//         text << current->GetGeneratingString() << "\n";
+//         current = current->GetNext();
+//         if (current == NULL)
+//            break;
+//      } while (current->GetTypeName() != "EndScript");
+//      // Be sure to write out the last one!
+//      text << current->GetGeneratingString() << "\n";
+//      theCommand->SetGeneratingString(text.str());
+//   }
+//   else
+      text << theCommand->GetGeneratingString();
+
+   wxString scriptText = text.str().c_str();
    mFileContentsTextCtrl->AppendText(scriptText);
    
-   mFileContentsTextCtrl->AppendText("\n");
-
    theApplyButton->Disable();
 }
 

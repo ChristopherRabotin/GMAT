@@ -659,8 +659,16 @@ bool ScriptInterpreter::WriteScript(void)
 
    // Command sequence
    GmatCommand *cmd = moderator->GetNextCommand();
+   bool inTextMode = false;
    while (cmd != NULL) {
-      *outstream << (cmd->GetGeneratingString()) << "\n";
+      if (!inTextMode)
+         *outstream << (cmd->GetGeneratingString()) << "\n";
+         
+      if (cmd->GetTypeName() == "BeginScript")
+         inTextMode = true;
+      if (cmd->GetTypeName() == "EndScript")
+         inTextMode = false;
+         
       if (cmd == cmd->GetNext())
          throw InterpreterException("Self-reference found in command stream during write.");
       cmd = cmd->GetNext();

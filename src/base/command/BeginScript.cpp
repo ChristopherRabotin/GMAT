@@ -18,6 +18,7 @@
 
 
 #include "BeginScript.hpp" 
+#include <sstream>
 
 
 //------------------------------------------------------------------------------
@@ -106,3 +107,38 @@ GmatBase* BeginScript::Clone(void) const
    return (new BeginScript(*this));
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the BeginScript.
+ *
+ * @return clone of the BeginScript.
+ */
+//------------------------------------------------------------------------------
+const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
+                                                    const std::string &prefix,
+                                                    const std::string &useName)
+{
+   std::stringstream gen;
+   
+   gen << "BeginScript\n";
+   
+   GmatCommand *current = next;
+   while (current != NULL) {
+      if (current->GetTypeName() != "EndScript;") {
+         gen << "   " << current->GetGeneratingString() << "\n";
+         current = current->GetNext();
+         if (current == NULL)
+            gen << "EndScript;\n";
+      }
+      else {
+         gen << "EndScript;\n";
+         current = NULL;
+      }
+   }
+   
+   generatingString = gen.str();
+   return generatingString;
+}
