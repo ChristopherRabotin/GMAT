@@ -46,6 +46,7 @@
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
 #include "ImpulsiveBurnSetupPanel.hpp"
+#include "FiniteBurnSetupPanel.hpp"
 #include "DCSetupPanel.hpp"
 #include "ManeuverPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
@@ -345,6 +346,16 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if ((dataType == GmatTree::DEFAULT_FINITE_BURN)  ||
+               (dataType == GmatTree::CREATED_FINITE_BURN))
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);  
+         sizer->Add(new FiniteBurnSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
@@ -764,6 +775,8 @@ void GmatMainFrame::MinimizeChildren(int selection)
                 (dataType == GmatTree::CREATED_PROPAGATOR)              ||
                 (dataType == GmatTree::DEFAULT_IMPULSIVE_BURN)            ||
                 (dataType == GmatTree::CREATED_IMPULSIVE_BURN)     ||
+                (dataType == GmatTree::DEFAULT_FINITE_BURN)            ||
+                (dataType == GmatTree::CREATED_FINITE_BURN)     ||
                 (dataType == GmatTree::DEFAULT_BODY)                ||
                 (dataType == GmatTree::CREATED_BODY)           ||
                 (dataType == GmatTree::DEFAULT_DIFF_CORR)              ||
