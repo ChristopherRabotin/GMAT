@@ -162,6 +162,12 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
                                                  const wxSize &size,
                                                  wxArrayString &namesToExclude)
 {
+#if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::GetSpaceObjectListBox() theNumSpaceObject=%d\n",
+       theNumSpaceObject);
+#endif
+      
    wxString emptyList[] = {};
 
    if (namesToExclude.IsEmpty())
@@ -594,12 +600,14 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
       theSpaceObjectList[0] = wxString("-- None --");
    }
    
+   theNumSpaceObject = soCount;
+   
 #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage
-      ("<==========GuiItemManager::UpdateSpaceObjectList() exiting\n");
+      ("theNumSpaceObject=%d\n"
+       "<==========GuiItemManager::UpdateSpaceObjectList() exiting\n",
+       theNumSpaceObject);
 #endif
-
-   theNumSpaceObject = soCount;
 }
 
 //------------------------------------------------------------------------------

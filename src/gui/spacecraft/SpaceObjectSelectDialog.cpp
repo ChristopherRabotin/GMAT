@@ -113,7 +113,10 @@ void SpaceObjectSelectDialog::Create()
    clearSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("<="),
                                          wxDefaultPosition, wxSize(20,20), 0 );
 
-   MessageInterface::ShowMessage("Calling GetSpaceObjectListBox\n");
+#if DEBUG_SO_DIALOG
+   MessageInterface::ShowMessage
+      ("SpaceObjectSelectDialog::Create() Calling GetSpaceObjectListBox\n");
+#endif
    
    // wxListBox
    spaceObjAvailableListBox =
