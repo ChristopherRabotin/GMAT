@@ -250,105 +250,31 @@ GmatBase* JacchiaRobertsAtmosphere::Clone(void) const
 bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
-//    Real mass;
-//    Real dragCoeff;
-//    Real area;    
-//
-//    Real scVel[3];
-//    Real sunUnit[3];
-//    Real accel[3];
-//    
-//     if ( GetJacchiaRobertsDrag(epoch, pos, scVel, sunUnit, area, mass, 
-//          dragCoeff, sfFileName, newFile, density, accel) )
-//        return true;
-//     else
-//        return false;
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// Integer GetJacchiaRobertsDrag(Real time, Real sc_pos[3], Real sc_vel[3],
-//                               Real sun_unit[3], Real area, Real mass,
-//                               Real drag_coeff, FILE *tkptr, bool new_file,
-//                               Real *density, Real acceleration[3]);
-//------------------------------------------------------------------------------
-/**
- * Obtain aerodynamic drag using the Jacchia-Roberts density model
- *
- *  @param  <time>         Reduced Julian date (days)
- *  @param  <sc_pos>       Spacecraft position in TOD GCI coordinates (km)
- *  @param  <sc_vel>       Spacecraft velocity in TOD GCI  coordinates (km/sec)
- *  @param  <sun_unit>     Sun unit vector in TOD GCI coordinates 
- *  @param  <area>         Effective cross sectional area of the spacecraft
- *                         (km**2)
- *  @param  <mass>         Spacecraft mass (Kg)
- *  @param  <drag_coeff>   Spacecraft drag coefficient 
- *  @param  <*tkptr>       Pointer to file containing exospheric temperatures
- *                         and geomagnetic indices used by Jacchia-Roberts model
- *  @param  <new_file>     If true, flush static data for file
- *  @param  <acceleration> Spacecraft acceleration due to atmospheric drag
- *                         (km/sec**2)
- *
- *  @return true if drag calculated, false otherwise
- *
- *  Modifications:
- *     01/11/94  D. Gates - R94.02 delta SCR058: - Converted time to UTC and
- *               adjusted the day boundary to midnight.  This results in correct
- *               access of the file and correct corrections of the density for
- *               geomagnetic activity.
- *     01/28/94  D. Gates - R94.03 B1 SCR037: - Made it skip call to 
- *               JacchiaRoberts if the height is zero or less. This prevents it 
- *               from abending to DOS.
- *     01/26/94  D. Ginn  - DSPSE OPS:  Added new_file argument, logic
- *     10/07/99  R. Feiertag - R99.03 SCR xxxx: Output atmospheric density.
- *     06/07/04  W. Waktola - Code 583: Modified to get earth radius from 
- *               CelestialBody, and utc_time gets time from A1MJD.
- */
-//------------------------------------------------------------------------------
-bool JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time, 
-                                  Real sc_pos[3], Real sc_vel[3],
-                                  Real sun_unit[3], Real area, Real mass,
-                                  Real drag_coeff, FILE *tkptr, bool new_file,
-                                  Real *density, Real acceleration[3])
-{
-   Real rel_vel[3], config, vel_abs, height, rho;
-   Integer istat=0;
+   Real height, rho;
+   Integer istat = 0;
    Real utc_time;
-   A1Mjd *a1mjd_time = new A1Mjd(time); // waw: added 06/08/04
-
+   A1Mjd *a1mjd_time = new A1Mjd(epoch);
+      
    // Compute height of spacecraft
-   //  height = sqrt(sc_pos[0]*sc_pos[0] + sc_pos[1]*sc_pos[1]
-   //             + sc_pos[2]*sc_pos[2]) - ra;
+   //  height = sqrt(pos[0]*pos[0] + pos[1]*pos[1]
+   //             + pos[2]*pos[2]) - ra;
    
-   // waw: added 06/07/04
    GetEarth();  
    Real earthRadius = earth->GetEquatorialRadius();
-   //height = get_geodetic_height(get_body_radius(EARTH), sc_pos, flat);
-   height = get_geodetic_height(earthRadius, sc_pos, flat);
+   height = get_geodetic_height(earthRadius, pos, flat);
    
    // Obtain density of atmosphere at spacecraft height
 
-   // Compute the correct time first
-   // waw: added 06/07/04
-   //utc_time = a1mjd_to_utcmjd(time) - 0.5;    
-   utc_time = (Real)a1mjd_time->ToUtcMjd();
+   // Compute the correct time first  
+   utc_time = (Real)a1mjd_time->ToUtcMjd() - 0.5;
 
    //  For heights in the air, use JacchiaRoberts to calculate the density.  For
    //  heights at or below the surface of the Earth, use the constant value
    //  used for heights below 90 KM.
    if (height > 0.0)
-   {
-      // waw: Added check if file opened successfully
-      if (fileReader->OpenSolarFluxFile(fileName))
-         tkptr = fileReader->GetSolarFluxFile();
-      else
-         throw AtmosphereException("Error opening solar flux file for JacchiaRoberts.");
-         
-      rho = 1.0e12*JacchiaRoberts(height, sc_pos, sun_unit, utc_time, tkptr, 
-                                  new_file, istat);
-      // waw: Added for checking                            
-      if (!fileReader->CloseSolarFluxFile())
-         throw AtmosphereException("Error closing solar flux file for JacchiaRoberts.");
+   {         
+      rho = 1.0e12*JacchiaRoberts(height, pos, sunVector, utc_time, sfFileName, 
+                                  true, istat);
    }
    else
    {
@@ -357,41 +283,9 @@ bool JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time,
 
    // Output density in units of kg/m3
    *density = 1.0e-9*rho;
-
-
-   // If computation of density succeeded compute acceleration
-   if (istat == 0)
-   {
-      // Compute relative velocity between atmosphere and spacecraft
-      rel_vel[0] = sc_vel[0] + sc_pos[1] * earth_rate;
-      rel_vel[1] = sc_vel[1] - sc_pos[0] * earth_rate;
-      rel_vel[2] = sc_vel[2];
-      vel_abs = sqrt(rel_vel[0]*rel_vel[0] + rel_vel[1]*rel_vel[1] +
-                     rel_vel[2]*rel_vel[2]);
-
-      // Compute multiplicative factor for drag
-      config = -0.5 * drag_coeff * area * rho * vel_abs/ mass;
-
-      // Compute acceleration due to atmospheric drag
-      acceleration[0] = config * rel_vel[0];
-      acceleration[1] = config * rel_vel[1];
-      acceleration[2] = config * rel_vel[2];
-   }
-   // Set acceleration to zero if computation of density failed
-   else
-   {
-      acceleration[0] = 0.0;
-      acceleration[1] = 0.0;
-      acceleration[2] = 0.0;
-   }
-
-   // Return status
+   
    return true;
-} // end GetJacchiaRobertsDrag()
-
-//---------------------------------
-// private
-//---------------------------------
+}
 
 //------------------------------------------------------------------------------
 // Real JacchiaRoberts(Real height, Real space_craft[3], Real sun[3], 
@@ -426,11 +320,10 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    Real density, temperature, t_500, sun_dec, geo_lat;
 
    // Read minimum temperature and geomagnetic indices
-   // waw: Modified to use fileReader->LoadSolarFluxFile()
-    if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
-    {
-        return 0.0;
-    }
+   if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
+   {
+      return 0.0;
+   }
 
    // Compute declination of the sun
    sun_dec = atan2(sun[2], sqrt(sun[0]*sun[0] + sun[1]*sun[1]));

@@ -30,11 +30,7 @@ public:
     virtual GmatBase* Clone(void) const;
     
     bool Density(Real *position, Real *density, Real epoch=21545.0, Integer count = 1);
-    
-    bool GetJacchiaRobertsDrag(Real time, Real sc_pos[3], Real sc_vel[3],
-                               Real sun_unit[3], Real area, Real mass,
-                               Real drag_coeff, FILE *tkptr, bool new_file,
-                               Real *density, Real acceleration[3]);
+
    Real  JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],
                       Real a1_time, FILE *tkptr, bool new_file,
                       Integer istat);
