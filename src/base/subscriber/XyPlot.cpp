@@ -20,7 +20,7 @@
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp"     // for XY plot
 #include "Moderator.hpp"         // for GetParameter()
-//#include "MessageInterface.hpp"  // for ShowMessage()
+#include "MessageInterface.hpp"  // for ShowMessage()
 
 //---------------------------------
 // static data
@@ -184,6 +184,8 @@ Integer XyPlot::GetNumYParameters()
 //------------------------------------------------------------------------------
 bool XyPlot::SetXParameter(const std::string &paramName)
 {
+   //@todo Do not use Moderator
+   
    bool status = false;
    Moderator *theModerator = Moderator::Instance();
 
@@ -208,14 +210,15 @@ bool XyPlot::SetXParameter(const std::string &paramName)
 bool XyPlot::SetXParameter(Parameter *param)
 {
    //loj: Do I really need to validate parameter before set?
-   if (param->Validate())
-   {
+   //     Validate when the parameter is actually evaluated?
+   //if (param->Validate()) //loj: 4/27/04 commented out
+   //{
       mXParamName = param->GetName();
       mXParam = param;
       return true;
-   }
+   //}
 
-   return false;
+   //return false;
 }
 
 //------------------------------------------------------------------------------
@@ -250,8 +253,8 @@ bool XyPlot::AddYParameter(Parameter *param)
    bool added = false;
     
    //loj: Do I really need to validate parameter before add?
-   if (param->Validate())
-   {
+   //if (param->Validate()) //loj: 4/27/04 commented out
+   //{
       //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
       //                              param->GetName().c_str());
       mYParamNames.push_back(param->GetName());
@@ -259,7 +262,7 @@ bool XyPlot::AddYParameter(Parameter *param)
       mNumYParams = mYParams.size();
 
       added = true;
-   }
+   //}
 
    return added;
 }
@@ -489,12 +492,14 @@ void XyPlot::DeletePlotCurves()
 void XyPlot::BuildPlotTitle()
 {
    //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() entered\n");
+   
    //set X and Y axis title
    if (mXAxisTitle == "" || mAddNewCurve)
       mXAxisTitle = mXParam->GetName();
             
-    //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
-    //                              mXAxisTitle.c_str());
+   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
+   //                              mXAxisTitle.c_str());
+   
    if (mYAxisTitle == "" || mAddNewCurve)
    {
       mYAxisTitle = "";
