@@ -51,7 +51,7 @@ public:
    // The inherited methods from GmatBase
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual std::string GetParameterText(const Integer id);
+   virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str);
    virtual std::string GetStringParameter(const Integer id);
    virtual bool SetStringParameter(const Integer id, const std::string &value);

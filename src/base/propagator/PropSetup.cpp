@@ -307,7 +307,7 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string PropSetup::GetParameterText(const Integer id)
+std::string PropSetup::GetParameterText(const Integer id) const
 {
    switch (id)
    {

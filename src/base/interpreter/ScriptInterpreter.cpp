@@ -22,6 +22,10 @@
 #include <fstream>
 
 
+// Maybe put something like this in the Gmat namespace?
+#define REV_STRING "Build 1, November 2003"
+
+
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
 ScriptInterpreter* ScriptInterpreter::Instance()
@@ -58,17 +62,13 @@ bool ScriptInterpreter::Interpret(void)
 
 bool ScriptInterpreter::Interpret(std::string &scriptfile)
 {
-    if (!initialized)
-        Initialize();
-
     bool retval = false;
     
+    filename = scriptfile;
     std::ifstream inFile(scriptfile.c_str());
     instream = &inFile;
     
-    outstream = &std::cout;
-    
-    retval = ReadScript();
+    retval = Interpret();
     
     inFile.close();
     instream = NULL;
@@ -81,7 +81,26 @@ bool ScriptInterpreter::Build(void)
 {
     if (!initialized)
         Initialize();
-    return false;
+        
+    return WriteScript();
+}
+
+
+bool ScriptInterpreter::Build(std::string &scriptfile)
+{
+    bool retval = false;
+    
+    filename = scriptfile;
+
+    std::ofstream outFile(scriptfile.c_str());
+    outstream = &outFile;
+
+    retval = Build();
+    
+    outFile.close();
+    outstream = NULL;
+    
+    return retval;
 }
 
 
@@ -180,6 +199,32 @@ bool ScriptInterpreter::Parse(void)
         // Clear the array of words found in the line
         chunks.clear();
     }
+    
+    return true;
+}
+
+
+bool ScriptInterpreter::WriteScript(void)
+{
+    *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
+     
+    // First write out the objects, one type at a time
+    StringArray::iterator current;
+    StringArray objs;
+    
+    // Spacecraft
+    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+    
+    // Propagator setups
+    objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+            
+    // Command sequence
     
     return true;
 }

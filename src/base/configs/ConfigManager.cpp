@@ -159,7 +159,6 @@ bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 }
 
 
-
 StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 {
     listOfItems.erase(listOfItems.begin(), listOfItems.end());

@@ -159,17 +159,59 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
 
 
 // The "Build" methods take GMAT objects and write out scripts or subscripts
-bool Interpreter::Build(void)
+bool Interpreter::BuildObject(std::string &objectname)
 {
-    return false;
+    GmatBase *obj = FindObject(objectname);
+    
+    (*outstream).precision(18);        /// @todo Make output precision generic
+    
+    // For now, "Create Propagator" creates a PropSetup.  This kludge handles 
+    // that special case.
+    std::string tname = obj->GetTypeName();
+    if (tname == "PropSetup")
+        tname = "Propagator";
+    *outstream << "Create " << tname << " " 
+               << obj->GetName() << "\n";
+               
+    Integer i;
+    for (i = 0; i < obj->GetParameterCount(); ++i) 
+    {
+        // Fill in the l.h.s.
+        *outstream << "GMAT " << objectname << "." 
+                   << obj->GetParameterText(i) << " = ";
+        WriteParameterValue(obj, i);
+        *outstream << ";\n";
+    }
+    *outstream << "\n";
+    return true;
 }
 
 
-bool Interpreter::BuildObject(std::string objectname)
+void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
 {
-    return false;
+    Gmat::ParameterType tid = obj->GetParameterType(id);
+    
+    switch (tid) {
+        case Gmat::STRING_TYPE:
+            *outstream << obj->GetStringParameter(id);
+            break;
+            
+        case Gmat::INTEGER_TYPE:
+            *outstream << obj->GetIntegerParameter(id);
+            break;
+            
+        case Gmat::REAL_TYPE:
+            *outstream << obj->GetRealParameter(id);
+            break;
+            
+        case Gmat::BOOLEAN_TYPE:
+            *outstream << ((obj->GetBooleanParameter(id)) ? "true" : "false");
+            break;
+            
+        default:
+            break;
+    }
 }
-
 
 
 // The "Create" methods make calls, through the Moderator, to the Factories
@@ -256,8 +298,9 @@ void Interpreter::ChunkLine(void)
     while (start != -1) {
         end = start;
         while ((str[end] != ' ') && (str[end] != '\t') && (str[end] != '\r') &&
-               (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0'))
+               (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0')) {
             ++end;
+        }
         phrase.assign(line, start, (end-start));
         chunks.push_back(new std::string(phrase));
         start = SkipWhiteSpace(end);
@@ -269,6 +312,9 @@ Integer Interpreter::SkipWhiteSpace(Integer start)
 {
     Integer finish = start;
     const char *str = line.c_str();
+    if (str[0] == '%')  // Comment line
+        return -1;
+        
     while ((str[finish] == ' ') || (str[finish] == '\t')) {
         ++finish;
         if ((str[finish] == '\r') || (str[finish] == '\n') ||

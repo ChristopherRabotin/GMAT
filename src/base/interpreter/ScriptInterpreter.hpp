@@ -40,14 +40,18 @@ class ScriptInterpreter : public Interpreter
         virtual bool                Interpret(void);
         virtual bool                Interpret(std::string &scriptfile);
         virtual bool                Build(void);
+        virtual bool                Build(std::string &scriptfile);
         
     protected:
         static ScriptInterpreter    *instance;
+        std::string                 filename;
 
         bool                        ReadScript(void);
         bool                        ReadLine(void);
         bool                        Parse(void);
         
+        bool                        WriteScript(void);
+
         bool                        ConfigureCommand(Command *);
         bool                        ConfigureMathematics(void);
         

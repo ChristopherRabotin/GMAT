@@ -71,7 +71,7 @@ public:
     
     // The "Build" methods take GMAT objects and write out scripts or subscripts
     virtual bool                    Build(void) = 0;
-    bool                            BuildObject(std::string objectname);
+    bool                            BuildObject(std::string &objectname);
 
 protected:
     /// The input stream processed by the interpreter
@@ -102,7 +102,7 @@ protected:
     /// Current line from the script
     std::string                     line;
     std::vector<std::string *>      chunks;
-
+    
     /// Identifies the different types of script lines possible
     enum linetype               { CREATEOBJECT = 7001,
                                   OBJECTPARM,
@@ -138,6 +138,7 @@ protected:
     // Methods used to break apart lines of script
     void                            ChunkLine(void);
     Integer                         SkipWhiteSpace(Integer start = 0);
+    void                            WriteParameterValue(GmatBase *obj, Integer id);
     Integer                         FindDelimiter(std::string str,
                                                   std::string specChar = "");
     std::string                     GetToken(std::string tokstr = "");
