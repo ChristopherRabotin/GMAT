@@ -35,8 +35,8 @@
 class GMAT_API Propagate : public GmatCommand
 {
 public:
-   Propagate(void);
-   virtual ~Propagate(void);
+   Propagate();
+   virtual ~Propagate();
    Propagate(const Propagate &p);
    Propagate&          operator=(const Propagate &p);
 
@@ -53,7 +53,6 @@ public:
    virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
                                  const std::string objName = "");
    virtual void        ClearObject(const Gmat::ObjectType type);
-    
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -88,12 +87,13 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
 
    // Methods used to run the command
-   virtual bool        InterpretAction(void);
+   virtual bool        InterpretAction();
     
-   virtual bool        Initialize(void);
+   virtual bool        Initialize();
    virtual void        FillFormation(SpaceObject *so, StringArray& owners,
                                      StringArray& elements);
-   virtual bool        Execute(void);
+   virtual GmatCommand* GetNext();
+   virtual bool        Execute();
 
 protected:
    // We may eventually want to make this a list of propagator names for the
@@ -109,6 +109,8 @@ protected:
    bool                    propCoupled;
    /// Frequency used to check for user interrupts of the run
    Integer                 interruptCheckFrequency;
+   /// Flag that specifies if we are rejoining a run in progress
+   bool                    inProgress;
    /// Starting epoch for the propagation
    Real                    baseEpoch;
 
@@ -144,6 +146,28 @@ protected:
    Real                    secondsToProp;
    /// ID for the temporary parameter
    const Integer           secondsToPropID;
+   
+   // Parameters moved from Execute so that it can be reentrant
+   /// Time elapsed during this Propagate
+   Real                    elapsedTime;
+   /// Start epoch for the step
+   Real                    currEpoch;
+   /// The Propagator
+   Propagator              *p;
+   /// The ForceModel
+   ForceModel              *fm;
+
+
+   /// The state that is propagated
+   Real                    *state;
+   /// Data sent to the Publisher
+   Real                    *pubdata;
+   /// Flag for stopping
+   bool                    stopCondMet;
+   /// Epoch used for stop
+   Real                    stopEpoch;
+   /// Dimension used for (local) state vector
+   Integer                 dim;
    
    virtual void            SetNames(const std::string& name, 
                                     StringArray& owners, StringArray& elements);
