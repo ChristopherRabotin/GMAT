@@ -19,22 +19,22 @@
 
 namespace GmatPlot
 {
-    enum EventType
+    enum GlEventType
     {
-        MDI_QUIT = 100,
-        MDI_OPEN_TRAJECTORY_FILE,
-        MDI_CHILD_ZOOM_IN,
-        MDI_CHILD_ZOOM_OUT,
-        MDI_CLEAR_PLOT,
-        MDI_CHANGE_TITLE,
-        MDI_CHILD_QUIT,
-        MDI_SHOW_DEFAULT_VIEW,
-        MDI_ZOOM_IN,
-        MDI_ZOOM_OUT,
-        MDI_VIEW_OPTION,
-        MDI_SHOW_WIRE_FRAME,
-        MDI_SHOW_EQUATORIAL_PLANE,
-        MDI_HELP_VIEW
+        MDI_GL_QUIT = 100,
+        MDI_GL_OPEN_TRAJECTORY_FILE,
+        MDI_GL_CHILD_ZOOM_IN,
+        MDI_GL_CHILD_ZOOM_OUT,
+        MDI_GL_CLEAR_PLOT,
+        MDI_GL_CHANGE_TITLE,
+        MDI_GL_CHILD_QUIT,
+        MDI_GL_SHOW_DEFAULT_VIEW,
+        MDI_GL_ZOOM_IN,
+        MDI_GL_ZOOM_OUT,
+        MDI_GL_VIEW_OPTION,
+        MDI_GL_SHOW_WIRE_FRAME,
+        MDI_GL_SHOW_EQUATORIAL_PLANE,
+        MDI_GL_HELP_VIEW
     };
 }
 
@@ -42,7 +42,7 @@ struct MdiGlPlot
 {
     static MdiParentGlFrame *mdiParentGlFrame;
     static wxList mdiChildren;
-    static int numChildFrames;
+    static int numChildren;
 };
 
 #endif
