@@ -14,6 +14,9 @@
 //------------------------------------------------------------------------------
 #include "GmatNotebook.hpp"
 #include "GmatAppData.hpp"
+#include "MessageInterface.hpp"
+
+#define DEBUG_NOTEBOOK 0
 
 //------------------------------
 // event tables for wxWindows
@@ -29,26 +32,56 @@
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatNotebook, wxNotebook)
+   EVT_NOTEBOOK_PAGE_CHANGED(-1, GmatNotebook::OnNotebookSelChange)
 END_EVENT_TABLE()
 
+//------------------------------------------------------------------------------
+// GmatNotebook(wxWindow *parent, wxWindowID id,
+//              const wxPoint &pos, const wxSize &size, long style)
+//------------------------------------------------------------------------------
 GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
-                   const wxPoint &pos, const wxSize &size, long style)
-                   :wxNotebook(parent, id, pos, size, style)
+                           const wxPoint &pos, const wxSize &size, long style)
+   : wxNotebook(parent, id, pos, size, style)
 {
-  this->parent = parent;
+   this->parent = parent;
     
-  wxPanel *panel = (wxPanel *)NULL;
+   wxPanel *panel = (wxPanel *)NULL;
   
-  // Create and add Resource, Mission, and Output Tabs
-  panel = CreateResourcePage( );
-  AddPage( panel, wxT("Resources") );
+   // Create and add Resource, Mission, and Output Tabs
+   panel = CreateResourcePage( );
+   AddPage( panel, wxT("Resources") );
   
-  panel = CreateMissionPage( );
-  AddPage( panel, wxT("Mission") );
+   panel = CreateMissionPage( );
+   AddPage( panel, wxT("Mission") );
 
-  panel = CreateOutputPage( );
-  AddPage( panel, wxT("Output") );
+   panel = CreateOutputPage( );
+   AddPage( panel, wxT("Output") );
 
+}
+
+//------------------------------------------------------------------------------
+// void OnNoetbookSelChange(wxNotebookEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles notebook page change
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void GmatNotebook::OnNotebookSelChange(wxNotebookEvent &event)
+{
+   int sel = event.GetSelection();
+   
+#if DEBUG_NOTEBOOK
+   MessageInterface::ShowMessage("GmatNotebook::OnNotebookSelChange sel=%d\n", sel);
+#endif
+   
+   if (sel == 0)
+   {
+      resourceTree->UpdateResource();
+   }
+
+   event.Skip();
 }
 
 //-------------------------------
@@ -66,32 +99,32 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 wxPanel *GmatNotebook::CreateResourcePage()
 {
-    wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel *panel = new wxPanel(this);
+   wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
+   wxPanel *panel = new wxPanel(this);
 
-    //loj: 2/14/04 commented out
-    //long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-    //            wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT|
-    //            wxTR_EDIT_LABELS;
+   //loj: 2/14/04 commented out
+   //long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
+   //            wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT|
+   //            wxTR_EDIT_LABELS;
 
-    //loj: 2/14/04 we don't want to edit labels
-    long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-                 wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT;
+   //loj: 2/14/04 we don't want to edit labels
+   long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
+      wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT;
 
-    resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
-                   wxDefaultSize, style);
+   resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
+                                   wxDefaultSize, style);
 
-    // set to GmatAppData
-    GmatAppData::SetResourceTree(resourceTree);
+   // set to GmatAppData
+   GmatAppData::SetResourceTree(resourceTree);
     
-    sizer->Add( resourceTree, 0, wxGROW|wxALL, 0 );
+   sizer->Add( resourceTree, 0, wxGROW|wxALL, 0 );
 
-    panel->SetAutoLayout( TRUE );
-    panel->SetSizer( sizer );
-    sizer->Fit( panel );
-    sizer->SetSizeHints( panel );
+   panel->SetAutoLayout( TRUE );
+   panel->SetSizer( sizer );
+   sizer->Fit( panel );
+   sizer->SetSizeHints( panel );
     
-    return panel;
+   return panel;
 }
 
 //------------------------------------------------------------------------------
@@ -105,26 +138,26 @@ wxPanel *GmatNotebook::CreateResourcePage()
 //------------------------------------------------------------------------------
 wxPanel *GmatNotebook::CreateMissionPage()
 {
-    wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
-    wxPanel *panel = new wxPanel(this);
+   wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
+   wxPanel *panel = new wxPanel(this);
 
-    long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-                wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT |wxTR_EXTENDED;
+   long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
+      wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT |wxTR_EXTENDED;
 
-    missionTree = new MissionTree(panel, -1, wxDefaultPosition,
-                  wxDefaultSize, style);
+   missionTree = new MissionTree(panel, -1, wxDefaultPosition,
+                                 wxDefaultSize, style);
 
-    // set to GmatAppData
-    GmatAppData::SetMissionTree(missionTree);
+   // set to GmatAppData
+   GmatAppData::SetMissionTree(missionTree);
 
-    sizer->Add( missionTree, 0, wxGROW|wxALL, 0 );
+   sizer->Add( missionTree, 0, wxGROW|wxALL, 0 );
 
-    panel->SetAutoLayout( TRUE );
-    panel->SetSizer( sizer );
-    sizer->Fit( panel );
-    sizer->SetSizeHints( panel );
+   panel->SetAutoLayout( TRUE );
+   panel->SetSizer( sizer );
+   sizer->Fit( panel );
+   sizer->SetSizeHints( panel );
 
-    return panel;
+   return panel;
 }
 
 //------------------------------------------------------------------------------
@@ -138,6 +171,6 @@ wxPanel *GmatNotebook::CreateMissionPage()
 //------------------------------------------------------------------------------
 wxPanel *GmatNotebook::CreateOutputPage()
 {
-    wxPanel *panel = new wxPanel(this);
-    return panel;
+   wxPanel *panel = new wxPanel(this);
+   return panel;
 }

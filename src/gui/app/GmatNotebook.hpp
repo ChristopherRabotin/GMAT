@@ -25,26 +25,29 @@
 class GmatNotebook : public wxNotebook
 {
 public:
-    // constructors
-    GmatNotebook( wxWindow *parent, wxWindowID id = -1,
-                  const wxPoint& pos = wxDefaultPosition,
-                  const wxSize& size = wxDefaultSize, long style = 0 );
-//    void SetMainNotebook (GmatMainNotebook *gmatMainNotebook);
-//    GmatMainNotebook *GetMainNotebook();
+   // constructors
+   GmatNotebook( wxWindow *parent, wxWindowID id = -1,
+                 const wxPoint& pos = wxDefaultPosition,
+                 const wxSize& size = wxDefaultSize, long style = 0 );
+   //void SetMainNotebook (GmatMainNotebook *gmatMainNotebook);
+   //GmatMainNotebook *GetMainNotebook();
 
 protected:
 private:
-    wxWindow *parent;
-//    GmatMainNotebook *mainNotebook;
-    ResourceTree *resourceTree;
-    MissionTree *missionTree;
+   wxWindow *parent;
+   //GmatMainNotebook *mainNotebook;
+   ResourceTree *resourceTree;
+   MissionTree *missionTree;
 
-    wxPanel *CreateResourcePage();
-    wxPanel *CreateMissionPage();
-    wxPanel *CreateOutputPage();
+   wxPanel *CreateResourcePage();
+   wxPanel *CreateMissionPage();
+   wxPanel *CreateOutputPage();
 
-    // event handlers
-    DECLARE_EVENT_TABLE();
+   // event handlers
+   void OnNotebookSelChange(wxNotebookEvent &event);
+   
+   DECLARE_EVENT_TABLE();
+
 };
 
 #endif // GmatNotebook_hpp
