@@ -14,7 +14,7 @@
 // Modified: 2003/09/15 Linda Jun - See TableTemplate.hpp
 //
 /**
- * Provies declarations for the TableTemplate template class, representing
+ * Provides declarations for the TableTemplate template class, representing
  * a 2-dimensional table of any type T (see assumptions about type T, below)
  */
 //------------------------------------------------------------------------------
