@@ -321,11 +321,13 @@ bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
                               polarMotion->GetElement(i,1);
                Real diffY   = polarMotion->GetElement(i+1,2) -
                               polarMotion->GetElement(i,2);
-               Real diffLOD = polarMotion->GetElement(i+1,3) -
-                              polarMotion->GetElement(i,3);
+               //Real diffLOD = polarMotion->GetElement(i+1,3) -
+               //               polarMotion->GetElement(i,3);
                xval   = polarMotion->GetElement(i,1) + ratio * diffX;
                yval   = polarMotion->GetElement(i,2) + ratio * diffY;
-               lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+               // 2005.02.23 - Steve says not to interpolate lod
+               //lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+               lodval = polarMotion->GetElement(i,3);
             }
             break;
          }
