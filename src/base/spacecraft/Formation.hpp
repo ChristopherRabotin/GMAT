@@ -25,9 +25,9 @@
 
 class GMAT_API Formation : public SpaceObject{
 public:
-	Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
+   Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
              const std::string &nomme);
-	virtual ~Formation();
+   virtual ~Formation();
    Formation(const Formation& orig);
    Formation&           operator=(const Formation& orig);
    
@@ -41,6 +41,12 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool GetBooleanParameter(const Integer id) const;
+   virtual bool GetBooleanParameter(const std::string &label) const;
+   virtual bool SetBooleanParameter(const Integer id, const bool value);
+   virtual bool SetBooleanParameter(const std::string &label,
+                                    const bool value);
+   
 //   virtual std::string GetStringParameter(const Integer id) const;
 //   virtual std::string GetStringParameter(const Integer id,
 //                                          const Integer index) const;
@@ -96,6 +102,7 @@ protected:
    {
       ADDED_SPACECRAFT = SpaceObjectParamCount,
       REMOVED_SPACECRAFT,
+      CLEAR_NAMES,
       FormationParamCount
    }; 
    /// Array of supported parameters

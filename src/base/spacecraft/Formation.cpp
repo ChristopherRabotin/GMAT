@@ -28,14 +28,16 @@ const std::string
 Formation::PARAMETER_TEXT[FormationParamCount - SpaceObjectParamCount] =
 {
    "Add",
-   "Remove"
+   "Remove",
+   "Clear"
 };
 
 const Gmat::ParameterType
 Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
-   Gmat::UNKNOWN_PARAMETER_TYPE     // Don't write the "remove" parms
+   Gmat::UNKNOWN_PARAMETER_TYPE,     // Don't write the "remove" parms
+   Gmat::BOOLEAN_TYPE
 };
 
 
@@ -146,6 +148,53 @@ Gmat::ParameterType Formation::GetParameterType(const Integer id) const
    return GmatBase::GetParameterType(id);
 }
 
+//loj: 8/6/04 added
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+bool Formation::GetBooleanParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case CLEAR_NAMES:
+      return false;
+   default:
+      return SpaceObject::GetBooleanParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+bool Formation::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+bool Formation::SetBooleanParameter(const Integer id, const bool value)
+{
+   switch (id)
+   {
+   case CLEAR_NAMES:
+      componentNames.clear();
+      return true;
+   default:
+      return SpaceObject::SetBooleanParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label,
+//                          const bool value)
+//------------------------------------------------------------------------------
+bool Formation::SetBooleanParameter(const std::string &label,
+                                 const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterTypeString(const Integer id) const
