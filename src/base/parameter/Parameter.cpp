@@ -36,7 +36,8 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 
 //------------------------------------------------------------------------------
 // Parameter(const std::string &name, const std::string &typeStr,
-//           ParameterKey key, GmatBase *obj, const std::string &desc)
+//           ParameterKey key, GmatBase *obj, const std::string &desc
+//           const std::string &unit, bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -47,13 +48,14 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
+ * @param <isTimeParam> true if parameter is time related, false otherwise
  *
  * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
-                     ParameterKey key, GmatBase *obj,
-                     const std::string &desc, const std::string &unit)
+                     ParameterKey key, GmatBase *obj, const std::string &desc,
+                     const std::string &unit, bool isTimeParam)
     : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
     mKey = key;
@@ -73,7 +75,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
         mDesc = desc;
 
     mUnit = unit;
-
+    mIsTimeParam = isTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -91,6 +93,7 @@ Parameter::Parameter(const Parameter &param)
     mKey = param.mKey;
     mDesc = param.mDesc;
     mUnit = param.mUnit;
+    mIsTimeParam = param.mIsTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -111,7 +114,7 @@ Parameter& Parameter::operator= (const Parameter& right)
         GmatBase::operator=(right);
         mKey = right.mKey;
         mDesc = right.mDesc;
-        mUnit = right.mUnit;
+        mIsTimeParam = right.mIsTimeParam;
     }
 
     return *this;
@@ -168,6 +171,20 @@ std::string Parameter::GetDesc() const
 std::string Parameter::GetUnit() const
 {
     return mUnit;
+}
+
+//------------------------------------------------------------------------------
+// bool IsTimeParameter() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves parameter unit.
+ *
+ * @return parameter description.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsTimeParameter() const
+{
+    return mIsTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -240,6 +257,20 @@ bool Parameter::operator==(const Parameter &right) const
 bool Parameter::operator!=(const Parameter &right) const
 {
     return !(*this == right);
+}
+
+//------------------------------------------------------------------------------
+// Real EvaluateReal()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates parameter value.
+ *
+ * @return REAL_PARAMETER_UNDEFINED if derived class doesn't implement this
+ */
+//------------------------------------------------------------------------------
+Real Parameter::EvaluateReal()
+{
+    return REAL_PARAMETER_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
