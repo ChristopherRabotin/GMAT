@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                        AdamsBashfordMoulton
 //------------------------------------------------------------------------------
@@ -109,7 +109,8 @@ AdamsBashfordMoulton
 //------------------------------------------------------------------------------
 std::string AdamsBashfordMoulton::GetType(void) const
 {
-    return "Adams-Bashford-Moulton 4";
+//    return "Adams-Bashford-Moulton 4";
+   return "Adams-Bashford-Moulton 4";
 }
 
 

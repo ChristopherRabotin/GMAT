@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                        AdamsBashfordMoulton
 //------------------------------------------------------------------------------
@@ -38,7 +38,7 @@
 
 #include "gmatdefs.hpp"
 #include "PredictorCorrector.hpp"
-
+#include "RungeKutta.hpp"
 
 /**
  * Implementation of the Adams-Bashford-Moulton Predictor-Corrector
