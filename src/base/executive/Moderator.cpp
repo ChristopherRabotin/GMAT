@@ -111,48 +111,53 @@ Moderator* Moderator::Instance()
 //------------------------------------------------------------------------------
 bool Moderator::Initialize()
 {
-   // Create interpreters and managers
-   theGuiInterpreter = GuiInterpreter::Instance();
-   theScriptInterpreter = ScriptInterpreter::Instance();
-   theFactoryManager = FactoryManager::Instance();
-   theConfigManager = ConfigManager::Instance();
+    if (!isInitialized)
+    {
+        // Create interpreters and managers
+        theGuiInterpreter = GuiInterpreter::Instance();
+        theScriptInterpreter = ScriptInterpreter::Instance();
+        theFactoryManager = FactoryManager::Instance();
+        theConfigManager = ConfigManager::Instance();
 
-   // Create publisher
-   thePublisher = new Publisher();
+        // Create publisher
+        thePublisher = new Publisher();
 
-   // Create factories
-   theCommandFactory = new CommandFactory();
-   theForceModelFactory = new ForceModelFactory();
-   theParameterFactory = new ParameterFactory();
-   thePhysicalModelFactory = new PhysicalModelFactory();
-   thePropSetupFactory = new PropSetupFactory();
-   thePropagatorFactory = new PropagatorFactory();
-   theSpacecraftFactory = new SpacecraftFactory();
-   theStopConditionFactory = new StopConditionFactory();
-   theSubscriberFactory = new SubscriberFactory();
+        // Create factories
+        theCommandFactory = new CommandFactory();
+        theForceModelFactory = new ForceModelFactory();
+        theParameterFactory = new ParameterFactory();
+        thePhysicalModelFactory = new PhysicalModelFactory();
+        thePropSetupFactory = new PropSetupFactory();
+        thePropagatorFactory = new PropagatorFactory();
+        theSpacecraftFactory = new SpacecraftFactory();
+        theStopConditionFactory = new StopConditionFactory();
+        theSubscriberFactory = new SubscriberFactory();
 
-   // Register factories
-   theFactoryManager->RegisterFactory(theCommandFactory);
-   theFactoryManager->RegisterFactory(theForceModelFactory);
-   theFactoryManager->RegisterFactory(theParameterFactory);
-   theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-   theFactoryManager->RegisterFactory(thePropSetupFactory);
-   theFactoryManager->RegisterFactory(thePropagatorFactory);
-   theFactoryManager->RegisterFactory(theSpacecraftFactory);
-   theFactoryManager->RegisterFactory(theStopConditionFactory);
-   theFactoryManager->RegisterFactory(theSubscriberFactory);
+        // Register factories
+        theFactoryManager->RegisterFactory(theCommandFactory);
+        theFactoryManager->RegisterFactory(theForceModelFactory);
+        theFactoryManager->RegisterFactory(theParameterFactory);
+        theFactoryManager->RegisterFactory(thePhysicalModelFactory);
+        theFactoryManager->RegisterFactory(thePropSetupFactory);
+        theFactoryManager->RegisterFactory(thePropagatorFactory);
+        theFactoryManager->RegisterFactory(theSpacecraftFactory);
+        theFactoryManager->RegisterFactory(theStopConditionFactory);
+        theFactoryManager->RegisterFactory(theSubscriberFactory);
 
-   // create default Spacecraft
-   Spacecraft *defaultSc = CreateSpacecraft("Spacecraft", "DefaultSC");
+        // create default Spacecraft
+        Spacecraft *defaultSc = CreateSpacecraft("Spacecraft", "DefaultSC");
 
-   // create default SolarSystem
-   
-   return true; //loj: for now
-   
-   //loj: reads in initial files, such as, system parameters, default mission script file.
-   //loj: calls ScriptInterpreter to interpret initial script and create necessary objects
-   //loj: creates initial commands and add to sandbox
-   //loj: at this point the sandbox is ready to run without GUI.
+        // create default SolarSystem
+     
+        //loj: reads in initial files, such as, system parameters, default mission script file.
+        //loj: calls ScriptInterpreter to interpret initial script and create necessary objects
+        //loj: creates initial commands and add to sandbox
+        //loj: at this point the sandbox is ready to run without GUI.
+
+        isInitialized = true;
+    }
+
+    return isInitialized;
 }
 
 //----- ObjectType
@@ -331,9 +336,10 @@ ForceModel* Moderator::GetForceModel(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// bool AddToForceModel(const std::string forceModelName, std::string forceName)
+// bool AddToForceModel(const std::string &forceModelName, const std::string &forceName)
 //------------------------------------------------------------------------------
-bool Moderator::AddToForceModel(const std::string forceModelName, std::string forceName)
+bool Moderator::AddToForceModel(const std::string &forceModelName,
+                                const std::string &forceName)
 {
    bool status = true;
    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
@@ -343,11 +349,12 @@ bool Moderator::AddToForceModel(const std::string forceModelName, std::string fo
 }
 
 //------------------------------------------------------------------------------
-// StopCondition* CreateStopCondition(const std::string &name)
+// StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-StopCondition* Moderator::CreateStopCondition(const std::string &name)
+StopCondition* Moderator::CreateStopCondition(const std::string &type,
+                                              const std::string &name)
 {
-   StopCondition *stopCond = theFactoryManager->CreateStopCondition(name);
+   StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
 //   theConfigManager->AddStopCondition(stopCond);
    return stopCond;
 }
@@ -361,11 +368,12 @@ StopCondition* Moderator::GetStopCondition(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// PropSetup* CreatePropSetup(const std::string &name, std::string propagatorName,
-//                                       std::string forceModelName)
+// PropSetup* CreatePropSetup(const std::string &name, const std::string &propagatorName,
+//                            const std::string &forceModelName)
 //------------------------------------------------------------------------------
-PropSetup* Moderator::CreatePropSetup(const std::string &name, std::string propagatorName,
-                                      std::string forceModelName)
+PropSetup* Moderator::CreatePropSetup(const std::string &name,
+                                      const std::string &propagatorName,
+                                      const std::string &forceModelName)
 {
    // assumes propagatorName and forceModelName exist alreay.
    Propagator *prop = theConfigManager->GetPropagator(propagatorName);

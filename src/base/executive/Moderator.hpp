@@ -99,17 +99,17 @@ public:
    // ForceModel
    ForceModel* CreateForceModel(const std::string &name);
    ForceModel* GetForceModel(const std::string &name);
-   bool AddToForceModel(const std::string forceModelName, std::string forceName);
+   bool AddToForceModel(const std::string &forceModelName, const std::string &forceName);
 
    // StopCondition
-   StopCondition* CreateStopCondition(const std::string &name);
+   StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
    StopCondition* GetStopCondition(const std::string &name);
-   bool AddToStopCondition(const std::string stopCondName, std::string paramName);
+   bool AddToStopCondition(const std::string &stopCondName, const std::string &paramName);
 
    // PropSetup
    PropSetup* CreatePropSetup(const std::string &name,
-                              std::string propagatorName = "",
-                              std::string forceModelName = "");
+                              const std::string &propagatorName = "",
+                              const std::string &forceModelName = "");
    PropSetup* GetPropSetup(const std::string &name);
 
    // CelestialBody
