@@ -1632,6 +1632,24 @@ bool GmatBase::SetBooleanParameter(const std::string &label, const bool value,
 
 
 //---------------------------------------------------------------------------
+//  bool TakeAction(const std::string &action, const std::string &actionData)
+//---------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ *
+ * @param <action> The string descriptor for the requested action.
+ * @param <actionData> Optional data used for the action.
+ * 
+ * @return true if the action was performed, false if not.
+ */
+bool GmatBase::TakeAction(const std::string &action, 
+                          const std::string &actionData)
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
 //  void CopyParameters(const GmatBase &a)
 //---------------------------------------------------------------------------
 /**

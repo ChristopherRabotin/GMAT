@@ -207,6 +207,9 @@ public:
    virtual bool        SetBooleanParameter(const std::string &label,
                                            const bool value,
                                            const Integer index);
+                                           
+   virtual bool        TakeAction(const std::string &action,  
+                                  const std::string &actionData = "");
    
    /// Return value used if the parameter is not accessible as a Real
    static const Real         REAL_PARAMETER_UNDEFINED;
