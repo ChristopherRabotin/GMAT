@@ -46,7 +46,7 @@ namespace GmatTimeUtil
       : year(y), month(mo), day(d), hour(h), minute(m), second(s)
    {};
 
-   CalDate() : year(1941), month(1), day(1), hour(0), minute(0), second(0.0) {};
+   CalDate() : year(1941), month(1), day(5), hour(0), minute(0), second(0.0) {};
    
    YearNumber   year;
    MonthOfYear  month;
