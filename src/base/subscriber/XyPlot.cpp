@@ -41,7 +41,8 @@ XyPlot::PARAMETER_TEXT[XyPlotParamCount - SubscriberParamCount] =
    "PlotTitle",
    "XAxisTitle",
    "YAxisTitle",
-   "DrawGrid",
+   "Grid",
+   "TargetStatus",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
 }; 
@@ -58,7 +59,8 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
-   Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
 };
@@ -83,6 +85,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
    parameterCount = XyPlotParamCount;
     
    mDrawGrid = drawGrid;
+   mDrawTarget = false;
    mNumYParams = 0;
 
    mXParamName = "";
@@ -121,6 +124,7 @@ XyPlot::XyPlot(const XyPlot &copy) :
    mXAxisTitle = copy.mXAxisTitle;
    mYAxisTitle = copy.mYAxisTitle;
    mDrawGrid = copy.mDrawGrid;
+   mDrawTarget = copy.mDrawTarget;
    mIsXyPlotWindowSet = copy.mIsXyPlotWindowSet;
     
    mDataCollectFrequency = copy.mDataCollectFrequency;
@@ -129,7 +133,6 @@ XyPlot::XyPlot(const XyPlot &copy) :
    mNumDataPoints = copy.mNumDataPoints;
    mNumCollected = copy.mNumCollected;
 }
-
 
 //------------------------------------------------------------------------------
 // ~XyPlot(void)
@@ -397,8 +400,6 @@ bool XyPlot::GetBooleanParameter(const Integer id) const
 {
    switch (id)
    {
-   case DRAW_GRID:
-      return mDrawGrid;
    case CLEAR_DEP_VAR_LIST: //loj: 8/5/04 added
       return false;
    default:
@@ -421,9 +422,6 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
 {
    switch (id)
    {
-   case DRAW_GRID:
-      mDrawGrid = value;
-      return mDrawGrid;
    case CLEAR_DEP_VAR_LIST:
       ClearYParameters();
       return true;
@@ -532,6 +530,16 @@ std::string XyPlot::GetStringParameter(const Integer id) const
       return mXAxisTitle;
    case Y_AXIS_TITLE:
       return mYAxisTitle;
+   case DRAW_GRID:
+      if (mDrawGrid)
+         return "On";
+      else
+         return "Off";
+   case TARGET_STATUS:
+      if (mDrawTarget)
+         return "On";
+      else
+         return "Off";
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -574,6 +582,26 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
    case Y_AXIS_TITLE:
       mYAxisTitle = value;
       return true;
+   case DRAW_GRID:
+      if (value == "On" || value == "Off")
+      {
+         mDrawGrid = (value == "On");
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   case TARGET_STATUS:
+      if (value == "On" || value == "Off")
+      {
+         mDrawTarget = (value == "On");
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    default:
       return Subscriber::SetStringParameter(id, value);
    }
@@ -705,6 +733,11 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    {
       return PlotInterface::RefreshXyPlot(instanceName);
    }
+
+   //loj: 8/6/04 added
+   // if targetting and draw target is off, just return
+   if (!mDrawTarget && (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+      return true;
    
    if (len > 0)
    {

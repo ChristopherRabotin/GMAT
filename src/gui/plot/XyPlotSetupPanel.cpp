@@ -46,8 +46,7 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
    EVT_BUTTON(LINE_COLOR_BUTTON, XyPlotSetupPanel::OnLineColorClick)
    EVT_LISTBOX(PARAM_LISTBOX, XyPlotSetupPanel::OnSelectParam)
    EVT_LISTBOX(Y_SEL_LISTBOX, XyPlotSetupPanel::OnSelectY)
-   EVT_CHECKBOX(SHOW_PLOT_CHECKBOX, XyPlotSetupPanel::OnShowPlotCheckBoxChange)
-   EVT_CHECKBOX(SHOW_GRID_CHECKBOX, XyPlotSetupPanel::OnShowGridCheckBoxChange)
+   EVT_CHECKBOX(CHECKBOX, XyPlotSetupPanel::OnCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -226,17 +225,9 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnShowPlotCheckBoxChange(wxCommandEvent& event)
+// void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void XyPlotSetupPanel::OnShowPlotCheckBoxChange(wxCommandEvent& event)
-{
-   theApplyButton->Enable();
-}
-
-//------------------------------------------------------------------------------
-// void OnShowGridCheckBoxChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void XyPlotSetupPanel::OnShowGridCheckBoxChange(wxCommandEvent& event)
+void XyPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
 }
@@ -293,15 +284,21 @@ void XyPlotSetupPanel::Create()
    // plot option
    //------------------------------------------------------
    showPlotCheckBox =
-      new wxCheckBox(this, SHOW_PLOT_CHECKBOX, wxT("Show Plot"),
+      new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
+   
    showGridCheckBox =
-      new wxCheckBox(this, SHOW_GRID_CHECKBOX, wxT("Show Grid"),
+      new wxCheckBox(this, CHECKBOX, wxT("Show Grid"),
+                     wxDefaultPosition, wxSize(100, -1), 0);
+   
+   targetStatusCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    plotOptionBoxSizer->Add(showPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(showGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // X box label (1st column)
@@ -442,29 +439,30 @@ void XyPlotSetupPanel::LoadData()
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
     
       showPlotCheckBox->SetValue(mSubscriber->IsActive());
-      showGridCheckBox->SetValue(mSubscriber->GetBooleanParameter("DrawGrid"));
+      showGridCheckBox->SetValue(mSubscriber->GetStringParameter("Grid") == "On");
+      targetStatusCheckBox->SetValue(mSubscriber->GetStringParameter("TargetStatus") == "On");
       
       // get X parameter
       wxString *xParamNames = new wxString[1];
       xParamNames[0] = mSubscriber->GetStringParameter("IndVar").c_str();
-        
+      
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
       //                              xParamNames[0].c_str());
-        
+      
       if (!xParamNames[0].IsSameAs(""))
       {
          mNumXParams = 1;
          mXSelectedListBox->Set(1, xParamNames);
       }
-    
+      
       // get Y parameters
       StringArray yParamList = mSubscriber->GetStringArrayParameter("DepVarList");
       mNumYParams = yParamList.size();
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
       //                              mNumYParams);
-
+      
       delete xParamNames;
-    
+      
       if (mNumYParams > 0)
       {
          wxString *yParamNames = new wxString[mNumYParams];
@@ -489,7 +487,7 @@ void XyPlotSetupPanel::LoadData()
                   = RgbColor(param->GetUnsignedIntParameter("Color"));               
             }
          }
-    
+         
          mYSelectedListBox->Set(mNumYParams, yParamNames);
          mYSelectedListBox->SetSelection(0);
          delete yParamNames;
@@ -516,8 +514,18 @@ void XyPlotSetupPanel::SaveData()
    // save data to core engine
     
    mSubscriber->Activate(showPlotCheckBox->IsChecked());
-   mSubscriber->SetBooleanParameter("DrawGrid", showGridCheckBox->IsChecked());
-   
+
+   //loj: 8/6/04 changed "Grid" to string parameter
+   if (showGridCheckBox->IsChecked())
+      mSubscriber->SetStringParameter("Grid", "On");
+   else
+      mSubscriber->SetStringParameter("Grid", "Off");
+
+   if (targetStatusCheckBox->IsChecked())
+      mSubscriber->SetStringParameter("TargetStatus", "On");
+   else
+      mSubscriber->SetStringParameter("TargetStatus", "Off");
+
    // set X parameter
    if (mXParamChanged)
    {

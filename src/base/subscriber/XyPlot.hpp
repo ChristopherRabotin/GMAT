@@ -95,6 +95,7 @@ protected:
    std::string mXAxisTitle;
    std::string mYAxisTitle;
    bool mDrawGrid;
+   bool mDrawTarget;
    bool mIsXyPlotWindowSet;
     
    Integer mDataCollectFrequency;
@@ -117,11 +118,12 @@ protected:
       X_AXIS_TITLE,
       Y_AXIS_TITLE,
       DRAW_GRID,
+      TARGET_STATUS,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       XyPlotParamCount
    };
-    
+   
    static const Gmat::ParameterType
       PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount];
    static const std::string
