@@ -2,10 +2,11 @@
 # Module:     Makefile.mac for base directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
+# Modified:   2004/01/14 - Added burn directory
 
-SUBS = command configs executive factory forcemodel foundation interpolator \
-	interpreter parameter propagator refframe solarsys solver spacecraft \
-	stopcond subscriber util
+SUBS = burn command configs executive factory forcemodel foundation \
+	interpolator interpreter parameter propagator refframe solarsys solver \
+	spacecraft stopcond subscriber util
 
 all clean bare:
 	-X=`pwd`; \
