@@ -309,6 +309,7 @@ bool ScriptInterpreter::Parse(void)
                          epstr.assign(line, start, end-start);
                          
                          ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
+                         // Force the epoch into the spacecraft data
                          ((Spacecraft*)obj)->SaveDisplay();
                          chunks.clear();
                          return true;
@@ -321,7 +322,8 @@ bool ScriptInterpreter::Parse(void)
                             ++start;
                          ((Spacecraft*)obj)->SetDisplayDateFormat("TAIModJulian");
                          ((Spacecraft*)obj)->SetDisplayEpoch(&(linestr[start]));
- //                        ((Spacecraft*)obj)->SaveDisplay();
+                         // Force the epoch into the spacecraft data
+                         ((Spacecraft*)obj)->SaveDisplay();
                          // obj->SetRealParameter(objParm, &(linestr[start]));
                       }
                    }
