@@ -54,8 +54,11 @@ public:
    // method to return the UT1-UTC offset for the given UTCMjd - use UtcMjd???
    virtual Real    GetUt1UtcOffset(const Real utcMjd);
    
-   // method to return JD, X, Y data (for use by coordinate systems)
+   // method to return JD, X, Y, LOD data (for use by coordinate systems)
    virtual Rmatrix GetPolarMotionData();
+   // interpolate x, y, and lod to input time
+   virtual bool    GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
+                                        Real &lodval);
   
 protected:
 
@@ -65,7 +68,7 @@ protected:
    std::string          eopFileName;
    Integer              tableSz;
 
-   /// table of polar motion data : MJD, X, Y 
+   /// table of polar motion data : MJD, X, Y, LOD
    Rmatrix*             polarMotion;
    /// vector of UT1-UTC offsets : MJD, offset
    Rmatrix*             ut1UtcOffsets;

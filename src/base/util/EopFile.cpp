@@ -28,6 +28,7 @@
 #include "TimeTypes.hpp"
 #include "UtilityException.hpp"
 
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -47,7 +48,7 @@ EopFile::EopFile(const std::string &fileName, GmatEop::EopFileType eop) :
 eopFType        (eop),
 eopFileName     (fileName),
 tableSz         (0),
-polarMotion     (new Rmatrix(MAX_TABLE_SIZE,3)),
+polarMotion     (new Rmatrix(MAX_TABLE_SIZE,4)),
 ut1UtcOffsets   (new Rmatrix(MAX_TABLE_SIZE,2)),
 isInitialized   (false)
 {
@@ -150,7 +151,7 @@ void EopFile::Initialize()
       // now start reading the data
       Integer     year, day, mjd;
       std::string month;
-      Real        x, y, ut1_utc; // ignore lod, dPsi, dEpsilon
+      Real        x, y, ut1_utc, lod; // ignore lod, dPsi, dEpsilon
       while (!eopFile.eof())
       {
          getline(eopFile, line);
@@ -158,12 +159,13 @@ void EopFile::Initialize()
          {
             std::istringstream lineS;
             lineS.str(line);
-            lineS >> year >> month >> day >> mjd >> x >> y >> ut1_utc;
-            ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
+            lineS >> year >> month >> day >> mjd >> x >> y >> ut1_utc >> lod;
+            ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
             ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-            polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
+            polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
             polarMotion->SetElement(tableSz,1,x);
             polarMotion->SetElement(tableSz,2,y);
+            polarMotion->SetElement(tableSz,3,lod);
             tableSz++;
          }
       }
@@ -171,9 +173,9 @@ void EopFile::Initialize()
    else if (eopFType == GmatEop::FINALS)
    {
       char        ipFlag1, ipFlag2;
-      Real        mjd, x, y, ut1_utc;
+      Real        mjd, x, y, ut1_utc, lod;
       // ignore dutc, lod, dlod, I/P, dPsi ddPsi, dEpsilon, ddEpsilon, Bull. B data?
-      Real        dx, dy;
+      Real        dx, dy, dut1_utc;
       bool        done = false;
       while (!done && (!eopFile.eof()))
       {
@@ -184,19 +186,20 @@ void EopFile::Initialize()
             lineS.str(line);
             lineS.ignore(6);
             lineS >> mjd >> ipFlag1
-               >> x >> dx >> y >> dy >> ipFlag2 >> ut1_utc;
-            // We're done when we reach teh end of the predicted values
+               >> x >> dx >> y >> dy >> ipFlag2 >> ut1_utc >> dut1_utc >> lod;
+            // We're done when we reach the end of the predicted values
             if ((ipFlag1 != 'I') && (ipFlag1 != 'P')) 
             {
                done = true;
             }
             else
             {
-               ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
+               ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
                ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-               polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
+               polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
                polarMotion->SetElement(tableSz,1,x);
                polarMotion->SetElement(tableSz,2,y);
+               polarMotion->SetElement(tableSz,3,lod*1.0e-03); // convert to seconds
                tableSz++;
             }
          }
@@ -225,7 +228,7 @@ void EopFile::Initialize()
 Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 {
    Integer i = 0;
-   Real    utcJD = utcMjd + GmatTimeUtil::JD_MJD_OFFSET;
+   Real    utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
    for (i = (tableSz - 1); i >= 0; i--)
    {
       if (utcJD >= ut1UtcOffsets->GetElement(i,0))
@@ -263,6 +266,69 @@ Rmatrix EopFile::GetPolarMotionData()
    return Rmatrix(*polarMotion);
 }
 
+//---------------------------------------------------------------------------
+//  bool GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
+//                            Real &lodval)
+//---------------------------------------------------------------------------
+/**
+ * Returns the polar motion data X, Y, and LOD, for the input UTC MJD time.
+ * 
+ * @param forUtcMjd time for which to return the data
+ * @param xval      return X value of polar motion data (arcsec)
+ * @param yval      return Y value of polar motion data (arcsec)
+ * @param lodval    return LOD value (seconds)
+ *
+ */
+//---------------------------------------------------------------------------
+bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
+                                   Real &lodval)
+{
+   Integer i = 0;
+   Real    utcJD = forUtcMjd + GmatTimeUtil::JD_NOV_17_1858;
+   // if it's before the time on the file, return the first values
+   if (utcJD <= polarMotion->GetElement(0,0))
+   {
+      xval   = polarMotion->GetElement(0,1);
+      yval   = polarMotion->GetElement(0,2);
+      lodval = polarMotion->GetElement(0,3);
+   }
+   else
+   {
+      for (i = (tableSz - 1); i >= 0; i--)
+      {
+         if (utcJD >= polarMotion->GetElement(i,0))
+         {
+            // if it's greater than the last entry in the table, then return the 
+            // last value
+            if (i == (tableSz -1))
+            {
+               xval   = polarMotion->GetElement(i,1);
+               yval   = polarMotion->GetElement(i,2);
+               lodval = polarMotion->GetElement(i,3);
+            }
+            else
+            {
+               // otherwise, interpolate between values
+               Real diffJD  = polarMotion->GetElement(i+1,0) - 
+                              polarMotion->GetElement(i,0);
+               Real whereJD = utcJD - polarMotion->GetElement(i,0);
+               Real ratio   = whereJD / diffJD;
+               Real diffX   = polarMotion->GetElement(i+1,1) -
+                              polarMotion->GetElement(i,1);
+               Real diffY   = polarMotion->GetElement(i+1,2) -
+                              polarMotion->GetElement(i,2);
+               Real diffLOD = polarMotion->GetElement(i+1,3) -
+                              polarMotion->GetElement(i,3);
+               xval   = polarMotion->GetElement(i,1) + ratio * diffX;
+               yval   = polarMotion->GetElement(i,2) + ratio * diffY;
+               lodval = polarMotion->GetElement(i,3) + ratio * diffLOD;
+            }
+            break;
+         }
+      }
+   }
+   return true;
+}
 
 //------------------------------------------------------------------------------
 //  bool IsBlank(char* aLine)
