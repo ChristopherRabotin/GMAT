@@ -54,7 +54,8 @@ Toggle::~Toggle()
 //------------------------------------------------------------------------------
 Toggle::Toggle(const Toggle& t) :
    GmatCommand(t),
-   subscriberID(t.subscriberID)
+   subscriberID(t.subscriberID),
+   toggleStateID(t.toggleStateID) //loj: 4/405 Added
 {
    parameterCount = t.parameterCount;
 }

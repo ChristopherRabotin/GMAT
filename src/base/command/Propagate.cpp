@@ -63,6 +63,7 @@ Propagate::Propagate() :
    interruptCheckFrequencyID   (parameterCount+2),
    satNameID                   (parameterCount+3),
    propNameID                  (parameterCount+4),
+   stopWhenID                  (parameterCount+5), //loj: 4/4/05 Added
    singleStepMode              (false),
    currentMode                 (INDEPENDENT)
 {
@@ -106,6 +107,7 @@ Propagate::Propagate(const Propagate &p) :
    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
    satNameID                   (p.satNameID),
    propNameID                  (p.propNameID),
+   stopWhenID                  (p.stopWhenID), //loj:4/4/05 Added
    singleStepMode              (p.singleStepMode),
    currentMode                 (p.currentMode)
 {
