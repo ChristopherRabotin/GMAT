@@ -30,7 +30,7 @@
 #include "EnvParameters.hpp"
 #include "PlanetParameters.hpp"
 #include "Variable.hpp"
-#include "StringVar.hpp" //loj: 1/5/05 Added
+#include "StringVar.hpp"
 #include "Array.hpp"
 
 //---------------------------------
@@ -79,7 +79,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new CartVy(withName);
    if (ofType == "VZ")
       return new CartVz(withName);
-   if (ofType == "CartState")
+   if (ofType == "Cartesian") //loj: 2/16/05 Changed from CartState
       return new CartState(withName);
 
     // Keplerian parameters
@@ -101,8 +101,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepMA(withName);
    if (ofType == "MM")
       return new KepMM(withName);
-   if (ofType == "KepElem")
+   if (ofType == "Keplerian")    //loj: 2/16/05 Chagned from KepElem
       return new KepElem(withName);
+   if (ofType == "ModKeplerian") //loj: 2/16/05 Added
+      return new ModKepElem(withName);
 
    // Spherical parameters
    if (ofType == "RMAG")
@@ -117,8 +119,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SphRAV(withName);
    if (ofType == "DECV")
       return new SphDecV(withName);
-   if (ofType == "SphElem")
-      return new SphElem(withName);
+   if (ofType == "SphericalRADEC") //loj: 2/16/05 changed from SphElem
+      return new SphRaDecElem(withName);
+   if (ofType == "SphericalAZFPA") //loj: 2/16/05 Added
+      return new SphAzFpaElem(withName);
    if (ofType == "Altitude")
       return new Altitude(withName);
 
@@ -208,7 +212,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VX");
       creatables.push_back("VY");
       creatables.push_back("VZ");
-      creatables.push_back("CartState");
+      creatables.push_back("Cartesian");
 
       // Keplerian parameters
       creatables.push_back("SMA");
@@ -220,7 +224,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("TA");
       creatables.push_back("MA");
       creatables.push_back("MM");
-      creatables.push_back("KepElem");
+      creatables.push_back("Keplerian");
+      creatables.push_back("ModKeplerian");
 
       // Spherical parameters
       creatables.push_back("RMAG");
@@ -229,7 +234,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VMAG");
       creatables.push_back("RAV");
       creatables.push_back("DECV");
-      creatables.push_back("SphElem");
+      creatables.push_back("SphericalRADEC");
+      creatables.push_back("SphericalAZFPA");
       creatables.push_back("Altitude");
 
       // Orbital parameters
