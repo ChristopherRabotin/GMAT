@@ -12,7 +12,7 @@
  * This class contains GMAT main application. Program starts here.
  */
 //------------------------------------------------------------------------------
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 #include "GmatMainFrame.hpp"
 #include "GmatApp.hpp"
