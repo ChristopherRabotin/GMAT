@@ -32,6 +32,7 @@
 //#include "GmatMainNotebook.hpp"
 #include "GmatTreeItemData.hpp"
 #include "GmatServer.hpp"
+#include "MatlabInterface.hpp"
 
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
@@ -113,6 +114,9 @@ private:
    
    void OnStartServer(wxCommandEvent& event);
    void OnStopServer(wxCommandEvent& event);
+
+   void OnOpenMatlab(wxCommandEvent& event);
+   void OnCloseMatlab(wxCommandEvent& event);
    
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
@@ -162,6 +166,10 @@ private:
       MENU_VARIABLES_EVALUATE,
         
       MENU_TOOLS_SWINGBY,
+      MENU_TOOLS_MATLAB,
+      MENU_TOOLS_MATLAB_OPEN,
+      MENU_TOOLS_MATLAB_INTERACTIVE,
+      MENU_TOOLS_MATLAB_CLOSE,
 
       MENU_HELP_TOPICS,
         
