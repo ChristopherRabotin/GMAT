@@ -42,9 +42,9 @@
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepSMA", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepSMA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const KepSMA &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -73,10 +73,10 @@ KepSMA::KepSMA(const KepSMA &copy)
 const KepSMA&
 KepSMA::operator=(const KepSMA &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -105,12 +105,12 @@ KepSMA::~KepSMA()
 //------------------------------------------------------------------------------
 bool KepSMA::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepSMA");    
+   mRealValue = OrbitData::GetKepReal("KepSMA");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -136,9 +136,9 @@ bool KepSMA::Evaluate()
 //------------------------------------------------------------------------------
 KepEcc::KepEcc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepEcc", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepEcc", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepEcc::KepEcc(const KepEcc &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -167,10 +167,10 @@ KepEcc::KepEcc(const KepEcc &copy)
 const KepEcc&
 KepEcc::operator=(const KepEcc &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -199,12 +199,12 @@ KepEcc::~KepEcc()
 //------------------------------------------------------------------------------
 bool KepEcc::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepEcc");
+   mRealValue = OrbitData::GetKepReal("KepEcc");
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -231,9 +231,9 @@ bool KepEcc::Evaluate()
 //------------------------------------------------------------------------------
 KepInc::KepInc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepInc", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepInc", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ KepInc::KepInc(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepInc::KepInc(const KepInc &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -262,10 +262,10 @@ KepInc::KepInc(const KepInc &copy)
 const KepInc&
 KepInc::operator=(const KepInc &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -294,12 +294,12 @@ KepInc::~KepInc()
 //------------------------------------------------------------------------------
 bool KepInc::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepInc");    
+   mRealValue = OrbitData::GetKepReal("KepInc");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -325,9 +325,9 @@ bool KepInc::Evaluate()
 //------------------------------------------------------------------------------
 KepAOP::KepAOP(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepAOP", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepAOP", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -340,7 +340,7 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepAOP::KepAOP(const KepAOP &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -356,10 +356,10 @@ KepAOP::KepAOP(const KepAOP &copy)
 const KepAOP&
 KepAOP::operator=(const KepAOP &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -388,12 +388,12 @@ KepAOP::~KepAOP()
 //------------------------------------------------------------------------------
 bool KepAOP::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepAOP");    
+   mRealValue = OrbitData::GetKepReal("KepAOP");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -418,10 +418,10 @@ bool KepAOP::Evaluate()
  */
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
-                           const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepRAAN", SYSTEM_PARAM, obj, desc, unit, false)
+                 const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "KepRAAN", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const KepRAAN &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -450,10 +450,10 @@ KepRAAN::KepRAAN(const KepRAAN &copy)
 const KepRAAN&
 KepRAAN::operator=(const KepRAAN &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
     
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -482,12 +482,12 @@ KepRAAN::~KepRAAN()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepRAAN");    
+   mRealValue = OrbitData::GetKepReal("KepRAAN");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -512,10 +512,10 @@ bool KepRAAN::Evaluate()
  */
 //------------------------------------------------------------------------------
 KepTA::KepTA(const std::string &name, GmatBase *obj,
-                       const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepTA", SYSTEM_PARAM, obj, desc, unit, false)
+             const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "KepTA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ KepTA::KepTA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepTA::KepTA(const KepTA &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -544,10 +544,10 @@ KepTA::KepTA(const KepTA &copy)
 const KepTA&
 KepTA::operator=(const KepTA &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -576,12 +576,12 @@ KepTA::~KepTA()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepTA");    
+   mRealValue = OrbitData::GetKepReal("KepTA");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -607,9 +607,9 @@ bool KepTA::Evaluate()
 //------------------------------------------------------------------------------
 KepMA::KepMA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepMA", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepMA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -622,7 +622,7 @@ KepMA::KepMA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepMA::KepMA(const KepMA &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -638,10 +638,10 @@ KepMA::KepMA(const KepMA &copy)
 const KepMA&
 KepMA::operator=(const KepMA &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -670,12 +670,12 @@ KepMA::~KepMA()
 //------------------------------------------------------------------------------
 bool KepMA::Evaluate()
 {
-    mRealValue = OrbitData::GetKepReal("KepMA");    
+   mRealValue = OrbitData::GetKepReal("KepMA");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -701,9 +701,9 @@ bool KepMA::Evaluate()
 //------------------------------------------------------------------------------
 KepMM::KepMM(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "KepMM", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "KepMM", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -716,7 +716,7 @@ KepMM::KepMM(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepMM::KepMM(const KepMM &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -732,10 +732,10 @@ KepMM::KepMM(const KepMM &copy)
 const KepMM&
 KepMM::operator=(const KepMM &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -764,12 +764,12 @@ KepMM::~KepMM()
 //------------------------------------------------------------------------------
 bool KepMM::Evaluate()
 {
-    mRealValue = OrbitData::GetOtherKepReal("KepMm");    
+   mRealValue = OrbitData::GetOtherKepReal("KepMM");  //loj: 4/28/04 changed from KepMm
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -797,9 +797,9 @@ bool KepMM::Evaluate()
 //------------------------------------------------------------------------------
 KepElem::KepElem(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
-    : Rvec6Var(name, "KepElem", SYSTEM_PARAM, obj, desc, unit, false)
+   : Rvec6Var(name, "KepElem", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -812,7 +812,7 @@ KepElem::KepElem(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepElem::KepElem(const KepElem &copy)
-    : Rvec6Var(copy)
+   : Rvec6Var(copy)
 {
 }
 
@@ -828,10 +828,10 @@ KepElem::KepElem(const KepElem &copy)
 const KepElem&
 KepElem::operator=(const KepElem &right)
 {
-    if (this != &right)
-        Rvec6Var::operator=(right);
+   if (this != &right)
+      Rvec6Var::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -858,8 +858,8 @@ KepElem::~KepElem()
 //------------------------------------------------------------------------------
 Rvector6 KepElem::EvaluateRvector6()
 {
-    Evaluate();
-    return mRvec6Value;
+   Evaluate();
+   return mRvec6Value;
 }
 
 
@@ -876,7 +876,7 @@ Rvector6 KepElem::EvaluateRvector6()
 //------------------------------------------------------------------------------
 Integer KepElem::GetNumObjects() const
 {
-    return GetNumRefObjects();
+   return GetNumRefObjects();
 }
 
 //------------------------------------------------------------------------------
@@ -884,7 +884,7 @@ Integer KepElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* KepElem::GetObject(const std::string &objTypeName)
 {
-    return GetRefObject(objTypeName);
+   return GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -898,13 +898,13 @@ GmatBase* KepElem::GetObject(const std::string &objTypeName)
  */
 //------------------------------------------------------------------------------
 bool KepElem::SetObject(Gmat::ObjectType objType,
-                             const std::string &objName,
-                             GmatBase *obj)
+                        const std::string &objName,
+                        GmatBase *obj)
 {
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
+   if (obj != NULL)
+      return SetRefObject(objType, objName, obj);
+   else
+      return false;
 }
 
 //------------------------------------------------------------------------------
@@ -918,15 +918,15 @@ bool KepElem::SetObject(Gmat::ObjectType objType,
 //------------------------------------------------------------------------------
 bool KepElem::AddObject(GmatBase *obj)
 {
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
+   if (obj != NULL)
+   {
+      if (AddRefObject(obj))
+         ManageObject(obj);
         
-        return true;
-    }
+      return true;
+   }
 
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -940,7 +940,7 @@ bool KepElem::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool KepElem::Validate()
 {
-    return ValidateRefObjects(this);
+   return ValidateRefObjects(this);
 }
 
 //------------------------------------------------------------------------------
@@ -954,12 +954,12 @@ bool KepElem::Validate()
 //------------------------------------------------------------------------------
 bool KepElem::Evaluate()
 {
-    mRvec6Value.Set(OrbitData::GetKepReal("KepSMA"),
-                    GetKepReal("KepEcc"),
-                    GetKepReal("KepInc"),
-                    GetKepReal("KepRAAN"),
-                    GetKepReal("KepAOP"),
-                    GetKepReal("KepTA"));
+   mRvec6Value.Set(OrbitData::GetKepReal("KepSMA"),
+                   GetKepReal("KepEcc"),
+                   GetKepReal("KepInc"),
+                   GetKepReal("KepRAAN"),
+                   GetKepReal("KepAOP"),
+                   GetKepReal("KepTA"));
 
-    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
