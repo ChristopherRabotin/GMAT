@@ -19,7 +19,6 @@
  */
 //------------------------------------------------------------------------------
 #include "ThrusterPanel.hpp"
-#include "ThrusterCoefficientDialog.hpp"
 #include "TankSelectionDialog.hpp"
 #include "MessageInterface.hpp"
 
@@ -400,14 +399,14 @@ void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
     {
        std::string type = "C";
        
-       ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       tcDlg.ShowModal();       
+       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
+       //tcDlg.ShowModal();       
     } 
     else if (event.GetEventObject() == kCoefButton)
     {
        std::string type = "K";
        
-       ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       tcDlg.ShowModal();
+       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
+       //tcDlg.ShowModal();
     }            
 }    
