@@ -140,9 +140,9 @@ bool OpenGlPlot::Initialize()
    else
    {
       active = false;
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-                                     "OpenGlPlot is turned off. No spacecraft "
-                                     "has been added to OpenGlPlot");
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "OpenGlPlot is turned off. No spacecraft "
+          "has been added to OpenGlPlot\n"); //loj: 6/25/04 added \n
       return false;
    }
 }
