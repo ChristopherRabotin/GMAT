@@ -347,6 +347,10 @@ void Star::InitializeStar()
    defaultMu           = Star::MU;
    defaultEqRadius     = Star::EQUATORIAL_RADIUS;
    defaultCoefSize     = Star::COEFFICIENT_SIZE;
+
+   //if (instanceName != SolarSystem::SUN_NAME)
+      //MessageInterface::ShowMessage(
+      // "Unknown star created - please supply physical parameter values");
 }
 
 //------------------------------------------------------------------------------
