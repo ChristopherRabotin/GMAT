@@ -45,12 +45,13 @@ private:
    struct PropType
    {
       bool isChanged;
+      int stopCondCount;
       wxString propName;
       wxString scNames;
       wxArrayString scNameList;
       PropSetup *propSetupPtr;
    };
-    
+
    struct StopCondType
    {
       bool           isChanged;
@@ -87,13 +88,16 @@ private:
    wxGrid *propGrid;
    wxGrid *stopCondGrid;
 
+   wxBoxSizer *mMiddleBoxSizer;
+   wxStaticBoxSizer *mStopSizer;
+
    Integer numOfModes;
    Integer numOfEqualities;
    Integer numOfProp;
    Integer numOfSC;
    Integer propID;
    Integer scID;
-   Integer numOfStopCond;
+   Integer mStopCondCount;
    Integer tempPropCount;
    PropType tempProp[MAX_PROP_ROW];
    StopCondType tempStopCond[MAX_PROP_ROW][MAX_STOPCOND_ROW];
@@ -119,7 +123,7 @@ private:
 
    // Layout & data handling methods
    void DisplayPropagator();
-   void DisplayStopCondition(int propRow);
+   void DisplayStopCondition(int numStopCond, int propRow);
    void UpdateStopCondition();
    void ClearDetailedStopCond();
    void ShowDetailedStopCond(int propRow, int stopRow);
