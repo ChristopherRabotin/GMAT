@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            ThrusterPanel
 //------------------------------------------------------------------------------
@@ -19,14 +19,13 @@
  */
 //------------------------------------------------------------------------------
 #include "ThrusterPanel.hpp"
-#include "TankSelectionDialog.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(ThrusterPanel, wxPanel)
-   EVT_TEXT(ID_TEXTCTRL, ThrusterPanel::OnTextChange)
    EVT_LISTBOX(ID_LISTBOX, ThrusterPanel::OnSelect)
    EVT_BUTTON(ID_BUTTON, ThrusterPanel::OnButtonClick)
 END_EVENT_TABLE()
@@ -42,15 +41,19 @@ END_EVENT_TABLE()
  * Constructs ThrusterPanel object.
  */
 //------------------------------------------------------------------------------
-ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft, 
-                             wxButton *theApplyButton):wxPanel(parent)
+ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
+                     wxButton *theApplyButton):wxPanel(parent)
 {
-    thrusterCount = 0;
-    tankCount = 0;
-    coordsysCount = 0;
-    
     this->theSpacecraft = spacecraft;
     this->theApplyButton = theApplyButton;
+    
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+    
+    availableThrusterCount = 0;
+    selectedThrusterCount = 0;
+    
+    currentAvailThruster = 0;
+    currentSelectedThruster = 0;
     
     Create();
 }
@@ -66,172 +69,147 @@ ThrusterPanel::~ThrusterPanel()
 // private methods
 //-------------------------------
 
-//----------------------------------
-// methods inherited from GmatPanel
-//----------------------------------
-
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
 void ThrusterPanel::Create()
 {
-    // Integer
-    Integer bsize = 3; // border size
-    
-    
-    // wxString
-    wxString emptyList[] = {};
-    
-    // wxButton
-    tankButton = new wxButton( this, ID_BUTTON, wxT("Select"),
+   // wxButton
+   selectButton = new wxButton( this, ID_BUTTON, wxT("->"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    addButton = new wxButton( this, ID_BUTTON, wxT("Add Thruster"),
+   removeButton = new wxButton( this, ID_BUTTON, wxT("<-"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    removeButton = new wxButton( this, ID_BUTTON, wxT("Remove Thruster"),
+   selectAllButton = new wxButton( this, ID_BUTTON, wxT("=>"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
+   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<="),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Impulse Coef."),
-                              wxDefaultPosition, wxDefaultSize, 0 );  
-                                
-    // wxComboBox 
-    tankComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), tankCount,
-                      emptyList, wxCB_DROPDOWN|wxCB_READONLY );;
-    coordsysComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                      wxDefaultPosition, wxSize(125,-1), coordsysCount,
-                      emptyList, wxCB_DROPDOWN|wxCB_READONLY );;
-   
-    // wxTextCtrl
-    XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
-    YTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
-    ZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                              
+   // wxString
+   wxString emptyList[] = {};
                             
-    //wxStaticText
-    tankStaticText = new wxStaticText( this, ID_TEXT, wxT("Tank"),
-                            wxDefaultPosition,wxDefaultSize, 0);
-    coordsysStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coordinate System"), wxDefaultPosition,
-                            wxDefaultSize, 0);
-    XStaticText = new wxStaticText( this, ID_TEXT, wxT("X Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0);
-    YStaticText = new wxStaticText( this, ID_TEXT, wxT("Y Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0);  
-    ZStaticText = new wxStaticText( this, ID_TEXT, wxT("Z Direction"),
-                            wxDefaultPosition,wxDefaultSize, 0); 
+   // wxListBox
+   availableThrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+                    wxSize(150,200), availableThrusterCount, emptyList, wxLB_SINGLE);
+   selectedThrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+                    wxSize(150,200), selectedThrusterCount, emptyList, wxLB_SINGLE);
                             
-    // wxListBox
-    thrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), thrusterCount, emptyList, wxLB_SINGLE);
-    
-    // wx*Sizers                                            
-    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
-    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
+   Integer bsize = 3; // border size
    
-    wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT("Thruster List") );
-    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxVERTICAL );
-    wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT("Thruster Parameters") );
-    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxVERTICAL );
+   // wx*Sizers   
+   wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
+   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT("Available Thrusters") );
+   wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxHORIZONTAL );
+   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT("Selected Thrusters") );
+   wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxHORIZONTAL );
 
-    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
-    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 0 );
-    
-    // Add to wx*Sizers 
-    flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-    flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(tankButton, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add(coordsysStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-    flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add(XStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add(YStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
-    boxSizer2->Add(addButton, 0, wxALIGN_CENTER|wxALL, bsize );
-    boxSizer2->Add(removeButton, 0, wxALIGN_CENTER|wxALL, bsize );
-    
-    boxSizer3->Add(flexGridSizer1, 0, wxALIGN_CENTER|wxALL, bsize );
-    
-    boxSizer4->Add(thrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize );
-    boxSizer4->Add(boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize );
-        
-    staticBoxSizer1->Add( boxSizer4, 0, wxALIGN_CENTER|wxALL, bsize ); 
-    staticBoxSizer2->Add( boxSizer3, 0, wxALIGN_CENTER|wxALL, bsize );
+   // Add to wx*Sizers   
+   boxSizer2->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);    
+   boxSizer2->Add(selectButton, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxSizer2->Add(removeButton, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxSizer2->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer2->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   boxSizer2->Add(selectAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxSizer2->Add(removeAllButton, 0, wxALIGN_CENTER|wxALL, bsize );
    
-    flexGridSizer2->Add( staticBoxSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
-    flexGridSizer2->Add( staticBoxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticBoxSizer1->Add( availableThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize ); 
+   staticBoxSizer2->Add( selectedThrusterListBox, 0, wxALIGN_CENTER|wxALL, bsize );
    
-    boxSizer1->Add( flexGridSizer2, 0, wxGROW, bsize);
-    
-    this->SetAutoLayout( true );  
-    this->SetSizer( boxSizer1 );
-    boxSizer1->Fit( this );
-    boxSizer1->SetSizeHints( this );
-    
-    removeButton->Enable(false);
-    cCoefButton->Enable(false);
-    kCoefButton->Enable(false);
-    tankButton->Enable(false);
+   boxSizer3->Add( staticBoxSizer1, 0, wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Add( boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize);
+   boxSizer3->Add( staticBoxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   boxSizer1->Add( boxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   this->SetAutoLayout( true );  
+   this->SetSizer( boxSizer1 );
+   boxSizer1->Fit( this );
+   boxSizer1->SetSizeHints( this );
+   
+   selectButton->Enable(false);
+   removeButton->Enable(false);
+   selectAllButton->Enable(false);
+   removeAllButton->Enable(false);
 }
+
+//------------------------------------------------------------------------------
+// void DisplayData()
+//------------------------------------------------------------------------------
+void ThrusterPanel::DisplayData()
+{
+    if (availableThrusterCount > 0)
+    {
+        selectButton->Enable(true);
+        selectAllButton->Enable(true);
+    } 
+    else
+    {
+        selectButton->Enable(false);
+        selectAllButton->Enable(false);
+    }     
+    
+    if (selectedThrusterCount > 0)
+    {
+        removeButton->Enable(true);
+        removeAllButton->Enable(true);
+    } 
+    else
+    {
+        removeButton->Enable(false);
+        removeAllButton->Enable(false);         
+    }     
+    
+    availableThrusterListBox->Clear();  
+    selectedThrusterListBox->Clear(); 
+    
+    for (Integer i = 0; i < availableThrusterCount; i++) 
+        availableThrusterListBox->Append(availableThrusterArray[i].c_str());
+        
+    for (Integer i = 0; i < selectedThrusterCount; i++) 
+        selectedThrusterListBox->Append(selectedThrusterArray[i].c_str());
+        
+    availableThrusterListBox->SetSelection(currentAvailThruster, true);
+    selectedThrusterListBox->SetSelection(currentSelectedThruster, true);
+}    
 
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void ThrusterPanel::LoadData()
-{  
+{
     if (theSpacecraft == NULL)
        return;
+
+    // Load list of selected thruster
+    Integer paramID = theSpacecraft->GetParameterID("Thrusters");
+    StringArray thrusterNames = theSpacecraft->GetStringArrayParameter(paramID);
     
-    theThrusters = theSpacecraft->GetRefObjectArray(Gmat::THRUSTER);
-    thrusterNames = theSpacecraft->GetRefObjectNameArray(Gmat::THRUSTER);
-    
-    if (theThrusters.empty())
-       return;  
+    for (Integer i = 0; i < (Integer)thrusterNames.size(); i++)
+       selectedThrusterArray.Add(thrusterNames[i].c_str());
        
-    thrusterCount = theThrusters.size();
-    
-    Integer paramID;
+    selectedThrusterCount = selectedThrusterArray.GetCount();
+           
+    // Load list of available thrusters
+    availableThrusterCount = 0;
+
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
+    Integer size = itemNames.size();  
       
-    for (Integer i = 0; i < thrusterCount; i++)
-    {    
-        Thruster *tr = (Thruster *)theThrusters[i];
-        
-        thrusters[i]->thruster = tr;
-        thrusters[i]->thrusterName = thrusterNames[i];
-        
-        paramID = tr->GetParameterID("Tank");
-        thrusters[i]->tanks = tr->GetStringArrayParameter(paramID);
-        
-        paramID = tr->GetParameterID("CoordinateSystem");
-        thrusters[i]->coordName = tr->GetStringParameter(paramID);
-  
-        paramID = tr->GetParameterID("X_Direction");
-        thrusters[i]->x_direction = tr->GetRealParameter(paramID);
+    for (Integer i = 0; i < size; i++)
+    {
+        Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
+        wxString objTypeName = wxString(hw->GetTypeName().c_str());
+
+        if (objTypeName == "Thruster")
+        {
+           if (find(thrusterNames.begin(), thrusterNames.end(), itemNames[i].c_str()) == thrusterNames.end()) 
+              availableThrusterArray.Add(itemNames[i].c_str());
+        }    
+    }
     
-        paramID = tr->GetParameterID("Y_Direction");
-        thrusters[i]->y_direction = tr->GetRealParameter(paramID);
-        
-        paramID = tr->GetParameterID("Z_Direction");
-        thrusters[i]->z_direction = tr->GetRealParameter(paramID);
-    }   
-    currentThruster = thrusterCount-1;
+    availableThrusterCount = availableThrusterArray.GetCount();
+
     DisplayData();
 }
 
@@ -241,172 +219,96 @@ void ThrusterPanel::LoadData()
 void ThrusterPanel::SaveData()
 {
     if (!theApplyButton->IsEnabled())
-       return; 
-}
-
-//------------------------------------------------------------------------------
-// void DisplayData()
-//------------------------------------------------------------------------------
-void ThrusterPanel::DisplayData()
-{ 
-   tankNames = thrusters[currentThruster]->tanks;
-   tankCount = tankNames.size();
-   
-   tankComboBox->Clear();
-   
-   if (tankCount == 0)
-      tankComboBox->Append("None");
-   else
-   {
-      for (Integer i = 0; i < tankCount; i++)
-      {
-         tankComboBox->Append(tankNames[i].c_str());
-      }    
-   }  
-   tankComboBox->SetSelection(0);
-   
-   coordsysCount = 1; // Temp value
-   coordsysComboBox->Clear();
-   for (Integer i = 0; i < coordsysCount; i++)
-   {
-       coordsysComboBox->Append(thrusters[currentThruster]->coordName.c_str());
-   }
-   coordsysComboBox->SetSelection(0);
-          
-   //removeButton->Enable(true);
-   cCoefButton->Enable(true);
-   kCoefButton->Enable(true); 
-   tankButton->Enable(true);
-   
-   thrusterListBox->Clear();
-   for (Integer i = 0; i < thrusterCount; i++) 
-      thrusterListBox->Append(thrusters[i]->thrusterName.c_str());    
-        
-   thrusterListBox->SetSelection(currentThruster, true);
-   
-   wxString xString;
-   wxString yString;
-   wxString zString;
-   
-   xString.Printf("%f", thrusters[currentThruster]->x_direction);
-   yString.Printf("%f", thrusters[currentThruster]->y_direction);
-   zString.Printf("%f", thrusters[currentThruster]->z_direction);
-
-   XTextCtrl->Clear();
-   YTextCtrl->Clear();
-   ZTextCtrl->Clear();
+       return;
     
-   XTextCtrl->SetValue(xString);
-   YTextCtrl->SetValue(yString);
-   ZTextCtrl->SetValue(zString);    
-}
-
-//------------------------------------------------------------------------------
-// void OnTextChange()
-//------------------------------------------------------------------------------
-void ThrusterPanel::OnTextChange()
-{
-    theApplyButton->Enable();
+    Integer paramID = 0; 
+    theSpacecraft->TakeAction("RemoveThruster", "");    
+    for (Integer i = 0; i < selectedThrusterCount; i++) 
+    {       
+        paramID = theSpacecraft->GetParameterID("Thrusters");
+        theSpacecraft->SetStringParameter(paramID, selectedThrusterArray[i].c_str());     
+    }   
 }
 
 //------------------------------------------------------------------------------
 // void OnSelect()
 //------------------------------------------------------------------------------
-void ThrusterPanel::OnSelect()
+void ThrusterPanel::OnSelect(wxCommandEvent &event)
 {
-    Integer id = thrusterListBox->GetSelection();
-    
-    if (id <= thrusterCount)
+    if (event.GetEventObject() == availableThrusterListBox)
     {
-        currentThruster = id;
-        DisplayData(); 
+        currentAvailThruster = availableThrusterListBox->GetSelection(); 
+        availableThrusterListBox->SetSelection(currentAvailThruster, true);
     }    
-}  
+    else if (event.GetEventObject() == selectedThrusterListBox)
+    {
+        currentSelectedThruster = selectedThrusterListBox->GetSelection(); 
+        selectedThrusterListBox->SetSelection(currentSelectedThruster, true);
+    }    
+}   
 
 //------------------------------------------------------------------------------
-// void OnButtonClick()
+// void OnButtonClick(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {
-    wxString tname;
-    Integer paramID;
-
-    if (event.GetEventObject() == addButton)
+    if (event.GetEventObject() == selectButton)
     {  
-       tname.Printf("Engine%d", ++thrusterCount);
-       Thruster *tr = new Thruster(tname.c_str());
-       thrusters.push_back( new Thrusters(tr, tname.c_str()) );
-       
-       thrusterCount = thrusters.size();
-       currentThruster = thrusterCount-1;     
-       
-       thrusters[currentThruster]->thruster = tr;
-       thrusters[currentThruster]->thrusterName = tname.c_str();
-
-       paramID = tr->GetParameterID("Tank");
-       thrusters[currentThruster]->tanks = tr->GetStringArrayParameter(paramID);
-               
-       paramID = tr->GetParameterID("CoordinateSystem");
-       thrusters[currentThruster]->coordName = tr->GetStringParameter(paramID);
-
-       paramID = tr->GetParameterID("X_Direction");
-       thrusters[currentThruster]->x_direction = tr->GetRealParameter(paramID);
-    
-       paramID = tr->GetParameterID("Y_Direction");
-       thrusters[currentThruster]->y_direction = tr->GetRealParameter(paramID);
+        wxString thruster = availableThrusterArray.Item(currentAvailThruster);
+        availableThrusterArray.Remove(thruster.c_str());
+        availableThrusterCount = availableThrusterArray.GetCount();
+        currentAvailThruster = 0;
         
-       paramID = tr->GetParameterID("Z_Direction");
-       thrusters[currentThruster]->z_direction = tr->GetRealParameter(paramID);
+        selectedThrusterArray.Add(thruster);
+        selectedThrusterCount = selectedThrusterArray.GetCount();
+        currentSelectedThruster = 0;
         
-       DisplayData();
+        DisplayData();
+        theApplyButton->Enable();
     }
     else if (event.GetEventObject() == removeButton)
     {
-       if (thrusters.empty())
-          return;
-       
-       int count = 0;  
-       std::vector <Thrusters*>::iterator iter;
-       for (iter = thrusters.begin(); iter < thrusters.end(); iter++)
-       {
-          if (count == thrusterCount)
-          {
-             thrusters.erase(iter);  
-          }    
-          count++;     
-       }
-       
-       thrusterCount = thrusters.size();
-       currentThruster = thrusterCount-1;
-       
-       if (thrusters.empty())  
-       {
-          removeButton->Enable(false); 
-          cCoefButton->Enable(false);
-          kCoefButton->Enable(false);
-          tankButton->Enable(false);
-          thrusterListBox->Clear(); 
-       }    
-       else
-          DisplayData();
-    }     
-    else if (event.GetEventObject() == tankButton)
+        wxString thruster = selectedThrusterArray.Item(currentSelectedThruster);
+        selectedThrusterArray.Remove(thruster.c_str());
+        selectedThrusterCount = selectedThrusterArray.GetCount();
+        currentSelectedThruster = 0;
+        
+        availableThrusterArray.Add(thruster);
+        availableThrusterCount = availableThrusterArray.GetCount();
+        currentAvailThruster = 0;
+        
+        DisplayData();
+        theApplyButton->Enable();
+    }   
+    else if (event.GetEventObject() == selectAllButton)
     {
-       TankSelectionDialog tsDlg(this, theSpacecraft, tankNames);
-       tsDlg.ShowModal(); 
-    }    
-    else if (event.GetEventObject() == cCoefButton)
-    {
-       std::string type = "C";
-       
-       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       //tcDlg.ShowModal();       
+        for (Integer i = 0; i < availableThrusterCount; i++) 
+           selectedThrusterArray.Add(availableThrusterArray.Item(i));
+  
+        availableThrusterArray.Clear();
+        availableThrusterCount = availableThrusterArray.GetCount();
+        currentAvailThruster = 0;
+        
+        selectedThrusterCount = selectedThrusterArray.GetCount();
+        currentSelectedThruster = 0;
+        
+        DisplayData();
+        theApplyButton->Enable();
     } 
-    else if (event.GetEventObject() == kCoefButton)
+    else if (event.GetEventObject() == removeAllButton)
     {
-       std::string type = "K";
-       
-       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       //tcDlg.ShowModal();
-    }            
-}    
+        for (Integer i = 0; i < selectedThrusterCount; i++) 
+           availableThrusterArray.Add(selectedThrusterArray.Item(i));
+        
+        selectedThrusterArray.Clear();
+        selectedThrusterCount = selectedThrusterArray.GetCount();
+        currentSelectedThruster = 0;
+        
+        availableThrusterCount = availableThrusterArray.GetCount();
+        currentAvailThruster = 0;
+        
+        DisplayData();
+        theApplyButton->Enable();
+    }   
+}     
+    

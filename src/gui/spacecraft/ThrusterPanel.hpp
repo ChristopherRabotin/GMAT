@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            ThrusterPanel
 //------------------------------------------------------------------------------
@@ -37,74 +37,41 @@ public:
     void SaveData();
     void LoadData();
     
-private:
-    struct Thrusters
-    {
-        std::string thrusterName;
-        std::string coordName;
-        Thruster* thruster;
-        Real x_direction;
-        Real y_direction;
-        Real z_direction;
-        StringArray tanks;
-      
-        Thrusters(Thruster* tr, const std::string &name)
-        {
-            thruster = tr;
-            thrusterName = name;
-        }
-    }; 
-    
+private:    
     void Create();
+    void DisplayData();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void DisplayData();
-    void OnTextChange();
-    void OnSelect();
+    void OnSelect(wxCommandEvent &event);
     void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
-    ObjectArray theThrusters;
-    StringArray thrusterNames;
-    StringArray tankNames;
-    std::vector<Thrusters *> thrusters;
+    GuiInterpreter *theGuiInterpreter;
     
-    Integer thrusterCount;
-    Integer tankCount;
-    Integer coordsysCount;
-    Integer currentThruster;
+    wxArrayString availableThrusterArray;
+    wxArrayString selectedThrusterArray;
+        
+    Integer availableThrusterCount;
+    Integer selectedThrusterCount;
+    
+    Integer currentAvailThruster;
+    Integer currentSelectedThruster;
     
     wxButton *theApplyButton;
-    wxButton *tankButton;
-    wxButton *addButton;
+    wxButton *selectButton;
     wxButton *removeButton;
-    wxButton *cCoefButton;
-    wxButton *kCoefButton;
+    wxButton *selectAllButton;
+    wxButton *removeAllButton;
     
-    wxComboBox *tankComboBox;
-    wxComboBox *coordsysComboBox;
-    
-    wxTextCtrl *XTextCtrl;
-    wxTextCtrl *YTextCtrl;
-    wxTextCtrl *ZTextCtrl;
-    
-    wxStaticText *tankStaticText;
-    wxStaticText *coordsysStaticText;
-    wxStaticText *XStaticText;
-    wxStaticText *YStaticText;
-    wxStaticText *ZStaticText;
-    
-    wxListBox *thrusterListBox;
+    wxListBox *availableThrusterListBox;
+    wxListBox *selectedThrusterListBox;
         
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 30250,
-        ID_TEXTCTRL,
-        ID_LISTBOX,
+        ID_LISTBOX = 30200,
         ID_BUTTON,
-        ID_COMBO,
     };
 };
 #endif
