@@ -72,8 +72,8 @@ void CelesBodySelectDialog::Create()
     clearBodyButton = new wxButton( this, ID_BUTTON, wxT("<="),
                                     wxDefaultPosition, wxSize(20,20), 0 );
     
-    MessageInterface::ShowMessage("CelesBodySelectDialog::Create() bodiesToExclude = %d\n",
-                                  mBodiesToExclude.GetCount());
+    //MessageInterface::ShowMessage("CelesBodySelectDialog::Create() bodiesToExclude = %d\n",
+    //                              mBodiesToExclude.GetCount());
     // wxListBox
     bodyListBox =
         theGuiManager->GetConfigBodyListBox(this, wxSize(150, 200), mBodiesToExclude);
@@ -156,14 +156,14 @@ void CelesBodySelectDialog::LoadData()
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::SaveData()
 {
-    MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData() bodies count = %d\n",
-                                  bodySelectedListBox->GetCount());
+    //MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData() bodies count = %d\n",
+    //                              bodySelectedListBox->GetCount());
     
     for(int i=0; i<bodySelectedListBox->GetCount(); i++)
     {
         mBodyNames.Add(bodySelectedListBox->GetString(i));
-        MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()name = %s\n",
-                                      mBodyNames[i].c_str());
+        //MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()name = %s\n",
+        //                              mBodyNames[i].c_str());
     }
 
     if (bodySelectedListBox->GetCount() > 0)
