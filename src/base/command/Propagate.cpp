@@ -151,7 +151,10 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
    
       case Gmat::PROP_SETUP:
          propName.push_back(name);
-         direction.push_back(1.0);
+         if (name[0] == '-')
+            direction.push_back(-1.0);
+         else
+            direction.push_back(1.0);
          satName.push_back(new StringArray);
          return true;
    
@@ -945,7 +948,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                                 " string does not identify propagator\n");
       
       if (generatingString[currentLoc] == '-') {
-         ++currentLoc;
+//         ++currentLoc;
          direction.push_back(-1.0);
       }
       else
@@ -963,7 +966,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       
    #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
-                                    " Propagators Identified:\n");
+                                    " Propagator strings Identified:\n");
       std::vector<Real>::iterator j = direction.begin();
       for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++j) 
          MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
@@ -977,7 +980,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       end = i->find("(", loc);
       if (end == (Integer)std::string::npos)
          throw CommandException("Propagate string does not identify propagator\n");
-   
+
       std::string component = i->substr(loc, end-loc);
       SetObject(component, Gmat::PROP_SETUP);
    
@@ -1150,6 +1153,16 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    if (stopWhen.empty())
       singleStepMode = true;
       //throw CommandException("Propagate does not identify any stopping conditions\n");
+
+   #ifdef DEBUG_PROPAGATE_DIRECTION
+      MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
+                                    " Propagators Identified:\n");
+      j = direction.begin();
+      for (StringArray::iterator i = propName.begin(); i != propName.end();
+           ++i, ++j)
+         MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
+         ((*j) > 0.0 ? "forwards" : "backwards"));
+   #endif
 }
 
 
@@ -1436,9 +1449,19 @@ bool Propagate::Initialize(void)
          ("Propagate::Initialize() SolarSystem not set in StopCondition");
    }
 
-#if DEBUG_PROPAGATE_EXE
+   #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage("Propagate::Initialize() complete.\n");
-#endif
+   #endif
+
+   #ifdef DEBUG_PROPAGATE_DIRECTION
+      MessageInterface::ShowMessage("Propagate::Initialize():"
+                                    " Propagators Identified:\n");
+      std::vector<Real>::iterator j = direction.begin();
+      for (StringArray::iterator i = propName.begin(); i != propName.end();
+           ++i, ++j)
+         MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
+         ((*j) > 0.0 ? "forwards" : "backwards"));
+   #endif
 
    return initialized;
 }
@@ -1564,6 +1587,13 @@ bool Propagate::Execute(void)
             baseEpoch.push_back(sat1->GetRealParameter(epochID));
             elapsedTime[n] = fm[n]->GetTime();
             currEpoch[n] = baseEpoch[n] + elapsedTime[n] / 86400.0;
+#if DEBUG_PROPAGATE_DIRECTION
+      MessageInterface::ShowMessage("Propagate::Execute() running %s %s.\n",
+         prop[n]->GetName().c_str(),
+         (prop[n]->GetPropagator()->GetRealParameter("StepSize") > 0.0 ?
+         "forwards" : "backwards"));
+      MessageInterface::ShowMessage("   direction =  %lf.\n", direction[n]);
+#endif
          }
          // Now setup the stopping condition elements
          #if DEBUG_PROPAGATE_EXE
