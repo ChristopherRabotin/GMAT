@@ -94,10 +94,10 @@ const Real                  Planet::MU[NumberOfPlanets]                        =
    0.102086492070628526e+04  // Vallado has 9.00E+02
 };
 const Integer               Planet::ORDER[NumberOfPlanets]               =
-{4, 4, 4, 4, 4, 4, 4, 4, 4};
+{0, 0, 4, 0, 0, 0, 0, 0, 0};
 
 const Integer               Planet::DEGREE[NumberOfPlanets]              =
-{4, 4, 4, 4, 4, 4, 4, 4, 4};
+{0, 0, 4, 0, 0, 0, 0, 0, 0};
 //const Integer               Planet::COEFFICIENT_SIZE[NumberOfPlanets]    =
 //{4, 4, 4, 4, 4, 4, 4, 4, 4};  // do I need this?
 const Rmatrix               Planet::SIJ[NumberOfPlanets]                 =
