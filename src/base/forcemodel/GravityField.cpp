@@ -60,9 +60,6 @@
 #include "Rvector.hpp"
 //#include "SolarSystemException.hpp"
 
-//************
-#include <iostream>
-using namespace std;
 
 using namespace GmatMathUtil;
 
@@ -692,7 +689,6 @@ bool GravityField::gravity_init(void)
    }
    if (!ReadFile())
    {
-      cout << "Returned false from ReadFile() ........" << endl;
       // try to get default coefficients from the body
       MessageInterface::ShowMessage("Using default coefficients from the body.\n");
       mu     = body->GetGravitationalConstant();
