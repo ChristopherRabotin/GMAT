@@ -263,20 +263,24 @@ void ParameterDatabase::Add(Parameter *param)
 }
 
 //------------------------------------------------------------------------------
-// void Add(const std::string &name, Parameter *param)
+// void Add(const std::string &name, Parameter *param = NULL)
 //------------------------------------------------------------------------------
 void ParameterDatabase::Add(const std::string &name, Parameter *param)
 {
    StringParamPtrMap::iterator pos;
 
    pos = mStringParamPtrMap->find(name);
-   if (pos != mStringParamPtrMap->end())
-      throw ParameterDatabaseException
-         ("ParameterDatabase::Add() Parameter name: " + name +
-          " already in the database\n");
 
-   mStringParamPtrMap->insert(StringParamPtrPair(name, param));
-   mNumParams = mStringParamPtrMap->size();
+   //loj: 1/5/05 if name already in the database, just ignore
+//     if (pos != mStringParamPtrMap->end())
+//        throw ParameterDatabaseException
+//           ("ParameterDatabase::Add() Parameter name: " + name +
+//            " already in the database\n");
+   if (pos == mStringParamPtrMap->end())
+   {
+      mStringParamPtrMap->insert(StringParamPtrPair(name, param));
+      mNumParams = mStringParamPtrMap->size();
+   }
 }
 
 //------------------------------------------------------------------------------
