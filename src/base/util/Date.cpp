@@ -18,12 +18,13 @@
  * ways of representing calendar dates and times.
  */
 //------------------------------------------------------------------------------
-#include <sstream>            // for stringstream
+#include <sstream>              // for stringstream and ostringstream
 #include "gmatdefs.hpp"
-#include "TimeTypes.hpp"      // for Time constants
+#include "TimeTypes.hpp"        // for Time constants
 #include "Date.hpp"
 #include "A1Mjd.hpp"
-#include "DateUtil.hpp"       // for ToHMSFromSecondsOfDay()
+#include "DateUtil.hpp"         // for ToHMSFromSecondsOfDay()
+#include "StringTokenizer.hpp"  // for calendar in string
 
 //---------------------------------
 // static data
@@ -158,8 +159,8 @@ Real Date::ToPackedCalendarReal() const
    
    ToYearMonDayHourMinSec(ymd, hms);
     
-	return ymd + hms;
-   // return ymd + (hms * 1e-9);
+//    return ymd + (hms * 1e-9);
+   return ymd + hms;
 }
 
 //------------------------------------------------------------------------------
@@ -167,7 +168,7 @@ Real Date::ToPackedCalendarReal() const
 //------------------------------------------------------------------------------
 std::string& Date::ToPackedCalendarString()
 {
-   std::stringstream ss("");
+   std::ostringstream ss("");
    ss.precision(9);
    ss.setf(std::ios::fixed);
    
@@ -176,9 +177,21 @@ std::string& Date::ToPackedCalendarString()
    
    ToYearMonDayHourMinSec(ymd, hms);
    
-   ss << (ymd + hms);
-   mPackedString = ss.str();
+   // Get date in YMD
+   ss << ymd;   
+   StringTokenizer stringToken(ss.str(),".");
+   std::string tempString = stringToken.GetToken(0);
    
+   // Get time in HMS 
+   ss.str("");
+   ss << hms;
+   stringToken.Set(ss.str());
+   tempString = tempString + "." + stringToken.GetToken(1);
+
+//    ss << (ymd + hms);
+//   mPackedString = ss.str();
+   mPackedString = tempString;
+
    return mPackedString;
 } 
 
@@ -387,7 +400,7 @@ Date::Date(const std::string& time)
    }
    catch(TimeRangeError& tre)
    {
-      throw;
+      throw tre;
    }
    yearD = year;
    monthD = month;
