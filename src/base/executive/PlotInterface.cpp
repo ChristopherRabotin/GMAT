@@ -61,7 +61,7 @@ PlotInterface::~PlotInterface()
 }
 
 //================================================
-#if !defined __CONSOLE_APP__
+//#if !defined __CONSOLE_APP__
 //================================================
 //------------------------------------------------------------------------------
 //  bool CreateGlPlotWindow()
@@ -74,6 +74,10 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow()
 {    
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     //loj: 3/8/04 added if
     if (MdiGlPlot::mdiParentGlFrame == NULL)
     {
@@ -122,6 +126,7 @@ bool PlotInterface::CreateGlPlotWindow()
     MdiGlPlot::mdiParentGlFrame->UpdateUI();
 
     return true;
+#endif
 }
 
 //loj: 3/8/04 added
@@ -135,6 +140,10 @@ bool PlotInterface::CreateGlPlotWindow()
 //------------------------------------------------------------------------------
 bool PlotInterface::DeleteGlPlot()
 {    
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     if (MdiGlPlot::mdiParentGlFrame != NULL)
     {
         //MessageInterface::ShowMessage("PlotInterface::DeleteGlPlot() "
@@ -147,7 +156,9 @@ bool PlotInterface::DeleteGlPlot()
 
         MdiGlPlot::mdiParentGlFrame->Hide();
     }
+
     return true;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -162,6 +173,10 @@ bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
                                        const Real &posY, const Real &posZ,
                                        bool updateCanvas)
 {   
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     if (MdiGlPlot::mdiParentGlFrame != NULL)
     {
                 
@@ -204,6 +219,7 @@ bool PlotInterface::UpdateGlSpacecraft(const Real &time, const Real &posX,
     }
 
     return false;
+#endif
 } // end UpdateGlSpacecraft()
 
 
@@ -224,6 +240,10 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
                                        const std::string &xAxisTitle,
                                        const std::string &yAxisTitle)
 {    
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     if (MdiXyPlot::mdiParentXyFrame == NULL)
     {
         //MessageInterface::ShowMessage("PlotInterface::CreateXyPlotWindow() "
@@ -283,6 +303,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
     MdiXyPlot::mdiParentXyFrame->Show(true);
     
     return true;
+#endif
 }
 
 //loj: 3/8/04 added
@@ -296,6 +317,10 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
 //------------------------------------------------------------------------------
 bool PlotInterface::DeleteXyPlot(bool hideFrame)
 {    
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     if (MdiXyPlot::mdiParentXyFrame != NULL)
     {
         //MessageInterface::ShowMessage("PlotInterface::DeleteXyPlot()\n");
@@ -310,6 +335,7 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
     }
     
     return true;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -327,6 +353,10 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
                                    const std::string &curveTitle,
                                    const std::string &penColor)
 {
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     bool added = false;
     
     //MessageInterface::ShowMessage("PlotInterface::AddXyPlotCurve() entered."
@@ -351,6 +381,7 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
     }
 
     return added;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -362,6 +393,10 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
 //------------------------------------------------------------------------------
 bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName)
 {
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     //MessageInterface::ShowMessage("PlotInterface::DeleteAllPlotCurve() plotName = %s "
     //                              "numChildren = %d\n", plotName.c_str(),
     //                              MdiXyPlot::numChildren);
@@ -374,6 +409,7 @@ bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName)
     }
 
     return true;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -385,6 +421,10 @@ bool PlotInterface::DeleteAllXyPlotCurves(const std::string &plotName)
 //------------------------------------------------------------------------------
 bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveIndex)
 {
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     //MessageInterface::ShowMessage("PlotInterface::DeleteXyPlotCurve() entered "
     //                              " plotName = %s curveIndex = %d\n", plotName.c_str(),
     //                              curveIndex);
@@ -403,6 +443,7 @@ bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveInde
     }
 
     return true;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -410,6 +451,10 @@ bool PlotInterface::DeleteXyPlotCurve(const std::string &plotName, int curveInde
 //------------------------------------------------------------------------------
 void PlotInterface::ClearXyPlotData(const std::string &plotName)
 {
+#if defined __CONSOLE_APP__
+    return;
+#else
+
     for (int i=0; i<MdiXyPlot::numChildren; i++)
     {
         MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
@@ -419,6 +464,7 @@ void PlotInterface::ClearXyPlotData(const std::string &plotName)
             frame->ClearPlotData();
         }
     }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -427,6 +473,10 @@ void PlotInterface::ClearXyPlotData(const std::string &plotName)
 void PlotInterface::SetXyPlotTitle(const std::string &plotName,
                                    const std::string &plotTitle)
 {
+#if defined __CONSOLE_APP__
+    return;
+#else
+
     //MessageInterface::ShowMessage("PlotInterface::SetXyPlotTitle() plotName = %s "
     //                              "plotTitle = %s\n", plotName.c_str(), plotTitle.c_str());
     
@@ -441,6 +491,7 @@ void PlotInterface::SetXyPlotTitle(const std::string &plotName,
             frame->SetPlotTitle(wxString(plotTitle.c_str()));
         }
     }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -465,6 +516,10 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
                                  const std::string &yAxisTitle,
                                  bool updateCanvas)
 {
+#if defined __CONSOLE_APP__
+    return true;
+#else
+
     bool updated = false;
     wxString owner = wxString(plotName.c_str());
     
@@ -508,7 +563,8 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
     }
     
     return updated;
+#endif
 }
 //================================================
-#endif
+//#endif
 //================================================

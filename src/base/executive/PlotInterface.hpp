@@ -26,7 +26,7 @@ class PlotInterface
 {
 
 public:
-#if !defined __CONSOLE_APP__
+//#if !defined __CONSOLE_APP__
     // for OpenGL Plot
     static bool CreateGlPlotWindow();
     static bool DeleteGlPlot(); //loj: 3/8/04 added
@@ -56,7 +56,7 @@ public:
                              const std::string &yAxisTitle,
                              bool updateCanvas);
                              
-#endif
+//#endif
     
 private:
     
