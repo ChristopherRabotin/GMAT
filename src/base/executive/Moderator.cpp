@@ -34,31 +34,19 @@ Moderator* Moderator::instance = NULL;
 GuiInterpreter* Moderator::theGuiInterpreter = NULL;
 ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
 
-//-----------------------------------------------------
-//*** should match with ObjectType in gmatdefs.hpp
-//-----------------------------------------------------
-const std::string
-Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
-{
-   "Spacecraft",
-   "GroundStation",
-   "Burn",
-   "Command",
-   "Propagator",
-   "ForceModel",
-   "PhysicalModel",
-   "Interpolator",
-   "SolarSystem",
-   "CelestialBody",
-   "Atmosphere",
-   "Parameter",
-   "StopCondition",
-   "Solver",
-   "Subscriber",
-   "PropSetup",
-   "RefFrame",
-   "UnknownObjectType"
-};
+//loj: 9/10/04 moved to GmatBase
+//  //-----------------------------------------------------
+//  //*** should match with ObjectType in gmatdefs.hpp
+//  //-----------------------------------------------------
+//  const std::string
+//  Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
+//  {
+//     "Spacecraft",   "GroundStation",   "Burn",   "Command",
+//     "Propagator",   "ForceModel",   "PhysicalModel",   "Interpolator",
+//     "SolarSystem",   "CelestialBody",   "Atmosphere",   "Parameter",
+//     "StopCondition",   "Solver",   "Subscriber",   "PropSetup",
+//     "RefFrame",   "UnknownObject"
+//  };
 
 const std::string
 Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
@@ -188,7 +176,7 @@ void Moderator::SetRunReady(bool flag)
 std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 {
    if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
-      return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
+      return GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
    else
       return "UnknownObject";
 }
@@ -2199,7 +2187,8 @@ void Moderator::CreateDefaultMission()
       {
          param = GetParameter(params[i]);
          param->SetStringParameter("Description", param->GetName());
-         param->SetStringParameter("Object", "DefaultSC");
+         param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
+         //loj: 9/13/04 param->SetStringParameter("Object", "DefaultSC");
       }
     
       // StopCondition
@@ -2271,98 +2260,106 @@ void Moderator::CreateDefaultMission()
 void Moderator::SetupRun(Integer sandboxNum)
 {
    MessageInterface::ShowMessage("Moderator setting up for a run...\n");
-   std::string objName;
-   std::string objTypeName;
+//     std::string objName;
+//     std::string objTypeName;
   
-   //--------------------------------------------
-   // get/set internal objects for parameters
-   //--------------------------------------------
-   //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
-   GmatBase *obj;
-   StringArray objTypeList;
+//     //--------------------------------------------
+//     // get/set internal objects for parameters
+//     //--------------------------------------------
+//     //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
+//     //GmatBase *obj;
+//     StringArray objTypeList;
     
-   // for configured parameters use internal copy of Spacecraft
-   StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
-   Parameter *param;
-   Spacecraft *sc;
+//     // for configured parameters use internal copy of Spacecraft
+//     StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+//     Parameter *param;
+//     Spacecraft *sc;
     
-   for (unsigned int i=0; i<params.size(); i++)
-   {
-      try
-      {
-         param = GetParameter(params[i]);
+//     for (unsigned int i=0; i<params.size(); i++)
+//     {
+//        try
+//        {
+//           param = GetParameter(params[i]);
 
-#if DEBUG_SETUP_RUN
-         MessageInterface::ShowMessage
-            ("Moderator::SetupRun() ParamType = %s, "
-             "ParamName = %s\n", param->GetTypeName().c_str(),
-             param->GetName().c_str());
-#endif
+//  #if DEBUG_SETUP_RUN
+//           MessageInterface::ShowMessage
+//              ("Moderator::SetupRun() ParamType = %s, "
+//               "ParamName = %s\n", param->GetTypeName().c_str(),
+//               param->GetName().c_str());
+//  #endif
 
-         //loj: 6/24/04 setting SolarSystem on parameters done in Sandbox
-         //-----------------------------------------------------------
-         // set SolarSystem to orbit related parameters
-         //if (!param->IsTimeParameter())
-         //   param->AddObject(theDefaultSolarSystem);
-         //-----------------------------------------------------------
-         //param->SetSolarSystem(theDefaultSolarSystem);
-         //-----------------------------------------------------------
+//           //loj: 6/24/04 setting SolarSystem on parameters done in Sandbox
+//           //-----------------------------------------------------------
+//           // set SolarSystem to orbit related parameters
+//           //if (!param->IsTimeParameter())
+//           //   param->AddObject(theDefaultSolarSystem);
+//           //-----------------------------------------------------------
+//           //param->SetSolarSystem(theDefaultSolarSystem);
+//           //-----------------------------------------------------------
          
-         // set internal Spacecraft to parameters
-         //@todo
-         //loj: 6/24/04 move the code to Sandbox later
-         objTypeList = param->GetObjectTypeNames();
-         for (unsigned int j=0; j<objTypeList.size(); j++)
-         {
-            obj = param->GetObject(objTypeList[j]);
-            objName = obj->GetName();
-            
-            if (objTypeList[j] == "Spacecraft")
-            {
-               sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-               param->SetObject(Gmat::SPACECRAFT, objName, sc);
-            }
-            
-#if DEBUG_SETUP_RUN
-            MessageInterface::ShowMessage
-               ("Moderator::SetupRun() SetObject ParamName = %s, "
-                "ObjName = %s\n", param->GetName().c_str(),
-                objName.c_str());
-#endif
-         }
+//           // set internal Spacecraft to parameters
+//           //@todo
+//           //loj: 6/24/04 move the code to Sandbox later
+//           //objTypeList = param->GetObjectTypeNames();
+//           //for (unsigned int j=0; j<objTypeList.size(); j++)
+//           for (int j=0; j<param->GetNumRefObjects(); j++)
+//           {
+//              //obj = param->GetObject(objTypeList[j]);
+//              //objName = obj->GetName();
+//              //if (objTypeList[j] == "Spacecraft")
+//              //{
+//              //   sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+//              //   param->SetObject(Gmat::SPACECRAFT, objName, sc);
+//              //}
 
-         param->Initialize();
+//              //loj: 9/10/04 new code
+//              objName = param->GetRefObjectName(Gmat::SPACECRAFT);
+//              if (objName != "UNKNOWN_OBJECT_TYPE")
+//              {
+//                 sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+//                 param->SetRefObject(sc, Gmat::SPACECRAFT, objName);
+//              }
+            
+//  #if DEBUG_SETUP_RUN
+//              MessageInterface::ShowMessage
+//                 ("Moderator::SetupRun() SetObject ParamName = %s, "
+//                  "objName = %s\n", param->GetName().c_str(),
+//                  objName.c_str());
+//  #endif
+//           }
 
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-                                       e.GetMessage().c_str());
-      }
-   }
+//           param->Initialize();
+
+//        }
+//        catch (BaseException &e)
+//        {
+//           MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+//                                         e.GetMessage().c_str());
+//        }
+//     }
    
-   //--------------------------------------------
-   // create plot window
-   //--------------------------------------------
-   //@todo
-   //loj: 6/24/04 move the code to Sandbox later
-   StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-   Subscriber *sub;
+//     //--------------------------------------------
+//     // create plot window
+//     //--------------------------------------------
+//     //@todo
+//     //loj: 6/24/04 move the code to Sandbox later
+//     StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+//     Subscriber *sub;
 
-   //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
-   for (unsigned int i=0; i<subs.size(); i++)
-   {
-      sub = GetSubscriber(subs[i]);
-      objTypeName = sub->GetTypeName();
-      objName = sub->GetName();
-#if DEBUG_SETUP_RUN
-      MessageInterface::ShowMessage
-         ("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-          objTypeName.c_str(), objName.c_str());
-#endif
-      sub->Initialize();
-      //MessageInterface::ShowMessage("Moderator::SetupRun() subscriber initialized\n");
-   }
+//     //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
+//     for (unsigned int i=0; i<subs.size(); i++)
+//     {
+//        sub = GetSubscriber(subs[i]);
+//        objTypeName = sub->GetTypeName();
+//        objName = sub->GetName();
+//  #if DEBUG_SETUP_RUN
+//        MessageInterface::ShowMessage
+//           ("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+//            objTypeName.c_str(), objName.c_str());
+//  #endif
+//        sub->Initialize();
+//        //MessageInterface::ShowMessage("Moderator::SetupRun() subscriber initialized\n");
+//     }
    
    MessageInterface::ShowMessage("Moderator successfully set up for a run...\n");
 }

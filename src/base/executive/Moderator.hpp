@@ -301,8 +301,9 @@ private:
    StringArray thePlanetaryFileNames;
    StringArray thePlanetaryFileTypesInUse;
    StringArray theTempFileList;
-    
-   static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
+
+   //loj: 9/10/04 commented out
+   //static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
    enum
    {
