@@ -52,13 +52,22 @@
 // XPMs
 // ----------------------------------------------------------------------------
 
-#if !defined(__WXMSW__) && !defined(__WXPM__)
+#if !defined(__WXMSW__) && !defined(__WXPM__) && !defined(__WXMAC__)
    #include "wx/plot/plot_enl.xpm"
    #include "wx/plot/plot_shr.xpm"
    #include "wx/plot/plot_zin.xpm"
    #include "wx/plot/plot_zot.xpm"
    #include "wx/plot/plot_up.xpm"
    #include "wx/plot/plot_dwn.xpm"
+#endif
+
+#if defined(__WXMAC__)
+   #include "plot_enl.xpm"
+   #include "plot_shr.xpm"
+   #include "plot_zin.xpm"
+   #include "plot_zot.xpm"
+   #include "plot_up.xpm"
+   #include "plot_dwn.xpm"
 #endif
 
 
