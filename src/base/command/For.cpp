@@ -23,9 +23,6 @@
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
 
-#include <iostream>
-using namespace std; // **************
-
 //---------------------------------
 // static data
 //---------------------------------
@@ -247,7 +244,6 @@ bool For::Execute(void)
    {
       retval = ExecuteBranch();
       currentValue += stepSize;
-      cout << "current value bumped to ......." << currentValue << endl;
       if (indexIsParam)   indexParam->SetReal(currentValue);
    }
    else
@@ -328,8 +324,6 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                        const std::string &name)
 {
    
-   cout << "In SetRef .... name = " << name << endl;
-   cout << "In SetRef .... startName = " << name << endl;
    switch (type)
    {
       case Gmat::PARAMETER:
@@ -642,13 +636,9 @@ bool For::StillLooping()
    // initialize the loop, if it's the first time through
    if (currentValue == UNINITIALIZED_VALUE)
    {
-      cout << "First time through .........." << endl;
       if (startIsParam)  startValue = startParam->GetReal();
       if (endIsParam)    endValue   = endParam->GetReal();
       if (incrIsParam)   stepSize   = incrParam->GetReal();
-      cout << "Start value = " << startValue << endl;
-      cout << "End value = " << endValue << endl;
-      cout << "Step value = " << stepSize << endl;
       if ((stepSize == 0.0) ||
           ((stepSize > 0.0) && (startValue > endValue)) ||
           ((stepSize < 0.0) && (startValue < endValue)) )
@@ -656,8 +646,6 @@ bool For::StillLooping()
                "For loop values incorrect - will result in infinite loop.");
       
       currentValue = startValue;
-      
-      cout << "Current value set to " << currentValue << endl;
       
       if (indexIsParam)
          indexParam->SetReal(currentValue);
