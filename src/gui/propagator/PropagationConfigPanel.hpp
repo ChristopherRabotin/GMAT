@@ -47,6 +47,7 @@ private:
       RKV89 = 0,
       RKN68,
       RKF56,
+      PD78,
       IntegratorCount,
    };
    

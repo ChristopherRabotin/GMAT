@@ -147,6 +147,8 @@ void PropagationConfigPanel::LoadData()
       typeId = RKN68;    
    else if (propType == "RungeKuttaFehlberg56")
       typeId = RKF56;
+   else if (propType == "PrinceDormand78")
+      typeId = PD78;
 
    // fill body combobox
    if ( !primaryBodiesArray.IsEmpty() )
@@ -487,6 +489,7 @@ void PropagationConfigPanel::Initialize()
    integratorArray.Add("RKV 8(9)");
    integratorArray.Add("RKN 6(8)");
    integratorArray.Add("RKF 5(6)");
+   integratorArray.Add("PD  7(8)");
     
    // initialize gravity model type array
    gravModelArray.push_back("Point Mass");
@@ -767,7 +770,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    {
       integratorArray[0],
       integratorArray[1],
-      integratorArray[2]
+      integratorArray[2],
+      integratorArray[3]
    };
 
    wxString strArray2[] =
@@ -980,6 +984,14 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
         
          if (newProp == NULL)
             newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
+      }
+      else if (integratorString.IsSameAs(integratorArray[PD78]))
+      {   
+         newPropName = propSetupName + "PD78";
+         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
+         if (newProp == NULL)
+            newProp = theGuiInterpreter->CreatePropagator("PrinceDormand78", newPropName);
       }
    }
    else
