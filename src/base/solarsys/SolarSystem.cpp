@@ -129,10 +129,10 @@ SolarSystem::~SolarSystem()
    std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
-      delete *cbi;       // delete each body first
+      delete (*cbi);       // delete each body first
       ++cbi;
    }
-   bodiesInUse.~list<CelestialBody*>();
+   //bodiesInUse.~list<CelestialBody*>();
    delete pE;
 }
 
