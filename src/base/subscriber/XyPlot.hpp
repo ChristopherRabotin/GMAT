@@ -32,57 +32,53 @@ public:
           bool drawGrid = false);
    XyPlot(const XyPlot &copy);
    virtual ~XyPlot(void);
-
-   Integer GetNumYParameters();
-    
-   bool SetXParameter(const std::string &paramName);
-   //bool SetXParameter(Parameter *param);
-    
-   bool AddYParameter(const std::string &paramName);
-   //bool AddYParameter(Parameter *param);
-
+   
    // methods inherited from Subscriber
    virtual bool Initialize();
-    
+   
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   
+   virtual bool TakeAction(const std::string &action,  
+                           const std::string &actionData = "");
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
-   virtual bool GetBooleanParameter(const Integer id) const;
-   virtual bool GetBooleanParameter(const std::string &label) const;
-   virtual bool SetBooleanParameter(const Integer id, const bool value);
-   virtual bool SetBooleanParameter(const std::string &label,
-                                    const bool value);
-    
-   UnsignedInt GetUnsignedIntParameter(const Integer id, const std::string &item);
-   UnsignedInt GetUnsignedIntParameter(const std::string &label,
-                                       const std::string &item);
-   UnsignedInt SetUnsignedIntParameter(const Integer id, const std::string &item,
-                                       const UnsignedInt value);
-   UnsignedInt  SetUnsignedIntParameter(const std::string &label,
-                                        const std::string &item,
-                                        const UnsignedInt value);
-   
+   virtual Integer GetIntegerParameter(const Integer id) const;
+   virtual Integer GetIntegerParameter(const std::string &label) const;
+   virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer SetIntegerParameter(const std::string &label,
+                                       const Integer value);
+      
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
     
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
+   
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
 
+   bool SetXParameter(const std::string &paramName);
+   bool AddYParameter(const std::string &paramName, Integer index);
    void BuildPlotTitle();
-   void ClearYParameters();
+   bool ClearYParameters();
+   bool RemoveYParameter(const std::string &name);
    void DeletePlotCurves();
     
    Parameter *mXParam;
-   std::vector<Parameter*> mYParams; //loj: 6/4/04 remove this later
+   std::vector<Parameter*> mYParams;
    std::map<std::string, Parameter*> mYParamMap;
 
    Integer mNumXParams;
@@ -90,7 +86,7 @@ protected:
 
    std::string mXParamName;
    StringArray mYParamNames;
-    
+   
    std::string mPlotTitle;
    std::string mXAxisTitle;
    std::string mYAxisTitle;
@@ -104,16 +100,10 @@ protected:
    Integer mNumDataPoints;
    Integer mNumCollected;
    
-   std::map<std::string, UnsignedInt> mColorMap;
-    
    enum
    {
       IND_VAR = SubscriberParamCount,
       ADD,
-      DEP_VAR,
-      DEP_VAR_LIST,
-      CLEAR_DEP_VAR_LIST,
-      COLOR,
       PLOT_TITLE,
       X_AXIS_TITLE,
       Y_AXIS_TITLE,

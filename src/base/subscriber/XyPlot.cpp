@@ -19,11 +19,13 @@
 
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp"     // for XY plot
-#include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "Moderator.hpp"         // for GetParameter()
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-#define DEBUG_XYPLOT 0
+//#define DEBUG_XYPLOT_INIT 1
+//#define DEBUG_XYPLOT_PARAM 1
+//#define DEBUG_XYPLOT_UPDATE 1
+//#define DEBUG_ACTION_REMOVE 1
 
 //---------------------------------
 // static data
@@ -33,11 +35,7 @@ const std::string
 XyPlot::PARAMETER_TEXT[XyPlotParamCount - SubscriberParamCount] =
 {
    "IndVar",
-   "Add",               //loj: 6/4/04 added to match script
-   "DepVar",
-   "DepVarList",
-   "ClearDepVarList",
-   "Color",
+   "Add",
    "PlotTitle",
    "XAxisTitle",
    "YAxisTitle",
@@ -51,11 +49,7 @@ const Gmat::ParameterType
 XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::UNSIGNED_INT_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -93,7 +87,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
     
    mXParam = xParam;
    if (firstYParam != NULL)
-      AddYParameter(firstYParam->GetName());
+      AddYParameter(firstYParam->GetName(), mNumYParams);
 
    mPlotTitle = plotTitle;
    mXAxisTitle = xAxisTitle;
@@ -142,14 +136,6 @@ XyPlot::~XyPlot(void)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumYParameters()
-//------------------------------------------------------------------------------
-Integer XyPlot::GetNumYParameters()
-{
-   return mNumYParams;
-}
-
-//------------------------------------------------------------------------------
 // bool SetXParameter(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool XyPlot::SetXParameter(const std::string &paramName)
@@ -177,44 +163,25 @@ bool XyPlot::SetXParameter(const std::string &paramName)
    return status;
 }
 
-//  //------------------------------------------------------------------------------
-//  // bool SetXParameter(Parameter *param)
-//  //------------------------------------------------------------------------------
-//  bool XyPlot::SetXParameter(Parameter *param)
-//  {
-//     //loj: Do I really need to validate parameter before set?
-//     //     Validate when the parameter is actually evaluated?
-//     //if (param->Validate()) //loj: 4/27/04 commented out
-//     //{
-//        mXParamName = param->GetName();
-//        mXParam = param;
-//        return true;
-//     //}
-
-//     //return false;
-//  }
-
 //------------------------------------------------------------------------------
-// bool AddYParameter(const std::string &paramName)
+// bool AddYParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
-bool XyPlot::AddYParameter(const std::string &paramName)
+bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
 {
    bool status = false;
    Moderator *theModerator = Moderator::Instance();
     
-   if (paramName != "")
+   if (paramName != "" && index == mNumYParams)
    {
       mYParamNames.push_back(paramName);
       mYParamMap[paramName] = NULL;
       mNumYParams = mYParamNames.size();
 
-      mColorMap[paramName] = GmatColor::BLACK32;
-
       // get parameter pointer
       Parameter *param = theModerator->GetParameter(paramName);
       if (param != NULL)
       {
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_PARAM
          MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
                                        param->GetName().c_str());
 #endif
@@ -226,26 +193,6 @@ bool XyPlot::AddYParameter(const std::string &paramName)
 
    return status;
 }
-
-//  //------------------------------------------------------------------------------
-//  // bool AddYParameter(Parameter *param)
-//  //------------------------------------------------------------------------------
-//  bool XyPlot::AddYParameter(Parameter *param)
-//  {
-//     bool added = false;
-    
-//     //loj: Do I really need to validate parameter before add?
-//     //if (param->Validate()) //loj: 4/27/04 commented out
-//     //{
-//        //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
-//        //                              param->GetName().c_str());
-//        mYParams.push_back(param);
-
-//        added = true;
-//     //}
-
-//     return added;
-//  }
 
 //----------------------------------
 // methods inherited from Subscriber
@@ -264,12 +211,12 @@ bool XyPlot::Initialize()
    //-----------------------------------
    // implement this later
 
+#if DEBUG_XYPLOT_INIT
+   MessageInterface::ShowMessage("XyPlot::Initialize() active=%d\n", active);
+#endif
    
-   //MessageInterface::ShowMessage("XyPlot::Initialize() entered\n");
    bool status = false;
-   DeletePlotCurves(); //loj: 5/3/04 added to fix index out of range
-   
-   //MessageInterface::ShowMessage("XyPlot::Initialize() active=%d\n", active);
+   DeletePlotCurves();
    
    if (active)
    {
@@ -277,11 +224,13 @@ bool XyPlot::Initialize()
       BuildPlotTitle();
       
       // Create XyPlotWindow, if not exist
-      //MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
+#if DEBUG_XYPLOT_INIT
+      MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
+#endif
       PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
                                         mXAxisTitle, mYAxisTitle, mDrawGrid);
       
-      PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle); //loj: 7/13/04 added
+      PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsXyPlotWindowSet = true; //loj: 5/12/04 Do I need this flag?
       
       // add to Y params to XyPlotWindow
@@ -293,13 +242,12 @@ bool XyPlot::Initialize()
       for (int i=0; i<mNumYParams; i++)
       {
          std::string curveTitle = mYParams[i]->GetName();
-         //std::string penColor = "RED"; //loj: should parameter provide pen color?
-         //loj: 7/13/04 changed to use UnsignedInt for color
          UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
          
-         //MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-         //                              curveTitle.c_str());
-                
+#if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+                                       curveTitle.c_str());
+#endif
          PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
                                        curveTitle, penColor);
       }
@@ -307,7 +255,9 @@ bool XyPlot::Initialize()
       PlotInterface::ShowXyPlotLegend(instanceName); //loj: 7/14/04 added
       status = true;
         
-      //MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
+#if DEBUG_XYPLOT_INIT
+      MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
+#endif
       PlotInterface::ClearXyPlotData(instanceName);
    }
    else
@@ -343,6 +293,38 @@ bool XyPlot::Initialize()
 GmatBase* XyPlot::Clone(void) const
 {
    return (new XyPlot(*this));
+}
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool XyPlot::TakeAction(const std::string &action,
+                        const std::string &actionData)
+{
+#if DEBUG_ACTION_REMOVE
+   MessageInterface::ShowMessage("XyPlot::TakeAction() action=%s, actionData=%s\n",
+                                 action.c_str(), actionData.c_str());
+#endif
+   if (action == "Clear")
+   {
+      return ClearYParameters();
+   }
+   else if (action == "Remove")
+   {
+      return RemoveYParameter(actionData);
+   }
+   
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -394,121 +376,57 @@ std::string XyPlot::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
+// virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
-bool XyPlot::GetBooleanParameter(const Integer id) const
+Integer XyPlot::GetIntegerParameter(const Integer id) const
 {
    switch (id)
    {
-   case CLEAR_DEP_VAR_LIST: //loj: 8/5/04 added
-      return false;
+   case DATA_COLLECT_FREQUENCY:
+      return mDataCollectFrequency;
+   case UPDATE_PLOT_FREQUENCY:
+      return mUpdatePlotFrequency;
    default:
-      return Subscriber::GetBooleanParameter(id);
+      return Subscriber::GetIntegerParameter(id);
    }
 }
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label) const
+// virtual Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
-bool XyPlot::GetBooleanParameter(const std::string &label) const
+Integer XyPlot::GetIntegerParameter(const std::string &label) const
 {
-   return GetBooleanParameter(GetParameterID(label));
+   return GetIntegerParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
+// virtual Integer SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
-bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
+Integer XyPlot::SetIntegerParameter(const Integer id, const Integer value)
 {
    switch (id)
    {
-   case CLEAR_DEP_VAR_LIST:
-      ClearYParameters();
-      return true;
+   case DATA_COLLECT_FREQUENCY:
+      mDataCollectFrequency = value;
+      return value;
+   case UPDATE_PLOT_FREQUENCY:
+      mUpdatePlotFrequency = value;
+      return value;
    default:
-      return Subscriber::SetBooleanParameter(id, value);
+      return Subscriber::SetIntegerParameter(id, value);
    }
 }
 
 //------------------------------------------------------------------------------
-// bool SetBooleanParameter(const std::string &label,
-//                          const bool value)
+// virtual Integer SetIntegerParameter(const std::string &label,
+//                                     const Integer value)
 //------------------------------------------------------------------------------
-bool XyPlot::SetBooleanParameter(const std::string &label,
-                                 const bool value)
+Integer XyPlot::SetIntegerParameter(const std::string &label,
+                                    const Integer value)
 {
-   return SetBooleanParameter(GetParameterID(label), value);
+   return SetIntegerParameter(GetParameterID(label), value);
 }
 
-//------------------------------------------------------------------------------
-// UnsignedInt GetUnsignedIntParameter(const Integer id,
-//                                     const std::string &item)
-//------------------------------------------------------------------------------
-UnsignedInt XyPlot::GetUnsignedIntParameter(const Integer id,
-                                            const std::string &item)
-{   
-   switch (id)
-   {
-   case COLOR:
-      if (mColorMap.find(item) != mColorMap.end())
-         return mColorMap[item];
-      else
-         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-   default:
-      return Subscriber::GetUnsignedIntParameter(id);
-   }
-}
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetUnsignedIntParameter(const std::string &label,
-//                                     const std::string &item)
-//------------------------------------------------------------------------------
-UnsignedInt XyPlot::GetUnsignedIntParameter(const std::string &label,
-                                                const std::string &item)
-{
-   return GetUnsignedIntParameter(GetParameterID(label), item);
-}
-
-//------------------------------------------------------------------------------
-// UnsignedInt SetUnsignedIntParameter(const Integer id,
-//                                     const std::string &item,
-//                                     const UnsignedInt value)
-//------------------------------------------------------------------------------
-UnsignedInt XyPlot::SetUnsignedIntParameter(const Integer id,
-                                            const std::string &item,
-                                            const UnsignedInt value)
-{
-#ifdef DEBUG_OPENGL
-   MessageInterface::ShowMessage
-      ("XyPlot::SetUnsignedIntParameter()"
-       "id=%d, item=%s, value=%d\n", id, item.c_str(), value);
-#endif
-   
-   switch (id)
-   {
-   case COLOR:
-      if (mColorMap.find(item) != mColorMap.end())
-      {
-         mColorMap[item] = value;
-         return value;
-      }
-      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-   default:
-      return Subscriber::SetUnsignedIntParameter(id, value);
-   }
-}
-
-//------------------------------------------------------------------------------
-// UnsignedInt SetUnsignedIntParameter(const std::string &label,
-//                                     const std::string &item,
-//                                     const UnsignedInt value)
-//------------------------------------------------------------------------------
-UnsignedInt XyPlot::SetUnsignedIntParameter(const std::string &label,
-                                            const std::string &item,
-                                            const UnsignedInt value)
-{
-   return SetUnsignedIntParameter(GetParameterID(label), item, value);
-}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -519,11 +437,6 @@ std::string XyPlot::GetStringParameter(const Integer id) const
    {
    case IND_VAR:
       return mXParamName;
-   case DEP_VAR:
-      if (mNumYParams > 0)
-         return mYParamNames[0]; //loj: return first Y Param
-      else
-         return "";
    case PLOT_TITLE:
       return mPlotTitle;
    case X_AXIS_TITLE:
@@ -550,9 +463,10 @@ std::string XyPlot::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string XyPlot::GetStringParameter(const std::string &label) const
 {
-   //MessageInterface::ShowMessage("XyPlot::GetStringParameter() label = %s\n",
-   //                              label.c_str());
-
+#if DEBUG_XY_PARAM
+   MessageInterface::ShowMessage("XyPlot::GetStringParameter() label = %s\n",
+                                 label.c_str());
+#endif
    return GetStringParameter(GetParameterID(label));
 }
 
@@ -561,7 +475,7 @@ std::string XyPlot::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 {
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_PARAM
    MessageInterface::ShowMessage("XyPlot::SetStringParameter() id = %d, "
                                  "value = %s \n", id, value.c_str());
 #endif
@@ -570,9 +484,7 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
    case IND_VAR:
       return SetXParameter(value);
    case ADD:
-      return AddYParameter(value);
-   case DEP_VAR:
-      return AddYParameter(value);
+      return AddYParameter(value, mNumYParams);
    case PLOT_TITLE:
       mPlotTitle = value;
       return true;
@@ -614,10 +526,44 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 bool XyPlot::SetStringParameter(const std::string &label,
                                 const std::string &value)
 {
-   //MessageInterface::ShowMessage("XyPlot::SetStringParameter() label = %s, "
-   //                              "value = %s \n", label.c_str(), value.c_str());
-
+#if DEBUG_XYPLOT_PARAM
+   MessageInterface::ShowMessage("XyPlot::SetStringParameter() label = %s, "
+                                 "value = %s \n", label.c_str(), value.c_str());
+#endif
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool XyPlot::SetStringParameter(const Integer id, const std::string &value,
+                                const Integer index)
+{
+   switch (id)
+   {
+   case ADD:
+      return AddYParameter(value, index);
+   default:
+      return Subscriber::SetStringParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool XyPlot::SetStringParameter(const std::string &label,
+                                const std::string &value,
+                                const Integer index)
+{
+#if DEBUG_XYPLOT_PARAM
+   MessageInterface::ShowMessage
+      ("XyPlot::SetStringParameter() label=%s, value=%s, index=%d \n",
+       label.c_str(), value.c_str(), index);
+#endif
+   return SetStringParameter(GetParameterID(label), value, index);
 }
 
 //------------------------------------------------------------------------------
@@ -627,7 +573,7 @@ const StringArray& XyPlot::GetStringArrayParameter(const Integer id) const
 {
    switch (id)
    {
-   case DEP_VAR_LIST:
+   case ADD:
       return mYParamNames;
    default:
       return Subscriber::GetStringArrayParameter(id);
@@ -655,7 +601,7 @@ void XyPlot::BuildPlotTitle()
    if (mXAxisTitle == "")
       mXAxisTitle = mXParam->GetName();
 
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
                                  mXAxisTitle.c_str());
 #endif
@@ -670,7 +616,7 @@ void XyPlot::BuildPlotTitle()
       mYAxisTitle += mYParams[mNumYParams-1]->GetName();
    }
             
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
                                  mYAxisTitle.c_str());
 #endif
@@ -680,27 +626,99 @@ void XyPlot::BuildPlotTitle()
       mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
    }
     
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
                                  mPlotTitle.c_str());
 #endif
 }
 
-//loj: 5/4/04 added
 //------------------------------------------------------------------------------
-// void ClearYParameters()
+// bool ClearYParameters()
 //------------------------------------------------------------------------------
-void XyPlot::ClearYParameters()
+bool XyPlot::ClearYParameters()
 {
    DeletePlotCurves();
    mYParams.clear();
    mYParamNames.clear();
-   mColorMap.clear();
    mNumYParams = 0;
    mPlotTitle = "";
    mXAxisTitle = "";
    mYAxisTitle = "";
    mIsXyPlotWindowSet = false;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool RemoveYParameter(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Removes parameter from the Y parameter list
+ *
+ * @param <name> parameter name to be removed from the Y parameter list
+ *
+ * @return true if parameter was removed from the Y parameter list, false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool XyPlot::RemoveYParameter(const std::string &name)
+{
+#if DEBUG_ACTION_REMOVE
+   MessageInterface::ShowMessage
+      ("XyPlot::RemoveYParameter() name=%s\n--- Before remove:\n", name.c_str());
+   for (int i=0; i<mNumYParams; i++)
+   {
+      MessageInterface::ShowMessage("mYParamNames[%d]=%s\n", i,
+                                    mYParamNames[i].c_str());
+   }
+#endif
+   
+   bool canRemove = false;
+   StringArray::iterator pos1 =
+      find(mYParamNames.begin(), mYParamNames.end(), name);
+   std::vector<Parameter*>::iterator pos2 =
+      (std::vector<Parameter*>::iterator)(mYParams.begin());
+   
+   if (pos1 != mYParamNames.end())
+   {
+      while (pos2 != (std::vector<Parameter*>::iterator)(mYParams.end()))
+      {
+         if ((*pos2)->GetName() != name)
+         {
+            ++pos2;
+         }
+         else
+         {
+            canRemove = true;
+            break;
+         }
+      }
+      
+      if (canRemove)
+      {
+         mYParamNames.erase(pos1);
+         mYParams.erase(pos2);
+         mNumYParams = mYParamNames.size();
+
+#if DEBUG_ACTION_REMOVE
+         MessageInterface::ShowMessage("---After remove\n");
+         for (int i=0; i<mNumYParams; i++)
+         {
+            MessageInterface::ShowMessage("mYParamNames[%d]=%s\n", i,
+                                          mYParamNames[i].c_str());
+         }
+#endif
+         //------------------------------------------
+         // loj: 9/29/04
+         // Need to remove from PlotCurves also
+         //------------------------------------------
+         return true;
+      }
+   }
+   
+#if DEBUG_ACTION_REMOVE
+   MessageInterface::ShowMessage("XyPlot::RemoveYParameter() name=%s not found\n");
+#endif
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -746,7 +764,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // get x param
          Real xval = mXParam->EvaluateReal();
 
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_UPDATE
          MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
 #endif
          //xval = dat[0]; // loj: temp code to test XY plot dat[0] is time
@@ -760,7 +778,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          {
             yvals[i] = mYParams[i]->EvaluateReal();
             
-#if DEBUG_XYPLOT
+#if DEBUG_XYPLOT_UPDATE
             MessageInterface::ShowMessage
                ("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
 #endif
