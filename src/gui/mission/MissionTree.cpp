@@ -580,7 +580,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    GmatCommand *endCmd = NULL;
    GmatTree::ItemType endType = GmatTree::END_TARGET_COMMAND;
    bool cmdAdded = false;
-   
+
 #if DEBUG_MISSION_TREE
    MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId); 
    GmatCommand *parentCmd = parentItem->GetCommand();
@@ -1374,7 +1374,7 @@ void MissionTree::OnAddScriptEvent(wxCommandEvent &event)
                                  prevCmd->GetTypeName().c_str());
 #endif
    
-   GmatCommand *cmd = theGuiInterpreter->CreateCommand("ScriptEvent");
+   GmatCommand *cmd = theGuiInterpreter->CreateCommand("BeginScript");
 
    if (cmd != NULL)
    {
@@ -1388,8 +1388,6 @@ void MissionTree::OnAddScriptEvent(wxCommandEvent &event)
       Expand(itemId);
       Expand(node);
    }
-   else
-      MessageInterface::ShowMessage("cmd == null \n");
 
 #if DEBUG_MISSION_TREE
    ShowCommands("After OnAddScriptEvent()");
