@@ -464,8 +464,11 @@ Burn* Moderator::GetBurn(const std::string &name)
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
-    // Manage it if it is a named parameter
 
+    if (parameter == NULL)
+        return NULL;
+
+    // Manage it if it is a named parameter
     try
     {
         if (parameter->GetName() != "")
