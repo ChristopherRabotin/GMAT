@@ -116,12 +116,12 @@ public:
    // get the Hour Angle, in degrees, from Prime Meridian westward
    // Note: Mean Sidereal Time is -HourAngle
    virtual Real                 GetHourAngle(A1Mjd atTime); 
-   //virtual const Rmatrix&       GetHarmonicCoefficientsSij(); // const??
-   //virtual const Rmatrix&       GetHarmonicCoefficientsCij(); // const??
+   virtual const Rmatrix&       GetHarmonicCoefficientsSij(); // const??
+   virtual const Rmatrix&       GetHarmonicCoefficientsCij(); // const??
+   virtual Integer              GetDegree();
+   virtual Integer              GetOrder();
    //virtual const Rmatrix&       GetCoefDriftS();
    //virtual const Rmatrix&       GetCoefDriftC();
-   //virtual Integer              GetDegree();
-   //virtual Integer              GetOrder();
    virtual const StringArray&   GetSupportedAtmospheres() const;
    virtual std::string          GetAtmosphereModelType();
    virtual AtmosphereModel*     GetAtmosphereModel(const std::string& type = "");
@@ -223,8 +223,6 @@ protected:
       ANALYTIC_METHOD,
       STATE,
       STATE_TIME,
-      //ORDER,
-      //DEGREE,
       CENTRAL_BODY,
       BODY_NUMBER,
       REF_BODY_NUMBER,
@@ -234,11 +232,13 @@ protected:
       POTENTIAL_FILE_NAME,
       ANGULAR_VELOCITY,
       //COEFFICIENT_SIZE,
-      //SIJ,
-      //CIJ,
       HOUR_ANGLE,
       ATMOS_MODEL_NAME,
       SUPPORTED_ATMOS_MODELS,
+      //ORDER,  // may need to access these through general methods at some point
+      //DEGREE,
+      //SIJ,
+      //CIJ,
       CelestialBodyParamCount
    };
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount];
@@ -292,9 +292,9 @@ protected:
    Real                   defaultEqRadius;
    
    // order of the gravity model
-   //Integer                order;     // are these the same as coefficientSize?
+   Integer                order;    
    // degree of the gravity model
-   //Integer                degree;     // are these the same as coefficientSize?
+   Integer                degree;  
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused
    /// date and time of end of sourcce file
@@ -302,8 +302,12 @@ protected:
    //Integer                coefficientSize;      // n   // same as degree, order above?
    //Rmatrix                Cbar, Sbar;
    //Rmatrix                dCbar, dSbar; // from original GravityField
-   //Rmatrix                sij;                  // n x n
-   //Rmatrix                cij;                  // n x n
+   Rmatrix                sij;  
+   Rmatrix                cij;
+   //Integer                defaultCoefSize;
+   //Rmatrix                defaultSij;
+   //Rmatrix                defaultCij;
+
    
    // initialze the body
    void Initialize(std::string withBodyType = "Planet");
@@ -318,10 +322,6 @@ protected:
    
    bool          IsBlank(char* aLine);
    
-   //Integer       defaultCoefSize;
-   //Rmatrix       defaultSij;
-   //Rmatrix       defaultCij;
-
 private:
 
 };

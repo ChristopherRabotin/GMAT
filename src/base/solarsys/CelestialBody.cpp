@@ -443,8 +443,8 @@ Real CelestialBody::GetGravitationalConstant()
             if (firstTimeMu)
             {
                MessageInterface::ShowMessage(
-               "Cannot read file \"%s\", so using default value (%lf) for mu\n",
-               potentialFileName.c_str(), defaultMu);
+               "For body %s, cannot read file \"%s\", so using default value (%lf) for mu\n",
+               instanceName.c_str(), potentialFileName.c_str(), defaultMu);
                firstTimeMu = false;
             }
          
@@ -485,8 +485,8 @@ Real CelestialBody::GetEquatorialRadius()
          if (firstTimeRadius)
          {
              MessageInterface::ShowMessage(
-              "Cannot read file \"%s\", so using default value (%lf) for radius\n",
-               potentialFileName.c_str(), defaultEqRadius);
+              "For body %s, cannot read file \"%s\", so using default value (%lf) for radius\n",
+               instanceName.c_str(), potentialFileName.c_str(), defaultEqRadius);
             firstTimeRadius = false;
          }
          equatorialRadius = defaultEqRadius;
@@ -666,15 +666,15 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
  * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij() 
-//{
+const Rmatrix& CelestialBody::GetHarmonicCoefficientsSij() 
+{
 //   if ((usePotentialFile == true) & (!potentialFileRead))
 //   {
 //      bool OK = ReadPotentialFile();
 //      if (!OK) throw SolarSystemException("Unable to read potential file"); 
 //   }
-//   return sij;
-//}
+   return sij;
+}
 
 //------------------------------------------------------------------------------
 //  const Rmatrix& GetHarmonicCoefficientsCij() 
@@ -688,15 +688,15 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
  * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-//const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij() 
-//{
+const Rmatrix& CelestialBody::GetHarmonicCoefficientsCij() 
+{
 //   if ((usePotentialFile == true) & (!potentialFileRead))
 //   {
 //      bool OK = ReadPotentialFile();
 //      if (!OK) throw SolarSystemException("Unable to read potential file");
 //   }
-//   return cij;
-//}
+   return cij;
+}
 
 //------------------------------------------------------------------------------
 //  const Rmatrix& GetCoefDriftS()
@@ -754,15 +754,15 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
  * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-//Integer CelestialBody::GetDegree()
-//{
+Integer CelestialBody::GetDegree()
+{
 //   if ((usePotentialFile == true) & (!potentialFileRead))
 //   {
 //      bool OK = ReadPotentialFile();
 //      if (!OK) throw SolarSystemException("Unable to read potential file");
 //   }
-//   return degree;
-//}
+   return degree;
+}
 
 //------------------------------------------------------------------------------
 // Integer GetOrder()
@@ -776,15 +776,15 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
  * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-//Integer CelestialBody::GetOrder()
-//{
+Integer CelestialBody::GetOrder()
+{
 //   if ((usePotentialFile == true) & (!potentialFileRead))
 //   {
 //      bool OK = ReadPotentialFile();
 //      if (!OK) throw SolarSystemException("Unable to read potential file");
 //   }
-//   return order;
-//}
+   return order;
+}
 
 //------------------------------------------------------------------------------
 //  const StringArray& GetSupportedAtmospheres() const
