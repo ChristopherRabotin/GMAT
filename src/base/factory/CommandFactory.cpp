@@ -31,7 +31,7 @@
 #include "EndTarget.hpp"      // for EndTarget command
 #include "ForCommand.hpp"     // for FOR command
 #include "EndForCommand.hpp"  // for EndFor command
-#include "IfCommand.hpp"      // for IF command
+#include "If.hpp"      // for IF command
 #include "ElseCommand.hpp"    // for Else command
 #include "EndIfCommand.hpp"   // for EndIf command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
@@ -76,7 +76,7 @@ GmatCommand* CommandFactory::CreateCommand(std::string ofType,
     else if (ofType == "EndFor")
         return new EndForCommand;
     else if (ofType == "If")
-        return new IfCommand;
+        return new If;
     else if (ofType == "Else")
         return new ElseCommand;
     else if (ofType == "EndIf")
