@@ -19,6 +19,7 @@
 
 #include "Moderator.hpp"
 #include "NoOp.hpp"
+#include "GravityField.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RUN 1
@@ -1144,7 +1145,19 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    
    //loj: 5/11/04 since PropSetup creates default Integrator(RungeKutta89)
    // and default force (PointMassForce body=Eargh)
-   PropSetup *propSetup = CreatePropSetup(name);    
+   PropSetup *propSetup = CreatePropSetup(name);
+
+   // create default force model with Earth primary body
+   ForceModel *oldfm= propSetup->GetForceModel();
+   if (oldfm->GetName() == "")
+      delete oldfm;
+   
+   ForceModel *newfm= CreateForceModel("");
+   GravityField *gravForce = new GravityField("", "Earth"); 
+   gravForce->SetStringParameter("Filename", GetPotentialFileName("JGM2"));
+   newfm->AddForce(gravForce);
+   propSetup->SetForceModel(newfm);
+   
    return propSetup;
 }
 
