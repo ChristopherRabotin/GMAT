@@ -23,8 +23,8 @@
 #include "MatlabInterface.hpp"   // for Matlab Engine functions
 #endif
 
-//#define DEBUG_CALL_FUNCTION 1
-//#define DEBUG_UPDATE_VAR 1
+#define DEBUG_CALL_FUNCTION 1
+#define DEBUG_UPDATE_VAR 1
 //#define DEBUG_USE_ARRAY 1
 
 //---------------------------------
@@ -41,7 +41,7 @@ CallFunction::PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount] =
 const Gmat::ParameterType
 CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
 {
-	Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
 };
@@ -69,6 +69,15 @@ CallFunction::CallFunction(const CallFunction& cf) :
    mNumInputParams = cf.mNumInputParams;
    mNumOutputParams = cf.mNumOutputParams;
 
+   objectArray = cf.objectArray;
+   mInputList = cf.mInputList;
+   mOutputList = cf.mOutputList;
+   mParamList = cf.mParamList;
+
+   mInputListNames = cf.mInputListNames;
+   mOutputListNames = cf.mOutputListNames;
+   mParamListNames = cf.mParamListNames;
+
    parameterCount = GmatCommandParamCount;
 }
 
@@ -77,6 +86,23 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
 {
    if (this == &cf)
       return *this;
+      
+   GmatCommand::operator=(cf);
+
+   mFunction = cf.mFunction;
+   mFunctionName = cf.mFunctionName;
+      
+   mNumInputParams = cf.mNumInputParams;
+   mNumOutputParams = cf.mNumOutputParams;
+
+   objectArray = cf.objectArray;
+   mInputList = cf.mInputList;
+   mOutputList = cf.mOutputList;
+   mParamList = cf.mParamList;
+
+   mInputListNames = cf.mInputListNames;
+   mOutputListNames = cf.mOutputListNames;
+   mParamListNames = cf.mParamListNames;
     
    return *this;
 }
@@ -202,6 +228,10 @@ bool CallFunction::SetStringParameter(const Integer id, const std::string &value
    case FUNCTION_NAME:
       mFunctionName = value;
       return true;
+   case ADD_INPUT:
+      return AddInputParameter(value, mNumInputParams);
+   case ADD_OUTPUT:
+      return AddOutputParameter(value, mNumOutputParams);
    default:
       return GmatCommand::SetStringParameter(id, value);
    }
@@ -217,6 +247,60 @@ bool CallFunction::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool CallFunction::SetStringParameter(const Integer id, const std::string &value,
+                                const Integer index)
+{
+   switch (id)
+   {
+   case ADD_INPUT:
+      return AddInputParameter(value, index);
+   case ADD_OUTPUT:
+      return AddOutputParameter(value, index);
+   default:
+      return GmatCommand::SetStringParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool CallFunction::SetStringParameter(const std::string &label,
+                                const std::string &value,
+                                const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& CallFunction::GetStringArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case ADD_INPUT:
+      return mInputListNames;
+   case ADD_OUTPUT:
+      return mOutputListNames;
+   default:
+      return GmatCommand::GetStringArrayParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& CallFunction::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
 
 
 //------------------------------------------------------------------------------
@@ -237,9 +321,13 @@ bool CallFunction::TakeAction(const std::string &action,
 {
    if (action == "ClearInput")
    {
+      ClearInputParameters();
+      return true;
    }
    else if (action == "ClearOutput")
    {
+      ClearOutputParameters();
+      return true;
    }
    else if (action == "Clear")
    {
@@ -551,8 +639,57 @@ bool CallFunction::Initialize()
       mOutputList.push_back((Parameter *)((*objectMap)[*i]));
    }
 
+   if (mInputList[0] == NULL)
+   {
+       MessageInterface::PopupMessage
+         (Gmat::WARNING_,
+          "CallFunction::Initialize() CallFunction will not be created.\n"
+          "The first parameter selected as input for the CallFunction is NULL\n");
+       return false;
+   }
+
+   if (mOutputList[0] == NULL)
+   {
+       MessageInterface::PopupMessage
+         (Gmat::WARNING_,
+          "CallFunction::Initialize() CallFunction will not be created.\n"
+          "The first parameter selected as output for the CallFunction is NULL\n");
+       return false;
+   }
 
    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool AddInputParameter(const std::string &paramName, Integer index)
+//------------------------------------------------------------------------------
+bool CallFunction::AddInputParameter(const std::string &paramName, Integer index)
+{
+   if (paramName != "" && index == mNumInputParams)
+   {
+      mInputListNames.push_back(paramName);
+      mNumInputParams = mInputListNames.size();
+      mInputList.push_back(NULL);
+      return true;
+   }
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool AddOutputParameter(const std::string &paramName, Integer index)
+//------------------------------------------------------------------------------
+bool CallFunction::AddOutputParameter(const std::string &paramName, Integer index)
+{
+   if (paramName != "" && index == mNumOutputParams)
+   {
+      mOutputListNames.push_back(paramName);
+      mNumOutputParams = mOutputListNames.size();
+      mOutputList.push_back(NULL);
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -570,8 +707,12 @@ bool CallFunction::Execute()
 #if defined __USE_MATLAB__
    if (mFunction->GetTypeName() == "MatlabFunction")
    {
-      return ExecuteMatlabFunction();
+      status = ExecuteMatlabFunction();
    }
+#endif
+
+#if DEBUG_CALL_FUNCTION
+   MessageInterface::ShowMessage("Excecuted command\n");
 #endif
 
    return status;
@@ -582,124 +723,16 @@ bool CallFunction::Execute()
 //------------------------------------------------------------------------------
 bool CallFunction::ExecuteMatlabFunction()
 {
-#if DEBUG_CALL_FUNCTION
-   MessageInterface::ShowMessage("CallFunction::ExecuteMatlabFunction()\n");
-#endif
-
    bool status = false;
 
 #if defined __USE_MATLAB__
-
-#if DEBUG_CALL_FUNCTION
-    MessageInterface::ShowMessage("opening matlab\n");
-#endif
-
     MatlabInterface::Open();
-
-   // ag:  having trouble getting the string parameter and typename
-   // for input params
+    
+    // send the in parameters
    for (unsigned int i=0; i<mInputList.size(); i++)
    {
-#if DEBUG_CALL_FUNCTION
-   MessageInterface::ShowMessage("Adding input param # %d\n", i);
-#endif
-
       Parameter *param = (Parameter *)mInputList[i];
-
-      if (param == NULL)
-      {
-         MessageInterface::ShowMessage("Parameter was null");
-         break;
-      }
-
-
-#if DEBUG_CALL_FUNCTION
-   MessageInterface::ShowMessage("After getting param  ");
-   MessageInterface::ShowMessage("Got param %s\n", param->GetName().c_str());
-#endif
-
-      if (param->GetTypeName() == "Array")
-      {
-#if DEBUG_USE_ARRAY
-         MessageInterface::ShowMessage("Parameter is an array\n");
-#endif
-         Array *array = (Array *)param;
-         int numRows = array->GetIntegerParameter("NumRows");
-         int numCols = array->GetIntegerParameter("NumCols");
-         std::ostringstream os;
-
-#if DEBUG_USE_ARRAY
-         MessageInterface::ShowMessage("Number of rows = %d, number of columns %d\n",
-                        numRows, numCols);
-#endif
-
-         Rmatrix rmatrix = array->GetMatrix();
-
-         for (int j=0; j<numRows; j++)
-         {
-            os << "[";
-
-            for (int k=0; k<numCols; k++)
-            {
-               os << rmatrix(j, k) << ",";
-#if DEBUG_USE_ARRAY
-               MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
-#endif
-            }
-#if DEBUG_USE_ARRAY
-            MessageInterface::ShowMessage("\n");
-#endif
-            os << "], \n";
-        }
-
-         std::string inParamString = array->GetName() + " = [" +os.str() + "];";
-#if DEBUG_USE_ARRAY
-         MessageInterface::ShowMessage("The string to send = %s\n", inParamString.c_str());
-#endif
-         status =  MatlabInterface::EvalString(inParamString);
-      }
-      else
-      {
-#if DEBUG_CALL_FUNCTION
-         MessageInterface::ShowMessage("Parameter type is not array: %s\n",
-               param->GetTypeName().c_str());
-#endif
-//      if (param->GetTypeName() == "Variable")
-//         MessageInterface::ShowMessage("Parameter is variable\n");
-         // ag: Send string to add variable to workspace rather than using "PutVariable"
-         //     so that there is no problem parsing variables with a "." in the name
-         //     like "DefaultSC.X"
-         // status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
-         try
-         {
-            std::ostringstream os;
-            os << param->EvaluateReal();
-//            os << param->GetReal();
-
-#if DEBUG_CALL_FUNCTION
-         MessageInterface::ShowMessage("Got param real\n");
-#endif
-            std::string inParamString = param->GetName() +" = " + os.str() +";";
-            status =  MatlabInterface::EvalString(inParamString);
-
-#if DEBUG_UPDATE_VAR
-      MessageInterface::ShowMessage("Sent string %s to matlab\n",
-                        inParamString.c_str());
-      MessageInterface::ShowMessage("Status is %d\n", status);
-#endif
-         }
-         catch (BaseException &ex)
-         {
-            throw CommandException("Unknown parameter type\n");
-         }
-      }
-//      else
-//      {
-//         MessageInterface::ShowMessage("Unknown paramater type = %s\n",
-//               param->GetTypeName().c_str());
-//         throw CommandException("Unknown parameter type\n");
-//      }
-
+      SendInParam(param);
    }
 
    //  Eval String
@@ -708,13 +741,92 @@ bool CallFunction::ExecuteMatlabFunction()
    MessageInterface::ShowMessage("Eval string is %s\n", evalString.c_str());
 #endif
    status =  MatlabInterface::EvalString(evalString);
+   
+   // get the value for the out parameters
+   GetOutParams();
 
-   // ag: Not updating the variable correctly (setrealparameter)
-   // for output params
+#endif
+
+   return status;
+}
+
+void CallFunction::SendInParam(Parameter *param)
+{
+  if (param == NULL)
+  {
+     MessageInterface::ShowMessage("Parameter was null");
+     return;
+  }
+
+  if (param->GetTypeName() == "Array")
+  {
+#if DEBUG_USE_ARRAY
+     MessageInterface::ShowMessage("Parameter is an array\n");
+#endif
+     Array *array = (Array *)param;
+     int numRows = array->GetIntegerParameter("NumRows");
+     int numCols = array->GetIntegerParameter("NumCols");
+     std::ostringstream os;
+
+#if DEBUG_USE_ARRAY
+     MessageInterface::ShowMessage("Number of rows = %d, number of columns %d\n",
+                    numRows, numCols);
+#endif
+
+     Rmatrix rmatrix = array->GetMatrix();
+
+     for (int j=0; j<numRows; j++)
+     {
+        os << "[";
+        for (int k=0; k<numCols; k++)
+           os << rmatrix(j, k) << ",";
+        os << "], \n";
+    }
+
+     std::string inParamString = array->GetName() + " = [" +os.str() + "];";
+#if DEBUG_USE_ARRAY
+     MessageInterface::ShowMessage("The string to send = %s\n", inParamString.c_str());
+#endif
+     //status =  
+     MatlabInterface::EvalString(inParamString);
+  }
+  else
+  {
+#if DEBUG_CALL_FUNCTION
+     MessageInterface::ShowMessage("Parameter type is not array: %s\n",
+           param->GetTypeName().c_str());
+#endif
+     try
+     {
+        std::ostringstream os;
+        os << param->EvaluateReal();
+//            os << param->GetReal();
+
+#if DEBUG_CALL_FUNCTION
+     MessageInterface::ShowMessage("Got param real\n");
+#endif
+        std::string inParamString = param->GetName() +" = " + os.str() +";";
+        //status =  
+        MatlabInterface::EvalString(inParamString);
+
+#if DEBUG_UPDATE_VAR
+  MessageInterface::ShowMessage("Sent string %s to matlab\n",
+                    inParamString.c_str());
+#endif
+     }
+     catch (BaseException &ex)
+     {
+        throw CommandException("Unknown parameter type\n");
+     }
+  }
+}
+
+void CallFunction::GetOutParams()
+{
    for (unsigned int i=0; i<mOutputList.size(); i++)
    {
       Parameter *param = (Parameter *)mOutputList[i];
-
+      MessageInterface::ShowMessage("Out param type = %s\n", param->GetTypeName().c_str());
 
       if (param->GetTypeName() == "Array")
       {
@@ -725,7 +837,8 @@ bool CallFunction::ExecuteMatlabFunction()
          int totalCells = numRows * numCols;
 
          double outArray[totalCells];
-         status = MatlabInterface::GetVariable(varName, totalCells, outArray);
+         //status = 
+         MatlabInterface::GetVariable(varName, totalCells, outArray);
 
          // create rmatrix
          Rmatrix rmatrix = Rmatrix (numRows, numCols);
@@ -749,23 +862,33 @@ bool CallFunction::ExecuteMatlabFunction()
       else
 //      if (param->GetTypeName() == "Variable")
       {
-         try
-         {
+//         try
+//         {
             std::string varName = param->GetName();
+            
+            // set ans to this variable
+            MatlabInterface::EvalString(varName);
+            
             double outArray[500];   // array size???
-            status = MatlabInterface::GetVariable(varName, 1, outArray);
+            int status = 
+               MatlabInterface::GetVariable("ans", 1, outArray);
+            MessageInterface::ShowMessage("The status is : %d\n", status);
+            MessageInterface::ShowMessage("The varName is %s\n", varName.c_str());
+            MessageInterface::ShowMessage("The outArray is %f\n", outArray[0]);
             param->SetRealParameter("Param1", outArray[0]);
             std::ostringstream ss;
-            ss << param->EvaluateReal();
+            ss << outArray[0];
             param->SetStringParameter("Expression", ss.str());
 #if DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
+            MessageInterface::ShowMessage("The GetReal is %f\n", param->GetReal());
+            MessageInterface::ShowMessage("The GetRealParameter is %f\n", param->GetRealParameter("Param1"));
 #endif
-         }
-         catch (BaseException &ex)
-         {
-            throw CommandException("Unknown parameter type\n");
-         }
+//         }
+//         catch (BaseException &ex)
+//         {
+//            throw CommandException("Unknown parameter type\n");
+//         }
 
       }
 //      else
@@ -774,9 +897,6 @@ bool CallFunction::ExecuteMatlabFunction()
 //      }
    }
 
-#endif
-
-   return status;
 }
 
 
@@ -852,11 +972,31 @@ bool CallFunction::InterpretAction(void)
 
 Integer CallFunction::GetNumInputParams()
 {
-   return mInputList.size();
+   return mNumInputParams;
 }
 
 Integer CallFunction::GetNumOutputParams()
 {
-   return mOutputList.size();
+   return mNumOutputParams;
+}
+
+//------------------------------------------------------------------------------
+// void ClearInputParameters()
+//------------------------------------------------------------------------------
+void CallFunction::ClearInputParameters()
+{
+   mInputList.clear();
+   mInputListNames.clear();
+   mNumInputParams = 0; 
+}
+
+//------------------------------------------------------------------------------
+// void ClearOutputParameters()
+//------------------------------------------------------------------------------
+void CallFunction::ClearOutputParameters()
+{
+   mOutputList.clear();
+   mOutputListNames.clear();
+   mNumOutputParams = 0; 
 }
 

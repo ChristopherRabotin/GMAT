@@ -82,7 +82,14 @@ public:
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
-
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
+   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+   
    // Methods used to run the command
    virtual bool            InterpretAction();
     
@@ -92,6 +99,9 @@ public:
    Integer GetNumInputParams();
    Integer GetNumOutputParams();
    std::string FormEvalString();
+   
+   bool AddInputParameter(const std::string &paramName, Integer index);
+   bool AddOutputParameter(const std::string &paramName, Integer index);
 
 protected:
 
@@ -103,8 +113,7 @@ private:
 
    StringArray mInputListNames;
    StringArray mOutputListNames;
-   StringArray mparamListNames;
-
+   StringArray mParamListNames;
 
    Integer mNumInputParams;
    Integer mNumOutputParams;
@@ -113,6 +122,10 @@ private:
    std::string mFunctionName;
 
    bool ExecuteMatlabFunction();
+   void SendInParam(Parameter *param);
+   void GetOutParams();
+   void ClearInputParameters();
+   void ClearOutputParameters();
 
    enum
    {
