@@ -23,58 +23,65 @@
 #include "GmatBase.hpp"
 #include "RefData.hpp"
 #include "Rvector6.hpp"
+#include "Spacecraft.hpp"
+#include "SolarSystem.hpp"
 
 class GMAT_API OrbitData : public RefData
 {
 public:
 
-    OrbitData();
-    OrbitData(const OrbitData &data);
-    OrbitData& operator= (const OrbitData& right);
-    virtual ~OrbitData();
+   OrbitData();
+   OrbitData(const OrbitData &data);
+   OrbitData& operator= (const OrbitData& right);
+   virtual ~OrbitData();
 
-    Rvector6 GetCartState();
-    Rvector6 GetKepState();
-    Rvector6 GetSphState();
+   Rvector6 GetCartState();
+   Rvector6 GetKepState();
+   Rvector6 GetSphState();
     
-    Real GetCartReal(const std::string &str);
-    Real GetKepReal(const std::string &str);
-    Real GetOtherKepReal(const std::string &str);
-    Real GetSphReal(const std::string &str);
-    Real GetAngularReal(const std::string &str);
+   Real GetCartReal(const std::string &str);
+   Real GetKepReal(const std::string &str);
+   Real GetOtherKepReal(const std::string &str);
+   Real GetSphReal(const std::string &str);
+   Real GetAngularReal(const std::string &str);
     
-    // The inherited methods from RefData
-    virtual bool ValidateRefObjects(GmatBase *param);
-    virtual const std::string* GetValidObjectList() const;
+   // The inherited methods from RefData
+   virtual bool ValidateRefObjects(GmatBase *param);
+   virtual const std::string* GetValidObjectList() const;
 
-    const static Real ORBIT_REAL_UNDEFINED = -9876543210.1234;
-    const static Real ORBIT_TOL = 1.0e-10;
+   const static Real ORBIT_REAL_UNDEFINED = -9876543210.1234;
+   const static Real ORBIT_TOL = 1.0e-10;
 
 protected:
     
-    Rvector6 mCartState;
-    Rvector6 mKepState;
-    Rvector6 mSphState;
-    
-    Real mMA;
-    Real mCartEpoch;
-    Real mKepEpoch;
-    Real mSphEpoch;
-    
-    // The inherited methods from RefData
-    virtual void Initialize(); //loj: 3/31/04 added
-    virtual bool IsValidObject(GmatBase *obj);
+   // The inherited methods from RefData
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObject(GmatBase *obj);
 
-    enum {PX, PY, PZ, VX, VY, VZ};
-    enum {SMA, ECC, INC, RAAN, AOP, TA};
+   Rvector6 mCartState;
+   Rvector6 mKepState;
+   Rvector6 mSphState;
     
-    enum
-    {
-        SPACECRAFT = 0,
-        OrbitDataObjectCount
-    };
+   Real mMA;
+   Real mCartEpoch;
+
+   Spacecraft *mSpacecraft;
+   SolarSystem *mSolarSystem;
+   
+
+   enum {PX, PY, PZ, VX, VY, VZ};
+   enum {SMA, ECC, INC, RAAN, AOP, TA};
+   enum {RMAG, RRA, RDEC, VMAG, VRA, VDEC};
+   
+   enum
+   {
+      SPACECRAFT = 0,
+      SOLAR_SYSTEM,
+      OrbitDataObjectCount
+   };
     
-    static const std::string VALID_OBJECT_LIST[OrbitDataObjectCount];
+   static const std::string VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount];
 };
 #endif // OrbitData_hpp
 
+   
