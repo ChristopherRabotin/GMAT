@@ -135,6 +135,7 @@ Factory(fact)
 CelestialBodyFactory& CelestialBodyFactory::operator= (
                                              const CelestialBodyFactory &fact)
 {
+   if (this == &fact) return *this;
    Factory::operator=(fact);
    if (creatables.empty())
    {
