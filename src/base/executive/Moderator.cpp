@@ -671,24 +671,30 @@ Solver* Moderator::GetSolver(const std::string &name)
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
     // assumes "RungeKutta89" is the default propagator
-    std::string propName = name+"RKV89";
+    std::string propName = name + "RKV89";
     Propagator *prop = CreatePropagator("RungeKutta89", propName);
     
     // creates empty ForceModel
-    ForceModel *fm = CreateForceModel(name+"ForceModel");
-    
-    // create PointMass force and add to Force
-    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", name+"EarthGravity");
-    fm->AddForce(earthGrav);
-    
+    std::string fmName = name + "ForceModel";
+    ForceModel *fm = CreateForceModel(fmName);
+
+    // create PropSetup
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
-    
+
+    // create PointMass force and add to Force
+    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", name + "EarthGravity");
+
     if (prop)
         propSetup->SetPropagator(prop);
+    
     if (fm)
-        propSetup->SetForceModel(fm);
+    {
+        propSetup->SetForceModel(fm); //loj: 3/12/04 added
+        propSetup->AddForce(earthGrav);
+    }
     
     theConfigManager->AddPropSetup(propSetup);
+    
     return propSetup;
 }
 
