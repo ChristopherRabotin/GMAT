@@ -67,7 +67,7 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
     //theCommand = propCommand;
     
     Initialize();
-    Setup(this);
+    //Setup(this);
 }
 
 void PropagateCommandPanel::Initialize()
