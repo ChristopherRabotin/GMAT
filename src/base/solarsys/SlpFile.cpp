@@ -195,7 +195,7 @@ Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime)
    int       iBody[1]           = {forBody};
    double    pos[MAX_BODIES][3];
    double    vel[MAX_BODIES][3];
-   Real*     result = new Real[6];
+   static Real      result[6];
    
    int posCode     = slp_pos(forTime, 0.0, 1, iBody, pos);
    //      0 = No error
