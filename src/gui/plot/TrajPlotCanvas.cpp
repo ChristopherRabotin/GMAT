@@ -14,6 +14,7 @@
 //------------------------------------------------------------------------------
 #include "TrajPlotCanvas.hpp"
 #include "FileManager.hpp"        // for Earth texture file
+#include "MessageInterface.hpp"
 
 #include <math.h>
 #include "gmatdefs.hpp"
@@ -33,6 +34,8 @@
 #  include <IL/ilu.h>
 #  include <IL/ilut.h>
 #endif
+
+#define DEBUG_TRAJ_CANVAS 0
 
 BEGIN_EVENT_TABLE(TrajPlotCanvas, wxGLCanvas)
    EVT_SIZE(TrajPlotCanvas::OnSize)
@@ -362,7 +365,7 @@ void TrajPlotCanvas::OnSize(wxSizeEvent& event)
    // this is also necessary to update the context on some platforms
    wxGLCanvas::OnSize(event);
     
-    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+   // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
    int nWidth, nHeight;
    GetClientSize(&nWidth, &nHeight);
    mCanvasSize.x = nWidth;
@@ -663,6 +666,11 @@ void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawPicture()
 {
+#if DEBUG_TRAJ_CANVAS
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::DrawPicture() mNumData=%d\n", mNumData);
+#endif
+   
    glClearColor(0.0, 0.0, 0.0, 1); // black
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -831,7 +839,7 @@ void TrajPlotCanvas::DrawEarthTrajectory()
    //-------------------------------------------------------
    //draw earth with texture
    //-------------------------------------------------------
-   if (mNumData > 1)
+   if (mNumData > 0) //loj: 6/22/04 changed 1 to 0
    {
       glPushMatrix();
       glLoadIdentity();
@@ -996,7 +1004,7 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
    if (mShowSpacecraft)
    {
 
-      if (mNumData > 1)
+      if (mNumData > 0) //loj: 6/22/04 changed 1 to 0
       {
          glPushMatrix();
          glLoadIdentity();
@@ -1165,7 +1173,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const Real &posX,
-//                       const Real &posY, const Real &posZ, bool updateCanvas)
+//                       const Real &posY, const Real &posZ)
 //------------------------------------------------------------------------------
 /**
  * Updates spacecraft trajectory.
@@ -1174,14 +1182,12 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
  * @param <posX> position x
  * @param <posY> position y
  * @param <posZ> position z
- * @param <updateCanvas> updates canvas if true
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
                                       const Real &posY, const Real &posZ,
                                       const UnsignedInt orbitColor,
-                                      const UnsignedInt targetColor,
-                                      bool updateCanvas)
+                                      const UnsignedInt targetColor)
 {
    int sc = 0;
    if (mNumData < MAX_DATA)
@@ -1197,6 +1203,6 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
       mTempEarthPos[mNumData][2] = 0.0;
       mNumData++;
    }
-    
+   
    Refresh(false);
 }

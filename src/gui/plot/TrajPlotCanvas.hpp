@@ -16,7 +16,6 @@
 #define TrajPlotCanvas_hpp
 
 #include "gmatwxdefs.hpp"
-//#include "wx/glcanvas.h"
 #include "MdiGlPlotData.hpp"
 #include "TextTrajectoryFile.hpp"
 
@@ -56,8 +55,7 @@ public:
    void UpdateSpacecraft(const Real &time, const Real &posX,
                          const Real &posY, const Real &posZ,
                          const UnsignedInt orbitColor,
-                         const UnsignedInt targetColor,
-                         bool updateCanvas);
+                         const UnsignedInt targetColor);
     
 private:
    
