@@ -2,12 +2,15 @@
 # Module:     Makefile.mac for command directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-
+# Modified:   2004/01/28 - Added BranchCommand.cpp, EndTarget.cpp,
+#                          Maneuver.cpp, and Target.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Command.cpp CommandException.cpp NoOp.cpp Propagate.cpp Toggle.cpp
+SRC = BranchCommand.cpp Command.cpp CommandException.cpp EndTarget.cpp \
+	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Toggle.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
