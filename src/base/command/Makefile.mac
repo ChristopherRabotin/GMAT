@@ -9,6 +9,10 @@
 #             2004/02/27 - Added Save.cpp
 #             2004/08/10 - W. Shoan - added While
 #             2004/08/11 - W. Shoan - added EndWhile
+#             2004/08/12 - W. Shoan - changed IfCommand to If;
+#                          EndIfCommand to EndIf; ElseCommand to
+#                          Else; ForCommand to For; EndForCommand
+#                          to EndFor
 #
 #
 # Define the marco for the top-level directories
@@ -16,8 +20,8 @@ PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
 SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp Command.cpp \
-	CommandException.cpp ElseCommand.cpp EndIfCommand.cpp \
-	EndForCommand.cpp EndTarget.cpp EndWhile.cpp ForCommand.cpp IfCommand.cpp \
+	CommandException.cpp Else.cpp EndIf.cpp \
+	EndFor.cpp EndTarget.cpp EndWhile.cpp For.cpp If.cpp \
 	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Save.cpp Toggle.cpp \
 	Vary.cpp While.cpp
 #
