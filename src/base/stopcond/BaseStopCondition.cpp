@@ -29,7 +29,7 @@
 #include "Moderator.hpp"
 #endif
 
-#define DEBUG_BASE_STOPCOND 0
+//#define DEBUG_BASE_STOPCOND 1
 
 //---------------------------------
 // static data
@@ -159,7 +159,7 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEccParam = copy.mEccParam;   //loj: 6/23/04 added
    mRmagParam = copy.mRmagParam; //loj: 6/23/04 added
    
-   Initialize();
+   //Initialize(); //loj: 9/13/04 Initialized() will be called during initialization
    CopyDynamicData(copy);
 }
 
@@ -188,7 +188,7 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
       mEccParam = right.mEccParam;   //loj: 6/23/04 added
       mRmagParam = right.mRmagParam; //loj: 6/23/04 added
 
-      Initialize();
+      //Initialize();
       CopyDynamicData(right);
    }
 
@@ -531,7 +531,7 @@ void BaseStopCondition::Initialize()
       {
          mGoal = 0.0;
       }
-        
+      
       if (mNeedInterpolator)
       {
          mBufferSize = mInterpolator->GetBufferSize();
@@ -574,10 +574,10 @@ void BaseStopCondition::Initialize()
 bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
 {
    if (mEccParam != NULL)
-      mEccParam->SetObject(Gmat::SPACECRAFT, sc->GetName(), sc);
+      mEccParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName()); //loj: 9/13/04 new method
 
    if (mRmagParam != NULL)
-      mRmagParam->SetObject(Gmat::SPACECRAFT, sc->GetName(), sc);
+      mRmagParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
 
    return true;
    //return false; // base class doesn't know which object is used
@@ -638,21 +638,26 @@ bool BaseStopCondition::Validate()
       {
          // check on Ecc parameter
          if (mEccParam  == NULL)
-         {
             mEccParam = new KepEcc("");
-            mEccParam->AddObject(mStopParam->GetObject("Spacecraft"));
-            mEccParam->AddObject(mSolarSystem); //loj: 4/29/04 added
-         }
-            
+         
+         //loj: 9/13/04 changed AddObject() to AddRefObject()
+         mEccParam->AddRefObject
+            (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
+                                      mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+         mEccParam->AddRefObject(mSolarSystem);
+         
          // check on SphRMag parameter if "Periapsis"
          if (mStopParam->GetTypeName() == "Periapsis")
          {
             if (mRmagParam == NULL)
-            {
                mRmagParam = new SphRMag("");
-               mRmagParam->AddObject(mStopParam->GetObject("Spacecraft"));
-               mRmagParam->AddObject(mSolarSystem); //loj: 4/29/04 added
-            }
+            
+            //loj: 9/13/04 changed AddObject() to AddRefObject()
+            mRmagParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::SPACECRAFT,
+                                         mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+            mRmagParam->AddRefObject(mSolarSystem);
+            
          }
       }
    }

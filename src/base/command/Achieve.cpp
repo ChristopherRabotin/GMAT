@@ -22,6 +22,7 @@
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
 
+//#define DEBUG_ACHIEVE 1
 
 //------------------------------------------------------------------------------
 //  Achieve(void)
@@ -304,12 +305,18 @@ bool Achieve::InterpretAction(void)
     // Get an instance if this is a Parameter
     Moderator *mod = Moderator::Instance();
 
-    std::string parmName;
     loc = goalName.find(".");
-    parmName = goalName.substr(loc+1, goalName.length() - (loc+1));
-    //loj: 5/11/04 replaced blank parm name to parmName so that SolarSystem
-    // can be set during run setup.
-    goalParm = mod->CreateParameter(parmName, parmName);
+    std::string parmObj = goalName.substr(0, loc);
+    std::string parmType = goalName.substr(loc+1, goalName.length() - (loc+1));
+    
+#if DEBUG_ACHIEVE
+    MessageInterface::ShowMessage
+       ("Achieve::InterpretAction() parmObj=%s, parmType=%s\n", parmObj.c_str(),
+        parmType.c_str());
+#endif
+    
+    goalParm = mod->CreateParameter(parmType, goalName);
+    goalParm->SetRefObjectName(Gmat::SPACECRAFT, parmObj); //loj: 9/13/04 added
     
     // Find the value
     loc = end + 1;
@@ -368,7 +375,7 @@ bool Achieve::Initialize(void)
     
     if (goalParm != NULL) {
         // temporary exit
-        goalParm->AddObject(obj);
+        goalParm->AddRefObject(obj);//loj: 9/13/04 changed AddObject() to AddRefObject()
 //        throw CommandException("Parameter access not yet built");
     }
     else {

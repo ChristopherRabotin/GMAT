@@ -672,8 +672,9 @@ bool Propagate::InterpretAction(void)
    //loj: if we want to see parameter via the GUI, use named parameter
    // This will be deleted when system shuts down
    Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
-   stopParam->SetStringParameter("Object", paramObj);
-    
+   //stopParam->SetStringParameter("Object", paramObj);
+   stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
+   
    StopCondition *stopCond =
       theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
     
