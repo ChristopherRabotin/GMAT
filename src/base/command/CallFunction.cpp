@@ -612,18 +612,28 @@ GmatBase* CallFunction::GetObject(const Gmat::ObjectType type,
 
 bool CallFunction::Initialize()
 {
-#if DEBUG_CALL_FUNCTION
-   MessageInterface::ShowMessage("In Initialized\n");
-#endif
+   #if DEBUG_CALL_FUNCTION
+      MessageInterface::ShowMessage("In Initialized\n");
+   #endif
+   
    GmatCommand::Initialize();
 
-    // need to initialize parameters
+   if (objectMap->find(mFunctionName)  == objectMap->end())
+      throw CommandException("CallFunction command cannot find Function " +
+               mFunctionName);
+   mFunction = (Function *)((*objectMap)[mFunctionName]);
+   
+   // need to initialize parameters
    mInputList.clear();
 
    for (StringArray::iterator i = mInputListNames.begin(); i != mInputListNames.end(); ++i)
    {
       if (objectMap->find(*i)  == objectMap->end())
         throw CommandException("CallFunction command cannot find Parameter");
+
+         #if DEBUG_CALL_FUNCTION
+            MessageInterface::ShowMessage("Adding input parameter %s\n", i->c_str());
+         #endif
 
       mInputList.push_back((Parameter *)((*objectMap)[*i]));
    }
@@ -634,30 +644,34 @@ bool CallFunction::Initialize()
    for (StringArray::iterator i = mOutputListNames.begin(); i != mOutputListNames.end(); ++i)
    {
       if (objectMap->find(*i)  == objectMap->end())
-        throw CommandException("CallFunction command cannot find Parameter");
+        throw CommandException("CallFunction command cannot find Parameter " + (*i));
+
+        #if DEBUG_CALL_FUNCTION
+           MessageInterface::ShowMessage("Adding output parameter %s\n", i->c_str());
+        #endif
 
       mOutputList.push_back((Parameter *)((*objectMap)[*i]));
    }
 
-if (mInputList.size() > 0)
-   if (mInputList[0] == NULL)
-   {
-       MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "CallFunction::Initialize() CallFunction will not be created.\n"
-          "The first parameter selected as input for the CallFunction is NULL\n");
-       return false;
-   }
+   if (mInputList.size() > 0)
+      if (mInputList[0] == NULL)
+      {
+          MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "CallFunction::Initialize() CallFunction will not be created.\n"
+             "The first parameter selected as input for the CallFunction is NULL\n");
+          return false;
+      }
 
-if (mOutputList.size() > 0)
-   if (mOutputList[0] == NULL)
-   {
-       MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "CallFunction::Initialize() CallFunction will not be created.\n"
-          "The first parameter selected as output for the CallFunction is NULL\n");
-       return false;
-   }
+   if (mOutputList.size() > 0)
+      if (mOutputList[0] == NULL)
+      {
+          MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "CallFunction::Initialize() CallFunction will not be created.\n"
+             "The first parameter selected as output for the CallFunction is NULL\n");
+          return false;
+      }
 
    return true;
 }
