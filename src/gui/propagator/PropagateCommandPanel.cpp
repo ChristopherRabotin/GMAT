@@ -85,7 +85,7 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
     //numOfPropRows = 10;
     //numOfCondRows = 20;
     numOfEqualities = 6;
-
+    
     for (int i=0; i<MAX_PROP_ROW; i++)
     {
         tempProp[i].isChanged = false;
@@ -155,7 +155,6 @@ void PropagateCommandPanel::Initialize()
     
         tempProp[i].scNames += scList[numOfSC-1].c_str();
     }
-    //MessageInterface::ShowMessage("PropagateCommandPanel::Initialize() tempProp initialized\n");
 
     //----------------------------------
     // stopping condition
@@ -169,20 +168,23 @@ void PropagateCommandPanel::Initialize()
     ParameterPtrArray theParams;
     for (int i=0; i<numOfStopCond; i++)
     {
-        tempStopCond[i].stopCondPtr = theStopCond;
-        tempStopCond[i].name = wxT(theStopCond->GetName().c_str());
-        theParams = theStopCond->GetParameters();
-        tempStopCond[i].varName = wxT(theParams[0]->GetName().c_str()); //loj: get first parameter for build2
-        tempStopCond[i].typeName = wxT(theStopCond->GetTypeName().c_str());
-        tempStopCond[i].goal = theStopCond->GetGoal();
-        tempStopCond[i].tol = theStopCond->GetTolerance();
-        tempStopCond[i].repeat = theStopCond->GetRepeatCount();
-        wxString str = FormatStopCondDesc(tempStopCond[i].varName,
-                                          tempStopCond[i].relOpStr,
-                                          tempStopCond[i].goal);
-        tempStopCond[i].desc = str;
+        // StopCondition created from the script might not have been configured (unnamed)
+        if (theStopCond != NULL)
+        {
+            tempStopCond[i].stopCondPtr = theStopCond;
+            tempStopCond[i].name = wxT(theStopCond->GetName().c_str());
+            theParams = theStopCond->GetParameters();
+            tempStopCond[i].varName = wxT(theParams[0]->GetName().c_str()); //loj: get first parameter for build2
+            tempStopCond[i].typeName = wxT(theStopCond->GetTypeName().c_str());
+            tempStopCond[i].goal = theStopCond->GetGoal();
+            tempStopCond[i].tol = theStopCond->GetTolerance();
+            tempStopCond[i].repeat = theStopCond->GetRepeatCount();
+            wxString str = FormatStopCondDesc(tempStopCond[i].varName,
+                                              tempStopCond[i].relOpStr,
+                                              tempStopCond[i].goal);
+            tempStopCond[i].desc = str;
+        }
     }
-    //MessageInterface::ShowMessage("PropagateCommandPanel::Initialize() tempStopCond initialized\n");
    
     /*  Waw:
         Display all the stop. cond. elements 
@@ -403,15 +405,24 @@ void PropagateCommandPanel::SetData()
     {
         if (tempStopCond[i].isChanged)
         {
-            tempStopCond[i].stopCondPtr->SetName(std::string(tempStopCond[i].name.c_str()));
-            ((SingleValueStop*)tempStopCond[i].stopCondPtr)->
-                SetSingleParameter(theGuiInterpreter->GetParameter(tempStopCond[i].varName.c_str()));
-            tempStopCond[i].stopCondPtr->SetGoal(tempStopCond[i].goal);
-            MessageInterface::ShowMessage("PropagateCommandPanel::SetData() goal = %f\n",
-                                          tempStopCond[i].goal);
-            tempStopCond[i].stopCondPtr->SetTolerance(tempStopCond[i].tol);  
-            tempStopCond[i].stopCondPtr->SetRepeatCount(tempStopCond[i].repeat);
-            //thePropagateCommand->SetObject(tempStopCond[i].stopCondPtr, Gmat::STOP_CONDITION);
+            // StopCondition created from the script might not have been configured (unnamed)
+            if (tempStopCond[i].stopCondPtr != NULL)
+            {
+                tempStopCond[i].stopCondPtr->
+                    SetName(std::string(tempStopCond[i].name.c_str()));
+                
+                ((SingleValueStop*)tempStopCond[i].stopCondPtr)->
+                    SetSingleParameter(theGuiInterpreter->
+                                       GetParameter(tempStopCond[i].varName.c_str()));
+                
+                tempStopCond[i].stopCondPtr->SetGoal(tempStopCond[i].goal);
+                MessageInterface::ShowMessage("PropagateCommandPanel::SetData() goal = %f\n",
+                                              tempStopCond[i].goal);
+                
+                tempStopCond[i].stopCondPtr->SetTolerance(tempStopCond[i].tol);  
+                tempStopCond[i].stopCondPtr->SetRepeatCount(tempStopCond[i].repeat);
+                //thePropagateCommand->SetObject(tempStopCond[i].stopCondPtr, Gmat::STOP_CONDITION);
+            }
         }
     }
     
@@ -601,26 +612,29 @@ void PropagateCommandPanel::OnComboSelection(wxCommandEvent& event)
     if ( event.GetEventObject() == condTypeComboBox )
     {
         wxString type = condTypeComboBox->GetStringSelection();
-        tempStopCond[row].typeStr = type;
-        MessageInterface::ShowMessage("PropCmdPanel::OnComboSelection() %s\n", type.c_str());
+        if (!tempStopCond[row].typeStr.IsSameAs(type))
+        {
+            tempStopCond[row].typeStr = type;
+            MessageInterface::ShowMessage("PropCmdPanel::OnComboSelection() %s\n", type.c_str());
   
-        if (type.IsSameAs("SingleValueStop"))
-        {
-            varStaticText->Enable(true);
-            variableTextCtrl->Enable(false);
-            viewButton->Enable(true);
-            equalityComboBox->Enable(true);
-            goalTextCtrl->Enable(true);            
+            if (type.IsSameAs("SingleValueStop"))
+            {
+                varStaticText->Enable(true);
+                variableTextCtrl->Enable(false);
+                viewButton->Enable(true);
+                equalityComboBox->Enable(true);
+                goalTextCtrl->Enable(true);            
+            }
+            else
+            {
+                varStaticText->Enable(false);
+                variableTextCtrl->Enable(false);
+                viewButton->Enable(false);
+                equalityComboBox->Enable(false);
+                goalTextCtrl->Enable(false);   
+            }
+            applyButton->Enable(true);
         }
-        else
-        {
-            varStaticText->Enable(false);
-            variableTextCtrl->Enable(false);
-            viewButton->Enable(false);
-            equalityComboBox->Enable(false);
-            goalTextCtrl->Enable(false);   
-        }
-        applyButton->Enable(true);
     } 
     else if ( event.GetEventObject() == synchComboBox )
     {
