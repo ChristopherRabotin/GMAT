@@ -44,16 +44,7 @@ public:
    ~Sandbox();
 
    // Setup methods
-   bool AddObject(GmatBase *obj);
-
-   //loj: 6/24/04 Moderator calls AddObject() for adding the following objects
-//     bool AddSpacecraft(Spacecraft *obj);
-//     bool AddPropSetup(PropSetup *propSetup);
-//     bool AddPropagator(Propagator *prop);
-//     bool AddForceModel(ForceModel *forces);
-//     bool AddBurn(Burn *burn);
-//     bool AddSolver(Solver *s);
-   
+   bool AddObject(GmatBase *obj);   
    bool AddCommand(GmatCommand *cmd);
    bool AddSolarSystem(SolarSystem *ss);
    bool AddSubscriber(Subscriber *sub);

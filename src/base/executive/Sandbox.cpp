@@ -24,7 +24,7 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_SANDBOX 0
+//#define DEBUG_SANDBOX 1
 
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox(void)
@@ -205,10 +205,11 @@ bool Sandbox::Initialize()
    if (!current)
       return false;
         
+   std::map<std::string, GmatBase *>::iterator omi;
    // Set the solar system on each force model, spacecraft, parameter
    if (solarSys)
    {
-      std::map<std::string, GmatBase *>::iterator omi;
+      //std::map<std::string, GmatBase *>::iterator omi;
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
 #if DEBUG_SANDBOX
@@ -221,21 +222,39 @@ bool Sandbox::Initialize()
          {
             ((PropSetup*)(omi->second))->GetForceModel()
                ->SetSolarSystem(solarSys);
-//            ((PropSetup*)(omi->second))->Initialize();
+            //((PropSetup*)(omi->second))->Initialize();
          }
          else if((omi->second)->GetType() == Gmat::SPACECRAFT) //loj: 6/24/04 added
-         { 
+         {
             ((Spacecraft*)(omi->second))->SetSolarSystem(solarSys);
          }
          else if((omi->second)->GetType() == Gmat::PARAMETER) //loj: 6/24/04 added
-         { 
-            ((Parameter*)(omi->second))->SetSolarSystem(solarSys);
+         {
+            //loj: 9/13/04 moved code from Moderator::SetupRun()
+            Parameter *param = (Parameter*)(omi->second);
+            std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
+            param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
+            param->SetSolarSystem(solarSys);
+            param->Initialize();
+            //((Parameter*)(omi->second))->SetRefObject(sc, Gmat::SPACECRAFT, scName);
+            //((Parameter*)(omi->second))->SetSolarSystem(solarSys);
          }
       }
    }
    else
       throw SandboxException("No solar system defined in the Sandbox!");
 
+   // Initialize subscribers (loj: 9/13/04 moved code from Moderator::SetupRun())
+   //std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+      if((omi->second)->GetType() == Gmat::SUBSCRIBER)
+      {
+         ((Subscriber*)(omi->second))->Initialize();
+      }
+   }
+   
+   // Initialize commands
    while (current)
    {
       current->SetObjectMap(&objectMap);
@@ -359,44 +378,6 @@ void Sandbox::Clear()
    ///       be fixed.
    objectMap.clear();
 }
-
-
-//loj: 6/24/04 Moderator calls AddObject() for adding the following objects
-
-//  bool Sandbox::AddSpacecraft(Spacecraft *obj)
-//  {
-//      return AddObject(obj);
-//  }
-
-
-//  bool Sandbox::AddPropSetup(PropSetup *propSetup)
-//  {
-//      return AddObject(propSetup);
-//  }
-
-
-//  bool Sandbox::AddPropagator(Propagator *prop)
-//  {
-//      return AddObject(prop);
-//  }
-
-
-//  bool Sandbox::AddForceModel(ForceModel *forces)
-//  {
-//      return AddObject(forces);
-//  }
-
-
-//  bool Sandbox::AddBurn(Burn *burn)
-//  {
-//      return AddObject(burn);
-//  }
-
-
-//  bool Sandbox::AddSolver(Solver *solver)
-//  {
-//      return AddObject(solver);
-//  }
 
 
 //------------------------------------------------------------------------------
