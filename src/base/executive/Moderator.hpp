@@ -65,7 +65,7 @@ class GMAT_API Moderator
 public:
 
     static Moderator* Instance();
-    bool Initialize(bool fromGui = false);
+    bool Initialize(bool isFromGui = false);
 
     //----- ObjectType
     std::string GetObjectTypeString(Gmat::ObjectType type);  
@@ -171,26 +171,27 @@ public:
 
     // Sandbox
     void ClearAllSandboxes();
-    Integer RunMission(Integer sandboxNum = 1, bool fromGui = false);
+    Integer RunMission(Integer sandboxNum = 1, bool isFromGui = false);
 
     // Script
     bool InterpretScript(const std::string &scriptFilename);
     bool SaveScript(const std::string &scriptFilename);
-    Integer RunScript(Integer sandboxNum = 1);
+    Integer RunScript(Integer sandboxNum = 1, bool isFromGui = false);
     
 private:
 
     // initialization
     void CreateDefaultMission();
-    void SetupRun(Integer sandboxNum);
+    void SetupRun(Integer sandboxNum, bool isFromGui = false);
     
     // sandbox
     void AddSolarSysToSandbox(Integer index);
+    void AddSubscriberToSandbox(Integer index);
     void AddSpacecraftToSandbox(Integer index);
     void AddPropSetupToSandbox(Integer index);
     void AddBurnToSandbox(Integer index);
     void AddSolverToSandbox(Integer index);
-    void AddSubscriberToSandbox(Integer index);
+    void AddPublisherToSandbox(Integer index);
     void AddCommandToSandbox(Integer index);
     void InitializeSandbox(Integer index);
     void ExecuteSandbox(Integer index);

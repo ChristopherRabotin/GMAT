@@ -20,6 +20,7 @@
 
 #include "Moderator.hpp"
 #include "NoOp.hpp"
+#include "PlotInterface.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -881,7 +882,8 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
 //                                  ", name = " + name + "\n");
     Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
     theConfigManager->AddSubscriber(subs);
-    thePublisher->Subscribe(subs);
+    //loj: 3/9/04 commented out. The subscribers are added in AddSubscriberToSandbox()
+    //thePublisher->Subscribe(subs);
     return subs;
 }
 
@@ -1049,9 +1051,9 @@ void Moderator::ClearAllSandboxes()
 }
 
 //------------------------------------------------------------------------------
-// Integer RunMission(Integer sandboxNum, bool fromGui = false)
+// Integer RunMission(Integer sandboxNum, bool isFromGui = false)
 //------------------------------------------------------------------------------
-Integer Moderator::RunMission(Integer sandboxNum, bool fromGui)
+Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 {
     Integer status = 0;
 
@@ -1070,17 +1072,18 @@ Integer Moderator::RunMission(Integer sandboxNum, bool fromGui)
     try
     {
         AddSolarSysToSandbox(sandboxNum-1);
+        AddPublisherToSandbox(sandboxNum-1);
         AddSpacecraftToSandbox(sandboxNum-1);
         AddPropSetupToSandbox(sandboxNum-1);
         AddBurnToSandbox(sandboxNum-1);        
         AddSolverToSandbox(sandboxNum-1);        
         AddSubscriberToSandbox(sandboxNum-1);
         AddCommandToSandbox(sandboxNum-1);
+        
         InitializeSandbox(sandboxNum-1);
         
-        if (fromGui)
-            SetupRun(sandboxNum);
-    
+        SetupRun(sandboxNum, isFromGui);
+
         ExecuteSandbox(sandboxNum-1);
     }
     catch (BaseException &e)
@@ -1150,7 +1153,7 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 }
 
 //------------------------------------------------------------------------------
-// Integer RunScript(Integer sandboxNum)
+// Integer RunScript(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 /**
  * Executes commands built from the script file.
@@ -1161,10 +1164,10 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
  *    0 = successful, <0 = error (tbd)
  */
 //------------------------------------------------------------------------------
-Integer Moderator::RunScript(Integer sandboxNum)
+Integer Moderator::RunScript(Integer sandboxNum, bool isFromGui)
 {
     MessageInterface::ShowMessage("Moderator::RunScript() entered\n");
-    return RunMission(sandboxNum);
+    return RunMission(sandboxNum, isFromGui);
 }
 
 //---------------------------------
@@ -1177,6 +1180,7 @@ Integer Moderator::RunScript(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
 {
+    MessageInterface::ShowMessage("========================================\n");
     MessageInterface::ShowMessage("Moderator creating default mission...\n");
 
     // SolarSystem
@@ -1247,7 +1251,7 @@ void Moderator::CreateDefaultMission()
     sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
     sub->SetStringParameter("XParamName", "DefaultSC.CurrentTime");
     sub->SetStringParameter("YParamName", "DefaultSC.X");
-    sub->Activate(false);
+    sub->Activate(true);
     
     // OpenGlPlot
     sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
@@ -1266,47 +1270,73 @@ void Moderator::CreateDefaultMission()
 }
 
 //------------------------------------------------------------------------------
-// void SetupRun(Integer sandboxNum)
+// void SetupRun(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
-void Moderator::SetupRun(Integer sandboxNum)
+void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
 {
+    MessageInterface::ShowMessage("========================================\n");
     MessageInterface::ShowMessage("Moderator setting up for run...\n");
-    std::string name;
-    GmatBase *obj;
-    StringArray objList;
-    
-    // for configured parameters use internal copy of Spacecraft
-    StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
-    Parameter *param;
-    Spacecraft *sc;
-    
-    for (int i=0; i<params.size(); i++)
+    std::string objName;
+    std::string objTypeName;
+
+    //--------------------------------------------
+    // get/set internal objects for parameters
+    //--------------------------------------------
+    if (isFromGui)
     {
-        param = GetParameter(params[i]);
-        objList = param->GetObjectTypeNames();
-        for (int j=0; j<objList.size(); j++)
+        GmatBase *obj;
+        StringArray objList;
+    
+        // for configured parameters use internal copy of Spacecraft
+        StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+        Parameter *param;
+        Spacecraft *sc;
+    
+        for (unsigned int i=0; i<params.size(); i++)
         {
-            obj = param->GetObject(objList[j]);
-            name = obj->GetName(); 
-            sc = sandboxes[sandboxNum-1]->GetSpacecraft(name);
-            param->SetObject(Gmat::SPACECRAFT, name, sc);
+            param = GetParameter(params[i]);
+            objList = param->GetObjectTypeNames();
+            for (unsigned int j=0; j<objList.size(); j++)
+            {
+                obj = param->GetObject(objList[j]);
+                objName = obj->GetName(); 
+                sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+                param->SetObject(Gmat::SPACECRAFT, objName, sc);
+                //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
+                //                              "ObjName = %s\n", param->GetName().c_str(),
+                //                              objName.c_str());
+            }
         }
+    
+        StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
+        StopCondition *stopCond;
+    
+        for (unsigned int i=0; i<stopconds.size(); i++)
+        {
+            stopCond = GetStopCondition(stopconds[i]);
+            objName = stopCond->GetName();
+            //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
+            //                              objName.c_str(), stopCond->GetGoal());
+        }    
     }
     
-    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
-    StopCondition *stopCond;
-    std::string objName;
+    //--------------------------------------------
+    //create plot window
+    //--------------------------------------------
+    StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+    Subscriber *sub;
     
-    for (int i=0; i<stopconds.size(); i++)
+    for (unsigned int i=0; i<subs.size(); i++)
     {
-        stopCond = GetStopCondition(stopconds[i]);
-        objName = stopCond->GetName();
-        MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
-                                      objName.c_str(), stopCond->GetGoal());
-    }    
-   
-    //loj:@todo: create plot window
+        sub = GetSubscriber(subs[i]);
+        objTypeName = sub->GetTypeName();
+        objName = sub->GetName();
+        //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+        //                              objTypeName.c_str(), objName.c_str());
+        sub->Initialize();
+    }
 }
+
 
 // sandbox
 //------------------------------------------------------------------------------
@@ -1314,9 +1344,17 @@ void Moderator::SetupRun(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::AddSolarSysToSandbox(Integer index)
 {
-    //loj: Do I get clone of SolarSystem from ConfigManager?
     SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
     sandboxes[index]->AddSolarSystem(solarSys);
+}
+
+//------------------------------------------------------------------------------
+// void AddPublisherToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddPublisherToSandbox(Integer index)
+{
+    thePublisher->UnsubscribeAll(); //loj: 3/9/04 added
+    sandboxes[index]->SetPublisher(thePublisher);
 }
 
 //------------------------------------------------------------------------------
@@ -1380,7 +1418,7 @@ void Moderator::AddSolverToSandbox(Integer index)
 }
 
 //------------------------------------------------------------------------------
-// void AddSubscriberToSandbox(Integer index)
+// void AddSuscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
