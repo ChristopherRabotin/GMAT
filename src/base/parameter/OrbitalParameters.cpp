@@ -331,8 +331,8 @@ bool Apoapsis::Evaluate()
 //                              Periapsis
 //==============================================================================
 /**
- * Implements Periapsis class.
- */
+* Implements Periapsis class.
+*/
 //------------------------------------------------------------------------------
 
 //---------------------------------
@@ -344,32 +344,32 @@ bool Apoapsis::Evaluate()
 //          const std::string &desc, const std::string &unit)
 //------------------------------------------------------------------------------
 /**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
+* Constructor.
+*
+* @param <name> name of the parameter
+* @param <obj> reference object pointer
+* @param <desc> description of the parameter
+* @param <unit> unit of the parameter
+*/
 //------------------------------------------------------------------------------
 Periapsis::Periapsis(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "Periapsis", SYSTEM_PARAM, obj, desc, unit, false)
+: OrbitReal(name, "Periapsis", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
 // Periapsis(const Periapsis &copy)
 //------------------------------------------------------------------------------
 /**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
+* Copy constructor.
+*
+* @param <copy> the parameter to make copy of
+*/
 //------------------------------------------------------------------------------
 Periapsis::Periapsis(const Periapsis &copy)
-    : OrbitReal(copy)
+: OrbitReal(copy)
 {
 }
 
@@ -377,26 +377,26 @@ Periapsis::Periapsis(const Periapsis &copy)
 // const Periapsis& operator=(const Periapsis &right)
 //------------------------------------------------------------------------------
 /**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
+* Assignment operator.
+*
+* @param <right> the parameter to make copy of
+*/
 //------------------------------------------------------------------------------
 const Periapsis&
 Periapsis::operator=(const Periapsis &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
 // ~Periapsis()
 //------------------------------------------------------------------------------
 /**
- * Destructor.
- */
+* Destructor.
+*/
 //------------------------------------------------------------------------------
 Periapsis::~Periapsis()
 {
@@ -410,27 +410,127 @@ Periapsis::~Periapsis()
 // virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
+* Evaluates value of the parameter.
+*
+* @return true if parameter value successfully evaluated; false otherwise
+*/
 //------------------------------------------------------------------------------
 bool Periapsis::Evaluate()
 {
-    Rvector6 cartState = OrbitData::GetCartState();
-    if (cartState == Rvector6::RVECTOR6_UNDEFINED)
-        return false;
-    
-    // compute position and velocity unit vectors
-    Rvector3 pos = Rvector3(cartState[0], cartState[1], cartState[2]);
-    Rvector3 vel = Rvector3(cartState[3], cartState[4], cartState[5]);
-    Rvector3 R = pos.GetUnitVector();
-    Rvector3 V = vel.GetUnitVector();
-    
-    // compute cos(90 - beta) as the dot product of the R and V vectors
-    Real rdotv = R*V;
-    mRealValue = rdotv;
-    
-    return true;
+   Rvector6 cartState = OrbitData::GetCartState();
+   if (cartState == Rvector6::RVECTOR6_UNDEFINED)
+      return false;
+
+   // compute position and velocity unit vectors
+   Rvector3 pos = Rvector3(cartState[0], cartState[1], cartState[2]);
+   Rvector3 vel = Rvector3(cartState[3], cartState[4], cartState[5]);
+   Rvector3 R = pos.GetUnitVector();
+   Rvector3 V = vel.GetUnitVector();
+
+   // compute cos(90 - beta) as the dot product of the R and V vectors
+   Real rdotv = R*V;
+   mRealValue = rdotv;
+
+   return true;
+}
+
+
+
+//==============================================================================
+//                              OrbitPeriod
+//==============================================================================
+/**
+* Implements OrbitPeriod class.
+*/
+//------------------------------------------------------------------------------
+
+//---------------------------------
+// public methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// OrbitPeriod(const std::string &name, GmatBase *obj,
+//             const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+* Constructor.
+*
+* @param <name> name of the parameter
+* @param <obj> reference object pointer
+* @param <desc> description of the parameter
+* @param <unit> unit of the parameter
+*/
+//------------------------------------------------------------------------------
+OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj,
+                         const std::string &desc, const std::string &unit)
+: OrbitReal(name, "OrbitPeriod", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// OrbitPeriod(const OrbitPeriod &copy)
+//------------------------------------------------------------------------------
+/**
+* Copy constructor.
+*
+* @param <copy> the parameter to make copy of
+*/
+//------------------------------------------------------------------------------
+OrbitPeriod::OrbitPeriod(const OrbitPeriod &copy)
+: OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const OrbitPeriod& operator=(const OrbitPeriod &right)
+//------------------------------------------------------------------------------
+/**
+* Assignment operator.
+*
+* @param <right> the parameter to make copy of
+*/
+//------------------------------------------------------------------------------
+const OrbitPeriod&
+OrbitPeriod::operator=(const OrbitPeriod &right)
+{
+   if (this != &right)
+OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~OrbitPeriod()
+//------------------------------------------------------------------------------
+/**
+* Destructor.
+*/
+//------------------------------------------------------------------------------
+OrbitPeriod::~OrbitPeriod()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+* Evaluates value of the parameter.
+*
+* @return true if parameter value successfully evaluated; false otherwise
+*/
+//------------------------------------------------------------------------------
+bool OrbitPeriod::Evaluate()
+{
+   mRealValue = OrbitData::GetOtherKepReal("OrbitPeriod");    
+
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 

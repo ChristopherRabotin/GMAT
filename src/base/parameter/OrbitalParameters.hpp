@@ -11,11 +11,12 @@
 //
 // Author: Linda Jun
 // Created: 2004/03/12
+// Modified: Wendy Shoan 2004/04/01 added OrbitPeriod
 //
 /**
  * Declares Keplerian related parameter classes.
  *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, 
- *   KepMM, VelApoapsis, VelPeriapsis
+ *   KepMM, VelApoapsis, VelPeriapsis, OrbitPeriod
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitalParameters_hpp
@@ -113,24 +114,51 @@ protected:
 //                              Periapsis
 //==============================================================================
 /**
- * Declares Periapsis class.
- */
+* Declares Periapsis class.
+*/
 //------------------------------------------------------------------------------
 
 class GMAT_API Periapsis : public OrbitReal
 {
 public:
 
-    Periapsis(const std::string &name = "",
-              GmatBase *obj = NULL,
-              const std::string &desc = "",
-              const std::string &unit = "");
-    Periapsis(const Periapsis &copy);
-    const Periapsis& operator=(const Periapsis &right);
-    virtual ~Periapsis();
+   Periapsis(const std::string &name = "",
+             GmatBase *obj = NULL,
+             const std::string &desc = "",
+             const std::string &unit = "");
+   Periapsis(const Periapsis &copy);
+   const Periapsis& operator=(const Periapsis &right);
+   virtual ~Periapsis();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+protected:
+
+};
+
+//==============================================================================
+//                              OrbitPeriod
+//==============================================================================
+/**
+* Declares OrbitPeriod class.
+*/
+//------------------------------------------------------------------------------
+
+class GMAT_API OrbitPeriod : public OrbitReal
+{
+public:
+
+   OrbitPeriod(const std::string &name = "",
+             GmatBase *obj = NULL,
+             const std::string &desc = "",
+             const std::string &unit = "");
+   OrbitPeriod(const OrbitPeriod &copy);
+   const OrbitPeriod& operator=(const OrbitPeriod &right);
+   virtual ~OrbitPeriod();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
