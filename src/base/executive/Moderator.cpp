@@ -124,8 +124,12 @@ bool Moderator::Initialize(bool fromGui)
          theFactoryManager->RegisterFactory(theSolverFactory);
 
          // Create default SolarSystem
-         theDefaultSolarSystem = new SolarSystem("DefaultSS");
-            
+         theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
+         //theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
+         //SetSolarSystemInUse("DefaultSolarSystem");
+         //MessageInterface::ShowMessage
+         //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
+         
          // Read startup file
          theFileManager->ReadStartupFile();
          InitializePlanetarySource();
@@ -792,6 +796,11 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    //loj: 3/25/04 PointMassForce will create default body of Earth
    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
 
+   // set SolarSystem and Earth as default body
+   //loj: 4/28/08 - Uncomment the following when PointMassForce is ready to CelestialBody
+   //earthGrav->SetSolarSystem(theDefaultSolarSystem);
+   //earthGrav->SetBody(theDefaultSolarSystem->GetBody("Earth"));
+   
    //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
    // because PropSetup::Initialize() needs at least 1 force
    fm->AddForce(earthGrav);
@@ -1068,7 +1077,8 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetSolarSystemInUse()
 {
-   return theConfigManager->GetSolarSystemInUse();
+   //return theConfigManager->GetSolarSystemInUse();
+   return theDefaultSolarSystem;
 }
 
 //------------------------------------------------------------------------------
@@ -1617,6 +1627,8 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 
          ExecuteSandbox(sandboxNum-1);
          //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
+         
+         MessageInterface::ShowMessage("Moderator successfully ran mission\n");
       }
       catch (BaseException &e)
       {
@@ -1635,7 +1647,7 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
    }
-    
+
    return status;
 }
 
@@ -1796,8 +1808,8 @@ void Moderator::CreateDefaultMission()
       CreateParameter("CartY", "DefaultSC.Y");
       CreateParameter("CartZ", "DefaultSC.Z");
       CreateParameter("CartVx", "DefaultSC.Vx");
-      CreateParameter("CartVx", "DefaultSC.Vy");
-      CreateParameter("CartVx", "DefaultSC.Vz");
+      CreateParameter("CartVy", "DefaultSC.Vy");
+      CreateParameter("CartVz", "DefaultSC.Vz");
 
       // Keplerian parameters
       CreateParameter("KepSMA", "DefaultSC.SMA");
@@ -1832,6 +1844,11 @@ void Moderator::CreateDefaultMission()
          param = GetParameter(params[i]);
          param->SetDesc(param->GetName());
          param->SetStringParameter("Object", "DefaultSC");
+
+         //loj: SolarSystem is set in the SetupRun(), due to Script doesn't have SolarSystem field
+         //if (!param->IsTimeParameter())
+            //param->SetStringParameter("Object", "DefaultSolarSystem");
+            //param->AddObject(theDefaultSolarSystem); //loj: until CreateSolarSystem works
       }
     
       // StopCondition
@@ -1896,7 +1913,7 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    //--------------------------------------------
    //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
    GmatBase *obj;
-   StringArray objList;
+   StringArray objTypeList;
     
    // for configured parameters use internal copy of Spacecraft
    StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
@@ -1908,18 +1925,35 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
       try
       {
          param = GetParameter(params[i]);
-         objList = param->GetObjectTypeNames();
-         for (unsigned int j=0; j<objList.size(); j++)
-         {
-            obj = param->GetObject(objList[j]);
-            objName = obj->GetName(); 
-            sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-            param->SetObject(Gmat::SPACECRAFT, objName, sc);
 
+         //MessageInterface::ShowMessage("Moderator::SetupRun() ParamType = %s, "
+         //                              "ParamName = %s\n", param->GetTypeName().c_str(),
+         //                              param->GetName().c_str());
+         
+         // set SolarSystem to orbit related parameters
+         if (!param->IsTimeParameter())
+            param->AddObject(theDefaultSolarSystem);
+         
+         // set internal Spacecraft to parameters
+         objTypeList = param->GetObjectTypeNames();
+         for (unsigned int j=0; j<objTypeList.size(); j++)
+         {
+            obj = param->GetObject(objTypeList[j]);
+            objName = obj->GetName();
+            
+            if (objTypeList[j] == "Spacecraft")
+            {
+               sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+               param->SetObject(Gmat::SPACECRAFT, objName, sc);
+            }
+            
             //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
             //                              "ObjName = %s\n", param->GetName().c_str(),
             //                              objName.c_str());
          }
+         
+         param->Initialize();
+
       }
       catch (BaseException &e)
       {
@@ -1929,18 +1963,20 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    }
         
    //--------------------------------------------
-   // check stopping condition
+   // initialize stopping condition
    //--------------------------------------------
    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
    StopCondition *stopCond;
     
-   //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
+   MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
    for (unsigned int i=0; i<stopconds.size(); i++)
    {
       try
       {
          stopCond = GetStopCondition(stopconds[i]);
-         objName = stopCond->GetName();
+         stopCond->SetSolarSystem(theDefaultSolarSystem);
+         stopCond->Initialize();
+         //objName = stopCond->GetName();
          //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
          //                              objName.c_str(), stopCond->GetRealParameter("Goal"));
       }
@@ -1966,7 +2002,10 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
       //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
       //                              objTypeName.c_str(), objName.c_str());
       sub->Initialize();
+      //MessageInterface::ShowMessage("Moderator::SetupRun() subscriber initialized\n");
    }
+   
+   MessageInterface::ShowMessage("Moderator successfully set up for a run...\n");
 }
 
 // sandbox
