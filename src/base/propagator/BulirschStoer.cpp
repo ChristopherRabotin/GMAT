@@ -48,7 +48,7 @@
 // static data
 //---------------------------------
 const std::string
-BulirschStoer::PARAMETER_TEXT[BulirschStoerParamCount - GmatBaseParamCount] =
+BulirschStoer::PARAMETER_TEXT[BulirschStoerParamCount - IntegratorParamCount] =
 {
 	"Safety1",
 	"Safety2",
@@ -66,7 +66,7 @@ BulirschStoer::PARAMETER_TEXT[BulirschStoerParamCount - GmatBaseParamCount] =
 };
 
 const Gmat::ParameterType
-BulirschStoer::PARAMETER_TYPE[BulirschStoerParamCount - GmatBaseParamCount] =
+BulirschStoer::PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount] =
 {
 	Gmat::REAL_TYPE,
 	Gmat::REAL_TYPE,
@@ -1111,9 +1111,9 @@ bool BulirschStoer::AdaptStep(Real maxerror)
 std::string BulirschStoer::GetParameterText(const Integer id) const
 {
     if (id >= SAFETY1 && id < BulirschStoerParamCount)
-        return PARAMETER_TEXT[id - GmatBaseParamCount];
+        return PARAMETER_TEXT[id - IntegratorParamCount];
     else
-        return GmatBase::GetParameterText(id);
+        return Integrator::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1127,11 +1127,11 @@ Integer BulirschStoer::GetParameterID(const std::string &str) const
 {
     for (Integer i = SAFETY1; i < BulirschStoerParamCount; i++)
     {
-        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+        if (str == PARAMETER_TEXT[i - IntegratorParamCount])
             return i;
     }
 
-    return GmatBase::GetParameterID(str);
+    return Integrator::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -1144,9 +1144,9 @@ Integer BulirschStoer::GetParameterID(const std::string &str) const
 Gmat::ParameterType BulirschStoer::GetParameterType(const Integer id) const
 {
     if (id >= SAFETY1 && id < BulirschStoerParamCount)
-        return PARAMETER_TYPE[id - GmatBaseParamCount];
+        return PARAMETER_TYPE[id - IntegratorParamCount];
     else
-        return GmatBase::GetParameterType(id);
+        return Integrator::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1161,7 +1161,7 @@ std::string BulirschStoer::GetParameterTypeString(const Integer id) const
    if (id >= SAFETY1 && id < BulirschStoerParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
-      return GmatBase::GetParameterTypeString(id);
+      return Integrator::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1180,7 +1180,7 @@ Real BulirschStoer::GetRealParameter(const Integer id) const
 	else if (id == SCALE)				return SCALE_DT;
 	else if (id == MIN_TOLERANCE)       return mintolerance;
 
-    return GmatBase::GetRealParameter(id);
+    return Integrator::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1255,7 +1255,7 @@ Real BulirschStoer::SetRealParameter(const Integer id, const Real value)
 //                retval = true;
 //        }
 //    }
-    return GmatBase::SetRealParameter(id, value);
+    return Integrator::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1291,7 +1291,7 @@ Integer BulirschStoer::GetIntegerParameter(const Integer id) const
 	else if (id == K_MAX)				return kmax;
 	else if (id == K_USED)				return kused;
 
-	return GmatBase::GetIntegerParameter(id);
+	return Integrator::GetIntegerParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1337,7 +1337,7 @@ Integer BulirschStoer::SetIntegerParameter(const Integer id,
 		return kused;
 	}
 
-	return GmatBase::SetIntegerParameter(id,value);
+	return Integrator::SetIntegerParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -1358,7 +1358,7 @@ bool BulirschStoer::GetBooleanParameter(const Integer id) const
 	if (id == DEPTH_INITIALIZED)	return depthInitialized;
 	else if (id == FIRST)			return first;
 
-	return GmatBase::GetBooleanParameter(id);
+	return Integrator::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1388,5 +1388,5 @@ bool BulirschStoer::SetBooleanParameter(const Integer id, const bool value)
 		return first;
 	}
 
-	return GmatBase::SetBooleanParameter(id,value);
+	return Integrator::SetBooleanParameter(id,value);
 }

@@ -111,8 +111,8 @@ protected:
 		MIN_TOLERANCE,
         BulirschStoerParamCount  /// Count of the parameters for this class
     };
-	static const std::string PARAMETER_TEXT[BulirschStoerParamCount - GmatBaseParamCount];
-	static const Gmat::ParameterType PARAMETER_TYPE[BulirschStoerParamCount - GmatBaseParamCount];
+	static const std::string PARAMETER_TEXT[BulirschStoerParamCount - IntegratorParamCount];
+	static const Gmat::ParameterType PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount];
 
 private:
 	/// Limit on the smallest tolerance for the BS integrator
