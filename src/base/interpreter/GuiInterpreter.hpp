@@ -144,9 +144,11 @@ public:
    Function* GetFunction(const std::string &name);
    
    // GmatCommand
-   GmatCommand* CreateCommand(const std::string &type, const std::string &name);
+   //loj: 10/14/04 set initial value for name
+   GmatCommand* CreateCommand(const std::string &type,
+                              const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
-                                     const std::string &name);
+                                     const std::string &name = "");
 
    // Resource
    bool ClearResource();

@@ -688,8 +688,10 @@ Function* GuiInterpreter::GetFunction(const std::string &name)
 }
 
 // GmatCommand
+//loj: 10/14/04 set initial value for name
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const std::string &type, const std::string &name)
+// GmatCommand* CreateCommand(const std::string &type,
+//                            const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
  * Creates a command object by given type and name.
@@ -706,10 +708,10 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
    return moderator->CreateCommand(type, name);
 }
 
-// GmatCommand
+//loj: 10/14/04 set initial value for name
 //------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
-//                                   const std::string &name)
+//                                   const std::string &name = "")
 //------------------------------------------------------------------------------
 /**
  * Creates a default command object by given type and name.
