@@ -9,7 +9,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = PropagateCommandPanel.cpp PropagationConfigPanel.cpp
+SRC = PropagationConfigPanel.cpp PropagatorSelectDialog.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
