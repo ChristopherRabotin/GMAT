@@ -57,6 +57,10 @@ public:
     // Methods used to run the command
     virtual bool        Initialize(void);
     virtual bool        Execute(void);
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     
 protected:
     std::string         forName;

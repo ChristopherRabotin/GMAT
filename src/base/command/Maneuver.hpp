@@ -55,7 +55,11 @@ public:
     
     virtual bool            SetObject(GmatBase *obj,
                                       const Gmat::ObjectType type);
-    
+
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string     GetParameterText(const Integer id) const;
     virtual Integer         GetParameterID(const std::string &str) const;

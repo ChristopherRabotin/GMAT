@@ -36,6 +36,10 @@ class NoOp : public GmatCommand
 
 		
 		bool                          Execute(void);
+
+      // inherited from GmatBase
+      virtual GmatBase* Clone(void) const;
+
 };
 
 

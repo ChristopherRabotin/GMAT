@@ -157,3 +157,20 @@ bool ForCommand::Execute(void)
     
     return retval;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ForCommand.
+ *
+ * @return clone of the ForCommand.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ForCommand::Clone(void) const
+{
+   return (new ForCommand(*this));
+}
+

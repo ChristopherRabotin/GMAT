@@ -45,7 +45,11 @@ public:
     
     // Inherited methods that need some enhancement from the base class
     virtual bool        Append(GmatCommand *cmd);
-    
+
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Parameter access methods
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
@@ -62,7 +66,7 @@ public:
     virtual void        InterpretAction(void);
     virtual bool        Initialize(void);
     virtual bool        Execute(void);
-    
+
 protected:
     /// The name of the spacecraft that gets maneuvered
     std::string         targeterName;

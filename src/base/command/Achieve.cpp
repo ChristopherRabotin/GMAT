@@ -100,7 +100,23 @@ Achieve& Achieve::operator=(const Achieve& t)
 }
 
 
-    // Parameter accessors
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Achieve.
+ *
+ * @return clone of the Achieve.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Achieve::Clone(void) const
+{
+   return (new Achieve(*this));
+}
+
+// Parameter accessors
 std::string Achieve::GetParameterText(const Integer id) const
 {
     if (id == targeterNameID)

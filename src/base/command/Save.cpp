@@ -162,3 +162,20 @@ void Save::WriteParameterValue(std::ofstream &file, Integer id)
             break;
     }
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Save.
+ *
+ * @return clone of the Save.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Save::Clone(void) const
+{
+   return (new Save(*this));
+}
+

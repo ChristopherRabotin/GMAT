@@ -36,6 +36,9 @@ public:
     
     virtual bool            Initialize(void);
     virtual bool            Execute(void);
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 };
 
 

@@ -148,3 +148,19 @@ bool ElseCommand::Execute(void)
    
     return retval;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ElseCommand.
+ *
+ * @return clone of the ElseCommand.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ElseCommand::Clone(void) const
+{
+   return (new ElseCommand(*this));
+}

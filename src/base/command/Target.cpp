@@ -172,6 +172,22 @@ void Target::InterpretAction(void)
 }
 
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Target.
+ *
+ * @return clone of the Target.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Target::Clone(void) const
+{
+   return (new Target(*this));
+}
+
 // Parameter access methods
 
 //------------------------------------------------------------------------------

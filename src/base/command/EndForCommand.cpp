@@ -62,3 +62,20 @@ bool EndForCommand::Execute(void)
 {
     return true;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the EndForCommand.
+ *
+ * @return clone of the EndForCommand.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* EndForCommand::Clone(void) const
+{
+   return (new EndForCommand(*this));
+}
+

@@ -41,7 +41,10 @@ class Toggle : public GmatCommand
         Toggle(const Toggle& t);
 		Toggle&               operator=(const Toggle& t);
 		
-        // Access methods derived classes can override
+      // inherited from GmatBase
+      virtual GmatBase* Clone(void) const;
+
+      // Access methods derived classes can override
         virtual std::string GetParameterText(const Integer id) const;
         virtual Integer     GetParameterID(const std::string &str) const;
         virtual Gmat::ParameterType

@@ -109,6 +109,22 @@ bool Toggle::Execute(void)
 }
 
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Toggle.
+ *
+ * @return clone of the Toggle.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Toggle::Clone(void) const
+{
+   return (new Toggle(*this));
+}
+
 std::string Toggle::GetParameterText(const Integer id) const
 {
     if (id == subscriberID)

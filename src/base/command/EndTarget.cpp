@@ -61,3 +61,20 @@ bool EndTarget::Execute(void)
 {
     return true;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the EndTarget.
+ *
+ * @return clone of the EndTarget.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* EndTarget::Clone(void) const
+{
+   return (new EndTarget(*this));
+}
+

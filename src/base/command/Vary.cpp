@@ -102,6 +102,22 @@ Vary& Vary::operator=(const Vary& t)
 }
 
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Vary.
+ *
+ * @return clone of the Vary.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Vary::Clone(void) const
+{
+   return (new Vary(*this));
+}
+
 std::string Vary::GetParameterText(const Integer id) const
 {
     if (id == targeterNameID)

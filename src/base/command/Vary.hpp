@@ -53,6 +53,9 @@ public:
     Vary(const Vary& t);
     Vary&             operator=(const Vary& t);
 
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Parameter accessors
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;

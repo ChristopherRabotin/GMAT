@@ -41,7 +41,11 @@ public:
     virtual bool        Initialize(void);
     virtual void        InterpretAction(void);
     virtual bool        Execute(void);
-    
+
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 protected:
     std::string         ownerName;
     std::string         parmName;

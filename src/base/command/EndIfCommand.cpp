@@ -61,3 +61,20 @@ bool EndIfCommand::Execute(void)
 {
     return true;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the EndIfCommand.
+ *
+ * @return clone of the EndIfCommand.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* EndIfCommand::Clone(void) const
+{
+   return (new EndIfCommand(*this));
+}
+

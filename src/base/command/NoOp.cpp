@@ -86,3 +86,20 @@ bool NoOp::Execute(void)
 {
     return true;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the NoOp.
+ *
+ * @return clone of the NoOp.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* NoOp::Clone(void) const
+{
+   return (new NoOp(*this));
+}
+

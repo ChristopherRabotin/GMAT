@@ -168,3 +168,20 @@ bool Assignment::Execute(void)
     
     return retval;
 }
+
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Assignment.
+ *
+ * @return clone of the Assignment.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Assignment::Clone(void) const
+{
+   return (new Assignment(*this));
+}
+

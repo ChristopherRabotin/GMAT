@@ -79,6 +79,22 @@ bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 }
 
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Maneuver.
+ *
+ * @return clone of the Maneuver.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Maneuver::Clone(void) const
+{
+   return (new Maneuver(*this));
+}
+
 std::string Maneuver::GetParameterText(const Integer id) const
 {
     if (id == burnNameID) {

@@ -183,6 +183,22 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
 }
 
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Propagate.
+ *
+ * @return clone of the Propagate.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Propagate::Clone(void) const
+{
+   return (new Propagate(*this));
+}
+
 // Parameter accessor methods
 std::string Propagate::GetParameterText(const Integer id) const
 {

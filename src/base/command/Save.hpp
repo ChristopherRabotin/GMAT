@@ -15,7 +15,10 @@ public:
     virtual void            InterpretAction(void);
     virtual bool            Initialize(void);
     bool                    Execute(void);
-  
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 protected:
     /// Name of the save file -- for now, it is objectName.objectType
     std::string             filename;

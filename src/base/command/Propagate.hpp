@@ -50,6 +50,10 @@ public:
                                   const std::string objName = "");
     virtual void        ClearObject(const Gmat::ObjectType type); //loj: 3/31/04 added
     
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
