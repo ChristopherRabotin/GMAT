@@ -9,8 +9,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-# Will add CelestialBodyFactory.cpp in SRC when fixed
-SRC = BurnFactory.cpp CommandFactory.cpp Factory.cpp \
+SRC = BurnFactory.cpp CelestialBodyFactory.cpp CommandFactory.cpp Factory.cpp \
 	FactoryException.cpp FactoryManager.cpp ForceModelFactory.cpp \
 	ParameterFactory.cpp PhysicalModelFactory.cpp PropSetupFactory.cpp \
 	PropagatorFactory.cpp SolverFactory.cpp SpacecraftFactory.cpp \
