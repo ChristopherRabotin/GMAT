@@ -43,13 +43,16 @@ private:
     
    wxTreeItemId mMissionSeqTopItem;
    wxTreeItemId mMissionSeqSubItem;
-    
+   wxTreeItemId mNewTreeId;
+   
    bool before;
    int numManeuver;
    int mNumMissionSeq;
    int mNumPropagate;
    int mNumManeuver;
    int mNumTarget;
+   int mNumAchieve;
+   int mNumVary;
    int mNumIfStatement;
    int mNumWhileLoop;
    int mNumForLoop;
@@ -57,7 +60,9 @@ private:
    int mNumSwitchCase;
 
    void UpdateCommand();
-   void UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd);
+   wxTreeItemId& UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd);
+   void ExpandChildCommand(wxTreeItemId parentTreeId, GmatCommand *baseCmd,
+                           GmatCommand *cmd);
    void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
@@ -76,6 +81,8 @@ private:
    void OnAddPropagate(wxCommandEvent &event);
    void OnAddManeuver(wxCommandEvent &event);
    void OnAddTarget(wxCommandEvent &event);
+   void OnAddAchieve(wxCommandEvent &event);
+   void OnAddVary(wxCommandEvent &event);
 
    void OnAddIfStatement(wxCommandEvent &event);
    void OnAddWhileLoop(wxCommandEvent &event);
@@ -88,6 +95,8 @@ private:
    void OnInsertPropagate(wxCommandEvent &event);
    void OnInsertManeuver(wxCommandEvent &event);
    void OnInsertTarget(wxCommandEvent &event);
+   void OnInsertAchieve(wxCommandEvent &event);
+   void OnInsertVary(wxCommandEvent &event);
 
    void OnInsertIfStatement(wxCommandEvent &event);
    void OnInsertWhileLoop(wxCommandEvent &event);
@@ -105,8 +114,9 @@ private:
    void OnOpen();
    void OnClose();
  
-   wxMenu* CreatePopupMenu();
+   wxMenu* CreateAddPopupMenu();
    wxMenu* CreateInsertPopupMenu();
+   wxMenu* CreateTargetPopupMenu(bool insert);
    // wxMenu* CreateControlLogicPopupMenu();
    wxMenu* CreateAddControlLogicPopupMenu();
    wxMenu* CreateAddIfPopupMenu();
@@ -131,11 +141,15 @@ private:
       POPUP_ADD_PROPAGATE,
       POPUP_ADD_MANEUVER,
       POPUP_ADD_TARGET,
+      POPUP_ADD_VARY,
+      POPUP_ADD_ACHIEVE,
         
       POPUP_INSERT_COMMAND,
       POPUP_INSERT_PROPAGATE,
       POPUP_INSERT_MANEUVER,
       POPUP_INSERT_TARGET,
+      POPUP_INSERT_VARY,
+      POPUP_INSERT_ACHIEVE,
 
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 

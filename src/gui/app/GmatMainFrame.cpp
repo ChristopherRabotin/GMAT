@@ -426,6 +426,24 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add ( new SolverEventPanel (panel, item->GetDesc(), item->GetCommand()),
                       0, wxGROW|wxALL, 0 );
       }
+      else if (dataType == GmatTree::ACHIEVE_COMMAND)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);              
+         sizer->Add ( new SolverGoalsPanel (panel),
+                      0, wxGROW|wxALL, 0 );
+      }
+      else if (dataType == GmatTree::VARY_COMMAND)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);  
+         sizer->Add ( new SolverVariablesPanel (panel),
+                      0, wxGROW|wxALL, 0 );
+      }
       else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
