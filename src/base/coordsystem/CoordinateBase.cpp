@@ -34,11 +34,13 @@ const std::string
 CoordinateBase::PARAMETER_TEXT[CoordinateBaseParamCount - GmatBaseParamCount] =
 {
    "OriginName",
+   "J2000BodyName",
 };
 
 const Gmat::ParameterType
 CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
 {
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -69,6 +71,8 @@ CoordinateBase::CoordinateBase(Gmat::ObjectType ofType,
 GmatBase(ofType,itsType,itsName),
 origin         (NULL),
 originName     ("Earth"),
+j2000Body      (NULL),
+j2000BodyName  ("Earth"),
 solar          (NULL)
 {
 }
@@ -86,9 +90,11 @@ solar          (NULL)
 //---------------------------------------------------------------------------
 CoordinateBase::CoordinateBase(const CoordinateBase &coordBase) :
 GmatBase(coordBase),
-origin     (NULL),
-originName (coordBase.originName),
-solar      (coordBase.solar)
+origin        (NULL),
+originName    (coordBase.originName),
+j2000Body     (NULL),
+j2000BodyName (coordBase.j2000BodyName),
+solar         (coordBase.solar)
 {
 }
 
@@ -108,9 +114,11 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    if (&coordBase == this)
       return *this;
    GmatBase::operator=(coordBase);
-   origin     = coordBase.origin;
-   originName = coordBase.originName;
-   solar      = coordBase.solar;
+   origin        = coordBase.origin;
+   originName    = coordBase.originName;
+   j2000Body     = coordBase.j2000Body;
+   j2000BodyName = coordBase.j2000BodyName;
+   solar         = coordBase.solar;
    
    return *this;
 }
@@ -138,6 +146,116 @@ void CoordinateBase::SetSolarSystem(SolarSystem *ss)
    solar = ss;
 }
 
+//------------------------------------------------------------------------------
+//  void  SetOriginName(const std::string &toName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the origin name for the CoordinateBase class.
+ *
+ */
+//------------------------------------------------------------------------------
+void CoordinateBase::SetOriginName(const std::string &toName)
+{
+   originName = toName;
+}
+
+//------------------------------------------------------------------------------
+//  void  SetOrigin(SpacePoint *originPtr)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the origin for the CoordinateBase class.
+ *
+ */
+//------------------------------------------------------------------------------
+void CoordinateBase::SetOrigin(SpacePoint *originPtr)
+{
+   origin = originPtr;
+}
+
+//------------------------------------------------------------------------------
+//  void  SetJ2000BodyName(const std::string &toName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000Body for the CoordinateBase class.
+ *
+ */
+//------------------------------------------------------------------------------
+void CoordinateBase::SetJ2000BodyName(const std::string &toName)
+{
+   j2000BodyName = toName;
+}
+
+//------------------------------------------------------------------------------
+//  void  SetJ2000Body(SpacePoint *j2000Ptr)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000Body for the CoordinateBase class.
+ *
+ */
+//------------------------------------------------------------------------------
+void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)
+{
+   j2000Body = j2000Ptr;
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetOriginName() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the origin name for the CoordinateBase class.
+ *
+ * @return name of the origin for the CoordinateBase object
+ */
+//------------------------------------------------------------------------------
+std::string CoordinateBase::GetOriginName() const
+{
+   if (origin) return origin->GetName();
+   else        return originName;
+}
+
+//------------------------------------------------------------------------------
+//  SpacePoint*  GetOrigin() const
+//------------------------------------------------------------------------------
+/**
+* This method returns the origin pointer for the CoordinateBase class.
+ *
+ * @return pointer to the origin for the CoordinateBase object
+ */
+//------------------------------------------------------------------------------
+SpacePoint* CoordinateBase::GetOrigin() const
+{
+   return origin;
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetJ2000BodyName() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the origin name for the CoordinateBase class.
+ *
+ * @return name of the origin for the CoordinateBase object
+ */
+//------------------------------------------------------------------------------
+std::string CoordinateBase::GetJ2000BodyName() const
+{
+   if (j2000Body) return j2000Body->GetName();
+   else           return j2000BodyName;
+}
+
+//------------------------------------------------------------------------------
+//  SpacePoint*  GetJ2000Body() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the j2000Body pointer for the CoordinateBase class.
+ *
+ * @return pointer to the j2000Body for the CoordinateBase object
+ */
+//------------------------------------------------------------------------------
+SpacePoint* CoordinateBase::GetJ2000Body() const
+{
+   return j2000Body;
+}
+
 
 //------------------------------------------------------------------------------
 //  void  Initialize()
@@ -152,6 +270,9 @@ void CoordinateBase::Initialize()
    if (!origin)
       throw CoordinateSystemException(
             "Origin has not been defined for CoordinateBase object");
+   if (!j2000Body) // ????????????????????????????????
+      throw CoordinateSystemException(
+            "j2000Body has not been defined for CoordinateBase object");
    if (!solar)
       throw CoordinateSystemException(
             "Solar System has not been defined for CoordinateBase object");
@@ -256,10 +377,15 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 {
    if (id == ORIGIN_NAME)   
    {
-      if (origin) return origin->GetName();
-      else        return originName;
+      if (origin)    return origin->GetName();
+      else           return originName;
    }
-
+   else if (id == J2000_BODY_NAME)   
+   {
+      if (j2000Body) return j2000Body->GetName();
+      else           return j2000BodyName;
+   }
+   
    return GmatBase::GetStringParameter(id);
 }
 
@@ -281,12 +407,17 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
  bool CoordinateBase::SetStringParameter(const Integer id, 
                                          const std::string &value)
 {
-   if (id == ORIGIN_NAME) 
-   {
-      originName = value; 
-      return true;
-   }
-   
+    if (id == ORIGIN_NAME) 
+    {
+       originName    = value; 
+       return true;
+    }
+    else if (id == J2000_BODY_NAME) 
+    {
+       j2000BodyName = value; 
+       return true;
+    }
+    
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -345,7 +476,8 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::SPACE_POINT:
-         return origin;
+         if (name == originName)    return origin;
+         if (name == j2000BodyName) return j2000Body;
       default:
          break;
    }
@@ -377,7 +509,14 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       case Gmat::SPACE_POINT:
       {
-         origin = (SpacePoint*) obj;
+         if (name == originName)
+         {
+            origin = (SpacePoint*) obj;
+         }
+         else if (name == j2000BodyName)
+         {
+            j2000Body = (SpacePoint*) obj;
+         }
          return true;
       }
       default:

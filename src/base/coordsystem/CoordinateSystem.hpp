@@ -48,10 +48,10 @@ public:
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
    virtual Rvector ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                            SpacePoint *j2000Body);
+                              bool coincident = false);  // j2000Body?
    
    virtual Rvector FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                              SpacePoint *j2000Body);
+                                bool coincident = false);   // j2000Body?
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -85,15 +85,15 @@ protected:
       CoordinateSystemParamCount - CoordinateBaseParamCount];
    
    virtual bool TranslateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                  Rvector &outState, SpacePoint *j2000Body);
+                                    Rvector &outState);
+   // Rvector &outState, SpacePoint *j2000Body);
    
    virtual bool TranslateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
-                                    Rvector &outState, SpacePoint *j2000Body);
+                                      Rvector &outState);
+   // Rvector &outState, SpacePoint *j2000Body);
    
    /// axis system
    AxisSystem    *axes;
-   /// internal state
-   //Rvector       internalState; - moved to methods as local data
    
 };
 #endif // CoordinateSystem_hpp

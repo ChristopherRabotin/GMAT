@@ -44,10 +44,10 @@ public:
    // initializes the CoordinateConverter
    virtual void Initialize(); 
    
-   void        SetJ2000BodyName(const std::string &toName);
-   std::string GetJ2000BodyName() const;
-   void        SetJ2000Body(SpacePoint *toBody);
-   SpacePoint* GetJ2000Body();
+   //void        SetJ2000BodyName(const std::string &toName);
+   //std::string GetJ2000BodyName() const;
+   //void        SetJ2000Body(SpacePoint *toBody);
+   //SpacePoint* GetJ2000Body();
    
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
@@ -57,11 +57,9 @@ protected:
    
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)
-   SpacePoint                     *j2000Body;  
+   //SpacePoint                     *j2000Body;  
    /// Name for the J2000 body
-   std::string                    j2000BodyName;
+   //std::string                    j2000BodyName;
    
-   /// internal (intermediate) state
-  // Rvector                        internalState; - moved to methods as local data
 };
 #endif // CoordinateConverter_hpp

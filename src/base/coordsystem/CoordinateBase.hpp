@@ -41,7 +41,15 @@ public:
    // destructor
    virtual ~CoordinateBase();
    
-   virtual void            SetSolarSystem(SolarSystem *ss);
+   virtual void                SetSolarSystem(SolarSystem *ss);
+   virtual void                SetOriginName(const std::string &toName);
+   virtual void                SetOrigin(SpacePoint *originPtr);
+   virtual void                SetJ2000BodyName(const std::string &toName);
+   virtual void                SetJ2000Body(SpacePoint *j2000Ptr);
+   virtual std::string         GetOriginName() const;
+   virtual SpacePoint*         GetOrigin() const;
+   virtual std::string         GetJ2000BodyName() const;
+   virtual SpacePoint*         GetJ2000Body() const;
    
    // initializes the CoordinateBase
    virtual void Initialize();
@@ -75,6 +83,7 @@ protected:
    enum
    {
       ORIGIN_NAME = GmatBaseParamCount,
+      J2000_BODY_NAME,
       CoordinateBaseParamCount
    };
    
@@ -86,8 +95,12 @@ protected:
    /// Origin for the return coordinate system (aligned with the MJ2000 Earth
    /// Equatorial coordinate system)
    SpacePoint      *origin;  
-   /// Name for the J2000 body
+   /// Name for the origin body
    std::string     originName;
+   /// j2000Body for the system
+   SpacePoint      *j2000Body;  
+   /// Name for the origin body
+   std::string     j2000BodyName;
    /// pointer to the solar system
    SolarSystem     *solar;
    

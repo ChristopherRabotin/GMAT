@@ -27,6 +27,7 @@
 #include "CoordinateSystemException.hpp"
 #include "Rvector.hpp"
 
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -44,9 +45,9 @@
  * (default constructor).
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter() :
-j2000Body         (NULL),
-j2000BodyName     ("Earth")
+CoordinateConverter::CoordinateConverter() //:
+//j2000Body         (NULL),
+//j2000BodyName     ("Earth")
 {
 }
 
@@ -61,9 +62,9 @@ j2000BodyName     ("Earth")
  *                  instance.
  */
 //---------------------------------------------------------------------------
-CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt) :
-j2000Body     (coordCvt.j2000Body),
-j2000BodyName (coordCvt.j2000BodyName)
+CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt) //:
+//j2000Body     (coordCvt.j2000Body),
+//j2000BodyName (coordCvt.j2000BodyName)
 {
 }
 
@@ -83,8 +84,8 @@ const CoordinateConverter& CoordinateConverter::operator=(
 {
    if (&coordCvt == this)
       return *this;
-   j2000Body     = coordCvt.j2000Body;
-   j2000BodyName = coordCvt.j2000BodyName;
+   //j2000Body     = coordCvt.j2000Body;
+   //j2000BodyName = coordCvt.j2000BodyName;
    
    return *this;
 }
@@ -110,9 +111,9 @@ CoordinateConverter::~CoordinateConverter()
 //------------------------------------------------------------------------------
 void CoordinateConverter::Initialize()
 {
-   if (!j2000Body)
-      throw CoordinateSystemException(
-            "j2000Body has not been defined for CoordinateConverter object");
+   //if (!j2000Body)
+   //   throw CoordinateSystemException(
+   //         "j2000Body has not been defined for CoordinateConverter object");
 }
 
 //------------------------------------------------------------------------------
@@ -124,10 +125,10 @@ void CoordinateConverter::Initialize()
  * @param toName name to which to set the j2000 body name.
  */
 //------------------------------------------------------------------------------
-void CoordinateConverter::SetJ2000BodyName(const std::string &toName)
-{
-   j2000BodyName = toName;
-}
+//void CoordinateConverter::SetJ2000BodyName(const std::string &toName)
+//{
+//   j2000BodyName = toName;
+//}
 
 //------------------------------------------------------------------------------
 //  std::string  GetJ2000BodyName() const
@@ -138,11 +139,11 @@ void CoordinateConverter::SetJ2000BodyName(const std::string &toName)
  * @return j2000 body name.
  */
 //------------------------------------------------------------------------------
-std::string CoordinateConverter::GetJ2000BodyName() const
-{
-   if (j2000Body) return j2000Body->GetName();
-   else           return j2000BodyName;
-}
+//std::string CoordinateConverter::GetJ2000BodyName() const
+//{
+//   if (j2000Body) return j2000Body->GetName();
+//   else           return j2000BodyName;
+//}
 
 //------------------------------------------------------------------------------
 //  void  SetJ2000Body(SpacePoint *toBody)
@@ -153,10 +154,10 @@ std::string CoordinateConverter::GetJ2000BodyName() const
  * @param toBody body pointer to which to set the j2000 body parameter.
  */
 //------------------------------------------------------------------------------
-void CoordinateConverter::SetJ2000Body(SpacePoint *toBody)
-{
-   j2000Body = toBody;
-}
+//void CoordinateConverter::SetJ2000Body(SpacePoint *toBody)
+//{
+//   j2000Body = toBody;
+//}
 
 //------------------------------------------------------------------------------
 //  SpacePoint*  GetJ2000Body() const
@@ -168,10 +169,10 @@ void CoordinateConverter::SetJ2000Body(SpacePoint *toBody)
  * @return j2000 body pointer.
  */
 //------------------------------------------------------------------------------
-SpacePoint* CoordinateConverter::GetJ2000Body()
-{
-   return j2000Body;
-}
+//SpacePoint* CoordinateConverter::GetJ2000Body()
+//{
+//   return j2000Body;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -200,14 +201,16 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
    if (inState.GetSize() != outState.GetSize())
       throw CoordinateSystemException(
              "input and output states have different sizes - no conversion done");
-   Rvector internalState(inState.GetSize());
    if ((!inCoord) || (!outCoord))
       throw CoordinateSystemException(
             "Undefined coordinate system - conversion not performed.");
    // call coordinate system methods to convert - allow exceptions to
    // percolate up (to be caught at a higher level)
-   internalState = inCoord->ToMJ2000Eq(epoch, inState,j2000Body);
-   outState      = outCoord->FromMJ2000Eq(epoch, internalState, j2000Body);
+   Rvector internalState(inState.GetSize());
+   bool coincident = (inCoord->GetOrigin() == outCoord->GetOrigin() ? 
+                      true : false);
+   internalState = inCoord->ToMJ2000Eq(epoch, inState, coincident);
+   outState      = outCoord->FromMJ2000Eq(epoch, internalState, coincident);
    return true;
 }
 
