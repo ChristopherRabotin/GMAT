@@ -95,6 +95,9 @@ private:
       //Mission Tree
       MISSIONS_FOLDER,
       DEFAULT_PROPAGATE_COMMAND,
+      MANEUVER_COMMAND,
+      PROPAGATE_COMMAND,
+      TARGET_COMMAND,
   };
 
 

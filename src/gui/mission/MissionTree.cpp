@@ -31,6 +31,18 @@
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
+   
+   EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
+   EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
+
+   EVT_MENU(POPUP_ADD_MANEUVER_BEFORE, MissionTree::OnAddManeuverBefore)
+   EVT_MENU(POPUP_ADD_PROPAGATE_BEFORE, MissionTree::OnAddPropagateBefore)
+   EVT_MENU(POPUP_ADD_TARGET_BEFORE, MissionTree::OnAddTargetBefore)
+   
+   EVT_MENU(POPUP_ADD_MANEUVER_AFTER, MissionTree::OnAddManeuverAfter)
+   EVT_MENU(POPUP_ADD_PROPAGATE_AFTER, MissionTree::OnAddPropagateAfter)
+   EVT_MENU(POPUP_ADD_TARGET_AFTER, MissionTree::OnAddTargetAfter)
+
 END_EVENT_TABLE()
 
 //------------------------------
@@ -55,9 +67,12 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
               const wxPoint &pos, const wxSize &size, long style)
-              :wxTreeCtrl(parent, id, pos, size, style)
+              :DecoratedTree(parent, id, pos, size, style)
 {
     this->parent = parent;
+//    this->SetNodes();
+    this->SetParameter(BOXCOUNT, 2);
+    this->SetParameter(BOXWIDTH, 20);
     AddIcons();
     AddDefaultMission();
 }
@@ -192,20 +207,126 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 {
-    wxString title;
-    if ( id.IsOk() )
-    {
-        title << wxT("Menu for ") << GetItemText(id);
-    }
-    else
-    {
-        title = wxT("Menu for no particular item");
-    }
-
 #if wxUSE_MENUS
-    wxMenu menu(title);
-    menu.Append(1, wxT("&About..."));
+    wxMenu *menu = new wxMenu;
 
-    PopupMenu(&menu, pt);
+    wxMenu *menuAddBefore = new wxMenu;;
+    
+    menuAddBefore->Append(POPUP_ADD_BEFORE_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_TARGET, wxT("Target"), wxT(""), FALSE);
+
+    wxMenu *menuAddAfter = new wxMenu;;
+    
+    menuAddAfter->Append(POPUP_ADD_AFTER_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_TARGET, wxT("Target"), wxT(""), FALSE);
+
+    menu->Append(POPUP_ADD_BEFORE, wxT("Insert Before"), menuAddBefore, wxT(""));
+    menu->Append(POPUP_ADD_AFTER, wxT("Insert After"), menuAddAfter, wxT(""));
+    menu->AppendSeparator();
+    
+    menu->Append(POPUP_SWAP_BEFORE, wxT("Swap Before"), wxT(""), FALSE);
+    menu->Append(POPUP_SWAP_AFTER, wxT("Swap After"), wxT(""), FALSE);
+    menu->AppendSeparator();
+    
+    menu->Append(POPUP_CUT, wxT("Cut"), wxT(""), FALSE);
+    menu->Append(POPUP_COPY, wxT("Copy"), wxT(""), FALSE);
+    menu->Append(POPUP_PASTE, wxT("Paste"), wxT(""), FALSE);
+    menu->Append(POPUP_DELETE, wxT("Delete"), wxT(""), FALSE);
+    
+    PopupMenu(menu, pt);
+    //PopupMenu(&menuAddEvent, pt);
 #endif // wxUSE_MENUS
 }
+
+void MissionTree::OnBefore ()
+{
+    before = true;
+}
+
+void MissionTree::OnAfter ()
+{
+    before = false;
+}
+
+void MissionTree::OnAddManeuverBefore(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+
+  item = GetPrevSibling(item);
+  
+  this->InsertItem(itemParent, item, wxT("Maneuver"), -1, -1,
+        new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
+}
+
+void MissionTree::OnAddPropagateBefore(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+  
+  item = GetPrevSibling(item);
+  
+  this->InsertItem(itemParent, item, wxT("Propagate"), -1, -1,
+        new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
+}
+
+void MissionTree::OnAddTargetBefore(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+  
+  item = GetPrevSibling(item);
+  
+  this->InsertItem(itemParent, item, wxT("Target"), -1, -1,
+        new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
+}
+
+void MissionTree::OnAddManeuverAfter(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+
+  this->InsertItem(itemParent, item, wxT("Maneuver"), -1, -1,
+        new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
+}
+
+void MissionTree::OnAddPropagateAfter(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+  
+  this->InsertItem(itemParent, item, wxT("Propagate"), -1, -1,
+        new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
+}
+
+void MissionTree::OnAddTargetAfter(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  wxTreeItemId itemParent = GetItemParent(item);
+  
+  this->InsertItem(itemParent, item, wxT("Target"), -1, -1,
+        new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
+}
+
+//------------------------------------------------------------------------------
+// void AddManeuver(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::AddManeuver(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  
+  wxString withName;
+  withName.Printf("Maneuver%d", numManeuver++);
+  
+  Burn *theBurn = theGuiInterpreter->CreateBurn("ImpulsiveBurn", (const std::string) withName);
+
+  wxString newName = wxT(theBurn->GetName().c_str());
+  
+  this->AppendItem(item, newName, -1, -1,
+              new GmatTreeItemData(newName, MANEUVER_COMMAND));
+
+}
+
+
