@@ -10,7 +10,7 @@ PROJECT_ROOT    = ../..
 SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
 	EquatorAxes.cpp InertialAxes.cpp ItrfCoefficientsFile.cpp \
-	MJ2000EcAxes.cpp MJ2000EqAxes.cpp
+	MJ2000EcAxes.cpp MJ2000EqAxes.cpp ObjectReferencedAxes.cpp
 
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
