@@ -264,13 +264,13 @@ void FiniteBurnSetupPanel::SaveData()
    wxString thrusterString = thrusterCB->GetStringSelection();
    int thrusterID = theBurn->GetParameterID("Thrusters");
    std::string thruster = std::string (thrusterString.c_str());
-   theBurn->SetStringParameter(thrusterID, thruster);
+   theBurn->SetStringParameter(thrusterID, thruster, 0);
 
    // Tanks
    wxString tankString = tankCB->GetStringSelection();
    int tankID = theBurn->GetParameterID("Tanks");
    std::string tank = std::string (tankString.c_str());
-   theBurn->SetStringParameter(tankID, tank);
+   theBurn->SetStringParameter(tankID, tank, 0);
     
    // Burn scale factor
    int bsfID = theBurn->GetParameterID("BurnScaleFactor");
