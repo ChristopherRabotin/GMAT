@@ -375,8 +375,6 @@ void Planet::InitializePlanet(const std::string &cBody)
    //defaultCij          = cij;
    //defaultCoefSize     = Planet::COEFFICIENT_SIZE[bodyIndex];
 
-   atmManager          = new AtmosphereManager(instanceName);
-
    // set defaults in case use chooses to go back to not using potential file
    defaultMu           = mu;
    defaultEqRadius     = equatorialRadius;

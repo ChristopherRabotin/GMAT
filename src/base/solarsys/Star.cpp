@@ -360,8 +360,6 @@ void Star::InitializeStar()
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
 
-   atmManager          = NULL;
-   
    // fill in default values for Star-specific stuff
    radiantPower        = Star::STAR_RADIANT_POWER;
    referenceDistance   = Star::STAR_REFERENCE_DISTANCE;

@@ -187,8 +187,6 @@ void Moon::InitializeMoon(const std::string &cBody)
    bodyNumber          = Moon::BODY_NUMBER;
    referenceBodyNumber = Moon::REF_BODY_NUMBER;
 
-   atmManager          = new AtmosphereManager(instanceName);
-
    //coefficientSize     = Moon::COEFFICIENT_SIZE;
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
