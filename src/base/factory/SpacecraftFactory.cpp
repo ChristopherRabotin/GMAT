@@ -143,9 +143,3 @@ SpacecraftFactory::~SpacecraftFactory()
 //---------------------------------
 //  private methods
 //---------------------------------
-
-
-
-
-
-   
