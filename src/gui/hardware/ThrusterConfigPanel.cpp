@@ -27,6 +27,10 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(ThrusterConfigPanel, wxPanel)
+   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
+   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
+   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
+   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_TEXT(ID_TEXTCTRL, ThrusterConfigPanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, ThrusterConfigPanel::OnButtonClick)
 END_EVENT_TABLE()
@@ -72,7 +76,7 @@ ThrusterConfigPanel::~ThrusterConfigPanel()
 void ThrusterConfigPanel::Create()
 {
     // Integer
-    Integer bsize = 3; // border size
+    Integer bsize = 5; // border size
     
     // wxString
     wxString emptyList[] = {};
@@ -126,7 +130,7 @@ void ThrusterConfigPanel::Create()
     flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
     flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
     
-    theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
+    theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
