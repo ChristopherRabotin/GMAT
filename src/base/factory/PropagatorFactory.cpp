@@ -45,12 +45,13 @@
 Propagator* PropagatorFactory::CreatePropagator(std::string ofType,
                                                 std::string withName)
 {
+   //loj: 3/4/04 passed withName and used correct name for RungeKuttaFehlberg56
    if (ofType == "RungeKutta89")
-      return new RungeKutta89();
+      return new RungeKutta89(withName);
    if (ofType == "DormandElMikkawyPrince68")
-      return new DormandElMikkawyPrince68();
+      return new DormandElMikkawyPrince68(withName);
    if (ofType == "RungeKuttaFehlberg56")
-      return new DormandElMikkawyPrince68();
+      return new RungeKuttaFehlberg56(withName);
    // add others here
    else
       return NULL;
