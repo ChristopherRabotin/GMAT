@@ -214,6 +214,6 @@ bool Sandbox::AddPropSetup(PropSetup *propSetup)
 
 bool Sandbox::AddSubscriber(Subscriber *sub)
 {
-    return false;
+    return  AddObject(sub);
 }
 

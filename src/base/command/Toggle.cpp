@@ -65,23 +65,29 @@ void Toggle::InterpretAction(void)
     while (str[loc] == ' ')
         ++loc;
     
-    Integer cmd = generatingString.find_last_of("On", generatingString.length());
-    
-    if (cmd == std::string::npos) {
-        cmd = generatingString.find_last_of("Off", generatingString.length());
+    Integer cmd = generatingString.find("On", loc);
+    while (generatingString.find("On", cmd+1) != std::string::npos)
+        cmd = generatingString.find("On", cmd+1);
+        
+    if ((cmd == std::string::npos) || (cmd <= (generatingString.length() - 5))) {
+        cmd = generatingString.find("Off", loc);
+        while (generatingString.find("Off", cmd+1) != std::string::npos)
+            cmd = generatingString.find("Off", cmd+1);
+            
         if (cmd == std::string::npos)
             throw CommandException("Must Toggle either 'On' or 'Off'");
-        if (cmd > generatingString.length() - 5)
+        if (cmd > (generatingString.length() - 6)) {
             toggleState = false;
+        }
     }
     else
-        if (cmd > generatingString.length() - 4)
+        if (cmd > (generatingString.length() - 5)) {
             toggleState = true;
+        }
             
     // Find the Subscriber list
-    end = generatingString.find(" ", loc, cmd);
-    std::string sName = generatingString.substr(loc, end);
-    
+    end = generatingString.find(" ", loc);
+    std::string sName = generatingString.substr(loc, end-loc);
     subNames.push_back(sName);
 }
 
@@ -89,10 +95,12 @@ void Toggle::InterpretAction(void)
 bool Toggle::Execute(void)
 {
     Subscriber *sub;
+    
     for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) {
         sub = (Subscriber *)(*objectMap)[*s];
-        if (sub)
+        if (sub) {
             sub->Activate(toggleState);
+        }
     }
     
     char data[] = "Toggle executed\n\n";

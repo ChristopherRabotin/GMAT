@@ -207,7 +207,7 @@ bool ForceModel::AddSpacecraft(Spacecraft *sc)
  * Updates the state data for the spacecraft that use this force model.
  */
 //------------------------------------------------------------------------------
-void ForceModel::UpdateSpacecraft(void)
+void ForceModel::UpdateSpacecraft(Real newEpoch)
 {
     if (spacecraft.size() > 0) {
         Integer j = 0;
@@ -218,6 +218,9 @@ void ForceModel::UpdateSpacecraft(void)
             state = (*sat)->GetState();
             memcpy(state, &modelState[j*stateSize], stateSize * sizeof(Real));
             ++j;
+            // Update the epoch if it was passed in
+            if (newEpoch != -1.0)
+                (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newEpoch);
         }
     }
 }

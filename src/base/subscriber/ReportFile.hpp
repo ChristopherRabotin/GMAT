@@ -61,6 +61,7 @@ protected:
 
     virtual bool        Distribute(Integer len);
     virtual bool        Distribute(const Real * dat, Integer len);
+    virtual bool        OpenReportFile(void);
 };
 
 

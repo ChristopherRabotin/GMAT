@@ -38,7 +38,6 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
     if (fileName != "")
         dstream.open(fileName.c_str());
     else {
-        dstream.open("ReportFile.txt");
         filename = "ReportFile.txt";
     }
 
@@ -57,7 +56,8 @@ ReportFile::~ReportFile(void)
 bool ReportFile::Distribute(int len)
 {
     if (!dstream.is_open())
-        return false;
+        if (!OpenReportFile())
+            return false;
 
     if (len == 0)
         dstream << data;
@@ -72,7 +72,8 @@ bool ReportFile::Distribute(int len)
 bool ReportFile::Distribute(const Real * dat, Integer len)
 {
     if (!dstream.is_open())
-        return false;
+        if (!OpenReportFile())
+            return false;
         
     dstream.precision(precision);
 
@@ -87,6 +88,14 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
     return true;
 }
 
+
+bool ReportFile::OpenReportFile(void)
+{
+    dstream.open(filename.c_str());
+    if (!dstream.is_open())
+        return false;
+    return true;
+}
 
 std::string ReportFile::GetParameterText(const Integer id) const
 {

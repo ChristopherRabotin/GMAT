@@ -83,6 +83,8 @@ protected:
     bool                    propCoupled;
     /// Frequency used to check for user interrupts of the run
     Integer                 interruptCheckFrequency;
+    /// Starting epoch for the propagation
+    Real                    baseEpoch;
 
     // We may eventually want to make this a list of propagators all driven by
     // this command, like this:

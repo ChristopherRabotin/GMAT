@@ -73,6 +73,7 @@ Propagate::Propagate(const Propagate &p) :
     // Set the parameter IDs
     propCoupledID               (p.propCoupledID),
     interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
+    baseEpoch                   (0.0),
     secondsToProp               (p.secondsToProp)
 {
     // Increase the number of parms by the 2 new ones
@@ -320,10 +321,15 @@ bool Propagate::Execute(void)
 
     Propagator *p = prop->GetPropagator();
     ForceModel *fm = prop->GetForceModel();
+    fm->SetTime(0.0);
     
     p->Initialize();
     Real *state = fm->GetState();
     Integer dim = fm->GetDimension();
+    Real *pubdata = new Real[dim+1];
+    GmatBase* sat1 = (*objectMap)[*(satName.begin())];
+    Integer epochID = sat1->GetParameterID("Epoch");
+    baseEpoch = sat1->GetRealParameter(epochID);
 
     while (elapsedTime < secondsToProp) {
         if (!p->Step())
@@ -337,18 +343,27 @@ bool Propagate::Execute(void)
         else // Passed stop epoch
         {
             fm->UpdateFromSpacecraft();
+            fm->SetTime(elapsedTime);
             break;
         }
         // Publish the data here
-        publisher->Publish(state, dim);
+        pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
+        memcpy(&pubdata[1], state, dim*sizeof(Real));
+        publisher->Publish(pubdata, dim+1);
     }
     
     if (secondsToProp - elapsedTime > 0.0) {
         if (!p->Step(secondsToProp - elapsedTime))
             throw CommandException("Propagator Failed to Step fixed interval");
         // Publish the final data point here
-        publisher->Publish(state, dim);
+        pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
+        
+        memcpy(&pubdata[1], state, dim*sizeof(Real));
+        publisher->Publish(pubdata, dim+1);
+        fm->UpdateSpacecraft(baseEpoch + fm->GetTime() / 86400.0);
     }
+    
+    delete [] pubdata;
 
     return true;
 }

@@ -75,7 +75,7 @@ public:
 
     void AddForce(PhysicalModel *pPhyscialModel);
     bool AddSpacecraft(Spacecraft *sc);
-    void UpdateSpacecraft(void);
+    void UpdateSpacecraft(Real newEpoch = -1.0);
     void UpdateFromSpacecraft(void);
     
     virtual bool Initialize(void);
