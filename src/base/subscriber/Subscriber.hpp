@@ -41,28 +41,34 @@
 class GMAT_API Subscriber : public GmatBase
 {
 public:
-    Subscriber(std::string typeStr, std::string nomme);
-    Subscriber& operator=(const Subscriber &right);
-    virtual ~Subscriber(void);
-
-    virtual bool        Initialize(); //loj: 3/8/04 added
-    virtual bool        ReceiveData(const char * datastream);
-    virtual bool        ReceiveData(const char * datastream, const Integer len);
-    virtual bool        ReceiveData(const Real * datastream, const Integer len = 0);
-    Subscriber        * Next(void);
-    bool                Add(Subscriber * s);
-    bool                Remove(Subscriber * s, const bool del);
-    
-    void                Activate(bool state = true);
-    bool                IsActive();
+   Subscriber(std::string typeStr, std::string nomme);
+   Subscriber(const Subscriber &copy);
+   Subscriber& operator=(const Subscriber &right);
+   virtual ~Subscriber(void);
+   
+   virtual bool        Initialize(); //loj: 3/8/04 added
+   virtual bool        ReceiveData(const char * datastream);
+   virtual bool        ReceiveData(const char * datastream, const Integer len);
+   virtual bool        ReceiveData(const Real * datastream, const Integer len = 0);
+   Subscriber        * Next(void);
+   bool                Add(Subscriber * s);
+   bool                Remove(Subscriber * s, const bool del);
+   
+   void                Activate(bool state = true);
+   bool                IsActive();
     
 protected:
-    const char        * data;
-    Subscriber        * next;
-    bool                active;
-
-    virtual bool        Distribute(Integer len) = 0;
-    virtual bool        Distribute(const Real * dat, Integer len);
+   enum
+   {
+      SubscriberParamCount = GmatBaseParamCount,
+   };
+   
+   const char        * data;
+   Subscriber        * next;
+   bool                active;
+   
+   virtual bool        Distribute(Integer len) = 0;
+   virtual bool        Distribute(const Real * dat, Integer len);
 private:
 
 };

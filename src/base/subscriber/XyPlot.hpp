@@ -30,6 +30,7 @@ public:
           Parameter *firstYParam = NULL, const std::string &plotTitle = "",
           const std::string &xAxisTitle = "", const std::string &yAxisTitle = "",
           bool drawGrid = false);
+   XyPlot(const XyPlot &copy);
    virtual ~XyPlot(void);
 
    // methods inherited from Subscriber
@@ -42,6 +43,9 @@ public:
     
    bool AddYParameter(const std::string &paramName);
    bool AddYParameter(Parameter *param);
+
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
    // methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
@@ -98,7 +102,7 @@ protected:
     
    enum
    {
-      IND_VAR = 0,
+      IND_VAR = SubscriberParamCount,
       DEP_VAR,
       DEP_VAR_LIST,
       CLEAR_DEP_VAR_LIST,

@@ -96,6 +96,16 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
 }
 
 //------------------------------------------------------------------------------
+// XyPlot(const XyPlot &copy)
+//------------------------------------------------------------------------------
+XyPlot::XyPlot(const XyPlot &copy) :
+Subscriber(copy)
+{
+   // wcs : someone else will need to complete this
+}
+
+
+//------------------------------------------------------------------------------
 // ~XyPlot(void)
 //------------------------------------------------------------------------------
 XyPlot::~XyPlot(void)
@@ -269,6 +279,21 @@ bool XyPlot::AddYParameter(Parameter *param)
 //---------------------------------
 // methods inherited from GmatBase
 //---------------------------------
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the XyPlot.
+ *
+ * @return clone of the XyPlot.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* XyPlot::Clone(void) const
+{
+   return (new XyPlot(*this));
+}
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const

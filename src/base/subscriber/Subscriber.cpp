@@ -42,10 +42,18 @@
 //---------------------------------
 
 Subscriber::Subscriber(std::string typeStr, std::string nomme) :
-    GmatBase        (Gmat::SUBSCRIBER, typeStr, nomme),
-    data            (NULL),
-    next            (NULL),
-    active          (true)
+GmatBase        (Gmat::SUBSCRIBER, typeStr, nomme),
+data            (NULL),
+next            (NULL),
+active          (true)
+{
+}
+
+Subscriber::Subscriber(const Subscriber &copy) :
+GmatBase        (copy),
+data            (NULL),
+next            (NULL),
+active          (true)
 {
 }
 

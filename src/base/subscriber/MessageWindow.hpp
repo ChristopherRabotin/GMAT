@@ -25,36 +25,40 @@
 class MessageWindow : public Subscriber
 {
 public:
-    MessageWindow(const std::string &name);
-    virtual ~MessageWindow(void);
-    
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer     GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType
-                        GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
-
-    virtual Integer     GetIntegerParameter(const Integer id) const;
-    virtual Integer     SetIntegerParameter(const Integer id,
-                                            const Integer value);
+   MessageWindow(const std::string &name);
+   MessageWindow(const MessageWindow &mw);
+   virtual ~MessageWindow(void);
+   
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                     GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual Integer     GetIntegerParameter(const Integer id) const;
+   virtual Integer     SetIntegerParameter(const Integer id,
+                                          const Integer value);
 
 protected:
-    /// Precision for output of real data
-    Integer precision;
-
-    enum
-    {
-        PRECISION = 0,
-        MessageWindowParamCount
-    };
-    
-    static const Gmat::ParameterType PARAMETER_TYPE[MessageWindowParamCount];
-    static const std::string PARAMETER_TEXT[MessageWindowParamCount];
-    
-    virtual bool Distribute(Integer len);
-    virtual bool Distribute(const Real * dat, Integer len);
-
-    std::stringstream dstream;
+   /// Precision for output of real data
+   Integer precision;
+   
+   enum
+   {
+      PRECISION = SubscriberParamCount,
+      MessageWindowParamCount
+   };
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[MessageWindowParamCount];
+   static const std::string PARAMETER_TEXT[MessageWindowParamCount];
+   
+   virtual bool Distribute(Integer len);
+   virtual bool Distribute(const Real * dat, Integer len);
+   
+   std::stringstream dstream;
 };
 
 #endif

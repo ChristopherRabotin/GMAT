@@ -26,11 +26,15 @@ class OpenGlPlot : public Subscriber
 {
 public:
    OpenGlPlot(const std::string &name);
+   OpenGlPlot(const OpenGlPlot &ogl);
    virtual ~OpenGlPlot(void);
 
    // methods inherited from Subscriber
    virtual bool Initialize(); //loj: 3/8/04 added
     
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
    // methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -60,7 +64,7 @@ protected:
     
    enum
    {
-      DRAW_AXIS = 0,
+      DRAW_AXIS = SubscriberParamCount,
       DRAW_EQUATORIAL_PLANE,
       WIRE_FRAME,
       DATA_COLLECT_FREQUENCY,

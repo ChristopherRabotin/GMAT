@@ -29,20 +29,37 @@ ReportFile::ReportFile(char * filename)
 }
 */
 ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
-    Subscriber      ("ReportFile", name),
-    filename        (fileName),
-    precision       (12),
-    filenameID      (parameterCount),
-    precisionID     (parameterCount + 1)
+Subscriber      ("ReportFile", name),
+filename        (fileName),
+precision       (12),
+filenameID      (parameterCount),
+precisionID     (parameterCount + 1)
 {
-    if (fileName != "")
-        dstream.open(fileName.c_str());
-    else {
-        filename = "ReportFile.txt";
-    }
+   if (fileName != "")
+      dstream.open(fileName.c_str());
+   else {
+      filename = "ReportFile.txt";
+   }
 
-    // Added 1 parameter
-    parameterCount += 2;
+   // Added 1 parameter
+   parameterCount += 2;
+}
+
+ReportFile::ReportFile(const ReportFile &rf) :
+Subscriber      (rf),
+filename        (rf.filename),
+precision       (rf.precision),
+filenameID      (parameterCount),
+precisionID     (parameterCount + 1)
+{
+   if (filename != "")
+      dstream.open(filename.c_str());
+   else {
+      filename = "ReportFile.txt";
+   }
+
+   // Added 1 parameter
+   parameterCount += 2;
 }
 
 
@@ -95,6 +112,21 @@ bool ReportFile::OpenReportFile(void)
     if (!dstream.is_open())
         return false;
     return true;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ReportFile.
+ *
+ * @return clone of the ReportFile.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ReportFile::Clone(void) const
+{
+   return (new ReportFile(*this));
 }
 
 std::string ReportFile::GetParameterText(const Integer id) const

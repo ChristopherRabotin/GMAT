@@ -36,16 +36,29 @@ MessageWindow::PARAMETER_TYPE[MessageWindowParamCount] =
 };
 
 //------------------------------------------------------------------------------
+// MessageWindow(const MessageWindow &mw)
+//------------------------------------------------------------------------------
+MessageWindow::MessageWindow(const MessageWindow &mw)
+: Subscriber      (mw),
+precision         (mw.precision)
+{
+   // GmatBase data
+   //parameterCount = MessageWindowParamCount;
+   dstream.precision(precision);
+   dstream.setf(std::ios::fixed);
+}
+
+//------------------------------------------------------------------------------
 // MessageWindow(const std::string &name)
 //------------------------------------------------------------------------------
 MessageWindow::MessageWindow(const std::string &name)
-    : Subscriber      ("MessageWindow", name),
-      precision       (10)
+: Subscriber      ("MessageWindow", name),
+precision       (10)
 {
-    // GmatBase data
-    parameterCount = MessageWindowParamCount;
-    dstream.precision(precision);
-    dstream.setf(std::ios::fixed);
+   // GmatBase data
+   parameterCount = MessageWindowParamCount;
+   dstream.precision(precision);
+   dstream.setf(std::ios::fixed);
 }
 
 //------------------------------------------------------------------------------
@@ -99,6 +112,21 @@ bool MessageWindow::Distribute(const Real * dat, Integer len)
     //dstream << "line # " << MessageInterface::GetNumberOfMessageLines() << std::endl;
     //MessageInterface::ShowMessage(dstream.str());
     return true;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the MessageWindow.
+ *
+ * @return clone of the MessageWindow.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* MessageWindow::Clone(void) const
+{
+   return (new MessageWindow(*this));
 }
 
 //------------------------------------------------------------------------------

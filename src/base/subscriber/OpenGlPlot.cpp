@@ -48,7 +48,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount] =
 // OpenGlPlot(const std::string &name)
 //------------------------------------------------------------------------------
 OpenGlPlot::OpenGlPlot(const std::string &name)
-   : Subscriber      ("OpenGlPlot", name)
+: Subscriber      ("OpenGlPlot", name)
 {
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
@@ -58,6 +58,24 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mDrawWireFrame = false;
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
+   mNumData = 0;
+   mNumCollected = 0;
+}
+
+//------------------------------------------------------------------------------
+// OpenGlPlot(const OpenGlPlot &ogl)
+//------------------------------------------------------------------------------
+OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
+: Subscriber      (ogl)
+{
+   // GmatBase data
+   //parameterCount = OpenGlPlotParamCount;
+
+   mDrawAxis = ogl.mDrawAxis;
+   mDrawEquatorialPlane = ogl.mDrawEquatorialPlane;
+   mDrawWireFrame = ogl.mDrawWireFrame;
+   mDataCollectFrequency = ogl.mDataCollectFrequency;
+   mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
    mNumData = 0;
    mNumCollected = 0;
 }
@@ -121,6 +139,21 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()
    return true;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the OpenGlPlot.
+ *
+ * @return clone of the OpenGlPlot.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* OpenGlPlot::Clone(void) const
+{
+   return (new OpenGlPlot(*this));
 }
 
 //------------------------------------------------------------------------------
