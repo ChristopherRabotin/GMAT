@@ -11,6 +11,7 @@
 //
 // Author: Linda Jun
 // Created: 2003/09/15
+// Modified: 2004/05/06  J. Gurganus - See A1Mjd.hpp for details.
 //
 /**
  * This class provides A1 Modified Julian Date(MJD). The zero date of the MJD
@@ -388,6 +389,23 @@ A1Date A1Mjd::ToA1Date()
    CalDate calDate;
    calDate = UtcMjdToCalDate(mMjd);
    return A1Date(calDate);   
+}
+
+//------------------------------------------------------------------------------
+// Real UtcMjdToA1Mjd(const Real utcMjd)
+//------------------------------------------------------------------------------
+/**
+ * Converts from UTC modified Julian date to a A1 modified Julian date
+ */
+//------------------------------------------------------------------------------
+Real A1Mjd::UtcMjdToA1Mjd(const Real utcMjd)
+{
+   Real a1mjd;
+   
+   // Get A1-UTC offset in seconds
+   a1mjd = GetA1UtcDiff(utcMjd);
+   
+   return (utcMjd + a1mjd/SECS_PER_DAY);
 }
 
 //------------------------------------------------------------------------------

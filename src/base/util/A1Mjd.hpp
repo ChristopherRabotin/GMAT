@@ -10,7 +10,9 @@
 // number S-67573-G
 //
 // Author: Linda Jun
-// Created: 2003/09/15
+// Created:  2003/09/15
+// Modified: 2004/05/06  J. Gurganus - Added UtcMjdToA1Mjd and moved ToUtcMjd
+//                                     from private to public method.
 //
 /**
  * This class provides A1 Modified Julian Date(MJD). The zero date of the MJD
@@ -66,6 +68,9 @@ public:
    UtcDate ToUtcDate();
    A1Date ToA1Date();
 
+   Real   UtcMjdToA1Mjd(const Real utcMjd);
+   UtcMjd ToUtcMjd();
+
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
    std::string* ToValueStrings();
@@ -75,12 +80,10 @@ public:
 protected:
 private:
 
-   UtcMjd ToUtcMjd();
    Real GetA1UtcDiff(const UtcMjd &utcmjd);
    Real GetA1UtcDiffAnalytic(const UtcMjd &utcmjd);
    GmatTimeUtil::CalDate A1MjdToCalDate(const A1Mjd &a1mjd);
    GmatTimeUtil::CalDate UtcMjdToCalDate(const UtcMjd &utcmjd);
-
 
 //     static Real SecondsSinceReference(Integer year, MonthOfYear month,
 //                                       DayOfMonth day, HourOfDay hour,
