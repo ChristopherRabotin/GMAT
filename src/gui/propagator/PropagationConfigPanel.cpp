@@ -218,8 +218,8 @@ void PropagationConfigPanel::SaveData()
       if (max < min)
       {
          MessageInterface::PopupMessage
-         (Gmat::WARNING_, "PropagationConfigPanel::SaveData -- \n"
-         "Maximum Step can not be less than Minimum Step.");
+         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
+         "Propagation updates have not been saved");
          return;
       }    
         
