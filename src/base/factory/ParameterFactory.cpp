@@ -91,10 +91,6 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
         return new KepMA(withName);
     if (ofType == "KepMM")
         return new KepMM(withName);
-    if (ofType == "VelApoapsis")
-        return new VelApoapsis(withName);
-    if (ofType == "VelPeriapsis")
-        return new VelPeriapsis(withName);
     if (ofType == "SMA")
         return new SMA(withName);
     if (ofType == "Ecc")
