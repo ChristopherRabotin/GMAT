@@ -30,11 +30,12 @@ class ReportFile :
     public Subscriber
 {
 public:
-    ReportFile(char * filename = NULL);
+//    ReportFile(char * filename = NULL);
+    ReportFile(const std::string &fileName);
     virtual ~ReportFile(void);
 
 protected:
-    std::ofstream       dstream;
+    std::ofstream       dstream;  // output data stream
 
     virtual bool        Distribute(Integer len);
 };
