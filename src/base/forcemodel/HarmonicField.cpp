@@ -351,16 +351,43 @@ bool HarmonicField::legendreP_init(void)
    if ( !Abar ) {
       throw ForceModelException("legendreP_init: memory allocation failed for Abar!");
    }
-   for (cc = 0; cc <= maxDegree+1; ++cc) {
-      if ( maxOrder >= cc )
-         Abar[cc] = new Real[cc+3];
-      else
-         Abar[cc] = new Real[maxOrder+3];
 
-      if ( !Abar[cc] ) {
+   // old code
+   //for (cc = 0; cc <= maxDegree+1; ++cc) {
+   //   if ( maxOrder >= cc )
+   //      Abar[cc] = new Real[cc+3];
+   //   else
+   //      Abar[cc] = new Real[maxOrder+3];
+
+   //   if ( !Abar[cc] ) {
+   //      throw ForceModelException("legendreP_init:  calloc failed!\a\n!");
+   //   }
+   //}
+
+   //loj: 1/13/05 allocate and initialize Abar
+   // new code
+   Integer allocsize = 0;
+   
+   for (cc = 0; cc <= maxDegree+1; ++cc)
+   {
+      if ( maxOrder >= cc )
+         allocsize = cc + 3;
+      else
+         allocsize = maxOrder + 3;
+
+      Abar[cc] = new Real[allocsize];
+      
+      if ( !Abar[cc] )
+      {
          throw ForceModelException("legendreP_init:  calloc failed!\a\n!");
       }
+      else
+      {
+         for (int jj=0; jj<allocsize; jj++)
+            Abar[cc][jj] = 0.0;
+      }
    }
+
 
    /* initialize the diagonal elements (not a function of the input) */
    Abar[0][0] = (Real)1.0;
