@@ -770,6 +770,9 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          throw CommandException("Propagate does not identify stopping condition: looking for {\n");
    
       loc = end + 1;
+      while ((*i)[loc] == ' ')
+         ++loc;
+         
       end = i->find(".", loc);
    
       if (end == (Integer)std::string::npos)
