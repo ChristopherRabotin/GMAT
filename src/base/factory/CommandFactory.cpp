@@ -28,12 +28,13 @@
 #include "Target.hpp"         // for Target command
 #include "Vary.hpp"           // for Vary command
 #include "Achieve.hpp"        // for Achieve command
+#include "EndTarget.hpp"      // for EndTarget command
 #include "ForCommand.hpp"     // for FOR command
 #include "EndForCommand.hpp"  // for EndFor command
 #include "IfCommand.hpp"      // for IF command
 #include "ElseCommand.hpp"    // for Else command
 #include "EndIfCommand.hpp"   // for EndIf command
-#include "EndTarget.hpp"      // for EndTarget command
+#include "Assignment.hpp"     // for Assignment (GMAT) command  
 
 
 //---------------------------------
@@ -67,6 +68,8 @@ Command* CommandFactory::CreateCommand(std::string ofType,
         return new Vary;
     else if (ofType == "Achieve")
         return new Achieve;
+    else if (ofType == "EndTarget")
+        return new EndTarget;
     else if (ofType == "For")
         return new ForCommand;
     else if (ofType == "EndFor")
@@ -77,8 +80,8 @@ Command* CommandFactory::CreateCommand(std::string ofType,
         return new ElseCommand;
     else if (ofType == "EndIf")
         return new EndIfCommand;
-    else if (ofType == "EndTarget")
-        return new EndTarget;
+    else if (ofType == "GMAT")
+        return new Assignment;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -108,12 +111,13 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Target");
       creatables.push_back("Vary");
       creatables.push_back("Achieve");
+      creatables.push_back("EndTarget");
       creatables.push_back("For");
       creatables.push_back("EndFor");
       creatables.push_back("If");
       creatables.push_back("Else");
       creatables.push_back("EndIf");
-      creatables.push_back("EndTarget");
+      creatables.push_back("GMAT");
    }
 }
 
@@ -154,12 +158,13 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Target");
       creatables.push_back("Vary");
       creatables.push_back("Achieve");
+      creatables.push_back("EndTarget");
       creatables.push_back("For");
       creatables.push_back("EndFor");
       creatables.push_back("If");
       creatables.push_back("Else");
       creatables.push_back("EndIf");
-      creatables.push_back("EndTarget");
+      creatables.push_back("GMAT");
    }
 }
 

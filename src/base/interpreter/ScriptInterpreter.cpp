@@ -161,6 +161,7 @@ bool ScriptInterpreter::Parse(void)
                 throw InterpreterException("Unable to create object: " + name); //loj: added name
         }
 
+/*
         if (**phrase == "GMAT") {
             // Look up related object(s)
             ++phrase;
@@ -205,7 +206,7 @@ bool ScriptInterpreter::Parse(void)
                 }
             }
         }
-        
+*/
         // Check to see if it's a command
         if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             Command *cmd = moderator->AppendCommand(**phrase, "");

@@ -27,8 +27,15 @@
 
 #include "Assignment.hpp"
 
+
 Assignment::Assignment() :
-    Command         ("GMAT")
+    Command         ("GMAT"),
+    ownerName       (""),
+    parmName        (""),    
+    parmOwner       (NULL),
+    parmID          (-1),
+    parmType        (Gmat::UNKNOWN_PARAMETER_TYPE),
+    value           ("Not_Set")
 {
 }
 
@@ -39,7 +46,13 @@ Assignment::~Assignment()
 
 
 Assignment::Assignment(const Assignment& a) :
-    Command         (a)
+    Command         (a),
+    ownerName       (a.ownerName),
+    parmName        (a.parmName),    
+    parmOwner       (a.parmOwner),
+    parmID          (a.parmID),
+    parmType        (a.parmType),
+    value           (a.value)
 {
 }
 
@@ -49,17 +62,67 @@ Assignment& Assignment::operator=(const Assignment& a)
     if (this == &a)
         return *this;
         
+    ownerName = a.ownerName;
+    parmName  = a.parmName;    
+    parmOwner = a.parmOwner;
+    parmID    = a.parmID;
+    parmType  = a.parmType;
+    value     = a.value;
+    
     return *this;
 }
 
 
 bool Assignment::Initialize(void)
 {
+    // Find the object
+    if (objectMap->find(ownerName) == objectMap->end())
+        throw CommandException("Assignment command cannot find object");
+    
+    parmOwner = (*objectMap)[ownerName];
+    return true;
 }
 
 
 void Assignment::InterpretAction(void)
 {
+    /// @todo: Clean up this hack for the Maneuver::InterpretAction method
+    // Assignment lines have the form GMAT Sat.Element1 = 7654.321;
+    Integer loc = generatingString.find("GMAT", 0) + 4, end;
+    const char *str = generatingString.c_str();
+    while (str[loc] == ' ')
+        ++loc;
+    
+    end = generatingString.find(".", loc);
+    if (end == (Integer)std::string::npos)
+        throw CommandException("Assignment string does not identify object");
+    
+    std::string component = generatingString.substr(loc, end-loc);
+    if (component == "")
+        throw CommandException("Assignment string does not identify object");
+    ownerName = component;
+    
+    loc = end + 1;
+    end = generatingString.find("=", loc);
+    if (end == (Integer)std::string::npos)
+        throw CommandException("Assignment string does not set value");
+    
+    Integer strend = end;
+    while (str[strend] == ' ')
+        --strend;
+    component = generatingString.substr(loc, strend-loc-1);
+    if (component == "")
+        throw CommandException("Assignment string does not identify parameter");
+    parmName = component;
+    
+    loc = end + 1;
+    while (str[loc] == ' ')
+        ++loc;
+
+    value     = &str[loc];
+    
+    end = value.find(";");
+    value = value.substr(0, end);
 }
 
 
@@ -74,5 +137,34 @@ void Assignment::InterpretAction(void)
  */
 bool Assignment::Execute(void)
 {
-    return false;
+    bool retval = false;
+
+    // Get the parameter ID and ID type
+    parmID    = parmOwner->GetParameterID(parmName);
+    parmType  = parmOwner->GetParameterType(parmID);
+    
+    if (parmOwner == NULL)
+        throw CommandException("Parameter Owner Not Initialized");
+    
+    switch (parmType) {
+        case Gmat::INTEGER_TYPE:
+            parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
+            retval = true;
+            break;
+            
+        case Gmat::REAL_TYPE:
+            parmOwner->SetRealParameter(parmID, atof(value.c_str()));
+            retval = true;
+            break;
+            
+        case Gmat::STRING_TYPE:
+            parmOwner->SetStringParameter(parmID, value);
+            retval = true;
+            break;
+            
+        default:
+            break;
+    }
+    
+    return retval;
 }

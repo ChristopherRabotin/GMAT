@@ -41,6 +41,14 @@ public:
     virtual bool        Initialize(void);
     virtual void        InterpretAction(void);
     virtual bool        Execute(void);
+    
+protected:
+    std::string         ownerName;
+    std::string         parmName;
+    GmatBase            *parmOwner;
+    Integer             parmID;
+    Gmat::ParameterType parmType;
+    std::string         value;
 };
 
 #endif // Assignment_hpp
