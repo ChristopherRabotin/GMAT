@@ -184,19 +184,25 @@ bool Sandbox::SetPublisher(Publisher *pub)
 }
 
 
+//loj: 3/2/05 Added default ObjectType
 //------------------------------------------------------------------------------
-// GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type)
+// GmatBase* GetInternalObject(std::string name,
+//                             Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT)
 //------------------------------------------------------------------------------
-GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
+GmatBase* Sandbox::GetInternalObject(std::string name,
+                                     Gmat::ObjectType type)
 {
    GmatBase* obj = NULL;
     
    if (objectMap.find(name) != objectMap.end()) {
       obj = objectMap[name];
-      if (obj->GetType() != type) {
-         std::string errorStr = "GetInternalObject type mismatch for ";
-         errorStr += name;
-         throw SandboxException(errorStr);
+      if (type != Gmat::UNKNOWN_OBJECT)
+      {
+         if (obj->GetType() != type) {
+            std::string errorStr = "GetInternalObject type mismatch for ";
+            errorStr += name;
+            throw SandboxException(errorStr);
+         }
       }
    }
    else {

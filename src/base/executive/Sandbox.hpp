@@ -52,9 +52,10 @@ public:
    bool SetInternalCoordSystem(CoordinateSystem *ss);
    bool SetPublisher(Publisher *pub = NULL);
     
-   GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type);
+   GmatBase* GetInternalObject(std::string name,
+                               Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
    Spacecraft* GetSpacecraft(std::string name);
-    
+   
    // Execution methods
    bool Initialize();
    bool Execute();
