@@ -22,7 +22,7 @@
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
 
-//#define DEBUG_ACHIEVE 1
+#define DEBUG_ACHIEVE 1
 
 //------------------------------------------------------------------------------
 //  Achieve(void)
@@ -411,34 +411,49 @@ bool Achieve::InterpretAction(void)
 
 #if DEBUG_ACHIEVE
    MessageInterface::ShowMessage
-      ("Achieve::InterpretAction() goalName = %s\n", goalName.c_str());
+      ("Achieve::InterpretAction() goalName = \"%s\"\n", goalName.c_str());
 #endif
 
-   loc = goalName.find(".");
-   std::string parmObj = goalName.substr(0, loc);
-   std::string parmType = goalName.substr(loc+1, goalName.length() - (loc+1));
-    
+   std::string parmObj, parmType, parmSystem;
+   InterpretParameter(goalName, parmType, parmObj, parmSystem);
+
 #if DEBUG_ACHIEVE
    MessageInterface::ShowMessage
-      ("Achieve::InterpretAction() parmObj=%s, parmType=%s\n", parmObj.c_str(),
-       parmType.c_str());
+      ("Achieve::InterpretAction() parmObj=%s, parmType=%s, "
+       "parmSystem = \"%s\"\n", parmObj.c_str(),
+       parmType.c_str(), parmSystem.c_str());
 #endif
     
    goalParm = mod->CreateParameter(parmType, goalName);
+   if (!goalParm)
+      throw CommandException("Unable to create parameter " + goalName);
    goalParm->SetRefObjectName(Gmat::SPACECRAFT, parmObj); //loj: 9/13/04 added
-    
+
+   if (goalParm->IsCoordSysDependent()) {
+      if (parmSystem == "")
+         parmSystem = "EarthMJ2000Eq";
+      goalParm->SetStringParameter("DepObject", parmSystem);
+      goalParm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+   }
+
+   if (goalParm->IsOriginDependent()) {
+      if (parmSystem == "")
+         parmSystem = "Earth";
+      goalParm->SetStringParameter("DepObject", parmSystem);
+   }
+
    // Find the value
    loc = end + 1;
     
    // Goal can be either a parameter or a number; ConstructGoal determines this.
    Real value;
    if (ConstructGoal(&str[loc]))
-      value = 42160.0;
+      // It's a parameter; just set dummy value here -- gets reset on execution
+      value = 54321.0;    
    else
       value = atof(&str[loc]);
-//   SetRealParameter(goalID, value);
    goal = value;
-      
+
    // Find perts
    loc = generatingString.find("Tolerance", strend);
    end = generatingString.find("=", loc);
@@ -454,6 +469,8 @@ bool Achieve::InterpretAction(void)
 // bool ConstructGoal(const char* str)
 //------------------------------------------------------------------------------
 /**
+ * Builds goals -- either as a parameter or as a numerc value, depending on the
+ * script contents.
  * 
  * @return true on success, false on failure.
  */
@@ -472,8 +489,7 @@ bool Achieve::ConstructGoal(const char* str)
       ++end;
    }
 
-   std::string sstr = str, owner, parm;
-   
+   std::string sstr = str;
    goalString = sstr.substr(start, end-start);
 
    #ifdef DEBUG_ACHIEVE
@@ -487,50 +503,99 @@ bool Achieve::ConstructGoal(const char* str)
    #endif
 
    if ((dot > start) && (dot < end)) {    // Could be a parameter
-      owner = sstr.substr(start, dot-start);
-      parm = sstr.substr(dot+1, end-(dot+1));
-      #ifdef DEBUG_ACHIEVE
-         MessageInterface::ShowMessage("%s%s%s%s\"\n",
-                              "   Checking for parameter \"", parm.c_str(),
-                              "\" on object \"", owner.c_str());
-      #endif
-      
-      Moderator *mod = Moderator::Instance();
-      if (mod->IsParameter(parm))
-      {
-         std::string name = sstr.substr(start, end-start);
-         #ifdef DEBUG_ACHIEVE
-            MessageInterface::ShowMessage("%s%s\"\n",
-                                          "Attempting to build parameter \"",
-                                          parm.c_str());
-         #endif
-         goalTarget = mod->CreateParameter(parm, name);
-         if (goalTarget != NULL) {
-            std::string parmtype = "Object";
-            #ifdef DEBUG_ACHIEVE
 
-               MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-                                             "Assigning \"",
-                                             owner.c_str(), 
-                                             "\" to parameter \"", 
-                                             goalTarget->GetName().c_str(),
-                                             "\" with descriptor \"",
-                                             parmtype.c_str());
-            #endif
-            goalTarget->SetStringParameter(parmtype, owner);
-            return true;
+      std::string parmType, parmObj, parmSystem;
+      InterpretParameter(goalString, parmType, parmObj, parmSystem);
+
+      #if DEBUG_ACHIEVE
+         MessageInterface::ShowMessage
+            ("   Achieve::ConstructGoal() parmObj=%s, parmType=%s, "
+             "parmSystem = \"%s\"\n", parmObj.c_str(),
+             parmType.c_str(), parmSystem.c_str());
+      #endif
+
+      Moderator *mod = Moderator::Instance();
+
+      if (mod->IsParameter(parmType))
+      {
+         goalTarget = mod->CreateParameter(parmType, goalString);
+         if (!goalTarget)
+            throw CommandException("Unable to create parameter " + goalString);
+         goalTarget->SetRefObjectName(Gmat::SPACECRAFT, parmObj); //loj: 9/13/04 added
+
+         if (goalTarget->IsCoordSysDependent()) {
+            if (parmSystem == "")
+               parmSystem = "EarthMJ2000Eq";
+            goalTarget->SetStringParameter("DepObject", parmSystem);
+            goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
          }
+
+         if (goalTarget->IsOriginDependent()) {
+            if (parmSystem == "")
+               parmSystem = "Earth";
+            goalTarget->SetStringParameter("DepObject", parmSystem);
+         }
+         return true;
       }
       #ifdef DEBUG_ACHIEVE
          else {
             MessageInterface::ShowMessage("\"%s\" is not a parameter\n",
-                                          parm.c_str());
+                                          goalString.c_str());
          }
       #endif
-      
    }
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool InterpretParameter(const std::string text, std::string &paramType,
+//                          std::string &paramObj, std::string &parmSystem)
+//------------------------------------------------------------------------------
+/**
+ * Breaks apart a parameter declaration into its component pieces
+ *
+ * @param text The string that gets decomposed.
+ * @param paramType Type of parameter that is needed.
+ * @param paramObj The Object used for the parameter calculations.
+ * @param parmSystem The coordinate system or body used for the parameter
+ *                   calculations (or the empty string if this piece is
+ *                   unspecified).
+ *
+ * @return true if the decomposition worked.
+ */
+//------------------------------------------------------------------------------
+bool Achieve::InterpretParameter(const std::string text,
+                                 std::string &paramType, 
+                                 std::string &paramObj, 
+                                 std::string &parmSystem)
+{
+   Integer start = 0, dotLoc = text.find(".", 0);
+   if (dotLoc == (Integer)std::string::npos)
+      throw CommandException("Propagate::InterpretParameter: Unable to "
+               "interpret parameter object in the string " +
+               text);
+               
+   paramObj = text.substr(start, dotLoc - start);
+   start = dotLoc + 1;
+   dotLoc = text.find(".", start);
+   if (dotLoc != (Integer)std::string::npos) {
+      parmSystem = text.substr(start, dotLoc - start);
+      start = dotLoc + 1;
+   }
+   else {
+      parmSystem = "";
+   }
+   
+   paramType = text.substr(start);
+   
+   #ifdef DEBUG_PROPAGATE_INIT
+      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
+         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+   #endif
+   
+   return true;
 }
 
 

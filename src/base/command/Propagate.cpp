@@ -987,16 +987,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             throw CommandException("Propagate::AssemblePropagators: Unable to "
                                    "parse the parameter string \"" + 
                                    i->substr(loc, parmEnd-loc) + "\"");
-         loc = parmEnd+1;
+         loc = parmEnd;//+1;
          
-//         end = i->find(".", loc);
-//      
-//         if (end == (Integer)std::string::npos)
-//            throw CommandException("Propagate does not identify stopping condition: looking for .\n");
-//          
-//         std::string paramObj = i->substr(loc, end-loc);
-//         loc = end + 1;
-
          end = i->find("=", loc);
          if (end == (Integer)std::string::npos)
          {
@@ -1006,11 +998,10 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
               
             end = i->find("}", loc);
             if (end == (Integer)std::string::npos)
-               throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+               throw CommandException("Propagate " + (*i) +
+                  " does not identify stopping condition: looking for }\n");
          }
           
-//         std::string paramType = i->substr(loc, end-loc);
-      
          unsigned int start = 0;
          for (unsigned int idx=start; idx<paramType.size(); ++idx)
          {
@@ -1028,14 +1019,13 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          //loj: if we want to see parameter via the GUI, use named parameter
          // This will be deleted when system shuts down
          Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
-         //stopParam->SetStringParameter("Object", paramObj);
          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
          
          if (stopParam->IsCoordSysDependent()) {
             if (parmSystem == "")
                parmSystem = "EarthMJ2000Eq";
-            /// Which is correct here???
-//            stopParam->SetStringParameter("DepObject", parmSystem);
+            // Which is correct here???
+            stopParam->SetStringParameter("DepObject", parmSystem);
             stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
 
          }
@@ -1095,7 +1085,24 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 }
 
 
-bool Propagate::InterpretParameter(const std::string text, 
+//------------------------------------------------------------------------------
+//  bool InterpretParameter(const std::string text, std::string &paramType,
+//                          std::string &paramObj, std::string &parmSystem)
+//------------------------------------------------------------------------------
+/**
+ * Breaks apart a parameter declaration into its component pieces
+ *
+ * @param text The string that gets decomposed.
+ * @param paramType Type of parameter that is needed.
+ * @param paramObj The Object used for the parameter calculations.
+ * @param parmSystem The coordinate system or body used for the parameter
+ *                   calculations (or the empty string if this piece is
+ *                   unspecified).
+ *
+ * @return true if the decomposition worked.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::InterpretParameter(const std::string text,
                                    std::string &paramType, 
                                    std::string &paramObj, 
                                    std::string &parmSystem)

@@ -63,8 +63,6 @@ public:
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
     
-   bool                ConstructGoal(const char* str);
-    
     // Inherited methods overridden from the base class
    virtual bool        InterpretAction(void);
    virtual bool        Initialize(void);
@@ -105,6 +103,13 @@ protected:
    const Integer       goalID;
    /// ID for the tolerance
    const Integer       toleranceID;
+
+   bool                InterpretParameter(const std::string text,
+                                 std::string &paramType,
+                                 std::string &paramObj,
+                                 std::string &parmSystem);
+   bool                ConstructGoal(const char* str);
+
 };
 
 
