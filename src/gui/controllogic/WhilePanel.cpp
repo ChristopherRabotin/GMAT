@@ -140,7 +140,7 @@ void WhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
          };
          
          wxSingleChoiceDialog dialog(this, _T("Condition: \n"),
-                                        _T("IfConditionDialog"), 6, strArray);
+                                        _T("WhileConditionDialog"), 6, strArray);
          dialog.SetSelection(0);
 
          if (dialog.ShowModal() == wxID_OK)
