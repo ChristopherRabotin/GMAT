@@ -204,7 +204,7 @@ bool For::Execute(void)
       commandExecuting = false;
       currentValue     = UNINITIALIZED_VALUE;  // start the loop over
    }
-     
+   
    return retval;
 }
 
@@ -385,6 +385,7 @@ bool For::StillLooping()
                "For loop values incorrect - will result in infinite loop.");
       
       currentValue = startValue;
+      commandComplete  = false;      
    }
    if (((stepSize > 0.0) && (currentValue <= endValue)) ||
        ((stepSize < 0.0) && (currentValue >= endValue)) )
