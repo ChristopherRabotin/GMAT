@@ -30,10 +30,15 @@ Save::Save(const Save& sv) :
 
 Save& Save::operator=(const Save& sv)
 {
+    if (this == &sv)
+        return *this;
+        
     filename = sv.filename;
     append   = sv.append;
     written  = sv.written;
     objName  = sv.objName;
+    
+    return *this;
 }
      
 
@@ -83,6 +88,7 @@ bool Save::Initialize(void)
 bool Save::Execute(void)
 {
     WriteObject();
+    return true;
 }
   
 

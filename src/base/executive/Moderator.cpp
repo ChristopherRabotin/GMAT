@@ -837,6 +837,7 @@ GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string
 bool Moderator::LoadDefaultMission()
 {
     CreateDefaultMission();
+    return true;        // DJC added to fix warning message
 }
 
 // Resource
@@ -846,6 +847,7 @@ bool Moderator::LoadDefaultMission()
 bool Moderator::ClearResource()
 {
     theConfigManager->RemoveAllItems();
+    return true;        // DJC added to fix warning message
 }
 
 // Command Sequence

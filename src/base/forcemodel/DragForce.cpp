@@ -168,9 +168,9 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
         vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] + 
                        vRelative[2]*vRelative[2]);
         
+        factor = prefactor[i] * density[i];
         if (order == 1) 
         {
-            factor = prefactor[i] * density[i];
             // Do dv/dt first, in case deriv = state
             deriv[3+i6] = factor * vRelMag * vRelative[0];
             deriv[4+i6] = factor * vRelMag * vRelative[1];
