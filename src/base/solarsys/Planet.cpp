@@ -220,10 +220,10 @@ CelestialBody     ("Planet",name)
 }
 
 //------------------------------------------------------------------------------
-//  Planet(std::string name, CelestialBody* cBody)
+//  Planet(std::string name, const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Planet class
+ * This method creates an object of the Planet class
  * (constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -231,7 +231,7 @@ CelestialBody     ("Planet",name)
  * @param <cBody> pointer to a central body.
  */
 //------------------------------------------------------------------------------
-Planet::Planet(std::string name, CelestialBody* cBody) :
+Planet::Planet(std::string name, const std::string &cBody) :
 CelestialBody     ("Planet",name)
 {
    InitializePlanet(cBody); 
@@ -306,7 +306,7 @@ Planet* Planet::Clone(void) const
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  void  InitializePlanet(CelestialBody* cBody)
+//  void  InitializePlanet(const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
  * This method initializes the data values for the body.
@@ -315,7 +315,7 @@ Planet* Planet::Clone(void) const
  *
  */
 //------------------------------------------------------------------------------
-void Planet::InitializePlanet(CelestialBody* cBody)
+void Planet::InitializePlanet(const std::string &cBody)
 {
    CelestialBody::Initialize();
 

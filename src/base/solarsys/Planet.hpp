@@ -44,7 +44,7 @@ public:
    // default constructor, with optional name
    Planet(std::string name = SolarSystem::EARTH_NAME);
    // additional constructor
-   Planet(std::string name, CelestialBody* cBody);
+   Planet(std::string name, const std::string &cBody);
    // copy constructor
    Planet(const Planet &pl);
    // operator=
@@ -101,7 +101,7 @@ protected:
    
    // what other planet-specific parameters do I need?
 
-   void InitializePlanet(CelestialBody* cBody);
+   void InitializePlanet(const std::string &cBody);
 
 private:
 
