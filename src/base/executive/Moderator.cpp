@@ -16,6 +16,7 @@
  * Implements opeartions of the GMAT executive.
  */
 //------------------------------------------------------------------------------
+
 #include "gmatdefs.hpp"
 // executive
 #include "Sandbox.hpp"
@@ -47,6 +48,7 @@
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
 #include "BurnFactory.hpp"
+#include "ParameterFactory.hpp"
 
 #include "BaseException.hpp"
 #include "NoOp.hpp"
@@ -268,6 +270,36 @@ StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 }
 
 //------------------------------------------------------------------------------
+// GmatBase* GetConfiguredItem(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Moderator::GetConfiguredItem(const std::string &name)
+{
+//      MessageInterface::ShowMessage("Moderator::GetConfiguredItem() entered: "
+//                                    "name = " + name + "\n");
+    return theConfigManager->GetItem(name);
+}
+
+//------------------------------------------------------------------------------
+// bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName
+//                           const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Renames configured item
+ *
+ * @param <type> object type
+ * @param <oldName>  old object name
+ * @param <newName>  new object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
+                                     const std::string &newName)
+{
+    return theConfigManager->RenameItem(type, oldName, newName);
+}
+
+//------------------------------------------------------------------------------
 // bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -451,10 +483,22 @@ Burn* Moderator::GetBurn(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
+    MessageInterface::ShowMessage("Moderator::CreateParameter() entered: type = " + type +
+                                  ", name = " + name + "\n");
     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
     // Manage it if it is a named parameter
-    if (parameter->GetName() != "")
-        theConfigManager->AddParameter(parameter);
+
+    try
+    {
+        if (parameter->GetName() != "")
+            theConfigManager->AddParameter(parameter);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
+                                      e.GetMessage());
+    }
+    
     return parameter;
 }
 
@@ -675,6 +719,8 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
                                         const std::string &filename)
 {
+    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
+                                  ", name = " + name + "\n");
     Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
     theConfigManager->AddSubscriber(subs);
     thePublisher->Subscribe(subs);

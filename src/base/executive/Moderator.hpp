@@ -78,8 +78,12 @@ public:
 
     //----- configuration
     StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
-    bool RemoveConfiguredItem(Gmat::ObjectType, const std::string &name);
-
+    //future build:GmatBase* GetConfiguredItem(Gmat::ObjectType type, const std::string &name);
+    GmatBase* GetConfiguredItem(const std::string &name);
+    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
+                              const std::string &newName);
+    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
+    
     // Spacecraft
     Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name);
     Spacecraft* GetSpacecraft(const std::string &name);
