@@ -100,12 +100,12 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if ((dataType == DEFAULT_SPACECRAFT )  ||
                (dataType == CREATED_SPACECRAFT ))
       {
-        sizer->Add( new SpacecraftPanel(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new SpacecraftPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == DEFAULT_PROPAGATOR)   ||
                (dataType == CREATED_PROPAGATOR))
       {
-        sizer->Add( new PropagationConfigPanel(panel), 0,
+        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()), 0,
                     wxGROW|wxALL, 0 );
       }
       else if (dataType == DEFAULT_PROPAGATE_COMMAND)
