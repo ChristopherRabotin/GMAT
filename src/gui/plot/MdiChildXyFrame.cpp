@@ -322,7 +322,7 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin, dou
     {
         wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
         curve->SetPenNormal(*pen);
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
+        //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
     }
 
     //loj: Set selected pen to black for now (build2)
