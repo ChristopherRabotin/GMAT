@@ -49,6 +49,7 @@ public :
     Radians GetInclination() const;
     Radians GetRAAscendingNode() const;
     Radians GetArgumentOfPeriapsis() const;
+    Radians GetTrueAnomaly() const;
     Radians GetMeanAnomaly() const;
 
     //  functions to set member data
@@ -57,6 +58,7 @@ public :
     void SetInclination(Radians i);
     void SetRAAscendingNode(Radians raan);
     void SetArgumentOfPeriapsis(Radians aop);
+    void SetTrueAnomaly(Radians ma);
     void SetMeanAnomaly(Radians ma);
     void SetAll(Real a, Real e, Radians i, Radians raan,
                 Radians aop, Radians ma);

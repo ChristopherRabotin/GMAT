@@ -158,6 +158,14 @@ Radians Keplerian::GetMeanAnomaly() const
 }
 
 //------------------------------------------------------------------------------
+// Radians Keplerian::GetTrueAnomaly() const
+//------------------------------------------------------------------------------
+Radians Keplerian::GetTrueAnomaly() const
+{
+    return MeanToTrueAnomaly(meanAnomalyD, eccentricityD);
+}
+
+//------------------------------------------------------------------------------
 // void Keplerian::SetSemimajorAxis(Real sma)
 //------------------------------------------------------------------------------
 void Keplerian::SetSemimajorAxis(Real a)
@@ -206,11 +214,19 @@ void Keplerian::SetMeanAnomaly(Radians ma)
 }
 
 //------------------------------------------------------------------------------
+// void Keplerian::SetTrueAnomaly(Radians ta)
+//------------------------------------------------------------------------------
+void Keplerian::SetTrueAnomaly(Radians ta)
+{
+    meanAnomalyD = TrueToMeanAnomaly(ta, eccentricityD);
+}
+
+//------------------------------------------------------------------------------
 // void Keplerian::Setall(Real a, Real e, Radians i, Radians raan,
 //                                Radians aop, Radians ma)
 //------------------------------------------------------------------------------
 void Keplerian::SetAll(Real a, Real e, Radians i, Radians raan,
-                               Radians aop, Radians ma)
+                       Radians aop, Radians ma)
 {
    semimajorAxisD = a;
    eccentricityD = e;
