@@ -136,8 +136,9 @@ void PropagationConfigPanel::Initialize()
                     //primaryBodiesArray.Add(theBodies[i]->GetName().c_str());
                     primaryBodiesArray.Add("Earth");
                     primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());
-                    degreeID = theBodies[i]->GetParameterID("Degree");
-                    orderID = theBodies[i]->GetParameterID("Order");
+                    // waw: Future implementation
+                    //degreeID = theBodies[i]->GetParameterID("Degree");
+                    //orderID = theBodies[i]->GetParameterID("Order");
                     degreeArray.Add(wxVariant((long)theBodies[i]->GetIntegerParameter(degreeID)));
                     orderArray.Add(wxVariant((long)theBodies[i]->GetIntegerParameter(orderID)));
                 }
@@ -490,31 +491,36 @@ void PropagationConfigPanel::SaveData()
         Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
         if ( atmosModelString.CmpNoCase("Exponential") == 0 )
         {
-            // future implementation
+            // waw: Future implementation
+            //if (theDragForce == NULL)
+            //    theDragForce = (DragForce *)theGuiInterpreter->CreatePhysicalModel("DragForce", "Exponential");
             //theDragForce->SetStringParameter(atmosTypeID, "Exponential");
             //theForceModel->AddForce(theDragForce);
         }
         else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
         {
+            if (theDragForce == NULL)
+                theDragForce = (DragForce *)theGuiInterpreter->CreatePhysicalModel("DragForce", "MSISE90");
+            
             theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
             theForceModel->AddForce(theDragForce);
         }
     }
     else
     {
-        PhysicalModel *force;
-            
-        for (Integer i = 0; i < numOfForces; i++)
-        {
-            force = theForceModel->GetForce(i);
-           
-            if (force->GetTypeName() == "DragForce")
-            {
-                useDragForce = false;
-                wxString forceName = theSRP->GetName().c_str();
-                theForceModel->DeleteForce(forceName.c_str());
-            }
-        }    
+//        PhysicalModel *force;
+//            
+//        for (Integer i = 0; i < numOfForces; i++)
+//        {
+//            force = theForceModel->GetForce(i);
+//           
+//            if (force->GetTypeName() == "DragForce")
+//            {
+//                useDragForce = false;
+//                wxString forceName = theSRP->GetName().c_str();
+//                theForceModel->DeleteForce(forceName.c_str());
+//            }
+//        }    
     }
     
     // the srp data
@@ -528,19 +534,19 @@ void PropagationConfigPanel::SaveData()
    }
    else
    {
-       PhysicalModel *force;
-       
-       for (Integer i = 0; i < numOfForces; i++)
-       {
-           force = theForceModel->GetForce(i);
-           
-           if (force->GetTypeName() == "SolarRadiationPressure")
-           {
-              useSRP = false;
-              wxString forceName = theSRP->GetName().c_str();
-              theForceModel->DeleteForce(forceName.c_str());
-           }
-       }
+//       PhysicalModel *force;
+//       
+//       for (Integer i = 0; i < numOfForces; i++)
+//       {
+//           force = theForceModel->GetForce(i);
+//           
+//           if (force->GetTypeName() == "SolarRadiationPressure")
+//           {
+//              useSRP = false;
+//              wxString forceName = theSRP->GetName().c_str();
+//              theForceModel->DeleteForce(forceName.c_str());
+//           }
+//       }
    }
    // save forces to the prop setup
    if (theForceModel != NULL)
