@@ -18,7 +18,7 @@
 #include "SpacecraftPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
-#include "PropagatorSetupPanel.hpp"
+#include "PropagateCommandPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "GmatTreeItemData.hpp"
@@ -105,7 +105,9 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
                (dataType == GmatTree::CREATED_PROPAGATOR))
       {
-        sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
+        //sizer->Add( new PropagationConfigPanel(panel, wxT("Prop Setup") ));
+        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0 );
       }
       //loj: commented out
       // else if ((dataType == GmatTree::DEFAULT_REPORT)   ||
@@ -129,11 +131,11 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       }
       else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new PropagateCommandPanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
+        sizer->Add( new PropagateCommandPanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::MANEUVER_COMMAND)
       {
@@ -232,4 +234,3 @@ wxScrolledWindow *GmatMainNotebook::GetPanel()
 {
    return this->panel;
 }
-
