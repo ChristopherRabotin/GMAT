@@ -191,8 +191,6 @@ private:
       PERCENT_SUN,
       SRPParamCount  // Count of the parameters for this class
    };
-
-   // waw: Also need methods to edit Real *cbSunVector, Real *forceVector
    
    static const std::string PARAMETER_TEXT[SRPParamCount];
    static const Gmat::ParameterType PARAMETER_TYPE[SRPParamCount];
