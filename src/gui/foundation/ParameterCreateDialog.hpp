@@ -35,19 +35,19 @@ private:
    bool mIsParamCreated;
    
    wxColour mColor;
-   wxTextCtrl *nameTextCtrl;
-   wxTextCtrl *expTextCtrl;
-   wxTextCtrl *epochTextCtrl;
-   wxTextCtrl *indexTextCtrl;
+   wxTextCtrl *mNameTextCtrl;
+   wxTextCtrl *mExprTextCtrl;
+   wxTextCtrl *mEpochTextCtrl;
+   wxTextCtrl *mIndexTextCtrl;
 
    wxButton *mCreateParamButton;
    wxButton *mAddPropertyButton;
    wxButton *mAddParamButton;
    wxButton *mColorButton;
    
-   wxListBox *objectListBox;
-   wxListBox *propertyListBox;
-   wxListBox *parameterListBox;
+   wxListBox *mObjectListBox;
+   wxListBox *mPropertyListBox;
+   wxListBox *mUserParamListBox;
     
    wxComboBox *cbodyComboBox;
    wxComboBox *coordComboBox;

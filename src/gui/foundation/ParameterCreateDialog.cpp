@@ -17,10 +17,11 @@
 #include "ParameterCreateDialog.hpp"
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"
+#include "StringTokenizer.hpp"
 
 #include "wx/colordlg.h"   // for wxColourDialog
 
-#define DEBUG_PARAM_DIALOG 0
+#define DEBUG_PARAM_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -99,23 +100,23 @@ void ParameterCreateDialog::Create()
       new wxStaticText(this, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *expStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Expression"),
+      new wxStaticText(this, ID_TEXT, wxT("Expression (Available Operators: +-*/^ )"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *colorStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Color"),
                        wxDefaultPosition, wxDefaultSize, 0);
     
    // wxTextCtrl
-   nameTextCtrl =
+   mNameTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(150,20), 0);
-   expTextCtrl =
+   mExprTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(300,20), 0);
-   epochTextCtrl =
+   mEpochTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(80,20), 0);
-   indexTextCtrl =
+   mIndexTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(80,20), 0);
    
@@ -136,19 +137,22 @@ void ParameterCreateDialog::Create()
    mColorButton->SetBackgroundColour(mColor);
    
    // wxListBox
-   //loj: 8/4/04 changed GetObjectListBox to GetSpacecraftListBox
    wxArrayString emptyArray;
-   objectListBox = 
-      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150, 200), emptyArray);
+   mObjectListBox = 
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150, 150), emptyArray);
    
-   propertyListBox = 
-      theGuiManager->GetParameterListBox(this, -1, wxSize(150, 200),
-                                         objectListBox->GetStringSelection(),
-                                         theGuiManager->GetNumSpacecraft());
-   parameterListBox =
-      theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150, 200),
-                                               "");
-   
+   mPropertyListBox = 
+      theGuiManager->GetParameterListBox(this, -1, wxSize(150, 150),
+                                         "Spacecraft"); //loj: 9/22/04 Spacecraft for now
+                                         //mObjectListBox->GetStringSelection());
+
+//     mUserParamListBox = 
+//        theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150, 200),
+//                                                 "");
+   //loj: 9/24/04 use GetUserParameterListBox()
+   mUserParamListBox =
+      theGuiManager->GetUserParameterListBox(this, -1, wxSize(150, 150), "");
+    
    
    // wxComboBox
    cbodyComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
@@ -166,19 +170,17 @@ void ParameterCreateDialog::Create()
    wxFlexGridSizer *detailsBoxSizer = new wxFlexGridSizer(5, 0, 0);
    wxStaticBox *detailStaticBox = new wxStaticBox(this, -1, wxT("Details"));
    wxStaticBoxSizer *detailsStaticBoxSizer = new wxStaticBoxSizer(detailStaticBox, wxVERTICAL);
-    
+   
    // Add to wx*Sizers
    top1FlexGridSizer->Add(nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    top1FlexGridSizer->Add(expStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
     
-   top1FlexGridSizer->Add(nameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(equalSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   top1FlexGridSizer->Add(expTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mExprTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
                         
    // 1st row
-   //loj: 7/28/04 added "Create" button so that more than 1 parrm can be created.
-   //objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(mCreateParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(mAddPropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -191,10 +193,10 @@ void ParameterCreateDialog::Create()
    objPropertyFlexGridSizer->Add(paramStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
 
    // 3rd row
-   objPropertyFlexGridSizer->Add(objectListBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(propertyListBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mObjectListBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mPropertyListBox, 0, wxALIGN_CENTER|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(parameterListBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mUserParamListBox, 0, wxALIGN_CENTER|wxALL, bsize);
 
    // detail
    detailsBoxSizer->Add(cbodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -218,8 +220,8 @@ void ParameterCreateDialog::Create()
    detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(epochTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(indexTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(mEpochTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(mIndexTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
 
    detailsStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);    
     
@@ -239,9 +241,10 @@ void ParameterCreateDialog::Create()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
 {
-   if ((nameTextCtrl->GetValue() != "") &&
-       (expTextCtrl->GetValue() != ""))
+   if (mNameTextCtrl->GetValue() != "" && mNameTextCtrl->GetValue() != " " &&
+       mExprTextCtrl->GetValue() != "" && mExprTextCtrl->GetValue() != " ")
    {
+      mCreateParamButton->Enable();
       theOkButton->Enable();
    }
 }
@@ -265,18 +268,22 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mAddPropertyButton)  
    {
-      wxString s = objectListBox->GetStringSelection() + "." +
-         propertyListBox->GetStringSelection();
+      wxString s = mObjectListBox->GetStringSelection() + "." +
+         mPropertyListBox->GetStringSelection();
 
-      expTextCtrl->SetValue(s);
-      nameTextCtrl->SetValue(s);
+      mExprTextCtrl->AppendText(s);
+      //mNameTextCtrl->SetValue(s); //loj: 9/23/04
 
-      mCreateParamButton->Enable();
-      theOkButton->Enable();
+      if (mNameTextCtrl->GetValue() != "" &&
+          mNameTextCtrl->GetValue() != " ")
+      {
+         mCreateParamButton->Enable();
+         theOkButton->Enable();
+      }
    }
    else if (event.GetEventObject() == mAddParamButton)  
    {
-      expTextCtrl->AppendText(parameterListBox->GetStringSelection());
+      mExprTextCtrl->AppendText(mUserParamListBox->GetStringSelection());
    }
 }
 
@@ -304,9 +311,8 @@ void ParameterCreateDialog::OnColorButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::LoadData()
 {
-   //loj: for build2, disable the button, disable textctrl
-   mAddParamButton->Disable();
-   expTextCtrl->Disable();
+   //mAddParamButton->Disable();
+   //mExprTextCtrl->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -314,10 +320,11 @@ void ParameterCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::SaveData()
 {
-   std::string objName = std::string(objectListBox->GetStringSelection().c_str());
-   std::string varName = std::string(nameTextCtrl->GetValue().c_str());
-   std::string varType = std::string(propertyListBox->GetStringSelection().c_str());
-   std::string varDesc = std::string(expTextCtrl->GetValue().c_str());
+   std::string objName = std::string(mObjectListBox->GetStringSelection().c_str());
+   std::string varName = std::string(mNameTextCtrl->GetValue().c_str());
+   std::string varType = std::string(mPropertyListBox->GetStringSelection().c_str());
+   //std::string varDesc = std::string(mExprTextCtrl->GetValue().c_str());
+   std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
 
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage
@@ -325,18 +332,34 @@ void ParameterCreateDialog::SaveData()
        " varName = " + varName + "varType = " + varType + "\n");
 #endif
    
-   if (varName != "" && varDesc != "")
+   //if (varName != "" && varDesc != "")
+   if (varName != "" && varExpr != "")
    {
       // if new user variable to create
       if (theGuiInterpreter->GetParameter(varName) == NULL)
       {
          Parameter *param;
          
-         param = theGuiInterpreter->CreateParameter(varType, varName);
-         
-         //loj: 9/13/04 changed AddObject() to SetRefObjectName()
-         param->SetRefObjectName(GmatBase::GetObjectType(varType), objName);
-         param->SetStringParameter("Description", varDesc);
+         //param = theGuiInterpreter->CreateParameter(varType, varName);
+         param = theGuiInterpreter->CreateParameter("Variable", varName);
+         //param->SetStringParameter("Description", varDesc); //loj: 9/23/04
+         param->SetStringParameter("Expression", varExpr);
+
+         // Parse the Parameter
+         StringTokenizer st(varExpr, "()*/+-^ ");
+         StringArray tokens = st.GetAllTokens();
+
+         for (unsigned int i=0; i<tokens.size(); i++)
+         {
+#if DEBUG_PARAM_DIALOG
+            MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
+#endif
+            // if token does not start with number
+            if (!isdigit(*tokens[i].c_str()))
+            {
+               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
+            }
+         }
          
          RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
          param->SetUnsignedIntParameter("Color", color.GetIntColor());
@@ -351,13 +374,13 @@ void ParameterCreateDialog::SaveData()
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
 
-         parameterListBox->Append(varName.c_str());
+         mUserParamListBox->Append(varName.c_str());
 
-         for (int i=0; i<parameterListBox->GetCount(); i++)
+         for (int i=0; i<mUserParamListBox->GetCount(); i++)
          {
-            if (parameterListBox->GetString(i).IsSameAs(varName.c_str()))
+            if (mUserParamListBox->GetString(i).IsSameAs(varName.c_str()))
             {
-               parameterListBox->SetSelection(i);
+               mUserParamListBox->SetSelection(i);
                break;
             }
          }
@@ -375,8 +398,8 @@ void ParameterCreateDialog::SaveData()
       }
       
       mCreateParamButton->Disable();
-      expTextCtrl->SetValue("");
-      nameTextCtrl->SetValue("");
+      mExprTextCtrl->SetValue("");
+      mNameTextCtrl->SetValue("");
    }
 }
 

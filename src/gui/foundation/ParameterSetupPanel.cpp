@@ -185,11 +185,13 @@ void ParameterSetupPanel::LoadData()
    {
       
 #if DEBUG_PARAM_PANEL
-   MessageInterface::ShowMessage
-      ("ParameterSetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
+      MessageInterface::ShowMessage
+         ("ParameterSetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
 #endif
    
-      std::string varDesc = mParam->GetStringParameter("Description");
+      //std::string varDesc = mParam->GetStringParameter("Description");
+      // Show expression (loj: 9/23/04)
+      std::string varDesc = mParam->GetStringParameter("Expression");
       nameTextCtrl->SetValue(theVarName);
       expTextCtrl->SetValue(varDesc.c_str());
 
