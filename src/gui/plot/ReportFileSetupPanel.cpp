@@ -356,9 +356,21 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      mVarSelectedListBox->Append(s);
-      mVarSelectedListBox->SetStringSelection(s);
-      theApplyButton->Enable();
+      // check if parameter is plottable
+      Parameter *param;
+      param = theGuiInterpreter->GetParameter(std::string(s.c_str()));
+
+      if (param->IsPlottable())
+      {
+         mVarSelectedListBox->Append(s);
+         mVarSelectedListBox->SetStringSelection(s);
+         theApplyButton->Enable();
+      }
+      else
+      {
+         wxLogMessage("Selected  parameter:%s is not reportable. Please select "
+                      "another parameter\n", s.c_str());
+      }
    }
 }
 
