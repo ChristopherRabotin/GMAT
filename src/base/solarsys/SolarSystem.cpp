@@ -365,7 +365,7 @@ bool SolarSystem::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 }
 
 //------------------------------------------------------------------------------
-//  StringArray GetBodiesInUse() const
+//  const StringArray& GetBodiesInUse() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a list of strings representing the bodies in use.
@@ -374,7 +374,7 @@ bool SolarSystem::SetAnalyticMethod(Gmat::AnalyticMethod aM)
  *
  */
 //------------------------------------------------------------------------------
-StringArray SolarSystem::GetBodiesInUse() const
+const StringArray& SolarSystem::GetBodiesInUse() const
 {
    return bodyStrings;
 }

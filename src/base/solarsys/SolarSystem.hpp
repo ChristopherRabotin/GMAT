@@ -62,7 +62,7 @@ public:
 
    // method to return an array of the names of the bodies included in
    // this solar system
-   StringArray    GetBodiesInUse() const;
+   const StringArray&   GetBodiesInUse() const;
    // method to return a flag indicating whether or not the specified
    // body is in use for this solar system
    bool           IsBodyInUse(std::string theBody);
