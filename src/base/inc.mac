@@ -1,0 +1,64 @@
+# Project:    GMAT
+# Module:     inc.mac for base directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/18
+
+# Program to make (library)
+LIBDIR = $(PROJECT_ROOT)/lib
+LIB = $(LIBDIR)/libgmatbase.a
+#
+# Define macros for the base directory
+COMMAND    = $(PROJECT_ROOT)/base/command
+CONFIGS    = $(PROJECT_ROOT)/base/configs
+INCLUDE    = $(PROJECT_ROOT)/base/include
+EXECUTIVE  = $(PROJECT_ROOT)/base/executive
+FACTORY    = $(PROJECT_ROOT)/base/factory
+FOUNDATION = $(PROJECT_ROOT)/base/foundation
+FORCEMODEL = $(PROJECT_ROOT)/base/forcemodel
+INTERPOL   = $(PROJECT_ROOT)/base/interpolator
+INTERPRET  = $(PROJECT_ROOT)/base/interpreter
+PARAM      = $(PROJECT_ROOT)/base/parameter
+PROPAG     = $(PROJECT_ROOT)/base/propagator
+REFFRAME   = $(PROJECT_ROOT)/base/refframe
+SOLARSYS   = $(PROJECT_ROOT)/base/solarsys
+SOLVER     = $(PROJECT_ROOT)/base/solver
+SPACECRAFT = $(PROJECT_ROOT)/base/spacecraft
+STOPCOND   = $(PROJECT_ROOT)/base/stopcond
+SUBSCRIBER = $(PROJECT_ROOT)/base/subscriber
+UTIL       = $(PROJECT_ROOT)/base/util
+
+INCS = -I$(COMMAND) -I$(CONFIGS) -I$(EXECUTIVE) -I$(FACTORY) -I$(FORCEMODEL) \
+	-I$(FOUNDATION) -I$(INCLUDE) -I$(INTERPOL) -I$(INTERPRET) -I$(PARAM) \
+	-I$(PROPAG) -I$(REFFRAME) -I$(SOLARSYS) -I$(SOLVER) -I$(SPACECRAFT) \
+	-I$(STOPCOND) -I$(SUBSCRIBER) -I$(UTIL)
+
+# Object modules for library
+OBJ = $(SRC:.cpp=.o)
+#
+CXXFLAGS = $(INCS) $(TESTFLAGS)
+CPP = g++ $(CXXFLAGS)
+#
+# Default suffix rule
+.SUFFIXES: .o .cpp
+#
+###############################################################################
+# Target definitions
+#
+all: $(LIB)
+
+$(LIB): $(OBJ) 
+	@if [ ! -x $(LIBDIR) ]; then mkdir $(LIBDIR); echo 'Creating $(LIBDIR)'; fi
+
+	ar cr $@ $(OBJ)
+	@ranlib $@
+	@chmod -R 755 $(LIBDIR)
+
+.cpp.o:
+	@echo 'Compiling $(SRC)...'
+	@$(CPP) -c $<
+
+clean:
+	rm -f $(OBJ) core
+
+bare: clean
+	rm -f $(LIB)
