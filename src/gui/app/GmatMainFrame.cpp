@@ -6,6 +6,9 @@
 //
 // ** Legal **
 //
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: Linda Jun
 // Created: 2003/08/05
 //
@@ -491,9 +494,9 @@ wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
 void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
 {
 
-    //Windows mode
+    //not MAC mode
     //----------------------------------------------------------------
-#ifdef __WXMSW__
+#if !defined __WXMAC__
     // Create a document manager
     mDocManager = new wxDocManager;
 
