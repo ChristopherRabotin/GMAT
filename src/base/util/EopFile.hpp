@@ -54,7 +54,7 @@ public:
    // method to return the UT1-UTC offset for the given UTCMjd - use UtcMjd???
    virtual Real    GetUt1UtcOffset(const Real utcMjd);
    
-   // method to return MJD, X, Y data (for use by coordinate systems)
+   // method to return JD, X, Y data (for use by coordinate systems)
    virtual Rmatrix GetPolarMotionData();
   
 protected:

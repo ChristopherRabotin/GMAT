@@ -159,9 +159,9 @@ void EopFile::Initialize()
             std::istringstream lineS;
             lineS.str(line);
             lineS >> year >> month >> day >> mjd >> x >> y >> ut1_utc;
-            ut1UtcOffsets->SetElement(tableSz,0,mjd);
+            ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
             ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-            polarMotion->SetElement(tableSz,0,mjd);
+            polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
             polarMotion->SetElement(tableSz,1,x);
             polarMotion->SetElement(tableSz,2,y);
             tableSz++;
@@ -192,9 +192,9 @@ void EopFile::Initialize()
             }
             else
             {
-               ut1UtcOffsets->SetElement(tableSz,0,mjd);
+               ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
                ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
-               polarMotion->SetElement(tableSz,0,mjd);
+               polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_MJD_OFFSET);
                polarMotion->SetElement(tableSz,1,x);
                polarMotion->SetElement(tableSz,2,y);
                tableSz++;
@@ -218,17 +218,33 @@ void EopFile::Initialize()
  *
  * @param utcMjd  The utc mjd for which to return the offset.
  *
- * @return UT1-UTC offset for the given time.
+ * @return UT1-UTC offset for the given time; values between table entries
+ *         are interpolated linearly.  
  */
 //---------------------------------------------------------------------------
 Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 {
    Integer i = 0;
+   Real    utcJD = utcMjd + GmatTimeUtil::JD_MJD_OFFSET;
    for (i = (tableSz - 1); i >= 0; i--)
    {
-      if (utcMjd >= ut1UtcOffsets->GetElement(i,0))
-         return ut1UtcOffsets->GetElement(i,1);
+      if (utcJD >= ut1UtcOffsets->GetElement(i,0))
+      {
+         // if it's greater than the last entry in the table, then return the 
+         // last value
+         if (i == (tableSz -1))  return ut1UtcOffsets->GetElement(i,1);
+         // otherwise, interpolate between values
+         Real diffJD  = ut1UtcOffsets->GetElement(i+1,0) - 
+                        ut1UtcOffsets->GetElement(i,0);
+         Real whereJD = utcJD - ut1UtcOffsets->GetElement(i,0);
+         Real ratio   = whereJD / diffJD;
+         Real diffOff = ut1UtcOffsets->GetElement(i+1,1) -
+                        ut1UtcOffsets->GetElement(i,1);
+         Real off     = ut1UtcOffsets->GetElement(i,1) + ratio * diffOff;
+         return off;
+      }
    }
+   // if it's before the time on the file, return the first value
    return ut1UtcOffsets->GetElement(0,1);
 }
 
