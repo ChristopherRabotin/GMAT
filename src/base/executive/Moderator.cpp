@@ -810,6 +810,9 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
     //djc: if you plan on adding the gui commands to the sandbox next, using 
     // the same approach used when running a script.
     commands[sandboxNum-1] = new NoOp; 
+
+    //@todo Clear plot for build3
+    //PlotInterface::ClearGlPlotWindow();
     
     return true;
 }
@@ -1078,7 +1081,7 @@ void Moderator::CreateDefaultMission()
     //StopCondition *stopCond = CreateStopCondition("SingleValueStop", "StopOnElapsedSecs");
     StopCondition *stopCond = CreateStopCondition("SingleValueStop", "Duration");
     stopCond->AddParameter(elapsedSecs);
-    stopCond->SetGoal(86400.0);
+    stopCond->SetGoal(8640.0);
 
     // Subscribers
     // ReportFile
