@@ -73,10 +73,10 @@ private:
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
     void OnCloseTabs(wxCommandEvent& WXUNUSED(event));
-    //loj: addded
-    void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
-    void OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event));
-    void OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event));
+
+    //void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
+    void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event));
+    void OnScriptBuild(wxCommandEvent& WXUNUSED(event));
     
     // IDs for the controls and the menu commands
     enum
@@ -97,9 +97,9 @@ private:
         MENU_SET_PATH_AND_LOG,
         MENU_INFORMATION,
 
-        MENU_SCRIPT_OPEN_SDI_FRAME,
-        MENU_SCRIPT_OPEN_MDI_FRAME,
-      
+        MENU_SCRIPT_OPEN_EDITOR,
+        MENU_SCRIPT_BUILD,
+        
         MENU_EDIT_CUT,
         MENU_EDIT_COPY,
         MENU_EDIT_PASTE,
@@ -136,8 +136,8 @@ private:
         MENU_HELP_TOPICS,
         MENU_HELP_DEMOS,
 
-        MENU_DEMO_BATCH_RUN, //loj: added
-      
+        //MENU_DEMO_BATCH_RUN,
+        
         // it is important for the id corresponding to the "About" command to have
         // this standard value as otherwise it won't be handled properly under Mac
         // (where it is special and put into the "Apple" menu)    

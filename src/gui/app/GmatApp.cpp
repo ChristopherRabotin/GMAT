@@ -71,10 +71,10 @@ bool GmatApp::OnInit()
     bool status = false;
     
     // create MessageWindow and save in GmatApp for later use
-    theMessageWindow = new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-                                         20, 20, 450, 350);
-    theMessageWindow->Show(false);
-    GmatAppData::SetMessageWindow(theMessageWindow);
+    GmatAppData::theMessageWindow =
+        new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                          20, 20, 600, 350, "Permanent");
+    GmatAppData::theMessageWindow->Show(false);
 
     // create the Moderator - GMAT executive
     theModerator = Moderator::Instance();
@@ -127,7 +127,6 @@ bool GmatApp::OnInit()
 //------------------------------------------------------------------------------
 int GmatApp::OnExit()
 {
-    //delete m_docManager;
     return 0;
 }
 

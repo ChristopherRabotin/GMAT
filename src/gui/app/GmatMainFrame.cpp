@@ -27,10 +27,10 @@
 #include "BatchRunFromGui.hpp"
 #include "ConsoleAppException.hpp"
 #include "DocViewFrame.hpp"
-#include "MdiDocViewFrame.hpp"
 #include "TextEditView.hpp"
-#include "MdiTextEditView.hpp"
 #include "TextDocument.hpp"
+#include "MdiTextEditView.hpp"
+#include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
 
 //------------------------------
@@ -50,9 +50,9 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
-    EVT_MENU(MENU_DEMO_BATCH_RUN, GmatMainFrame::OnDemoBatchRun)    
-    EVT_MENU(MENU_SCRIPT_OPEN_SDI_FRAME, GmatMainFrame::OnScriptOpenSdiFrame)    
-    EVT_MENU(MENU_SCRIPT_OPEN_MDI_FRAME, GmatMainFrame::OnScriptOpenMdiFrame)    
+    //EVT_MENU(MENU_DEMO_BATCH_RUN, GmatMainFrame::OnDemoBatchRun)    
+    EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
+    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
 END_EVENT_TABLE()
 
 //------------------------------
@@ -117,7 +117,8 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
-    GmatAppData::GetMessageWindow()->Close();
+    if (GmatAppData::GetMessageWindow() != NULL)
+        GmatAppData::GetMessageWindow()->Close();
 }
 
 //-------------------------------
@@ -268,7 +269,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
            *toolsMenu = new wxMenu,
            *helpMenu = new wxMenu;
     //loj: added
-    wxMenu *demoMenu = new wxMenu;
+    //wxMenu *demoMenu = new wxMenu;
     wxMenu *scriptMenu = new wxMenu;
     
     wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
@@ -305,9 +306,8 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     fileMenu->AppendSeparator();
     fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
 
-    //loj: added
-    scriptMenu->Append(MENU_SCRIPT_OPEN_SDI_FRAME, wxT("Open SDI Window"), wxT(""), FALSE);
-    scriptMenu->Append(MENU_SCRIPT_OPEN_MDI_FRAME, wxT("Open MDI Window"), wxT(""), FALSE);
+    scriptMenu->Append(MENU_SCRIPT_OPEN_EDITOR, wxT("Open Editor"), wxT(""), FALSE);
+    scriptMenu->Append(MENU_SCRIPT_BUILD, wxT("Build Script from Object"), wxT(""), FALSE);
     
     editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
     editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
@@ -365,12 +365,12 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
     
     helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
-    helpMenu->Append(MENU_HELP_DEMOS, wxT("Demos"), wxT(""), FALSE);
+    //helpMenu->Append(MENU_HELP_DEMOS, wxT("Demos"), wxT(""), FALSE);
     helpMenu->AppendSeparator();
     helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
 
     //loj: added
-    demoMenu->Append(MENU_DEMO_BATCH_RUN, wxT("Batch Run"), wxT(""), FALSE);
+    //demoMenu->Append(MENU_DEMO_BATCH_RUN, wxT("Batch Run"), wxT(""), FALSE);
     
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(scriptMenu, wxT("Script"));
@@ -381,7 +381,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     menuBar->Append(viewsMenu, wxT("Views"));
     menuBar->Append(toolsMenu, wxT("Tools"));
     //loj: added
-    menuBar->Append(demoMenu, wxT("Demo"));
+    //menuBar->Append(demoMenu, wxT("Demo"));
     
     menuBar->Append(helpMenu, wxT("Help"));
     
@@ -441,44 +441,46 @@ wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
 }
 
 //loj: added
-//------------------------------------------------------------------------------
-// void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles demo output from the menu bar.
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
-{
-    mTextFrame = new ViewTextFrame(this, _T("Demo Batch Run"), 50, 50, 450, 340);
-    mTextFrame->Show(true);
+//  //------------------------------------------------------------------------------
+//  // void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
+//  //------------------------------------------------------------------------------
+//  /**
+//   * Handles demo output from the menu bar.
+//   *
+//   * @param <event> input event.
+//   */
+//  //------------------------------------------------------------------------------
+//  void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
+//  {
+//      mTextFrame = new ViewTextFrame(this, _T("Demo Batch Run"), 50, 50, 450, 340);
+//      mTextFrame->Show(true);
 
-    try
-    {
-        BatchRunFromGui batchMode;
-        batchMode.Run();
-        StringArray output = batchMode.GetTextBuffer();
+//      GmatAppData::theMessageWindow->ClearText();
+    
+//      try
+//      {
+//          BatchRunFromGui batchMode;
+//          batchMode.Run();
+//          StringArray output = batchMode.GetTextBuffer();
         
-        int size = output.size();
-        for(int i=0; i<size; i++)
-            mTextFrame->WriteText(wxString(output[i].c_str()));
+//          int size = output.size();
+//          for(int i=0; i<size; i++)
+//              mTextFrame->AppendText(wxString(output[i].c_str()));
 
-    }
-    catch (BaseException &e)
-    {
-        mTextFrame->WriteText("*** Some Exception occurred in BatchRunFromGui! \n");
-        mTextFrame->WriteText(wxString(e.GetMessage().c_str()));
-    }
-    catch (...)
-    {
-        mTextFrame->WriteText("*** Some other Error occurred in BatchRunFromGui! ");
-    }
-}
+//      }
+//      catch (BaseException &e)
+//      {
+//          mTextFrame->AppendText("*** Some Exception occurred in BatchRunFromGui! \n");
+//          mTextFrame->AppendText(wxString(e.GetMessage().c_str()));
+//      }
+//      catch (...)
+//      {
+//          mTextFrame->AppendText("*** Some other Error occurred in BatchRunFromGui! ");
+//      }
+//  }
 
 //------------------------------------------------------------------------------
-// void OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event))
+// void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
  * Handles script file from the menu bar.
@@ -486,57 +488,12 @@ void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event))
-{   
-    // Create a document manager
-    mDocManager = new wxDocManager;
+void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
+{
 
-    // Create a template relating text documents to their views
-    mDocTemplate = 
-        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-                          CLASSINFO(TextDocument), CLASSINFO(TextEditView));
-    //loj: why void?
-//      // Create a template relating text documents to their views
-//      (void) new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-//                               _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-//                               CLASSINFO(TextDocument), CLASSINFO(TextEditView));
-    
-    // Create the main frame window    
-    //loj: pass "this" so that this frame closes when the main frame closes
-    docMainFrame =
-        new DocViewFrame(mDocManager, this, -1, _T("Script Window"),
-                         wxPoint(0, 0), wxSize(600, 500), wxDEFAULT_FRAME_STYLE);
-    
-    // Give it an icon (this is ignored in MDI mode: uses resources)
+    //Windows mode
+    //----------------------------------------------------------------
 #ifdef __WXMSW__
-    docMainFrame->SetIcon(wxIcon(_T("doc_icn")));
-#endif
-    
-    // Make a menubar
-    wxMenuBar *menuBar = CreateScriptWindowMenu("sdi");
-       
-    // Associate the menu bar with the frame
-    docMainFrame->SetMenuBar(menuBar);
-    
-    docMainFrame->Centre(wxBOTH);
-    docMainFrame->Show(TRUE);
-    
-    //loj:compile error:
-    //SetTopWindow(docMainFrame);
-}
-
-//------------------------------------------------------------------------------
-// void OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles script file from the menu bar.
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
-{   
     // Create a document manager
     mDocManager = new wxDocManager;
 
@@ -554,9 +511,7 @@ void GmatMainFrame::OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
                             (wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE));
     
     // Give it an icon (this is ignored in MDI mode: uses resources)
-#ifdef __WXMSW__
     mdiDocMainFrame->SetIcon(wxIcon(_T("doc")));
-#endif
     
     // Make a menubar
     wxMenuBar *menuBar = CreateScriptWindowMenu("mdi");
@@ -569,5 +524,48 @@ void GmatMainFrame::OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
     
     //loj:compile error:
     //SetTopWindow(mdiDocMainFrame);
+    //----------------------------------------------------------------
+#else
+    // Create a document manager
+    mDocManager = new wxDocManager;
+
+    // Create a template relating text documents to their views
+    mDocTemplate = 
+        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+                          CLASSINFO(TextDocument), CLASSINFO(TextEditView));
+    
+    // Create the main frame window    
+    //loj: pass "this" so that this frame closes when the main frame closes
+    docMainFrame =
+        new DocViewFrame(mDocManager, this, -1, _T("Script Window"),
+                         wxPoint(0, 0), wxSize(600, 500), wxDEFAULT_FRAME_STYLE);
+        
+    // Make a menubar
+    wxMenuBar *menuBar = CreateScriptWindowMenu("sdi");
+       
+    // Associate the menu bar with the frame
+    docMainFrame->SetMenuBar(menuBar);
+    
+    docMainFrame->Centre(wxBOTH);
+    docMainFrame->Show(TRUE);
+    
+    //loj:compile error:
+    //SetTopWindow(docMainFrame);
+#endif
 }
 
+//------------------------------------------------------------------------------
+// void OnScriptBuild(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles building script file from objects
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
+{
+    bool status = GmatAppData::GetGuiInterpreter()->
+        SaveScript("$gmattempscript$.script");
+}
