@@ -24,7 +24,6 @@
 #include <iostream>
 #include "gmatdefs.hpp"
 #include "Linear.hpp"
-#include "PhysicalConstants.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 
@@ -74,8 +73,8 @@ public:
 
    //  Friend functions
    friend Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
-                                const Rvector3 &qVector, Real mu=GmatPhysicalConst::mu);
-   friend Cartesian ToCartesian(const Keplerian &k, Real mu=GmatPhysicalConst::mu);
+                                const Rvector3 &qVector, Real mu);
+   friend Cartesian ToCartesian(const Keplerian &k, Real mu);
    friend std::ostream& operator<<(std::ostream& output, Cartesian& c);
    friend std::istream& operator>>(std::istream& input, Cartesian& c);
 

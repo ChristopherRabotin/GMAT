@@ -28,7 +28,6 @@
 #include "gmatdefs.hpp"
 #include "RealTypes.hpp"          // for Radians
 #include "Linear.hpp"
-#include "PhysicalConstants.hpp"  // for mu
 
 
 // Forward declaration
@@ -82,7 +81,7 @@ public :
     friend Radians MeanToTrueAnomaly(Radians meanAnomaly,
                                      Real eccentricity);
     friend Keplerian ToKeplerian(const Cartesian &c,
-                                 Real mu=GmatPhysicalConst::mu);
+                                 Real mu);
 
     friend std::ostream& operator<<(std::ostream& output, Keplerian& k);
     friend std::istream& operator>>(std::istream& input, Keplerian& k);
