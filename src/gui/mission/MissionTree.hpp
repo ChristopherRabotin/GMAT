@@ -97,7 +97,12 @@ private:
     void OnViewVariables();
     void OnViewGoals();
 
-    void OnRun();   
+    void OnRun();  
+    
+    void OnDelete(); 
+    
+    void OnOpen();
+    void OnClose();
  
     wxMenu* CreatePopupMenu();
     wxMenu* CreateInsertPopupMenu();
@@ -117,6 +122,8 @@ private:
         POPUP_PASTE,
         POPUP_DELETE,
         POPUP_RENAME,
+        POPUP_OPEN,
+        POPUP_CLOSE,
 
         POPUP_ADD_MISSION_SEQ,
         POPUP_ADD_COMMAND,
