@@ -16,4 +16,4 @@
 
 MdiParentGlFrame* MdiGlPlot::mdiParentGlFrame = (MdiParentGlFrame *) NULL;    
 wxList MdiGlPlot::mdiChildren = 0;
-int MdiGlPlot::numChildFrames = 0;
+int MdiGlPlot::numChildren = 0;
