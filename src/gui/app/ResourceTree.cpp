@@ -817,7 +817,6 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    wxString oldName = selItem->GetDesc();
    int dataType = selItem->GetDataType();
 
-
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
@@ -859,6 +858,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
           RenameConfiguredItem(objType, oldName.c_str(), newName.c_str()))
       {
          SetItemText(item, newName);
+         GmatAppData::GetMainFrame()->RenameChild(selItem, newName);
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
          //theGuiManager->UpdateSpacecraft();
@@ -970,7 +970,7 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
       int itemType = selItem->GetDataType();
 
       selItem->SetDesc(newLabel);
-                  
+       
       // if label refers to an object reset the object name
       if ((itemType == GmatTree::DEFAULT_SPACECRAFT)  ||
           (itemType == GmatTree::CREATED_SPACECRAFT))

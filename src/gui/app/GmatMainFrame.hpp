@@ -46,6 +46,7 @@ public:
     ~GmatMainFrame();
     void CreateChild(GmatTreeItemData *item);
     bool IsChildOpen(GmatTreeItemData *item);
+    bool RenameChild(GmatTreeItemData *item, wxString newName);
     void RemoveChild(wxString item);
     void CloseActiveChild();
     void CloseAllChildren();

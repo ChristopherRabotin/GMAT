@@ -1261,6 +1261,45 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
 }
 
 //------------------------------------------------------------------------------
+// bool RenameChild(GmatTreeItemData *item, wxString newName)
+//------------------------------------------------------------------------------
+/**
+ * Determines if page should be opened.  If the page is already opened, sets that
+ * page as the selected page.
+ *
+ * @param <item> input GmatTreeItemData.
+ *
+ * @return True if page should be opened, false if it should not be opened.
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
+{
+   wxNode *node = mdiChildren->GetFirst();
+   while (node)
+   {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+
+#if DEBUG_MAINFRAME
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::GetChild() child %s  this %s\n",
+          theChild->GetTitle().c_str(), item->GetDesc().c_str());
+#endif
+    
+      if (theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))
+      {
+         theChild->SetTitle(newName);
+         return TRUE;   
+      }
+      node = node->GetNext();
+   }
+ 
+   return FALSE;
+}
+
+
+
+
+//------------------------------------------------------------------------------
 // void GmatMainFrame::RemoveChild(wxString *item)
 //------------------------------------------------------------------------------
 void GmatMainFrame::RemoveChild(wxString item)
