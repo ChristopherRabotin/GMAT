@@ -129,6 +129,7 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 {
    mInitialEpoch = initialEpoch;
    mIsInitialEpochSet = true;
+   
    //MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
    //                              mInitialEpoch);
 }
@@ -219,13 +220,12 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
       }
       else
       {
-         Real rval = FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT])->
-            GetRealParameter("Epoch");
+         Spacecraft *sc = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+         Real rval = sc->GetRealParameter("Epoch");
 
          if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
          {
-            mInitialEpoch =
-               FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT])->GetRealParameter("Epoch");
+            mInitialEpoch = sc->GetRealParameter("Epoch");
             mIsInitialEpochSet = true;
             status = true;
          }
@@ -244,6 +244,14 @@ void TimeData::InitializeRefObjects()
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
       throw ParameterException("OrbitData::InitializeRefObjects() Cannot find Spacecraft object");
+   else
+      if (!mIsInitialEpochSet)
+      {
+         mInitialEpoch = mSpacecraft->GetRealParameter("Epoch");
+         mIsInitialEpochSet = true;
+         //MessageInterface::ShowMessage
+         //   ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
+      }
 }
 
 //------------------------------------------------------------------------------
