@@ -21,7 +21,7 @@ namespace GmatPlot
 {
     enum GlEventType
     {
-        MDI_GL_QUIT = 90000,
+        MDI_GL_QUIT = 500, //Do not change. Higher number doesn't work!!
         MDI_GL_OPEN_TRAJECTORY_FILE,
         MDI_GL_CHILD_ZOOM_IN,
         MDI_GL_CHILD_ZOOM_OUT,
