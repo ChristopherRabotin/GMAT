@@ -4,6 +4,7 @@
 # Date:       2003/11/13
 # Modified:   2004/01/14 - Added PlotInterface.cpp
 #             2004/02/20 - Adjusted the flag for wxMac/wxWindows 
+#             2004/04/12 - Added FileManager.cpp
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
@@ -21,8 +22,9 @@ GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
 	-I$(G_MISSION) -I$(G_VIEW)
 #
 # Source file for creating new library
-SRC = MessageInterface.cpp Moderator.cpp PlotInterface.cpp Publisher.cpp \
-	Sandbox.cpp SandboxException.cpp
+SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
+	Publisher.cpp Sandbox.cpp SandboxException.cpp
+
 #
 #TESTFLAGS = -D__CONSOLE_APP__
 TESTFLAGS = $(GUI_INCS) `wx-config --cxxflags`
