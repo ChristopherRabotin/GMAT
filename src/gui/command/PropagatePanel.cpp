@@ -317,6 +317,9 @@ void PropagatePanel::LoadData()
 #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage("PropagatePanel::LoadData() entered\n");
 #endif
+
+   // Set the pointer for the "Show Script" button
+   mObject = thePropCmd;
    
    //----------------------------------
    // propagation mode

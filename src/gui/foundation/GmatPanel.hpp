@@ -66,6 +66,8 @@ protected:
    wxButton *theCancelButton;
    wxButton *theHelpButton;
    wxButton *theScriptButton;
+   
+   GmatBase *mObject;
     
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();

@@ -155,6 +155,9 @@ void TargetPanel::LoadData()
 {
    try
    {
+      // Set the pointer for the "Show Script" button
+      mObject = theCommand;
+
       std::string solverName =
          theCommand->GetStringParameter(theCommand->GetParameterID("Targeter"));
       mSolverComboBox->SetStringSelection(solverName.c_str());

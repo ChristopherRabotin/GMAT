@@ -81,7 +81,10 @@ void SpacecraftPanel::Create()
 {
     SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     currentSpacecraft = new Spacecraft(*theSpacecraft);
-    
+
+    // Set object pointer for "Show Script"
+    mObject = currentSpacecraft;
+
     // wxNotebook
     spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
                          wxDefaultSize, wxGROW );

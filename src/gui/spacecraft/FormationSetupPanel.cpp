@@ -160,6 +160,9 @@ void FormationSetupPanel::LoadData()
    Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
    StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
 
+   // Set object pointer for "Show Script"
+   mObject = form;
+
    for (unsigned int i=0; i<scList.size(); i++)
    {
       mSoSelectedListBox->Append(scList[i].c_str());

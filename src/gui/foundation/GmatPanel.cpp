@@ -87,6 +87,8 @@ GmatPanel::GmatPanel(wxWindow *parent)
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
+   
+   mObject = NULL;
 }
 
 //-------------------------------
@@ -117,7 +119,7 @@ void GmatPanel::Show()
     theApplyButton->Disable();
     LoadData();
 
-    theScriptButton->Disable(); //loj: for build2
+//    theScriptButton->Disable(); //loj: for build2
     theHelpButton->Disable();   //loj: for build2
 }
 
@@ -190,5 +192,12 @@ void GmatPanel::OnHelp()
 void GmatPanel::OnScript()
 {
    // open separate window to show scripts?
+   if (mObject == NULL)
+      MessageInterface::PopupMessage(Gmat::INFO_,
+         "Script not yet available for this panel");
+   else {
+      std::string genString = mObject->GetGeneratingString();
+      MessageInterface::PopupMessage(Gmat::INFO_, genString);
+   }
 }
 

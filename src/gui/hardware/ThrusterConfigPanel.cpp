@@ -147,7 +147,10 @@ void ThrusterConfigPanel::LoadData()
 { 
    if (theThruster == NULL)
       return;
-      
+
+   // Set object pointer for "Show Script"
+   mObject = theThruster;
+
    Integer paramID;
       
    paramID = theThruster->GetParameterID("CoordinateSystem");

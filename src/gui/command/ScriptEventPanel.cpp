@@ -42,7 +42,7 @@ ScriptEventPanel::ScriptEventPanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
    theCommand = cmd;
-
+   
    if (theCommand != NULL)
    {
      Create();
@@ -86,8 +86,13 @@ void ScriptEventPanel::Create()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::LoadData()
 {
+   // Set the pointer for the "Show Script" button
+   mObject = theCommand;
+
    wxString scriptText = theCommand->GetGeneratingString().c_str();
    mFileContentsTextCtrl->AppendText(scriptText);
+   
+   mFileContentsTextCtrl->AppendText("\n");
 
    theApplyButton->Disable();
 }
@@ -97,8 +102,8 @@ void ScriptEventPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::SaveData()
 {
-//   std::string scriptText = mFileContentsTextCtrl->GetValue().c_str();
-//   theCommand->SetStringParameter("ScriptText", scriptText);
+   std::string scriptText = mFileContentsTextCtrl->GetValue().c_str();
+   theCommand->SetGeneratingString(scriptText);
 }
 
 //------------------------------------------------------------------------------

@@ -184,6 +184,10 @@ void FiniteBurnSetupPanel::LoadData()
       StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
       int size = itemNames.size();
       
+      // Set object pointer for "Show Script"
+      mObject = theBurn;
+
+      
       wxString *tankList = new wxString[size];
       wxString *thrusterList = new wxString[size];
       

@@ -153,6 +153,9 @@ void TankConfigPanel::LoadData()
        
    Integer paramID;
    
+   // Set object pointer for "Show Script"
+   mObject = theFuelTank;
+
    paramID = theFuelTank->GetParameterID("Temperature");
    temperatureTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
          

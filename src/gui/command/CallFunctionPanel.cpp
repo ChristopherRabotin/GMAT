@@ -196,6 +196,9 @@ void CallFunctionPanel::LoadData()
 {
 //   MessageInterface::ShowMessage("Loading data...\n"); 
      
+   // Set the pointer for the "Show Script" button
+   mObject = theCommand;
+
    std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
    functionComboBox->SetValue(objectName.c_str());
 

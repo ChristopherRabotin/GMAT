@@ -190,6 +190,9 @@ void AchievePanel::LoadData()
    
    try
    {
+      // Set the pointer for the "Show Script" button
+      mObject = mAchieveCommand;
+      
       std::string solverName = mAchieveCommand->
          GetStringParameter(mAchieveCommand->GetParameterID("TargeterName"));
 

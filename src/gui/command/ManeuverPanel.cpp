@@ -191,6 +191,9 @@ void ManeuverPanel::LoadData()
    Integer id;
    int index;
     
+   // Set the pointer for the "Show Script" button
+   mObject = theCommand;
+
    // default values
    //burnCB->SetSelection(0);
    //satCB->SetSelection(0);

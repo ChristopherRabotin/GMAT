@@ -108,6 +108,9 @@ void TogglePanel::Create()
 //------------------------------------------------------------------------------
 void TogglePanel::LoadData()
 {
+   // Set the pointer for the "Show Script" button
+   mObject = theCommand;
+
    // load data from the core engine
    
    std::string toggleState = theCommand->GetStringParameter

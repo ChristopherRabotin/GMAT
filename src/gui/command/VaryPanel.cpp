@@ -204,6 +204,9 @@ void VaryPanel::LoadData()
    
    try
    {
+      // Set the pointer for the "Show Script" button
+      mObject = mVaryCommand;
+
       std::string solverName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("TargeterName"));
 

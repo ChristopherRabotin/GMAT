@@ -326,7 +326,10 @@ void ImpulsiveBurnSetupPanel::LoadData()
    Integer id, el;
    Real element;
     
-   // Coordinate Frame   
+   // Set object pointer for "Show Script"
+   mObject = theBurn;
+
+   // Coordinate Frame
    id = theBurn->GetParameterID("CoordinateFrame");
    std::string coordFrame = theBurn->GetStringParameter(id);
    StringArray frames = theBurn->GetStringArrayParameter(id);

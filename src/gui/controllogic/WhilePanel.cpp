@@ -107,6 +107,9 @@ void WhilePanel::Setup(wxWindow *parent)
 //------------------------------------------------------------------------------
 void WhilePanel::LoadData()
 {
+    // Set the pointer for the "Show Script" button
+    mObject = theWhileCommand;
+
     if (theWhileCommand != NULL)
     {
        Integer paramId;

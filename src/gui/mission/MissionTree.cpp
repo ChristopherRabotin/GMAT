@@ -195,6 +195,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    //    Initialize();
    //    SetNodes();
    //    ExpandAll();
+   
+   inScriptEvent = false;
 }
 
 //loj: 6/29/04 added resetCounter
@@ -230,6 +232,8 @@ void MissionTree::UpdateMission(bool resetCounter)
       mNumFunct = 0;
 //      mNumAssign = 0;
       mNumScriptEvent = 0;
+      
+      inScriptEvent = false;
    }
    
    DeleteChildren(mMissionSeqSubItem);
@@ -436,6 +440,14 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    {
 
    }
+   else if (cmdTypeName == "BeginScript")
+   {
+      mNewTreeId =
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SCRIPT_COMMAND,
+                       cmd, &mNumScriptEvent, mNumScriptEvent);
+      inScriptEvent = true;
+      Expand(parent);
+   }
    else
    {
       mNewTreeId =
@@ -576,7 +588,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    // Create End* command if branch command
    //------------------------------------------------------------
    if (typeName == "Target" || typeName == "For"  ||  typeName == "While" ||
-       typeName == "If") //loj: add Do, Switch later
+       typeName == "If" || typeName == "BeginScript") //loj: add Do, Switch later
    {
       if (typeName == "Target")
       {
@@ -598,7 +610,12 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          endCmd = theGuiInterpreter->CreateCommand("EndIf");
          endType = GmatTree::END_IF_CONTROL;
       }
-      
+      if (typeName == "BeginScript")
+      {
+         endCmd = theGuiInterpreter->CreateCommand("EndScript");
+         endType = GmatTree::END_TARGET_COMMAND;
+      }
+
 #if DEBUG_MISSION_TREE
       MessageInterface::ShowMessage("----- Appending End*...\n");
 #endif
@@ -1991,7 +2008,7 @@ void MissionTree::OnInsertScriptEvent(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {
-      GmatCommand *cmd = theGuiInterpreter->CreateCommand("ScriptEvent");
+      GmatCommand *cmd = theGuiInterpreter->CreateCommand("BeginScript");
 
       if (cmd != NULL)
       {

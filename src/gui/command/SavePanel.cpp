@@ -100,6 +100,9 @@ void SavePanel::Create()
 //------------------------------------------------------------------------------
 void SavePanel::LoadData()
 {
+   // Set the pointer for the "Show Script" button
+   mObject = theCommand;
+
    // load data from the core engine
     
    // object

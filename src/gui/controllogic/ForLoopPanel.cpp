@@ -137,6 +137,9 @@ void ForLoopPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void ForLoopPanel::LoadData()
 {
+    // Set the pointer for the "Show Script" button
+    mObject = theForCommand;
+
     if (theForCommand != NULL)
     {
        Integer paramId;

@@ -94,6 +94,9 @@ void IfPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void IfPanel::LoadData()
 {
+    // Set the pointer for the "Show Script" button
+    mObject = theIfCommand;
+
     if (theIfCommand != NULL)
     {
        Integer paramId;

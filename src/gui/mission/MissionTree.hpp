@@ -67,6 +67,9 @@ private:
    int mNumFunct;
    int mNumAssign;
    int mNumScriptEvent;
+   
+   // Added 2/25/05, DJC
+   bool inScriptEvent;
 
    void UpdateCommand();
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
