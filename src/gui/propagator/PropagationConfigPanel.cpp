@@ -1531,14 +1531,15 @@ void PropagationConfigPanel::OnAddBodyButton()
       //----------------------------------------------
       bodyComboBox->Clear();
       bodyTextCtrl->Clear();
+      wxString name;
       for (Integer i = 0; i < (Integer)forceList.size(); i++)
       {
+         name = forceList[i]->bodyName.c_str();
+         bodyTextCtrl->AppendText(name + " ");
          bodyComboBox->Append(forceList[i]->bodyName.c_str());
          bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
-//         bodyTextCtrl->AppendText(bodyComboBox->GetString(i) + " ");
       }
-      
-      DisplayForceData();
+      OnBodySelection();    
 
       theApplyButton->Enable(true);
       isForceModelChanged = true;
