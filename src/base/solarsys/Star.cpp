@@ -58,8 +58,11 @@ const Real                  Star::REFERENCE_DISTANCE  = 1.49597870e8; // km (1 A
  */
 //------------------------------------------------------------------------------
 Star::Star(std::string name) :
-CelestialBody     (name)
+CelestialBody       (name),
+radiantPowerID      (parameterCount),
+referenceDistanceID (parameterCount +1)
 {
+   parameterCount += 2;
    InitializeStar();  // should this be the default?
 }
 
@@ -74,9 +77,11 @@ CelestialBody     (name)
  */
 //------------------------------------------------------------------------------
 Star::Star(const Star &st) :
-CelestialBody     (st),
-radiantPower      (st.radiantPower),
-referenceDistance (st.referenceDistance)
+CelestialBody       (st),
+radiantPower        (st.radiantPower),
+referenceDistance   (st.referenceDistance),
+radiantPowerID      (st.radiantPowerID),
+referenceDistanceID (st.referenceDistanceID)
 {
 }
 
@@ -98,8 +103,11 @@ Star& Star::operator=(const Star &st)
       return *this;
 
    GmatBase::operator=(st);
-   radiantPower      = st.radiantPower;
-   referenceDistance = st.referenceDistance;
+   radiantPower        = st.radiantPower;
+   referenceDistance   = st.referenceDistance;
+
+   radiantPowerID      = st.radiantPowerID;
+   referenceDistanceID = st.referenceDistanceID;
    return *this;
 }
 
@@ -177,6 +185,124 @@ Star* Star::Clone(void) const
 {
    Star* theClone = new Star(*this);
    return theClone;   // huh??????????????????????????????
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Star::GetParameterText(const Integer id) const
+{
+   if (id == radiantPowerID)          return "RadiantPower";
+   if (id == referenceDistanceID)     return "ReferenceDistance";
+
+   return CelestialBody::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer     Star::GetParameterID(const std::string &str) const
+{
+   if (str == "RadiantPower")               return radiantPowerID;
+   if (str == "ReferenceDistance")          return referenceDistanceID;
+   
+   return CelestialBody::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Star::GetParameterType(const Integer id) const
+{
+   if (id == radiantPowerID)          return Gmat::REAL_TYPE;
+   if (id == referenceDistanceID)     return Gmat::REAL_TYPE;
+      
+   return CelestialBody::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Star::GetParameterTypeString(const Integer id) const
+{
+   return CelestialBody::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Real parameter value, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter value.
+ *
+ * @return  Real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real        Star::GetRealParameter(const Integer id) const
+{
+   if (id == radiantPowerID)             return radiantPower;
+   if (id == referenceDistanceID)        return referenceDistanceID;
+
+   return CelestialBody::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Real parameter value, given the input parameter ID.
+ *
+ * @param <id> ID for the parameter whose value to change.
+ * @param <value> value for the parameter.
+ *
+ * @return  Real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real        Star::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == radiantPowerID)             return (radiantPower        = value);
+   if (id == referenceDistanceID)        return (referenceDistance   = value);
+   
+   return CelestialBody::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------

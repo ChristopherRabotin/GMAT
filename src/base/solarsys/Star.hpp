@@ -51,6 +51,16 @@ public:
 
    bool SetRadiantPower(Real radPower, Real refDistance);
 
+   // overridden access methods from CelestialBody
+   virtual std::string    GetParameterText(const Integer id) const;     // const?
+   virtual Integer        GetParameterID(const std::string &str) const; // const?
+   virtual Gmat::ParameterType
+      GetParameterType(const Integer id) const;
+   virtual std::string    GetParameterTypeString(const Integer id) const;
+
+   virtual Real           GetRealParameter(const Integer id) const;
+   virtual Real           SetRealParameter(const Integer id,
+                                           const Real value);
    //------------------------------------------------------------------------------
    // virtual Star* Clone(void) const
    //------------------------------------------------------------------------------
@@ -83,8 +93,11 @@ public:
 protected:
 
    // radiant power and reference distance
-   Real radiantPower;
-   Real referenceDistance;
+   Real      radiantPower;
+   Real      referenceDistance;
+
+   Integer   radiantPowerID;
+   Integer   referenceDistanceID;
 
    void InitializeStar();
 
