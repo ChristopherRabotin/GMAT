@@ -27,6 +27,8 @@
 #include "CoordinateBase.hpp"
 #include "Rmatrix33.hpp"
 #include "A1Mjd.hpp"
+#include "EopFile.hpp"
+#include "ItrfCoefficientsFile.hpp"
 
 class GMAT_API AxisSystem : public CoordinateBase
 {
@@ -45,6 +47,12 @@ public:
    
    // initializes the AxisSystem
    virtual void Initialize();
+
+   // methods to set the files to use - for those AxisSystems that 
+   // need all or part of the FK5 reduction
+   virtual void SetEopFile(EopFile *eopF);
+   virtual void SetCoefficientsFile(ItrfCoefficientsFile *itrfF);
+   
    
    //---------------------------------------------------------------------------
    //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
@@ -131,6 +139,37 @@ protected:
    /// derivative of rotation matrix - 
    /// default constructor creates a 3x3 zero-matrix
    Rmatrix33   rotDotMatrix;
+   
+   // data and methods for those AxisSystems that need all or part of the FK5 
+   // reduction
+   static const Real  JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????
+   static const Real  DETERMINANT_TOLERANCE = 1.0e-15;
+
+   EopFile                   *eop;
+   ItrfCoefficientsFile      *itrf;
+   
+   std::vector<IntegerArray> a, ap;
+   Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
+   
+   // internediate quantitied needed by more than one method
+   
+   virtual void      InitializeFK5();
+
+   virtual Rmatrix33 ComputePrecessionMatrix(const Real tTDB);
+   virtual Rmatrix33 ComputeNutationMatrix(const Real tTDB, Real &dPsi,
+                                           Real &longAscNodeLunar,
+                                           Real &cosEpsbar);
+   virtual Rmatrix33 ComputeSiderealTimeRotation(const Real jdTT,
+                                                 const Real tUT1,
+                                                 Real dPsi,
+                                                 Real longAscNodeLunar,
+                                                 Real cosEpsbar,
+                                                 Real &cosAst,
+                                                 Real &sinAst);
+   virtual Rmatrix33 ComputeSiderealTimeDotRotation(const Real mjdUTC, 
+                                                    Real cosAst, Real sinAst,
+                                                    Real &x, Real &y);
+   virtual Rmatrix33 ComputePolarMotionRotation(Real x, Real y);
    
 };
 #endif // AxisSystem_hpp
