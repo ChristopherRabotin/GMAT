@@ -35,10 +35,8 @@
  * machine depends on the solver implementation.  This class defines the state 
  * values used, and the core methods that use these states and that report on 
  * the results of the states.
- * 
- * 
  */
-class Solver : public GmatBase
+class GMAT_API Solver : public GmatBase
 {
 public:
     /// Enumeration defining the states in the state machine
@@ -58,12 +56,12 @@ public:
     Solver(const Solver& sol);
     Solver&             operator=(const Solver& sol);
     
-    SolverState         GetState(void)
+    SolverState         GetState()
     {
         return currentState;
     }
     
-    virtual SolverState AdvanceState(void);
+    virtual SolverState AdvanceState();
     
     /**
      * Derived classes implement this method to set object pointers and validate
@@ -71,7 +69,7 @@ public:
      * 
      * @return true on success, false (or throws a SolverException) on failure
      */
-    virtual bool        Initialize(void) = 0;
+    virtual bool        Initialize() = 0;
     
     /**
      * Derived classes use this method to pass in parameter data specific to
@@ -125,16 +123,16 @@ protected:
     // Methods that correspond to the solver states.  Implement the methods
     // that correspond to the Solver's state machine.  The default 
     // implementation just advances the state to the "next" state in the list. 
-    virtual void        CompleteInitialization(void);
-    virtual void        RunNominal(void);
-    virtual void        RunPerturbation(void);
-    virtual void        RunIteration(void);
-    virtual void        CalculateParameters(void);
-    virtual void        CheckCompletion(void);
-    virtual void        RunComplete(void);
+    virtual void        CompleteInitialization();
+    virtual void        RunNominal();
+    virtual void        RunPerturbation();
+    virtual void        RunIteration();
+    virtual void        CalculateParameters();
+    virtual void        CheckCompletion();
+    virtual void        RunComplete();
     
     /** Utility function used by the solvers to generate a progress file */
-    virtual void        WriteToTextFile(void) = 0;
+    virtual void        WriteToTextFile() = 0;
 };
 
 
