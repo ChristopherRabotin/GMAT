@@ -13,7 +13,12 @@
 // Created: 2003/12/26
 //
 /**
- * Manager for all of the maneuver types. 
+ * Manager for all of the maneuver frame types. 
+ * 
+ * This class implements the interface to different representations of a 
+ * maneuver based on classes derived from the ManeuverFrame class.  To add a new
+ * frame, insert the calls for the derived classes in the three indicated 
+ * places.
  */
 //------------------------------------------------------------------------------
 

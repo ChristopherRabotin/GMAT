@@ -1,3 +1,23 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                              VnbManeuverFrame 
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: 2003/12/17
+//
+/**
+ * Defines the class used for maneuvers defined in VNB coordinates. 
+ */
+//------------------------------------------------------------------------------
+
+
 #include "VnbManeuverFrame.hpp"
 
 
@@ -8,6 +28,22 @@ VnbManeuverFrame::VnbManeuverFrame()
 
 VnbManeuverFrame::~VnbManeuverFrame()
 {
+}
+
+
+VnbManeuverFrame::VnbManeuverFrame(const VnbManeuverFrame& vmf) :
+    ManeuverFrame       (vmf)
+{
+}
+
+
+VnbManeuverFrame& VnbManeuverFrame::operator=(const VnbManeuverFrame& vmf)
+{
+    if (this == &vmf)
+        return *this;
+        
+    ManeuverFrame::operator=(vmf);
+    return *this;
 }
 
 

@@ -37,10 +37,18 @@ ManeuverFrame::~ManeuverFrame()
 
 
 ManeuverFrame::ManeuverFrame(const ManeuverFrame& mf)
-{}
+{
+}
+
 
 ManeuverFrame& ManeuverFrame::operator=(const ManeuverFrame& mf)
-{}
+{
+    if (this == &mf)
+        return *this;
+        
+    return *this;
+}
+
 
 void ManeuverFrame::SetState(Real *pos, Real *vel)
 {
