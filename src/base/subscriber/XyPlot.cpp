@@ -253,6 +253,8 @@ bool XyPlot::AddYParameter(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool XyPlot::Initialize()
 {
+   Subscriber::Initialize();
+
    //-----------------------------------
    //@todo
    // need to set Parameter pointers
@@ -692,6 +694,12 @@ bool XyPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool XyPlot::Distribute(const Real * dat, Integer len)
 {
+   //loj: 6/22/04 added if (isEndOfReceive)
+   if (isEndOfReceive)
+   {
+      return PlotInterface::RefreshXyPlot(instanceName);
+   }
+   
    if (len > 0)
    {
       if (mXParam != NULL && mNumYParams > 0)
@@ -745,7 +753,7 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          }
       }
    }
-
+   
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()
    return true;
