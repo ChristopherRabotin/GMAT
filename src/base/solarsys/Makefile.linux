@@ -9,6 +9,7 @@ OBJECTS = CelestialBody.o SolarSystem.o Moon.o Planet.o Star.o \
           AtmosphereException.o \
           AtmosphereModel.o \
           ExponentialAtmosphere.o \
+          msise90.o \
           Msise90Atmosphere.o
 
 all: libSolarSystem 

@@ -389,12 +389,17 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                 throw InterpreterException("Force model does not exist");
         }    
         else {
-        // Could be a subitem
-//        std::string subparm = GetToken();
-//        if (subparm == "")
-//            throw InterpreterException("Assignment string does not parse");
-//        // Find the owned object
-//        // Set the parm on the owned object
+            // Could be a subitem -- Drag.Earth = Exponential, for example
+            std::string subparm = GetToken();
+            if (subparm == "")
+                throw InterpreterException("Assignment string does not parse");
+            // Find the owned object
+            if (objParm == "Drag") {
+                if (subparm != "Earth")
+                    throw InterpreterException("Only Earth drag is supported in build 2");
+            }
+                
+            // Set the parm on the owned object
             throw InterpreterException("Assignment string does not parse");
         }
     }

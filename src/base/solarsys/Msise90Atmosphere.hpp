@@ -22,6 +22,7 @@
 #define Msise90Atmosphere_hpp
 
 #include "AtmosphereModel.hpp"
+#include "msise90.hpp"
 
 
 class Msise90Atmosphere : public AtmosphereModel
@@ -32,6 +33,9 @@ public:
     
     bool                    Density(Real *position, Real *density, 
                                     Integer count = 1);
+                                    
+protected:
+    MSISE90                 msise90;
 
 private:
     Msise90Atmosphere(const Msise90Atmosphere& msise);

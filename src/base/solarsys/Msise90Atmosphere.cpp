@@ -19,6 +19,7 @@
 
 
 #include "Msise90Atmosphere.hpp"
+#include <math.h>
 
 
 Msise90Atmosphere::Msise90Atmosphere() :
@@ -32,23 +33,36 @@ Msise90Atmosphere::~Msise90Atmosphere()
 }
 
 
-//Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
-//    AtmosphereModel     (msise)
-//{
-//}
-//
-//
-//Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
-//{
-//    if (this == &msise)
-//        return *this;
-//        
-//    return *this;
-//}
-    
-
-bool Msise90Atmosphere::Density(Real *position, Real *density, Integer count)
+bool Msise90Atmosphere::Density(Real *pos, Real *density, Integer count)
 {
-    return false;
+    Integer i, i6;
+    Real    alt;
+  
+    // For now, hard code the MSISE90 parameters.
+    Real    f107  =   150.0;
+    Real    f107a =   150.0;
+    Integer doy   =   172;
+    Real    sod   = 29000.0;
+    Integer year  =  2003;
+    Real    lat   =    60.0;
+    Real    lon   =   -70.0; 
+    Real    lst   =    16.0;
+    
+    Integer yd = year * 1000 + doy;
+    
+    Real    ap[7], den[8], temp[2];
+    for (i = 0; i < 7; i++)
+        ap[i] = 4.0;
+    
+    for (i = 0; i < count; ++i) {
+        i6 = i*6;
+        alt = sqrt(pos[ i6 ]*pos[ i6 ] + 
+                   pos[i6+1]*pos[i6+1] + 
+                   pos[i6+2]*pos[i6+2]) - 6378.14;
+        msise90.GTD6(yd,sod,alt,lat,lon,lst,f107a,f107,ap,48,den,temp);
+        density[i] = den[5];
+    }
+    
+    return true;
 }
 
