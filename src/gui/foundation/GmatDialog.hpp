@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              GmatPanel
+//                              GmatDialog
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -8,12 +8,12 @@
 // Created: 2004/02/02
 //
 /**
- * Declares GmatPanel class.
+ * Declares GmatDialog class. This class provides base class of GMAT Dialogs.
  */
 //------------------------------------------------------------------------------
 
-#ifndef GmatPanel_hpp
-#define GmatPanel_hpp
+#ifndef GmatDialog_hpp
+#define GmatDialog_hpp
 
 #include "gmatwxdefs.hpp"
 #include <wx/sizer.h>
@@ -21,7 +21,6 @@
 #include <wx/textctrl.h>
 #include <wx/combobox.h>
 #include <wx/checkbox.h>
-#include "wx/notebook.h"
 #include <wx/button.h>
 #include <wx/grid.h>
 #include "wx/radiobut.h"
@@ -30,40 +29,36 @@
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 
-class GmatPanel : public wxPanel
+class GmatDialog : public wxDialog
 {
 public:
     // constructors
-    GmatPanel( wxWindow *parent);
+    GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
     
 protected:
     // member functions
-    virtual void Create() = 0;
     virtual void Show();
+    virtual void Create() = 0;
     virtual void LoadData() = 0;
     virtual void SaveData() = 0;
+    virtual void ResetData() = 0;
     
-    virtual void OnApply();
     virtual void OnOK();
     virtual void OnCancel();
     virtual void OnHelp();
-    virtual void OnScript();
 
     // member data
     GuiInterpreter *theGuiInterpreter;
     GuiItemManager *theGuiManager;
     wxWindow *theParent;
     
-    wxBoxSizer *thePanelSizer;
-    wxStaticBoxSizer *theTopSizer;
+    wxBoxSizer *theDialogSizer;
     wxStaticBoxSizer *theMiddleSizer;
     wxStaticBoxSizer *theBottomSizer;
     
     wxButton *theOkButton;
-    wxButton *theApplyButton;
     wxButton *theCancelButton;
     wxButton *theHelpButton;
-    wxButton *theScriptButton;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
@@ -71,13 +66,12 @@ protected:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_BUTTON_OK = 8000,
+        ID_BUTTON_OK = 8100,
         ID_BUTTON_APPLY,
         ID_BUTTON_CANCEL,
-        ID_BUTTON_HELP,
-        ID_BUTTON_SCRIPT,
+        ID_BUTTON_HELP
     };
 
 };
 
-#endif // GmatPanel_hpp
+#endif // GmatDialog_hpp

@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              GmatPanel
+//                              GmatDialog
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -8,11 +8,11 @@
 // Created: 2004/02/02
 //
 /**
- * Implements GmatPanel class.
+ * Implements GmatDialog class.
  */
 //------------------------------------------------------------------------------
 
-#include "GmatPanel.hpp"
+#include "GmatDialog.hpp"
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
@@ -20,11 +20,10 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(GmatPanel, wxPanel)
-    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+BEGIN_EVENT_TABLE(GmatDialog, wxDialog)
+    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
+    EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
+    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -32,17 +31,17 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// GmatPanel(wxWindow *parent)
+// GmatDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 /**
- * Constructs GmatPanel object.
+ * Constructs GmatDialog object.
  *
- * @param <parent> parent window.
+ * @param <parent> parent window
  *
  */
 //------------------------------------------------------------------------------
-GmatPanel::GmatPanel(wxWindow *parent)
-    : wxPanel(parent)
+GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
+    : wxDialog(parent, id, title)
 {
     int borderSize = 3;
     
@@ -55,42 +54,26 @@ GmatPanel::GmatPanel(wxWindow *parent)
     wxStaticBox *bottomStaticBox = new wxStaticBox( this, -1, wxT("") );
     
     // create sizers
-    thePanelSizer = new wxBoxSizer(wxVERTICAL);
-    theTopSizer = new wxStaticBoxSizer( topStaticBox, wxVERTICAL );
+    theDialogSizer = new wxBoxSizer(wxVERTICAL);
     theMiddleSizer = new wxStaticBoxSizer( middleStaticBox, wxVERTICAL );
     theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
     wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
-    
-    // create script button
-    theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script", 
-                                   wxDefaultPosition, wxDefaultSize, 0);
-
+  
     // create bottom buttons
     theOkButton =
         new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
-    theApplyButton =
-        new wxButton(this, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
     theCancelButton =
         new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
     theHelpButton =
         new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-    
-    // add items to top sizer
-    theTopSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
-    
+        
     // adds the buttons to button sizer    
     theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     
-//      // adds the buttons to button sizer    
-//      theBottomSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-
     theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
+
 }
 
 //-------------------------------
@@ -104,23 +87,24 @@ GmatPanel::GmatPanel(wxWindow *parent)
  * Shows the panel.
  */
 //------------------------------------------------------------------------------
-void GmatPanel::Show()
+void GmatDialog::Show()
 {
     // add items to middle sizer
     
-    thePanelSizer->Add(theTopSizer, 0, wxGROW | wxALL, 1);
-    thePanelSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
-    thePanelSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
+    theDialogSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 1);
+    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
     
     // tells the enclosing window to adjust to the size of the sizer
     SetAutoLayout( TRUE );
-    SetSizer(thePanelSizer); //use the sizer for layout
-    thePanelSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
-    thePanelSizer->SetSizeHints(this); //set size hints to honour minimum size
+    SetSizer(theDialogSizer); //use the sizer for layout
+    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
+    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
 
+    CenterOnScreen(wxBOTH);
+    
     LoadData();
 
-    theApplyButton->Disable();
+    theOkButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -130,14 +114,10 @@ void GmatPanel::Show()
  * Saves the data and closes the page
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnOK()
+void GmatDialog::OnOK()
 {
-    if (theApplyButton->IsEnabled())
-        OnApply();
-    
-    // Close page from main notebook    
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
+    SaveData();
+    Close();
 }
 
 //------------------------------------------------------------------------------
@@ -147,23 +127,10 @@ void GmatPanel::OnOK()
  * Close page.
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnCancel()
+void GmatDialog::OnCancel()
 {
-    // Close page from main notebook
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
-}
-
-//------------------------------------------------------------------------------
-// void OnApply()
-//------------------------------------------------------------------------------
-/**
- * Saves the data and remain unclosed.
- */
-//------------------------------------------------------------------------------
-void GmatPanel::OnApply()
-{
-    SaveData();
+    ResetData();
+    Close();
 }
 
 //------------------------------------------------------------------------------
@@ -173,20 +140,7 @@ void GmatPanel::OnApply()
  * Shows Helps
  */
 //------------------------------------------------------------------------------
-void GmatPanel::OnHelp()
+void GmatDialog::OnHelp()
 {
     // open separate window to show help
 }
-
-//------------------------------------------------------------------------------
-// void OnScript()
-//------------------------------------------------------------------------------
-/**
- * Shows Scripts
- */
-//------------------------------------------------------------------------------
-void GmatPanel::OnScript()
-{
-    // open separate window to show scripts
-}
-

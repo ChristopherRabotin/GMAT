@@ -52,33 +52,41 @@ public:
     static wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size);
     
+    static wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size);
+    
     static wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
                                           const wxString &objName, int numObj);
     
-    static wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size);
+    static wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size,
+                                                const wxString &nameToExclude = "");
     
+    static void UpdateObject();
     static void UpdateSpacecraft();
     static void UpdateParameter(const wxString &objName = "");
-    static void UpdateConfigParameter(const wxString &objName = "");
     
 private:
 
+    static void UpdateObjectList(bool firstTime = false);
     static void UpdateSpacecraftList(bool firstTime = false);
     static void UpdateParameterList(const wxString &objName, bool firstTime = false);
     static void UpdateConfigParameterList(const wxString &objName, bool firstTime = false);
+    static void UpdateConfigUserVarList(const wxString &objName, bool firstTime = false);
     
     static GuiItemManager *theInstance;
     static GuiInterpreter *theGuiInterpreter;
     
+    static int theNumObject;
     static int theNumSpacecraft;
     static int theNumParam;
     static int theNumConfigParam;
     
+    static wxString *theObjectList;
+    static wxString *theSpacecraftList;
     static wxString *theParamList;
     static wxString *theConfigParamList;
-    static wxString *theSpacecraftList;
     
     static wxComboBox *theSpacecraftComboBox;
+    static wxListBox *theObjectListBox;
     static wxListBox *theParamListBox;
     static wxListBox *theConfigParamListBox;
     

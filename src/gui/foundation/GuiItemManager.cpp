@@ -23,15 +23,18 @@
 GuiItemManager* GuiItemManager::theInstance = NULL;
 GuiInterpreter* GuiItemManager::theGuiInterpreter = NULL;
 
+int GuiItemManager::theNumObject = 0;
 int GuiItemManager::theNumSpacecraft = 0;
 int GuiItemManager::theNumParam = 0;
 int GuiItemManager::theNumConfigParam = 0;
 
+wxString* GuiItemManager::theObjectList = NULL;
+wxString* GuiItemManager::theSpacecraftList = NULL;
 wxString* GuiItemManager::theParamList = NULL;
 wxString* GuiItemManager::theConfigParamList = NULL;
-wxString* GuiItemManager::theSpacecraftList = NULL;
 
 wxComboBox* GuiItemManager::theSpacecraftComboBox = NULL;
+wxListBox* GuiItemManager::theObjectListBox = NULL;
 wxListBox* GuiItemManager::theParamListBox = NULL;
 wxListBox* GuiItemManager::theConfigParamListBox = NULL;
 
@@ -58,6 +61,18 @@ GuiItemManager* GuiItemManager::GetInstance()
 }
 
 //------------------------------------------------------------------------------
+//  void UpdateObject()
+//------------------------------------------------------------------------------
+/**
+ * Updates spacecraft related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateObject()
+{
+    UpdateObjectList();
+}
+
+//------------------------------------------------------------------------------
 //  void UpdateSpacecraft()
 //------------------------------------------------------------------------------
 /**
@@ -79,17 +94,6 @@ void GuiItemManager::UpdateSpacecraft()
 void GuiItemManager::UpdateParameter(const wxString &objName)
 {
     UpdateParameterList(objName);
-}
-
-//------------------------------------------------------------------------------
-//  void UpdateConfigParameter(const wxString &objName)
-//------------------------------------------------------------------------------
-/**
- * Updates parameter related gui components.
- */
-//------------------------------------------------------------------------------
-void GuiItemManager::UpdateConfigParameter(const wxString &objName)
-{
     UpdateConfigParameterList(objName);
 }
 
@@ -122,6 +126,44 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
+// wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size,
+//                             const wxString &objName, int numObj)
+//------------------------------------------------------------------------------
+/**
+ * @return Available Object ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetObjectListBox(wxWindow *parent, const wxSize &size)
+    //const wxString &objName, int numObj)
+{
+
+    // Spacecraft
+    //loj: 2/23/04 add other objects in the future build
+    
+    int numObj = theNumObject;
+    
+    if (theNumObject == 0)
+        numObj = 1;
+    
+    wxString emptyList[] = {};
+        
+    if (numObj > 0)
+    {       
+        theObjectListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, numObj,
+                          theObjectList, wxLB_SINGLE);
+    }
+    else
+    {       
+        theObjectListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE);
+    }
+   
+    return theObjectListBox;
+}
+
+//------------------------------------------------------------------------------
 // wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
 //                                const wxString &objName, int numObj)
 //------------------------------------------------------------------------------
@@ -152,30 +194,52 @@ wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, const wxSize &s
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size)
+// wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size,
+//                                      const wxString &nameToExclude)
 //------------------------------------------------------------------------------
 /**
- * @return Configured ConfigParameter ListBox pointer
+ * @return Configured ConfigParameterListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent, const wxSize &size)
+wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
+                                                     const wxSize &size,
+                                                     const wxString &nameToExclude)
 {
         
     wxString emptyList[] = {};
+    wxString *newConfigParamList;
+    int numParams = 0;
+    
+    if (nameToExclude != "" && theNumConfigParam >= 2)
+    {
+        newConfigParamList = new wxString[theNumConfigParam-1];
         
-    if (theNumConfigParam > 0)
-    {       
+        for (int i=0; i<theNumConfigParam; i++)
+        {
+            if (theConfigParamList[i] != nameToExclude)
+                newConfigParamList[numParams++] = theConfigParamList[i];
+        }
+        
         theConfigParamListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam,
-                          theConfigParamList, wxLB_SINGLE);
+            new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam-1,
+                          newConfigParamList, wxLB_SINGLE);
     }
     else
-    {       
-        theConfigParamListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                          emptyList, wxLB_SINGLE);
+    {
+        if (theNumConfigParam > 0)
+        {       
+            theConfigParamListBox =
+                new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam,
+                              theConfigParamList, wxLB_SINGLE);
+        }
+        else
+        {       
+            theConfigParamListBox =
+                new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                              emptyList, wxLB_SINGLE);
+        }
     }
-   
+    
     return theConfigParamListBox;
 }
 
@@ -183,6 +247,47 @@ wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent, const wxS
 //-------------------------------
 // priavate methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+//  void UpdateObjectList(bool firstTime)
+//------------------------------------------------------------------------------
+/**
+ * updates spacecraft list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateObjectList(bool firstTime)
+{
+    // Spacecraft
+    //loj: add other objects later
+    
+    StringArray &listSc = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    int numObj = listSc.size();
+
+    if (theObjectList != NULL)
+    {
+        delete theObjectList;
+        theObjectList = NULL;
+    }
+    
+    if (numObj > 0)  // check to see if any objects exist
+    {
+        theObjectList = new wxString[numObj];
+        
+        for (int i=0; i<numObj; i++)
+        {
+            theObjectList[i] = wxString(listSc[i].c_str());
+            //MessageInterface::ShowMessage("GuiItemManager::UpdateObjectList() " +
+            //                              std::string(theObjectList[i].c_str()) + "\n");
+        }
+    }
+    else
+    {
+        theObjectList = new wxString[1];
+        theObjectList[0] = wxString("-- None --");
+    }
+        
+    theNumObject = numObj;
+}
 
 //------------------------------------------------------------------------------
 //  void UpdateSpacecraftList(bool firstTime)
@@ -197,8 +302,13 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
     int numSc = listSc.size();
 
     if (theSpacecraftList != NULL)
-        delete theSpacecraftList;
+    {
+        //delete theSpacecraftList;
+        //theSpacecraftList = NULL;
+        theSpacecraftList->Clear();
         
+    }
+    
     if (numSc > 0)  // check to see if any spacecrafts exist
     {
         theSpacecraftList = new wxString[numSc];
@@ -245,9 +355,16 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
 
     theParamList = new wxString[theNumParam];
     
+    int len;
     for (int i=0; i<theNumParam; i++)
     {
         theParamList[i] = items[i].c_str();
+        len = theParamList[i].Length();
+
+        // remove "Param" from the parameter name
+        // Note: When a new Parameter is created "Param" should be appended
+        //       That's the constructor name
+        theParamList[i].Remove(len-5, 5);
         
         //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
         //                              std::string(theParamList[i].c_str()) + "\n");
@@ -289,3 +406,4 @@ void GuiItemManager::UpdateConfigParameterList(const wxString &objName, bool fir
         //                             std::string(theConfigParamList[i].c_str()) + "\n");
     }
 }
+

@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              ParameterSetupPanel
+//                              ParameterCreateDialog
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -8,49 +8,65 @@
 // Created: 2004/02/25
 //
 /**
- * Declares ParameterSetupPanel class.
+ * Declares ParameterCreateDialog class. This class shows dialog window where a
+ * user parameter can be created.
+ * 
  */
 //------------------------------------------------------------------------------
+#ifndef ParameterCreateDialog_hpp
+#define ParameterCreateDialog_hpp
 
-#ifndef ParameterSetupPanel_hpp
-#define ParameterSetupPanel_hpp
+#include "gmatwxdefs.hpp"
+#include "GmatDialog.hpp"
 
-#include "GmatPanel.hpp"
-
-class ParameterSetupPanel: public GmatPanel
+class ParameterCreateDialog : public GmatDialog
 {
 public:
-    // constructors
-    ParameterSetupPanel(wxWindow *parent, const wxString &name); 
+    
+    ParameterCreateDialog(wxWindow *parent);
+
+    wxString GetParamName()
+        { return mParamName; }
+    bool IsParamCreated()
+        { return mIsParamCreated; }
     
 private:
-    
-    wxString theVarName;
+    wxString mParamName;
+    bool mIsParamCreated;
     
     wxTextCtrl *nameTextCtrl;
     wxTextCtrl *expTextCtrl;
     wxTextCtrl *epochTextCtrl;
     wxTextCtrl *indexTextCtrl;
+
+    wxButton *addPropertyButton;
+    wxButton *addParamButton;
+    
+    wxListBox *objectListBox;
+    wxListBox *propertyListBox;
+    wxListBox *parameterListBox;
     
     wxComboBox *cbodyComboBox;
     wxComboBox *coordComboBox;
     wxComboBox *rbodyComboBox;
-    
-    // methods inherited from GmatPanel
+
+    // methods inherited from GmatDialog
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    
+    virtual void ResetData();
+
     // event handling
     void OnTextUpdate(wxCommandEvent& event);
     void OnComboSelection(wxCommandEvent& event);
+    void OnButton(wxCommandEvent& event);
 
-    DECLARE_EVENT_TABLE();
-
+    DECLARE_EVENT_TABLE()
+        
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 9000,
+        ID_TEXT = 9200,
         ID_LISTBOX,
         ID_BUTTON,
         ID_COMBO,
@@ -59,5 +75,3 @@ private:
 };
 
 #endif
-
-
