@@ -54,7 +54,7 @@ public:
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
 private:             
-    wxStaticText *item8;
+    wxStaticText *integratorStaticText;
     wxStaticText *setting1StaticText;
     wxStaticText *setting2StaticText;
     wxStaticText *setting3StaticText;
@@ -140,7 +140,9 @@ private:
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
     SolarSystem    *theSolarSystem;
-    CelestialBody*  theCelestialBody;
+    CelestialBody  *theCelestialBody;
+    wxArrayString  thePointMassBodies;
+    
     //CelestialBody  *theEarth;
     //CelestialBody  *theSun;
     //CelestialBody  *theMoon;
@@ -152,6 +154,7 @@ private:
     void SetData();
     void DisplayIntegratorData();
     void DisplayPrimaryBodyData();
+    void DisplayForceData(); //loj: 2/11/04 added
     void DisplayGravityFieldData();
     void DisplayAtmosphereModelData();
     void DisplayMagneticFieldData();
