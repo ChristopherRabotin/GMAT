@@ -166,6 +166,8 @@ void PropagationConfigPanel::LoadData()
       typeId = RKN68;    
    else if (propType == "RungeKuttaFehlberg56")
       typeId = RKF56;
+   else if (propType == "PrinceDormand45")
+      typeId = PD45;
    else if (propType == "PrinceDormand78")
       typeId = PD78;
    else if (propType == "BulirschStoer")
@@ -416,6 +418,7 @@ void PropagationConfigPanel::Initialize()
    integratorArray.Add("RKV 8(9)");
    integratorArray.Add("RKN 6(8)");
    integratorArray.Add("RKF 5(6)");
+   integratorArray.Add("PD  4(5)");
    integratorArray.Add("PD  7(8)");
    integratorArray.Add("BS");
    integratorArray.Add("ABM");
@@ -939,6 +942,14 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 
          if (newProp == NULL)
             newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
+      }
+      else if (integratorString.IsSameAs(integratorArray[PD45]))
+      {   
+         newPropName = propSetupName + "PD45";
+         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
+         if (newProp == NULL)
+            newProp = theGuiInterpreter->CreatePropagator("PrinceDormand45", newPropName);
       }
       else if (integratorString.IsSameAs(integratorArray[PD78]))
       {   

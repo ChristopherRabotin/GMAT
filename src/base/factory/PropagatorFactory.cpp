@@ -23,6 +23,7 @@
 #include "RungeKutta89.hpp"             // for RungeKutta89 class
 #include "DormandElMikkawyPrince68.hpp" // for DormandElMikkawyPrince68 class
 #include "RungeKuttaFehlberg56.hpp"     // for RungeKuttaFehlberg56 class
+#include "PrinceDormand45.hpp"          // for PrinceDormand45 class
 #include "PrinceDormand78.hpp"          // for PrinceDormand78 class
 #include "AdamsBashfordMoulton.hpp"     // for AdamsBashfordMoulton class
 #include "BulirschStoer.hpp"            // for BulirschStoer class
@@ -51,6 +52,8 @@ Propagator* PropagatorFactory::CreatePropagator(std::string ofType,
    //loj: 3/4/04 passed withName and used correct name for RungeKuttaFehlberg56
    if (ofType == "RungeKutta89")
       return new RungeKutta89(withName);
+   if (ofType == "PrinceDormand45")
+      return new PrinceDormand45(withName);
    if (ofType == "PrinceDormand78")
       return new PrinceDormand78(withName);
    if (ofType == "BulirschStoer")
@@ -83,6 +86,7 @@ Factory(Gmat::PROPAGATOR)
    if (creatables.empty())
    {
       creatables.push_back("RungeKutta89");
+      creatables.push_back("PrinceDormand45");
       creatables.push_back("PrinceDormand78");
       creatables.push_back("BulirschStoer");
       creatables.push_back("AdamsBashfordMoulton");
