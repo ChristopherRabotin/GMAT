@@ -43,9 +43,13 @@ class ScriptInterpreter : public Interpreter
         virtual bool                Build(const std::string &scriptfile);
         
     protected:
+        /// The script interpreter singleton
         static ScriptInterpreter    *instance;
+        /// Name of the current script file
         std::string                 filename;
-
+        /// Toggle for the portion of the script -- Initialization or sequence
+        bool                        sequenceStarted;
+        
         bool                        ReadScript(void);
         bool                        ReadLine(void);
         bool                        Parse(void);

@@ -56,7 +56,8 @@ bool ScriptInterpreter::Interpret(void)
 {
     if (!initialized)
         Initialize();
-    
+        
+    sequenceStarted = false;
     return ReadScript();
 }
 
@@ -161,8 +162,8 @@ bool ScriptInterpreter::Parse(void)
                 throw InterpreterException("Unable to create object: " + name); //loj: added name
         }
 
-/*
-        if (**phrase == "GMAT") {
+//*
+        if ((**phrase == "GMAT") && (!sequenceStarted)) {
             // Look up related object(s)
             ++phrase;
             std::string objName = GetToken(**phrase);
@@ -206,12 +207,13 @@ bool ScriptInterpreter::Parse(void)
                 }
             }
         }
-*/
+//*/
         // Check to see if it's a command
-        if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
+        else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
             cmd->SetGeneratingString(line);
             cmd->InterpretAction();
+            sequenceStarted = true;
         }
 
         // Clear the array of words found in the line
