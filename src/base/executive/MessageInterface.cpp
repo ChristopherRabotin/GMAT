@@ -55,8 +55,8 @@ bool MessageInterface::logFlag = false;
 //------------------------------------------------------------------------------
 MessageInterface::MessageInterface()
 {
-    MessageInterface::messageQueue.push
-        ("MessageInterface.cpp:MessageInterface(): Starting GMAT ...");
+   MessageInterface::messageQueue.push
+      ("MessageInterface.cpp:MessageInterface(): Starting GMAT ...");
 }
 
 //------------------------------------------------------------------------------
@@ -74,16 +74,16 @@ MessageInterface::~MessageInterface()
 //------------------------------------------------------------------------------
 std::string MessageInterface::GetMessage()
 {
-    std::string msg;
+   std::string msg;
    
-    while (!MessageInterface::messageQueue.empty())
-    {
-        msg = msg + MessageInterface::messageQueue.front().c_str();
-        MessageInterface::messageQueue.pop();
-    }
-    MessageInterface::messageExist = 0;
+   while (!MessageInterface::messageQueue.empty())
+   {
+      msg = msg + MessageInterface::messageQueue.front().c_str();
+      MessageInterface::messageQueue.pop();
+   }
+   MessageInterface::messageExist = 0;
 
-    return msg;
+   return msg;
 }
 
 //------------------------------------------------------------------------------
@@ -95,15 +95,15 @@ std::string MessageInterface::GetMessage()
 void MessageInterface::ClearMessage()
 {
 #if !defined __CONSOLE_APP__
-    if (GmatAppData::theMessageWindow != NULL)
-    {
-        GmatAppData::theMessageWindow->ClearText();
-    }
-    else
-    {
-        wxLogError("MessageInterface::ClearMessage(): MessageWindow was not created.");
-        wxLog::FlushActive();
-    }
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+      GmatAppData::theMessageWindow->ClearText();
+   }
+   else
+   {
+      wxLogError("MessageInterface::ClearMessage(): MessageWindow was not created.");
+      wxLog::FlushActive();
+   }
 #endif
 }
 
@@ -116,18 +116,18 @@ void MessageInterface::ClearMessage()
 int MessageInterface::GetNumberOfMessageLines()
 {
 #if !defined __CONSOLE_APP__
-    if (GmatAppData::theMessageWindow != NULL)
-    {
-        return GmatAppData::theMessageWindow->GetNumberOfLines();
-    }
-    else
-    {
-        wxLogError("MessageInterface::GetNumberOfMessageLines(): MessageWindow was not created.");
-        wxLog::FlushActive();
-        return 0;
-    }
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+      return GmatAppData::theMessageWindow->GetNumberOfLines();
+   }
+   else
+   {
+      wxLogError("MessageInterface::GetNumberOfMessageLines(): MessageWindow was not created.");
+      wxLog::FlushActive();
+      return 0;
+   }
 #endif
-    return 0;
+   return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -138,28 +138,28 @@ int MessageInterface::GetNumberOfMessageLines()
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const std::string &msgString)
 {
-    //loj: I don't think we need this
-    //MessageInterface::messageQueue.push(msgString);
+   //loj: I don't think we need this
+   //MessageInterface::messageQueue.push(msgString);
    
 #if !defined __CONSOLE_APP__
-    if (GmatAppData::theMessageWindow != NULL)
-    {
-        GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));
-    }
-    else
-    {
-        wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
-        wxLog::FlushActive();
-        GmatAppData::theMessageWindow =
-            new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-                              20, 20, 600, 350, "Permanent");
-        GmatAppData::theMessageWindow->SetMaxLength(600000);
-        GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));        
-    }
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+      GmatAppData::theMessageWindow->Show(true);
+      GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));
+   }
+   else
+   {
+      wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
+      wxLog::FlushActive();
+      GmatAppData::theMessageWindow =
+         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                           20, 20, 600, 350, "Permanent");
+      GmatAppData::theMessageWindow->SetMaxLength(600000);
+      GmatAppData::theMessageWindow->Show(true);
+      GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));        
+   }
 #else
-    LogMessage(msgString);
+   LogMessage(msgString);
 #endif
 
 } // end ShowMessage()
@@ -173,43 +173,45 @@ void MessageInterface::ShowMessage(const std::string &msgString)
 void MessageInterface::ShowMessage(const char *msg, ...)
 {
 
-    short    ret;
-    short    size;
-    va_list  marker;
-    char     *msgBuffer;
+   short    ret;
+   short    size;
+   va_list  marker;
+   char     *msgBuffer;
 
-    size = strlen(msg) + MAX_MESSAGE_LENGTH;
+   size = strlen(msg) + MAX_MESSAGE_LENGTH;
       
-    if( (msgBuffer = (char *)malloc(size)) != NULL )
-    {
-        va_start(marker, msg);      
-        ret = vsprintf(msgBuffer, msg, marker);      
-        va_end(marker);
+   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   {
+      va_start(marker, msg);      
+      ret = vsprintf(msgBuffer, msg, marker);      
+      va_end(marker);
 
-        //std::string message(msgBuffer);
-    }
+      //std::string message(msgBuffer);
+   }
     
 #if !defined __CONSOLE_APP__
-    if (GmatAppData::theMessageWindow != NULL)
-    {
-        GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));
-    }
-    else
-    {
-        wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
-        wxLog::FlushActive();
-        GmatAppData::theMessageWindow =
-            new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-                              20, 20, 600, 350, "Permanent");
-        GmatAppData::theMessageWindow->SetMaxLength(600000);
-        GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));        
-    }
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+      GmatAppData::theMessageWindow->Show(true);
+      GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));
+   }
+   else
+   {
+      wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
+      wxLog::FlushActive();
+      GmatAppData::theMessageWindow =
+         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                           20, 20, 600, 350, "Permanent");
+      GmatAppData::theMessageWindow->SetMaxLength(600000);
+      GmatAppData::theMessageWindow->Show(true);
+      GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));        
+   }
 #else
-    LogMessage(std::string(msgBuffer));
+   LogMessage(std::string(msgBuffer));
 #endif
 
+   free(msgBuffer);
+   
 } // end ShowMessage()
 
 //------------------------------------------------------------------------------
@@ -222,9 +224,9 @@ void MessageInterface::PopupAbortContinue(const std::string &abortMsg,
                                           const std::string &continueMsg,
                                           const std::string &msg)
 {  
-    MessageInterface::popupMessage = msg;
-    MessageInterface::abortMessage = abortMsg;
-    MessageInterface::continueMessage = continueMsg;
+   MessageInterface::popupMessage = msg;
+   MessageInterface::abortMessage = abortMsg;
+   MessageInterface::continueMessage = continueMsg;
 
 } // end PopupAbortContinue()
 
@@ -236,30 +238,30 @@ void MessageInterface::PopupAbortContinue(const std::string &abortMsg,
 //------------------------------------------------------------------------------
 void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 {
-    MessageInterface::popupMessage = msg;
-    MessageInterface::messageType = msgType;
+   MessageInterface::popupMessage = msg;
+   MessageInterface::messageType = msgType;
 
 #if !defined __CONSOLE_APP__
-    switch (msgType)
-    {
-    case Gmat::ERROR_:
-        wxLogError(wxT(wxString(msg.c_str())));
-        wxLog::FlushActive();
-        break;
-    case Gmat::WARNING_:
-        wxLogWarning(wxT(wxString(msg.c_str())));
-        wxLog::FlushActive();
-        break;
-    case Gmat::INFO_:
-        (void)wxMessageBox(wxT(wxString(msg.c_str())),
-                           wxT("Information"));
-        break;
-        //loj: there should be more
-    default:
-        break;
-    };
+   switch (msgType)
+   {
+   case Gmat::ERROR_:
+      wxLogError(wxT(wxString(msg.c_str())));
+      wxLog::FlushActive();
+      break;
+   case Gmat::WARNING_:
+      wxLogWarning(wxT(wxString(msg.c_str())));
+      wxLog::FlushActive();
+      break;
+   case Gmat::INFO_:
+      (void)wxMessageBox(wxT(wxString(msg.c_str())),
+                         wxT("Information"));
+      break;
+      //loj: there should be more
+   default:
+      break;
+   };
 #else
-    LogMessage(msg);
+   LogMessage(msg);
 #endif
    
 } // end PopupMessage()
@@ -272,44 +274,44 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
 //------------------------------------------------------------------------------
 void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 {
-    short    ret;
-    short    size;
-    va_list  marker;
-    char     *msgBuffer;
+   short    ret;
+   short    size;
+   va_list  marker;
+   char     *msgBuffer;
 
-    size = strlen(msg) + MAX_MESSAGE_LENGTH;
+   size = strlen(msg) + MAX_MESSAGE_LENGTH;
       
-    if( (msgBuffer = (char *)malloc(size)) != NULL )
-    {
-        va_start(marker, msg);      
-        ret = vsprintf(msgBuffer, msg, marker);      
-        va_end(marker);
+   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   {
+      va_start(marker, msg);      
+      ret = vsprintf(msgBuffer, msg, marker);      
+      va_end(marker);
 
-        popupMessage = std::string(msgBuffer);
-    }
+      popupMessage = std::string(msgBuffer);
+   }
 
 
 #if !defined __CONSOLE_APP__
-    switch (msgType)
-    {
-    case Gmat::ERROR_:
-        wxLogError(wxT(wxString(msgBuffer)));
-        wxLog::FlushActive();
-        break;
-    case Gmat::WARNING_:
-        wxLogWarning(wxT(wxString(msgBuffer)));
-        wxLog::FlushActive();
-        break;
-    case Gmat::INFO_:
-        (void)wxMessageBox(wxT(wxString(msgBuffer)),
-                           wxT("Information"));
-        break;
-        //loj: there should be more
-    default:
-        break;
-    };
+   switch (msgType)
+   {
+   case Gmat::ERROR_:
+      wxLogError(wxT(wxString(msgBuffer)));
+      wxLog::FlushActive();
+      break;
+   case Gmat::WARNING_:
+      wxLogWarning(wxT(wxString(msgBuffer)));
+      wxLog::FlushActive();
+      break;
+   case Gmat::INFO_:
+      (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                         wxT("Information"));
+      break;
+      //loj: there should be more
+   default:
+      break;
+   };
 #else
-    LogMessage(msg);
+   LogMessage(msg);
 #endif
    
 } // end PopupMessage()
@@ -335,12 +337,12 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
 //------------------------------------------------------------------------------
 void MessageInterface::LogMessage(const std::string &msg)
 {
-    if (logFile == NULL)
-    {
-        std::cout << msg << std::endl;
-    }
-    else
-    {
-        // work on this
-    }
+   if (logFile == NULL)
+   {
+      std::cout << msg; // loj: 4/28/04 removed extra line
+   }
+   else
+   {
+      // work on this
+   }
 }
