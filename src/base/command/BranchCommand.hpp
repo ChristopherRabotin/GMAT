@@ -40,7 +40,9 @@ public:
    // Inherited methods that need refinements to handle the branching
    virtual bool            Append(GmatCommand *cmd);
    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
-   virtual GmatCommand*        Remove(GmatCommand *cmd);
+   virtual GmatCommand*    Remove(GmatCommand *cmd);
+   // Insert into the main sequence, not into a branch
+   virtual bool            InsertRightAfter(GmatCommand *cmd);
    
    virtual void            SetSolarSystem(SolarSystem *ss);
    virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
@@ -54,7 +56,7 @@ public:
    virtual bool            Execute();
     
 protected:
-
+      
    // no additional parameters to add at this time
    enum
    {
