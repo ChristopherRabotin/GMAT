@@ -29,6 +29,7 @@ public:
     XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
+    wxWindow *theParent;
     GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
     Subscriber *theSubscriber;
     wxString *theParamList;
@@ -81,15 +82,15 @@ protected:
     // IDs for the controls and the menu commands
     enum
     {     
-        XY_TEXT = 92000,
-        XY_LISTBOX,
+        XY_PLOT_TEXT = 92000,
+        XY_PLOT_LISTBOX,
         XY_PLOT_ADD_X,
         XY_PLOT_ADD_Y,
         XY_PLOT_REMOVE_X,
         XY_PLOT_REMOVE_Y,
         XY_PLOT_CLEAR_Y,
         XY_PLOT_ENABLE,
-        XY_PLOT_SELECT_SC
+        XY_PLOT_SC_COMBOBOX
     };
 };
 #endif

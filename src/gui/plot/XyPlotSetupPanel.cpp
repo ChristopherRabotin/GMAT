@@ -26,13 +26,15 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(XyPlotSetupPanel, wxPanel)
-   EVT_BUTTON(XY_PLOT_ADD_X,     XyPlotSetupPanel::OnAddX)
-   EVT_BUTTON(XY_PLOT_ADD_Y,     XyPlotSetupPanel::OnAddY)
-   EVT_BUTTON(XY_PLOT_REMOVE_X,  XyPlotSetupPanel::OnRemoveX)
-   EVT_BUTTON(XY_PLOT_REMOVE_Y,  XyPlotSetupPanel::OnRemoveY)
-   EVT_BUTTON(XY_PLOT_CLEAR_Y,   XyPlotSetupPanel::OnClearY)
-   EVT_BUTTON(XY_PLOT_ENABLE,    XyPlotSetupPanel::OnEnablePlot)
-   EVT_BUTTON(XY_PLOT_SELECT_SC, XyPlotSetupPanel::OnSelectSc)
+    EVT_BUTTON(XY_PLOT_ADD_X,    XyPlotSetupPanel::OnAddX)
+    EVT_BUTTON(XY_PLOT_ADD_Y,    XyPlotSetupPanel::OnAddY)
+    EVT_BUTTON(XY_PLOT_REMOVE_X, XyPlotSetupPanel::OnRemoveX)
+    EVT_BUTTON(XY_PLOT_REMOVE_Y, XyPlotSetupPanel::OnRemoveY)
+    EVT_BUTTON(XY_PLOT_CLEAR_Y,  XyPlotSetupPanel::OnClearY)
+    EVT_BUTTON(XY_PLOT_ENABLE,   XyPlotSetupPanel::OnEnablePlot)
+    EVT_BUTTON(XY_PLOT_SC_COMBOBOX,   XyPlotSetupPanel::OnSelectSc)
+    
+    EVT_COMBOBOX(XY_PLOT_SC_COMBOBOX, XyPlotSetupPanel::OnSelectSc)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -53,6 +55,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
                                    const wxString &subscriberName)
     : GmatPanel(parent)
 {
+    theParent = parent;
     theSubscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
@@ -132,8 +135,12 @@ void XyPlotSetupPanel::OnEnablePlot(wxCommandEvent& event)
 // void OnSelectSc(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnSelectSc(wxCommandEvent& event)
-{
-    // show proper parameters
+{    
+    theGuiManager->UpdateParameter(scComboBox->GetStringSelection());
+    
+    paramListBox->Set(theGuiManager->GetNumParameter(),
+                      theGuiManager->GetParameterList());
+    
 }
 
 //----------------------------------
@@ -160,7 +167,7 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     paramGridSizer = new wxFlexGridSizer(6, 0, 0);
 
     // empty text for spacing line
-    emptyText = new wxStaticText(parent, XY_TEXT, wxT(""),
+    emptyText = new wxStaticText(parent, XY_PLOT_TEXT, wxT(""),
                                   wxDefaultPosition, wxSize(100, -1), 0);
     
     //------------------------------------------------------
@@ -170,41 +177,13 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
                                    wxDefaultPosition, wxSize(100, -1), 0);
     
     // spacecraft label
-    titleScText = new wxStaticText(parent, XY_TEXT, wxT("Spacecraft"),
+    titleScText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Spacecraft"),
                                     wxDefaultPosition, wxSize(100, -1), 0);
 
     // get spacecraft ComboBox
-    scComboBox = theGuiManager->GetSpacecraftComboBox(parent, XY_PLOT_SELECT_SC);
-    
-//      // list of spacecrafts
-//      StringArray &listSat = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-//      int listSize = listSat.size();
-    
-//      if (listSize > 0)  // check to see if any spacecrafts exist
-//      {
-//          wxString choices[listSize];
+    scComboBox = theGuiManager->GetSpacecraftComboBox(parent, XY_PLOT_SC_COMBOBOX,
+                                                      wxSize(100, -1));
         
-//          for (int i=0; i<listSize; i++)
-//              choices[i] = wxString(listSat[i].c_str());
-        
-//          // combo box for avaliable spacecrafts 
-//          scComboBox = new wxComboBox(parent, XY_PLOT_SELECT_SC, wxT(""), wxDefaultPosition, 
-//                                      wxSize(100, -1), listSize, choices, wxCB_DROPDOWN);
-//      }
-//      else
-//      {
-//          // combo box for avaliable spacecrafts 
-//          wxString emptyList[] =
-//          {
-//              wxT("No Spacecrafts Available"), 
-//          }; 
-//          scComboBox = new wxComboBox(parent, XY_PLOT_SELECT_SC, wxT(""), wxDefaultPosition, 
-//                                      wxSize(100, -1), 1, emptyList, wxCB_DROPDOWN);
-//      }
-
-//      // show first spacecraft
-//      scComboBox->SetSelection(0);
-    
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
     optionBoxSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, 5);
@@ -215,40 +194,17 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     // parameters box (4th column)
     //------------------------------------------------------
     paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-
-    if (theParamList != NULL)
-    {
-        delete theParamList;
-        theParamList = NULL;
-    }
     
-    if (theGuiManager->GetNumSpacecraft() > 0)
-    {
-        wxString scName = scComboBox->GetStringSelection();
-        
-        StringArray items =
-            theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
-        unsigned int count = items.size();
-
-        theParamList = new wxString[count];
-    
-        for (i=0; i<count; i++)
-        {
-            theParamList[i] = scName + "." + items[i].c_str();
-            //MessageInterface::ShowMessage("XyPlotSetupPanel::Create() " + items[i] + "\n");
-        }
-        
-        paramListBox = new wxListBox(parent, XY_LISTBOX, wxDefaultPosition,
-                                     wxSize(140,125), count, theParamList, wxLB_SINGLE);
-    }
-    else
-    {
-        paramListBox = new wxListBox(parent, XY_LISTBOX, wxDefaultPosition,
-                                     wxSize(140,125), 0, emptyList, wxLB_SINGLE);
-    }
-    
-    titleAvailbleText = new wxStaticText(parent, XY_TEXT, wxT("Parameters"),
+    titleAvailbleText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Parameters"),
                                           wxDefaultPosition, wxSize(80,-1), 0);
+    
+    theGuiManager->UpdateParameter(scComboBox->GetStringSelection());
+    
+    paramListBox =
+        theGuiManager->GetParameterListBox(parent, wxSize(140,125),
+                                           scComboBox->GetStringSelection(),
+                                           theGuiManager->GetNumSpacecraft());
+    
     paramBoxSizer->Add(titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5);
     paramBoxSizer->Add(paramListBox, 0, wxALIGN_CENTRE|wxALL, 5);
 
@@ -290,10 +246,10 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     //------------------------------------------------------
     // X box label (2nd column)
     //------------------------------------------------------
-    titleXText = new wxStaticText(parent, XY_TEXT, wxT("Selected X"),
+    titleXText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Selected X"),
                                   wxDefaultPosition, wxSize(80,-1), 0);
     
-    xSelectedListBox = new wxListBox(parent, XY_LISTBOX, wxDefaultPosition,
+    xSelectedListBox = new wxListBox(parent, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE);
         
     xSelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -303,10 +259,10 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     //------------------------------------------------------
     // Y box label (6th column)
     //------------------------------------------------------
-    titleYText = new wxStaticText(parent, XY_TEXT, wxT("Selected Y"),
+    titleYText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Selected Y"),
                                   wxDefaultPosition, wxSize(80,-1), 0);
 
-    ySelectedListBox = new wxListBox(parent, XY_LISTBOX, wxDefaultPosition,
+    ySelectedListBox = new wxListBox(parent, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE);
     
     ySelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
