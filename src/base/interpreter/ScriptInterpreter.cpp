@@ -281,13 +281,40 @@ bool ScriptInterpreter::Parse(void)
             
             // PropSetup has configuration info for the member objects, so it 
             // gets special treatment
-            if (obj->GetType() == Gmat::PROP_SETUP) {
+            if ((sar.size() > 1) && (obj->GetType() == Gmat::PROP_SETUP)) {
                 if (!InterpretPropSetupParameter(obj, sar, phrase))
-                    throw InterpreterException("PropSetup Parameter was not recognized");
+                    throw InterpreterException(
+                       "PropSetup Parameter was not recognized");
             }
             else 
             {
                try {
+                   // Handle the case of object = something
+                   if (sar.size() == 1) {
+                      // Objects can be set to match other objects (copy c'tors 
+                      // need to be correct)
+                      if (!EquateObjects(obj)) {
+                         // Arrays and variables can be set directly
+                         if (obj->GetTypeName() == "Variable") {
+                            if (SetVariable(obj)) {
+                               // Variable set successfully
+                               chunks.clear();
+                               return true;
+                            }
+                         }
+//                         else if (obj->GetTypeName() == "Array")
+//                             ???
+//                         else
+                             throw InterpreterException(
+                                "Attempting to set an object in an unknown"
+                                " context; see the line\n   \"" +
+                                line + "\"");
+                      }
+                      // Objects equated
+                      chunks.clear();
+                      return true;
+                   }
+                                 
                    // Set object associations
                    std::string objParm = sar[1];
                    

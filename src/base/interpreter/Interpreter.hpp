@@ -127,6 +127,8 @@ protected:
    // to get new instances of the requested objects
    Spacecraft*                   CreateSpacecraft(std::string satname);
    Formation*                    CreateFormation(std::string formname);
+   Parameter*                    CreateArray(std::string arrname, 
+                                             std::string type);
    Hardware*                     CreateHardware(std::string hwname, 
                                                 std::string type);
    GmatCommand*                  CreateCommand(std::string commandtype);
@@ -170,8 +172,13 @@ protected:
                                                  GmatBase *obj);
    void                          WriteParameterValue(GmatBase *obj, Integer id);
    Integer                       FindDelimiter(const std::string &str,
-                                               const std::string &specChar = "");
+                                               const std::string &specChar="");
    std::string                   GetToken(const std::string &tokstr = "");
+   
+   bool                          EquateObjects(GmatBase *obj, 
+                                               const std::string &obj2Name="");
+   bool                          SetVariable(GmatBase *obj, 
+                                             const std::string &val = "");
 
 // temporarily make public to test this piece
 public:

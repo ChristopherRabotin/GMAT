@@ -20,12 +20,15 @@
 #include "Moderator.hpp"
 
 #include <ctype.h>         // for isalpha
+#include <sstream>         // for std::stringstream
 
 
 //#define DEBUG_INTERPRETER 1
 //#define DEBUG_TOKEN_PARSING 1
 //#define DEBUG_TOKEN_PARSING_DETAILS 1
 //#define DEBUG_RHS_PARSING 1
+//#define DEBUG_ARRAY_INTERPRETING 1
+//#define DEBUG_INTERPRET_OBJECTEQUATES 1
 
 #include "MessageInterface.hpp"
 
@@ -247,6 +250,12 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     if (objecttype == "FiniteBurn") {
         CreateBurn(objectname, false);
         return true;
+    }
+
+    // Array definitions may include the row and column counts, so they are 
+    // given special treatment.
+    if (objecttype == "Array") {
+        return CreateArray(objectname, objecttype);
     }
 
     // Handle tanks, thrusters, etc.
@@ -475,6 +484,81 @@ Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 Formation* Interpreter::CreateFormation(std::string formname)
 {
     return (Formation *)(moderator->CreateSpacecraft("Formation", formname));
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateArray(std::string arrname, std::string type)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a new Hardware object.
+ * 
+ * @param hwname Name of the object.
+ * @param type Type of the hardware requested.
+ * 
+ * @return Pointer to the constructed Formation.
+ */
+//------------------------------------------------------------------------------
+Parameter* Interpreter::CreateArray(std::string arrname, std::string type)
+{
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage(
+         "Interpreter::CreateArray called for \"%s\"\n", arrname.c_str());
+   #endif
+   
+   Integer rows = 3, columns = 1;   // default to a 3 x 1 array
+   std::string name;
+
+   // Reparse the script line, in case there are spaces in the array settings
+   Integer locLeft = arrname.find("[", 0);
+   name = arrname.substr(0, locLeft);
+   
+   locLeft = line.find("[", 0);
+   Integer locComma = line.find(",", 0);
+   Integer locRight = line.find("]", 0);
+
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage(
+         "   locLeft = %d, locComma = %d, locRight = %d\n", locLeft, 
+         locComma, locRight);
+   #endif
+   
+   if (locLeft != (Integer)std::string::npos) {
+      if (locRight == (Integer)std::string::npos)
+         throw InterpreterException("Interpreter::CreateArray starts to set "
+            "array dimensions for " + name + 
+            "\nbut never finishes specification (missing ']'?)");
+      std::stringstream rval, cval;
+      rval << line.substr(locLeft+1);
+
+      #ifdef DEBUG_ARRAY_INTERPRETING
+            MessageInterface::ShowMessage(
+            "   Row count reset by \"%s\"\n", rval.str().c_str());
+      #endif
+
+      rval >> rows;
+      if (locComma != (Integer)std::string::npos) {
+         cval << line.substr(locComma+1);
+      
+         #ifdef DEBUG_ARRAY_INTERPRETING
+            MessageInterface::ShowMessage(
+               "   Column count reset by \"%s\"\n", cval.str().c_str());
+         #endif
+
+         cval >> columns;
+      }
+   }
+   
+   #ifdef DEBUG_ARRAY_INTERPRETING
+      MessageInterface::ShowMessage("   Creating an array named \"%s\"\n"
+         "   Array has %d rows and %d columns\n", 
+         name.c_str(), rows, columns);
+   #endif
+ 
+   Parameter *arr = (Parameter *)(moderator->CreateParameter(type, name));
+   arr->SetIntegerParameter("NumRows", rows);
+   arr->SetIntegerParameter("NumCols", columns);
+   return arr;
 }
 
 
@@ -1309,6 +1393,114 @@ std::string Interpreter::GetToken(const std::string &tokstr)
     }
     
     return token;
+}
+
+
+//------------------------------------------------------------------------------
+// bool EquateObjects(GmatBase *obj, const std::string &obj2Name)
+//------------------------------------------------------------------------------
+/**
+ * Used to set one object equal to another
+ * 
+ * @param obj The object that receives the values.
+ * @param obj2Name The name of the object that contains the values.  If obj2Name
+ *                 is the empty string, the second object's name is parsed from 
+ *                 the script line.
+ * 
+ * @return true is the assignment was made, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
+{
+   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
+      MessageInterface::ShowMessage("Interpreter::EquateObjects entered\n");
+   #endif
+   
+   std::string other;
+   
+   if (obj2Name != "")
+      other = obj2Name;
+   else {
+      unsigned sp = line.find("=") + 1;
+      Integer end = line.find(";");
+      
+      if (sp == std::string::npos)
+         return false;
+      while (line[sp] == ' ')
+         ++sp;
+      other = line.substr(sp, end-sp);
+
+      #ifdef DEBUG_INTERPRET_OBJECTEQUATES
+         MessageInterface::ShowMessage(
+            "Interpreter::EquateObjects line = \"%s\"\n"
+            "                           sp = %u, end = %d, other = \"%s\"\n",
+            line.c_str(), sp, end, other.c_str());
+      #endif
+   }
+   
+   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
+      MessageInterface::ShowMessage(
+         "Interpreter::EquateObjects original object is named \"%s\"\n",
+         other.c_str());
+   #endif
+   
+   GmatBase *orig = FindObject(other);
+
+   if (orig != NULL) {
+      if (obj->GetTypeName() != orig->GetTypeName())
+         throw InterpreterException("Interpreter::EquateObjects: \"" + 
+            obj->GetName() + "\" and \"" + orig->GetName() + 
+            "\" have different types");
+      obj->Copy(orig);
+
+      #ifdef DEBUG_INTERPRET_OBJECTEQUATES
+         MessageInterface::ShowMessage("Interpreter::EquateObjects succeeded\n");
+      #endif
+      
+      return true;
+   }
+   #ifdef DEBUG_INTERPRET_OBJECTEQUATES
+      MessageInterface::ShowMessage("Interpreter::EquateObjects failed\n");
+   #endif
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetVariable(GmatBase *obj, const std::string &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value of a variable equal to a string.
+ * 
+ * @param obj The object that receives the string.
+ * @param val The string that is set on the Variable.  If this string is the 
+ *            empty string, the value is parsed from the current script line.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::SetVariable(GmatBase *obj, const std::string &val)
+{
+   if (obj->GetTypeName() != "Variable")
+      return false;
+ 
+   std::string other;
+   
+   if (val == "") {    
+      unsigned sp = line.find("=") + 1;
+      Integer end = line.find(";");
+      
+      if (sp == std::string::npos)
+         return false;
+      while (line[sp] == ' ')
+         ++sp;
+      other = line.substr(sp, end-sp);
+   }
+   else
+      other = val;
+
+   return obj->SetStringParameter("Expression", other);
 }
 
 
