@@ -182,6 +182,10 @@ void Moon::InitializeMoon(CelestialBody* cBody)
    defaultMu           = Moon::MU;
    defaultEqRadius     = Moon::EQUATORIAL_RADIUS;
    defaultCoefSize     = Moon::COEFFICIENT_SIZE;
+   
+   //if (instanceName != SolarSystem::MOON_NAME)
+   //MessageInterface::ShowMessage(
+   // "Unknown moon created - please supply physical parameter values");
 }
 
 //------------------------------------------------------------------------------
