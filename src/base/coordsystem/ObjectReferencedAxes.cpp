@@ -738,17 +738,17 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    if (xUsed && yUsed && !zUsed)
    {
       zUnit = Cross(xUnit, yUnit);
-      zDot  = Cross(xDot,  yDot);
+      zDot  = Cross(xDot, yUnit) + Cross(xUnit, yDot);
    }
    else if (xUsed && zUsed && !yUsed)
    {
       yUnit = Cross(zUnit,xUnit);
-      yDot  = Cross(zDot, xDot);
+      yDot  = Cross(zDot, xUnit) + Cross(zUnit, xDot);
    }
    else if (yUsed && zUsed && !xUsed)
    {
       xUnit = Cross(yUnit,zUnit);
-      xDot  = Cross(yDot, zDot);
+      xDot  = Cross(yDot, zUnit) + Cross(yUnit, zDot);
    }
    else
    {
@@ -765,6 +765,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotMatrix(2,0) = xUnit(2);
    rotMatrix(2,1) = yUnit(2);
    rotMatrix(2,2) = zUnit(2);
+   
    // Compute the rotation derivative matrix
    rotDotMatrix(0,0) = xDot(0);
    rotDotMatrix(0,1) = yDot(0);
@@ -775,6 +776,7 @@ void ObjectReferencedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    rotDotMatrix(2,0) = xDot(2);
    rotDotMatrix(2,1) = yDot(2);
    rotDotMatrix(2,2) = zDot(2);
+
    // Check for orthogonality - is this correct?
    // orthonormal instead? accuracy (tolerance)? 
    if (!rotMatrix.IsOrthogonal(1.0e-15))
