@@ -97,10 +97,10 @@ protected:
     
     enum
     {
-        X_PARAM_NAME = 0,
-        Y_PARAM_NAME,
-        Y_PARAM_NAME_LIST,
-        CLEAR_Y_PARAM_LIST,
+        IND_VAR = 0,
+        DEP_VAR,
+        DEP_VAR_LIST,
+        CLEAR_DEP_VAR_LIST,
         PLOT_TITLE,
         X_AXIS_TITLE,
         Y_AXIS_TITLE,
