@@ -11,9 +11,7 @@
 // number S-67573-G
 //
 /**
- * Insert descriptive text here.
- *
- * @note Any notes here.
+ * A basic linear interpolator.
  */
 //------------------------------------------------------------------------------
 
@@ -39,8 +37,8 @@ class LinearInterpolator : public Interpolator
 		LinearInterpolator&        operator=(const LinearInterpolator &li);
 
         virtual bool               Interpolate(const Real ind, Real *results);
-        virtual Integer            GetBufferSize(void);
 };
+
 
 #endif // LINEARINTERPOLATOR_HPP
 

@@ -25,11 +25,14 @@
 #include "GmatBase.hpp"
 
 
+/**
+ * Base class for the GMAT Interpolators
+ */
 class Interpolator : public GmatBase
 {
 public:
     Interpolator(const std::string &typestr, Integer dim = 1);
-    ~Interpolator(void);
+    virtual ~Interpolator(void);
 
     Interpolator(const Interpolator &i);
     Interpolator&			operator=(const Interpolator &i);
@@ -37,13 +40,15 @@ public:
     virtual bool            AddPoint(const Real ind, const Real *data);
     virtual bool	        Interpolate(const Real ind, Real *results) = 0;
     virtual void            Clear(void);
-    virtual Integer         GetBufferSize(void) = 0;
+    virtual Integer         GetBufferSize(void);
 
 protected:
     /// Data array used for the independent variable
     Real					*independent;
     /// The data that gets interpolated
     Real					**dependent;
+    /// Previous independent value, used to determine direction data is going
+    Real                    previousX; 
 
     // Parameters
     /// Number of dependent points to be interpolated
@@ -60,10 +65,12 @@ protected:
     Real                    range[2];
     /// Flag used to detect if range has already been calculated
     bool                    rangeCalculated;
+    /// Flag used to determine if independent variable increases or decreases
+    bool                    dataIncreases;
     
-    void                    AllocateArrays(void);
-    void                    CleanupArrays(void);
-    void                    CopyArrays(const Interpolator &i);
+    virtual void            AllocateArrays(void);
+    virtual void            CleanupArrays(void);
+    virtual void            CopyArrays(const Interpolator &i);
     void                    SetRange(void);
 };
 

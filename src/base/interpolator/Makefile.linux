@@ -2,7 +2,7 @@
 # Initial Version - D. Conway - 2003/11/19
 
 HEADERS = -I../include -I../foundation
-OBJECTS = Interpolator.o LinearInterpolator.o
+OBJECTS = Interpolator.o LinearInterpolator.o CubicSplineInterpolator.o
 
 all: libInterpolator
 	mkdir -p ../lib

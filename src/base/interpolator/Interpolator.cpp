@@ -21,35 +21,67 @@
 #include "Interpolator.hpp"
 
 
+
+//------------------------------------------------------------------------------
+//  Interpolator(const std::string &typestr, Integer dim)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the core elements of an Interpolator.
+ * 
+ * @param typestr   Text string identifying the type of interpolator.
+ * @param dim       Dimension of data that gets interpolated (defaults to 1).
+ */
+//------------------------------------------------------------------------------
 Interpolator::Interpolator(const std::string &typestr, Integer dim) :
     GmatBase        (Gmat::INTERPOLATOR, typestr),
     independent     (NULL),
     dependent       (NULL),
+    previousX       (-9.9999e65),
     dimension       (dim),
     requiredPoints  (2),
     bufferSize      (2),
     pointCount      (0),
     latestPoint     (-1),
-    rangeCalculated (false)
+    rangeCalculated (false),
+    dataIncreases   (true)
 {
     range[0] = range[1] = 0.0;
 }
 
 
+
+//------------------------------------------------------------------------------
+//  ~Interpolator(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the core elements of an Interpolator.
+ */
+//------------------------------------------------------------------------------
 Interpolator::~Interpolator(void)
 {
     CleanupArrays();
 }
 
 
+//------------------------------------------------------------------------------
+//  Interpolator(const std::string &typestr, Integer dim)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the core elements of an Interpolator (Copy Constructor).
+ * 
+ * @param i   The interpolator that is copied.
+ */
+//------------------------------------------------------------------------------
 Interpolator::Interpolator(const Interpolator &i) :
     GmatBase        (i),
+    previousX       (i.previousX),
     dimension       (i.dimension),
     requiredPoints  (i.requiredPoints),
     bufferSize      (i.bufferSize),
     pointCount      (i.pointCount),
     latestPoint     (i.latestPoint),
-    rangeCalculated (i.rangeCalculated)
+    rangeCalculated (i.rangeCalculated),
+    dataIncreases   (i.dataIncreases)
 {
     if (i.independent)
         CopyArrays(i);
@@ -65,6 +97,16 @@ Interpolator::Interpolator(const Interpolator &i) :
     }
 }
 
+
+//------------------------------------------------------------------------------
+//  Interpolator& operator=(const Interpolator &i)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ * 
+ * @param i Interpolator that is used to set the values for this one.
+ */
+//------------------------------------------------------------------------------
 Interpolator& Interpolator::operator=(const Interpolator &i)
 {
     if (&i == this)
@@ -96,6 +138,27 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
     return *this;
 }
 
+
+//------------------------------------------------------------------------------
+//  bool AddPoint(const Real ind, const Real *data)
+//------------------------------------------------------------------------------
+/**
+ * Add a data point to the ring buffer used in the Interpolator.
+ * 
+ * This method is the core method used to fill the buffer prior to 
+ * interpolation.  It manages a ring buffer of data points used by the 
+ * interpolation routine (Interpolate(const Real, Real*)) to generate the 
+ * estimated parameter values.
+ * 
+ * @param ind   Value of the independent (domain) variable.
+ * @param data  Array of dependent data associated with the independent value
+ *              in the first variable.  This array should have the same size as
+ *              the dimension of the interpolator instance.
+ * 
+ * @return  True if the data was added to the buffer, false if a problem was 
+ *          encountered.
+ */
+//------------------------------------------------------------------------------
 bool Interpolator::AddPoint(const Real ind, const Real *data)
 {
     Integer i;
@@ -106,6 +169,9 @@ bool Interpolator::AddPoint(const Real ind, const Real *data)
     // Reset the index into the array if at the end
     if (latestPoint == bufferSize-1)
         latestPoint = -1;
+        
+    dataIncreases = (ind > previousX ? true : false);
+    previousX = ind;
 
     independent[++latestPoint] = ind;
     for (i = 0; i < dimension; ++i)
@@ -118,6 +184,16 @@ bool Interpolator::AddPoint(const Real ind, const Real *data)
 }
 
 
+//------------------------------------------------------------------------------
+//  void Clear(void)
+//------------------------------------------------------------------------------
+/**
+ * Resets the buffer for the interpolator.  
+ * 
+ * This method does not reallocate the buffer; it just resets the pointers and
+ * data counts so that the interpolation can be restarted.
+ */
+//------------------------------------------------------------------------------
 void Interpolator::Clear(void)
 {
     latestPoint = -1;
@@ -125,9 +201,18 @@ void Interpolator::Clear(void)
 }
 
 
+//------------------------------------------------------------------------------
+//  void AllocateArrays(void)
+//------------------------------------------------------------------------------
+/**
+ * Allocates the data structures used by the ring buffer.  
+ */
+//------------------------------------------------------------------------------
 void Interpolator::AllocateArrays(void)
 {
     Integer i;
+
+    CleanupArrays();    
     
     independent = new Real[bufferSize];
     dependent = new Real*[bufferSize];
@@ -137,6 +222,14 @@ void Interpolator::AllocateArrays(void)
 }
 
 
+//------------------------------------------------------------------------------
+//  void CleanupArrays(void)
+//------------------------------------------------------------------------------
+/**
+ * Frees the memory used by the data arrays in the ring buffer, and resets the
+ * counters used to manage the buffer.
+ */
+//------------------------------------------------------------------------------
 void Interpolator::CleanupArrays(void)
 {
     Integer i;
@@ -157,6 +250,15 @@ void Interpolator::CleanupArrays(void)
 }
 
 
+//------------------------------------------------------------------------------
+//  void CopyArrays(const Interpolator &i)
+//------------------------------------------------------------------------------
+/**
+ * Copies the ring buffer from one Interpolator to this one.  
+ * 
+ * @param i The Interpolator that supplies the data copied to this one.
+ */
+//------------------------------------------------------------------------------
 void Interpolator::CopyArrays(const Interpolator &i)
 {
     Integer j;
@@ -168,6 +270,13 @@ void Interpolator::CopyArrays(const Interpolator &i)
 }
 
 
+//------------------------------------------------------------------------------
+//  void SetRange(void)
+//------------------------------------------------------------------------------
+/**
+ * Finds the minimum and maximum values of the independent variable.
+ */
+//------------------------------------------------------------------------------
 void Interpolator::SetRange(void)
 {
     if (rangeCalculated)
@@ -187,5 +296,21 @@ void Interpolator::SetRange(void)
         if (independent[i] > range[1])
             range[1] = independent[i];
     }
+    
+    rangeCalculated = true;
 }
 
+
+//------------------------------------------------------------------------------
+//  Integer GetBufferSize(void)
+//------------------------------------------------------------------------------
+/**
+ * Access method for the bufferSize parameter.
+ * 
+ * @return  The buffer size.
+ */
+//------------------------------------------------------------------------------
+Integer Interpolator::GetBufferSize(void)
+{
+    return bufferSize;
+}
