@@ -96,6 +96,11 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
    {
       mScSelectedListBox->Append(s);
       mScSelectedListBox->SetStringSelection(s);
+      
+      // select next available item (loj: 8/18/04)
+      mScAvailableListBox->
+         SetSelection(mScAvailableListBox->GetSelection()+1);
+
       ShowSpacecraftOption(s, true);
       mIsScChanged = true;
       theApplyButton->Enable();
