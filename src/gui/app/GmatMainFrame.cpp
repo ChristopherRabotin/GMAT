@@ -124,7 +124,7 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
 //    // add the left and right side to splitter
 //    leftTabs->SetMainNotebook(rightTabs);
 
-    splitter->SplitVertically( leftTabs, rightTabs, 175 );
+    splitter->SplitVertically( leftTabs, rightTabs, 200 );
 }
 
 //------------------------------------------------------------------------------
