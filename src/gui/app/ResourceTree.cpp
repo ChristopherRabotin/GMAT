@@ -51,12 +51,13 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSc)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
-   EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
+   EVT_MENU(POPUP_ADD_BURN, ResourceTree::OnAddBurn)
    EVT_MENU(POPUP_ADD_PROPAGATOR, ResourceTree::OnAddPropagator)
    EVT_MENU(POPUP_ADD_BODY, ResourceTree::OnAddBody)
    EVT_MENU(POPUP_ADD_REPORT_FILE, ResourceTree::OnAddReportFile)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
+   EVT_MENU(POPUP_ADD_SOLVER, ResourceTree::OnAddSolver)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -87,6 +88,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     mNumReportFile = 0;
     mNumXyPlot = 0;
     mNumOpenGlPlot = 0;
+    mNumSolver = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -144,9 +146,9 @@ void ResourceTree::UpdateResources()
     {
         wxString objname = wxString(itemNames[i].c_str());
         
-        if (objname == "ImpulsiveBurn")
+        if (objname == "Burn")
             this->AppendItem(mBurnItem, wxT(objname), ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objname), GmatTree::DEFAULT_IMPULSIVE_BURN));
+                             new GmatTreeItemData(wxT(objname), GmatTree::DEFAULT_BURN));
     };
 
     if (size !=0)
@@ -245,13 +247,12 @@ void ResourceTree::AddDefaultResources()
     SetItemImage(universeItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
     //----- Solver
-    wxTreeItemId solverItem =
-        this->AppendItem(resource, wxT("Solvers"),
-                         -1, -1,
+    mSolverItem =
+        this->AppendItem(resource, wxT("Solvers"), -1, -1,
                          new GmatTreeItemData(wxT("Solvers"),
                                               GmatTree::SOLVERS_FOLDER));
     
-    SetItemImage(solverItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mSolverItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
     //----- Subscribers
     mSubscriberItem =
@@ -290,7 +291,7 @@ void ResourceTree::AddDefaultResources()
     AddDefaultFormations(formationItem);
     AddDefaultConstellations(constellationItem);
     AddDefaultPropagators(mPropagatorItem);
-    AddDefaultSolvers(solverItem);
+    AddDefaultSolvers(mSolverItem);
     AddDefaultSubscribers(mSubscriberItem);
     AddDefaultInterfaces(interfaceItem);
 }
@@ -414,28 +415,23 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSolvers(wxTreeItemId solver)
 {
-    this->AppendItem(solver, wxT("DC"), ICON_FILE, -1,
-          new GmatTreeItemData(wxT("DC"), GmatTree::DEFAULT_SOLVER));
-    this->AppendItem(solver, wxT("Optimizers"), ICON_FILE, -1,
-          new GmatTreeItemData(wxT("Optimizers"), GmatTree::DEFAULT_SOLVER));
-    this->AppendItem(solver, wxT("Monte Carlo"), ICON_FILE, -1,
-          new GmatTreeItemData(wxT("Monte Carlo"), GmatTree::DEFAULT_SOLVER));
-}
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
+    int size = itemNames.size();
+    for (int i = 0; i<size; i++)
+    {
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(solver, wxT(objname), -1, -1,
+                         new GmatTreeItemData(wxT(objname), GmatTree::DEFAULT_SOLVER));
+    };
 
-//  //------------------------------------------------------------------------------
-//  // void AddDefaultPlots(wxTreeItemId plot)
-//  //------------------------------------------------------------------------------
-//  void ResourceTree::AddDefaultPlots(wxTreeItemId plot)
-//  {
-//      this->AppendItem(plot, wxT("Polar"), ICON_FILE, -1,
-//            new GmatTreeItemData(wxT("Polar"), GmatTree::DEFAULT_PLOT));
-//      this->AppendItem(plot, wxT("3D"), ICON_FILE, -1,
-//            new GmatTreeItemData(wxT("3D"), GmatTree::DEFAULT_PLOT));
-//      this->AppendItem(plot, wxT("Ground Track"), ICON_FILE, -1,
-//            new GmatTreeItemData(wxT("Ground Track"), GmatTree::DEFAULT_PLOT));
-//      this->AppendItem(plot, wxT("XY"), ICON_FILE, -1,
-//            new GmatTreeItemData(wxT("XY"), GmatTree::DEFAULT_PLOT));
-//  }
+    //loj: commented out
+//      this->AppendItem(solver, wxT("DC"), ICON_FILE, -1,
+//            new GmatTreeItemData(wxT("DC"), GmatTree::DEFAULT_SOLVER));
+//      this->AppendItem(solver, wxT("Optimizers"), ICON_FILE, -1,
+//            new GmatTreeItemData(wxT("Optimizers"), GmatTree::DEFAULT_SOLVER));
+//      this->AppendItem(solver, wxT("Monte Carlo"), ICON_FILE, -1,
+//            new GmatTreeItemData(wxT("Monte Carlo"), GmatTree::DEFAULT_SOLVER));
+}
 
 //------------------------------------------------------------------------------
 // void AddDefaultSubscribers(wxTreeItemId subs)
@@ -499,9 +495,11 @@ void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
     else if (strcmp(title, wxT("Constellations")) == 0)
         menu.Append(POPUP_ADD_CONSTELLATION, wxT("Add Constellation..."));
     else if (strcmp(title, wxT("Burns")) == 0)
-        menu.Append(POPUP_ADD_IMPULSIVE_BURN, wxT("Add"), CreatePopupMenu(Gmat::BURN));
+        menu.Append(POPUP_ADD_BURN, wxT("Add Burn"));
     else if (strcmp(title, wxT("Propagators")) == 0)
         menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator..."));
+    else if (strcmp(title, wxT("Solvers")) == 0)
+        menu.Append(POPUP_ADD_SOLVER, wxT("Add Solver..."));
     else if (strcmp(title, wxT("Universe")) == 0)
         menu.Append(POPUP_ADD_BODY, wxT("Add Body..."));
     else if (strcmp(title, wxT("Plots/Reports")) == 0)
@@ -882,23 +880,21 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
-// void OnAddImpulsiveBurn(wxCommandEvent &event)
+// void OnAddBurn(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
+void ResourceTree::OnAddBurn(wxCommandEvent &event)
 {
-  wxTreeItemId item = GetSelection();
+    
+    MessageInterface::ShowMessage("ResourceTree::OnAddBurn() entered\n");
+    wxTreeItemId item = GetSelection();
   
-  wxString name;
-  name.Printf("ImpulsiveBurn%d", ++mNumBurn);
-
-  //loj: ImpulsiveBurn for now
-  Burn* burn =
-      theGuiInterpreter->CreateBurn("ImpulsiveBurn", std::string(name.c_str()));
+    wxString name;
+    name.Printf("Burn%d", ++mNumBurn);
   
-  this->AppendItem(item, name, ICON_FILE, -1,
-        new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
+    this->AppendItem(item, name, ICON_FILE, -1,
+                     new GmatTreeItemData(name, GmatTree::CREATED_BURN));
 
-  Expand(item);
+    Expand(item);
 }
 
 //------------------------------------------------------------------------------
@@ -958,6 +954,26 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
   Expand(item);
 }
 
+//------------------------------------------------------------------------------
+// void OnAddSolver(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddSolver(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  
+  wxString name;
+  name.Printf("Solver%d", ++mNumSolver);
+
+  //loj: How do I know which solver? (DC, QN,...)
+  Solver *solver =
+      theGuiInterpreter->CreateSolver("DifferentialCorrector", std::string(name.c_str()));
+   
+  this->AppendItem(item, name, ICON_FILE, -1,
+        new GmatTreeItemData(name, GmatTree::CREATED_SOLVER));
+
+  Expand(item);
+}
+
 //---------------------------------
 // Crete popup menu
 //---------------------------------
@@ -972,19 +988,6 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
 
     switch (type)
     {
-    case Gmat::BURN:
-        {
-            StringArray items = theGuiInterpreter->GetListOfFactoryItems(type);
-
-            for (i=0; i<items.size(); i++)
-            {        
-                if (items[i] == "ImpulsiveBurn")
-                {
-                    menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
-                }
-            }
-            break;
-        }
     case Gmat::SUBSCRIBER:
         {
             StringArray items = theGuiInterpreter->GetListOfFactoryItems(type);

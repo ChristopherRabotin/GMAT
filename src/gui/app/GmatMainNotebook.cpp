@@ -19,9 +19,12 @@
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagateCommandPanel.hpp"
+#include "BurnSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
+#include "SolverCreatePanel.hpp"
 #include "GmatTreeItemData.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -102,40 +105,50 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       {
         sizer->Add( new SpacecraftPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
+      else if ((dataType == GmatTree::DEFAULT_BURN )  ||
+               (dataType == GmatTree::CREATED_BURN ))
+      {
+          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Burn\n");
+          sizer->Add( new BurnSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
+      }
       else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
                (dataType == GmatTree::CREATED_PROPAGATOR))
       {
-        //sizer->Add( new PropagationConfigPanel(panel, wxT("Prop Setup") ));
-        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()),
-                    0, wxGROW|wxALL, 0 );
+        sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
       }
-      //loj: commented out
-      // else if ((dataType == GmatTree::DEFAULT_REPORT)   ||
-      //          (dataType == GmatTree::CREATED_REPORT))
+      else if ((dataType == GmatTree::DEFAULT_SOLVER)   ||
+               (dataType == GmatTree::CREATED_SOLVER))
+      {
+          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Solver\n");
+          sizer->Add( new SolverCreatePanel(panel));
+      }
       else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
                (dataType == GmatTree::CREATED_REPORT_FILE))
       {
           //loj: ReportFileSetupPanel is not ready yet.
-          // sizer->Add( new ReportFileSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
+          // sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
                (dataType == GmatTree::CREATED_XY_PLOT))
       {
-        sizer->Add( new XyPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
+        sizer->Add( new XyPlotSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );          
       }
       else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
                (dataType == GmatTree::CREATED_OPENGL_PLOT))
       {
           //loj: OpenGlSetupPanel is not ready yet.
-          // sizer->Add( new OpenGlPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
+          // sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagateCommandPanel(panel), 0, wxGROW|wxALL, 0 );
+          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
+          sizer->Add( new PropagateCommandPanel(panel, ""), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagateCommandPanel(panel), 0, wxGROW|wxALL, 0 );
+          //loj: what should I pass for the 2nd arg
+          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
+          sizer->Add( new PropagateCommandPanel(panel, ""), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::MANEUVER_COMMAND)
       {

@@ -45,6 +45,7 @@ private:
     wxTreeItemId mReportItem;
     wxTreeItemId mBurnItem;
     wxTreeItemId mSubscriberItem;
+    wxTreeItemId mSolverItem;
 
     int numSc;
     int mNumPropagator;
@@ -52,6 +53,7 @@ private:
     int mNumReportFile;
     int mNumXyPlot;
     int mNumOpenGlPlot;
+    int mNumSolver;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
@@ -61,11 +63,6 @@ private:
     void AddDefaultPropagators(wxTreeItemId propagator);
     void AddDefaultSolvers(wxTreeItemId solver);
     void AddDefaultSubscribers(wxTreeItemId subscriber);
-    //loj: commented out
-//      void AddDefaultPlots(wxTreeItemId plot);
-//      void AddDefaultReports(wxTreeItemId subs);
-    
-    //loj: why interface causing parse error? changed to interfaceTree
     void AddDefaultInterfaces(wxTreeItemId interfaceTree);
     void AddIcons();
     void OnItemRightClick(wxTreeEvent& event);
@@ -79,7 +76,7 @@ private:
     void OnRename(wxCommandEvent &event);
     
     void OnAddBody(wxCommandEvent &event);
-    void OnAddImpulsiveBurn(wxCommandEvent &event);
+    void OnAddBurn(wxCommandEvent &event);
     void OnAddPropagator(wxCommandEvent &event);
     void OnAddConstellation(wxCommandEvent &event);
     void OnAddFormation(wxCommandEvent &event);
@@ -87,7 +84,8 @@ private:
     void OnAddReportFile(wxCommandEvent &event);
     void OnAddXyPlot(wxCommandEvent &event);
     void OnAddOpenGlPlot(wxCommandEvent &event);
-
+    void OnAddSolver(wxCommandEvent &event);
+    
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
     DECLARE_EVENT_TABLE();
@@ -129,6 +127,7 @@ private:
         POPUP_ADD_REPORT_FILE,
         POPUP_ADD_XY_PLOT,
         POPUP_ADD_OPENGL_PLOT,
+        POPUP_ADD_SOLVER,
         POPUP_OPEN,
         POPUP_CLOSE,
         POPUP_RENAME,

@@ -70,8 +70,8 @@ namespace GmatTree
         DEFAULT_PROPAGATOR,
         CREATED_PROPAGATOR,
 
-        DEFAULT_IMPULSIVE_BURN,
-        CREATED_IMPULSIVE_BURN,
+        DEFAULT_BURN,
+        CREATED_BURN,
 
         DEFAULT_BODY,
         CREATED_BODY,
