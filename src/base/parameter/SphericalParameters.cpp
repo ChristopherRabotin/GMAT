@@ -14,7 +14,7 @@
 //
 /**
  * Implements Spacecraft Spehrical parameter classes.
- *   RMag, VMag, SphRA, SphDec, SphElem
+ *   SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV, SphElem
  */
 //------------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@
 
 
 //==============================================================================
-//                              RMag
+//                              SphRMag
 //==============================================================================
 /**
  * Implements Magnitude of Position.
@@ -30,8 +30,8 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// RMag(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// SphRMag(const std::string &name, GmatBase *obj,
+//         const std::string &desc, const std::string &unit)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -42,15 +42,15 @@
  * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-RMag::RMag(const std::string &name, GmatBase *obj,
-           const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RMag", SYSTEM_PARAM, obj, desc, unit, false)
+SphRMag::SphRMag(const std::string &name, GmatBase *obj,
+                 const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "RMAG", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
-// RMag(const RMag &copy)
+// SphRMag(const SphRMag &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -58,13 +58,13 @@ RMag::RMag(const std::string &name, GmatBase *obj,
  * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-RMag::RMag(const RMag &copy)
+SphRMag::SphRMag(const SphRMag &copy)
    : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// RMag& operator=(const RMag &right)
+// SphRMag& operator=(const SphRMag &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -72,7 +72,7 @@ RMag::RMag(const RMag &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-RMag& RMag::operator=(const RMag &right)
+SphRMag& SphRMag::operator=(const SphRMag &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
@@ -81,13 +81,13 @@ RMag& RMag::operator=(const RMag &right)
 }
 
 //------------------------------------------------------------------------------
-// ~RMag()
+// ~SphRMag()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-RMag::~RMag()
+SphRMag::~SphRMag()
 {
 }
 
@@ -104,102 +104,9 @@ RMag::~RMag()
  * @return true if parameter value successfully evaluated; false otherwise
  */
 //------------------------------------------------------------------------------
-bool RMag::Evaluate()
+bool SphRMag::Evaluate()
 {
    mRealValue = OrbitData::GetSphReal("SphRMag");    
-    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-      return false;
-   else
-      return true;
-}
-
-//==============================================================================
-//                              VMag
-//==============================================================================
-/**
- * Implements Magnitude of Velocity.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// VMag(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-VMag::VMag(const std::string &name, GmatBase *obj,
-           const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VMag", SYSTEM_PARAM, obj, desc, unit, false)
-{
-   AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// VMag(const VMag &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-VMag::VMag(const VMag &copy)
-   : OrbitReal(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// VMag& operator=(const VMag &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-VMag& VMag::operator=(const VMag &right)
-{
-   if (this != &right)
-      OrbitReal::operator=(right);
-
-   return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~VMag()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-VMag::~VMag()
-{
-}
-
-//--------------------------------------
-// Inherited methods from Parameter
-//--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VMag::Evaluate()
-{
-   mRealValue = OrbitData::GetSphReal("SphVMag");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -230,7 +137,7 @@ bool VMag::Evaluate()
 //------------------------------------------------------------------------------
 SphRA::SphRA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "SphRA", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "RA", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -324,7 +231,7 @@ bool SphRA::Evaluate()
 //------------------------------------------------------------------------------
 SphDec::SphDec(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "SphDec", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "DEC", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -394,13 +301,292 @@ bool SphDec::Evaluate()
       return true;
 }
 
+//==============================================================================
+//                              SphVMag
+//==============================================================================
+/**
+ * Implements Magnitude of Velocity.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphVMag(const std::string &name, GmatBase *obj,
+//        const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+SphVMag::SphVMag(const std::string &name, GmatBase *obj,
+                 const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "VMAG", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// SphVMag(const SphVMag &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphVMag::SphVMag(const SphVMag &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// SphVMag& operator=(const SphVMag &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphVMag& SphVMag::operator=(const SphVMag &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~SphVMag()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphVMag::~SphVMag()
+{
+}
+
+//--------------------------------------
+// Inherited methods from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SphVMag::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("SphVMag");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//==============================================================================
+//                              SphRAV
+//==============================================================================
+/**
+ * Implements Spherical Right Ascension of Velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphRAV(const std::string &name, GmatBase *obj,
+//     const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+SphRAV::SphRAV(const std::string &name, GmatBase *obj,
+         const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "RAV", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// SphRAV(const SphRAV &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphRAV::SphRAV(const SphRAV &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// SphRAV& operator=(const SphRAV &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphRAV& SphRAV::operator=(const SphRAV &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~SphRAV()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphRAV::~SphRAV()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SphRAV::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("SphRAV");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//==============================================================================
+//                              SphDecV
+//==============================================================================
+/**
+ * Implements Spherical Declination of Velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphDecV(const std::string &name, GmatBase *obj,
+//         const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+SphDecV::SphDecV(const std::string &name, GmatBase *obj,
+                 const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "DECV", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// SphDecV(const SphDecV &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphDecV::SphDecV(const SphDecV &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// SphDecV& operator=(const SphDecV &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphDecV& SphDecV::operator=(const SphDecV &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~SphDecV()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphDecV::~SphDecV()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SphDecV::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("SphDecV");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
 
 //==============================================================================
 //                              SphElem
 //==============================================================================
 /**
  * Implements Spherical Elements class.
- *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphVRA, SphVDec
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
  */
 //------------------------------------------------------------------------------
 
@@ -579,8 +765,8 @@ bool SphElem::Evaluate()
                    GetSphReal("SphRA"),
                    GetSphReal("SphDec"),
                    GetSphReal("SphVMag"),
-                   GetSphReal("SphVRA"),
-                   GetSphReal("SphVDec"));
+                   GetSphReal("SphRAV"),
+                   GetSphReal("SphDecV"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }

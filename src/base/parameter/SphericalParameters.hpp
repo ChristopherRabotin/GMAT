@@ -28,54 +28,25 @@
 #include "OrbitReal.hpp"
 
 //==============================================================================
-//                              RMag
+//                              SphRMag
 //==============================================================================
 /**
  * Declares Magnitude of Position class.
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API RMag : public OrbitReal
+class GMAT_API SphRMag : public OrbitReal
 {
 public:
 
-    RMag(const std::string &name = "",
-         GmatBase *obj = NULL,
-         const std::string &desc = "",
-         const std::string &unit = "Km/Sec");
-    RMag(const RMag &copy);
-    RMag& operator=(const RMag &right);
-    virtual ~RMag();
+   SphRMag(const std::string &name = "", GmatBase *obj = NULL,
+           const std::string &desc = "", const std::string &unit = "Km/Sec");
+   SphRMag(const SphRMag &copy);
+   SphRMag& operator=(const SphRMag &right);
+   virtual ~SphRMag();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
-    
-protected:
-
-};
-
-//==============================================================================
-//                              VMag
-//==============================================================================
-/**
- * Declares Magnitude of Velocity class.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API VMag : public OrbitReal
-{
-public:
-
-    VMag(const std::string &name = "",
-         GmatBase *obj = NULL,
-         const std::string &desc = "",
-         const std::string &unit = "Km/Sec");
-    VMag(const VMag &copy);
-    VMag& operator=(const VMag &right);
-    virtual ~VMag();
-    
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
     
 protected:
 
@@ -134,41 +105,113 @@ protected:
 
 };
 
+//==============================================================================
+//                              SphVMag
+//==============================================================================
+/**
+ * Declares Magnitude of Velocity class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API SphVMag : public OrbitReal
+{
+public:
+
+   SphVMag(const std::string &name = "", GmatBase *obj = NULL,
+           const std::string &desc = "", const std::string &unit = "Km/Sec");
+   SphVMag(const SphVMag &copy);
+   SphVMag& operator=(const SphVMag &right);
+   virtual ~SphVMag();
+    
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+    
+protected:
+
+};
+
+//==============================================================================
+//                              SphRAV
+//==============================================================================
+/**
+ * Declares Spherical Right Ascension of velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+class GMAT_API SphRAV : public OrbitReal
+{
+public:
+
+   SphRAV(const std::string &name = "", GmatBase *obj = NULL,
+          const std::string &desc = "", const std::string &unit = "Deg");
+   SphRAV(const SphRAV &copy);
+   SphRAV& operator=(const SphRAV &right);
+   virtual ~SphRAV();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+protected:
+
+};
+
+//==============================================================================
+//                              SphDecV
+//==============================================================================
+/**
+ * Declares Spherical Declination of Velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+class GMAT_API SphDecV : public OrbitReal
+{
+public:
+
+   SphDecV(const std::string &name = "", GmatBase *obj = NULL,
+        const std::string &desc = "", const std::string &unit = "Deg");
+   SphDecV(const SphDecV &copy);
+   SphDecV& operator=(const SphDecV &right);
+   virtual ~SphDecV();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+protected:
+
+};
 
 //==============================================================================
 //                              SphElem
 //==============================================================================
 /**
  * Declares Spherical Elements class.
- *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphVRA, SphVDec
-*/
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
+ */
 //------------------------------------------------------------------------------
-class GMAT_API SphElem : public Rvec6Var, OrbitData
+class GMAT_API SphElem : public Rvec6Var, public OrbitData
 {
 public:
 
-    SphElem(const std::string &name = "",
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "");
-    SphElem(const SphElem &copy);
-    SphElem& operator=(const SphElem &right);
-    virtual ~SphElem();
+   SphElem(const std::string &name = "",
+           GmatBase *obj = NULL,
+           const std::string &desc = "",
+           const std::string &unit = "");
+   SphElem(const SphElem &copy);
+   SphElem& operator=(const SphElem &right);
+   virtual ~SphElem();
 
-    // The inherited methods from Rvec6Var
-    virtual Rvector6 EvaluateRvector6();
+   // The inherited methods from Rvec6Var
+   virtual Rvector6 EvaluateRvector6();
     
-    // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
+   // The inherited methods from Parameter
+   virtual Integer GetNumObjects() const;
+   virtual GmatBase* GetObject(const std::string &objTypeName);
     
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
+   virtual bool SetObject(Gmat::ObjectType objType,
+                          const std::string &objName,
+                          GmatBase *obj);
     
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
-    virtual bool Evaluate();
+   virtual bool AddObject(GmatBase *obj);
+   virtual bool Validate();
+   virtual bool Evaluate();
 
 protected:
 
