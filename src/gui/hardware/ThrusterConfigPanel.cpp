@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            ThrusterConfigPanel
 //------------------------------------------------------------------------------
@@ -22,6 +22,7 @@
 #include "ThrusterCoefficientDialog.hpp"
 #include "TankSelectionDialog.hpp"
 #include "MessageInterface.hpp"
+#include <wx/variant.h>
 
 //------------------------------
 // event tables for wxWindows
@@ -47,12 +48,18 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent, 
-                                  const wxString &thrusterName):GmatPanel(parent)
+                                  const wxString &name):GmatPanel(parent)
 {
-    coordsysCount = 0;
+   coordsysCount = 0;
+   
+   thrusterName = std::string(name.c_str());
     
-    Create();
-    Show();
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   
+   theThruster = (Thruster*)theGuiInterpreter->GetHardware(thrusterName);
+    
+   Create();
+   Show();
 }
 
 //------------------------------------------------------------------------------
@@ -137,8 +144,33 @@ void ThrusterConfigPanel::Create()
 // void LoadData()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::LoadData()
-{  
-    DisplayData();
+{ 
+   if (theThruster == NULL)
+      return;
+      
+   Integer paramID;
+      
+   paramID = theThruster->GetParameterID("CoordinateSystem");
+   coordsysName = theThruster->GetStringParameter(paramID);
+   
+   coordsysCount = 1; // Temp value
+   coordsysComboBox->Clear();
+   for (Integer i = 0; i < coordsysCount; i++)
+   {
+       coordsysComboBox->Append(coordsysName.c_str());
+   }
+   coordsysComboBox->SetSelection(0);
+  
+   paramID = theThruster->GetParameterID("X_Direction");
+   XTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
+    
+   paramID = theThruster->GetParameterID("Y_Direction");
+   YTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
+        
+   paramID = theThruster->GetParameterID("Z_Direction");
+   ZTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
+   
+   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -146,13 +178,24 @@ void ThrusterConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void ThrusterConfigPanel::SaveData()
 {
-}
+    if (!theApplyButton->IsEnabled())
+      return;
+       
+   if (theThruster == NULL)
+      return; 
 
-//------------------------------------------------------------------------------
-// void DisplayData()
-//------------------------------------------------------------------------------
-void ThrusterConfigPanel::DisplayData()
-{ 
+   Integer paramID;
+   
+   paramID = theThruster->GetParameterID("X_Direction");
+   theThruster->SetRealParameter(paramID, atof(XTextCtrl->GetValue())); 
+   
+   paramID = theThruster->GetParameterID("Y_Direction");
+   theThruster->SetRealParameter(paramID, atof(YTextCtrl->GetValue()));
+        
+   paramID = theThruster->GetParameterID("Z_Direction");
+   theThruster->SetRealParameter(paramID, atof(ZTextCtrl->GetValue()));   
+      
+   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -172,14 +215,16 @@ void ThrusterConfigPanel::OnButtonClick(wxCommandEvent &event)
     {
        std::string type = "C";
        
-       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       //tcDlg.ShowModal();       
+       ThrusterCoefficientDialog tcDlg(this, theThruster, type);
+       tcDlg.ShowModal(); 
+       theApplyButton->Enable();      
     } 
     else if (event.GetEventObject() == kCoefButton)
     {
        std::string type = "K";
        
-       //ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
-       //tcDlg.ShowModal();
+       ThrusterCoefficientDialog tcDlg(this, theThruster, type);
+       tcDlg.ShowModal();
+       theApplyButton->Enable();
     }            
 }    

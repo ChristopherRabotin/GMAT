@@ -1,4 +1,4 @@
-//$Header: 
+//$Header$
 //------------------------------------------------------------------------------
 //                              ThrusterCoefficientDialog
 //------------------------------------------------------------------------------
@@ -323,4 +323,3 @@ void ThrusterCoefficientDialog::OnCellValueChange(wxGridEvent &event)
        theOkButton->Enable(true);
     }    
 }
-@

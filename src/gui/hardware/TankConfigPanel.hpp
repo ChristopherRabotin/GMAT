@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            TankConfigPanel
 //------------------------------------------------------------------------------
@@ -45,9 +45,6 @@ private:
     void OnTextChange();
     
     FuelTank* theFuelTank;
-    
-    Integer tankCount;
-    Integer currentTank;
     
     std::string tankName;
 

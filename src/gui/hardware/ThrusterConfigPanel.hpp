@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            ThrusterConfigPanel
 //------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 class ThrusterConfigPanel: public GmatPanel
 {
 public:
-    ThrusterConfigPanel(wxWindow *parent, const wxString &thrusterName);
+    ThrusterConfigPanel(wxWindow *parent, const wxString &name);
     ~ThrusterConfigPanel();
     
 private:
@@ -43,11 +43,13 @@ private:
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void DisplayData();
     void OnTextChange();
     void OnButtonClick(wxCommandEvent &event);
     
     std::string thrusterName;
+    std::string coordsysName;
+    
+    Thruster* theThruster;
     
     Integer coordsysCount;
     

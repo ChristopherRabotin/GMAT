@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            TankConfigPanel
 //------------------------------------------------------------------------------
@@ -19,8 +19,8 @@
  */
 //------------------------------------------------------------------------------
 #include "TankConfigPanel.hpp"
-#include <wx/variant.h>
 #include "MessageInterface.hpp"
+#include <wx/variant.h>
 
 //------------------------------
 // event tables for wxWindows
@@ -204,6 +204,8 @@ void TankConfigPanel::SaveData()
         
    paramID = theFuelTank->GetParameterID("Volume");
    theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
+   
+   theApplyButton->Disable();
 }
   
 
