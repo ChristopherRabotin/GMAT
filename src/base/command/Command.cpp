@@ -502,6 +502,7 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       if (!next) return Append(cmd);
       next = cmd;
       return next->Append(temp); // this assumes cmd->next is NULL and next != NULL
+      //return next->Insert(temp,next);
    }
    
    if (next == NULL)

@@ -21,7 +21,6 @@
 
 #include "BranchCommand.hpp"
 
-
 BranchCommand::BranchCommand(const std::string &typeStr) :
    GmatCommand          (typeStr),
    branch               (1),
@@ -142,6 +141,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    // See if we're supposed to put it at the top of the first branch
    if (prev == this)
    {
+      
       current = branch[0];
       branch[0] = cmd;
       cmd->Append(current);
