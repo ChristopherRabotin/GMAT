@@ -22,6 +22,7 @@
  */
 //------------------------------------------------------------------------------
 #include <cmath>
+#include <iostream>       // for debug printout
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"     // for A1Mjd
 #include "UtcDate.hpp"   // for UtcDate
@@ -245,18 +246,17 @@ Real UtcDate::ToA1Mjd() const
    Integer hour   = GetHour();
    Integer minute = GetMinute();
    Real second    = GetSecond();
-   Real utcmjd;
-
 
    // Convert to Modified Julian date
-   utcmjd = ModifiedJulianDate(year,month,day,hour,minute,second);
+   Real utcmjd = ModifiedJulianDate(year,month,day,hour,minute,second);
 
    A1Mjd newA1Mjd; 
    utcmjd = newA1Mjd.UtcMjdToA1Mjd(utcmjd);
-   Real testUtc = fabs(utcmjd - ((Integer)utcmjd + (Real)(.9999999)));
+
+   Real testUtc = fabs(utcmjd - (Integer)utcmjd);
 
    // Check for the tolerance then round-off 
-   if (testUtc > 1.0e-08) 
+   if (testUtc < 1.0e-07) 
       utcmjd = round(utcmjd);
       
    return utcmjd;
