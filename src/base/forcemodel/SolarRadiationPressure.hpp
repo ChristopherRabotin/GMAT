@@ -175,7 +175,6 @@ private:
       USE_ANALYTIC = PhysicalModelParamCount,
       SHADOW_MODEL,
       VECTOR_MODEL,
-      BODY_ID,
       BODY_RADIUS,
       SUN_RADIUS,
       HAS_MOONS,
@@ -192,8 +191,8 @@ private:
       SRPParamCount  // Count of the parameters for this class
    };
    
-   static const std::string PARAMETER_TEXT[SRPParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[SRPParamCount];
+   static const std::string PARAMETER_TEXT[SRPParamCount - PhysicalModelParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount];
 
 };
 

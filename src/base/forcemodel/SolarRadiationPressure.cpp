@@ -57,12 +57,11 @@
 // static data
 //---------------------------------
 const std::string
-SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount] =
+SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount - PhysicalModelParamCount] =
 {
     "UseAnalytic",
     "ShadowModel",
     "VectorModel",
-    "Body", //loj: 5/28/04 added to match with enum/ this will be removed when PhysicalModel has body
     "BodyRadius",
     "SunRadius",
     "HasMoons",
@@ -79,12 +78,11 @@ SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount] =
 };
 
 const Gmat::ParameterType
-SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount] =
+SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] =
 {
    Gmat::BOOLEAN_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
-   Gmat::STRING_TYPE, //loj: 5/28/04 added to match with enum
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::BOOLEAN_TYPE,
@@ -232,7 +230,7 @@ GmatBase* SolarRadiationPressure::Clone(void) const
 std::string SolarRadiationPressure::GetParameterText(const Integer id) const
 {
    if (id >= USE_ANALYTIC && id < SRPParamCount)
-      return SolarRadiationPressure::PARAMETER_TEXT[id];
+      return SolarRadiationPressure::PARAMETER_TEXT[id - PhysicalModelParamCount];
    else
       return PhysicalModel::GetParameterText(id);
 }
@@ -248,7 +246,7 @@ Integer SolarRadiationPressure::GetParameterID(const std::string &str) const
 {
    for (int i = USE_ANALYTIC; i < SRPParamCount; i++)
    {
-      if (str == SolarRadiationPressure::PARAMETER_TEXT[i])
+      if (str == SolarRadiationPressure::PARAMETER_TEXT[i - PhysicalModelParamCount])
          return i;
    }
    return PhysicalModel::GetParameterID(str);
@@ -264,7 +262,7 @@ Integer SolarRadiationPressure::GetParameterID(const std::string &str) const
 Gmat::ParameterType SolarRadiationPressure::GetParameterType(const Integer id) const
 {
    if (id >= USE_ANALYTIC && id < SRPParamCount)
-      return PARAMETER_TYPE[id];
+      return PARAMETER_TYPE[id - PhysicalModelParamCount];
    else
       return PhysicalModel::GetParameterType(id);
 }
