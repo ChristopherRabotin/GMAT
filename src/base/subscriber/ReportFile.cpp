@@ -19,11 +19,19 @@
 
 
 #include "ReportFile.hpp"
-
+/*
 ReportFile::ReportFile(char * filename)
 {
     if (filename)
         dstream.open(filename);
+    else
+        dstream.open("ReportFile.txt");
+}
+*/
+ReportFile::ReportFile(const std::string &fileName)
+{
+    if (fileName != "")
+        dstream.open(fileName.c_str());
     else
         dstream.open("ReportFile.txt");
 }
