@@ -27,6 +27,7 @@
 #include "FactoryManager.hpp"
 #include "ConfigManager.hpp"
 #include "Publisher.hpp"
+#include "FileManager.hpp"
 // core
 #include "Burn.hpp"
 #include "Command.hpp"
@@ -41,7 +42,6 @@
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
-#include "SlpFile.hpp"
 #include "Interpolator.hpp"
 #include "RefFrame.hpp"
 // factories
@@ -56,6 +56,9 @@
 #include "SpacecraftFactory.hpp"
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
+// files
+#include "SlpFile.hpp"
+#include "DeFile.hpp"
 
 namespace Gmat
 {
@@ -90,39 +93,48 @@ public:
     bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
     
     // Spacecraft
-    Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name);
+    Spacecraft* CreateSpacecraft(const std::string &type,
+                                 const std::string &name);
     Spacecraft* GetSpacecraft(const std::string &name);
     //future build:GroundStation* CreateGroundStation(const std::string &type, const std::string &name);
     //future build:GroundStation* GetGroundStation(const std::string &name);
 
     // Propagator
-    Propagator* CreatePropagator(const std::string &type, const std::string &name);
+    Propagator* CreatePropagator(const std::string &type,
+                                 const std::string &name);
     Propagator* GetPropagator(const std::string &name);
 
     // PhysicalModel
-    PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
+    PhysicalModel* CreatePhysicalModel(const std::string &type,
+                                       const std::string &name);
     PhysicalModel* GetPhysicalModel(const std::string &name);
 
     // Burn
-    Burn* CreateBurn(const std::string &type, const std::string &name);
+    Burn* CreateBurn(const std::string &type,
+                     const std::string &name);
     Burn* GetBurn(const std::string &name);
 
     // Parameter
-    Parameter* CreateParameter(const std::string &type, const std::string &name);
+    Parameter* CreateParameter(const std::string &type,
+                               const std::string &name);
     Parameter* GetParameter(const std::string &name);
 
     // ForceModel
     ForceModel* CreateForceModel(const std::string &name);
     ForceModel* GetForceModel(const std::string &name);
-    bool AddToForceModel(const std::string &forceModelName, const std::string &forceName);
+    bool AddToForceModel(const std::string &forceModelName,
+                         const std::string &forceName);
 
     // StopCondition
-    StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
+    StopCondition* CreateStopCondition(const std::string &type,
+                                       const std::string &name);
     StopCondition* GetStopCondition(const std::string &name);
-    bool AddToStopCondition(const std::string &stopCondName, const std::string &paramName);
+    bool AddToStopCondition(const std::string &stopCondName,
+                            const std::string &paramName);
 
     // Solver
-    Solver* CreateSolver(const std::string &type, const std::string &name);
+    Solver* CreateSolver(const std::string &type,
+                         const std::string &name);
     Solver* GetSolver(const std::string &name);
 
     // PropSetup
@@ -133,33 +145,45 @@ public:
     PropSetup* GetPropSetup(const std::string &name);
 
     // CelestialBody
-    CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
+    CelestialBody* CreateCelestialBody(const std::string &type,
+                                       const std::string &name);
     CelestialBody* GetCelestialBody(const std::string &name);
 
     // Interpolator //loj: 3/23/04 added
-    Interpolator* CreateInterpolator(const std::string &type, const std::string &name);
+    Interpolator* CreateInterpolator(const std::string &type,
+                                     const std::string &name);
     Interpolator* GetInterpolator(const std::string &name);
 
     // RefFrame //loj: 3/23/04 added
-    RefFrame* CreateRefFrame(const std::string &type, const std::string &name);
+    RefFrame* CreateRefFrame(const std::string &type,
+                             const std::string &name);
     RefFrame* GetRefFrame(const std::string &name);
 
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
     SolarSystem* CreateSolarSystem(const std::string &name);
     SolarSystem* GetSolarSystemInUse();
-    StringArray& GetSolarSystemSourceList();
-    StringArray& GetSolarSystemSourceFileList();
     bool SetSolarSystemInUse(const std::string &name);
-    bool SetSlpFileToUse(const std::string &filename);
-
+    
+    // Planetary files
+    StringArray& GetPlanetaryFileTypes();
+    StringArray& GetPlanetaryFileNames();
+    StringArray& GetPlanetaryFileTypesInUse();
+    std::string GetPlanetaryFileName(const std::string &filetype);
+    bool SetPlanetaryFileName(const std::string &filetype,
+                              const std::string &filename);
+    bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
+    Integer GetPlanetaryFileId(const std::string &filetype);
+    
     // Subscriber
-    Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
+    Subscriber* CreateSubscriber(const std::string &type,
+                                 const std::string &name,
                                  const std::string &filename = "");
     Subscriber* GetSubscriber(const std::string &name);
 
     // GmatCommand
-    GmatCommand* CreateCommand(const std::string &type, const std::string &name = "");
+    GmatCommand* CreateCommand(const std::string &type,
+                               const std::string &name = "");
 
     // Mission
     bool LoadDefaultMission();
@@ -170,12 +194,15 @@ public:
     // Mission sequence
     bool ClearCommandSeq(Integer sandboxNum = 1);
     bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-    GmatCommand* AppendCommand(const std::string &type, const std::string &name,
-                           Integer sandboxNum = 1);
+    GmatCommand* AppendCommand(const std::string &type,
+                               const std::string &name,
+                               Integer sandboxNum = 1);
     bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                        Integer sandboxNum = 1);
-    GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
-                           const std::string &prevName, Integer sandboxNum = 1);
+    GmatCommand* InsertCommand(const std::string &type,
+                               const std::string &currName,
+                               const std::string &prevName,
+                               Integer sandboxNum = 1);
     GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
     GmatCommand* GetNextCommand(Integer sanboxNum = 1);
 
@@ -191,8 +218,12 @@ public:
 private:
 
     // initialization
+    void InitializePlanetarySource();
     void CreateDefaultMission();
     void SetupRun(Integer sandboxNum, bool isFromGui = false);
+    bool CreateSlpFile(const std::string &filename);
+    bool CreateDeFile(const Integer id, const std::string &filename,
+                      Gmat::DeFileFormat format = Gmat::DE_BINARY);
     
     // sandbox
     void AddSolarSysToSandbox(Integer index);
@@ -215,15 +246,15 @@ private:
     bool isInitialized;
     bool isSlpAlreadyInUse;
     bool isRunReady;
-    
     std::vector<Sandbox*> sandboxes;
     std::vector<GmatCommand*> commands;
 
     static Moderator *instance;
-    static ConfigManager *theConfigManager;
-    static FactoryManager *theFactoryManager;
     static GuiInterpreter *theGuiInterpreter;
     static ScriptInterpreter *theScriptInterpreter;
+    ConfigManager *theConfigManager;
+    FactoryManager *theFactoryManager;
+    FileManager *theFileManager;
 
     Publisher *thePublisher;
     BurnFactory *theBurnFactory;
@@ -237,13 +268,30 @@ private:
     StopConditionFactory *theStopConditionFactory;
     SubscriberFactory *theSubscriberFactory;
     SolverFactory *theSolverFactory;
-
+    
     SolarSystem *theDefaultSolarSystem;
     SlpFile *theDefaultSlpFile;
-    StringArray theSolarSystemSourceList;
-    StringArray theSolarSystemSourceFileList;
+    DeFile *theDefaultDeFile;
+    StringArray thePlanetaryFileTypes;
+    StringArray thePlanetaryFileNames;
+    StringArray thePlanetaryFileTypesInUse;
+    StringArray theList;
+    
     static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
+    enum
+    {
+        SLP = 0,
+        DE200,
+        //DE202, //not supported
+        DE405,
+        PlanetaryFileCount,
+    };
+    
+    Integer thePlanetarySourcePriority[PlanetaryFileCount];
+    bool isPlanetaryFileInUse[PlanetaryFileCount];
+    static const std::string PLANETARY_SOURCE_STRING[PlanetaryFileCount];
+    static const Integer HIGHEST_PRIORITY = 10;
 };
 
 #endif // Moderator_hpp

@@ -28,14 +28,12 @@
 Moderator* Moderator::instance = NULL;
 GuiInterpreter* Moderator::theGuiInterpreter = NULL;
 ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
-FactoryManager* Moderator::theFactoryManager = NULL;
-ConfigManager* Moderator::theConfigManager = NULL;
 
 //-----------------------------------------------------
 //*** should match with ObjectType in gmatdefs.hpp
 //-----------------------------------------------------
 const std::string
-Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
+Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 {
     "Spacecraft",
     "GroundStation",
@@ -53,6 +51,15 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
     "Subscriber",
     "PropSetup",
     "RefFrame",
+};
+
+const std::string
+Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
+{
+    "SLP",
+    "DE200",
+    //"DE202", //not supported
+    "DE405",
 };
 
 //---------------------------------
@@ -75,55 +82,75 @@ Moderator* Moderator::Instance()
 //------------------------------------------------------------------------------
 bool Moderator::Initialize(bool fromGui)
 {
-    if (!isInitialized)
+    try
     {
-        MessageInterface::ShowMessage("Moderator is creating core engine ...\n");
-        
-        // Create interpreters and managers
-        theGuiInterpreter = GuiInterpreter::Instance();
-        theScriptInterpreter = ScriptInterpreter::Instance();
-        theFactoryManager = FactoryManager::Instance();
-        theConfigManager = ConfigManager::Instance();
-
-        // Create publisher
-        thePublisher = Publisher::Instance();
-
-        // Create factories
-        theBurnFactory = new BurnFactory();
-        theCommandFactory = new CommandFactory();
-        theForceModelFactory = new ForceModelFactory();
-        theParameterFactory = new ParameterFactory();
-        thePhysicalModelFactory = new PhysicalModelFactory();
-        thePropSetupFactory = new PropSetupFactory();
-        thePropagatorFactory = new PropagatorFactory();
-        theSpacecraftFactory = new SpacecraftFactory();
-        theStopConditionFactory = new StopConditionFactory();
-        theSubscriberFactory = new SubscriberFactory();
-        theSolverFactory = new SolverFactory();
-
-        // Register factories
-        theFactoryManager->RegisterFactory(theBurnFactory);
-        theFactoryManager->RegisterFactory(theCommandFactory);
-        theFactoryManager->RegisterFactory(theForceModelFactory);
-        theFactoryManager->RegisterFactory(theParameterFactory);
-        theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-        theFactoryManager->RegisterFactory(thePropSetupFactory);
-        theFactoryManager->RegisterFactory(thePropagatorFactory);
-        theFactoryManager->RegisterFactory(theSpacecraftFactory);
-        theFactoryManager->RegisterFactory(theStopConditionFactory);
-        theFactoryManager->RegisterFactory(theSubscriberFactory);
-        theFactoryManager->RegisterFactory(theSolverFactory);
-        
-        if (fromGui)
+        if (!isInitialized)
         {
-            CreateDefaultMission();
-        }
+            MessageInterface::ShowMessage("Moderator is creating core engine ...\n");
         
-        MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+            // Create interpreters and managers
+            theGuiInterpreter = GuiInterpreter::Instance();
+            theScriptInterpreter = ScriptInterpreter::Instance();
+            theFactoryManager = FactoryManager::Instance();
+            theConfigManager = ConfigManager::Instance();
+            theFileManager = FileManager::Instance();
         
-        isInitialized = true;
-    }
+            // Create publisher
+            thePublisher = Publisher::Instance();
+        
+            // Create factories
+            theBurnFactory = new BurnFactory();
+            theCommandFactory = new CommandFactory();
+            theForceModelFactory = new ForceModelFactory();
+            theParameterFactory = new ParameterFactory();
+            thePhysicalModelFactory = new PhysicalModelFactory();
+            thePropSetupFactory = new PropSetupFactory();
+            thePropagatorFactory = new PropagatorFactory();
+            theSpacecraftFactory = new SpacecraftFactory();
+            theStopConditionFactory = new StopConditionFactory();
+            theSubscriberFactory = new SubscriberFactory();
+            theSolverFactory = new SolverFactory();
 
+            // Register factories
+            theFactoryManager->RegisterFactory(theBurnFactory);
+            theFactoryManager->RegisterFactory(theCommandFactory);
+            theFactoryManager->RegisterFactory(theForceModelFactory);
+            theFactoryManager->RegisterFactory(theParameterFactory);
+            theFactoryManager->RegisterFactory(thePhysicalModelFactory);
+            theFactoryManager->RegisterFactory(thePropSetupFactory);
+            theFactoryManager->RegisterFactory(thePropagatorFactory);
+            theFactoryManager->RegisterFactory(theSpacecraftFactory);
+            theFactoryManager->RegisterFactory(theStopConditionFactory);
+            theFactoryManager->RegisterFactory(theSubscriberFactory);
+            theFactoryManager->RegisterFactory(theSolverFactory);
+
+            // Create default SolarSystem
+            theDefaultSolarSystem = new SolarSystem("DefaultSS");
+            
+            // Read startup file
+            theFileManager->ReadStartupFile();
+            InitializePlanetarySource();
+            
+            if (fromGui)
+            {
+                CreateDefaultMission();
+            }
+        }
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::PopupMessage(Gmat::WARNING_,
+                                       "Error occured during initialization: " +
+                                       e.GetMessage());
+    }
+    catch (...)
+    {
+        MessageInterface::PopupMessage(Gmat::WARNING_,
+                                       "Unknown Error occured during initialization");
+    }
+    
+    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+    isInitialized = true;
     return isInitialized;
 }
 
@@ -1045,63 +1072,314 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
     return theConfigManager->SetSolarSystemInUse(name);
 }
 
+//Planetary files
 //------------------------------------------------------------------------------
-// StringArray& GetSolarSystemSourceList()
+// StringArray& GetPlanetaryFileTypes()
 //------------------------------------------------------------------------------
 /**
- * Retrieves solar system source list
- *
- * @return a solar system source list
+ * @return a planetary source types
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetSolarSystemSourceList()
+StringArray& Moderator::GetPlanetaryFileTypes()
 {
-    return theSolarSystemSourceList;
+    return thePlanetaryFileTypes;
 }
 
 //------------------------------------------------------------------------------
-// StringArray& GetSolarSystemSourceFileList()
+// StringArray& GetPlanetaryFileNames()
 //------------------------------------------------------------------------------
 /**
- * Retrieves solar system source file list
- *
- * @return a solar system source file list
+ * @return a planetary source file names
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetSolarSystemSourceFileList()
+StringArray& Moderator::GetPlanetaryFileNames()
 {
-    return theSolarSystemSourceFileList;
+    return thePlanetaryFileNames;
 }
 
 //------------------------------------------------------------------------------
-// bool SetSlpFileToUse(const std::string &filename)
+// StringArray& GetPlanetaryFileTypesInUse()
 //------------------------------------------------------------------------------
-bool Moderator::SetSlpFileToUse(const std::string &filename)
+/**
+ * @return a planetary source types in use
+ */
+//------------------------------------------------------------------------------
+StringArray& Moderator::GetPlanetaryFileTypesInUse()
+{
+    theList.clear();
+    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+        theList.push_back(thePlanetaryFileTypesInUse[i]);
+
+    return theList;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetPlanetaryFileName(const std::string &filetype)
+//------------------------------------------------------------------------------
+std::string Moderator::GetPlanetaryFileName(const std::string &filetype)
+{
+    Integer id = GetPlanetaryFileId(filetype);
+
+    if (id >= 0)
+        return thePlanetaryFileNames[id];
+    else
+        return "Unknown File Type";
+}
+
+//------------------------------------------------------------------------------
+// bool SetPlanetaryFileName(const std::string &filetype,
+//                           const std::string &filename)
+//------------------------------------------------------------------------------
+bool Moderator::SetPlanetaryFileName(const std::string &filetype,
+                                     const std::string &filename)
 {
     bool status = false;
-    
-    if (isSlpAlreadyInUse)
+    Integer id = GetPlanetaryFileId(filetype);
+
+    if (id >= 0)
     {
-        MessageInterface::ShowMessage("Moderator::SetSlpFileToUse() SlpFile already set\n");
+        thePlanetaryFileNames[id] = filename;
         status = true;
     }
-    else
+    
+    return status;
+}
+
+//------------------------------------------------------------------------------
+// bool SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+//------------------------------------------------------------------------------
+/*
+ * @param <filetypes> list of file type in the priority order of use
+ */
+//------------------------------------------------------------------------------
+bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+{
+    //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
+    //                              filetypes.size());
+    bool status = false;
+    Integer fileTypeInUse = -1;
+    
+    // update planetary file types
+    if (&thePlanetaryFileTypesInUse != &filetypes)
     {
-        MessageInterface::ShowMessage("Moderator::SetSlpFileToUse() setting SlpFile\n");
-        theDefaultSlpFile = new SlpFile(filename);
-        if (theDefaultSolarSystem->SetSource(Gmat::SLP))
+        //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
+        thePlanetaryFileTypesInUse.clear();
+    
+        for (unsigned int i=0; i<filetypes.size(); i++)
         {
-            if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
+            thePlanetaryFileTypesInUse.push_back(filetypes[i]);
+        }
+    }
+
+    // create planetary ephem file
+    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+    {
+        thePlanetarySourcePriority[i] = 0;
+       
+        if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
+        {
+            status = CreateSlpFile(thePlanetaryFileNames[SLP]);
+            if (status)
             {
-                theSolarSystemSourceList.push_back("SLP");
-                theSolarSystemSourceFileList.push_back(filename);
-                isSlpAlreadyInUse = true;
-                status = true;
+                thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
+                isPlanetaryFileInUse[SLP] = true;
+                fileTypeInUse = SLP;
+                break;
+            }
+        }
+        else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
+        {
+            //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
+            status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
+            if (status)
+            {
+                thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
+                isPlanetaryFileInUse[DE200] = true;
+                fileTypeInUse = DE200;
+                break;
+            }
+        }
+//          else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE202])
+//          {
+//              MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE202\n");
+//              status = CreateDeFile(DE202, thePlanetaryFileNames[DE202]);
+//              if (status)
+//              {
+//                  thePlanetarySourcePriority[DE202] = HIGHEST_PRIORITY - i;
+//                  isPlanetaryFileInUse[DE202] = true;
+//                  fileTypeInUse = DE202;
+//                  break;
+//              }
+//          }
+        else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
+        {
+            //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
+            status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
+            if (status)
+            {
+                thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
+                isPlanetaryFileInUse[DE405] = true;
+                fileTypeInUse = DE405;
+                break;
             }
         }
     }
 
+    status = false;
+
+    // set SolarSystem to use the file
+    if (fileTypeInUse == -1)
+    {
+        MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() NO "
+                                      "Planetary file is set to use \n");
+    }
+    else
+    {
+        //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
+        //                              "Set Planetary file to use:%d\n", fileTypeInUse);
+        
+        switch (fileTypeInUse)
+        {
+        case SLP:
+            if (theDefaultSolarSystem->SetSource(Gmat::SLP))
+                if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
+                    status = true;
+            
+            break;
+        case DE200:
+            if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
+                if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+                    status = true;
+            break;
+//          case DE202:
+//              if (theDefaultSolarSystem->SetSource(Gmat::DE_202))
+//                  if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+//                      status = true;
+//              break;
+        case DE405:
+            if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
+                if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+                    status = true;
+            break;
+        default:
+            break;
+        }
+    }
+    
+//      if (status)
+//          MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
+//                                        "set Planetary file to use: %s\n",
+//                                        PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
+    
     return status;
+}
+
+//------------------------------------------------------------------------------
+// bool CreateSlpFile(const std::string &filename)
+//------------------------------------------------------------------------------
+bool Moderator::CreateSlpFile(const std::string &filename)
+{
+    //MessageInterface::ShowMessage("Moderator::CreateSlpFile() filename=%s\n",
+    //                              filename.c_str());
+    
+    bool status = false;
+    
+    if (isPlanetaryFileInUse[SLP])
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile already created\n");
+        status = true;
+    }
+    else
+    {
+        theDefaultSlpFile = new SlpFile(filename);
+        //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
+        
+        if (theDefaultSlpFile != NULL)
+            status = true;
+    }
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
+// bool CreateDeFile(const Integer id, const std::string &filename,
+//                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
+//------------------------------------------------------------------------------
+bool Moderator::CreateDeFile(Integer id, const std::string &filename,
+                             Gmat::DeFileFormat format)
+{
+    bool status = false;
+    Gmat::DeFileType deFileType;
+    
+    if (isPlanetaryFileInUse[id])
+    {
+        MessageInterface::ShowMessage("Moderator::CreateDeFile() DeFile already created\n");
+        status = true;
+    }
+    else
+    {
+        switch (id)
+        {
+        case DE200:
+            deFileType = Gmat::DE200;
+            break;
+//          case DE202:
+//              deFileType = Gmat::DE202;
+//              break;
+        case DE405:
+            deFileType = Gmat::DE405;
+            break;
+        default:
+            MessageInterface::PopupMessage
+                (Gmat::WARNING_,
+                 "Moderator::CreateDeFile() unsupported DE file type");
+            return false;
+        }
+
+        MessageInterface::ShowMessage
+            ("Moderator::CreateDeFile() creating DeFile. type=%d, "
+             "filename=%s, format=%d\n", deFileType, filename.c_str(),
+             format);
+
+        //loj: 4/7/04 temp code until DeFile is resolved
+        MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "Moderator::CreateDeFile() Error creating %s.\n"
+             "The next filetype in the list will "
+             "be created.\n", filename.c_str());
+         
+//          try
+//          {
+//              theDefaultDeFile = new DeFile(deFileType, filename, format);
+        
+//              if (theDefaultDeFile != NULL)
+//                  status = true;
+//          }
+//          catch (...)
+//          {
+//              MessageInterface::PopupMessage
+//                  (Gmat::WARNING_,
+//                   "Moderator::CreateDeFile() Error creating %s. "
+//                   "The next filetype in the list will "
+//                   "be created.\n", filename.c_str());
+//          }
+    }
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetPlanetaryFileId(const std::string &filetype)
+//------------------------------------------------------------------------------
+Integer Moderator::GetPlanetaryFileId(const std::string &filetype)
+{
+    for (int i=0; i<PlanetaryFileCount; i++)
+    {
+        if (filetype == PLANETARY_SOURCE_STRING[i])
+            return i;
+    }
+    
+    return -1;
 }
 
 // Subscriber
@@ -1449,6 +1727,42 @@ Integer Moderator::RunScript(Integer sandboxNum, bool isFromGui)
 
 // initialization
 //------------------------------------------------------------------------------
+// void InitializePlanetarySource()
+//------------------------------------------------------------------------------
+void Moderator::InitializePlanetarySource()
+{
+    MessageInterface::ShowMessage("========================================\n");
+    MessageInterface::ShowMessage("Moderator initializing planetary source...\n");
+
+    // initialize planetary source
+    for (int i=0; i<PlanetaryFileCount; i++)
+    {
+        thePlanetarySourcePriority[i] = 0;
+        isPlanetaryFileInUse[i] = false;
+    }
+
+    // initialize in the order of enum data
+    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
+    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
+    //thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE202]); //loj: not supported yet
+    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
+    
+    thePlanetaryFileNames.push_back(theFileManager->
+                                    GetStringParameter("FULL_SLP_FILE"));
+    thePlanetaryFileNames.push_back(theFileManager->
+                                    GetStringParameter("FULL_DE200_FILE"));
+//      thePlanetaryFileNames.push_back(theFileManager->
+//                                      GetStringParameter("FULL_DE202_FILE")); //loj: not supported yet
+    thePlanetaryFileNames.push_back(theFileManager->
+                                    GetStringParameter("FULL_DE405_FILE"));
+
+    // initialize planetary file types/names in use
+    thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+    //thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
+    SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
+}
+
+//------------------------------------------------------------------------------
 // void CreateDefaultMission()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
@@ -1458,10 +1772,6 @@ void Moderator::CreateDefaultMission()
 
     try
     {
-        // SolarSystem
-        theDefaultSolarSystem = new SolarSystem("DefaultSS");
-        //MessageInterface::ShowMessage("-->default SolarSystem created\n");
-
         // Spacecraft
         Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
         //MessageInterface::ShowMessage("-->default Spacecraft created\n");
@@ -1470,54 +1780,60 @@ void Moderator::CreateDefaultMission()
         PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
         //MessageInterface::ShowMessage("-->default PropSetup created\n");
 
-        // Parameters
+        // Time parameters
         Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
         Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+        Parameter *elapsedDays = CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
+
+        // Cartesian parameters
         Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
         Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
         Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
         Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
         Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
         Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
+
+        // Keplerian parameters
+        Parameter *kepSma = CreateParameter("KepSMA", "DefaultSC.SMA");
+        Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.Ecc");
+        Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.Inc");
+        Parameter *kepRaan = CreateParameter("KepRAAN", "DefaultSC.RAAN");
+        Parameter *kepAop = CreateParameter("KepAOP", "DefaultSC.AOP");
+        Parameter *kepTa = CreateParameter("KepTA", "DefaultSC.TA");
+        Parameter *kepMa = CreateParameter("KepMA", "DefaultSC.MA");
+        Parameter *kepMm = CreateParameter("KepMM", "DefaultSC.MM");
+
+        // Orbital parameters
+        Parameter *velApoapsis = CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
+        Parameter *velPeriapsis = CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
+        Parameter *apapsis = CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
+        Parameter *periapsis = CreateParameter("Periapsis", "DefaultSC.Periapsis");
+
+        // Spherical parameters
+        Parameter *sphRa = CreateParameter("SphRA", "DefaultSC.RA");
+        Parameter *sphDec = CreateParameter("SphDec", "DefaultSC.Dec");
+
+        // Angular parameters
+        Parameter *semiLatRec = CreateParameter("SemilatusRectum", "DefaultSC.SLR");
         //MessageInterface::ShowMessage("-->default parameters created\n");
     
-        //Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
-        //Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
-        //Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.INC");
-        //Parameter *kepRaan = CreateParameter("KepRaan", "DefaultSC.RAAN");
-        //Parameter *kepAop = CreateParameter("KepAop", "DefaultSC.AOP");
-        //Parameter *kepTa = CreateParameter("KepTa", "DefaultSC.TA");
+        // Set parameter description and object name
+        StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+        Parameter *param;
     
-        currTime->SetStringParameter("Object", "DefaultSC");
-        elapsedSecs->SetStringParameter("Object", "DefaultSC");
-        elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
-
-        cartX->SetStringParameter("Object", "DefaultSC");
-        cartY->SetStringParameter("Object", "DefaultSC");
-        cartZ->SetStringParameter("Object", "DefaultSC");
-        cartVx->SetStringParameter("Object", "DefaultSC");
-        cartVy->SetStringParameter("Object", "DefaultSC");
-        cartVz->SetStringParameter("Object", "DefaultSC");
-        
-        //kepSma->SetStringParameter("Object", "DefaultSC");
-        //kepEcc->SetStringParameter("Object", "DefaultSC");
-        //kepInc->SetStringParameter("Object", "DefaultSC");
-        //kepRaan->SetStringParameter("Object", "DefaultSC");
-        //kepAop->SetStringParameter("Object", "DefaultSC");
-        //kepTa->SetStringParameter("Object", "DefaultSC");
-        
-        currTime->SetDesc(currTime->GetName());
-        elapsedSecs->SetDesc(elapsedSecs->GetName());
-        cartX->SetDesc(cartX->GetName());
-        cartY->SetDesc(cartY->GetName());
-        cartZ->SetDesc(cartZ->GetName());
-        cartVx->SetDesc(cartVx->GetName());
-        cartVy->SetDesc(cartVy->GetName());
-        cartVz->SetDesc(cartVz->GetName());
+        for (unsigned int i=0; i<params.size(); i++)
+        {
+            param = GetParameter(params[i]);
+            param->SetDesc(param->GetName());
+            param->SetStringParameter("Object", "DefaultSC");
+        }
+    
+        // Set initial epoch for elapsed time parameter
+        //elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
+        //elapsedDays->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
 
         // StopCondition
-        //loj: 2/12/04 Propagate command knows "Duration" only
-        StopCondition *stopCond = CreateStopCondition("StopCondition", "Duration");
+        StopCondition *stopCond = CreateStopCondition("StopCondition", "StopOnElapsedSecs");
         stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
         stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
         stopCond->SetRealParameter("Goal", 8640.0);
@@ -1569,7 +1885,7 @@ void Moderator::CreateDefaultMission()
 void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
 {
     MessageInterface::ShowMessage("========================================\n");
-    MessageInterface::ShowMessage("Moderator setting up for run...\n");
+    MessageInterface::ShowMessage("Moderator setting up for a run...\n");
     std::string objName;
     std::string objTypeName;
 
@@ -1578,6 +1894,7 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
     //--------------------------------------------
     if (isFromGui)
     {
+        //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
         GmatBase *obj;
         StringArray objList;
     
@@ -1588,38 +1905,60 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
     
         for (unsigned int i=0; i<params.size(); i++)
         {
-            param = GetParameter(params[i]);
-            objList = param->GetObjectTypeNames();
-            for (unsigned int j=0; j<objList.size(); j++)
+            try
             {
-                obj = param->GetObject(objList[j]);
-                objName = obj->GetName(); 
-                sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-                param->SetObject(Gmat::SPACECRAFT, objName, sc);
-                //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
-                //                              "ObjName = %s\n", param->GetName().c_str(),
-                //                              objName.c_str());
+                param = GetParameter(params[i]);
+                objList = param->GetObjectTypeNames();
+                for (unsigned int j=0; j<objList.size(); j++)
+                {
+                    obj = param->GetObject(objList[j]);
+                    objName = obj->GetName(); 
+                    sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+                    param->SetObject(Gmat::SPACECRAFT, objName, sc);
+
+                    //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
+                    //                              "ObjName = %s\n", param->GetName().c_str(),
+                    //                              objName.c_str());
+                }
+            }
+            catch (BaseException &e)
+            {
+                MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+                                              e.GetMessage().c_str());
             }
         }
-    
+        
+        //--------------------------------------------
+        // check stopping condition
+        //--------------------------------------------
         StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
         StopCondition *stopCond;
     
+        //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
         for (unsigned int i=0; i<stopconds.size(); i++)
         {
-            stopCond = GetStopCondition(stopconds[i]);
-            objName = stopCond->GetName();
-            //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
-            //                              objName.c_str(), stopCond->GetGoal());
+            try
+            {
+                stopCond = GetStopCondition(stopconds[i]);
+                objName = stopCond->GetName();
+                //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
+                //                              objName.c_str(), stopCond->GetRealParameter("Goal"));
+            }
+            catch (BaseException &e)
+            {
+                MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+                                              e.GetMessage().c_str());
+            }
         }    
     }
     
     //--------------------------------------------
-    //create plot window
+    // create plot window
     //--------------------------------------------
     StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
     Subscriber *sub;
-    
+
+    //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
     for (unsigned int i=0; i<subs.size(); i++)
     {
         sub = GetSubscriber(subs[i]);
@@ -1630,7 +1969,6 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
         sub->Initialize();
     }
 }
-
 
 // sandbox
 //------------------------------------------------------------------------------
@@ -1761,15 +2099,21 @@ void Moderator::ExecuteSandbox(Integer index)
 //------------------------------------------------------------------------------
 // Moderator()
 //------------------------------------------------------------------------------
+/*
+ * Constructor
+ */
+//------------------------------------------------------------------------------
 Moderator::Moderator()
 {
     isInitialized = false;
-    isSlpAlreadyInUse = false;
     isRunReady = false;
     theDefaultSolarSystem = NULL;
     theDefaultSlpFile = NULL;
+
     theFactoryManager = FactoryManager::Instance();
     theConfigManager = ConfigManager::Instance();
+    theFileManager = FileManager::Instance();
+
     sandboxes.reserve(Gmat::MAX_SANDBOX);
     commands.reserve(Gmat::MAX_SANDBOX);
 
