@@ -291,6 +291,8 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
       return filename;
+   if (id == ADD)
+      return "";
    return Subscriber::GetStringParameter(id);
 }
 
