@@ -203,27 +203,32 @@ bool PointMassForce::Initialize(void)
       {
          mu = body->GetGravitationalConstant();
          
-#if DEBUG_PMF_BODY
-         MessageInterface::ShowMessage
-            ("PointMassForce::Initialize() setting mu=%f for type=%s, "
-             "name=%s\n", mu, body->GetTypeName().c_str(), body->GetName().c_str());
-#endif
+         #if DEBUG_PMF_BODY
+             MessageInterface::ShowMessage
+                ("PointMassForce::Initialize() setting mu=%f for type=%s, "
+                 "name=%s\n", mu, body->GetTypeName().c_str(), 
+                 body->GetName().c_str());
+         #endif
          
       }
       else
       {
-         MessageInterface::ShowMessage("PointMassForce::Initialize() body is NULL\n");
+         MessageInterface::ShowMessage(
+            "PointMassForce::Initialize() body \"%s\" is not in the solar "
+            "system\n", bodyName.c_str());
          initialized = false;
-         throw ForceModelException("PointMassForce::Initialize() body is NULL\n");
+         throw ForceModelException("PointMassForce::Initialize() body \"" +
+            bodyName + "\" is not in the solar system\n");
          //return false;
       }
    }
    else
    {
-      MessageInterface::ShowMessage("PointMassForce::Initialize() solarSystem is NULL\n");
+      MessageInterface::ShowMessage(
+         "PointMassForce::Initialize() solarSystem is NULL\n");
       initialized = false;
-      throw ForceModelException("PointMassForce::Initialize() solarSystem is NULL\n");
-      //return false;
+      throw ForceModelException(
+         "PointMassForce::Initialize() solarSystem is NULL\n");
    }
     
    Integer satCount = (Integer)(dimension / 6);
