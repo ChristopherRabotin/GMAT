@@ -20,6 +20,7 @@
 
 #include "DragForce.hpp"
 #include "ForceModelException.hpp"
+#include "MessageInterface.hpp"
 
 // Uncomment to generate drag model data for debugging:
 // #define     DEBUG      
@@ -30,6 +31,7 @@
    std::ofstream dragdata;
 #endif
 
+//#defin DEBUG_DRAGFORCE_PARAM 1
 
 //------------------------------------------------------------------------------
 // DragForce(const std::string &name)
@@ -58,7 +60,7 @@ DragForce::DragForce(const std::string &name) :
     fluxF107A              (210.0),
     ap                     (40.0),
     atmosphereModelID      (parameterCount),
-    centralBodyID          (parameterCount+1),
+    centralBodyID          (parameterCount+1), //loj: Why do we need this? PhysicalModel has the body.
     sourceTypeID           (parameterCount+2),
     fluxFileID             (parameterCount+3),
     fluxID                 (parameterCount+4),
@@ -751,7 +753,7 @@ std::string DragForce::GetStringParameter(const Integer id) const
 
    if (id == centralBodyID)
       return bodyName;
-    
+   
    if (id == sourceTypeID)
       return dataType;
     
@@ -759,6 +761,15 @@ std::string DragForce::GetStringParameter(const Integer id) const
       return fluxFile;
     
    return PhysicalModel::GetStringParameter(id);
+}
+
+//loj: 10/25/04 added
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string DragForce::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -775,6 +786,11 @@ std::string DragForce::GetStringParameter(const Integer id) const
  */
 bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 {
+#if DEBUG_DRAGFORCE_PARAM
+   MessageInterface::ShowMessage
+      ("DragForce::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
+#endif
+   
    if (id == atmosphereModelID) {
       atmosphereType = value;
 
@@ -815,6 +831,21 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    }
     
    return PhysicalModel::SetStringParameter(id, value);
+}
+
+//loj: 10/25/04 added
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const std::string &label,
+                                   const std::string &value)
+{
+#if DEBUG_DRAGFORCE_PARAM
+   MessageInterface::ShowMessage("DragForce::SetStringParameter() label=%s, value=%s\n",
+                                 label.c_str(), value.c_str());
+#endif
+   
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 

@@ -32,8 +32,8 @@
 class DragForce : public PhysicalModel
 {
 public:
-	DragForce(const std::string &name = "");
-	virtual ~DragForce();
+        DragForce(const std::string &name = "");
+        virtual ~DragForce();
  
     DragForce(const DragForce& df); 
     DragForce&          operator=(const DragForce& df); 
@@ -62,7 +62,10 @@ public:
     virtual Real        GetRealParameter(const Integer id) const;
     virtual Real        SetRealParameter(const Integer id, const Real value);    
     virtual std::string GetStringParameter(const Integer id) const;
+    virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+    virtual bool        SetStringParameter(const std::string &label, 
                                            const std::string &value);
     virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
