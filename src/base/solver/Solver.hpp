@@ -41,6 +41,17 @@
 class Solver : public GmatBase
 {
 public:
+    /// Enumeration defining the states in the state machine
+    enum SolverState {
+        NOMINAL = 10001,
+        PERTURBING,
+        ITERATING,
+        CALCULATING,
+        CHECKINGRUN,
+        FINISHED            // This one should stay at the end of the list.
+    };
+    
+public:
     Solver(std::string type, std::string name);
     virtual ~Solver();
     Solver(const Solver& sol);
@@ -56,18 +67,8 @@ public:
      */
     virtual bool                Initialize(void) = 0;
 
-    
-protected:    
-    /// Enumeration defining the states in the state machine
-    enum SolverState {
-        NOMINAL = 10001,
-        PERTURBING,
-        ITERATING,
-        CALCULATING,
-        CHECKINGRUN,
-        FINISHED            // This one should stay at the end of the list.
-    };
-    
+
+protected:
     /// Current state for the state machine
     SolverState                 currentState;
     
@@ -80,6 +81,9 @@ protected:
     virtual void                CalculateParameters(void);
     virtual void                CheckCompletion(void);
     virtual void                RunComplete(void);
+
+    /** Utility function used by the solvers to generate a progress file */
+    virtual void                WriteToTextFile(void) = 0;
 };
 
 

@@ -52,7 +52,25 @@ public:
     
     Vary(const Vary& t);
     Vary&             operator=(const Vary& t);
-    
+
+    // Parameter accessors
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
+    virtual Real        GetRealParameter(const Integer id) const;
+    virtual Real        SetRealParameter(const Integer id,
+                                         const Real value);
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+
+// Multiple variables specified on the same line are not allowed in build 2
+//    virtual const StringArray& 
+//                        GetStringArrayParameter(const Integer id) const; 
+
     // Inherited methods overridden from the base class
     virtual void        InterpretAction(void);
     virtual bool        Initialize(void);
@@ -61,13 +79,38 @@ public:
 protected:
     /// The name of the spacecraft that gets maneuvered
     std::string         targeterName;
-    /// The Varyer instance used to manage the Varyer state machine
+    /// Name(s) of the variable(s)
+    StringArray         variableName;
+    /// Initial variable value(s)
+    std::vector<Real>   initialValue;
+    /// Current (nominal) variable value(s)
+    std::vector<Real>   currentValue;
+    /// Variable perturbation(s)
+    std::vector<Real>   perturbation;
+    /// Absolute minimum value
+    std::vector<Real>   variableMinimum;
+    /// Absolute maximum value
+    std::vector<Real>   variableMaximum;
+    /// Maximum step allowed
+    std::vector<Real>   variableMaximumStep;
+    /// The Targeter instance used to manage the state machine
     Solver              *targeter;
     
     // Parameter IDs 
     /// ID for the burn object
-    Integer             targeterNameID;
-    
+    const Integer       targeterNameID;
+    /// ID for the burn object
+    const Integer       variableNameID;
+    /// ID for the burn object
+    const Integer       initialValueID;
+    /// ID for the burn object
+    const Integer       perturbationID;
+    /// ID for the burn object
+    const Integer       variableMinimumID;
+    /// ID for the burn object
+    const Integer       variableMaximumID;
+    /// ID for the burn object
+    const Integer       variableMaximumStepID;
 };
 
 

@@ -105,23 +105,23 @@ Achieve& Achieve::operator=(const Achieve& t)
 void Achieve::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Achieve::InterpretAction method
-    // Sample string:  "Achieve myDC;"
+    // Sample string:  "Achieve myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
     
     // Set starting location to the space following the command string
-    Integer loc = generatingString.find("Achieve", 0) + 6, end;
+    Integer loc = generatingString.find("Achieve", 0) + 7, end;
     const char *str = generatingString.c_str();
     
     // Skip white space
     while (str[loc] == ' ')
         ++loc;
     
-    // Stop at the semicolon if it is there
-    end = generatingString.find(";", loc);
+    // Stop at the opening paren
+    end = generatingString.find("(", loc);
     
     
     std::string component = generatingString.substr(loc, end-loc);
     if (component == "")
-        throw CommandException("Achieve string does not the Achieveer");
+        throw CommandException("Achieve string does specify the targeter");
     SetStringParameter(targeterNameID, component);
 }
 

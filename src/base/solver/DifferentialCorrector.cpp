@@ -43,9 +43,11 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     solverTextFile          ("targeter.data"),
     solverTextFileID        (parameterCount),
     variableNamesID         (parameterCount+1),
-    goalNamesID             (parameterCount+2)
+    goalNamesID             (parameterCount+2),
+    maxIterationsID         (parameterCount+3),
+    useCentralDifferencingID(parameterCount+4)
 {
-    parameterCount += 3;
+    parameterCount += 5;
 }
 
 
@@ -77,7 +79,9 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
     solverTextFile          (dc.solverTextFile),
     solverTextFileID        (dc.solverTextFileID),
     variableNamesID         (dc.variableNamesID),
-    goalNamesID             (dc.goalNamesID)
+    goalNamesID             (dc.goalNamesID),
+    maxIterationsID         (dc.maxIterationsID),
+    useCentralDifferencingID(dc.useCentralDifferencingID)
 {
     parameterCount = dc.parameterCount;
 }
@@ -106,6 +110,12 @@ std::string DifferentialCorrector::GetParameterText(const Integer id) const
     if (id == goalNamesID)
         return "Goals";
         
+    if (id == maxIterationsID)
+        return "MaximumIterations";
+        
+    if (id == useCentralDifferencingID)
+        return "UseCentralDifferences";
+        
     return Solver::GetParameterText(id);
 }
 
@@ -120,6 +130,12 @@ Integer DifferentialCorrector::GetParameterID(const std::string &str) const
         
     if (str == "Goals")
         return goalNamesID;
+
+    if (str == "MaximumIterations")
+        return maxIterationsID;
+        
+    if (str == "UseCentralDifferences")
+        return useCentralDifferencingID;
         
     return Solver::GetParameterID(str);
 }
@@ -136,6 +152,12 @@ Gmat::ParameterType DifferentialCorrector::GetParameterType(const Integer id) co
     if (id == goalNamesID)
         return Gmat::STRINGARRAY_TYPE;
         
+    if (id == maxIterationsID)
+        return Gmat::INTEGER_TYPE;
+        
+    if (id == useCentralDifferencingID)
+        return Gmat::BOOLEAN_TYPE;
+
     return Solver::GetParameterType(id);
 }
 
@@ -151,7 +173,57 @@ std::string DifferentialCorrector::GetParameterTypeString(const Integer id) cons
     if (id == goalNamesID)
         return GmatBase::PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
         
+    if (id == maxIterationsID)
+        return GmatBase::PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
+        
+    if (id == useCentralDifferencingID)
+        return GmatBase::PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
+
     return Solver::GetParameterTypeString(id);
+}
+
+
+
+Integer DifferentialCorrector::GetIntegerParameter(const Integer id) const
+{
+    if (id == maxIterationsID)
+        return maxIterations;
+        
+    return Solver::GetIntegerParameter(id);
+}
+
+
+Integer DifferentialCorrector::SetIntegerParameter(const Integer id, 
+                                                   const Integer value)
+{
+    if (id == maxIterationsID) {
+        if (value > 0)
+            maxIterations = value;
+        return maxIterations;
+    }
+    
+    return Solver::SetIntegerParameter(id, value);
+}
+
+
+bool DifferentialCorrector::GetBooleanParameter(const Integer id) const
+{
+    if (id == useCentralDifferencingID)
+        return useCentralDifferences;
+        
+    return Solver::GetBooleanParameter(id);
+}
+
+
+bool DifferentialCorrector::SetBooleanParameter(const Integer id, 
+                                                const bool value)
+{
+    if (id == useCentralDifferencingID) {
+        useCentralDifferences = value;
+        return useCentralDifferences;
+    }
+        
+    return Solver::SetBooleanParameter(id, value);
 }
 
 
@@ -255,6 +327,71 @@ bool DifferentialCorrector::Initialize(void)
 }
 
 
+bool DifferentialCorrector::AdvanceState(void)
+{
+    switch (currentState) {
+        case NOMINAL:
+            RunNominal();
+            break;
+        
+        case PERTURBING:
+        case ITERATING:
+        case CALCULATING:
+        case CHECKINGRUN:
+        case FINISHED:
+        default:
+            throw SolverException("Solver state not supported for the targeter");
+    }
+    
+    return false;
+}
+
+
+void DifferentialCorrector::RunNominal(void)
+{
+    // On success, set the state to the next machine state
+    
+}
+
+
+void DifferentialCorrector::RunPerturbation(void)
+{
+}
+
+
+void DifferentialCorrector::CalculateParameters(void)
+{
+}
+
+
+void DifferentialCorrector::CheckCompletion(void)
+{
+}
+
+
+/** 
+ * Calculates the matrix of derivatives of the goals with respect to the 
+ * variables.
+ */
+void DifferentialCorrector::CalculateJacobian(void)
+{
+}
+
+
+/** 
+ * Inverts the matrix of derivatives so that the change in the variables can be
+ * estimated.
+ */
+void DifferentialCorrector::InvertJacobian(void)
+{
+}
+
+
+/**
+ * Frees the memory used by the targeter, so it can be reused later in the 
+ * sequence.  This method is also called by the destructor when the script is 
+ * cleared.
+ */
 void DifferentialCorrector::FreeArrays(void)
 {
     if (textFile.is_open()) {
@@ -325,30 +462,11 @@ void DifferentialCorrector::FreeArrays(void)
 }
 
 
-void DifferentialCorrector::RunNominal(void)
-{
-    // On success, set the state to the next machine state
-    
-}
-
-
-void DifferentialCorrector::RunPerturbation(void)
-{
-}
-
-
-void DifferentialCorrector::CalculateParameters(void)
-{
-}
-
-
-void DifferentialCorrector::CheckCompletion(void)
-{
-}
-
-
 void DifferentialCorrector::WriteToTextFile(void)
 {
+    StringArray::iterator current;
+    Integer i;
+    
     if (!initialized) {
         textFile << "********************************************************\n"
                  << "*** Targeter Text File\n"
@@ -357,14 +475,76 @@ void DifferentialCorrector::WriteToTextFile(void)
                  
         // Write out the setup data
         textFile << "*** " << variableCount << " variables\n*** "
-                 << goalCount << " goals\n***\n";
+                 << goalCount << " goals\n***\n*** Variables:\n***    ";
                  
-        /// @todo Iterate through the variables and goals, writing them to the file
+        // Iterate through the variables and goals, writing them to the file
+        for (current = variableNames.begin(), i = 0; 
+             current != variableNames.end(); ++current) 
+        {
+             textFile << *current << " = " << variable[i++] << "\n***    ";
+        }
         
-        textFile << "********************************************************\n"
+        textFile << "\n*** Goals:\n***    ";
+        
+        for (current = goalNames.begin(), i = 0; 
+             current != goalNames.end(); ++current) 
+        {
+             textFile << *current << "   Desired value: " 
+                      << goal[i] << "\n***    ";
+        }
+        
+        textFile << "\n****************************" 
+                 << "****************************\n"
                  << std::endl;
     }
     else {
-
+        switch (currentState) {
+            case NOMINAL:
+                textFile << "Running Nominal Pass\nVariables:\n   ";
+                // Write out the nominal variable values
+                
+                // Iterate through the variables, writing them to the file
+                for (current = variableNames.begin(), i = 0; 
+                     current != variableNames.end(); ++current) 
+                {
+                     textFile << *current << " = " << variable[i++] << "\n   ";
+                }
+                break;
+            
+            case PERTURBING:
+                break;
+            
+            case CALCULATING:
+                break;
+            
+            case CHECKINGRUN:
+                // Iterate through the goals, writing them to the file
+                textFile << "\n*** Goals and achieved values:\n***    ";
+                
+                for (current = goalNames.begin(), i = 0; 
+                     current != goalNames.end(); ++current) 
+                {
+                     textFile << *current << "   Desired value: " << goal[i] 
+                              << "Current value: " << nominal[i++] << "\n***    ";
+                }
+                
+                textFile << "\n*****************************" 
+                         << "***************************\n\n"
+                         << std::endl;
+                break;
+            
+            case FINISHED:
+                textFile << "\n****************************" 
+                         << "****************************\n"
+                         << "*** Targeting Complete!"
+                         << "\n****************************" 
+                         << "****************************\n"
+                         << std::endl;
+                break;
+            
+            case ITERATING:     // Intentional fall through
+            default:
+                throw SolverException("Solver state not supported for the targeter");
+        }
     }
 }

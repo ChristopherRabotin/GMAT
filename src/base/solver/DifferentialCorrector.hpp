@@ -42,6 +42,7 @@ public:
     DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
     
     virtual bool                Initialize(void);
+    virtual bool                AdvanceState(void);
 
     // Access methods overriden from the base class
     virtual std::string GetParameterText(const Integer id) const;
@@ -50,6 +51,12 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
 
+    virtual Integer     GetIntegerParameter(const Integer id) const;
+    virtual Integer     SetIntegerParameter(const Integer id,
+                                            const Integer value);
+    virtual bool        GetBooleanParameter(const Integer id) const;
+    virtual bool        SetBooleanParameter(const Integer id,
+                                            const bool value);
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
@@ -57,7 +64,7 @@ public:
                         GetStringArrayParameter(const Integer id) const; 
 
 protected:
-    // Core elements used for the targeter numerics
+    // Core data members used for the targeter numerics
     /// The number of variables in the targeting problem
     Integer                     variableCount;
     /// The number of goals in the targeting problem
@@ -105,16 +112,6 @@ protected:
     /// The targeter text file
     std::ofstream               textFile;
     
-    virtual void                RunNominal(void); 
-    virtual void                RunPerturbation(void);
-    virtual void                CalculateParameters(void);
-    virtual void                CheckCompletion(void);
-//    virtual void                RunComplete(void);
-
-    void                        FreeArrays(void);
-
-    virtual void                WriteToTextFile(void);
-    
     // Parameter IDs
     /// ID for the targeter text file name
     const Integer               solverTextFileID;
@@ -122,6 +119,24 @@ protected:
     const Integer               variableNamesID;
     /// ID for goal names
     const Integer               goalNamesID;
+    /// ID for the maximum number of iterations allowed
+    const Integer               maxIterationsID;
+    /// ID for the central differencing flag
+    const Integer               useCentralDifferencingID;
+    
+    // Methods
+    virtual void                RunNominal(void); 
+    virtual void                RunPerturbation(void);
+    virtual void                CalculateParameters(void);
+    virtual void                CheckCompletion(void);
+//    virtual void                RunComplete(void);
+
+    // Methods used to perform differential correction
+    void                        CalculateJacobian(void);
+    void                        InvertJacobian(void);
+
+    void                        FreeArrays(void);
+    virtual void                WriteToTextFile(void);
 };
 
 #endif // DifferentialCorrector_hpp
