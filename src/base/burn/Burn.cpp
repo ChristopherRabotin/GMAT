@@ -66,8 +66,8 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 /**
  * Constructs the Burn object (default constructor).
  * 
- * @param typeStr String text identifying the object type
- * @param nomme   Name for the object
+ * @param <typeStr> String text identifying the object type
+ * @param <nomme>   Name for the object
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const std::string &typeStr, const std::string &nomme) :
@@ -96,7 +96,7 @@ Burn::Burn(const std::string &typeStr, const std::string &nomme) :
 
 
 //------------------------------------------------------------------------------
-//  ~Burn(void)
+//  ~Burn()
 //------------------------------------------------------------------------------
 /**
  * Destroys the Burn object (destructor).
@@ -114,7 +114,7 @@ Burn::~Burn()
 /**
  * Constructs the Burn object (copy constructor).
  * 
- * @param b Object that is copied
+ * @param <b> Object that is copied
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
@@ -141,7 +141,7 @@ Burn::Burn(const Burn &b) :
 /**
  * Sets one burn object to match another (assignment operator).
  * 
- * @param b The object that is copied.
+ * @param <b> The object that is copied.
  * 
  * @return this object, with the parameters set as needed.
  */
@@ -174,7 +174,7 @@ Burn& Burn::operator=(const Burn &b)
 /**
  * Gets the name of the parameter with the input id.
  * 
- * @param id Integer id for the parameter.
+ * @param <id> Integer id for the parameter.
  * 
  * @return The string name of the parameter.
  */
@@ -193,7 +193,7 @@ std::string Burn::GetParameterText(const Integer id) const
 /**
  * Gets the id corresponding to a named parameter.
  * 
- * @param str Name of the parameter.
+ * @param <str> Name of the parameter.
  * 
  * @return The ID.
  */
@@ -227,7 +227,7 @@ Integer Burn::GetParameterID(const std::string &str) const
 /**
  * Gets the type of a parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The type of the parameter.
  */
@@ -247,7 +247,7 @@ Gmat::ParameterType Burn::GetParameterType(const Integer id) const
 /**
  * Gets the text description for the type of a parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The text description of the type of the parameter.
  */
@@ -264,7 +264,7 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 /**
  * Gets the value for a Real parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -290,8 +290,8 @@ Real Burn::GetRealParameter(const Integer id) const
 /**
  * Sets the value for a Real parameter.
  * 
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -321,12 +321,12 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 
 
 //------------------------------------------------------------------------------
-//  Real GetStringParameter(const Integer id) const
+//  std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Gets the value for a std::string parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -356,13 +356,13 @@ std::string Burn::GetStringParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-//  Real SetStringParameter(const Integer id, const Real value)
+//  bool SetStringParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter.
  * 
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -413,15 +413,15 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-//  Real SetStringParameter(const Integer id, const Real value,
+//  bool SetStringParameter(const Integer id, const Real value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a specific std::string element in an array.
  *
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
- * @param index Index for the element
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> Index for the element
  *
  * @return true on success
  */
@@ -442,7 +442,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
  * For the Burn classes, calls to this method get passed to the maneuver frame
  * manager when the user requests the frames that are available for the system.
  *
- * @param id The integer ID for the parameter.
+ * @param <id> The integer ID for the parameter.
  *
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
@@ -464,7 +464,7 @@ const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 /**
  * Accessor method used by Maneuver to pass in the spacecraft pointer
  * 
- * @param sat the Spacecraft
+ * @param <sat> the Spacecraft
  */
 //------------------------------------------------------------------------------
 void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
