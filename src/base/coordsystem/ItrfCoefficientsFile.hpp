@@ -46,8 +46,8 @@ class GMAT_API ItrfCoefficientsFile
 public:
 
    // default constructor
-   ItrfCoefficientsFile(const std::string &nutFileName, 
-               const std::string planFileName,
+   ItrfCoefficientsFile(const std::string &nutFileName = "NUTATION.DAT", 
+               const std::string planFileName = "NUT85.DAT",
                GmatItrf::NutationTerms  nutTerms  = GmatItrf::NUTATION_1996,
                GmatItrf::PlanetaryTerms planTerms = GmatItrf::PLANETARY_1996);
    // copy constructor
