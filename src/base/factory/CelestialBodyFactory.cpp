@@ -53,7 +53,7 @@ CelestialBody* CelestialBodyFactory::CreateCelestialBody(std::string ofType,
    else {
       return NULL;   // doesn't match any known type of command
    }
-
+}
 
 //------------------------------------------------------------------------------
 //  CelestialBodyFactory()
