@@ -19,6 +19,7 @@
 #include "GmatAppData.hpp"
 #include "MissionTree.hpp"
 #include "MessageInterface.hpp"
+#include "GmatTreeItemData.hpp"
 
 #include "Maneuver.hpp"
 
@@ -129,11 +130,11 @@ void MissionTree::AddDefaultMission()
 {
     wxTreeItemId resource = this->AddRoot(wxT("Mission"), -1, -1,
                                   new GmatTreeItemData(wxT("Mission"),
-                                  MISSIONS_FOLDER));
+                                  GmatTree::MISSIONS_FOLDER));
 
     // hard code mission in for now
     this->AppendItem(resource, wxT("Propagate"), -1, -1,
-          new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
+          new GmatTreeItemData(wxT("Propagate"), GmatTree::PROPAGATE_COMMAND));
 }
 
 //------------------------------------------------------------------------------
@@ -267,7 +268,7 @@ void MissionTree::OnAddBeforeManeuver(wxCommandEvent &event)
   item = GetPrevSibling(item);
   
   this->InsertItem(itemParent, item, wxT("Maneuver"), -1, -1,
-        new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
+        new GmatTreeItemData(wxT("Maneuver"), GmatTree::MANEUVER_COMMAND));
 }
 
 void MissionTree::OnAddBeforePropagate(wxCommandEvent &event)
@@ -278,7 +279,7 @@ void MissionTree::OnAddBeforePropagate(wxCommandEvent &event)
   item = GetPrevSibling(item);
   
   this->InsertItem(itemParent, item, wxT("Propagate"), -1, -1,
-        new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
+        new GmatTreeItemData(wxT("Propagate"), GmatTree::PROPAGATE_COMMAND));
 }
 
 void MissionTree::OnAddBeforeTarget(wxCommandEvent &event)
@@ -289,7 +290,7 @@ void MissionTree::OnAddBeforeTarget(wxCommandEvent &event)
   item = GetPrevSibling(item);
   
   this->InsertItem(itemParent, item, wxT("Target"), -1, -1,
-        new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
+        new GmatTreeItemData(wxT("Target"), GmatTree::TARGET_COMMAND));
 }
 
 void MissionTree::OnAddAfterManeuver(wxCommandEvent &event)
@@ -298,7 +299,7 @@ void MissionTree::OnAddAfterManeuver(wxCommandEvent &event)
   wxTreeItemId itemParent = GetItemParent(item);
 
   this->InsertItem(itemParent, item, wxT("Maneuver"), -1, -1,
-        new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
+        new GmatTreeItemData(wxT("Maneuver"), GmatTree::MANEUVER_COMMAND));
 }
 
 void MissionTree::OnAddAfterPropagate(wxCommandEvent &event)
@@ -307,7 +308,7 @@ void MissionTree::OnAddAfterPropagate(wxCommandEvent &event)
   wxTreeItemId itemParent = GetItemParent(item);
   
   this->InsertItem(itemParent, item, wxT("Propagate"), -1, -1,
-        new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
+        new GmatTreeItemData(wxT("Propagate"), GmatTree::PROPAGATE_COMMAND));
 }
 
 void MissionTree::OnAddAfterTarget(wxCommandEvent &event)
@@ -316,7 +317,7 @@ void MissionTree::OnAddAfterTarget(wxCommandEvent &event)
   wxTreeItemId itemParent = GetItemParent(item);
   
   this->InsertItem(itemParent, item, wxT("Target"), -1, -1,
-        new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
+        new GmatTreeItemData(wxT("Target"), GmatTree::TARGET_COMMAND));
 }
 
 

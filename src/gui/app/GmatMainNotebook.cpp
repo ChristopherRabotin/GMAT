@@ -21,6 +21,7 @@
 #include "PropagatorSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
+#include "GmatTreeItemData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -86,55 +87,55 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
     {
       curPages->Append( (wxObject *) item);
       
-      if (dataType == UNIVERSE_FOLDER)
+      if (dataType == GmatTree::UNIVERSE_FOLDER)
       {
         sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
       }
       // invisible for build 2
-//      else if ((dataType == DEFAULT_BODY)   ||
-//               (dataType == CREATED_BODY))
+//      else if ((dataType == GmatTree::DEFAULT_BODY)   ||
+//               (dataType == GmatTree::CREATED_BODY))
 //      {
 //         sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
 //      }
-      else if ((dataType == DEFAULT_SPACECRAFT )  ||
-               (dataType == CREATED_SPACECRAFT ))
+      else if ((dataType == GmatTree::DEFAULT_SPACECRAFT )  ||
+               (dataType == GmatTree::CREATED_SPACECRAFT ))
       {
         sizer->Add( new SpacecraftPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
-      else if ((dataType == DEFAULT_PROPAGATOR)   ||
-               (dataType == CREATED_PROPAGATOR))
+      else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
+               (dataType == GmatTree::CREATED_PROPAGATOR))
       {
         sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
       }
       //loj: commented out
-      // else if ((dataType == DEFAULT_REPORT)   ||
-      //          (dataType == CREATED_REPORT))
-      else if ((dataType == DEFAULT_REPORT_FILE)   ||
-               (dataType == CREATED_REPORT_FILE))
+      // else if ((dataType == GmatTree::DEFAULT_REPORT)   ||
+      //          (dataType == GmatTree::CREATED_REPORT))
+      else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
+               (dataType == GmatTree::CREATED_REPORT_FILE))
       {
           //loj: ReportFileSetupPanel is not ready yet.
           // sizer->Add( new ReportFileSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
       }
-      else if ((dataType == DEFAULT_XY_PLOT)   ||
-               (dataType == CREATED_XY_PLOT))
+      else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
+               (dataType == GmatTree::CREATED_XY_PLOT))
       {
         sizer->Add( new XyPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
       }
-      else if ((dataType == DEFAULT_OPENGL_PLOT)   ||
-               (dataType == CREATED_OPENGL_PLOT))
+      else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
+               (dataType == GmatTree::CREATED_OPENGL_PLOT))
       {
           //loj: OpenGlSetupPanel is not ready yet.
           // sizer->Add( new OpenGlPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
       }
-      else if (dataType == DEFAULT_PROPAGATE_COMMAND)
+      else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
       {
         sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
-      else if (dataType == PROPAGATE_COMMAND)
+      else if (dataType == GmatTree::PROPAGATE_COMMAND)
       {
         sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
-      else if (dataType == MANEUVER_COMMAND)
+      else if (dataType == GmatTree::MANEUVER_COMMAND)
       {
         sizer->Add( new ManeuverSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
@@ -190,22 +191,22 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
   bool result = TRUE;
   int dataType = item->GetDataType();
 
-  if ((dataType == RESOURCES_FOLDER)            ||
-      (dataType == SPACECRAFT_FOLDER)           ||
-      (dataType == FORMATIONS_FOLDER)           ||
-      (dataType == CONSTELLATIONS_FOLDER)       ||
-      (dataType == BURNS_FOLDER)                ||
-      (dataType == PROPAGATORS_FOLDER)          ||
-      (dataType == SOLVERS_FOLDER)              ||
-      (dataType == SUBSCRIBERS_FOLDER)          ||
-      (dataType == SUBSCRIPTS_FOLDER)           ||
-      (dataType == INTERFACES_FOLDER)           ||
-      (dataType == DEFAULT_BODY)                ||
-      (dataType == CREATED_BODY)                ||
-      (dataType == DEFAULT_FORMATION_FOLDER)    ||
-      (dataType == CREATED_FORMATION_FOLDER)    ||
-      (dataType == DEFAULT_CONSTELLATION_FOLDER)||
-      (dataType == CREATED_CONSTELLATION_FOLDER))
+  if ((dataType == GmatTree::RESOURCES_FOLDER)            ||
+      (dataType == GmatTree::SPACECRAFT_FOLDER)           ||
+      (dataType == GmatTree::FORMATIONS_FOLDER)           ||
+      (dataType == GmatTree::CONSTELLATIONS_FOLDER)       ||
+      (dataType == GmatTree::BURNS_FOLDER)                ||
+      (dataType == GmatTree::PROPAGATORS_FOLDER)          ||
+      (dataType == GmatTree::SOLVERS_FOLDER)              ||
+      (dataType == GmatTree::SUBSCRIBERS_FOLDER)          ||
+      (dataType == GmatTree::SUBSCRIPTS_FOLDER)           ||
+      (dataType == GmatTree::INTERFACES_FOLDER)           ||
+      (dataType == GmatTree::DEFAULT_BODY)                ||
+      (dataType == GmatTree::CREATED_BODY)                ||
+      (dataType == GmatTree::DEFAULT_FORMATION_FOLDER)    ||
+      (dataType == GmatTree::CREATED_FORMATION_FOLDER)    ||
+      (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER)||
+      (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER))
   {
     result = FALSE;
   }
