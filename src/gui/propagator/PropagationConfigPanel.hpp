@@ -17,17 +17,7 @@
 #define PropagationConfigPanel_hpp
 
 // gui includes
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/checkbox.h>
-#include <wx/button.h>
-#include <wx/variant.h>
-#include <wx/string.h>
-
 #include "gmatwxdefs.hpp"
-//loj: 3/3/04 commented out for build2
 //#include "ViewTextFrame.hpp"
 //#include "DocViewFrame.hpp"
 //#include "TextEditView.hpp"
@@ -45,6 +35,7 @@
 #include "PropSetup.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
+#include "PointMassForce.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "Planet.hpp"
@@ -55,15 +46,7 @@ public:
     // constructor
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
-private:
-
-    enum
-    {
-        RKV89_ID = 0,
-        RKN68_ID,
-        RKF56_ID
-    };
-    
+private:             
     wxStaticText *integratorStaticText;
     wxStaticText *setting1StaticText;
     wxStaticText *setting2StaticText;
@@ -120,17 +103,28 @@ private:
     
     wxString integratorString;
     wxString primaryBodyString;
-    std::string propSetupName; //loj: 3/3/04 changed from wxString
+    wxString gravityFieldString;
+    wxString earthDegreeString;
+    wxString earthOrderString;
+    wxString sunDegreeString;
+    wxString sunOrderString;
+    wxString moonDegreeString;
+    wxString moonOrderString;
+
+    std::string propSetupName;
     std::string newPropName;
     
-    //loj: 3/3/04 commented out for build2
-    //wxDocManager *mDocManager;
-    //wxDocTemplate *mDocTemplate;
-    //ViewTextFrame *mTextFrame;
+    wxArrayString primaryBodiesArray;
+    wxArrayString savedBodiesArray;
+    wxArrayString pointmassBodiesArray;    
+    wxArrayString primaryBodiesGravityArray;
+    
+//    wxDocManager *mDocManager;
+//    wxDocTemplate *mDocTemplate;
+//    ViewTextFrame *mTextFrame;
     
     Integer numOfIntegrators;
     Integer numOfBodies;
-    Integer numOfPrimaryBodies;
     Integer numOfAtmosTypes;
     Integer numOfForces;
     Integer numOfMagFields;
@@ -140,14 +134,7 @@ private:
     
     bool useSRP;
     bool isForceModelChanged;
-
-    wxArrayString integratorArray;
-    wxArrayString primaryBodiesArray;
-    wxArrayString pointmassBodiesArray;
-    wxArrayString allBodiesArray;
-    //wxArrayString earthParam;
-    //wxArrayString sunParam;
-    //wxArrayString moonParam;
+    bool isIntegratorChanged;
     
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
@@ -156,17 +143,20 @@ private:
     PropSetup      *thePropSetup;
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
+    PointMassForce *thePointMass;
     SolarSystem    *theSolarSystem;
     CelestialBody  *theEarth;  
     CelestialBody  *theSun;    
-    CelestialBody  *theMoon;    
+    CelestialBody  *theMoon; 
+    std::vector<PointMassForce *> thePMForces;
+    std::vector<Planet *> thePlanets;
    
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
     void LoadData();
     void SaveData();
-    void DisplayIntegratorData(bool integratorChanged);
+    void DisplayIntegratorData();
     void DisplayPrimaryBodyData();
     void DisplayForceData(); //loj: 2/11/04 added
     void DisplayGravityFieldData();
@@ -175,8 +165,8 @@ private:
     void DisplayPointMassData();
     void DisplaySRPData();
     ForceModel* UpdateForceModel();
-    //void CreateScript();
-    //wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
+//    void CreateScript();
+//    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Text control event method
     void OnIntegratorTextUpdate();

@@ -135,14 +135,14 @@ public:
     virtual bool RawStep(void) = 0;
 
     virtual bool RawStep(Real dt);
-
-protected:
-
+    
     enum
     {
         STEP_SIZE = 0,        /// Stepsize for the propagation
         PropagatorParamCount  /// Count of the parameters for this class
     };
+
+protected:
     
     // Start with the parameter IDs and associated strings
     static const std::string PARAMETER_TEXT[PropagatorParamCount];

@@ -149,9 +149,7 @@ public:
     virtual void Initialize(void) = 0;
     
     virtual bool RawStep(void) = 0;
-
-protected:
-
+    
     enum
     {
         ACCURACY = PropagatorParamCount,  // Accuracy parameter for Integrators
@@ -162,6 +160,8 @@ protected:
         MAX_STEP_ATTEMPTS,                // Number of attempts to take before giving up
         IntegratorParamCount
     };
+
+protected:
     
     // Start with the parameter IDs and associates strings
     static const std::string PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount];
