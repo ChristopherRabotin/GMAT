@@ -1,0 +1,18 @@
+# Project:    GMAT
+# Module:     Makefile.mac for executive directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/13
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = MessageInterface.cpp Moderator.cpp Publisher.cpp Sandbox.cpp \
+	SandboxException.cpp
+#
+TESTFLAGS = -D__CONSOLE_APP__
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
