@@ -413,7 +413,7 @@ bool Parameter::Validate()
       throw ParameterException("Parameter: Validate() should be implemented "
                                "for Parameter Type: " + GetTypeName() + "\n");
 
-   return false;
+   return true; // loj: 9/23/04 There is nothing to validate for USER_PARAM
 }
 
 
@@ -568,6 +568,11 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
+#if DEBUG_PARAMETER
+   MessageInterface::ShowMessage("Parameter::SetStringParameter() id=%d, value=%s\n",
+                                 id, value.c_str());
+#endif
+   
    switch (id)
    {
    case OBJECT: //loj: 9/13/04 only spacecraft is allowed for now
@@ -596,8 +601,8 @@ bool Parameter::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
 #if DEBUG_PARAMETER
-   MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
-                                 "label = " + label + ", value = " + value + "\n");
+   MessageInterface::ShowMessage("Parameter::SetStringParameter() label=%s value=%s\n",
+                                 label.c_str(), value.c_str());
 #endif
    
    return SetStringParameter(GetParameterID(label), value);
