@@ -386,6 +386,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                      FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Save Script"));
    currentX += width + 5;
+   toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, FALSE);
    toolBar->AddSeparator();
 
    toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, *bitmaps[12], 
@@ -409,13 +410,20 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                     (wxObject *) NULL, _T("Print"));
    currentX += width + 5;
    toolBar->AddSeparator();
+
+   toolBar->EnableTool(3, FALSE);
+   toolBar->EnableTool(4, FALSE);
+   toolBar->EnableTool(5, FALSE);
+   toolBar->EnableTool(6, FALSE);
     
    toolBar->AddTool(TOOL_RUN, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Run"));
    toolBar->AddTool(TOOL_PAUSE, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Pause"));
+   toolBar->EnableTool(TOOL_PAUSE, FALSE);
    toolBar->AddTool(TOOL_STOP, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Stop"));
+   toolBar->EnableTool(TOOL_STOP, FALSE);
 
 //   toolBar->AddSeparator();
 //   toolBar->AddTool(TOOL_CLOSE_TABS, *bitmaps[11], wxNullBitmap, FALSE,
@@ -505,6 +513,12 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Append(MENU_PROJECT_PRINT, wxT("Print"), wxT(""), FALSE);
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
+   
+   fileMenu->Enable(MENU_PROJECT_PREFERENCES, FALSE);
+   fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
+   fileMenu->Enable(MENU_INFORMATION, FALSE);
+   fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
+
 
 //   scriptMenu->Append(MENU_SCRIPT_OPEN_EDITOR, wxT("Open Editor"), wxT(""), FALSE);
 //   scriptMenu->Append(MENU_SCRIPT_BUILD, wxT("Build Script from Object"), wxT(""), FALSE);
@@ -515,7 +529,13 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    editMenu->AppendSeparator();
    editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
-  
+
+   editMenu->Enable(MENU_EDIT_CUT, FALSE);
+   editMenu->Enable(MENU_EDIT_COPY, FALSE);
+   editMenu->Enable(MENU_EDIT_PASTE, FALSE);
+   editMenu->Enable(MENU_EDIT_RESOURCES, FALSE);
+   editMenu->Enable(MENU_EDIT_MISSION, FALSE);
+        
    parametersMenu->Append(MENU_PARAMETERS_PROP_CONFIG,
                           wxT("Propagation Configuration"), wxT(""), FALSE);
     
@@ -539,13 +559,27 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
                           wxT("Setup Solar Electric Conversion"), wxT(""),
                           FALSE);
 
+   parametersMenu->Enable(MENU_PARAMETERS_PROP_CONFIG, FALSE);     
+   parametersMenu->Enable(MENU_PARAMETERS_PROPAGATOR, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_LAUNCH_MODEL, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_INJECTION_BURN_MODEL, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_RAD, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_ORBIT_INFO, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_ATTITUDE_MODES, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_SAILS, FALSE);
+   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_ELEC_CONV, FALSE);
+                     
    orbitFileMenu->Append(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
                          wxT("Read/OpenGl Plot Trajectory File"), wxT(""), FALSE);
    orbitFileMenu->Append(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
                          wxT("Read/XY Plot Trajectory File (time vs position)"), wxT(""), FALSE);
    orbitFileMenu->Append(MENU_ORBIT_FILES_EPHEM_FILE,
                          wxT("Read/Plot Ephemeris File"), wxT(""), FALSE);
-    
+   
+   orbitFileMenu->Enable(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, FALSE);
+   orbitFileMenu->Enable(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, FALSE);
+   orbitFileMenu->Enable(MENU_ORBIT_FILES_EPHEM_FILE, FALSE);
+      
 //   variablesMenu->Append(MENU_VARIABLES_CREATE, wxT("Create"), wxT(""), FALSE); 
 //   variablesMenu->Append(MENU_VARIABLES_EVALUATE, wxT("Evaluate"), wxT(""),
 //                         FALSE);
@@ -565,11 +599,16 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //   viewsMenu->Append(MENU_VIEWS_CLOSE, wxT("Close Plots"), wxT(""), FALSE); 
 
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
+
+   toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
+
     
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
-   
+ 
+   helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
+  
    menuBar->Append(fileMenu, wxT("File"));
 //   menuBar->Append(scriptMenu, wxT("Script"));
    menuBar->Append(editMenu, wxT("Edit"));
