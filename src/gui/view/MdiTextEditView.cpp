@@ -20,7 +20,7 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
-#include "GmatAppData.hpp" // for GuiInterpreter pointer
+#include "GmatAppData.hpp"  // for GuiInterpreter pointer
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in setup.h!
@@ -88,10 +88,14 @@ bool MdiTextEditView::OnClose(bool deleteWindow)
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
+    //GmatAppData::theMessageWindow->ClearText();
     wxString filename = GetDocument()->GetFilename();
     
     bool status = GmatAppData::GetGuiInterpreter()->
         InterpretScript(std::string(filename.c_str()));
+
+    // Update ResourceTree
+    GmatAppData::GetResourceTree()->UpdateResources();
 }
 
 //------------------------------------------------------------------------------
@@ -99,5 +103,6 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
+    //GmatAppData::theMessageWindow->ClearText();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }
