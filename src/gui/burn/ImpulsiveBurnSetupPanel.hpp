@@ -17,17 +17,8 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
 #include "Burn.hpp"
-
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/checkbox.h>
-#include "wx/notebook.h"
-#include <wx/button.h>
-#include <wx/grid.h>
-#include "wx/radiobut.h"
 
 class ImpulsiveBurnSetupPanel : public wxPanel
 {
@@ -38,7 +29,6 @@ public:
 private:
     // member functions
     void CreateBurn(wxWindow *parent, const wxString &burnName);
-//    void CreateFinite(wxWindow *parent);
 
     void AddVector(wxWindow *parent);
     void OnVectorChange();
@@ -63,9 +53,6 @@ private:
     wxComboBox *vectorCB;
     wxComboBox *coordCB;
     
-    wxNotebook *mainNotebook;
-    wxNotebookSizer * sizer;
-
     wxPanel *vectorPanel;
 
     wxStaticText *description1;
@@ -75,10 +62,6 @@ private:
     wxStaticText *label2;
     wxStaticText *label3;
     
-    wxStaticBox *vectorBox;
-    wxStaticBoxSizer *vectorSizer;
-
-    wxTextCtrl *nameField;
     wxTextCtrl *textCtrl1;
     wxTextCtrl *textCtrl2;
     wxTextCtrl *textCtrl3;
@@ -89,7 +72,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 70000,
+        ID_TEXT = 81000,
         ID_TEXTCTRL,
 
         ID_CB_COORD,
