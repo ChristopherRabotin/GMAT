@@ -5,6 +5,7 @@
 # Modified:   2004/01/14 - Added PlotInterface.cpp
 #             2004/02/20 - Adjusted the flag for wxMac/wxWindows 
 #             2004/04/12 - Added FileManager.cpp
+#             2004/07/30 - W. Shoan - added PublisherException
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
@@ -23,7 +24,7 @@ GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
 #
 # Source file for creating new library
 SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
-	Publisher.cpp Sandbox.cpp SandboxException.cpp
+	Publisher.cpp PublisherException.cpp Sandbox.cpp SandboxException.cpp
 
 #
 #TESTFLAGS = -D__CONSOLE_APP__
