@@ -238,6 +238,15 @@ void Date::ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
 }
 
 //------------------------------------------------------------------------------
+// bool IsValid() const
+//------------------------------------------------------------------------------
+bool Date::IsValid() const
+{
+   return(IsValidTime(yearD,monthD,dayD,GetHour(),GetMinute(),GetSecond()));
+}
+
+
+//------------------------------------------------------------------------------
 // Integer GetNumData() const
 //------------------------------------------------------------------------------
 Integer Date::GetNumData() const

@@ -57,6 +57,8 @@ public:
                                 Integer& hour, Integer& minute, Real& second) const;
     void ToYearMonDayHourMinSec(Real& ymd, Real& hms) const;
 
+    bool IsValid() const;
+
     Integer GetNumData() const;
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
