@@ -55,9 +55,9 @@
 #endif
 
 
-typedef double Real;              // 8 byte float
-typedef int    Integer;           // 4 byte signed integer
-
+typedef double          Real;              // 8 byte float
+typedef int             Integer;           // 4 byte signed integer
+typedef unsigned char   Byte;              // 1 byte
 typedef std::vector<Real> RealArray;
 typedef std::vector<Integer> IntegerArray;
 typedef std::vector<std::string> StringArray;
