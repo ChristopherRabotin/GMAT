@@ -38,10 +38,6 @@ public:
 
    // default constructor
    BodyFixedAxes(const std::string &itsName = "");
-   // constructor that sets the filenames
-   BodyFixedAxes(const std::string eopFile,
-                 const std::string coefFile,
-                 const std::string &itsName = "");
    // copy constructor
    BodyFixedAxes(const BodyFixedAxes &bfAxes);
    // operator = for assignment
@@ -74,6 +70,7 @@ public:
    virtual GmatBase*       Clone(void) const;
 
    // Parameter access methods - overridden from GmatBase
+   /*
    virtual std::string     GetParameterText(const Integer id) const;     
    virtual Integer         GetParameterID(const std::string &str) const; 
    virtual Gmat::ParameterType
@@ -85,43 +82,33 @@ public:
    virtual std::string     GetStringParameter(const std::string &label) const;
    virtual bool            SetStringParameter(const std::string &label, 
                                               const std::string &value);
+    */
    
    
 protected:
 
    enum
    {
-      EOP_FILENAME = DynamicAxesParamCount,
-      COEFF_FILENAME,
-      BodyFixedAxesParamCount,
+      BodyFixedAxesParamCount = DynamicAxesParamCount,
    };
    
-   static const std::string PARAMETER_TEXT[BodyFixedAxesParamCount - 
-                                           DynamicAxesParamCount];
+   //static const std::string PARAMETER_TEXT[BodyFixedAxesParamCount - 
+   //                                        DynamicAxesParamCount];
    
-   static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
-                                                   DynamicAxesParamCount];
+   //static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
+   //                                                DynamicAxesParamCount];
    
    static const Real  JD_OF_JANUARY_1_1997 = 2450449.5;  // correct????
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
 
-   
-   std::string               eopFileName;
-   std::string               itrfFileName;
          
    EopFile                   *eop;
    ItrfCoefficientsFile      *itrf;
    
-   //Rmatrix                   pm;
    std::vector<IntegerArray> a, ap;
    Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
    
-   // methods from Steve Queen (C code - not yet fully converted to c++
-   // and GMAT style)
-   //Reduction redux96_init(const char *fname_coeff, const char *fname_eop, 
-   //                       int nut, int nutpl, Real jday );
-   //void redux96_rtq( Reduction *ITRF, Real Rj2000[], Real Ritrf[], Real jday );
    
 };
 #endif // BodyFixedAxes_hpp
