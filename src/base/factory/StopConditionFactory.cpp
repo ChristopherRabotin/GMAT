@@ -21,6 +21,7 @@
 #include "Factory.hpp"
 #include "StopConditionFactory.hpp"
 #include "SingleValueStop.hpp"   // for SingleValueStop class
+#include "ApoapsisStop.hpp"      // for ApoapsisStop class
 
 
 //---------------------------------
@@ -45,6 +46,8 @@ StopCondition* StopConditionFactory::CreateStopCondition(std::string ofType,
 {
    if (ofType == "SingleValueStop")
       return new SingleValueStop(withName);
+   if (ofType == "ApoapsisStop")
+      return new ApoapsisStop(withName);
    return NULL;
 }
 
@@ -63,7 +66,10 @@ StopConditionFactory::StopConditionFactory() :
 Factory(Gmat::STOP_CONDITION)
 {
    if (creatables.empty())
+   {
       creatables.push_back("SingleValueStop");
+      creatables.push_back("ApoapsisStop");
+   }
 }
 
 //------------------------------------------------------------------------------
