@@ -579,16 +579,14 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
       if (find(pmodes.begin(), pmodes.end(), value) != pmodes.end()) {
          currentPropMode = value;
          for (Integer i = 0; i < PROP_MODE_COUNT; ++i)
-            if (value == pmodes[i])
+            if (value == pmodes[i]) {
                currentMode = (PropModes)i;
+               return true;
+            }
       }
    }
  
    if (id == satNameID) {
-//       if (satName.empty())
-//          satName.push_back(value);
-//       else                            /// @todo: Generalize for multiple sats
-//          satName[0] = value;
       Integer propNum = propName.size()-1;
       satName[propNum]->push_back(value);
       return true;
@@ -596,12 +594,32 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == propNameID) {
       propName.push_back(value);
+      satName.push_back(new StringArray);
       return true;
    }
  
    return GmatCommand::SetStringParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
+bool Propagate::SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index)
+{
+   if (id == satNameID) {
+      if (index < (Integer)propName.size())
+         satName[index]->push_back(value);
+      else
+         throw CommandException("Propagate::SetStringParameter Attempting to "
+                         "assign a spacecraft without an associated PropSetup");
+      return true;
+   }
+
+   return GmatCommand::SetStringParameter(id, value, index);
+}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
@@ -639,6 +657,32 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id,
 
    return GmatCommand::GetStringArrayParameter(id, index);
 }
+
+
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+bool Propagate::TakeAction(const std::string &action, 
+                           const std::string &actionData)
+{
+   if (action == "Clear") {
+      for (Integer i = 0; i < (Integer)satName.size(); ++i)
+         delete satName[i];
+      satName.clear();
+      stopSatNames.clear();
+      propName.clear();
+      prop.clear();
+      sats.clear();
+      for (unsigned int i=0; i<stopWhen.size(); i++)
+         delete stopWhen[i];
+      stopWhen.clear();
+      stopSats.clear();
+      return true;
+   }
+   
+   return GmatCommand::TakeAction(action, actionData);
+}
+
 
 //------------------------------------------------------------------------------
 // void InterpretAction(void)

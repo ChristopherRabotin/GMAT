@@ -80,11 +80,16 @@ public:
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
    virtual const StringArray& 
                        GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& 
                        GetStringArrayParameter(const Integer id, 
                                                const Integer index) const; 
+   virtual bool        TakeAction(const std::string &action,  
+                                  const std::string &actionData = "");
     
 
    // Methods used to run the command
