@@ -26,7 +26,7 @@ class GMAT_API PlanetaryEphemException : public BaseException
 {
 public:
 
-   PlanetaryEphemException(std::string details = "");
+   PlanetaryEphemException(const std::string &details = "");
 
 protected:
 

@@ -31,7 +31,7 @@
  */
 //------------------------------------------------------------------------------
 
-PlanetaryEphemException::PlanetaryEphemException(std::string details) :
+PlanetaryEphemException::PlanetaryEphemException(const std::string &details) :
 BaseException  ("PlanetaryEphem (sub)class exception: ", details)
 {
 
