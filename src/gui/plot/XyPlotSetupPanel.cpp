@@ -291,40 +291,50 @@ void XyPlotSetupPanel::Create()
 void XyPlotSetupPanel::LoadData()
 {
     // load data from the core engine
-    
-    //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
-    
-    plotCheckBox->SetValue(theSubscriber->IsActive());
-    
-    // get X parameter
-    wxString *xParam = new wxString[1];
-    xParam[0] = theSubscriber->GetStringParameter("XParamName").c_str();
-    if (!xParam[0].IsSameAs(""))
-    {
-        mNumXParams = 1;
-        xSelectedListBox->Set(1, xParam);
-    }
-    
-    // get Y parameters
-    StringArray yParamList = theSubscriber->GetStringArrayParameter("YParamNameList");
-    mNumYParams = yParamList.size();
-    //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
-    //                              mNumYParams);
 
-    delete xParam;
-    
-    if (mNumYParams > 0)
+    //loj: 3/18/04 added try block
+    try
     {
-        wxString *yParam = new wxString[mNumYParams];
-        for (int i=0; i<mNumYParams; i++)
+        //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
+    
+        plotCheckBox->SetValue(theSubscriber->IsActive());
+    
+        // get X parameter
+        wxString *xParam = new wxString[1];
+        xParam[0] = theSubscriber->GetStringParameter("IndVar").c_str();
+        MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParam = %s\n",
+                                      xParam[0].c_str());
+        if (!xParam[0].IsSameAs(""))
         {
-            //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() y param = %s\n",
-            //                              yParamList[i].c_str());
-            yParam[i] = yParamList[i].c_str();
+            mNumXParams = 1;
+            xSelectedListBox->Set(1, xParam);
         }
     
-        ySelectedListBox->Set(mNumYParams, yParam);
-        delete yParam;
+        // get Y parameters
+        StringArray yParamList = theSubscriber->GetStringArrayParameter("DepVarList");
+        mNumYParams = yParamList.size();
+        //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
+        //                              mNumYParams);
+
+        delete xParam;
+    
+        if (mNumYParams > 0)
+        {
+            wxString *yParam = new wxString[mNumYParams];
+            for (int i=0; i<mNumYParams; i++)
+            {
+                //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() y param = %s\n",
+                //                              yParamList[i].c_str());
+                yParam[i] = yParamList[i].c_str();
+            }
+    
+            ySelectedListBox->Set(mNumYParams, yParam);
+            delete yParam;
+        }
+    }
+    catch (...)
+    {
+        MessageInterface::ShowMessage("XyPlotSetupPanel:LoadData() Unknown error occurred!\n");
     }
 }
 
@@ -340,7 +350,7 @@ void XyPlotSetupPanel::SaveData()
     // set X parameter
     if (mXParamChanged)
     {
-        if (xSelectedListBox->GetCount() == 0)
+        if (xSelectedListBox->GetCount() == 0 && plotCheckBox->IsChecked())
         {
             wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
             theSubscriber->Activate(false);
@@ -348,7 +358,7 @@ void XyPlotSetupPanel::SaveData()
         else
         {
             theSubscriber->
-                SetStringParameter("XParamName",
+                SetStringParameter("IndVar",
                                    std::string(xSelectedListBox->GetString(0).c_str()));
         }
 
@@ -361,7 +371,7 @@ void XyPlotSetupPanel::SaveData()
         mNumYParams = ySelectedListBox->GetCount();
         int numYParams = 0;
         
-        if (mNumYParams == 0)
+        if (mNumYParams == 0 && plotCheckBox->IsChecked())
         {
             wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
             theSubscriber->Activate(false);
@@ -383,10 +393,10 @@ void XyPlotSetupPanel::SaveData()
             theSubscriber->SetBooleanParameter("ClearYParamList", true);
             for (int i=0; i<numYParams; i++)
             {
-                //MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() YParamName = %s\n",
+                //MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() DepVar = %s\n",
                 //                              ySelectedListBox->GetString(i).c_str());
                 theSubscriber->
-                    SetStringParameter("YParamName",
+                    SetStringParameter("DepVar",
                                        std::string(ySelectedListBox->GetString(i).c_str()));
             }
         }
