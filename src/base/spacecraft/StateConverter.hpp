@@ -21,18 +21,17 @@
 #define StateConverter_hpp
 
 // #include "Converter.hpp"
-#include "SolarSystem.hpp"     // include new heaaer
+#include "SolarSystem.hpp" 
 #include "CelestialBody.hpp"
 #include "A1Date.hpp"
 #include "A1Mjd.hpp"
 #include "UtcDate.hpp"
 // #include "Cartesian.hpp"
 // #include "Keplerian.hpp"
-#include "CoordUtil.hpp"      // include new heaaer
-#include "SphericalOne.hpp"
-#include "SphericalTwo.hpp"
+#include "CoordUtil.hpp" 
+#include "SphericalAZFPA.hpp"
+ #include "SphericalRADEC.hpp"
 #include "Rvector6.hpp"
-#include "Rvector3.hpp"
 
 class GMAT_API StateConverter 
 {
