@@ -16,6 +16,7 @@
  * Defines operation of MessageWindow class.
  */
 //------------------------------------------------------------------------------
+#include <iomanip>
 #include "MessageWindow.hpp"
 #include "MessageInterface.hpp" // for ShowMessage()
 
@@ -41,8 +42,10 @@ MessageWindow::MessageWindow(const std::string &name)
     : Subscriber      ("MessageWindow", name),
       precision       (10)
 {
-   // GmatBase data
+    // GmatBase data
     parameterCount = MessageWindowParamCount;
+    dstream.precision(precision);
+    dstream.setf(std::ios::fixed);
 }
 
 //------------------------------------------------------------------------------
@@ -58,7 +61,6 @@ MessageWindow::~MessageWindow(void)
 //------------------------------------------------------------------------------
 bool MessageWindow::Distribute(int len)
 {
-    dstream.precision(precision);
     dstream.str("");
     
     if (len == 0)
@@ -67,6 +69,7 @@ bool MessageWindow::Distribute(int len)
         for (int i = 0; i < len; ++i)
             dstream << data[i];
 
+    dstream.flush();
     MessageInterface::ShowMessage(dstream.str());
     return true;
 }
@@ -75,9 +78,9 @@ bool MessageWindow::Distribute(int len)
 // bool Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 bool MessageWindow::Distribute(const Real * dat, Integer len)
-{       
-    dstream.precision(precision);
+{
     dstream.str("");
+    dstream.flush();
     
     if (len == 0)
     {
@@ -90,8 +93,11 @@ bool MessageWindow::Distribute(const Real * dat, Integer len)
         
         dstream << dat[len-1] << std::endl;
     }
-    
+
     MessageInterface::ShowMessage(dstream.str());
+    //dstream.str("");
+    //dstream << "line # " << MessageInterface::GetNumberOfMessageLines() << std::endl;
+    //MessageInterface::ShowMessage(dstream.str());
     return true;
 }
 
@@ -174,7 +180,10 @@ Integer MessageWindow::SetIntegerParameter(const Integer id, const Integer value
     {
     case PRECISION:
         if (value > 0)
+        {
             precision = value;
+            dstream.precision(precision);
+        }
         return precision;
     default:
         return Subscriber::GetIntegerParameter(id);
