@@ -20,6 +20,7 @@
 #ifndef Spacecraft_hpp
 #define Spacecraft_hpp
 
+#include <valarray>
 #include "SpaceObject.hpp"
 #include "SolarSystem.hpp"
 #include "Rvector6.hpp"
@@ -33,21 +34,6 @@
 
 class GMAT_API Spacecraft : public SpaceObject
 {
-   enum SC_Param_ID 
-   {
-      //EPOCH_ID = SpaceObjectParamCount, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
-      ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
-      ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
-      DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
-      REFLECT_COEFF_ID, 
-      
-      // Parameters added by DJC, 11/13/04
-      FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
-      
-      /*NO_NAME,*/    // Someone else did this one -- don't blame me!
-      SC_ParameterIDs
-   };
-   
 public:
    // Default constructor
    Spacecraft();
@@ -132,21 +118,22 @@ public:
    virtual SolarSystem* GetSolarSystem() const;
    virtual void SetSolarSystem(SolarSystem *ss);
    
-   // Default values for spacecraft 
-   static const Real EPOCH; 
-   static const Real ELEMENT1; 
-   static const Real ELEMENT2; 
-   static const Real ELEMENT3; 
-   static const Real ELEMENT4; 
-   static const Real ELEMENT5; 
-   static const Real ELEMENT6; 
-   static const std::string DATEFORMAT; 
-   static const std::string STATE_TYPE; 
-   static const std::string REF_BODY; 
-   static const std::string REF_FRAME; 
-   static const std::string REF_PLANE; 
-
 protected:
+   enum SC_Param_ID 
+   {
+      // EPOCH_ID = SpaceObjectParamCount, 
+      ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, 
+      ELEMENT4_ID, ELEMENT5_ID, ELEMENT6_ID, 
+      STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
+      DRY_MASS_ID,DATE_FORMAT_ID, CD_ID, CR_ID, DRAG_AREA_ID, SRP_AREA_ID,
+      FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
+      SC_ParamCount
+   };
+
+   // Spacecraft parameter types
+   static const Gmat::ParameterType 
+          PARAMETER_TYPE[SC_ParamCount - SpaceObjectParamCount];
+   
    // Declare protetced method data of internal spacecraft information
    // Real           epoch;      // Moved to SpaceObject  
    // DJC:  7/21/04 Update for the state vector used in propagation
@@ -163,29 +150,6 @@ protected:
    std::string    refBody; 
    std::string    refFrame;   
    std::string    refPlane; 
-   //Integer        epochID;
-   Integer        state1ID;
-   Integer        state2ID;
-   Integer        state3ID;
-   Integer        state4ID;
-   Integer        state5ID;
-   Integer        state6ID;       
-   Integer        subTypeID;     // @todo will add it later
-   Integer        stateTypeID;
-   Integer        refBodyID; 
-   Integer        refFrameID; 
-   Integer        refPlaneID; 
-   Integer        dryMassID;
-   Integer        dateFormatID;
-   Integer        coeffDragID;
-   Integer        dragAreaID;
-   Integer        srpAreaID;
-   Integer        reflectCoeffID;
-   
-   // Parameters added by DJC, 11/13/04
-   Integer        fuelTankID;
-   Integer        thrusterID;
-   Integer        totalMassID;
    
    // for non-internal spacecraft information
    SolarSystem    *solarSystem;
