@@ -128,6 +128,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
        wxLogWarning(wxT(wxString(msg.c_str())));
        wxLog::FlushActive();
        break;
+   case Gmat::INFO_:
+       (void)wxMessageBox(wxT(wxString(msg.c_str())),
+                          wxT("Information"));
+       break;
        //loj: there should be more
    default:
        break;
