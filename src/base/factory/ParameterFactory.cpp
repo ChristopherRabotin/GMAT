@@ -28,10 +28,6 @@
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 
-//#include "SMA.hpp"
-//#include "Ecc.hpp"
-//#include "Inc.hpp"
-
 //---------------------------------
 //  public methods
 //---------------------------------
@@ -70,6 +66,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new CartVy(withName);
    if (ofType == "VZ")
       return new CartVz(withName);
+   if (ofType == "CartState")  //loj: 9/2/04 added
+      return new CartState(withName);
 
     // Keplerian parameters
    if (ofType == "SMA")
@@ -88,12 +86,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new KepMA(withName);
    if (ofType == "MM")
       return new KepMM(withName);
-   //if (ofType == "SMA")
-   //    return new SMA(withName);
-   //if (ofType == "Ecc")
-   //    return new Ecc(withName);
-   //if (ofType == "Inc")
-   //    return new Inc(withName);
+   if (ofType == "KepElem")  //loj: 9/2/04 added
+      return new KepElem(withName);
 
    // Spherical parameters
    if (ofType == "RMAG")
@@ -108,6 +102,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new SphRAV(withName);
    if (ofType == "DECV")
       return new SphDecV(withName);
+   if (ofType == "SphElem")  //loj: 9/2/04 added
+      return new SphElem(withName);
 
    // Orbital parameters
    if (ofType == "VelApoapsis")
@@ -118,7 +114,7 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new Apoapsis(withName);
    if (ofType == "Periapsis")
       return new Periapsis(withName);
-   if (ofType == "OrbitPeriod") //loj: 7/13/04 added
+   if (ofType == "OrbitPeriod")
       return new OrbitPeriod(withName);
 
    // Angular parameters
@@ -158,6 +154,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VX");
       creatables.push_back("VY");
       creatables.push_back("VZ");
+      creatables.push_back("CartState"); //loj: 9/2/04 added
 
       // Keplerian parameters
       creatables.push_back("SMA");
@@ -168,16 +165,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("TA");
       creatables.push_back("MA");
       creatables.push_back("MM");
-      //creatables.push_back("SMA");
-      //creatables.push_back("Ecc");
-      //creatables.push_back("Inc");
-
-      // Orbital parameters
-      creatables.push_back("VelApoapsis");
-      creatables.push_back("VelPeriapsis");
-      creatables.push_back("Apoapsis");
-      creatables.push_back("Periapsis");
-      creatables.push_back("OrbitPeriod"); //loj: 7/13/04 added
+      creatables.push_back("KepElem"); //loj: 9/2/04 added
 
       // Spherical parameters
       creatables.push_back("RMAG");
@@ -186,6 +174,14 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VMAG");
       creatables.push_back("RAV");
       creatables.push_back("DECV");
+      creatables.push_back("SphElem"); //loj: 9/2/04 added
+
+      // Orbital parameters
+      creatables.push_back("VelApoapsis");
+      creatables.push_back("VelPeriapsis");
+      creatables.push_back("Apoapsis");
+      creatables.push_back("Periapsis");
+      creatables.push_back("OrbitPeriod");
 
       // Angular parameters
       creatables.push_back("SemilatusRectum");
