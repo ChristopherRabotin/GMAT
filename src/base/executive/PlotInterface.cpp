@@ -55,6 +55,7 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 bool PlotInterface::CreatePlotWindow(bool canvasOnly)
 {    
+#if !defined __CONSOLE_APP__
     if (!canvasOnly)
     {
         MdiGlPlot::mdiParentGlFrame =
@@ -91,6 +92,7 @@ bool PlotInterface::CreatePlotWindow(bool canvasOnly)
 
     MdiGlPlot::mdiParentGlFrame->UpdateUI();
     
+#endif
     return true;
 }
 
