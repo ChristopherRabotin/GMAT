@@ -123,8 +123,9 @@ protected:
     Real                    secondsToProp;
 	/// ID for the temporary parameter
     const Integer           secondsToPropID;
-    
-    // Accessors
+
+public:    
+    // Accessors (Temporary, to support internal prop duration)
     virtual Real        GetRealParameter(const Integer id) const;
     virtual Real        SetRealParameter(const Integer id,
                                          const Real value);
