@@ -783,21 +783,21 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
    std::string propName = name + "RKV89";
    Propagator *prop = CreatePropagator("RungeKutta89", propName);
     
-    // creates empty ForceModel
+   // creates empty ForceModel
    std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
    ForceModel *fm = CreateForceModel(fmName);
 
-    // create PointMass force and add to Force
-    //loj: 3/15/04 do not configure force, force model has linked list of force
-    //loj: 3/25/04 PointMassForce will create default body of Earth
+   // create PointMass force and add to Force
+   //loj: 3/15/04 do not configure force, force model has linked list of force
+   //loj: 3/25/04 PointMassForce will create default body of Earth
    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
 
    //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
    // because PropSetup::Initialize() needs at least 1 force
    fm->AddForce(earthGrav);
     
-    // create PropSetup
-    // PropSetup creates default Integrator, ForceModel with PointMassForce
+   // create PropSetup
+   // PropSetup creates default Integrator, ForceModel with PointMassForce
    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
 
    if (prop)
@@ -1587,7 +1587,6 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 
    if (isRunReady)
    {
-
       // check sandbox number
       if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
       {
@@ -1711,7 +1710,7 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 }
 
 //------------------------------------------------------------------------------
-// Integer RunScript(Integer sandboxNum, bool isFromGui)
+// Integer RunScript(Integer sandboxNum = 1, bool isFromGui = false)
 //------------------------------------------------------------------------------
 /**
  * Executes commands built from the script file.
@@ -1780,48 +1779,48 @@ void Moderator::CreateDefaultMission()
    try
    {
       // Spacecraft
-      Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
+      CreateSpacecraft("Spacecraft", "DefaultSC");
       //MessageInterface::ShowMessage("-->default Spacecraft created\n");
 
       // PropSetup
-      PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
+      CreateDefaultPropSetup("DefaultProp");
       //MessageInterface::ShowMessage("-->default PropSetup created\n");
 
       // Time parameters
-      Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
-      Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-      Parameter *elapsedDays = CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+      CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+      CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
       // Cartesian parameters
-      Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
-      Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
-      Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
-      Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
-      Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
-      Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
+      CreateParameter("CartX", "DefaultSC.X");
+      CreateParameter("CartY", "DefaultSC.Y");
+      CreateParameter("CartZ", "DefaultSC.Z");
+      CreateParameter("CartVx", "DefaultSC.Vx");
+      CreateParameter("CartVx", "DefaultSC.Vy");
+      CreateParameter("CartVx", "DefaultSC.Vz");
 
       // Keplerian parameters
-      Parameter *kepSma = CreateParameter("KepSMA", "DefaultSC.SMA");
-      Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.Ecc");
-      Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.Inc");
-      Parameter *kepRaan = CreateParameter("KepRAAN", "DefaultSC.RAAN");
-      Parameter *kepAop = CreateParameter("KepAOP", "DefaultSC.AOP");
-      Parameter *kepTa = CreateParameter("KepTA", "DefaultSC.TA");
-      Parameter *kepMa = CreateParameter("KepMA", "DefaultSC.MA");
-      Parameter *kepMm = CreateParameter("KepMM", "DefaultSC.MM");
+      CreateParameter("KepSMA", "DefaultSC.SMA");
+      CreateParameter("KepEcc", "DefaultSC.Ecc");
+      CreateParameter("KepInc", "DefaultSC.Inc");
+      CreateParameter("KepRAAN", "DefaultSC.RAAN");
+      CreateParameter("KepAOP", "DefaultSC.AOP");
+      CreateParameter("KepTA", "DefaultSC.TA");
+      CreateParameter("KepMA", "DefaultSC.MA");
+      CreateParameter("KepMM", "DefaultSC.MM");
 
       // Orbital parameters
-      Parameter *velApoapsis = CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
-      Parameter *velPeriapsis = CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
-      Parameter *apapsis = CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
-      Parameter *periapsis = CreateParameter("Periapsis", "DefaultSC.Periapsis");
+      CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
+      CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
+      CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
+      CreateParameter("Periapsis", "DefaultSC.Periapsis");
 
       // Spherical parameters
-      Parameter *sphRa = CreateParameter("SphRA", "DefaultSC.RA");
-      Parameter *sphDec = CreateParameter("SphDec", "DefaultSC.Dec");
+      CreateParameter("SphRA", "DefaultSC.RA");
+      CreateParameter("SphDec", "DefaultSC.Dec");
 
       // Angular parameters
-      Parameter *semiLatRec = CreateParameter("SemilatusRectum", "DefaultSC.SLR");
+      CreateParameter("SemilatusRectum", "DefaultSC.SLR");
       //MessageInterface::ShowMessage("-->default parameters created\n");
     
       // Set parameter description and object name
@@ -1835,10 +1834,6 @@ void Moderator::CreateDefaultMission()
          param->SetStringParameter("Object", "DefaultSC");
       }
     
-      // Set initial epoch for elapsed time parameter
-      //elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
-      //elapsedDays->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
-
       // StopCondition
       StopCondition *stopCond = CreateStopCondition("StopCondition", "StopOnElapsedSecs");
       stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
@@ -1939,7 +1934,7 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
    StopCondition *stopCond;
     
-      //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
+   //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
    for (unsigned int i=0; i<stopconds.size(); i++)
    {
       try
@@ -1980,8 +1975,9 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 void Moderator::AddSolarSysToSandbox(Integer index)
 {
-   SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
-   sandboxes[index]->AddSolarSystem(solarSys);
+   //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
+   //sandboxes[index]->AddSolarSystem(solarSys);
+   sandboxes[index]->AddSolarSystem(theDefaultSolarSystem);
 }
 
 //------------------------------------------------------------------------------
