@@ -34,9 +34,9 @@ public:
    // constructor
    SpacecraftFactory(StringArray createList);
    // copy constructor
-   SpacecraftFactory(const SpacecraftFactory& fact);
+   SpacecraftFactory(const SpacecraftFactory &fact);
    // assignment operator
-   SpacecraftFactory& operator= (const SpacecraftFactory& fact);
+   SpacecraftFactory& operator= (const SpacecraftFactory &fact);
 
    // destructor
    ~SpacecraftFactory();
@@ -51,7 +51,3 @@ private:
 };
 
 #endif // SpacecraftFactory_hpp
-
-
-
-

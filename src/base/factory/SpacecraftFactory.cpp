@@ -20,7 +20,7 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "SpacecraftFactory.hpp"
-#include "Spacecraft.hpp"   // for Spacecraft class - add specific s/c as needed
+#include "Spacecraft.hpp" 
 #include "Formation.hpp"
 
 //---------------------------------
@@ -59,8 +59,9 @@ SpaceObject* SpacecraftFactory::CreateSpacecraft(const std::string &ofType,
  *  (default constructor)
  */
 //------------------------------------------------------------------------------
-SpacecraftFactory::SpacecraftFactory() :
-Factory(Gmat::SPACECRAFT)
+SpacecraftFactory::SpacecraftFactory() 
+   :
+   Factory(Gmat::SPACECRAFT)
 {
    if (creatables.empty())
    {
@@ -79,8 +80,9 @@ Factory(Gmat::SPACECRAFT)
  * @param <createList> the initial list of createble objects for this class
  */
 //------------------------------------------------------------------------------
-SpacecraftFactory::SpacecraftFactory(StringArray createList) :
-Factory(createList, Gmat::SPACECRAFT)
+SpacecraftFactory::SpacecraftFactory(StringArray createList) 
+   :
+   Factory(createList, Gmat::SPACECRAFT)
 {
    if (creatables.empty())
    {
@@ -90,7 +92,7 @@ Factory(createList, Gmat::SPACECRAFT)
 }
 
 //------------------------------------------------------------------------------
-//  SpacecraftFactory(const SpacecraftFactory& fact)
+//  SpacecraftFactory(const SpacecraftFactory &fact)
 //------------------------------------------------------------------------------
 /**
    * This method creates an object of the (base) class SpacecraftFactory 
@@ -99,7 +101,7 @@ Factory(createList, Gmat::SPACECRAFT)
    * @param <fact> the factory object to copy to "this" factory.
    */
 //------------------------------------------------------------------------------
-SpacecraftFactory::SpacecraftFactory(const SpacecraftFactory& fact) :
+SpacecraftFactory::SpacecraftFactory(const SpacecraftFactory &fact) :
 Factory(fact)
 {
    if (creatables.empty())
@@ -110,7 +112,7 @@ Factory(fact)
 }
 
 //------------------------------------------------------------------------------
-//  SpacecraftFactory& operator= (const SpacecraftFactory& fact)
+//  SpacecraftFactory& operator= (const SpacecraftFactory &fact)
 //------------------------------------------------------------------------------
 /**
    * Assignment operator for the SpacecraftFactory base class.
@@ -121,7 +123,7 @@ Factory(fact)
    * @return "this" SpacecraftFactory with data of input factory fact.
    */
 //------------------------------------------------------------------------------
-SpacecraftFactory& SpacecraftFactory::operator= (const SpacecraftFactory& fact)
+SpacecraftFactory& SpacecraftFactory::operator= (const SpacecraftFactory &fact)
 {
    Factory::operator=(fact);
    if (creatables.empty())
