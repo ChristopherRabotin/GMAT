@@ -6,6 +6,7 @@
 #             2004/09/23 - W. Shoan - added function directory
 #             2004/09/24 - J. Gurgnaus - cleaned up
 #             2004/09/27 - J. Gurgnaus - removed WX_HOME and WXBASE 
+#             2004/12/23 - J. Gurgnaus - included coordsystem directory
 
 #
 # Program to make (library)
@@ -16,6 +17,7 @@ LIB = $(LIBDIR)/libgmatgui.a
 B_BURN       = $(PROJECT_ROOT)/base/burn
 B_COMMAND    = $(PROJECT_ROOT)/base/command
 B_CONFIGS    = $(PROJECT_ROOT)/base/configs
+B_COORDSYS   = $(PROJECT_ROOT)/base/coordsystem
 B_INCLUDE    = $(PROJECT_ROOT)/base/include
 B_EXECUTIVE  = $(PROJECT_ROOT)/base/executive
 B_FACTORY    = $(PROJECT_ROOT)/base/factory
@@ -40,6 +42,7 @@ APP        = $(PROJECT_ROOT)/gui/app
 BURN       = $(PROJECT_ROOT)/gui/burn
 COMMAND    = $(PROJECT_ROOT)/gui/command
 CTRLLOGIC  = $(PROJECT_ROOT)/gui/controllogic
+COORDSYS   = $(PROJECT_ROOT)/gui/coordsystem
 FORCEMODEL = $(PROJECT_ROOT)/gui/forcemodel
 FOUNDATION = $(PROJECT_ROOT)/gui/foundation
 INCLUDE    = $(PROJECT_ROOT)/gui/include
@@ -55,14 +58,15 @@ SOLVER     = $(PROJECT_ROOT)/gui/solver
 SPACECRAFT = $(PROJECT_ROOT)/gui/spacecraft
 VIEW       = $(PROJECT_ROOT)/gui/view
 
-BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
-	-I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) -I$(B_FUNCTION) \
-	-I$(B_INCLUDE) -I$(B_INTERFACE) \
+BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_COORDSYS \
+	-I$(B_EXECUTIVE) -I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) \
+	-I$(B_FUNCTION) -I$(B_INCLUDE) -I$(B_INTERFACE) \
 	-I$(B_INTERPOL) -I$(B_INTERPRET) -I$(B_PARAM) -I$(B_PROPAG) \
 	-I$(B_REFFRAME) -I$(B_SOLARSYS) -I$(B_SOLVER) -I$(B_SPACECRAFT) \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
 
-GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
+GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(COORDSYS) \
+	-I$(FORCEMODEL) -I$(FOUNDATION) \
 	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(MANEUVER) \
 	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
 	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
