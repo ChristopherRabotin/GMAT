@@ -500,7 +500,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 //    if (id == epochID) return SetRealParameter("Epoch", value);
 
     // Check for the coordinate representation then set the value
-    if (stateType == "Cartesian")
+    if (displayCoordType == "Cartesian")
     {
        if (id == state1ID) return SetRealParameter("X",value); 
        if (id == state2ID) return SetRealParameter("Y",value); 
@@ -509,11 +509,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state5ID) return SetRealParameter("Vy",value); 
        if (id == state6ID) return SetRealParameter("Vz",value); 
     }
-    else if (stateType == "Keplerian" || stateType == "ModifiedKeplerian") 
+    else if (displayCoordType == "Keplerian" || displayCoordType == "ModifiedKeplerian")
     {
-       if (id == state1ID) 
+       if (id == state1ID)
        {
-          if (stateType == "Keplerian")
+          if (displayCoordType == "Keplerian")
              return SetRealParameter("SMA",value); 
           else
              return SetRealParameter("RadPer",value); 
@@ -521,7 +521,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
        if (id == state2ID) 
        {
-          if (stateType == "Keplerian")
+          if (displayCoordType == "Keplerian")
              return SetRealParameter("ECC",value); 
           else
              return SetRealParameter("RadApo",value); 
@@ -532,22 +532,22 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state5ID) return SetRealParameter("AOP",value); 
        if (id == state6ID) return SetRealParameter("TA",value); 
     }
-    else if (stateType == "Spherical1" || stateType == "Spherical2")
+    else if (displayCoordType == "Spherical1" || displayCoordType == "Spherical2")
     {
-       if (id == state1ID) return SetRealParameter("RMAG",value); 
+       if (id == state1ID) return SetRealParameter("RMAG",value);
        if (id == state2ID) return SetRealParameter("RA",value); 
        if (id == state3ID) return SetRealParameter("DEC",value); 
        if (id == state4ID) return SetRealParameter("VMAG",value); 
        if (id == state5ID) 
        {
-          if (stateType == "Spherical1")
+          if (displayCoordType == "Spherical1")
              return SetRealParameter("AZI",value); 
           else 
              return SetRealParameter("RAV",value); 
        }   
        if (id == state6ID) 
        {
-          if (stateType == "Spherical1")
+          if (displayCoordType == "Spherical1")
              return SetRealParameter("FPA",value); 
           else 
              return SetRealParameter("DECV",value); 
@@ -583,24 +583,41 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 //    if (label == "Epoch") 
 ////       return epoch = value;
 //       return state.SetEpoch(value);
-
     if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
+    {
+       displayState[0] = value;
        return state[0] = value;
+    }
 
-    if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")  
+    if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")
+    {
+       displayState[1] = value;
        return state[1] = value;
+    }
 
     if (label == "Z" || label == "INC" || label == "DEC")  
+    {
+       displayState[2] = value;
        return state[2] = value;
+    }
 
     if (label == "Vx" || label == "RAAN" || label == "VMAG")  
+    {
+       displayState[3] = value;
        return state[3] = value;
+    }
 
     if (label == "Vy" || label == "AOP" || label == "AZI" || label == "RAV")  
+    {
+       displayState[4] = value;
        return state[4] = value;
+    }
 
     if (label == "Vz" || label == "TA" || label == "FPA" || label == "DECV")  
+    {
+       displayState[5] = value;
        return state[5] = value;
+    }
 
     if (label == "DryMass") return dryMass = value;
 
@@ -678,7 +695,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
           return GmatBase::SetStringParameter(id, value);
        }
   
-       stateType = value;
+//       stateType = value;
+       displayCoordType = value;   //ag: so reading from a script displays properly in GUI
     }
     else if (id == refBodyID)
     {
@@ -817,7 +835,7 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  */
 Rvector6 Spacecraft::GetCartesianState() 
 {
-   return(cartesianState = stateConverter.Convert(state.GetState(),stateType,"Cartesian"));
+   return(cartesianState = stateConverter.Convert(state.GetState(),displayCoordType,"Cartesian"));
 }
 
 //---------------------------------------------------------------------------
@@ -831,7 +849,7 @@ Rvector6 Spacecraft::GetCartesianState()
  */
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-   return(keplerianState = stateConverter.Convert(state.GetState(),stateType,"Keplerian"));
+   return(keplerianState = stateConverter.Convert(state.GetState(),displayCoordType,"Keplerian"));
 }
 
 //---------------------------------------------------------------------------
@@ -847,7 +865,7 @@ Rvector6 Spacecraft::GetKeplerianState()
 Rvector6 Spacecraft::GetModifiedKeplerianState() 
 {
    modifiedKeplerianState = 
-      stateConverter.Convert(state.GetState(),stateType,"ModifiedKeplerian");
+      stateConverter.Convert(state.GetState(),displayCoordType,"ModifiedKeplerian");
 
 #if 0
    // @todo- this won't work
@@ -1292,7 +1310,7 @@ void Spacecraft::SetInitialDisplay()
 //    displayEpoch = ToString(epoch);
     displayEpoch = ToString(state.GetEpoch());
     displayDateFormat = dateFormat;
-    displayCoordType = stateType;
+//    displayCoordType = stateType;          // ag: resets to default value
     initialDisplay = false;
 }
 
