@@ -42,10 +42,12 @@
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
    EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
-//    ag: 10/20/2004 Commented out so that the position of the click is not
-//        checked to open up a panel from the variables/goals boxes
-//   EVT_LEFT_DCLICK(MissionTree::OnDoubleClick)
-
+   //ag: 10/20/2004 Commented out so that the position of the click is not
+   // checked to open up a panel from the variables/goals boxes
+   //loj: 11/4/04 Uncommented so that double click on Target/If/For/While folder
+   // will not collapse
+   EVT_LEFT_DCLICK(MissionTree::OnDoubleClick)
+   
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
    
@@ -477,18 +479,22 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                            GmatTree::ItemType type, GmatCommand *prevCmd,
                            GmatCommand *cmd, int *cmdCount, int endCount)
 {
-#if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage
-      ("MissionTree::InsertCommand()\n");
-#endif
 
-
-   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId);   
+   MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId); 
+   GmatCommand *parentCmd = parentItem->GetCommand();
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId); 
    GmatCommand *currCmd = currItem->GetCommand();
    wxString typeName = cmd->GetTypeName().c_str();
    wxString nodeName = cmd->GetName().c_str();
    wxTreeItemId node;
    bool cmdAdded = false;
+   
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertCommand() parentCmd=%s, prevCmd=%s, currCmd=%s\n",
+       parentCmd->GetTypeName().c_str(), prevCmd->GetTypeName().c_str(),
+       currCmd->GetTypeName().c_str());
+#endif
    
    //-----------------------------------
    // Compose node name
@@ -505,8 +511,8 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    
 #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
-      ("MissionTree::InsertCommand() currCmd=%s, nodeName=%s\n",
-       currCmd->GetTypeName().c_str(), nodeName.c_str());
+      ("MissionTree::InsertCommand() cmd=%s, nodeName=%s\n",
+       typeName.c_str(), nodeName.c_str());
 #endif
    
    //------------------------------------------------------------
@@ -528,28 +534,41 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 
       return node;
    }
-
    
    //------------------------------------------------------------
    // Insert to Branch command
    //------------------------------------------------------------
    wxString prevTypeName = prevCmd->GetTypeName().c_str();
-
+   
    // Insert to base command list
+   
+   if (typeName.Contains("End"))
+   {
 #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("----- Inserting command...\n");
+      MessageInterface::ShowMessage("----- Appending command...\n");
 #endif
-
-   cmdAdded = theGuiInterpreter->InsertCommand(cmd, prevCmd);
+      cmdAdded = prevCmd->Append(cmd);
+   }
+   else
+   {
+#if DEBUG_MISSION_TREE
+      MessageInterface::ShowMessage("----- Inserting command...\n");
+#endif
+      cmdAdded = theGuiInterpreter->InsertCommand(cmd, prevCmd);
+   }
    
    if (cmdAdded)
    {
-      //if (currId == prevId)
       if ((prevTypeName == "NoOp" || prevTypeName == "Target" ||
            prevTypeName == "For"  ||  prevTypeName == "While" ||
            prevTypeName == "If")) //loj: add Do, Switch later
       {
          node = InsertItem(parentId, 0, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
+      }
+      else if (prevTypeName.Contains("End"))
+      {
+         node = InsertItem(parentId, GetPrevSibling(currId), nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
       }
       else
@@ -687,12 +706,15 @@ void MissionTree::OnItemRightClick(wxTreeEvent& event)
 //------------------------------------------------------------------------------
 void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
-   //MessageInterface::ShowMessage("MissionTree::OnItemActivated() entered\n");
-
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
    MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
-
+   
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::OnItemActivated() item=%s\n",
+                                 item->GetDesc().c_str());
+#endif
+   
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
@@ -708,9 +730,22 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 void MissionTree::OnDoubleClick(wxMouseEvent &event)
 {
    //MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
-   wxPoint position = event.GetPosition();
+   //wxPoint position = event.GetPosition();
    //MessageInterface::ShowMessage("Event position is %d %d\n", position.x, position.y );
-   CheckClickIn(position);
+   
+   wxTreeItemId itemId = GetSelection();
+   MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
+
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::OnDoubleClick() item=%s\n", item->GetDesc().c_str());
+#endif
+   
+   //loj: 11/04/04 added
+   // Show panel here. because OnItemActivated() always collapse the node.
+   GmatAppData::GetMainFrame()->CreateChild(item);
+
+   //CheckClickIn(position);
 }
 
 
@@ -942,7 +977,8 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
    
    if (prevCmd != NULL)
    {
-      GmatCommand *cmd = theGuiInterpreter->CreateCommand("Target");
+      //GmatCommand *cmd = theGuiInterpreter->CreateCommand("Target");
+      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Target");
       GmatCommand *endCmd = theGuiInterpreter->CreateCommand("EndTarget");
 
       if (cmd != NULL && endCmd != NULL)
@@ -1454,7 +1490,7 @@ void MissionTree::OnInsertManeuver(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {
-      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Maneuver");;
+      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Maneuver");
       
       if (cmd != NULL)
       {  
