@@ -34,44 +34,47 @@ class Rvector : public ArrayTemplate<Real>
 {
 public:
    
-    // exceptions
-    class IsZeroVector : public BaseException
-        { public:  IsZeroVector(const std::string &message =
-           "Rvector error : vector is a zero vector")
-           : BaseException(message) {}; };
+   // exceptions
+   class IsZeroVector : public BaseException
+   { public:  IsZeroVector(const std::string &message =
+                           "Rvector error : vector is a zero vector")
+        : BaseException(message) {}; };
     
-    Rvector();
-    Rvector(int size);
-    Rvector(int size, Real a1, ... );  
-    Rvector(const Rvector &v); 
-    virtual ~Rvector();
+   Rvector();
+   Rvector(int size);
+   Rvector(int size, Real a1, ... );  
+   Rvector(const Rvector &v); 
+   virtual ~Rvector();
 
-    virtual Real GetMagnitude() const;          
-    Rvector GetUnitRvector() const; 
-    const Rvector& Normalize();
-    const Rvector& operator=(const Rvector &v); 
-    bool operator==(const Rvector &v)const;
-    bool operator!=(const Rvector &v)const;
-    Rvector operator-() const;                     // negation 
-    Rvector operator+(const Rvector & v) const;
-    const Rvector& operator+=(const Rvector &v);
-    Rvector operator-(const Rvector &v) const; 
-    const Rvector& operator-=(const Rvector &v);
-    Rvector operator*(Real s) const;
-    const Rvector& operator*=(Real s);
-    Real operator*(const Rvector &v) const;        // dot product
-    Rvector operator/(Real s) const;
-    const Rvector& operator/=(Real s);
+   virtual Real GetMagnitude() const;          
+   Rvector GetUnitRvector() const; 
+   const Rvector& Normalize();
+   const Rvector& operator=(const Rvector &v); 
+   bool operator==(const Rvector &v)const;
+   bool operator!=(const Rvector &v)const;
+   Rvector operator-() const;                     // negation 
+   Rvector operator+(const Rvector & v) const;
+   const Rvector& operator+=(const Rvector &v);
+   Rvector operator-(const Rvector &v) const; 
+   const Rvector& operator-=(const Rvector &v);
+   Rvector operator*(Real s) const;
+   const Rvector& operator*=(Real s);
+   Real operator*(const Rvector &v) const;        // dot product
+   Rvector operator/(Real s) const;
+   const Rvector& operator/=(Real s);
 
-    friend class Rmatrix;
-    Rvector operator*(const Rmatrix &m) const; 
-    const Rvector& operator*=(const Rmatrix &m);
-    Rvector operator/(const Rmatrix &m) const;
-    const Rvector& operator/=(const Rmatrix &m);
+   friend class Rmatrix;
+   Rvector operator*(const Rmatrix &m) const; 
+   const Rvector& operator*=(const Rmatrix &m);
+   Rvector operator/(const Rmatrix &m) const;
+   const Rvector& operator/=(const Rmatrix &m);
     
-    friend Rvector operator*(Real s, const Rvector &v);
-    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2); 
+   friend Rvector operator*(Real s, const Rvector &v);
+   friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2); 
    
+   friend std::istream& operator>> (std::istream &input, Rvector &a);
+   friend std::ostream& operator<< (std::ostream &output, const Rvector &a);
+
 protected:
 private:
 };

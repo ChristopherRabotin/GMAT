@@ -25,6 +25,7 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"
 #include "Rvector.hpp"
+#include "Linear.hpp"         // for operator<<, operator >>
 
 //---------------------------------
 //  public
@@ -532,6 +533,10 @@ const Rvector& Rvector::operator/=(const Rmatrix &m)
     return *this;
 }
 
+//---------------------------------
+// friend function
+//---------------------------------
+
 //------------------------------------------------------------------------------
 //  <friend>
 //  Rvector operator*(Real s, const Rvector &v)
@@ -579,4 +584,20 @@ Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2)
         }
     }
     return prod;
+}
+
+//------------------------------------------------------------------------------
+// friend std::istream& operator>> (std::istream &input, Rvector &a)
+//------------------------------------------------------------------------------
+std::istream& operator>> (std::istream &input, Rvector &a)
+{
+   return GmatRealUtil::operator>> (input, a);
+}
+
+//------------------------------------------------------------------------------
+// friend std::ostream& operator<< (std::ostream &output, const Rvector &a)
+//------------------------------------------------------------------------------
+std::ostream& operator<< (std::ostream &output, const Rvector &a)
+{
+   return GmatRealUtil::operator<< (output, a);
 }

@@ -24,6 +24,7 @@
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
+#include "Linear.hpp"         // for operator<<, operator >>
 
 //---------------------------------
 //  public
@@ -520,6 +521,10 @@ Rvector Rmatrix::operator*(const Rvector &v) const
     return prod;
 }
 
+//---------------------------------
+// friend functions
+//---------------------------------
+
 //------------------------------------------------------------------------------
 //  <friend>
 //  Rmatrix operator*(Real scalar, const Rmatrix &m)
@@ -949,4 +954,20 @@ Rmatrix TransposeTimesTranspose(const Rmatrix &m1, const Rmatrix &m2)
     }
 
     return m;
+}
+
+//------------------------------------------------------------------------------
+// friend std::istream& operator>> (std::istream &input, Rmatrix &a)
+//------------------------------------------------------------------------------
+std::istream& operator>> (std::istream &input, Rmatrix &a)
+{
+   return GmatRealUtil::operator>> (input, a);
+}
+
+//------------------------------------------------------------------------------
+// friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a)
+//------------------------------------------------------------------------------
+std::ostream& operator<< (std::ostream &output, const Rmatrix &a)
+{
+   return GmatRealUtil::operator<< (output, a);
 }
