@@ -324,31 +324,23 @@ void InteractiveMatlabDialog::SetupCommand()
    else
       throw ("No Function Name Given");
 
-//   MessageInterface::ShowMessage("Set function \n");
-
    // clear out previous parameters
-   theCmd->ClearObject(Gmat::PARAMETER);
-//   MessageInterface::ShowMessage("Cleared objects \n");
+   theCmd->TakeAction("Clear");
 
    // set input parameters
    for (unsigned int i=0; i<inputStrings.Count(); i++)
    {
-      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-                std::string(inputStrings[i]));
-      theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
+      std::string selInName = std::string(inputStrings[i]);
+      theCmd->SetStringParameter("AddInput", selInName, i);
    }
-
-//   MessageInterface::ShowMessage("Set input \n");
 
    // set output parameters
    for (unsigned int i=0; i<outputStrings.Count(); i++)
    {
-      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-               std::string(outputStrings[i]));
-      theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
+       std::string selOutName = std::string(outputStrings[i]);
+       theCmd->SetStringParameter("AddOutput", selOutName, i);
    }
 
-//   MessageInterface::ShowMessage("Set output \n");
 }
 
 void InteractiveMatlabDialog::SetResults()
@@ -433,5 +425,5 @@ void InteractiveMatlabDialog::OnClear()
       outputStrings.Clear();
 
       // clear out previous parameters
-      theCmd->ClearObject(Gmat::PARAMETER);
+      theCmd->TakeAction("Clear");
 }
