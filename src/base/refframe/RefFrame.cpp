@@ -33,7 +33,7 @@
  * @return the central body object
  */
 //------------------------------------------------------------------------------
-CelestialBody RefFrame::GetCentralBody() const
+CelestialBody* RefFrame::GetCentralBody() const
 {
    return mCentralBody;
 }
@@ -96,7 +96,7 @@ std::string RefFrame::GetFrameName() const
 //------------------------------------------------------------------------------
 bool RefFrame::operator== (const RefFrame &right) const
 {
-   if (mCentralBody.GetName() != right.mCentralBody.GetName())
+   if (mCentralBody->GetName() != right.mCentralBody->GetName())
       return false;
 
    if (mRefDate != right.mRefDate)
@@ -143,7 +143,7 @@ bool RefFrame::operator!= (const RefFrame &right) const
 RefFrame::RefFrame(const CelestialBody &centralBody, const A1Mjd &refDate,
                    const std::string &frameName)
 {
-   mCentralBody = centralBody;
+   mCentralBody = *centralBody;
    mRefDate = refDate;
    mFrameName = frameName;
 }
