@@ -32,6 +32,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CelestialBody.hpp"
+#include "PlanetaryEphem.hpp"
 /**
  * SolarSystem class, containing pointers to all of the objects currently in
  * use.
@@ -63,7 +64,19 @@ public:
    StringArray    GetBodiesInUse() const;
    // method to return a flag indicating whether or not the specified
    // body is in use for this solar system
-   bool           IsBodyInUse(std::string theBody) const;
+   bool           IsBodyInUse(std::string theBody);
+
+   // methods to gt the source and analytic model flags
+   Gmat::PosVelSource   GetPosVelSource() const;
+   Gmat::AnalyticMethod GetAnalyticMethod() const;
+   std::string          GetSourceFileName() const;
+
+   // methods to set the source, source file, and analytic method for each
+   // of the bodies in use
+   bool SetSource(Gmat::PosVelSource pvSrc);
+   bool SetSourceFile(PlanetaryEphem *src);
+   bool SetAnalyticMethod(Gmat::AnalyticMethod aM);
+   
 
    // Parameter access methods - overridden from GmatBase do I need these???
    //virtual std::string    GetParameterText(const Integer id) const;     // const?
@@ -84,6 +97,9 @@ public:
    //virtual bool           GetBooleanParameter(const Integer id) const; // const?
    //virtual bool           SetBooleanParameter(const Integer id,
    //                                           const bool value); // const?
+   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+
+      
    // all classes derived from GmatBase must supply this Clone method
    virtual SolarSystem* Clone(void) const;
 
@@ -103,6 +119,11 @@ public:
    // what do we do about libration points??
    
 protected:
+
+   Gmat::PosVelSource    pvSrcForAll;
+   Gmat::AnalyticMethod  anMethodForAll;
+   PlanetaryEphem*       pE;
+   Integer               bodiesInUseID;
 
 private:
 
