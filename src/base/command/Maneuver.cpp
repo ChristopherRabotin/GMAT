@@ -38,10 +38,6 @@ Maneuver::Maneuver(void) :
 
 Maneuver::~Maneuver(void)
 {
-    // Delete the burn if it is not managed in the ConfigManager
-    if (burn)
-        if (burn->GetName() == "")
-            delete burn;
 }
 
 
