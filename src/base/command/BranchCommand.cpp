@@ -57,6 +57,8 @@ BranchCommand::~BranchCommand()
       current = *node;
       while (current->GetNext() != this) {
          current = current->GetNext();
+         if (current == NULL)
+            break;
       }
          
       // Calling Remove this way just sets the next pointer to NULL
