@@ -206,8 +206,6 @@ protected:
     //------------------------------------------------------------------------------
     virtual bool AdaptStep(Real maxerror) = 0;
 	
-private:
-
     enum
     {
         ACCURACY = PropagatorParamCount,  // Accuracy parameter for Integrators
