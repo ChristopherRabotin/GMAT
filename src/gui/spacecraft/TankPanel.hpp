@@ -38,17 +38,41 @@ public:
     void LoadData();
     
 private:
+    struct Tank
+    {
+        std::string tankName;
+        Real temperature;
+        Real refTemperature;
+        Real fuelMass;
+        Real fuelDensity;
+        Real pressure;
+        Real volume;
+        bool pressureRegulated;
+        FuelTank* fuelTank;
+      
+        Tank(FuelTank* ft, const std::string &name)
+        {
+            fuelTank = ft;
+            tankName = name;
+        }
+    };    
     
     void Create();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
+    void DisplayData();
     void OnTextChange();
+    void OnSelect();
+    void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
-    FuelTank *theFuelTank;
+    std::vector<Tank *> theTanks;
+    ObjectArray theFuelTanks;
+    StringArray fuelTankNames;
     
     Integer tankCount;
+    Integer currentTank;
     
     wxButton *theApplyButton;
     wxButton *addButton;

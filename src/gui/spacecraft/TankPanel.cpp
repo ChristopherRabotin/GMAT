@@ -26,6 +26,8 @@
 //------------------------------
 BEGIN_EVENT_TABLE(TankPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, TankPanel::OnTextChange)
+   EVT_LISTBOX(ID_LISTBOX, TankPanel::OnSelect)
+   EVT_BUTTON(ID_BUTTON, TankPanel::OnButtonClick)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -43,10 +45,16 @@ TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
                      wxButton *theApplyButton):wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
-    this->theFuelTank = NULL;
+//    this->theFuelTanks = NULL
     this->theApplyButton = theApplyButton;
     
+    theTanks.clear();
+    theFuelTanks.clear();
+    fuelTankNames.clear();
+    
     tankCount = 0;
+
+    currentTank = 0;
     
     Create();
 }
@@ -56,6 +64,10 @@ TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
 //------------------------------------------------------------------------------
 TankPanel::~TankPanel()
 {
+//    for (unsigned int i = 0; i < theTanks.size(); i++)
+//      delete theTanks[i];
+//    for (unsigned int i = 0; i < theFuelTanks.size(); i++)
+//      delete theFuelTanks[i];
 }
 
 //-------------------------------
@@ -181,8 +193,6 @@ void TankPanel::Create()
    boxSizer1->Fit( this );
    boxSizer1->SetSizeHints( this );
    
-   // Temp
-   addButton->Enable(false);
    removeButton->Enable(false);
 }
 
@@ -190,50 +200,50 @@ void TankPanel::Create()
 // void LoadData()
 //------------------------------------------------------------------------------
 void TankPanel::LoadData()
-{  
-    if (theFuelTank == NULL)
+{
+    if (theSpacecraft == NULL)
        return;
-       
+          
+    theFuelTanks = theSpacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
+    fuelTankNames = theSpacecraft->GetRefObjectNameArray(Gmat::FUEL_TANK);
+    
+    MessageInterface::ShowMessage("TankPanel::LoadData(1)\n"); 
+    
+    if (theFuelTanks.empty())
+       return;     
+      
+    tankCount = theFuelTanks.size();
+    
     Integer paramID;
-    
-    paramID = theFuelTank->GetParameterID("Temperature");
-    Real temperature = theFuelTank->GetRealParameter(paramID);
+      
+    for (Integer i = 0; i < tankCount; i++)
+    {    
+        MessageInterface::ShowMessage("TankPanel::LoadData(2)\n"); 
+        FuelTank * ft = (FuelTank *)theFuelTanks[i];
+        
+        theTanks[i]->fuelTank = ft;
+        theTanks[i]->tankName = fuelTankNames[i];
+        
+        paramID = ft->GetParameterID("Temperature");
+        theTanks[i]->temperature = ft->GetRealParameter(paramID);
   
-    paramID = theFuelTank->GetParameterID("RefTemperature");
-    Real refTemperature = theFuelTank->GetRealParameter(paramID);
+        paramID = ft->GetParameterID("RefTemperature");
+        theTanks[i]->refTemperature = ft->GetRealParameter(paramID);
     
-    paramID = theFuelTank->GetParameterID("FuelMass");
-    Real fuelMass = theFuelTank->GetRealParameter(paramID);
+        paramID = ft->GetParameterID("FuelMass");
+        theTanks[i]->fuelMass = ft->GetRealParameter(paramID);
 
-    paramID = theFuelTank->GetParameterID("FuelDensity");
-    Real fuelDensity = theFuelTank->GetRealParameter(paramID);
+        paramID = ft->GetParameterID("FuelDensity");
+        theTanks[i]->fuelDensity = ft->GetRealParameter(paramID);
    
-    paramID = theFuelTank->GetParameterID("Pressure");
-    Real pressure = theFuelTank->GetRealParameter(paramID);
+        paramID = ft->GetParameterID("Pressure");
+        theTanks[i]->pressure = ft->GetRealParameter(paramID);
    
-    paramID = theFuelTank->GetParameterID("Volume");
-    Real volume = theFuelTank->GetRealParameter(paramID);
- 
-    wxString temperatureString;
-    wxString refTemperatureString;
-    wxString fuelMassString;
-    wxString fuelDensityString;
-    wxString pressureString;
-    wxString volumeString;
-   
-    temperatureString.Printf("%f", temperature);
-    refTemperatureString.Printf("%f", refTemperature);
-    fuelMassString.Printf("%f", fuelMass);
-    fuelDensityString.Printf("%f", fuelDensity);
-    pressureString.Printf("%f", pressure);
-    volumeString.Printf("%f", volume);
-
-    temperatureTextCtrl->SetValue(temperatureString);
-    refTemperatureTextCtrl->SetValue(refTemperatureString);
-    fuelMassTextCtrl->SetValue(fuelMassString);
-    fuelDensityTextCtrl->SetValue(fuelDensityString);
-    pressureTextCtrl->SetValue(pressureString);
-    volumeTextCtrl->SetValue(volumeString);
+        paramID = ft->GetParameterID("Volume");
+        theTanks[i]->volume = ft->GetRealParameter(paramID);
+    }   
+    currentTank = tankCount-1;
+    DisplayData();  
 }
 
 //------------------------------------------------------------------------------
@@ -243,34 +253,172 @@ void TankPanel::SaveData()
 {
     if (!theApplyButton->IsEnabled())
        return;
-       
-    wxString temperatureString = temperatureTextCtrl->GetValue();
-    wxString refTemperatureString = refTemperatureTextCtrl->GetValue();
-    wxString fuelMassString = fuelMassTextCtrl->GetValue();
-    wxString fuelDensityString = fuelDensityTextCtrl->GetValue();
-    wxString pressureString = pressureTextCtrl->GetValue();
-    wxString volumeString = volumeTextCtrl->GetValue();
     
+    FuelTank *ft;
     Integer paramID;
     
-    paramID = theFuelTank->GetParameterID("Temperature");
-    theFuelTank->SetRealParameter(paramID, atof(temperatureString));  
-    paramID = theFuelTank->GetParameterID("RefTemperature");
-    theFuelTank->SetRealParameter(paramID, atof(refTemperatureString)); 
-    paramID = theFuelTank->GetParameterID("FuelMass");
-    theFuelTank->SetRealParameter(paramID, atof(fuelMassString)); 
-    paramID = theFuelTank->GetParameterID("FuelDensity");
-    theFuelTank->SetRealParameter(paramID, atof(fuelDensityString)); 
-    paramID = theFuelTank->GetParameterID("Pressure");
-    theFuelTank->SetRealParameter(paramID, atof(pressureString)); 
-    paramID = theFuelTank->GetParameterID("Volume");
-    theFuelTank->SetRealParameter(paramID, atof(volumeString)); 
+    for (Integer i = 0; i < tankCount; i++)
+    {   
+        ft = theTanks[i]->fuelTank;
+
+        paramID = ft->GetParameterID("Temperature");
+        ft->SetRealParameter(paramID, theTanks[i]->temperature);
+        
+        paramID = ft->GetParameterID("RefTemperature");
+        ft->SetRealParameter(paramID, theTanks[i]->refTemperature);
+        
+        paramID = ft->GetParameterID("FuelMass");
+        ft->SetRealParameter(paramID, theTanks[i]->fuelMass);
+        
+        paramID = ft->GetParameterID("FuelDensity");
+        ft->SetRealParameter(paramID, theTanks[i]->fuelDensity);
+        
+        paramID = ft->GetParameterID("Pressure");
+        ft->SetRealParameter(paramID, theTanks[i]->pressure);
+        
+        paramID = ft->GetParameterID("Volume");
+        ft->SetRealParameter(paramID, theTanks[i]->volume);
+
+        //theTanks[i]->fuelTank = ft;
+        theSpacecraft->SetRefObject(theTanks[i]->fuelTank, Gmat::HARDWARE, 
+                       theTanks[i]->tankName);
+    }
 }
+
+//------------------------------------------------------------------------------
+// void DisplayData()
+//------------------------------------------------------------------------------
+void TankPanel::DisplayData()
+{   
+    wxString temperatureString;
+    wxString refTemperatureString;
+    wxString fuelMassString;
+    wxString fuelDensityString;
+    wxString pressureString;
+    wxString volumeString;
+    
+    removeButton->Enable(true); 
+    tankListBox->Clear();
+    
+    for (Integer i = 0; i < tankCount; i++) 
+        tankListBox->Append(theTanks[i]->tankName.c_str());    
+        
+    tankListBox->SetSelection(currentTank, true);
+    
+    temperatureString.Printf("%f", theTanks[currentTank]->temperature);
+    refTemperatureString.Printf("%f", theTanks[currentTank]->refTemperature);
+    fuelMassString.Printf("%f", theTanks[currentTank]->fuelMass);
+    fuelDensityString.Printf("%f", theTanks[currentTank]->fuelDensity);
+    pressureString.Printf("%f", theTanks[currentTank]->pressure);
+    volumeString.Printf("%f", theTanks[currentTank]->volume);
+
+    temperatureTextCtrl->Clear();
+    refTemperatureTextCtrl->Clear();
+    fuelMassTextCtrl->Clear();
+    fuelDensityTextCtrl->Clear();
+    pressureTextCtrl->Clear();
+    volumeTextCtrl->Clear();
+    
+    temperatureTextCtrl->SetValue(temperatureString);
+    refTemperatureTextCtrl->SetValue(refTemperatureString);
+    fuelMassTextCtrl->SetValue(fuelMassString);
+    fuelDensityTextCtrl->SetValue(fuelDensityString);
+    pressureTextCtrl->SetValue(pressureString);
+    volumeTextCtrl->SetValue(volumeString);   
+}    
 
 //------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
 void TankPanel::OnTextChange()
 {
+    theTanks[currentTank]->temperature = atof(temperatureTextCtrl->GetValue());
+    theTanks[currentTank]->refTemperature = atof(refTemperatureTextCtrl->GetValue());
+    theTanks[currentTank]->fuelMass = atof(fuelMassTextCtrl->GetValue());
+    theTanks[currentTank]->fuelDensity = atof(fuelDensityTextCtrl->GetValue());
+    theTanks[currentTank]->pressure = atof(pressureTextCtrl->GetValue());
+    theTanks[currentTank]->volume = atof(volumeTextCtrl->GetValue());
+
     theApplyButton->Enable();
 }
+
+//------------------------------------------------------------------------------
+// void OnSelect()
+//------------------------------------------------------------------------------
+void TankPanel::OnSelect()
+{
+    Integer id = tankListBox->GetSelection();
+    
+    if (id <= tankCount)
+    {
+        currentTank = id;
+        DisplayData(); 
+    }    
+}    
+
+//------------------------------------------------------------------------------
+// void OnButtonClick(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void TankPanel::OnButtonClick(wxCommandEvent &event)
+{
+    wxString tname;
+    Integer paramID;
+
+    if (event.GetEventObject() == addButton)
+    {  
+       tname.Printf("Tank%d", ++tankCount);
+       FuelTank *ft = new FuelTank(tname.c_str());
+       theTanks.push_back( new Tank(ft, tname.c_str()) );
+       
+       tankCount = theTanks.size();
+       currentTank = tankCount-1;
+       
+       theTanks[currentTank]->fuelTank = ft;
+       theTanks[currentTank]->tankName = tname.c_str();
+       
+       paramID = ft->GetParameterID("Temperature");
+       theTanks[currentTank]->temperature = ft->GetRealParameter(paramID);
+  
+       paramID = ft->GetParameterID("RefTemperature");
+       theTanks[currentTank]->refTemperature = ft->GetRealParameter(paramID);
+    
+       paramID = ft->GetParameterID("FuelMass");
+       theTanks[currentTank]->fuelMass = ft->GetRealParameter(paramID);
+
+       paramID = ft->GetParameterID("FuelDensity");
+       theTanks[currentTank]->fuelDensity = ft->GetRealParameter(paramID);
+   
+       paramID = ft->GetParameterID("Pressure");
+       theTanks[currentTank]->pressure = ft->GetRealParameter(paramID);
+   
+       paramID = ft->GetParameterID("Volume");
+       theTanks[currentTank]->volume = ft->GetRealParameter(paramID);
+        
+       DisplayData();
+    }
+    else if (event.GetEventObject() == removeButton)
+    {
+       if (theTanks.empty())
+          return;
+       
+       int count = 0;  
+       std::vector <Tank*>::iterator iter;
+       for (iter = theTanks.begin(); iter < theTanks.end(); iter++)
+       {
+          if (count == currentTank)
+          {
+             theTanks.erase(iter);  
+             tankListBox->Delete(count);
+          }    
+          count++;     
+       }
+       
+       tankCount = theTanks.size();
+       currentTank = tankCount-1;
+       
+       if (theTanks.empty())  
+          removeButton->Enable(false);  
+       else
+          DisplayData();
+    }     
+}    
