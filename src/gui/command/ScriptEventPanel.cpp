@@ -118,6 +118,7 @@ void ScriptEventPanel::SaveData()
 {
    std::string scriptText = mFileContentsTextCtrl->GetValue().c_str();
    theCommand->SetGeneratingString(scriptText);
+   theGuiInterpreter->Interpret(theCommand);
 }
 
 //------------------------------------------------------------------------------
