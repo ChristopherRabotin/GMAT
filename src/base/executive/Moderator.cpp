@@ -682,15 +682,22 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
 
     // create PointMass force and add to Force
-    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", name + "EarthGravity");
-
+    //loj: 3/15/04 do not configure force, force model has linked list of force
+    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
+    
+    //loj: 3/15/ 04 always add to force model before propSetup::SetForceModel()
+    // because PropSetup::Initialize() needs at least 1 force
+    fm->AddForce(earthGrav);
+    
     if (prop)
+    {
         propSetup->SetPropagator(prop);
+        propSetup->SetUseDrag(false);   // turn off internal drag
+    }
     
     if (fm)
     {
         propSetup->SetForceModel(fm); //loj: 3/12/04 added
-        propSetup->AddForce(earthGrav);
     }
     
     theConfigManager->AddPropSetup(propSetup);
@@ -1087,10 +1094,12 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
         AddCommandToSandbox(sandboxNum-1);
         
         InitializeSandbox(sandboxNum-1);
-        
+
         SetupRun(sandboxNum, isFromGui);
+        MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
         ExecuteSandbox(sandboxNum-1);
+        MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
     }
     catch (BaseException &e)
     {
@@ -1337,8 +1346,8 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
         sub = GetSubscriber(subs[i]);
         objTypeName = sub->GetTypeName();
         objName = sub->GetName();
-        //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-        //                              objTypeName.c_str(), objName.c_str());
+        MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+                                      objTypeName.c_str(), objName.c_str());
         sub->Initialize();
     }
 }
