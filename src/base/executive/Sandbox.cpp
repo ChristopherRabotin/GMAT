@@ -20,13 +20,13 @@
 
 #include "Sandbox.hpp"
 #include "SandboxException.hpp"
-
+#include "MessageInterface.hpp"
 
 Sandbox::Sandbox(void) :
     solarSys        (NULL),
     publisher       (NULL),
-    sequence		(NULL),
-    current			(NULL),
+    sequence            (NULL),
+    current                     (NULL),
     state           (IDLE)
 {
 }
@@ -50,7 +50,7 @@ bool Sandbox::AddObject(GmatBase *obj)
 
     std::string name = obj->GetName();
     if (name == "")
-        return false;		// No unnamed objects in the Sandbox tables
+        return false;           // No unnamed objects in the Sandbox tables
 
     // Check to see if the object is already in the map
     if (objectMap.find(name) == objectMap.end())
@@ -280,6 +280,9 @@ bool Sandbox::AddSolver(Solver *solver)
 
 bool Sandbox::AddSubscriber(Subscriber *sub)
 {
+    //MessageInterface::ShowMessage("Sandbox::AddSubscriber() name = %s\n",
+    //                              sub->GetName().c_str());
+    publisher->Subscribe(sub); //loj: 3/9/04 added
     return  AddObject(sub);
 }
 
