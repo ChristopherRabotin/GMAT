@@ -362,19 +362,22 @@ public:
    // ---------
 
    void RedrawEverything();
-   void RedrawPlotArea(); //loj: 3/10/04 added
+   void RedrawPlotArea();
    void RedrawXAxis();
    void RedrawYAxis();
-   void SetPlotTitle(const wxString &title); //loj: 3/11/04 added
    void ResetScrollbar();
+   
+   wxString GetPlotTitle(); //loj: 5/13/04 added
+   void SetPlotTitle(const wxString &title);
 
 private:
    friend class wxPlotArea;
    friend class wxPlotXAxisArea;
    friend class wxPlotYAxisArea;
-    
-   wxStaticText *mTitleText; //loj: 3/11/04 added
-   wxBoxSizer *mTopPanelSizer; //loj: 3/11/04 added
+
+   wxString mPlotTitle;
+   wxStaticText *mTitleText;
+   wxBoxSizer *mTopPanelSizer;
     
    double             m_xUnitsPerValue;
    double             m_xZoom;
