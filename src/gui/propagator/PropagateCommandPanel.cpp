@@ -65,14 +65,14 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 //loj: 2/9/04 PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName )
 PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName,
-                                              Command *cmd )
+                                              GmatCommand *cmd )
     : wxPanel(parent)
 {
     propNameString = propName;
     theCommand = cmd;
 
     //GuiInterpreter *theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //Command *theCommand = theGuiInterpreter->GetCommand(propName.c_str());
+    //GmatCommand *theCommand = theGuiInterpreter->GetCommand(propName.c_str());
     
     // Default values
     numOfModes = 1;
