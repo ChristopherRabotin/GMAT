@@ -41,6 +41,7 @@ public:
 
     // The inherited methods from StopCondition
     virtual bool AddParameter(Parameter *param);
+    virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj);
     virtual bool Evaluate();
     virtual bool Validate();
 

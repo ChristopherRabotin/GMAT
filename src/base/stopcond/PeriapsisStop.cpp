@@ -106,8 +106,7 @@ PeriapsisStop::~PeriapsisStop()
 // virtual bool AddParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
- * @return true if apoapsis stopping condition has been met;
- *   false otherwise
+ * @return true if parameter has been added, false otherwise
  */
 //------------------------------------------------------------------------------
 bool PeriapsisStop::AddParameter(Parameter *param)
@@ -118,6 +117,28 @@ bool PeriapsisStop::AddParameter(Parameter *param)
     }
 
     return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Sets object to parameter used in stop condition.
+ *
+ * @return true if object has been set.
+ */
+//------------------------------------------------------------------------------
+bool PeriapsisStop::SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+{
+    bool status = false;
+
+    if (objType == Gmat::SPACECRAFT)
+    {
+        mCartStateParam->SetObject(Gmat::SPACECRAFT, "Spacecraft", obj);
+        mKepEccParam->SetObject(Gmat::SPACECRAFT, "Spacecraft", obj);
+    }
+
+    return status;
 }
 
 //------------------------------------------------------------------------------

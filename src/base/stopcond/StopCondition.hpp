@@ -75,13 +75,14 @@ public:
         { mRepeatCount = repeatCount; }
     void SetDescription(const std::string &desc)
         { mDescription = desc; }
-    
+
     bool SetInterpolator(Interpolator *interp);
     bool SetRefFrame(RefFrame *refFrame);
     bool SetEpochParameter(Parameter *epochParam);
     
     Real GetStopEpoch();
     
+    virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj);
     virtual bool AddParameter(Parameter *param);
 
     /**

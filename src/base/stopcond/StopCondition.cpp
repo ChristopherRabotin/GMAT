@@ -198,7 +198,21 @@ bool StopCondition::SetEpochParameter(Parameter *epochParam)
 }
 
 //------------------------------------------------------------------------------
-// bool AddParameter(Parameter *param)
+// virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Sets object to parameter used in stop condition.
+ *
+ * @return true if object has been set.
+ */
+//------------------------------------------------------------------------------
+bool StopCondition::SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+{
+    return false; // base class doesn't know which object is used
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
  * Add parameter to stop condition.
@@ -210,9 +224,9 @@ bool StopCondition::AddParameter(Parameter *param)
 {
     bool added = false;
     
-    //loj: Do I really need to validate parameter before add?
-    if (param->Validate())
-    {
+    //loj: 2/26/04 Do I really need to validate parameter before add?
+    //if (param->Validate())
+    //{
         mParameters.push_back(param);
         mNumParams = mParameters.size();
         if (param->IsTimeParameter())
@@ -220,7 +234,7 @@ bool StopCondition::AddParameter(Parameter *param)
         
         SetParameter(param);
         added = true;
-    }
+    //}
 
     return added;
 }
