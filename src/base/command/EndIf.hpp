@@ -25,22 +25,22 @@
 #include "Command.hpp"
 
 
-class EndIf : public GmatCommand
+class GMAT_API EndIf : public GmatCommand
 {
 public:
-    EndIf(void);
-    virtual ~EndIf(void);
+    EndIf();
+    virtual ~EndIf();
     
     EndIf(const EndIf& ic);
     EndIf&              operator=(const EndIf& ic);
     
-    virtual bool            Initialize(void);
-    virtual bool            Execute(void);
+    virtual bool            Initialize();
+    virtual bool            Execute();
 
     virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
        // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+    virtual GmatBase* Clone() const;
 
 };
 

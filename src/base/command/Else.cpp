@@ -15,7 +15,7 @@
 //           code accordingly
 //
 /**
- * Definition for the Else command class
+ * Implementation for the Else command class
  */
 //------------------------------------------------------------------------------
 
@@ -23,93 +23,79 @@
 
 
 //------------------------------------------------------------------------------
-//  Else(void)
+//  Else()
 //------------------------------------------------------------------------------
 /**
  * Creates a Else command.  (default constructor)
  */
 //------------------------------------------------------------------------------
-Else::Else(void) :
+Else::Else() :
     GmatCommand      ("Else")
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  ~Else(void)
+//  ~Else()
 //------------------------------------------------------------------------------
 /**
  * Destroys the for command.  (destructor)
  */
 //------------------------------------------------------------------------------
-Else::~Else(void)
+Else::~Else()
 {}
 
     
 //------------------------------------------------------------------------------
-//  Else(const Else& t)
+//  Else(const Else& ec)
 //------------------------------------------------------------------------------
 /**
  * Constructor that replicates a for command.  (Copy constructor)
  *
+ * @param ec Else command to copy to create 'this' one
+ *
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
-Else::Else(const Else& ic) :
-    GmatCommand   (ic)
+Else::Else(const Else& ec) :
+    GmatCommand   (ec)
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  Else& operator=(const Else& ic)
+//  Else& operator=(const Else& ec)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the for command.
  *
+ * @param ec Else command whose values to use to assign those of 'this' Else
+ *
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
-Else& Else::operator=(const Else& ic)
+Else& Else::operator=(const Else& ec)
 {
-    if (this == &ic)
+    if (this == &ec)
         return *this;
 
-    GmatCommand::operator=(ic);
+    GmatCommand::operator=(ec);
     return *this;
 }
 
-
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 /**
- * Adds a command to the ELSE statement.
+ * Inserts the command cmd after the command prev.
  *
- * This method calls the BranchCommand base class method that adds a command
- * to the command sequence that branches off of the main mission sequence.  This
- * extension was needed so that the EndIf command can be set to point back 
- * to the head of the ELSE statement.
+ * @param cmd Command to insert.
  *
- * @return true if the Command is appended, false if an error occurs.
+ * @param prev Command after which to insert the command cmd.
+ *
+ * @return true if the cmd is inserted, false otherwise.
  */
 //------------------------------------------------------------------------------
-//bool Else::Append(GmatCommand *cmd)
-//{
-    //if (!BranchCommand::Append(cmd))
-    //    return false;
-
-    // Check for the end of "Else" branch, point that end back to this command
-    //if (cmd->GetTypeName() == "EndIf")
-    //{
-    //   cmd->Append(this);
-       // Targeter loop is complete; -1 points us back to the main sequence. 
-    //   branchToFill = -1;
-    //}
-
-    //return true;
-//}
-
 bool Else::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if we've gotten to this point, we should have inserted it into the front
@@ -119,7 +105,7 @@ bool Else::Insert(GmatCommand *cmd, GmatCommand *prev)
 }
     
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the ELSE statement.
@@ -127,7 +113,7 @@ bool Else::Insert(GmatCommand *cmd, GmatCommand *prev)
  * @return true if the Command is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Else::Initialize(void)
+bool Else::Initialize()
 {
     bool retval = GmatCommand::Initialize();
 
@@ -138,32 +124,23 @@ bool Else::Initialize(void)
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Target the variables defined for this for ELSE statement.
- *
- * This method (will eventually) runs the state machine in order to
- * determine the variable values needed to achieve the user specified 
- * goals.
+ * Execute the Else statement.
  *
  * @return true if the Command runs to completion, false if an error
  *         occurs.
  */
 //------------------------------------------------------------------------------
-bool Else::Execute(void)
+bool Else::Execute()
 {
-    bool retval = true;
-
-    //commandComplete = true;
-    //GmatCommand::Execute();
-   
-    return retval;
+   return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Else.
@@ -172,7 +149,7 @@ bool Else::Execute(void)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* Else::Clone(void) const
+GmatBase* Else::Clone() const
 {
    return (new Else(*this));
 }

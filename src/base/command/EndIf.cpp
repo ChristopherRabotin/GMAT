@@ -13,7 +13,7 @@
 // Created: 2004/01/29
 //
 /**
- * Definition for the closing line of the ENDIF Statement
+ * Implementation for the closing line of the ENDIF Statement
  */
 //------------------------------------------------------------------------------
 
@@ -22,22 +22,58 @@
 #include "BranchCommand.hpp"
 
 
-EndIf::EndIf(void) :
+//------------------------------------------------------------------------------
+//  EndIf()
+//------------------------------------------------------------------------------
+/**
+ * Creates a EndIf command.  (default constructor)
+ */
+//------------------------------------------------------------------------------
+EndIf::EndIf() :
     GmatCommand         ("EndIf")
 {
    depthChange = -1;
 }
 
 
-EndIf::~EndIf(void)
+//------------------------------------------------------------------------------
+//  ~EndIf()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the EndIf command.  (destructor)
+ */
+//------------------------------------------------------------------------------
+EndIf::~EndIf()
 {}
     
 
+//------------------------------------------------------------------------------
+//  EndIf(const EndIf& ec)
+//------------------------------------------------------------------------------
+/**
+ * Constructor that replicates a for command.  (Copy constructor)
+ *
+ * @param ec EndIf to use to construct 'this' EndIf.
+ *
+ * @return A reference to this instance.
+ */
+//------------------------------------------------------------------------------
 EndIf::EndIf(const EndIf& ic) :
     GmatCommand         (ic)
 {}
 
 
+//------------------------------------------------------------------------------
+//  EndIf& operator=(const EndIf& ec)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the EndIf command.
+ *
+ * @param ec EndIf whose values to use to construct 'this' EndIf.
+ *
+ * @return A reference to this instance.
+ */
+//------------------------------------------------------------------------------
 EndIf& EndIf::operator=(const EndIf& ic)
 {
     if (this == &ic)
@@ -48,12 +84,23 @@ EndIf& EndIf::operator=(const EndIf& ic)
 }
     
 
-bool EndIf::Initialize(void)
+//------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the EndIf statement.
+ *
+ * @return true if the Command is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool EndIf::Initialize()
 {
-    // Validate that next points to the owning for command
+    // Validate that next points to the owning If command
     if (!next)
         throw CommandException("EndIf Command not properly reconnected");
     
+   // @todo remove references to Else and ElseIf, if EndIf can only be commected 
+   //       to If.
     if (next->GetTypeName() != "If" && next->GetTypeName() != "Else" &&
         next->GetTypeName() != "ElseIf")
         throw CommandException("EndIf Command not connected to IF Command");
@@ -62,11 +109,34 @@ bool EndIf::Initialize(void)
 }
 
 
-bool EndIf::Execute(void)
+//------------------------------------------------------------------------------
+//  bool Execute()
+//------------------------------------------------------------------------------
+/**
+ * Execute the EndIf statement.
+ *
+ * @return true if the Command runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
+bool EndIf::Execute()
 {
     return true;
 }
 
+//------------------------------------------------------------------------------
+//  bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
+/**
+ * Inserts the command cmd after the command prev.
+ *
+ * @param cmd Command to insert.
+ *
+ * @param prev Command after which to insert the command cmd.
+ *
+ * @return true if the cmd is inserted, false otherwise.
+ */
+//------------------------------------------------------------------------------
 bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if inserting after End statement for branch command, we want to 
@@ -77,7 +147,7 @@ bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the EndIf.
@@ -86,7 +156,7 @@ bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* EndIf::Clone(void) const
+GmatBase* EndIf::Clone() const
 {
    return (new EndIf(*this));
 }

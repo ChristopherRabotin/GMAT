@@ -13,101 +13,86 @@
 // Created: 2004/10/21
 //
 /**
- * Definition for the ElseIf command class
+ * Implementation for the ElseIf command class
  */
 //------------------------------------------------------------------------------
 
 #include "ElseIf.hpp"
 
 //------------------------------------------------------------------------------
-//  ElseIf(void)
+//  ElseIf()
 //------------------------------------------------------------------------------
 /**
  * Creates a ElseIf command.  (default constructor)
  */
 //------------------------------------------------------------------------------
-ElseIf::ElseIf(void) :
+ElseIf::ElseIf() :
     GmatCommand      ("ElseIf")
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  ~ElseIf(void)
+//  ~ElseIf()
 //------------------------------------------------------------------------------
 /**
- * Destroys the for command.  (destructor)
+ * Destroys the ElseIf command.  (destructor)
  */
 //------------------------------------------------------------------------------
-ElseIf::~ElseIf(void)
+ElseIf::~ElseIf()
 {}
 
     
 //------------------------------------------------------------------------------
-//  ElseIf(const ElseIf& t)
+//  ElseIf(const ElseIf& ec)
 //------------------------------------------------------------------------------
 /**
  * Constructor that replicates a for command.  (Copy constructor)
  *
+ * @param ec Elseif to use to construct 'this' ElseIf.
+ *
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
-ElseIf::ElseIf(const ElseIf& ic) :
-    GmatCommand   (ic)
+ElseIf::ElseIf(const ElseIf& ec) :
+    GmatCommand   (ec)
 {
 }
 
 
 //------------------------------------------------------------------------------
-//  ElseIf& operator=(const ElseIf& ic)
+//  ElseIf& operator=(const ElseIf& ec)
 //------------------------------------------------------------------------------
 /**
- * Assignment operator for the for command.
+ * Assignment operator for the Elseif command.
+ *
+ * @param ec Elseif whose values to use to construct 'this' ElseIf.
  *
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
-ElseIf& ElseIf::operator=(const ElseIf& ic)
+ElseIf& ElseIf::operator=(const ElseIf& ec)
 {
-    if (this == &ic)
+    if (this == &ec)
         return *this;
 
-    GmatCommand::operator=(ic);
+    GmatCommand::operator=(ec);
     return *this;
 }
 
-
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 /**
- * Adds a command to the ElseIf statement.
+ * Inserts the command cmd after the command prev.
  *
- * This method calls the BranchCommand base class method that adds a command
- * to the command sequence that branches off of the main mission sequence.  This
- * extension was needed so that the EndIf command can be set to point back 
- * to the head of the ElseIf statement.
+ * @param cmd Command to insert.
  *
- * @return true if the Command is appended, false if an error occurs.
+ * @param prev Command after which to insert the command cmd.
+ *
+ * @return true if the cmd is inserted, false otherwise.
  */
 //------------------------------------------------------------------------------
-//bool ElseIf::Append(GmatCommand *cmd)
-//{
-    //if (!BranchCommand::Append(cmd))
-    //    return false;
-
-    // Check for the end of "ElseIf" branch, point that end back to this command
-    //if (cmd->GetTypeName() == "EndIf")
-    //{
-    //   cmd->Append(this);
-       // Targeter loop is complete; -1 points us back to the main sequence. 
-    //   branchToFill = -1;
-    //}
-
-    //return true;
-//}
-
-
 bool ElseIf::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    // if we've gotten to this point, we should have inserted it into the front
@@ -118,7 +103,7 @@ bool ElseIf::Insert(GmatCommand *cmd, GmatCommand *prev)
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the ElseIf statement.
@@ -126,7 +111,7 @@ bool ElseIf::Insert(GmatCommand *cmd, GmatCommand *prev)
  * @return true if the Command is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool ElseIf::Initialize(void)
+bool ElseIf::Initialize()
 {
     bool retval = GmatCommand::Initialize();
 
@@ -137,32 +122,23 @@ bool ElseIf::Initialize(void)
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Target the variables defined for this for ElseIf statement.
- *
- * This method (will eventually) runs the state machine in order to
- * determine the variable values needed to achieve the user specified 
- * goals.
+ * Execute the ElseIf statement.
  *
  * @return true if the Command runs to completion, false if an error
  *         occurs.
  */
 //------------------------------------------------------------------------------
-bool ElseIf::Execute(void)
+bool ElseIf::Execute()
 {
-    bool retval = true;
-
-    //commandComplete = true;
-    //GmatCommand::Execute();
-   
-    return retval;
+    return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the ElseIf.
@@ -171,7 +147,7 @@ bool ElseIf::Execute(void)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ElseIf::Clone(void) const
+GmatBase* ElseIf::Clone() const
 {
    return (new ElseIf(*this));
 }

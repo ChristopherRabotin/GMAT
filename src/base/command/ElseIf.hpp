@@ -40,25 +40,24 @@
  *     ElseIf statement. 
  *
  */
-class ElseIf : public GmatCommand
+class GMAT_API ElseIf : public GmatCommand
 {
 public:
-    ElseIf(void);
-    virtual ~ElseIf(void);
+    ElseIf();
+    virtual ~ElseIf();
     
     ElseIf(const ElseIf& ec);
     ElseIf&             operator=(const ElseIf& ec);
     
     // Inherited methods that need some enhancement from the base class
-    //virtual bool        Append(GmatCommand *cmd);
     virtual bool        Insert(GmatCommand *cmd, GmatCommand *prev);
     
     // Methods used to run the command
-    virtual bool        Initialize(void);
-    virtual bool        Execute(void);  // do I even need this?
+    virtual bool        Initialize();
+    virtual bool        Execute();  
 
     // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+    virtual GmatBase* Clone() const;
 
     
 protected:
