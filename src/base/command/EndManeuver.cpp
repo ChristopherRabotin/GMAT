@@ -20,7 +20,7 @@
 #include "EndManeuver.hpp"
 
 
-#define DEBUG_END_MANEUVER
+//#define DEBUG_END_MANEUVER
 
 #ifdef DEBUG_END_MANEUVER
   #include "MessageInterface.hpp"

@@ -20,7 +20,7 @@
 #include "BeginManeuver.hpp"
 
 
-#define DEBUG_BEGIN_MANEUVER
+//#define DEBUG_BEGIN_MANEUVER
 
 #ifdef DEBUG_BEGIN_MANEUVER
   #include "MessageInterface.hpp"
