@@ -22,73 +22,79 @@
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
+#include "XyPlot.hpp"
+#include "RgbColor.hpp"
 
 class XyPlotSetupPanel: public GmatPanel
 {
 public:
-    XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
+   XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    Subscriber *theSubscriber;
-    wxString *theParamList;
-    int  mNumXParams;
-    int  mNumYParams;
-    bool mXParamChanged;
-    bool mYParamChanged;
-    
-    wxBoxSizer *pageBoxSizer;
-    wxFlexGridSizer *paramGridSizer;
-    wxBoxSizer *paramBoxSizer;
-    wxBoxSizer *xButtonsBoxSizer;
-    wxBoxSizer *yButtonsBoxSizer;
-    wxBoxSizer *xSelelectedBoxSizer;
-    wxBoxSizer *ySelelectedBoxSizer;
-    wxBoxSizer *optionBoxSizer;
-    
-    wxStaticText *titleAvailbleText;
-    wxStaticText *titleXText;
-    wxStaticText *titleYText;
-    wxStaticText *titleScText;
-    wxStaticText *emptyText;
-    
-    wxListBox *paramListBox;
-    wxListBox *xSelectedListBox;
-    wxListBox *ySelectedListBox;
-    
-    wxButton *addXButton;
-    wxButton *addYButton;
-    wxButton *clearYButton;
-    wxButton *removeXButton;
-    wxButton *removeYButton;
-    
-    wxCheckBox *plotCheckBox;
-    wxComboBox *scComboBox;
+   Subscriber *mSubscriber;
+   XyPlot *mXyPlot;
+   
+   int  mNumXParams;
+   int  mNumYParams;
+   bool mXParamChanged;
+   bool mYParamChanged;
+   bool mIsColorChanged;
+   
+   std::string mSelYName;
+   std::map<std::string, RgbColor> mColorMap;
 
-    void OnAddX(wxCommandEvent& event);
-    void OnAddY(wxCommandEvent& event);
-    void OnRemoveX(wxCommandEvent& event);
-    void OnRemoveY(wxCommandEvent& event);
-    void OnClearY(wxCommandEvent& event);
-    void OnPlotCheckBoxChange(wxCommandEvent& event);
+   wxColour mLineColor;
+   
+   wxListBox *paramListBox;
+   wxListBox *xSelectedListBox;
+   wxListBox *ySelectedListBox;
+    
+   wxButton *addXButton;
+   wxButton *addYButton;
+   wxButton *clearYButton;
+   wxButton *removeXButton;
+   wxButton *removeYButton;
+   wxButton *mLineColorButton;
+   
+   wxCheckBox *plotCheckBox;
+   wxComboBox *scComboBox;
+   
+   wxFlexGridSizer *mFlexGridSizer;
+   wxBoxSizer *mParamOptionBoxSizer;
 
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
+   void OnAddX(wxCommandEvent& event);
+   void OnAddY(wxCommandEvent& event);
+   void OnRemoveX(wxCommandEvent& event);
+   void OnRemoveY(wxCommandEvent& event);
+   void OnClearY(wxCommandEvent& event);
+   void OnSelectY(wxCommandEvent& event);
+   void OnPlotCheckBoxChange(wxCommandEvent& event);
+   void OnLineColorClick(wxCommandEvent& event);
+
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
     
-    DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE();
     
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        XY_PLOT_TEXT = 92000,
-        XY_PLOT_LISTBOX,
-        XY_PLOT_ADD_X,
-        XY_PLOT_ADD_Y,
-        XY_PLOT_REMOVE_X,
-        XY_PLOT_REMOVE_Y,
-        XY_PLOT_CLEAR_Y,
-        XY_PLOT_CHECKBOX,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      TEXTCTRL = 92000,
+      LISTBOX,
+      Y_SEL_LISTBOX,
+      ADD_X,
+      ADD_Y,
+      REMOVE_X,
+      REMOVE_Y,
+      CLEAR_Y,
+      PLOT_CHECKBOX,
+      LINE_COLOR_BUTTON,
+   };
+   
+private:
+   void ShowParameterOption(const wxString &scName, bool show = true);
+   
 };
 #endif
