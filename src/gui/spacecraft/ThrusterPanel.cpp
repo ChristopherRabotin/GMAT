@@ -19,6 +19,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ThrusterPanel.hpp"
+#include "ThrusterCoefficientDialog.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -26,6 +27,7 @@
 //------------------------------
 BEGIN_EVENT_TABLE(ThrusterPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, ThrusterPanel::OnTextChange)
+   EVT_BUTTON(ID_BUTTON, ThrusterPanel::OnButtonClick)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -84,9 +86,9 @@ void ThrusterPanel::Create()
                               wxDefaultPosition, wxDefaultSize, 0 );
     removeButton = new wxButton( this, ID_BUTTON, wxT("Remove Thruster"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit C Coef."),
+    cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
                               wxDefaultPosition, wxDefaultSize, 0 );
-    kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit K Coef."),
+    kCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Impulse Coef."),
                               wxDefaultPosition, wxDefaultSize, 0 );  
                                 
     // wxComboBox 
@@ -201,3 +203,20 @@ void ThrusterPanel::OnTextChange()
 {
     theApplyButton->Enable();
 }
+
+//------------------------------------------------------------------------------
+// void OnButtonClick()
+//------------------------------------------------------------------------------
+void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
+{
+   if (event.GetEventObject() == cCoefButton)
+   {
+      ThrusterCoefficientDialog tcDlg(this);
+      tcDlg.ShowModal();       
+   } 
+   else if (event.GetEventObject() == kCoefButton)
+   {
+      ThrusterCoefficientDialog tcDlg(this);
+      tcDlg.ShowModal();
+   }            
+}    

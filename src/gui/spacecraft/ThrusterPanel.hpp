@@ -44,6 +44,7 @@ private:
     // Event Handling
     DECLARE_EVENT_TABLE();
     void OnTextChange();
+    void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
     Thruster *theThruster;
