@@ -37,15 +37,11 @@ public:
    bool operator==(const Array &right) const;
    bool operator!=(const Array &right) const;
 
-   //loj: Do we need to add thise methods to GmatBase?
-   //-----------------------------------------------------------------
-   virtual Integer SetIntegerParameter(const Integer id,
-                                       const Integer row,
-                                       const Integer col);
-   virtual Integer SetIntegerParameter(const std::string &label,
-                                       const Integer row,
-                                       const Integer col);
+   bool SetSize(const Integer row, const Integer col);
 
+   //-----------------------------------------------------------------
+   //loj: 9/20/04 Do we need to add thise methods to GmatBase?
+   //-----------------------------------------------------------------
    virtual Real GetRealParameter(const Integer id, const Integer row,
                                  const Integer col) const;
    virtual Real GetRealParameter(const std::string &label, const Integer row,
@@ -71,13 +67,12 @@ public:
   
    // methods inherited from Parameter
    virtual std::string ToString();
-   
    virtual const Rmatrix& GetMatrix() const;
-   
    virtual const std::string* GetParameterList() const;
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -85,7 +80,10 @@ public:
 
    virtual Integer GetIntegerParameter(const Integer id) const;
    virtual Integer GetIntegerParameter(const std::string &label) const;
-   
+   virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer SetIntegerParameter(const std::string &label,
+                                       const Integer value);
+  
    virtual const Rmatrix& GetRmatrixParameter(const Integer id) const;
    virtual const Rmatrix& GetRmatrixParameter(const std::string &label) const;
    virtual const Rmatrix& SetRmatrixParameter(const Integer id,
@@ -95,12 +93,14 @@ public:
    
 protected:
 
+   Integer mNumRows;
+   Integer mNumCols;
+   bool mSizeSet;
    Rmatrix mRmatValue;
-    
+   
    enum
    {
-      SIZE = ParameterParamCount,
-      NUM_ROWS,
+      NUM_ROWS = ParameterParamCount,
       NUM_COLS,
       RMAT_VALUE,
       SINGLE_VALUE,

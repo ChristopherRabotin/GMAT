@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_ARRAY 1
+#define DEBUG_ARRAY 1
 
 //---------------------------------
 // static data
@@ -31,9 +31,8 @@
 const std::string
 Array::PARAMETER_TEXT[ArrayParamCount - ParameterParamCount] =
 {
-   "Size",
-   "NumCol",
-   "NumRow",
+   "NumRows",
+   "NumCols",
    "RmatValue",
    "SingleValue",
    "RowValue",
@@ -43,7 +42,6 @@ Array::PARAMETER_TEXT[ArrayParamCount - ParameterParamCount] =
 const Gmat::ParameterType
 Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 {
-   Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::RMATRIX_TYPE,
@@ -73,7 +71,14 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 Array::Array(const std::string &name, const std::string &desc,
              const std::string &unit)
    : Parameter(name, "Array", USER_PARAM, NULL, desc, unit, false)
-{  
+{
+   mNumRows = 0;
+   mNumCols = 0;
+   mSizeSet = false;
+   
+   // Parameter data
+   mIsPlottable = false;
+   
    // GmatBase data
    parameterCount = ArrayParamCount;
 }
@@ -90,6 +95,9 @@ Array::Array(const std::string &name, const std::string &desc,
 Array::Array(const Array &copy)
    : Parameter(copy)
 {
+   mNumRows = copy.mNumRows;
+   mNumCols = copy.mNumCols;
+   mSizeSet = copy.mSizeSet;
    mRmatValue = copy.mRmatValue;
 }
 
@@ -109,6 +117,9 @@ Array& Array::operator= (const Array& right)
    if (this != &right)
    {
       Parameter::operator=(right);
+      mNumRows = right.mNumRows;
+      mNumCols = right.mNumCols;
+      mSizeSet = right.mSizeSet;
       mRmatValue = right.mRmatValue;
    }
 
@@ -154,43 +165,6 @@ bool Array::operator!=(const Array &right) const
 //----- Real parameter need be added to GmatBase
 //------------------------------------------------
 
-//----- Integer parameter
-
-//------------------------------------------------------------------------------
-// Integer SetIntegerParameter(const Integer id, const Integer row,
-//                             const Integer col)
-//------------------------------------------------------------------------------
-Integer Array::SetIntegerParameter(const Integer id, const Integer row,
-                                   const Integer col)
-{
-   switch (id)
-   {
-   case SIZE:
-      MessageInterface::ShowMessage
-         ("Array::SetIntegerParameter() SetSize to %d,%d\n", row, col);
-      mRmatValue.SetSize(row, col);
-      return row;
-   default:
-      throw ParameterException
-         ("Array::SetIntegerParameter() Unknown Parameter Name" +
-          PARAMETER_TEXT[id]);
-      //return Parameter::SetIntegerParameter(id, row, col);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Integer SetIntegerParameter(const std:string &label, const Integer row,
-//                             const Integer col)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Integer Array::SetIntegerParameter(const std::string &label, const Integer row,
-                                   const Integer col)
-{
-   return SetIntegerParameter(GetParameterID(label), row, col);
-}
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id, const Integer row,
@@ -264,25 +238,22 @@ Real Array::SetRealParameter(const std::string &label, const Real value,
 //------------------------------------------------------------------------------
 Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
 {
-   Integer row, col;
-   mRmatValue.GetSize(row, col);
-   
    switch (id)
    {
    case ROW_VALUE:
       {
-         Rvector rvec(col);
+         Rvector rvec(mNumCols);
       
-         for (int i=0; i<col; i++)
+         for (int i=0; i<mNumCols; i++)
             rvec.SetElement(i, mRmatValue.GetElement(index, i));
 
          return rvec;
       }
    case COL_VALUE:
       {
-         Rvector rvec(row);
+         Rvector rvec(mNumRows);
       
-         for (int i=0; i<row; i++)
+         for (int i=0; i<mNumRows; i++)
             rvec.SetElement(i, mRmatValue.GetElement(i, index));
 
          return rvec;
@@ -315,23 +286,22 @@ Rvector Array::GetRvectorParameter(const std::string &label,
 const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value,
                                           const Integer index)
 {
-   Integer row, col;
-   mRmatValue.GetSize(row, col);
    
 #if DEBUG_ARRAY
    MessageInterface::ShowMessage
-      ("Array::SetRvectorParameter() index=%d, row=%d, col=%d\n", index, row, col);
+      ("Array::SetRvectorParameter() index=%d, mNumRows=%d, mNumCols=%d\n",
+       index, mNumRows, mNumCols);
 #endif
    
    switch (id)
    {
    case ROW_VALUE:
-      for (int i=0; i<col; i++)
+      for (int i=0; i<mNumCols; i++)
          mRmatValue.SetElement(index, i, value(i));
       
       return value;
    case COL_VALUE:
-      for (int i=0; i<row; i++)
+      for (int i=0; i<mNumRows; i++)
          mRmatValue.SetElement(i, index, value(i));
       
       return value;
@@ -366,8 +336,6 @@ const Rvector& Array::SetRvectorParameter(const std::string &label,
 //------------------------------------------------------------------------------
 /**
  * @return parameter value converted to std::string.
- *
- * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
 std::string Array::ToString()
@@ -383,11 +351,16 @@ std::string Array::ToString()
 //------------------------------------------------------------------------------
 /**
  * Retrieves Rmatrix value of parameter without evaluating.
+ *
+ * @exception <ParameterException> thrown if matrix size has not been set.
  */
 //------------------------------------------------------------------------------
 const Rmatrix& Array::GetMatrix() const
 {
-   return mRmatValue;
+   if (mSizeSet)
+      return mRmatValue;
+   else
+      throw ParameterException("The size has not been set for " + GetName());      
 }
 
 //------------------------------------------------------------------------------
@@ -448,26 +421,23 @@ std::string Array::GetParameterTypeString(const Integer id) const
 //----- Integer parameter
 
 //------------------------------------------------------------------------------
-// Integer GetIntegerParameter(const Integer id) const
+// virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Array::GetIntegerParameter(const Integer id) const
 {
-   Integer row, col;
-   mRmatValue.GetSize(row, col);
-
    switch (id)
    {
    case NUM_ROWS:
-      return row;
+      return mNumRows;
    case NUM_COLS:
-      return col;
+      return mNumCols;
    default:
       return Parameter::GetIntegerParameter(id);
    }
 }
 
 //------------------------------------------------------------------------------
-// Integer GetIntegerParameter(const std::string &label) const
+// virtual Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
@@ -478,6 +448,60 @@ Integer Array::GetIntegerParameter(const std::string &label) const
    return GetIntegerParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ *
+ * @exception <ParameterException> thrown if Row or Column already has been set.
+ */
+//------------------------------------------------------------------------------
+Integer Array::SetIntegerParameter(const Integer id, const Integer value)
+{
+   switch (id)
+   {
+   case NUM_ROWS:
+      if (mNumRows == 0)
+         mNumRows = value;
+      else
+         throw ParameterException("Row alrealy has been set for " + GetName());
+
+      if (mNumCols > 0 && !mSizeSet)
+      {
+         mRmatValue.SetSize(mNumRows, mNumCols);
+         mSizeSet = true;
+      }
+      return value;
+   case NUM_COLS:
+      if (mNumCols == 0)
+         mNumCols = value;
+      else
+         throw ParameterException("Column alrealy has been set for " + GetName());
+
+      if (mNumRows > 0 && !mSizeSet)
+      {
+         mRmatValue.SetSize(mNumRows, mNumCols);
+         mSizeSet = true;
+      }
+      return value;
+   default:
+      return Parameter::SetIntegerParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer Array::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
 //----- Rmatrix parameter
 
 //------------------------------------------------------------------------------
@@ -485,16 +509,25 @@ Integer Array::GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
+ *
+ * @exception <ParameterException> thrown if matrix size has not been set.
  */
 //------------------------------------------------------------------------------
 const Rmatrix& Array::GetRmatrixParameter(const Integer id) const
 {
-   switch (id)
+   if (mSizeSet)
    {
-   case RMAT_VALUE:
-      return mRmatValue;
-   default:
-      return Parameter::GetRmatrixParameter(id);
+      switch (id)
+      {
+      case RMAT_VALUE:
+         return mRmatValue;
+      default:
+         return Parameter::GetRmatrixParameter(id);
+      }
+   }
+   else
+   {
+      throw ParameterException("The size has not been set for " + GetName());
    }
 }
 
@@ -518,18 +551,27 @@ const Rmatrix& Array::GetRmatrixParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
+ *
+ * @exception <ParameterException> thrown if matrix size has not been set.
  */
 //------------------------------------------------------------------------------
 const Rmatrix& Array::SetRmatrixParameter(const Integer id,
                                           const Rmatrix &value)
 {
-   switch (id)
+   if (mSizeSet)
    {
-   case RMAT_VALUE:
-      mRmatValue = value;
-      return value;
-   default:
-      return Parameter::SetRmatrixParameter(id, value);
+      switch (id)
+      {
+      case RMAT_VALUE:
+         mRmatValue = value;
+         return value;
+      default:
+         return Parameter::SetRmatrixParameter(id, value);
+      }
+   }
+   else
+   {
+      throw ParameterException("The size has not been set for " + GetName());
    }
 }
 
