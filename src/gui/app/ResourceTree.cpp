@@ -85,6 +85,20 @@ void ResourceTree::UpdateResources()
         this->AppendItem(mSpacecraftItem, wxT(scname), ICON_SPACECRAFT, -1,
                          new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
     };
+    
+    // update propagator
+    StringArray propSetupNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+    size = propSetupNames.size();
+
+    this->DeleteChildren(mPropagatorItem);
+    
+    for (int i = 0; i<size; i++)
+    {
+        wxString scname = wxString(propSetupNames[i].c_str());
+        MessageInterface::ShowMessage(" Propagator name: " + propSetupNames[i] + "\n");
+        this->AppendItem(mPropagatorItem, wxT(scname), -1, -1,
+                         new GmatTreeItemData(wxT(scname), DEFAULT_PROPAGATOR));
+    };
 
     // update other tree items
 }
@@ -98,6 +112,7 @@ void ResourceTree::AddDefaultResources()
                                   new GmatTreeItemData(wxT("Resources"),
                                   RESOURCES_FOLDER));
 
+    //loj: commented out
 //      wxTreeItemId spacecraftItem = this->AppendItem(resource, wxT("Spacecraft"),
 //                                    -1, -1, new GmatTreeItemData(wxT("Spacecraft"),
 //                                    SPACECRAFT_FOLDER));
@@ -121,11 +136,18 @@ void ResourceTree::AddDefaultResources()
                                      CONSTELLATIONS_FOLDER));
     SetItemImage(constellationItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
-    wxTreeItemId propagatorItem = this->AppendItem(resource,
+    //loj: commented out
+//      wxTreeItemId propagatorItem = this->AppendItem(resource,
+//                       wxT("Propagators"), -1, -1,
+//                       new GmatTreeItemData(wxT("Propagators"),
+//                       PROPAGATORS_FOLDER));
+//      SetItemImage(propagatorItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+    
+    mPropagatorItem = this->AppendItem(resource,
                      wxT("Propagators"), -1, -1,
                      new GmatTreeItemData(wxT("Propagators"),
                      PROPAGATORS_FOLDER));
-    SetItemImage(propagatorItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mPropagatorItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
     
     wxTreeItemId universeItem = this->AppendItem(resource, wxT("Universe"), -1, -1,
                      new GmatTreeItemData(wxT("Universe"), UNIVERSE_FOLDER));
@@ -153,11 +175,12 @@ void ResourceTree::AddDefaultResources()
                      new GmatTreeItemData(wxT("Ground Stations"), GROUNDSTATIONS_FOLDER));
 
     AddDefaultBodies(universeItem);
-//      AddDefaultSpacecraft(spacecraftItem);
+//loj:      AddDefaultSpacecraft(spacecraftItem);
     AddDefaultSpacecraft(mSpacecraftItem);
     AddDefaultFormations(formationItem);
     AddDefaultConstellations(constellationItem);
-    AddDefaultPropagators(propagatorItem);
+//loj:      AddDefaultPropagators(propagatorItem);
+    AddDefaultPropagators(mPropagatorItem);
     AddDefaultSolvers(solverItem);
     AddDefaultPlots(plotItem);
     AddDefaultInterfaces(interfaceItem);
@@ -210,10 +233,11 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId spacecraft)
                          new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
     };
 
-    this->AppendItem(spacecraft, wxT("TempSat1"), ICON_SPACECRAFT, -1,
-                     new GmatTreeItemData(wxT("TempSat1"), DEFAULT_SPACECRAFT));
-    this->AppendItem(spacecraft, wxT("TempSat2"), ICON_SPACECRAFT, -1,
-                     new GmatTreeItemData(wxT("TempSat2"), DEFAULT_SPACECRAFT));
+    //loj: commented out
+//      this->AppendItem(spacecraft, wxT("TempSat1"), ICON_SPACECRAFT, -1,
+//                       new GmatTreeItemData(wxT("TempSat1"), DEFAULT_SPACECRAFT));
+//      this->AppendItem(spacecraft, wxT("TempSat2"), ICON_SPACECRAFT, -1,
+//                       new GmatTreeItemData(wxT("TempSat2"), DEFAULT_SPACECRAFT));
 }
 
 
@@ -260,12 +284,24 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId constellation)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
 {
-    this->AppendItem(propagator, wxT("RKV89"), -1, -1,
-          new GmatTreeItemData(wxT("RKV89"), DEFAULT_PROPAGATOR));
-    this->AppendItem(propagator, wxT("RKV45"), -1, -1,
-          new GmatTreeItemData(wxT("RKV45"), DEFAULT_PROPAGATOR));
-    this->AppendItem(propagator, wxT("Cowell"), -1, -1,
-          new GmatTreeItemData(wxT("Cowell"), DEFAULT_PROPAGATOR));
+    MessageInterface::ShowMessage(" In ResourceTree::AddDefaultPropagators()\n");
+    StringArray propSetupNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+    int size = propSetupNames.size();
+    for (int i = 0; i<size; i++)
+    {
+        wxString scname = wxString(propSetupNames[i].c_str());
+        MessageInterface::ShowMessage(" SC name: " + propSetupNames[i] + "\n");
+        this->AppendItem(propagator, wxT(scname), -1, -1,
+                         new GmatTreeItemData(wxT(scname), DEFAULT_PROPAGATOR));
+    };
+
+    //loj: commented out
+//      this->AppendItem(propagator, wxT("RKV89"), -1, -1,
+//            new GmatTreeItemData(wxT("RKV89"), DEFAULT_PROPAGATOR));
+//      this->AppendItem(propagator, wxT("RKV45"), -1, -1,
+//            new GmatTreeItemData(wxT("RKV45"), DEFAULT_PROPAGATOR));
+//      this->AppendItem(propagator, wxT("Cowell"), -1, -1,
+//            new GmatTreeItemData(wxT("Cowell"), DEFAULT_PROPAGATOR));
 }
 
 //------------------------------------------------------------------------------
