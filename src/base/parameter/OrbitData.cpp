@@ -486,6 +486,11 @@ Real OrbitData::GetSphReal(const std::string &str)
       return mSphState[RAV];
    else if (str == "SphDecV")
       return mSphState[DECV];
+   else if (str == "Altitude") //loj: 11/5/04 added
+   {
+      //loj: Do I need to use other radius?
+      return mSphState[RMAG] - mCentralBody->GetEquatorialRadius();
+   }
    else
    {
       throw ParameterException("OrbitData::GetSphReal() Unknown parameter name: " +
@@ -590,14 +595,15 @@ void OrbitData::InitializeRefObjects()
    
    Integer id = mSpacecraft->GetParameterID("ReferenceBody");
    std::string bodyName = mSpacecraft->GetStringParameter(id);
-   CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
+   //loj: 11/5/04 CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
+   mCentralBody = mSolarSystem->GetBody(bodyName);
    
-   if (!centralBody)
+   if (!mCentralBody)
       throw ParameterException("OrbitData::GetCartState() Body not found in the "
                                "SolarSystem: " + bodyName + "\n");
 
    //assume gravitational constant doesn't change through the mission run
-   mGravConst = centralBody->GetGravitationalConstant();
+   mGravConst = mCentralBody->GetGravitationalConstant();
 }
 
 //------------------------------------------------------------------------------

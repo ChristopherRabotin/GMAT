@@ -14,9 +14,10 @@
 // Modified: Wendy Shoan 2004/04/01 added OrbitPeriod
 //
 /**
- * Declares other Keplerian related parameter classes.
+ * Declares other orbit related parameter classes.
  *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
- *   RadApoapsis, RadPeriapais, C3Energy, Energy
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy, Altitude
+ *
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitalParameters_hpp
@@ -294,6 +295,37 @@ public:
    
 protected:
 
+};
+
+//loj: 11/05/04 added
+//==============================================================================
+//                              Altitude
+//==============================================================================
+/**
+ * Declares Altitude class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API Altitude : public OrbitReal
+{
+public:
+   
+   Altitude(const std::string &name = "",
+          GmatBase *obj = NULL,
+          const std::string &desc = "",
+          const std::string &unit = "");
+   Altitude(const Altitude &copy);
+   const Altitude& operator=(const Altitude &right);
+   virtual ~Altitude();
+   
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+   
 };
 
 

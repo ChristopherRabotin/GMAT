@@ -69,7 +69,7 @@ protected:
    
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
-   
+   CelestialBody *mCentralBody; //loj: 11/5/04 added
 
    enum {PX, PY, PZ, VX, VY, VZ};
    enum {SMA, ECC, INC, RAAN, AOP, TA};

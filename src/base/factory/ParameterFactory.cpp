@@ -112,6 +112,8 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SphDecV(withName);
    if (ofType == "SphElem")
       return new SphElem(withName);
+   if (ofType == "Altitude")
+      return new Altitude(withName); //loj: 11/4/04 added
 
    // Orbital parameters
    if (ofType == "VelApoapsis")
@@ -195,6 +197,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("RAV");
       creatables.push_back("DECV");
       creatables.push_back("SphElem");
+      creatables.push_back("Altitude"); //loj: 11/4/04 added
 
       // Orbital parameters
       creatables.push_back("VelApoapsis");

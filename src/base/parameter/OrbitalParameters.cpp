@@ -13,8 +13,9 @@
 // Created: 2004/03/25
 //
 /**
- * Implements Orbital related parameter classes.
- *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod, RadPer, RadApo
+ * Implements other orbit related parameter classes.
+ *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy, Altitude
  */
 //------------------------------------------------------------------------------
 #include "OrbitalParameters.hpp"
@@ -840,7 +841,7 @@ GmatBase* RadPeriapsis::Clone(void) const
 //                              C3Energy
 //==============================================================================
 /**
- * Implements radius of periapsis.
+ * Implements orbit c3 energy.
  */
 //------------------------------------------------------------------------------
 
@@ -951,7 +952,7 @@ GmatBase* C3Energy::Clone(void) const
 //                              Energy
 //==============================================================================
 /**
- * Implements radius of periapsis.
+ * Implements orbit energy.
  */
 //------------------------------------------------------------------------------
 
@@ -1055,6 +1056,117 @@ bool Energy::Evaluate()
 GmatBase* Energy::Clone(void) const
 {
    return new Energy(*this);
+}
+
+
+//==============================================================================
+//                              Altitude
+//==============================================================================
+/**
+ * Implements spcecraft altitude.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Altitude(const std::string &name, GmatBase *obj,
+//          const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+Altitude::Altitude(const std::string &name, GmatBase *obj,
+                   const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "Altitude", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// Altitude(const Altitude &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+Altitude::Altitude(const Altitude &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const Altitude& operator=(const Altitude &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const Altitude&
+Altitude::operator=(const Altitude &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~Altitude()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+Altitude::~Altitude()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Altitude::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("Altitude");    
+   
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* Altitude::Clone(void) const
+{
+   return new Altitude(*this);
 }
 
 
