@@ -27,18 +27,18 @@
 // static data
 //---------------------------------
 
-/* placeholder - may be needed later
 const std::string
 DynamicAxes::PARAMETER_TEXT[DynamicAxesParamCount - AxisSystemParamCount] =
 {
-   "",
+   "Epoch",
 };
 
 const Gmat::ParameterType
 DynamicAxes::PARAMETER_TYPE[DynamicAxesParamCount - AxisSystemParamCount] =
 {
+   Gmat::REAL_TYPE,
+   //Gmat::A1MJD_TYPE, // but no access methods available - should be TaiMjd?
 };
-*/
 
 //------------------------------------------------------------------------------
 // public methods
@@ -151,10 +151,10 @@ const A1Mjd& DynamicAxes::GetEpoch() const
  *
  */
 //---------------------------------------------------------------------------
-//void DynamicAxes::Initialize()
-//{
-//   AxisSystem::Initialize();
-//}
+void DynamicAxes::Initialize()
+{
+   AxisSystem::Initialize();
+}
 
 
 //------------------------------------------------------------------------------
@@ -172,13 +172,13 @@ const A1Mjd& DynamicAxes::GetEpoch() const
  *
  */
 //------------------------------------------------------------------------------
-/*std::string DynamicAxes::GetParameterText(const Integer id) const
+std::string DynamicAxes::GetParameterText(const Integer id) const
 {
    if (id >= AxisSystemParamCount && id < DynamicAxesParamCount)
       return PARAMETER_TEXT[id - AxisSystemParamCount];
    return AxisSystem::GetParameterText(id);
 }
-*/
+
 //------------------------------------------------------------------------------
 //  Integer  GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
@@ -191,7 +191,7 @@ const A1Mjd& DynamicAxes::GetEpoch() const
  *
  */
 //------------------------------------------------------------------------------
-/*Integer DynamicAxes::GetParameterID(const std::string &str) const
+Integer DynamicAxes::GetParameterID(const std::string &str) const
 {
    for (Integer i = AxisSystemParamCount; i < DynamicAxesParamCount; i++)
    {
@@ -201,7 +201,7 @@ const A1Mjd& DynamicAxes::GetEpoch() const
    
    return AxisSystem::GetParameterID(str);
 }
-*/
+
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType  GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
@@ -214,14 +214,14 @@ const A1Mjd& DynamicAxes::GetEpoch() const
  *
  */
 //------------------------------------------------------------------------------
-/*Gmat::ParameterType DynamicAxes::GetParameterType(const Integer id) const
+Gmat::ParameterType DynamicAxes::GetParameterType(const Integer id) const
 {
    if (id >= AxisSystemParamCount && id < DynamicAxesParamCount)
       return PARAMETER_TYPE[id - AxisSystemParamCount];
    
    return AxisSystem::GetParameterType(id);
 }
-*/
+
 //------------------------------------------------------------------------------
 //  std::string  GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
@@ -234,8 +234,85 @@ const A1Mjd& DynamicAxes::GetEpoch() const
  *
  */
 //------------------------------------------------------------------------------
-/*std::string DynamicAxes::GetParameterTypeString(const Integer id) const
+std::string DynamicAxes::GetParameterTypeString(const Integer id) const
 {
    return AxisSystem::PARAM_TYPE_STRING[GetParameterType(id)];
 }
-*/
+
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real DynamicAxes::GetRealParameter(const Integer id) const
+{
+   if (id == EPOCH) return epoch.Get();  // modify later????????????
+   return AxisSystem::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real DynamicAxes::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == EPOCH)
+   {
+      epoch.Set(value);
+      return true;
+   }
+   return AxisSystem::SetRealParameter(id,value);
+}
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real DynamicAxes::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const std::string &label, const Real value) 
+//------------------------------------------------------------------------------
+/**
+ * This method sets the real value, given the input parameter label.
+ *
+ * @param label label for the requested parameter.
+ * @param value to use to set the parameter.
+ *
+ * @return real value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Real DynamicAxes::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
