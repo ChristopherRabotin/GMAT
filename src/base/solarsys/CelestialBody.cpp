@@ -1833,8 +1833,8 @@ bool CelestialBody::ReadDatFile()
 
    fscanf(fp, "%lg\n", &mu ); mu = (Real)mu;
    fscanf(fp, "%lg\n", &equatorialRadius ); equatorialRadius = (Real)equatorialRadius;
-   equatorialRadius  = equatorialRadius / 1000.0;
-   mu                = mu / 1.0e09;
+   equatorialRadius  = equatorialRadius / 1000.0;  // -> Km
+   mu                = mu / 1.0e09;                // -> Km^3/sec^2
    return true;
 }
 
