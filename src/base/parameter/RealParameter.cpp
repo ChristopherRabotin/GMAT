@@ -191,7 +191,7 @@ Gmat::ParameterType RealParameter::GetParameterType(const Integer id) const
     switch (id)
     {
     case PARAM_1:
-        return RealParameter::PARAMETER_TYPE[id];
+        return RealParameter::PARAMETER_TYPE[id - ParameterParamCount];
     default:
         return Parameter::GetParameterType(id);
     }
@@ -219,7 +219,7 @@ std::string RealParameter::GetParameterText(const Integer id)
     switch (id)
     {
     case PARAM_1:
-        return PARAMETER_TEXT[id];
+        return PARAMETER_TEXT[id - ParameterParamCount];
     default:
         return Parameter::GetParameterText(id);
     }
@@ -233,7 +233,7 @@ Integer RealParameter::GetParameterID(const std::string str)
     for (int i=0; i<RealParameterCount; i++)
     {
         if (str == PARAMETER_TEXT[i])
-            return i;
+            return i + ParameterParamCount;
     }
    
     return Parameter::GetParameterID(str);
@@ -254,21 +254,6 @@ Real RealParameter::GetRealParameter(const Integer id)
 }
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real RealParameter::GetRealParameter(const std::string &label)
-{
-   if (label == "Param1")
-       return mValue;
-   else
-       return RealParameter::GetRealParameter(label);
-}
-
-//------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real RealParameter::SetRealParameter(const Integer id, const Real value)
@@ -281,6 +266,21 @@ Real RealParameter::SetRealParameter(const Integer id, const Real value)
     default:
         return Parameter::SetRealParameter(id, value);
     }
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real RealParameter::GetRealParameter(const std::string &label)
+{
+   if (label == "Param1")
+       return mValue;
+   else
+       return RealParameter::GetRealParameter(label);
 }
 
 //------------------------------------------------------------------------------

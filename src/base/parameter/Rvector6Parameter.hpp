@@ -55,7 +55,7 @@ protected:
     
     enum
     {
-        PARAM_1,
+        PARAM_1 = ParameterParamCount,
         PARAM_2,
         PARAM_3,
         PARAM_4,

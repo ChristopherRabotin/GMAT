@@ -48,9 +48,9 @@ public:
     virtual std::string GetParameterTypeString(const Integer id) const;
     virtual std::string GetParameterText(const Integer id);
     virtual Integer GetParameterID(const std::string str);
-    virtual Real GetRealParameter(const Integer id);
-    virtual Real GetRealParameter(const std::string &label);
+    virtual Real GetRealParameter(const Integer id); //loj:1/23 switch the line
     virtual Real SetRealParameter(const Integer id, const Real value);
+    virtual Real GetRealParameter(const std::string &label);
     virtual Real SetRealParameter(const std::string &label, const Real value);
     
 protected:
@@ -59,7 +59,7 @@ protected:
     
     enum
     {
-        PARAM_1 = 0,
+        PARAM_1 = ParameterParamCount,
         RealParameterCount
     };
     

@@ -204,7 +204,7 @@ const std::string* Rvector6Parameter::GetParameterList() const
 Gmat::ParameterType Rvector6Parameter::GetParameterType(const Integer id) const
 {
     if (id >= PARAM_1 && id <= PARAM_6)
-        return PARAMETER_TYPE[id];
+        return PARAMETER_TYPE[id - ParameterParamCount];
     else
         return Parameter::GetParameterType(id);
 }
@@ -226,7 +226,7 @@ std::string Rvector6Parameter::GetParameterTypeString(const Integer id) const
 std::string Rvector6Parameter::GetParameterText(const Integer id)
 {
     if (id >= PARAM_1 && id <= PARAM_6)
-        return PARAMETER_TEXT[id];
+        return PARAMETER_TEXT[id - ParameterParamCount];
     else
         return Parameter::GetParameterText(id);
 }
@@ -238,8 +238,8 @@ Integer Rvector6Parameter::GetParameterID(const std::string str)
 {
     for (int i=0; i<Rvector6ParameterCount; i++)
     {
-        if (str == PARAMETER_TEXT[i])
-            return i;
+        if (str == PARAMETER_TEXT[i - ParameterParamCount])
+            return i + ParameterParamCount;
     }
    
     return Parameter::GetParameterID(str);
