@@ -1852,7 +1852,9 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
          SetupRun(sandboxNum, isFromGui);
          //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
+         runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
+         runState = Gmat::IDLE;
          //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
       }
       catch (BaseException &e)
@@ -1874,6 +1876,42 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
       MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
    }
 
+   return status;
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetUserInterrupt()
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if the user has requested that the run stop or pause.
+ * 
+ * This method is called by the Sandbox periodically during a run to determine
+ * if the user has requested that the run terminate before the mission sequence
+ * has finished executing.
+ * 
+ * @retval The expected state of the system (RUNNING, PAUSED, or IDLE).
+ */
+Gmat::RunState Moderator::GetUserInterrupt()
+{
+   Gmat::RunState status = runState;
+   
+   //// Test code for the polling function -- stop on the 5th call
+   //static Integer tester = 0;
+   //++tester;
+   //if (tester == 5)
+   //   status = Gmat::IDLE;
+   
+   // DJC: This part needs to be filled out for polling the UI
+   // if (the stop button was pressed)   // Should uncomment in build 3
+   //    status = Gmat::IDLE;            // when GUI is ready 
+   //
+   // if (the pause button was pressed)  // Commented until build 4
+   //    status = Gmat::PAUSED;
+   //
+   // if (the resume button was pressed) // Commented until build 4
+   //    status = Gmat::RUNNING;
+   //
    return status;
 }
 
@@ -2702,7 +2740,8 @@ Moderator::Moderator()
    isRunReady = false;
    theDefaultSolarSystem = NULL;
    theDefaultSlpFile = NULL;
-
+   runState = Gmat::IDLE;
+   
    theFactoryManager = FactoryManager::Instance();
    theConfigManager = ConfigManager::Instance();
    theFileManager = FileManager::Instance();

@@ -24,9 +24,9 @@
 #include "gmatdefs.hpp"
 
 // Core classes
-#include "Publisher.hpp"
 #include "GmatBase.hpp"
 #include "Command.hpp"
+#include "Publisher.hpp"
 
 #include "Spacecraft.hpp"
 #include "PropSetup.hpp"
@@ -35,12 +35,13 @@
 #include "Solver.hpp"
 #include "Burn.hpp"
 
+class Moderator;        // Forward reference for the moderator pointer
 
 class GMAT_API Sandbox
 {
 public:
-   Sandbox(void);
-   ~Sandbox(void);
+   Sandbox();
+   ~Sandbox();
 
    // Setup methods
    bool AddObject(GmatBase *obj);
@@ -62,10 +63,10 @@ public:
    Spacecraft* GetSpacecraft(std::string name);
     
    // Execution methods
-   bool Initialize(void);
-   bool Execute(void);
-   bool Interrupt(void);
-   void Clear(void);
+   bool Initialize();
+   bool Execute();
+   bool Interrupt();
+   void Clear();
 
 protected:
     
@@ -91,6 +92,8 @@ private:
    GmatCommand   *sequence;
    /// The executing Command
    GmatCommand   *current;
+   /// Pointer to the moderator, used to check Pause/Stop status
+   Moderator     *moderator;
    /// Execution mode for the sandbox
    runMode       state;
 

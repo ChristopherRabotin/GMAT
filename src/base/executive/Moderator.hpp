@@ -219,6 +219,7 @@ public:
    // Sandbox
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1, bool isFromGui = false);
+   Gmat::RunState GetUserInterrupt();
 
    // Script
    bool InterpretScript(const std::string &scriptFileName);
@@ -314,6 +315,7 @@ private:
    bool isPlanetaryFileInUse[PlanetaryFileCount];
    static const std::string PLANETARY_SOURCE_STRING[PlanetaryFileCount];
    static const Integer HIGHEST_PRIORITY = 10;
+   Gmat::RunState runState;
 };
 
 #endif // Moderator_hpp

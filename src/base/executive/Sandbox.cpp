@@ -19,6 +19,7 @@
 
 
 #include "Sandbox.hpp"
+#include "Moderator.hpp"
 #include "SandboxException.hpp"
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
@@ -28,11 +29,12 @@
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox(void)
 //------------------------------------------------------------------------------
-Sandbox::Sandbox(void) :
+Sandbox::Sandbox() :
    solarSys        (NULL),
    publisher       (NULL),
    sequence        (NULL),
    current         (NULL),
+   moderator       (NULL),
    state           (IDLE)
 {
 }
@@ -41,7 +43,7 @@ Sandbox::Sandbox(void) :
 //------------------------------------------------------------------------------
 // ~Sandbox(void)
 //------------------------------------------------------------------------------
-Sandbox::~Sandbox(void)
+Sandbox::~Sandbox()
 {
    if (solarSys)
       delete solarSys;
@@ -188,9 +190,12 @@ Spacecraft* Sandbox::GetSpacecraft(std::string name)
 //------------------------------------------------------------------------------
 // bool Initialize(void)
 //------------------------------------------------------------------------------
-bool Sandbox::Initialize(void)
+bool Sandbox::Initialize()
 {
    bool rv = false;
+   
+   if (moderator == NULL)
+      moderator = Moderator::Instance();
 
    // Already initialized
    if (state == INITIALIZED)
@@ -249,7 +254,7 @@ bool Sandbox::Initialize(void)
 //------------------------------------------------------------------------------
 // bool Execute(void)
 //------------------------------------------------------------------------------
-bool Sandbox::Execute(void)
+bool Sandbox::Execute()
 {
    
    bool rv = true;
@@ -263,9 +268,14 @@ bool Sandbox::Execute(void)
 
    while (current) {
       // First check to see if the run should be interrupted
-      if (Interrupt())
-         break;
+      if (Interrupt()) {
+         MessageInterface::ShowMessage("Sandbox::Execution interrupted by Moderator\n");
+         return rv;
+      }
         
+      // MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
+      //                               current->GetTypeName().c_str());
+
       if (current->GetTypeName() == "Target") {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
             currentState = Gmat::RUNNING;
@@ -303,36 +313,39 @@ bool Sandbox::Execute(void)
 //------------------------------------------------------------------------------
 // bool Interrupt(void)
 //------------------------------------------------------------------------------
-bool Sandbox::Interrupt(void)
+bool Sandbox::Interrupt()
 {
-    // We'll want something like this in build 2, so the user can interrupt
-    // a run:
-    //
-    // Integer interruptType =  moderator->GetUserInterrupt();
-    // switch (interruptType) {
-    //     case 1:   // Pause
-    //         state = PAUSED;
-    //         break;
-    //
-    //     case 2:   // Stop
-    //         state = STOPPED;
-    //         break;
-    //
-    //     case 3:   // Reset, which is also the fefault value
-    //     default:
-    //         state = RESET;
-    //         break;
-    //
-    // }
+   // Ask the moderator for the current RunState:
+   Gmat::RunState interruptType =  moderator->GetUserInterrupt();
     
-    return false;
+   switch (interruptType) {
+      case Gmat::PAUSED:   // Pause
+         state = PAUSED;
+         break;
+    
+      case Gmat::IDLE:     // Stop puts GMAT into the Idle state
+         state = STOPPED;
+         break;
+    
+      case Gmat::RUNNING:   // Pause
+         state = RUNNING;
+         break;
+    
+      default:
+         break;
+   }
+   
+   if ((state == PAUSED) || (state == STOPPED))
+      return true;
+      
+   return false;
 }
 
 
 //------------------------------------------------------------------------------
 // void Clear(void)
 //------------------------------------------------------------------------------
-void Sandbox::Clear(void)
+void Sandbox::Clear()
 {
 //   if (solarSys)
 //      delete solarSys;
