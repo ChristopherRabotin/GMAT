@@ -126,12 +126,14 @@ void PropagatePanel::Create()
    propGrid =
       new wxGrid(this, -1, wxDefaultPosition, wxSize(700,100), wxWANTS_CHARS);
    
-   propGrid->CreateGrid(MAX_PROP_ROW, 2, wxGrid::wxGridSelectRows);
+   propGrid->CreateGrid(MAX_PROP_ROW, 3, wxGrid::wxGridSelectRows);
    propGrid->SetColSize(0, 200);
-   propGrid->SetColSize(1, 500);
+   propGrid->SetColSize(1, 400);
+   propGrid->SetColSize(2, 100);
    propGrid->SetMargins(0, 0);
    propGrid->SetColLabelValue(0, _T("Propagator"));
    propGrid->SetColLabelValue(1, _T("Spacecraft List"));
+   propGrid->SetColLabelValue(2, _T("Direction"));
    propGrid->SetRowLabelSize(0);
    propGrid->SetScrollbars(5, 8, 15, 15);
    propGrid->EnableEditing(false);
@@ -878,10 +880,18 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
 void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
 {
    int row = event.GetRow();
+   int col = event.GetCol();
     
    if (event.GetEventObject() == propGrid)
    {
-      propGrid->SelectRow(row);
+      if ( (col == 0) || (col == 1) )
+      {
+         propGrid->SelectRow(row);
+      }    
+      else if (col == 2)
+      {
+         propGrid->SelectBlock(row, col, row, col, false);
+      }    
    }
    else if (event.GetEventObject() == stopCondGrid)
    {
