@@ -55,8 +55,6 @@ protected:
     Real                *cbPosition;
     /// Angular velocity of the central body
     Real                *angVel;
-    /// Relative velocity of the atmosphere (omega cross r)
-    std::vector <Real[3]>    vRelative;
     /// Flag to indicate if the atmosphere model is externally owned or internal
     bool                useExternalAtmosphere;
     /// Pointer to the atmosphere model used
@@ -65,8 +63,12 @@ protected:
     SolarSystem         *ss;
     /// Array of densities
     Real                *density;
+    /// Array of products of spacecraft properties
+    Real                *prefactor;
+    /// Number of spacecraft in the state vector
+    Integer             satCount;
     
-    virtual Real        GetDensity(Real *position);
+    void                GetDensity(Real *state);
 
 };
 
