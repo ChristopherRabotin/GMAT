@@ -292,11 +292,7 @@ bool ScriptInterpreter::Parse(void)
                    
                    Integer id = obj->GetParameterID(objParm);
                    
-                   /// @todo Correct this kludge in the Spacecraft code!!!
-                   // This code is a real hack put in place because the 
-                   // spacecraft code does NOT conform to the agreed upon 
-                   // interfaces for parameter names in GMAT.
-                   //
+                   /// @todo Correct epoch handling the Spacecraft code
                    // Code to handle "Sat.Epoch.TAIGregorian", etc.
                    if ((objParm == "Epoch") && 
                        (obj->GetType() == Gmat::SPACECRAFT)) {

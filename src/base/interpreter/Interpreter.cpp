@@ -24,7 +24,7 @@
 
 //#define DEBUG_TOKEN_PARSING 1
 //#define DEBUG_TOKEN_PARSING_DETAILS 1
-//#define DEBUG_RHS_PARSING 1
+#define DEBUG_RHS_PARSING 1
 
 #ifdef DEBUG_TOKEN_PARSING
    #include "MessageInterface.hpp"
@@ -492,7 +492,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    GmatBase    *temp;
    Integer     ol = 0;        // Current object level (depth when drilling into 
                               // owned objects)
-   Gmat::ObjectType type;
+   Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
    
    #ifdef DEBUG_TOKEN_PARSING
       std::cout << "Top level command decomposition:\n   size = " 
@@ -1833,32 +1833,49 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
    StringArray sar = Decompose(rhs);
    if ((sar.size() > 1) && isalpha(sar[1][0])) {
       if (!IsGroup(rhs.c_str())) {
-         if (moderator->IsParameter(sar[1]))
+         std::string name = rhs;
+         std::string paramType, paramObj, parmSystem;
+         InterpretParameter(name, paramType, paramObj, parmSystem);
+         if (moderator->IsParameter(paramType))
          {
-            std::string name = rhs;
             #ifdef DEBUG_RHS_PARSING
-               MessageInterface::ShowMessage("%s%s\"\n",
+               MessageInterface::ShowMessage("%s%s\" named \"%s\"\n",
                                              "Attempting to build parameter \"",
-                                             sar[1].c_str());
+                                             paramType.c_str(), name.c_str());
             #endif
-            Parameter *parm = CreateParameter(name, sar[1]);
+            Parameter *parm = CreateParameter(name, paramType);
             if (parm != NULL) {
                //GmatBase *parmObj = FindObject(sar[0]);
                std::string parmtype = "Object";
-               //loj: 12/10/04
-               // Parameter no longer has Spacecraft. Object will handle all the objects
-               //if (parmObj->GetType() == Gmat::SPACECRAFT)
-               //   parmtype = "Spacecraft";
                #ifdef DEBUG_RHS_PARSING
                   MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
                                                 "Assigning \"",
-                                                sar[0].c_str(), 
+                                                paramObj.c_str(),
                                                 "\" to parameter \"", 
                                                 parm->GetName().c_str(),
                                                 "\" with descriptor \"",
                                                 parmtype.c_str());
                #endif
-               parm->SetStringParameter(parmtype, sar[0]);
+               parm->SetStringParameter(parmtype, paramObj);
+
+               if (parm->IsCoordSysDependent()) {
+                  if (parmSystem == "")
+                     parmSystem = "EarthMJ2000Eq";
+                  // Which is correct here???
+                  parm->SetStringParameter("DepObject", parmSystem);
+                  parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+
+               }
+
+               if (parm->IsOriginDependent()) {
+                  if (parmSystem == "")
+                     parmSystem = "Earth";
+                  parm->SetStringParameter("DepObject", parmSystem);
+                  if (parm->NeedCoordSystem())
+                     /// @todo Update coordinate system to better value for body parms
+                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+               }
+
                lhsObject->SetStringParameter(label, name);
                return true;
             }
@@ -1868,3 +1885,55 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
    
    return false;
 }
+
+//------------------------------------------------------------------------------
+//  bool InterpretParameter(const std::string text, std::string &paramType,
+//                          std::string &paramObj, std::string &parmSystem)
+//------------------------------------------------------------------------------
+/**
+ * Breaks apart a parameter declaration into its component pieces
+ *
+ * @param text The string that gets decomposed.
+ * @param paramType Type of parameter that is needed.
+ * @param paramObj The Object used for the parameter calculations.
+ * @param parmSystem The coordinate system or body used for the parameter
+ *                   calculations (or the empty string if this piece is
+ *                   unspecified).
+ *
+ * @return true if the decomposition worked.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::InterpretParameter(const std::string text,
+                                     std::string &paramType,
+                                     std::string &paramObj,
+                                     std::string &parmSystem)
+{
+   Integer start = 0, dotLoc = text.find(".", 0);
+   if (dotLoc == (Integer)std::string::npos)
+      throw CommandException("Propagate::InterpretParameter: Unable to "
+               "interpret parameter object in the string " +
+               text);
+
+   paramObj = text.substr(start, dotLoc - start);
+   start = dotLoc + 1;
+   dotLoc = text.find(".", start);
+   if (dotLoc != (Integer)std::string::npos) {
+      parmSystem = text.substr(start, dotLoc - start);
+      start = dotLoc + 1;
+   }
+   else {
+      parmSystem = "";
+   }
+
+   paramType = text.substr(start);
+
+   #ifdef DEBUG_PROPAGATE_INIT
+      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
+         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+   #endif
+
+   return true;
+}
+
+
+

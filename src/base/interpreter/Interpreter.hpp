@@ -199,6 +199,10 @@ protected:
    bool                          ConstructRHS(GmatBase *lhsObject, 
                                               const std::string& rhs, 
                                               const std::string& label);
+   bool                          InterpretParameter(const std::string text,
+                                                    std::string &paramType,
+                                                    std::string &paramObj,
+                                                    std::string &parmSystem);
 };
 
 #endif // INTERPRETER_HPP

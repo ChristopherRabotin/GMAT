@@ -304,25 +304,25 @@ bool Sandbox::Initialize()
                   param->SetInternalCoordSystem(internalCoordSys);
                   std::string csName;
                   
-                  try
-                  {
+//                  try
+//                  {
                      csName = param->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-                  }
-                  catch(BaseException &e)
-                  {
-                     //----------------------------------------------------
-                     //loj: 1/26/05 temp. fix until ScriptInterpreter can
-                     //     handle CoordinateSystem
-                     //----------------------------------------------------
-                     #if DEBUG_SANDBOX_INIT
-                     MessageInterface::ShowMessage
-                        ("Sandbox::Initialize() ===>temp. fix for B3 script. setting "
-                         "EarthMJ2000Eq to %s \n", param->GetName().c_str());
-                     #endif
-                     csName = "EarthMJ2000Eq";
-                     param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, csName);
-                  }
-                  
+//                  }
+//                  catch(BaseException &e)
+//                  {
+//                     //----------------------------------------------------
+//                     //loj: 1/26/05 temp. fix until ScriptInterpreter can
+//                     //     handle CoordinateSystem
+//                     //----------------------------------------------------
+//                     #if DEBUG_SANDBOX_INIT
+//                     MessageInterface::ShowMessage
+//                        ("Sandbox::Initialize() ===>temp. fix for B3 script. setting "
+//                         "EarthMJ2000Eq to %s \n", param->GetName().c_str());
+//                     #endif
+//                     csName = "EarthMJ2000Eq";
+//                     param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, csName);
+//                  }
+
                   #if DEBUG_SANDBOX_INIT > 1
                   MessageInterface::ShowMessage
                      ("Sandbox::Initialize() Set CS <%s> pointer on parameter: \"%s\"\n",

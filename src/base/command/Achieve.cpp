@@ -440,6 +440,10 @@ bool Achieve::InterpretAction(void)
       if (parmSystem == "")
          parmSystem = "Earth";
       goalParm->SetStringParameter("DepObject", parmSystem);
+      if (goalParm->NeedCoordSystem())
+         /// @todo Update coordinate system to better value for body parms
+         goalParm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+
    }
 
    // Find the value
@@ -534,6 +538,9 @@ bool Achieve::ConstructGoal(const char* str)
             if (parmSystem == "")
                parmSystem = "Earth";
             goalTarget->SetStringParameter("DepObject", parmSystem);
+            if (goalTarget->NeedCoordSystem())
+               /// @todo Update coordinate system to better value for body parms
+               goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
          }
          return true;
       }
