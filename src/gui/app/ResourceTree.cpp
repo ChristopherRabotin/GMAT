@@ -56,9 +56,9 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, ResourceTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, ResourceTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, ResourceTree::OnEndLabelEdit)
-   EVT_TREE_BEGIN_DRAG(-1, ResourceTree::OnBeginDrag)
+//   EVT_TREE_BEGIN_DRAG(-1, ResourceTree::OnBeginDrag)
    //   EVT_TREE_BEGIN_RDRAG(-1, ResourceTree::OnBeginRDrag)
-   EVT_TREE_END_DRAG(-1, ResourceTree::OnEndDrag)
+//   EVT_TREE_END_DRAG(-1, ResourceTree::OnEndDrag)
    
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSpacecraft)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
@@ -684,19 +684,19 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
    else if (strcmp(title, wxT("Variables")) == 0)
       menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
-   else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
-            (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
-            (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
-            (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER))
-   {
-      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft..."));
-      menu.AppendSeparator();
-      menu.Append(POPUP_OPEN, wxT("Open"));
-      menu.Append(POPUP_CLOSE, wxT("Close"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_RENAME, wxT("Rename"));
-      menu.Append(POPUP_DELETE, wxT("Delete"));
-   }
+//   else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
+//            (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
+//            (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
+//            (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER))
+//   {
+//      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft..."));
+//      menu.AppendSeparator();
+//      menu.Append(POPUP_OPEN, wxT("Open"));
+//      menu.Append(POPUP_CLOSE, wxT("Close"));
+//      menu.AppendSeparator();
+//      menu.Append(POPUP_RENAME, wxT("Rename"));
+//      menu.Append(POPUP_DELETE, wxT("Delete"));
+//   }
    else if (dataType == GmatTree::DEFAULT_PROPAGATOR)
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
@@ -861,7 +861,8 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          SetItemText(item, newName);
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
-         theGuiManager->UpdateSpacecraft();
+         //theGuiManager->UpdateSpacecraft();
+         theGuiManager->UpdateAll(); //loj: 8/5/04 Let's try UpdateAll
       }
    }
 
@@ -1092,8 +1093,6 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 
    if (sc != NULL)
    {
-      //sc->SetName("Big Daddy");
-  
       wxString newName = wxT(sc->GetName().c_str());
   
       AppendItem(item, newName, GmatTree::ICON_SPACECRAFT, -1,
@@ -1129,8 +1128,6 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
 
    if (form != NULL)
    {
-      //sc->SetName("Big Daddy");
-  
       wxString newName = wxT(form->GetName().c_str());
   
       wxTreeItemId formationItem =
@@ -1139,7 +1136,7 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
 
-//      theGuiManager->UpdateSpacecraft();
+      theGuiManager->UpdateFormation(); //loj: 8/5/04 added
   
       Expand(item);
    }
