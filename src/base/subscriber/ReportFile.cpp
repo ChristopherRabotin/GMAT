@@ -24,7 +24,7 @@
 #include "Moderator.hpp"         // for GetParameter()
 #include "Publisher.hpp"         // for Instance()
 
-#define DEBUG_REPORTFILE 0
+//#define DEBUG_REPORTFILE 1
 
 //---------------------------------
 // static data
@@ -45,14 +45,14 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 {
-	Gmat::STRING_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::STRINGARRAY_TYPE,
-	Gmat::STRING_TYPE,
-	Gmat::BOOLEAN_TYPE,
-	Gmat::STRING_TYPE,
-	Gmat::INTEGER_TYPE,
-//	Gmat::STRING_TYPE,
+        Gmat::STRING_TYPE,
+        Gmat::INTEGER_TYPE,
+        Gmat::STRINGARRAY_TYPE,
+        Gmat::STRING_TYPE,
+        Gmat::BOOLEAN_TYPE,
+        Gmat::STRING_TYPE,
+        Gmat::INTEGER_TYPE,
+//      Gmat::STRING_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -170,6 +170,16 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
 //------------------------------------------------------------------------------
 bool ReportFile::Initialize()
 {
+   //loj: 11/2/04 added
+   // Check if there are parameters selected for report
+   if (mNumVarParams == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
+          "No parameters selected for ReportFile.\n");
+      return false;
+   }
+   
    Subscriber::Initialize();
 
    //-----------------------------------
@@ -475,20 +485,30 @@ bool ReportFile::AddVarParameter(const std::string &paramName)
     
    if (paramName != "")
    {
-      mVarParamNames.push_back(paramName);
-      mVarParamMap[paramName] = NULL;
-      mNumVarParams = mVarParamNames.size();
-
+      //-----------------------------------------------------------------
+      //loj: 11/01/04 Until SetRefObject() is implemented, add parameter
+      // if the parameter has been created and configured already
+      //-----------------------------------------------------------------
       // get parameter pointer
       Parameter *param = theModerator->GetParameter(paramName);
       if (param != NULL)
       {
+         mVarParamNames.push_back(paramName);
+         mVarParamMap[paramName] = NULL;
+         mNumVarParams = mVarParamNames.size();
+
          mVarParamMap[paramName] = param;
          mVarParams.push_back(param);
+         status = true;
       }
-      status = true;
+      else
+      {
+         MessageInterface::ShowMessage
+            ("ReportFile::AddVarParameter() Unconfigured parameter:%s will not be "
+             "added to ReportFile.\n", paramName.c_str());
+      }
    }
-
+   
    return status;
 }
 
