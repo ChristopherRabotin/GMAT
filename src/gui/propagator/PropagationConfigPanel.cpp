@@ -75,7 +75,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, wxPanel)
     EVT_TEXT(ID_TEXTCTRL_MAGN1, PropagationConfigPanel::OnMagneticTextUpdate)
     EVT_TEXT(ID_TEXTCTRL_MAGN2, PropagationConfigPanel::OnMagneticTextUpdate)
     EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorSelection)
-    EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnBodySelection)
+    EVT_TEXT(ID_CB_BODY, PropagationConfigPanel::OnBodySelection)
     EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravitySelection)
     EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereSelection)
     EVT_CHECKBOX(ID_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
@@ -278,7 +278,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition,  wxSize(100,-1), numOfBodies,
                         strArray2, wxCB_DROPDOWN|wxCB_READONLY );
     gravityTypeComboBox =
-        new wxComboBox( parent, ID_CB_GRAV, wxT(strArray3[0]),
+        new wxComboBox( parent, ID_CB_GRAV, wxT(strArray3[1]),
                         wxDefaultPosition, wxSize(300,-1), numOfGraFields,
                         strArray3, wxCB_DROPDOWN|wxCB_READONLY );
     atmosComboBox =
@@ -414,7 +414,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     atmosComboBox->Enable(false);
     searchGravityButton->Enable(false);
     setupButton->Enable(false);
-    editMassButton->Enable(false);
     editPressureButton->Enable(false);
     helpButton->Enable(false);
     
@@ -1013,14 +1012,24 @@ void OnHelpButton()
 
 void PropagationConfigPanel::OnAddButton()
 {
-    /*wxArrayString emptyString = new wxArrayString();
+    wxArrayString emptyString;
     
-    CelesBodySelectDialog bodyDlg(this, emptyString);
+    wxString bodies = bodyTextCtrl->GetValue();
+    
+    if (bodies.IsEmpty())
+    {
+        primaryBodiesArray.Clear(); 
+    }
+    
+    CelesBodySelectDialog bodyDlg(this, primaryBodiesArray);
     bodyDlg.ShowModal();
-    
+        
     if (bodyDlg.IsBodySelected())
     {        
         wxArrayString &names = bodyDlg.GetBodyNames();
+        
+        bodyTextCtrl->Clear();
+        bodyComboBox->Clear();
         
         int index = primaryBodiesArray.GetCount();
         
@@ -1028,14 +1037,21 @@ void PropagationConfigPanel::OnAddButton()
         {
            primaryBodiesArray.Insert(names.Item(i), index);
            index++;
-        }
-        bodyTextCtrl->Clear();
-        bodyComboBox->Clear();
-        bodyComboBox->Append(primaryBodyString);
-        bodyComboBox->SetSelection(0);
+           
+           bodyTextCtrl->AppendText(primaryBodiesArray.Item(i));
+           bodyTextCtrl->AppendText(" ");
+           
+           bodyComboBox->Append(primaryBodiesArray.Item(i));
+        } 
         
+        int pos = bodyComboBox->FindString(primaryBodyString);
+        if (pos == -1)
+            bodyComboBox->SetSelection(0);
+        else
+            bodyComboBox->SetSelection(pos);       
+            
         applyButton->Enable(true);
-    }*/
+    }
     
     /*
     wxString body = bodyComboBox->GetStringSelection();
@@ -1110,39 +1126,30 @@ void PropagationConfigPanel::OnPMEditButton()
         
         int index = primaryBodiesArray.GetCount();
         
+        pmEditTextCtrl->Clear();
+        
         for (int i = 0; i < names.GetCount(); i++)
         {
            pointmassBodiesArray.Insert(names.Item(i), index);
            index++;
+           pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
+           pmEditTextCtrl->AppendText(" ");
         }
-        pmEditTextCtrl->Clear();
-        
-        
+        // If any primary bodies exist, take them out (just a precaution)
         if (!pointmassBodiesArray.IsEmpty())
         {
-            // Take out the primary bodies from the point mass bodies, if any exist
-            if (!pointmassBodiesArray.IsEmpty())
+            for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
             {
-                for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
+                wxString pbStr = primaryBodiesArray.Item(i);
+                for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
                 {
-                    wxString pbStr = primaryBodiesArray.Item(i);
-                    for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
+                    wxString pmStr = pointmassBodiesArray.Item(j);
+                    if (pmStr.CmpNoCase(pbStr))
                     {
-                        wxString pmStr = pointmassBodiesArray.Item(j);
-                        if (pmStr.CmpNoCase(pbStr))
-                        {
-                            pointmassBodiesArray.Remove(pmStr);
-                        }
+                        pointmassBodiesArray.Remove(pmStr);
                     }
-                } 
-            }
-            
-            // Display point mass bodies
-            for (int i = 0; i < pointmassBodiesArray.GetCount(); i++)
-            {            
-                pmEditTextCtrl->AppendText(pointmassBodiesArray[i].c_str());
-                bodyTextCtrl->AppendText(" ");
-            }
+                }
+            } 
         }
         applyButton->Enable(true);
     }
