@@ -21,6 +21,7 @@
 #include "Factory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PointMassForce.hpp"   // for PointMassForce class
+#include "SolarRadiationPressure.hpp" // for SolarRadiationPressure class
 
 
 //---------------------------------
@@ -45,6 +46,8 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(std::string ofType,
 {
    if (ofType == "PointMassForce")
        return new PointMassForce(withName); //loj: 3/12/04 pass the name
+   else if (ofType == "SolarRadiationPressure")  // waw: 04/22/04 added to handle SRP
+       return new SolarRadiationPressure(withName);
    return NULL;
 }
 
@@ -64,6 +67,7 @@ Factory(Gmat::PHYSICAL_MODEL)
 {
    if (creatables.empty())
       creatables.push_back("PointMassForce");
+      //creatables.push_back("SolarRadiationPressure");
 }
 
 //------------------------------------------------------------------------------

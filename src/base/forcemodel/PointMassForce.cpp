@@ -61,6 +61,8 @@
 
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
+#include "SolarSystem.hpp"
+#include "Rvector6.hpp"
 
 //---------------------------------
 // static data
@@ -105,10 +107,14 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 {
     parameterCount = PointMassParamCount;
     dimension = 6 * satcount;
-    thePlanet = NULL;
+    theBody = NULL;
 
     // create default body
-    SetBody("Earth");
+    // temp fix, will be removed when default mission sets initial data
+    if (solarSystem != NULL)
+    {
+       SetBody("Earth");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -120,7 +126,7 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 //------------------------------------------------------------------------------
 PointMassForce::~PointMassForce(void)
 {
-    delete thePlanet;
+    delete theBody;
 }
 
 //------------------------------------------------------------------------------
@@ -179,7 +185,13 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 bool PointMassForce::Initialize(void)
 {
     PhysicalModel::Initialize();
-
+    
+    if (solarSystem != NULL)
+    {
+       SetBody("Earth");
+       mu = theBody->GetGravitationalConstant();
+    }
+    
     Integer satCount = (Integer)(dimension / 6);
     if (dimension != satCount * 6) 
     {
@@ -239,40 +251,48 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 
     Real radius, r3, mu_r;
     Integer i6;
+    
+    //waw: 04/27/04
+    Real now = epoch + dt/86400.0;
+    Rvector6 rv = theBody->GetState(now), relativePosition;
 
     for (Integer i = 0; i < satCount; i++) 
     {
-        i6 = i * 6;
-        r3 = state[ i6 ]*state[ i6 ] + 
-             state[1+i6]*state[1+i6] + 
-             state[2+i6]*state[2+i6];
-        radius = sqrt(r3);
-        r3 *= radius;
-        mu_r = - mu / r3;
+       i6 = i * 6;
+       
+       relativePosition[0] = rv[0] - state[ i6 ];
+       relativePosition[1] = rv[1] - state[i6+1];
+       relativePosition[2] = rv[2] - state[i6+2];
 
-        if (order == 1) 
-        {
-            // Do dv/dt first, in case deriv = state
-            deriv[3 + i6] = state[i6]     * mu_r;
-            deriv[4 + i6] = state[1 + i6] * mu_r;
-            deriv[5 + i6] = state[2 + i6] * mu_r;
-            // dr/dt = v
-            deriv[i6]     = state[3 + i6];
-            deriv[1 + i6] = state[4 + i6];
-            deriv[2 + i6] = state[5 + i6];
-        }
-        else 
-        {
-            // Feed accelerations to corresponding components directly for RKN
-            deriv[ i6 ] = state[ i6 ] * mu_r; 
-            deriv[i6+1] = state[i6+1] * mu_r; 
-            deriv[i6+2] = state[i6+2] * mu_r; 
-            deriv[i6+3] = 0.0; 
-            deriv[i6+4] = 0.0; 
-            deriv[i6+5] = 0.0; 
-        }
+       r3 = relativePosition[ i6 ]*relativePosition[ i6 ] + 
+         relativePosition[1+i6]*relativePosition[1+i6] + 
+         relativePosition[2+i6]*relativePosition[2+i6];
+       radius = sqrt(r3);
+       r3 *= radius;
+       mu_r = - mu / r3;
+
+       if (order == 1) 
+       {
+          // Do dv/dt first, in case deriv = state
+          deriv[3 + i6] = relativePosition[i6]     * mu_r;
+          deriv[4 + i6] = relativePosition[1 + i6] * mu_r;
+          deriv[5 + i6] = relativePosition[2 + i6] * mu_r;
+          // dr/dt = v
+          deriv[i6]     = state[3 + i6];
+          deriv[1 + i6] = state[4 + i6];
+          deriv[2 + i6] = state[5 + i6];
+       } 
+       else 
+       {
+          // Feed accelerations to corresponding components directly for RKN
+          deriv[ i6 ] = relativePosition[ i6 ] * mu_r; 
+          deriv[i6+1] = relativePosition[i6+1] * mu_r; 
+          deriv[i6+2] = relativePosition[i6+2] * mu_r; 
+          deriv[i6+3] = 0.0; 
+          deriv[i6+4] = 0.0; 
+          deriv[i6+5] = 0.0; 
+       }
     }
-
     return true;
 }
 
@@ -381,40 +401,40 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
 }
 
 //------------------------------------------------------------------------------
-// Planet* GetBody()
+// CelestialBody* GetBody()
 //------------------------------------------------------------------------------
 /**
  * 
  */
 //------------------------------------------------------------------------------
-Planet* PointMassForce::GetBody()
+CelestialBody* PointMassForce::GetBody()
 {
-    return thePlanet;
+    return theBody;
 }
 
 //------------------------------------------------------------------------------
-// void SetBody(Planet *body)
+// void SetBody(CelestialBody *body)
 //------------------------------------------------------------------------------
 /**
  *
  */
 //------------------------------------------------------------------------------
-void PointMassForce::SetBody(Planet *body)
+void PointMassForce::SetBody(CelestialBody *body)
 {
     if (body != NULL)
     {
-        if (thePlanet != NULL)
+        if (theBody != NULL)
         {
-            delete thePlanet;
+            delete theBody;
         }
     }
   
-    thePlanet = body;
-    mu = thePlanet->GetGravitationalConstant();
+    theBody = body;
+    mu = theBody->GetGravitationalConstant();
 }
 
 //------------------------------------------------------------------------------
-// void SetBody(const std::string &name)
+// bool SetBody(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  *
@@ -422,16 +442,12 @@ void PointMassForce::SetBody(Planet *body)
 //------------------------------------------------------------------------------
 bool PointMassForce::SetBody(const std::string &name)
 {
-    Planet *body = new Planet(name);
+    CelestialBody *body = solarSystem->GetBody(name);
     if (body != NULL)
     {
-        //MessageInterface::ShowMessage("PointMassForce::SetBody() name = %s\n",
-        //                              name.c_str());
-
         SetBody(body);
         return true;
     }
-    
     return false;
 }
 
@@ -586,7 +602,7 @@ std::string PointMassForce::GetStringParameter(const Integer id) const
     switch (id)
     {
     case BODY:
-        return thePlanet->GetTypeName(); //loj: What should we return?
+        return theBody->GetTypeName(); //loj: What should we return?
     default:
         return PhysicalModel::GetStringParameter(id);
     }

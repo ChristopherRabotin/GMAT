@@ -69,7 +69,6 @@
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
 //                              Changes:
 //                                - Fixed format.
-//                                - parameterCount to PhysicalModelParamCount.
 //                              Removals:
 //                                - GetParameterName()
 //
@@ -102,7 +101,10 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
+
 #include "ForceModelException.hpp"
+
 #include <math.h>
 
 class GMAT_API PhysicalModel : public GmatBase
@@ -114,6 +116,11 @@ public:
 
     PhysicalModel(const PhysicalModel&);
     PhysicalModel& operator=(const PhysicalModel&);
+    
+    //waw: added o3/16/04
+    CelestialBody* GetBody();
+    void SetBody(CelestialBody *body);
+    bool SetBody(const std::string &name);
 
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
@@ -172,7 +179,9 @@ protected:
     Real relativeErrorThreshold;
     /// Pointer to the solar system model used as a data provider for the forces
     SolarSystem *solarSystem;
-
+    /// Pointer to the body associated with the force model
+    CelestialBody *theBody;
+    
     /// Parameter IDs
     enum
     {

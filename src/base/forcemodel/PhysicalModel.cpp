@@ -89,6 +89,7 @@
 #include "PhysicalModel.hpp"
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "CelestialBody.hpp"
 
 //---------------------------------
 // static data
@@ -250,6 +251,57 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    }
    
    return *this;
+}
+
+//------------------------------------------------------------------------------
+// CelestialBody* GetBody()
+//------------------------------------------------------------------------------
+/**
+ * 
+ */
+//------------------------------------------------------------------------------
+CelestialBody* PhysicalModel::GetBody()
+{
+    return theBody;
+}
+
+//------------------------------------------------------------------------------
+// void SetBody(CelestialBody *body)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetBody(CelestialBody *body)
+{
+    if (body != NULL)
+    {
+        if (theBody != NULL)
+        {
+            delete theBody;
+        }
+    }
+  
+    theBody = body;
+//    mu = theBody->GetGravitationalConstant();
+}
+
+//------------------------------------------------------------------------------
+// bool SetBody(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetBody(const std::string &name)
+{
+    CelestialBody *body = solarSystem->GetBody(name);
+    if (body != NULL)
+    {
+        SetBody(body);
+        return true;
+    }
+    return false;
 }
 
 //------------------------------------------------------------------------------

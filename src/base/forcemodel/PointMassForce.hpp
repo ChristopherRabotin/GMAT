@@ -61,7 +61,7 @@
 
 #include "gmatdefs.hpp"
 #include "PhysicalModel.hpp"
-#include "Planet.hpp"
+#include "CelestialBody.hpp"
 
 class GMAT_API PointMassForce : public PhysicalModel
 {
@@ -73,14 +73,14 @@ public:
     PointMassForce(const PointMassForce& pmf);
     PointMassForce& operator= (const PointMassForce& pmf);
 
-    bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
+    bool GetDerivatives(Real *state, Real dt = 0.0, Integer order = 1);
     bool GetComponentMap(Integer * map, Integer order) const;
     bool Initialize(void);
-    virtual Real EstimateError(Real * diffs, Real * answer) const;
+    virtual Real EstimateError(Real *diffs, Real *answer) const;
 
     //waw: added o3/16/04
-    Planet* GetBody();
-    void SetBody(Planet *body);
+    CelestialBody* GetBody();
+    void SetBody(CelestialBody *body);
     bool SetBody(const std::string &name);
 
     virtual std::string GetParameterText(const Integer id) const;
@@ -122,7 +122,7 @@ protected:
     /// Type of error estimate to perform
     Real estimationMethod;
     //waw: added 03/16/04
-    Planet *thePlanet;
+    //CelestialBody *theBody;
 };
 
 #endif  // PointMassForce_hpp
