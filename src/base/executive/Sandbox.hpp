@@ -55,6 +55,10 @@ public:
     bool                AddSubscriber(Subscriber *sub);
     bool				SetPublisher(Publisher *pub = NULL);
     
+    GmatBase*           GetInternalObject(std::string name, 
+                                          Gmat::ObjectType type);
+    Spacecraft*         GetSpacecraft(std::string name);
+    
     // Execution methods
     bool                Initialize(void);
     bool                Execute(void);

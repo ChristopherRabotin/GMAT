@@ -115,6 +115,41 @@ bool Sandbox::SetPublisher(Publisher *pub)
 }
 
 
+GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
+{
+    GmatBase* obj = NULL;
+    
+    if (objectMap.find(name) != objectMap.end()) {
+        obj = objectMap[name];
+        if (obj->GetType() != type) {
+            std::string errorStr = "GetInternalObject type mismatch for ";
+            errorStr += name;
+            throw SandboxException(errorStr);
+        }
+    }
+    else {
+        std::string errorStr = "Could not find ";
+        errorStr += name;
+        errorStr += " in the Sandbox.";
+        throw SandboxException(errorStr);
+    }
+    
+    return obj;
+}
+
+
+Spacecraft* Sandbox::GetSpacecraft(std::string name)
+{
+    Spacecraft *sc = NULL;
+    GmatBase* obj = GetInternalObject(name, Gmat::SPACECRAFT);
+   
+    if (obj)
+        sc = (Spacecraft*)(obj);
+    
+    return sc;
+}
+
+
 // Execution methods
 bool Sandbox::Initialize(void)
 {
