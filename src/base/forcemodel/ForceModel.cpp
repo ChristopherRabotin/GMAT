@@ -279,6 +279,7 @@ void ForceModel::DeleteForce(const std::string &name)
     }
 }
 
+
 //------------------------------------------------------------------------------
 // bool HasForce(const std::string &name)
 //------------------------------------------------------------------------------
@@ -362,6 +363,38 @@ PhysicalModel* ForceModel::GetForce(Integer index)
         return forceList[index];
     }
     
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// PhysicalModel* GetForce(std::string forcetype, Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Search for a force in the force model.
+ * 
+ * @param  forcetype The kind of force desired.
+ * @param  whichOne  Which force (zero-based index) of that type is desired.
+ * 
+ * @return The pointer to that force instance.
+ */
+//------------------------------------------------------------------------------
+const PhysicalModel* ForceModel::GetForce(std::string forcetype, Integer whichOne) const
+{
+    std::vector<PhysicalModel *>::const_iterator force;
+    Integer i = 0;
+
+    for (force = forceList.begin(); force != forceList.end(); force++) 
+    {
+        std::string pmName = (*force)->GetTypeName();
+        
+        if (pmName == forcetype) {
+           if (whichOne <= i)
+              return *force;
+           else
+              ++i;
+        }
+    }
+
     return NULL;
 }
 
@@ -1059,11 +1092,17 @@ std::string ForceModel::GetStringParameter(const Integer id) const
     case CENTRAL_BODY:
        return "Earth";
     case  DRAG:
+    {
        // Find the drag force
-       
+       const PhysicalModel *pm = GetForce("DragForce");
+       // No drag force, return "None"
+       if (pm == NULL)
+          return "None";
        // Get the atmosphere model from the drag force
-//       Integer id = currentPm->GetParameterID("AtmosphereModel");
-       return "Exponential";
+       Integer id = pm->GetParameterID("AtmosphereModel");
+       std::string am = pm->GetStringParameter(id);
+       return am;
+    }
     case  SRP:
        return "On";
     default:

@@ -82,6 +82,7 @@ public:
     std::string GetForceTypeName(Integer index);
     void ClearSpacecraft(); //loj: 4/1/04 added
     PhysicalModel* GetForce(Integer index);
+    const PhysicalModel* GetForce(std::string forcetype, Integer whichOne = 0) const; 
     bool AddSpaceObject(SpaceObject *so);
     void UpdateSpaceObject(Real newEpoch = -1.0);
     void UpdateFromSpaceObject(void);

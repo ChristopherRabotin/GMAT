@@ -282,16 +282,20 @@ bool ScriptInterpreter::Parse(void)
                    Integer id = obj->GetParameterID(objParm);
                    
                    // Look for owned objects if the list is deeper than 2
-                   if (sar.size() > 2)
+                   if (sar.size() > 2) {
                       obj = FindOwnedObject(sar, obj, 1);
-                   if (obj == NULL) {
-                      std::string errstr = objName;
-                      errstr += sar[1];
-                      errstr += ": Object was not found";
-                      throw InterpreterException(errstr);
+                      if (obj == NULL) {
+                         std::string errstr = objName;
+                         errstr += sar[1];
+                         errstr += ": Object was not found";
+                         throw InterpreterException(errstr);
+                      }
+                      objParm = sar[sar.size() - 1];
+                      id = obj->GetParameterID(objParm);
                    }
        
                    // Set parameter data
+                   
                    ++phrase;
                    if (**phrase == "=")
                        ++phrase;
@@ -301,7 +305,6 @@ bool ScriptInterpreter::Parse(void)
                        sa = Decompose(**phrase);
                    else
                        sa.push_back(**phrase);
-                       
                    for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
                        if (!SetParameter(obj, id, *i)) {
                           if (obj->GetType() == Gmat::FORCE_MODEL)

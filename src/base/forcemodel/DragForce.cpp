@@ -574,6 +574,7 @@ std::string DragForce::GetParameterText(const Integer id) const
  * 
  * @return     ID for the parameter of interest.
  */
+#include <iostream>
 Integer DragForce::GetParameterID(const std::string &str) const
 {
     if (str == "AtmosphereModel")
@@ -588,10 +589,10 @@ Integer DragForce::GetParameterID(const std::string &str) const
     if (str == "SolarFluxFile")
        return  fluxFileID;
     
-    if (str == "SolarFlux")
+    if (str == "F107")
        return  fluxID;
     
-    if (str == "AverageSolarFlux")
+    if (str == "F107A")
        return  averageFluxID;
     
     if (str == "MagneticIndex")
@@ -796,6 +797,8 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
     
    if (id == fluxFileID) {
       fluxFile = value;
+      if (!atmos)
+         throw ForceModelException("Cannot set flux file: Atmosphere Model undefined");
       atmos->SetSolarFluxFile(fluxFile);  // waw: Added 06/29/04
       atmos->SetFileFlag(true);           // waw: Added 07/20/04
       return true;

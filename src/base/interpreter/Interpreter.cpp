@@ -20,6 +20,9 @@
 #include "Moderator.hpp"
 
 
+// #define DEBUG_TOKEN_PARSING
+
+
 //------------------------------------------------------------------------------
 // Interpreter()
 //------------------------------------------------------------------------------
@@ -1232,11 +1235,22 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
    GmatBase* obj = NULL;
    Integer count = tokenList.size(), i = 0;
    
+#ifdef DEBUG_TOKEN_PARSING
+   std::cout << "Token list:\n   ";
+   for (StringArray::iterator ix = tokenList.begin(); ix != tokenList.end(); ++ix)
+      std::cout << *ix << "\n   ";
+   std::cout << "\n";
+#endif
+   
    if (owner->GetType() != Gmat::FORCE_MODEL)
       throw InterpreterException("The ForceModel is the only allowed owner");
    
    ObjectArray objs = owner->GetRefObjectArray(tokenList[index]);
    if (index == count - 2) {
+
+#ifdef DEBUG_TOKEN_PARSING
+      std::cout << "Looking for " << tokenList[index] << "\n";
+#endif
       if (objs.size() > 1) {
          for (ObjectArray::iterator j = objs.begin(); j != objs.end(); ++j) {
             Integer id = (*j)->GetParameterID("BodyName");
@@ -1253,6 +1267,10 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
    else
       obj = FindOwnedObject(tokenList, objs[i], index+1); 
    
+#ifdef DEBUG_TOKEN_PARSING
+   std::cout << "Returning a \"" << obj->GetTypeName() << "\" object\n";   
+#endif
+
    return obj;
 }
 
@@ -1313,6 +1331,9 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
    std::string forcetype = ForceModel::GetScriptAlias(objParm);
    if (forcetype == "SolarRadiationPressure")
       if (parm != "On")
+         return true;
+   if (forcetype == "DragForce")
+      if (parm == "None")
          return true;
    PhysicalModel *pm = moderator->CreatePhysicalModel(forcetype, "");
    if (pm) {
