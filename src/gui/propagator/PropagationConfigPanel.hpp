@@ -183,7 +183,6 @@ private:
    bool isGravTextChanged;
    bool isPotFileChanged;
    bool isMagfTextChanged;
-   bool isBodiesChanged;
    bool isIntegratorChanged;
 
    Propagator                     *thePropagator;

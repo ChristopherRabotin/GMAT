@@ -107,7 +107,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isGravTextChanged = false;
    isPotFileChanged = false;
    isMagfTextChanged = false;
-   isBodiesChanged = false;
    isIntegratorChanged = false;
    
    theApplyButton->Disable();
@@ -182,18 +181,10 @@ void PropagationConfigPanel::LoadData()
    else if (propType == "AdamsBashforthMoulton")
       typeId = ABM;
 
-   // fill primary bodies combobox
+   // Display primary bodies
    if ( !primaryBodiesArray.IsEmpty() )
       for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-      {
-         bodyComboBox->Append(primaryBodiesArray[i]);
-         originComboBox->Append(primaryBodiesArray[i]);
-      }    
-
-// waw: 10/14/04 commented out   
-   // fill other potential file name
-//   if (forceList[currentBodyId]->gravType == gravModelArray[OTHER])
-//       potFileTextCtrl->SetValue(potFilename.c_str());
+         bodyComboBox->Append(primaryBodiesArray[i]);   
 
    integratorComboBox->SetSelection(typeId);
    integratorString = integratorArray[typeId]; 
@@ -790,10 +781,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxSize(70,-1), MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
-   originComboBox =
-      new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      wxDefaultPosition,  wxSize(100,-1), 0,
-                      bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
+   originComboBox  =
+      theGuiManager->GetCoordSysComboBox(this, ID_CB_BODY, wxSize(120,-1));
+//    =
+//      new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
+//                      wxDefaultPosition,  wxSize(100,-1), 0,
+//                      bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
       
 #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
