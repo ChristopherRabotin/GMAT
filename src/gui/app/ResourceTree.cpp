@@ -310,6 +310,7 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mVariableItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
+   //----- Coordinate System
    mCoordSysItem =
    AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Coordinate Systems"), GmatTree::COORD_SYS_FOLDER));
@@ -719,29 +720,29 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
 // void AddDefaultCoordSys(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 /**
- * Add the default interfaces
+ * Add the default coordinate system
  *
- * @param <itemId> tree item for the interfaces folder
+ * @param <itemId> tree item for the coordinate system folder
  */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 {
-/// @todo add default coordinate systems from gui interpreter
-//   StringArray itemNames = GmatAppData::GetGuiInterpreter()
-//                     ->GetListOfConfiguredItems(Gmat::COORD_SYS);
-//   int size = itemNames.size();
-//   wxString objName;
-//
-//   for (int i = 0; i<size; i++)
-//   {
-//      objName = wxString(itemNames[i].c_str());
-//      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
-//                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_COORD_SYS));
-//   };
-//
-//   if (size > 0)
-//      Expand(itemId);
-//
+   //loj: 1/18/05 uncommented the code
+   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
+      GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
+   int size = itemNames.size();
+   wxString objName;
+
+   for (int i = 0; i<size; i++)
+   {
+      objName = wxString(itemNames[i].c_str());
+      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
+                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_COORD_SYSTEM));
+   };
+   
+   if (size > 0)
+      Expand(itemId);
+   
 }
 
 
