@@ -124,6 +124,7 @@ public:
    Burn* GetBurn(const std::string &name);
 
    // Parameter
+   bool IsParameter(const std::string &type);
    Parameter* CreateParameter(const std::string &type,
                               const std::string &name);
    Parameter* GetParameter(const std::string &name);

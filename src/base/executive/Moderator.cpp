@@ -28,6 +28,7 @@
 //#define DEBUG_MULTI_STOP 1
 //#define DEBUG_USER_INTERRUPT 1
 //#define DEBUG_ACTION_REMOVE 1
+//#define DEBUG_LOOKUP_RESOURCE 1
 
 //---------------------------------
 // static data
@@ -706,6 +707,36 @@ Burn* Moderator::GetBurn(const std::string &name)
 }
 
 // Parameter
+//------------------------------------------------------------------------------
+// bool Moderator::IsParameter(const std::string &type)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a given type is a Parameter.
+ *
+ * @param <type> object type
+ *
+ * @return true if the type is a registered parameter, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Moderator::IsParameter(const std::string &type)
+{
+   StringArray sar = theFactoryManager->GetListOfItems(Gmat::PARAMETER);
+      
+   if (find(sar.begin(), sar.end(), type) != sar.end()) {
+#ifdef DEBUG_LOOKUP_RESOURCE
+      MessageInterface::ShowMessage("Found parameter \"%s\"\n", type.c_str());
+#endif
+      return true;
+   }
+
+#ifdef DEBUG_LOOKUP_RESOURCE
+   MessageInterface::ShowMessage("Could not find parameter \"%s\"\n", type.c_str());
+#endif
+
+   return false;   
+}
+
+
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
