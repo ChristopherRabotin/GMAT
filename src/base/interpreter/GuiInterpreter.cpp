@@ -466,44 +466,67 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
     return theModerator->GetDefaultSolarSystem();
 }
 
+// Planetary files
 //------------------------------------------------------------------------------
-// StringArray& GetSolarSystemSourceList()
+// StringArray& GetPlanetaryFileTypes()
 //------------------------------------------------------------------------------
 /**
- * Retrieves solar system source list
- *
- * @return a solar system source list
+ * @return a planetary source types
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetSolarSystemSourceList()
+StringArray& GuiInterpreter::GetPlanetaryFileTypes()
 {
-    return theModerator->GetSolarSystemSourceList();
+    return theModerator->GetPlanetaryFileTypes();
 }
 
 //------------------------------------------------------------------------------
-// StringArray& GetSolarSystemSourceFileList()
+// StringArray& GetPlanetaryFileNames()
 //------------------------------------------------------------------------------
 /**
- * Retrieves solar system source file list
- *
- * @return a solar system source file list
+ * @return a planetary source file names
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetSolarSystemSourceFileList()
+StringArray& GuiInterpreter::GetPlanetaryFileNames()
 {
-    return theModerator->GetSolarSystemSourceFileList();
+    return theModerator->GetPlanetaryFileNames();
 }
 
 //------------------------------------------------------------------------------
-// bool SetSlpFileToUse(const std::string &filename)
+// StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
 //------------------------------------------------------------------------------
-/**
- * @return true if it is successful set to use SLP file
+StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
+{
+    return theModerator->GetPlanetaryFileTypesInUse();
+}
+
+//------------------------------------------------------------------------------
+// std::string GetPlanetaryFileName(const std::string &filetype)
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetPlanetaryFileName(const std::string &filetype)
+{
+    return theModerator->GetPlanetaryFileName(filetype);
+}
+
+//------------------------------------------------------------------------------
+// bool SetPlanetaryFileName(const std::string &filetype,
+//                           const std::string &filename)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::SetPlanetaryFileName(const std::string &filetype,
+                                          const std::string &filename)
+{
+    return theModerator->SetPlanetaryFileName(filetype, filename);
+}
+
+//------------------------------------------------------------------------------
+// bool SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+//------------------------------------------------------------------------------
+/*
+ * @param <filetypes> list of file type in the priority order of use
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::SetSlpFileToUse(const std::string &filename)
+bool GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 {
-    return theModerator->SetSlpFileToUse(filename);
+    return theModerator->SetPlanetaryFileTypesInUse(filetypes);
 }
 
 // Subscriber

@@ -95,9 +95,15 @@ public:
 
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
-    StringArray& GetSolarSystemSourceList();
-    StringArray& GetSolarSystemSourceFileList();
-    bool SetSlpFileToUse(const std::string &filename);
+
+    // Planetary files
+    StringArray& GetPlanetaryFileTypes();
+    StringArray& GetPlanetaryFileNames();
+    StringArray& GetPlanetaryFileTypesInUse();
+    std::string GetPlanetaryFileName(const std::string &filetype);
+    bool SetPlanetaryFileName(const std::string &filetype,
+                              const std::string &filename);
+    bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
     
     // Subscriber
     Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
