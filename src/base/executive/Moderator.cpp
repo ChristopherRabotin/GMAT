@@ -2570,6 +2570,13 @@ void Moderator::CreateDefaultMission()
       // Environmental parameters (loj: 12/10/04 Added)
       CreateParameter("AtmosDensity", "DefaultSC.AtmosDensity");
 
+      // Planet parameters (loj: 12/14/04 Added)
+      CreateParameter("GHA", "DefaultSC.GHA");
+      CreateParameter("Longitude", "DefaultSC.Longitude");
+      CreateParameter("Latitude", "DefaultSC.Latitude");
+      CreateParameter("LST", "DefaultSC.LST");
+      CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
+      
       // User variable
       Parameter *var = CreateParameter("Variable", "DefaultSC.Xx2");
       var->SetStringParameter("Expression", "DefaultSC.X * 2.0");
