@@ -29,7 +29,7 @@
 #include "PointMassForce.hpp"
 #include "SolarRadiationPressure.hpp"
 #include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
+//#include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 #include "GmatPanel.hpp"
 
@@ -52,8 +52,7 @@ private:
    
    enum GravModelType
    {
-      NONE_GM = 0,
-      POINT_MASS,
+      POINT_MASS = 0,
       JGM2,
       JGM3,
       OTHER,
@@ -81,10 +80,25 @@ private:
       std::string gravType;
       std::string dragType;
       std::string magfType;
-      ForceType(const std::string &body, const std::string grav, const std::string drag,
-                const std::string &mag)
-         {bodyName = body; gravType = grav; dragType = drag; magfType = mag;}
-         
+      wxString gravDegree;
+      wxString gravOrder;
+      wxString magfDegree;
+      wxString magfOrder;
+      std::string potFilename;
+      PointMassForce *pmf;
+      GravityField *gravf;
+      DragForce *dragf;
+      SolarRadiationPressure *srpf;
+      bool useSrp;
+      
+      ForceType(const std::string &body, const std::string &grav,
+                const std::string &drag, const std::string &mag)
+         {
+            bodyName = body; gravType = grav; dragType = drag; magfType = mag;
+            gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; magfOrder = "0";
+            potFilename = ""; pmf = NULL; gravf = NULL; dragf = NULL; srpf = NULL;
+            useSrp = false;
+         }
    };
     
    wxStaticText *integratorStaticText;
@@ -125,10 +139,10 @@ private:
 
    wxButton *bodyButton;
    wxButton *searchGravityButton;
-   wxButton *setupButton;
+   wxButton *dragSetupButton;
    wxButton *searchMagneticButton;
-   wxButton *editMassButton;
-   wxButton *editPressureButton;
+   wxButton *editPmfButton;
+   wxButton *editSrpButton;
     
    wxString integratorString;
    wxString primaryBodyString;
@@ -168,12 +182,13 @@ private:
    Propagator                     *newProp;
    PropSetup                      *thePropSetup;
    ForceModel                     *theForceModel;
-   SolarRadiationPressure         *theSRP;
+   PointMassForce                 *thePMF;
    DragForce                      *theDragForce;
    GravityField                   *theGravForce;
+   SolarRadiationPressure         *theSRP;
    SolarSystem                    *theSolarSystem;
    std::vector<PointMassForce *>  thePMForces;
-   std::vector<CelestialBody *>   theBodies;
+   //std::vector<CelestialBody *>   theBodies;
    std::vector<ForceType*> forceList;
 
    // methods inherited from GmatPanel
