@@ -40,8 +40,7 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
    EVT_BUTTON(SC_ORBIT_COLOR_BUTTON, OpenGlPlotSetupPanel::OnOrbitColorClick)
    EVT_BUTTON(SC_TARGET_COLOR_BUTTON, OpenGlPlotSetupPanel::OnTargetColorClick)
    EVT_LISTBOX(SC_SEL_LISTBOX, OpenGlPlotSetupPanel::OnSelectSpacecraft)
-   EVT_CHECKBOX(PLOT_CHECKBOX, OpenGlPlotSetupPanel::OnPlotCheckBoxChange)
-   EVT_CHECKBOX(WIREFRAME_CHECKBOX, OpenGlPlotSetupPanel::OnWireFrameCheckBoxChange)
+   EVT_CHECKBOX(CHECKBOX, OpenGlPlotSetupPanel::OnCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -149,17 +148,9 @@ void OpenGlPlotSetupPanel::OnSelectSpacecraft(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnPlotCheckBoxChange(wxCommandEvent& event)
+// void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
-{
-   theApplyButton->Enable();
-}
-
-//------------------------------------------------------------------------------
-// void OnWireFrameCheckBoxChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnWireFrameCheckBoxChange(wxCommandEvent& event)
+void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    theApplyButton->Enable();
 }
@@ -251,17 +242,22 @@ void OpenGlPlotSetupPanel::Create()
    // plot option, (1st column)
    //------------------------------------------------------
    plotCheckBox =
-      new wxCheckBox(this, PLOT_CHECKBOX, wxT("Show Plot"),
+      new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
-    
+   
    wireFrameCheckBox =
-      new wxCheckBox(this, WIREFRAME_CHECKBOX, wxT("Draw WireFrame"),
+      new wxCheckBox(this, CHECKBOX, wxT("Draw WireFrame"),
                      wxDefaultPosition, wxSize(100, -1), 0);
-    
+   
+   targetStatusCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
+                     wxDefaultPosition, wxSize(100, -1), 0);
+   
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    plotOptionBoxSizer->Add(plotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    plotOptionBoxSizer->Add(wireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-            
+   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   
    //------------------------------------------------------
    // available spacecraft list (2th column)
    //------------------------------------------------------
@@ -369,6 +365,7 @@ void OpenGlPlotSetupPanel::LoadData()
    // load data from the core engine
    plotCheckBox->SetValue(mSubscriber->IsActive());
    wireFrameCheckBox->SetValue(mSubscriber->GetStringParameter("WireFrame") == "On");
+   targetStatusCheckBox->SetValue(mSubscriber->GetStringParameter("TargetStatus") == "On");
 
    // get spacecraft list to plot
    StringArray scNameList = mSubscriber->GetStringArrayParameter("SpacecraftList");
@@ -415,6 +412,11 @@ void OpenGlPlotSetupPanel::SaveData()
       mSubscriber->SetStringParameter("WireFrame", "On");
    else
       mSubscriber->SetStringParameter("WireFrame", "Off");
+   
+   if (targetStatusCheckBox->IsChecked())
+      mSubscriber->SetStringParameter("TargetStatus", "On");
+   else
+      mSubscriber->SetStringParameter("TargetStatus", "Off");
 
    // save spacecraft list
    if (mIsScChanged)

@@ -56,6 +56,7 @@ protected:
    
    wxCheckBox *plotCheckBox;
    wxCheckBox *wireFrameCheckBox;
+   wxCheckBox *targetStatusCheckBox;
 
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mScOptionBoxSizer;
@@ -64,8 +65,7 @@ protected:
    void OnRemoveSpacecraft(wxCommandEvent& event);
    void OnClearSpacecraft(wxCommandEvent& event);
    void OnSelectSpacecraft(wxCommandEvent& event);
-   void OnPlotCheckBoxChange(wxCommandEvent& event);
-   void OnWireFrameCheckBoxChange(wxCommandEvent& event);
+   void OnCheckBoxChange(wxCommandEvent& event);
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
    
@@ -82,8 +82,7 @@ protected:
       TEXTCTRL = 93000,
       LISTBOX,
       SC_SEL_LISTBOX,
-      PLOT_CHECKBOX,
-      WIREFRAME_CHECKBOX,
+      CHECKBOX,
       ADD_SC_BUTTON,
       REMOVE_SC_BUTTON,
       CLEAR_SC_BUTTON,

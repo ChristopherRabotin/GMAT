@@ -23,7 +23,7 @@
 const int MAX_DATA = 20000;
 const int MAX_EARTH_ZOOM_IN = 12756;
 const int MAX_BODIES = 20;
-const int MAX_SCS = 5;
+const int MAX_SCS = 30;
 
 class TrajPlotCanvas: public wxGLCanvas
 {
@@ -36,7 +36,7 @@ public:
 
    // initialization
    bool InitGL();
-    
+   
    // events
    void OnPaint(wxPaintEvent &event);
    void OnSize(wxSizeEvent &event);
@@ -56,8 +56,7 @@ public:
    int  ReadTextTrajectory(const wxString &filename);
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
-                         const UnsignedIntArray &orbitColor,
-                         const UnsignedIntArray &targetColor);
+                         const UnsignedIntArray &olor);
     
 private:
    

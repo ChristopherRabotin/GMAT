@@ -61,8 +61,7 @@ public:
    
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
-                         const UnsignedIntArray &orbitColor,
-                         const UnsignedIntArray &targetColor,
+                         const UnsignedIntArray &color,
                          bool updateCanvas);
    void RefreshPlot();
    void DeletePlot();

@@ -1217,8 +1217,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
-//                       const UnsignedIntArray &orbitColor,
-//                       const UnsignedIntArray &targetColor)
+//                       const UnsignedIntArray &color)
 //------------------------------------------------------------------------------
 /**
  * Updates spacecraft trajectory.
@@ -1228,13 +1227,11 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
  * @param <posY> position y array
  * @param <posZ> position z array
  * @param <orbitColor> orbit color array
- * @param <targetColor> target color array
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
                                       const RealArray &posY, const RealArray &posZ,
-                                      const UnsignedIntArray &orbitColor,
-                                      const UnsignedIntArray &targetColor)
+                                      const UnsignedIntArray &color) //loj: 8/5/04 color
 {
    mScCount = posX.size();
    if (mScCount > MAX_SCS)
@@ -1248,7 +1245,7 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
          mTempScPos[i][mNumData][0] = posX[i];
          mTempScPos[i][mNumData][1] = posY[i];
          mTempScPos[i][mNumData][2] = posZ[i];
-         mScTrajColor[i][mNumData]  = orbitColor[i];
+         mScTrajColor[i][mNumData]  = color[i];
          mTempEarthPos[mNumData][0] = 0.0;
          mTempEarthPos[mNumData][1] = 0.0;
          mTempEarthPos[mNumData][2] = 0.0;

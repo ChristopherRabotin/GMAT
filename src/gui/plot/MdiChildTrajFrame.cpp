@@ -294,19 +294,19 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
+//                       const UnsignedIntArray &color,
 //                       bool updateCanvas)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX,
                                          const RealArray &posY, const RealArray &posZ,
-                                         const UnsignedIntArray &orbitColor,
-                                         const UnsignedIntArray &targetColor,
+                                         const UnsignedIntArray &color, //loj: 8/5/04 color
                                          bool updateCanvas)
 {
    if (mCanvas)
    {
       mCanvas->SetFocus();
-      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
-                                targetColor);
+      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, color);
+
       if (updateCanvas)
          Update();
    }
