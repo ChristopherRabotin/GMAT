@@ -356,7 +356,9 @@ bool DragForce::Initialize(void)
                atmos = centralBody->GetAtmosphereModel();
            }
            else {
-               if (atmosphereType == "BodyDefault")
+              std::string modelBodyIsUsing = centralBody->GetAtmosphereModelType(); // wcs = 2004.10.12
+              //if (atmosphereType == "BodyDefault")
+               if ((atmosphereType == "BodyDefault") || (atmosphereType == modelBodyIsUsing)) // wcs - ???
                   atmos = centralBody->GetAtmosphereModel();
                else
                   atmos = internalAtmos; // wcs - 2004.08.31
