@@ -153,29 +153,30 @@ public:
     virtual bool RawStep(void);
 
 protected:
-    // The number of stages used to take an integration step
+    /// The number of stages used to take an integration step
     Integer stages;
-    // The results of each stage are stored in this array
+    /// The results of each stage are stored in this array
     Real ** ki;
-    // The portions of the total step taken for each stage
+    /// The portions of the total step taken for each stage
     Real * ai;
-    // The Runge-Kutta coefficients used to calculate the ki's
+    /// The Runge-Kutta coefficients used to calculate the ki's
     Real ** bij;
-    // The array used to accumulate the results of the stage calculations
+    /// The array used to accumulate the results of the stage calculations
     Real * cj;
 
-    // The difference array used when calculating the error estimate
+    /// The difference array used when calculating the error estimate
     Real * ee;
-    // A safety factor for the error control
+    /// A safety factor for the error control
     Real sigma;
-    // Exponent used to increase the stepsize for the next iteration
+    /// Exponent used to increase the stepsize for the next iteration
     Real incPower;
-    // Exponent used to decrease stepsize for this iteration (too much error)
+    /// Exponent used to decrease stepsize for this iteration (too much error)
     Real decPower;
-    // Accumulator for the intermediate states used in the stages
+    /// Accumulator for the intermediate states used in the stages
     Real * stageState;
-    // Candidate state for the step (used if the error is acceptable)
+    /// Candidate state for the step (used if the error is acceptable)
     Real * candidateState;
+    
 
     bool SetupAccumulator(void);
     void ClearArrays(void);

@@ -63,7 +63,6 @@ DormandElMikkawyPrince68& DormandElMikkawyPrince68::operator=
         return *this;
 
     RungeKuttaNystrom::operator=(dpn);
-
     return *this;
 }
 
@@ -90,7 +89,7 @@ GmatBase* DormandElMikkawyPrince68::Clone(void) const
 void DormandElMikkawyPrince68::SetCoefficients(void)
 {
     if (!initialized || (ai == NULL) || (bij == NULL) || (cj == NULL) ||
-        (ee == NULL) || (cdotj == NULL) || (ki == NULL)) {
+        (ee == NULL) || (eeDeriv == NULL) || (cdotj == NULL) || (ki == NULL)) {
         initialized = false;
         throw PropagatorException("DormandElMikkawyPrince68 cannot set coefficients");
     }

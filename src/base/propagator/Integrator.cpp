@@ -126,7 +126,8 @@ Integrator::Integrator(const std::string &typeStr, const std::string &nomme)
       timeleft                (stepSize),    
       ddt                     (NULL),
       errorEstimates          (NULL),
-      errorThreshold          (0.10)
+      errorThreshold          (0.10),
+      derivativeOrder         (1)
 {
     parameterCount = IntegratorParamCount;
 }
@@ -154,7 +155,8 @@ Integrator::Integrator(const Integrator& i) :
     timeleft                (i.timeleft),    
     ddt                     (NULL),
     errorEstimates          (NULL),
-    errorThreshold          (i.errorThreshold)
+    errorThreshold          (i.errorThreshold),
+    derivativeOrder         (i.derivativeOrder)
 {
     parameterCount = IntegratorParamCount;
 }
@@ -184,6 +186,8 @@ Integrator& Integrator::operator=(const Integrator& i)
     maximumStep = i.maximumStep;
     stepAttempts = 0;
     maxStepAttempts = i.maxStepAttempts;
+    
+    derivativeOrder = i.derivativeOrder;
 
     return *this;
 }

@@ -70,6 +70,7 @@ RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::strin
     derivativeError     (false),
     eeDeriv             (NULL)
 {
+   derivativeOrder = 2;       // Use second derivatives here
 }
 
 //------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ RungeKuttaNystrom::~RungeKuttaNystrom(void)
  */
 //------------------------------------------------------------------------------
 RungeKuttaNystrom::RungeKuttaNystrom(const RungeKuttaNystrom& rk) :
-    RungeKutta (rk),
+    RungeKutta          (rk),
     cdotj               (NULL),
     derivativeMap       (NULL),
     inverseMap          (NULL),
@@ -121,6 +122,7 @@ RungeKuttaNystrom & RungeKuttaNystrom::operator=(const RungeKuttaNystrom& rk)
     if (this == &rk)
         return *this;
 
+    RungeKutta::operator=(rk);
     initialized = false;
     derivativeError = rk.derivativeError;
 
@@ -166,7 +168,12 @@ char * RungeKuttaNystrom::GetType(void) const
 //------------------------------------------------------------------------------
 void RungeKuttaNystrom::Initialize(void)
 {
+    RungeKutta::Initialize();
     initialized = true;
+    
+    // DJC: 06/18/04 Dimension needs to be set early in the initialization
+    if (physicalModel) 
+        dimension = physicalModel->GetDimension();
     
     if (cdotj) {
         delete [] cdotj;
@@ -243,8 +250,6 @@ void RungeKuttaNystrom::Initialize(void)
         }
     }
 
-
-    RungeKutta::Initialize();
     if (initialized == false) {
         throw PropagatorException("RungeKutta base did not initialize for the RKN class");
     }

@@ -108,6 +108,8 @@
 #include "gmatdefs.hpp"
 #include "Propagator.hpp"
 
+#include "MessageInterface.hpp"
+
 class GMAT_API Integrator : public Propagator
 {
 public:
@@ -166,32 +168,34 @@ protected:
     static const std::string PARAMETER_TEXT[IntegratorParamCount - PropagatorParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[IntegratorParamCount - PropagatorParamCount];
         
-    // The level of "acceptable" relative error for the integrator
+    /// The level of "acceptable" relative error for the integrator
     Real tolerance;
-    // Flag used to activate fixed step mode
+    /// Flag used to activate fixed step mode
     bool fixedStep;
-    // Step to take in fixed step mode
+    /// Step to take in fixed step mode
     Real fixedStepsize;
-    // Minimum allowed step to take (always positive - sign handled elsewhere)
+    /// Minimum allowed step to take (always positive - sign handled elsewhere)
     Real minimumStep;
-    // Maximum allowed step to take (always positive - sign handled elsewhere)
+    /// Maximum allowed step to take (always positive - sign handled elsewhere)
     Real maximumStep;
-    // Accuracy of the time step interval
+    /// Accuracy of the time step interval
     Real smallestTime;
-    // Number of failed attempts tried
+    /// Number of failed attempts tried
     Integer stepAttempts;
-    // Number of failed attempts allowed before reporting failure
+    /// Number of failed attempts allowed before reporting failure
     Integer maxStepAttempts;
-    // Actual interval taken by the step
+    /// Actual interval taken by the step
     Real stepTaken;
-    // Remaining time for a specified or fixed timestep
+    /// Remaining time for a specified or fixed timestep
     Real timeleft;
-    // Derivative array pointer (obtained from the PhysicalModel instance)
+    /// Derivative array pointer (obtained from the PhysicalModel instance)
     const Real * ddt;
-    // An array of the error estimates, sized by the dimension of the system
+    /// An array of the error estimates, sized by the dimension of the system
     Real * errorEstimates;
-    // An array of the error estimates, sized by the dimension of the system
+    /// An array of the error estimates, sized by the dimension of the system
     Real errorThreshold;
+    /// Indicator for the integrator derivative order -- 2 for Nystrom methods
+    Integer derivativeOrder;
 
     //------------------------------------------------------------------------------
     // virtual Real EstimateError(void)

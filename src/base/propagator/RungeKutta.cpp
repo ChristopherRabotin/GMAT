@@ -232,9 +232,12 @@ void RungeKutta::Initialize(void)
             return;
         }
     }
-
-    SetCoefficients();
-    SetupAccumulator();
+    
+    // DJC: 06/18/04 Only set coefficients here for 1st order propagators
+    if (derivativeOrder == 1) {
+       SetCoefficients();
+       SetupAccumulator();
+    }
 }
 
 //------------------------------------------------------------------------------
