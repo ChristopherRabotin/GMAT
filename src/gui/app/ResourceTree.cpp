@@ -319,7 +319,6 @@ void ResourceTree::AddDefaultResources()
    mMatlabFunctItem =
       AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("MATLAB Functions"), GmatTree::MATLAB_FUNCT_FOLDER));
-
    SetItemImage(mMatlabFunctItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 

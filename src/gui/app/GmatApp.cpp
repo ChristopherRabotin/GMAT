@@ -41,7 +41,7 @@
 #include "wx/splash.h"
 #include "wx/image.h"
 
-#include "bitmaps/splash.xpm"
+//#include "bitmaps/splash.xpm"
 
 DocViewFrame *docMainFrame = (DocViewFrame *) NULL;
 MdiDocViewFrame *mdiDocMainFrame = (MdiDocViewFrame *) NULL;
@@ -102,12 +102,12 @@ bool GmatApp::OnInit()
 //                              wxDEFAULT_FRAME_STYLE);
 
          //testing the splash screen
-        wxBitmap bitmap = wxBitmap( splash_xpm );
-
-        new wxSplashScreen(bitmap,
-                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-                6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
-                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
+//        wxBitmap bitmap = wxBitmap( splash_xpm );
+//
+//        new wxSplashScreen(bitmap,
+//                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+//                6000, NULL, -1, wxDefaultPosition, wxSize(500, 500),
+//                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
 
         wxYield();
 

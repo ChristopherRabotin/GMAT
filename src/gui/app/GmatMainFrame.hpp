@@ -55,6 +55,7 @@ public:
    void RemoveChild(wxString item);
    void CloseActiveChild();
    void CloseAllChildren();
+   void MinimizeChildren(int selection);
    void CloseCurrentProject();
    void RunCurrentMission();
    void NotifyRunCompleted(); //loj: 10/28/04 added
@@ -117,6 +118,7 @@ private:
 
    void OnOpenMatlab(wxCommandEvent& event);
    void OnCloseMatlab(wxCommandEvent& event);
+   void OnMatlabInteractive(wxCommandEvent& WXUNUSED(event));
    
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);

@@ -45,7 +45,8 @@ private:
 
    // event handlers
    void OnNotebookSelChange(wxNotebookEvent &event);
-   
+   void OnNotebookSelChanging(wxNotebookEvent &event);
+
    DECLARE_EVENT_TABLE();
 
 };

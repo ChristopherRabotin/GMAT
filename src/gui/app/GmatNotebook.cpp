@@ -33,6 +33,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatNotebook, wxNotebook)
    EVT_NOTEBOOK_PAGE_CHANGED(-1, GmatNotebook::OnNotebookSelChange)
+//   EVT_NOTEBOOK_PAGE_CHANGING(-1, GmatNotebook::OnNotebookSelChanging)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -82,7 +83,40 @@ void GmatNotebook::OnNotebookSelChange(wxNotebookEvent &event)
    }
 
    event.Skip(); // need this
+
+   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
+
+   if (theMainFrame != NULL)
+   {
+      theMainFrame->MinimizeChildren(sel);
+      theMainFrame->Cascade();
+   }
 }
+
+//------------------------------------------------------------------------------
+// void OnNoetbookSelChanging(wxNotebookEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Handles notebook page change
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void GmatNotebook::OnNotebookSelChanging(wxNotebookEvent &event)
+{
+   int sel = event.GetSelection();
+
+   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
+
+   if (theMainFrame != NULL)
+   {
+      theMainFrame->Cascade();
+      theMainFrame->MinimizeChildren(sel);
+   }
+   else
+      event.Skip(); // need this
+}
+
 
 //-------------------------------
 // private methods
