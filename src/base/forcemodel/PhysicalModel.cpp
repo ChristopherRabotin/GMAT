@@ -210,45 +210,46 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
 //------------------------------------------------------------------------------
 PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
 {
-    if (&pm == this)
-        return *this;
+   if (&pm == this)
+      return *this;
 
-    dimension   = pm.dimension;
-    initialized = pm.initialized;
-    epoch       = pm.epoch;
-    elapsedTime = pm.elapsedTime;
-
-    if (pm.modelState) 
-    {
-        if (modelState) 
-        {
-            delete [] modelState;
-            modelState = NULL;
-        }
-        modelState = new Real[dimension];
-        if (modelState != NULL) 
-            memcpy(modelState, pm.modelState, dimension * sizeof(Real));
-        else
-            initialized = false;
-
-        stateChanged = pm.stateChanged;
-    }
-
-    if (pm.deriv) 
-    {
-        if (deriv)
-        {
-            delete [] deriv;
-            deriv = NULL;
-        }
-        deriv = new Real[dimension];
-        if (deriv != NULL) 
-            memcpy(deriv, pm.deriv, dimension * sizeof(Real));
-        else
-            initialized = false;
-    }
-
-    return *this;
+   GmatBase::operator=(pm);
+   dimension   = pm.dimension;
+   initialized = pm.initialized;
+   epoch       = pm.epoch;
+   elapsedTime = pm.elapsedTime;
+   
+   if (pm.modelState) 
+   {
+      if (modelState) 
+      {
+         delete [] modelState;
+         modelState = NULL;
+      }
+      modelState = new Real[dimension];
+      if (modelState != NULL) 
+         memcpy(modelState, pm.modelState, dimension * sizeof(Real));
+      else
+         initialized = false;
+   
+      stateChanged = pm.stateChanged;
+   }
+   
+   if (pm.deriv) 
+   {
+      if (deriv)
+      {
+         delete [] deriv;
+         deriv = NULL;
+      }
+      deriv = new Real[dimension];
+      if (deriv != NULL) 
+         memcpy(deriv, pm.deriv, dimension * sizeof(Real));
+      else
+         initialized = false;
+   }
+   
+   return *this;
 }
 
 //------------------------------------------------------------------------------
