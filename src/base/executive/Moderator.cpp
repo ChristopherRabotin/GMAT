@@ -2039,14 +2039,14 @@ void Moderator::CreateDefaultMission()
       CreateParameter("X", "DefaultSC.X");
       CreateParameter("Y", "DefaultSC.Y");
       CreateParameter("Z", "DefaultSC.Z");
-      CreateParameter("VX", "DefaultSC.Vx");
-      CreateParameter("VY", "DefaultSC.Vy");
-      CreateParameter("VZ", "DefaultSC.Vz");
+      CreateParameter("VX", "DefaultSC.VX");
+      CreateParameter("VY", "DefaultSC.VY");
+      CreateParameter("VZ", "DefaultSC.VZ");
 
       // Keplerian parameters
       CreateParameter("SMA", "DefaultSC.SMA");
-      CreateParameter("ECC", "DefaultSC.Ecc");
-      CreateParameter("INC", "DefaultSC.Inc");
+      CreateParameter("ECC", "DefaultSC.ECC");
+      CreateParameter("INC", "DefaultSC.INC");
       CreateParameter("RAAN", "DefaultSC.RAAN");
       CreateParameter("AOP", "DefaultSC.AOP");
       CreateParameter("TA", "DefaultSC.TA");
@@ -2068,7 +2068,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("DECV", "DefaultSC.DECV");
 
       // Angular parameters
-      CreateParameter("SemilatusRectum", "DefaultSC.SLR");
+      CreateParameter("SemilatusRectum", "DefaultSC.SemilatusRectum");
       //MessageInterface::ShowMessage("-->default parameters created\n");
     
       // Set parameter description and object name
