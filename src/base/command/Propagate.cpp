@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PROPAGATE_OBJ 1
+//#define DEBUG_PROPAGATE_INIT 1
 //#define DEBUG_PROPAGATE_EXE 1
 //#define DEBUG_STOPPING_CONDITIONS 1
 //#define DEBUG_RENAME 1
@@ -328,18 +329,36 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
    case Gmat::STOP_CONDITION:
       {
+         //-----------------------------------------------------------
+         // loj: 11/30/04
+         // Notes: Need to parse the expression if stop variable is
+         // a user variable which doesn't use Object.Property name
+         // convention.
+         //-----------------------------------------------------------
+         std::string satName = obj->GetName();
+         Integer strt = satName.find("StopOn") + 6;
+         if (strt == (Integer)std::string::npos)
+            strt = 0;
+         Integer ndx = satName.find(".",0);
+         if (ndx != (Integer)std::string::npos)
+            satName = satName.substr(strt, ndx-strt);
+
          Integer size = stopWhen.size();
+         
          if (stopWhen.empty() && index == 0)
          {
             stopWhen.push_back((StopCondition *)obj);
+            stopSatNames.push_back(satName);
          }
          else if (index == size)
          {
             stopWhen.push_back((StopCondition *)obj);
+            stopSatNames.push_back(satName);
          }
          else if (index < size)
          {
             stopWhen[index] = (StopCondition *)obj;
+            stopSatNames[index] = satName;
          }
          else
          {
@@ -349,15 +368,23 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                 obj->GetTypeName().c_str(), obj->GetName().c_str());
             return false;
          }
-         
-         std::string satName = obj->GetName();
-         Integer strt = satName.find("StopOn") + 6;
-         if (strt == (Integer)std::string::npos)
-            strt = 0;
-         Integer ndx = satName.find(".",0);
-         if (ndx != (Integer)std::string::npos)
-            satName = satName.substr(strt, ndx-strt);
-         stopSatNames.push_back(satName);
+
+         //loj: 11/30/04 moved to top
+         //std::string satName = obj->GetName();
+         //Integer strt = satName.find("StopOn") + 6;
+         //if (strt == (Integer)std::string::npos)
+         //   strt = 0;
+         //Integer ndx = satName.find(".",0);
+         //if (ndx != (Integer)std::string::npos)
+         //   satName = satName.substr(strt, ndx-strt);
+
+         //stopSatNames.push_back(satName);
+
+#if DEBUG_PROPAGATE_OBJ
+         for (unsigned int j=0; j<stopSatNames.size(); j++)
+            MessageInterface::ShowMessage("Propagate::SetRefObject() stopSatNames=%s\n",
+                                          stopSatNames[j].c_str());
+#endif
          return true;
       }
    default:
@@ -665,7 +692,6 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id,
 bool Propagate::TakeAction(const std::string &action, 
                            const std::string &actionData)
 {
-   //loj: 10/20/04 added actionData   
    if (action == "Clear")
    {
       if (actionData == "Propagator")
@@ -673,17 +699,20 @@ bool Propagate::TakeAction(const std::string &action,
          for (Integer i = 0; i < (Integer)satName.size(); ++i)
             delete satName[i];
          satName.clear();
-         stopSatNames.clear();
+         //stopSatNames.clear(); //loj: 11/30/04 - commented out
          propName.clear();
          prop.clear();
          sats.clear();
       }
       else if (actionData == "StopCondition")
       {
-         for (unsigned int i=0; i<stopWhen.size(); i++)
-            delete stopWhen[i];
+         //11/30/04 - commented out
+         //for (unsigned int i=0; i<stopWhen.size(); i++)
+         //   delete stopWhen[i];
+         
          stopWhen.clear();
          stopSats.clear();
+         stopSatNames.clear(); //loj: 11/30/04 - added
          return true;
       }
    }
@@ -1101,7 +1130,7 @@ bool Propagate::TakeAStep(Real propStep)
 //------------------------------------------------------------------------------
 bool Propagate::Initialize(void)
 {
-#if DEBUG_PROPAGATE_EXE
+#if DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage("Propagate::Initialize() entered.\n%s\n",
                                     generatingString.c_str());
 #endif
@@ -1173,7 +1202,8 @@ bool Propagate::Initialize(void)
       ++index;
    }
    initialized = true;
-   
+
+   stopSats.clear(); //loj: 11/30/04 - added
    // Setup spacecraft array used for stopping conditions
    for (StringArray::iterator sc = stopSatNames.begin(); 
         sc != stopSatNames.end(); ++sc) {
@@ -1187,8 +1217,15 @@ bool Propagate::Initialize(void)
       stopSats.push_back(so);
    }
 
+#if DEBUG_PROPAGATE_INIT
+   for (unsigned int i=0; i<stopSats.size(); i++)
+      MessageInterface::ShowMessage("Propagate::Initialize() stopSats[%d]=%s\n", i,
+                                    stopSats[i]->GetName().c_str());
+#endif
+   
    if ((stopWhen.size() == 0) && !singleStepMode)
       throw CommandException("No stopping conditions specified!");
+   
    if (solarSys != NULL)
    {
       for (unsigned int i=0; i<stopWhen.size(); i++)
@@ -1406,12 +1443,13 @@ bool Propagate::Execute(void)
          inProgress = true;
       }
 
+
       /// @todo Find a more elegant way to perform epoch refresh during propagation
       for (unsigned int i = 0; i < fm.size(); ++i)
          fm[i]->UpdateInitialData();
-
+      
       Integer epochID = sats[0]->GetParameterID("Epoch");;
-         
+      
       while (!stopCondMet)
       {
          if (!TakeAStep())
