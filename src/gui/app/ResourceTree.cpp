@@ -117,6 +117,14 @@ void ResourceTree::UpdateResource()
     mNumDiffCorr = 0;
     mNumVariable = 0;
 
+    // ag: collapse, so folder icon is closed
+    Collapse(mSpacecraftItem);
+    Collapse(mPropagatorItem);
+    Collapse(mBurnItem);
+    Collapse(mSolverItem);
+    Collapse(mSubscriberItem);
+    Collapse(mVariableItem);
+    
     DeleteChildren(mSpacecraftItem);
     DeleteChildren(mPropagatorItem);
     DeleteChildren(mBurnItem);
@@ -130,7 +138,7 @@ void ResourceTree::UpdateResource()
     AddDefaultSolvers(mSolverItem);
     AddDefaultSubscribers(mSubscriberItem);
     AddDefaultVariables(mVariableItem);
-    
+      
     theGuiManager->UpdateAll(); //loj: 3/5/04 added
 
 }
