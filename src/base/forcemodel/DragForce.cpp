@@ -44,51 +44,54 @@
  */
 //------------------------------------------------------------------------------
 DragForce::DragForce(const std::string &name) :
-    PhysicalModel          (Gmat::PHYSICAL_MODEL, "DragForce", name),
-    sun                    (NULL),
-    centralBody            (NULL),
-    useExternalAtmosphere  (true),
-    atmosphereType         (""),  
-    atmos                  (NULL),
-    internalAtmos          (NULL),
-    density                (NULL),
-    prefactor              (NULL),
-    firedOnce              (false),
-    //bodyName               ("Earth"),
-    dataType               ("Constant"),
-    fluxFile               (""),
-    fluxF107               (150.0),
-    fluxF107A              (150.0),
-    ap                     (13.85),
-    atmosphereModelID      (parameterCount),
-    centralBodyID          (parameterCount+1), //loj: Why do we need this? PhysicalModel has the body.
-    sourceTypeID           (parameterCount+2),
-    fluxFileID             (parameterCount+3),
-    fluxID                 (parameterCount+4),
-    averageFluxID          (parameterCount+5),
-    magneticIndexID        (parameterCount+6)
+   PhysicalModel          (Gmat::PHYSICAL_MODEL, "DragForce", name),
+   sun                    (NULL),
+   centralBody            (NULL),
+   useExternalAtmosphere  (true),
+   atmosphereType         (""),
+   atmos                  (NULL),
+   internalAtmos          (NULL),
+   density                (NULL),
+   prefactor              (NULL),
+   firedOnce              (false),
+   //bodyName               ("Earth"),
+   dataType               ("Constant"),
+   fluxFile               (""),
+   fluxF107               (150.0),
+   fluxF107A              (150.0),
+   kp                     (3.0),
+   atmosphereModelID      (parameterCount),
+   //loj: Why do we need the following line? PhysicalModel has the body.
+   centralBodyID          (parameterCount+1),
+   sourceTypeID           (parameterCount+2),
+   fluxFileID             (parameterCount+3),
+   fluxID                 (parameterCount+4),
+   averageFluxID          (parameterCount+5),
+   magneticIndexID        (parameterCount+6)
 {
-    dimension = 6;
-    parameterCount+=7;
+   dimension = 6;
+   parameterCount+=7;
     
-    // Default Sun location, from the SLP file at MJD 21545.0:
-    sunLoc[0] =  2.65e+07; 
-    sunLoc[1] = -1.32757e+08;
-    sunLoc[2] = -5.75566e+07;
+   // Default Sun location, from the SLP file at MJD 21545.0:
+   sunLoc[0] =  2.65e+07;
+   sunLoc[1] = -1.32757e+08;
+   sunLoc[2] = -5.75566e+07;
     
-    cbLoc[0]  = 0.0;
-    cbLoc[1]  = 0.0;
-    cbLoc[2]  = 0.0;
+   cbLoc[0]  = 0.0;
+   cbLoc[1]  = 0.0;
+   cbLoc[2]  = 0.0;
     
-    // Nominal Earth angular velocity
-    angVel[0]      = 0.0;
-    angVel[1]      = 0.0;
-    angVel[2]      = 7.29211585530e-5;
+   // Nominal Earth angular velocity
+   angVel[0]      = 0.0;
+   angVel[1]      = 0.0;
+   angVel[2]      = 7.29211585530e-5;
+    
+   ap = CalculateAp(kp);
 
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata.open("DragData.csv");
-         dragdata << "Atmospheric drag parameters\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+       dragdata.open("DragData.csv");
+       dragdata << "Atmospheric drag parameters\n";
+   #endif
 }
 
 
@@ -101,20 +104,20 @@ DragForce::DragForce(const std::string &name) :
 //------------------------------------------------------------------------------
 DragForce::~DragForce()
 {
-    //if (!useExternalAtmosphere && atmos)
-    //   delete atmos;
+   //if (!useExternalAtmosphere && atmos)
+   //   delete atmos;
    if (internalAtmos)
       delete internalAtmos;
         
-    if (density)
-        delete [] density;
+   if (density)
+      delete [] density;
         
-    if (prefactor)
-        delete [] prefactor;
+   if (prefactor)
+      delete [] prefactor;
 
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata.close();
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata.close();
+   #endif
 }
 
 
@@ -128,45 +131,47 @@ DragForce::~DragForce()
  */
 //------------------------------------------------------------------------------
 DragForce::DragForce(const DragForce& df) :
-    PhysicalModel           (df),
-    sun                     (NULL),
-    centralBody             (NULL),
-    useExternalAtmosphere   (true),
-    atmosphereType          (df.atmosphereType),
-    atmos                   (NULL),
-    internalAtmos           (NULL),
-    density                 (NULL),
-    prefactor               (NULL),
-    firedOnce               (false),
-    //bodyName                (df.bodyName),
-    dataType                (df.dataType),
-    fluxFile                (df.fluxFile),
-    fluxF107                (df.fluxF107),
-    fluxF107A               (df.fluxF107A),
-    ap                      (df.ap),
-    atmosphereModelID       (parameterCount),
-    centralBodyID           (parameterCount+1),
-    sourceTypeID            (parameterCount+2),
-    fluxFileID              (parameterCount+3),
-    fluxID                  (parameterCount+4),
-    averageFluxID           (parameterCount+5),
-    magneticIndexID         (parameterCount+6)
+   PhysicalModel           (df),
+   sun                     (NULL),
+   centralBody             (NULL),
+   useExternalAtmosphere   (true),
+   atmosphereType          (df.atmosphereType),
+   atmos                   (NULL),
+   internalAtmos           (NULL),
+   density                 (NULL),
+   prefactor               (NULL),
+   firedOnce               (false),
+   //bodyName                (df.bodyName),
+   dataType                (df.dataType),
+   fluxFile                (df.fluxFile),
+   fluxF107                (df.fluxF107),
+   fluxF107A               (df.fluxF107A),
+   kp                      (df.kp),
+   atmosphereModelID       (parameterCount),
+   centralBodyID           (parameterCount+1),
+   sourceTypeID            (parameterCount+2),
+   fluxFileID              (parameterCount+3),
+   fluxID                  (parameterCount+4),
+   averageFluxID           (parameterCount+5),
+   magneticIndexID         (parameterCount+6)
 {
-    parameterCount += 7;
-    dimension = df.dimension;
+   parameterCount += 7;
+   dimension = df.dimension;
 
-    /// @todo Remove hard coded central body parms in DragForce
-    sunLoc[0] = 138276412034.25;
-    sunLoc[1] = -71626341186.98;
-    sunLoc[2] =    119832241.16;
+   /// @todo Remove hard coded central body parms in DragForce
+   sunLoc[0] = 138276412034.25;
+   sunLoc[1] = -71626341186.98;
+   sunLoc[2] =    119832241.16;
     
-    cbLoc[0]  = 0.0;
-    cbLoc[1]  = 0.0;
-    cbLoc[2]  = 0.0;
+   cbLoc[0]  = 0.0;
+   cbLoc[1]  = 0.0;
+   cbLoc[2]  = 0.0;
     
-    angVel[0]      = 0.0;
-    angVel[1]      = 0.0;
-    angVel[2]      = 7.29211585530e-5;
+   angVel[0]      = 0.0;
+   angVel[1]      = 0.0;
+   angVel[2]      = 7.29211585530e-5;
+
+   ap = CalculateAp(kp);
 }
 
 
@@ -183,19 +188,34 @@ DragForce::DragForce(const DragForce& df) :
 //------------------------------------------------------------------------------
 DragForce& DragForce::operator=(const DragForce& df)
 {
-    if (this == &df)
-        return *this;
+   if (this == &df)
+      return *this;
         
-    PhysicalModel::operator=(df); 
-    firedOnce = false;
+   PhysicalModel::operator=(df);
+   firedOnce = false;
 
-    // more must be done here!!!!!!!!!!
-          
-    return *this;
+   sun                   = NULL;
+   centralBody           = NULL;
+   useExternalAtmosphere = df.useExternalAtmosphere;
+   atmosphereType        = df.atmosphereType;
+   atmos                 = NULL;
+   internalAtmos         = NULL;
+   density               = NULL;
+   prefactor             = NULL;
+   firedOnce             = false;
+   //bodyName              = df.bodyName;
+   dataType              = df.dataType;
+   fluxFile              = df.fluxFile;
+   fluxF107              = df.fluxF107;
+   fluxF107A             = df.fluxF107A;
+   kp                    = df.kp;
+   ap                    = CalculateAp(kp);
+
+   return *this;
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the DragForce.
@@ -204,7 +224,7 @@ DragForce& DragForce::operator=(const DragForce& df)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* DragForce::Clone(void) const
+GmatBase* DragForce::Clone() const
 {
    return (new DragForce(*this));
 }
@@ -227,26 +247,27 @@ GmatBase* DragForce::Clone(void) const
 //------------------------------------------------------------------------------
 bool DragForce::GetComponentMap(Integer * map, Integer order) const
 {
-    Integer i6;
+   Integer i6;
 
-    if (order != 1)
-        throw ForceModelException("Drag supports 1st order equations of motion only");
+   if (order != 1)
+      throw ForceModelException(
+         "Drag supports 1st order equations of motion only");
 
-    // Calculate how many spacecraft are in the model
-    Integer satCount = (Integer)(dimension / 6);
-    for (Integer i = 0; i < satCount; i++) 
-    {
-        i6 = i * 6;
+   // Calculate how many spacecraft are in the model
+   Integer satCount = (Integer)(dimension / 6);
+   for (Integer i = 0; i < satCount; i++)
+   {
+      i6 = i * 6;
 
-        map[ i6 ] = i6 + 3;
-        map[i6+1] = i6 + 4;
-        map[i6+2] = i6 + 5;
-        map[i6+3] = -1;
-        map[i6+4] = -1;
-        map[i6+5] = -1;
-    }
+      map[ i6 ] = i6 + 3;
+      map[i6+1] = i6 + 4;
+      map[i6+2] = i6 + 5;
+      map[i6+3] = -1;
+      map[i6+4] = -1;
+      map[i6+5] = -1;
+   }
 
-    return true;
+   return true;
 }
 
 
@@ -268,28 +289,28 @@ void DragForce::SetSatelliteParameter(const Integer i,
                                       const std::string parmName, 
                                       const Real parm)
 {
-    unsigned parmNumber = (unsigned)(i+1);
+   unsigned parmNumber = (unsigned)(i+1);
 
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata << "Setting satellite parameter " << parmName 
-                  << " for Spacecraft " << i << " to " << parm << "\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Setting satellite parameter " << parmName
+               << " for Spacecraft " << i << " to " << parm << "\n";
+   #endif
     
-    if (parmName == "DryMass")
-        if (parmNumber < mass.size())
-            mass[i] = parm;
-        else
-            mass.push_back(parm);
-    if (parmName == "Cd")
-        if (parmNumber < dragCoeff.size())
-            dragCoeff[i] = parm;
-        else
-            dragCoeff.push_back(parm);
-    if (parmName == "DragArea")
-        if (parmNumber < area.size())
-            area[i] = parm;
-        else
-            area.push_back(parm);
+   if (parmName == "DryMass")
+      if (parmNumber < mass.size())
+         mass[i] = parm;
+      else
+         mass.push_back(parm);
+   if (parmName == "Cd")
+      if (parmNumber < dragCoeff.size())
+         dragCoeff[i] = parm;
+      else
+         dragCoeff.push_back(parm);
+   if (parmName == "DragArea")
+      if (parmNumber < area.size())
+         area[i] = parm;
+      else
+         area.push_back(parm);
 }
 
 
@@ -311,13 +332,13 @@ void DragForce::SetSatelliteParameter(const Integer i,
                                       const std::string parmName, 
                                       const std::string parm)
 {
-    unsigned parmNumber = (unsigned)(i+1);
+   unsigned parmNumber = (unsigned)(i+1);
     
-    if (parmName == "ReferenceBody")
-        if (parmNumber < mass.size())
-            dragBody[i] = parm;
-        else
-            dragBody.push_back(parm);
+   if (parmName == "ReferenceBody")
+      if (parmNumber < mass.size())
+         dragBody[i] = parm;
+      else
+         dragBody.push_back(parm);
 }
 
 
@@ -343,7 +364,7 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
 
 
 //------------------------------------------------------------------------------
-// void Initialize(void)
+// void Initialize()
 //------------------------------------------------------------------------------
 /**
  * Allocates memory and performs other drag force initialization.
@@ -351,79 +372,88 @@ void DragForce::ClearSatelliteParameters(const std::string parmName)
 //------------------------------------------------------------------------------
 bool DragForce::Initialize()
 {
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata << "Entered DragForce::Initialize()\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Entered DragForce::Initialize()\n";
+   #endif
 
-    bool retval = PhysicalModel::Initialize();
+   bool retval = PhysicalModel::Initialize();
     
-    if (retval) {
-       satCount = dimension / 6;
-       if (satCount <= 0)
-           throw ForceModelException("Drag called with dimension zero");
+   if (retval)
+   {
+      satCount = dimension / 6;
+      if (satCount <= 0)
+         throw ForceModelException("Drag called with dimension zero");
            
-       density   = new Real[satCount];
-       prefactor = new Real[satCount];
+      density   = new Real[satCount];
+      prefactor = new Real[satCount];
    
-       // Set the atmosphere model
-       if (solarSystem) {
-           sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
-           if (!sun)
-               throw ForceModelException("The Sun is not in solar system");
+      // Set the atmosphere model
+      if (solarSystem)
+      {
+         sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
+         if (!sun)
+            throw ForceModelException("The Sun is not in solar system");
            
-           std::string bodyName;
-           if (dragBody.size() > 0)
-               bodyName = dragBody[0];
-           else
-               bodyName = "Earth";
-           centralBody = solarSystem->GetBody(bodyName);
+         std::string bodyName;
+         if (dragBody.size() > 0)
+            bodyName = dragBody[0];
+         else
+            bodyName = "Earth";
+         centralBody = solarSystem->GetBody(bodyName);
    
-           if (!centralBody)
-               throw ForceModelException("Central body (for Drag) not in solar system");
-           if (useExternalAtmosphere) {
+         if (!centralBody)
+            throw ForceModelException(
+               "Central body (for Drag) not in solar system");
+         if (useExternalAtmosphere)
+         {
+            atmos = centralBody->GetAtmosphereModel();
+         }
+         else
+         {
+            std::string modelBodyIsUsing =
+               centralBody->GetAtmosphereModelType();
+            //if (atmosphereType == "BodyDefault")
+            if ((atmosphereType == "BodyDefault") ||
+                (atmosphereType == modelBodyIsUsing))
                atmos = centralBody->GetAtmosphereModel();
-           }
-           else {
-              std::string modelBodyIsUsing = centralBody->GetAtmosphereModelType(); // wcs = 2004.10.12
-              //if (atmosphereType == "BodyDefault")
-               if ((atmosphereType == "BodyDefault") || (atmosphereType == modelBodyIsUsing)) // wcs - ???
-                  atmos = centralBody->GetAtmosphereModel();
-               else
-                  atmos = internalAtmos; // wcs - 2004.08.31
-                  //atmos = centralBody->GetAtmosphereModel(atmosphereType);
-               if (!atmos)
-                  throw ForceModelException("Atmosphere model not defined");
-           }
+            else
+               atmos = internalAtmos;
+            if (!atmos)
+               throw ForceModelException("Atmosphere model not defined");
+         }
                
-           if (atmos)  {
-               atmos->SetSunVector(sunLoc);
-               atmos->SetCentralBodyVector(cbLoc);
-               atmos->SetCentralBody(centralBody);
-               atmos->SetSolarSystem(solarSystem);
-           }
-           else {
-              if (atmosphereType != "BodyDefault") {
-                 std::string msg = "Could not create ";
-                 msg += atmosphereType;
-                 msg += " atmosphere model";
-                 throw ForceModelException(msg);
-              }
-           }
-       }
-    }
+         if (atmos)
+         {
+            atmos->SetSunVector(sunLoc);
+            atmos->SetCentralBodyVector(cbLoc);
+            atmos->SetCentralBody(centralBody);
+            atmos->SetSolarSystem(solarSystem);
+         }
+         else
+         {
+            if (atmosphereType != "BodyDefault")
+            {
+               std::string msg = "Could not create ";
+               msg += atmosphereType;
+               msg += " atmosphere model";
+               throw ForceModelException(msg);
+            }
+         }
+      }
+   }
     
-    firedOnce = false;
+   firedOnce = false;
 
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata << "Leaving DragForce::Initialize()\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Leaving DragForce::Initialize()\n";
+   #endif
     
-    return retval;
+   return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// void BuildPrefactors(void) 
+// void BuildPrefactors() 
 //------------------------------------------------------------------------------
 /**
  * Builds drag prefactors prior to modeling the force.
@@ -438,33 +468,40 @@ bool DragForce::Initialize()
  * expressed in units of m^2, and the mass is in kg.
  */
 //------------------------------------------------------------------------------
-void DragForce::BuildPrefactors(void) 
+void DragForce::BuildPrefactors() 
 {
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-         dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
+   #endif
 
-    for (Integer i = 0; i < satCount; ++i) {
-        if (mass.size() < (unsigned)(i+1))
-            throw ForceModelException("Spacecraft not set correctly");
-        if (mass[i] <= 0.0) {
-            std::string errorMsg = "Spacecraft ";
-            errorMsg += i;
-            errorMsg += " has non-physical mass; Drag modeling cannot be used.";
-            throw ForceModelException(errorMsg); 
-        }
+   for (Integer i = 0; i < satCount; ++i)
+   {
+      if (mass.size() < (unsigned)(i+1))
+         throw ForceModelException("Spacecraft not set correctly");
+      if (mass[i] <= 0.0)
+      {
+         std::string errorMsg = "Spacecraft ";
+         errorMsg += i;
+         errorMsg += " has non-physical mass; Drag modeling cannot be used.";
+         throw ForceModelException(errorMsg);
+      }
         
-        // Note: Prefactor is scaled to account for density in kg / m^3
-        prefactor[i] = -500.0 * dragCoeff[i] * area[i] / mass[i];
+      // Note: Prefactor is scaled to account for density in kg / m^3
+      prefactor[i] = -500.0 * dragCoeff[i] * area[i] / mass[i];
 
-       #ifdef DEBUG_DRAGFORCE_DENSITY
-            dragdata << "Prefactor data\n   Spacecraft "
-                     << i 
-                     << "\n      Cd = " << dragCoeff[i] 
-                     << "\n      Area = " << area[i] 
-                     << "\n      Mass = " << mass[i]
-                     << "\n      Prefactor = " << prefactor[i]  << "\n";
-       #endif
+      #ifdef DEBUG_DRAGFORCE_DENSITY
+         dragdata << "Prefactor data\n   Spacecraft "
+                  << i
+                  << "\n      Cd = " << dragCoeff[i]
+                  << "\n      Area = " << area[i]
+                  << "\n      Mass = " << mass[i]
+                  << "\n      Prefactor = " << prefactor[i]  << "\n";
+
+         MessageInterface::ShowMessage(
+            "Prefactor data\n   Spacecraft %d\n      Cd = %lf\n      "
+            "Area = %lf\n      Mass = %lf\n      Prefactor = %lf\n", i,
+            dragCoeff[i], area[i], mass[i], prefactor[i]);
+      #endif
     }
 }
 
@@ -493,115 +530,124 @@ void DragForce::BuildPrefactors(void)
  */
 bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 {
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-       dragdata << "Entered DragForce::GetDerivatives()\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Entered DragForce::GetDerivatives()\n";
+   #endif
 
-    Integer i, i6;
-    Real vRelative[3], vRelMag, factor;
+   Integer i, i6;
+   Real vRelative[3], vRelMag, factor;
 
-    if (!firedOnce) {
-       if (mass.size() > 0)
-          BuildPrefactors();
-       else
-          if (mass.size() == 0) 
-             for (Integer i = 0; i < satCount; ++i) {
-                #ifdef DEBUG_DRAGFORCE_DENSITY
-                    dragdata << "Using default prefactors for " << satCount <<" Spacecraft\n";
-                #endif
-                prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
-             }
+   if (!firedOnce)
+   {
+      if (mass.size() > 0)
+         BuildPrefactors();
+      else
+         if (mass.size() == 0)
+            for (Integer i = 0; i < satCount; ++i)
+            {
+               #ifdef DEBUG_DRAGFORCE_DENSITY
+                   dragdata << "Using default prefactors for " << satCount
+                            << " Spacecraft\n";
+               #endif
+               prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0; // Dummy up the product
+            }
                
-       firedOnce = true;
-    }
+      firedOnce = true;
+   }
     
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-       dragdata << "Looking up density\n";
-    #endif
-    GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-       dragdata << "density[0] = " << density[0] << "\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Looking up density\n";
+   #endif
+   GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "density[0] = " << density[0] << "\n";
+   #endif
     
     
-    for (i = 0; i < satCount; ++i) {
-        i6 = i * 6;
-        #ifdef DEBUG_DRAGFORCE_DENSITY
-           dragdata << "Spacecraft " << (i+1) << ": ";
-        #endif
+   for (i = 0; i < satCount; ++i)
+   {
+      i6 = i * 6;
+      #ifdef DEBUG_DRAGFORCE_DENSITY
+         dragdata << "Spacecraft " << (i+1) << ": ";
+      #endif
 
-        // v_rel = v - w x R
-        vRelative[0] = state[i6+3] - 
-                       (angVel[1]*state[i6+2] - angVel[2]*state[i6+1]);
-        vRelative[1] = state[i6+4] - 
-                       (angVel[2]*state[ i6 ] - angVel[0]*state[i6+2]);
-        vRelative[2] = state[i6+5] - 
-                       (angVel[0]*state[i6+1] - angVel[1]*state[ i6 ]);
-        vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] + 
-                       vRelative[2]*vRelative[2]);
+      // v_rel = v - w x R
+      vRelative[0] = state[i6+3] -
+                     (angVel[1]*state[i6+2] - angVel[2]*state[i6+1]);
+      vRelative[1] = state[i6+4] -
+                     (angVel[2]*state[ i6 ] - angVel[0]*state[i6+2]);
+      vRelative[2] = state[i6+5] -
+                     (angVel[0]*state[i6+1] - angVel[1]*state[ i6 ]);
+      vRelMag = sqrt(vRelative[0]*vRelative[0] + vRelative[1]*vRelative[1] +
+                     vRelative[2]*vRelative[2]);
         
-        factor = prefactor[i] * density[i];
+      factor = prefactor[i] * density[i];
 
-        if (order == 1) 
-        {
-            // Do dv/dt first, in case deriv = state
-            deriv[3+i6] = factor * vRelMag * vRelative[0];
-            deriv[4+i6] = factor * vRelMag * vRelative[1];
-            deriv[5+i6] = factor * vRelMag * vRelative[2];
-            // dr/dt = v
-            deriv[i6]   = state[3+i6];
-            deriv[1+i6] = state[4+i6];
-            deriv[2+i6] = state[5+i6];
+      if (order == 1)
+      {
+         // Do dv/dt first, in case deriv = state
+         deriv[3+i6] = factor * vRelMag * vRelative[0];
+         deriv[4+i6] = factor * vRelMag * vRelative[1];
+         deriv[5+i6] = factor * vRelMag * vRelative[2];
+         // dr/dt = v
+         deriv[i6]   = state[3+i6];
+         deriv[1+i6] = state[4+i6];
+         deriv[2+i6] = state[5+i6];
 
-            #ifdef DEBUG_DRAGFORCE_DENSITY
-               for (Integer m = 0; m < satCount; ++m)
-                  dragdata << "   Drag Accel: " 
-                           << deriv[3+i6] << "  "
-                           << deriv[4+i6] << "  "
-                           << deriv[5+i6] << "\n";
-            #endif
-//for (Integer m = 0; m < satCount; ++m) {
-//   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
-//      state[i6], state[i6+1], state[i6+2]);
-//   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
-//      state[i6+3], state[i6+4], state[i6+5]);
-//   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
-//      deriv[3+i6], deriv[4+i6], deriv[5+i6]);
-//   MessageInterface::ShowMessage("   Density:    %16.9le\n",
-//      density[i]);
-//}
-        }
-        else 
-        {
-            // Feed accelerations to corresponding components directly for RKN
-            deriv[ i6 ] = factor * vRelMag * vRelative[0];
-            deriv[1+i6] = factor * vRelMag * vRelative[1];
-            deriv[2+i6] = factor * vRelMag * vRelative[2];
-            deriv[3+i6] = 0.0; 
-            deriv[4+i6] = 0.0; 
-            deriv[5+i6] = 0.0; 
+         #ifdef DEBUG_DRAGFORCE_DENSITY
+            for (Integer m = 0; m < satCount; ++m)
+               dragdata << "   Drag Accel: "
+                        << deriv[3+i6] << "  "
+                        << deriv[4+i6] << "  "
+                        << deriv[5+i6] << "\n";
+            for (Integer m = 0; m < satCount; ++m)
+            {
+               MessageInterface::ShowMessage(
+                  "   Position:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6], state[i6+1], state[i6+2]);
+               MessageInterface::ShowMessage(
+                  "   Velocity:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6+3], state[i6+4], state[i6+5]);
+               MessageInterface::ShowMessage(
+                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                  deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+               MessageInterface::ShowMessage(
+                  "   Density:    %16.9le\n", density[i]);
+            }
+         #endif
+      }
+      else
+      {
+         // Feed accelerations to corresponding components directly for RKN
+         deriv[ i6 ] = factor * vRelMag * vRelative[0];
+         deriv[1+i6] = factor * vRelMag * vRelative[1];
+         deriv[2+i6] = factor * vRelMag * vRelative[2];
+         deriv[3+i6] = 0.0;
+         deriv[4+i6] = 0.0;
+         deriv[5+i6] = 0.0;
 
-            #ifdef DEBUG_DRAGFORCE_DENSITY
-               for (Integer m = 0; m < satCount; ++m)
-                  dragdata << "   Accel: " 
-                           << deriv[i6] << "  "
-                           << deriv[1+i6] << "  "
-                           << deriv[2+i6] << "\n";
-            #endif
-//for (Integer m = 0; m < satCount; ++m) {
-//   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
-//      state[i6], state[i6+1], state[i6+2]);
-//   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
-//      state[i6+3], state[i6+4], state[i6+5]);
-//   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
-//      deriv[i6], deriv[1+i6], deriv[2+i6]);
-//   MessageInterface::ShowMessage("   Density:    %16.9le\n",
-//      density[i]);
-//}
-        }
-    }
+         #ifdef DEBUG_DRAGFORCE_DENSITY
+            for (Integer m = 0; m < satCount; ++m)
+               dragdata << "   Accel: "
+                        << deriv[i6] << "  "
+                        << deriv[1+i6] << "  "
+                        << deriv[2+i6] << "\n";
+         #endif
+for (Integer m = 0; m < satCount; ++m)
+{
+   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
+      state[i6], state[i6+1], state[i6+2]);
+   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
+      state[i6+3], state[i6+4], state[i6+5]);
+   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+      deriv[i6], deriv[1+i6], deriv[2+i6]);
+   MessageInterface::ShowMessage("   Density:    %16.9le\n",
+      density[i]);
+}
+      }
+   }
     
-    return true;
+   return true;
 }
 
 
@@ -617,28 +663,28 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
  */
 std::string DragForce::GetParameterText(const Integer id) const
 {
-    if (id == atmosphereModelID)
-       return "AtmosphereModel";
+   if (id == atmosphereModelID)
+      return "AtmosphereModel";
     
-    if (id == centralBodyID)
-       return "AtmosphereBody";
+   if (id == centralBodyID)
+      return "AtmosphereBody";
     
-    if (id == sourceTypeID)
-       return "InputSource";
+   if (id == sourceTypeID)
+      return "InputSource";
     
-    if (id == fluxFileID)
-       return "SolarFluxFile";
+   if (id == fluxFileID)
+      return "SolarFluxFile";
     
-    if (id == fluxID)
-       return "F107";
+   if (id == fluxID)
+      return "F107";
     
-    if (id == averageFluxID)
-       return "F107A";
+   if (id == averageFluxID)
+      return "F107A";
     
-    if (id == magneticIndexID)
-       return "MagneticIndex";
+   if (id == magneticIndexID)
+      return "MagneticIndex";
     
-    return PhysicalModel::GetParameterText(id);
+   return PhysicalModel::GetParameterText(id);
 }
 
 
@@ -655,28 +701,28 @@ std::string DragForce::GetParameterText(const Integer id) const
 #include <iostream>
 Integer DragForce::GetParameterID(const std::string &str) const
 {
-    if (str == "AtmosphereModel")
-       return atmosphereModelID;
+   if (str == "AtmosphereModel")
+      return atmosphereModelID;
        
-    if (str == "AtmosphereBody")
-       return centralBodyID;
+   if (str == "AtmosphereBody")
+      return centralBodyID;
     
-    if (str == "InputSource")
-       return  sourceTypeID;
+   if (str == "InputSource")
+      return  sourceTypeID;
     
-    if (str == "SolarFluxFile")
-       return  fluxFileID;
+   if (str == "SolarFluxFile")
+      return  fluxFileID;
     
-    if (str == "F107")
-       return  fluxID;
+   if (str == "F107")
+      return  fluxID;
     
-    if (str == "F107A")
-       return  averageFluxID;
+   if (str == "F107A")
+      return  averageFluxID;
     
-    if (str == "MagneticIndex")
-       return  magneticIndexID;
+   if (str == "MagneticIndex")
+      return  magneticIndexID;
     
-    return PhysicalModel::GetParameterID(str);
+   return PhysicalModel::GetParameterID(str);
 }
 
 
@@ -692,28 +738,28 @@ Integer DragForce::GetParameterID(const std::string &str) const
  */
 Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
 {
-    if (id == atmosphereModelID)
-       return Gmat::STRING_TYPE;
+   if (id == atmosphereModelID)
+      return Gmat::STRING_TYPE;
     
-    if (id == centralBodyID)
-       return Gmat::STRING_TYPE;
+   if (id == centralBodyID)
+      return Gmat::STRING_TYPE;
     
-    if (id == sourceTypeID)
-       return Gmat::STRING_TYPE;    // "File" or "Constant" for now
+   if (id == sourceTypeID)
+      return Gmat::STRING_TYPE;    // "File" or "Constant" for now
     
-    if (id == fluxFileID)
-       return Gmat::STRING_TYPE;
+   if (id == fluxFileID)
+      return Gmat::STRING_TYPE;
     
-    if (id == fluxID)
-       return Gmat::REAL_TYPE;
+   if (id == fluxID)
+      return Gmat::REAL_TYPE;
     
-    if (id == averageFluxID)
-       return Gmat::REAL_TYPE;
+   if (id == averageFluxID)
+      return Gmat::REAL_TYPE;
     
-    if (id == magneticIndexID)
-       return Gmat::REAL_TYPE;
+   if (id == magneticIndexID)
+      return Gmat::REAL_TYPE;
 
-    return PhysicalModel::GetParameterType(id);
+   return PhysicalModel::GetParameterType(id);
 }
 
 
@@ -729,16 +775,16 @@ Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
  */
 std::string DragForce::GetParameterTypeString(const Integer id) const
 {
-    if ( (id == atmosphereModelID) ||
-         (id == centralBodyID) ||
-         (id == sourceTypeID) ||
-         (id == fluxFileID) ||
-         (id == fluxID) ||
-         (id == averageFluxID) ||
-         (id == magneticIndexID) )
-       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   if ( (id == atmosphereModelID) ||
+        (id == centralBodyID) ||
+        (id == sourceTypeID) ||
+        (id == fluxFileID) ||
+        (id == fluxID) ||
+        (id == averageFluxID) ||
+        (id == magneticIndexID) )
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 
-    return PhysicalModel::GetParameterTypeString(id);
+   return PhysicalModel::GetParameterTypeString(id);
 }
 
 
@@ -754,16 +800,16 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
  */
 Real DragForce::GetRealParameter(const Integer id) const
 {
-    if (id == fluxID)
-       return fluxF107;
+   if (id == fluxID)
+      return fluxF107;
     
-    if (id == averageFluxID)
-       return fluxF107A;
+   if (id == averageFluxID)
+      return fluxF107A;
     
-    if (id == magneticIndexID)
-       return ap;
+   if (id == magneticIndexID)
+      return kp;
 
-    return PhysicalModel::GetRealParameter(id);
+   return PhysicalModel::GetRealParameter(id);
 }
 
 
@@ -780,25 +826,31 @@ Real DragForce::GetRealParameter(const Integer id) const
  */
 Real DragForce::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == fluxID) {
-       if (value >= 0.0)
-          fluxF107 = value;
-       return fluxF107;
-    }
+   if (id == fluxID)
+   {
+      if (value >= 0.0)
+         fluxF107 = value;
+      return fluxF107;
+   }
     
-    if (id == averageFluxID) {
-       if (value >= 0.0)
-          fluxF107A = value;
-       return fluxF107A;
-    }
+   if (id == averageFluxID)
+   {
+      if (value >= 0.0)
+         fluxF107A = value;
+      return fluxF107A;
+   }
     
-    if (id == magneticIndexID) {
-       if (value >= 0.0)
-          ap = value;
-       return ap;
-    }
+   if (id == magneticIndexID)
+   {
+      if (value >= 0.0)
+      {
+         kp = value;
+         ap = CalculateAp(kp);
+      }
+      return ap;
+   }
 
-    return PhysicalModel::SetRealParameter(id, value);
+   return PhysicalModel::SetRealParameter(id, value);
 }
 
 
@@ -856,12 +908,14 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       ("DragForce::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
 #endif
    
-   if (id == atmosphereModelID) {
+   if (id == atmosphereModelID)
+   {
       atmosphereType = value;
 
       if ((value == "") || (value == "BodyDefault"))
          useExternalAtmosphere = true;
-      else {
+      else
+      {
          if (!useExternalAtmosphere)
             delete atmos;
          atmos = NULL;
@@ -871,7 +925,8 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
    
-   if (id == centralBodyID) {
+   if (id == centralBodyID)
+   {
       if (value == "")
          return false;
       bodyName = value;
@@ -879,17 +934,20 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    }
       
     
-   if (id == sourceTypeID) {     // "File" or "Constant" for now
+   if (id == sourceTypeID)      // "File" or "Constant" for now
+   {
       if ((value != "File") && (value != "Constant"))
          return false;
       dataType = value;
       return true;
    }
     
-   if (id == fluxFileID) {
+   if (id == fluxFileID)
+   {
       fluxFile = value;
       if (!internalAtmos)
-         throw ForceModelException("Cannot set flux file: Atmosphere Model undefined");
+         throw ForceModelException(
+            "Cannot set flux file: Atmosphere Model undefined");
          
       internalAtmos->SetSolarFluxFile(fluxFile);
       internalAtmos->SetNewFileFlag(true);
@@ -906,8 +964,9 @@ bool DragForce::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
 #ifdef DEBUG_DRAGFORCE_PARAM
-   MessageInterface::ShowMessage("DragForce::SetStringParameter() label=%s, value=%s\n",
-                                 label.c_str(), value.c_str());
+   MessageInterface::ShowMessage(
+      "DragForce::SetStringParameter() label=%s, value=%s\n", label.c_str(),
+      value.c_str());
 #endif
    
    return SetStringParameter(GetParameterID(label), value);
@@ -928,7 +987,8 @@ bool DragForce::SetStringParameter(const std::string &label,
 bool DragForce::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name)
 {
-   if (type == Gmat::ATMOSPHERE) {
+   if (type == Gmat::ATMOSPHERE)
+   {
       if (obj->GetType() != Gmat::ATMOSPHERE)
          throw ForceModelException("DragForce::SetRefObject: AtmosphereModel "
                                    "type set incorrectly.");
@@ -984,60 +1044,88 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
  *              is needed.
  * @param when  TAI Modified Julian epoch for the calculation
  */
+//------------------------------------------------------------------------------
 void DragForce::GetDensity(Real *state, Real when)
 {
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-       dragdata << "Entered DragForce::GetDensity()\n";
-    #endif
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Entered DragForce::GetDensity()\n";
+   #endif
 
-    // Give it a default value if the atmosphere model is not set
-    if (!atmos) {
-        for (Integer i = 0; i < satCount; ++i)
-            density[i] = 4.0e-13;
-    }
-    else {
-        if (atmos) {
-            if (sun && centralBody) {
-                // Update the Sun vector
-                Rvector sunV = sun->GetState(when);
-                Rvector cbV  = centralBody->GetState(when);
+   // Give it a default value if the atmosphere model is not set
+   if (!atmos)
+   {
+      for (Integer i = 0; i < satCount; ++i)
+         density[i] = 4.0e-13;
+   }
+   else
+   {
+      if (atmos)
+      {
+         if (sun && centralBody)
+         {
+            // Update the Sun vector
+            Rvector sunV = sun->GetState(when);
+            Rvector cbV  = centralBody->GetState(when);
                 
-                sunLoc[0] = sunV[0];
-                sunLoc[1] = sunV[1];
-                sunLoc[2] = sunV[2];
-                cbLoc[0]  = cbV[0];
-                cbLoc[1]  = cbV[1];
-                cbLoc[2]  = cbV[2];
-            }
-            if (fluxFile == "")
-            {
-               atmos->SetRealParameter(atmos->GetParameterID("F107"), fluxF107);
-               atmos->SetRealParameter(atmos->GetParameterID("F107A"),
-                         fluxF107A);
-               atmos->SetRealParameter(atmos->GetParameterID("MagneticIndex"),
-                         ap);
-            }
-        }
+            sunLoc[0] = sunV[0];
+            sunLoc[1] = sunV[1];
+            sunLoc[2] = sunV[2];
+            cbLoc[0]  = cbV[0];
+            cbLoc[1]  = cbV[1];
+            cbLoc[2]  = cbV[2];
+         }
+         if (fluxFile == "")
+         {
+            atmos->SetRealParameter(atmos->GetParameterID("F107"), fluxF107);
+            atmos->SetRealParameter(atmos->GetParameterID("F107A"),
+                                    fluxF107A);
+            atmos->SetRealParameter(atmos->GetParameterID("MagneticIndex"), kp);
+         }
+      }
 
-        #ifdef DEBUG_DRAGFORCE_DENSITY
-           dragdata << "Calling atmos->Density() on " << atmos->GetTypeName() << "\n";
-        #endif
-        atmos->Density(state, density, when, satCount);
-        #ifdef DEBUG_DRAGFORCE_DENSITY
-           dragdata << "Returned from atmos->Density()\n";
-        #endif
+      #ifdef DEBUG_DRAGFORCE_DENSITY
+         dragdata << "Calling atmos->Density() on " << atmos->GetTypeName()
+                  << "\n";
+      #endif
+      atmos->Density(state, density, when, satCount);
+      #ifdef DEBUG_DRAGFORCE_DENSITY
+         dragdata << "Returned from atmos->Density()\n";
+      #endif
         
-        #ifdef DEBUG_DRAGFORCE_DENSITY
-            for (Integer m = 0; m < satCount; ++m)
-               dragdata << "   Epoch: " << when 
-                        << "   State: " 
-                        << state[m*6] << "  "
-                        << state[m*6+1] << "  "
-                        << state[m*6+2] << "    Density: "
-                        << density[m] << "\n";
-        #endif
-    }
-    #ifdef DEBUG_DRAGFORCE_DENSITY
-       dragdata << "Leaving DragForce::GetDensity()\n";
-    #endif
+      #ifdef DEBUG_DRAGFORCE_DENSITY
+         for (Integer m = 0; m < satCount; ++m)
+            dragdata << "   Epoch: " << when
+                     << "   State: "
+                     << state[m*6] << "  "
+                     << state[m*6+1] << "  "
+                     << state[m*6+2] << "    Density: "
+                     << density[m] << "\n";
+      #endif
+   }
+   #ifdef DEBUG_DRAGFORCE_DENSITY
+      dragdata << "Leaving DragForce::GetDensity()\n";
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// Real CalculateAp(Real kp)
+//------------------------------------------------------------------------------
+/**
+ * Converts Kp values to Ap values using Vallado, eq 8-31.
+ *
+ * This routine uses Valaldo 8-31:
+ *
+ *    \f[a_p = \exp\left(\frac{k_p + 1.6} {1.75}\right)\f]
+ *
+ * to convert Kp values to Ap values.
+ *
+ * @param <kp> The planetary index that is converted.
+ *
+ * @return The corresponding (approximate) planetary amplitude, Ap.
+ */
+//------------------------------------------------------------------------------
+Real DragForce::CalculateAp(Real kp)
+{
+   return exp((kp + 1.6) / 1.75);
 }

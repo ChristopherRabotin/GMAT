@@ -139,7 +139,31 @@ const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCou
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
-SpacePoint(Gmat::CELESTIAL_BODY, itsBodyType, name)
+   SpacePoint(Gmat::CELESTIAL_BODY, itsBodyType, name),
+//   bodyType           (Gmat::PLANET),
+   mass               (5.9733319571407163e24),
+   equatorialRadius   (6378.137),
+   flattening         (0.0033528106647474807198455),
+   polarRadius        (6356.76),
+   mu                 (398600.4415),
+   posVelSrc          (Gmat::DE_405),
+   analyticMethod     (Gmat::NO_ANALYTIC_METHOD),
+   stateTime          (21545.0),
+   centralBody        (""),
+   bodyNumber         (0),
+   referenceBodyNumber(0),
+   sourceFilename     (""),
+   theSourceFile      (NULL),
+   usePotentialFile   (false),
+   potentialFileName  (""),
+   hourAngle          (0.0),
+   atmModel           (NULL),
+   atmModelType       (""),
+   potentialFileRead  (false),
+   defaultMu          (398600.4415),
+   defaultEqRadius    (6378.14),
+   order              (4),
+   degree             (4)
 {
    parameterCount = CelestialBodyParamCount;
    Initialize(itsBodyType);
@@ -157,8 +181,33 @@ SpacePoint(Gmat::CELESTIAL_BODY, itsBodyType, name)
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
-SpacePoint(Gmat::CELESTIAL_BODY,
-           CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name)
+   SpacePoint(Gmat::CELESTIAL_BODY,
+              CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name),
+   bodyType           (itsBodyType),
+   mass               (5.9733319571407163e24),
+   equatorialRadius   (6378.137),
+   flattening         (0.0033528106647474807198455),
+   polarRadius        (6356.76),
+   mu                 (398600.4415),
+   posVelSrc          (Gmat::DE_405),
+   analyticMethod     (Gmat::NO_ANALYTIC_METHOD),
+   stateTime          (21545.0),
+   centralBody        (""),
+   bodyNumber         (0),
+   referenceBodyNumber(0),
+   sourceFilename     (""),
+   theSourceFile      (NULL),
+   usePotentialFile   (false),
+   potentialFileName  (""),
+   hourAngle          (0.0),
+   atmModel           (NULL),
+   atmModelType       (""),
+   potentialFileRead  (false),
+   defaultMu          (398600.4415),
+   defaultEqRadius    (6378.14),
+   order              (4),
+   degree             (4)
+
 {
    parameterCount = CelestialBodyParamCount;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
@@ -175,46 +224,46 @@ SpacePoint(Gmat::CELESTIAL_BODY,
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(const CelestialBody &cb) :
-SpacePoint          (cb),
-bodyType            (cb.bodyType),
-mass                (cb.mass),
-equatorialRadius    (cb.equatorialRadius),
-flattening          (cb.flattening),
-polarRadius         (cb.polarRadius),
-mu                  (cb.mu),
-posVelSrc           (cb.posVelSrc),
-analyticMethod      (cb.analyticMethod),
-centralBody         (cb.centralBody),
-bodyNumber          (cb.bodyNumber),
-referenceBodyNumber (cb.referenceBodyNumber),
-sourceFilename      (cb.sourceFilename),
-theSourceFile       (cb.theSourceFile), // ????????????????
-usePotentialFile    (cb.usePotentialFile),
-potentialFileName   (cb.potentialFileName),
-hourAngle           (cb.hourAngle),
-//coefficientSize     (cb.coefficientSize),
-//dCbar               (cb.dCbar),
-//dSbar               (cb.dSbar),
-order               (cb.order),
-degree              (cb.degree),
-sij                 (cb.sij),
-cij                 (cb.cij)//,
-//atmModel            (cb.atmModel)
+   SpacePoint          (cb),
+   bodyType            (cb.bodyType),
+   mass                (cb.mass),
+   equatorialRadius    (cb.equatorialRadius),
+   flattening          (cb.flattening),
+   polarRadius         (cb.polarRadius),
+   mu                  (cb.mu),
+   posVelSrc           (cb.posVelSrc),
+   analyticMethod      (cb.analyticMethod),
+   centralBody         (cb.centralBody),
+   bodyNumber          (cb.bodyNumber),
+   referenceBodyNumber (cb.referenceBodyNumber),
+   sourceFilename      (cb.sourceFilename),
+   theSourceFile       (cb.theSourceFile), // ????????????????
+   usePotentialFile    (cb.usePotentialFile),
+   potentialFileName   (cb.potentialFileName),
+   hourAngle           (cb.hourAngle),
+   atmModel            (NULL),
+   //coefficientSize     (cb.coefficientSize),
+   //dCbar               (cb.dCbar),
+   //dSbar               (cb.dSbar),
+   order               (cb.order),
+   degree              (cb.degree),
+   sij                 (cb.sij),
+   cij                 (cb.cij)
 {
-   
    state                  = cb.state;
    stateTime              = cb.stateTime;
    angularVelocity        = cb.angularVelocity;
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
    potentialFileRead      = false;
+
    if (cb.atmModel)
    {
-      if (atmModel) delete atmModel;   // do I want to do this?
-      atmModel = (AtmosphereModel*)(cb.atmModel)->Clone();
+      MessageInterface::ShowMessage("Setting ATM on %s\n",
+         instanceName.c_str());
+      atmModel = (AtmosphereModel*)(cb.atmModel->Clone());
    }
-   else
-      atmModel = NULL;
+
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
@@ -257,13 +306,17 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    potentialFileName   = cb.potentialFileName;
    angularVelocity     = cb.angularVelocity;
    hourAngle           = cb.hourAngle;
+
+   if (atmModel)
+      delete atmModel;
+
    if (cb.atmModel)
    {
-      if (atmModel) delete atmModel;   // do I want to do this?
       atmModel = (AtmosphereModel*)(cb.atmModel)->Clone();
    }
    else
       atmModel = NULL;
+
    potentialFileRead   = false;
    defaultMu           = cb.defaultMu;
    defaultEqRadius     = cb.defaultEqRadius;

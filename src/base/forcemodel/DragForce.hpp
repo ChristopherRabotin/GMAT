@@ -126,9 +126,11 @@ protected:
     Real                fluxF107;
     /// Running average of the F10.7
     Real                fluxF107A;
-    /// Magnetic field index, Ap
+    /// Magnetic field index, Ap (a calculated value)
     Real                ap;
-       
+    /// Magnetic field index, Kp (user specified)
+    Real                kp;
+
     void                BuildPrefactors(void);
     void                GetDensity(Real *state, Real when = 21545.0);
     
@@ -146,6 +148,8 @@ protected:
     const Integer       averageFluxID;
     /// ID for the atmosphere model
     const Integer       magneticIndexID;
+    
+    Real                CalculateAp(Real kp);
 };
 
 #endif // DragForce_hpp

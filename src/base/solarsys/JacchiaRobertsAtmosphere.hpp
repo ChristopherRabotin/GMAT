@@ -22,13 +22,14 @@
 class JacchiaRobertsAtmosphere : public AtmosphereModel
 {
 public:
-    JacchiaRobertsAtmosphere();
-    virtual ~JacchiaRobertsAtmosphere();
+   JacchiaRobertsAtmosphere();
+   virtual ~JacchiaRobertsAtmosphere();
     
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
     
-    bool Density(Real *position, Real *density, Real epoch=21545.0, Integer count = 1);
+   bool Density(Real *position, Real *density, Real epoch = 21545.0,
+                Integer count = 1);
 
    Real  JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],
                       Real a1_time, bool new_file);
@@ -54,6 +55,7 @@ public:
 protected:
    JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr);
    JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
+
 private:
    CelestialBody *earth;
    

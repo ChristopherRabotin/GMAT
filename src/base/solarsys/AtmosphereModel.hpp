@@ -89,15 +89,15 @@ public:
 
 protected:
    /// Solar flux binary file reader
-   SolarFluxFileReader *fileReader;
+   SolarFluxFileReader     *fileReader;
    /// The solarsystem
-   SolarSystem *solarSystem;
+   SolarSystem             *solarSystem;
    /// The central body
-   CelestialBody *mCentralBody;
+   CelestialBody           *mCentralBody;
    /// Pointer to the binary file
-   FILE *solarFluxFile;
+   FILE                    *solarFluxFile;
    /// Solar flux file name
-   std::string fileName;  // waw: Added 06/29/04
+   std::string             fileName;  // waw: Added 06/29/04
    /// Vector from the central body to the sun
    Real                    *sunVector;
    /// Name of the central body
@@ -112,13 +112,15 @@ protected:
    bool fileRead;
     
    // Values used if a file is not set
-   /// Nominal value of F10.7 to use
+   /// Nominal value of F10.7 to use.
    Real                    nominalF107;
-   /// Nominal 3 month average of the F10.7 data
+   /// Nominal 3 month average of the F10.7 data.
    Real                    nominalF107a;
-   /// Nominal geomagnetic index
+   /// Nominal geomagnetic (planetary) index, \f$K_p\f$, the value users access.
+   Real                    nominalKp;
+   /// Nominal geomagnetic planetary amplitude, calculated via Vallado eq. 8-31.
    Real                    nominalAp;
-   
+
    enum {
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,

@@ -19,6 +19,8 @@
 
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
+//#include "RealUtilities.hpp"        // Inadequate for my needs here, so...
+#include <cmath>                    // for exp
 
 
 //---------------------------------
@@ -30,7 +32,7 @@ AtmosphereModel::PARAMETER_TEXT[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
    "F107",
    "F107A",
-   "MagneticIndex"
+   "MagneticIndex"                  // In GMAT, the "published" value is K_p.
 };
 
 const Gmat::ParameterType
@@ -62,10 +64,11 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
    fileRead            (false),
    nominalF107         (150.0),
    nominalF107a        (150.0),
-   nominalAp           (13.85)     // Corresponds to kp = 3, per Vallado (8-31)
+   nominalKp           (3.0)
 {
    fileName = "";
    parameterCount = AtmosphereModelParamCount;
+   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
 }
 
 //------------------------------------------------------------------------------
@@ -99,10 +102,11 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    fileRead            (am.fileRead),
    nominalF107         (am.nominalF107),
    nominalF107a        (am.nominalF107a),
-   nominalAp           (am.nominalAp)
+   nominalKp           (am.nominalKp)
 {
    fileName = am.fileName;
    parameterCount = AtmosphereModelParamCount;
+   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +137,8 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    fileRead            = am.fileRead;
    nominalF107         = am.nominalF107;
    nominalF107a        = am.nominalF107a;
-   nominalAp           = am.nominalAp;
+   nominalKp           = am.nominalKp;
+   nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
 
    return *this;
 }
@@ -287,7 +292,7 @@ Real AtmosphereModel::GetRealParameter(const Integer id) const
    if (id == NOMINAL_AVERAGE_FLUX)
       return nominalF107a;
    if (id == NOMINAL_MAGNETIC_INDEX)
-      return nominalAp;
+      return nominalKp;
 
    return GmatBase::GetRealParameter(id);
 }
@@ -327,8 +332,11 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
    if (id == NOMINAL_MAGNETIC_INDEX)
    {
       if (value > 0.0)
-         nominalAp = value;
-      return nominalAp;
+      {
+         nominalKp = value;
+         nominalAp = exp((nominalKp + 1.6) / 1.75);      // Vallado, 8-31
+      }
+      return nominalKp;
    }
    
    /// @todo Throw exceptions when the values are unphysical here.
