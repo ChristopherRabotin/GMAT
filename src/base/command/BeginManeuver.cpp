@@ -23,9 +23,8 @@
 //#define DEBUG_BEGIN_MANEUVER
 //#define DEBUG_BEGIN_MANEUVER_EXE
 
-#ifdef DEBUG_BEGIN_MANEUVER
-  #include "MessageInterface.hpp"
-#endif
+
+#include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
