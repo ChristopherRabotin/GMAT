@@ -114,16 +114,16 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount];
    
    //---------------------------------------------------------------------------
-   //  void CalculateRotationMatrix(SpacePoint *j2000Body)
+   //  void CalculateRotationMatrix(const A1Mjd &atEpoch)
    //---------------------------------------------------------------------------
    /**
     * This method will compute the rotMatrix and rotDotMatrix used for rotations
     * from/to this AxisSystem to/from the MJ2000EqAxes system.
     *
-    * @param j2000Body the origin of the MJ2000EqAxes frame.
+    * @param atEpoch  epoch at which to compute the roration matrix
     */
    //---------------------------------------------------------------------------
-   virtual void CalculateRotationMatrix() = 0;
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch) = 0;
    
    /// rotation matrix - 
    /// default constructor creates a 3x3 zero-matrix

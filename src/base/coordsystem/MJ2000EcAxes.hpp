@@ -75,7 +75,7 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[MJ2000EcAxesParamCount - 
    //                                                InertialAxesParamCount];
    
-   virtual void CalculateRotationMatrix();
+   virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
 
    // no additional data at this time
 };
