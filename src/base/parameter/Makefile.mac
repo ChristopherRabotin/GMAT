@@ -8,14 +8,18 @@
 #                  2) Added CartXParam.cpp, CurrentA1MjdParam.cpp,
 #                     ElapsedDaysParam.cpp, OrbitData.cpp, RealParameter.cpp,
 #                     RefData.cpp, and TimeData.cpp 
-
+#
+#             2004/01/16 - Added CartStateParam.cpp, ElapsedSecsParam.cpp,
+#                          KepEccParam.cpp, and Rvector6Parameter.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = CartXParam.cpp CurrentA1MjdParam.cpp ElapsedDaysParam.cpp OrbitData.cpp \
-	Parameter.cpp ParameterDatabase.cpp	RealParameter.cpp RefData.cpp \
-	TimeData.cpp
+SRC = CartStateParam.cpp CartXParam.cpp CurrentA1MjdParam.cpp \
+	ElapsedDaysParam.cpp ElapsedSecsParam.cpp KepEccParam.cpp \
+	OrbitData.cpp Parameter.cpp ParameterDatabase.cpp \
+	RealParameter.cpp RefData.cpp Rvector6Parameter.cpp TimeData.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
