@@ -31,7 +31,8 @@ BEGIN_EVENT_TABLE(PropagateCommandPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
     
-   EVT_TEXT(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
+   //EVT_TEXT(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
+   EVT_TEXT_ENTER(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, PropagateCommandPanel::OnButton)
    EVT_COMBOBOX(ID_COMBO, PropagateCommandPanel::OnComboSelection)
    EVT_GRID_CELL_LEFT_CLICK(PropagateCommandPanel::OnCellLeftClick)
@@ -82,6 +83,7 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
     
    Create();
    Show();
+   updateButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -165,33 +167,41 @@ void PropagateCommandPanel::Create()
       new wxStaticText( this, -1, wxT("Tolerance"), 
                         wxDefaultPosition, wxDefaultSize, 0 );
 
-   // wxTextCtrl   
+   // wxTextCtrl
    stopNameTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(250,-1), 0 );
    varNameTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(250,-1), 0 );
    goalTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(150,-1), 0 );
    repeatTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(80,-1), 0 );
    toleranceTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(80,-1), 0 );
 
    // wxButton
    viewButton =
-      new wxButton( this, -1, wxT("View"), wxDefaultPosition, wxDefaultSize, 0 );
+      new wxButton( this, ID_BUTTON, wxT("View"),
+                    wxDefaultPosition, wxDefaultSize, 0 );
    updateButton =
-      new wxButton( this, -1, wxT("Update"), wxDefaultPosition, wxDefaultSize, 0 );
+      new wxButton( this, ID_BUTTON, wxT("Update"),
+                    wxDefaultPosition, wxDefaultSize, 0 );
    deleteButton =
-      new wxButton( this, -1, wxT("Delete"), wxDefaultPosition, wxDefaultSize, 0 );
+      new wxButton( this, ID_BUTTON, wxT("Delete"),
+                    wxDefaultPosition, wxDefaultSize, 0 );
     
    // wxComboBox
    synchComboBox =
-      new wxComboBox( this, -1, wxT(strArray1[0]), wxDefaultPosition,
+      new wxComboBox( this, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition,
                       wxSize(200,-1), numOfModes, strArray1,
                       wxCB_DROPDOWN|wxCB_READONLY );
    equalityComboBox =
-      new wxComboBox( this, -1, wxT(strArray2[0]), wxDefaultPosition,
+      new wxComboBox( this, ID_COMBO, wxT(strArray2[0]), wxDefaultPosition,
                       wxSize(50,-1), numOfEqualities, strArray2,
                       wxCB_DROPDOWN|wxCB_READONLY );
        
