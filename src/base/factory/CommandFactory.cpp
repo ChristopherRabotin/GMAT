@@ -22,13 +22,18 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CommandFactory.hpp"
-#include "Propagate.hpp"   // for Propagate command
-#include "Toggle.hpp"      // for Toggle command
-#include "Maneuver.hpp"    // for Maneuver command
-#include "Target.hpp"      // for Target command
-#include "Vary.hpp"        // for Vary command
-#include "Achieve.hpp"     // for Achieve command
-#include "EndTarget.hpp"   // for EndTarget command
+#include "Propagate.hpp"      // for Propagate command
+#include "Toggle.hpp"         // for Toggle command
+#include "Maneuver.hpp"       // for Maneuver command
+#include "Target.hpp"         // for Target command
+#include "Vary.hpp"           // for Vary command
+#include "Achieve.hpp"        // for Achieve command
+#include "ForCommand.hpp"     // for FOR command
+#include "EndForCommand.hpp"  // for EndFor command
+#include "IfCommand.hpp"      // for IF command
+#include "ElseCommand.hpp"    // for Else command
+#include "EndIfCommand.hpp"   // for EndIf command
+#include "EndTarget.hpp"      // for EndTarget command
 
 
 //---------------------------------
@@ -62,6 +67,16 @@ Command* CommandFactory::CreateCommand(std::string ofType,
         return new Vary;
     else if (ofType == "Achieve")
         return new Achieve;
+    else if (ofType == "For")
+        return new ForCommand;
+    else if (ofType == "EndFor")
+        return new EndForCommand;
+    else if (ofType == "If")
+        return new IfCommand;
+    else if (ofType == "Else")
+        return new ElseCommand;
+    else if (ofType == "EndIf")
+        return new EndIfCommand;
     else if (ofType == "EndTarget")
         return new EndTarget;
    // add more here .......
@@ -93,6 +108,11 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Target");
       creatables.push_back("Vary");
       creatables.push_back("Achieve");
+      creatables.push_back("For");
+      creatables.push_back("EndFor");
+      creatables.push_back("If");
+      creatables.push_back("Else");
+      creatables.push_back("EndIf");
       creatables.push_back("EndTarget");
    }
 }
@@ -134,6 +154,11 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Target");
       creatables.push_back("Vary");
       creatables.push_back("Achieve");
+      creatables.push_back("For");
+      creatables.push_back("EndFor");
+      creatables.push_back("If");
+      creatables.push_back("Else");
+      creatables.push_back("EndIf");
       creatables.push_back("EndTarget");
    }
 }
