@@ -362,6 +362,7 @@ CelestialBody::~CelestialBody()
 {
    delete atmManager;
    delete atmModel;
+   //delete centralBody;  // ?????????
 }
 
 //------------------------------------------------------------------------------
