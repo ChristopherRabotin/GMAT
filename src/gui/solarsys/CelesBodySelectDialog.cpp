@@ -32,12 +32,17 @@ END_EVENT_TABLE()
 // CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude)
 //------------------------------------------------------------------------------
 CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
-                                             wxArrayString &bodiesToExclude)
+                                             wxArrayString &bodiesToExclude,
+                                             wxArrayString &bodiesToHide)
     : GmatDialog(parent, -1, wxString(_T("CelesBodySelectDialog")))
 {
     mBodyNames.Clear();
-    mIsBodySelected = false;
+    mBodiesToHide.Clear();
+    
     mBodiesToExclude = bodiesToExclude;
+    mBodiesToHide = bodiesToHide;
+    
+    mIsBodySelected = false;
         
     Create();
     Show();
@@ -71,9 +76,6 @@ void CelesBodySelectDialog::Create()
                                      wxDefaultPosition, wxSize(20,20), 0 );
     clearBodyButton = new wxButton( this, ID_BUTTON, wxT("<="),
                                     wxDefaultPosition, wxSize(20,20), 0 );
-    
-    //MessageInterface::ShowMessage("CelesBodySelectDialog::Create() bodiesToExclude = %d\n",
-    //                              mBodiesToExclude.GetCount());
 
     // wxListBox
     bodyListBox =
@@ -146,8 +148,8 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
             bodySelectedListBox->Append(s);
             bodyListBox->Delete(strId1);
         }
-
-        theOkButton->Enable();
+//waw: 09/17/04
+//        theOkButton->Enable();
     }
     else if ( event.GetEventObject() == removeBodyButton )  
     {
@@ -156,14 +158,15 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
         if (s.IsEmpty())
            return;
            
+//        MessageInterface::ShowMessage("Removing body: %s\n", s.c_str());
         bodyListBox->Append(s);
         int sel = bodySelectedListBox->GetSelection();
         bodySelectedListBox->Delete(sel);
-        
-        if (bodySelectedListBox->GetCount() > 0)
-            theOkButton->Enable();
-        else
-            theOkButton->Disable();
+//waw: 09/17/04        
+//        if (bodySelectedListBox->GetCount() > 0)
+//            theOkButton->Enable();
+//        else
+//            theOkButton->Disable();
     }
     else if ( event.GetEventObject() == clearBodyButton )  
     {
@@ -177,8 +180,10 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
            bodyListBox->Append(bodySelectedListBox->GetString(i));
         }
         bodySelectedListBox->Clear();
-        theOkButton->Disable();
+//waw: 09/17/04
+//        theOkButton->Disable();
     }
+    theOkButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -186,27 +191,42 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::LoadData()
 {
+    if (! mBodiesToHide.IsEmpty())
+    {
+      // Check bodyListBox
+      for (Integer i = 0; i < (Integer)mBodiesToHide.GetCount(); i++)
+      {
+         for (Integer j = 0; j < (Integer)bodyListBox->GetCount(); j++)
+         {
+            std::string bName = bodyListBox->GetString(j).c_str();
+            if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
+               bodyListBox->Delete(j);
+         }    
+      }    
+      // Check bodySelectedListBox
+      for (Integer i = 0; i < (Integer)mBodiesToHide.GetCount(); i++)
+      {
+         for (Integer j = 0; j < (Integer)bodySelectedListBox->GetCount(); j++)
+         {
+            std::string bName = bodySelectedListBox->GetString(j).c_str();
+            if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
+               bodySelectedListBox->Delete(j);
+         }    
+      } 
+    }
 }
 
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::SaveData()
-{
-//    MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData() bodies count = %d\n",
-//                                  bodySelectedListBox->GetCount());
-    
+{  
+    mBodyNames.Clear();
     for(int i=0; i<bodySelectedListBox->GetCount(); i++)
     {
         mBodyNames.Add(bodySelectedListBox->GetString(i));
-//        MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()name = %s\n",
-//                                      mBodyNames[i].c_str());
     }
-
-    if (bodySelectedListBox->GetCount() > 0)
-        mIsBodySelected = true;
-    else
-        mIsBodySelected = false;
+    mIsBodySelected = true;
 }
 
 //------------------------------------------------------------------------------

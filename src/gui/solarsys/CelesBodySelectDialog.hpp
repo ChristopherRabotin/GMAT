@@ -25,7 +25,8 @@ class CelesBodySelectDialog : public GmatDialog
 {
 public:
     
-    CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude);
+    CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude, 
+                          wxArrayString &bodiesToHide);
 
     wxArrayString& GetBodyNames()
         { return mBodyNames; }
@@ -36,6 +37,7 @@ private:
     static const int MAX_LIST_SIZE = 30;
     wxArrayString mBodyNames;
     wxArrayString mBodiesToExclude;
+    wxArrayString mBodiesToHide;
     bool mIsBodySelected;
 
     wxButton *addBodyButton;
