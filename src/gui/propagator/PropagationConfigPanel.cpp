@@ -48,28 +48,32 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent)
-    :wxPanel(parent)
+PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
+                                               const wxString &propSetupName)
+    : wxPanel(parent)
 {
-    Setup(this);
+    Setup(this, propSetupName);
 }
 
-void PropagationConfigPanel::Setup(wxWindow *parent)
+void PropagationConfigPanel::Setup(wxWindow *parent, const wxString &propSetupName)
 {
     StringArray propList;
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();  
-     
-    propList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROPAGATOR);
+
+    //loj: commented out
+//      propList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROPAGATOR);
     
-    if (propList.empty())
-    {
-        thePropagator = theGuiInterpreter->CreatePropagator("Propagator", "RungeKutta89");
-        propList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROPAGATOR);
-    }
-    else
-        thePropagator = theGuiInterpreter->GetPropagator(propList[0]);
-        
+//      if (propList.empty())
+//      {
+//          thePropagator = theGuiInterpreter->CreatePropagator("Propagator", "RungeKutta89");
+//          propList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROPAGATOR);
+//      }
+//      else
+//          thePropagator = theGuiInterpreter->GetPropagator(propList[0]);
+
+    thePropagator = theGuiInterpreter->GetPropagator(std::string(propSetupName.c_str()));
+    
     //theRK89 = new RungeKutta89( "RungeKutta89" );
     //theIntegrator = new Integrator( thePropagator->GetName(), "RungeKutta89" );
     //thePhysicalModel = 
@@ -77,13 +81,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     item0 = new wxBoxSizer( wxVERTICAL );
     item1 = new wxBoxSizer( wxHORIZONTAL );
 
-    item2 = new wxStaticText( parent, ID_TEXT, wxT("Propagation Name"), wxDefaultPosition, wxDefaultSize, 0 );
-    item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
+    //loj: do we need propagator name? The tab shows the name.
+    //item2 = new wxStaticText( parent, ID_TEXT, wxT("Propagation Name"), wxDefaultPosition, wxDefaultSize, 0 );
+    //loj:item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("Lunar Tran"), wxDefaultPosition, wxSize(250,-1), 0 );
+    //loj:item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("Lunar Tran"), wxDefaultPosition, wxSize(250,-1), 0 );
+    //item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(propSetupName), wxDefaultPosition, wxSize(250,-1), 0 );
         
-    item1->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
-        
+    //loj:item1->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
+   
     item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item4 = new wxBoxSizer( wxHORIZONTAL );

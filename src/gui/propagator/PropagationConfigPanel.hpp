@@ -36,7 +36,7 @@ class PropagationConfigPanel : public wxPanel
 {
 public:
     // constructors
-    PropagationConfigPanel(wxWindow *parent);
+    PropagationConfigPanel(wxWindow *parent, const wxString &propSetupName);
        
 private:
     wxBoxSizer *item0;
@@ -128,7 +128,7 @@ private:
     void OnOK();
     void OnApply();
     void OnCancel();
-    void Setup(wxWindow *parent);
+    void Setup(wxWindow *parent, const wxString &propSetupName);
     void GetData();
     void SetData();
 
