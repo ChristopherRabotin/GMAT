@@ -590,11 +590,11 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_REPORT_FILE));
-      else if (objTypeName == "XyPlot")
+      else if (objTypeName == "XYPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_XY_PLOT));
-      else if (objTypeName == "OpenGlPlot")
+      else if (objTypeName == "OpenGLPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_OPENGL_PLOT));
@@ -1401,7 +1401,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
    name.Printf("XYPlot%d", ++mNumXyPlot);
 
    if (theGuiInterpreter->CreateSubscriber
-       ("XyPlot", std::string(name.c_str())) != NULL)
+       ("XYPlot", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_REPORT, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
@@ -1424,10 +1424,10 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
   
    wxString name;
-   name.Printf("OpenGlPlot%d", ++mNumOpenGlPlot);
+   name.Printf("OpenGLPlot%d", ++mNumOpenGlPlot);
 
    if (theGuiInterpreter->CreateSubscriber
-       ("OpenGlPlot", std::string(name.c_str())) != NULL)
+       ("OpenGLPlot", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_REPORT, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
@@ -1573,11 +1573,11 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
          {
             menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
          }
-         else if (items[i] == "XyPlot")
+         else if (items[i] == "XYPlot") //loj: 11/01/04 changed from XyPlot
          {
             menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
          }
-         else if (items[i] == "OpenGlPlot")
+         else if (items[i] == "OpenGLPlot") //loj: 11/01/04 changed from OpenGlPlot
          {
             menu->Append(POPUP_ADD_OPENGL_PLOT, wxT("OpenGLPlot"));
          }
@@ -1586,7 +1586,7 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
    default:
       break;
    }
-    
+   
    return menu;
 }
 
