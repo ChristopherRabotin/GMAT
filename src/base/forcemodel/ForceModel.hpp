@@ -150,6 +150,8 @@ protected:
     static std::map<std::string, std::string> scriptAliases;
     
     const StringArray&        BuildBodyList(std::string type) const;
+    virtual Integer           SetupSpacecraftData(GmatBase *sat, 
+                                                  PhysicalModel *pm, Integer i);
 
     enum
     {

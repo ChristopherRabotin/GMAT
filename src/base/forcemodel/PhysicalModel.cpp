@@ -332,6 +332,7 @@ bool PhysicalModel::Initialize(void)
       delete [] deriv;
       deriv = NULL;
    }
+   
    modelState = new Real[dimension];
    if (modelState != NULL) {
       deriv = new Real[dimension];

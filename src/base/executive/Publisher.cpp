@@ -130,7 +130,6 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
        subs.size());
 #endif
 
-int j = 0;   
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {

@@ -54,8 +54,8 @@ Formation::~Formation()
 
 Formation::Formation(const Formation& orig) :
    SpaceObject    (orig),
-   dimension      (orig.dimension),
-   componentNames (orig.componentNames)
+   componentNames (orig.componentNames),
+   dimension      (orig.dimension)
 {
 }
 
@@ -293,6 +293,13 @@ ObjectArray& Formation::GetRefObjectArray(const Gmat::ObjectType type)
             oa.push_back(*i);
       return oa;
    }
+
+   if (type == Gmat::SPACEOBJECT) {
+      for (std::vector<SpaceObject *>::iterator i = components.begin();
+           i != components.end(); ++i)
+         oa.push_back(*i);
+      return oa;
+   }
       
    return SpaceObject::GetRefObjectArray(type);
 }
@@ -300,14 +307,16 @@ ObjectArray& Formation::GetRefObjectArray(const Gmat::ObjectType type)
 
 ObjectArray& Formation::GetRefObjectArray(const std::string& typeString)
 {
-   Integer id = -1;
+   Gmat::ObjectType id = Gmat::UNKNOWN_OBJECT;
    if (typeString == "Spacecraft") 
       id = Gmat::SPACECRAFT;
    if (typeString == "Formation") 
       id = Gmat::FORMATION;
+   if (typeString == "SpaceObject") 
+      id = Gmat::SPACEOBJECT;
       
-   if (id != -1)
-      return GetRefObjectArray(typeString);
+   if (id != Gmat::UNKNOWN_OBJECT)
+      return GetRefObjectArray(id);
       
    return SpaceObject::GetRefObjectArray(typeString);
 }

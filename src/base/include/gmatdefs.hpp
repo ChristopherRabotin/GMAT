@@ -82,6 +82,7 @@ namespace Gmat
    {
       SPACECRAFT= 1001,
       FORMATION,
+      SPACEOBJECT,
       GROUND_STATION,
       BURN,
       COMMAND,

@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef DRAGFORCE_H
-#define DRAGFORCE_H
+#ifndef DRAGFORCE_HPP
+#define DRAGFORCE_HPP
 
 #include "PhysicalModel.hpp"
 #include "AtmosphereModel.hpp"
@@ -89,6 +89,8 @@ protected:
     Real                *density;
     /// Array of products of spacecraft properties
     Real                *prefactor;
+    /// Flag used to determine if data has changed for the prefactors
+    bool                firedOnce;
     /// Number of spacecraft in the state vector
     Integer             satCount;
     /// Central bodies used for atmosphere source
@@ -134,4 +136,4 @@ protected:
     const Integer       magneticIndexID;
 };
 
-#endif // DRAGFORCE_H
+#endif // DRAGFORCE_HPP

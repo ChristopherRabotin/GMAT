@@ -49,6 +49,7 @@ DragForce::DragForce(const std::string &name) :
     atmos                  (NULL),
     density                (NULL),
     prefactor              (NULL),
+    firedOnce              (false),
     //bodyName               ("Earth"),
     dataType               ("Constant"),
     fluxFile               (""),
@@ -129,6 +130,7 @@ DragForce::DragForce(const DragForce& df) :
     atmos                   (NULL),
     density                 (NULL),
     prefactor               (NULL),
+    firedOnce               (false),
     //bodyName                (df.bodyName),
     dataType                (df.dataType),
     fluxFile                (df.fluxFile),
@@ -177,7 +179,9 @@ DragForce& DragForce::operator=(const DragForce& df)
     if (this == &df)
         return *this;
         
-    PhysicalModel::operator=(df);        
+    PhysicalModel::operator=(df); 
+    firedOnce = false;
+          
     return *this;
 }
 
@@ -255,13 +259,18 @@ void DragForce::SetSatelliteParameter(const Integer i,
                                       const Real parm)
 {
     unsigned parmNumber = (unsigned)(i+1);
+
+    #ifdef DEBUG
+         dragdata << "Setting satellite parameter " << parmName 
+                  << " for Spacecraft " << i << " to " << parm << "\n";
+    #endif
     
     if (parmName == "DryMass")
         if (parmNumber < mass.size())
             mass[i] = parm;
         else
             mass.push_back(parm);
-    if (parmName == "CoefficientDrag")
+    if (parmName == "Cd")
         if (parmNumber < dragCoeff.size())
             dragCoeff[i] = parm;
         else
@@ -321,14 +330,6 @@ bool DragForce::Initialize(void)
        density   = new Real[satCount];
        prefactor = new Real[satCount];
    
-       if (mass.size() > 0)
-           BuildPrefactors();
-       else
-           if (mass.size() == 0) 
-               for (Integer i = 0; i < satCount; ++i) {
-                   prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
-               }
-           
        // Set the atmosphere model
        if (solarSystem) {
            sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
@@ -371,6 +372,8 @@ bool DragForce::Initialize(void)
        }
     }
     
+    firedOnce = false;
+    
     return retval;
 }
 
@@ -393,6 +396,10 @@ bool DragForce::Initialize(void)
 //------------------------------------------------------------------------------
 void DragForce::BuildPrefactors(void) 
 {
+    #ifdef DEBUG
+         dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
+    #endif
+
     for (Integer i = 0; i < satCount; ++i) {
         if (mass.size() < (unsigned)(i+1))
             throw ForceModelException("Spacecraft not set correctly");
@@ -444,6 +451,21 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 {
     Integer i, i6;
     Real vRelative[3], vRelMag, factor;
+
+    if (!firedOnce) {
+       if (mass.size() > 0)
+          BuildPrefactors();
+       else
+          if (mass.size() == 0) 
+             for (Integer i = 0; i < satCount; ++i) {
+                #ifdef DEBUG
+                    dragdata << "Using default prefactors for " << satCount <<" Spacecraft\n";
+                #endif
+                prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
+             }
+               
+       firedOnce = true;
+    }
     
     GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
     

@@ -558,8 +558,8 @@ bool ForceModel::Initialize(void)
 
     // Variables used to set spacecraft parameters
     std::string parmName, stringParm;
-    Real parm;
-    Integer id, i;
+//    Real parm;
+    Integer i;
 
     while (current) 
     {
@@ -567,6 +567,8 @@ bool ForceModel::Initialize(void)
         currentPm = current;  // waw: added 06/04/04 
         currentPm->SetDimension(dimension);
         currentPm->SetSolarSystem(solarSystem);
+
+        // Initialize the forces
         if (!currentPm->Initialize()) 
         {
            std::string msg = "Component force ";
@@ -580,39 +582,10 @@ bool ForceModel::Initialize(void)
         i = 0;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
-            parmName = "Epoch";
-            id = (*sat)->GetParameterID(parmName);
-            parm = (*sat)->GetRealParameter(id);
-            id = currentPm->GetParameterID(parmName);
-            currentPm->SetRealParameter(id, parm);
-        
-            parmName = "ReferenceBody";
-            id = (*sat)->GetParameterID(parmName);
-            stringParm = (*sat)->GetStringParameter(id);
-            currentPm->SetSatelliteParameter(i, parmName, stringParm);
-        
-            parmName = "DryMass";
-            id = (*sat)->GetParameterID(parmName);
-            parm = (*sat)->GetRealParameter(id);
-            currentPm->SetSatelliteParameter(i, parmName, parm);
-        
-            parmName = "CoefficientDrag";
-            id = (*sat)->GetParameterID(parmName);
-            parm = (*sat)->GetRealParameter(id);
-            currentPm->SetSatelliteParameter(i, parmName, parm);
-            
-            parmName = "DragArea";
-            id = (*sat)->GetParameterID(parmName);
-            parm = (*sat)->GetRealParameter(id);
-            currentPm->SetSatelliteParameter(i, parmName, parm);
-            
-            parmName = "ReflectivityCoefficient";
-            id = (*sat)->GetParameterID(parmName);
-            parm = (*sat)->GetRealParameter(id);
-            currentPm->SetSatelliteParameter(i, parmName, parm);
-            
-            ++i;
+           i = SetupSpacecraftData(*sat, currentPm, i);
+           ++i;
         }
+        
         // current = current->Next(); waw: 06/04/04
         // waw: added 06/04/04
         cf++;
@@ -621,6 +594,108 @@ bool ForceModel::Initialize(void)
 
     return true;
 }
+
+
+Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm, 
+                                        Integer i)
+{
+   Integer retval = i, id;
+   std::string parmName;
+   Real parm;
+   std::string stringParm;
+   
+   if (sat->GetType() == Gmat::SPACECRAFT) {
+      // Set epoch for the PhysicalModel to match the Spacecraft's
+      parmName = "Epoch";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Epoch parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      id = pm->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Epoch parameter undefined on PhysicalModel");
+      pm->SetRealParameter(id, parm);
+        
+      parmName = "ReferenceBody";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Reference body parameter undefined on object " +
+                                         sat->GetName());
+      stringParm = sat->GetStringParameter(id);
+      pm->SetSatelliteParameter(i, parmName, stringParm);
+        
+      parmName = "DryMass";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Dry Mass parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      if (parm <= 0)
+         throw ForceModelException("Mass parameter unphysical on object " + 
+                                         sat->GetName());
+      pm->SetSatelliteParameter(i, parmName, parm);
+        
+      parmName = "Cd";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Cd parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      if (parm < 0)
+         throw ForceModelException("Cd parameter unphysical on object " + 
+                                   sat->GetName());
+      pm->SetSatelliteParameter(i, parmName, parm);
+      
+      parmName = "DragArea";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Drag Area parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      if (parm < 0)
+         throw ForceModelException("Drag Area parameter unphysical on object " + 
+                                   sat->GetName());
+      pm->SetSatelliteParameter(i, parmName, parm);
+      
+      parmName = "SRPArea";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("SRP Area parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      if (parm < 0)
+         throw ForceModelException("SRP Area parameter unphysical on object " + 
+                                   sat->GetName());
+      pm->SetSatelliteParameter(i, parmName, parm);
+      
+      parmName = "Cr";
+      id = sat->GetParameterID(parmName);
+      if (id < 0)
+         throw ForceModelException("Cr parameter undefined on object " +
+                                   sat->GetName());
+      parm = sat->GetRealParameter(id);
+      if (parm < 0)
+         throw ForceModelException("Cr parameter unphysical on object " + 
+                                   sat->GetName());
+      pm->SetSatelliteParameter(i, parmName, parm);
+   }
+   else if (sat->GetType() == Gmat::FORMATION) {
+      Integer j = -1;
+      ObjectArray elements = sat->GetRefObjectArray("SpaceObject");
+      for (ObjectArray::iterator n = elements.begin(); n != elements.end(); ++n) {
+         ++j;
+         j = SetupSpacecraftData(*n, pm, j);
+      }
+      retval = j;
+   }
+   else
+      throw ForceModelException("Setting SpaceObject parameters on unknown type for " +
+                                 sat->GetName());
+
+   return retval;
+}
+
 
 //------------------------------------------------------------------------------
 // void ForceModel::IncrementTime(Real dt)
