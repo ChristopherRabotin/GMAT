@@ -28,6 +28,8 @@
 
 #include "gmatdefs.hpp"        // for UnsignedIntArray
 #include "MdiGlPlotData.hpp"   // for MAX_BODIES
+#include "GuiItemManager.hpp"
+#include "CoordinateSystem.hpp"
 
 class MdiChildTrajFrame;
 
@@ -46,7 +48,7 @@ public:
       { return mHasChangeMade; }
 
    void SetDistance(float dist);
-   void SetDrawEquPlane(bool flag);
+   void SetDrawEqPlane(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetGotoStdBody(int bodyId);
    
@@ -70,20 +72,31 @@ protected:
    };
    
    // member data
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
    MdiChildTrajFrame *mTrajFrame;
+   CoordinateSystem *mCoordSystem;
    
    bool mHasChangeMade;
-   bool mIsDistanceChanged;
-   bool mIsGotoBodyChanged;
-   bool mDrawEquPlaneChanged;
-   bool mDrawWireFrameChanged;
-   bool mIsEquPlaneColorChanged;
+   bool mHasDistanceChanged;
+   bool mHasGotoBodyChanged;
+   bool mHasCoordSysChanged;
+   bool mHasDrawEqPlaneChanged;
+   bool mHasDrawEcPlaneChanged;
+   bool mHasDrawEcLineChanged;
+   bool mHasDrawWireFrameChanged;
+   bool mHasEqPlaneColorChanged;
+   bool mHasEcPlaneColorChanged;
+   bool mHasEcLineColorChanged;
    
-   bool mDrawEquPlane;
+   bool mDrawEqPlane;
+   bool mDrawEcPlane;
+   bool mDrawEcLine;
    bool mDrawWireFrame;
    
    float mDistance;
    wxString mGotoBodyName;
+   wxString mCoordSysName;
    
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyIntColors;
@@ -91,23 +104,27 @@ protected:
    int mBodyCount;
    
    wxTextCtrl *mDistanceTextCtrl;
-
+   
    wxComboBox *mGotoBodyComboBox;
    wxComboBox *mCoordSysComboBox;
-
-   wxCheckBox *mWireFrameCheckBox;
-   wxCheckBox *mEquPlaneCheckBox;
-   wxCheckBox *mEarthSunLineCheckBox;
    
-   wxButton *mEquPlaneColorButton;
-   wxButton *mEarthSunLineColorButton;
+   wxCheckBox *mWireFrameCheckBox;
+   wxCheckBox *mEqPlaneCheckBox;
+   wxCheckBox *mEcPlaneCheckBox;
+   wxCheckBox *mEcLineCheckBox;
 
+   wxButton *mCreateCoordSysButton;
+   wxButton *mEqPlaneColorButton;
+   wxButton *mEcPlaneColorButton;
+   wxButton *mEcLineColorButton;
+   
    wxButton *mAddBodyButton;
    wxButton *mAddSatButton;
    wxButton *theApplyButton;
    
-   wxColor mEquPlaneColor;
-   wxColor mSunLineColor;
+   wxColor mEqPlaneColor;
+   wxColor mEcPlaneColor;
+   wxColor mEcLineColor;
    
    wxBoxSizer *theDialogSizer;
    
@@ -117,7 +134,8 @@ protected:
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
-
+   bool ShowColorDialog(wxColor &oldColor, wxButton *button);
+   
    // event handlers
    void OnTextChange(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
@@ -127,12 +145,13 @@ protected:
    void OnSatColorButtonClick(wxCommandEvent& event);
    void OnAddBodyButtonClick(wxCommandEvent& event);
    void OnApplyButtonClick(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
    
    void OnClose(wxCloseEvent& event);
-
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-
+   
    // IDs for the controls and the menu commands
    enum
    {     
@@ -140,8 +159,10 @@ protected:
       ID_TEXTCTRL,
       ID_CHECKBOX,
       ID_COMBOBOX,
+      ID_BUTTON,
       ID_ADD_BODY_BUTTON,
-      ID_EQUPLANE_COLOR_BUTTON,
+      ID_EQPLANE_COLOR_BUTTON,
+      ID_ECPLANE_COLOR_BUTTON,
       ID_SUNLINE_COLOR_BUTTON,
       ID_BODY_COLOR_BUTTON,
       ID_BODY_COLOR_BUTTON1,

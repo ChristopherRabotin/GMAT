@@ -19,6 +19,8 @@
 #include "MdiGlPlotData.hpp"
 #include "TextTrajectoryFile.hpp"
 #include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
 
 class TrajPlotCanvas: public wxGLCanvas
 {
@@ -34,16 +36,24 @@ public:
 
    // getters
    float GetDistance() {return mAxisLength;}
-   bool  GetDrawEquPlane() {return mDrawEquPlane;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
-   unsigned int GetEquPlaneColor() {return mEquPlaneColor;}
+   bool  GetDrawEqPlane() {return mDrawEqPlane;}
+   bool  GetDrawEcPlane() {return mDrawEcPlane;}
+   bool  GetDrawEcLine() {return mDrawEcLine;}
+   unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
+   unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
+   unsigned int GetEcLineColor() {return mEcLineColor;}
    int GetGotoBodyId() {return mCenterViewBody;}
    
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
-   void SetDrawEquPlane(bool flag) {mDrawEquPlane = flag;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
-   void SetEquPlaneColor(unsigned int color) {mEquPlaneColor = color;}
+   void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
+   void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
+   void SetDrawEcLine(bool flag) {mDrawEcLine = flag;}
+   void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
+   void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
+   void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
    
    // events
    void OnPaint(wxPaintEvent &event);
@@ -59,9 +69,14 @@ public:
    void ShowDefaultView();
    void ZoomIn();
    void ZoomOut();
-   void DrawEquPlane(bool flag);
    void DrawWireFrame(bool flag);
-
+   void DrawEqPlane(bool flag);
+   void DrawEcPlane(bool flag);
+   void DrawEcLine(bool flag);
+   void DrawInNewCoordSystem(CoordinateSystem *cs);
+   void GotoStdBody(int bodyId);
+   void GotoOtherBody(const wxString &bodyName);
+   
    // data
    int  ReadTextTrajectory(const wxString &filename);
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
@@ -72,13 +87,13 @@ public:
    void AddBody(const wxArrayString &bodyNames,
                 const UnsignedIntArray &bodyColors);
    
-   void GotoStdBody(int bodyId);
-   void GotoOtherBody(const wxString &bodyName);
-   
+
+
 private:
    
    static const int MAX_DATA = 20000;
    static const int LAST_STD_BODY_ID = 10;
+   static const int MAX_COORD_SYS = 10;
    static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
    static const unsigned int UNINIT_TEXTURE = 999;
    static const float MAX_ZOOM_IN = 3700.0;
@@ -103,11 +118,20 @@ private:
    // draw option
    float mAxisLength;
    bool mDrawWireFrame;
-   bool mDrawEquPlane;
+   bool mDrawEqPlane;
+   bool mDrawEcPlane;
+   bool mDrawEclipticPlane;
+   bool mDrawEcLine;
    bool mDrawSpacecraft;
+
+   // coordinate sytem conversion
+   bool mNeedSpacecraftConversion;
+   CoordinateConverter mCoordConverter;
    
    // color
-   unsigned int mEquPlaneColor;
+   unsigned int mEqPlaneColor;
+   unsigned int mEcPlaneColor;
+   unsigned int mEcLineColor;
    
    // texture
    GLuint mBodyTextureIndex[GmatPlot::MAX_BODIES];
@@ -139,7 +163,8 @@ private:
 
    // spacecraft
    int   mScCount;
-   float mTempScPos[GmatPlot::MAX_SCS][MAX_DATA][3];
+   float mScGciPos[GmatPlot::MAX_SCS][MAX_DATA][3];
+   float mScTempPos[GmatPlot::MAX_SCS][MAX_DATA][3];
    unsigned int mScTrajColor[GmatPlot::MAX_SCS][MAX_DATA];
    float mScRadius;
    GLuint mGlList;
@@ -147,10 +172,19 @@ private:
    // solar system
    SolarSystem *mSolarSystem;
    
+   // coordinate system
+   CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mCoordSystemList[MAX_COORD_SYS];
+   CoordinateSystem *mCurrCoordSystem;
+   
+   short mCurrViewFrame;
+   short mCurrBody;
+   int   mCenterViewBody;
+   
    // earth
    float mEarthRadius;
    float mEarthGciPos[MAX_DATA][3];
-   float mTempEarthPos[MAX_DATA][3];
+   float mEarthTempPos[MAX_DATA][3];
    
    // bodies
    //std::string mBodyName[GmatPlot::MAX_BODIES];
@@ -161,12 +195,6 @@ private:
    float mTempBodyPos[GmatPlot::MAX_BODIES][MAX_DATA][3];
    short mPivotBodyIndex[GmatPlot::MAX_BODIES];
    int   mOtherBodyCount;
-   
-   // coordinate frame
-   //loj: for build2 only GCI frame will show
-   short mCurrViewFrame;
-   short mCurrBody;
-   int   mCenterViewBody;
    
    // view
    wxSize mCanvasSize;
@@ -199,22 +227,28 @@ private:
    // drawing objects
    void DrawPicture();
    void DrawEarth();
-   void DrawEarthTrajectory();
-   void DrawBody(int bodyIndex);
-   void DrawBodyTrajectory(int bodyIndex);
+   void DrawEarthOrbit();
+   void DrawOtherBody(int bodyIndex);
+   void DrawOtherBodyOrbit(int bodyIndex);
    void DrawSpacecraft(UnsignedInt scColor);
-   void DrawSpacecraftTrajectory();
+   void DrawSpacecraftOrbit();
    void DrawEquatorialPlane();
-
+   void DrawEclipticPlane(); //loj: 1/31/05 Added
+   void DrawEarthSunLine();  //loj: 1/31/05 Added
+   
    // for body
    int GetStdBodyId(const std::string &name);
+
+   // for coordinate sytem
+   //CoordinateSystem* CreateCoordSystem();
+   bool ConvertSpacecraftData();
    
    // for copy
    void CopyVector3(float to[3], double from[3]);
    void CopyVector3(float to[3], float from[3]);
    void CopyVector3(double to[3], double from[3]);
    void CopyVector3(double to[3], float from[3]);
-
+   
    DECLARE_EVENT_TABLE();
 };
 

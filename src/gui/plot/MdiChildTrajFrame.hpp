@@ -49,20 +49,29 @@ public:
    // getters
    wxString GetPlotName() {return mPlotName;}
    bool GetOverlapPlot() {return mOverlapPlot;}
-   bool GetDrawEquPlane();
    bool GetDrawWireFrame();
-   unsigned int GetEquPlaneColor();
+   bool GetDrawEqPlane();
+   bool GetDrawEcPlane();
+   bool GetDrawEcLine();
+   unsigned int GetEqPlaneColor();
+   unsigned int GetEcPlaneColor();
+   unsigned int GetEcLineColor();
    float GetDistance();
    int   GetGotoBodyId();
    
    // setters
    void SetPlotName(const wxString &name);
    void SetOverlapPlot(bool overlap);
-   void SetDrawEquPlane(bool flag);
    void SetDrawWireFrame(bool flag);
-   void SetEquPlaneColor(unsigned int color);
+   void SetDrawEqPlane(bool flag);
+   void SetDrawEcPlane(bool flag);
+   void SetDrawEcLine(bool flag);
+   void SetEqPlaneColor(unsigned int color);
+   void SetEcPlaneColor(unsigned int color);
+   void SetEcLineColor(unsigned int color);
    void SetDistance(float dist);
-   void SetGotoBodyName(const wxString &body);
+   void SetGotoBodyName(const wxString &bodyName);
+   void SetCoordSystem(CoordinateSystem *cs); //loj: 1/28/05 Added
 
    // actions
    void UpdatePlot();
@@ -75,7 +84,7 @@ public:
    
    void OnShowOptionDialog(wxCommandEvent& event);
    void OnDrawWireFrame(wxCommandEvent& event);
-   void OnDrawEquPlane(wxCommandEvent& event);
+   void OnDrawEqPlane(wxCommandEvent& event);
    
    void OnAddBody(wxCommandEvent& event);
    void OnGotoStdBody(wxCommandEvent& event);

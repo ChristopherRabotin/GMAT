@@ -34,7 +34,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    
    EVT_MENU(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, MdiChildTrajFrame::OnShowOptionDialog)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
-   EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawEquPlane)
+   EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawEqPlane)
    
    EVT_MENU(GmatPlot::MDI_GL_VIEW_ADD_BODY, MdiChildTrajFrame::OnAddBody)
 
@@ -172,18 +172,14 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 //------------------------------------------------------------------------------
 MdiChildTrajFrame::~MdiChildTrajFrame()
 {
+   if (mOptionDialog)
+   {
+      //MessageInterface::ShowMessage("Deleting mOptionDialog...\n");
+      delete mOptionDialog;
+   }
+   
    MdiGlPlot::mdiChildren.DeleteObject(this);
-}
-
-//------------------------------------------------------------------------------
-// bool GetDrawEquPlane()
-//------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetDrawEquPlane()
-{
-   if (mCanvas)
-      return mCanvas->GetDrawEquPlane();
-
-   return false;
+   
 }
 
 //------------------------------------------------------------------------------
@@ -198,12 +194,67 @@ bool MdiChildTrajFrame::GetDrawWireFrame()
 }
 
 //------------------------------------------------------------------------------
-// unsigned int GetEquPlaneColor()
+// bool GetDrawEqPlane()
 //------------------------------------------------------------------------------
-unsigned int MdiChildTrajFrame::GetEquPlaneColor()
+bool MdiChildTrajFrame::GetDrawEqPlane()
 {
    if (mCanvas)
-      return mCanvas->GetEquPlaneColor();
+      return mCanvas->GetDrawEqPlane();
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool GetDrawEcPlane()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetDrawEcPlane()
+{
+   if (mCanvas)
+      return mCanvas->GetDrawEcPlane();
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool GetDrawEcLine()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetDrawEcLine()
+{
+   if (mCanvas)
+      return mCanvas->GetDrawEcLine();
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// unsigned int GetEqPlaneColor()
+//------------------------------------------------------------------------------
+unsigned int MdiChildTrajFrame::GetEqPlaneColor()
+{
+   if (mCanvas)
+      return mCanvas->GetEqPlaneColor();
+
+   return 0;
+}
+
+//------------------------------------------------------------------------------
+// unsigned int GetEcPlaneColor()
+//------------------------------------------------------------------------------
+unsigned int MdiChildTrajFrame::GetEcPlaneColor()
+{
+   if (mCanvas)
+      return mCanvas->GetEcPlaneColor();
+
+   return 0;
+}
+
+//------------------------------------------------------------------------------
+// unsigned int GetEcLineColor()
+//------------------------------------------------------------------------------
+unsigned int MdiChildTrajFrame::GetEcLineColor()
+{
+   if (mCanvas)
+      return mCanvas->GetEcLineColor();
 
    return 0;
 }
@@ -262,18 +313,6 @@ void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
 }
 
 //------------------------------------------------------------------------------
-// void SetDrawEquPlane(bool flag)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawEquPlane(bool flag)
-{
-   if (mCanvas)
-   {
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
-      mCanvas->SetDrawEquPlane(flag);
-   }
-}
-
-//------------------------------------------------------------------------------
 // void SetDrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
@@ -286,13 +325,73 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 }
 
 //------------------------------------------------------------------------------
-// void SetEquPlaneColor(UnsignedInt color)
+// void SetDrawEqPlane(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetEquPlaneColor(UnsignedInt color)
+void MdiChildTrajFrame::SetDrawEqPlane(bool flag)
 {
    if (mCanvas)
    {
-      mCanvas->SetEquPlaneColor(color);
+      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);
+      mCanvas->SetDrawEqPlane(flag);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetDrawEcPlane(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDrawEcPlane(bool flag)
+{
+   if (mCanvas)
+   {
+      //loj: the event ID is not in the GmatPlot yet
+      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_PLANE, flag);
+      mCanvas->SetDrawEcPlane(flag);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetDrawEcLine(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDrawEcLine(bool flag)
+{
+   if (mCanvas)
+   {
+      //loj: the event ID is not in the GmatPlot yet
+      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_LINE, flag);
+      mCanvas->SetDrawEcLine(flag);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetEqPlaneColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetEqPlaneColor(UnsignedInt color)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetEqPlaneColor(color);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetEcPlaneColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetEcPlaneColor(UnsignedInt color)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetEcPlaneColor(color);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetEcLineColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetEcLineColor(UnsignedInt color)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetEcLineColor(color);
    }
 }
 
@@ -306,13 +405,24 @@ void MdiChildTrajFrame::SetDistance(float dist)
 }
 
 //------------------------------------------------------------------------------
-// void SetGotoBodyName(const wxString &body)
+// void SetGotoBodyName(const wxString &bodyName)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGotoBodyName(const wxString &body)
+void MdiChildTrajFrame::SetGotoBodyName(const wxString &bodyName)
 {
    if (mCanvas)
    {
-      mCanvas->GotoStdBody(GmatPlot::GetBodyId(body));
+      mCanvas->GotoStdBody(GmatPlot::GetBodyId(bodyName));
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetCoordSystem(CoordinateSystem *cs)
+{
+   if (mCanvas)
+   {
+      mCanvas->DrawInNewCoordSystem(cs);
    }
 }
 
@@ -401,15 +511,17 @@ void MdiChildTrajFrame::OnZoomOut(wxCommandEvent& event)
 // void OnShowOptionDialog(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
-{
-   //OpenGlOptionDialog dlg(this, mBodyNames, mBodyColors);
-   //dlg.ShowModal();
-   
+{   
    if (event.IsChecked())
    {
       if (mOptionDialog == NULL)
-         mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames, mBodyColors);
+         mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
+                                                mBodyColors);
       
+      int x, y, w, h;
+      MdiGlPlot::mdiParentGlFrame->GetPosition(&x, &y);
+      mOptionDialog->GetSize(&w, &h);
+      mOptionDialog->Move(x-w, y);
       mOptionDialog->Show(true); //modeless dialog
    }
    else
@@ -431,15 +543,15 @@ void MdiChildTrajFrame::OnDrawWireFrame(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnDrawEquPlane(wxCommandEvent& WXUNUSED(event))
+// void OnDrawEqPlane(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnDrawEquPlane(wxCommandEvent& event)
+void MdiChildTrajFrame::OnDrawEqPlane(wxCommandEvent& event)
 {
    if (mCanvas)
-      mCanvas->DrawEquPlane(event.IsChecked());
+      mCanvas->DrawEqPlane(event.IsChecked());
 
    if (mOptionDialog)
-      mOptionDialog->SetDrawEquPlane(event.IsChecked());
+      mOptionDialog->SetDrawEqPlane(event.IsChecked());
 }
 
 //loj: 12/16/04 Added

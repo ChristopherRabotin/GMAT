@@ -36,8 +36,9 @@ protected:
    
    bool mIsScChanged;
    bool mIsColorChanged;
+   bool mIsCoordSysChanged;
    int mScCount;
-
+   
    std::string mSelScName;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
@@ -47,7 +48,7 @@ protected:
    
    wxListBox *mScAvailableListBox;
    wxListBox *mScSelectedListBox;
-    
+   
    wxButton *addScButton;
    wxButton *removeScButton;
    wxButton *clearScButton;
@@ -59,11 +60,11 @@ protected:
    wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mOverlapCheckBox;
    
-   wxComboBox *mCoordSysComboBox; //loj: 12/22/04 Added
-
+   wxComboBox *mCoordSysComboBox;
+   
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mScOptionBoxSizer;
-
+   
    void OnAddSpacecraft(wxCommandEvent& event);
    void OnRemoveSpacecraft(wxCommandEvent& event);
    void OnClearSpacecraft(wxCommandEvent& event);
@@ -71,14 +72,15 @@ protected:
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event); //loj: 1/27/05 Added
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
@@ -93,9 +95,9 @@ protected:
       SC_ORBIT_COLOR_BUTTON,
       SC_TARGET_COLOR_BUTTON
    };
-
+   
 private:
    void ShowSpacecraftOption(const wxString &name, bool show = true);
-  
+   
 };
 #endif

@@ -42,6 +42,7 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
    EVT_BUTTON(SC_TARGET_COLOR_BUTTON, OpenGlPlotSetupPanel::OnTargetColorClick)
    EVT_LISTBOX(SC_SEL_LISTBOX, OpenGlPlotSetupPanel::OnSelectSpacecraft)
    EVT_CHECKBOX(CHECKBOX, OpenGlPlotSetupPanel::OnCheckBoxChange)
+   EVT_COMBOBOX(ID_COMBOBOX, OpenGlPlotSetupPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -71,6 +72,11 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
    mOpenGlPlot = (OpenGlPlot*)subscriber;
 
+   mIsScChanged = false;
+   mIsColorChanged = false;
+   mIsCoordSysChanged = false;
+   mScCount = 0;
+   
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    
@@ -221,6 +227,18 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
       
       theApplyButton->Enable();
       mIsColorChanged = true;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnComboBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
+{    
+   if (event.GetEventObject() == mCoordSysComboBox)
+   {
+      mIsCoordSysChanged = true;
+      theApplyButton->Enable();
    }
 }
 
@@ -403,7 +421,9 @@ void OpenGlPlotSetupPanel::LoadData()
       mWireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
       mTargetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
       mOverlapCheckBox->SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
-
+      mCoordSysComboBox->SetStringSelection
+         (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
+      
       // get spacecraft list to plot
       StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
       mScCount = scNameList.size();
@@ -419,11 +439,6 @@ void OpenGlPlotSetupPanel::LoadData()
                = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameList[i]));
             mTargetColorMap[scNameList[i]]
                = RgbColor(mOpenGlPlot->GetColor("Target", scNameList[i]));
-         
-            //mOrbitColorMap[scNameList[i]]
-            //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("OrbitColor", scNameList[i]));
-            //mTargetColorMap[scNameList[i]]
-            //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("TargetColor", scNameList[i]));
          }
       
          mScSelectedListBox->Set(mScCount, scNames);
@@ -516,14 +531,15 @@ void OpenGlPlotSetupPanel::SaveData()
          mOpenGlPlot->
             SetColor("Target", mSelScName,
                      mTargetColorMap[mSelScName].GetIntColor());
-         
-         //mOpenGlPlot->
-         //   SetUnsignedIntParameter("OrbitColor", mSelScName,
-         //                           mOrbitColorMap[mSelScName].GetIntColor());
-         //mOpenGlPlot->
-         //   SetUnsignedIntParameter("TargetColor", mSelScName,
-         //                           mTargetColorMap[mSelScName].GetIntColor());
       }
+   }
+   
+   // save coordinate system
+   if (mIsCoordSysChanged)
+   {
+      mIsCoordSysChanged = false;
+      mOpenGlPlot->SetStringParameter("CoordinateSystem",
+         std::string(mCoordSysComboBox->GetStringSelection().c_str()));
    }
 }
 
