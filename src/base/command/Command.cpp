@@ -189,6 +189,13 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
 //------------------------------------------------------------------------------
 const std::string& GmatCommand::GetGeneratingString()
 {
+   static std::string empty;
+   if (generatingString == "") {
+      if (typeName == "NoOp")
+         return generatingString;
+      empty = "% Generating string not set for " + typeName + " command.";
+      return empty;
+   }
    return generatingString;
 }
 

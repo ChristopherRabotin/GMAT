@@ -61,6 +61,9 @@ public:
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   
+   virtual const std::string&
+                        GetGeneratingString();
 
    // Reference object accessor methods
    //loj: 6/25/04 added

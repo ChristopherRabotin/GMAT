@@ -23,6 +23,8 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
+#include <sstream>
+
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_INIT 1
 //#define DEBUG_PROPAGATE_DIRECTION 1
@@ -216,6 +218,69 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
             
    return GmatCommand::GetObject(type, objName);
 }
+
+//------------------------------------------------------------------------------
+//  const std::string GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * This method is used to retrieve the GmatCommand string from the script that was
+ * parsed to build the GmatCommand.  It is used to save the script line, so that
+ * the script can be written to a file without inverting the steps taken to set
+ * up the internal object data.  As a side benefit, the script line is
+ * available in the GmatCommand structure for debugging purposes.
+ *
+ * @return The script line that was interpreted to define this GmatCommand.
+ */
+//------------------------------------------------------------------------------
+const std::string& Propagate::GetGeneratingString()
+{
+   std::string gen = "% Generated live from GMAT!!\nPropagate ";
+   
+   // Construct the generating string
+   Integer index = 0;
+   for (StringArray::iterator prop = propName.begin(); prop != propName.end();
+        ++prop) {
+      gen += (*prop) + "(";
+      // Spaceobjects that are propagated by this PropSetup
+      StringArray *sats = satName[index];
+      for (StringArray::iterator sc = sats->begin(); sc != sats->end(); ++sc) {
+         // Add a comma if needed
+         if (sc != sats->begin())
+            gen += ", ";
+         gen += (*sc);
+      }
+         
+      // Now the stopping conditions
+      if (stopWhen.size() > 0) {
+         gen += ", {";
+         
+         std::stringstream stopCondDesc;
+         for (std::vector<StopCondition*>::iterator stp = stopWhen.begin();
+              stp != stopWhen.end(); ++stp) {
+            if (stp != stopWhen.begin())
+               gen += ", ";
+            
+            Parameter *stopParam = (*stp)->GetStopParameter();
+            stopCondDesc << stopParam->GetName() << " = "
+                         << (*stp)->GetRealParameter("Goal");
+
+            gen += stopCondDesc.str();
+         }
+         gen += "}";
+      }
+
+      gen += ")";
+      
+      ++index;
+   }
+   
+   generatingString = gen + ";";
+   // Then call the base class method
+   return GmatCommand::GetGeneratingString();
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1235,18 +1300,29 @@ bool Propagate::Initialize(void)
    unsigned int index = 0;
    prop.clear();
    SpaceObject *so;
-   
+   std::string pName;
+   Real dir;
+
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i) {
       if (satName.size() <= index)
          throw CommandException("Size mismatch for SpaceObject names\n");
-    
-      if (objectMap->find(*i) == objectMap->end())
+         
+      if ((*i)[0] == '-') {
+         pName = i->substr(1);
+         dir = -1.0;
+      }
+      else {
+        pName = *i;
+        dir = 1.0;
+      }
+
+      if (objectMap->find(pName) == objectMap->end())
          throw CommandException(
-            "Propagate command cannot find Propagator Setup\n");
+            "Propagate command cannot find Propagator Setup\"" + (pName) + "\"\n");
    
       if (satName[index]->empty())
          throw CommandException(
-            "Propagate command does not have a SpaceObject for " + (*i) + 
+            "Propagate command does not have a SpaceObject for " + (pName) +
             " in \n\"" + generatingString + "\"\n");
    
       if (stopWhen.empty())
@@ -1254,9 +1330,11 @@ bool Propagate::Initialize(void)
       else
          singleStepMode = false;
 
-      prop.push_back((PropSetup *)((*objectMap)[*i]));
+      prop.push_back((PropSetup *)((*objectMap)[pName]));
       if (!prop[index])
          return false;
+      direction[index] = dir;
+      
       Propagator *p = prop[index]->GetPropagator();
       if (!p)
          throw CommandException("Propagator not set in PropSetup\n");
@@ -1268,7 +1346,7 @@ bool Propagate::Initialize(void)
       fm->ClearSpacecraft();
       StringArray::iterator scName;
       StringArray owners, elements;
-   
+
       /// @todo Check to see if All and All.Epoch belong in place for all modes.
       owners.push_back("All");
       elements.push_back("All.epoch");
