@@ -34,8 +34,11 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_ADD,       UniversePanel::OnAddButton)
    EVT_BUTTON(ID_BUTTON_SORT,      UniversePanel::OnSortButton)
    EVT_BUTTON(ID_BUTTON_REMOVE,    UniversePanel::OnRemoveButton)
+   EVT_BUTTON(ID_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
 
    EVT_LISTBOX(ID_AVAILABLE_LIST, UniversePanel::OnAvailableSelectionChange)
+   EVT_LISTBOX(ID_SELECTED_LIST, UniversePanel::OnSelectedSelectionChange)
+
 END_EVENT_TABLE()
 
 //------------------------------
@@ -85,7 +88,8 @@ void UniversePanel::Create()
     wxGridSizer *item1 = new wxGridSizer( 3, 0, 0 );
     wxBoxSizer *item2 = new wxBoxSizer( wxVERTICAL );
     
-    item3 = new wxStaticText( this, ID_TEXT, wxT("Available"), wxDefaultPosition, wxSize(80,-1), 0 );
+    item3 = new wxStaticText( this, ID_TEXT, wxT("Available"), wxDefaultPosition, 
+                              wxSize(80,-1), 0 );
     item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     //loj: 2/24/04 these should not be hardcoded for future build
@@ -101,44 +105,53 @@ void UniversePanel::Create()
 //        wxT("Low Accuracy Analytic"), 
 //        wxT("High Accuracy Analytic")
 
-    availableListBox = new wxListBox( this, ID_AVAILABLE_LIST, wxDefaultPosition, wxSize(140,125), 3, 
+    availableListBox = new wxListBox( this, ID_AVAILABLE_LIST, wxDefaultPosition, 
+                                       wxSize(140,125), 3, 
                                        availableStrs, wxLB_SINGLE );
     item2->Add( availableListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
     item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
     wxBoxSizer *item5 = new wxBoxSizer( wxVERTICAL );
     item5->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    addButton = new wxButton( this, ID_BUTTON_ADD, wxT("Add"), wxDefaultPosition, wxDefaultSize, 0 );
+    addButton = new wxButton( this, ID_BUTTON_ADD, wxT("Add"), wxDefaultPosition, 
+                                       wxDefaultSize, 0 );
     item5->Add( addButton, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     // ag:  changed button from "sort" to "prioritize"
-    prioritizeButton = new wxButton( this, ID_BUTTON_SORT, wxT("Prioritize"), wxDefaultPosition, wxDefaultSize, 0 );
+    prioritizeButton = new wxButton( this, ID_BUTTON_SORT, wxT("Prioritize"), 
+                                      wxDefaultPosition, wxDefaultSize, 0 );
     item5->Add( prioritizeButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     prioritizeButton->Enable(false);
 
-    removeButton = new wxButton( this, ID_BUTTON_REMOVE, wxT("Remove"), wxDefaultPosition, wxDefaultSize, 0 );
+    removeButton = new wxButton( this, ID_BUTTON_REMOVE, wxT("Remove"), 
+                                 wxDefaultPosition, wxDefaultSize, 0 );
     item5->Add( removeButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     removeButton->Enable(false);
     item1->Add( item5, 0, wxALIGN_CENTRE|wxALL, 5 );
     wxBoxSizer *item9 = new wxBoxSizer( wxVERTICAL );
-    item10 = new wxStaticText( this, ID_TEXT, wxT("Selected"), wxDefaultPosition, wxSize(80,-1), 0 );
+    item10 = new wxStaticText( this, ID_TEXT, wxT("Selected"), wxDefaultPosition, 
+                               wxSize(80,-1), 0 );
     item9->Add( item10, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxString strs11[] = 
     {
     };
-    selectedListBox = new wxListBox( this, ID_LISTBOX, wxDefaultPosition, wxSize(140,125), 0, strs11, wxLB_SINGLE );
+    selectedListBox = new wxListBox( this, ID_SELECTED_LIST, wxDefaultPosition, 
+                                     wxSize(140,125), 0, strs11, wxLB_SINGLE );
     item9->Add( selectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item1->Add( item9, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
     // will need to change
-    wxStaticText *filetypeStaticText = new wxStaticText( this, ID_TEXT, wxT("SLP File: "), 
+    filetypeStaticText = new wxStaticText( this, ID_TEXT, 
+                                       wxT("SLP File: "), 
                                        wxDefaultPosition, wxSize(80,-1), 0 );
-    wxTextCtrl *fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), wxDefaultPosition, 
+    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                              wxDefaultPosition, 
                                               wxSize(250, -1),  0);
-    wxButton *browseButton = new wxButton( this, ID_BUTTON_BROWSE, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
-
+    browseButton = new wxButton( this, ID_BUTTON_BROWSE, wxT("Browse"), 
+                                              wxDefaultPosition, wxDefaultSize, 0 );
+ 
     fileSizer->Add(filetypeStaticText, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
@@ -175,9 +188,13 @@ void UniversePanel::SaveData()
     //if first item in the list is "SLP"
     if (selectedListBox->GetString(0).IsSameAs("SLP"))
     {
+        wxString absoluteFilename = fileTextCtrl->GetValue();
+
         MessageInterface::ShowMessage("UniversePanel::SaveData() "
                                       "calling theGuiInterpreter->SetSlpFileToUse()\n");
-        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat");
+        
+	//ag:        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat"); 
+        theGuiInterpreter->SetSlpFileToUse(std::string (absoluteFilename.c_str()));
     }
 }
 
@@ -217,6 +234,7 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
     if ( found == wxNOT_FOUND )
     {
       selectedListBox->Insert(s, 0);
+      selectedListBox->SetSelection(0);
       addButton->Enable(false);
       removeButton->Enable(true);
       theApplyButton->Enable(); //loj: 2/27/04 added
@@ -254,6 +272,19 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
     if (availableListBox->GetStringSelection().IsSameAs("SLP"))
       addButton->Enable(true);
 }
+void UniversePanel::OnBrowseButton(wxCommandEvent& event)
+{
+    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+    
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString filename;
+        
+        filename = dialog.GetPath().c_str();
+        
+        fileTextCtrl->SetValue(filename); 
+    }
+}
 
 void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)
 {
@@ -267,7 +298,18 @@ void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)
     }
     else
       addButton->Enable(false);
+}
+void UniversePanel::OnSelectedSelectionChange(wxCommandEvent& event)
+{
+    // get string
+//      wxString s = availableListBox->GetStringSelection();
 
+//      if (s.IsSameAs("SLP"))
+//      {
+//      }
+//      else
+//      {
 
-
+//      }
+    
 }

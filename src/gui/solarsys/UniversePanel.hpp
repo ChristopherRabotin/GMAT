@@ -19,18 +19,10 @@
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 
-#include "wx/sizer.h"
-
-
-#include <wx/image.h>
-#include <wx/statline.h>
-#include <wx/spinbutt.h>
-#include <wx/spinctrl.h>
-#include <wx/splitter.h>
-#include <wx/listctrl.h>
-#include <wx/treectrl.h>
-#include <wx/notebook.h>
-#include <wx/grid.h>
+//  #include <wx/sizer.h>
+//  #include <wx/image.h>
+//  #include <wx/statline.h>
+//  #include <wx/listctrl.h>
 
 // Declare window functions
 //loj: commented out
@@ -47,28 +39,15 @@ public:
     UniversePanel(wxWindow *parent);
    
 private:
-//      wxBoxSizer *item0;
-//      wxGridSizer *item1;
-//      wxBoxSizer *item2;
-//      wxBoxSizer *item5;
-//      wxBoxSizer *item9;
-    
-    wxStaticText *item3;
-    wxStaticText *item10;
-    
-    wxListBox *availableListBox;
-    wxListBox *selectedListBox;
-    
-    wxButton *addButton;
-    wxButton *prioritizeButton;
-    wxButton *removeButton;
-    
+
   //    void CreateUniverse(wxWindow *parent);
     void OnAddButton(wxCommandEvent& event);
     void OnSortButton(wxCommandEvent& event);
     void OnRemoveButton(wxCommandEvent& event);
+    void OnBrowseButton(wxCommandEvent& event);
 
     void OnAvailableSelectionChange(wxCommandEvent& event);
+    void OnSelectedSelectionChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -77,6 +56,26 @@ private:
     //loj: 2/27/04 commented out
     //virtual void OnHelp();
     //virtual void OnScript();
+    
+//      wxBoxSizer *item0;
+//      wxGridSizer *item1;
+//      wxBoxSizer *item2;
+//      wxBoxSizer *item5;
+//      wxBoxSizer *item9;
+
+    wxTextCtrl *fileTextCtrl;
+
+    wxStaticText *item3;
+    wxStaticText *item10;
+    wxStaticText *filetypeStaticText;    
+
+    wxListBox *availableListBox;
+    wxListBox *selectedListBox;
+    
+    wxButton *addButton;
+    wxButton *prioritizeButton;
+    wxButton *removeButton;
+    wxButton *browseButton;
     
     DECLARE_EVENT_TABLE();
     
@@ -93,6 +92,10 @@ private:
         ID_AVAILABLE_LIST,
         ID_TEXT_CTRL,
         ID_BUTTON_BROWSE,
+        ID_SELECTED_LIST,
     };
 };
 #endif
+
+
+
