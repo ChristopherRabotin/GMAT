@@ -62,6 +62,8 @@ StopCondition* StopConditionFactory::CreateStopCondition(std::string ofType,
 StopConditionFactory::StopConditionFactory() :
 Factory(Gmat::STOP_CONDITION)
 {
+   if (creatables.empty())
+      creatables.push_back("SingleValueStop");
 }
 
 //------------------------------------------------------------------------------

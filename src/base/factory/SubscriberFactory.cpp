@@ -42,7 +42,9 @@ Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
                                                 std::string withName,
                                                 std::string fileName)
 {
-   return new ReportFile(withName, fileName);
+   if (ofType == "ReportFile")
+      return new ReportFile(withName, fileName);
+   return NULL;
 }
 
 
@@ -59,6 +61,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
 SubscriberFactory::SubscriberFactory() :
 Factory(Gmat::SUBSCRIBER)
 {
+   if (creatables.empty())
+      creatables.push_back("ReportFile");
 }
 
 //------------------------------------------------------------------------------
