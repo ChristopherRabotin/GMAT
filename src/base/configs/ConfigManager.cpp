@@ -420,7 +420,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       GmatBase *obj = mapping[oldName];
       if (obj->GetType() == type)
       {
-         // if newName does not exist, change name (loj: 11/19/04 - added)
+         // if newName does not exist, change name
          if (mapping.find(newName) == mapping.end())
          {
             mapping.erase(oldName);
@@ -446,65 +446,89 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       return false;
    }
    
-   //loj: 11/17/04 - added
    //--------------------------------------------------
    // rename ref. object name used in parameters
    //--------------------------------------------------
    
    if (type == Gmat::SPACECRAFT)
    {
-      StringArray params = GetListOfItems(Gmat::PARAMETER);
+      StringArray forms = GetListOfItems(Gmat::FORMATION);
       StringArray subs = GetListOfItems(Gmat::SUBSCRIBER);
+      StringArray params = GetListOfItems(Gmat::PARAMETER);
       Subscriber *sub;
       Parameter *param;
       std::string oldParamName;
       std::string newParamName;
+      std::string::size_type pos1;
       
+      //loj: 2/22/05 - Added
+      //------------------------------------------
+      // Formation has spacecraft name
+      //------------------------------------------
+      for (unsigned int i=0; i<forms.size(); i++)
+      {
+         GetSpacecraft(forms[i])->RenameRefObject(type, oldName, newName);
+      }
+      
+      //------------------------------------------
+      // OpenGLPlot has spacecraft name
+      //------------------------------------------
+      for (unsigned int i=0; i<subs.size(); i++)
+      {
+         sub = GetSubscriber(subs[i]);
+         if (sub->GetTypeName() == "OpenGLPlot")
+         {
+            sub->RenameRefObject(type, oldName, newName);
+         }
+      }
+
+      //------------------------------------------
+      // Parameter name consists of spacecraft name
+      //------------------------------------------
       for (unsigned int i=0; i<params.size(); i++)
       {
-#if DEBUG_RENAME
+         #if DEBUG_RENAME
          MessageInterface::ShowMessage("params[%d]=%s\n", i, params[i].c_str());
-#endif
+         #endif
          
          param = GetParameter(params[i]);
          
          // if system parameter
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             oldParamName = param->GetName();
-            // if parameter name has old name (loj: 11/23/04 - added)
+            // if parameter name has old name
             if (oldParamName.find(oldName) != oldParamName.npos)
             {
                // rename ref. object name
                param->RenameRefObject(type, oldName, newName);
                
                // rename actual parameter name
-               newParamName = newName + "." + param->GetTypeName();
+               newParamName = oldParamName;
+               pos1 = newParamName.find(".");
+               newParamName.replace(0, pos1, newName);
                
                // rename configured parameter name
                renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
                
-#if DEBUG_RENAME
+               #if DEBUG_RENAME
                MessageInterface::ShowMessage
                   ("newParamName=%s\n", param->GetName().c_str());
                MessageInterface::ShowMessage
                   ("===> Change Subscriber ref object names\n");
-#endif
+               #endif
+               
                //--------------------------------------------------
                // rename ref. objects used in subscribers
                //--------------------------------------------------
                for (unsigned int i=0; i<subs.size(); i++)
                {
                   sub = GetSubscriber(subs[i]);
-                  if (sub->GetTypeName() == "OpenGLPlot")
-                  {
-                     sub->RenameRefObject(type, oldName, newName);
-                  }
-                  else if (sub->GetTypeName() == "XYPlot" ||
-                           sub->GetTypeName() == "ReportFile")
-                  {
+                  
+                  // Subscribers other than OpenGLPlot has paramter name
+                  if (sub->GetTypeName() != "OpenGLPlot")
                      sub->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
-                  }
+                  
                }
             }
          }
@@ -528,7 +552,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                param->SetStringParameter("Expression", newExp);
                
                // rename ref. parameter name
-               StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+               //loj: 2/22/05 "RefParams" no longer used
+               //StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+               StringArray refParamNames = param->GetRefObjectNameArray(Gmat::PARAMETER);
                for (unsigned int i=0; i<refParamNames.size(); i++)
                {
                   oldParamName = refParamNames[i];
@@ -559,6 +585,7 @@ bool ConfigManager::RemoveAllItems()
 
    for (unsigned int i=0; i<objects.size(); i++)
    {
+      //MessageInterface::ShowMessage("Deleting %s\n", objects[i]->GetName().c_str());
       delete objects[i];
       objects[i] = NULL;
    }
