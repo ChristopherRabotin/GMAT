@@ -19,14 +19,22 @@
 
 #include "OpenGlPlot.hpp"
 #include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
+#include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "MessageInterface.hpp"  // for ShowMessage()
+
+#define DEBUG_OPENGL 0
 
 //---------------------------------
 // static data
 //---------------------------------
 const std::string
-OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount] =
+OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 {
+   "Add",
+   "SpacecraftList",
+   "ClearSpacecraftList",
+   "OrbitColor",
+   "TargetColor",
    "Axis",
    "DrawEquatorialPlane",
    "WireFrame",
@@ -35,8 +43,13 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount] =
 }; 
 
 const Gmat::ParameterType
-OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount] =
+OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
+   Gmat::STRING_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::UNSIGNED_INT_TYPE,
+   Gmat::UNSIGNED_INT_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::STRING_TYPE,
@@ -87,7 +100,10 @@ OpenGlPlot::~OpenGlPlot(void)
 {
 }
 
-//loj: 3/8/04 added
+//----------------------------------
+// inherited methods from Subscriber
+//----------------------------------
+
 //------------------------------------------------------------------------------
 // virtual bool Initialize()
 //------------------------------------------------------------------------------
@@ -161,8 +177,8 @@ GmatBase* OpenGlPlot::Clone(void) const
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetParameterText(const Integer id) const
 {
-   if (id >= DRAW_AXIS && id < OpenGlPlotParamCount)
-      return PARAMETER_TEXT[id];
+   if (id >= SubscriberParamCount && id < OpenGlPlotParamCount)
+      return PARAMETER_TEXT[id - SubscriberParamCount];
    else
       return Subscriber::GetParameterText(id);
     
@@ -173,9 +189,9 @@ std::string OpenGlPlot::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer OpenGlPlot::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<OpenGlPlotParamCount-1; i++)
+   for (int i=SubscriberParamCount; i<OpenGlPlotParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - SubscriberParamCount])
          return i;
    }
    
@@ -187,8 +203,8 @@ Integer OpenGlPlot::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType OpenGlPlot::GetParameterType(const Integer id) const
 {
-   if (id >= DRAW_AXIS && id < OpenGlPlotParamCount)
-      return PARAMETER_TYPE[id];
+   if (id >= SubscriberParamCount && id < OpenGlPlotParamCount)
+      return PARAMETER_TYPE[id - SubscriberParamCount];
    else
       return Subscriber::GetParameterType(id);
 }
@@ -198,11 +214,10 @@ Gmat::ParameterType OpenGlPlot::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetParameterTypeString(const Integer id) const
 {
-   if (id >= DRAW_AXIS && id <= OpenGlPlotParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   if (id >= SubscriberParamCount && id < OpenGlPlotParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - SubscriberParamCount)];
    else
       return Subscriber::GetParameterTypeString(id);
-    
 }
 
 //------------------------------------------------------------------------------
@@ -234,9 +249,94 @@ bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
    case DRAW_EQUATORIAL_PLANE:
       mDrawEquatorialPlane = value;
       return mDrawEquatorialPlane;
+   case CLEAR_SPACECRAFT_LIST:
+      ClearSpacecraftList();
+      return true;
    default:
       return Subscriber::SetBooleanParameter(id, value);
    }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const Integer id,
+//                                     const std::string &item)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::GetUnsignedIntParameter(const Integer id,
+                                                const std::string &item)
+{   
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      if (mOrbitColorMap.find(item) != mOrbitColorMap.end())
+         return mOrbitColorMap[item];
+      else
+         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   case TARGET_COLOR:
+      if (mTargetColorMap.find(item) != mTargetColorMap.end())
+         return mTargetColorMap[item];
+      else
+         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   default:
+      return Subscriber::GetUnsignedIntParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const std::string &label,
+//                                     const std::string &item)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::GetUnsignedIntParameter(const std::string &label,
+                                                const std::string &item)
+{
+   return GetUnsignedIntParameter(GetParameterID(label), item);
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                     const std::string &item,
+//                                     const UnsignedInt value)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
+                                                const std::string &item,
+                                                const UnsignedInt value)
+{
+#if DEBUG_OPENGL
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetUnsignedIntParameter()"
+       "id=%d, item=%s, value=%d\n", id, item.c_str(), value);
+#endif
+   
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      if (mOrbitColorMap.find(item) != mOrbitColorMap.end())
+      {
+         mOrbitColorMap[item] = value;
+         return value;
+      }
+      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   case TARGET_COLOR:
+      if (mTargetColorMap.find(item) != mTargetColorMap.end())
+      {
+         mTargetColorMap[item] = value;
+         return value;
+      }
+      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   default:
+      return Subscriber::SetUnsignedIntParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                     const std::string &item,
+//                                     const UnsignedInt value)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
+                                                const std::string &item,
+                                                const UnsignedInt value)
+{
+   return SetUnsignedIntParameter(GetParameterID(label), item, value);
 }
 
 //------------------------------------------------------------------------------
@@ -277,6 +377,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
+   case ADD:
+      return AddSpacecraft(value);
    case WIRE_FRAME:
       if (value == "On" || value == "Off")
       {
@@ -300,10 +402,67 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 //                         const std::string &value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetStringParameter(const std::string &label,
-                                const std::string &value)
+                                    const std::string &value)
 {
-   //MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
-   //                              "value = %s \n", label.c_str(), value.c_str());
+   MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
+                                 "value = %s \n", label.c_str(), value.c_str());
 
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case SPACECRAFT_LIST:
+      return mScList;
+   default:
+      return Subscriber::GetStringArrayParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// bool AddSpacecraft(const std::string &name)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::AddSpacecraft(const std::string &name)
+{
+   bool status = false;
+    
+   if (name != "")
+   {
+      mScList.push_back(name);
+      mScCount = mScList.size();
+
+      mOrbitColorMap[name] = GmatColor::RED32;
+      mTargetColorMap[name] = GmatColor::ORANGE32;
+      status = true;
+   }
+
+   return status;
+}
+
+//------------------------------------------------------------------------------
+// void ClearSpacecraftList()
+//------------------------------------------------------------------------------
+void OpenGlPlot::ClearSpacecraftList()
+{
+   mScList.clear();
+   mOrbitColorMap.clear();
+   mTargetColorMap.clear();
+   mScCount = 0;
 }
