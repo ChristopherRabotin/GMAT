@@ -88,6 +88,7 @@ bool Moderator::Initialize(bool fromGui)
          theCommandFactory = new CommandFactory();
          theForceModelFactory = new ForceModelFactory();
          theFunctionFactory = new FunctionFactory(); //loj: 9/27/04 - added
+         theHardwareFactory = new HardwareFactory(); //djc: 11/10/04 - added
          theParameterFactory = new ParameterFactory();
          thePhysicalModelFactory = new PhysicalModelFactory();
          thePropSetupFactory = new PropSetupFactory();
@@ -103,6 +104,7 @@ bool Moderator::Initialize(bool fromGui)
          theFactoryManager->RegisterFactory(theCommandFactory);
          theFactoryManager->RegisterFactory(theForceModelFactory);
          theFactoryManager->RegisterFactory(theFunctionFactory);
+         theFactoryManager->RegisterFactory(theHardwareFactory);
          theFactoryManager->RegisterFactory(theParameterFactory);
          theFactoryManager->RegisterFactory(thePhysicalModelFactory);
          theFactoryManager->RegisterFactory(thePropSetupFactory);
@@ -389,6 +391,87 @@ SpaceObject* Moderator::GetSpacecraft(const std::string &name)
    else
       return theConfigManager->GetSpacecraft(name);
 }
+
+
+// Spacecraft
+//------------------------------------------------------------------------------
+// SpaceObject* CreateSpacecraft(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a spacecraft object by given name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return spacecraft object pointer
+ */
+//------------------------------------------------------------------------------
+Hardware* Moderator::CreateHardware(const std::string &type, const std::string &name)
+{
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::CreateHardware() type = %s, name = %s\n",
+       type.c_str(), name.c_str());
+#endif
+
+   if (GetHardware(name) == NULL)
+   {
+      Hardware *hw = theFactoryManager->CreateHardware(type, name);
+
+      if (hw == NULL)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::CreateHardware() Error Creating \"%s\".  Make sure "
+             "HardwareFactory is registered and has correct type. \n", type.c_str());
+         
+         throw GmatBaseException("Error Creating Hardware");
+      }
+    
+      // Manage it if it is a named Spacecraft
+      try
+      {
+         if (hw->GetName() != "")
+            theConfigManager->AddHardware(hw);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("Moderator::CreateHardware()\n" +
+                                       e.GetMessage());
+      }
+
+      return hw;
+   }
+   else
+   {
+#if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateHardware() Unable to create Hardware "
+          "name: \"%s\" already exists\n", name.c_str());
+#endif
+      return GetHardware(name);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Hardware* GetHardware(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a hardware object pointer by given name and add to configuration.
+ *
+ * @param <name> object name
+ *
+ * @return a Hardware object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Hardware* Moderator::GetHardware(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return theConfigManager->GetHardware(name);
+}
+
 
 // Propagator
 //------------------------------------------------------------------------------
@@ -2783,6 +2866,15 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
    {
       sc = (Spacecraft*)theConfigManager->GetSpacecraft(scNames[i]);
       sandboxes[index]->AddObject(sc);
+   }
+
+   Hardware *hw;
+   StringArray hwNames = theConfigManager->GetListOfItems(Gmat::HARDWARE);
+
+   for (Integer i=0; i<(Integer)hwNames.size(); i++)
+   {
+      hw = (Hardware*)theConfigManager->GetHardware(hwNames[i]);
+      sandboxes[index]->AddObject(hw);
    }
 }
 

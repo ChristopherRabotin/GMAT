@@ -89,6 +89,8 @@ public:
                                                 const std::string &forBody = "Earth");
    Function*              CreateFunction(const std::string &ofType,
                                          const std::string &withName = "");
+   Hardware*              CreateHardware(const std::string &ofType,
+                                         const std::string &withName = "");
 
    
    // method to return a list of strings representing the objects of the input
@@ -111,6 +113,7 @@ public:
    StringArray            GetListOfBurn();
    StringArray            GetListOfAtmosphereModel();
    StringArray            GetListOfFunction();
+   StringArray            GetListOfHardware();
 
    // class destructor
    ~FactoryManager();

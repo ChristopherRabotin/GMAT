@@ -86,6 +86,9 @@ void Interpreter::Initialize(void)
     StringArray cmds = moderator->GetListOfFactoryItems(Gmat::COMMAND);
     copy(cmds.begin(), cmds.end(), back_inserter(cmdmap));
     
+    StringArray hw = moderator->GetListOfFactoryItems(Gmat::HARDWARE);
+    copy(hw.begin(), hw.end(), back_inserter(hardwaremap));
+
     StringArray props = moderator->GetListOfFactoryItems(Gmat::PROPAGATOR);
     copy(props.begin(), props.end(), back_inserter(propmap));
 
@@ -230,6 +233,13 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     
     if (objecttype == "ImpulsiveBurn") {
         CreateBurn(objectname, true);
+        return true;
+    }
+
+    // Handle tanks, thrusters, etc.
+    if (find(hardwaremap.begin(), hardwaremap.end(), objecttype) != 
+        hardwaremap.end()) {
+        CreateHardware(objectname, objecttype);
         return true;
     }
 
@@ -431,6 +441,24 @@ Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 Formation* Interpreter::CreateFormation(std::string formname)
 {
     return (Formation *)(moderator->CreateSpacecraft("Formation", formname));
+}
+
+
+//------------------------------------------------------------------------------
+// Hardware* CreateHardware(std::string hwname, std::string type)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a new Hardware object.
+ * 
+ * @param hwname Name of the object.
+ * @param type Type of the hardware requested.
+ * 
+ * @return Pointer to the constructed Formation.
+ */
+//------------------------------------------------------------------------------
+Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
+{
+   return (Hardware *)(moderator->CreateHardware(type, hwname));
 }
 
 

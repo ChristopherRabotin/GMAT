@@ -30,6 +30,7 @@
 // Forward references for GMAT core objects
 class Spacecraft;
 class Formation;
+class Hardware;
 class Propagator;
 class ForceModel;
 class PropSetup;
@@ -90,6 +91,8 @@ protected:
    StringArray                     cmdmap;
    /// Available propagators
    StringArray                     propmap;
+   /// Available hardware elements
+   StringArray                     hardwaremap;
    /// Available forces
    StringArray                     forcemap;
    /// Available subscribers
@@ -120,6 +123,8 @@ protected:
    // to get new instances of the requested objects
    Spacecraft*                   CreateSpacecraft(std::string satname);
    Formation*                    CreateFormation(std::string formname);
+   Hardware*                     CreateHardware(std::string hwname, 
+                                                std::string type);
    GmatCommand*                  CreateCommand(std::string commandtype);
    Propagator*                   CreatePropagator(std::string proptype);
    ForceModel*                   CreateForceModel(std::string modelname);

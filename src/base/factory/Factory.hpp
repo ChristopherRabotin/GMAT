@@ -36,6 +36,7 @@
 #include "Command.hpp"
 #include "AtmosphereModel.hpp" //loj: 9/14/04 - added
 #include "Function.hpp"        //loj: 9/27/04 - added
+#include "Hardware.hpp"
 
 class GMAT_API Factory
 {
@@ -72,6 +73,8 @@ public:
                                                   const std::string &withName = "",
                                                   const std::string &forBody = "Earth");
    virtual Function*        CreateFunction(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual Hardware*        CreateHardware(const std::string &ofType,
                                            const std::string &withName = "");
 
    

@@ -454,6 +454,35 @@ Function* Factory::CreateFunction(const std::string &ofType,
       ("Factory::CreateFunction() must be implemented by FunctionFactory()\n");
 }
 
+//djc: 11/10/04 - added
+//------------------------------------------------------------------------------
+//  Hardware* CreateHardware(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates tanks, thrusters, and other hardware attached to the GMAT spacecraft.
+ * 
+ * Must be implemented by derived classes that create Hardware objects -
+ * in that case, it returns a new Hardware object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Hardware.
+ *
+ * @param <ofType>   specific type of Hardware object to create.
+ * @param <withName> name to give to the newly created Hardware object.
+ *
+ * @return pointer to a new Hardware object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type Hardware.
+ */
+//------------------------------------------------------------------------------
+Hardware* Factory::CreateHardware(const std::string &ofType,
+                                  const std::string &withName)
+{
+   throw FactoryException
+      ("Factory::CreateHardware() must be implemented by the Factory\n");
+}
+
 //------------------------------------------------------------------------------
 //  StringArray GetListOfCreatableObjects(void) const
 //------------------------------------------------------------------------------

@@ -47,12 +47,14 @@
 #include "Interpolator.hpp"
 #include "RefFrame.hpp"
 #include "Function.hpp"
+#include "Hardware.hpp"
 // factories
 #include "AtmosphereFactory.hpp"
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
 #include "FunctionFactory.hpp"
+#include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropSetupFactory.hpp"
@@ -101,6 +103,11 @@ public:
    SpaceObject* CreateSpacecraft(const std::string &type,
                                  const std::string &name);
    SpaceObject* GetSpacecraft(const std::string &name);
+
+   // Hardware
+   Hardware* CreateHardware(const std::string &type,
+                            const std::string &name);
+   Hardware* GetHardware(const std::string &name);
 
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -296,6 +303,7 @@ private:
    BurnFactory *theBurnFactory;
    CommandFactory *theCommandFactory;
    ForceModelFactory *theForceModelFactory;
+   HardwareFactory *theHardwareFactory;
    ParameterFactory *theParameterFactory;
    PhysicalModelFactory *thePhysicalModelFactory;
    PropSetupFactory *thePropSetupFactory;

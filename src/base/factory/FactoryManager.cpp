@@ -405,6 +405,29 @@ Function* FactoryManager::CreateFunction(const std::string &ofType,
    return NULL;
 }
 
+//djc: 11/10/04 added
+//------------------------------------------------------------------------------
+//  Hardware* CreateHardware(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type Hardware, with the name withName.
+ *
+ * @param <ofType>   type name of the new Hardware object.
+ * @param <withName> name of the new Hardware object.
+ *
+ * @return pointer to the newly-created Hardware object
+ */
+//------------------------------------------------------------------------------
+Hardware* FactoryManager::CreateHardware(const std::string &ofType,
+                                         const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::HARDWARE, ofType);
+   if (f != NULL)
+      return f->CreateHardware(ofType, withName);
+   return NULL;
+}
+
 //------------------------------------------------------------------------------
 // StringArray  GetListOfItems(Gmat::ObjectType byType)
 //------------------------------------------------------------------------------
@@ -629,6 +652,20 @@ StringArray  FactoryManager::GetListOfAtmosphereModel()
 StringArray  FactoryManager::GetListOfFunction()
 {
    return GetList(Gmat::FUNCTION);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfHardware()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type Function that can be created.
+ *
+ * @return list of creatable items of type Function.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfHardware()
+{
+   return GetList(Gmat::HARDWARE);
 }
 
 //------------------------------------------------------------------------------

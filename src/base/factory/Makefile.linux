@@ -17,6 +17,7 @@ OBJECTS = Factory.o \
           PropagatorFactory.o \
           PropSetupFactory.o \
           SpacecraftFactory.o \
+          HardwareFactory.o \
           StopConditionFactory.o \
           SubscriberFactory.o \
           BurnFactory.o \
