@@ -23,9 +23,7 @@
 // #include "Converter.hpp"
 #include "SolarSystem.hpp" 
 #include "CelestialBody.hpp"
-#include "A1Date.hpp"
-#include "A1Mjd.hpp"
-#include "UtcDate.hpp"
+#include "Anomaly.hpp"
 // #include "Cartesian.hpp"
 // #include "Keplerian.hpp"
 #include "CoordUtil.hpp" 
@@ -58,10 +56,10 @@ public:
 
    //loj: 10/21/04 added
    Rvector6 Convert(const Rvector6 &state, const std::string &fromElementType,
-                    const std::string &toElementType);
+                    const std::string &toElementType, Anomaly &anomaly);
 
    Rvector6 Convert(const Real *state, const std::string &fromElementType,
-                    const std::string &toElementType);
+                    const std::string &toElementType, Anomaly &anomaly);
 
    Rvector6 Convert(const Real *state, const std::string &toElementType);
    

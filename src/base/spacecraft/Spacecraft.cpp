@@ -19,10 +19,13 @@
 
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
-#include <iostream>    // will remove it later
-#include <sstream>     // will remove it later
 
-// #define DEBUG_SPACECRAFT 1
+// #define DEBUG_SPACECRAFT 1 
+
+#if DEBUG_SPACECRAFT
+#include <iostream>
+#include <sstream> 
+#endif
 
 // Spacecraft parameter types
 const Gmat::ParameterType   
@@ -104,7 +107,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //    epoch          (a.epoch),
     dateFormat     (a.dateFormat),
     stateType      (a.stateType),
-    anomalyType    (a.anomalyType),
+    anomaly        (a.anomaly),
     refBody        (a.refBody),
     refFrame       (a.refFrame),
     refPlane       (a.refPlane),
@@ -170,7 +173,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 //    epoch = a.epoch;
     dateFormat = a.dateFormat;
     stateType = a.stateType;
-    anomalyType = a.anomalyType;
+    anomaly = a.anomaly;
     refBody = a.refBody;
     refFrame = a.refFrame;
     refPlane = a.refPlane;
@@ -554,7 +557,7 @@ Real Spacecraft::GetRealParameter(const Integer id) const
     if (id == ELEMENT4_ID) return state[3];
     if (id == ELEMENT5_ID) return state[4];
     if (id == ELEMENT6_ID) return state[5];
-
+          
     if (id == DRY_MASS_ID) return dryMass;
 
     if (id == CD_ID) return coeffDrag;
@@ -581,6 +584,10 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
+    // First check with anomaly
+    if (label == "TA" || label == "MA" || label == "EA")
+       return anomaly.GetValue();
+  
     return GetRealParameter(GetParameterID(label));
 }
 
@@ -633,7 +640,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == ELEMENT3_ID) return SetRealParameter("INC",value); 
        if (id == ELEMENT4_ID) return SetRealParameter("RAAN",value); 
        if (id == ELEMENT5_ID) return SetRealParameter("AOP",value); 
-       if (id == ELEMENT6_ID) return SetRealParameter(anomalyType,value);
+       if (id == ELEMENT6_ID) return SetRealParameter(anomaly.GetType(),value);
     }
     else if (displayCoordType == "SphericalAZFPA" 
              || displayCoordType == "SphericalRADEC")
@@ -815,7 +822,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[4] = value;
     }
 
-    if (label == "VZ" || label == "TA" || label == "MA" || label == "EA" ||
+    if (label == "VZ" || !anomaly.IsInvalid(label) ||
         label == "FPA" || label == "DECV")  
     {
        displayState[5] = value;
@@ -825,11 +832,29 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        // StateType does not mix with other types.
        hasElements[5] = true;
        // incase StateType is not specified
-       if (label == "TA" || label == "MA" || label == "EA")
+       if (!anomaly.IsInvalid(label))
        { 
           if (displayCoordType != "Keplerian" 
                         && displayCoordType != "ModifiedKeplerian")
              displayCoordType = "Keplerian"; 
+          
+          // @todo:  need to figure out this based on stateType/displayCoordType
+#if DEBUG_SPACECRAFT
+   std::cout << "\nSpacecraft::SetRealParameter()..."
+             << "\n......hasElements[0] = " << hasElements[0]
+             << ", [1] = " << hasElements[1]
+             << "\n......displayState[0] = " <<  displayState[0]
+             << ", [1] = " <<  displayState[1];
+#endif
+          // Set new data to for anomaly
+          anomaly.Set(displayState[0],displayState[1],value,label);
+
+#if DEBUG_SPACECRAFT
+   MessageInterface::ShowMessage("\n......Anomaly info -> a: %f, e: %f, "
+       "%s: %f\nSpacecraft::SetRealParameter() is about exiting",
+       anomaly.GetSMA(), anomaly.GetECC(), anomaly.GetType().c_str(), 
+       anomaly.GetValue());
+#endif
        }
        else if (label == "FPA")  
             displayCoordType = "SphericalAZFPA";
@@ -875,7 +900,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
        return stateType; 
 
     if (id == ANOMALY_ID)
-       return anomalyType; 
+       return anomaly.GetType(); 
     
     if (id == BODY_ID)
        return refBody; 
@@ -971,12 +996,28 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     else if (id == ANOMALY_ID)
     {
        // Check for invalid input then return unknown value from GmatBase 
-       if (value != "TA" && value != "MA" && value != "EA") 
+       if (anomaly.IsInvalid(value))
        {   
           return GmatBase::SetStringParameter(id, value);
        }
-       anomalyType = value;
-       // @todo:  need to figure out if it needs displayAnomalyType???
+#if DEBUG_SPACECRAFT
+    MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
+       "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
+       anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+       anomaly.GetValue());   
+#endif
+
+       anomaly.SetType(value);
+
+#if DEBUG_SPACECRAFT
+    MessageInterface::ShowMessage(
+       "\n   After change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
+       anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+       anomaly.GetValue());   
+#endif
+       if (displayCoordType == "Keplerian" || 
+           displayCoordType == "ModifiedKeplerian")
+          displayState[5] = anomaly.GetValue();   // @todo: add state[5]?
     }
     else if (id == BODY_ID)
     {
@@ -1204,7 +1245,8 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
    if (elementType != "Cartesian")
    {
       stateType = "Cartesian"; //loj: 10/25/04 added
-      newState = stateConverter.Convert(instate, elementType, stateType);
+      newState = stateConverter.Convert(instate, elementType, 
+                                        stateType, anomaly);
    }
     
    cartesianState = newState;
@@ -1252,7 +1294,7 @@ Rvector6 Spacecraft::GetCartesianState()
 {
    //loj: 10/25/04 commented out
    //cartesianState = stateConverter.Convert(state.GetState(), displayCoordType,
-   //                                        "Cartesian");
+   //                                        "Cartesian",anomaly);
    
    Real *tempState = state.GetState();
 
@@ -1274,11 +1316,11 @@ Rvector6 Spacecraft::GetCartesianState()
 Rvector6 Spacecraft::GetKeplerianState() 
 {
    //loj: 10/25/04 commented out
-   //keplerianState = stateConverter.Convert(state.GetState(),
-   //                                        displayCoordType, "Keplerian");
+   //keplerianState = stateConverter.Convert(state.GetState(),displayCoordType,
+   //                                        "Keplerian",anomaly);
 
-   keplerianState = stateConverter.Convert(state.GetState(),
-                                           stateType, "Keplerian");
+   keplerianState = stateConverter.Convert(state.GetState(), stateType,
+                                           "Keplerian",anomaly);
 
    return keplerianState;
 }
@@ -1296,7 +1338,7 @@ Rvector6 Spacecraft::GetKeplerianState()
 Rvector6 Spacecraft::GetModifiedKeplerianState() 
 {
    modifiedKeplerianState = stateConverter.Convert(state.GetState(),stateType,
-                                                   "ModifiedKeplerian");
+                                                   "ModifiedKeplerian",anomaly);
    return (modifiedKeplerianState);
 }
 
@@ -1473,7 +1515,7 @@ void Spacecraft::SetDisplayCoordType(const std::string &coordType)
    if (displayCoordType != coordType)
    {
       Rvector6 newState = stateConverter.Convert(displayState,displayCoordType,
-                                                coordType);
+                                                coordType,anomaly);
       SetDisplayState(newState);
    }
 
@@ -1652,7 +1694,11 @@ void Spacecraft::InitializeValues()
 
     dateFormat = "TAIModJulian";
     stateType = "Cartesian";
-    anomalyType = "TA";
+    
+    // Get the keplerian state and then initialize anomaly
+    Rvector6 tempKepl = GetKeplerianState();
+    anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
+
     refBody = "Earth";
     refFrame = "MJ2000";
     refPlane = "Equatorial";
@@ -1734,10 +1780,7 @@ std::string Spacecraft::GetElementName(const Integer id) const
        if (id == ELEMENT4_ID) return("RAAN");  
        if (id == ELEMENT5_ID) return("AOP");  
        if (id == ELEMENT6_ID) 
-       {
-           // @todo will add anomalyType to check with MA, TA, EA
-           return("TA");  
-       }
+           return anomaly.GetType();  
     }
     else if (localCoordType == "SphericalAZFPA" 
             || localCoordType == "SphericalRADEC")
@@ -1861,7 +1904,8 @@ void Spacecraft::SetInitialState()
 
          // Convert elements to Cartesian
          cartesianState =
-            stateConverter.Convert(displayState, displayCoordType, stateType);
+            stateConverter.Convert(displayState, displayCoordType, 
+                                   stateType, anomaly);
 
          for (int i=0; i<6; i++)
             state[i] = cartesianState[i];
@@ -1876,7 +1920,10 @@ void Spacecraft::SetInitialState()
          ("stateType=%s, state=\n%f, %f, %f, %f, %f, %f\n",
           stateType.c_str(), state[0], state[1], state[2], state[3],
           state[4], state[5]);
+      MessageInterface::ShowMessage("\nAnomaly info-> a: %f, e: %f, %s: %f\n",
+          anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+          anomaly.GetValue()); 
+      MessageInterface::ShowMessage("\nSpacecraft::SetInitialState() exits\n");
 #endif
    }
 }
-

@@ -20,7 +20,7 @@
 #include "StateConverter.hpp"
 #include "MessageInterface.hpp"
 
-// #define DEBUG_STATE_CONVERTER 1
+#define DEBUG_STATE_CONVERTER 0
 
 //-------------------------------------
 // public methods
@@ -158,7 +158,8 @@ bool StateConverter::SetMu(SolarSystem *solarSystem,
 //---------------------------------------------------------------------------
 //  Rvector6 StateConverter::Convert(const Rvector6 &state,   
 //                                   const std::string &fromElementType,
-//                                   const std::string &toElementType)
+//                                   const std::string &toElementType,
+//                                   Anomaly &anomaly)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for StateConverter structures.
@@ -172,13 +173,14 @@ bool StateConverter::SetMu(SolarSystem *solarSystem,
 //---------------------------------------------------------------------------
 Rvector6 StateConverter::Convert(const Rvector6 &state,   
                                  const std::string &fromElementType,
-                                 const std::string &toElementType)
+                                 const std::string &toElementType,
+                                 Anomaly &anomaly)
 {
    Real tempState[6];
    for (int i=0; i<6; i++)
       tempState[i] = state.Get(i);
 
-   return Convert(tempState, fromElementType, toElementType);
+   return Convert(tempState, fromElementType, toElementType, anomaly);
 }
 
 //---------------------------------------------------------------------------
@@ -196,26 +198,30 @@ Rvector6 StateConverter::Convert(const Rvector6 &state,
 Rvector6 StateConverter::Convert(const Real *state,
                                  const std::string &toElementType)
 {
-   return Convert(state, type, toElementType);
+   Anomaly tempAnomaly;
+   return Convert(state, type, toElementType, tempAnomaly);
 }
 
 //---------------------------------------------------------------------------
 //  Rvector6 StateConverter::Convert(Real *state,   
 //                                   const std::string &fromElementType,
-//                                   const std::string &toElementType)
+//                                   const std::string &toElementType,
+//                                   Anomaly &anomaly)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for StateConverter structures.
  *
- * @param <state> Element states 
- * @param <fromElementType>  Element Type 
- * @param <toElementType> Element Type
+ * @param <state>            Element states 
+ * @param <fromElementType>  Element Type converted from
+ * @param <toElementType>    Element Type converted to
+ * @param <anomaly>          Anomaly 
  *
  * @return Converted states from the specific element type 
  */
 Rvector6 StateConverter::Convert(const Real *state,   
                                  const std::string &fromElementType,
-                                 const std::string &toElementType)
+                                 const std::string &toElementType,
+                                 Anomaly &anomaly)
 {
    Rvector6 newState;
    newState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
@@ -226,6 +232,11 @@ Rvector6 StateConverter::Convert(const Real *state,
         " state=\n %f %f %f %f %f %f\n", fromElementType.c_str(),
         toElementType.c_str(), state[0], state[1], state[2], state[3],
         state[4], state[5]);
+
+   MessageInterface::ShowMessage
+       ("Anomaly info-> a: %f, e: %f, %s value: %f\n",
+        anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
+        anomaly.GetValue());
 #endif
 
    // Check if both are the same then return the state with no conversion 
@@ -240,8 +251,7 @@ Rvector6 StateConverter::Convert(const Real *state,
          if (toElementType == "Keplerian" || 
              toElementType == "ModifiedKeplerian") 
          {
-            Real meanAnomaly;   // why use MeanAnomaly?
-            Rvector6 kepl = CartesianToKeplerian(newState,mu,&meanAnomaly);
+            Rvector6 kepl = CartesianToKeplerian(newState,mu,anomaly);
                       
             if (toElementType == "ModifiedKeplerian")
                 return KeplerianToModKeplerian(kepl);
@@ -259,23 +269,23 @@ Rvector6 StateConverter::Convert(const Real *state,
       else if (fromElementType == "Keplerian")
       {       
          if (toElementType == "Cartesian")
-            return(KeplerianToCartesian(newState,mu,CoordUtil::TA));
+            return(KeplerianToCartesian(newState,mu,anomaly));
 
          else if (toElementType == "ModifiedKeplerian")
             return KeplerianToModKeplerian(newState); 
 
          else if (toElementType == "SphericalAZFPA")
-            return KeplerianToSphericalAZFPA(newState,mu);
+            return KeplerianToSphericalAZFPA(newState,mu,anomaly);
 
          else if (toElementType == "SphericalRADEC")
-            return KeplerianToSphericalRADEC(newState,mu);
+            return KeplerianToSphericalRADEC(newState,mu,anomaly);
       }
       else if (fromElementType == "ModifiedKeplerian")
       {       
          if (toElementType == "Cartesian")
          {
             Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToCartesian(keplerian,mu,CoordUtil::TA);
+            return KeplerianToCartesian(keplerian,mu,anomaly);
          }
          else if (toElementType == "Keplerian")
             return ModKeplerianToKeplerian(newState); 
@@ -283,13 +293,13 @@ Rvector6 StateConverter::Convert(const Real *state,
          else if (toElementType == "SphericalAZFPA")
          {
             Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToSphericalAZFPA(keplerian,mu);
+            return KeplerianToSphericalAZFPA(keplerian,mu,anomaly);
          }
 
          else if (toElementType == "SphericalRADEC")
          {
             Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToSphericalRADEC(keplerian,mu);
+            return KeplerianToSphericalRADEC(keplerian,mu,anomaly);
          }
       }
       else if (fromElementType == "SphericalAZFPA")
@@ -298,11 +308,11 @@ Rvector6 StateConverter::Convert(const Real *state,
             return SphericalAZFPAToCartesian(newState);
 
          else if (toElementType == "Keplerian")
-            return SphericalAZFPAToKeplerian(newState,mu);
+            return SphericalAZFPAToKeplerian(newState,mu,anomaly);
 
          else if (toElementType == "ModifiedKeplerian")
          {
-            Rvector6 keplerian = SphericalAZFPAToKeplerian(newState,mu);
+            Rvector6 keplerian = SphericalAZFPAToKeplerian(newState,mu,anomaly);
             return KeplerianToModKeplerian(keplerian);
          }
 
@@ -315,11 +325,11 @@ Rvector6 StateConverter::Convert(const Real *state,
             return SphericalRADECToCartesian(newState);
 
          else if (toElementType == "Keplerian")
-            return SphericalRADECToKeplerian(newState,mu);
+            return SphericalRADECToKeplerian(newState,mu,anomaly);
 
          else if (toElementType == "ModifiedKeplerian")
          {
-            Rvector6 keplerian = SphericalRADECToKeplerian(newState,mu);
+            Rvector6 keplerian = SphericalRADECToKeplerian(newState,mu,anomaly);
             return KeplerianToModKeplerian(keplerian);
          }
 
