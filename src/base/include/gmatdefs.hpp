@@ -102,6 +102,7 @@ namespace Gmat
       FUNCTION,
       FUEL_TANK,
       THRUSTER,
+      HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       UNKNOWN_OBJECT
    };
 

@@ -66,8 +66,9 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "PhysicalModel", "Interpolator",  "SolarSystem",   "CelestialBody",
    "Atmosphere",    "Parameter",     "StopCondition", "Solver",
    "Subscriber",    "PropSetup",     "RefFrame",      "Function",
-   "FuelTank",      "Thruster",      "UnknownObject"
+   "FuelTank",      "Thruster",      "Hardware",      "UnknownObject"
 };
+
 
 /// initialize the count of instances
 Integer GmatBase::instanceCount = 0; 
