@@ -179,10 +179,13 @@ void PropagationConfigPanel::LoadData()
    else if (propType == "AdamsBashforthMoulton")
       typeId = ABM;
 
-   // fill body combobox
+   // fill primary bodies combobox
    if ( !primaryBodiesArray.IsEmpty() )
       for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
+      {
          bodyComboBox->Append(primaryBodiesArray[i]);
+         originComboBox->Append(primaryBodiesArray[i]);
+      }    
 
 // waw: 10/14/04 commented out   
    // fill other potential file name
@@ -640,6 +643,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    potFileStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
                         wxDefaultPosition, wxDefaultSize, 0 );
+   originStaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Propagation Origin"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
    
 #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -770,6 +776,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
                       wxDefaultPosition, wxSize(100,-1), MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
+   originComboBox =
+      new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
+                      wxDefaultPosition,  wxSize(100,-1), 0,
+                      bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
       
 #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -789,6 +799,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
 
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 2 );
@@ -799,9 +810,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxVERTICAL );
    wxStaticBox *staticBox3 = new wxStaticBox( parent, -1, wxT("Primary Bodies") );
    wxStaticBoxSizer *staticBoxSizer3 = new wxStaticBoxSizer( staticBox3, wxVERTICAL );
+   wxStaticBox *staticBox4 = new wxStaticBox( parent, -1, wxT("Coordinate Systems") );
+   wxStaticBoxSizer *staticBoxSizer4 = new wxStaticBoxSizer( staticBox4, wxHORIZONTAL );
    wxStaticBox *item37 = new wxStaticBox( parent, -1, wxT("Gravity Field") );
    //loj: 5/20/04 wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxHORIZONTAL );
    wxStaticBoxSizer *item36 = new wxStaticBoxSizer( item37, wxVERTICAL );
+   
    wxBoxSizer *item361 = new wxBoxSizer( wxHORIZONTAL ); //loj: 5/20/04
    wxBoxSizer *item362 = new wxBoxSizer( wxHORIZONTAL ); //loj: 5/20/04
    
@@ -900,8 +914,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    staticBoxSizer2->Add( staticBoxSizer3, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( staticBoxSizer7, 0, wxALIGN_CENTRE|wxALL, bsize);
    staticBoxSizer2->Add( item64, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-    
-   boxSizer2->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   
+   staticBoxSizer4->Add(originStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticBoxSizer4->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   staticBoxSizer4->Add(originComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   boxSizer4->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   boxSizer4->Add( staticBoxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+     
+   boxSizer2->Add( boxSizer4, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
    boxSizer2->Add( staticBoxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
     
    boxSizer1->Add( boxSizer2, 0, wxALIGN_CENTRE|wxALL, bsize);

@@ -121,6 +121,7 @@ private:
    wxStaticText *order2StaticText;
    wxStaticText *type3StaticText;
    wxStaticText *potFileStaticText;
+   wxStaticText *originStaticText;
    
    wxTextCtrl *setting1TextCtrl;
    wxTextCtrl *setting2TextCtrl;
@@ -142,6 +143,7 @@ private:
    wxComboBox *atmosComboBox;
    wxComboBox *gravComboBox;
    wxComboBox *magfComboBox;
+   wxComboBox *originComboBox;
 
    wxCheckBox *srpCheckBox;
 
