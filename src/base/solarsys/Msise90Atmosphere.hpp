@@ -38,7 +38,8 @@ public:
     bool                    Density(Real *position, Real *density, 
                                     Real epoch=21545.0,
                                     Integer count = 1);
-                                    
+
+    virtual GmatBase*       Clone() const; // inherited from GmatBase
 protected:
     /// Instance of the calculation engine
     MSISE90                 msise90;

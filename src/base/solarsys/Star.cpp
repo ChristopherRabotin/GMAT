@@ -177,7 +177,7 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
 
 
 //------------------------------------------------------------------------------
-//  Star* Clone(void) const
+//  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Star.
@@ -186,10 +186,8 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
  *
  */
 //------------------------------------------------------------------------------
-Star* Star::Clone(void) const
+GmatBase* Star::Clone(void) const
 {
-   //Star* theClone = new Star(*this);
-   //return theClone;   // huh??????????????????????????????
    return (new Star(*this));
 }
 

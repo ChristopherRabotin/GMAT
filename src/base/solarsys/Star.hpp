@@ -61,14 +61,8 @@ public:
    virtual Real           GetRealParameter(const Integer id) const;
    virtual Real           SetRealParameter(const Integer id,
                                            const Real value);
-   //------------------------------------------------------------------------------
-   // virtual Star* Clone(void) const
-   //------------------------------------------------------------------------------
-   /**
-     * Method used to create a copy of the Star object
-     */
-   //------------------------------------------------------------------------------
-   Star* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
    // default values for CelesitalBody data
    static const Gmat::BodyType        BODY_TYPE;

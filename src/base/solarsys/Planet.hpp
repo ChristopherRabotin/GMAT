@@ -53,14 +53,8 @@ public:
    virtual ~Planet();
 
 
-   //------------------------------------------------------------------------------
-   // virtual Planet* Clone(void) const
-   //------------------------------------------------------------------------------
-   /**
-     * Method used to create a copy of the Planet object
-     */
-   //------------------------------------------------------------------------------
-   Planet* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 
 protected:

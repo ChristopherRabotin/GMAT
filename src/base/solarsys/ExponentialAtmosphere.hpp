@@ -76,6 +76,7 @@ protected:
    Integer                 FindBand(Real height);
    Real                    Smooth(Real height, Integer index);
 
+   virtual GmatBase*       Clone() const; // inherited from GmatBase
 private:
    ExponentialAtmosphere(const ExponentialAtmosphere& atm);
    ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);

@@ -303,3 +303,40 @@ Real ExponentialAtmosphere::Smooth(Real height, Integer index)
 {
    throw AtmosphereException("Smoothing not yet coded for Exponential Drag");
 }
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Clone the object (inherited from GmatBase).
+ *
+ * @return a clone of "this" object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* ExponentialAtmosphere::Clone() const
+{
+   return new ExponentialAtmosphere(*this);
+}
+
+
+//------------------------------------------------------------------------------
+// ExponentialAtmosphere(const ExponentialAtmosphere& atm)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor. (private implementation)
+ *
+ * @param <atm> ExponentialAtmosphere object to copy increating the new one.
+ */
+//------------------------------------------------------------------------------
+ExponentialAtmosphere::ExponentialAtmosphere(const ExponentialAtmosphere& atm) :
+AtmosphereModel      (atm),
+scaleHeight          (NULL),
+refHeight            (NULL),
+refDensity           (NULL),
+altitudeBands        (atm.altitudeBands),
+smoothDensity        (false)
+{
+   SetConstants();
+}
+
+

@@ -299,19 +299,17 @@ Planet::~Planet()
 
 
 //------------------------------------------------------------------------------
-//  Planet* Clone(void) const
+//  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Planet.
  *
- * @return clone of the star.
+ * @return clone of the Planet.
  *
  */
 //------------------------------------------------------------------------------
-Planet* Planet::Clone(void) const
+GmatBase* Planet::Clone(void) const
 {
-  // Planet* theClone = new Planet(*this);
-   //return theClone;   // huh??????????????????????????????
    return (new Planet(*this));
 }
 

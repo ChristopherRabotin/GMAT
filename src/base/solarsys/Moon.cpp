@@ -139,19 +139,17 @@ Moon::~Moon()
 }
 
 //------------------------------------------------------------------------------
-//  Moon* Clone(void) const
+//  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Moon.
  *
- * @return clone of the star.
+ * @return clone of the Moon.
  *
  */
 //------------------------------------------------------------------------------
-Moon* Moon::Clone(void) const
+GmatBase* Moon::Clone(void) const
 {
-   //Moon* theClone = new Moon(*this);
-   //return theClone;   // huh??????????????????????????????
    return (new Moon(*this));
 }
 

@@ -49,14 +49,8 @@ public:
    virtual ~Moon();
 
 
-   //------------------------------------------------------------------------------
-   // virtual Moon* Clone(void) const
-   //------------------------------------------------------------------------------
-   /**
-     * Method used to create a copy of the Moon object
-     */
-   //------------------------------------------------------------------------------
-   Moon* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
    // default values for CelesitalBody data
    static const Gmat::BodyType        BODY_TYPE;

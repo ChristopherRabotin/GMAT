@@ -128,3 +128,39 @@ void Msise90Atmosphere::GetInputs(Real epoch)
            ap[i] = nominalAp;
     }
 }
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone() cnst
+//------------------------------------------------------------------------------
+/**
+ * Clone the object (inherited from GmatBase).
+ *
+ * @return a clone of "this" object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Msise90Atmosphere::Clone() const
+{
+   return new Msise90Atmosphere(*this);
+}
+
+
+//------------------------------------------------------------------------------
+//  Msise90Atmosphere(const Msise90Atmosphere& msise)
+//------------------------------------------------------------------------------
+/**
+ *  Copy constructor.
+ *
+ * @param <msise> MSISE90 object to copy increating the new one.
+ */
+//------------------------------------------------------------------------------
+Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
+AtmosphereModel     (msise),
+fileData            (false),  // is this correct?
+fluxfilename        (msise.fluxfilename),
+nominalF107         (msise.nominalF107),
+nominalF107a        (msise.nominalF107a),
+nominalAp           (msise.nominalAp)
+{
+   
+}
+
