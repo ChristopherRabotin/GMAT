@@ -105,6 +105,7 @@ SpaceObject* FactoryManager::CreateSpacecraft(const std::string &ofType,
  * Create an object of type Parameter, with the name withName, and of the
  * specific propagator type ofType.
  *
+ * @param <ofType>   type name of the new Parameter object.
  * @param <withName> name of the new Parameter object.
  *
  * @return pointer to the newly-created Parameter object
@@ -127,6 +128,7 @@ Parameter* FactoryManager::CreateParameter(const std::string &ofType,
  * Create an object of type Propagator, with the name withName, and of the
  * specific propagator type ofType.
  *
+ * @param <ofType>   type name of the new Propagator object.
  * @param <withName> name of the new Propagator object.
  *
  * @return pointer to the newly-created Propagator object
@@ -167,6 +169,7 @@ ForceModel* FactoryManager::CreateForceModel(const std::string &withName)
  * Create an object of type PhysicalModel, with the name withName, and of the
  * type ofType.
  *
+ * @param <ofType>   type name of the new PhysicalModel object.
  * @param <withName> name of the new PhysicalModel object.
  *
  * @return pointer to the newly-created PhysicalModel object
@@ -206,6 +209,7 @@ PropSetup* FactoryManager::CreatePropSetup(const std::string &withName)
 /**
  * Create an object of type StopCondition, with the name withName.
  *
+ * @param <ofType>   type name of the new StopCondition object.
  * @param <withName> name of the new StopCondition object.
  *
  * @return pointer to the newly-created StopCondition object
@@ -228,6 +232,7 @@ StopCondition* FactoryManager::CreateStopCondition(const std::string &ofType,
  * Create an object of type CelestialBody, with the name withName,
  * and of the type ofType.
  *
+ * @param <ofType>   type name of the new CelestialBody object.
  * @param <withName> name of the new CelestialBody object.
  *
  * @return pointer to the newly-created CelestialBody object
@@ -269,6 +274,7 @@ SolarSystem* FactoryManager::CreateSolarSystem(const std::string &withName)
  * Create an object of type Solver, with the name withName,
  * and of the type ofType.
  *
+ * @param <ofType>   type name of the new Solver object.
  * @param <withName> name of the new Solver object.
  *
  * @return pointer to the newly-created Solver object
@@ -291,7 +297,10 @@ Solver* FactoryManager::CreateSolver(const std::string &ofType,
 /**
  * Create an object of type Subscriber, with the name withName.
  *
+ * @param <ofType>   type name of the new Subscriber object.
  * @param <withName> name of the new Subscriber object.
+ * @param <fileName> file name of Subscriber object, used only if Subscriber
+ *                   is ReportFile
  *
  * @return pointer to the newly-created Subscriber object
  */
@@ -312,6 +321,7 @@ Subscriber* FactoryManager::CreateSubscriber(const std::string &ofType,
 /**
  * Create an object of type GmatCommand, with the name withName.
  *
+ * @param <ofType>   type name of the new GmatCommand object.
  * @param <withName> name of the new GmatCommand object.
  *
  * @return pointer to the newly-created GmatCommand object
@@ -332,6 +342,7 @@ GmatCommand* FactoryManager::CreateCommand(const std::string &ofType,
 /**
  * Create an object of type Burn, with the name withName.
  *
+ * @param <ofType>   type name of the new Burn object.
  * @param <withName> name of the new Burn object.
  *
  * @return pointer to the newly-created Burn object
@@ -354,7 +365,9 @@ Burn* FactoryManager::CreateBurn(const std::string &ofType,
 /**
  * Create an object of type AtmosphereModel, with the name withName.
  *
+ * @param <ofType>   type name of the new AtmosphereModel object.
  * @param <withName> name of the new AtmosphereModel object.
+ * @param <forBody>  body name of the new AtmosphereModel object.
  *
  * @return pointer to the newly-created AtmosphereModel object
  */
@@ -369,8 +382,31 @@ AtmosphereModel* FactoryManager::CreateAtmosphereModel(const std::string &ofType
    return NULL;
 }
 
+//loj: 9/27/04 added
 //------------------------------------------------------------------------------
-// StringArray  GetListOfItems(Gmat::ObjectType byType) const;
+//  Function* CreateFunction(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type Function, with the name withName.
+ *
+ * @param <ofType>   type name of the new Function object.
+ * @param <withName> name of the new Function object.
+ *
+ * @return pointer to the newly-created Function object
+ */
+//------------------------------------------------------------------------------
+Function* FactoryManager::CreateFunction(const std::string &ofType,
+                                         const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::FUNCTION, ofType);
+   if (f != NULL)
+      return f->CreateFunction(ofType, withName);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfItems(Gmat::ObjectType byType)
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that can be created.
@@ -380,13 +416,13 @@ AtmosphereModel* FactoryManager::CreateAtmosphereModel(const std::string &ofType
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
+StringArray  FactoryManager::GetListOfItems(Gmat::ObjectType byType)
 {
    return GetList(byType);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfSpacecraft(void) const;
+// StringArray  GetListOfSpacecraft()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Spacecraft that can be created.
@@ -394,13 +430,13 @@ StringArray  FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
  * @return list of creatable items of type Spacecraft.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSpacecraft(void)// const
+StringArray  FactoryManager::GetListOfSpacecraft()
 {
    return GetList(Gmat::SPACECRAFT);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfGroundStation(void) const;
+// StringArray GetListOfGroundStation()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type GroundStation that can be created.
@@ -408,13 +444,13 @@ StringArray  FactoryManager::GetListOfSpacecraft(void)// const
  * @return list of creatable items of type GroundStation.
  */
 //------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfGroundStation(void) const
+//StringArray FactoryManager::GetListOfGroundStation() const
 //{
 //   return GetList(Gmat::GROUND_STATION);
 //}
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfPropagator(void) const;
+// StringArray  GetListOfPropagator()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Propagator that can be created.
@@ -422,13 +458,13 @@ StringArray  FactoryManager::GetListOfSpacecraft(void)// const
  * @return list of creatable items of type Propagator.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPropagator(void)// const
+StringArray  FactoryManager::GetListOfPropagator()
 {
    return GetList(Gmat::PROPAGATOR);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfForceModel(void) const;
+// StringArray  GetListOfForceModel()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ForceModel that can be created.
@@ -436,13 +472,13 @@ StringArray  FactoryManager::GetListOfPropagator(void)// const
  * @return list of creatable items of type ForceModel.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfForceModel(void)// const
+StringArray  FactoryManager::GetListOfForceModel()
 {
    return GetList(Gmat::FORCE_MODEL);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfPhysicalModel(void) const;
+// StringArray  GetListOfPhysicalModel()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type PhysicalModel that can be created.
@@ -450,13 +486,13 @@ StringArray  FactoryManager::GetListOfForceModel(void)// const
  * @return list of creatable items of type Force.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPhysicalModel(void)// const
+StringArray  FactoryManager::GetListOfPhysicalModel()
 {
    return GetList(Gmat::PHYSICAL_MODEL);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfPropSetup(void) const;
+// StringArray  GetListOfPropSetup()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type PropSetup that can be created.
@@ -464,13 +500,13 @@ StringArray  FactoryManager::GetListOfPhysicalModel(void)// const
  * @return list of creatable items of type PropSetup.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPropSetup(void)// const
+StringArray  FactoryManager::GetListOfPropSetup()
 {
    return GetList(Gmat::PROP_SETUP);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfStopCondition(void) const;
+// StringArray  GetListOfStopCondition()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type StopCondition that can be created.
@@ -478,13 +514,13 @@ StringArray  FactoryManager::GetListOfPropSetup(void)// const
  * @return list of creatable items of type StopCondition.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfStopCondition(void)// const
+StringArray  FactoryManager::GetListOfStopCondition()
 {
    return GetList(Gmat::STOP_CONDITION);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfCelestialBody(void) const;
+// StringArray  GetListOfCelestialBody()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type CelestialBody that can be created.
@@ -492,13 +528,13 @@ StringArray  FactoryManager::GetListOfStopCondition(void)// const
  * @return list of creatable items of type CelestialBody.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfCelestialBody(void)
+StringArray  FactoryManager::GetListOfCelestialBody()
 {
    return GetList(Gmat::CELESTIAL_BODY);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfSolarSystem(void) const;
+// StringArray  GetListOfSolarSystem()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type SolarSystem that can be created.
@@ -506,13 +542,13 @@ StringArray  FactoryManager::GetListOfCelestialBody(void)
  * @return list of creatable items of type SolarSystem.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSolarSystem(void)
+StringArray  FactoryManager::GetListOfSolarSystem()
 {
    return GetList(Gmat::SOLAR_SYSTEM);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfSolver(void) const;
+// StringArray  GetListOfSolver()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Solver that can be created.
@@ -520,13 +556,13 @@ StringArray  FactoryManager::GetListOfSolarSystem(void)
  * @return list of creatable items of type Solver.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSolver(void)// const
+StringArray  FactoryManager::GetListOfSolver()
 {
    return GetList(Gmat::SOLVER);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfSubscriber(void) const;
+// StringArray  GetListOfSubscriber()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Subscriber that can be created.
@@ -534,13 +570,13 @@ StringArray  FactoryManager::GetListOfSolver(void)// const
  * @return list of creatable items of type Subscriber.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSubscriber(void)// const
+StringArray  FactoryManager::GetListOfSubscriber()
 {
    return GetList(Gmat::SUBSCRIBER);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfCommand(void) const;
+// StringArray  GetListOfCommand()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type GmatCommand that can be created.
@@ -548,13 +584,13 @@ StringArray  FactoryManager::GetListOfSubscriber(void)// const
  * @return list of creatable items of type GmatCommand.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfCommand(void)// const
+StringArray  FactoryManager::GetListOfCommand()
 {
    return GetList(Gmat::COMMAND);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfBurn(void) const;
+// StringArray  GetListOfBurn()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Burn that can be created.
@@ -562,13 +598,13 @@ StringArray  FactoryManager::GetListOfCommand(void)// const
  * @return list of creatable items of type Burn.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfBurn(void)// const
+StringArray  FactoryManager::GetListOfBurn()
 {
    return GetList(Gmat::BURN);
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfAtmosphereModel(void) const;
+// StringArray  GetListOfAtmosphereModel()
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type AtmosphereModel that can be created.
@@ -576,9 +612,23 @@ StringArray  FactoryManager::GetListOfBurn(void)// const
  * @return list of creatable items of type AtmosphereModel.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfAtmosphereModel(void)// const
+StringArray  FactoryManager::GetListOfAtmosphereModel()
 {
    return GetList(Gmat::ATMOSPHERE);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfFunction()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type Function that can be created.
+ *
+ * @return list of creatable items of type Function.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfFunction()
+{
+   return GetList(Gmat::FUNCTION);
 }
 
 //------------------------------------------------------------------------------
@@ -712,7 +762,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetList(Gmat::ObjectType ofType)// const
+StringArray  FactoryManager::GetList(Gmat::ObjectType ofType)
 {
     entireList.clear();
 

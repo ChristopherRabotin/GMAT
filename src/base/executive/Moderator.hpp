@@ -46,11 +46,13 @@
 #include "Subscriber.hpp"
 #include "Interpolator.hpp"
 #include "RefFrame.hpp"
+#include "Function.hpp"
 // factories
 #include "AtmosphereFactory.hpp"
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
+#include "FunctionFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropSetupFactory.hpp"
@@ -170,9 +172,14 @@ public:
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
                                 const std::string &fileName = "",
-                                bool createDefault = false); //loj: 6/21/04 added
+                                bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
 
+   // Function (loj: 9/27/04 added)
+   Function* CreateFunction(const std::string &type,
+                            const std::string &name);
+   Function* GetFunction(const std::string &name);
+   
    // GmatCommand
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
@@ -297,6 +304,7 @@ private:
    SubscriberFactory *theSubscriberFactory;
    SolverFactory *theSolverFactory;
    AtmosphereFactory *theAtmosphereFactory; //loj: 9/14/04 - added
+   FunctionFactory *theFunctionFactory; //loj: 9/27/04 - added
    
    SolarSystem *theDefaultSolarSystem;
    SlpFile *theDefaultSlpFile;

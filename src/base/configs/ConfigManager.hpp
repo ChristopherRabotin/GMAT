@@ -39,8 +39,10 @@
 #include "Burn.hpp"
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"
+#include "Function.hpp"
 
 //loj: 9/14/04 - added AtmosphereModel
+//loj: 9/27/04 - added Function
 
 /**
  * Configuration Manager Stub -- a hack until the real code is ready
@@ -49,7 +51,9 @@ class ConfigManager
 {
 public:
    static ConfigManager*   Instance(void);
-        
+   
+   void                AddPhysicalModel(PhysicalModel *pm);
+   void                AddPropagator(Propagator *prop);
    void                AddForceModel(ForceModel *fm);
    void                AddSubscriber(Subscriber *subs);
    void                AddSolarSystem(SolarSystem *solarSys);
@@ -60,9 +64,10 @@ public:
    void                AddBurn(Burn* burn);
    void                AddSolver(Solver *solver);
    void                AddAtmosphereModel(AtmosphereModel *atmosModel);
-    
+   void                AddFunction(Function *function);
+   
    bool                SetSolarSystemInUse(const std::string &name);
-    
+   
    StringArray&        GetListOfAllItems();
    StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
    GmatBase*           GetItem(const std::string &name);
@@ -70,10 +75,12 @@ public:
    bool                RenameItem(Gmat::ObjectType itemType,
                                   const std::string &oldName,
                                   const std::string &newName);
-    
+   
    bool                RemoveAllItems();
    bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
-        
+   
+   PhysicalModel*      GetPhysicalModel(const std::string &name);
+   Propagator*         GetPropagator(const std::string &name);
    ForceModel*         GetForceModel(const std::string &name);
    SpaceObject*        GetSpacecraft(const std::string &name);
    PropSetup*          GetPropSetup(const std::string &name);
@@ -85,12 +92,7 @@ public:
    Burn*               GetBurn(const std::string &name);
    Solver*             GetSolver(const std::string &name);
    AtmosphereModel*    GetAtmosphereModel(const std::string &name);
-   
-   void                AddPhysicalModel(PhysicalModel *pm);
-   void                AddPropagator(Propagator *prop);
-   
-   PhysicalModel*      GetPhysicalModel(const std::string &name);
-   Propagator*         GetPropagator(const std::string &name);
+   Function*           GetFunction(const std::string &name);
    
    // Methods I'm not sure we need
    void                AddCelestialBody(CelestialBody* body);
@@ -104,7 +106,7 @@ private:
    static ConfigManager*   theConfigManager;
    ConfigManager();
    ~ConfigManager();
-                
+   
    std::vector<GmatBase*>  objects;
    StringArray  listOfItems;
    std::map<std::string, GmatBase *>  mapping;

@@ -56,6 +56,43 @@ ConfigManager::~ConfigManager()
 }
 
 //------------------------------------------------------------------------------
+// void AddPhysicalModel(PhysicalModel *pm)
+//------------------------------------------------------------------------------
+void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
+{
+   std::string name = pm->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(pm);
+      mapping[name] = pm;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void ConfigManager::AddPropagator(Propagator *prop)
+//------------------------------------------------------------------------------
+void ConfigManager::AddPropagator(Propagator *prop)
+{
+   std::string name = prop->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(prop);
+      mapping[name] = prop;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void AddForceModel(ForceModel *fm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddForceModel(ForceModel *fm)
@@ -237,6 +274,28 @@ void ConfigManager::AddAtmosphereModel(AtmosphereModel* atmosModel)
    }
 }
 
+//loj: 9/27/04 - added
+//------------------------------------------------------------------------------
+// void AddFunction(Function* function)
+//------------------------------------------------------------------------------
+void ConfigManager::AddFunction(Function* function)
+{
+   std::string name = function->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   
+   if (mapping.find(name) != mapping.end())
+   {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else
+   {
+      objects.push_back(function);
+      mapping[name] = function;
+   }
+}
+
 //------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
@@ -389,6 +448,41 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// PhysicalModel* GetPhysicalModel(const std::string &name)
+//------------------------------------------------------------------------------
+PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
+{
+   PhysicalModel *physicalModel = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
+         std::string str = mapping[name]->GetName() +
+            " is not a PhysicalModel";
+         throw ConfigManagerException(str);
+      }
+      physicalModel = (PhysicalModel *)mapping[name];
+   }
+   return physicalModel;
+}
+
+//------------------------------------------------------------------------------
+// Propagator* GetPropagator(const std::string &name)
+//------------------------------------------------------------------------------
+Propagator* ConfigManager::GetPropagator(const std::string &name)
+{
+   Propagator *prop = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PROPAGATOR) {
+         std::string str = mapping[name]->GetName() +
+            " is not a Propagator";
+         throw ConfigManagerException(str);
+      }
+      prop = (Propagator *)mapping[name];
+   }
+   return prop;
+}
+
+
+//------------------------------------------------------------------------------
 // ForceModel* GetForceModel(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* ConfigManager::GetForceModel(const std::string &name)
@@ -506,78 +600,6 @@ StopCondition* ConfigManager::GetStopCondition(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void AddPhysicalModel(PhysicalModel *pm)
-//------------------------------------------------------------------------------
-void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
-{
-   std::string name = pm->GetName();
-   if (name == "")
-      throw ConfigManagerException("Unnamed objects cannot be managed");
-   if (mapping.find(name) != mapping.end()) {
-      name += " is already in the configuration table";
-      throw ConfigManagerException(name);
-   }
-   else {
-      objects.push_back(pm);
-      mapping[name] = pm;
-   }
-}
-
-//------------------------------------------------------------------------------
-// void ConfigManager::AddPropagator(Propagator *prop)
-//------------------------------------------------------------------------------
-void ConfigManager::AddPropagator(Propagator *prop)
-{
-   std::string name = prop->GetName();
-   if (name == "")
-      throw ConfigManagerException("Unnamed objects cannot be managed");
-   if (mapping.find(name) != mapping.end()) {
-      name += " is already in the configuration table";
-      throw ConfigManagerException(name);
-   }
-   else {
-      objects.push_back(prop);
-      mapping[name] = prop;
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// PhysicalModel* GetPhysicalModel(const std::string &name)
-//------------------------------------------------------------------------------
-PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
-{
-   PhysicalModel *physicalModel = NULL;
-   if (mapping.find(name) != mapping.end()) {
-      if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
-         std::string str = mapping[name]->GetName() +
-            " is not a PhysicalModel";
-         throw ConfigManagerException(str);
-      }
-      physicalModel = (PhysicalModel *)mapping[name];
-   }
-   return physicalModel;
-}
-
-//------------------------------------------------------------------------------
-// Propagator* GetPropagator(const std::string &name)
-//------------------------------------------------------------------------------
-Propagator* ConfigManager::GetPropagator(const std::string &name)
-{
-   Propagator *prop = NULL;
-   if (mapping.find(name) != mapping.end()) {
-      if (mapping[name]->GetType() != Gmat::PROPAGATOR) {
-         std::string str = mapping[name]->GetName() +
-            " is not a Propagator";
-         throw ConfigManagerException(str);
-      }
-      prop = (Propagator *)mapping[name];
-   }
-   return prop;
-}
-
-
-//------------------------------------------------------------------------------
 // Parameter* GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* ConfigManager::GetParameter(const std::string &name)
@@ -640,12 +662,31 @@ AtmosphereModel* ConfigManager::GetAtmosphereModel(const std::string &name)
       if (mapping[name]->GetType() != Gmat::ATMOSPHERE)
       {
          std::string str = mapping[name]->GetName() +
-            " is not an atmosphere model";
+            " is not an AtmosphereModel type";
          throw ConfigManagerException(str);
       }
       atmosModel = (AtmosphereModel *)mapping[name];
    }
    return atmosModel;
+}
+
+//loj: 9/27/04 - added
+//------------------------------------------------------------------------------
+// Function* GetFunction(const std::string &name)
+//------------------------------------------------------------------------------
+Function* ConfigManager::GetFunction(const std::string &name)
+{
+   Function *function = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->GetType() != Gmat::FUNCTION)
+      {
+         std::string str = mapping[name]->GetName() + " is not a Function type";
+         throw ConfigManagerException(str);
+      }
+      function = (Function *)mapping[name];
+   }
+   return function;
 }
 
 //=================================

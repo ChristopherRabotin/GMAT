@@ -427,6 +427,33 @@ AtmosphereModel* Factory::CreateAtmosphereModel(const std::string &ofType,
       ("Factory::CreateAtmosphereModel() must be implemented by AtmosphereFactory()\n");
 }
 
+//loj: 9/27/04 - added
+//------------------------------------------------------------------------------
+//  Function* CreateFunction(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create  Function objects -
+ * in that case, it returns a new  Function object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type  Function.
+ *
+ * @param <ofType>   specific type of  Function object to create.
+ * @param <withName> name to give to the newly created  Function object.
+ *
+ * @return pointer to a new  Function object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type  Function.
+ */
+//------------------------------------------------------------------------------
+Function* Factory::CreateFunction(const std::string &ofType,
+                                  const std::string &withName)
+{
+   throw FactoryException
+      ("Factory::CreateFunction() must be implemented by FunctionFactory()\n");
+}
+
 //------------------------------------------------------------------------------
 //  StringArray GetListOfCreatableObjects(void) const
 //------------------------------------------------------------------------------

@@ -35,20 +35,6 @@ Moderator* Moderator::instance = NULL;
 GuiInterpreter* Moderator::theGuiInterpreter = NULL;
 ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
 
-//loj: 9/10/04 moved to GmatBase
-//  //-----------------------------------------------------
-//  //*** should match with ObjectType in gmatdefs.hpp
-//  //-----------------------------------------------------
-//  const std::string
-//  Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
-//  {
-//     "Spacecraft",   "GroundStation",   "Burn",   "Command",
-//     "Propagator",   "ForceModel",   "PhysicalModel",   "Interpolator",
-//     "SolarSystem",   "CelestialBody",   "Atmosphere",   "Parameter",
-//     "StopCondition",   "Solver",   "Subscriber",   "PropSetup",
-//     "RefFrame",   "UnknownObject"
-//  };
-
 const std::string
 Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
 {
@@ -99,6 +85,7 @@ bool Moderator::Initialize(bool fromGui)
          theBurnFactory = new BurnFactory();
          theCommandFactory = new CommandFactory();
          theForceModelFactory = new ForceModelFactory();
+         theFunctionFactory = new FunctionFactory(); //loj: 9/27/04 - added
          theParameterFactory = new ParameterFactory();
          thePhysicalModelFactory = new PhysicalModelFactory();
          thePropSetupFactory = new PropSetupFactory();
@@ -113,6 +100,7 @@ bool Moderator::Initialize(bool fromGui)
          theFactoryManager->RegisterFactory(theBurnFactory);
          theFactoryManager->RegisterFactory(theCommandFactory);
          theFactoryManager->RegisterFactory(theForceModelFactory);
+         theFactoryManager->RegisterFactory(theFunctionFactory);
          theFactoryManager->RegisterFactory(theParameterFactory);
          theFactoryManager->RegisterFactory(thePhysicalModelFactory);
          theFactoryManager->RegisterFactory(thePropSetupFactory);
@@ -349,8 +337,9 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
 
       if (sc == NULL)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Error Creating "
-                                       "%s.  Check SpacecraftFactory. \n", type.c_str());
+         MessageInterface::ShowMessage
+            ("Moderator::CreateSpacecraft() Error Creating %s.  Make sure "
+             "SpacecraftFactory is registered and has correct type. \n", type.c_str());
          
          throw GmatBaseException("Error Creating Spacecraft");
       }
@@ -371,9 +360,11 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSpacecraft() Unable to create Spacecraft "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetSpacecraft(name);
    }
 }
@@ -426,8 +417,8 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
       if (prop ==  NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreatePropagator() Error Creating "
-             "%s.  Check PropagatorFactory. \n", type.c_str());
+            ("Moderator::CreatePropagator() Error Creating %s.  Make sure "
+             "PropagatorFactory is registered and has correct type. \n", type.c_str());
          
          throw GmatBaseException("Error Creating Propagator");
       }
@@ -448,9 +439,11 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropagator() Unable to create Propagator "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetPropagator(name);
    }
 }
@@ -497,8 +490,8 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
       if (physicalModel ==  NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreatePhysicalModel() Error Creating "
-             "%s.  Check PhysicalModelFactory. \n", type.c_str());
+            ("Moderator::CreatePhysicalModel() Error Creating %s.  Make sure "
+             "PhysicalModelFactory is registered and has correct type. \n", type.c_str());
 
          throw GmatBaseException("Error Creating PhysicalModel");
       }
@@ -519,9 +512,11 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetPhysicalModel(name);
    }
 }
@@ -580,10 +575,10 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
       if (atmosphereModel ==  NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreateAtmosphereModel() Error Creating "
-             "%s.  Check AtmosphereModelFactory. \n", type.c_str());
+            ("Moderator::CreateAtmosphereModel() Error Creating %s.  Make sure "
+             "AtmosphereModelFactory is registered and has correct type. \n", type.c_str());
 
-         throw GmatBaseException("Error Creating AtmosphereModel");
+         throw GmatBaseException("Error Creating AtmosphereModel: " + type);
       }
     
       // Manage it if it is a named AtmosphereModel
@@ -602,9 +597,11 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateAtmosphereModel() Unable to create AtmosphereModel "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetAtmosphereModel(name);
    }
 }
@@ -656,10 +653,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
 
       if (burn ==  NULL)
       {
-         MessageInterface::ShowMessage("Moderator::CreateBurn() Error Creating "
-                                       "%s.  Check BurnFactory. \n", type.c_str());
+         MessageInterface::ShowMessage
+            ("Moderator::CreateBurn() Error Creating %s.  Make sure "
+             "BurnFactory is registered and has correct type. \n", type.c_str());
 
-         throw GmatBaseException("Error Creating Burn");
+         throw GmatBaseException("Error Creating Burn: " + type);
       }
     
       // Manage it if it is a named burn
@@ -678,9 +676,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateBurn() Unable to create Burn "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetBurn(name);
    }
 }
@@ -728,10 +728,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       if (parameter == NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreateParameter() Error Creating " +
-             type + ".  Check ParameterFactory. \n");
+            ("Moderator::CreateParameter() Error Creating %s.  Make sure "
+             "ParameterFactory is registered and has correct type. \n", type.c_str());
 
-         throw GmatBaseException("Error Creating Parameter");
+         throw GmatBaseException("Error Creating Parameter: " + type);
       }
 
       // Manage it if it is a named parameter
@@ -750,9 +750,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateParameter() Unable to create Parameter "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetParameter(name);
    }
 }
@@ -787,8 +789,8 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
    if (fm == NULL)
    {
       MessageInterface::ShowMessage
-         ("Moderator::CreateForceModel() Error Creating "
-          "%s.  Check ForceModelFactory. \n", name.c_str());
+         ("Moderator::CreateForceModel() Error Creating %s.  Make sure "
+          "ForceModelFactory is registered and has correct type. \n", name.c_str());
 
       throw GmatBaseException("Error Creating ForceModel");
    }
@@ -857,10 +859,10 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
    if (stopCond ==  NULL)
    {
       MessageInterface::ShowMessage
-         ("Moderator::CreateStopCondition() Error Creating "
-          "%s.  Check StopConditionFactory. \n", type.c_str());
+         ("Moderator::CreateStopCondition() Error Creating %s.  Make sure "
+          "StopConditionFactory is registered and has correct type. \n", type.c_str());
 
-      throw GmatBaseException("Error Creating StopCondition");
+      throw GmatBaseException("Error Creating StopCondition: " + type);
    }
    
    return stopCond;
@@ -898,10 +900,11 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
 
       if (solver == NULL)
       {
-         MessageInterface::ShowMessage("Moderator::CreateSolver() Error Creating "
-                                       "%s.  Check SolverFactory. \n", type.c_str());
+         MessageInterface::ShowMessage
+            ("Moderator::CreateSolver() Error Creating %s.  Make sure "
+             "SolverFactory is registered and has correct type. \n", type.c_str());
 
-         throw GmatBaseException("Error Creating Solver");
+         throw GmatBaseException("Error Creating Solver: " + type);
       }
     
       // Manage it if it is a named solver
@@ -920,9 +923,11 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSolver() Unable to create Solver "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetSolver(name);
    }
 }
@@ -999,9 +1004,11 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropSetup() Unable to create PropSetup "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetPropSetup(name);
    }
 }
@@ -1040,10 +1047,10 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
       if (body == NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreateCelestialBody() Error Creating "
-             "%s.  Check CelestialBodyFactory. \n", type.c_str());
+            ("Moderator::CreateCelestialBody() Error Creating %s.  Make sure "
+             "CelestialBodyFactory is registered and has correct type. \n", type.c_str());
 
-         throw GmatBaseException("Error Creating CelestialBody");
+         throw GmatBaseException("Error Creating CelestialBody: " + type);
       }
     
       // Manage it if it is a named body
@@ -1063,9 +1070,11 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateCelestialBody() Unable to create CelestialBody "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetCelestialBody(name);
    }
 }
@@ -1106,33 +1115,6 @@ Interpolator* Moderator::CreateInterpolator(const std::string &type,
 {
 
    //loj: 3/22/04 theFactoryManager->CreateInterpolator() not implemented
-   // comment out the code
-    
-   //      Interpolator *interp = theFactoryManager->CreateInterpolator(type, name);
-    
-   //      if (interp == NULL)
-   //      {
-   //          MessageInterface::ShowMessage("Moderator::CreateInterpolator() Error Creating "
-   //                                        "%s.  Check InterpolatorFactory. \n", type.c_str());
-
-   //          throw GmatBaseException("Error Creating Interpolator");
-   //          //return NULL;
-   //      }
-    
-   //      // Manage it if it is a named interp
-   //      try
-   //      {
-   //          if (interp->GetName() != "")
-   //              theConfigManager->AddInterpolator(interp);
-   //      }
-   //      catch (BaseException &e)
-   //      {
-   //          MessageInterface::ShowMessage("Moderator::CreateInterpolator()\n" +
-   //                                        e.GetMessage());
-   //      }
-    
-   //      return interp;
-    
    return NULL;
 }
 
@@ -1149,11 +1131,6 @@ Interpolator* Moderator::CreateInterpolator(const std::string &type,
 //------------------------------------------------------------------------------
 Interpolator* Moderator::GetInterpolator(const std::string &name)
 {
-   //if (name == "")
-   //   return NULL;
-   //else
-   //   return theConfigManager->GetInterpolator(name);
-   
    return NULL;
 }
 
@@ -1173,33 +1150,6 @@ RefFrame* Moderator::CreateRefFrame(const std::string &type,
                                     const std::string &name)
 {
    //loj: 3/22/04 theFactoryManager->CreateRefFrame() not implemented
-   // comment out the code
-    
-//      RefFrame *refFrame = theFactoryManager->CreateRefFrame(type, name);
-    
-//      if (refFrame == NULL)
-//      {
-//          MessageInterface::ShowMessage("Moderator::CreateRefFrame() Error Creating "
-//                                        "%s.  Check RefFrameFactory. \n", type.c_str());
-
-//          throw GmatBaseException("Error Creating RefFrame");
-//          //return NULL;
-//      }
-    
-//      // Manage it if it is a named refFrame
-//      try
-//      {
-//          if (refFrame->GetName() != "")
-//              theConfigManager->AddRefFrame(refFrame);
-//      }
-//      catch (BaseException &e)
-//      {
-//          MessageInterface::ShowMessage("Moderator::CreateRefFrame()\n" +
-//                                        e.GetMessage());
-//      }
-    
-//      return refFrame;
-
    return NULL;
 }
 
@@ -1216,11 +1166,6 @@ RefFrame* Moderator::CreateRefFrame(const std::string &type,
 //------------------------------------------------------------------------------
 RefFrame* Moderator::GetRefFrame(const std::string &name)
 {
-   //if (name == "")
-   //   return NULL;
-   //else
-   //   return theConfigManager->GetRefFrame(name);
-   
    return NULL;
 }
 
@@ -1259,8 +1204,8 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
       if (sub == NULL)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreateSubscriber() Error Creating "
-             "%s.  Check SubscriberFactory. \n", type.c_str());
+            ("Moderator::CreateSubscriber() Error Creating %s.  Make sure "
+             "SubscriberFactory is registered and has correct type. \n", type.c_str());
 
          throw GmatBaseException("Error Creating Subscriber:" + type);
       }
@@ -1296,9 +1241,11 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
    }
    else
    {
+#if DEBUG_RESOUCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSubscriber() Unable to create Subscriber "
           "name: %s already exist\n", name.c_str());
+#endif
       return GetSubscriber(name);
    }
 }
@@ -1320,6 +1267,83 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
       return NULL;
    else
       return theConfigManager->GetSubscriber(name);
+}
+
+// Function
+//------------------------------------------------------------------------------
+// Function* CreateFunction(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a celestial body object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a Function object pointer
+ */
+//------------------------------------------------------------------------------
+Function* Moderator::CreateFunction(const std::string &type,
+                                    const std::string &name)
+{
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateFunction() entered: type = " +
+                                 type + ", name = " + name + "\n");
+#endif
+   if (GetFunction(name) == NULL)
+   {
+      Function *function = theFactoryManager->CreateFunction(type, name);
+
+      if (function == NULL)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::CreateFunction() Error Creating %s.  Make sure "
+             "FunctionFactory is registered and has correct type. \n", type.c_str());
+
+         throw GmatBaseException("Error Creating Function:" + type);
+      }
+
+      // Manage it if it is a named function
+      try
+      {
+         if (function->GetName() != "")
+            theConfigManager->AddFunction(function);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("Moderator::CreateFunction()\n" +
+                                       e.GetMessage());
+      }
+   
+      return function;
+   }
+   else
+   {
+#if DEBUG_RESOUCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateFunction() Unable to create Function "
+          "name: %s already exist\n", name.c_str());
+#endif
+      return GetFunction(name);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Function* GetFunction(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a celestial body object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a Function object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Function* Moderator::GetFunction(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return theConfigManager->GetFunction(name);
 }
 
 // GmatCommand

@@ -669,6 +669,24 @@ StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
    return moderator->GetStopCondition(name);
 }
 
+// Function
+//------------------------------------------------------------------------------
+// Function* CreateFunction(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+Function* GuiInterpreter::CreateFunction(const std::string &type,
+                                         const std::string &name)
+{
+   return moderator->CreateFunction(type, name);
+}
+
+//------------------------------------------------------------------------------
+// Function* GetFunction(const std::string &name)
+//------------------------------------------------------------------------------
+Function* GuiInterpreter::GetFunction(const std::string &name)
+{
+   return moderator->GetFunction(name);
+}
+
 // GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type, const std::string &name)

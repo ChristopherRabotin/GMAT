@@ -35,6 +35,7 @@
 #include "Burn.hpp"
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"
+#include "Function.hpp"
 #include "Interpreter.hpp"
 
 //class Moderator;
@@ -137,7 +138,12 @@ public:
                                       const std::string &name);
    StopCondition* GetStopCondition(const std::string &name);
     
-   // Command
+   // Function (loj: 9/27/04 added)
+   Function* CreateFunction(const std::string &type,
+                            const std::string &name);
+   Function* GetFunction(const std::string &name);
+   
+   // GmatCommand
    GmatCommand* CreateCommand(const std::string &type, const std::string &name);
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name);

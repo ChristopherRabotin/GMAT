@@ -35,6 +35,7 @@
 #include "Subscriber.hpp"
 #include "Command.hpp"
 #include "AtmosphereModel.hpp" //loj: 9/14/04 - added
+#include "Function.hpp"        //loj: 9/27/04 - added
 
 class GMAT_API Factory
 {
@@ -70,7 +71,10 @@ public:
    virtual AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
                                                   const std::string &withName = "",
                                                   const std::string &forBody = "Earth");
+   virtual Function*        CreateFunction(const std::string &ofType,
+                                           const std::string &withName = "");
 
+   
    // method to return list of types of objects that this factory can create
    StringArray              GetListOfCreatableObjects(void) const;
    // method to set the types of objects that this factory can create

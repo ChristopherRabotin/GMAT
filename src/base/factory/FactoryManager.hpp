@@ -39,6 +39,7 @@
 #include "Command.hpp"
 #include "Burn.hpp"
 #include "AtmosphereModel.hpp"
+#include "Function.hpp"
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -86,26 +87,30 @@ public:
    AtmosphereModel*       CreateAtmosphereModel(const std::string &ofType,
                                                 const std::string &withName = "",
                                                 const std::string &forBody = "Earth");
+   Function*              CreateFunction(const std::string &ofType,
+                                         const std::string &withName = "");
+
    
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
-   StringArray            GetListOfItems(Gmat::ObjectType byType);// const;
+   StringArray            GetListOfItems(Gmat::ObjectType byType);
 
    // individual methods to return a list of strings representing the types of
    // objects that may be created in the system, by Gmat::ObjectType
-   StringArray            GetListOfSpacecraft(void);// const;
-   StringArray            GetListOfPropagator(void);// const;
-   StringArray            GetListOfForceModel(void);// const;
-   StringArray            GetListOfPhysicalModel(void);// const;
-   StringArray            GetListOfPropSetup(void);// const;
-   StringArray            GetListOfStopCondition(void);// const;
-   StringArray            GetListOfCelestialBody(void);// const;
-   StringArray            GetListOfSolarSystem(void);// const;
-   StringArray            GetListOfSolver(void);// const;
-   StringArray            GetListOfSubscriber(void);// const;
-   StringArray            GetListOfCommand(void);// const;
-   StringArray            GetListOfBurn(void);// const;
-   StringArray            GetListOfAtmosphereModel(void);// const;
+   StringArray            GetListOfSpacecraft();
+   StringArray            GetListOfPropagator();
+   StringArray            GetListOfForceModel();
+   StringArray            GetListOfPhysicalModel();
+   StringArray            GetListOfPropSetup();
+   StringArray            GetListOfStopCondition();
+   StringArray            GetListOfCelestialBody();
+   StringArray            GetListOfSolarSystem();
+   StringArray            GetListOfSolver();
+   StringArray            GetListOfSubscriber();
+   StringArray            GetListOfCommand();
+   StringArray            GetListOfBurn();
+   StringArray            GetListOfAtmosphereModel();
+   StringArray            GetListOfFunction();
 
    // class destructor
    ~FactoryManager();
@@ -131,7 +136,7 @@ private:
    
    // private methods 
    Factory* FindFactory(Gmat::ObjectType ofType, const std::string &forType);
-   StringArray  GetList(Gmat::ObjectType ofType);// const;
+   StringArray  GetList(Gmat::ObjectType ofType);
 
 };
 
