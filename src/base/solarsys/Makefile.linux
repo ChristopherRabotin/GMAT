@@ -5,7 +5,6 @@ HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
           -I../spacecraft -I../executive
 
 OBJECTS = AtmosphereException.o \
-          AtmosphereManager.o \
           AtmosphereModel.o \
           CelestialBody.o \
           DeFile.o \

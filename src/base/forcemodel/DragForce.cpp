@@ -353,6 +353,8 @@ bool DragForce::Initialize(void)
                throw ForceModelException("Central body (for Drag) not in solar system");
            if (useExternalAtmosphere) {
                atmos = centralBody->GetAtmosphereModel();
+//<<<<<<< DragForce.cpp
+//=======
            }
            else {
                if (atmosphereType == "BodyDefault")
@@ -362,6 +364,15 @@ bool DragForce::Initialize(void)
                   //atmos = centralBody->GetAtmosphereModel(atmosphereType);
                if (!atmos)
                   throw ForceModelException("Atmosphere model not defined");
+////>>>>>>> 1.24
+//           }
+//           else {
+//               if (atmosphereType == "BodyDefault")
+//                  atmos = centralBody->GetAtmosphereModel();
+//               else
+//                  atmos = centralBody->GetAtmosphereModel(atmosphereType);
+//               if (!atmos)
+//                  throw ForceModelException("Atmosphere model not defined");
            }
                
            if (atmos)  {
@@ -815,6 +826,31 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
+//<<<<<<< DragForce.cpp
+//------------------------------------------------------------------------------
+// void SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                              const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set the AtmosphereModel.
+ * 
+ * @param obj The model.
+ * @param type Type of object passed in.
+ * @param name Name of the object.
+ */
+bool DragForce::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name)
+{
+   if (type == Gmat::ATMOSPHERE) {
+      if (obj->GetType() != Gmat::ATMOSPHERE)
+         throw ForceModelException("DragForce::SetRefObject: AtmosphereModel "
+                                   "type set incorrectly.");
+      SetInternalAtmosphereModel((AtmosphereModel*)obj);
+      return true;
+   }
+   return PhysicalModel::SetRefObject(obj, type, name);
+}
+   
 
 //------------------------------------------------------------------------------
 // bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
@@ -849,6 +885,7 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
 {
    return internalAtmos;
 }
+
 
 //------------------------------------------------------------------------------
 // void DragForce::GetDensity(Real *state)

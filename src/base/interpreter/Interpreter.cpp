@@ -1551,9 +1551,16 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
       if (!pm->SetStringParameter("BodyName", parm))
          if ((forcetype == "GravityField") || (forcetype == "PointMassForce"))
             throw InterpreterException("Unable to set body for force " + objParm);
-      if (forcetype == "DragForce")
+      if (forcetype == "DragForce") {
          if (!pm->SetStringParameter("AtmosphereModel", parm))
             throw InterpreterException("Unable to set AtmosphereModel for drag force.");
+         /// @todo Add the body name for drag at other bodies
+         if (parm != "BodyDefault") {
+            AtmosphereModel *m = moderator->CreateAtmosphereModel(parm, "");
+            if (m)
+               pm->SetRefObject(m, Gmat::ATMOSPHERE);
+         }
+      }
       obj->AddForce(pm);
       retval = true;
    }
