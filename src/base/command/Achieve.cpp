@@ -349,7 +349,7 @@ bool Achieve::Initialize(void)
     }
     
     goalObject = obj;
-    goalId = id;
+    parmId = id;
 
     // The targeter cannot be finalized until all of the loop is initialized
     targeterDataFinalized = false;
@@ -379,14 +379,14 @@ bool Achieve::Execute(void)
         Real goalData[2];
         goalData[0] = goal;
         goalData[1] = tolerance;
-        targeter->SetSolverResults(goalData, goalName);
+        goalId = targeter->SetSolverResults(goalData, goalName);
       
         targeterDataFinalized = true;
         return retval;
     }
     
     // Evaluate goal and pass it to the targeter
-    Real val = goalObject->GetRealParameter(goalId);
+    Real val = goalObject->GetRealParameter(parmId);
     targeter->SetResultValue(goalId, val);
     return retval;
 }

@@ -130,22 +130,22 @@ Spacecraft::Spacecraft(const std::string &name) :
  * @param <a> The original that is being copied.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
-    GmatBase (a),
-    epoch    (a.epoch),
-    refBody  (a.refBody),
-    refFrame (a.refFrame),
-    refPlane (a.refPlane),
-    epochID      (a.epochID),
-    state1ID     (a.state1ID),
-    state2ID     (a.state2ID),
-    state3ID     (a.state3ID),
-    state4ID     (a.state4ID),
-    state5ID     (a.state5ID),
-    state6ID     (a.state6ID),
-    refBodyID    (a.refBodyID),
-    refFrameID   (a.refFrameID),
-    refPlaneID   (a.refPlaneID),
-    massID       (a.massID)
+    GmatBase    (a),
+    epoch       (a.epoch),
+    refBody     (a.refBody),
+    refFrame    (a.refFrame),
+    refPlane    (a.refPlane),
+    epochID     (a.epochID),
+    state1ID    (a.state1ID),
+    state2ID    (a.state2ID),
+    state3ID    (a.state3ID),
+    state4ID    (a.state4ID),
+    state5ID    (a.state5ID),
+    state6ID    (a.state6ID),
+    refBodyID   (a.refBodyID),
+    refFrameID  (a.refFrameID),
+    refPlaneID  (a.refPlaneID),
+    massID      (a.massID)
 {
     parameterCount = a.parameterCount;
     for (int i = 0; i < 6; ++i)

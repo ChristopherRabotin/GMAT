@@ -99,7 +99,8 @@ GmatBase::~GmatBase(void)
 GmatBase::GmatBase(const GmatBase &a) :
     parameterCount  (a.parameterCount),
     typeName        (a.typeName),
-    instanceName    ("CopyOf"+a.instanceName),
+//    instanceName    ("CopyOf"+a.instanceName),
+    instanceName    (a.instanceName),
     type            (a.type)
 {
 }

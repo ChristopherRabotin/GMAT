@@ -23,12 +23,17 @@ OBJECTS = Command.o CommandException.o \
           EndForCommand.o \
           IfCommand.o \
           ElseCommand.o \
-          EndIfCommand.o
+          EndIfCommand.o \
+          Assignment.o
 
 
 all: libCommand 
 	mkdir -p ../lib
 	mv libCommand.a ../lib
+
+clean:
+	rm *.o
+	rm ../lib/libCommand.a
 
 libCommand : ../lib/libCommand.a
 

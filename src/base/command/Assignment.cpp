@@ -27,8 +27,8 @@
 
 #include "Assignment.hpp"
 
-Assignment::Assignment()
-    Command         ("Assignment")
+Assignment::Assignment() :
+    Command         ("GMAT")
 {
 }
 
@@ -38,7 +38,7 @@ Assignment::~Assignment()
 }
 
 
-Assignment::Assignment(const Assignment& a)
+Assignment::Assignment(const Assignment& a) :
     Command         (a)
 {
 }

@@ -339,7 +339,17 @@ Integer DifferentialCorrector::SetSolverResults(Real *data, std::string name)
  */
 void DifferentialCorrector::SetResultValue(Integer id, Real value)
 {
-    nominal[id] = value;
+    textFile << "Achieved value = " << value;
+
+    if (currentState == NOMINAL) {
+        nominal[id] = value;
+        textFile << " (nominal)\n";
+    }
+        
+    if (currentState == PERTURBING) {
+        textFile << " (perturbed), pert # " << pertNumber << " with id " << id << std::endl;
+        achieved[pertNumber][id] = value;
+    }
 }
 
 
@@ -370,13 +380,13 @@ bool DifferentialCorrector::Initialize(void)
     
     // And the sensitivity matrix
     Integer i;
-    achieved        = new Real*[localGoalCount];
+    achieved        = new Real*[localVariableCount];
     jacobian        = new Real*[localVariableCount];
     inverseJacobian = new Real*[localVariableCount];
     for (i = 0; i < localVariableCount; ++i) {
         jacobian[i] = new Real[localVariableCount];
         inverseJacobian[i] = new Real[localVariableCount];
-        achieved[i] = new Real[localVariableCount];
+        achieved[i] = new Real[localGoalCount];
         
         // Initialize to the identity matrix
         jacobian[i][i] = 1.0;
@@ -450,8 +460,6 @@ void DifferentialCorrector::RunNominal(void)
 
 void DifferentialCorrector::RunPerturbation(void)
 {
-    static Integer pertNumber = -1;
-    
     // Calculate the perts, one at a time
     if (pertNumber != -1)
         // Back out the last pert applied
@@ -463,6 +471,7 @@ void DifferentialCorrector::RunPerturbation(void)
         return;
     }
     variable[pertNumber] += perturbation[pertNumber];
+    WriteToTextFile();
 }
 
 
@@ -472,7 +481,14 @@ void DifferentialCorrector::CalculateParameters(void)
     CalculateJacobian();
     InvertJacobian();
     
+    Real delta;
     // Apply the inverse Jacobian to build the next set of variables
+    for (Integer i = 0; i < variableCount; ++i) {
+        delta = 0.0;
+        for (Integer j = 0; j < goalCount; j++)
+            delta += inverseJacobian[i][j] * (goal[j] - achieved[i][j]);
+        variable[i] += delta;
+    }
     
     WriteToTextFile();
     currentState = NOMINAL;
@@ -482,12 +498,19 @@ void DifferentialCorrector::CalculateParameters(void)
 void DifferentialCorrector::CheckCompletion(void)
 {
     WriteToTextFile();
-    bool converged = true;
+    bool converged = true;          // Assume convergence
     
-    // check for convergence
-   
+    // check for lack of convergence
+    for (Integer i = 0; i < goalCount; ++i) {
+        if (fabs(nominal[i] - goal[i]) > tolerance[i])
+            converged = false;
+    }
+
     if (!converged) {
         // Set to run perts if not converged
+        pertNumber = -1;
+        // Build the first perturbation
+        RunPerturbation();
         currentState = PERTURBING;
     }
     else
@@ -508,6 +531,16 @@ void DifferentialCorrector::RunComplete(void)
  */
 void DifferentialCorrector::CalculateJacobian(void)
 {
+    textFile << "Calculating the Jacobian\n";
+    
+    textFile << "Nominal[0]     = " << nominal[0] << "\n";
+    textFile << "Achieved[0][0] = " << achieved[0][0] << "\n";
+    
+    jacobian[0][0] = nominal[0] - achieved[0][0];
+    textFile << "Difference     = " << jacobian[0][0] << "\n";
+    
+    jacobian[0][0] /= perturbation[0];
+    textFile << "Jacobian[0][0] = " << jacobian[0][0] << "\n";
 }
 
 
@@ -517,6 +550,8 @@ void DifferentialCorrector::CalculateJacobian(void)
  */
 void DifferentialCorrector::InvertJacobian(void)
 {
+    inverseJacobian[0][0] = 1.0 / jacobian[0][0];
+    textFile << "InverseJacobian[0][0] = " << inverseJacobian[0][0] << "\n";
 }
 
 
@@ -652,9 +687,23 @@ void DifferentialCorrector::WriteToTextFile(void)
                 break;
             
             case PERTURBING:
+                textFile << "\nPerturbing with variable values:\n   ";
+                for (current = variableNames.begin(), i = 0; 
+                     current != variableNames.end(); ++current) 
+                {
+                    textFile << *current << " = " << variable[i++] << "\n   ";
+                }
+                textFile << std::endl;
                 break;
             
             case CALCULATING:
+                textFile << "\nNew variable estimates:\n   ";
+                for (current = variableNames.begin(), i = 0; 
+                     current != variableNames.end(); ++current) 
+                {
+                    textFile << *current << " = " << variable[i++] << "\n   ";
+                }
+                textFile << std::endl;
                 break;
             
             case CHECKINGRUN:

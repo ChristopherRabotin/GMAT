@@ -1,4 +1,4 @@
-# Makefile for GMAT Command library
+# Makefile for GMAT Solver library
 # Initial Version - D. Conway - 2003/12/29
 
 HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
@@ -12,6 +12,10 @@ OBJECTS = Solver.o SolverException.o \
 all: libSolver
 	mkdir -p ../lib
 	mv libSolver.a ../lib
+
+clean:
+	rm *.o
+	rm ../lib/libSolver.a
 
 libSolver : ../lib/libSolver.a
 

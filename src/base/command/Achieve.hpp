@@ -83,7 +83,9 @@ protected:
     Real                tolerance;
     /// Pointer to the object that owns the goal
     GmatBase            *goalObject;
-    /// ID for the parameter 
+    /// Object ID for the parameter
+    Integer             parmId;
+    /// Targeter ID for the goal 
     Integer             goalId;
     /// The targeter instance used to manage the targeter state machine
     Solver              *targeter;

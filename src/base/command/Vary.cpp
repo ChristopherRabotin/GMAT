@@ -500,6 +500,6 @@ bool Vary::Execute(void)
     
     Real var = targeter->GetSolverVariable(variableId[0]);
     pobject[0]->SetRealParameter(parmId[0], var);
-    
+
     return retval;
 }

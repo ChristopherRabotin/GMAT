@@ -40,7 +40,7 @@ public:
     virtual ~DifferentialCorrector();
     DifferentialCorrector(const DifferentialCorrector &dc);
     DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
-    
+
     virtual bool                Initialize(void);
     virtual SolverState         AdvanceState(void);
 
@@ -62,7 +62,7 @@ public:
                                            const std::string &value);
     virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
-                        
+
     // Solver interfaces used to talk to the Vary and Achieve commands
     virtual Integer     SetSolverVariables(Real *data, std::string name);
     virtual Real        GetSolverVariable(Integer id);
@@ -101,6 +101,9 @@ protected:
     Real                        **jacobian;
     /// The inverted sensitivity matrix
     Real                        **inverseJacobian;
+    /// Current perturbation being run.
+    Integer                     pertNumber;
+    
    
     // Control parameters
     /// Used to turn on central differencing.  Currently not implemented. 

@@ -28,9 +28,10 @@
 #ifndef Assignment_hpp
 #define Assignment_hpp
 
-#include "Command.h"
+#include "Command.hpp"
 
-class Assignment : public Command{
+class Assignment : public Command
+{
 public:
 	Assignment();
 	virtual ~Assignment();
