@@ -1349,7 +1349,7 @@ wxMenu* MissionTree::CreatePopupMenu()
       else if (items[i] == "Target")
       {
          menu->Append(POPUP_ADD_TARGET, wxT("Target"));
-         menu->Enable(POPUP_ADD_TARGET, FALSE);
+//         menu->Enable(POPUP_ADD_TARGET, FALSE);
       }            
    }
 
@@ -1384,7 +1384,7 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
       else if (items[i] == "Target")
       {
          menu->Append(POPUP_INSERT_TARGET, wxT("Target"));
-         menu->Enable(POPUP_INSERT_TARGET, FALSE);
+//         menu->Enable(POPUP_INSERT_TARGET, FALSE);
       }
    }
 
@@ -1449,9 +1449,9 @@ wxMenu* MissionTree::CreateAddControlLogicPopupMenu()
 //   menu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
    menu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch")); 
    
-   menu->Enable(POPUP_ADD_IF_STATEMENT, FALSE);
-   menu->Enable(POPUP_ADD_WHILE_LOOP, FALSE);
-   menu->Enable(POPUP_ADD_FOR_LOOP, FALSE);
+//   menu->Enable(POPUP_ADD_IF_STATEMENT, FALSE);
+//   menu->Enable(POPUP_ADD_WHILE_LOOP, FALSE);
+//   menu->Enable(POPUP_ADD_FOR_LOOP, FALSE);
    menu->Enable(POPUP_ADD_SWITCH_CASE, FALSE);
        
    //    if (items[i] == "Propagate")
@@ -1552,9 +1552,9 @@ wxMenu* MissionTree::CreateInsertControlLogicPopupMenu()
 //   menu->Append(POPUP_INSERT_D0_WHILE, wxT("Do While"));
    menu->Append(POPUP_INSERT_SWITCH_CASE, wxT("Switch")); 
    
-   menu->Enable(POPUP_INSERT_IF_STATEMENT, FALSE);
-   menu->Enable(POPUP_INSERT_WHILE_LOOP, FALSE);
-   menu->Enable(POPUP_INSERT_FOR_LOOP, FALSE);
+//   menu->Enable(POPUP_INSERT_IF_STATEMENT, FALSE);
+//   menu->Enable(POPUP_INSERT_WHILE_LOOP, FALSE);
+//   menu->Enable(POPUP_INSERT_FOR_LOOP, FALSE);
    menu->Enable(POPUP_INSERT_SWITCH_CASE, FALSE);
        
    //    if (items[i] == "Propagate")
