@@ -62,7 +62,7 @@ public:
 protected: 
    /// Table of scale heights, \f$H\f$.
    Real                    *scaleHeight;
-   /// Table of Reference heights, \f$\h_0\f$.
+   /// Table of Reference heights, \f$h_0\f$.
    Real                    *refHeight;
    /// Table of reference densities, \f$\rho_0\f$.
    Real                    *refDensity;

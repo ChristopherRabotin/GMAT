@@ -27,6 +27,7 @@
 // Longest allowed single line in the script file
 #define         MAXLINELENGTH       4096
 
+
 /**
  * The ScriptInterpreter translates script files into GMAT objects and saves 
  * GMAT objects in script files

@@ -24,11 +24,21 @@
 
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 2, February 2004"
+#define REV_STRING "Build 3, July 2004"
 
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
+
+//------------------------------------------------------------------------------
+// ScriptInterpreter* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the ScriptInterpreter singleton.
+ * 
+ * @return Pointer to the singleton.
+ */
+//------------------------------------------------------------------------------
 ScriptInterpreter* ScriptInterpreter::Instance()
 {
     if (!instance)
@@ -37,21 +47,41 @@ ScriptInterpreter* ScriptInterpreter::Instance()
 }
 
 
+//------------------------------------------------------------------------------
+// ScriptInterpreter()
+//------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ */
+//------------------------------------------------------------------------------
 // class constructor
 ScriptInterpreter::ScriptInterpreter()
 {
     moderator = Moderator::Instance();
 }
 
-// class destructor
+
+//------------------------------------------------------------------------------
+// ~ScriptInterpreter()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
 ScriptInterpreter::~ScriptInterpreter()
 {
 }
 
 
-/** \brief Parses the input stream, line by line, into GMAT objects
- *
+//------------------------------------------------------------------------------
+// bool Interpret(void)
+//------------------------------------------------------------------------------
+/**
+ * Parses the input stream, line by line, into GMAT objects.
+ * 
+ * @return true if the stream parses successfully, false on failure.
  */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret(void)
 {
     if (!initialized)
@@ -62,6 +92,17 @@ bool ScriptInterpreter::Interpret(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Interpret(const std::string &scriptfile)
+//------------------------------------------------------------------------------
+/**
+ * Parses the input stream from a file into GMAT objects.
+ * 
+ * @param scriptfile The name of the input file.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 {
     bool retval = false;
@@ -79,6 +120,15 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Build(void)
+//------------------------------------------------------------------------------
+/**
+ * Writes the currently configured data to an output stream.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::Build(void)
 {
     if (!initialized)
@@ -88,6 +138,17 @@ bool ScriptInterpreter::Build(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Build(const std::string &scriptfile)
+//------------------------------------------------------------------------------
+/**
+ * Writes the currently configured data to a file.
+ * 
+ * @param scriptfile Name of the output file.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::Build(const std::string &scriptfile)
 {
     bool retval = false;
@@ -106,6 +167,15 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
 }
 
 
+//------------------------------------------------------------------------------
+// bool ReadScript(void)
+//------------------------------------------------------------------------------
+/**
+ * Reads a script from the input stream line by line and parses it.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadScript(void)
 {
     StringArray::iterator current = cmdmap.begin(), last = cmdmap.end();
@@ -128,6 +198,15 @@ bool ScriptInterpreter::ReadScript(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool ReadLine(void)
+//------------------------------------------------------------------------------
+/**
+ * Reads a line from the input stream.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadLine(void)
 {
     char charLine[4096] = "";
@@ -139,6 +218,15 @@ bool ScriptInterpreter::ReadLine(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Parse(void)
+//------------------------------------------------------------------------------
+/**
+ * Builds or configures GMAT objects based on the current line of script.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::Parse(void)
 {
     // Determine what kind of line we have
@@ -234,6 +322,15 @@ bool ScriptInterpreter::Parse(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool WriteScript(void)
+//------------------------------------------------------------------------------
+/**
+ * Writes a script -- including all configured objects -- to the output stream.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::WriteScript(void)
 {
     *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
@@ -289,12 +386,34 @@ bool ScriptInterpreter::WriteScript(void)
 }
 
 
+//------------------------------------------------------------------------------
+// bool ConfigureCommand(GmatCommand *)
+//------------------------------------------------------------------------------
+/**
+ * Configures GMAT commands.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ * 
+ * @note This method is not implemented.
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::ConfigureCommand(GmatCommand *)
 {
     return false;
 }
 
 
+//------------------------------------------------------------------------------
+// bool ConfigureMathematics(void)
+//------------------------------------------------------------------------------
+/**
+ * Configures mathematics embedded in a script.
+ * 
+ * @return true if the file parses successfully, false on failure.
+ * 
+ * @note This method is not implemented (Build 5?).
+ */
+//------------------------------------------------------------------------------
 bool ScriptInterpreter::ConfigureMathematics(void)
 {
     return false;
