@@ -1754,7 +1754,9 @@ void GmatMainFrame::OnStopServer(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
 {
+   wxBeginBusyCursor();
    MatlabInterface::Open();
+   wxEndBusyCursor();
 }
 
 //------------------------------------------------------------------------------

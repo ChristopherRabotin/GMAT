@@ -213,6 +213,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultCoordSys(mCoordSysItem);
 
    theGuiManager->UpdateAll();
+   ScrollTo(mSpacecraftItem);
 }
 
 //------------------------------------------------------------------------------
@@ -884,11 +885,11 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //      menu.Append(POPUP_RENAME, wxT("Rename"));
 //      menu.Append(POPUP_DELETE, wxT("Delete"));
 //   }
-   else if (dataType == GmatTree::PROPAGATOR)
-   {
-      menu.Append(POPUP_OPEN, wxT("Open"));
-      menu.Append(POPUP_CLOSE, wxT("Close"));
-   }
+//   else if (dataType == GmatTree::PROPAGATOR)
+//   {
+//      menu.Append(POPUP_OPEN, wxT("Open"));
+//      menu.Append(POPUP_CLOSE, wxT("Close"));
+//   }
    else if (dataType == GmatTree::FUNCT_FOLDER)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
@@ -1019,6 +1020,9 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       case GmatTree::FINITE_BURN:
          objType = Gmat::BURN;
          break;
+      case GmatTree::PROPAGATOR:
+         objType = Gmat::PROPAGATOR;
+         break;
       case GmatTree::DIFF_CORR:
          objType = Gmat::SOLVER;
          break;
@@ -1058,7 +1062,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
             Collapse(mSpacecraftItem);
             DeleteChildren(mSpacecraftItem);
             AddDefaultSpacecraft(mSpacecraftItem);
-            
+
             Collapse(mFormationItem);
             DeleteChildren(mFormationItem);
             AddDefaultFormations(mFormationItem);
@@ -1068,6 +1072,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
+         UpdateResource(false);
       }
       else
       {
