@@ -20,6 +20,7 @@
 #include "PropagationConfigPanel.hpp"
 #include "PropagatorSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
+#include "XyPlotSetupPanel.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -105,25 +106,37 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       {
         sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
       }
-      else if ((dataType == DEFAULT_REPORT)   ||
-               (dataType == CREATED_REPORT))
+      //loj: commented out
+      // else if ((dataType == DEFAULT_REPORT)   ||
+      //          (dataType == CREATED_REPORT))
+      else if ((dataType == DEFAULT_REPORT_FILE)   ||
+               (dataType == CREATED_REPORT_FILE))
       {
-          //loj: add Report Panel here
+          //loj: ReportFileSetupPanel is not ready yet.
+          // sizer->Add( new ReportFileSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
+      }
+      else if ((dataType == DEFAULT_XY_PLOT)   ||
+               (dataType == CREATED_XY_PLOT))
+      {
+        sizer->Add( new XyPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
+      }
+      else if ((dataType == DEFAULT_OPENGL_PLOT)   ||
+               (dataType == CREATED_OPENGL_PLOT))
+      {
+          //loj: OpenGlSetupPanel is not ready yet.
+          // sizer->Add( new OpenGlPlotSetupPanel(panel), 0, wxGROW|wxALL, 0 );          
       }
       else if (dataType == DEFAULT_PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagatorSetupPanel(panel),
-                    0, wxGROW|wxALL, 0 );
+        sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == PROPAGATE_COMMAND)
       {
-        sizer->Add( new PropagatorSetupPanel(panel),
-                    0, wxGROW|wxALL, 0 );
+        sizer->Add( new PropagatorSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == MANEUVER_COMMAND)
       {
-        sizer->Add( new ManeuverSetupPanel(panel),
-                    0, wxGROW|wxALL, 0 );
+        sizer->Add( new ManeuverSetupPanel(panel), 0, wxGROW|wxALL, 0 );
       }
 
       panel->SetScrollRate( 5, 5 );
@@ -181,11 +194,10 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
       (dataType == SPACECRAFT_FOLDER)           ||
       (dataType == FORMATIONS_FOLDER)           ||
       (dataType == CONSTELLATIONS_FOLDER)       ||
-      (dataType == BURNS_FOLDER)          ||
+      (dataType == BURNS_FOLDER)                ||
       (dataType == PROPAGATORS_FOLDER)          ||
       (dataType == SOLVERS_FOLDER)              ||
-      (dataType == PLOTS_FOLDER)                ||
-      (dataType == REPORTS_FOLDER)              ||
+      (dataType == SUBSCRIBERS_FOLDER)          ||
       (dataType == SUBSCRIPTS_FOLDER)           ||
       (dataType == INTERFACES_FOLDER)           ||
       (dataType == DEFAULT_BODY)                ||

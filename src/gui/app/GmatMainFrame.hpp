@@ -83,7 +83,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {
-        MENU_PROJECT_NEW,
+        MENU_PROJECT_NEW = 10000,
         MENU_PROJECT_OPEN,
         MENU_PROJECT_OPEN_BINARY,
         MENU_PROJECT_OPEN_ASCII,
