@@ -26,7 +26,9 @@
 // base includes
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROP_PANEL 0
+
+//#define DEBUG_PROP_PANEL_SETUP 1
+//#define DEBUG_PROP_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -66,7 +68,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
 {
    propSetupName = std::string(propName.c_str());
    
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel() entered propSetupName=%s\n",
        propSetupName.c_str());
@@ -333,13 +335,15 @@ void PropagationConfigPanel::SaveData()
 #endif                              
             paramId = theDragForce->GetParameterID("AtmosphereModel");
             theDragForce->SetStringParameter(paramId, forceList[i]->dragType.c_str());
-            paramId = theDragForce->GetParameterID("AtmosphereBody");
-            theDragForce->SetStringParameter(paramId, forceList[i]->bodyName.c_str());
+            //loj: 10/25/04
+            //paramId = theDragForce->GetParameterID("AtmosphereBody");
+            //paramId = theDragForce->GetParameterID("BodyName");
+            theDragForce->SetStringParameter("BodyName", forceList[i]->bodyName.c_str());
             forceList[i]->dragf = theDragForce;
             newFm->AddForce(theDragForce);
             
 #if DEBUG_PROP_PANEL
-      ShowForceList("SaveData() AFTER  saving DragForce");
+            ShowForceList("SaveData() AFTER  saving DragForce");
 #endif 
          }
          //----------------------------------------------------
@@ -432,8 +436,8 @@ void PropagationConfigPanel::Initialize()
    dragModelArray.push_back("None");
    dragModelArray.push_back("Exponential");
    dragModelArray.push_back("MSISE90");
-   dragModelArray.push_back("JacchiaRoberts");
-      
+   dragModelArray.push_back("Jacchia-Roberts"); //loj: 10/25/04 match with actual name
+   
    // initialize mag. filed model type array
    magfModelArray.push_back("None");
       
@@ -499,11 +503,12 @@ void PropagationConfigPanel::Initialize()
             theDragForce = (DragForce*)force;  
             paramId = theDragForce->GetParameterID("AtmosphereModel");
             atmosModelString = theDragForce->GetStringParameter(paramId).c_str();
-
-            paramId = theDragForce->GetParameterID("AtmosphereBody");
-            bodyName = theDragForce->GetStringParameter(paramId);
-            primaryBodiesArray.Add(bodyName.c_str());
             
+            //paramId = theDragForce->GetParameterID("AtmosphereBody");
+            //paramId = theDragForce->GetParameterID("BodyName"); //loj: 10/25/04
+            bodyName = theDragForce->GetStringParameter("BodyName");
+            primaryBodiesArray.Add(bodyName.c_str());
+                        
             currentBodyId = FindBody(bodyName);
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->dragType = atmosModelString;
@@ -559,13 +564,13 @@ void PropagationConfigPanel::Initialize()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::Setup(wxWindow *parent)
 {
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() entered\n");
 #endif
    
    // wxStaticText
    //loj: 5/19/04 changed wxSize(250,30) to wxSize(80,20)
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxStaticText\n");
 #endif
@@ -627,7 +632,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Other Potential Field File:"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxTextCtrl\n");
 #endif
@@ -675,7 +680,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
                       wxSize(40,-1), 0 );
 
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxButton\n");
 #endif
@@ -700,7 +705,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxButton( parent, ID_BUTTON_SRP_EDIT, wxT("Edit"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create strArray*\n");
 #endif
@@ -726,7 +731,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    for (int i=0; i<MagfModelCount; i++)
       magfArray[i] = magfModelArray[i].c_str();
 
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxComboBox\n"
        "IntegratorCount=%d, GravModelCount=%d, DragModelCount=%d, "
@@ -757,7 +762,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       wxDefaultPosition, wxSize(100,-1), MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
       
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() ComboBoxes created\n");
 #endif
@@ -766,7 +771,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    srpCheckBox = new wxCheckBox( parent, ID_CHECKBOX, wxT("Use"),
                                  wxDefaultPosition, wxDefaultSize, 0 );
    
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::Setup() create wxSizer\n");
 #endif
@@ -910,7 +915,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    srpCheckBox->Enable(true);
    dragSetupButton->Enable(false);
    
-#if DEBUG_PROP_PANEL
+#if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
 #endif
 }
@@ -1081,10 +1086,10 @@ void PropagationConfigPanel::DisplayForceData()
 {
    if (!pmForceList.empty())
       DisplayPointMassData(); 
-      
+   
    if (forceList.empty())
       return;  
-      
+   
    DisplayPrimaryBodyData(); 
    DisplayGravityFieldData(); 
    DisplayAtmosphereModelData(); 
@@ -1760,7 +1765,7 @@ void PropagationConfigPanel::ShowPropData(const std::string &header)
                                  theForceModel->GetName().c_str());
    MessageInterface::ShowMessage("numOfForces=%d\n", numOfForces);
    
-   Integer paramId;
+   //Integer paramId;
    std::string forceType;
    std::string forceBody;
    PhysicalModel *force;
@@ -1772,8 +1777,8 @@ void PropagationConfigPanel::ShowPropData(const std::string &header)
 
       if (forceType == "DragForce")
       {
-         paramId = force->GetParameterID("AtmosphereBody");
-         forceBody = force->GetStringParameter(paramId);
+         //paramId = force->GetParameterID("AtmosphereBody");
+         //forceBody = force->GetStringParameter(paramId);
          forceBody = force->GetStringParameter("BodyName");
       }
       else 
