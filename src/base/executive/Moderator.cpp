@@ -13,7 +13,7 @@
 // Created: 2003/08/25
 //
 /**
- * Defines opeartions of the GMAT executive.
+ * Implements opeartions of the GMAT executive.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -36,6 +36,7 @@
 #include "PropSetup.hpp"
 #include "Command.hpp"
 #include "Subscriber.hpp"
+#include "Burn.hpp"
 // factories
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
@@ -85,17 +86,6 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 //---------------------------------
 // public
 //---------------------------------
-
-//loj: I'm assuming GmatMainApp::OnInit() will have something like:
-//loj:-------------------------------------------------------------
-//loj: GmatMainApp::OnInit()
-//loj: {
-//loj:    theModerator = Moderator::Instance();
-//loj:    theModerator->Initialize();
-//loj:    theGuiInterpreter = theModerator->GetGuiInterpreter();
-//loj:    ....
-//loj: }
-//loj:-------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Moderator* Instance()
@@ -166,6 +156,14 @@ bool Moderator::Initialize()
 //------------------------------------------------------------------------------
 // std::string GetObjectTypeString(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
+/**
+ * Returns object type name of given object type.
+ *
+ * @param <type> object type
+ *
+ * @return object type name
+ */
+//------------------------------------------------------------------------------
 std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 {
     if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
@@ -178,6 +176,12 @@ std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 // GuiInterpreter* GetGuiInterpreter()
 //------------------------------------------------------------------------------
+/**
+ * Returns GuiInterpreter pointer.
+ *
+ * @return GuiInterpreter pointer
+ */
+//------------------------------------------------------------------------------
 GuiInterpreter* Moderator::GetGuiInterpreter()
 {
     return theGuiInterpreter;
@@ -186,6 +190,12 @@ GuiInterpreter* Moderator::GetGuiInterpreter()
 //------------------------------------------------------------------------------
 // ScriptInterpreter* GetScriptInterpreter()
 //------------------------------------------------------------------------------
+/**
+ * Returns ScriptInterpreter pointer.
+ *
+ * @return ScriptInterpreter pointer
+ */
+//------------------------------------------------------------------------------
 ScriptInterpreter* Moderator::GetScriptInterpreter()
 {
     return theScriptInterpreter;
@@ -193,6 +203,10 @@ ScriptInterpreter* Moderator::GetScriptInterpreter()
 
 //------------------------------------------------------------------------------
 // void SetGuiInterpreter(GuiInterpreter *guiInterp)
+//------------------------------------------------------------------------------
+/**
+ * Sets GuiInterpreter pointer.
+ */
 //------------------------------------------------------------------------------
 void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 {
@@ -203,6 +217,10 @@ void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 
 //------------------------------------------------------------------------------
 // void SetScriptInterpreter(ScriptInterpreter *scriptInterp)
+//------------------------------------------------------------------------------
+/**
+ * Sets ScriptInterpreter pointer.
+ */
 //------------------------------------------------------------------------------
 void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 {
@@ -215,6 +233,14 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 //------------------------------------------------------------------------------
 // StringArray GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
+/**
+ * Returns names of all configured items of object type.
+ *
+ * @param <type> object type
+ *
+ * @return array of configured item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
 StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 {
     return theFactoryManager->GetListOfItems(type);
@@ -222,24 +248,50 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 
 //----- configuration
 //------------------------------------------------------------------------------
-// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
-//------------------------------------------------------------------------------
-bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
-{
-    return theConfigManager->RemoveItem(type, name);
-}
-
-//------------------------------------------------------------------------------
 // StringArray GetListOfConfiguredItems(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Returns names of all configured items of object type.
+ *
+ * @param <type> object type
+ *
+ * @return array of configured item names; return empty array if none
+ */
 //------------------------------------------------------------------------------
 StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
     return theConfigManager->GetListOfItems(type);
 }
 
+//------------------------------------------------------------------------------
+// bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Removes item from the configured list.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+{
+    return theConfigManager->RemoveItem(type, name);
+}
+
 // Spacecraft
 //------------------------------------------------------------------------------
 // Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a spacecraft object by given name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return spacecraft object pointer
+ */
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
@@ -252,6 +304,14 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 // Spacecraft* GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Retrieves a spacecraft object pointer by given name and add to configuration.
+ *
+ * @param <name> object name
+ *
+ * @return a spacecraft object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
     return theConfigManager->GetSpacecraft(name);
@@ -261,15 +321,33 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 // Propagator* CreatePropagator(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Creates a propagator object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a propagator object pointer
+ */
+//------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
+    //djc: commented out
     //   theConfigManager->AddPropagator(prop);
     return prop;
 }
 
 //------------------------------------------------------------------------------
 // Propagator* GetPropagator(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a propagator object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a propagator object pointer, return null if name not found
+ */
 //------------------------------------------------------------------------------
 Propagator* Moderator::GetPropagator(const std::string &name)
 {
@@ -280,10 +358,20 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 //------------------------------------------------------------------------------
 // PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Creates a physical model object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a physical model object pointer
+ */
+//------------------------------------------------------------------------------
 PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
     PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
+    //djc: do we need to add PhysicalModel to configuration?
     //   theConfigManager->AddPhysicalModel(physicalModel);
     return physicalModel;
 }
@@ -291,14 +379,71 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
 //------------------------------------------------------------------------------
 // PhysicalModel* GetPhysicalModel(const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Retrieves a physical model object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a physical model object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
 PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 {
     return theConfigManager->GetPhysicalModel(name);
 }
 
+// burn
+//------------------------------------------------------------------------------
+// Burn* CreateBurn(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a burn object by given type and name and add to configuration.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a burn object pointer
+ */
+//------------------------------------------------------------------------------
+Burn* Moderator::CreateBurn(const std::string &type,
+                            const std::string &name)
+{
+    //loj: need to add CreateBurn to FactoryManager
+    //Burn *burn = theFactoryManager->CreateBurn(type, name);
+    //return burn;
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// Burn* GetBurn(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a burn object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a burn pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Burn* Moderator::GetBurn(const std::string &name)
+{
+    //loj: need to add GetBurn to FactoryManager
+    //return theConfigManager->GetBurn(name);
+    return NULL;
+}
+
 // Parameter
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a parameter object by given type and name and add to configuration.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a parameter object pointer
+ */
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
@@ -307,11 +452,18 @@ Parameter* Moderator::CreateParameter(const std::string &type, const std::string
     if (parameter->GetName() != "")
         theConfigManager->AddParameter(parameter);
     return parameter;
-    return NULL;
 }
 
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a parameter object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a parameter object pointer, return null if name not found
+ */
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetParameter(const std::string &name)
 {
@@ -351,6 +503,7 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
     return status;
 }
 
+// StopCondition
 //------------------------------------------------------------------------------
 // StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -358,6 +511,7 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
     StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+    //djc: do we need to add StopCondition to configuration?
     //   theConfigManager->AddStopCondition(stopCond);
     return stopCond;
 }
@@ -368,6 +522,27 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
 StopCondition* Moderator::GetStopCondition(const std::string &name)
 {
     return theConfigManager->GetStopCondition(name);
+}
+
+// PropSetup
+//------------------------------------------------------------------------------
+// PropSetup* CreateDefaultPropSetup(const std::string &name)
+//------------------------------------------------------------------------------
+PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
+{
+    // assumes "RungeKutta89" is the default propagator
+    Propagator *prop = CreatePropagator("RungeKutta89", "DefaultPropagator");
+    // creates empty ForceModel
+    ForceModel *fm = CreateForceModel("DefaultForceModel");
+    //loj: What forces shoul be in the default ForceModel?
+    
+    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+    if (prop)
+        propSetup->SetPropagator(prop);
+    if (fm)
+        propSetup->SetForceModel(fm);
+    theConfigManager->AddPropSetup(propSetup);
+    return propSetup;
 }
 
 //------------------------------------------------------------------------------
@@ -398,9 +573,18 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
     return theConfigManager->GetPropSetup(name);
 }
 
-// celestial body
+// CelestialBody
 //------------------------------------------------------------------------------
 // CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a celestial body object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a celestial body object pointer
+ */
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
                                               const std::string &name)
@@ -414,14 +598,28 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 // CelestialBody* GetCelestialBody(const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Retrieves a celestial body object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a celestial body object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
 CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 {
     return theConfigManager->GetCelestialBody(name);
 }
 
-// solar system
+// SolarSystem
 //------------------------------------------------------------------------------
 // SolarSystem* GetDefaultSolarSystem()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a default solar system object pointer.
+ *
+ * @return a default solar system object pointer
+ */
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetDefaultSolarSystem()
 {
@@ -454,10 +652,20 @@ SolarSystem* Moderator::GetSolarSystemInUse()
     return theConfigManager->GetSolarSystemInUse();
 }
 
-// subscriber
+// Subscriber
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
 //                              const std::string &filename)
+//------------------------------------------------------------------------------
+/**
+ * Creates a subscriber object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ * @param <filename> file name if used
+ *
+ * @return a subscriber object pointer
+ */
 //------------------------------------------------------------------------------
 Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
@@ -472,12 +680,20 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
 //------------------------------------------------------------------------------
 // Subscriber* GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
+/**
+ * Retrieves a subscriber object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a subscriber object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
 Subscriber* Moderator::GetSubscriber(const std::string &name)
 {
     return theConfigManager->GetSubscriber(name);
 }
 
-// command
+// Command
 //------------------------------------------------------------------------------
 // Command* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -605,6 +821,14 @@ Integer Moderator::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 // bool InterpretScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
+/**
+ * Creates objects from script file.
+ *
+ * @param <scriptFilename> input script file name
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
     MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
@@ -623,6 +847,14 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 // bool SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
+/**
+ * Builds scripts from objects and write to a file.
+ *
+ * @param <scriptFilename> output script file name
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
 bool Moderator::SaveScript(const std::string &scriptFilename)
 {
     MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
@@ -633,6 +865,15 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 
 //------------------------------------------------------------------------------
 // Integer RunScript(Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * Executes commands built from the script file.
+ *
+ * @param <sandboxNum> sandbox number
+ *
+ * @return a status code
+ *    0 = successful, <0 = error (tbd)
+ */
 //------------------------------------------------------------------------------
 Integer Moderator::RunScript(Integer sandboxNum)
 {
@@ -746,7 +987,7 @@ Moderator::Moderator()
     sandboxes.reserve(Gmat::MAX_SANDBOX);
     commands.reserve(Gmat::MAX_SANDBOX);
 
-    // create atleast 1 Sandbox and Command
+    // create at least 1 Sandbox and Command
     sandboxes.push_back(new Sandbox());
     commands.push_back(new NoOp());
 }

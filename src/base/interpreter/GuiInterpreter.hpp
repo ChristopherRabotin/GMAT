@@ -31,6 +31,7 @@
 #include "PropSetup.hpp"
 #include "Command.hpp"
 #include "Subscriber.hpp"
+#include "Burn.hpp"
 
 class Moderator;
 
@@ -63,9 +64,17 @@ public:
     Propagator* CreatePropagator(const std::string &type, const std::string &name);
     Propagator* GetPropagator(const std::string &name);
 
+    // PropSetup
+    PropSetup* CreateDefaultPropSetup(const std::string &name);
+    PropSetup* GetPropSetup(const std::string &name);
+
     // PhysicalModel
     PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
     PhysicalModel* GetPhysicalModel(const std::string &name);
+
+    // Burn
+    Burn* CreateBurn(const std::string &type, const std::string &name);
+    Burn* GetBurn(const std::string &name);
 
     // Parameter
     Parameter* CreateParameter(const std::string &type, const std::string &name);
@@ -84,7 +93,7 @@ public:
     Subscriber* GetSubscriber(const std::string &name);
 
     // Command
-    Command* CreateCommand(const std::string&type, const std::string &name);
+    Command* CreateCommand(const std::string&type, const std::string &name = "");
     Command* GetCommand(const std::string &name);
     Command* GetNextCommand(Integer sandboxNum = 1);
     bool DeleteCommand(const std::string &name, Integer position,
