@@ -9,7 +9,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = MessageWindow.cpp OpenGlPlot.cpp ReportFile.cpp Subscriber.cpp XyPlot.cpp
+SRC = MatlabWs.cpp MessageWindow.cpp OpenGlPlot.cpp ReportFile.cpp Subscriber.cpp XyPlot.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
