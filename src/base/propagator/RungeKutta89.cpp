@@ -124,13 +124,13 @@ char * RungeKutta89::GetType(void) const
 }
 
 //------------------------------------------------------------------------------
-// Propagator* RungeKutta89::Clone(void) const
+// GmatBase* RungeKutta89::Clone(void) const
 //------------------------------------------------------------------------------
 /**
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-Propagator* RungeKutta89::Clone(void) const
+GmatBase* RungeKutta89::Clone(void) const
 {
     return new RungeKutta89(*this);
 }

@@ -80,7 +80,7 @@ char* DormandElMikkawyPrince68::GetType(void) const
   Each class that can be instantiated provides an implementation of this
   method so that copies can be made from a base class pointer. 
  */
-Propagator* DormandElMikkawyPrince68::Clone(void) const
+GmatBase* DormandElMikkawyPrince68::Clone(void) const
 {
     return new DormandElMikkawyPrince68(*this);
 }

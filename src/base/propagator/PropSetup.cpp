@@ -324,6 +324,20 @@ Integer PropSetup::GetParameterCount(void) const
 //------------------------------------
 // Inherited methods from GmatBase
 //------------------------------------
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the PropSetup.
+ *
+ * @return clone of the PropSetup.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* PropSetup::Clone(void) const
+{
+   return (new PropSetup(*this));
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const

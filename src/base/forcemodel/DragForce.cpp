@@ -181,7 +181,21 @@ DragForce& DragForce::operator=(const DragForce& df)
     return *this;
 }
 
- 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the DragForce.
+ *
+ * @return clone of the DragForce.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* DragForce::Clone(void) const
+{
+   return (new DragForce(*this));
+}
+
 //------------------------------------------------------------------------------
 // bool GetComponentMap(Integer * map, Integer order) const
 //------------------------------------------------------------------------------

@@ -49,6 +49,9 @@ public:
 
    virtual const std::string* GetParameterList() const;
 
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
    // The inherited methods from GmatBase
    virtual Integer GetParameterCount(void) const;
 
@@ -75,7 +78,7 @@ private:
 
    enum
    {
-      FORCE_MODEL_NAME = 0,
+      FORCE_MODEL_NAME = GmatBaseParamCount,
       PROPAGATOR_NAME,
       USE_DRAG,
       USE_SRP,

@@ -176,6 +176,21 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
 }
 
 //------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the SolarRadiationPressure.
+ *
+ * @return clone of the SolarRadiationPressure.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* SolarRadiationPressure::Clone(void) const
+{
+   return (new SolarRadiationPressure(*this));
+}
+
+//------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**

@@ -84,6 +84,9 @@ public:
    void SetBody(CelestialBody *body);
    void SetBodyName(const std::string &name); //loj: 5/7/04 added
 
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
    // inherited methods from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;

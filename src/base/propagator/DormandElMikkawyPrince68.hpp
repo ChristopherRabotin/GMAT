@@ -56,7 +56,8 @@ public:
     DormandElMikkawyPrince68&   operator=(const DormandElMikkawyPrince68& dpn);
 
     virtual char*               GetType(void) const;
-    virtual Propagator*         Clone(void) const;
+    // wcs 2004.06.04 return GmatBase*
+    virtual GmatBase*           Clone(void) const;
 
 protected:
     virtual void                SetCoefficients(void);

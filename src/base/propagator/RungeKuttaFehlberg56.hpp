@@ -60,7 +60,7 @@ public:
     RungeKuttaFehlberg56 &  operator=(const RungeKuttaFehlberg56&);
 
     virtual char*           GetType(void) const;
-    virtual Propagator*     Clone(void) const;
+    virtual GmatBase*       Clone(void) const; // wcs 2004.06.04 
 
 protected:
     void                    SetCoefficients(void);

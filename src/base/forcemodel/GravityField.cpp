@@ -110,6 +110,7 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
     gfInitialized   (false)
 {
    bodyName = forBodyName;
+   parameterCount = GravityFieldParamCount;
 }
 
 
@@ -440,6 +441,21 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
 //---------------------------------
 // inherited methods from GmatBase
 //---------------------------------
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the GravityField.
+ *
+ * @return clone of the GravityField.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* GravityField::Clone(void) const
+{
+   return (new GravityField(*this));
+}
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------

@@ -734,6 +734,21 @@ Integer ForceModel::GetParameterCount(void) const
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ForceModel.
+ *
+ * @return clone of the ForceModel.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ForceModel::Clone(void) const
+{
+   return (new ForceModel(*this));
+}
+
 // Access methods 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const

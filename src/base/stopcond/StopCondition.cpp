@@ -234,6 +234,21 @@ bool StopCondition::Evaluate()
    return goalMet;
 }
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the StopCondition.
+ *
+ * @return clone of the StopCondition.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* StopCondition::Clone(void) const
+{
+   return (new StopCondition(*this));
+}
+
 //---------------------------------
 // protected methods
 //---------------------------------

@@ -130,7 +130,7 @@ protected:
     
    enum
    {
-      EPOCH = 0,
+      EPOCH = GmatBaseParamCount,
       EPOCH_VAR,
       STOP_VAR,
       GOAL,

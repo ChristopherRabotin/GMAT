@@ -42,6 +42,9 @@ public:
 
    virtual bool Evaluate();
 
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
 protected:
 
    bool CheckOnPeriapsis();

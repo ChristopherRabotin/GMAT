@@ -80,7 +80,10 @@ public:
    virtual bool Initialize(void);
    virtual bool SetCentralBody();
    virtual bool GetDerivatives(Real *state, Real dt = 0.0,Integer order = 1);
-    
+
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
    // Parameter access methods - overridden from GmatBase
    virtual std::string         GetParameterText(const Integer id) const;
    virtual Integer             GetParameterID(const std::string &str) const;

@@ -78,7 +78,7 @@ char * RungeKuttaFehlberg56::GetType(void) const
 
 
 /** \brief Method used to create a copy of the object */
-Propagator* RungeKuttaFehlberg56::Clone(void) const
+GmatBase* RungeKuttaFehlberg56::Clone(void) const
 {
     return new RungeKuttaFehlberg56(*this);
 }

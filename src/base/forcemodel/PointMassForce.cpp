@@ -507,6 +507,20 @@ void PointMassForce::SetBodyName(const std::string &name)
 //---------------------------------
 // inherited methods from GmatBase
 //---------------------------------
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+ /**
+* This method returns a clone of the PointMassForce.
+ *
+ * @return clone of the PointMassForce.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* PointMassForce::Clone(void) const
+{
+   return (new PointMassForce(*this));
+}
 
 //------------------------------------------------------------------------------
 // std::string PointMassForce::GetParameterText(const Integer id) const
