@@ -41,115 +41,169 @@
 //  public methods
 //---------------------------------
 
+//------------------------------------------------------------------------------
+// Subscriber(std::string typeStr, std::string nomme)
+//------------------------------------------------------------------------------
 Subscriber::Subscriber(std::string typeStr, std::string nomme) :
-GmatBase        (Gmat::SUBSCRIBER, typeStr, nomme),
-data            (NULL),
-next            (NULL),
-active          (true)
+   GmatBase (Gmat::SUBSCRIBER, typeStr, nomme),
+   data (NULL),
+   next (NULL),
+   active (true),
+   isEndOfReceive(false)
 {
 }
 
+//------------------------------------------------------------------------------
+// Subscriber(const Subscriber &copy)
+//------------------------------------------------------------------------------
 Subscriber::Subscriber(const Subscriber &copy) :
-GmatBase        (copy),
-data            (NULL),
-next            (NULL),
-active          (true)
+   GmatBase (copy),
+   data (NULL),
+   next (NULL),
+   active (true),
+   isEndOfReceive(false)
 {
 }
 
+//------------------------------------------------------------------------------
+// ~Subscriber(void)
+//------------------------------------------------------------------------------
 Subscriber::~Subscriber(void)
 {
 }
 
-//loj: 3/8/04 added
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
 bool Subscriber::Initialize()
 {
-    return true;
+   isEndOfReceive = false;
+   return true;
 }
 
-bool Subscriber::ReceiveData( const char * datastream)
+//------------------------------------------------------------------------------
+// bool ReceiveData(const char *datastream)
+//------------------------------------------------------------------------------
+bool Subscriber::ReceiveData(const char *datastream)
 {
-    if (!active)        // Not currently processing data
-        return true;
+   if (!active)        // Not currently processing data
+      return true;
         
-    data = datastream;
-    return true;
+   data = datastream;
+   return true;
 }
 
-bool Subscriber::ReceiveData( const char * datastream,  const int len)
+//------------------------------------------------------------------------------
+// bool ReceiveData(const char *datastream,  const int len)
+//------------------------------------------------------------------------------
+bool Subscriber::ReceiveData(const char *datastream,  const int len)
 {
-    if (!active)        // Not currently processing data
-        return true;
+   if (!active)        // Not currently processing data
+      return true;
 
-    data = datastream;
-    if (!Distribute(len)) {
-        data = NULL;
-        return false;
-    }
+   data = datastream;
+   if (!Distribute(len))
+   {
+      data = NULL;
+      return false;
+   }
 
-    data = NULL;
-    return true;
+   data = NULL;
+   return true;
 }
 
-
-bool Subscriber::ReceiveData(const double * datastream, const int len)
+//------------------------------------------------------------------------------
+// bool ReceiveData(const double *datastream, const int len)
+//------------------------------------------------------------------------------
+bool Subscriber::ReceiveData(const double *datastream, const int len)
 {
-    if (!active)        // Not currently processing data
-        return true;
+   if (!active)        // Not currently processing data
+      return true;
 
-    if (len == 0)
-        return true;
+   if (len == 0)
+      return true;
 
-    if (!Distribute(datastream, len)) {
-        return false;
-    }
+   if (!Distribute(datastream, len))
+   {
+      return false;
+   }
 
-    return true;
+   return true;
 }
 
+//------------------------------------------------------------------------------
+// bool FlushData()
+//------------------------------------------------------------------------------
+bool Subscriber::FlushData()
+{
+   isEndOfReceive = true;
+   Distribute(0);
+   Distribute(NULL, 0);
+   isEndOfReceive = false;
+   return true;
+}
 
-Subscriber * Subscriber::Next(void)
+//------------------------------------------------------------------------------
+// Subscriber* Next(void)
+//------------------------------------------------------------------------------
+Subscriber* Subscriber::Next(void)
 {
     return next;
 }
 
-
-bool Subscriber::Add(Subscriber * s)
+//------------------------------------------------------------------------------
+// bool Add(Subscriber *s)
+//------------------------------------------------------------------------------
+bool Subscriber::Add(Subscriber *s)
 {
-    if (next)
-        return next->Add(s);
+   if (next)
+      return next->Add(s);
 
-    next = s;
-    return true;
+   next = s;
+   return true;
 }
 
-
-bool Subscriber::Remove(Subscriber * s, const bool del)
+//------------------------------------------------------------------------------
+// bool Remove(Subscriber *s, const bool del)
+//------------------------------------------------------------------------------
+bool Subscriber::Remove(Subscriber *s, const bool del)
 {
-    Subscriber *temp = next;
+   Subscriber *temp = next;
 
-    if (next == s) {
-        next = next->Next();
-        if (del)
-            delete temp;
-        return true;
-    }
-    return false;
+   if (next == s)
+   {
+      next = next->Next();
+      if (del)
+         delete temp;
+      return true;
+   }
+   return false;
 }
 
-
+//------------------------------------------------------------------------------
+// void Activate(bool state)
+//------------------------------------------------------------------------------
 void Subscriber::Activate(bool state)
 {
-    active = state;
+   active = state;
 }
 
+//------------------------------------------------------------------------------
+// bool IsActive()
+//------------------------------------------------------------------------------
 bool Subscriber::IsActive()
 {
-    return active;
+   return active;
 }
 
-bool Subscriber::Distribute(const double * dat, int len)
+//---------------------------------
+//  protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// bool Distribute(const double *dat, int len)
+//------------------------------------------------------------------------------
+bool Subscriber::Distribute(const double *dat, int len)
 {
-    return true;
+   return true;
 }
-

@@ -46,16 +46,18 @@ public:
    Subscriber& operator=(const Subscriber &right);
    virtual ~Subscriber(void);
    
-   virtual bool        Initialize(); //loj: 3/8/04 added
-   virtual bool        ReceiveData(const char * datastream);
-   virtual bool        ReceiveData(const char * datastream, const Integer len);
-   virtual bool        ReceiveData(const Real * datastream, const Integer len = 0);
-   Subscriber        * Next(void);
-   bool                Add(Subscriber * s);
-   bool                Remove(Subscriber * s, const bool del);
+   virtual bool Initialize();
+   virtual bool ReceiveData(const char * datastream);
+   virtual bool ReceiveData(const char * datastream, const Integer len);
+   virtual bool ReceiveData(const Real * datastream, const Integer len = 0);
+   virtual bool FlushData();
    
-   void                Activate(bool state = true);
-   bool                IsActive();
+   Subscriber*  Next(void);
+   bool Add(Subscriber *s);
+   bool Remove(Subscriber *s, const bool del);
+   
+   void Activate(bool state = true);
+   bool IsActive();
     
 protected:
    enum
@@ -63,12 +65,14 @@ protected:
       SubscriberParamCount = GmatBaseParamCount,
    };
    
-   const char        * data;
-   Subscriber        * next;
-   bool                active;
+   const char *data;
+   Subscriber *next;
+   bool        active;
+   bool        isEndOfReceive;
    
-   virtual bool        Distribute(Integer len) = 0;
-   virtual bool        Distribute(const Real * dat, Integer len);
+   virtual bool Distribute(Integer len) = 0;
+   virtual bool Distribute(const Real *dat, Integer len);
+   
 private:
 
 };
