@@ -31,7 +31,6 @@ BEGIN_EVENT_TABLE(ParameterSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    
    EVT_BUTTON(ID_COLOR_BUTTON, ParameterSetupPanel::OnColorButtonClick)
-   EVT_COMBOBOX(ID_COMBO, ParameterSetupPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, ParameterSetupPanel::OnTextUpdate)
 END_EVENT_TABLE()
 
@@ -63,13 +62,6 @@ void ParameterSetupPanel::Create()
    //-------------------------------------------------------
    // for Variable Setup
    //-------------------------------------------------------
-   // wxString
-   wxString strCoordArray[] = { wxT("") };
-   
-   //wxStaticText
-   wxStaticText *coordStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Coordinate System"),
-                       wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *nameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Name"),
@@ -98,12 +90,7 @@ void ParameterSetupPanel::Create()
       new wxButton(this, ID_COLOR_BUTTON, wxT(""),
                    wxDefaultPosition, wxSize(25, 20), 0);
    mColorButton->SetBackgroundColour(mColor);
-   
-   // wxComboBox
-   mCoordComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                  wxSize(100,-1), 1, strCoordArray, wxCB_DROPDOWN);
-    
-    
+      
    // wxSizers
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -124,8 +111,6 @@ void ParameterSetupPanel::Create()
    top1FlexGridSizer->Add(mVarExpTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
    // detail
-   detailsBoxSizer->Add(coordStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(mCoordComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(colorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
 
@@ -215,13 +200,6 @@ void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
       mIsExpChanged = true;
       theApplyButton->Enable();
    }
-}
-
-//------------------------------------------------------------------------------
-// void OnComboBoxChange(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterSetupPanel::OnComboBoxChange(wxCommandEvent& event)
-{
 }
 
 //------------------------------------------------------------------------------

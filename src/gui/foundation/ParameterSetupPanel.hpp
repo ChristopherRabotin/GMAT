@@ -39,7 +39,6 @@ private:
    
    wxButton *mColorButton;
    
-   wxComboBox *mCoordComboBox;
    wxBoxSizer *mPageBoxSizer;
    wxStaticBoxSizer *mVarStaticBoxSizer;
    
@@ -50,7 +49,6 @@ private:
     
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
-   void OnComboBoxChange(wxCommandEvent& event);
    void OnColorButtonClick(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
@@ -62,7 +60,6 @@ private:
       ID_LISTBOX,
       ID_BUTTON,
       ID_COLOR_BUTTON,
-      ID_COMBO,
       ID_TEXTCTRL
    };
 };

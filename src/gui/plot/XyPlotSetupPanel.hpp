@@ -54,18 +54,18 @@ protected:
    wxListBox *mPropertyListBox;
    wxListBox *mXSelectedListBox;
    wxListBox *mYSelectedListBox;
-
+   
    wxButton *mAddXButton;
    wxButton *mAddYButton;
    wxButton *mLineColorButton;
-
+   
    wxCheckBox *showPlotCheckBox;
    wxCheckBox *showGridCheckBox;
    wxCheckBox *targetStatusCheckBox;
    
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mParamOptionBoxSizer;
-
+   
    void OnAddX(wxCommandEvent& event);
    void OnAddY(wxCommandEvent& event);
    void OnRemoveX(wxCommandEvent& event);
@@ -78,14 +78,14 @@ protected:
    void OnCreateVariable(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnLineColorClick(wxCommandEvent& event);
-
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
@@ -108,7 +108,7 @@ protected:
 private:
    void ShowParameterOption(const wxString &scName, bool show = true);
    void ShowCoordSystem();
-   wxString GetNewParam();
+   wxString GetParamName();
    Parameter* CreateParameter(const wxString &name);
 };
 #endif

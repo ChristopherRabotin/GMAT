@@ -110,7 +110,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
 void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 {
    wxString oldParam = mXSelectedListBox->GetStringSelection();
-   wxString newParam = GetNewParam();
+   wxString newParam = GetParamName();
    
    if (!oldParam.IsSameAs(newParam))
    {
@@ -141,7 +141,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
 {
    // get string in first list and then search for it in the second list
-   wxString newParam = GetNewParam();
+   wxString newParam = GetParamName();
    int found = mYSelectedListBox->FindString(newParam);
    
    // if the string wasn't found in the second list, insert it
@@ -745,30 +745,44 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
 void XyPlotSetupPanel::ShowCoordSystem()
 {
    // get parameter pointer
-   wxString newParam = GetNewParam();
-   Parameter *param = CreateParameter(newParam);
+   wxString paramName = GetParamName();
+   Parameter *mCurrParam = CreateParameter(paramName);
    
-   if (param->IsCoordSysDependent())
+   if (mCurrParam->IsCoordSysDependent())
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
+      mCoordSysComboBox->Clear();
+      mCoordSysComboBox->Show();
    }
-   else if (param->IsOriginDependent())
+   else if (mCurrParam->IsOriginDependent())
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
+      
+      mCoordSysComboBox->Clear();
+      int bodyCount = theGuiManager->GetNumConfigBody();
+      wxString *bodyList = theGuiManager->GetConfigBodyList();
+      
+      for (int i=0; i<bodyCount; i++)
+         mCoordSysComboBox->Append(bodyList[i]);
+      
+      mCoordSysComboBox->SetStringSelection
+         (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCoordSysComboBox->Show();
    }
    else
    {
       mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
    }
    
 }
 
 //------------------------------------------------------------------------------
-// wxString GetNewParam()
+// wxString GetParamName()
 //------------------------------------------------------------------------------
-wxString XyPlotSetupPanel::GetNewParam()
+wxString XyPlotSetupPanel::GetParamName()
 {
    if (mUseUserParam)
    {
@@ -776,7 +790,12 @@ wxString XyPlotSetupPanel::GetNewParam()
    }
    else
    {
-      return mObjectComboBox->GetStringSelection() + "." +
+      wxString depObj = "";
+      
+      if (mCoordSysComboBox->IsShown())
+         depObj = mCoordSysComboBox->GetStringSelection();
+      
+      return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
          mPropertyListBox->GetStringSelection();
    }
 }
@@ -792,16 +811,23 @@ wxString XyPlotSetupPanel::GetNewParam()
 Parameter* XyPlotSetupPanel::CreateParameter(const wxString &name)
 {
    std::string paramName(name.c_str());
-   std::string objName(mObjectComboBox->GetStringSelection().c_str());
+   std::string ownerName(mObjectComboBox->GetStringSelection().c_str());
    std::string propName(mPropertyListBox->GetStringSelection().c_str());
+   std::string depObjName = "";
 
+   if (mCoordSysComboBox->IsShown())
+      depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+   
    Parameter *param = theGuiInterpreter->GetParameter(paramName);
 
    // create a parameter if it does not exist
    if (param == NULL)
    {
       param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+      param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
+      
+      if (depObjName != "")
+         param->SetStringParameter("DepObject", depObjName);
    }
 
    return param;
