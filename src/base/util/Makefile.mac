@@ -12,6 +12,7 @@
 #             2005/02/02 - renamed SphericalOne to SphericalAZFPA and 
 #                          SphericalTwo to SphericalRADEC
 #             2005/02/08 - Added ModKeplerian
+#             2005/02/09 - W. Shoan - added TimeSystemConverter
 #
 #
 # Define the marco for the top-level directories
@@ -23,7 +24,8 @@ SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
 	GregorianDate.cpp Keplerian.cpp LeapSecsFileReader.cpp Linear.cpp \
 	ModKeplerian.cpp RgbColor.cpp RealUtilities.cpp Rmatrix.cpp \
 	Rmatrix33.cpp Rvector.cpp Rvector3.cpp Rvector6.cpp Spherical.cpp \
-	SphericalAZFPA.cpp SphericalRADEC.cpp StringTokenizer.cpp UtcDate.cpp
+	SphericalAZFPA.cpp SphericalRADEC.cpp StringTokenizer.cpp \
+	TimeSystemConverter.cpp UtcDate.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
