@@ -51,12 +51,14 @@ public:
     virtual Real* GetState(void)
     { return state; }
 
-    
     // Default values for spacecraft 
     static const Real EPOCH; 
     static const Real SEMI_MAJOR_AXIS; 
-    static const Real ARG_OF_PERIGEE; 
+    static const Real ECCENTRICITY;
     static const Real INCLINATION; 
+    static const Real RIGHT_ASCENSION;
+    static const Real ARG_OF_PERIGEE; 
+    static const Real MEAN_ANOMALY;
     static const std::string REF_BODY; 
     static const std::string REF_FRAME; 
     static const std::string REF_PLANE; 
@@ -85,6 +87,7 @@ protected:
     Integer      refPlaneID; 
 
 private:
+    void InitializeValues();
 
 };
 
