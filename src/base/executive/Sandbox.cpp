@@ -556,8 +556,12 @@ void Sandbox::Clear()
    std::map<std::string, GmatBase *>::iterator omi;
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
-      if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
-          ((omi->second)->GetType() == Gmat::FORMATION))
+//      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
+//         publisher->Unsubscribe((Subscriber*)(omi->second));
+      if (   ((omi->second)->GetType() == Gmat::SPACECRAFT)
+          || ((omi->second)->GetType() == Gmat::FORMATION)
+//          || ((omi->second)->GetType() == Gmat::SUBSCRIBER)
+         )
          delete omi->second;
    }
    
@@ -570,8 +574,9 @@ void Sandbox::Clear()
 //------------------------------------------------------------------------------
 // bool AddSubscriber(Subscriber *sub)
 //------------------------------------------------------------------------------
-bool Sandbox::AddSubscriber(Subscriber *sub)
+bool Sandbox::AddSubscriber(Subscriber *subsc)
 {
+   Subscriber *sub = (Subscriber *)(subsc->Clone());
 #if DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::AddSubscriber() name = %s\n",
