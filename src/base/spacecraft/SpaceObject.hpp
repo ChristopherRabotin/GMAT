@@ -22,10 +22,11 @@
 #define SPACEOBJECT_HPP
 
 #include "GmatBase.hpp"
+#include "SpacePoint.hpp"
 #include "PropState.hpp"
 #include "SpaceObjectException.hpp"
 
-class SpaceObject : public GmatBase
+class GMAT_API SpaceObject : public SpacePoint
 {
 public:
 	SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr, 
@@ -46,6 +47,12 @@ public:
 //   virtual std::string GetStringParameter(const Integer id) const;
 //   virtual bool SetStringParameter(const Integer id, const std::string &value);
    
+   // temporarily here *************************************************
+   virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
+   // temporarily here *************************************************
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
                        GetParameterType(const Integer id) const;
@@ -57,15 +64,15 @@ protected:
    /// Enumerated parameter IDs   
    enum
    {
-       EPOCH_PARAM= GmatBaseParamCount,
+       EPOCH_PARAM= SpacePointParamCount,
        SpaceObjectParamCount
    };
    /// Array of supported parameters
    static const std::string PARAMETER_TEXT[SpaceObjectParamCount - 
-                                           GmatBaseParamCount];
+                                           SpacePointParamCount];
    /// Array of parameter types
    static const Gmat::ParameterType PARAMETER_TYPE[SpaceObjectParamCount - 
-                                                   GmatBaseParamCount];
+                                                   SpacePointParamCount];
    
 };
 

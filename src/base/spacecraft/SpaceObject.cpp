@@ -22,14 +22,14 @@
 
 
 const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount - 
-                                              GmatBaseParamCount] =
+                                              SpacePointParamCount] =
    {
       "Epoch"
    };
 
 
 const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount - 
-                                                      GmatBaseParamCount] =
+                                                      SpacePointParamCount] =
    {
       Gmat::REAL_TYPE
    };
@@ -37,7 +37,7 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
 
 SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr, 
                          const std::string &nomme) :
-   GmatBase       (typeId, typeStr, nomme)
+   SpacePoint       (typeId, typeStr, nomme)
 {
 }
 
@@ -48,7 +48,7 @@ SpaceObject::~SpaceObject()
 
 
 SpaceObject::SpaceObject(const SpaceObject& so) :
-   GmatBase       (so),
+   SpacePoint     (so),
    state          (so.state)
 {
 }
@@ -81,39 +81,62 @@ Real SpaceObject::SetEpoch(const Real ep)
    return state.SetEpoch(ep);
 }
 
+// temporarily here *************************************************
+const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
+{
+   PropState ps = GetState();
+  // Rvector6& itsState(ps.GetState());
+   return Rvector6(ps.GetState()); // temporary
+}
+const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
+{
+   PropState ps    = GetState();
+   Real      *st = ps.GetState();
+   Rvector6 itsState(st);
+   return (itsState.GetR());  // temporary
+}
+
+const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
+{
+   PropState ps = GetState();
+   Real      *st = ps.GetState();
+   Rvector6 itsState(st);
+   return (itsState.GetV());  // temporary
+}
+// temporarily here *************************************************
 
 Integer SpaceObject::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatBaseParamCount; i < SpaceObjectParamCount; i++)
+   for (Integer i = SpacePointParamCount; i < SpaceObjectParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (str == PARAMETER_TEXT[i - SpacePointParamCount])
          return i;
    }
    
-   return GmatBase::GetParameterID(str);
+   return SpacePoint::GetParameterID(str);
 }
 
 
 std::string SpaceObject::GetParameterText(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < SpaceObjectParamCount)
-      return PARAMETER_TEXT[id - GmatBaseParamCount];
-   return SpaceObject::GetParameterText(id);
+   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
+      return PARAMETER_TEXT[id - SpacePointParamCount];
+   return SpacePoint::GetParameterText(id);
 }
 
 
 Gmat::ParameterType SpaceObject::GetParameterType(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < SpaceObjectParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
+      return PARAMETER_TYPE[id - SpacePointParamCount];
    
-   return GmatBase::GetParameterType(id);
+   return SpacePoint::GetParameterType(id);
 }
 
 
 std::string SpaceObject::GetParameterTypeString(const Integer id) const
 {
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -121,7 +144,7 @@ Real SpaceObject::GetRealParameter(const Integer id) const
 {
    if (id == EPOCH_PARAM)
       return state.GetEpoch();
-   return GmatBase::GetRealParameter(id);
+   return SpacePoint::GetRealParameter(id);
 }
 
 
@@ -135,7 +158,7 @@ Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 {
    if (id == EPOCH_PARAM)
       return state.SetEpoch(value);
-   return GmatBase::GetRealParameter(id);
+   return SpacePoint::GetRealParameter(id);
 }
 
 
