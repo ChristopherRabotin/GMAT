@@ -17,7 +17,6 @@
 
 #include "AtmosphereModel.hpp"
 #include "CelestialBody.hpp"
-#include "SolarSystem.hpp"
 #include "A1Mjd.hpp"
 
 class JacchiaRobertsAtmosphere : public AtmosphereModel
@@ -32,8 +31,7 @@ public:
     bool Density(Real *position, Real *density, Real epoch=21545.0, Integer count = 1);
 
    Real  JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],
-                      Real a1_time, FILE *tkptr, bool new_file,
-                      Integer istat);
+                      Real a1_time, bool new_file);
    Real  exotherm(Real space_craft[3], Real sun[3], GEOPARMS *geo,
                        Real height, Real sun_dec, Real geo_lat);
    Real  rho_100(Real height, Real temperature);
@@ -50,7 +48,7 @@ public:
    
    Real length_of(Real v[3]);
    Real dot_product(Real a[3] , Real b[3]);
-   virtual void SetSolarSystem(SolarSystem *solsys);
+   
    void GetEarth();                             
                                                                                                  
 protected:
@@ -58,8 +56,7 @@ protected:
    JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
 private:
    CelestialBody *earth;
-   /// Solarsystem
-   SolarSystem *solarSystem;
+   
    ///  Auxiliary temperature related quantities
    Real root1;
    Real root2;
@@ -72,4 +69,4 @@ private:
    Real sum;
 };
 
-#endif // Msise90Atmosphere_hpp
+#endif // JacchiaRobertsAtmosphere_hpp
