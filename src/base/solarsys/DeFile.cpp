@@ -44,6 +44,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <iostream>
+using namespace std;  //********************
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -262,7 +265,12 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    //double tmpJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
    double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
                    "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+   //double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+   //                "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+   //double absJD  = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    double absJD  = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+   
+   //cout << "absJd = " << absJD << endl;
 
 
    // if we're asking for the moon state, just get it and return it, as
