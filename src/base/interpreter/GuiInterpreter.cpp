@@ -59,9 +59,9 @@ bool GuiInterpreter::Build(void)
    return false;
 }
 
-bool GuiInterpreter::Interpret(GmatBase *obj)
+bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
 {
-   return Interpreter::Interpret(obj);
+   return Interpreter::Interpret(obj, generator);
 }
 
 //------------------------------------------------------------------------------

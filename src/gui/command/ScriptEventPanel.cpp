@@ -15,8 +15,10 @@
 #include "ScriptEventPanel.hpp"
 #include "MessageInterface.hpp"
 
+#include <sstream>      // for std::stringstream
 
-//#define DEBUG_PARAM_PANEL 1
+
+//#define DEBUG_SCRIPTEVENT_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -116,9 +118,25 @@ void ScriptEventPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::SaveData()
 {
-   std::string scriptText = mFileContentsTextCtrl->GetValue().c_str();
-   theCommand->SetGeneratingString(scriptText);
-   theGuiInterpreter->Interpret(theCommand);
+   std::stringstream scriptText;
+   scriptText << mFileContentsTextCtrl->GetValue().c_str();
+   std::string firstBlock;
+   scriptText >> firstBlock;
+
+   #ifdef DEBUG_SCRIPTEVENT_PANEL
+      MessageInterface::PopupMessage(Gmat::INFO_, "First block is [" +
+         firstBlock + "]");
+   #endif
+
+   if (firstBlock != theCommand->GetTypeName()) {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+         "Changing command types from " + theCommand->GetTypeName() +
+         " to " + firstBlock + " is not yet supported.");
+      return;
+   }
+
+   theCommand->SetGeneratingString(scriptText.str());
+   theGuiInterpreter->Interpret(theCommand, scriptText.str());
 }
 
 //------------------------------------------------------------------------------

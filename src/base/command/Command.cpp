@@ -169,7 +169,11 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
 //------------------------------------------------------------------------------
 void GmatCommand::SetGeneratingString(const std::string &gs)
 {
-   generatingString = gs;
+   // Drop the leading white space
+   unsigned start = 0;
+   while ((start < gs.length()) && (gs[start] == ' '))
+      ++start;
+   generatingString = gs.substr(start);
 }
 
 //------------------------------------------------------------------------------

@@ -69,7 +69,8 @@ public:
    virtual bool                    Interpret(void) = 0;
    bool                            InterpretObject(std::string objecttype,
                                                     std::string objectname);
-   virtual bool                    Interpret(GmatBase *obj);
+   virtual bool                    Interpret(GmatBase *obj,
+                                             const std::string generator);
 
    // The "Build" methods take GMAT objects and write out scripts or subscripts
    virtual bool                    Build(void) = 0;
@@ -215,6 +216,10 @@ protected:
                                                     std::string &paramType,
                                                     std::string &paramObj,
                                                     std::string &parmSystem);
+                                                    
+   bool                          InterpretTextBlock(GmatCommand* cmd,
+                                    const std::string block);
+   StringArray                   SeparateLines(const std::string block);
 };
 
 #endif // INTERPRETER_HPP

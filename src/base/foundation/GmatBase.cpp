@@ -2004,9 +2004,18 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
                                                const std::string &useName)
 {
    StringArray sar;
-   
    std::string genstr = GetGeneratingString(mode, prefix, useName);
-   sar.push_back(genstr);
+   std::string text;
+   Integer start = 0, end = 0, len = genstr.length();
+
+   while (end < len) {
+      if (genstr[end] == '\n') {
+         text = genstr.substr(start, end - start);
+         sar.push_back(text);
+         start = end+1;
+      }
+      ++end;
+   }
    
    return sar;
 }

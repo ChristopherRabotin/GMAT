@@ -311,15 +311,52 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     return false;
 }
 
-bool Interpreter::Interpret(GmatBase *obj)
+
+//------------------------------------------------------------------------------
+// bool Interpret(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Reads the generatingString for an object and builds the corresponding data.
+ *
+ * This method is used to rebuild pieces of a mission sequence when a user makes
+ * changes on a ScriptEvent panel, and to build the commands that are encoded
+ * in a BeginScript/EndScript block.
+ *
+ * @param obj The object that is being reinterpreted.
+ *
+ * @return true on success, false on failure.
+ *
+ * @note Interpret only works for GmatCommands at this time.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::Interpret(GmatBase *obj, const std::string generator)
 {
    if (obj->GetType() != Gmat::COMMAND)
       throw InterpreterException(
          "Interpret(GmatBase*) currently only supports GmatCommands.");
-   MessageInterface::ShowMessage(
-      "%s\n%s\n  \"%s\"\n",
-      "Interpret(GmatBase*)is under construction.  Please be patient!",
-      "String that is interpreted:", obj->GetGeneratingString().c_str());
+
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "%s\n%s\n\"%s\"\n",
+         "\nInterpret(GmatBase*)is under construction.  Please be patient!",
+         "String that is interpreted:", obj->GetGeneratingString().c_str());
+   #endif
+   
+   if (obj->GetTypeName() == "BeginScript") {
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("Parsing in-line text:\n%s\n",
+            generator.c_str());
+      #endif
+      return InterpretTextBlock((GmatCommand*)obj, generator);
+   }
+   else {
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("Resetting command using\n%s\n",
+            generator.c_str());
+      #endif
+      AssembleCommand(generator, (GmatCommand*)obj);
+   }
+
    return true;
 }
 
@@ -610,6 +647,13 @@ Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
 //------------------------------------------------------------------------------
 bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cmd)
 {
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Interpreter::AssembleCommand(\"%s\", %s) called\n",
+             scriptline.c_str(),
+             ((cmd == NULL) ? "NULL" : cmd->GetTypeName().c_str()));
+   #endif
+
    StringArray topLevel = Decompose(scriptline);
    StringArray sublevel[10];  // Allow up to 10 deep for now
    Integer     cl = 0;        // Current level of decomposition
@@ -620,11 +664,10 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT;
    
    #ifdef DEBUG_TOKEN_PARSING
-      std::cout << "Top level command decomposition:\n   size = " 
-                << topLevel.size() << "\n   ";
+      MessageInterface::ShowMessage(
+         "Top level command decomposition:\n   size = %d\n",topLevel.size());
       for (StringArray::iterator i = topLevel.begin(); i != topLevel.end(); ++i)
-         std::cout << *i << "\n   ";
-      std::cout << std::endl;
+      MessageInterface::ShowMessage("      %s\n", i->c_str());
    #endif
    
    // First construct the Command if the input is NULL
@@ -647,6 +690,15 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    
    // Perform Command specific tasks: Setting string data, and so forth
    std::string cmdCase = cmd->GetTypeName();
+
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage("Setting up a %s command\n",
+         cmdCase.c_str());
+   #endif
+
+   if (cmd->InterpretAction())
+      return true;
+
    Integer condNumber = 1, index = 0;
    if ((cmdCase == "If") || (cmdCase == "While")) {
       // chain through the conditions
@@ -748,11 +800,17 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
             #endif
             type = object[ol]->GetType();
             try {
+               #ifdef DEBUG_TOKEN_PARSING
+                  MessageInterface::ShowMessage("   Trying ref object name\n");
+               #endif
                if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
                   throw InterpreterException("Cannot set object " + (*i) + 
                                              " for command " + (cmd->GetTypeName()));
             }
             catch (BaseException &ex) {
+               #ifdef DEBUG_TOKEN_PARSING
+                  MessageInterface::ShowMessage("   Trying ref object\n");
+               #endif
                if (!cmd->SetRefObject(object[ol], type, object[ol]->GetName(), 0))
                   throw;
             }
@@ -766,6 +824,11 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
             return false;
       }
    }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage("Interpreter::AssembleCommand finished\n");
+   #endif
+
    return true;
 }
 
@@ -2363,4 +2426,119 @@ bool Interpreter::InterpretParameter(const std::string text,
 }
 
 
+//------------------------------------------------------------------------------
+//  bool InterpretTextBlock(GmatCommand* cmd, const std::string block)
+//------------------------------------------------------------------------------
+/**
+ * Takes a block of script and interprets it, building the commands contained in
+ * the block and inserting these commands immediately after theinput command.
+ *
+ * @param cmd The command at the start of the block.
+ * @param block The script
+ * 
+ * @return true if the interpretation worked.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
+{
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Interpreter::InterpretTextBlock entered\n");
+   #endif
+
+   StringArray sar = SeparateLines(block);
+   
+   if (cmd->GetTypeName() == "BeginScript") {
+      GmatCommand *current, *subsequent = cmd->GetNext();
+      while ((subsequent != NULL) &&
+             (subsequent->GetTypeName() != "EndScript")) {
+         // Remove all of the commands between cmd and its terminator
+         current = subsequent;
+         subsequent = current->GetNext();
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   Destroying a command of type %s\n",
+               current->GetTypeName().c_str());
+         #endif
+         
+         cmd->Remove(current);
+         delete current;
+      }
+      
+      // Now build the commands in the block, one line at a time
+      current = cmd;
+      std::string cmdType;
+      for (StringArray::iterator i = sar.begin()+1; i != sar.end()-1; ++i) {
+         // Grab the name for the command
+         std::stringstream cmdLine;
+         cmdLine.clear();
+         cmdLine << *i;
+         cmdLine >> cmdType;
+
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   Constucting a command of type %s\n", cmdType.c_str());
+         #endif
+
+         // Create the command
+         subsequent = moderator->CreateCommand(cmdType);
+         if (!subsequent)
+            throw InterpreterException(
+               "Interpreter::InterpretTextBlock failed to create a " + cmdType +
+               " command; please check the script syntax.");
+         subsequent->SetGeneratingString(*i);
+         cmd->Insert(subsequent, current);
+         if (!AssembleCommand(*i, subsequent))
+            throw InterpreterException(
+               "Interpreter::InterpretTextBlock failed to assemble a " +
+               cmdType + " command from the line\n" + (*i) +
+               "\nPlease check the script syntax.");
+         current = subsequent;
+      }
+   }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Interpreter::InterpretTextBlock completed\n");
+   #endif
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  StringArray Interpreter::SeparateLines(const std::string block)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a multiline block of script into separate lines.
+ *
+ * @param block The script
+ *
+ * @return An array containing the individual script lines.
+ */
+//------------------------------------------------------------------------------
+StringArray Interpreter::SeparateLines(const std::string block)
+{
+   StringArray sar;
+   std::string text;
+   Integer start = 0, end = 0, len = block.length();
+
+   while (end < len) {
+      if (block[end] == '\n') {
+         text = block.substr(start, end - start);
+         sar.push_back(text);
+         start = end+1;
+      }
+      ++end;
+   }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage("Broke this text:\n\n%s\ninto these lines:\n",
+         block.c_str());
+      for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+   #endif
+   
+   return sar;
+}
 

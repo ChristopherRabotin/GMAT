@@ -49,7 +49,7 @@ public:
 
    virtual bool Interpret(void);
    virtual bool Build(void);
-   virtual bool Interpret(GmatBase *obj);
+   virtual bool Interpret(GmatBase *obj, const std::string generator);
 
    bool IsInitialized();
    void Initialize();
