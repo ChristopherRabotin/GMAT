@@ -449,17 +449,17 @@ SpaceObject* Moderator::GetSpacecraft(const std::string &name)
 }
 
 
-// Spacecraft
+// Hardware
 //------------------------------------------------------------------------------
-// SpaceObject* CreateSpacecraft(const std::string &type, const std::string &name)
+// Hardware* CreateHardware(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Creates a spacecraft object by given name.
+ * Creates a Hardware object by given name.
  *
  * @param <type> object type
  * @param <name> object name
  *
- * @return spacecraft object pointer
+ * @return Hardware object pointer
  */
 //------------------------------------------------------------------------------
 Hardware* Moderator::CreateHardware(const std::string &type, const std::string &name)
@@ -513,7 +513,7 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
 // Hardware* GetHardware(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a hardware object pointer by given name and add to configuration.
+ * Retrieves a Hardware object pointer by given name and add to configuration.
  *
  * @param <name> object name
  *
@@ -1592,8 +1592,17 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    }
    else if (type == "Propagate")
    {
+
       cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
-      cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
+
+      StringArray &formList = GetListOfConfiguredItems(Gmat::FORMATION);
+      
+      // if formation exist, set first formation to command (loj: 1/7/05)
+      if (formList.size() > 0)
+         cmd->SetObject(formList[0], Gmat::SPACECRAFT);
+      else
+         cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
+      
       cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
       cmd->SetSolarSystem(theDefaultSolarSystem);
    }
@@ -2819,22 +2828,19 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
-   StringArray &configList = GetListOfConfiguredItems(Gmat::SPACECRAFT);
-   
-   if (configList.size() > 0)
+   StringArray &soConfigList = GetListOfConfiguredItems(Gmat::SPACECRAFT);
+  
+   if (soConfigList.size() > 0)
    {
-      // return 1st Spacecraft from the list
-      SpaceObject *so = GetSpacecraft(configList[0]);
-      if (so->GetType() == Gmat::SPACECRAFT)
-         return (Spacecraft*)so;
+      // return 1st Spacecraft
+      SpaceObject *so = GetSpacecraft(soConfigList[0]);
+      return (Spacecraft*)so;
    }
    else
    {
       // create Spacecraft
       return (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
    }
-   
-   return NULL;
 }
 
 //------------------------------------------------------------------------------
