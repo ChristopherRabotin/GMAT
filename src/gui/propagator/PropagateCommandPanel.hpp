@@ -35,8 +35,8 @@ public:
 
 private:
 
-   static const int MAX_PROP_ROW = 10;
-   static const int MAX_STOPCOND_ROW = 20;
+   static const int MAX_PROP_ROW = 5;
+   static const int MAX_STOPCOND_ROW = 5;
    static const int PROP_NAME_COL = 0;
    static const int PROP_SCS_COL = 1;
    static const int STOPCOND_NAME_COL = 0;
@@ -47,6 +47,7 @@ private:
       bool isChanged;
       wxString propName;
       wxString scNames;
+      wxArrayString scNameList;
       PropSetup *propSetupPtr;
    };
     
@@ -93,12 +94,10 @@ private:
    Integer propID;
    Integer scID;
    Integer numOfStopCond;
-   Integer currentRowStopCond;
-   Integer currentRowProp;
-   Integer currentRow;
+   Integer tempPropCount;
    PropType tempProp[MAX_PROP_ROW];
-   StopCondType tempStopCond[MAX_STOPCOND_ROW];
-        
+   StopCondType tempStopCond[MAX_PROP_ROW][MAX_STOPCOND_ROW];
+   
    std::string propSetupName;
    wxString propNameString;
    wxString scListString;
@@ -120,10 +119,10 @@ private:
 
    // Layout & data handling methods
    void DisplayPropagator();
-   void DisplayStopCondition();
+   void DisplayStopCondition(int propRow);
    void UpdateStopCondition();
    void ClearDetailedStopCond();
-   void ShowDetailedStopCond(int row);
+   void ShowDetailedStopCond(int propRow, int stopRow);
    void ActivateUpdateButton();
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
