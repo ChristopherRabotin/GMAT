@@ -27,23 +27,29 @@ class GMAT_API StopCondition : public BaseStopCondition
 {
 public:
 
-    StopCondition(const std::string &name = "",
-                  const std::string &desc = "",
-                  Parameter *epochParam = NULL,
-                  Parameter *stopParam = NULL,
-                  const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
-                  const Real &tol = GmatRealConst::REAL_TOL,
-                  const Integer repeatCount = 1,
-                  RefFrame *refFrame = NULL,
-                  Interpolator *interp = NULL);
-    StopCondition(const StopCondition &copy);
-    StopCondition& operator= (const StopCondition &right); 
-    virtual ~StopCondition();
+   StopCondition(const std::string &name = "",
+                 const std::string &desc = "",
+                 Parameter *epochParam = NULL,
+                 Parameter *stopParam = NULL,
+                 const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
+                 const Real &tol = GmatRealConst::REAL_TOL,
+                 const Integer repeatCount = 1,
+                 RefFrame *refFrame = NULL,
+                 Interpolator *interp = NULL);
+   StopCondition(const StopCondition &copy);
+   StopCondition& operator= (const StopCondition &right); 
+   virtual ~StopCondition();
 
-    virtual bool Evaluate();
+   virtual bool Evaluate();
 
 protected:
 
+   bool CheckOnPeriapsis();
+   bool CheckOnApoapsis();
+   bool CheckOnAnomaly(Real anomaly);
+
+private:
+   
 };
 
 #endif // StopCondition_hpp
