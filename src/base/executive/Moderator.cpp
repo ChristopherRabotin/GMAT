@@ -361,7 +361,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSpacecraft() Unable to create Spacecraft "
           "name: %s already exist\n", name.c_str());
@@ -440,7 +440,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropagator() Unable to create Propagator "
           "name: %s already exist\n", name.c_str());
@@ -513,7 +513,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
@@ -598,7 +598,7 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateAtmosphereModel() Unable to create AtmosphereModel "
           "name: %s already exist\n", name.c_str());
@@ -677,7 +677,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateBurn() Unable to create Burn "
           "name: %s already exist\n", name.c_str());
@@ -721,6 +721,11 @@ Burn* Moderator::GetBurn(const std::string &name)
 Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &name)
 {
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateParameter() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+#endif
+   
    // if Parameter name doesn't exist, create Parameter -- loj: 6/30/04
    if (GetParameter(name) == NULL)
    {
@@ -751,7 +756,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateParameter() Unable to create Parameter "
           "name: %s already exist\n", name.c_str());
@@ -924,7 +929,7 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSolver() Unable to create Solver "
           "name: %s already exist\n", name.c_str());
@@ -1005,7 +1010,7 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropSetup() Unable to create PropSetup "
           "name: %s already exist\n", name.c_str());
@@ -1071,7 +1076,7 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateCelestialBody() Unable to create CelestialBody "
           "name: %s already exist\n", name.c_str());
@@ -1216,6 +1221,11 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          if (sub->GetName() != "")
             theConfigManager->AddSubscriber(sub);
       
+#if DEBUG_CREATE_RESOURCE
+         MessageInterface::ShowMessage
+            ("Moderator::CreateSubscriber() Creating default subscriber...\n");
+#endif
+         
          if (createDefault)
          {
             if (type == "OpenGlPlot")
@@ -1242,7 +1252,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSubscriber() Unable to create Subscriber "
           "name: %s already exist\n", name.c_str());
@@ -1319,7 +1329,7 @@ Function* Moderator::CreateFunction(const std::string &type,
    }
    else
    {
-#if DEBUG_RESOUCE
+#if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() Unable to create Function "
           "name: %s already exist\n", name.c_str());
@@ -2591,10 +2601,14 @@ Parameter* Moderator::GetDefaultX()
 {
    Spacecraft *sc = GetDefaultSpacecraft();
    Parameter* param = GetParameter(sc->GetName() + ".CurrA1MJD");
-   
-   if (param == NULL)
-      CreateParameter("CurrA1MJD", sc->GetName() + ".CurrA1MJD");
 
+   //loj: 10/1/04 SetRefObjectName to param
+   if (param == NULL)
+   {
+      param = CreateParameter("CurrA1MJD", sc->GetName() + ".CurrA1MJD");
+      param->SetRefObjectName(Gmat::SPACECRAFT, sc->GetName());
+   }
+   
    return param;
 }
 
@@ -2606,9 +2620,13 @@ Parameter* Moderator::GetDefaultY()
    Spacecraft *sc = GetDefaultSpacecraft();
    Parameter* param = GetParameter(sc->GetName() + ".X");
    
+   //loj: 10/1/04  SetRefObjectName to param
    if (param == NULL)
-      CreateParameter("X", sc->GetName() + ".X");
-
+   {
+      param = CreateParameter("X", sc->GetName() + ".X");
+      param->SetRefObjectName(Gmat::SPACECRAFT, sc->GetName());
+   }
+   
    return param;
 }
 
