@@ -44,9 +44,9 @@
 //------------------------------------------------------------------------------
 CartX::CartX(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartX", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartX", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -59,12 +59,12 @@ CartX::CartX(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartX::CartX(const CartX &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartX& operator=(const CartX &right)
+// CartX& operator=(const CartX &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -72,13 +72,12 @@ CartX::CartX(const CartX &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartX&
-CartX::operator=(const CartX &right)
+CartX& CartX::operator=(const CartX &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -91,23 +90,6 @@ CartX::operator=(const CartX &right)
 CartX::~CartX()
 {
 }
-
-//  //-------------------------------------
-//  // Inherited methods from RealVar
-//  //-------------------------------------
-
-//  //------------------------------------------------------------------------------
-//  // virtual Real EvaluateReal()
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return newly evaluated value of parameter
-//   */
-//  //------------------------------------------------------------------------------
-//  Real CartX::EvaluateReal()
-//  {
-//      Evaluate();
-//      return mRealValue;
-//  }
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -124,12 +106,12 @@ CartX::~CartX()
 //------------------------------------------------------------------------------
 bool CartX::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartX");
+   mRealValue = OrbitData::GetCartReal("CartX");
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -156,9 +138,9 @@ bool CartX::Evaluate()
 //------------------------------------------------------------------------------
 CartY::CartY(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartY", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartY", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -171,12 +153,12 @@ CartY::CartY(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartY::CartY(const CartY &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartY& operator=(const CartY &right)
+// CartY& operator=(const CartY &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -184,13 +166,12 @@ CartY::CartY(const CartY &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartY&
-CartY::operator=(const CartY &right)
+CartY& CartY::operator=(const CartY &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -203,24 +184,6 @@ CartY::operator=(const CartY &right)
 CartY::~CartY()
 {
 }
-
-//  //-------------------------------------
-//  // Inherited methods from RealVar
-//  //-------------------------------------
-
-//  //------------------------------------------------------------------------------
-//  // virtual Real EvaluateReal()
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return newly evaluated value of parameter
-//   */
-//  //------------------------------------------------------------------------------
-//  Real CartY::EvaluateReal()
-//  {
-//      Evaluate();
-//      return mRealValue;
-//  }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -237,12 +200,12 @@ CartY::~CartY()
 //------------------------------------------------------------------------------
 bool CartY::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartY");
+   mRealValue = OrbitData::GetCartReal("CartY");
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -269,9 +232,9 @@ bool CartY::Evaluate()
 //------------------------------------------------------------------------------
 CartZ::CartZ(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartZ", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartZ", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -284,12 +247,12 @@ CartZ::CartZ(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartZ::CartZ(const CartZ &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartZ& operator=(const CartZ &right)
+// CartZ& operator=(const CartZ &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -297,13 +260,12 @@ CartZ::CartZ(const CartZ &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartZ&
-CartZ::operator=(const CartZ &right)
+CartZ& CartZ::operator=(const CartZ &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -316,23 +278,6 @@ CartZ::operator=(const CartZ &right)
 CartZ::~CartZ()
 {
 }
-
-//  //-------------------------------------
-//  // Inherited methods from RealVar
-//  //-------------------------------------
-
-//  //------------------------------------------------------------------------------
-//  // virtual Real EvaluateReal()
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return newly evaluated value of parameter
-//   */
-//  //------------------------------------------------------------------------------
-//  Real CartZ::EvaluateReal()
-//  {
-//      Evaluate();
-//      return mRealValue;
-//  }
 
 //--------------------------------------
 // Inherited methods from Parameter
@@ -349,12 +294,12 @@ CartZ::~CartZ()
 //------------------------------------------------------------------------------
 bool CartZ::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartZ");    
+   mRealValue = OrbitData::GetCartReal("CartZ");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -381,9 +326,9 @@ bool CartZ::Evaluate()
 //------------------------------------------------------------------------------
 CartVx::CartVx(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartVx", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartVx", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -396,12 +341,12 @@ CartVx::CartVx(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartVx::CartVx(const CartVx &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartVx& operator=(const CartVx &right)
+// CartVx& operator=(const CartVx &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -409,13 +354,12 @@ CartVx::CartVx(const CartVx &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartVx&
-CartVx::operator=(const CartVx &right)
+CartVx& CartVx::operator=(const CartVx &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -444,12 +388,12 @@ CartVx::~CartVx()
 //------------------------------------------------------------------------------
 bool CartVx::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartVx");    
+   mRealValue = OrbitData::GetCartReal("CartVx");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //==============================================================================
@@ -475,9 +419,9 @@ bool CartVx::Evaluate()
 //------------------------------------------------------------------------------
 CartVy::CartVy(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartVy", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartVy", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -490,12 +434,12 @@ CartVy::CartVy(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartVy::CartVy(const CartVy &param)
-    : OrbitReal(param)
+   : OrbitReal(param)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartVy& operator=(const CartVy &right)
+// CartVy& operator=(const CartVy &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -503,13 +447,12 @@ CartVy::CartVy(const CartVy &param)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartVy&
-CartVy::operator=(const CartVy &right)
+CartVy& CartVy::operator=(const CartVy &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -538,12 +481,12 @@ CartVy::~CartVy()
 //------------------------------------------------------------------------------
 bool CartVy::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartVy");    
+   mRealValue = OrbitData::GetCartReal("CartVy");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -570,9 +513,9 @@ bool CartVy::Evaluate()
 //------------------------------------------------------------------------------
 CartVz::CartVz(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "CartVz", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "CartVz", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -585,12 +528,12 @@ CartVz::CartVz(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartVz::CartVz(const CartVz &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartVz& operator=(const CartVz &right)
+// CartVz& operator=(const CartVz &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -598,13 +541,12 @@ CartVz::CartVz(const CartVz &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartVz&
-CartVz::operator=(const CartVz &right)
+CartVz& CartVz::operator=(const CartVz &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -633,202 +575,14 @@ CartVz::~CartVz()
 //------------------------------------------------------------------------------
 bool CartVz::Evaluate()
 {
-    mRealValue = OrbitData::GetCartReal("CartVz");    
+   mRealValue = OrbitData::GetCartReal("CartVz");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
-
-//==============================================================================
-//                              RMag
-//==============================================================================
-/**
- * Implements Magnitude of Position.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// RMag(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-RMag::RMag(const std::string &name, GmatBase *obj,
-           const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "RMag", SYSTEM_PARAM, obj, desc, unit, false)
-{
-    AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// RMag(const RMag &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-RMag::RMag(const RMag &copy)
-    : OrbitReal(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// const RMag& operator=(const RMag &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const RMag&
-RMag::operator=(const RMag &right)
-{
-    if (this != &right)
-        OrbitReal::operator=(right);
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~RMag()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-RMag::~RMag()
-{
-}
-
-//--------------------------------------
-// Inherited methods from Parameter
-//--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool RMag::Evaluate()
-{
-    mRealValue = OrbitData::GetCartReal("RMag");    
-    
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
-}
-
-//==============================================================================
-//                              VMag
-//==============================================================================
-/**
- * Implements Magnitude of Velocity.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// VMag(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-VMag::VMag(const std::string &name, GmatBase *obj,
-           const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "VMag", SYSTEM_PARAM, obj, desc, unit, false)
-{
-    AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// VMag(const VMag &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-VMag::VMag(const VMag &copy)
-    : OrbitReal(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// const VMag& operator=(const VMag &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const VMag&
-VMag::operator=(const VMag &right)
-{
-    if (this != &right)
-        OrbitReal::operator=(right);
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~VMag()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-VMag::~VMag()
-{
-}
-
-//--------------------------------------
-// Inherited methods from Parameter
-//--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VMag::Evaluate()
-{
-    mRealValue = OrbitData::GetCartReal("VMag");    
-    
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
-}
 
 //==============================================================================
 //                              CartState
@@ -854,9 +608,9 @@ bool VMag::Evaluate()
 //------------------------------------------------------------------------------
 CartState::CartState(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
-    : Rvec6Var(name, "CartState", SYSTEM_PARAM, obj, desc, unit, false)
+   : Rvec6Var(name, "CartState", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -869,12 +623,12 @@ CartState::CartState(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartState::CartState(const CartState &copy)
-    : Rvec6Var(copy)
+   : Rvec6Var(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const CartState& operator=(const CartState &right)
+// CartState& operator=(const CartState &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -882,13 +636,12 @@ CartState::CartState(const CartState &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const CartState&
-CartState::operator=(const CartState &right)
+CartState& CartState::operator=(const CartState &right)
 {
-    if (this != &right)
-        Rvec6Var::operator=(right);
+   if (this != &right)
+      Rvec6Var::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -915,8 +668,8 @@ CartState::~CartState()
 //------------------------------------------------------------------------------
 Rvector6 CartState::EvaluateRvector6()
 {
-    Evaluate();
-    return mRvec6Value;
+   Evaluate();
+   return mRvec6Value;
 }
 
 
@@ -933,7 +686,7 @@ Rvector6 CartState::EvaluateRvector6()
 //------------------------------------------------------------------------------
 Integer CartState::GetNumObjects() const
 {
-    return GetNumRefObjects();
+   return GetNumRefObjects();
 }
 
 //------------------------------------------------------------------------------
@@ -941,7 +694,7 @@ Integer CartState::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* CartState::GetObject(const std::string &objTypeName)
 {
-    return GetRefObject(objTypeName);
+   return GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -955,13 +708,13 @@ GmatBase* CartState::GetObject(const std::string &objTypeName)
  */
 //------------------------------------------------------------------------------
 bool CartState::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
+                          const std::string &objName,
+                          GmatBase *obj)
 {
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
+   if (obj != NULL)
+      return SetRefObject(objType, objName, obj);
+   else
+      return false;
 }
 
 //------------------------------------------------------------------------------
@@ -975,15 +728,15 @@ bool CartState::SetObject(Gmat::ObjectType objType,
 //------------------------------------------------------------------------------
 bool CartState::AddObject(GmatBase *obj)
 {
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
+   if (obj != NULL)
+   {
+      if (AddRefObject(obj))
+         ManageObject(obj);
         
-        return true;
-    }
+      return true;
+   }
 
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -997,7 +750,7 @@ bool CartState::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool CartState::Validate()
 {
-    return ValidateRefObjects(this);
+   return ValidateRefObjects(this);
 }
 
 //------------------------------------------------------------------------------
@@ -1011,13 +764,13 @@ bool CartState::Validate()
 //------------------------------------------------------------------------------
 bool CartState::Evaluate()
 {    
-    mRvec6Value.Set(GetCartReal("CartX"),
-                    GetCartReal("CartY"),
-                    GetCartReal("CartZ"),
-                    GetCartReal("CartVx"),
-                    GetCartReal("CartVy"),
-                    GetCartReal("CartVz"));
+   mRvec6Value.Set(GetCartReal("CartX"),
+                   GetCartReal("CartY"),
+                   GetCartReal("CartZ"),
+                   GetCartReal("CartVx"),
+                   GetCartReal("CartVy"),
+                   GetCartReal("CartVz"));
 
-    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
 

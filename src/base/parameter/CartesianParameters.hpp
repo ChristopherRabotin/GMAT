@@ -14,7 +14,7 @@
 //
 /**
  * Declares Cartesian related parameter classes.
- *   CartX, CartY, CartZ, CartVx, CartVy, CartVz, RMag, VMag, CartState
+ *   CartX, CartY, CartZ, CartVx, CartVy, CartVz, CartState
  */
 //------------------------------------------------------------------------------
 #ifndef CartesianParameters_hpp
@@ -44,7 +44,7 @@ public:
           const std::string &desc = "",
           const std::string &unit = "Km");
     CartX(const CartX &copy);
-    const CartX& operator=(const CartX &right);
+    CartX& operator=(const CartX &right);
     virtual ~CartX();
 
     // The inherited methods from Parameter
@@ -71,7 +71,7 @@ public:
           const std::string &desc = "",
           const std::string &unit = "Km");
     CartY(const CartY &copy);
-    const CartY& operator=(const CartY &right);
+    CartY& operator=(const CartY &right);
     virtual ~CartY();
 
     // The inherited methods from Parameter
@@ -98,7 +98,7 @@ public:
           const std::string &desc = "",
           const std::string &unit = "Km");
     CartZ(const CartZ &copy);
-    const CartZ& operator=(const CartZ &right);
+    CartZ& operator=(const CartZ &right);
     virtual ~CartZ();
 
     // The inherited methods from Parameter
@@ -125,7 +125,7 @@ public:
            const std::string &desc = "",
            const std::string &unit = "Km/Sec");
     CartVx(const CartVx &copy);
-    const CartVx& operator=(const CartVx &right);
+    CartVx& operator=(const CartVx &right);
     virtual ~CartVx();
 
     // The inherited methods from Parameter
@@ -152,7 +152,7 @@ public:
            const std::string &desc = "",
            const std::string &unit = "Km/Sec");
     CartVy(const CartVy &copy);
-    const CartVy& operator=(const CartVy &right);
+    CartVy& operator=(const CartVy &right);
     virtual ~CartVy();
 
     // The inherited methods from Parameter
@@ -179,63 +179,9 @@ public:
            const std::string &desc = "",
            const std::string &unit = "Km/Sec");
     CartVz(const CartVz &copy);
-    const CartVz& operator=(const CartVz &right);
+    CartVz& operator=(const CartVz &right);
     virtual ~CartVz();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
-    
-protected:
-
-};
-
-//==============================================================================
-//                              RMag
-//==============================================================================
-/**
- * Declares Magnitude of Position class.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API RMag : public OrbitReal
-{
-public:
-
-    RMag(const std::string &name = "",
-         GmatBase *obj = NULL,
-         const std::string &desc = "",
-         const std::string &unit = "Km/Sec");
-    RMag(const RMag &copy);
-    const RMag& operator=(const RMag &right);
-    virtual ~RMag();
-
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
-    
-protected:
-
-};
-
-//==============================================================================
-//                              VMag
-//==============================================================================
-/**
- * Declares Magnitude of Velocity class.
- */
-//------------------------------------------------------------------------------
-
-class GMAT_API VMag : public OrbitReal
-{
-public:
-
-    VMag(const std::string &name = "",
-         GmatBase *obj = NULL,
-         const std::string &desc = "",
-         const std::string &unit = "Km/Sec");
-    VMag(const VMag &copy);
-    const VMag& operator=(const VMag &right);
-    virtual ~VMag();
-    
     // The inherited methods from Parameter
     virtual bool Evaluate();
     
@@ -261,7 +207,7 @@ public:
               const std::string &desc = "",
               const std::string &unit = "");
     CartState(const CartState &copy);
-    const CartState& operator=(const CartState &right);
+    CartState& operator=(const CartState &right);
     virtual ~CartState();
 
     // The inherited methods from Rvec6Var
