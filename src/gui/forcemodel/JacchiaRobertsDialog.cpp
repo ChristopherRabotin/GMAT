@@ -83,11 +83,7 @@ DragForce* JacchiaRobertsDialog::GetForce()
 void JacchiaRobertsDialog::Initialize()
 {  
     if (theForce == NULL)
-    {
-        MessageInterface::
-           ShowMessage("Error: The JacchiaRobertsDialog Drag Force is NULL.\n");
-        Close();
-    }
+        theForce->Initialize();
         
     useFile = false;
 }
@@ -192,17 +188,62 @@ void JacchiaRobertsDialog::LoadData()
 {   
     Initialize();
     
-    solarFluxID = theForce->GetParameterID("SolarFlux");
-    avgSolarFluxID = theForce->GetParameterID("AverageSolarFlux");
-    geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
-    solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
-    inputSourceID = theForce->GetParameterID("InputSource");
+    try
+    {
+       solarFluxID = theForce->GetParameterID("F107");
+       solarFluxTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       avgSolarFluxID = theForce->GetParameterID("F107A");
+       avgSolarFluxTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
+       geomagneticIndexTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
+       wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
 
-    solarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
-    avgSolarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
-    geomagneticIndexTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
-    
-    inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+       if (!filename.IsNull())
+          fileNameTextCtrl->SetValue(filename);
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }    
+    try
+    {
+       inputSourceID = theForce->GetParameterID("InputSource");
+       inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }       
     
     if ( inputSourceString.CmpNoCase("Constant") == 0 )
     {
@@ -216,11 +257,6 @@ void JacchiaRobertsDialog::LoadData()
        userInputRadioButton->SetValue(false);
        fileInputRadioButton->SetValue(true);
     }
-       
-    wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
-
-    if (!filename.IsNull())
-       fileNameTextCtrl->SetValue(filename);
     
     Update();
 }
@@ -236,7 +272,9 @@ void JacchiaRobertsDialog::SaveData()
         {
            inputSourceString = wxT("File");
            theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
+           MessageInterface::ShowMessage("Saved input source string\n");
            theForce->SetStringParameter(solarFluxFileID, fileNameTextCtrl->GetValue().c_str() );
+           MessageInterface::ShowMessage("Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
         }
         else
         {
