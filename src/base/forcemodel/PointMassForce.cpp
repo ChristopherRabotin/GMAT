@@ -73,14 +73,6 @@ PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
     "Radius",
     "EstimateMethod",
     "Body",
-    
-//loj: 3/18/04 field name cannot have blank space
-//      "Base Epoch (A.1 Modified Julian)",
-//      "Gravitational Constant (mu, km^3/s^2)",
-//      "Equatorial Radius (km)",
-//      "Flattening Factor",
-//      "Polar Radius (km)",
-//      "Error Estimation Method"
 };
 
 const Gmat::ParameterType
@@ -113,9 +105,10 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 {
     parameterCount = PointMassParamCount;
     dimension = 6 * satcount;
+    thePlanet = NULL;
 
-    if (thePlanet == NULL)
-        SetBody("Earth");
+    // create default body
+    SetBody("Earth");
 }
 
 //------------------------------------------------------------------------------
@@ -127,8 +120,7 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 //------------------------------------------------------------------------------
 PointMassForce::~PointMassForce(void)
 {
-    if (thePlanet->GetName() == "")
-        delete thePlanet;
+    delete thePlanet;
 }
 
 //------------------------------------------------------------------------------
@@ -409,16 +401,14 @@ Planet* PointMassForce::GetBody()
 //------------------------------------------------------------------------------
 void PointMassForce::SetBody(Planet *body)
 {
-//    if (body != NULL)
-//    {
-//        if (thePlanet != NULL)
-//        {
-//            if (thePlanet->GetName() == "")
-//                delete thePlanet;
-//
-//        }
-//
-//    }
+    if (body != NULL)
+    {
+        if (thePlanet != NULL)
+        {
+            delete thePlanet;
+        }
+    }
+  
     thePlanet = body;
     mu = thePlanet->GetGravitationalConstant();
 }
