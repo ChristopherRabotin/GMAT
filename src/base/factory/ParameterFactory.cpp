@@ -20,9 +20,9 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "ParameterFactory.hpp"
-//  #include "ElapsedSecParam.hpp" 
-//  #include "CurrentA1MjdParam.hpp"
-//  #include "CartXParam.hpp"
+#include "ElapsedDaysParam.hpp" 
+#include "CurrentA1MjdParam.hpp"
+#include "CartXParam.hpp"
 //  #include "CartYParam.hpp"
 //  #include "CartZParam.hpp"
 //  #include "CartVxParam.hpp"
@@ -54,12 +54,12 @@
 Parameter* ParameterFactory::CreateParameter(std::string ofType,
                                              std::string withName)
 {
-//     if (ofType == "ElapsedSecParam")
-//        return new ElapsedSecParam(withName);
-//     if (ofType == "CurrentA1MjdParam")
-//        return new CurrentA1MjdParam(withName);
-//     if (ofType == "CartXParam")
-//        return new CartXParam(withName);
+   if (ofType == "ElapsedDaysParam")
+      return new ElapsedDaysParam(withName);
+   if (ofType == "CurrentA1MjdParam")
+      return new CurrentA1MjdParam(withName);
+   if (ofType == "CartXParam")
+      return new CartXParam(withName);
 //     if (ofType == "CartYParam")
 //        return new CartYParam(withName);
 //     if (ofType == "CartZParam")
@@ -103,9 +103,9 @@ Factory(Gmat::PARAMETER)
 {
    if (creatables.empty())
    {
-//        creatables.push_back("ElapsedSecParam");
-//        creatables.push_back("CurrentA1MjdParam");
-//        creatables.push_back("CartXParam");
+      creatables.push_back("ElapsedDaysParam");
+      creatables.push_back("CurrentA1MjdParam");
+      creatables.push_back("CartXParam");
 //        creatables.push_back("CartYParam");
 //        creatables.push_back("CartZParam");
 //        creatables.push_back("CartVxParam");
