@@ -122,6 +122,8 @@ private:
     Integer numOfForces;
     Integer numOfMagFields;
     Integer numOfGraFields;
+    Integer orderID;
+    Integer degreeID;
     
     bool useSRP;
     

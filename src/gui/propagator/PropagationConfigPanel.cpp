@@ -114,6 +114,9 @@ void PropagationConfigPanel::Initialize()
     
     bodiesInUse = theSolarSystem->GetBodiesInUse();
     
+    orderID = theCelestialBody->GetParameterID("Order");
+    degreeID = theCelestialBody->GetParameterID("Degree");
+    
     // waw: TBD
     primaryBodyString = SolarSystem::EARTH_NAME.c_str();
        
@@ -393,8 +396,8 @@ void PropagationConfigPanel::SetData()
     
     if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
     {   
-        theCelestialBody->SetIntegerParameter(CelestialBody::orderID, atoi(gravityOrderTextCtrl->GetValue()));
-        theCelestialBody->SetIntegerParameter(CelestialBody::degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+        theCelestialBody->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
+        theCelestialBody->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
     
         //theCelestialBody->SetCentralBody(theEarth);
     }
@@ -567,8 +570,8 @@ void PropagationConfigPanel::DisplayGravityFieldData()
     
     if (primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0)
     {
-        gravityDegreeTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(CelestialBody::degreeID)));
-        gravityOrderTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(CelestialBody::orderID)));
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(orderID)));
     }
     else if (primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0)
     {
