@@ -154,7 +154,9 @@ public:
 
    // method to return the alpha, delta, and capital-W for the body (specifying
    // the direction of the north pole of rotation (right ascension and
-   // declination) and the prime meridian.  For more information, see
+   // declination) and the prime meridian.  
+   // Units are degrees (alpha), degrees (delta), and deg/day (W)
+   // For more information, see
    // "Report of the IAU/IAG Working Group on Cartographic Coordinates and
    // Rotational Elements of the Planets and Satellites: 2000"
    virtual Rvector3       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
