@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+#include "PlanetaryEphemException.hpp"
 #include "Rvector6.hpp"
 #include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
@@ -375,7 +376,11 @@ CelestialBody::~CelestialBody()
  *
  * @param <atTime>  time for which state of the body is requested.
  *
- * @return state of the body at the requested time.  +++++ pure virtual?
+ * @return state of the body at the requested time.
+ *
+ * @exception <PlanetaryEphemException> thrown when the requested Pos/Vel
+ *            source is set to SLP or DE***, but the source file has not
+ *            been set.
  *
  */
 //------------------------------------------------------------------------------
@@ -385,9 +390,17 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
   // RealArray rArray(6,0.0);
    switch (posVelSrc) {
       case Gmat::SLP :
-      case Gmat::DE :
-
-         // if SLP file not set , throw an exception here <<<<<<<<<
+      case Gmat::DE_102 :
+      case Gmat::DE_200 :
+      case Gmat::DE_202 :
+      case Gmat::DE_403 :
+      case Gmat::DE_405 :
+      case Gmat::DE_406 :
+         if (!theSourceFile)
+         {
+            throw PlanetaryEphemException(
+                           "SLP or DE file requested, but no file specified");
+         }
          posVel = theSourceFile->GetPosVel(bodyNumber,atTime);
          break;
       case Gmat::ANALYTIC :
@@ -649,7 +662,7 @@ const StringArray&   CelestialBody::GetSupportedAtmospheres() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string GetCurrentAtmosphereModel()
+//  std::string GetAtmosphereModelType()
 //------------------------------------------------------------------------------
 /**
  * This method returns the name (type) of the current atmosphere model for
@@ -661,6 +674,10 @@ const StringArray&   CelestialBody::GetSupportedAtmospheres() const
 //------------------------------------------------------------------------------
 std::string  CelestialBody::GetAtmosphereModelType()
 {
+   // DJC added the following 2 lines:
+   if (!atmModel)
+      return "Undefined";
+
    return atmModel->GetTypeName();  // or should I go through the AtmManager?
 }
 

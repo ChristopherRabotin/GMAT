@@ -43,7 +43,12 @@ namespace Gmat  // do all of these things exist somewhere else already?
    {
       ANALYTIC = 0,
       SLP,
-      DE,                 // different types of DE files?
+      DE_102,
+      DE_200,
+      DE_202,
+      DE_403,
+      DE_405,
+      DE_406,
       EPHEMERIS           // do we need more?
    };
 
@@ -262,8 +267,7 @@ protected:
    Integer                defaultCoefSize;
    Rmatrix                defaultSij;
    Rmatrix                defaultCij;
-   
-   
+
 private:
 
 };
