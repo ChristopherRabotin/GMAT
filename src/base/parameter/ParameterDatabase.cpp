@@ -16,18 +16,9 @@
  * Implements parameter database class.
  */
 //------------------------------------------------------------------------------
-#include "gmatdefs.hpp"
-#include "paramdefs.hpp"
-#include "Parameter.hpp"
+
 #include "ParameterDatabase.hpp"
 #include "ParameterDatabaseException.hpp"
-//  #include "Rvector3.hpp"
-//  #include "Rmatrix33.hpp"
-//  #include "Cartesian.hpp"
-//  #include "Keplerian.hpp"
-//  #include "A1Mjd.hpp"
-//  #include "ElapsedTimeParam.hpp"
-//  //loj:#include "UtcDate.hpp"
 
 //---------------------------------
 // public
@@ -45,17 +36,6 @@ ParameterDatabase::ParameterDatabase()
    mNumParams = 0;
    mStringParamPtrMap = new StringParamPtrMap;
 }
-
-//------------------------------------------------------------------------------
-// ParameterDatabase(std::vector<Parameter> params)
-//------------------------------------------------------------------------------
-//  ParameterDatabase::ParameterDatabase(ParameterPtrArray params)
-//  {
-//     for (int i=0; i<params.size(); ++i)
-//        Add(params[i])
-
-//     mNumParams = mStringParamPtrMap->size();
-//  }
 
 //------------------------------------------------------------------------------
 // ~ParameterDatabase()
@@ -108,26 +88,6 @@ StringArray ParameterDatabase::GetNamesOfParameters() const
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetDescsOfParameters() const
-//------------------------------------------------------------------------------
-/**
- * @return descriptions of parameters
- */
-//------------------------------------------------------------------------------
-StringArray ParameterDatabase::GetDescsOfParameters() const
-{
-   StringArray paramDescs;
-   StringParamPtrMap::iterator pos;
-
-   for (pos = mStringParamPtrMap->begin(); pos != mStringParamPtrMap->end(); ++pos)
-   {
-      paramDescs.push_back(pos->second->GetStringParameter("Description"));
-   }
-   
-   return paramDescs;
-}
-
-//------------------------------------------------------------------------------
 // ParameterPtrArray GetParameters() const
 //------------------------------------------------------------------------------
 /**
@@ -168,26 +128,6 @@ bool ParameterDatabase::HasParameter(const std::string &name) const
 }
 
 //------------------------------------------------------------------------------
-// std::string GetDesc(const std::string name) const
-//------------------------------------------------------------------------------
-/**
- * @return description of given parameter name
- */
-//------------------------------------------------------------------------------
-std::string ParameterDatabase::GetDesc(const std::string &name) const
-{
-   StringParamPtrMap::iterator pos;
-   
-   pos = mStringParamPtrMap->find(name);
-   if (pos == mStringParamPtrMap->end())
-      throw ParameterDatabaseException("Parameter name " + name +
-                                       " not found in the database");
-   else
-      return pos->second->GetStringParameter("Description");
-   
-}
-
-//------------------------------------------------------------------------------
 // Integer GetParameterCount(const std::string &name) const
 //------------------------------------------------------------------------------
 /**
@@ -200,8 +140,9 @@ Integer ParameterDatabase::GetParameterCount(const std::string &name) const
    
    pos = mStringParamPtrMap->find(name);
    if (pos == mStringParamPtrMap->end())
-      throw ParameterDatabaseException("Parameter name " + name +
-                                       " not found in the database");
+      throw ParameterDatabaseException
+         ("ParameterDatabase::GetParameterCount() Parameter name " + name +
+          " not found in the database");
    else
       return pos->second->GetParameterCount();
 }
@@ -219,10 +160,38 @@ Parameter* ParameterDatabase::GetParameter(const std::string &name) const
    
    pos = mStringParamPtrMap->find(name);
    if (pos == mStringParamPtrMap->end())
-      throw ParameterDatabaseException("Parameter name " + name +
-                                       " not found in the database");
+      throw ParameterDatabaseException
+         ("ParameterDatabase::GetParameter() Parameter name " + name +
+          " not found in the database");
    else
       return pos->second;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetFirstParameterName() const
+//------------------------------------------------------------------------------
+std::string ParameterDatabase::GetFirstParameterName() const
+{
+   StringParamPtrMap::iterator pos;
+   pos = mStringParamPtrMap->begin();
+   return pos->first;
+}
+
+//------------------------------------------------------------------------------
+// bool SetParameter(const std::string &name, Parameter *param)
+//------------------------------------------------------------------------------
+bool ParameterDatabase::SetParameter(const std::string &name, Parameter *param)
+{
+   StringParamPtrMap::iterator pos;
+   
+   pos = mStringParamPtrMap->find(name);
+   if (pos == mStringParamPtrMap->end())
+      throw ParameterDatabaseException
+         ("ParameterDatabase::SetParameter() Parameter name " + name +
+          " not found in the database\n");
+
+   pos->second = param;
+   return true;
 }
 
 
@@ -235,14 +204,32 @@ Parameter* ParameterDatabase::GetParameter(const std::string &name) const
 //------------------------------------------------------------------------------
 void ParameterDatabase::Add(Parameter *param)
 {
+   if (param != NULL)
+   {
+      std::string name = param->GetName();
+      Add(name, param);
+   }
+   else
+   {
+      throw ParameterDatabaseException
+         ("ParameterDatabase::Add() Cannot add NULL Parameter\n");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void Add(const std::string &name, Parameter *param)
+//------------------------------------------------------------------------------
+void ParameterDatabase::Add(const std::string &name, Parameter *param)
+{
    StringParamPtrMap::iterator pos;
 
-   pos = mStringParamPtrMap->find(param->GetName());
+   pos = mStringParamPtrMap->find(name);
    if (pos != mStringParamPtrMap->end())
-      throw ParameterDatabaseException("Parameter name " + param->GetName() +
-                                       " already in the database");
+      throw ParameterDatabaseException
+         ("ParameterDatabase::Add() Parameter name: " + name +
+          " already in the database\n");
 
-   mStringParamPtrMap->insert(StringParamPtrPair(param->GetName(), param));
+   mStringParamPtrMap->insert(StringParamPtrPair(name, param));
    mNumParams = mStringParamPtrMap->size();
 }
 
@@ -263,8 +250,9 @@ void ParameterDatabase::Remove(const std::string &name)
    
    pos = mStringParamPtrMap->find(name);
    if (pos == mStringParamPtrMap->end())
-      throw ParameterDatabaseException("Parameter name " + name +
-                                       " not found in the database");
+      throw ParameterDatabaseException
+         ("ParameterDatabase::Remove() Parameter name: " + name +
+          " not found in the database\n");
    
    mStringParamPtrMap->erase(name);
    mNumParams = mStringParamPtrMap->size();  

@@ -22,13 +22,6 @@
 #include "gmatdefs.hpp"
 #include "paramdefs.hpp"
 #include "Parameter.hpp"
-//  #include "Rvector3.hpp"
-//  #include "Rmatrix33.hpp"
-//  #include "Cartesian.hpp"
-//  #include "Keplerian.hpp"
-//  #include "A1Mjd.hpp"
-#include "Parameter.hpp"
-//loj:#include "UtcDate.hpp"
 
 class ParameterDatabase
 {
@@ -36,24 +29,23 @@ class ParameterDatabase
 public:
 
    ParameterDatabase();
-   //loj: future build:
-   //ParameterDatabase(ParameterPtrArray params);
    ~ParameterDatabase();
 
    Integer GetNumParameters() const;
    StringArray GetNamesOfParameters() const;
-   StringArray GetDescsOfParameters() const;
    ParameterPtrArray GetParameters() const;
 
    bool HasParameter(const std::string &name) const;
-   std::string GetDesc(const std::string &name) const;
    Integer GetParameterCount(const std::string &name) const;
 
    Parameter* GetParameter(const std::string &name) const;
-
+   std::string GetFirstParameterName() const;
+   bool SetParameter(const std::string &name, Parameter *param);
+   
+   void Add(const std::string &name, Parameter *param = NULL); //loj: 9/16/04 added
    void Add(Parameter *param);
-   void Remove(const Parameter *param);
    void Remove(const std::string &name);
+   void Remove(const Parameter *param);
 
 protected:
 private:
