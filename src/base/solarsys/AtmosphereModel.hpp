@@ -34,6 +34,7 @@ public:
     virtual ~AtmosphereModel();
     
     virtual bool            Density(Real *position, Real *density, 
+                                    Real epoch = 21545.0,
                                     Integer count = 1) = 0;
     void                    SetSunVector(Real *sv);
     void                    SetCentralBodyVector(Real *cv);

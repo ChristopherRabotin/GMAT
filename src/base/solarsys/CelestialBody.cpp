@@ -389,7 +389,7 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
-   Real*     posVel;
+   Real*     posVel = NULL;
    switch (posVelSrc)
    {
       case Gmat::SLP :
@@ -736,9 +736,12 @@ std::string  CelestialBody::GetAtmosphereModelType()
  *
  */
 //------------------------------------------------------------------------------
-AtmosphereModel* CelestialBody::GetAtmosphereModel(void)
+AtmosphereModel* CelestialBody::GetAtmosphereModel(const std::string& type)
 {
-   return atmModel;
+   if (type == "")
+      return atmModel;
+      
+   return atmManager->GetAtmosphere(type);   
 }
 
 //------------------------------------------------------------------------------

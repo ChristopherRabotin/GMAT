@@ -32,6 +32,7 @@ public:
     virtual ~Msise90Atmosphere();
     
     bool                    Density(Real *position, Real *density, 
+                                    Real epoch=21545.0,
                                     Integer count = 1);
                                     
 protected:

@@ -7,7 +7,7 @@
 #include "Msise90Atmosphere.hpp"
 
 
-AtmosphereManager::AtmosphereManager(std::string body) :
+AtmosphereManager::AtmosphereManager(const std::string& body) :
     currentAtmosphere       (NULL),
     atmOwner                (body),
     sunVector               (NULL)
@@ -27,7 +27,7 @@ AtmosphereManager::~AtmosphereManager()
 
 
 const StringArray& AtmosphereManager::GetSupportedAtmospheres(
-                                                        const std::string body)
+                                                        const std::string& body)
 {
     if (body != "") {
         atmOwner = body;
@@ -38,7 +38,7 @@ const StringArray& AtmosphereManager::GetSupportedAtmospheres(
 }
 
 
-AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string atmType)
+AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType)
 {
     if (atmType == "")
         return currentAtmosphere;

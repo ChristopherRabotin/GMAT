@@ -8,11 +8,11 @@
 class AtmosphereManager
 {
 public:
-	AtmosphereManager(std::string body = "Earth");
+	AtmosphereManager(const std::string& body = "Earth");
 	virtual ~AtmosphereManager();
  
-    const StringArray&  GetSupportedAtmospheres(const std::string body = "");
-    AtmosphereModel*    GetAtmosphere(const std::string atmType = "");
+    const StringArray&  GetSupportedAtmospheres(const std::string& body = "");
+    AtmosphereModel*    GetAtmosphere(const std::string& atmType = "");
     void                SetSunVector(Real *sv);
     
 protected:

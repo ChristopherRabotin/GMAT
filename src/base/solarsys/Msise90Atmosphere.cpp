@@ -33,7 +33,8 @@ Msise90Atmosphere::~Msise90Atmosphere()
 }
 
 
-bool Msise90Atmosphere::Density(Real *pos, Real *density, Integer count)
+bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch, 
+                                Integer count)
 {
     Integer i, i6;
     Real    alt;

@@ -32,6 +32,7 @@ public:
 	virtual ~ExponentialAtmosphere();
     
     bool                    Density(Real *position, Real *density, 
+                                    Real epoch=21545.0,
                                     Integer count = 1);
 protected: 
     /// The "Scale height"

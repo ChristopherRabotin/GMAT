@@ -49,7 +49,7 @@ ExponentialAtmosphere::~ExponentialAtmosphere()
 //}
   
     
-bool ExponentialAtmosphere::Density(Real *position, Real *density, Integer count)
+bool ExponentialAtmosphere::Density(Real *position, Real *density, Real epoch, Integer count)
 {
     if (sunVector == NULL)
         throw AtmosphereException("Sun vector was not initialized");
