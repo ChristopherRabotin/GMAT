@@ -112,9 +112,13 @@ PeriapsisStop::~PeriapsisStop()
  */
 //------------------------------------------------------------------------------
 bool PeriapsisStop::AddParameter(Parameter *param)
-{
-    StopCondition::AddParameter(param);
-    SetParameter(param);
+{    
+    if (StopCondition::AddParameter(param))
+    {
+        return SetParameter(param);
+    }
+
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -245,14 +249,16 @@ bool PeriapsisStop::Validate()
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// virtual void SetParameter(Parameter *param)
+// virtual bool SetParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
  * Sets parameter used in checking stop condition.
  */
 //------------------------------------------------------------------------------
-void PeriapsisStop::SetParameter(Parameter *param)
+bool PeriapsisStop::SetParameter(Parameter *param)
 {
+    bool status = false;
+    
     if (param != NULL)
     {
         std::string paramType = param->GetTypeName();
@@ -260,12 +266,20 @@ void PeriapsisStop::SetParameter(Parameter *param)
         if (paramType == "CartStateParam")
         {
             if (mCartStateParam == NULL)
+            {
                 mCartStateParam = param;
+                status = true;
+            }
         }
         else if (paramType == "KepEccParam")
         {
             if (mKepEccParam == NULL)
+            {
                 mKepEccParam = param;
+                status = true;
+            }
         }
     }
+
+    return status;
 }

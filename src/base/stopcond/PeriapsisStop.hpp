@@ -49,7 +49,7 @@ protected:
     Parameter *mCartStateParam;
     Parameter *mKepEccParam;
 
-    virtual void SetParameter(Parameter *param);
+    virtual bool SetParameter(Parameter *param);
     
 private:
 

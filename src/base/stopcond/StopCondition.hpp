@@ -76,7 +76,7 @@ public:
 protected:
 
     void Initialize();
-    virtual void SetParameter(Parameter *param);
+    virtual bool SetParameter(Parameter *param);
 
     Real mGoal;
     Real mTolerance;

@@ -382,10 +382,11 @@ void StopCondition::Initialize()
 }
 
 //------------------------------------------------------------------------------
-// virtual void SetParameter(Parameter *param)
+// virtual bool SetParameter(Parameter *param)
 //------------------------------------------------------------------------------
-void StopCondition::SetParameter(Parameter *param)
+bool StopCondition::SetParameter(Parameter *param)
 {
+    return false;
 }
 
 //---------------------------------

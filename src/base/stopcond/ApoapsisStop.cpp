@@ -113,8 +113,12 @@ ApoapsisStop::~ApoapsisStop()
 //------------------------------------------------------------------------------
 bool ApoapsisStop::AddParameter(Parameter *param)
 {
-    StopCondition::AddParameter(param);
-    SetParameter(param);
+    if (StopCondition::AddParameter(param))
+    {
+        return SetParameter(param);
+    }
+
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -238,14 +242,16 @@ bool ApoapsisStop::Validate()
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// virtual void SetParameter(Parameter *param)
+// virtual bool SetParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
  * Sets parameter used in checking stop condition.
  */
 //------------------------------------------------------------------------------
-void ApoapsisStop::SetParameter(Parameter *param)
+bool ApoapsisStop::SetParameter(Parameter *param)
 {
+    bool status = false;
+    
     if (param != NULL)
     {
         std::string paramType = param->GetTypeName();
@@ -253,12 +259,20 @@ void ApoapsisStop::SetParameter(Parameter *param)
         if (paramType == "CartStateParam")
         {
             if (mCartStateParam == NULL)
+            {
                 mCartStateParam = param;
+                status = true;
+            }
         }
         else if (paramType == "KepEccParam")
         {
             if (mKepEccParam == NULL)
+            {
                 mKepEccParam = param;
+                status = true;
+            }
         }
     }
+
+    return status;
 }
