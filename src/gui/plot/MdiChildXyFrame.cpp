@@ -62,7 +62,9 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     mPlotTitle = title;
     mXAxisTitle = xAxisTitle;
     mYAxisTitle = yAxisTitle;
-    mHasFirstXSet = false;
+
+    for (int i=0; i<MAX_NUM_CURVE; i++)
+        mHasFirstXSet[i] = false;
     
     MessageInterface::ShowMessage("MdiChildXyFrame::MdiChildXyFrame() "
                                   "X Axis Title = %s  Y Axis Title = %s\n",
@@ -351,54 +353,6 @@ void MdiChildXyFrame::OnClose(wxCloseEvent& event)
 }
 
 //------------------------------------------------------------------------------   
-// void AddPlotCurve(int yOffset, double yMin, double yMax,
-//                   const wxString &curveTitle, const wxString &penColorName)
-//------------------------------------------------------------------------------   
-void MdiChildXyFrame::AddPlotCurve(int yOffset, double yMin, double yMax,
-                                   const wxString &curveTitle,
-                                   const wxString &penColorName)
-{
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
-                                  yMin, yMax);
-    
-    mHasFirstXSet = false;
-    
-    // Create XyPlotCurve
-    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
-    
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
-                                  curve->GetCurveTitle().c_str());
-    
-    // Find the color
-    wxColour *color = wxTheColourDatabase->FindColour(penColorName);
-    if (color == NULL)
-    {
-        // Set normal pen to black dashed pen
-        curve->SetPenNormal(*wxBLACK_DASHED_PEN);
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
-    }
-    else
-    {
-        wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
-        curve->SetPenNormal(*pen);
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
-    }
-
-    // Set selected pen to black for now (build2)
-    curve->SetPenSelected(*wxBLACK_PEN);
-
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() before adding curve... \n");
-
-    if (mXyPlot != NULL)
-        mXyPlot->Add(curve);
-    else
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
-        
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() exit... \n");
-
-}
-
-//------------------------------------------------------------------------------   
 // int ReadXyPlotFile(const wxString &filename)
 //------------------------------------------------------------------------------   
 int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
@@ -473,6 +427,57 @@ int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
     return numData;
 }
 
+//------------------------------------------------------------------------------   
+// void AddPlotCurve(int curveNum, int yOffset, double yMin, double yMax,
+//                   const wxString &curveTitle, const wxString &penColorName)
+//------------------------------------------------------------------------------   
+void MdiChildXyFrame::AddPlotCurve(int curveNum, int yOffset, double yMin, double yMax,
+                                   const wxString &curveTitle,
+                                   const wxString &penColorName)
+{
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
+                                  yMin, yMax);
+    
+    mHasFirstXSet[curveNum] = false;
+    
+    // Create XyPlotCurve
+    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
+    
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
+                                  curve->GetCurveTitle().c_str());
+    
+    // Find the color
+    wxColour *color = wxTheColourDatabase->FindColour(penColorName);
+    if (color == NULL)
+    {
+        // Set normal pen to black dashed pen
+        curve->SetPenNormal(*wxBLACK_DASHED_PEN);
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
+    }
+    else
+    {
+        wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
+        curve->SetPenNormal(*pen);
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
+    }
+
+    //loj: Set selected pen to black for now (build2)
+    curve->SetPenSelected(*wxBLACK_PEN);
+
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() adding curve... \n");
+
+    if (mXyPlot != NULL)
+    {
+        mXyPlot->Add(curve);
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve count = %d\n",
+                                      mXyPlot->GetCount());
+    }
+    else
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
+        
+
+}
+
 //------------------------------------------------------------------------------
 // void AddDataPoints(int curveNum, double xData, double yData)
 //------------------------------------------------------------------------------
@@ -493,10 +498,10 @@ void MdiChildXyFrame::AddDataPoints(int curveNum, double xData, double yData)
         
         XyPlotCurve *curve = (XyPlotCurve*)(mXyPlot->GetAt(curveNum));
         
-        if (!mHasFirstXSet)
+        if (!mHasFirstXSet[curveNum])
         {
             curve->SetFirstX(xData);
-            mHasFirstXSet = true;
+            mHasFirstXSet[curveNum] = true;
         }
     
         curve->AddData((xData - curve->GetFirstX()), yData); //loj: should I check for curve title?
@@ -515,9 +520,8 @@ void MdiChildXyFrame::RedrawCurve()
     if (mXyPlot)
     {
         mXyPlot->SetFocus();
-        //mXyPlot->RedrawXAxis(); //loj: should I RedrawEverything()?
-        mXyPlot->RedrawEverything();
-        Update(); //loj: Why it doesn't update the plot as app runs?
+        mXyPlot->RedrawEverything(); // need to draw everything
+        Update();
     }
 }
 

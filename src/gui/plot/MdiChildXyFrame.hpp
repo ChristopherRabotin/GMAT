@@ -74,21 +74,23 @@ public:
     void OnMove(wxMoveEvent& event);
     void OnClose(wxCloseEvent& event);
 
-    void AddPlotCurve(int yOffset, double yMin, double yMax,
+    int ReadXyPlotFile(const wxString &filename);
+
+    void AddPlotCurve(int curveNum, int yOffset, double yMin, double yMax,
                       const wxString &curveTitle,
                       const wxString &penColorName);
     void AddDataPoints(int curveNum, double xData, double yData);
     void RedrawCurve();
     
-    int ReadXyPlotFile(const wxString &filename);
-    
 protected:
+
+    static const int MAX_NUM_CURVE = 6;
     
     wxString mPlotName;
     wxString mPlotTitle;
     wxString mXAxisTitle;
     wxString mYAxisTitle;
-    bool mHasFirstXSet;
+    bool mHasFirstXSet[MAX_NUM_CURVE];
     
     DECLARE_EVENT_TABLE()
 };

@@ -31,6 +31,8 @@ public:
 protected:
     Subscriber *theSubscriber;
     wxString *theParamList;
+    bool mXParamChanged;
+    bool mYParamChanged;
     
     wxBoxSizer *pageBoxSizer;
     wxFlexGridSizer *paramGridSizer;
