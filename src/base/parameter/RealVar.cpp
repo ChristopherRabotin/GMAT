@@ -143,6 +143,10 @@ bool RealVar::operator!=(const RealVar &right) const
    return Parameter::operator!=(right);
 }
 
+//------------------------------------
+// methods inherited from Parameter
+//------------------------------------
+
 //loj: 9/7/04 added
 //------------------------------------------------------------------------------
 // std::string ToString()
@@ -162,32 +166,6 @@ std::string RealVar::ToString()
 }
 
 //------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * Evaluates Real value of parameter. The derived class should implement this
- * method.
- */
-//------------------------------------------------------------------------------
-Real RealVar::EvaluateReal()
-{
-   if (mKey == SYSTEM_PARAM)
-   {
-      throw ParameterException("Parameter: EvaluateReal() should be implemented "
-                               "for Parameter Type:" + GetTypeName());
-   }
-   else
-   {
-      //loj: Parse the expresstion, then evaluate
-      //loj: Should we use mDesc field instead of creating new exp. field?
-      return mRealValue; //loj: temp code
-   }
-
-   return REAL_PARAMETER_UNDEFINED;
-}
-
-
-//------------------------------------------------------------------------------
 // Real GetReal() const
 //------------------------------------------------------------------------------
 /**
@@ -199,10 +177,6 @@ Real RealVar::GetReal() const
    return mRealValue;
 }
 
-//------------------------------------
-// Inherited methods from Parameter
-//------------------------------------
-
 //------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
 //------------------------------------------------------------------------------
@@ -210,11 +184,6 @@ const std::string* RealVar::GetParameterList() const
 {
    return PARAMETER_TEXT;
 }
-
-
-//------------------------------------
-// Inherited methods from GmatBase
-//------------------------------------
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -315,3 +284,20 @@ Real RealVar::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
 }
+
+//------------------------------------
+// methods inherited from GmatBase
+//------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* RealVar::Clone() const
+{
+   return new RealVar(*this);
+}
+

@@ -40,22 +40,22 @@ public:
    bool operator==(const RealVar &right) const;
    bool operator!=(const RealVar &right) const;
 
+   // methods inherited from Parameter
    virtual std::string ToString(); //loj: 9/7/04 added
    
-   virtual Real EvaluateReal() = 0;
    virtual Real GetReal() const;
    
-   // methods inherited from Parameter
    virtual const std::string* GetParameterList() const;
    
    // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    
-   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real GetRealParameter(const Integer id) const;
+   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
    
