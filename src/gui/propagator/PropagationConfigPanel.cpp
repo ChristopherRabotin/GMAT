@@ -888,7 +888,10 @@ void PropagationConfigPanel::CreateScript()
 {
     //not MAC mode
     //----------------------------------------------------------------
+/* **** NOTE:  it is temporary until it is fixed for Mac  ***************
 #if !defined __WXMAC__
+******************************* */
+#if 1 
     // Create a document manager
     mDocManager = new wxDocManager;
 
