@@ -640,7 +640,9 @@ void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
       //                              curve->GetFirstX(), mXyPlot->GetUnitsPerValue());
         
       wxString info;
-      info.Printf("%s: %5.3f  %s: %f\n", GetXAxisTitle().c_str(), x,
+      //info.Printf("%s: %5.3f  %s: %f\n", GetXAxisTitle().c_str(), x,
+      //            curve->GetCurveTitle().c_str(), y);
+      info.Printf("%s: %5.3f  %s: %g\n", GetXAxisTitle().c_str(), x, //loj: 12/10/04 changed to %g
                   curve->GetCurveTitle().c_str(), y);
         
       //loj: 2/26/04 changed to wxLogStatus
