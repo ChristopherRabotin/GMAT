@@ -32,17 +32,18 @@ END_EVENT_TABLE()
 
 
 
-SpacecraftPanel::SpacecraftPanel(wxWindow *parent):wxPanel(parent)
+SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
+    :wxPanel(parent)
 {
-   CreateNotebook(this);
+   CreateNotebook(this, scName);
 }
 
-void SpacecraftPanel::CreateNotebook(wxWindow *parent)
+void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     //loj: Need to get spacecraft name somehow when spacecraft name is clicked
     //loj: use "DefaultSC" for testing only
-    theSpacecraft = theGuiInterpreter->GetSpacecraft("DefaultSC");
+    theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
     
     if (theSpacecraft != NULL)
     {
