@@ -26,6 +26,7 @@
 EndFor::EndFor(void) :
     GmatCommand         ("EndFor")
 {
+   depthChange = -1;
 }
 
 

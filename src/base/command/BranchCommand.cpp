@@ -24,6 +24,7 @@
 
 #include "BranchCommand.hpp"
 
+#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
 #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
    #include "MessageInterface.hpp"
@@ -37,12 +38,16 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    branchToFill         (0),
    nestLevel            (0)
 {
+   depthChange = 1;
    parameterCount = BranchCommandParamCount;
 }
 
 
 BranchCommand::~BranchCommand()
 {
+   #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+      MessageInterface::ShowMessage("In BranchCommand::~BranchCommand()\n");
+   #endif
    std::vector<GmatCommand*>::iterator node;
    GmatCommand* current;
       
@@ -50,19 +55,30 @@ BranchCommand::~BranchCommand()
    {
       // Find the end for each branch and disconnect it fron the start
       current = *node;
-      while (current->GetNext() != this)
+      while (current->GetNext() != this) {
          current = current->GetNext();
+         if (current == NULL)
+{
+MessageInterface::ShowMessage("current == NULL\n");
+            break;
+}
+      }
          
       // Calling Remove this way just sets the next pointer to NULL
-      #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-         MessageInterface::ShowMessage("Removing %s\n", 
+      if (current) {
+         #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+            MessageInterface::ShowMessage("Removing %s\n", 
                                        current->GetTypeName().c_str());
-      #endif
-      current->Remove(current);  
+         #endif
+         current->Remove(current);  
+      }
       
       if (*node)
          delete *node;
    }
+   #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+      MessageInterface::ShowMessage("Finished BranchCommand::~BranchCommand()\n");
+   #endif
 }
 
 
@@ -72,8 +88,9 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
    commandComplete   (false),
    commandExecuting  (false),
    branchToFill      (0),
-    nestLevel        (bc.nestLevel)
+   nestLevel        (bc.nestLevel)
 {
+   depthChange = 1;
    parameterCount = BranchCommandParamCount;
 }
 

@@ -24,7 +24,9 @@
 
 EndTarget::EndTarget(void) :
     GmatCommand         ("EndTarget")
-{}
+{
+   depthChange = -1;
+}
 
 
 EndTarget::~EndTarget(void)

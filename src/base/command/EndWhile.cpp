@@ -25,6 +25,7 @@
 EndWhile::EndWhile(void) :
 GmatCommand         ("EndWhile")
 {
+   depthChange = -1;
 }
 
 

@@ -24,7 +24,9 @@
 
 EndIf::EndIf(void) :
     GmatCommand         ("EndIf")
-{}
+{
+   depthChange = -1;
+}
 
 
 EndIf::~EndIf(void)

@@ -105,6 +105,8 @@ public:
    virtual Integer      GetGoalCount();
    
    virtual bool         InterpretAction();
+   
+   Integer              DepthIncrement();
             
    /** 
    * The method that is fired to perform the GmatCommand.
@@ -146,6 +148,8 @@ protected:
    Publisher             *publisher;
    /// Stream ID issued by the Publisher to identify which Command is publishing
    Integer               streamID;
+   /// Change in branch depth caused by this command
+   Integer               depthChange;
       
    virtual bool          AssignObjects(); 
    virtual bool          ClearObjects();    

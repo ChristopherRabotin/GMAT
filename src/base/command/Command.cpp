@@ -47,7 +47,8 @@ level           (-1),   // Not set
 objectMap       (NULL),
 solarSys        (NULL),
 publisher       (NULL),
-streamID        (-1)
+streamID        (-1),
+depthChange     (0)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -105,7 +106,8 @@ level           (-1),   // Not set
 objectMap       (c.objectMap),
 solarSys        (c.solarSys),
 publisher       (c.publisher),
-streamID        (c.streamID)
+streamID        (c.streamID),
+depthChange     (c.depthChange)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -661,5 +663,24 @@ bool GmatCommand::ClearObjects()
 bool GmatCommand::InterpretAction()
 {
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer DepthIncrement()
+//------------------------------------------------------------------------------
+/**
+ * Indicates the change in branch depth for subsequent commands.
+ *
+ * This default implementation always returns false because the base class does
+ * not perform any actions.
+ *
+ * @return 0 if the depth stays the same, 1 if the depth increases, or -1 if
+ *           it decreases 
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::DepthIncrement()
+{
+   return depthChange;
 }
 
