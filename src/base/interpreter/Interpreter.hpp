@@ -128,7 +128,7 @@ protected:
    CelestialBody*                CreateCelestialBody(std::string cbname, 
                                                      std::string type);
    Parameter*                    CreateParameter(std::string name, 
-                                                    std::string type);
+                                                 std::string type);
 //   StoppingCondition*            CreateStopCond(std::string conditiontype);
    Subscriber*                   CreateSubscriber(std::string name, 
                                                   std::string type);
@@ -187,6 +187,9 @@ protected:
    bool                          ConfigureForce(ForceModel *obj, 
                                                 std::string& objParm, 
                                                 std::string& parm);
+   bool                          ConstructRHS(GmatBase *lhsObject, 
+                                              const std::string& rhs, 
+                                              const std::string& label);
 };
 
 #endif // INTERPRETER_HPP

@@ -19,8 +19,11 @@
 #include "Interpreter.hpp" // class's header file
 #include "Moderator.hpp"
 
+#include <ctype.h>         // for isalpha
 
-// #define DEBUG_TOKEN_PARSING 1
+
+//#define DEBUG_TOKEN_PARSING 1
+//#define DEBUG_RHS_PARSING 1
 
 
 //------------------------------------------------------------------------------
@@ -1685,4 +1688,74 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
    }
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ConstructRHS(GmatBase *lhsObject, const std::string& rhs, 
+//                   const std::string& label)
+//------------------------------------------------------------------------------
+/**
+ * Builds the right side of an assignment line (e.g. "GMAT plot.Add = sat.X;")
+ * 
+ * @param lhsObject The object on the left that receives the parameters.
+ * @param rhs       The string to the right of the equals sign.
+ * @param label     The string used to register the rhs (e.g. "Add").
+ * 
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs, 
+                               const std::string& label)
+{
+   #ifdef DEBUG_RHS_PARSING
+      MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+                                    "Interpreter::ConstructRHS called with string \"",
+                                    rhs.c_str(), 
+                                    "\" registered using \"",
+                                    label.c_str(),
+                                    "\" for object \"", 
+                                    lhsObject->GetName().c_str());
+   #endif
+   
+   StringArray sar = Decompose(rhs);
+   if ((sar.size() > 1) && isalpha(sar[1][0])) {
+      if (!IsGroup(rhs.c_str())) {
+         try {
+            std::string name = rhs;
+            #ifdef DEBUG_RHS_PARSING
+               MessageInterface::ShowMessage("%s%s\"\n",
+                                             "Attempting to build parameter \"",
+                                             sar[1].c_str());
+            #endif
+            Parameter *parm = CreateParameter(name, sar[1]);
+            if (parm != NULL) {
+               GmatBase *parmObj = FindObject(sar[0]);
+               std::string parmtype = "Object";
+               if (parmObj->GetType() == Gmat::SPACECRAFT)
+                  parmtype = "Spacecraft";
+               #ifdef DEBUG_RHS_PARSING
+                  MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
+                                                "Assigning \"",
+                                                sar[0].c_str(), 
+                                                "\" to parameter \"", 
+                                                parm->GetName().c_str(),
+                                                "\" with descriptor \"",
+                                                parmtype.c_str());
+               #endif
+               parm->SetStringParameter(parmtype, sar[0]);
+               lhsObject->SetStringParameter(label, name);
+               return true;
+            }
+         }
+         catch (BaseException &ex)
+         {
+            #ifdef DEBUG_RHS_PARSING
+               MessageInterface::ShowMessage("Parameter was not constructed.\n");
+            #endif
+         }
+      }
+   }
+   
+   return false;
 }

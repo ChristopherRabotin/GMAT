@@ -26,8 +26,8 @@
 
 
 //#define DEBUG_SCRIPTINTERPRETER
-//#define DEBUG_SCRIPT_READING_AND_WRITING
-
+//#define DEBUG_SCRIPT_READING_AND_WRITING 
+//#define DEBUG_PARAMETER_PARSING
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -353,17 +353,29 @@ bool ScriptInterpreter::Parse(void)
                    ++phrase;
                    if (**phrase == "=")
                        ++phrase;
-   
-                   StringArray sa;
-                   if (IsGroup((**phrase).c_str()))
-                       sa = Decompose(**phrase);
-                   else
-                       sa.push_back(**phrase);
-                   for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
-                       if (!SetParameter(obj, id, *i)) {
-                          if (obj->GetType() == Gmat::FORCE_MODEL)
-                             ConfigureForce((ForceModel*)(obj), objParm, *i);
-                       }
+
+                   #ifdef DEBUG_PARAMETER_PARSING
+                      std::cout << "Setting \"" << (**phrase) 
+                                << "\" on object \""<< obj->GetName() << "\"\n";
+                   #endif
+                   
+                   if (!ConstructRHS(obj, **phrase, objParm)) {
+      
+                      StringArray sa;
+                      if (IsGroup((**phrase).c_str()))
+                          sa = Decompose(**phrase);
+                      else
+                          sa.push_back(**phrase);
+                      for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
+                         #ifdef DEBUG_PARAMETER_PARSING
+                            std::cout << "Calling SetParameter with \"" << *i 
+                                      << "\" on object \""<< obj->GetName() << "\"\n";
+                         #endif
+                         if (!SetParameter(obj, id, *i)) {
+                            if (obj->GetType() == Gmat::FORCE_MODEL)
+                               ConfigureForce((ForceModel*)(obj), objParm, *i);
+                         }
+                      }
                    }
                 }
                 catch (BaseException &ex) {
