@@ -281,17 +281,58 @@ bool ScriptInterpreter::Parse(void)
                    std::string objParm = sar[1];
                    Integer id = obj->GetParameterID(objParm);
                    
+                   /// @todo Correct this kludge in the Spacecraft code!!!
+                   // This code is a real hack put in place because the 
+                   // spacecraft code does NOT conform to the agreed upon 
+                   // interfaces for parameter names in GMAT.
+                   //
+                   // Code to handle "Sat.Epoch.TAIGregorian", etc.
+                   if ((objParm == "Epoch") && 
+                       (obj->GetType() == Gmat::SPACECRAFT) &&
+                       (sar.size() > 2)) {
+   
+                      // obj->SetStringParameter("DateFormat", sar[2]);
+                      ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());                      
+                      unsigned int start, end;
+                      start = line.find("=") + 1;
+                      const char* linestr = line.c_str();
+                      while (linestr[start] == ' ')
+                         ++start;
+                      end = line.find(";");
+                      if (end == std::string::npos)
+                         end = line.length()-1;
+                      while (linestr[end] == ' ')
+                         --end;
+
+                      std::string epstr;
+                      epstr.assign(line, start, end-start);
+                      
+                      ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
+                      ((Spacecraft*)obj)->SaveDisplay();
+                      chunks.clear();
+                      return true;
+                   }
+                   
                    // Look for owned objects if the list is deeper than 2
                    if (sar.size() > 2) {
-                      obj = FindOwnedObject(sar, obj, 1);
-                      if (obj == NULL) {
-                         std::string errstr = objName;
-                         errstr += sar[1];
-                         errstr += ": Object was not found";
-                         throw InterpreterException(errstr);
-                      }
-                      objParm = sar[sar.size() - 1];
-                      id = obj->GetParameterID(objParm);
+//                      // Check to see if it's a subparameter first
+//                      if (obj->GetParameterType(id) == Gmat::STRING_TYPE) {
+//                         obj->SetStringParameter(objParm, sar[2]);
+//
+//                      }
+//                      
+//                      if (obj->GetParameterType(id) == Gmat::OBJECT_TYPE) {
+                         // Maybe it's an owned object
+                         obj = FindOwnedObject(sar, obj, 1);
+                         if (obj == NULL) {
+                            std::string errstr = objName;
+                            errstr += sar[1];
+                            errstr += ": Object was not found";
+                            throw InterpreterException(errstr);
+                         }
+                         objParm = sar[sar.size() - 1];
+                         id = obj->GetParameterID(objParm);
+//                      }
                    }
        
                    // Set parameter data

@@ -20,7 +20,7 @@
 #include "Moderator.hpp"
 
 
-// #define DEBUG_TOKEN_PARSING
+// #define DEBUG_TOKEN_PARSING 1
 
 
 //------------------------------------------------------------------------------
@@ -1493,7 +1493,8 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
 #endif
    
    if (owner->GetType() != Gmat::FORCE_MODEL)
-      throw InterpreterException("The ForceModel is the only allowed owner");
+      throw InterpreterException("The ForceModel is the only allowed owner\n" + 
+                                 line);
    
    ObjectArray objs = owner->GetRefObjectArray(tokenList[index]);
    if (index == count - 2) {
@@ -1501,6 +1502,13 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
 #ifdef DEBUG_TOKEN_PARSING
       std::cout << "Looking for " << tokenList[index] << "\n";
 #endif
+      if (objs.size() == 0) {
+         std::string errstr = "Object list is empty; ";
+         errstr += "cannot parse the line\n  \"";
+         errstr += line;
+         errstr += "\"";
+         throw InterpreterException(errstr);
+      }
       if (objs.size() > 1) {
          for (ObjectArray::iterator j = objs.begin(); j != objs.end(); ++j) {
             Integer id = (*j)->GetParameterID("BodyName");
