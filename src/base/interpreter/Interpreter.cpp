@@ -311,6 +311,17 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     return false;
 }
 
+bool Interpreter::Interpret(GmatBase *obj)
+{
+   if (obj->GetType() != Gmat::COMMAND)
+      throw InterpreterException(
+         "Interpret(GmatBase*) currently only supports GmatCommands.");
+   MessageInterface::ShowMessage(
+      "%s\n%s\n  \"%s\"\n",
+      "Interpret(GmatBase*)is under construction.  Please be patient!",
+      "String that is interpreted:", obj->GetGeneratingString().c_str());
+   return true;
+}
 
 // The "Build" methods take GMAT objects and serializes the objects (e.g., these
 // methods are invoked to write out scripts or subscripts).

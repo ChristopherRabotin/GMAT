@@ -19,6 +19,7 @@
 #ifndef GuiInterpreter_hpp
 #define GuiInterpreter_hpp
 
+#include "Interpreter.hpp"
 #include "gmatdefs.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
@@ -37,7 +38,6 @@
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
-#include "Interpreter.hpp"
 
 
 class GMAT_API GuiInterpreter : public Interpreter
@@ -47,8 +47,9 @@ public:
    static GuiInterpreter* Instance();
    ~GuiInterpreter();
 
-   virtual bool Interpret(void) {return false;};
-   virtual bool Build(void) {return false;};
+   virtual bool Interpret(void);
+   virtual bool Build(void);
+   virtual bool Interpret(GmatBase *obj);
 
    bool IsInitialized();
    void Initialize();

@@ -49,6 +49,21 @@ GuiInterpreter::~GuiInterpreter()
       delete instance;
 }
 
+bool GuiInterpreter::Interpret(void)
+{
+   return false;
+}
+
+bool GuiInterpreter::Build(void)
+{
+   return false;
+}
+
+bool GuiInterpreter::Interpret(GmatBase *obj)
+{
+   return Interpreter::Interpret(obj);
+}
+
 //------------------------------------------------------------------------------
 // bool IsInitialized()
 //------------------------------------------------------------------------------

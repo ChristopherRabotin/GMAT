@@ -69,7 +69,8 @@ public:
    virtual bool                    Interpret(void) = 0;
    bool                            InterpretObject(std::string objecttype,
                                                     std::string objectname);
-    
+   virtual bool                    Interpret(GmatBase *obj);
+
    // The "Build" methods take GMAT objects and write out scripts or subscripts
    virtual bool                    Build(void) = 0;
    bool                            BuildObject(std::string &objectname);

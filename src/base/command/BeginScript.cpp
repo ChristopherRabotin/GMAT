@@ -127,7 +127,7 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    
    GmatCommand *current = next;
    while (current != NULL) {
-      if (current->GetTypeName() != "EndScript;") {
+      if (current->GetTypeName() != "EndScript") {
          gen << "   " << current->GetGeneratingString() << "\n";
          current = current->GetNext();
          if (current == NULL)
