@@ -16,7 +16,8 @@ CPP = g++
 
 OPTIMIZATIONS = -O9
 
-CPPFLAGS = $(OPTIMIZATIONS) -Wall
+CPPFLAGS = $(OPTIMIZATIONS) -Wall -D__USE_MATLAB__=1 \
+           -I/usr/local/matlab7_0_1/extern/include
 
 export CPPFLAGS
 export CPP
