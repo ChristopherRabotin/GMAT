@@ -79,9 +79,19 @@ public:
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetPublisher(Publisher *p);
    
-   virtual bool         SetCondition(std::string lhs, std::string operation, 
-                                     std::string rhs);
-   virtual bool         SetConditionOperator(std::string& op);
+   
+   // methods to set conditions and operators between multiple conditions;
+   // atIndex = -999 means add it to the end of the list; otherwise, add/replace
+   // the condition at the specified index
+   virtual bool         SetCondition(const std::string &lhs, 
+                                     const std::string &operation, 
+                                     const std::string &rhs, 
+                                     Integer atIndex = -999);
+   virtual bool         SetConditionOperator(const std::string &op, 
+                                             Integer atIndex = -999);
+   
+   virtual bool         RemoveCondition(Integer atIndex);
+   virtual bool         RemoveConditionOperator(Integer atIndex);
    
    // Sequence methods
    virtual bool         Initialize();

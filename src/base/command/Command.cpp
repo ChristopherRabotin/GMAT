@@ -322,17 +322,87 @@ void GmatCommand::SetPublisher(Publisher *p)
    publisher = p;
 }
 
-
-bool GmatCommand::SetCondition(std::string lhs, std::string operation, 
-                               std::string rhs)
+//------------------------------------------------------------------------------
+//  bool SetCondition(const std::string &lhs, 
+//                    const std::string &operation, 
+//                    const std::string &rhs, 
+//                    Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Sets a condition for the command, at index atIndex (-999 to add to the end
+ * of the list).
+ * 
+ * @param <lhs>       string for the left hand side of the condition
+ * @param <operation> string for the operator
+ * @param <rhs>       string for the right hand side of the condition
+ * @param <atIndex>   where in the list to place the condition (-999 means to
+ *                    add it to the end of the list (default))
+ *
+ * @note See subclasses for more meaningful implementations.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetCondition(const std::string &lhs, 
+                               const std::string &operation, 
+                               const std::string &rhs, 
+                               Integer atIndex)
 {
    return false;
 }
 
-bool GmatCommand::SetConditionOperator(std::string& op)
+//------------------------------------------------------------------------------
+//  bool SetConditionOperator(const std::string &op, 
+//                            Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Sets a logical operator for the command, at index atIndex (-999 to add to the end
+ * of the list) - this is the operator connecting conditions, when there are
+ * multiple conditions.
+ * 
+ * @param <op>      string for the logical operator
+ * @param <atIndex> where in the list to place the logical operator (-999 means to
+ *                  add it to the end of the list (default))
+ *
+ * @note See subclasses for more meaningful implementations.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetConditionOperator(const std::string &op, 
+                                       Integer atIndex)
 {
    return false;
 }
+
+//------------------------------------------------------------------------------
+//  bool RemoveCondition(Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Removes the condition for the command, at index atIndex.
+ * 
+ * @param <atIndex>   where in the list to remove the condition from.
+ *
+ * @note See subclasses for more meaningful implementations.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::RemoveCondition(Integer atIndex)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+//  bool RemoveConditionOperator(Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Removes the logical operator for the command, at index atIndex.
+ * 
+ * @param <atIndex>   where in the list to remove the logical operator from.
+ *
+ * @note See subclasses for more meaningful implementations.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::RemoveConditionOperator(Integer atIndex)
+{
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize()
