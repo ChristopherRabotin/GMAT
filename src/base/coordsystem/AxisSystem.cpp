@@ -66,9 +66,9 @@ AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
 AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName)//,
-//rotMatrix         (NULL),
-//rotDotMatrix      (NULL)
 {
+   rotMatrix    = Rmatrix33(false); // want zero matrix, not identity matrix
+   rotDotMatrix = Rmatrix33(false); // want zero matrix, not identity matrix
 }
 
 //---------------------------------------------------------------------------
