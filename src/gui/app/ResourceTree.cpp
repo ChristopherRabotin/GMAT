@@ -498,7 +498,8 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
       
-      Formation *form = (Formation *)theGuiInterpreter->GuiInterpreter::GetFormation(itemNames[i].c_str());
+      Formation *form = (Formation *)theGuiInterpreter->
+         GuiInterpreter::GetFormation(itemNames[i].c_str());
       // get added spacecrafts
       int scListId = form->GetParameterID("Add");
       StringArray formSc = form->GetStringArrayParameter(scListId);
@@ -912,24 +913,6 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
         
       menu.Enable(POPUP_DELETE, FALSE);
    }
-
-   //loj: 2/13/04 I just thought about this for the future build
-   //      switch (dataType)
-   //      {
-   //      case GmatTree::SPACECRAFT_FOLDER:
-   //          menu.Append(POPUP_CLEAR_SC, wxT("Clear"));
-   //      case GmatTree::BURNS_FOLDER:
-   //          menu.Append(POPUP_CLEAR_BURN, wxT("Clear"));
-   //      case GmatTree::PROPAGATORS_FOLDER:
-   //           menu.Append(POPUP_CLEAR_PROPAGATOR, wxT("Clear"));
-   //      case GmatTree::SOLVERS_FOLDER:
-   //          menu.Append(POPUP_CLEAR_SOLVER, wxT("Clear"));
-   //      case GmatTree::SUBSCRIBERS_FOLDER:
-   //          menu.Append(POPUP_CLEAR_SUBSCRIBER, wxT("Clear"));
-   //          break;
-   //      default:
-   //          break;
-   //      }
     
    PopupMenu(&menu, pt);
 #endif // wxUSE_MENUS
@@ -1068,6 +1051,18 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          selItem->SetDesc(newName);
          theGuiManager->UpdateAll();
 
+         // update formation which may use new spacecraft name (loj: 2/22/05)
+         if (objType == Gmat::SPACECRAFT)
+         {
+            Collapse(mSpacecraftItem);
+            DeleteChildren(mSpacecraftItem);
+            AddDefaultSpacecraft(mSpacecraftItem);
+            
+            Collapse(mFormationItem);
+            DeleteChildren(mFormationItem);
+            AddDefaultFormations(mFormationItem);
+         }
+         
          // update variables which may use new object name
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
@@ -1080,10 +1075,6 @@ void ResourceTree::OnRename(wxCommandEvent &event)
              oldName.c_str(), newName.c_str());
       }
    }
-
-
-   //loj: It looks better to change name using EditLabel, but How do I get new name?
-   //loj:(void) EditLabel(item);
 
 }
 
