@@ -23,7 +23,8 @@ OBJECTS = Parameter.o \
           SMA.o \
           SphericalParameters.o \
           TimeData.o \
-          TimeParameters.o
+          TimeParameters.o \
+          TimeReal.o
 
 all: libParameter 
 	mkdir -p ../lib

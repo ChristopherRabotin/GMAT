@@ -1,7 +1,8 @@
 # Makefile for GMAT Solar System library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../foundation -I../util -I../forcemodel -I../spacecraft
+HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
+          -I../spacecraft -I../executive
 
 OBJECTS = AtmosphereException.o \
           AtmosphereManager.o \

@@ -689,7 +689,7 @@ Rmatrix Rmatrix::Inverse() const
     ArrayTemplate<bool> PivotAllowed(IndexRange);
     ArrayTemplate<int> PivotRowList(IndexRange), PivotColumnList(IndexRange);
     Real PivotElement;
-    int PivotRow, PivotColumn;
+    int PivotRow = -1, PivotColumn = -1;
     Real tmp;
     int k;
     for (k = 0; k < IndexRange; k++)
