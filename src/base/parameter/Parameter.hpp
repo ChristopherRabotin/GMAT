@@ -32,7 +32,7 @@ public:
     };
 
     Parameter(const std::string &name, const std::string &typeStr,
-              ParameterKey key, GmatBase *refObj,
+              ParameterKey key, GmatBase *obj,
               const std::string &desc, const std::string &unit);
     Parameter(const Parameter &param);
     Parameter& operator= (const Parameter& right);
@@ -49,23 +49,20 @@ public:
     bool operator==(const Parameter &right) const;
     bool operator!=(const Parameter &right) const;
 
-    //loj: may need more than one objects to evaluate parameter,
-    //     but assume need only one for now
-    virtual void SetObject(GmatBase *object);
-    virtual GmatBase *GetObject();
+    virtual bool AddObject(GmatBase *object) = 0;
+    virtual Integer GetNumObjects() const = 0;
 
     virtual void Evaluate() = 0;
+    virtual bool Validate() = 0;
     virtual const std::string* GetParameterList() const;
     
 protected:
-    virtual void CheckObjectType();
     
     static const std::string PARAMETER_KEY_STRING[KeyCount];
 
     ParameterKey  mKey;
     std::string   mDesc;
     std::string   mUnit;
-    GmatBase      *mObject;
 
 };
 #endif // Parameter_hpp

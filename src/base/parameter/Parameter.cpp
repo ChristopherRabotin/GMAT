@@ -36,7 +36,7 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 
 //------------------------------------------------------------------------------
 // Parameter(const std::string &name, const std::string &typeStr,
-//           ParameterKey key, GmatBase *refObj, const std::string &desc)
+//           ParameterKey key, GmatBase *obj, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -44,7 +44,7 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
  * @param <name> parameter name
  * @param <typeStr>  parameter type string
  * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
- * @param <refObj>  reference object pointer
+ * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
  *
@@ -52,7 +52,7 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
-                     ParameterKey key, GmatBase *refObj,
+                     ParameterKey key, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
     : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
@@ -73,7 +73,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
         mDesc = desc;
 
     mUnit = unit;
-    mObject = refObj;
+
 }
 
 //------------------------------------------------------------------------------
@@ -91,7 +91,6 @@ Parameter::Parameter(const Parameter &param)
     mKey = param.mKey;
     mDesc = param.mDesc;
     mUnit = param.mUnit;
-    mObject = param.mObject;
 }
 
 //------------------------------------------------------------------------------
@@ -113,7 +112,6 @@ Parameter& Parameter::operator= (const Parameter& right)
         mKey = right.mKey;
         mDesc = right.mDesc;
         mUnit = right.mUnit;
-        mObject = right.mObject;
     }
 
     return *this;
@@ -245,54 +243,9 @@ bool Parameter::operator!=(const Parameter &right) const
 }
 
 //------------------------------------------------------------------------------
-// void SetObject(GmatBase *refObj)
-//------------------------------------------------------------------------------
-/**
- * Sets object which is used in evaluation.
- */
-//------------------------------------------------------------------------------
-void Parameter::SetObject(GmatBase *refObj)
-{
-    if (mObject == NULL)
-    {
-        mObject = refObj;
-        CheckObjectType();
-    }
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject()
-//------------------------------------------------------------------------------
-/**
- * Gets object.
- */
-//------------------------------------------------------------------------------
-GmatBase* Parameter::GetObject()
-{
-    return mObject;
-}
-
-
-//------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
 //------------------------------------------------------------------------------
 const std::string* Parameter::GetParameterList() const
 {
     return NULL;
-}
-
-//---------------------------------
-// protected methods
-//---------------------------------
-
-//------------------------------------------------------------------------------
-// void CheckObjectType()
-//------------------------------------------------------------------------------
-/**
- * Checks reference object type.
- */
-//------------------------------------------------------------------------------
-void Parameter::CheckObjectType()
-{
 }
