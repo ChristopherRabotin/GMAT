@@ -111,6 +111,8 @@ private:
    wxStaticText *setting3StaticText;
    wxStaticText *setting4StaticText;
    wxStaticText *setting5StaticText;
+   wxStaticText *setting6StaticText;
+   wxStaticText *setting7StaticText;
    wxStaticText *degree1StaticText;
    wxStaticText *order1StaticText;
    wxStaticText *type1StaticText;
@@ -125,6 +127,8 @@ private:
    wxTextCtrl *setting3TextCtrl;
    wxTextCtrl *setting4TextCtrl;
    wxTextCtrl *setting5TextCtrl;
+   wxTextCtrl *setting6TextCtrl;
+   wxTextCtrl *setting7TextCtrl;
    wxTextCtrl *bodyTextCtrl;
    wxTextCtrl *gravityDegreeTextCtrl;
    wxTextCtrl *gravityOrderTextCtrl;

@@ -234,7 +234,12 @@ void PropagationConfigPanel::SaveData()
       newProp->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
       newProp->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
       newProp->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
-        
+      
+      if (integratorString.IsSameAs(integratorArray[ABM]))
+      {
+         newProp->SetRealParameter("LowerError", atof(setting6TextCtrl->GetValue()));
+         newProp->SetRealParameter("TargetError", atof(setting7TextCtrl->GetValue()));
+      }       
       thePropSetup->SetPropagator(newProp);
 #if DEBUG_PROP_PANEL
    ShowPropData("SaveData() AFTER  saving Integrator");
@@ -619,7 +624,14 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Max failed steps: "),
                         wxDefaultPosition, wxSize(80,20),
                         wxST_NO_AUTORESIZE );
-                           
+   setting6StaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Minimum Integration Error: "),
+                        wxDefaultPosition, wxSize(80,20),
+                        wxST_NO_AUTORESIZE );
+   setting7StaticText =
+      new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error: "),
+                        wxDefaultPosition, wxSize(80,20),
+                        wxST_NO_AUTORESIZE );    
    type1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Type"),
                         wxDefaultPosition, wxDefaultSize, 0 );
@@ -663,6 +675,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
                       wxDefaultPosition, wxSize(80,-1), 0 );
    setting5TextCtrl =
+      new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
+                      wxDefaultPosition, wxSize(80,-1), 0 );
+   setting6TextCtrl =
+      new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
+                      wxDefaultPosition, wxSize(80,-1), 0 );
+   setting7TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
                       wxDefaultPosition, wxSize(80,-1), 0 );
    bodyTextCtrl =
@@ -827,6 +845,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
    boxSizer3->Add( bodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    boxSizer3->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
@@ -980,6 +1002,56 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    {
       newProp = thePropSetup->GetPropagator();
    }
+   
+   if (integratorString.IsSameAs(integratorArray[RKV89]))
+   {
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[RKN68]))
+   {
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[RKF56]))
+   {   
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[PD45]))
+   {   
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[PD78]))
+   {   
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[BS]))
+   {   
+         setting6StaticText->Show(false);
+         setting7StaticText->Show(false);
+         setting6TextCtrl->Show(false);
+         setting7TextCtrl->Show(false);
+   }
+   else if (integratorString.IsSameAs(integratorArray[ABM]))
+   {   
+         setting6StaticText->Show(true);
+         setting7StaticText->Show(true);
+         setting6TextCtrl->Show(true);
+         setting7TextCtrl->Show(true);
+   }
     
 #if DEBUG_PROP_PANEL
    ShowPropData("DisplayIntegratorData() exiting...");
@@ -991,6 +1063,12 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MinStep")));
    setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MaxStep")));
    setting5TextCtrl->SetValue(wxVariant((long)newProp->GetIntegerParameter("MaxStepAttempts")));
+   
+   if (integratorString.IsSameAs(integratorArray[ABM]))
+   {
+      setting6TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("LowerError")));
+      setting7TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("TargetError")));
+   } 
 }
 
 //------------------------------------------------------------------------------
@@ -1370,6 +1448,12 @@ void PropagationConfigPanel::OnIntegratorTextUpdate()
    wxString set3 = setting3TextCtrl->GetValue();
    wxString set4 = setting4TextCtrl->GetValue();
    wxString set5 = setting5TextCtrl->GetValue();
+   
+   if (integratorString.IsSameAs(integratorArray[ABM]))
+   {
+      wxString set6 = setting6TextCtrl->GetValue();
+      wxString set7 = setting7TextCtrl->GetValue();
+   }  
 
    theApplyButton->Enable(true);
 }
