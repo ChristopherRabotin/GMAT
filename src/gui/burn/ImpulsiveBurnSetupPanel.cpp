@@ -7,6 +7,8 @@
 // Author: LaMont Ruley
 // Created: 2004/02/04
 //
+// 2004/12/16 - Added central body combo box selection
+//
 /**
  * This class contains the Impulsive Burn Setup window.
  */
@@ -297,6 +299,7 @@ void ImpulsiveBurnSetupPanel::Create()
       // create label and text field for the central body
       wxStaticText *item6 = new wxStaticText(this, ID_TEXT, wxT("Central body:"),
                                              wxDefaultPosition, wxDefaultSize, 0);
+      // list of bodies
       wxStaticText *item7 = new wxStaticText(this, ID_TEXT, wxT("Earth"),
                                              wxDefaultPosition, wxDefaultSize, wxCAPTION);
       bodyBoxSizer->Add( item6, 0, wxGROW | wxALIGN_CENTER_VERTICAL | wxALL, 5);
@@ -314,6 +317,7 @@ void ImpulsiveBurnSetupPanel::Create()
    else
    {
       // show error message
+      MessageInterface::ShowMessage("ImpulsiveBurnSetupPanel:Create() theBurn is NULL\n");
    }
 }
 
@@ -323,57 +327,65 @@ void ImpulsiveBurnSetupPanel::Create()
 void ImpulsiveBurnSetupPanel::LoadData()
 {
    // load data from the core engine
-   Integer id, el;
-   Real element;
-    
-   // Set object pointer for "Show Script"
-   mObject = theBurn;
-
-   // Coordinate Frame
-   id = theBurn->GetParameterID("CoordinateFrame");
-   std::string coordFrame = theBurn->GetStringParameter(id);
-   StringArray frames = theBurn->GetStringArrayParameter(id);
-   int index = 0;
-   for (StringArray::iterator iter = frames.begin(); 
-        iter != frames.end(); ++iter) 
+   try
    {
-      if (coordFrame == *iter) 
-         frameCB->SetSelection(index);
-      else
-         ++index;
-   }
-
-   // Vector Format
-   id = theBurn->GetParameterID("VectorFormat");
-   std::string vectorFormat = theBurn->GetStringParameter(id);
-
-   if (vectorFormat == "Cartesian") 
-      formatCB->SetSelection(0);
-   else
-      formatCB->SetSelection(1);
-
-   // Element1
-   el = theBurn->GetParameterID("Element1");
-   element = theBurn->GetRealParameter(el);
-   wxString el1;
-   el1.Printf("%f", element);
-   textCtrl1->SetValue(el1);
+      Integer id, el;
+      Real element;
     
-   // Element2
-   el = theBurn->GetParameterID("Element2");
-   element = theBurn->GetRealParameter(el);
-   wxString el2;
-   el2.Printf("%f", element);
-   textCtrl2->SetValue(el2);
+      // Set object pointer for "Show Script"
+      mObject = theBurn;
 
-   // Element3
-   el = theBurn->GetParameterID("Element3");
-   element = theBurn->GetRealParameter(el);
-   wxString el3;
-   el3.Printf("%f", element);
-   textCtrl3->SetValue(el3);
+      // Coordinate Frame
+      id = theBurn->GetParameterID("CoordinateFrame");
+      std::string coordFrame = theBurn->GetStringParameter(id);
+      StringArray frames = theBurn->GetStringArrayParameter(id);
+      int index = 0;
+      for (StringArray::iterator iter = frames.begin(); 
+        iter != frames.end(); ++iter) 
+      {
+         if (coordFrame == *iter) 
+            frameCB->SetSelection(index);
+         else
+            ++index;
+      }
 
-   LabelsUnits();
+      // Vector Format
+      id = theBurn->GetParameterID("VectorFormat");
+      std::string vectorFormat = theBurn->GetStringParameter(id);
+
+      if (vectorFormat == "Cartesian") 
+         formatCB->SetSelection(0);
+      else
+         formatCB->SetSelection(1);
+
+      // Element1
+      el = theBurn->GetParameterID("Element1");
+      element = theBurn->GetRealParameter(el);
+      wxString el1;
+      el1.Printf("%f", element);
+      textCtrl1->SetValue(el1);
+    
+      // Element2
+      el = theBurn->GetParameterID("Element2");
+      element = theBurn->GetRealParameter(el);
+      wxString el2;
+      el2.Printf("%f", element);
+      textCtrl2->SetValue(el2);
+
+      // Element3
+      el = theBurn->GetParameterID("Element3");
+      element = theBurn->GetRealParameter(el);
+      wxString el3;
+      el3.Printf("%f", element);
+      textCtrl3->SetValue(el3);
+
+      LabelsUnits();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("ImpulsiveBurnSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+   }
 }
 
 //------------------------------------------------------------------------------

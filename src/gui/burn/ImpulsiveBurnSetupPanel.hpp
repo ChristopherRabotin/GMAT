@@ -34,6 +34,7 @@ private:
 
     wxComboBox *frameCB;
     wxComboBox *formatCB;
+    wxComboBox *centralBodyCB;
     
     wxPanel *vectorPanel;
 
