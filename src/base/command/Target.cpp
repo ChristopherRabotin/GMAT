@@ -19,7 +19,6 @@
 
 
 #include "Target.hpp"
-#include "Spacecraft.hpp"
 
 
 // #define DEBUG_TARGETER_PARSING
@@ -41,7 +40,7 @@ Target::Target() :
    targeterNameID     (parameterCount),
    TargeterConvergedID(parameterCount+1)
 {
-    parameterCount += 2;
+   parameterCount += 2;
 }
 
 
@@ -65,17 +64,18 @@ Target::~Target()
 /**
  * Constructor that replicates a Target command.  (Copy constructor)
  *
- * @return A reference to this instance.
+ * @param t The target command that is copied.
  */
 //------------------------------------------------------------------------------
 Target::Target(const Target& t) :
-    BranchCommand       (t),
-    targeterName        (t.targeterName),
-    targeter            (NULL),
-    targeterNameID      (t.targeterNameID),
-    TargeterConvergedID (t.TargeterConvergedID)
+   BranchCommand       (t),
+   targeterName        (t.targeterName),
+   targeter            (NULL),
+   targeterConverged   (false),
+   targeterNameID      (t.targeterNameID),
+   TargeterConvergedID (t.TargeterConvergedID)
 {
-    parameterCount = t.parameterCount;
+   parameterCount = t.parameterCount;
 }
 
 
@@ -85,15 +85,23 @@ Target::Target(const Target& t) :
 /**
  * Assignment operator for the target command.
  *
+ * @param t The target command that is copied.
+ *
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
 Target& Target::operator=(const Target& t)
 {
-    if (this == &t)
-        return *this;
+   if (this == &t)
+      return *this;
     
-    return *this;
+   GmatCommand::operator=(t);
+
+   targeterName      = t.targeterName;
+   targeter          = NULL;
+   targeterConverged = false;
+
+   return *this;
 }
 
 
@@ -108,16 +116,13 @@ Target& Target::operator=(const Target& t)
  * extension was needed so that the EndTarget command can be set to point back 
  * to the head of the targeter loop.
  *
+ * @param cmd The command that gets appended.
+ *
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool Target::Append(GmatCommand *cmd)
 {
-// Need to fix the nested branching...
-//    if (nestLevel > 0) {
-//        Command *cmd = branch[0];
-//    }
-
    #ifdef DEBUG_TARGETER_PARSING
        MessageInterface::ShowMessage("\nTarget::Append received \"%s\" command",
                                      cmd->GetTypeName().c_str());
@@ -155,25 +160,34 @@ bool Target::Append(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Target.
  *
  * @return clone of the Target.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* Target::Clone(void) const
+GmatBase* Target::Clone() const
 {
    return (new Target(*this));
 }
 
-//loj: 11/22/04 added
+
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param type Type of the object that is renamed.
+ * @param oldName The current name for the object.
+ * @param newName The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
 bool Target::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
@@ -202,10 +216,10 @@ bool Target::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string Target::GetParameterText(const Integer id) const
 {
-    if (id == targeterNameID)
-        return "Targeter";
+   if (id == targeterNameID)
+      return "Targeter";
     
-    return BranchCommand::GetParameterText(id);
+   return BranchCommand::GetParameterText(id);
 }
 
 
@@ -222,12 +236,12 @@ std::string Target::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Target::GetParameterID(const std::string &str) const
 {
-    if (str == "Targeter")
-        return targeterNameID;
-    if (str == "TargeterConverged")
-        return TargeterConvergedID;
+   if (str == "Targeter")
+      return targeterNameID;
+   if (str == "TargeterConverged")
+      return TargeterConvergedID;
     
-    return BranchCommand::GetParameterID(str);
+   return BranchCommand::GetParameterID(str);
 }
 
 
@@ -244,12 +258,12 @@ Integer Target::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Target::GetParameterType(const Integer id) const
 {
-    if (id == targeterNameID)
-        return Gmat::STRING_TYPE;
-    if (id == TargeterConvergedID)
-        return Gmat::BOOLEAN_TYPE;
+   if (id == targeterNameID)
+      return Gmat::STRING_TYPE;
+   if (id == TargeterConvergedID)
+      return Gmat::BOOLEAN_TYPE;
     
-    return BranchCommand::GetParameterType(id);
+   return BranchCommand::GetParameterType(id);
 }
 
 
@@ -266,12 +280,12 @@ Gmat::ParameterType Target::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Target::GetParameterTypeString(const Integer id) const
 {
-    if (id == targeterNameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-    if (id == TargeterConvergedID)
-        return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
+   if (id == targeterNameID)
+      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+   if (id == TargeterConvergedID)
+      return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
     
-    return BranchCommand::GetParameterTypeString(id);
+   return BranchCommand::GetParameterTypeString(id);
 }
 
 
@@ -288,10 +302,10 @@ std::string Target::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Target::GetStringParameter(const Integer id) const
 {
-    if (id == targeterNameID)
-        return targeterName;
+   if (id == targeterNameID)
+      return targeterName;
     
-    return BranchCommand::GetStringParameter(id);
+   return BranchCommand::GetStringParameter(id);
 }
 
 
@@ -309,12 +323,12 @@ std::string Target::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Target::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == targeterNameID) {
-        targeterName = value;
-        return true;
-    }    
+   if (id == targeterNameID) {
+      targeterName = value;
+      return true;
+   }
     
-    return BranchCommand::SetStringParameter(id, value);
+   return BranchCommand::SetStringParameter(id, value);
 }
 
 
@@ -332,6 +346,7 @@ bool Target::SetStringParameter(const Integer id, const std::string &value)
  * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
  *       parameter accesses.
  */
+//---------------------------------------------------------------------------
 bool Target::GetBooleanParameter(const Integer id) const
 {
    if (id == TargeterConvergedID)
@@ -341,6 +356,17 @@ bool Target::GetBooleanParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the name of a reference object.
+ *
+ * @param <type> The type of object that is being looked up.
+ *
+ * @return the object's name.
+ */
+//------------------------------------------------------------------------------
 std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
@@ -349,7 +375,20 @@ std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
-bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Set the name of a reference object.
+ *
+ * @param <type> The type of object.
+ * @param <name> The name of the object.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Target::SetRefObjectName(const Gmat::ObjectType type,
+                              const std::string &name)
 {
    if (type == Gmat::SOLVER) {
       targeterName = name;
@@ -360,7 +399,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &na
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the targeter.
@@ -368,7 +407,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &na
  * @return true if the Command is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Target::Initialize(void)
+bool Target::Initialize()
 {
    if (objectMap->find(targeterName) == objectMap->end()) {
       std::string errorString = "Target command cannot find targeter \"";
@@ -397,25 +436,27 @@ bool Target::Initialize(void)
          current = current->GetNext();
       }
    }
+
    bool retval = BranchCommand::Initialize();
 
-   // Targeter specific initialization goes here:
-   if (objectMap->find(targeterName) == objectMap->end()) {
-      std::string errorString = "Target command cannot find targeter \"";
-      errorString += targeterName;
-      errorString += "\"";
-      throw CommandException(errorString);
-   }
+   if (retval == true) {
+      // Targeter specific initialization goes here:
+      if (objectMap->find(targeterName) == objectMap->end()) {
+         std::string errorString = "Target command cannot find targeter \"";
+         errorString += targeterName;
+         errorString += "\"";
+         throw CommandException(errorString);
+      }
 
-    
-   targeter->Initialize();
+      retval = targeter->Initialize();
+   }
         
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Target the variables defined for this targeting loop.
@@ -428,118 +469,140 @@ bool Target::Initialize(void)
  *         occurs.
  */
 //------------------------------------------------------------------------------
-bool Target::Execute(void)
+bool Target::Execute()
 {
-    bool retval = BranchCommand::Execute();
+   bool retval = BranchCommand::Execute();
     
-    // Drive through the state machine.
-    Solver::SolverState state = targeter->GetState();
-    GmatCommand *current;
+   // Drive through the state machine.
+   Solver::SolverState state = targeter->GetState();
+   GmatCommand *current;
     
-    switch (state) {
-        case Solver::INITIALIZING:
-            // Finalize initialization of the targeter data
-            current = branch[0];
-            targeterConverged = false;
-            while (current != this)  {
-                std::string type = current->GetTypeName();
-                if ((type == "Target") || (type == "Vary") || (type == "Achieve"))
-                    current->Execute();
-                current = current->GetNext();
-            }
-            StoreLoopData();
-            break;
+   switch (state) {
+      case Solver::INITIALIZING:
+         // Finalize initialization of the targeter data
+         current = branch[0];
+         targeterConverged = false;
+         while (current != this)  {
+            std::string type = current->GetTypeName();
+            if ((type == "Target") || (type == "Vary") ||
+                (type == "Achieve"))
+               current->Execute();
+            current = current->GetNext();
+         }
+         StoreLoopData();
+         break;
             
-        case Solver::NOMINAL:
-            // Execute the nominal sequence
-            if (!commandComplete) {
-                ResetLoopData();
-                retval = ExecuteBranch();
-            }
-            break;
-            
-        case Solver::CHECKINGRUN:
-            // Check for convergence; this is done in the targeter state 
-            // machine, so this case is a NoOp for the Target command
-            break;
-            
-        case Solver::PERTURBING:
+      case Solver::NOMINAL:
+         // Execute the nominal sequence
+         if (!commandComplete) {
             ResetLoopData();
             retval = ExecuteBranch();
-            break;
+         }
+         break;
             
-        case Solver::CALCULATING:
-            // Calculate the next set of variables to use; this is performed in
-            // the targeter -- nothing to be done here
-            break;
+      case Solver::CHECKINGRUN:
+         // Check for convergence; this is done in the targeter state
+         // machine, so this case is a NoOp for the Target command
+         break;
             
-        case Solver::FINISHED:
-            // Final clean-up
-            commandComplete = true;
-            targeterConverged = true;
+      case Solver::PERTURBING:
+         ResetLoopData();
+         retval = ExecuteBranch();
+         break;
             
-            // Run once more to publish the data from the converged state
-            ResetLoopData();
-            retval = ExecuteBranch();
-            break;
+      case Solver::CALCULATING:
+         // Calculate the next set of variables to use; this is performed in
+         // the targeter -- nothing to be done here
+         break;
             
-        case Solver::ITERATING:     // Intentional fall-through
-        default:
-            throw CommandException("Invalid state in the Targeter state machine");
-    }
+      case Solver::FINISHED:
+         // Final clean-up
+         commandComplete = true;
+         targeterConverged = true;
+            
+         // Run once more to publish the data from the converged state
+         ResetLoopData();
+         retval = ExecuteBranch();
+         break;
+            
+      case Solver::ITERATING:     // Intentional fall-through
+      default:
+         throw CommandException("Invalid state in the Targeter state machine");
+   }
 
-    targeter->AdvanceState();
+   targeter->AdvanceState();
 
-    if (targeter->GetState() == Solver::FINISHED) {
-       targeterConverged = true;
-    }
+   if (targeter->GetState() == Solver::FINISHED) {
+      targeterConverged = true;
+   }
 
-    return retval;
+   return retval;
 }
 
 
-void Target::StoreLoopData(void)
+//------------------------------------------------------------------------------
+// void StoreLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Makes local copies of the data so that a targeting loop can recover initial
+ * data while iterating.
+ */
+//------------------------------------------------------------------------------
+void Target::StoreLoopData()
 {
-    // Make local copies of all of the objects that may be affected by targeter
-    // loop iterations
-    std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
-    GmatBase *obj;
+   // Make local copies of all of the objects that may be affected by targeter
+   // loop iterations
+   std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
+   GmatBase *obj;
     
-    // Loop through the object map, looking for objects we'll need to restore. 
-    while (pair != objectMap->end()) {
-        obj = (*pair).second;
-        // Save copies of all of the spacecraft
-        if (obj->GetType() == Gmat::SPACECRAFT)
-            localStore.push_back(new Spacecraft((Spacecraft&)(*obj)));
-        ++pair;
-    }
+   // Loop through the object map, looking for objects we'll need to restore.
+   while (pair != objectMap->end()) {
+      obj = (*pair).second;
+      // Save copies of all of the spacecraft
+      if (obj->GetType() == Gmat::SPACECRAFT)
+         localStore.push_back(new Spacecraft((Spacecraft&)(*obj)));
+      ++pair;
+   }
 }
 
 
-void Target::ResetLoopData(void)
+//------------------------------------------------------------------------------
+// void ResetLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Resets starting data from local copiesso that a targeting loop can iterate.
+ */
+//------------------------------------------------------------------------------
+void Target::ResetLoopData()
 {
-    Spacecraft *sc;
-    std::string name;
+   Spacecraft *sc;
+   std::string name;
     
-    for (std::vector<GmatBase *>::iterator i = localStore.begin(); 
-            i != localStore.end(); ++i) {
-        name = (*i)->GetName();
-        GmatBase *gb = (*objectMap)[name];
-        if (gb != NULL) {
-            sc = (Spacecraft*)gb;
-            *sc = *((Spacecraft*)(*i));  // Assignment operator better be right!
-        }
-    }
+   for (std::vector<GmatBase *>::iterator i = localStore.begin();
+        i != localStore.end(); ++i) {
+      name = (*i)->GetName();
+      GmatBase *gb = (*objectMap)[name];
+      if (gb != NULL) {
+         sc = (Spacecraft*)gb;
+          *sc = *((Spacecraft*)(*i));
+      }
+   }
 }
 
 
-void Target::FreeLoopData(void)
+//------------------------------------------------------------------------------
+// void FreeLoopData()
+//------------------------------------------------------------------------------
+/**
+ * Cleans up starting data store after targeting has completed.
+ */
+//------------------------------------------------------------------------------
+void Target::FreeLoopData()
 {
-    GmatBase *obj;
-    while (!localStore.empty()) {
-       obj = *(--localStore.end());
-       localStore.pop_back();
-       delete obj;
-    }
+   GmatBase *obj;
+   while (!localStore.empty()) {
+      obj = *(--localStore.end());
+      localStore.pop_back();
+      delete obj;
+   }
 }
-

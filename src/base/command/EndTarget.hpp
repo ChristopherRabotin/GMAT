@@ -25,23 +25,22 @@
 #include "Command.hpp"
 
 
-class EndTarget : public GmatCommand
+class GMAT_API EndTarget : public GmatCommand
 {
 public:
-    EndTarget(void);
-    virtual ~EndTarget(void);
+   EndTarget();
+   virtual ~EndTarget();
     
-    EndTarget(const EndTarget& et);
-    EndTarget&              operator=(const EndTarget& et);
+   EndTarget(const EndTarget& et);
+   EndTarget&              operator=(const EndTarget& et);
     
-    virtual bool            Initialize(void);
-    virtual bool            Execute(void);
+   virtual bool            Initialize();
+   virtual bool            Execute();
     
-    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
+   virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
-
+   // inherited from GmatBase
+   virtual GmatBase*       Clone() const;
 };
 
 

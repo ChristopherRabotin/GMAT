@@ -24,17 +24,18 @@
 
 #include "BranchCommand.hpp"
 #include "Solver.hpp"
+#include "Spacecraft.hpp"
 
 
 /**
  * Command that manages processing for entry to the targeter loop
  *
- * The Target command manages the targeter loop.  All targeters implement a state
- * machine that evaluates the current state of the targeting process, and provides 
- * data to the command sequence about the next step to be taken in the targeting
- * process.
+ * The Target command manages the targeter loop.  All targeters implement a 
+ * state machine that evaluates the current state of the targeting process, and
+ * provides data to the command sequence about the next step to be taken in the 
+ * targeting process.
  */
-class Target : public BranchCommand
+class GMAT_API Target : public BranchCommand
 {
 public:
    Target();
@@ -70,7 +71,6 @@ public:
                                         const std::string &name);
     
    // Methods used to run the command
-//    virtual bool        InterpretAction(void);
    virtual bool        Initialize(void);
    virtual bool        Execute(void);
 
@@ -80,8 +80,7 @@ protected:
    /// The targeter instance used to manage the targeter state machine
    Solver              *targeter;
    /// Local store of the objects that we'll need to reset
-   std::vector<GmatBase *>
-                       localStore;
+   ObjectArray         localStore;
    /// Flag indicating is the targeter has converged
    bool                targeterConverged;
     
