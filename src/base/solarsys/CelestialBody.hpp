@@ -115,8 +115,8 @@ public:
    virtual bool                 GetUsePotentialFile() const;
    virtual Real*                GetAngularVelocity();             // rad/sec
    virtual Real                 GetHourAngle(Real offset);        // radians
-   virtual Rmatrix              GetHarmonicCoefficientsSij(); // const??
-   virtual Rmatrix              GetHarmonicCoefficientsCij(); // const??
+   virtual Rmatrix&             GetHarmonicCoefficientsSij(); // const??
+   virtual Rmatrix&             GetHarmonicCoefficientsCij(); // const??
    virtual const StringArray&   GetSupportedAtmospheres() const;
    virtual std::string          GetAtmosphereModelType();
    virtual AtmosphereModel*     GetAtmosphereModel(void);
@@ -132,6 +132,10 @@ public:
    virtual bool           SetUsePotentialFile(bool useIt);
    // need to set the filename here as well????
    virtual bool           SetAtmosphereModel(std::string toAtmModel);
+   virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
+                                                Real bodyPolarRad, Real bodyMu,
+                                                Integer coeffSize, Rmatrix& bodySij,
+                                                Rmatrix& bodyCij);
 
    
    // Parameter access methods - overridden from GmatBase

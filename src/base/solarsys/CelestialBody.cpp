@@ -390,7 +390,6 @@ CelestialBody::~CelestialBody()
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
    Real*     posVel;
-   Integer   itsBodyNumber;
    switch (posVelSrc)
    {
       case Gmat::SLP :
@@ -406,8 +405,8 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
                   "SLP or DE file requested, but no file specified");
          }
          // figure out the ID of the body
-         itsBodyNumber = theSourceFile->GetBodyID(instanceName);
-         posVel        = theSourceFile->GetPosVel(itsBodyNumber,atTime);
+         bodyNumber = theSourceFile->GetBodyID(instanceName);
+         posVel     = theSourceFile->GetPosVel(bodyNumber,atTime);
          break;
       case Gmat::ANALYTIC :
          switch (analyticMethod)
@@ -648,7 +647,7 @@ Real  CelestialBody:: GetHourAngle(Real offset)
 }
 
 //------------------------------------------------------------------------------
-//  Rmatrix GetHarmonicCoefficientsSij() 
+//  Rmatrix& GetHarmonicCoefficientsSij() 
 //------------------------------------------------------------------------------
 /**
  * This method returns the spherical harmonic coefficients sij for the body.  It
@@ -656,20 +655,22 @@ Real  CelestialBody:: GetHourAngle(Real offset)
  *
  * @return sij spherical harmonic coefficients for the body.
  *
+ *
+ * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-Rmatrix CelestialBody::GetHarmonicCoefficientsSij() 
+Rmatrix& CelestialBody::GetHarmonicCoefficientsSij() 
 {
    if ((usePotentialFile == true) & (!potentialFileRead))
    {
       bool err = ReadPotentialFile();
-      if (err) return Rmatrix();     // should throw an exception here
+      if (err) throw SolarSystemException("Unable to read potential file"); 
    }
    return sij;
 }
 
 //------------------------------------------------------------------------------
-//  Rmatrix GetHarmonicCoefficientsCij() 
+//  Rmatrix& GetHarmonicCoefficientsCij() 
 //------------------------------------------------------------------------------
 /**
  * This method returns the spherical harmonic coefficients cij for the body.  It
@@ -677,14 +678,15 @@ Rmatrix CelestialBody::GetHarmonicCoefficientsSij()
  *
  * @return cij spherical harmonic coefficients for the body.
  *
+ * @exception <SolarSystemException> thown if there is an error getting the data.
  */
 //------------------------------------------------------------------------------
-Rmatrix CelestialBody::GetHarmonicCoefficientsCij() 
+Rmatrix& CelestialBody::GetHarmonicCoefficientsCij() 
 {
    if ((usePotentialFile == true) & (!potentialFileRead))
    {
       bool err = ReadPotentialFile();
-      if (err) return Rmatrix();     // should throw an exception here
+      if (err) throw SolarSystemException("Unable to read potential file");
    }
    return cij;
 }
@@ -888,6 +890,61 @@ bool CelestialBody::SetAtmosphereModel(std::string toAtmModel)
    return true;
 }
 
+//------------------------------------------------------------------------------
+//  bool SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
+//                             Real bodyPolarRad, Real bodyMu,
+//                             Integer coeffSize, Rmatrix& bodySij,
+//                             Rmatrix& bodyCij);
+//------------------------------------------------------------------------------
+/**
+* This method sets the physical parameters for the body.
+ *
+ * @param <bodyMass>     mass (kg) of the body.
+ * @param <bodyMEqRad>   equatorial radius (km) of the body.
+ * @param <bodyPolarRad> polar radius (km) of the body.
+ * @param <bodyMu>       gravitational constant (km^3/s^2) of the body.
+ * @param <coeffSize>    size of Sij and Cij for the body.
+ * @param <bodySij>      coefficients Sij for the body (coeffSize x coeffSize).
+ * @param <bodyCij>      coefficients Cij for the body (coeffSize x coeffSize).
+ *
+ * @return flag indicating success of the method.
+ *
+ * @exception <SolarSystemException> thrown if there is an error in the
+ *                                   input data.
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
+                                          Real bodyPolarRad, Real bodyMu,
+                                          Integer coeffSize, Rmatrix& bodySij,
+                                          Rmatrix& bodyCij)
+{
+   // add data checks later <-
+   mass             = bodyMass;
+   equatorialRadius = bodyEqRad;
+   polarRadius      = bodyPolarRad;
+   mu               = bodyMu;
+   coefficientSize  = coeffSize;
+   Integer r,c;
+   try
+   {
+      bodySij.GetSize(r,c);
+      sij = bodySij;
+   }
+   catch (TableTemplateExceptions::IllegalSize& tte)
+   {
+      throw SolarSystemException("Sij input to body has no dimensions.");
+   }
+   try
+   {
+      bodyCij.GetSize(r,c);
+      cij = bodyCij;
+   }
+   catch (TableTemplateExceptions::IllegalSize& tte)
+   {
+      throw SolarSystemException("Cij input to body has no dimensions.");
+   }
+   return true;
+}
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
@@ -1315,6 +1372,7 @@ void CelestialBody::Initialize(std::string withBodyType)
 {
    // assuming derived classes will fill in all the specific things with
    // appropriate default values
+   usePotentialFile  = false;
    stateTime         = 0.0;
    state             = Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
    potentialFileRead = false;
