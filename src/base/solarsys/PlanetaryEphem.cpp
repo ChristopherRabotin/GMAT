@@ -1,0 +1,116 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  PlanetaryEphem
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// Author: Wendy C. Shoan
+// Created: 2004/02/18
+//
+/**
+ * Implementation of the PlanetaryEphem class.
+ *
+ * @note This class was created (basically) from Swingby code.  Major mods were:
+ * - changed #defines to static const parameters
+ * - removed _MAX_PATH (not standard on platforms) - use new static
+ *   const MAX_PATH_LEN instead
+ */
+//------------------------------------------------------------------------------
+
+#include "PlanetaryEphem.hpp"
+
+// maximum length of path name
+const Integer PlanetaryEphem::MAX_PATH_LEN        = 260;
+
+// Max number of bodies that can be modeled
+const Integer PlanetaryEphem::MAX_BODIES          = 3;             // increase later -> 20;
+// Max number of zonal values that are enterable
+const Integer PlanetaryEphem::MAX_ZONALS          =  5;
+// Max length of the name of a potential field name
+const Integer PlanetaryEphem::MAX_POTENTIAL_NAME  = 72;
+// The number of bodies normally found on the SLP file
+const Integer PlanetaryEphem::NUM_STANDARD_BODIES = 11;
+
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  PlanetaryEphem(std::string withFileName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates an object of the PlanetaryEphem class
+ * (default constructor).
+ *
+ * @param <name> parameter indicating the full path name of the File.
+ */
+//------------------------------------------------------------------------------
+PlanetaryEphem::PlanetaryEphem(std::string withFileName)
+{
+   itsName = withFileName;
+   strcpy(g_pef_dcb.full_path,withFileName.c_str());
+   g_pef_dcb.recl           = 0;
+   g_pef_dcb.fptr           = NULL;
+}
+
+//------------------------------------------------------------------------------
+//  PlanetaryEphem(const PlanetaryEphem& pef)
+//------------------------------------------------------------------------------
+/**
+ * This method creates an object of the PlanetaryEphem class
+ * (constructor).
+ *
+ * @param <pef> SlpFIle object whose values to copy to the new File.
+ */
+//------------------------------------------------------------------------------
+PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef)
+{
+   // set class data
+   itsName = pef.itsName;
+   g_pef_dcb       = pef.g_pef_dcb;
+}
+
+//------------------------------------------------------------------------------
+//  PlanetaryEphem& operator= (const PlanetaryEphem& pef)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator for the PlanetaryEphem class.
+ *
+ * @param <pef> the PlanetaryEphem object whose data to assign to "this"
+ *            File.
+ *
+ * @return "this" PlanetaryEphem with data of input PlanetaryEphem pef.
+ */
+//------------------------------------------------------------------------------
+PlanetaryEphem& PlanetaryEphem::operator=(const PlanetaryEphem& pef)
+{
+   if (this == &pef) return *this;
+   itsName = pef.itsName;
+   g_pef_dcb       = pef.g_pef_dcb;
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+//  ~PlanetaryEphem()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the PlanetaryEphem class.
+ */
+//------------------------------------------------------------------------------
+PlanetaryEphem::~PlanetaryEphem()
+{
+   fclose(g_pef_dcb.fptr);   
+}
+
+//------------------------------------------------------------------------------
+//  std:;string GetName()
+//------------------------------------------------------------------------------
+/**
+ * Returns the name of the file (full path name).
+ *
+ * @return the full path name of the file.
+ */
+//------------------------------------------------------------------------------
+std::string PlanetaryEphem::GetName() const
+{
+   return itsName;
+}
