@@ -525,7 +525,9 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
       if (depObjName != "")
          param->SetStringParameter("DepObject", depObjName);
       
-      if (param->NeedCoordSystem())
+      //loj: 3/3/05 Changed to if (mCoordSysComboBox->IsShown())
+      //if (param->NeedCoordSystem())
+      if (mCoordSysComboBox->IsShown())
          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
    }
    
