@@ -24,18 +24,10 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
-#include "wx/sizer.h"
-#include "wx/splitter.h"
-#include "wx/listctrl.h"
-#include "wx/treectrl.h"
-#include "wx/notebook.h"
-#include "wx/button.h"
-#include "wx/grid.h"
 
 #include "Spacecraft.hpp"
-#include "Keplerian.hpp"            // for coversion of number
-#include "Cartesian.hpp"            // for conversion of number
 #include "PhysicalConstants.hpp"   // for mu
+#include "GmatPanel.hpp"
 
 //loj: to remove warnings about duplicate defines
 // Declare window functions

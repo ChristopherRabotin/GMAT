@@ -146,11 +146,12 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
 {
     orbitPanel = new wxPanel(parent);
 
-    wxFlexGridSizer *orbitSizer = new wxFlexGridSizer(1, 0, 0 );
-    orbitSizer->AddGrowableCol( 0 );
-    orbitSizer->AddGrowableCol( 1 );
-    orbitSizer->AddGrowableRow( 0 );
-    orbitSizer->AddGrowableRow( 1 );
+    wxBoxSizer *orbitSizer = new wxBoxSizer(wxVERTICAL);
+//    wxFlexGridSizer *orbitSizer = new wxFlexGridSizer(1, 0, 0 );
+//    orbitSizer->AddGrowableCol( 0 );
+//    orbitSizer->AddGrowableCol( 1 );
+//    orbitSizer->AddGrowableRow( 0 );
+//    orbitSizer->AddGrowableRow( 1 );
 
     // static box for the Coordinate System
     wxStaticBox *item2 = new wxStaticBox( orbitPanel, ID_STATIC_COORD, 
@@ -192,7 +193,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     item7->Disable();
     item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    item1->Add( item3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
 
     //static box for the orbit state
     wxStaticBox *item9 = new wxStaticBox( orbitPanel, ID_STATIC_ORBIT, 
@@ -255,7 +256,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
 //                wxDefaultPosition, wxSize(100,-1), 5, strs15, wxCB_DROPDOWN );
     item10->Add( stateCB, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    item8->Add( item10, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    item8->Add( item10, 0, wxALIGN_CENTER|wxALL, 5 );
 
     // static box for the elements
     elementBox = new wxStaticBox(orbitPanel, ID_STATIC_ELEMENT, wxT("Elements"));
@@ -266,9 +267,9 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     elementsPanel = (wxPanel *)NULL; 
     // adds default descriptors/labels 
     AddElements(orbitPanel);
-    elementSizer->Add(elementsPanel, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
+    elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER|wxALL, 5);
 
-    item8->Add( elementSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    item8->Add( elementSizer, 0, wxALIGN_CENTER|wxALL, 5 );
 
     // adds the buttons
     wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -286,9 +287,9 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     buttonSizer->Add(cancelButton, 0, wxALL|wxALIGN_CENTER, 5);
     buttonSizer->Add(helpButton, 0, wxALL|wxALIGN_CENTER, 5);
 
-    orbitSizer->Add( item1, 0, wxGROW|wxALL, 5 );
-    orbitSizer->Add( item8, 0, wxGROW|wxALL, 5 );
-    orbitSizer->Add( buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
+    orbitSizer->Add( item1, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
+    orbitSizer->Add( item8, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
+    orbitSizer->Add( buttonSizer, 0, wxALIGN_CENTER|wxALL, 5 );
 
     orbitPanel->SetAutoLayout( TRUE );
     orbitPanel->SetSizer( orbitSizer );

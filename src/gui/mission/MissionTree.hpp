@@ -52,6 +52,11 @@ private:
     int mNumPropagate;
     int mNumManeuver;
     int mNumTarget;
+    int mNumIfStatement;
+    int mNumWhileLoop;
+    int mNumForLoop;
+    int mNumDoWhile;
+    int mNumSwitchCase;
 
     void UpdateCommand();
     void UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd);
@@ -73,10 +78,22 @@ private:
     void OnAddPropagate(wxCommandEvent &event);
     void OnAddManeuver(wxCommandEvent &event);
     void OnAddTarget(wxCommandEvent &event);
+
+    void OnAddIfStatement(wxCommandEvent &event);
+    void OnAddWhileLoop(wxCommandEvent &event);
+    void OnAddForLoop(wxCommandEvent &event);
+    void OnAddDoWhile(wxCommandEvent &event);
+    void OnAddSwitchCase(wxCommandEvent &event);
     
     void OnInsertPropagate(wxCommandEvent &event);
     void OnInsertManeuver(wxCommandEvent &event);
     void OnInsertTarget(wxCommandEvent &event);
+
+    void OnInsertIfStatement(wxCommandEvent &event);
+    void OnInsertWhileLoop(wxCommandEvent &event);
+    void OnInsertForLoop(wxCommandEvent &event);
+    void OnInsertDoWhile(wxCommandEvent &event);
+    void OnInsertSwitchCase(wxCommandEvent &event);
     
     void OnViewVariables();
     void OnViewGoals();
@@ -85,7 +102,10 @@ private:
  
     wxMenu* CreatePopupMenu();
     wxMenu* CreateInsertPopupMenu();
-    wxMenu* CreateControlLogicPopupMenu();
+//    wxMenu* CreateControlLogicPopupMenu();
+    wxMenu* CreateAddControlLogicPopupMenu();
+    wxMenu* CreateInsertControlLogicPopupMenu();
+
     
     DECLARE_EVENT_TABLE();
        
@@ -119,6 +139,18 @@ private:
         POPUP_WHILE_CONTROL,
         POPUP_FOR_CONTROL,
         POPUP_DO_CONTROL,
+        
+        POPUP_ADD_IF_STATEMENT,
+        POPUP_ADD_WHILE_LOOP,
+        POPUP_ADD_FOR_LOOP,
+        POPUP_ADD_D0_WHILE,
+        POPUP_ADD_SWITCH_CASE,
+        
+        POPUP_INSERT_IF_STATEMENT,
+        POPUP_INSERT_WHILE_LOOP,
+        POPUP_INSERT_FOR_LOOP,
+        POPUP_INSERT_D0_WHILE,
+        POPUP_INSERT_SWITCH_CASE,
     };
 };
 

@@ -147,6 +147,12 @@ namespace GmatTree
 
         // Instead of Variable_Folder
         VARIABLES,
+        
+        IF_CONTROL,
+        WHILE_CONTROL,
+        FOR_CONTROL,
+        DO_CONTROL,
+        SWITCH_CONTROL,
     };
 }
 #endif // GmatTreeItemData_hpp
