@@ -77,7 +77,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
    mXyPlot = (XyPlot*)subscriber;
-   
+
    mXParamChanged = false;
    mYParamChanged = false;
    mIsColorChanged = false;
@@ -298,7 +298,6 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
    wxColourData data;
    data.SetColour(mLineColor);
    wxColourDialog dialog(this, &data);
-   //dialog.CenterOnParent();
    dialog.Center();
    
    if (dialog.ShowModal() == wxID_OK)
@@ -327,7 +326,7 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
 void XyPlotSetupPanel::Create()
 {
    wxString emptyList[] = {};
-   Integer borderSize = 1; // border size
+   Integer bsize = 1; // border size
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
@@ -336,6 +335,120 @@ void XyPlotSetupPanel::Create()
    wxStaticText *emptyText =
       new wxStaticText(this, -1, wxT(""),
                        wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   //------------------------------------------------------
+   // X box label (1st column)
+   //------------------------------------------------------
+   
+   wxStaticBox *xSelectedStaticBox = new wxStaticBox( this, -1, wxT("") );
+
+   wxStaticText *titleXText =
+      new wxStaticText(this, -1, wxT("Selected X"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+
+   //loj: 1/19/05 Changed 150,250 to 170,260
+   mXSelectedListBox =
+      new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
+                    wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+   
+   wxStaticBoxSizer *xSelectedBoxSizer =
+      new wxStaticBoxSizer(xSelectedStaticBox, wxVERTICAL);
+   
+   xSelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xSelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // add, remove X buttons (2nd column)
+   //------------------------------------------------------
+   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
+                              wxDefaultPosition, wxSize(20,20), 0);
+
+   wxButton *removeXButton =
+      new wxButton(this, REMOVE_X, wxT("-->"),
+                   wxDefaultPosition, wxSize(20,20), 0);
+
+   wxBoxSizer *xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+   xButtonsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xButtonsBoxSizer->Add(mAddXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xButtonsBoxSizer->Add(removeXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // parameters box (3rd column)
+   //------------------------------------------------------
+   wxButton *createVarButton;
+   
+
+   mParamBoxSizer =
+      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
+                                          &mObjectComboBox, ID_COMBOBOX,
+                                          &mUserParamListBox, USER_PARAM_LISTBOX,
+                                          &mPropertyListBox, PROPERTY_LISTBOX,
+                                          &mCoordSysComboBox, ID_COMBOBOX,
+                                          &mCentralBodyComboBox, ID_COMBOBOX,
+                                          &mCoordSysLabel, &mCoordSysSizer);
+
+#if DEBUG_XYPLOT_PANEL
+   MessageInterface::ShowMessage
+      ("XyPlotSetupPanel::Create() got mParamBoxSizer from theGuiManager\n"
+       "createVarButton=%d, mObjectComboBox=%d\nmUserParamListBox=%d, "
+       "mPropertyListBox=%d\n", createVarButton, mObjectComboBox, mUserParamListBox,
+       mPropertyListBox);
+#endif
+
+
+   //------------------------------------------------------
+   // add, remove, clear Y buttons (4th column)
+   //------------------------------------------------------
+   mAddYButton =
+      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(20,20), 0);
+
+   wxButton *removeYButton =
+      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, wxSize(20,20), 0);
+   
+   wxButton *clearYButton =
+      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(20,20), 0);
+   
+   wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+   yButtonsBoxSizer->Add(mAddYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   yButtonsBoxSizer->Add(removeYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   yButtonsBoxSizer->Add(clearYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // Y box label (5th column)
+   //------------------------------------------------------
+   wxStaticBox *ySelectedStaticBox = new wxStaticBox( this, -1, wxT("") );
+
+   wxStaticText *titleYText =
+      new wxStaticText(this, -1, wxT("Selected Y"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+
+   //loj: 1/19/05 Changed 150,250 to 170,260
+   mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
+                                     wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+   
+   wxStaticBoxSizer *ySelectedBoxSizer =
+      new wxStaticBoxSizer(ySelectedStaticBox, wxVERTICAL);
+   
+   ySelectedBoxSizer->Add(titleYText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   ySelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //------------------------------------------------------
+   // line color (6th column)
+   //------------------------------------------------------
+   wxStaticText *titleColor =
+      new wxStaticText(this, -1, wxT("Color"),
+                       wxDefaultPosition, wxSize(40,20), wxALIGN_CENTRE);
+   
+   mLineColorButton = new wxButton(this, LINE_COLOR_BUTTON, "",
+                                   wxDefaultPosition, wxSize(25,20), 0);
+
+   mLineColorButton->SetBackgroundColour(mLineColor);
+   wxFlexGridSizer *paramOptionBoxSizer1 = new wxFlexGridSizer(2, 0, 0);
+   paramOptionBoxSizer1->Add(titleColor, 0, wxALIGN_LEFT|wxALL, bsize);
+   paramOptionBoxSizer1->Add(mLineColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   mParamOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   mParamOptionBoxSizer->Add(paramOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // plot option
@@ -353,147 +466,31 @@ void XyPlotSetupPanel::Create()
                      wxDefaultPosition, wxSize(100, -1), 0);
    
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   plotOptionBoxSizer->Add(showPlotCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
-   plotOptionBoxSizer->Add(showGridCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
-   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, borderSize);
-   
-   //------------------------------------------------------
-   // X box label (1st column)
-   //------------------------------------------------------
-   
-   //wxStaticBox
-   wxStaticBox *xSelectedStaticBox = new wxStaticBox( this, -1, wxT("") );
-
-   //wxStaticText
-   wxStaticText *titleXText =
-      new wxStaticText(this, -1, wxT("Selected X"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   mXSelectedListBox =
-      new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,250), 0, emptyList, wxLB_SINGLE);
-   
-   //wxSizer
-   wxStaticBoxSizer *xSelectedBoxSizer =
-      new wxStaticBoxSizer(xSelectedStaticBox, wxVERTICAL);
-   
-   xSelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   xSelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   //------------------------------------------------------
-   // add, remove X buttons (2nd column)
-   //------------------------------------------------------
-   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
-                              wxDefaultPosition, wxSize(20,20), 0);
-
-   wxButton *removeXButton =
-      new wxButton(this, REMOVE_X, wxT("-->"),
-                   wxDefaultPosition, wxSize(20,20), 0);
-
-   wxBoxSizer *xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   xButtonsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   xButtonsBoxSizer->Add(mAddXButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   xButtonsBoxSizer->Add(removeXButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   //------------------------------------------------------
-   // parameters box (3rd column)
-   //------------------------------------------------------
-   
-   wxButton *createVarButton;
-   
-   wxBoxSizer *paramBoxSizer =
-      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
-                                          &mObjectComboBox, ID_COMBOBOX,
-                                          &mUserParamListBox, USER_PARAM_LISTBOX,
-                                          &mPropertyListBox, PROPERTY_LISTBOX,
-                                          &mCoordSysComboBox, ID_COMBOBOX,
-                                          &mCoordSysLabel);
-
-#if DEBUG_XYPLOT_PANEL
-   MessageInterface::ShowMessage
-      ("XyPlotSetupPanel::Create() got paramBoxSizer from theGuiManager\n"
-       "createVarButton=%d, mObjectComboBox=%d\nmUserParamListBox=%d, "
-       "mPropertyListBox=%d\n", createVarButton, mObjectComboBox, mUserParamListBox,
-       mPropertyListBox);
-#endif
-   
-      
-   //------------------------------------------------------
-   // add, remove, clear Y buttons (4th column)
-   //------------------------------------------------------
-   mAddYButton =
-      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(20,20), 0);
-
-   wxButton *removeYButton =
-      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, wxSize(20,20), 0);
-   
-   wxButton *clearYButton =
-      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(20,20), 0);
-   
-   wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   yButtonsBoxSizer->Add(mAddYButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   yButtonsBoxSizer->Add(removeYButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   yButtonsBoxSizer->Add(clearYButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   //------------------------------------------------------
-   // Y box label (5th column)
-   //------------------------------------------------------
-   //wxStaticBox
-   wxStaticBox *ySelectedStaticBox = new wxStaticBox( this, -1, wxT("") );
-
-   //wxStaticText
-   wxStaticText *titleYText =
-      new wxStaticText(this, -1, wxT("Selected Y"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   
-   mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
-                                     wxSize(150,250), 0, emptyList, wxLB_SINGLE);
-   
-   wxStaticBoxSizer *ySelectedBoxSizer =
-      new wxStaticBoxSizer(ySelectedStaticBox, wxVERTICAL);
-   
-   ySelectedBoxSizer->Add(titleYText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   ySelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   //------------------------------------------------------
-   // line color (6th column)
-   //------------------------------------------------------
-   wxStaticText *titleColor =
-      new wxStaticText(this, -1, wxT("Color"),
-                       wxDefaultPosition, wxSize(40,20), wxALIGN_CENTRE);
-   
-   mLineColorButton = new wxButton(this, LINE_COLOR_BUTTON, "",
-                                   wxDefaultPosition, wxSize(25,20), 0);
-
-   mLineColorButton->SetBackgroundColour(mLineColor);
-   wxFlexGridSizer *paramOptionBoxSizer1 = new wxFlexGridSizer(2, 0, 0);
-   paramOptionBoxSizer1->Add(titleColor, 0, wxALIGN_LEFT|wxALL, borderSize);
-   paramOptionBoxSizer1->Add(mLineColorButton, 0, wxALIGN_LEFT|wxALL, borderSize);
-
-   mParamOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mParamOptionBoxSizer->Add(paramOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, borderSize);
+   plotOptionBoxSizer->Add(showPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(showGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------
-   mFlexGridSizer->Add(xSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   mFlexGridSizer->Add(xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   mFlexGridSizer->Add(paramBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   mFlexGridSizer->Add(yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   mFlexGridSizer->Add(ySelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   mFlexGridSizer->Add(xSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(ySelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   mFlexGridSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
-   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   mFlexGridSizer->Add(mParamOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   mFlexGridSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mFlexGridSizer->Add(mParamOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
 }
 
@@ -524,7 +521,6 @@ void XyPlotSetupPanel::LoadData()
       }
       
       // get Y parameters
-      //StringArray yParamList = mXyPlot->GetStringArrayParameter("DepVarList");
       StringArray yParamList = mXyPlot->GetStringArrayParameter("Add");
       mNumYParams = yParamList.size();
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
@@ -561,9 +557,6 @@ void XyPlotSetupPanel::LoadData()
          mYSelectedListBox->SetSelection(0);
          delete yParamNames;
 
-         // show coordinate system or central body
-         ShowCoordSystem();
-         
          // show parameter option
          ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
       }
@@ -581,6 +574,10 @@ void XyPlotSetupPanel::LoadData()
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
    mObjectComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
+   
+   // show coordinate system or central body
+   ShowCoordSystem();
+         
 }
 
 //------------------------------------------------------------------------------
@@ -752,31 +749,41 @@ void XyPlotSetupPanel::ShowCoordSystem()
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
-      mCoordSysComboBox->Clear();
+      
+      mCoordSysComboBox->SetStringSelection
+         (mCurrParam->GetStringParameter("DepObject").c_str());
+      
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Add(mCoordSysComboBox);
       mCoordSysComboBox->Show();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
    else if (mCurrParam->IsOriginDependent())
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
       
-      mCoordSysComboBox->Clear();
-      int bodyCount = theGuiManager->GetNumConfigBody();
-      wxString *bodyList = theGuiManager->GetConfigBodyList();
-      
-      for (int i=0; i<bodyCount; i++)
-         mCoordSysComboBox->Append(bodyList[i]);
-      
-      mCoordSysComboBox->SetStringSelection
+      mCentralBodyComboBox->SetStringSelection
          (mCurrParam->GetStringParameter("DepObject").c_str());
-      mCoordSysComboBox->Show();
+      
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Add(mCentralBodyComboBox);
+      mCentralBodyComboBox->Show();
+      mCoordSysComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
    else
    {
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysLabel->Hide();
       mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
-   
 }
 
 //------------------------------------------------------------------------------

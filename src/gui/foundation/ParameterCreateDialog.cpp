@@ -145,16 +145,17 @@ void ParameterCreateDialog::Create()
    mPropertyListBox = 
       theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX,
                                         wxSize(135, 85), "Spacecraft");
-   
+
+   //loj: 1/19/05 Changed width 130 to 170
    mUserVarListBox =
-      theGuiManager->GetUserVariableListBox(this, -1, wxSize(135, 85), "");
+      theGuiManager->GetUserVariableListBox(this, -1, wxSize(170, 85), "");
    
    mUserArrayListBox =
-      theGuiManager->GetUserArrayListBox(this, -1, wxSize(135, 50), "");
+      theGuiManager->GetUserArrayListBox(this, -1, wxSize(170, 50), "");
    
 
    // wxComboBox
-   mCoordSysComboBox = theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(100,-1));
+   mCoordSysComboBox = theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
    
    // wxComboBox
    mCentralBodyComboBox = theGuiManager->GetConfigBodyComboBox(this, ID_COMBO, wxSize(100,-1));
@@ -237,9 +238,10 @@ void ParameterCreateDialog::Create()
                                      wxDefaultPosition, wxSize(110,20), 0);
    mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
                                       wxDefaultPosition, wxDefaultSize, 0);
-   
+
+   //loj: 1/19/05 Changed 135 to 170
    mUserStringListBox =
-      theGuiManager->GetUserStringListBox(this, -1, wxSize(135, 50), "");
+      theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
    
    wxStaticBox *stringStaticBox = new wxStaticBox(this, -1, wxT("String"));
    wxStaticBoxSizer *stringStaticBoxSizer =
@@ -500,6 +502,8 @@ void ParameterCreateDialog::ShowCoordSystem()
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
+      mCoordSysComboBox->SetStringSelection
+         (mCurrParam->GetStringParameter("DepObject").c_str());
       mCoordSysComboBox->Show();
       mCentralBodyComboBox->Hide();
       mDetailsBoxSizer->Remove(mCentralBodyComboBox);

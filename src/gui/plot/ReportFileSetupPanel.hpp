@@ -35,26 +35,30 @@ protected:
    int  mNumVarParams;
    bool mUseUserParam;
     
-   wxBoxSizer *optionBoxSizer;
+   wxStaticText *mCoordSysLabel;
+   wxStaticText *fileStaticText;
+   
    wxTextCtrl *colWidthTextCtrl;
+   wxTextCtrl *fileTextCtrl;
 
+   wxButton *browseButton; 
+    
    wxCheckBox *writeCheckBox;
    wxCheckBox *showHeaderCheckBox;
     
-   wxStaticText *fileStaticText;
-   wxStaticText *mCoordSysLabel;
-   wxTextCtrl *fileTextCtrl;
-   wxButton *browseButton; 
-    
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
+   wxComboBox *mCentralBodyComboBox; //loj: 1/19/05 Added
 
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
-
-   wxBoxSizer *mVarBoxSizer;
    wxListBox *mVarListBox;
    wxListBox *mVarSelectedListBox;
+   
+   wxBoxSizer *mVarBoxSizer;
+   wxBoxSizer *optionBoxSizer;
+   wxBoxSizer *mCoordSysSizer;
+   wxBoxSizer *mParamBoxSizer;
 
    void OnWriteCheckBoxChange(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);

@@ -49,6 +49,7 @@ protected:
    
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
+   wxComboBox *mCentralBodyComboBox; //loj: 1/19/05 Added
    
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
@@ -65,7 +66,9 @@ protected:
    
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mParamOptionBoxSizer;
-   
+   wxBoxSizer *mCoordSysSizer;
+   wxBoxSizer *mParamBoxSizer;
+
    void OnAddX(wxCommandEvent& event);
    void OnAddY(wxCommandEvent& event);
    void OnRemoveX(wxCommandEvent& event);
@@ -90,8 +93,9 @@ protected:
    enum
    {     
       TEXTCTRL = 92000,
-      USER_PARAM_LISTBOX,
+      ID_TEXT,
       ID_COMBOBOX,
+      USER_PARAM_LISTBOX,
       PROPERTY_LISTBOX,
       X_SEL_LISTBOX,
       Y_SEL_LISTBOX,

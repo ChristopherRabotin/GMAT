@@ -155,18 +155,15 @@ public:
                                    const wxSize &size,
                                    wxArrayString &bodiesToExclude);
    
-   wxBoxSizer* CreateParameterSizer(wxWindow *parent,
-                                    wxButton **createVarButton,
-                                    wxWindowID createVarButtonId,
-                                    wxComboBox **objectComboBox,
-                                    wxWindowID objectComboBoxId,
-                                    wxListBox **userParamListBox,
-                                    wxWindowID userParamListBoxId,
-                                    wxListBox **propertyListBox,
-                                    wxWindowID propertyListBoxId,
-                                    wxComboBox **coordSysComboBox,
-                                    wxWindowID coordSysComboBoxId,
-                                    wxStaticText **coordSysLabel);
+   wxBoxSizer*
+   CreateParameterSizer(wxWindow *parent,
+                        wxButton **createVarButton, wxWindowID createVarButtonId,
+                        wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
+                        wxListBox **userParamListBox, wxWindowID userParamListBoxId,
+                        wxListBox **propertyListBox, wxWindowID propertyListBoxId,
+                        wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
+                        wxComboBox **originComboBox, wxWindowID originComboBoxId,
+                        wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer);
    
 private:
    

@@ -25,27 +25,23 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
-    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-    
-    EVT_BUTTON(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
-    EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
-    
-    EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
-    EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
-    EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
-    
+   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
+   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
+   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
+   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+   EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
+   
+   EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
+   EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
+   EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
    EVT_BUTTON(ADD_VAR_BUTTON, ReportFileSetupPanel::OnAddVariable)
    EVT_BUTTON(REMOVE_VAR_BUTTON, ReportFileSetupPanel::OnRemoveVariable)
    EVT_BUTTON(CLEAR_VAR_BUTTON, ReportFileSetupPanel::OnClearVariable)
-
+   EVT_BUTTON(CREATE_VARIABLE, ReportFileSetupPanel::OnCreateVariable)
+   EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
    EVT_LISTBOX(USER_PARAM_LISTBOX, ReportFileSetupPanel::OnSelectUserParam)
    EVT_LISTBOX(PROPERTY_LISTBOX, ReportFileSetupPanel::OnSelectProperty)
    EVT_COMBOBOX(ID_COMBOBOX, ReportFileSetupPanel::OnComboBoxChange)
-   EVT_BUTTON(CREATE_VARIABLE, ReportFileSetupPanel::OnCreateVariable)
 
 END_EVENT_TABLE()
 
@@ -111,70 +107,29 @@ void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 void ReportFileSetupPanel::Create()
 {
     //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
-
-    //------------------------------------------------------
-    // plot option, (1st column)
-    //------------------------------------------------------
-    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
-                                   wxDefaultPosition, wxSize(100, -1), 0);
-            
-    optionBoxSizer = new wxBoxSizer(wxVERTICAL);
-    optionBoxSizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
-            
-    //------------------------------------------------------
-    // file option
-    //------------------------------------------------------   
-    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-    // will need to change
-    fileStaticText = new wxStaticText( this, ID_TEXT, 
-                                       wxT("File: "), 
-                                       wxDefaultPosition, wxSize(80,-1), 0 );
-    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                              wxDefaultPosition, 
-                                              wxSize(250, -1),  0);
-    browseButton = new wxButton( this, ID_BROWSE_BUTTON, wxT("Browse"), 
-                                              wxDefaultPosition, wxDefaultSize, 0 );
- 
-    fileSizer->Add(fileStaticText, 0, wxALIGN_CENTER|wxALL, 5);
-    fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
-    fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
-
-    Integer bsize = 3; // border size
+   
+    Integer bsize = 2; // border size
     wxString emptyList[] = {};
 
-    wxBoxSizer *variablesBoxSizer = new wxBoxSizer(wxVERTICAL);
-    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-           
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
    mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
     
-//   wxStaticText *titleAvailable =
-//      new wxStaticText(this, -1, wxT("Variables"),
-//                       wxDefaultPosition, wxSize(-1,-1), 0);
-//   wxArrayString empty;
-
-//   //loj: 10/1/04 call GetPlottableParameterListBox()
-//   mVarListBox =
-//       theGuiManager->GetPlottableParameterListBox(this, -1, wxSize(150,200));
-//      //theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
    wxButton *createVarButton;
 
-   wxBoxSizer *paramBoxSizer =
+   mParamBoxSizer =
       theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
                                           &mObjectComboBox, ID_COMBOBOX,
                                           &mUserParamListBox, USER_PARAM_LISTBOX,
                                           &mPropertyListBox, PROPERTY_LISTBOX,
                                           &mCoordSysComboBox, ID_COMBOBOX,
-                                          &mCoordSysLabel);
+                                          &mCentralBodyComboBox, ID_COMBOBOX,
+                                          &mCoordSysLabel, &mCoordSysSizer);
 
-//   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
-//   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   //------------------------------------------------------
+   //-------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
-   //------------------------------------------------------
+   //-------------------------------------------------------
    wxButton *addScButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
                               wxDefaultPosition, wxSize(20,20), 0);
 
@@ -189,65 +144,87 @@ void ReportFileSetupPanel::Create()
    arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
     
-   //------------------------------------------------------
-   // selected spacecraft list (4th column)
-   //------------------------------------------------------
-   //wxStaticBox
+   //-------------------------------------------------------
+   // selected parameter list (3rd column)
+   //-------------------------------------------------------
    wxStaticBox *selectedStaticBox = new wxStaticBox( this, -1, wxT("") );
 
-   //wxStaticText
    wxStaticText *titleSelectedText =
       new wxStaticText(this, -1, wxT("Selected"),
                        wxDefaultPosition, wxSize(80,-1), 0);
-
+   
+   //loj: 1/19/05 Changed 150,250 to 170,260
    mVarSelectedListBox =
       new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,250), 0, emptyList, wxLB_SINGLE);
-        
+                    wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+   
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
 
    mVarSelectedBoxSizer->Add(titleSelectedText, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   //------------------------------------------------------
+   //-------------------------------------------------------
+   // report file name
+   //-------------------------------------------------------
+   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
+   fileStaticText = new wxStaticText(this, ID_TEXT, wxT("File: "), 
+                                     wxDefaultPosition, wxDefaultSize, 0 );
+   fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                 wxDefaultPosition, wxSize(250, -1),  0);
+   browseButton = new wxButton( this, ID_BROWSE_BUTTON, wxT("Browse"), 
+                                wxDefaultPosition, wxDefaultSize, 0 );
+   
+   fileSizer->Add(fileStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   //-------------------------------------------------------
    // options
-   //------------------------------------------------------
+   //-------------------------------------------------------
+
+   //loj: 1/19/05 put report option in Horizontal order to save space
+   writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
+                                  wxDefaultPosition, wxSize(100, -1), 0);
+   
    showHeaderCheckBox =
       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
-   wxBoxSizer *colWidthBoxSizer = new wxBoxSizer(wxHORIZONTAL);         
    wxStaticText *colWidthText =
       new wxStaticText(this, -1, wxT("Column Width  "),
                        wxDefaultPosition, wxSize(-1,-1), 0);
+   
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                              wxDefaultPosition, 
-                                              wxSize(35, -1),  0);
-
-   colWidthBoxSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, 0);
-   colWidthBoxSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, 0);           
-
-   optionBoxSizer->Add(showHeaderCheckBox, 0, wxALIGN_LEFT|wxALL, 5);                       
-   optionBoxSizer->Add(colWidthBoxSizer, 0, wxALIGN_LEFT|wxALL, 5);
-      
-   //------------------------------------------------------
+                                     wxDefaultPosition, wxSize(35, -1),  0);
+   
+   wxBoxSizer *reportOptionSizer = new wxBoxSizer(wxHORIZONTAL);
+   reportOptionSizer->Add(writeCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);                       
+   reportOptionSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
+   reportOptionSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   optionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   optionBoxSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   optionBoxSizer->Add(reportOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-------------------------------------------------------
    // put in the order
-   //------------------------------------------------------    
-   mFlexGridSizer->Add(paramBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //-------------------------------------------------------
+   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+   wxBoxSizer *variablesBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    variablesBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-    //------------------------------------------------------
-    // add to parent sizer
-    //------------------------------------------------------
-    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-    theMiddleSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_LEFT|wxALL, 5);
-
-//    theMiddleSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   //-------------------------------------------------------
+   // add to parent sizer
+   //-------------------------------------------------------
+   theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -268,7 +245,7 @@ void ReportFileSetupPanel::LoadData()
       showHeaderCheckBox->SetValue(true);
     else
       showHeaderCheckBox->SetValue(false);                     
-      
+    
     int spacesId = reportFile->GetParameterID("ColumnWidth");
     wxString numSpacesValue;
     numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
@@ -292,7 +269,14 @@ void ReportFileSetupPanel::LoadData()
        mVarSelectedListBox->Set(mNumVarParams, varParamNames);
        mVarSelectedListBox->SetSelection(0);
        delete varParamNames;
-    }    
+    }
+    
+    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+    mObjectComboBox->SetSelection(0);
+    mPropertyListBox->SetSelection(0);
+    
+    // show coordinate system or central body
+    ShowCoordSystem();
 
 }
 
@@ -534,33 +518,44 @@ void ReportFileSetupPanel::ShowCoordSystem()
    wxString paramName = GetParamName();
    Parameter *mCurrParam = CreateParameter(paramName);
    
-   if (mCurrParam->IsCoordSysDependent())
+      if (mCurrParam->IsCoordSysDependent())
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
-      mCoordSysComboBox->Clear();
+      
+      mCoordSysComboBox->SetStringSelection
+         (mCurrParam->GetStringParameter("DepObject").c_str());
+      
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Add(mCoordSysComboBox);
       mCoordSysComboBox->Show();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
    else if (mCurrParam->IsOriginDependent())
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
       
-      mCoordSysComboBox->Clear();
-      int bodyCount = theGuiManager->GetNumConfigBody();
-      wxString *bodyList = theGuiManager->GetConfigBodyList();
-      
-      for (int i=0; i<bodyCount; i++)
-         mCoordSysComboBox->Append(bodyList[i]);
-      
-      mCoordSysComboBox->SetStringSelection
+      mCentralBodyComboBox->SetStringSelection
          (mCurrParam->GetStringParameter("DepObject").c_str());
-      mCoordSysComboBox->Show();
+      
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Add(mCentralBodyComboBox);
+      mCentralBodyComboBox->Show();
+      mCoordSysComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
    else
    {
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysLabel->Hide();
       mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
    }
-   
+
 }

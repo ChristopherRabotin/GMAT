@@ -832,7 +832,8 @@ CreateParameterSizer(wxWindow *parent,
                      wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                      wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-                     wxStaticText **coordSysLabel)
+                     wxComboBox **originComboBox, wxWindowID originComboBoxId,
+                     wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer)
 {
 #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
@@ -865,20 +866,24 @@ CreateParameterSizer(wxWindow *parent,
    *createVarButton =
       new wxButton(parent, createVarButtonId, wxT("Create"),
                    wxDefaultPosition, wxSize(-1,-1), 0 );
-   
+
+   //loj: 1/19/05 Changed ListBox width to 170
    // wxComboBox
    *objectComboBox =
-      GetSpacecraftComboBox(parent, objectComboBoxId, wxSize(150, 20));
+      GetSpacecraftComboBox(parent, objectComboBoxId, wxSize(170, 20));
    *coordSysComboBox =
-      GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(150, 20));
+      GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
+   *originComboBox =
+      GetConfigBodyComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
    
    // wxListBox
    wxArrayString emptyArray;
    *userParamListBox =
-      GetUserVariableListBox(parent, userParamListBoxId, wxSize(150, 50), "");
+      GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
    
+   //loj: 1/19/05 Chagned height to 80 from 100
    *propertyListBox = 
-      GetPropertyListBox(parent, propertyListBoxId, wxSize(150, 100), "Spacecraft");
+      GetPropertyListBox(parent, propertyListBoxId, wxSize(170, 80), "Spacecraft");
    
    // wx*Sizer
    wxStaticBoxSizer *userParamBoxSizer =
@@ -886,6 +891,9 @@ CreateParameterSizer(wxWindow *parent,
    wxStaticBoxSizer *systemParamBoxSizer =
       new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
    wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
+   *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
+
+   (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    userParamBoxSizer->Add
       (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
@@ -903,9 +911,7 @@ CreateParameterSizer(wxWindow *parent,
    systemParamBoxSizer->Add
       (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
-      (*coordSysLabel, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (*coordSysComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+      (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    
    paramBoxSizer->Add(userParamBoxSizer, 0,
                       wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
@@ -1170,12 +1176,13 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
    {
       if (theNumScProperty < MAX_PROPERTY_SIZE)
       {
-         // add to list only system parameters returning single value (loj: 9/22/04)
+         // add to list only system parameters returning single value
          if (items[i].find("CartState") == std::string::npos &&
              items[i].find("KepElem") == std::string::npos &&
              items[i].find("SphElem") == std::string::npos &&
              items[i].find("Variable") == std::string::npos &&
-             items[i].find("Array") == std::string::npos)
+             items[i].find("Array") == std::string::npos &&
+             items[i].find("String") == std::string::npos) //loj: 1/19/05 Added
          {
             theScPropertyList[theNumScProperty] = items[i].c_str();
             theNumScProperty++;
