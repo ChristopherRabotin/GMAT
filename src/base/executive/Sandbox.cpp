@@ -70,7 +70,8 @@ bool Sandbox::AddCommand(Command *cmd)
         return false;
         
     if (cmd == sequence)
-        throw SandboxException("Adding command that is already in the Sandbox");
+        return true;
+//        throw SandboxException("Adding command that is already in the Sandbox");
     
     if (sequence)
         return sequence->Append(cmd);
