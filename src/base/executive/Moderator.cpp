@@ -17,7 +17,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "Moderator.hpp"
 #include "NoOp.hpp"
 #include "MessageInterface.hpp"
@@ -35,31 +34,31 @@ ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
 const std::string
 Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 {
-    "Spacecraft",
-    "GroundStation",
-    "Burn",
-    "Command",
-    "Propagator",
-    "ForceModel",
-    "PhysicalModel",
-    "Interpolator",
-    "SolarSystem",
-    "CelestialBody",
-    "Parameter",
-    "StopCondition",
-    "Solver",
-    "Subscriber",
-    "PropSetup",
-    "RefFrame",
+   "Spacecraft",
+   "GroundStation",
+   "Burn",
+   "Command",
+   "Propagator",
+   "ForceModel",
+   "PhysicalModel",
+   "Interpolator",
+   "SolarSystem",
+   "CelestialBody",
+   "Parameter",
+   "StopCondition",
+   "Solver",
+   "Subscriber",
+   "PropSetup",
+   "RefFrame",
 };
 
 const std::string
 Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
 {
-    "SLP",
-    "DE200",
-    //"DE202", //not supported
-    "DE405",
+   "SLP",
+   "DE200",
+   //"DE202", //not supported
+   "DE405",
 };
 
 //---------------------------------
@@ -71,10 +70,10 @@ Moderator::PLANETARY_SOURCE_STRING[PlanetaryFileCount] =
 //------------------------------------------------------------------------------
 Moderator* Moderator::Instance()
 {
-    if (instance == NULL)
-        instance = new Moderator;
+   if (instance == NULL)
+      instance = new Moderator;
     
-    return instance;
+   return instance;
 }
 
 //------------------------------------------------------------------------------
@@ -82,76 +81,84 @@ Moderator* Moderator::Instance()
 //------------------------------------------------------------------------------
 bool Moderator::Initialize(bool fromGui)
 {
-    try
-    {
-        if (!isInitialized)
-        {
-            MessageInterface::ShowMessage("Moderator is creating core engine ...\n");
+   try
+   {
+      if (!isInitialized)
+      {
+         MessageInterface::ShowMessage("Moderator is creating core engine ...\n");
         
-            // Create interpreters and managers
-            theGuiInterpreter = GuiInterpreter::Instance();
-            theScriptInterpreter = ScriptInterpreter::Instance();
-            theFactoryManager = FactoryManager::Instance();
-            theConfigManager = ConfigManager::Instance();
-            theFileManager = FileManager::Instance();
+         // Create interpreters and managers
+         theGuiInterpreter = GuiInterpreter::Instance();
+         theScriptInterpreter = ScriptInterpreter::Instance();
+         theFactoryManager = FactoryManager::Instance();
+         theConfigManager = ConfigManager::Instance();
+         theFileManager = FileManager::Instance();
         
-            // Create publisher
-            thePublisher = Publisher::Instance();
+         // Create publisher
+         thePublisher = Publisher::Instance();
         
-            // Create factories
-            theBurnFactory = new BurnFactory();
-            theCommandFactory = new CommandFactory();
-            theForceModelFactory = new ForceModelFactory();
-            theParameterFactory = new ParameterFactory();
-            thePhysicalModelFactory = new PhysicalModelFactory();
-            thePropSetupFactory = new PropSetupFactory();
-            thePropagatorFactory = new PropagatorFactory();
-            theSpacecraftFactory = new SpacecraftFactory();
-            theStopConditionFactory = new StopConditionFactory();
-            theSubscriberFactory = new SubscriberFactory();
-            theSolverFactory = new SolverFactory();
+         // Create factories
+         theBurnFactory = new BurnFactory();
+         theCommandFactory = new CommandFactory();
+         theForceModelFactory = new ForceModelFactory();
+         theParameterFactory = new ParameterFactory();
+         thePhysicalModelFactory = new PhysicalModelFactory();
+         thePropSetupFactory = new PropSetupFactory();
+         thePropagatorFactory = new PropagatorFactory();
+         theSpacecraftFactory = new SpacecraftFactory();
+         theStopConditionFactory = new StopConditionFactory();
+         theSubscriberFactory = new SubscriberFactory();
+         theSolverFactory = new SolverFactory();
 
-            // Register factories
-            theFactoryManager->RegisterFactory(theBurnFactory);
-            theFactoryManager->RegisterFactory(theCommandFactory);
-            theFactoryManager->RegisterFactory(theForceModelFactory);
-            theFactoryManager->RegisterFactory(theParameterFactory);
-            theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-            theFactoryManager->RegisterFactory(thePropSetupFactory);
-            theFactoryManager->RegisterFactory(thePropagatorFactory);
-            theFactoryManager->RegisterFactory(theSpacecraftFactory);
-            theFactoryManager->RegisterFactory(theStopConditionFactory);
-            theFactoryManager->RegisterFactory(theSubscriberFactory);
-            theFactoryManager->RegisterFactory(theSolverFactory);
+         // Register factories
+         theFactoryManager->RegisterFactory(theBurnFactory);
+         theFactoryManager->RegisterFactory(theCommandFactory);
+         theFactoryManager->RegisterFactory(theForceModelFactory);
+         theFactoryManager->RegisterFactory(theParameterFactory);
+         theFactoryManager->RegisterFactory(thePhysicalModelFactory);
+         theFactoryManager->RegisterFactory(thePropSetupFactory);
+         theFactoryManager->RegisterFactory(thePropagatorFactory);
+         theFactoryManager->RegisterFactory(theSpacecraftFactory);
+         theFactoryManager->RegisterFactory(theStopConditionFactory);
+         theFactoryManager->RegisterFactory(theSubscriberFactory);
+         theFactoryManager->RegisterFactory(theSolverFactory);
 
-            // Create default SolarSystem
-            theDefaultSolarSystem = new SolarSystem("DefaultSS");
+         // Create default SolarSystem
+         theDefaultSolarSystem = new SolarSystem("DefaultSS");
             
-            // Read startup file
-            theFileManager->ReadStartupFile();
-            InitializePlanetarySource();
+         // Read startup file
+         theFileManager->ReadStartupFile();
+         InitializePlanetarySource();
             
-            if (fromGui)
-            {
-                CreateDefaultMission();
-            }
-        }
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::PopupMessage(Gmat::WARNING_,
-                                       "Error occured during initialization: " +
-                                       e.GetMessage());
-    }
-    catch (...)
-    {
-        MessageInterface::PopupMessage(Gmat::WARNING_,
-                                       "Unknown Error occured during initialization");
-    }
+         if (fromGui)
+         {
+            CreateDefaultMission();
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+                                     "Error occured during initialization: " +
+                                     e.GetMessage());
+   }
+   catch (...)
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+                                     "Unknown Error occured during initialization");
+   }
     
-    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
-    isInitialized = true;
-    return isInitialized;
+   MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+   isInitialized = true;
+   return isInitialized;
+}
+
+//------------------------------------------------------------------------------
+// void SetRunReady(bool flag = false)
+//------------------------------------------------------------------------------
+void Moderator::SetRunReady(bool flag)
+{
+   isRunReady = flag;
 }
 
 //----- ObjectType
@@ -168,10 +175,10 @@ bool Moderator::Initialize(bool fromGui)
 //------------------------------------------------------------------------------
 std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 {
-    if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
-        return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
-    else
-        return "UnknownObject";
+   if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
+      return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
+   else
+      return "UnknownObject";
 }
 
 //----- interpreter
@@ -186,7 +193,7 @@ std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 GuiInterpreter* Moderator::GetGuiInterpreter()
 {
-    return theGuiInterpreter;
+   return theGuiInterpreter;
 }
 
 //------------------------------------------------------------------------------
@@ -200,7 +207,7 @@ GuiInterpreter* Moderator::GetGuiInterpreter()
 //------------------------------------------------------------------------------
 ScriptInterpreter* Moderator::GetScriptInterpreter()
 {
-    return theScriptInterpreter;
+   return theScriptInterpreter;
 }
 
 //------------------------------------------------------------------------------
@@ -212,9 +219,9 @@ ScriptInterpreter* Moderator::GetScriptInterpreter()
 //------------------------------------------------------------------------------
 void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 {
-    //loj: allow setting only for the first time?
-    if (theGuiInterpreter == NULL)
-        theGuiInterpreter = guiInterp;
+   //loj: allow setting only for the first time?
+   if (theGuiInterpreter == NULL)
+      theGuiInterpreter = guiInterp;
 }
 
 //------------------------------------------------------------------------------
@@ -226,9 +233,9 @@ void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 //------------------------------------------------------------------------------
 void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 {
-    //loj: allow setting only for the first time?
-    if (theScriptInterpreter == NULL)
-        theScriptInterpreter = scriptInterp;
+   //loj: allow setting only for the first time?
+   if (theScriptInterpreter == NULL)
+      theScriptInterpreter = scriptInterp;
 }
 
 //----- factory
@@ -245,7 +252,7 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 //------------------------------------------------------------------------------
 StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 {
-    return theFactoryManager->GetListOfItems(type);
+   return theFactoryManager->GetListOfItems(type);
 }
 
 //----- configuration
@@ -262,7 +269,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
-    return theConfigManager->GetListOfItems(type);
+   return theConfigManager->GetListOfItems(type);
 }
 
 //------------------------------------------------------------------------------
@@ -270,9 +277,9 @@ StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 {
-//      MessageInterface::ShowMessage("Moderator::GetConfiguredItem() entered: "
-//                                    "name = " + name + "\n");
-    return theConfigManager->GetItem(name);
+   //      MessageInterface::ShowMessage("Moderator::GetConfiguredItem() entered: "
+   //                                    "name = " + name + "\n");
+   return theConfigManager->GetItem(name);
 }
 
 //------------------------------------------------------------------------------
@@ -292,7 +299,7 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                                      const std::string &newName)
 {
-    return theConfigManager->RenameItem(type, oldName, newName);
+   return theConfigManager->RenameItem(type, oldName, newName);
 }
 
 //------------------------------------------------------------------------------
@@ -309,7 +316,7 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
 //------------------------------------------------------------------------------
 bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 {
-    return theConfigManager->RemoveItem(type, name);
+   return theConfigManager->RemoveItem(type, name);
 }
 
 // Spacecraft
@@ -327,31 +334,31 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
-    Spacecraft *sc =
-        theFactoryManager->CreateSpacecraft(type, name);
+   Spacecraft *sc =
+      theFactoryManager->CreateSpacecraft(type, name);
 
-    if (sc == NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Error Creating "
-                                      "%s.  Check SpacecraftFactory. \n", type.c_str());
+   if (sc == NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Error Creating "
+                                    "%s.  Check SpacecraftFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating Spacecraft");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating Spacecraft");
+      //return NULL;
+   }
     
-    // Manage it if it is a named Spacecraft
-    try
-    {
-        if (sc->GetName() != "")
-            theConfigManager->AddSpacecraft(sc);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSpacecraft()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named Spacecraft
+   try
+   {
+      if (sc->GetName() != "")
+         theConfigManager->AddSpacecraft(sc);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSpacecraft()\n" +
+                                    e.GetMessage());
+   }
 
-    return sc;
+   return sc;
 }
 
 //------------------------------------------------------------------------------
@@ -367,9 +374,9 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
-    Spacecraft *sc = theConfigManager->GetSpacecraft(name);
+   Spacecraft *sc = theConfigManager->GetSpacecraft(name);
 
-    return sc;
+   return sc;
 }
 
 // Propagator
@@ -387,33 +394,33 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
-    //MessageInterface::ShowMessage("Moderator::CreatePropagator() type = %s, name = %s\n",
-    //                              type.c_str(), name.c_str());
+   //MessageInterface::ShowMessage("Moderator::CreatePropagator() type = %s, name = %s\n",
+   //                              type.c_str(), name.c_str());
     
-    Propagator *prop = theFactoryManager->CreatePropagator(type, name);
+   Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
-    if (prop ==  NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreatePropagator() Error Creating "
-                                      "%s.  Check PropagatorFactory. \n", type.c_str());
+   if (prop ==  NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreatePropagator() Error Creating "
+                                    "%s.  Check PropagatorFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating Propagator");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating Propagator");
+      //return NULL;
+   }
     
-    // Manage it if it is a named Propagator
-    try
-    {
-        if (prop->GetName() != "")
-            theConfigManager->AddPropagator(prop);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named Propagator
+   try
+   {
+      if (prop->GetName() != "")
+         theConfigManager->AddPropagator(prop);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
+                                    e.GetMessage());
+   }
         
-    return prop;
+   return prop;
 }
 
 //------------------------------------------------------------------------------
@@ -429,7 +436,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Propagator* Moderator::GetPropagator(const std::string &name)
 {
-    return theConfigManager->GetPropagator(name);
+   return theConfigManager->GetPropagator(name);
 }
 
 // PhysicalModel
@@ -448,30 +455,30 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
-    PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
+   PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
     
-    if (physicalModel ==  NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreatePhysicalModel() Error Creating "
-                                      "%s.  Check PhysicalModelFactory. \n", type.c_str());
+   if (physicalModel ==  NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreatePhysicalModel() Error Creating "
+                                    "%s.  Check PhysicalModelFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating PhysicalModel");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating PhysicalModel");
+      //return NULL;
+   }
     
-    // Manage it if it is a named PhysicalModel
-    try
-    {
-        if (physicalModel->GetName() != "")
-            theConfigManager->AddPhysicalModel(physicalModel);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named PhysicalModel
+   try
+   {
+      if (physicalModel->GetName() != "")
+         theConfigManager->AddPhysicalModel(physicalModel);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
+                                    e.GetMessage());
+   }
         
-    return physicalModel;
+   return physicalModel;
 }
 
 //------------------------------------------------------------------------------
@@ -487,7 +494,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
 //------------------------------------------------------------------------------
 PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 {
-    return theConfigManager->GetPhysicalModel(name);
+   return theConfigManager->GetPhysicalModel(name);
 }
 
 // burn
@@ -506,30 +513,30 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
-    Burn *burn = theFactoryManager->CreateBurn(type, name);
+   Burn *burn = theFactoryManager->CreateBurn(type, name);
 
-    if (burn ==  NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateBurn() Error Creating "
-                                      "%s.  Check BurnFactory. \n", type.c_str());
+   if (burn ==  NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateBurn() Error Creating "
+                                    "%s.  Check BurnFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating Burn");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating Burn");
+      //return NULL;
+   }
     
-    // Manage it if it is a named burn
-    try
-    {
-        if (burn->GetName() != "")
-            theConfigManager->AddBurn(burn);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named burn
+   try
+   {
+      if (burn->GetName() != "")
+         theConfigManager->AddBurn(burn);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
+                                    e.GetMessage());
+   }
     
-    return burn;
+   return burn;
 }
 
 //------------------------------------------------------------------------------
@@ -545,7 +552,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
 //------------------------------------------------------------------------------
 Burn* Moderator::GetBurn(const std::string &name)
 {
-    return theConfigManager->GetBurn(name);
+   return theConfigManager->GetBurn(name);
 }
 
 // Parameter
@@ -563,31 +570,31 @@ Burn* Moderator::GetBurn(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
-    Parameter *parameter = theFactoryManager->CreateParameter(type, name);
+   Parameter *parameter = theFactoryManager->CreateParameter(type, name);
 
-    if (parameter == NULL)
-    {
+   if (parameter == NULL)
+   {
 
-        MessageInterface::ShowMessage("Moderator::CreateParameter() Error Creating " +
-                                      type + ".  Check ParameterFactory. \n");
+      MessageInterface::ShowMessage("Moderator::CreateParameter() Error Creating " +
+                                    type + ".  Check ParameterFactory. \n");
 
-        throw GmatBaseException("Error Creating Parameter");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating Parameter");
+      //return NULL;
+   }
 
-    // Manage it if it is a named parameter
-    try
-    {
-        if (parameter->GetName() != "")
-            theConfigManager->AddParameter(parameter);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named parameter
+   try
+   {
+      if (parameter->GetName() != "")
+         theConfigManager->AddParameter(parameter);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
+                                    e.GetMessage());
+   }
     
-    return parameter;
+   return parameter;
 }
 
 //------------------------------------------------------------------------------
@@ -603,7 +610,7 @@ Parameter* Moderator::CreateParameter(const std::string &type, const std::string
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetParameter(const std::string &name)
 {
-    return theConfigManager->GetParameter(name);
+   return theConfigManager->GetParameter(name);
 }
 
 // ForceModel
@@ -612,30 +619,30 @@ Parameter* Moderator::GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
-    ForceModel *fm = theFactoryManager->CreateForceModel(name);
+   ForceModel *fm = theFactoryManager->CreateForceModel(name);
 
-    if (fm == NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateForceModel() Error Creating "
-                                      "%s.  Check ForceModelFactory. \n", name.c_str());
+   if (fm == NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateForceModel() Error Creating "
+                                    "%s.  Check ForceModelFactory. \n", name.c_str());
 
-        throw GmatBaseException("Error Creating ForceModel");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating ForceModel");
+      //return NULL;
+   }
     
-    // Manage it if it is a named parameter
-    try
-    {
-        if (fm->GetName() != "")
-            theConfigManager->AddForceModel(fm);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named parameter
+   try
+   {
+      if (fm->GetName() != "")
+         theConfigManager->AddForceModel(fm);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
+                                    e.GetMessage());
+   }
 
-    return fm;
+   return fm;
 }
 
 //------------------------------------------------------------------------------
@@ -643,7 +650,7 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* Moderator::GetForceModel(const std::string &name)
 {
-    return theConfigManager->GetForceModel(name);
+   return theConfigManager->GetForceModel(name);
 }
 
 //------------------------------------------------------------------------------
@@ -652,11 +659,11 @@ ForceModel* Moderator::GetForceModel(const std::string &name)
 bool Moderator::AddToForceModel(const std::string &forceModelName,
                                 const std::string &forceName)
 {
-    bool status = true;
-    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
-    PhysicalModel *physicalModel = theConfigManager->GetPhysicalModel(forceName);
-    fm->AddForce(physicalModel);
-    return status;
+   bool status = true;
+   ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
+   PhysicalModel *physicalModel = theConfigManager->GetPhysicalModel(forceName);
+   fm->AddForce(physicalModel);
+   return status;
 }
 
 // StopCondition
@@ -666,35 +673,35 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
-    //MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
-    //                              "name = %s\n", type.c_str(), name.c_str());
+   //MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
+   //                              "name = %s\n", type.c_str(), name.c_str());
     
-    StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
-    //MessageInterface::ShowMessage("Moderator::CreateStopCondition() *stopCond type = %s\n",
-    //                              stopCond->GetTypeName().c_str());
+   StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+   //MessageInterface::ShowMessage("Moderator::CreateStopCondition() *stopCond type = %s\n",
+   //                              stopCond->GetTypeName().c_str());
     
-    if (stopCond ==  NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateStopCondition() Error Creating "
-                                      "%s.  Check StopConditionFactory. \n", type.c_str());
+   if (stopCond ==  NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateStopCondition() Error Creating "
+                                    "%s.  Check StopConditionFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating StopCondition");
-        return NULL;
-    }
+      throw GmatBaseException("Error Creating StopCondition");
+      return NULL;
+   }
     
-    // Manage it if it is a named stopCondition
-    try
-    {
-        if (stopCond->GetName() != "")
-            theConfigManager->AddStopCondition(stopCond);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named stopCondition
+   try
+   {
+      if (stopCond->GetName() != "")
+         theConfigManager->AddStopCondition(stopCond);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
+                                    e.GetMessage());
+   }
     
-    return stopCond;
+   return stopCond;
 }
 
 //------------------------------------------------------------------------------
@@ -702,7 +709,7 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
 //------------------------------------------------------------------------------
 StopCondition* Moderator::GetStopCondition(const std::string &name)
 {
-    return theConfigManager->GetStopCondition(name);
+   return theConfigManager->GetStopCondition(name);
 }
 
 // Solver
@@ -720,30 +727,30 @@ StopCondition* Moderator::GetStopCondition(const std::string &name)
 //------------------------------------------------------------------------------
 Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
 {
-    Solver *solver = theFactoryManager->CreateSolver(type, name);
+   Solver *solver = theFactoryManager->CreateSolver(type, name);
 
-    if (solver == NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSolver() Error Creating "
-                                      "%s.  Check SolverFactory. \n", type.c_str());
+   if (solver == NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSolver() Error Creating "
+                                    "%s.  Check SolverFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating Solver");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating Solver");
+      //return NULL;
+   }
     
-    // Manage it if it is a named solver
-    try
-    {
-        if (solver->GetName() != "")
-            theConfigManager->AddSolver(solver);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named solver
+   try
+   {
+      if (solver->GetName() != "")
+         theConfigManager->AddSolver(solver);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+                                    e.GetMessage());
+   }
     
-    return solver;
+   return solver;
 }
 
 //------------------------------------------------------------------------------
@@ -759,7 +766,7 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
 //------------------------------------------------------------------------------
 Solver* Moderator::GetSolver(const std::string &name)
 {
-    return theConfigManager->GetSolver(name);
+   return theConfigManager->GetSolver(name);
 }
 
 // PropSetup
@@ -768,45 +775,45 @@ Solver* Moderator::GetSolver(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
-    //MessageInterface::ShowMessage("====================\n");
-    //MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
-    //                              name.c_str());
+   //MessageInterface::ShowMessage("====================\n");
+   //MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
+   //                              name.c_str());
     
-    // assumes "RungeKutta89" is the default propagator
-    std::string propName = name + "RKV89";
-    Propagator *prop = CreatePropagator("RungeKutta89", propName);
+   // assumes "RungeKutta89" is the default propagator
+   std::string propName = name + "RKV89";
+   Propagator *prop = CreatePropagator("RungeKutta89", propName);
     
     // creates empty ForceModel
-    std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
-    ForceModel *fm = CreateForceModel(fmName);
+   std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
+   ForceModel *fm = CreateForceModel(fmName);
 
     // create PointMass force and add to Force
     //loj: 3/15/04 do not configure force, force model has linked list of force
     //loj: 3/25/04 PointMassForce will create default body of Earth
-    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
+   PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
 
-    //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
-    // because PropSetup::Initialize() needs at least 1 force
-    fm->AddForce(earthGrav);
+   //loj: 3/15/04 always add to force model before propSetup::SetForceModel()
+   // because PropSetup::Initialize() needs at least 1 force
+   fm->AddForce(earthGrav);
     
     // create PropSetup
     // PropSetup creates default Integrator, ForceModel with PointMassForce
-    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+   PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
 
-    if (prop)
-    {
-        propSetup->SetUseDrag(false);   // turn off internal drag
-        propSetup->SetPropagator(prop);
-    }
+   if (prop)
+   {
+      propSetup->SetUseDrag(false);   // turn off internal drag
+      propSetup->SetPropagator(prop);
+   }
     
-    if (fm)
-    {
-        propSetup->SetForceModel(fm); //loj: 3/12/04 added
-    }
+   if (fm)
+   {
+      propSetup->SetForceModel(fm); //loj: 3/12/04 added
+   }
     
-    theConfigManager->AddPropSetup(propSetup);
+   theConfigManager->AddPropSetup(propSetup);
     
-    return propSetup;
+   return propSetup;
 }
 
 //------------------------------------------------------------------------------
@@ -817,20 +824,20 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
                                       const std::string &propagatorName,
                                       const std::string &forceModelName)
 {
-    Propagator *prop = theConfigManager->GetPropagator(propagatorName);
-    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
+   Propagator *prop = theConfigManager->GetPropagator(propagatorName);
+   ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
     
-    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+   PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
     
-    if (prop)
-        propSetup->SetPropagator(prop);
+   if (prop)
+      propSetup->SetPropagator(prop);
     
-    if (fm)
-        propSetup->SetForceModel(fm);
+   if (fm)
+      propSetup->SetForceModel(fm);
     
-    theConfigManager->AddPropSetup(propSetup);
+   theConfigManager->AddPropSetup(propSetup);
     
-    return propSetup;
+   return propSetup;
 }
 
 //------------------------------------------------------------------------------
@@ -838,7 +845,7 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetPropSetup(const std::string &name)
 {
-    return theConfigManager->GetPropSetup(name);
+   return theConfigManager->GetPropSetup(name);
 }
 
 // CelestialBody
@@ -857,32 +864,32 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
                                               const std::string &name)
 {
-    // type is such as "Earth", "Moon" - we need const string EarthString etc.
-    CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
+   // type is such as "Earth", "Moon" - we need const string EarthString etc.
+   CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
     
-    if (body == NULL)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateCelestialBody() Error Creating "
-                                      "%s.  Check CelestialBodyFactory. \n", type.c_str());
+   if (body == NULL)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateCelestialBody() Error Creating "
+                                    "%s.  Check CelestialBodyFactory. \n", type.c_str());
 
-        throw GmatBaseException("Error Creating CelestialBody");
-        //return NULL;
-    }
+      throw GmatBaseException("Error Creating CelestialBody");
+      //return NULL;
+   }
     
-    // Manage it if it is a named body
-    //loj: Do we want to add bodies tnat are not in the default solar system?
-    try
-    {
-        if (body->GetName() != "")
-            theConfigManager->AddCelestialBody(body);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
-                                      e.GetMessage());
-    }
+   // Manage it if it is a named body
+   //loj: Do we want to add bodies tnat are not in the default solar system?
+   try
+   {
+      if (body->GetName() != "")
+         theConfigManager->AddCelestialBody(body);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+                                    e.GetMessage());
+   }
     
-    return body;
+   return body;
 }
 
 //------------------------------------------------------------------------------
@@ -898,7 +905,7 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 {
-    return theConfigManager->GetCelestialBody(name);
+   return theConfigManager->GetCelestialBody(name);
 }
 
 // Interpolator //loj: 3/23/04 added
@@ -918,35 +925,35 @@ Interpolator* Moderator::CreateInterpolator(const std::string &type,
                                             const std::string &name)
 {
 
-    //loj: 3/22/04 theFactoryManager->CreateInterpolator() not implemented
-    // comment out the code
+   //loj: 3/22/04 theFactoryManager->CreateInterpolator() not implemented
+   // comment out the code
     
-//      Interpolator *interp = theFactoryManager->CreateInterpolator(type, name);
+   //      Interpolator *interp = theFactoryManager->CreateInterpolator(type, name);
     
-//      if (interp == NULL)
-//      {
-//          MessageInterface::ShowMessage("Moderator::CreateInterpolator() Error Creating "
-//                                        "%s.  Check InterpolatorFactory. \n", type.c_str());
+   //      if (interp == NULL)
+   //      {
+   //          MessageInterface::ShowMessage("Moderator::CreateInterpolator() Error Creating "
+   //                                        "%s.  Check InterpolatorFactory. \n", type.c_str());
 
-//          throw GmatBaseException("Error Creating Interpolator");
-//          //return NULL;
-//      }
+   //          throw GmatBaseException("Error Creating Interpolator");
+   //          //return NULL;
+   //      }
     
-//      // Manage it if it is a named interp
-//      try
-//      {
-//          if (interp->GetName() != "")
-//              theConfigManager->AddInterpolator(interp);
-//      }
-//      catch (BaseException &e)
-//      {
-//          MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
-//                                        e.GetMessage());
-//      }
+   //      // Manage it if it is a named interp
+   //      try
+   //      {
+   //          if (interp->GetName() != "")
+   //              theConfigManager->AddInterpolator(interp);
+   //      }
+   //      catch (BaseException &e)
+   //      {
+   //          MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+   //                                        e.GetMessage());
+   //      }
     
-//      return interp;
+   //      return interp;
     
-    return NULL;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -962,8 +969,8 @@ Interpolator* Moderator::CreateInterpolator(const std::string &type,
 //------------------------------------------------------------------------------
 Interpolator* Moderator::GetInterpolator(const std::string &name)
 {
-    //return theConfigManager->GetInterpolator(name);
-    return NULL;
+   //return theConfigManager->GetInterpolator(name);
+   return NULL;
 }
 
 // RefFrame //loj: 3/23/04 added
@@ -980,10 +987,10 @@ Interpolator* Moderator::GetInterpolator(const std::string &name)
  */
 //------------------------------------------------------------------------------
 RefFrame* Moderator::CreateRefFrame(const std::string &type,
-                                            const std::string &name)
+                                    const std::string &name)
 {
-    //loj: 3/22/04 theFactoryManager->CreateRefFrame() not implemented
-    // comment out the code
+   //loj: 3/22/04 theFactoryManager->CreateRefFrame() not implemented
+   // comment out the code
     
 //      RefFrame *refFrame = theFactoryManager->CreateRefFrame(type, name);
     
@@ -1010,7 +1017,7 @@ RefFrame* Moderator::CreateRefFrame(const std::string &type,
     
 //      return refFrame;
 
-    return NULL;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -1026,8 +1033,8 @@ RefFrame* Moderator::CreateRefFrame(const std::string &type,
 //------------------------------------------------------------------------------
 RefFrame* Moderator::GetRefFrame(const std::string &name)
 {
-    //return theConfigManager->GetRefFrame(name);
-    return NULL;
+   //return theConfigManager->GetRefFrame(name);
+   return NULL;
 }
 
 // SolarSystem
@@ -1042,8 +1049,8 @@ RefFrame* Moderator::GetRefFrame(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetDefaultSolarSystem()
 {
-    //return theConfigManager->GetDefaultSolarSystem();
-    return theDefaultSolarSystem;
+   //return theConfigManager->GetDefaultSolarSystem();
+   return theDefaultSolarSystem;
 }
 
 //------------------------------------------------------------------------------
@@ -1051,9 +1058,9 @@ SolarSystem* Moderator::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 {
-    SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
-    theConfigManager->AddSolarSystem(solarSys);
-    return solarSys;
+   SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
+   theConfigManager->AddSolarSystem(solarSys);
+   return solarSys;
 }
 
 //------------------------------------------------------------------------------
@@ -1061,7 +1068,7 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetSolarSystemInUse()
 {
-    return theConfigManager->GetSolarSystemInUse();
+   return theConfigManager->GetSolarSystemInUse();
 }
 
 //------------------------------------------------------------------------------
@@ -1069,7 +1076,7 @@ SolarSystem* Moderator::GetSolarSystemInUse()
 //------------------------------------------------------------------------------
 bool Moderator::SetSolarSystemInUse(const std::string &name)
 {
-    return theConfigManager->SetSolarSystemInUse(name);
+   return theConfigManager->SetSolarSystemInUse(name);
 }
 
 //Planetary files
@@ -1082,7 +1089,7 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetPlanetaryFileTypes()
 {
-    return thePlanetaryFileTypes;
+   return thePlanetaryFileTypes;
 }
 
 //------------------------------------------------------------------------------
@@ -1094,7 +1101,7 @@ StringArray& Moderator::GetPlanetaryFileTypes()
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetPlanetaryFileNames()
 {
-    return thePlanetaryFileNames;
+   return thePlanetaryFileNames;
 }
 
 //------------------------------------------------------------------------------
@@ -1106,11 +1113,11 @@ StringArray& Moderator::GetPlanetaryFileNames()
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetPlanetaryFileTypesInUse()
 {
-    theList.clear();
-    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-        theList.push_back(thePlanetaryFileTypesInUse[i]);
+   theList.clear();
+   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+      theList.push_back(thePlanetaryFileTypesInUse[i]);
 
-    return theList;
+   return theList;
 }
 
 //------------------------------------------------------------------------------
@@ -1118,12 +1125,12 @@ StringArray& Moderator::GetPlanetaryFileTypesInUse()
 //------------------------------------------------------------------------------
 std::string Moderator::GetPlanetaryFileName(const std::string &filetype)
 {
-    Integer id = GetPlanetaryFileId(filetype);
+   Integer id = GetPlanetaryFileId(filetype);
 
-    if (id >= 0)
-        return thePlanetaryFileNames[id];
-    else
-        return "Unknown File Type";
+   if (id >= 0)
+      return thePlanetaryFileNames[id];
+   else
+      return "Unknown File Type";
 }
 
 //------------------------------------------------------------------------------
@@ -1133,16 +1140,16 @@ std::string Moderator::GetPlanetaryFileName(const std::string &filetype)
 bool Moderator::SetPlanetaryFileName(const std::string &filetype,
                                      const std::string &filename)
 {
-    bool status = false;
-    Integer id = GetPlanetaryFileId(filetype);
+   bool status = false;
+   Integer id = GetPlanetaryFileId(filetype);
 
-    if (id >= 0)
-    {
-        thePlanetaryFileNames[id] = filename;
-        status = true;
-    }
+   if (id >= 0)
+   {
+      thePlanetaryFileNames[id] = filename;
+      status = true;
+   }
     
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1154,124 +1161,124 @@ bool Moderator::SetPlanetaryFileName(const std::string &filetype,
 //------------------------------------------------------------------------------
 bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 {
-    //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
-    //                              filetypes.size());
-    bool status = false;
-    Integer fileTypeInUse = -1;
+   //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
+   //                              filetypes.size());
+   bool status = false;
+   Integer fileTypeInUse = -1;
     
     // update planetary file types
-    if (&thePlanetaryFileTypesInUse != &filetypes)
-    {
-        //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
-        thePlanetaryFileTypesInUse.clear();
+   if (&thePlanetaryFileTypesInUse != &filetypes)
+   {
+      //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
+      thePlanetaryFileTypesInUse.clear();
     
-        for (unsigned int i=0; i<filetypes.size(); i++)
-        {
-            thePlanetaryFileTypesInUse.push_back(filetypes[i]);
-        }
-    }
+      for (unsigned int i=0; i<filetypes.size(); i++)
+      {
+         thePlanetaryFileTypesInUse.push_back(filetypes[i]);
+      }
+   }
 
-    // create planetary ephem file
-    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-    {
-        thePlanetarySourcePriority[i] = 0;
+   // create planetary ephem file
+   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+   {
+      thePlanetarySourcePriority[i] = 0;
        
-        if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
-        {
-            status = CreateSlpFile(thePlanetaryFileNames[SLP]);
-            if (status)
-            {
-                thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
-                isPlanetaryFileInUse[SLP] = true;
-                fileTypeInUse = SLP;
-                break;
-            }
-        }
-        else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
-        {
-            //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
-            status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
-            if (status)
-            {
-                thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
-                isPlanetaryFileInUse[DE200] = true;
-                fileTypeInUse = DE200;
-                break;
-            }
-        }
-//          else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE202])
-//          {
-//              MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE202\n");
-//              status = CreateDeFile(DE202, thePlanetaryFileNames[DE202]);
-//              if (status)
-//              {
-//                  thePlanetarySourcePriority[DE202] = HIGHEST_PRIORITY - i;
-//                  isPlanetaryFileInUse[DE202] = true;
-//                  fileTypeInUse = DE202;
-//                  break;
-//              }
-//          }
-        else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
-        {
-            //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
-            status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
-            if (status)
-            {
-                thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
-                isPlanetaryFileInUse[DE405] = true;
-                fileTypeInUse = DE405;
-                break;
-            }
-        }
-    }
+      if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
+      {
+         status = CreateSlpFile(thePlanetaryFileNames[SLP]);
+         if (status)
+         {
+            thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
+            isPlanetaryFileInUse[SLP] = true;
+            fileTypeInUse = SLP;
+            break;
+         }
+      }
+      else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
+      {
+         //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
+         status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
+         if (status)
+         {
+            thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
+            isPlanetaryFileInUse[DE200] = true;
+            fileTypeInUse = DE200;
+            break;
+         }
+      }
+      //          else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE202])
+      //          {
+      //              MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE202\n");
+      //              status = CreateDeFile(DE202, thePlanetaryFileNames[DE202]);
+      //              if (status)
+      //              {
+      //                  thePlanetarySourcePriority[DE202] = HIGHEST_PRIORITY - i;
+      //                  isPlanetaryFileInUse[DE202] = true;
+      //                  fileTypeInUse = DE202;
+      //                  break;
+      //              }
+      //          }
+      else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
+      {
+         //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
+         status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
+         if (status)
+         {
+            thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
+            isPlanetaryFileInUse[DE405] = true;
+            fileTypeInUse = DE405;
+            break;
+         }
+      }
+   }
 
-    status = false;
+   status = false;
 
     // set SolarSystem to use the file
-    if (fileTypeInUse == -1)
-    {
-        MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() NO "
-                                      "Planetary file is set to use \n");
-    }
-    else
-    {
-        //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
-        //                              "Set Planetary file to use:%d\n", fileTypeInUse);
+   if (fileTypeInUse == -1)
+   {
+      MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() NO "
+                                    "Planetary file is set to use \n");
+   }
+   else
+   {
+      //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
+      //                              "Set Planetary file to use:%d\n", fileTypeInUse);
         
-        switch (fileTypeInUse)
-        {
-        case SLP:
-            if (theDefaultSolarSystem->SetSource(Gmat::SLP))
-                if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
-                    status = true;
+      switch (fileTypeInUse)
+      {
+      case SLP:
+         if (theDefaultSolarSystem->SetSource(Gmat::SLP))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
+               status = true;
             
-            break;
-        case DE200:
-            if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
-                if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-                    status = true;
-            break;
-//          case DE202:
-//              if (theDefaultSolarSystem->SetSource(Gmat::DE_202))
-//                  if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-//                      status = true;
-//              break;
-        case DE405:
-            if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
-                if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-                    status = true;
-            break;
-        default:
-            break;
-        }
-    }
+         break;
+      case DE200:
+         if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+               status = true;
+         break;
+         //          case DE202:
+         //              if (theDefaultSolarSystem->SetSource(Gmat::DE_202))
+         //                  if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+         //                      status = true;
+         //              break;
+      case DE405:
+         if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
+               status = true;
+         break;
+      default:
+         break;
+      }
+   }
     
-//      if (status)
-//          MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
-//                                        "set Planetary file to use: %s\n",
-//                                        PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
+   //      if (status)
+   //          MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
+   //                                        "set Planetary file to use: %s\n",
+   //                                        PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
     
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1279,26 +1286,26 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 //------------------------------------------------------------------------------
 bool Moderator::CreateSlpFile(const std::string &filename)
 {
-    //MessageInterface::ShowMessage("Moderator::CreateSlpFile() filename=%s\n",
-    //                              filename.c_str());
+   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() filename=%s\n",
+   //                              filename.c_str());
     
-    bool status = false;
+   bool status = false;
     
-    if (isPlanetaryFileInUse[SLP])
-    {
-        MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile already created\n");
-        status = true;
-    }
-    else
-    {
-        theDefaultSlpFile = new SlpFile(filename);
-        //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
+   if (isPlanetaryFileInUse[SLP])
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile already created\n");
+      status = true;
+   }
+   else
+   {
+      theDefaultSlpFile = new SlpFile(filename);
+      //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
         
-        if (theDefaultSlpFile != NULL)
-            status = true;
-    }
+      if (theDefaultSlpFile != NULL)
+         status = true;
+   }
 
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1308,64 +1315,64 @@ bool Moderator::CreateSlpFile(const std::string &filename)
 bool Moderator::CreateDeFile(Integer id, const std::string &filename,
                              Gmat::DeFileFormat format)
 {
-    bool status = false;
-    Gmat::DeFileType deFileType;
+   bool status = false;
+   Gmat::DeFileType deFileType;
     
-    if (isPlanetaryFileInUse[id])
-    {
-        MessageInterface::ShowMessage("Moderator::CreateDeFile() DeFile already created\n");
-        status = true;
-    }
-    else
-    {
-        switch (id)
-        {
-        case DE200:
-            deFileType = Gmat::DE200;
-            break;
-//          case DE202:
-//              deFileType = Gmat::DE202;
-//              break;
-        case DE405:
-            deFileType = Gmat::DE405;
-            break;
-        default:
-            MessageInterface::PopupMessage
-                (Gmat::WARNING_,
-                 "Moderator::CreateDeFile() unsupported DE file type");
-            return false;
-        }
-
-        MessageInterface::ShowMessage
-            ("Moderator::CreateDeFile() creating DeFile. type=%d, "
-             "filename=%s, format=%d\n", deFileType, filename.c_str(),
-             format);
-
-        //loj: 4/7/04 temp code until DeFile is resolved
-        MessageInterface::PopupMessage
+   if (isPlanetaryFileInUse[id])
+   {
+      MessageInterface::ShowMessage("Moderator::CreateDeFile() DeFile already created\n");
+      status = true;
+   }
+   else
+   {
+      switch (id)
+      {
+      case DE200:
+         deFileType = Gmat::DE200;
+         break;
+         //          case DE202:
+         //              deFileType = Gmat::DE202;
+         //              break;
+      case DE405:
+         deFileType = Gmat::DE405;
+         break;
+      default:
+         MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "Moderator::CreateDeFile() Error creating %s.\n"
-             "The next filetype in the list will "
-             "be created.\n", filename.c_str());
-         
-//          try
-//          {
-//              theDefaultDeFile = new DeFile(deFileType, filename, format);
-        
-//              if (theDefaultDeFile != NULL)
-//                  status = true;
-//          }
-//          catch (...)
-//          {
-//              MessageInterface::PopupMessage
-//                  (Gmat::WARNING_,
-//                   "Moderator::CreateDeFile() Error creating %s. "
-//                   "The next filetype in the list will "
-//                   "be created.\n", filename.c_str());
-//          }
-    }
+             "Moderator::CreateDeFile() unsupported DE file type");
+         return false;
+      }
 
-    return status;
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDeFile() creating DeFile. type=%d, "
+          "filename=%s, format=%d\n", deFileType, filename.c_str(),
+          format);
+
+      //loj: 4/7/04 temp code until DeFile is resolved
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_,
+          "Moderator::CreateDeFile() Error creating %s.\n"
+          "The next filetype in the list will "
+          "be created.\n", filename.c_str());
+         
+      //          try
+      //          {
+      //              theDefaultDeFile = new DeFile(deFileType, filename, format);
+        
+      //              if (theDefaultDeFile != NULL)
+      //                  status = true;
+      //          }
+      //          catch (...)
+      //          {
+      //              MessageInterface::PopupMessage
+      //                  (Gmat::WARNING_,
+      //                   "Moderator::CreateDeFile() Error creating %s. "
+      //                   "The next filetype in the list will "
+      //                   "be created.\n", filename.c_str());
+      //          }
+   }
+
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1373,13 +1380,13 @@ bool Moderator::CreateDeFile(Integer id, const std::string &filename,
 //------------------------------------------------------------------------------
 Integer Moderator::GetPlanetaryFileId(const std::string &filetype)
 {
-    for (int i=0; i<PlanetaryFileCount; i++)
-    {
-        if (filetype == PLANETARY_SOURCE_STRING[i])
-            return i;
-    }
+   for (int i=0; i<PlanetaryFileCount; i++)
+   {
+      if (filetype == PLANETARY_SOURCE_STRING[i])
+         return i;
+   }
     
-    return -1;
+   return -1;
 }
 
 // Subscriber
@@ -1401,13 +1408,13 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
                                         const std::string &filename)
 {
-//    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
-//                                  ", name = " + name + "\n");
-    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
-    theConfigManager->AddSubscriber(subs);
-    //loj: 3/9/04 commented out. The subscribers are added in AddSubscriberToSandbox()
-    //thePublisher->Subscribe(subs);
-    return subs;
+   //    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
+   //                                  ", name = " + name + "\n");
+   Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
+   theConfigManager->AddSubscriber(subs);
+   //loj: 3/9/04 commented out. The subscribers are added in AddSubscriberToSandbox()
+   //thePublisher->Subscribe(subs);
+   return subs;
 }
 
 //------------------------------------------------------------------------------
@@ -1423,7 +1430,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
 //------------------------------------------------------------------------------
 Subscriber* Moderator::GetSubscriber(const std::string &name)
 {
-    return theConfigManager->GetSubscriber(name);
+   return theConfigManager->GetSubscriber(name);
 }
 
 // GmatCommand
@@ -1432,8 +1439,8 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
-    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
-    return cmd;
+   GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
+   return cmd;
 }
 
 // Mission
@@ -1442,9 +1449,9 @@ GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string
 //------------------------------------------------------------------------------
 bool Moderator::LoadDefaultMission()
 {
-    CreateDefaultMission();
+   CreateDefaultMission();
     
-    return true;
+   return true;
 }
 
 // Resource
@@ -1453,10 +1460,10 @@ bool Moderator::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool Moderator::ClearResource()
 {
-    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
+   MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
 
-    theConfigManager->RemoveAllItems();
-    return true;
+   theConfigManager->RemoveAllItems();
+   return true;
 }
 
 // Command Sequence
@@ -1465,19 +1472,19 @@ bool Moderator::ClearResource()
 //------------------------------------------------------------------------------
 bool Moderator::ClearCommandSeq(Integer sandboxNum)
 {
-    MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
+   MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
     
-    //djc: Maybe set to NULL if you plan to do something completely different from
-    // the way GMAT acts from a script?  I think you want to do this, though:
-    // commands[sandboxNum-1] = NULL;
-    GmatCommand *cmd = commands[sandboxNum-1];
-    DeleteCommand(cmd);
+   //djc: Maybe set to NULL if you plan to do something completely different from
+   // the way GMAT acts from a script?  I think you want to do this, though:
+   // commands[sandboxNum-1] = NULL;
+   GmatCommand *cmd = commands[sandboxNum-1];
+   DeleteCommand(cmd);
     
-    //djc: if you plan on adding the gui commands to the sandbox next, using 
-    // the same approach used when running a script.
-    cmd = new NoOp; 
+   //djc: if you plan on adding the gui commands to the sandbox next, using 
+   // the same approach used when running a script.
+   cmd = new NoOp; 
     
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1485,7 +1492,7 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
-    return commands[sandboxNum-1]->Append(cmd);
+   return commands[sandboxNum-1]->Append(cmd);
 }
 
 //------------------------------------------------------------------------------
@@ -1493,20 +1500,20 @@ bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::AppendCommand(const std::string &type, const std::string &name,
-                                  Integer sandboxNum)
+                                      Integer sandboxNum)
 {
-    bool status;
-    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
+   bool status;
+   GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
 
-    if (cmd != NULL)
-    {
-        if (name != "")
-            theConfigManager->AddCommand(cmd);
+   if (cmd != NULL)
+   {
+      if (name != "")
+         theConfigManager->AddCommand(cmd);
     
-        status = commands[sandboxNum-1]->Append(cmd);
-    }
+      status = commands[sandboxNum-1]->Append(cmd);
+   }
     
-    return cmd;
+   return cmd;
 }
 
 //------------------------------------------------------------------------------
@@ -1515,7 +1522,7 @@ GmatCommand* Moderator::AppendCommand(const std::string &type, const std::string
 bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                               Integer sandboxNum)
 {
-    return commands[sandboxNum-1]->Insert(cmd, prevCmd);
+   return commands[sandboxNum-1]->Insert(cmd, prevCmd);
 }
 
 //------------------------------------------------------------------------------
@@ -1525,23 +1532,23 @@ bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 GmatCommand* Moderator::InsertCommand(const std::string &type, const std::string &currName,
                                       const std::string &prevName, Integer sandboxNum)
 {
-//      bool status = false;
-//      GmatCommand *currCmd = theFactoryManager->CreateCommand(type, currName);
-//      GmatCommand *prevCmd = NULL;
+   //      bool status = false;
+   //      GmatCommand *currCmd = theFactoryManager->CreateCommand(type, currName);
+   //      GmatCommand *prevCmd = NULL;
 
-//      if (currCmd != NULL)
-//      {
-//          if (currName != "")
-//              theConfigManager->AddCommand(currCmd);
+   //      if (currCmd != NULL)
+   //      {
+   //          if (currName != "")
+   //              theConfigManager->AddCommand(currCmd);
     
-//          if (prevName != "")
-//              prevCmd = theConfigManager->GetCommand(prevName);
+   //          if (prevName != "")
+   //              prevCmd = theConfigManager->GetCommand(prevName);
     
-//          status = commands[sandboxNum-1]->Insert(currCmd, prevCmd);
-//      }
+   //          status = commands[sandboxNum-1]->Insert(currCmd, prevCmd);
+   //      }
     
-//      return currCmd;
-    return NULL;
+   //      return currCmd;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -1549,7 +1556,7 @@ GmatCommand* Moderator::InsertCommand(const std::string &type, const std::string
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 {
-    return commands[sandboxNum-1]->Remove(cmd);
+   return commands[sandboxNum-1]->Remove(cmd);
 }
 
 //------------------------------------------------------------------------------
@@ -1557,8 +1564,8 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 {
-    //loj: 3/5/04 return commands[sandboxNum-1]->GetNext();
-    return commands[sandboxNum-1];
+   //loj: 3/5/04 return commands[sandboxNum-1]->GetNext();
+   return commands[sandboxNum-1];
 }
 
 // sandbox
@@ -1567,8 +1574,8 @@ GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ClearAllSandboxes()
 {
-    for (int i=0; i<Gmat::MAX_SANDBOX; i++)
-        sandboxes[i]->Clear();
+   for (int i=0; i<Gmat::MAX_SANDBOX; i++)
+      sandboxes[i]->Clear();
 }
 
 //------------------------------------------------------------------------------
@@ -1576,61 +1583,61 @@ void Moderator::ClearAllSandboxes()
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 {
-    Integer status = 0;
+   Integer status = 0;
 
-    if (isRunReady)
-    {
+   if (isRunReady)
+   {
 
-        // check sandbox number
-        if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
-        {
-            sandboxes[sandboxNum-1]->Clear();
-        }
-        else
-        {
-            status = -1;
-            MessageInterface::PopupMessage(Gmat::ERROR_,
-                                           "Invalid Sandbox number" + sandboxNum);
-        }
+      // check sandbox number
+      if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
+      {
+         sandboxes[sandboxNum-1]->Clear();
+      }
+      else
+      {
+         status = -1;
+         MessageInterface::PopupMessage(Gmat::ERROR_,
+                                        "Invalid Sandbox number" + sandboxNum);
+      }
 
-        try
-        {
-            AddSolarSysToSandbox(sandboxNum-1);
-            AddPublisherToSandbox(sandboxNum-1);
-            AddSpacecraftToSandbox(sandboxNum-1);
-            AddPropSetupToSandbox(sandboxNum-1);
-            AddBurnToSandbox(sandboxNum-1);        
-            AddSolverToSandbox(sandboxNum-1);        
-            AddSubscriberToSandbox(sandboxNum-1);
-            AddCommandToSandbox(sandboxNum-1);
+      try
+      {
+         AddSolarSysToSandbox(sandboxNum-1);
+         AddPublisherToSandbox(sandboxNum-1);
+         AddSpacecraftToSandbox(sandboxNum-1);
+         AddPropSetupToSandbox(sandboxNum-1);
+         AddBurnToSandbox(sandboxNum-1);        
+         AddSolverToSandbox(sandboxNum-1);        
+         AddSubscriberToSandbox(sandboxNum-1);
+         AddCommandToSandbox(sandboxNum-1);
         
-            InitializeSandbox(sandboxNum-1);
+         InitializeSandbox(sandboxNum-1);
 
-            SetupRun(sandboxNum, isFromGui);
-            //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
+         SetupRun(sandboxNum, isFromGui);
+         //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
-            ExecuteSandbox(sandboxNum-1);
-            //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
-        }
-        catch (BaseException &e)
-        {
-            MessageInterface::ShowMessage("Moderator::RunMission() " + e.GetMessage() + "\n");
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-            // assign status
-            // status = ?
-        }
-        catch (...)
-        {
-            // assign status
-            throw;
-        }
-    }
-    else
-    {
-        MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
-    }
+         ExecuteSandbox(sandboxNum-1);
+         //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("Moderator::RunMission() " + e.GetMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         // assign status
+         // status = ?
+      }
+      catch (...)
+      {
+         // assign status
+         throw;
+      }
+   }
+   else
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
+   }
     
-    return status;
+   return status;
 }
 
 // Script
@@ -1647,31 +1654,31 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
-    bool status = false;
-    isRunReady = false;
+   bool status = false;
+   isRunReady = false;
     
-    MessageInterface::ShowMessage("========================================\n");
-    MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
-                                  "file: " + scriptFilename + "\n");
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
+                                 "file: " + scriptFilename + "\n");
 
-    //loj: clear both resource and command sequence for B2
-    ClearResource();
-    ClearCommandSeq();
+   //loj: clear both resource and command sequence for B2
+   ClearResource();
+   ClearCommandSeq();
     
-    try
-    {
-        status = theScriptInterpreter->Interpret(scriptFilename);
-        if (status)
-            isRunReady = true;
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
-                                       "\n Check Type in the appropriate Factory or parameter text");
-        isRunReady = false;
-    }
+   try
+   {
+      status = theScriptInterpreter->Interpret(scriptFilename);
+      if (status)
+         isRunReady = true;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
+                                     "\n Check Type in the appropriate Factory or parameter text");
+      isRunReady = false;
+   }
 
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1687,19 +1694,19 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 bool Moderator::SaveScript(const std::string &scriptFilename)
 {
-    MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
-                                  "file: " + scriptFilename + "\n");
-    MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFilename);
+   MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
+                                 "file: " + scriptFilename + "\n");
+   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFilename);
 
-    try
-    {
-        return theScriptInterpreter->Build(scriptFilename);
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-        return false;
-    }
+   try
+   {
+      return theScriptInterpreter->Build(scriptFilename);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      return false;
+   }
     
 }
 
@@ -1717,8 +1724,8 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer Moderator::RunScript(Integer sandboxNum, bool isFromGui)
 {
-    MessageInterface::ShowMessage("Moderator::RunScript() entered\n");
-    return RunMission(sandboxNum, isFromGui);
+   MessageInterface::ShowMessage("Moderator::RunScript() entered\n");
+   return RunMission(sandboxNum, isFromGui);
 }
 
 //---------------------------------
@@ -1731,35 +1738,35 @@ Integer Moderator::RunScript(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 void Moderator::InitializePlanetarySource()
 {
-    MessageInterface::ShowMessage("========================================\n");
-    MessageInterface::ShowMessage("Moderator initializing planetary source...\n");
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator initializing planetary source...\n");
 
-    // initialize planetary source
-    for (int i=0; i<PlanetaryFileCount; i++)
-    {
-        thePlanetarySourcePriority[i] = 0;
-        isPlanetaryFileInUse[i] = false;
-    }
+   // initialize planetary source
+   for (int i=0; i<PlanetaryFileCount; i++)
+   {
+      thePlanetarySourcePriority[i] = 0;
+      isPlanetaryFileInUse[i] = false;
+   }
 
-    // initialize in the order of enum data
-    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
-    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
-    //thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE202]); //loj: not supported yet
-    thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
+   // initialize in the order of enum data
+   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[SLP]);
+   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE200]);
+   //thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE202]); //loj: not supported yet
+   thePlanetaryFileTypes.push_back(PLANETARY_SOURCE_STRING[DE405]);
     
-    thePlanetaryFileNames.push_back(theFileManager->
-                                    GetStringParameter("FULL_SLP_FILE"));
-    thePlanetaryFileNames.push_back(theFileManager->
-                                    GetStringParameter("FULL_DE200_FILE"));
-//      thePlanetaryFileNames.push_back(theFileManager->
-//                                      GetStringParameter("FULL_DE202_FILE")); //loj: not supported yet
-    thePlanetaryFileNames.push_back(theFileManager->
-                                    GetStringParameter("FULL_DE405_FILE"));
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetStringParameter("FULL_SLP_FILE"));
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetStringParameter("FULL_DE200_FILE"));
+   //      thePlanetaryFileNames.push_back(theFileManager->
+   //                                      GetStringParameter("FULL_DE202_FILE")); //loj: not supported yet
+   thePlanetaryFileNames.push_back(theFileManager->
+                                   GetStringParameter("FULL_DE405_FILE"));
 
-    // initialize planetary file types/names in use
-    thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
-    //thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
-    SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
+   // initialize planetary file types/names in use
+   thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+   //thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
+   SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
 }
 
 //------------------------------------------------------------------------------
@@ -1767,115 +1774,115 @@ void Moderator::InitializePlanetarySource()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
 {
-    MessageInterface::ShowMessage("========================================\n");
-    MessageInterface::ShowMessage("Moderator creating default mission...\n");
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator creating default mission...\n");
 
-    try
-    {
-        // Spacecraft
-        Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
-        //MessageInterface::ShowMessage("-->default Spacecraft created\n");
+   try
+   {
+      // Spacecraft
+      Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
+      //MessageInterface::ShowMessage("-->default Spacecraft created\n");
 
-        // PropSetup
-        PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
-        //MessageInterface::ShowMessage("-->default PropSetup created\n");
+      // PropSetup
+      PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
+      //MessageInterface::ShowMessage("-->default PropSetup created\n");
 
-        // Time parameters
-        Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
-        Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-        Parameter *elapsedDays = CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
+      // Time parameters
+      Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+      Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+      Parameter *elapsedDays = CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
-        // Cartesian parameters
-        Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
-        Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
-        Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
-        Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
-        Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
-        Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
+      // Cartesian parameters
+      Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
+      Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
+      Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
+      Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
+      Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
+      Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
 
-        // Keplerian parameters
-        Parameter *kepSma = CreateParameter("KepSMA", "DefaultSC.SMA");
-        Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.Ecc");
-        Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.Inc");
-        Parameter *kepRaan = CreateParameter("KepRAAN", "DefaultSC.RAAN");
-        Parameter *kepAop = CreateParameter("KepAOP", "DefaultSC.AOP");
-        Parameter *kepTa = CreateParameter("KepTA", "DefaultSC.TA");
-        Parameter *kepMa = CreateParameter("KepMA", "DefaultSC.MA");
-        Parameter *kepMm = CreateParameter("KepMM", "DefaultSC.MM");
+      // Keplerian parameters
+      Parameter *kepSma = CreateParameter("KepSMA", "DefaultSC.SMA");
+      Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.Ecc");
+      Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.Inc");
+      Parameter *kepRaan = CreateParameter("KepRAAN", "DefaultSC.RAAN");
+      Parameter *kepAop = CreateParameter("KepAOP", "DefaultSC.AOP");
+      Parameter *kepTa = CreateParameter("KepTA", "DefaultSC.TA");
+      Parameter *kepMa = CreateParameter("KepMA", "DefaultSC.MA");
+      Parameter *kepMm = CreateParameter("KepMM", "DefaultSC.MM");
 
-        // Orbital parameters
-        Parameter *velApoapsis = CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
-        Parameter *velPeriapsis = CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
-        Parameter *apapsis = CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
-        Parameter *periapsis = CreateParameter("Periapsis", "DefaultSC.Periapsis");
+      // Orbital parameters
+      Parameter *velApoapsis = CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
+      Parameter *velPeriapsis = CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
+      Parameter *apapsis = CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
+      Parameter *periapsis = CreateParameter("Periapsis", "DefaultSC.Periapsis");
 
-        // Spherical parameters
-        Parameter *sphRa = CreateParameter("SphRA", "DefaultSC.RA");
-        Parameter *sphDec = CreateParameter("SphDec", "DefaultSC.Dec");
+      // Spherical parameters
+      Parameter *sphRa = CreateParameter("SphRA", "DefaultSC.RA");
+      Parameter *sphDec = CreateParameter("SphDec", "DefaultSC.Dec");
 
-        // Angular parameters
-        Parameter *semiLatRec = CreateParameter("SemilatusRectum", "DefaultSC.SLR");
-        //MessageInterface::ShowMessage("-->default parameters created\n");
+      // Angular parameters
+      Parameter *semiLatRec = CreateParameter("SemilatusRectum", "DefaultSC.SLR");
+      //MessageInterface::ShowMessage("-->default parameters created\n");
     
-        // Set parameter description and object name
-        StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
-        Parameter *param;
+      // Set parameter description and object name
+      StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+      Parameter *param;
     
-        for (unsigned int i=0; i<params.size(); i++)
-        {
-            param = GetParameter(params[i]);
-            param->SetDesc(param->GetName());
-            param->SetStringParameter("Object", "DefaultSC");
-        }
+      for (unsigned int i=0; i<params.size(); i++)
+      {
+         param = GetParameter(params[i]);
+         param->SetDesc(param->GetName());
+         param->SetStringParameter("Object", "DefaultSC");
+      }
     
-        // Set initial epoch for elapsed time parameter
-        //elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
-        //elapsedDays->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
+      // Set initial epoch for elapsed time parameter
+      //elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
+      //elapsedDays->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
 
-        // StopCondition
-        StopCondition *stopCond = CreateStopCondition("StopCondition", "StopOnElapsedSecs");
-        stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
-        stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
-        stopCond->SetRealParameter("Goal", 8640.0);
-        //MessageInterface::ShowMessage("-->default StopCondition created\n");
+      // StopCondition
+      StopCondition *stopCond = CreateStopCondition("StopCondition", "StopOnElapsedSecs");
+      stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+      stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
+      stopCond->SetRealParameter("Goal", 8640.0);
+      //MessageInterface::ShowMessage("-->default StopCondition created\n");
 
-        // Subscribers
-        // ReportFile
-        Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
-        sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-        sub->Activate(false);
+      // Subscribers
+      // ReportFile
+      Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+      sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+      sub->Activate(false);
     
-        // XyPlot
-        sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
-        sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
-        sub->SetStringParameter("DepVar", "DefaultSC.X");
-        sub->Activate(true);
+      // XyPlot
+      sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
+      sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
+      sub->SetStringParameter("DepVar", "DefaultSC.X");
+      sub->Activate(true);
     
-        // OpenGlPlot
-        sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
-        sub->Activate(true);
-        //MessageInterface::ShowMessage("-->default Subscribers created\n");
+      // OpenGlPlot
+      sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+      sub->Activate(true);
+      //MessageInterface::ShowMessage("-->default Subscribers created\n");
 
-        // Propagate Command
-        GmatCommand *propCommand = CreateCommand("Propagate");
-        propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
-        propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
-        propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
-        propCommand->SetSolarSystem(theDefaultSolarSystem);
+      // Propagate Command
+      GmatCommand *propCommand = CreateCommand("Propagate");
+      propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
+      propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
+      propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
+      propCommand->SetSolarSystem(theDefaultSolarSystem);
 
-        //MessageInterface::ShowMessage("-->default Propagate command created\n");
-        // Add propagate command
-        AppendCommand(propCommand);
+      //MessageInterface::ShowMessage("-->default Propagate command created\n");
+      // Add propagate command
+      AppendCommand(propCommand);
 
-        isRunReady = true;
-    }
-    catch (...)
-    {
-        MessageInterface::PopupMessage(Gmat::ERROR_,
-                                       "Moderator::CreateDefaultMission() Error "
-                                       "occurred during default mission creation. "
-                                       "Default mission will not run");
-    }
+      isRunReady = true;
+   }
+   catch (...)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_,
+                                     "Moderator::CreateDefaultMission() Error "
+                                     "occurred during default mission creation. "
+                                     "Default mission will not run");
+   }
     
 }
 
@@ -1884,90 +1891,87 @@ void Moderator::CreateDefaultMission()
 //------------------------------------------------------------------------------
 void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
 {
-    MessageInterface::ShowMessage("========================================\n");
-    MessageInterface::ShowMessage("Moderator setting up for a run...\n");
-    std::string objName;
-    std::string objTypeName;
-
-    //--------------------------------------------
-    // get/set internal objects for parameters
-    //--------------------------------------------
-    if (isFromGui)
-    {
-        //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
-        GmatBase *obj;
-        StringArray objList;
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator setting up for a run...\n");
+   std::string objName;
+   std::string objTypeName;
+  
+   //--------------------------------------------
+   // get/set internal objects for parameters
+   //--------------------------------------------
+   //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
+   GmatBase *obj;
+   StringArray objList;
     
-        // for configured parameters use internal copy of Spacecraft
-        StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
-        Parameter *param;
-        Spacecraft *sc;
+   // for configured parameters use internal copy of Spacecraft
+   StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+   Parameter *param;
+   Spacecraft *sc;
     
-        for (unsigned int i=0; i<params.size(); i++)
-        {
-            try
-            {
-                param = GetParameter(params[i]);
-                objList = param->GetObjectTypeNames();
-                for (unsigned int j=0; j<objList.size(); j++)
-                {
-                    obj = param->GetObject(objList[j]);
-                    objName = obj->GetName(); 
-                    sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-                    param->SetObject(Gmat::SPACECRAFT, objName, sc);
+   for (unsigned int i=0; i<params.size(); i++)
+   {
+      try
+      {
+         param = GetParameter(params[i]);
+         objList = param->GetObjectTypeNames();
+         for (unsigned int j=0; j<objList.size(); j++)
+         {
+            obj = param->GetObject(objList[j]);
+            objName = obj->GetName(); 
+            sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
+            param->SetObject(Gmat::SPACECRAFT, objName, sc);
 
-                    //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
-                    //                              "ObjName = %s\n", param->GetName().c_str(),
-                    //                              objName.c_str());
-                }
-            }
-            catch (BaseException &e)
-            {
-                MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-                                              e.GetMessage().c_str());
-            }
-        }
+            //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
+            //                              "ObjName = %s\n", param->GetName().c_str(),
+            //                              objName.c_str());
+         }
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+                                       e.GetMessage().c_str());
+      }
+   }
         
-        //--------------------------------------------
-        // check stopping condition
-        //--------------------------------------------
-        StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
-        StopCondition *stopCond;
+   //--------------------------------------------
+   // check stopping condition
+   //--------------------------------------------
+   StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
+   StopCondition *stopCond;
     
-        //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
-        for (unsigned int i=0; i<stopconds.size(); i++)
-        {
-            try
-            {
-                stopCond = GetStopCondition(stopconds[i]);
-                objName = stopCond->GetName();
-                //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
-                //                              objName.c_str(), stopCond->GetRealParameter("Goal"));
-            }
-            catch (BaseException &e)
-            {
-                MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-                                              e.GetMessage().c_str());
-            }
-        }    
-    }
-    
-    //--------------------------------------------
-    // create plot window
-    //--------------------------------------------
-    StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-    Subscriber *sub;
+      //MessageInterface::ShowMessage("Moderator::SetupRun() Check stopping condition\n");
+   for (unsigned int i=0; i<stopconds.size(); i++)
+   {
+      try
+      {
+         stopCond = GetStopCondition(stopconds[i]);
+         objName = stopCond->GetName();
+         //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
+         //                              objName.c_str(), stopCond->GetRealParameter("Goal"));
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+                                       e.GetMessage().c_str());
+      }
+   }    
 
-    //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
-    for (unsigned int i=0; i<subs.size(); i++)
-    {
-        sub = GetSubscriber(subs[i]);
-        objTypeName = sub->GetTypeName();
-        objName = sub->GetName();
-        //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-        //                              objTypeName.c_str(), objName.c_str());
-        sub->Initialize();
-    }
+   //--------------------------------------------
+   // create plot window
+   //--------------------------------------------
+   StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   Subscriber *sub;
+
+   //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
+   for (unsigned int i=0; i<subs.size(); i++)
+   {
+      sub = GetSubscriber(subs[i]);
+      objTypeName = sub->GetTypeName();
+      objName = sub->GetName();
+      //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+      //                              objTypeName.c_str(), objName.c_str());
+      sub->Initialize();
+   }
 }
 
 // sandbox
@@ -1976,8 +1980,8 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 void Moderator::AddSolarSysToSandbox(Integer index)
 {
-    SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
-    sandboxes[index]->AddSolarSystem(solarSys);
+   SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
+   sandboxes[index]->AddSolarSystem(solarSys);
 }
 
 //------------------------------------------------------------------------------
@@ -1985,8 +1989,8 @@ void Moderator::AddSolarSysToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPublisherToSandbox(Integer index)
 {
-    thePublisher->UnsubscribeAll(); //loj: 3/9/04 added
-    sandboxes[index]->SetPublisher(thePublisher);
+   thePublisher->UnsubscribeAll(); //loj: 3/9/04 added
+   sandboxes[index]->SetPublisher(thePublisher);
 }
 
 //------------------------------------------------------------------------------
@@ -1994,14 +1998,14 @@ void Moderator::AddPublisherToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSpacecraftToSandbox(Integer index)
 {
-    Spacecraft *sc;
-    StringArray scNames = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
+   Spacecraft *sc;
+   StringArray scNames = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
 
-    for (Integer i=0; i<(Integer)scNames.size(); i++)
-    {
-        sc = theConfigManager->GetSpacecraft(scNames[i]);
-        sandboxes[index]->AddSpacecraft(sc);
-    }
+   for (Integer i=0; i<(Integer)scNames.size(); i++)
+   {
+      sc = theConfigManager->GetSpacecraft(scNames[i]);
+      sandboxes[index]->AddSpacecraft(sc);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2009,14 +2013,14 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropSetupToSandbox(Integer index)
 {
-    PropSetup *propSetup;
-    StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
+   PropSetup *propSetup;
+   StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
     
-    for (Integer i=0; i<(Integer)propSetupNames.size(); i++)
-    {
-        propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
-        sandboxes[index]->AddPropSetup(propSetup);
-    }
+   for (Integer i=0; i<(Integer)propSetupNames.size(); i++)
+   {
+      propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
+      sandboxes[index]->AddPropSetup(propSetup);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2024,14 +2028,14 @@ void Moderator::AddPropSetupToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddBurnToSandbox(Integer index)
 {
-    Burn *burn;
-    StringArray burnNames = theConfigManager->GetListOfItems(Gmat::BURN);
+   Burn *burn;
+   StringArray burnNames = theConfigManager->GetListOfItems(Gmat::BURN);
     
-    for (Integer i=0; i<(Integer)burnNames.size(); i++)
-    {
-        burn = theConfigManager->GetBurn(burnNames[i]);
-        sandboxes[index]->AddBurn(burn);
-    }
+   for (Integer i=0; i<(Integer)burnNames.size(); i++)
+   {
+      burn = theConfigManager->GetBurn(burnNames[i]);
+      sandboxes[index]->AddBurn(burn);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2039,14 +2043,14 @@ void Moderator::AddBurnToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSolverToSandbox(Integer index)
 {
-    Solver *solver;
-    StringArray solverNames = theConfigManager->GetListOfItems(Gmat::SOLVER);
+   Solver *solver;
+   StringArray solverNames = theConfigManager->GetListOfItems(Gmat::SOLVER);
     
-    for (Integer i=0; i<(Integer)solverNames.size(); i++)
-    {
-        solver = theConfigManager->GetSolver(solverNames[i]);
-        sandboxes[index]->AddSolver(solver);
-    }
+   for (Integer i=0; i<(Integer)solverNames.size(); i++)
+   {
+      solver = theConfigManager->GetSolver(solverNames[i]);
+      sandboxes[index]->AddSolver(solver);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2054,13 +2058,13 @@ void Moderator::AddSolverToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
-    Subscriber *subs;
-    StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
-    for (Integer i=0; i<(Integer)subsNames.size(); i++)
-    {
-        subs = theConfigManager->GetSubscriber(subsNames[i]);
-        sandboxes[index]->AddSubscriber(subs);
-    }
+   Subscriber *subs;
+   StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
+   for (Integer i=0; i<(Integer)subsNames.size(); i++)
+   {
+      subs = theConfigManager->GetSubscriber(subsNames[i]);
+      sandboxes[index]->AddSubscriber(subs);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2068,12 +2072,12 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
-    GmatCommand *cmd = commands[index]->GetNext();
+   GmatCommand *cmd = commands[index]->GetNext();
 
-    if (cmd != NULL)
-    {
-        sandboxes[index]->AddCommand(cmd);
-    }
+   if (cmd != NULL)
+   {
+      sandboxes[index]->AddCommand(cmd);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -2081,7 +2085,7 @@ void Moderator::AddCommandToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::InitializeSandbox(Integer index)
 {
-    sandboxes[index]->Initialize();
+   sandboxes[index]->Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -2089,7 +2093,7 @@ void Moderator::InitializeSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::ExecuteSandbox(Integer index)
 {
-    sandboxes[index]->Execute();
+   sandboxes[index]->Execute();
 }
 
 //---------------------------------
@@ -2105,21 +2109,21 @@ void Moderator::ExecuteSandbox(Integer index)
 //------------------------------------------------------------------------------
 Moderator::Moderator()
 {
-    isInitialized = false;
-    isRunReady = false;
-    theDefaultSolarSystem = NULL;
-    theDefaultSlpFile = NULL;
+   isInitialized = false;
+   isRunReady = false;
+   theDefaultSolarSystem = NULL;
+   theDefaultSlpFile = NULL;
 
-    theFactoryManager = FactoryManager::Instance();
-    theConfigManager = ConfigManager::Instance();
-    theFileManager = FileManager::Instance();
+   theFactoryManager = FactoryManager::Instance();
+   theConfigManager = ConfigManager::Instance();
+   theFileManager = FileManager::Instance();
 
-    sandboxes.reserve(Gmat::MAX_SANDBOX);
-    commands.reserve(Gmat::MAX_SANDBOX);
+   sandboxes.reserve(Gmat::MAX_SANDBOX);
+   commands.reserve(Gmat::MAX_SANDBOX);
 
-    // create at least 1 Sandbox and Command
-    sandboxes.push_back(new Sandbox());
-    commands.push_back(new NoOp());
+   // create at least 1 Sandbox and Command
+   sandboxes.push_back(new Sandbox());
+   commands.push_back(new NoOp());
 }
 
 //------------------------------------------------------------------------------
@@ -2127,36 +2131,35 @@ Moderator::Moderator()
 //------------------------------------------------------------------------------
 Moderator::~Moderator()
 {
-/*   if (instance != NULL)
-//      delete instance;
-//   if (theConfigManager != NULL)
-//      delete theConfigManager;
-   if (theFactoryManager != NULL)
-      delete theFactoryManager;
-   if (theGuiInterpreter != NULL)
-      delete theGuiInterpreter;
-//   if (theScriptInterpreter != NULL)
-//      delete theScriptInterpreter;
+   /*
+     if (instance != NULL)
+        delete instance;
+     if (theConfigManager != NULL)
+        delete theConfigManager;
+     if (theFactoryManager != NULL)
+        delete theFactoryManager;
+     if (theGuiInterpreter != NULL)
+        delete theGuiInterpreter;
+     if (theScriptInterpreter != NULL)
+        delete theScriptInterpreter;
    
-   if (thePublisher != NULL)
-      delete thePublisher;
-   if (theCommandFactory != NULL)
-      delete theCommandFactory;
-   if (theForceModelFactory != NULL)
-      delete theForceModelFactory;
-   if (thePhysicalModelFactory != NULL)
-      delete thePhysicalModelFactory;
-   if (thePropSetupFactory != NULL)
-      delete thePropSetupFactory;
-   if (thePropagatorFactory != NULL)
-      delete thePropagatorFactory;
-   if (theSpacecraftFactory != NULL)
-      delete theSpacecraftFactory;
-   if (theStopConditionFactory != NULL)
-      delete theStopConditionFactory;
-   if (theSubscriberFactory != NULL)
-      delete theSubscriberFactory;
-*/
+     if (thePublisher != NULL)
+        delete thePublisher;
+     if (theCommandFactory != NULL)
+        delete theCommandFactory;
+     if (theForceModelFactory != NULL)
+        delete theForceModelFactory;
+     if (thePhysicalModelFactory != NULL)
+        delete thePhysicalModelFactory;
+     if (thePropSetupFactory != NULL)
+        delete thePropSetupFactory;
+     if (thePropagatorFactory != NULL)
+        delete thePropagatorFactory;
+     if (theSpacecraftFactory != NULL)
+        delete theSpacecraftFactory;
+     if (theStopConditionFactory != NULL)
+        delete theStopConditionFactory;
+     if (theSubscriberFactory != NULL)
+        delete theSubscriberFactory;
+   */
 }
-
-
