@@ -45,13 +45,13 @@
 //                             Overrode GetParameterCount so the count 
 //                             increases based on the member forces
 // **************************************************************************
-//===> loj: 3/30/04 NO changes - just commented out the debug statements for delivery
 
 #include "ForceModel.hpp"
 #include <string.h> // waw: added 03/10/04
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_FORCEMODEL 0
 #define normType -2
 
 //---------------------------------
@@ -365,30 +365,39 @@ bool ForceModel::AddSpacecraft(Spacecraft *sc)
 //------------------------------------------------------------------------------
 void ForceModel::UpdateSpacecraft(Real newEpoch)
 {
-    if (spacecraft.size() > 0) {
-        Integer j = 0;
-        Integer stateSize = 6;
-        Integer vectorSize = stateSize * sizeof(Real);
-        std::vector<Spacecraft *>::iterator sat;
-        Real *state;
+   if (spacecraft.size() > 0) {
+      Integer j = 0;
+      Integer stateSize = 6;
+      Integer vectorSize = stateSize * sizeof(Real);
+      std::vector<Spacecraft *>::iterator sat;
+      Real *state;
 
-        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
-            state = (*sat)->GetState();
-            memcpy(&previousState[j*stateSize], state, vectorSize);
-            previousTime = 
-                ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
-                * 86400.0;
-            memcpy(state, &modelState[j*stateSize], vectorSize);
-            ++j;            
-//            // Update the epoch if it was passed in
-//            if (newEpoch != -1.0)
-//                (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newEpoch);
-              // Quick fix to get the epoch updated
-              Real newepoch = epoch + elapsedTime / 86400.0;      
-              (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
+      for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+         state = (*sat)->GetState();
+         memcpy(&previousState[j*stateSize], state, vectorSize);
+         previousTime = 
+            ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
+            * 86400.0;
+         memcpy(state, &modelState[j*stateSize], vectorSize);
+         ++j;
             
-        }
-    }
+         // Quick fix to get the epoch updated
+         Real newepoch = epoch + elapsedTime / 86400.0;      
+
+         //loj: 6/16/04 uncommented lines setting newEpoch.
+         // for consecutive Propagate command, spacecraft epoch doesn't get updated
+         
+         // Update the epoch if it was passed in
+         if (newEpoch != -1.0)
+            newepoch = newEpoch;
+         
+         (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
+#if DEBUG_FORCEMODEL
+         MessageInterface::ShowMessage
+            ("ForceModel::UpdateSpacecraft() newepoch=%f\n", newepoch);
+#endif
+      }
+   }
 }
 
 
