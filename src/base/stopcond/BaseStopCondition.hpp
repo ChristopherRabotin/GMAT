@@ -31,13 +31,15 @@
 class GMAT_API BaseStopCondition : public GmatBase
 {
 public:
-
+   
+   static const Real STOP_COND_TOL = 1.0e-11;
+   
    BaseStopCondition(const std::string &name = "",
                      const std::string &desc = "",
                      Parameter *epochParam = NULL,
                      Parameter *stopParam = NULL,
                      const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
-                     const Real &tol = GmatRealConst::REAL_TOL,
+                     const Real &tol = STOP_COND_TOL, //loj:3/10/05 GmatRealConst::REAL_TOL,
                      const Integer repeatCount = 1,
                      RefFrame *refFrame = NULL,
                      Interpolator *interp = NULL);
