@@ -29,13 +29,13 @@ class GMAT_API SingleValueStop : public StopCondition
 public:
 
     SingleValueStop(const std::string &name = "",
-                    Parameter *param = NULL,
+                    Parameter *epochParam = NULL, Parameter *stopParam = NULL,
                     const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                     const Real &tol = GmatRealConst::REAL_TOL,
                     const Integer repeatCount = 1,
                     RefFrame *refFrame = NULL,
                     Interpolator *interp = NULL);
-    SingleValueStop(const SingleValueStop &svsc);
+    SingleValueStop(const SingleValueStop &copy);
     SingleValueStop& operator= (const SingleValueStop &right); 
     virtual ~SingleValueStop();
 
@@ -44,7 +44,7 @@ public:
     virtual bool Validate();
 
 protected:
-
+    
 private:
 
 };

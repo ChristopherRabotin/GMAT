@@ -32,7 +32,7 @@ public:
 
     StopCondition(const std::string &name,
                   const std::string typeStr = "StopCondition",
-                  Parameter *param = NULL,
+                  Parameter *epochParam = NULL, Parameter *stopParam = NULL,
                   const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                   const Real &tol = GmatRealConst::REAL_TOL,
                   const Integer repeatCount = 1,
@@ -56,9 +56,11 @@ public:
     void SetTolerance(const Real &tol);
     bool SetInterpolator(Interpolator *interp);
     bool SetRefFrame(RefFrame *refFrame);
-
-    bool AddParameter(Parameter *param);
+    bool SetEpochParameter(Parameter *epochParam);
+    
     Real GetStopEpoch();
+    
+    virtual bool AddParameter(Parameter *param);
 
     /**
      * Evaluates stopping condition.
@@ -74,6 +76,7 @@ public:
 protected:
 
     void Initialize();
+    virtual void SetParameter(Parameter *param);
 
     Real mGoal;
     Real mTolerance;
@@ -81,6 +84,7 @@ protected:
     RefFrame *mRefFrame;
     Interpolator *mInterpolator;
 
+    Parameter *mEpochParam;
     ParameterPtrArray mParameters;
     Integer mNumParams;
 
@@ -90,7 +94,8 @@ protected:
     RealArray mValueBuffer;
     Integer mNumValidPoints;
     Integer mBufferSize;
-
+    Real mStopEpoch;
+    
     bool mInitialized;
 
 private:

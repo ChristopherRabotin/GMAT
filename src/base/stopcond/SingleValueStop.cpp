@@ -25,7 +25,7 @@
 
 //------------------------------------------------------------------------------
 // SingleValueStop(const std::string &name,
-//                 Parameter *param,
+//                 Parameter *epochParam, Parameter *stopParam,
 //                 const Real &goal, const Real &tol,
 //                 const Integer repeatCount,
 //                 RefFrame *refFrame,
@@ -35,7 +35,8 @@
  * Constructor.
  *
  * @param <name> name of stop condition
- * @param <param> Parameter object pointer to retrive parameter value
+ * @param <epochParam> Parameter object pointer to retrive epoch value
+ * @param <stopParam> Parameter object pointer to retrive stop value
  * @param <goal> goal for stop condition test
  * @param <tol>  tolerance for stop condition test
  * @param <repeatCount> repeat count for stop condition test
@@ -44,25 +45,25 @@
  */
 //------------------------------------------------------------------------------
 SingleValueStop::SingleValueStop(const std::string &name,
-                                 Parameter *param,
+                                 Parameter *epochParam, Parameter *stopParam,
                                  const Real &goal, const Real &tol,
                                  const Integer repeatCount,
                                  RefFrame *refFrame,
                                  Interpolator *interp)
-    : StopCondition(name, "SingleValueStop", param, goal, tol,
+    : StopCondition(name, "SingleValueStop", epochParam, stopParam, goal, tol,
                     repeatCount, refFrame, interp)
 {
 }
 
 //------------------------------------------------------------------------------
-// SingleValueStop(const SingleValueStop &svsc)
+// SingleValueStop(const SingleValueStop &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  */
 //------------------------------------------------------------------------------
-SingleValueStop::SingleValueStop(const SingleValueStop &svsc)
-    : StopCondition(svsc)
+SingleValueStop::SingleValueStop(const SingleValueStop &copy)
+    : StopCondition(copy)
 {
 }
 
@@ -112,8 +113,16 @@ SingleValueStop::~SingleValueStop()
 bool SingleValueStop::Evaluate()
 {
     bool goalMet = false;
-    Real val;
+    Real epoch;
+    Real rval;
+    Real stopEpoch;
     
+    if (!Validate())
+    {
+        throw StopConditionException
+            ("SingleValueStop::Evaluate(): Validate() failed.");
+    }
+      
     //loj: Do I really need to validate parameter before evaluate?
     //     Is validating parameter in AddParameter enough?
     if (mParameters[0]->Validate() == false)
@@ -127,8 +136,8 @@ bool SingleValueStop::Evaluate()
     // for time data we don't need to interpolate
     if (mParameters[0]->IsTimeParameter())
     {
-        val = mParameters[0]->EvaluateReal();
-        if (val >= mGoal)
+        rval = mParameters[0]->EvaluateReal();
+        if (rval >= mGoal)
             goalMet = true;
     }
     else
@@ -137,13 +146,6 @@ bool SingleValueStop::Evaluate()
         //    *** need to interpolate stop epoch
         //    *** need to convert to RefFrame for certain stop condition type
         //-----------------------------------------------------------------
-        if (!mInitialized)
-        {
-            throw StopConditionException
-                ("SingleValueStop::Evaluate(): The stopping condition ring buffer is "
-                 "not initialized.");
-        }
-      
         mNumValidPoints = (mNumValidPoints < mBufferSize) ?
             mNumValidPoints + 1 : mNumValidPoints;
       
@@ -151,19 +153,28 @@ bool SingleValueStop::Evaluate()
         for (int i=0; i<mBufferSize-1; i++)
             mValueBuffer[i] = mValueBuffer[i+1];
 
-        val = mParameters[0]->EvaluateReal();
-        mValueBuffer[mBufferSize - 1] = val;
+        epoch = mEpochParam->EvaluateReal();
+        rval = mParameters[0]->EvaluateReal();
+        mEpochBuffer[mBufferSize - 1] = epoch;
+        mValueBuffer[mBufferSize - 1] = rval;
          
-        // Stop if at least 2 points set, and either
+        // Stop if at least <mBufferSize> points set, and either
         //   1) last value was more than goal, but current value is less,
         //   2) last value was less than goal, but current value is more.
-        if (mNumValidPoints >= 2 &&
-            ((mValueBuffer[mBufferSize-2] <= mGoal  &&
+        if (mNumValidPoints >= mBufferSize &&
+            ((mValueBuffer[mBufferSize-mBufferSize] <= mGoal  &&
               mGoal <= mValueBuffer[mBufferSize-1]) ||  
-             (mValueBuffer[mBufferSize-2] >= mGoal  &&
+             (mValueBuffer[mBufferSize-mBufferSize] >= mGoal  &&
               mGoal >= mValueBuffer[mBufferSize-1]) ))
         {
             goalMet = true;
+
+            // now interpolate epoch
+            mInterpolator->Clear();
+            for (int i=0; i<mBufferSize; i++)
+                mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
+            if (mInterpolator->Interpolate(mGoal, &stopEpoch))
+                mStopEpoch = stopEpoch;
         }
     }
   
@@ -175,11 +186,21 @@ bool SingleValueStop::Evaluate()
 // virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
- * @return true if all necessary objects have been met; false otherwise
+ * @return true if all necessary objects have been set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool SingleValueStop::Validate()
 {
-    //loj: need any other checks here?
-    return mInitialized;
+    bool valid = false;
+    
+    if (mNumParams >= 1)
+    {
+        if (mParameters[0]->IsTimeParameter())
+            valid = true;
+        else
+            if (mEpochParam != NULL && mInterpolator != NULL)
+                valid = true;
+    }
+    
+    return valid;
 }

@@ -25,15 +25,17 @@
 
 //------------------------------------------------------------------------------
 // StopCondition(const std::string &name, const std::string typeStr,
-//               Parameter *param, const Real &goal, const Real &tol
-//               const Integer repeatCount, RefFrame *refFrame, Interpolator *interp)
+//               Parameter *epochParam, Parameter *stopParam, const Real &goal,
+//               const Real &tol, const Integer repeatCount, RefFrame *refFrame,
+//               Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
 StopCondition::StopCondition(const std::string &name, const std::string typeStr,
-                             Parameter *param, const Real &goal, const Real &tol,
+                             Parameter *epochParam, Parameter *stopParam,
+                             const Real &goal, const Real &tol,
                              const Integer repeatCount, RefFrame *refFrame,
                              Interpolator *interp)
     : GmatBase(Gmat::STOP_CONDITION, typeStr, name)
@@ -43,13 +45,15 @@ StopCondition::StopCondition(const std::string &name, const std::string typeStr,
     mRepeatCount = repeatCount;
     mRefFrame = refFrame;
     mInterpolator = interp;
+    mEpochParam = epochParam;
     
     mNumParams = 0;
     mNumValidPoints = 0;
     mBufferSize = 0;
-   
-    if (param != NULL)
-        AddParameter(param);
+    mStopEpoch = REAL_PARAMETER_UNDEFINED;
+    
+    if (stopParam != NULL)
+        AddParameter(stopParam);
        
     Initialize();
 }
@@ -69,8 +73,10 @@ StopCondition::StopCondition(const StopCondition &copy)
     mRepeatCount = copy.mRepeatCount;
     mRefFrame = copy.mRefFrame;
     mInterpolator = copy.mInterpolator;
+    mEpochParam = copy.mEpochParam;
     mNumParams = copy.mNumParams;
-
+    mStopEpoch = copy.mStopEpoch;
+    
     mParameters.reserve(mNumParams);
     for (int i=0; i<mNumParams; i++)
         mParameters[i] = copy.mParameters[i];
@@ -95,7 +101,9 @@ StopCondition& StopCondition::operator= (const StopCondition &right)
         mRepeatCount = right.mRepeatCount;
         mRefFrame = right.mRefFrame;
         mInterpolator = right.mInterpolator;
+        mEpochParam = right.mEpochParam;
         mNumParams = right.mNumParams;
+        mStopEpoch = right.mStopEpoch;
 
         mParameters.reserve(mNumParams);
         for (int i=0; i<mNumParams; i++)
@@ -258,6 +266,29 @@ bool StopCondition::SetRefFrame(RefFrame *refFrame)
 }
 
 //------------------------------------------------------------------------------
+// bool SetEpochParameter(Parameter *epochParam)
+//------------------------------------------------------------------------------
+/**
+ * Sets epoch parameter which will be used to interpolate stop epoch
+ *
+ * @return true if epoch paraemter is set;
+ *         false if epoch paraemter has already been set.
+ */
+//------------------------------------------------------------------------------
+bool StopCondition::SetEpochParameter(Parameter *epochParam)
+{
+    if (mEpochParam == NULL)
+    {
+        mEpochParam = epochParam;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//------------------------------------------------------------------------------
 // bool AddParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
@@ -275,9 +306,11 @@ bool StopCondition::AddParameter(Parameter *param)
     {
         mParameters.push_back(param);
         mNumParams = mParameters.size();
-        added = true;
         if (param->IsTimeParameter())
             mInitialized = true;
+        
+        SetParameter(param);
+        added = true;
     }
 
     return added;
@@ -287,17 +320,16 @@ bool StopCondition::AddParameter(Parameter *param)
 // virtual Real StopCondition::GetStopEpoch()
 //------------------------------------------------------------------------------
 /**
- * @note This method will be implemented in the future build.
+ * @return epoch at stop condition met.
  */
 //------------------------------------------------------------------------------
 Real StopCondition::GetStopEpoch()
 {
-    //loj: temporary code
-    return GmatBase::REAL_PARAMETER_UNDEFINED;
+    return mStopEpoch;
 }
 
 //---------------------------------
-// private methods
+// protected methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
@@ -323,6 +355,10 @@ void StopCondition::Initialize()
 
     if (needInterp)
     {
+        // need epoches for interpolator
+        if (mEpochParam == NULL)
+            mInitialized = false;
+        
         if (mInterpolator == NULL)
         {
             mInitialized = false;
@@ -344,6 +380,17 @@ void StopCondition::Initialize()
         }
     }
 }
+
+//------------------------------------------------------------------------------
+// virtual void SetParameter(Parameter *param)
+//------------------------------------------------------------------------------
+void StopCondition::SetParameter(Parameter *param)
+{
+}
+
+//---------------------------------
+// private methods
+//---------------------------------
 
 //------------------------------------------------------------------------------
 // void CopyDynamicData()
