@@ -7,6 +7,7 @@
 #             2004/05/04 - Added AngleUtil.cpp and CoordUtil.cpp.
 #             2004/05/16 - Added StringTokenizer.cpp
 #             2004/07/14 - Added GregorianDate.cpp
+#             2004/07/21 - Added RgbColor.cpp 
 #
 #
 # Define the marco for the top-level directories
@@ -15,9 +16,9 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
 	DateUtil.cpp ElapsedTime.cpp EphemerisUtil.cpp GregorianDate.cpp \
-	Keplerian.cpp Linear.cpp RealUtilities.cpp Rmatrix.cpp Rmatrix33.cpp \
-	Rvector.cpp Rvector3.cpp Rvector6.cpp Spherical.cpp SphericalOne.cpp \
-	SphericalTwo.cpp StringTokenizer.cpp UtcDate.cpp
+	Keplerian.cpp Linear.cpp RgbColor.cpp RealUtilities.cpp Rmatrix.cpp \
+	Rmatrix33.cpp Rvector.cpp Rvector3.cpp Rvector6.cpp Spherical.cpp \
+	SphericalOne.cpp SphericalTwo.cpp StringTokenizer.cpp UtcDate.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
