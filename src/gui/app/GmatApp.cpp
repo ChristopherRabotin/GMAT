@@ -102,12 +102,14 @@ bool GmatApp::OnInit()
 //                              wxDEFAULT_FRAME_STYLE);
 
          //testing the splash screen
-//        wxBitmap bitmap = wxBitmap( splash_xpm );
-//
-//        new wxSplashScreen(bitmap,
-//                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-//                6000, NULL, -1, wxDefaultPosition, wxSize(500, 500),
-//                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
+        wxImage::AddHandler(new wxTIFFHandler);
+        wxBitmap *bitmap = new wxBitmap("../../gui/include/bitmaps/GMATSplashScreen.tif",
+                           wxBITMAP_TYPE_TIF);
+
+        new wxSplashScreen(*bitmap,
+                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+                6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
+                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
 
         wxYield();
 
