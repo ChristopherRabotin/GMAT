@@ -211,9 +211,12 @@ bool DragForce::Initialize(void)
     density   = new Real[satCount];
     prefactor = new Real[satCount];
 
-    for (Integer i = 0; i < satCount; ++i) {
-        prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
-    }
+    if (mass.size() > 0)
+        BuildPrefactors();
+    else 
+        for (Integer i = 0; i < satCount; ++i) {
+            prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
+        }
     
     return true;
 }

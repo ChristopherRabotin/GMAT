@@ -981,10 +981,10 @@ void Spacecraft::InitializeValues()
     refFrame = Spacecraft::REF_FRAME;
     refPlane = Spacecraft::REF_PLANE;
 
-    mass = 0.0;
-    coeffDrag = 0.0;
-    incidentArea = 0.0;
-    reflectCoeff = 0.0;
+    mass = 850.0;
+    coeffDrag = 2.2;
+    incidentArea = 15.0;
+    reflectCoeff = 1.8;
 }
 
 //---------------------------------------------------------------------------
