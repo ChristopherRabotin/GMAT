@@ -123,7 +123,7 @@ Rvector3 Cartesian::GetVelocity() const
 //------------------------------------------------------------------------------
 Real Cartesian::GetPosition(Integer id) const
 {
-    return positionD[Cartesian::X];
+    return positionD[id];
 }
 
 //------------------------------------------------------------------------------
