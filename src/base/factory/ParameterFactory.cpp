@@ -27,7 +27,8 @@
 #include "SphericalParameters.hpp"
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
-#include "EnvParameters.hpp" //loj: 12/10/04 Added
+#include "EnvParameters.hpp"     //loj: 12/10/04 Added
+#include "PlanetParameters.hpp"  //loj: 12/14/04 Added
 #include "Variable.hpp"
 #include "Array.hpp"
 
@@ -154,6 +155,18 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "AtmosDensity") //loj: 12/10/04 Added AtmosDensity
       return new AtmosDensity(withName);
    
+   // Planet parameters
+   if (ofType == "GHA") //loj: 12/14/04 Added GHA, Longitude, Latitude, LST, BetaAngle
+      return new GHA(withName);
+   if (ofType == "Longitude")
+      return new Longitude(withName);
+   if (ofType == "Latitude")
+      return new Latitude(withName);
+   if (ofType == "LST")
+      return new LST(withName);
+   if (ofType == "BetaAngle")
+      return new BetaAngle(withName);
+   
    // add others here
    else
       return NULL;
@@ -235,6 +248,13 @@ ParameterFactory::ParameterFactory()
       
       // Environmental parameters
       creatables.push_back("AtmosDensity");
+      
+      // Planet parameters
+      creatables.push_back("GHA");
+      creatables.push_back("Longitude");
+      creatables.push_back("Latitude");
+      creatables.push_back("LST");
+      creatables.push_back("BetaAngle");
    }
 }
 
