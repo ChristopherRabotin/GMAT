@@ -34,10 +34,11 @@
 #include "Solver.hpp"
 #include "Subscriber.hpp"
 #include "Command.hpp"
-#include "AtmosphereModel.hpp" //loj: 9/14/04 - added
-#include "Function.hpp"        //loj: 9/27/04 - added
+#include "AtmosphereModel.hpp"
+#include "Function.hpp"
 #include "Hardware.hpp"
-#include "AxisSystem.hpp"      // wcs: 2004/12/23 - added
+#include "AxisSystem.hpp"       // wcs: 2004/12/23 - added
+#include "CoordinateSystem.hpp" // loj: 2005/01/18 - added
 
 class GMAT_API Factory
 {
@@ -79,6 +80,8 @@ public:
                                            const std::string &withName = "");
    virtual AxisSystem*      CreateAxisSystem(const std::string &ofType,
                                              const std::string &withName = "");
+   virtual CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
+                                                    const std::string &withName = "");
 
    
    // method to return list of types of objects that this factory can create

@@ -316,6 +316,27 @@ void ConfigManager::AddFunction(Function* function)
 }
 
 //------------------------------------------------------------------------------
+// void AddCoordinateSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void ConfigManager::AddCoordinateSystem(CoordinateSystem *cs)
+{
+   std::string name = cs->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   
+   if (mapping.find(name) != mapping.end())
+   {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else
+   {
+      objects.push_back(cs);
+      mapping[name] = cs;
+   }
+}
+
+//------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
@@ -841,6 +862,24 @@ Function* ConfigManager::GetFunction(const std::string &name)
       function = (Function *)mapping[name];
    }
    return function;
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+CoordinateSystem* ConfigManager::GetCoordinateSystem(const std::string &name)
+{
+   CoordinateSystem *cs = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->GetType() != Gmat::COORDINATE_SYSTEM)
+      {
+         std::string str = mapping[name]->GetName() + " is not a CoordinateSystem type";
+         throw ConfigManagerException(str);
+      }
+      cs = (CoordinateSystem *)mapping[name];
+   }
+   return cs;
 }
 
 //=================================

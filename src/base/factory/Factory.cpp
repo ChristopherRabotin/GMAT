@@ -397,7 +397,6 @@ GmatCommand* Factory::CreateCommand(const std::string &ofType,
    throw FactoryException("requested object must be of type GmatCommand");
 }
 
-//loj: 9/14/04 - added
 //------------------------------------------------------------------------------
 //  AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
 //                                         const std::string &withName,
@@ -427,7 +426,6 @@ AtmosphereModel* Factory::CreateAtmosphereModel(const std::string &ofType,
       ("Factory::CreateAtmosphereModel() must be implemented by AtmosphereFactory()\n");
 }
 
-//loj: 9/27/04 - added
 //------------------------------------------------------------------------------
 //  Function* CreateFunction(const std::string &ofType,
 //                           const std::string &withName)
@@ -510,6 +508,35 @@ AxisSystem* Factory::CreateAxisSystem(const std::string &ofType,
 {
    throw FactoryException
    ("Factory::CreateAxisSystem() must be implemented by the Factory\n");
+}
+
+//loj: 2005.01.18 - added
+//------------------------------------------------------------------------------
+//  CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
+//                                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates as CoordinateSystem object.
+ * 
+ * Must be implemented by derived classes that create CoordinateSystem objects -
+ * in that case, it returns a new CoordinateSystem object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type CoordinateSystem.
+ *
+ * @param <ofType>   specific type of CoordinateSystem object to create.
+ * @param <withName> name to give to the newly created CoordinateSystem object.
+ *
+ * @return pointer to a new CoordinateSystem object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* Factory::CreateCoordinateSystem(const std::string &ofType,
+                                                  const std::string &withName)
+{
+   throw FactoryException
+   ("Factory::CreateCoordinateSystem() must be implemented by the Factory\n");
 }
 
 //------------------------------------------------------------------------------

@@ -41,10 +41,10 @@
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
 #include "Hardware.hpp"
+#include "CoordinateSystem.hpp"
 
-//loj: 9/14/04 - added AtmosphereModel
-//loj: 9/27/04 - added Function
 //djc: 11/10/04 - added Hardware
+//loj: 01/18/05 - added CoordinateSystem
 
 /**
  * Configuration Manager Stub -- a hack until the real code is ready
@@ -68,6 +68,7 @@ public:
    void                AddSolver(Solver *solver);
    void                AddAtmosphereModel(AtmosphereModel *atmosModel);
    void                AddFunction(Function *function);
+   void                AddCoordinateSystem(CoordinateSystem *cs);
    
    bool                SetSolarSystemInUse(const std::string &name);
    
@@ -97,6 +98,7 @@ public:
    Solver*             GetSolver(const std::string &name);
    AtmosphereModel*    GetAtmosphereModel(const std::string &name);
    Function*           GetFunction(const std::string &name);
+   CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    
    // Methods I'm not sure we need
    void                AddCelestialBody(CelestialBody* body);

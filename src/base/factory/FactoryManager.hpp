@@ -41,6 +41,7 @@
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
 #include "AxisSystem.hpp"
+#include "CoordinateSystem.hpp"
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -94,6 +95,7 @@ public:
                                          const std::string &withName = "");
    AxisSystem*            CreateAxisSystem(const std::string &ofType,
                                            const std::string &withName = "");
+   CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
 
    
    // method to return a list of strings representing the objects of the input
@@ -118,6 +120,7 @@ public:
    StringArray            GetListOfFunction();
    StringArray            GetListOfHardware();
    StringArray            GetListOfAxisSystem();
+   StringArray            GetListOfCoordinateSystem();
 
    // class destructor
    ~FactoryManager();

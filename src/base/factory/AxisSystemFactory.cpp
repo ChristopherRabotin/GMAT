@@ -135,7 +135,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
  */
 //------------------------------------------------------------------------------
 AxisSystemFactory::AxisSystemFactory() :
-Factory(Gmat::ATMOSPHERE)
+Factory(Gmat::AXIS_SYSTEM) //loj: 1/19/05 Changed from ATMOSPHERE
 {
    if (creatables.empty())
    {

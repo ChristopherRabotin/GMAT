@@ -71,6 +71,11 @@ bool FactoryManager::RegisterFactory(Factory* fact)
    {
        return false;    // write some kind of error or throw an exception?
    }
+
+   //===> debug
+   MessageInterface::ShowMessage
+      ("FactoryManager::RegisterFactory() adding factory %d\n", fact->GetFactoryType());
+   
    factoryList.push_back(fact);  // better to put it at the back of the list?
    return true;
 }
@@ -382,7 +387,6 @@ AtmosphereModel* FactoryManager::CreateAtmosphereModel(const std::string &ofType
    return NULL;
 }
 
-//loj: 9/27/04 added
 //------------------------------------------------------------------------------
 //  Function* CreateFunction(const std::string &ofType,
 //                           const std::string &withName)
@@ -452,6 +456,26 @@ FactoryManager::CreateAxisSystem(const std::string &ofType,
    return NULL;
 }
 
+//loj: 2005/01/18 added
+//------------------------------------------------------------------------------
+//  CoordinateSystem* CreateCoordinateSystem(const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type CoordinateSystem, with the name withName.
+ *
+ * @param <withName> name of the new CoordinateSystem object.
+ *
+ * @return pointer to the newly-created CoordinateSystem object
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem*
+FactoryManager::CreateCoordinateSystem(const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::COORDINATE_SYSTEM, "CoordinateSystem");
+   if (f != NULL)
+      return f->CreateCoordinateSystem("CoordinateSystem", withName);
+   return NULL;
+}
 
 //------------------------------------------------------------------------------
 // StringArray  GetListOfItems(Gmat::ObjectType byType)
@@ -705,6 +729,20 @@ StringArray  FactoryManager::GetListOfHardware()
 StringArray  FactoryManager::GetListOfAxisSystem()
 {
    return GetList(Gmat::AXIS_SYSTEM);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfCoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type CoordinateSystem that can be created.
+ *
+ * @return list of creatable items of type CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfCoordinateSystem()
+{
+   return GetList(Gmat::COORDINATE_SYSTEM);
 }
 
 //------------------------------------------------------------------------------
