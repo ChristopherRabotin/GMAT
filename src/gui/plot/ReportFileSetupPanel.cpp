@@ -239,9 +239,11 @@ void ReportFileSetupPanel::LoadData()
     fileTextCtrl->SetValue(wxT(filename.c_str()));
     
     int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
-    showHeaderCheckBox->SetValue(theSubscriber->
-                           GetBooleanParameter(writeHeadersId));
-                           
+    if (strcmp(theSubscriber->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
+      showHeaderCheckBox->SetValue(true);
+    else
+      showHeaderCheckBox->SetValue(false);                     
+      
     int spacesId = theSubscriber->GetParameterID("ColumnWidth");
     wxString numSpacesValue;
     numSpacesValue.Printf("%d", theSubscriber->GetIntegerParameter(spacesId));
@@ -276,10 +278,16 @@ void ReportFileSetupPanel::SaveData()
 {
     // save data to core engine
     theSubscriber->Activate(writeCheckBox->IsChecked());
+//    if (theSubscriber->IsActive())
+//      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was activiated\n");
+//    else
+//      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was NOT activiated\n");
     
     int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
-    theSubscriber->SetBooleanParameter(writeHeadersId, 
-                  showHeaderCheckBox->IsChecked());
+    if (showHeaderCheckBox->IsChecked())
+      theSubscriber->SetStringParameter(writeHeadersId, "On");
+    else
+      theSubscriber->SetStringParameter(writeHeadersId, "Off");
                   
     int spacesId = theSubscriber->GetParameterID("ColumnWidth");
     theSubscriber->SetIntegerParameter(spacesId, 

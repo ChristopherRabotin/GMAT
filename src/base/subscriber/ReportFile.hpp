@@ -45,7 +45,10 @@ public:
 
    ReportFile(const ReportFile &);
    ReportFile& operator=(const ReportFile&);
-          
+    
+   // methods inherited from Subscriber
+   virtual bool Initialize();
+                      
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -110,6 +113,7 @@ private:
     void ClearVarParameters();
     void WriteHeaders();
     bool initial;
+    bool mOpenFile;
     
     enum
     {
