@@ -373,7 +373,7 @@ void ReportFileSetupPanel::OnTextChange()
 void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
 {
    // get string in first list and then search for it in the second list
-   wxString newParam = GetNewParam();
+   wxString newParam = GetParamName();
    int found = mVarSelectedListBox->FindString(newParam);
     
    // if the string wasn't found in the second list, insert it
@@ -459,6 +459,9 @@ void ReportFileSetupPanel::OnSelectProperty(wxCommandEvent& event)
    // deselect user param
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
 
+   // show coordinate system or central body
+   ShowCoordSystem();
+
    mUseUserParam = false;
 }
 
@@ -476,9 +479,9 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// wxString GetNewParam()
+// wxString GetParamName()
 //------------------------------------------------------------------------------
-wxString ReportFileSetupPanel::GetNewParam()
+wxString ReportFileSetupPanel::GetParamName()
 {
    if (mUseUserParam)
    {
@@ -486,7 +489,12 @@ wxString ReportFileSetupPanel::GetNewParam()
    }
    else
    {
-      return mObjectComboBox->GetStringSelection() + "." +
+      wxString depObj = "";
+      
+      if (mCoordSysComboBox->IsShown())
+         depObj = mCoordSysComboBox->GetStringSelection();
+      
+      return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
          mPropertyListBox->GetStringSelection();
    }
 }
@@ -515,4 +523,44 @@ Parameter* ReportFileSetupPanel::CreateParameter(const wxString &name)
    }
 
    return param;
+}
+
+//------------------------------------------------------------------------------
+// void ShowCoordSystem()
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::ShowCoordSystem()
+{
+   // get parameter pointer
+   wxString paramName = GetParamName();
+   Parameter *mCurrParam = CreateParameter(paramName);
+   
+   if (mCurrParam->IsCoordSysDependent())
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Coordinate System");
+      mCoordSysComboBox->Clear();
+      mCoordSysComboBox->Show();
+   }
+   else if (mCurrParam->IsOriginDependent())
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Central Body");
+      
+      mCoordSysComboBox->Clear();
+      int bodyCount = theGuiManager->GetNumConfigBody();
+      wxString *bodyList = theGuiManager->GetConfigBodyList();
+      
+      for (int i=0; i<bodyCount; i++)
+         mCoordSysComboBox->Append(bodyList[i]);
+      
+      mCoordSysComboBox->SetStringSelection
+         (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCoordSysComboBox->Show();
+   }
+   else
+   {
+      mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
+   }
+   
 }

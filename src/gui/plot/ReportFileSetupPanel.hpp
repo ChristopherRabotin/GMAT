@@ -99,7 +99,8 @@ protected:
    };
 
 private:
-   wxString GetNewParam();
+   wxString GetParamName();
    Parameter* CreateParameter(const wxString &name);
+   void ShowCoordSystem();
 };
 #endif
