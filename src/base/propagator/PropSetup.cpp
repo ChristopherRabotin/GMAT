@@ -36,9 +36,10 @@ PropSetup::PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount] =
 
 {
    "FM",
-   "Type",              // To match the script spec
-   "Drag",               // Place holder until we decide how to do this
-   "SRP"
+   "Type"              // To match the script spec
+// DJC 8/13/04: These are now part of the ForceModel
+//   "Drag",               // Place holder until we decide how to do this
+//   "SRP"
 };
 
 
@@ -46,9 +47,10 @@ const Gmat::ParameterType
 PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 {
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE
+// DJC 8/13/04: These are now part of the ForceModel
+//   Gmat::STRING_TYPE,
+//   Gmat::STRING_TYPE
 };
 
 //---------------------------------
@@ -65,14 +67,16 @@ PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 PropSetup::PropSetup(const std::string &name, Propagator *propagator,
                      ForceModel *forceModel)
-   : GmatBase     (Gmat::PROP_SETUP, "PropSetup", name),
-     usedrag      (false),
-     dragType     ("BodyDefault"),
-     //useSRP       ("Off") //loj: 5/11/04
-     useSRP       (false)
+   : GmatBase     (Gmat::PROP_SETUP, "PropSetup", name)
+// DJC 8/13/04: These are now part of the ForceModel
+//     usedrag      (false),
+//     dragType     ("BodyDefault"),
+//     //useSRP       ("Off") //loj: 5/11/04
+//     useSRP       (false)
 {
    // GmatBase data
    parameterCount = PropSetupParamCount;
+   ownedObjectCount += 1;
 
    // PropSetup data
    /// @note: For build 1, the PropSetup internal objects are defaulted
@@ -103,10 +107,13 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
  */
 //------------------------------------------------------------------------------
 PropSetup::PropSetup(const PropSetup &propSetup)
-   : GmatBase(propSetup),
-     usedrag(propSetup.usedrag),
-     useSRP(propSetup.useSRP)
+   : GmatBase(propSetup)
+// DJC 8/13/04: These are now part of the ForceModel
+//     usedrag(propSetup.usedrag),
+//     useSRP(propSetup.useSRP)
 {
+   ownedObjectCount = propSetup.ownedObjectCount;
+
    // PropSetup data
    mPropagator = propSetup.mPropagator;
    mForceModel = propSetup.mForceModel;
@@ -129,8 +136,9 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
       // PropSetup data
       mPropagator = right.mPropagator;
       mForceModel = right.mForceModel;
-      usedrag     = right.usedrag;
-      useSRP      = right.useSRP;
+// DJC 8/13/04: These are now part of the ForceModel
+//      usedrag     = right.usedrag;
+//      useSRP      = right.useSRP;
       //Initialize(); //loj: 5/11/04
    }
 
@@ -237,13 +245,14 @@ void PropSetup::SetForceModel(ForceModel *forceModel)
    //    Initialize();
 }
 
+// DJC 8/13/04: These are now part of the ForceModel
 //------------------------------------------------------------------------------
 // void SetUseDrag(bool flag)
 //------------------------------------------------------------------------------
-void PropSetup::SetUseDrag(bool flag)
-{
-   usedrag = flag;
-}
+//void PropSetup::SetUseDrag(bool flag)
+//{
+//   usedrag = flag;
+//}
 
 //------------------------------------------------------------------------------
 // void AddForce(PhysicalModel *force)
@@ -339,6 +348,27 @@ GmatBase* PropSetup::Clone(void) const
    return (new PropSetup(*this));
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the unnamed objects owned by the PropSetup.
+ *
+ * The current implementation only contains one PropSetup owned object: the 
+ * Propagator.
+ * 
+ * @return Pointer to the owned object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* PropSetup::GetOwnedObject(Integer whichOne)
+{
+   if (whichOne == ownedObjectCount - 1)   // If this works, make it more usable
+      return mPropagator;
+   return GmatBase::GetOwnedObject(whichOne);
+}
+
+   
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
@@ -352,8 +382,9 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-   case USE_DRAG:
-   case USE_SRP:
+// DJC 8/13/04: These are now part of the ForceModel
+//   case USE_DRAG:
+//   case USE_SRP:
       return PropSetup::PARAMETER_TYPE[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterType(id);
@@ -373,8 +404,9 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-   case USE_DRAG:
-   case USE_SRP:
+// DJC 8/13/04: These are now part of the ForceModel
+//   case USE_DRAG:
+//   case USE_SRP:
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    default:
       return GmatBase::GetParameterTypeString(id);
@@ -394,8 +426,9 @@ std::string PropSetup::GetParameterText(const Integer id) const
    {
    case PROPAGATOR_NAME:
    case FORCE_MODEL_NAME:
-   case USE_DRAG:
-   case USE_SRP:
+// DJC 8/13/04: These are now part of the ForceModel
+//   case USE_DRAG:
+//   case USE_SRP:
       return PropSetup::PARAMETER_TEXT[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterText(id);
@@ -439,14 +472,15 @@ std::string PropSetup::GetStringParameter(const Integer id) const
       if (mForceModel)
          return mForceModel->GetName();
       return "InternalForceModel";
-   case USE_DRAG:
-      if (usedrag)
-         return dragType;
-      return "Off";
-   case USE_SRP:
-      if (useSRP)
-         return "On";
-      return "Off";
+// DJC 8/13/04: These are now part of the ForceModel
+//   case USE_DRAG:
+//      if (usedrag)
+//         return dragType;
+//      return "Off";
+//   case USE_SRP:
+//      if (useSRP)
+//         return "On";
+//      return "Off";
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -513,22 +547,23 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
          }
          return false;
       }
-   case USE_DRAG:
-      if (value == "Off") {
-         usedrag = false;
-      }
-      else {
-         usedrag = true;
-         dragType = value;
-      }
-      return true;
-   case USE_SRP:
-      if (value == "Off") {
-         useSRP = false;
-      }
-      else 
-         useSRP = true;
-      return true;
+// DJC 8/13/04: These are now part of the ForceModel
+//   case USE_DRAG:
+//      if (value == "Off") {
+//         usedrag = false;
+//      }
+//      else {
+//         usedrag = true;
+//         dragType = value;
+//      }
+//      return true;
+//   case USE_SRP:
+//      if (value == "Off") {
+//         useSRP = false;
+//      }
+//      else 
+//         useSRP = true;
+//      return true;
       
    default:
       return GmatBase::SetStringParameter(id, value);
@@ -586,19 +621,20 @@ void PropSetup::Initialize()
    
    if (mInitialized == true)
    {
-      if (usedrag)
-      {
-         DragForce *dragForce = new DragForce;
-         mForceModel->AddForce(dragForce);
-         Integer id = dragForce->GetParameterID("AtmosphereModel");
-         dragForce->SetStringParameter(id, dragType);
-      }
-      
-      if (useSRP)
-      {
-         SolarRadiationPressure *srp = new SolarRadiationPressure("srp");
-         mForceModel->AddForce(srp);
-      }
+// DJC 8/13/04: These are now part of the ForceModel
+//      if (usedrag)
+//      {
+//         DragForce *dragForce = new DragForce;
+//         mForceModel->AddForce(dragForce);
+//         Integer id = dragForce->GetParameterID("AtmosphereModel");
+//         dragForce->SetStringParameter(id, dragType);
+//      }
+//      
+//      if (useSRP)
+//      {
+//         SolarRadiationPressure *srp = new SolarRadiationPressure("srp");
+//         mForceModel->AddForce(srp);
+//      }
       
       mPropagator->SetPhysicalModel(mForceModel);
       //MessageInterface::ShowMessage("PropSetup::Initialize() after SetPhysicalModel(%s) \n",

@@ -286,7 +286,6 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    //waw: 04/27/04
    Real now = epoch + dt/86400.0, relativePosition[3];
    const Rvector6 *rv = &(body->GetState(now));
-   
    // Precalculations for the indirect effect term
    rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
    if (rbb3 != 0.0) {

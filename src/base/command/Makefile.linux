@@ -22,11 +22,11 @@ OBJECTS = Command.o CommandException.o \
           Vary.o \
           Achieve.o \
           EndTarget.o \
-          ForCommand.o \
-          EndForCommand.o \
-          IfCommand.o \
-          ElseCommand.o \
-          EndIfCommand.o \
+          For.o \
+          EndFor.o \
+          If.o \
+          Else.o \
+          EndIf.o \
           Assignment.o \
           Save.o
 

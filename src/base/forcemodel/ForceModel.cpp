@@ -596,6 +596,39 @@ bool ForceModel::Initialize(void)
 }
 
 
+
+//------------------------------------------------------------------------------
+// void UpdateInitialData()
+//------------------------------------------------------------------------------
+/**
+ * Updates model and all contained models to catch changes in Spacecraft, etc.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::UpdateInitialData()
+{
+   Integer cf = currentForce;
+   PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
+//   PhysicalModel *currentPm;
+
+   // Variables used to set spacecraft parameters
+   std::string parmName, stringParm;
+   std::vector<SpaceObject *>::iterator sat;
+   Integer i;
+   while (current) 
+   {
+      i = 0;
+      // Set spacecraft parameters for forces that need them
+      for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+      {
+         SetupSpacecraftData(*sat, current, i);
+         ++i;
+      }
+      cf++;
+      current = GetForce(cf);
+   }
+}
+
+
 Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm, 
                                         Integer i)
 {
@@ -612,6 +645,8 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
          throw ForceModelException("Epoch parameter undefined on object " +
                                    sat->GetName());
       parm = sat->GetRealParameter(id);
+      // Update local value for epoch
+      epoch = parm;
       id = pm->GetParameterID(parmName);
       if (id < 0)
          throw ForceModelException("Epoch parameter undefined on PhysicalModel");

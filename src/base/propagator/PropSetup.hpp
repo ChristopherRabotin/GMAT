@@ -46,6 +46,8 @@ public:
    //loj: 3/16/04 void RemoveForce(const std::string &name); // future implementation
    PhysicalModel* GetForce(Integer index);
    Integer GetNumForces();
+   
+   virtual GmatBase* GetOwnedObject(Integer whichOne);
 
    virtual const std::string* GetParameterList() const;
 
@@ -72,16 +74,18 @@ private:
    Propagator *mPropagator;
    ForceModel *mForceModel;
    
-   bool           usedrag;
-   std::string    dragType;
-   bool           useSRP;
+// DJC 8/13/04: These are now part of the ForceModel
+//   bool           usedrag;
+//   std::string    dragType;
+//   bool           useSRP;
 
    enum
    {
       FORCE_MODEL_NAME = GmatBaseParamCount,
       PROPAGATOR_NAME,
-      USE_DRAG,
-      USE_SRP,
+// DJC 8/13/04: These are now part of the ForceModel
+//      USE_DRAG,
+//      USE_SRP,
       PropSetupParamCount
    };
 

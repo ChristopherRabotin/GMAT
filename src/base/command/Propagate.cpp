@@ -849,6 +849,8 @@ bool Propagate::Execute(void)
       p = prop->GetPropagator();
       fm = prop->GetForceModel();
       fm->SetTime(0.0);
+      fm->UpdateInitialData();
+      
       p->Initialize();
       state = fm->GetState();
       dim = fm->GetDimension();
@@ -861,6 +863,9 @@ bool Propagate::Execute(void)
       MessageInterface::ShowMessage
          ("Propagate::Execute() Propagate start; epoch = %f\n",
           (baseEpoch + fm->GetTime() / 86400.0));
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() Propagate start; fm epoch = %f\n",
+         (fm->GetRealParameter(fm->GetParameterID("Epoch"))));
       int stopCondCount = stopWhen.size();
       MessageInterface::ShowMessage
          ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
@@ -893,6 +898,8 @@ bool Propagate::Execute(void)
       }
       inProgress = true;
    }
+
+fm->UpdateInitialData();
    
    while (!stopCondMet)
    {
@@ -962,7 +969,7 @@ bool Propagate::Execute(void)
        currEpoch, stopEpoch, elapsedTime);
 #endif
 
-   Real secsToStep = (stopEpoch - currEpoch) * 86400;
+   Real secsToStep = (stopEpoch - currEpoch) * 86400.0;
 
    if (secsToStep > 0.0)
    {
