@@ -158,4 +158,9 @@ bool SphRaParam::Validate()
 bool SphRaParam::Evaluate()
 {
     mValue = GetSphReal("SphRa");    
+    
+    if (mValue == ORBIT_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
 }

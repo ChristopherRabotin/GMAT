@@ -158,5 +158,10 @@ bool SphDecParam::Validate()
 bool SphDecParam::Evaluate()
 {
     mValue = GetSphReal("SphDec");    
+    
+    if (mValue == ORBIT_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
 }
 
