@@ -25,17 +25,17 @@
 #include "Moon.hpp"
 
 // define default names form solar system bodies
-const std::string SUN_NAME       = "Sun";
-const std::string MERCURY_NAME   = "Mercury";
-const std::string VENUS_NAME     = "Venus";
-const std::string EARTH_NAME     = "Earth";
-const std::string MOON_NAME      = "Luna";
-const std::string MARS_NAME      = "Mars";
-const std::string JUPITER_NAME   = "Jupiter";
-const std::string SATURN_NAME    = "Saturn";
-const std::string URANUS_NAME    = "Uranus";
-const std::string NEPTUNE_NAME   = "Neptune";
-const std::string PLUTO_NAME     = "Pluto";
+const std::string SolarSystem::SUN_NAME       = "Sun";
+const std::string SolarSystem::MERCURY_NAME   = "Mercury";
+const std::string SolarSystem::VENUS_NAME     = "Venus";
+const std::string SolarSystem::EARTH_NAME     = "Earth";
+const std::string SolarSystem::MOON_NAME      = "Luna";
+const std::string SolarSystem::MARS_NAME      = "Mars";
+const std::string SolarSystem::JUPITER_NAME   = "Jupiter";
+const std::string SolarSystem::SATURN_NAME    = "Saturn";
+const std::string SolarSystem::URANUS_NAME    = "Uranus";
+const std::string SolarSystem::NEPTUNE_NAME   = "Neptune";
+const std::string SolarSystem::PLUTO_NAME     = "Pluto";
 // add other moons, asteroids, comets, as needed
 // what about libration points?
 
