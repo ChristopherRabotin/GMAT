@@ -29,26 +29,28 @@ class GMAT_API OrbitReal : public RealVar, public OrbitData
 {
 public:
 
-    OrbitReal(const std::string &name, const std::string &typeStr, 
+   OrbitReal(const std::string &name, const std::string &typeStr, 
              ParameterKey key, GmatBase *obj, const std::string &desc,
              const std::string &unit, bool isTimeParam);
-    OrbitReal(const OrbitReal &copy);
-    const OrbitReal& operator=(const OrbitReal &right);
-    virtual ~OrbitReal();
+   OrbitReal(const OrbitReal &copy);
+   OrbitReal& operator=(const OrbitReal &right);
+   virtual ~OrbitReal();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
+   // The inherited methods from RealVar
+   virtual Real GetReal();
+   virtual Real EvaluateReal();
 
-    // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
+   // The inherited methods from Parameter
+   virtual Integer GetNumObjects() const;
+   virtual GmatBase* GetObject(const std::string &objTypeName);
     
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
+   virtual bool SetObject(Gmat::ObjectType objType,
+                          const std::string &objName,
+                          GmatBase *obj);
     
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
+   virtual bool AddObject(GmatBase *obj);
+   virtual bool Validate();
+   virtual void Initialize();
 
 protected:
 

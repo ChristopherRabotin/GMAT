@@ -33,17 +33,20 @@
  * Constructor.
  *
  * @param <name> name of the parameter
+ * @param <typeStr> type of the parameter
+ * @param <key> SYSTEM_PARAM or USER_PARAM
  * @param <obj> reference object pointer
  * @param <desc> description of the parameter
  * @param <unit> unit of the parameter
+ * @param <isTimeParam> true if time related parameter
  */
 //------------------------------------------------------------------------------
 OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr, 
                      ParameterKey key, GmatBase *obj, const std::string &desc,
                      const std::string &unit, bool isTimeParam)
-    : RealVar(name, typeStr, key, obj, desc, unit, isTimeParam)
+   : RealVar(name, typeStr, key, obj, desc, unit, isTimeParam)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -56,12 +59,12 @@ OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 OrbitReal::OrbitReal(const OrbitReal &copy)
-    : RealVar(copy)
+   : RealVar(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const OrbitReal& operator=(const OrbitReal &right)
+// OrbitReal& operator=(const OrbitReal &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -69,13 +72,12 @@ OrbitReal::OrbitReal(const OrbitReal &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const OrbitReal&
-OrbitReal::operator=(const OrbitReal &right)
+OrbitReal& OrbitReal::operator=(const OrbitReal &right)
 {
-    if (this != &right)
-        RealVar::operator=(right);
+   if (this != &right)
+      RealVar::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -94,6 +96,18 @@ OrbitReal::~OrbitReal()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
+// virtual Real GetReal()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated value of parameter
+ */
+//------------------------------------------------------------------------------
+Real OrbitReal::GetReal()
+{
+   return mRealValue;
+}
+
+//------------------------------------------------------------------------------
 // virtual Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
@@ -102,8 +116,8 @@ OrbitReal::~OrbitReal()
 //------------------------------------------------------------------------------
 Real OrbitReal::EvaluateReal()
 {
-    Evaluate();
-    return mRealValue;
+   Evaluate();
+   return mRealValue;
 }
 
 //-------------------------------------
@@ -119,15 +133,19 @@ Real OrbitReal::EvaluateReal()
 //------------------------------------------------------------------------------
 Integer OrbitReal::GetNumObjects() const
 {
-    return GetNumRefObjects();
+   return GetNumRefObjects();
 }
 
 //------------------------------------------------------------------------------
 // GmatBase* GetObject(const std::string &objTypeName)
 //------------------------------------------------------------------------------
+/**
+ * @return reference object pointer of given object type
+ */
+//------------------------------------------------------------------------------
 GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
 {
-    return GetRefObject(objTypeName);
+   return GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -137,18 +155,21 @@ GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
 /**
  * Sets reference object.
  *
+ * @param <objType> object type
+ * @param <objName> object name
+ *
  * @return true if the object has been set.
  */
 //------------------------------------------------------------------------------
 bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
                           GmatBase *obj)
 {
-    Initialize();
-    //loj: 3/31/04 do not check for NULL so it can reset object
-    //if (obj != NULL) 
-        return SetRefObject(objType, objName, obj);
-    //else
-    //return false;
+   //Initialize(); //loj: 4/28/04 Initialize() will be called during run setup
+   //loj: 3/31/04 do not check for NULL so it can reset object
+   //if (obj != NULL) 
+   return SetRefObject(objType, objName, obj);
+   //else
+   //return false;
 }
 
 //------------------------------------------------------------------------------
@@ -157,20 +178,22 @@ bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
 /**
  * Adds reference object.
  *
+ * @param <obj> object pointer
+ *
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
 bool OrbitReal::AddObject(GmatBase *obj)
 {
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
+   if (obj != NULL)
+   {
+      if (AddRefObject(obj))
+         ManageObject(obj);
 
-    return false;
+      return true;
+   }
+
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -184,6 +207,20 @@ bool OrbitReal::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool OrbitReal::Validate()
 {
-    return ValidateRefObjects(this);
+   return ValidateRefObjects(this);
+}
+
+//------------------------------------------------------------------------------
+// virtual void Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initializes reference objects.
+ *
+ * @return true if all objects are set; false otherwise
+ */
+//------------------------------------------------------------------------------
+void OrbitReal::Initialize()
+{
+   InitializeRefObjects();
 }
 
