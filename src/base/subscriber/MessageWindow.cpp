@@ -39,7 +39,7 @@ MessageWindow::PARAMETER_TYPE[MessageWindowParamCount] =
 //------------------------------------------------------------------------------
 MessageWindow::MessageWindow(const std::string &name)
     : Subscriber      ("MessageWindow", name),
-      precision       (12)
+      precision       (10)
 {
    // GmatBase data
     parameterCount = MessageWindowParamCount;
@@ -59,6 +59,7 @@ MessageWindow::~MessageWindow(void)
 bool MessageWindow::Distribute(int len)
 {
     dstream.precision(precision);
+    dstream.str("");
     
     if (len == 0)
         dstream << data;
@@ -76,7 +77,8 @@ bool MessageWindow::Distribute(int len)
 bool MessageWindow::Distribute(const Real * dat, Integer len)
 {       
     dstream.precision(precision);
-
+    dstream.str("");
+    
     if (len == 0)
     {
         return false;
