@@ -17,6 +17,7 @@
 #define CelesBodySelectDialog_hpp
 
 #include "gmatwxdefs.hpp"
+#include "gmatdefs.hpp"
 #include "GmatDialog.hpp"
 #include <wx/string.h> // for wxArrayString
 
@@ -32,6 +33,7 @@ public:
         { return mIsBodySelected; }
     
 private:
+    static const int MAX_LIST_SIZE = 30;
     wxArrayString mBodyNames;
     wxArrayString mBodiesToExclude;
     bool mIsBodySelected;

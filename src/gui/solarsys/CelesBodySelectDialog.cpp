@@ -74,13 +74,28 @@ void CelesBodySelectDialog::Create()
     
     //MessageInterface::ShowMessage("CelesBodySelectDialog::Create() bodiesToExclude = %d\n",
     //                              mBodiesToExclude.GetCount());
+
     // wxListBox
     bodyListBox =
         theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200), mBodiesToExclude);
-        
-    bodySelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+
+    if (! mBodiesToExclude.IsEmpty())
+    {
+       Integer count = mBodiesToExclude.GetCount();
+       wxString selectedBodyList[MAX_LIST_SIZE];
+       for (Integer i = 0; i < count; i++)
+       {
+          selectedBodyList[i] = mBodiesToExclude[i].c_str(); 
+       }   
+          
+       bodySelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+                                       wxSize(150, 200), count, selectedBodyList, wxLB_SINGLE);
+    }
+    else
+    {
+       bodySelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                                        wxSize(150, 200), 0, emptyList, wxLB_SINGLE);
-    
+    }
     
     // wxSizers
     wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -108,7 +123,6 @@ void CelesBodySelectDialog::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-
 }
 
 //------------------------------------------------------------------------------
@@ -119,16 +133,30 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
     if ( event.GetEventObject() == addBodyButton )  
     {
         wxString s = bodyListBox->GetStringSelection();
-        int strId = bodySelectedListBox->FindString(s);
+        
+        if (s.IsEmpty())
+           return;
+           
+        int strId1 = bodyListBox->FindString(s);
+        int strId2 = bodySelectedListBox->FindString(s);
         
         // if the string wasn't found in the second list, insert it
-        if (strId == wxNOT_FOUND)
+        if (strId2 == wxNOT_FOUND)
+        {
             bodySelectedListBox->Append(s);
+            bodyListBox->Delete(strId1);
+        }
 
         theOkButton->Enable();
     }
     else if ( event.GetEventObject() == removeBodyButton )  
     {
+        wxString s = bodySelectedListBox->GetStringSelection();
+        
+        if (s.IsEmpty())
+           return;
+           
+        bodyListBox->Append(s);
         int sel = bodySelectedListBox->GetSelection();
         bodySelectedListBox->Delete(sel);
         
@@ -139,6 +167,15 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
     }
     else if ( event.GetEventObject() == clearBodyButton )  
     {
+        Integer count = bodySelectedListBox->GetCount();
+        
+        if (count == 0)
+           return;
+           
+        for (Integer i = 0; i < count; i++)
+        {
+           bodyListBox->Append(bodySelectedListBox->GetString(i));
+        }
         bodySelectedListBox->Clear();
         theOkButton->Disable();
     }
@@ -156,14 +193,14 @@ void CelesBodySelectDialog::LoadData()
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::SaveData()
 {
-    //MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData() bodies count = %d\n",
-    //                              bodySelectedListBox->GetCount());
+//    MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData() bodies count = %d\n",
+//                                  bodySelectedListBox->GetCount());
     
     for(int i=0; i<bodySelectedListBox->GetCount(); i++)
     {
         mBodyNames.Add(bodySelectedListBox->GetString(i));
-        //MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()name = %s\n",
-        //                              mBodyNames[i].c_str());
+//        MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()name = %s\n",
+//                                      mBodyNames[i].c_str());
     }
 
     if (bodySelectedListBox->GetCount() > 0)
