@@ -58,6 +58,7 @@
 typedef double          Real;              // 8 byte float
 typedef int             Integer;           // 4 byte signed integer
 typedef unsigned char   Byte;              // 1 byte
+typedef unsigned int    UnsignedInt;       // 4 byte unsigned integer
 typedef std::vector<Real> RealArray;
 typedef std::vector<Integer> IntegerArray;
 typedef std::vector<std::string> StringArray;
@@ -90,6 +91,7 @@ namespace Gmat
    enum ParameterType
    {
       INTEGER_TYPE,
+      UNSIGNED_INT_TYPE,  //wcs: added 2004.06.01
       REAL_TYPE,
       STRING_TYPE,
       STRINGARRAY_TYPE,
