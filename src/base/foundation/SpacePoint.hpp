@@ -56,11 +56,10 @@ public:
    void               SetJ2000Body(SpacePoint* toBody);
    
    //---------------------------------------------------------------------------
-   //  Rvector6& GetMJ2000State(const A1Mjd &atTime)
+   //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
    //---------------------------------------------------------------------------
    /**
-    * Method returning a reference to an Rvector6 containing the MJ2000 state
-    * of the SpacePoint at the time atTime.
+    * Method returning the MJ2000 state of the SpacePoint at the time atTime.
     *
     * @param <atTime> Time for which the state is requested.
     *
@@ -73,11 +72,10 @@ public:
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime)    = 0;
 
    //---------------------------------------------------------------------------
-   //  Rvector3& GetMJ2000Position(const A1Mjd &atTime)
+   //  const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
    //---------------------------------------------------------------------------
    /**
-    * Method returning a reference to an Rvector3 containing the MJ2000 position
-    * of the SpacePoint at the time atTime.
+    * Method returning the MJ2000 position of the SpacePoint at the time atTime.
     *
     * @param <atTime> Time for which the position is requested.
     *
@@ -90,11 +88,10 @@ public:
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime) = 0;
 
    //---------------------------------------------------------------------------
-   //  Rvector3& GetMJ2000Velocity(const A1Mjd &atTime)
+   //  const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
    //---------------------------------------------------------------------------
    /**
-    * Method returning a reference to an Rvector3 containing the MJ2000 velocity
-    * of the SpacePoint at the time atTime.
+    * Method returning the MJ2000 velocity of the SpacePoint at the time atTime.
     *
     * @param <atTime> Time for which the velocity is requested.
     *
