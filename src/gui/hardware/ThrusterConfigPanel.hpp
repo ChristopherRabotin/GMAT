@@ -61,11 +61,13 @@ private:
     wxTextCtrl *XTextCtrl;
     wxTextCtrl *YTextCtrl;
     wxTextCtrl *ZTextCtrl;
+    wxTextCtrl *scaleFactorTextCtrl;
     
     wxStaticText *coordsysStaticText;
     wxStaticText *XStaticText;
     wxStaticText *YStaticText;
     wxStaticText *ZStaticText;
+    wxStaticText *scaleFactorStaticText;
         
     // IDs for the controls and the menu commands
     enum

@@ -106,6 +106,8 @@ void ThrusterConfigPanel::Create()
                             wxDefaultPosition, wxSize(80,-1), 0 );
     ZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                             wxDefaultPosition, wxSize(80,-1), 0 );
+    scaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+                            wxDefaultPosition, wxSize(80,-1), 0 );
                             
     //wxStaticText
     coordsysStaticText = new wxStaticText( this, ID_TEXT, 
@@ -117,6 +119,8 @@ void ThrusterConfigPanel::Create()
                             wxDefaultPosition,wxDefaultSize, 0);  
     ZStaticText = new wxStaticText( this, ID_TEXT, wxT("Z Direction"),
                             wxDefaultPosition,wxDefaultSize, 0); 
+    scaleFactorStaticText = new wxStaticText( this, ID_TEXT, 
+            wxT("Thrust Scale Factor"), wxDefaultPosition,wxDefaultSize, 0);
     
     // wx*Sizers                                           
     wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
@@ -130,6 +134,8 @@ void ThrusterConfigPanel::Create()
     flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
     flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
     flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add(scaleFactorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(scaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -173,6 +179,9 @@ void ThrusterConfigPanel::LoadData()
    paramID = theThruster->GetParameterID("Z_Direction");
    ZTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
    
+   paramID = theThruster->GetParameterID("ThrustScaleFactor");
+   scaleFactorTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
+   
    theApplyButton->Disable();
 }
 
@@ -196,7 +205,10 @@ void ThrusterConfigPanel::SaveData()
    theThruster->SetRealParameter(paramID, atof(YTextCtrl->GetValue()));
         
    paramID = theThruster->GetParameterID("Z_Direction");
-   theThruster->SetRealParameter(paramID, atof(ZTextCtrl->GetValue()));   
+   theThruster->SetRealParameter(paramID, atof(ZTextCtrl->GetValue()));  
+   
+   paramID = theThruster->GetParameterID("ThrustScaleFactor");
+   theThruster->SetRealParameter(paramID, atof(scaleFactorTextCtrl->GetValue())); 
       
    theApplyButton->Disable();
 }
