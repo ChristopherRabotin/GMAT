@@ -211,7 +211,6 @@ bool Sandbox::Initialize()
       std::map<std::string, GmatBase *>::iterator omi;
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
-         
 #if DEBUG_SANDBOX
          MessageInterface::ShowMessage
             ("Sandbox::Initialize() objType=%s, objName=%s\n",

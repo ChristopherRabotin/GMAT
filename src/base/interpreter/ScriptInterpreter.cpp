@@ -402,6 +402,8 @@ bool ScriptInterpreter::WriteScript(void)
     GmatCommand *cmd = moderator->GetNextCommand();
     while (cmd != NULL) {
         *outstream << (cmd->GetGeneratingString()) << "\n";
+        if (cmd == cmd->GetNext())
+           throw InterpreterException("Self-reference found in command stream during write.");
         cmd = cmd->GetNext();
     }
     

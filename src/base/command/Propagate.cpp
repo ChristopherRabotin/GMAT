@@ -744,6 +744,12 @@ bool Propagate::Initialize(void)
    elements.push_back("All.epoch");
    
    for (scName = satName.begin(); scName != satName.end(); ++scName) {
+      if (objectMap->find(*scName) == objectMap->end()) {
+         std::string errmsg = "Unknown SpaceObject \"";
+         errmsg += *scName;
+         errmsg += "\"";
+         throw CommandException(errmsg);
+      }
       so = (SpaceObject*)(*objectMap)[*scName];
       sats.push_back(so);
       fm->AddSpaceObject(so);
@@ -843,177 +849,184 @@ bool Propagate::Execute(void)
    // Parm used to check for interrupt in the propagation   
    Integer checkCount = 0;
 
-   if (!inProgress) {
-      elapsedTime = 0.0;
-      currEpoch = 0.0;
-      p = prop->GetPropagator();
-      fm = prop->GetForceModel();
-      fm->SetTime(0.0);
-      fm->UpdateInitialData();
-      
-      p->Initialize();
-      state = fm->GetState();
-      dim = fm->GetDimension();
-      pubdata = new Real[dim+1];
-      GmatBase* sat1 = (*objectMap)[*(satName.begin())];
-      Integer epochID = sat1->GetParameterID("Epoch");
-      baseEpoch = sat1->GetRealParameter(epochID);
-
-#if DEBUG_PROPAGATE_EXE
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() Propagate start; epoch = %f\n",
-          (baseEpoch + fm->GetTime() / 86400.0));
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() Propagate start; fm epoch = %f\n",
-         (fm->GetRealParameter(fm->GetParameterID("Epoch"))));
-      int stopCondCount = stopWhen.size();
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
-      for (int i=0; i<stopCondCount; i++)
-      {
-         MessageInterface::ShowMessage
-            ("Propagate::Execute() stopCondName[%d]=%s\n", i,
-             stopWhen[i]->GetName().c_str());
-      }
-#endif
-    
-      stopCondMet = false;
-      stopEpoch = 0.0;
-      std::string stopVar;
-
-      elapsedTime = fm->GetTime();
-      currEpoch = baseEpoch + elapsedTime / 86400.0;
-      for (unsigned int i=0; i<stopWhen.size(); i++)
-      {
-         // StopCondition need new base epoch
-         stopWhen[i]->SetRealParameter("BaseEpoch", currEpoch);
-      
-         // ElapsedTime parameters need new initial epoch
-         stopVar = stopWhen[i]->GetStringParameter("StopVar");
-         if (stopVar.find("Elapsed") != stopVar.npos)
-         {
-            stopWhen[i]->GetStopParameter()->
-               SetRealParameter("InitialEpoch", currEpoch);
-         }
-      }
-      inProgress = true;
-   }
-
-   /// @todo Find a more elegant way to perform epoch refresh during propagation
-   fm->UpdateInitialData();
-   
-   while (!stopCondMet)
-   {
-      if (!p->Step())
-         throw CommandException("Propagate::Execute() Propagator Failed to Step\n");
-
-      // orbit related parameters use spacecraft for data
-      elapsedTime = fm->GetTime();
-      currEpoch = baseEpoch + elapsedTime / 86400.0;
-      
-      // Update spacecraft epoch, without argument the spacecraft epoch
-      // won't get updated for consecutive Propagate command
-      fm->UpdateSpaceObject(currEpoch);
-
-      //------------------------------------------
-      // loop through StopCondition list
-      //------------------------------------------
-      for (unsigned int i=0; i<stopWhen.size(); i++)
-      {
-         // StopCondition need epoch for the Interpolator
-         stopWhen[i]->SetRealParameter("Epoch", currEpoch);
+   try {
+      if (!inProgress) {
+         elapsedTime = 0.0;
+         currEpoch = 0.0;
+         p = prop->GetPropagator();
+         fm = prop->GetForceModel();
+         fm->SetTime(0.0);
+         fm->UpdateInitialData();
          
-         if (stopWhen[i]->Evaluate())
-         {
-            stopCondMet = true;
-            stopEpoch = (stopWhen[i]->GetStopEpoch());
+         p->Initialize();
+         state = fm->GetState();
+         dim = fm->GetDimension();
+         pubdata = new Real[dim+1];
+         GmatBase* sat1 = (*objectMap)[*(satName.begin())];
+         Integer epochID = sat1->GetParameterID("Epoch");
+            baseEpoch = sat1->GetRealParameter(epochID);
+   
 #if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() Propagate start; epoch = %f\n",
+          (baseEpoch + fm->GetTime() / 86400.0));
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() Propagate start; fm epoch = %f\n",
+            (fm->GetRealParameter(fm->GetParameterID("Epoch"))));
+         int stopCondCount = stopWhen.size();
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
+         for (int i=0; i<stopCondCount; i++)
+         {
             MessageInterface::ShowMessage
-               ("Propagate::Execute() %s met\n", stopWhen[i]->GetName().c_str());
-#endif
-            break; // exit if any stop condition met
+               ("Propagate::Execute() stopCondName[%d]=%s\n", i,
+                   stopWhen[i]->GetName().c_str());
          }
-      }
-      
-      if (!stopCondMet)
-      {
-         // Publish the data here
-         pubdata[0] = currEpoch;
-         memcpy(&pubdata[1], state, dim*sizeof(Real));
-         publisher->Publish(streamID, pubdata, dim+1);
-      }
-      else
-      {
-         fm->RevertSpaceObject();
+#endif
+       
+         stopCondMet = false;
+         stopEpoch = 0.0;
+         std::string stopVar;
+   
          elapsedTime = fm->GetTime();
          currEpoch = baseEpoch + elapsedTime / 86400.0;
-      }
-      
-#if DEBUG_PROPAGATE_EXE
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch);
-#endif
-
-      // Periodically see if the user has stopped the run 
-      ++checkCount;
-      if ((checkCount == interruptCheckFrequency) && !stopCondMet){
+         for (unsigned int i=0; i<stopWhen.size(); i++)
+         {
+            // StopCondition need new base epoch
+            stopWhen[i]->SetRealParameter("BaseEpoch", currEpoch);
+         
+            // ElapsedTime parameters need new initial epoch
+            stopVar = stopWhen[i]->GetStringParameter("StopVar");
+            if (stopVar.find("Elapsed") != stopVar.npos)
+            {
+               stopWhen[i]->GetStopParameter()->
+                  SetRealParameter("InitialEpoch", currEpoch);
+            }
+         }
          inProgress = true;
-         return true;
       }
-   }
    
-   inProgress = false;
-
+      /// @todo Find a more elegant way to perform epoch refresh during propagation
+      fm->UpdateInitialData();
+      
+      while (!stopCondMet)
+      {
+         if (!p->Step())
+            throw CommandException("Propagate::Execute() Propagator Failed to Step\n");
+   
+         // orbit related parameters use spacecraft for data
+         elapsedTime = fm->GetTime();
+         currEpoch = baseEpoch + elapsedTime / 86400.0;
+         
+         // Update spacecraft epoch, without argument the spacecraft epoch
+         // won't get updated for consecutive Propagate command
+         fm->UpdateSpaceObject(currEpoch);
+   
+         //------------------------------------------
+         // loop through StopCondition list
+         //------------------------------------------
+         for (unsigned int i=0; i<stopWhen.size(); i++)
+         {
+            // StopCondition need epoch for the Interpolator
+            stopWhen[i]->SetRealParameter("Epoch", currEpoch);
+            
+            if (stopWhen[i]->Evaluate())
+            {
+               stopCondMet = true;
+               stopEpoch = (stopWhen[i]->GetStopEpoch());
 #if DEBUG_PROPAGATE_EXE
-   MessageInterface::ShowMessage
-      ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
-       currEpoch, stopEpoch, elapsedTime);
+               MessageInterface::ShowMessage
+                  ("Propagate::Execute() %s met\n", stopWhen[i]->GetName().c_str());
 #endif
-
-   Real secsToStep = (stopEpoch - currEpoch) * 86400.0;
-
-   if (secsToStep > 0.0)
-   {
+               break; // exit if any stop condition met
+            }
+         }
+         
+         if (!stopCondMet)
+         {
+            // Publish the data here
+            pubdata[0] = currEpoch;
+            memcpy(&pubdata[1], state, dim*sizeof(Real));
+            publisher->Publish(streamID, pubdata, dim+1);
+         }
+         else
+         {
+            fm->RevertSpaceObject();
+            elapsedTime = fm->GetTime();
+            currEpoch = baseEpoch + elapsedTime / 86400.0;
+         }
+         
+#if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch);
+#endif
+   
+         // Periodically see if the user has stopped the run 
+         ++checkCount;
+         if ((checkCount == interruptCheckFrequency) && !stopCondMet){
+            inProgress = true;
+            return true;
+         }
+      }
+      
+      inProgress = false;
+   
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
-         ("Propagate::Execute() before Step(%f) epoch = %f\n",
-          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
-#endif
-      if (!p->Step(secsToStep))
-         throw CommandException("Propagator Failed to Step fixed interval\n");
-      
-      fm->UpdateSpaceObject(baseEpoch + fm->GetTime() / 86400.0);
-
-      // Publish the final data point here
-      pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
-      memcpy(&pubdata[1], state, dim*sizeof(Real));
-      publisher->Publish(streamID, pubdata, dim+1);
-      
-#if DEBUG_PROPAGATE_EXE
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() after Step(%f) epoch = %f\n",
-          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
-#endif
-
-   publisher->FlushBuffers(); //loj: 6/22/04 added
-   delete [] pubdata;
-    
-   for (unsigned int i=0; i<stopWhen.size(); i++)
-   {
-      if (stopWhen[i]->GetName() == "")
-         delete stopWhen[i];
-   }
-   //---------------------------------------
-
-#if DEBUG_PROPAGATE_EXE
-   MessageInterface::ShowMessage
-      ("Propagate::Execute() complete; epoch = %f\n",
-       (baseEpoch + fm->GetTime() / 86400.0));
+         ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
+          currEpoch, stopEpoch, elapsedTime);
 #endif
    
+      Real secsToStep = (stopEpoch - currEpoch) * 86400.0;
+   
+      if (secsToStep > 0.0)
+      {
+#if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() before Step(%f) epoch = %f\n",
+             secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
+#endif
+         if (!p->Step(secsToStep))
+            throw CommandException("Propagator Failed to Step fixed interval\n");
+         
+         fm->UpdateSpaceObject(baseEpoch + fm->GetTime() / 86400.0);
+   
+         // Publish the final data point here
+         pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
+         memcpy(&pubdata[1], state, dim*sizeof(Real));
+         publisher->Publish(streamID, pubdata, dim+1);
+         
+#if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage
+            ("Propagate::Execute() after Step(%f) epoch = %f\n",
+             secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
+#endif
+   
+      publisher->FlushBuffers(); //loj: 6/22/04 added
+      delete [] pubdata;
+       
+      for (unsigned int i=0; i<stopWhen.size(); i++)
+      {
+         if (stopWhen[i]->GetName() == "")
+            delete stopWhen[i];
+      }
+      //---------------------------------------
+   
+#if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() complete; epoch = %f\n",
+          (baseEpoch + fm->GetTime() / 86400.0));
+#endif
+      
+      }
+   
+      return true;
    }
-
-   return true;
+   catch (BaseException *ex) {
+      inProgress = false;
+      throw;
+   }
+      
 }
 
 
