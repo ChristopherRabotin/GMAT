@@ -92,7 +92,13 @@ public:
     virtual Integer     GetIntegerParameter(const Integer id) const;
     virtual Integer     SetIntegerParameter(const Integer id,
                                             const Integer value);
-
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id,
+                                           const std::string &value);
+    virtual std::string GetStringParameter(const std::string &label) const;
+    virtual bool        SetStringParameter(const std::string &label,
+                                           const std::string &value);
+    
     // constants defining maximum degree and order
     static const Integer HF_MAX_DEGREE = 360;
     static const Integer HF_MAX_ORDER  = 360;
@@ -105,6 +111,7 @@ protected:
       MAX_ORDER,
       DEGREE,
       ORDER,
+      BODY,
       HarmonicFieldParamCount
    };
 

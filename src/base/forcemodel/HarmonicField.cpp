@@ -56,6 +56,7 @@
 #include "Rmatrix.hpp"
 #include "MessageInterface.hpp"
 
+
 using namespace GmatMathUtil;
 
 
@@ -69,6 +70,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
    "MaxOrder",
    "Degree",
    "Order",
+   "Body",
 };
 
 const Gmat::ParameterType
@@ -78,6 +80,7 @@ Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
+Gmat::STRING_TYPE,
 };
 
 
@@ -447,7 +450,7 @@ std::string HarmonicField::GetParameterTypeString(const Integer id) const
 // Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
-* Accessor method used to obtain a parameter value
+ * Accessor method used to obtain a parameter value
  *
  * @param id    Integer ID for the requested parameter
  */
@@ -466,7 +469,7 @@ Integer HarmonicField::GetIntegerParameter(const Integer id) const
 // Integer SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
 /**
-* Accessor method used to set a parameter value
+ * Accessor method used to set a parameter value
  *
  * @param    id  Integer ID for the parameter
  * @param    val The new value for the parameter
@@ -482,6 +485,86 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
    return PhysicalModel::SetIntegerParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    id  Integer ID for the parameter
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string HarmonicField::GetStringParameter(const Integer id) const
+{
+   if (id == BODY) return bodyName;
+   return PhysicalModel::GetStringParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    id    Integer ID for the parameter
+ * @param    value The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::SetStringParameter(const Integer id,
+                                       const std::string &value)
+{
+   if (id == BODY)
+   {
+      if (!solarSystem) throw ForceModelException(
+          "In HarmonicField, cannot set body, as no solar system has been set");
+      if (value != bodyName)
+      {
+         body = solarSystem->GetBody(value);
+         if (body)
+         {
+            bodyName = body->GetName();
+            return true;
+         }
+         else      return false;
+      }
+      else return true;
+   }
+   return PhysicalModel::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    label  Integer ID for the parameter
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string HarmonicField::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    label Integer ID for the parameter
+ * @param    value The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::SetStringParameter(const std::string &label,
+                                       const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
 
 
 //---------------------------------
