@@ -741,7 +741,7 @@ AtmosphereModel* CelestialBody::GetAtmosphereModel(const std::string& type)
    if (type == "")
       return atmModel;
       
-   return atmManager->GetAtmosphere(type);   
+   return atmManager->GetAtmosphere(type, false);
 }
 
 //------------------------------------------------------------------------------
