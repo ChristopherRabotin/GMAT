@@ -6,6 +6,7 @@
 #                          SolverFactory.cpp, and SolarSystemFactory.cpp 
 #             2004/08/30 - W. Shoan - added AtmosphereFactory
 #             2004/09/23 - W. Shoan - added FunctionFactory
+#             2004/11/15 - W. Shoan - added HardwareFactory
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
@@ -14,7 +15,8 @@ PROJECT_ROOT    = ../..
 SRC = AtmosphereFactory.cpp BurnFactory.cpp CelestialBodyFactory.cpp \
 	CommandFactory.cpp Factory.cpp \
 	FactoryException.cpp FactoryManager.cpp ForceModelFactory.cpp \
-	FunctionFactory.cpp ParameterFactory.cpp PhysicalModelFactory.cpp \
+	FunctionFactory.cpp HardwareFactory.cpp ParameterFactory.cpp \
+	PhysicalModelFactory.cpp \
 	PropSetupFactory.cpp \
 	PropagatorFactory.cpp SolverFactory.cpp SpacecraftFactory.cpp \
 	StopConditionFactory.cpp SolarSystemFactory.cpp SubscriberFactory.cpp
