@@ -178,7 +178,7 @@ void OrbitPanel::Create()
 
     item8->Add( elementSizer, 0, wxALIGN_CENTER, 5 );
 
-    orbitSizer->Add( item8, 0, wxGROW|wxALIGN_CENTER, 5 );
+    orbitSizer->Add( item8, 1, wxGROW|wxALIGN_CENTER, 5 );
 
     theSpacecraft->SetDisplay(true);
 

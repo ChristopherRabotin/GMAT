@@ -115,9 +115,9 @@ void SpacecraftPanel::Create()
 //    visuals = new wxPanel( mainNotebook, -1 );
     spacecraftNotebook->AddPage( tanks, wxT("Visualization") );
 
-    theGridSizer->Add(sizer, 0, wxGROW, 5);
+    theGridSizer->Add(sizer, 1, wxGROW, 5);
 //    theMiddleSizer->Add(sizer, 0, wxGROW, 5);
-    theMiddleSizer->Add(theGridSizer, 0, wxGROW, 5);
+    theMiddleSizer->Add(theGridSizer, 1, wxGROW, 5);
 }
 
 
