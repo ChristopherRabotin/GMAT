@@ -35,8 +35,8 @@
 /**
  * Planet class, for all planets in the solar system : ).
  *
- * The Planet class will contain all data and methods for any planet that exists in
- * the solar system.
+ * The Planet class will contain all data and methods for any planet that exists 
+ * in the solar system.
  */
 class GMAT_API Planet : public CelestialBody
 {
@@ -52,7 +52,8 @@ public:
    // destructor
    virtual ~Planet();
 
-   virtual Rvector       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   virtual Rvector       GetBodyCartographicCoordinates(
+                            const A1Mjd &forTime) const;
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -72,7 +73,7 @@ protected:
       NEPTUNE,
       PLUTO,
       NumberOfPlanets
-      // add Sedna later??
+      /// @todo  add Sedna later??
    };
 
    // default values for CelestialBody data
@@ -82,20 +83,14 @@ protected:
    static const Integer               DEFAULT_BODY_NUMBER;
    static const Integer               DEFAULT_REF_BODY_NUMBER;
 
-   //static const Real                  MASS[NumberOfPlanets];
    static const Real                  EQUATORIAL_RADIUS[NumberOfPlanets];
    static const Real                  FLATTENING[NumberOfPlanets];
-   //static const Real                  POLAR_RADIUS[NumberOfPlanets];
    static const Real                  MU[NumberOfPlanets];
-   //static const Integer               COEFFICIENT_SIZE[NumberOfPlanets];
    static const Integer               ORDER[NumberOfPlanets];
    static const Integer               DEGREE[NumberOfPlanets];
    static const Rmatrix               SIJ[NumberOfPlanets];
    static const Rmatrix               CIJ[NumberOfPlanets];
-   // add other ones as needed
-
-   
-   // what other planet-specific parameters do I need?
+   /// @todo add other ones as needed
 
    void InitializePlanet(const std::string &cBody);
 

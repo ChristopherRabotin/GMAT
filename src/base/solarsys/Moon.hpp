@@ -13,8 +13,10 @@
 // Created: 2004/01/29
 //
 /**
- * This is the class for moons.
+ * The Moon class will contain all data and methods for any moon that exists in
+ * the solar system.
  *
+ * @note Currently, only contains default data for Luna, Phobos, and Deimos.
  */
 //------------------------------------------------------------------------------
 
@@ -28,12 +30,6 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 
-/**
- * Moon class, for all moons in the solar system : ).
- *
- * The Moon class will contain all data and methods for any moon that exists in
- * the solar system.
- */
 class GMAT_API Moon : public CelestialBody
 {
 public:
@@ -57,7 +53,6 @@ public:
    static const Gmat::BodyType        BODY_TYPE;
    static const Gmat::PosVelSource    POS_VEL_SOURCE;
    static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
-   //static const CelestialBody*        CENTRAL_BODY;
    static const Integer               ORDER;
    static const Integer               DEGREE;
 
@@ -71,8 +66,6 @@ public:
    static const Rmatrix               LUNA_CIJ;
 
 protected:
-
-   // what other star-specifi parameters do I need?
 
    void InitializeMoon(const std::string &cBody);
 

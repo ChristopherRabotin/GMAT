@@ -24,13 +24,12 @@
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
-//const Real                  Star::MASS                = 1.989E30;    // kg
 const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
 const Real                  Star::FLATTENING          = 0.0; 
-//const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
-const Real                  Star::MU                  = 1.32712438e11; //km^3/s^2
-const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
-const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
+// Units for MU are km^3/s^2
+const Real                  Star::MU                  = 1.32712438e11;
+const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;
+const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY;
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
 const Integer               Star::ORDER               = 0;      
@@ -44,11 +43,13 @@ const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
       0.0, 0.0,             0.0,             0.0,             0.0);
 //const Integer               Star::COEFFICIENT_SIZE    = 4;
 
-
-const Real                  Star::STAR_RADIANT_POWER       = 1358.0;       // W / m^2
-const Real                  Star::STAR_REFERENCE_DISTANCE  = 1.49597870e8; // km (1 AU)
-const Real                  Star::STAR_PHOTOSPHERE_RADIUS  = 695990000.0;  // m
-// add other ones as needed
+// Units for radiant power are W / m^2
+const Real                  Star::STAR_RADIANT_POWER       = 1358.0;     
+// Units for reference distance are km (1 AU)
+const Real                  Star::STAR_REFERENCE_DISTANCE  = 1.49597870e8; 
+// Units for radius are meters
+const Real                  Star::STAR_PHOTOSPHERE_RADIUS  = 695990000.0;  
+/// @todo add other ones as needed
 
 //---------------------------------
 // static data
@@ -64,9 +65,9 @@ Star::PARAMETER_TEXT[StarParamCount - CelestialBodyParamCount] =
 const Gmat::ParameterType
 Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
 {
-Gmat::REAL_TYPE,
-Gmat::REAL_TYPE,
-Gmat::REAL_TYPE
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE
 };
 
 
@@ -179,8 +180,11 @@ Real Star::GetReferenceDistance() const
 //------------------------------------------------------------------------------
 //  bool SetRadiantPower(Real radPower, Real refDistance)
 //------------------------------------------------------------------------------
- /**
+/**
  * This method sets the radiant power and reference distance for the star.
+ *
+ * @param <radPower>    radiant power value.
+ * @param <refDistance> reference distance value.
  *
  * @return flag indicating success of the operation.
  *
@@ -198,6 +202,8 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
 //------------------------------------------------------------------------------
 /**
  * This method returns the cartographic coordinates for the star.
+ *
+ * @param <forTime>    time for which to compute the cartographic coordinates.
  *
  * @return vector containing alpha, delta, W, Wdot.
  *

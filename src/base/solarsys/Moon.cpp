@@ -27,33 +27,42 @@ using namespace GmatMathUtil;
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
-const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
+const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP; 
+const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; 
 const Integer               Moon::ORDER               = 0; 
 const Integer               Moon::DEGREE              = 0;  
-const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1;     // km
+const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1; // km
 const Real                  Moon::LUNA_FLATTENING          = 0.0;
-const Real                  Moon::LUNA_MU                  = 4902.799;      // km^3 / s^2 
+// Units for mu are km^3 / s^2
+const Real                  Moon::LUNA_MU                  = 4902.799;
 const Integer               Moon::LUNA_BODY_NUMBER         = 2; 
 const Integer               Moon::LUNA_REF_BODY_NUMBER     = 3; 
 
-//const Integer               Moon::COEFFICIENT_SIZE    = 4;
-
 const Rmatrix               Moon::LUNA_SIJ                 = Rmatrix(5,5,
-   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
-   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
-   0.0, 4.78976286742000E-09, 1.19043314469000E-08,                  0.0,                 0.0,
-   0.0, 5.46564929895000E-06, 4.88875341590000E-06,-1.76416063010000E-06,                 0.0,
-   0.0, 1.63304293851000E-06,-6.76012176494000E-06,-1.34287028168000E-05, 3.94334642990000E-06);
+   0.0,                  0.0,                  0.0,                  0.0,
+   0.0,
+   0.0,                  0.0,                  0.0,                  0.0,
+   0.0,
+   0.0, 4.78976286742000E-09, 1.19043314469000E-08,                  0.0,
+   0.0,
+   0.0, 5.46564929895000E-06, 4.88875341590000E-06,-1.76416063010000E-06,
+   0.0,
+   0.0, 1.63304293851000E-06,-6.76012176494000E-06,-1.34287028168000E-05,
+   3.94334642990000E-06);
 const Rmatrix               Moon::LUNA_CIJ                 = Rmatrix(5,5,
-                     1.0,                 0.0,                  0.0,                  0.0,                   0.0,
-                     0.0,                 0.0,                  0.0,                  0.0,                   0.0,
-   -9.09314486280000E-05, 9.88441569067000E-09, 3.47139237760000E-05,                  0.0,                  0.0,
-   -3.17765981183000E-06, 2.63497832935000E-05, 1.42005317544000E-05, 1.22860504604000E-05,                  0.0,
-    3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,-1.37041711834000E-06,-6.03652719918000E-06);
+                     1.0,                 0.0,                  0.0,
+                     0.0,                 0.0,
+                     0.0,                 0.0,                  0.0,
+                     0.0,                 0.0,
+   -9.09314486280000E-05, 9.88441569067000E-09, 3.47139237760000E-05,
+                     0.0,                 0.0,
+   -3.17765981183000E-06, 2.63497832935000E-05, 1.42005317544000E-05,
+    1.22860504604000E-05,                 0.0,
+    3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,
+   -1.37041711834000E-06,-6.03652719918000E-06);
 
 
-// add other ones as needed
+/// @todo add other ones as needed
 
 
 //------------------------------------------------------------------------------
@@ -115,7 +124,7 @@ CelestialBody (m)
 /**
  * Assignment operator for the Moon class.
  *
- * @param <pl> the Moon object whose data to assign to "this"
+ * @param <m> the Moon object whose data to assign to "this"
  *            solar system.
  *
  * @return "this" Moon with data of input Moon st.
@@ -145,7 +154,9 @@ Moon::~Moon()
 //  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 /**
-* This method returns the cartographic coordinates for the planet.
+ * This method returns the cartographic coordinates for the planet.
+ * 
+ * @param <forTime> time for which to compute the cartographic coordinates.
  *
  * @return vector containing alpha, delta, W, Wdot.
  *
@@ -168,7 +179,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real p13 = 0.0;
    // Real p14 = 0.0, p15 = 0.0, p16 = 0.0;
    Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
-   Real T = d / 36525;                        // interval in Julian centuries
+   Real T = d / 36525;                          // interval in Julian centuries
    // Compute for Eath's Moon
    if (centralBody == SolarSystem::EARTH_NAME) 
    {
@@ -219,7 +230,8 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          delta =  52.90           -    0.061 * T     -  1.08 * Cos(p1);
          W     =  35.06           + 1128.8445850 * d +  8.864 * T * T  
                  - 1.42 * Sin(p1) -    0.78 * Sin(p2);
-         Wdot  = 0.0; // ******** TBD ***********
+         Wdot  = 0.0;
+         MessageInterface::ShowMessage("Wdot not yet computed for Phobos\n");
       }
       else  // Deimos
       {
@@ -227,10 +239,11 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          delta =  53.52           -    0.061 * T     -  1.78 * Cos(p3);
          W     =  79.41           +  285.1618970 * d -  0.520 * T * T  
                  - 2.58 * Sin(p3) +    0.19 * Cos(p3);
-         Wdot  = 0.0; // ******** TBD ***********
+         Wdot  = 0.0;
+         MessageInterface::ShowMessage("Wdot not yet computed for Deimos\n");
       }
    }
-   // add others when needed ...............
+   /// @todo add others when needed 
    else
    {
       return CelestialBody::GetBodyCartographicCoordinates(forTime);
@@ -276,7 +289,6 @@ void Moon::InitializeMoon(const std::string &cBody)
    analyticMethod      = Moon::ANALYTIC_METHOD;
    centralBody         = cBody;
 
-   //coefficientSize     = Moon::COEFFICIENT_SIZE;
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
 
@@ -303,7 +315,7 @@ void Moon::InitializeMoon(const std::string &cBody)
    // write message for now
    if (instanceName != SolarSystem::MOON_NAME)
    MessageInterface::ShowMessage(
-    "Unknown moon created - please supply physical parameter values");
+         "Unknown moon created - please supply physical parameter values");
 }
 
 //------------------------------------------------------------------------------
