@@ -2535,10 +2535,10 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          if (cmdType == "EndScript")
             continue;
 
-//         #ifdef DEBUG_TOKEN_PARSING
+         #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
                "   Constructing a command of type %s\n", cmdType.c_str());
-//         #endif
+         #endif
 
          // Create the command
          if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {

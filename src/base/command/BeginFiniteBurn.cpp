@@ -119,7 +119,8 @@ BeginFiniteBurn& BeginFiniteBurn::operator=(const BeginFiniteBurn& begman)
 //------------------------------------------------------------------------------
 std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::BURN:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
@@ -149,7 +150,8 @@ std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
                                                     const Gmat::ObjectType type)
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
@@ -180,7 +182,8 @@ const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
 bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
                                      const std::string &name)
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
@@ -282,7 +285,8 @@ bool BeginFiniteBurn::Initialize()
       MessageInterface::ShowMessage("BeginFiniteBurn::Initialize() entered\n");
    #endif
    
-   if (retval) {
+   if (retval)
+   {
       // Look up the maneuver object
       if (objectMap->find(burnName) == objectMap->end()) 
          throw CommandException("Unknown finite burn \"" + burnName + "\"");
@@ -299,7 +303,8 @@ bool BeginFiniteBurn::Initialize()
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
-      for (scName = satNames.begin(); scName != satNames.end(); ++scName) {
+      for (scName = satNames.begin(); scName != satNames.end(); ++scName)
+      {
          if (objectMap->find(*scName) == objectMap->end()) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
 
@@ -317,15 +322,18 @@ bool BeginFiniteBurn::Initialize()
       // Validate that the spacecraft have the thrusters they need
       thrusters.clear();
       for (std::vector<Spacecraft*>::iterator current = sats.begin(); 
-           current != sats.end(); ++current) {
+           current != sats.end(); ++current)
+      {
          StringArray thrusterNames = (*current)->GetStringArrayParameter(
                                      (*current)->GetParameterID("Thrusters"));
          StringArray engines = (maneuver)->GetStringArrayParameter(
                                (maneuver)->GetParameterID("Thrusters"));
          for (StringArray::iterator i = engines.begin(); 
-              i != engines.end(); ++i) {
+              i != engines.end(); ++i)
+         {
             if (find(thrusterNames.begin(), thrusterNames.end(), *i) == 
-                     thrusterNames.end()) {
+                     thrusterNames.end())
+            {
                thrusters.clear();
                throw CommandException("Spacecraft " + (*current)->GetName() +
                                       " does not have a thruster named \"" +
@@ -336,12 +344,12 @@ bool BeginFiniteBurn::Initialize()
                (Thruster*)((*current)->GetRefObject(Gmat::THRUSTER, *i));
             if (th)
                thrusters.push_back(th);
-            else {
+            else
+            {
                thrusters.clear();
                throw CommandException("Thruster object \"" + (*i) +
                                       "\" was not set on Spacecraft \"" 
-                                      + (*current)->GetName() +
-                                      "\"");
+                                      + (*current)->GetName() + "\"");
             }
          }
       }
@@ -356,7 +364,8 @@ bool BeginFiniteBurn::Initialize()
       StringArray::iterator iter;
       
       // load up the spacecraft name list
-      for (iter = satNames.begin(); iter != satNames.end(); ++iter) {
+      for (iter = satNames.begin(); iter != satNames.end(); ++iter)
+      {
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage(
                "BeginFiniteBurn::Initialize() setting %s on %s\n", 
@@ -364,10 +373,8 @@ bool BeginFiniteBurn::Initialize()
          #endif
          burnForce->SetRefObjectName(type, *iter);
       }
-      
    }
-   
-   
+
    return initialized;
 }
 
@@ -386,7 +393,8 @@ bool BeginFiniteBurn::Execute()
 {
    // Turn on all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 
-        i != thrusters.end(); ++i) {
+        i != thrusters.end(); ++i)
+   {
       #ifdef DEBUG_BEGIN_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Activating engine %s\n", 
