@@ -597,7 +597,9 @@ std::string Parameter::GetStringParameter(const Integer id) const
          //return GetRefObjectName(Gmat::SPACECRAFT);
          return GetRefObjectName(mOwnerType);
       else
-         return GmatBase::GetStringParameter(id);
+         // DJC Changed 1/5/05 to make parameter writing work
+         return "";
+//         return GmatBase::GetStringParameter(id);
    case EXPRESSION:
       return mExpr;
    case DESCRIPTION:
