@@ -13,39 +13,76 @@
 // Created: 2003/10/09
 //
 /**
- * Implements BaseStopCondition class.
+ * Implements StopCondition class.
  */
 //------------------------------------------------------------------------------
-#include "BaseStopCondition.hpp"
+
+#include "StopCondition.hpp"
 #include "StopConditionException.hpp"
 #include "MeanJ2000Equatorial.hpp"
 #include "CubicSplineInterpolator.hpp"
-#include "Moderator.hpp"
+#include "KeplerianParameters.hpp"     // for KepEcc()
+#include "CartesianParameters.hpp"     // for RMag()
 #include "MessageInterface.hpp"
 
+#if !defined __UNIT_TEST__
+#include "Moderator.hpp"
+#endif
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount] =
+{
+    "Epoch",
+    "EpochVar",
+    "StopVar",
+    "Goal",
+    "Tol",
+    "EccTol",
+    "Range",
+    "Repeat",
+    "Interpolator",
+    "RefFrame",
+};
+
+const Gmat::ParameterType
+BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount] =
+{
+    Gmat::REAL_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::INTEGER_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
+};
 
 //---------------------------------
 // public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// BaseStopCondition(const std::string &name, const std::string &typeStr,
-//               Parameter *epochParam, Parameter *stopParam, const Real &goal,
-//               const Real &tol, const Integer repeatCount, RefFrame *refFrame,
-//               Interpolator *interp)
+// BaseStopCondition(const std::string &name, const std::string &desc,
+//                   Parameter *epochParam, Parameter *stopParam, const Real &goal,
+//                   const Real &tol, const Integer repeatCount, RefFrame *refFrame,
+//                   Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-BaseStopCondition::BaseStopCondition(const std::string &name,
-                                     const std::string &typeStr,
-                                     const std::string &desc,
+BaseStopCondition::BaseStopCondition(const std::string &name, const std::string &desc,
                                      Parameter *epochParam, Parameter *stopParam,
                                      const Real &goal, const Real &tol,
                                      const Integer repeatCount, RefFrame *refFrame,
                                      Interpolator *interp)
-    : GmatBase(Gmat::STOP_CONDITION, typeStr, name)
+    : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name)
 {
     mGoal = goal;
     mTolerance = tol;
@@ -53,32 +90,37 @@ BaseStopCondition::BaseStopCondition(const std::string &name,
     mRefFrame = refFrame;
     mInterpolator = interp;
     mEpochParam = epochParam;
+    mStopParam = stopParam;
+    mEccParam = NULL;
+    mRmagParam = NULL;
     mDescription = desc;
+    mEccTol = 1.0e-6; //loj: valid default?
+    mRange = 10000;   //loj: valid default?
     
-    mNumParams = 0;
+    mStopParamType = "";
+    if (mStopParam != NULL)
+        mStopParamType = mStopParam->GetTypeName();
+    
     mNumValidPoints = 0;
     mBufferSize = 0;
     mStopEpoch = REAL_PARAMETER_UNDEFINED;
     
-    if (stopParam != NULL)
-        AddParameter(stopParam);
-
     mInitialized = false;
     mUseInternalEpoch = false;
+    mNeedInterpolator = false;
+    mNeedRefFrame = false;
     
     if (epochParam == NULL)
         mUseInternalEpoch = true;
 
-    //loj: 3/22/04
     // Create default Interpolator
     if (mInterpolator == NULL)
     {
         mInterpolator = new CubicSplineInterpolator("InternalInterpolator");
     }
     
-    //loj: 3/22/04
     // Create default RefFrame
-    if (mInterpolator == NULL)
+    if (mRefFrame == NULL)
     {
         mRefFrame = new MeanJ2000Equatorial("InternalRefFrame");
     }
@@ -102,13 +144,9 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
     mRefFrame = copy.mRefFrame;
     mInterpolator = copy.mInterpolator;
     mEpochParam = copy.mEpochParam;
-    mNumParams = copy.mNumParams;
     mStopEpoch = copy.mStopEpoch;
+    mStopParam = copy.mStopParam;
     
-    mParameters.reserve(mNumParams);
-    for (int i=0; i<mNumParams; i++)
-        mParameters[i] = copy.mParameters[i];
-
     Initialize();
     CopyDynamicData(copy);
 }
@@ -131,12 +169,7 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
         mRefFrame = right.mRefFrame;
         mInterpolator = right.mInterpolator;
         mEpochParam = right.mEpochParam;
-        mNumParams = right.mNumParams;
         mStopEpoch = right.mStopEpoch;
-
-        mParameters.reserve(mNumParams);
-        for (int i=0; i<mNumParams; i++)
-            mParameters[i] = right.mParameters[i];
 
         Initialize();
         CopyDynamicData(right);
@@ -154,6 +187,70 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
 //------------------------------------------------------------------------------
 BaseStopCondition::~BaseStopCondition()
 {
+}
+
+//------------------------------------------------------------------------------
+// bool IsInitialized()
+//------------------------------------------------------------------------------
+bool BaseStopCondition::IsInitialized()
+{
+    return mInitialized;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetBufferSize()
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::GetBufferSize()
+{
+    return mBufferSize;
+}
+    
+//------------------------------------------------------------------------------
+// std::string& GetDescription()
+//------------------------------------------------------------------------------
+std::string& BaseStopCondition::GetDescription()
+{
+    return mDescription;
+}
+    
+//------------------------------------------------------------------------------
+// Parameter* GetEpochParameter()
+//------------------------------------------------------------------------------
+Parameter* BaseStopCondition::GetEpochParameter()
+{
+    return mEpochParam;
+}
+
+//------------------------------------------------------------------------------
+// Parameter* GetStopParameter()
+//------------------------------------------------------------------------------
+Parameter* BaseStopCondition::GetStopParameter()
+{
+    return mStopParam;
+}
+
+//------------------------------------------------------------------------------
+// RefFrame* GetRefFrame()
+//------------------------------------------------------------------------------
+RefFrame* BaseStopCondition::GetRefFrame()
+{
+    return mRefFrame;
+}
+
+//------------------------------------------------------------------------------
+// Interpolator* GetInterpolator()
+//------------------------------------------------------------------------------
+Interpolator* BaseStopCondition::GetInterpolator()
+{
+    return mInterpolator;
+}
+    
+//------------------------------------------------------------------------------
+// void SetDescription(const std::string &desc)
+//------------------------------------------------------------------------------
+void BaseStopCondition::SetDescription(const std::string &desc)
+{
+    mDescription = desc;
 }
 
 //------------------------------------------------------------------------------
@@ -178,7 +275,6 @@ bool BaseStopCondition::SetInterpolator(Interpolator *interp)
     }
     else
     {
-        //throw StopCondException("BaseStopCondition:: The interpolator is already set.");
         return false;
     }
 }
@@ -196,6 +292,7 @@ bool BaseStopCondition::SetInterpolator(const std::string &name)
 {
     bool status = false;
     
+#if !defined __UNIT_TEST__
     Moderator *theModerator = Moderator::Instance();
     
     if (name != "")
@@ -208,6 +305,7 @@ bool BaseStopCondition::SetInterpolator(const std::string &name)
         }
     }
 
+#endif
     return status;
 }
 
@@ -249,6 +347,7 @@ bool BaseStopCondition::SetRefFrame(const std::string &name)
 {
     bool status = false;
 
+#if !defined __UNIT_TEST__
     Moderator *theModerator = Moderator::Instance();
     
     if (name != "")
@@ -260,12 +359,12 @@ bool BaseStopCondition::SetRefFrame(const std::string &name)
             status = SetRefFrame(refFrame);
         }
     }
-
+#endif
     return status;
 }
 
 //------------------------------------------------------------------------------
-// bool SetEpochParameter(Parameter *epochParam)
+// bool SetEpochParameter(Parameter *param)
 //------------------------------------------------------------------------------
 /**
  * Sets epoch parameter which will be used to interpolate stop epoch
@@ -273,11 +372,11 @@ bool BaseStopCondition::SetRefFrame(const std::string &name)
  * @return true if EpochParam is successfully set; false otherwise
  */
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetEpochParameter(Parameter *epochParam)
+bool BaseStopCondition::SetEpochParameter(Parameter *param)
 {
-    if (epochParam != NULL)
+    if (param != NULL)
     {
-        mEpochParam = epochParam;
+        mEpochParam = param;
         mUseInternalEpoch = false;
         return true;
     }
@@ -299,6 +398,8 @@ bool BaseStopCondition::SetEpochParameter(Parameter *epochParam)
 bool BaseStopCondition::SetEpochParameter(const std::string &name)
 {
     bool status = false;
+    
+#if !defined __UNIT_TEST__
     Moderator *theModerator = Moderator::Instance();
     
     if (name != "")
@@ -312,7 +413,61 @@ bool BaseStopCondition::SetEpochParameter(const std::string &name)
             status = SetEpochParameter(param);
         }
     }
+#endif
+    return status;
+}
 
+//------------------------------------------------------------------------------
+// virtual bool SetStopParameter(Parameter *param)
+//------------------------------------------------------------------------------
+/**
+ * Add parameter to stop condition.
+ *
+ * @return true if parameter has added to array.
+ */
+//------------------------------------------------------------------------------
+bool BaseStopCondition::SetStopParameter(Parameter *param)
+{
+    if (param != NULL)
+    {
+        mStopParam = param;
+        mStopParamType = mStopParam->GetTypeName();
+        
+        if (param->IsTimeParameter())
+            mInitialized = true;
+        else
+            Initialize();
+        
+        return true;
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStopParameter(const std::string &name)
+//------------------------------------------------------------------------------
+bool BaseStopCondition::SetStopParameter(const std::string &name)
+{
+    bool status = false;
+    
+#if !defined __UNIT_TEST__
+    Moderator *theModerator = Moderator::Instance();
+    
+    if (name != "")
+    {
+        // get parameter pointer
+        Parameter *param = theModerator->GetParameter(name);
+        if (param != NULL)
+        {
+            //MessageInterface::ShowMessage("BaseStopCondition::SetStopParameter() name = %s\n",
+            //                               param->GetName().c_str());
+            SetStopParameter(param);
+            status = true;
+        }
+    }
+#endif
+    
     return status;
 }
 
@@ -331,62 +486,6 @@ bool BaseStopCondition::SetObjectOfParameter(Gmat::ObjectType objType, GmatBase 
 }
 
 //------------------------------------------------------------------------------
-// virtual bool AddParameter(Parameter *param)
-//------------------------------------------------------------------------------
-/**
- * Add parameter to stop condition.
- *
- * @return true if parameter has added to array.
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::AddParameter(Parameter *param)
-{
-    bool added = false;
-    
-    //loj: 2/26/04 Do I really need to validate parameter before add?
-    //if (param->Validate())
-    //{
-        mParameters.push_back(param);
-        mParamNames.push_back(param->GetName());
-        mNumParams = mParameters.size();
-        
-        if (param->IsTimeParameter())
-            mInitialized = true;
-        else
-            Initialize();
-        
-        SetParameter(param);
-        added = true;
-    //}
-
-    return added;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddParameter(const std::string &paramName)
-//------------------------------------------------------------------------------
-bool BaseStopCondition::AddParameter(const std::string &paramName)
-{
-    bool status = false;
-    Moderator *theModerator = Moderator::Instance();
-    
-    if (paramName != "")
-    {
-        // get parameter pointer
-        Parameter *param = theModerator->GetParameter(paramName);
-        if (param != NULL)
-        {
-            //MessageInterface::ShowMessage("BaseStopCondition::AddParameter() name = %s\n",
-            //                               param->GetName().c_str());
-            AddParameter(param);
-            status = true;
-        }
-    }
-
-    return status;
-}
-
-//------------------------------------------------------------------------------
 // virtual Real BaseStopCondition::GetStopEpoch()
 //------------------------------------------------------------------------------
 /**
@@ -398,6 +497,332 @@ Real BaseStopCondition::GetStopEpoch()
     return mStopEpoch;
 }
 
+
+//------------------------------------------------------------------------------
+// virtual bool Validate()
+//------------------------------------------------------------------------------
+/**
+ * @return true if all necessary objects have been set; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool BaseStopCondition::Validate()
+{
+    bool valid = false;
+
+    // check on epoch parameter
+    if (mUseInternalEpoch || mEpochParam != NULL)
+        valid = true;
+
+    // check on stop parameter
+    if (valid)
+    {
+        valid = false;
+        if (mStopParam != NULL)
+        {
+            if (mStopParam->IsTimeParameter())
+            {
+                mNeedInterpolator = false;
+                valid = true;
+            }
+            else if (mInterpolator != NULL)
+            {
+                mNeedInterpolator = true;
+                valid = true;
+            }
+        }
+    }
+    
+    // Apoapsis and Periapsis need additional paraemters
+    if (valid)
+    {
+        if (mStopParam->GetTypeName() == "Apoapsis" ||
+            mStopParam->GetTypeName() == "Periapsis")
+        {
+            // check on Ecc parameter
+            if (mEccParam  == NULL)
+            {
+                mEccParam = new KepEcc("");
+                mEccParam->AddObject(mStopParam->GetObject("Spacecraft"));
+            }
+            
+            // check on RMag parameter if "Periapsis"
+            if (mStopParam->GetTypeName() == "Periapsis")
+            {
+                if (mRmagParam == NULL)
+                {
+                    mRmagParam = new RMag("");
+                    mRmagParam->AddObject(mStopParam->GetObject("Spacecraft"));
+                }
+            }
+        }
+    }
+
+    if (!valid)
+    {
+        MessageInterface::ShowMessage
+            ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, mEpochParam=%d, "
+             "mStopParam=%d, mEccParam=%d mInterpolator=%d\n",
+             mUseInternalEpoch, mEpochParam, mStopParam, mEccParam, mInterpolator);
+    }
+    
+    return valid;
+}
+
+//---------------------------------
+// methods inherited from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+std::string BaseStopCondition::GetParameterText(const Integer id) const
+{
+    if (id >= 0 && id < BaseStopConditionParamCount)
+        return PARAMETER_TEXT[id];
+    else
+        return GmatBase::GetParameterText(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::GetParameterID(const std::string &str) const
+{
+    //MessageInterface::ShowMessage("BaseStopCondition::GetParameterID() str = %s\n", str.c_str());
+    
+    for (int i=0; i<BaseStopConditionParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i])
+            return i;
+    }
+   
+    return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType BaseStopCondition::GetParameterType(const Integer id) const
+{
+    if (id >= 0 && id < BaseStopConditionParamCount)
+        return PARAMETER_TYPE[id];
+    else
+        return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string BaseStopCondition::GetParameterTypeString(const Integer id) const
+{
+    if (id >= 0 && id < BaseStopConditionParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    else
+       return GmatBase::GetParameterTypeString(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::GetIntegerParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case REPEAT_COUNT:
+        return mRepeatCount;
+    default:
+        return GmatBase::GetIntegerParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::GetIntegerParameter(const std::string &label) const
+{
+    return GetIntegerParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::SetIntegerParameter(const Integer id,
+                                           const Integer value)
+{
+    switch (id)
+    {
+    case REPEAT_COUNT:
+        mRepeatCount = value;
+        return mRepeatCount;
+    default:
+        return GmatBase::SetIntegerParameter(id, value);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+Integer BaseStopCondition::SetIntegerParameter(const std::string &label,
+                                           const Integer value)
+{
+    return SetIntegerParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+Real BaseStopCondition::GetRealParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case GOAL:
+        return mGoal;
+    case TOLERANCE:
+        return mTolerance;
+    case ECC_TOL:
+        return mEccTol;
+    case RANGE:
+        return mRange;
+    case EPOCH:
+        return mEpoch;
+    default:
+        return GmatBase::GetRealParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real BaseStopCondition::GetRealParameter(const std::string &label) const
+{
+    return GetRealParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+Real BaseStopCondition::SetRealParameter(const Integer id, const Real value)
+{
+    switch (id)
+    {
+    case GOAL:
+        mGoal = value;
+        return mGoal;
+    case TOLERANCE:
+        mTolerance = value;
+        return mTolerance;
+    case ECC_TOL:
+        mEccTol = value;
+        return mEccTol;
+    case RANGE:
+        mRange = value;
+        return mRange;
+    case EPOCH:
+        mEpoch = value;
+        return mEpoch;
+    default:
+        return GmatBase::GetRealParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+Real BaseStopCondition::SetRealParameter(const std::string &label, const Real value)
+{
+    //MessageInterface::ShowMessage("BaseStopCondition::SetRealParameter() label=%s, "
+    //                              "value=%d\n", label.c_str(), value);
+    
+    return SetRealParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string BaseStopCondition::GetStringParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case EPOCH_VAR:
+        if (mEpochParam != NULL)
+            return mEpochParam->GetTypeName();
+        else
+            return "InternalEpoch";
+    case STOP_VAR:
+        if (mStopParam != NULL)
+            return mStopParam->GetTypeName();
+        else
+            return "UndefinedStopVar";
+//      case ECC_VAR:
+//          if (mEccParam != NULL)
+//              return mEccParam->GetTypeName();
+//          else
+//              return "UndefinedEccParam";
+    case INTERPOLATOR:
+        if (mInterpolator != NULL)
+            return mInterpolator->GetTypeName();
+        else
+            return "UndefinedInterpolator";
+    case REF_FRAME:
+        if (mRefFrame != NULL)
+            return mRefFrame->GetTypeName();
+        else
+            return "UndefinedRefFrame";
+    default:
+        return GmatBase::GetStringParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string BaseStopCondition::GetStringParameter(const std::string &label) const
+{
+    //MessageInterface::ShowMessage("BaseStopCondition::GetStringParameter() label = %s\n",
+    //                              label.c_str());
+
+    return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool BaseStopCondition::SetStringParameter(const Integer id, const std::string &value)
+{
+    //MessageInterface::ShowMessage("BaseStopCondition::SetStringParameter() id = %d, "
+    //                              "value = %s \n", id, value.c_str());
+    
+    switch (id)
+    {
+    case EPOCH_VAR:
+        return SetEpochParameter(value);
+    case STOP_VAR:
+        return SetStopParameter(value);
+    case INTERPOLATOR:
+        return SetInterpolator(value);
+    case REF_FRAME:
+        return SetRefFrame(value);
+    default:
+        return GmatBase::SetStringParameter(id, value);
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool BaseStopCondition::SetStringParameter(const std::string &label,
+                                       const std::string &value)
+{
+    //MessageInterface::ShowMessage("BaseStopCondition::SetStringParameter() label = %s, "
+    //                              "value = %s \n", label.c_str(), value.c_str());
+
+    return SetStringParameter(GetParameterID(label), value);
+}
+
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -407,59 +832,34 @@ Real BaseStopCondition::GetStopEpoch()
 //------------------------------------------------------------------------------
 void BaseStopCondition::Initialize()
 {
-    //loj: How about mRefFrame?
-    //loj: Do I need RefFram* for all stopping condition?
-   
     mInitialized = false;
 
-    if (mNumParams >= 1)
-        mInitialized = true;
-
-    // if parameter is non-time parameter, need interpolator
-    bool needInterp = false;
-    for (int i=0; i<mNumParams; i++)
+    if (Validate())
     {
-        if (mParameters[i]->IsTimeParameter() == false)
-            needInterp = true;
-    }
-
-    if (needInterp)
-    {
-        // need epoches for interpolator
-        if (!mUseInternalEpoch && mEpochParam == NULL)
-            mInitialized = false;
-        
-        if (mInterpolator == NULL)
+        if (mStopParam->GetTypeName() == "Apoapsis" ||
+            mStopParam->GetTypeName() == "Periapsis")
         {
-            mInitialized = false;
+            mGoal = 0.0;
         }
-        else
+        
+        if (mNeedInterpolator)
         {
             mBufferSize = mInterpolator->GetBufferSize();
             mEpochBuffer.reserve(mBufferSize);
             mValueBuffer.reserve(mBufferSize);
-      
+        
             for (int i=0; i<mBufferSize; i++)
             {
                 mEpochBuffer[i] = 0.0;
                 mValueBuffer[i] = 0.0;
             }
-      
+        
             mNumValidPoints = 0;
             mInitialized = true;
         }
+        
+        //loj: How about mRefFrame? - need for crossing plane
     }
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetParameter(Parameter *param)
-/*
- * All derived class should implement this method
- */
-//------------------------------------------------------------------------------
-bool BaseStopCondition::SetParameter(Parameter *param)
-{
-    return false;
 }
 
 //---------------------------------
