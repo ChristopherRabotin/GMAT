@@ -244,14 +244,15 @@ private:
    
    // sandbox
    void AddSolarSysToSandbox(Integer index);
-   void AddSubscriberToSandbox(Integer index);
+   void AddPublisherToSandbox(Integer index);
    void AddSpacecraftToSandbox(Integer index);
    void AddPropSetupToSandbox(Integer index);
    void AddPropagatorToSandbox(Integer index);
    void AddForceModelToSandbox(Integer index);
    void AddBurnToSandbox(Integer index);
    void AddSolverToSandbox(Integer index);
-   void AddPublisherToSandbox(Integer index);
+   void AddSubscriberToSandbox(Integer index);
+   void AddParameterToSandbox(Integer index);
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);

@@ -1675,14 +1675,16 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
       try
       {
          AddSolarSysToSandbox(sandboxNum-1);
-         AddPublisherToSandbox(sandboxNum-1);
+         AddPublisherToSandbox(sandboxNum-1);        
          AddSpacecraftToSandbox(sandboxNum-1);
          AddForceModelToSandbox(sandboxNum-1);
          AddPropagatorToSandbox(sandboxNum-1);
          AddPropSetupToSandbox(sandboxNum-1);
          AddBurnToSandbox(sandboxNum-1);        
-         AddSolverToSandbox(sandboxNum-1);        
-         AddSubscriberToSandbox(sandboxNum-1);
+         AddSolverToSandbox(sandboxNum-1);
+         // Add Subscriber after Publisher. AddPublisherToSandbox() clears subscribers
+         AddSubscriberToSandbox(sandboxNum-1); 
+         AddParameterToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
          //MessageInterface::ShowMessage("Moderator::RunMission() after AddCommandToSandbox() \n");
         
@@ -2004,11 +2006,19 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
              "ParamName = %s\n", param->GetTypeName().c_str(),
              param->GetName().c_str());
 #endif
+
+         //loj: 6/24/04 setting SolarSystem on parameters done in Sandbox
+         //-----------------------------------------------------------
          // set SolarSystem to orbit related parameters
-         if (!param->IsTimeParameter())
-            param->AddObject(theDefaultSolarSystem);
+         //if (!param->IsTimeParameter())
+         //   param->AddObject(theDefaultSolarSystem);
+         //-----------------------------------------------------------
+         //param->SetSolarSystem(theDefaultSolarSystem);
+         //-----------------------------------------------------------
          
          // set internal Spacecraft to parameters
+         //@todo
+         //loj: 6/24/04 move the code to Sandbox later
          objTypeList = param->GetObjectTypeNames();
          for (unsigned int j=0; j<objTypeList.size(); j++)
          {
@@ -2074,6 +2084,8 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    //--------------------------------------------
    // create plot window
    //--------------------------------------------
+   //@todo
+   //loj: 6/24/04 move the code to Sandbox later
    StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
    Subscriber *sub;
 
@@ -2344,7 +2356,7 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
    for (Integer i=0; i<(Integer)scNames.size(); i++)
    {
       sc = theConfigManager->GetSpacecraft(scNames[i]);
-      sandboxes[index]->AddSpacecraft(sc);
+      sandboxes[index]->AddObject(sc);
    }
 }
 
@@ -2359,7 +2371,7 @@ void Moderator::AddPropSetupToSandbox(Integer index)
    for (Integer i=0; i<(Integer)propSetupNames.size(); i++)
    {
       propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
-      sandboxes[index]->AddPropSetup(propSetup);
+      sandboxes[index]->AddObject(propSetup);
    }
 }
 
@@ -2374,7 +2386,7 @@ void Moderator::AddPropagatorToSandbox(Integer index)
    for (Integer i=0; i<(Integer)propNames.size(); i++)
    {
       prop = theConfigManager->GetPropagator(propNames[i]);
-      sandboxes[index]->AddPropagator(prop);
+      sandboxes[index]->AddObject(prop);
    }
 }
 
@@ -2383,13 +2395,13 @@ void Moderator::AddPropagatorToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddForceModelToSandbox(Integer index)
 {
-   ForceModel *forces;
+   ForceModel *fm;
    StringArray fmNames = theConfigManager->GetListOfItems(Gmat::FORCE_MODEL);
     
    for (Integer i=0; i<(Integer)fmNames.size(); i++)
    {
-      forces = theConfigManager->GetForceModel(fmNames[i]);
-      sandboxes[index]->AddForceModel(forces);
+      fm = theConfigManager->GetForceModel(fmNames[i]);
+      sandboxes[index]->AddObject(fm);
    }
 }
 
@@ -2404,7 +2416,7 @@ void Moderator::AddBurnToSandbox(Integer index)
    for (Integer i=0; i<(Integer)burnNames.size(); i++)
    {
       burn = theConfigManager->GetBurn(burnNames[i]);
-      sandboxes[index]->AddBurn(burn);
+      sandboxes[index]->AddObject(burn);
    }
 }
 
@@ -2419,7 +2431,7 @@ void Moderator::AddSolverToSandbox(Integer index)
    for (Integer i=0; i<(Integer)solverNames.size(); i++)
    {
       solver = theConfigManager->GetSolver(solverNames[i]);
-      sandboxes[index]->AddSolver(solver);
+      sandboxes[index]->AddObject(solver);
    }
 }
 
@@ -2428,12 +2440,26 @@ void Moderator::AddSolverToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
-   Subscriber *subs;
-   StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
-   for (Integer i=0; i<(Integer)subsNames.size(); i++)
+   Subscriber *sub;
+   StringArray subNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
+   for (Integer i=0; i<(Integer)subNames.size(); i++)
    {
-      subs = theConfigManager->GetSubscriber(subsNames[i]);
-      sandboxes[index]->AddSubscriber(subs);
+      sub = theConfigManager->GetSubscriber(subNames[i]);
+      sandboxes[index]->AddSubscriber(sub);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void AddParameterToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddParameterToSandbox(Integer index)
+{
+   Parameter *param;
+   StringArray paramNames = theConfigManager->GetListOfItems(Gmat::PARAMETER);
+   for (Integer i=0; i<(Integer)paramNames.size(); i++)
+   {
+      param = theConfigManager->GetParameter(paramNames[i]);
+      sandboxes[index]->AddObject(param);
    }
 }
 
