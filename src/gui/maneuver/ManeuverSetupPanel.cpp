@@ -136,7 +136,7 @@ void ManeuverSetupPanel::CreateManeuver(wxWindow *parent)
             // no burns available 
             wxString strs9[] =
             {
-                wxT("No Burns Available"), 
+                wxT("No burn available"), 
             }; 
             burnCB = new wxComboBox(parent, ID_COMBO, wxT(""), wxDefaultPosition, 
                 wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);
@@ -166,7 +166,7 @@ void ManeuverSetupPanel::CreateManeuver(wxWindow *parent)
             // combo box for avaliable spacecrafts 
             wxString strs9[] =
             {
-                wxT("No Spacecrafts Available"), 
+                wxT("No spacecraft available"), 
             }; 
             satCB = new wxComboBox(parent, ID_COMBO, wxT(""), wxDefaultPosition, 
                 wxSize(150,-1), 1, strs9, wxCB_DROPDOWN);

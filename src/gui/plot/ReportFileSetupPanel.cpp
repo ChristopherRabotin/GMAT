@@ -102,8 +102,8 @@ void ReportFileSetupPanel::Create(wxWindow *parent)
     //------------------------------------------------------
     // plot option, (1st column)
     //------------------------------------------------------
-    writeCheckBox = new wxCheckBox(parent, RF_WRITE_CHECKBOX, wxT("Show Plot"),
-                                  wxDefaultPosition, wxSize(100, -1), 0);
+    writeCheckBox = new wxCheckBox(parent, RF_WRITE_CHECKBOX, wxT("Write Report"),
+                                   wxDefaultPosition, wxSize(100, -1), 0);
             
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, 5);

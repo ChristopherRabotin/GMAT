@@ -30,8 +30,9 @@
 #include "TextEditView.hpp"
 
 BEGIN_EVENT_TABLE(TextEditView, wxView)
-    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, TextEditView::OnScriptBuildObject)
-    EVT_MENU(MENU_SCRIPT_RUN, TextEditView::OnScriptRun)
+    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, TextEditView::OnScriptBuildObject)
+    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, TextEditView::OnScriptBuildAndRun)
+    EVT_MENU(GmatScript::MENU_SCRIPT_RUN, TextEditView::OnScriptRun)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -95,8 +96,30 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
         InterpretScript(std::string(filename.c_str()));
     
     // Update ResourceTree and MissionTree
-    GmatAppData::GetResourceTree()->UpdateResources();
-    GmatAppData::GetMissionTree()->UpdateMissionSeq();
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
+// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+{
+    bool status;
+    
+    wxString filename = GetDocument()->GetFilename();
+    
+    status = GmatAppData::GetGuiInterpreter()->
+        InterpretScript(std::string(filename.c_str()));
+
+    // Update ResourceTree
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();
+    status = GmatAppData::GetGuiInterpreter()->RunScript();
+
+    return status;
 }
 
 //------------------------------------------------------------------------------

@@ -34,7 +34,7 @@ public:
     //   void SetMainNotebook (GmatMainNotebook *mainNotebook);
     //   GmatMainNotebook *GetMainNotebook();
 
-    void UpdateMissionSeq();
+    void UpdateMission();
     
 protected:
 

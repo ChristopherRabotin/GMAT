@@ -141,7 +141,7 @@ void ImpulsiveBurnSetupPanel::CreateBurn(wxWindow *parent, const wxString &burnN
         { 
             wxString strs6[] =
             {
-                wxT("No coordinate frames available") 
+                wxT("No coordinate frame available") 
             };    
             coordCB = new wxComboBox(parent, ID_CB_COORD, wxT(""),
                 wxDefaultPosition, wxSize(150,-1), 1, strs6, wxCB_DROPDOWN);
@@ -450,11 +450,17 @@ void ImpulsiveBurnSetupPanel::OnVectorChange()
     wxString coordStr, vectorStr, el;
     std::string element;
     
+    // get the string of the combo box selections
     coordStr = coordCB->GetStringSelection();
+    vectorStr = coordCB->GetStringSelection();
+
+    // get the ID of the coordinate frame parameter 
     id = theBurn->GetParameterID("CoordinateFrame");
 
-    vectorStr = coordCB->GetStringSelection();
+    // store the coordinate from for cancellation
+    std::string coordFrame = theBurn->GetStringParameter(id);
     
+    // check the combo box selection
     if (coordStr == "Inertial")
         theBurn->SetStringParameter(id, "Inertial");
     else if (coordStr == "VNB")
@@ -481,6 +487,9 @@ void ImpulsiveBurnSetupPanel::OnVectorChange()
     description3->SetLabel(el);
     label3->SetLabel("km/s");
 
+    // reset coordinate frame to original selection if cancel button selected
+    id = theBurn->GetParameterID("CoordinateFrame");
+    theBurn->SetStringParameter(id, coordFrame);
 }
 
 //------------------------------------------------------------------------------

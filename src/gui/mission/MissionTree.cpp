@@ -134,18 +134,17 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 //}
 
 //------------------------------------------------------------------------------
-// void UpdateMissionSeq()
+// void UpdateMission()
 //------------------------------------------------------------------------------
 /**
  * Updates Mission Sequence
  */
 //------------------------------------------------------------------------------
-void MissionTree::UpdateMissionSeq()
+void MissionTree::UpdateMission()
 {
-    MessageInterface::ShowMessage("MissionTree::UpdateMissionSeq() entered\n");
+    MessageInterface::ShowMessage("MissionTree::UpdateCommandSeq() entered\n");
 
     this->DeleteChildren(mMissionSeqSubItem);
-    
     UpdateCommand();
 }
 

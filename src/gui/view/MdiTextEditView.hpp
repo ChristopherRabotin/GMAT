@@ -47,17 +47,14 @@ public:
     bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
     
     DECLARE_EVENT_TABLE();
-//      enum
-//      {
-//          MENU_SCRIPT_BUILD = 1,
-//          MENU_SCRIPT_RUN
-//      };
     
 private:
 };
 
 //loj: need here because OnCreate is implemented in GmatApp.cpp
-#define MENU_SCRIPT_BUILD_OBJECT  100
-#define MENU_SCRIPT_RUN           101
-#define MENU_SCRIPT_BUILD_AND_RUN 102
+//loj: 2/13/04 moved to GmatAppData.hpp because it is defind in TextEditView.hpp also
+//#define MENU_SCRIPT_BUILD_OBJECT  100
+//#define MENU_SCRIPT_RUN           101
+//#define MENU_SCRIPT_BUILD_AND_RUN 102
+
 #endif

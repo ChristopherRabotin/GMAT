@@ -30,9 +30,9 @@
 #include "MdiTextEditView.hpp"
 
 BEGIN_EVENT_TABLE(MdiTextEditView, wxView)
-    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, MdiTextEditView::OnScriptBuildObject)
-    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, MdiTextEditView::OnScriptBuildAndRun)
-    EVT_MENU(MENU_SCRIPT_RUN, MdiTextEditView::OnScriptRun)
+    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, MdiTextEditView::OnScriptBuildObject)
+    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, MdiTextEditView::OnScriptBuildAndRun)
+    EVT_MENU(GmatScript::MENU_SCRIPT_RUN, MdiTextEditView::OnScriptRun)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -96,8 +96,8 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
         InterpretScript(std::string(filename.c_str()));
 
     // Update ResourceTree and MissionTree
-    GmatAppData::GetResourceTree()->UpdateResources();
-    GmatAppData::GetMissionTree()->UpdateMissionSeq();
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();
 
     return status;
 }
@@ -115,7 +115,8 @@ bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
         InterpretScript(std::string(filename.c_str()));
 
     // Update ResourceTree
-    GmatAppData::GetResourceTree()->UpdateResources();
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();
     status = GmatAppData::GetGuiInterpreter()->RunScript();
 
     return status;
