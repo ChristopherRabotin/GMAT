@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                            Spacecraft
+//                            SpacecraftPanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,66 +13,88 @@
  */
 //------------------------------------------------------------------------------
 #include "SpacecraftPanel.hpp"
+#include "GmatAppData.hpp"
 
-BEGIN_EVENT_TABLE(Spacecraft, wxPanel)
-   EVT_CHOICE(ID_CHOICE_BODY,        Spacecraft::OnBodyChoice)
-   EVT_CHOICE(ID_CHOICE_FRAME,       Spacecraft::OnFrameChoice)
-   EVT_CHOICE(ID_CHOICE_EPOCH,       Spacecraft::OnEpochChoice)
-   EVT_CHOICE(ID_CHOICE_STATE,       Spacecraft::OnStateChoice)
-   EVT_BUTTON(ID_BUTTON_OK,          Spacecraft::OnOkButton)
-   EVT_BUTTON(ID_BUTTON_APPLY,       Spacecraft::OnApplyButton)
-   EVT_BUTTON(ID_SC_BUTTON_CANCEL,   Spacecraft::OnCancelButton)
-  // EVT_BUTTON(ID_BUTTON_HELP,      Spacecraft::OnHelpButton)  
+#include "gmatdefs.hpp" //put this one after GUI includes
+#include "GuiInterpreter.hpp"
+#include "Spacecraft.hpp"
+
+BEGIN_EVENT_TABLE(SpacecraftPanel, wxPanel)
+   EVT_CHOICE(ID_CHOICE_BODY,        SpacecraftPanel::OnBodyChoice)
+   EVT_CHOICE(ID_CHOICE_FRAME,       SpacecraftPanel::OnFrameChoice)
+   EVT_CHOICE(ID_CHOICE_EPOCH,       SpacecraftPanel::OnEpochChoice)
+   EVT_CHOICE(ID_CHOICE_STATE,       SpacecraftPanel::OnStateChoice)
+   EVT_BUTTON(ID_BUTTON_OK,          SpacecraftPanel::OnOkButton)
+   EVT_BUTTON(ID_BUTTON_APPLY,       SpacecraftPanel::OnApplyButton)
+   EVT_BUTTON(ID_SC_BUTTON_CANCEL,   SpacecraftPanel::OnCancelButton)
+  // EVT_BUTTON(ID_BUTTON_HELP,      SpacecraftPanel::OnHelpButton)  
 END_EVENT_TABLE()
 
 
 
-Spacecraft::Spacecraft(wxWindow *parent):wxPanel(parent)
+SpacecraftPanel::SpacecraftPanel(wxWindow *parent):wxPanel(parent)
 {
-     
    CreateNotebook(this);
 }
 
-void Spacecraft::CreateNotebook(wxWindow *parent)
+void SpacecraftPanel::CreateNotebook(wxWindow *parent)
 {
-    wxGridSizer *item = new wxGridSizer( 1, 0, 0 );
- //   item = new wxBoxSizer( wxVERTICAL );
-
-    mainNotebook = new wxNotebook( parent, ID_NOTEBOOK, wxDefaultPosition, wxSize(350,300), 0 );
-    sizer = new wxNotebookSizer( mainNotebook );
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+    //loj: Need to get spacecraft name somehow when spacecraft name is clicked
+    //loj: use "DefaultSC" for testing only
+    theSpacecraft = theGuiInterpreter->GetSpacecraft("DefaultSC");
     
-    wxPanel *orbitPanel = (wxPanel *)NULL;
-    orbitPanel = CreateOrbit( mainNotebook );
-    mainNotebook->AddPage( orbitPanel, wxT("Orbit") );
+    if (theSpacecraft != NULL)
+    {
+        wxGridSizer *item = new wxGridSizer( 1, 0, 0 );
+        //   item = new wxBoxSizer( wxVERTICAL );
 
-    attitude = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( attitude, wxT("Attitude") );
-
-    properties = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( properties, wxT("Ballistic/Mass") );
-
-    actuators = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( actuators, wxT("Actuators") );
-
-    sensors = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( sensors, wxT("Sensors") );
-
-    tanks = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( tanks, wxT("Tanks") );
-
-    visual = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( visual, wxT("Visualization") );
-
-    item->Add( sizer, 0, wxGROW|wxALL, 5 );
+        mainNotebook = new wxNotebook( parent, ID_NOTEBOOK, wxDefaultPosition, wxSize(350,300), 0 );
+        sizer = new wxNotebookSizer( mainNotebook );
     
-    parent->SetAutoLayout( TRUE );
-    parent->SetSizer( item );
-    item->Fit( parent );
-    item->SetSizeHints( parent );
+        wxPanel *orbitPanel = (wxPanel *)NULL;
+        orbitPanel = CreateOrbit( mainNotebook );
+        mainNotebook->AddPage( orbitPanel, wxT("Orbit") );
+
+        attitude = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( attitude, wxT("Attitude") );
+
+        properties = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( properties, wxT("Ballistic/Mass") );
+
+        actuators = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( actuators, wxT("Actuators") );
+
+        sensors = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( sensors, wxT("Sensors") );
+
+        tanks = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( tanks, wxT("Tanks") );
+
+        visual = new wxPanel( mainNotebook, -1 );
+        mainNotebook->AddPage( visual, wxT("Visualization") );
+
+        item->Add( sizer, 0, wxGROW|wxALL, 5 );
+    
+        parent->SetAutoLayout( TRUE );
+        parent->SetSizer( item );
+        item->Fit( parent );
+        item->SetSizeHints( parent );
+    }
+    else
+    {
+        // show error message
+    }
 }
 
-wxPanel *Spacecraft::CreateOrbit(wxWindow *parent)
+wxPanel *SpacecraftPanel::CreateOrbit(wxWindow *parent)
 {
+    //loj: since Spacecraft class is not complete,
+    //loj: use theSpacecraft->GetRealParameter(0) for epoch
+    //loj: use theSpacecraft->GetRealParameter(1) for state[0], etc
+
+    Real epoch = theSpacecraft->GetRealParameter(0);
+    
     wxPanel *panel = new wxPanel(parent);
 
     wxFlexGridSizer *orbitSizer = new wxFlexGridSizer( 1, 0, 0 );
@@ -167,17 +189,17 @@ wxPanel *Spacecraft::CreateOrbit(wxWindow *parent)
     return panel;
 }
 
-void Spacecraft::OnBodyChoice(wxCommandEvent& event)
+void SpacecraftPanel::OnBodyChoice(wxCommandEvent& event)
 {
 
 }
 
-void Spacecraft::OnFrameChoice(wxCommandEvent& event)
+void SpacecraftPanel::OnFrameChoice(wxCommandEvent& event)
 {
 
 }
 
-void Spacecraft::OnEpochChoice(wxCommandEvent& event)
+void SpacecraftPanel::OnEpochChoice(wxCommandEvent& event)
 {
   /* int n;
    wxString coord;
@@ -190,7 +212,7 @@ void Spacecraft::OnEpochChoice(wxCommandEvent& event)
      epochText->WriteText(wxT(""));*/
 }
 
-void Spacecraft::OnStateChoice(wxCommandEvent& event)
+void SpacecraftPanel::OnStateChoice(wxCommandEvent& event)
 {
   //wxST_NO_AUTORESIZE = false; Don't know if this is the right way to say don't
    //             automatically resize labels.
@@ -210,26 +232,26 @@ void Spacecraft::OnStateChoice(wxCommandEvent& event)
    }*/
 }
 
-void Spacecraft::OnOkButton(wxCommandEvent& event)
+void SpacecraftPanel::OnOkButton(wxCommandEvent& event)
 {
 }
 
-void Spacecraft::OnApplyButton(wxCommandEvent& event)
+void SpacecraftPanel::OnApplyButton(wxCommandEvent& event)
 {
 }
 
-void Spacecraft::OnCancelButton(wxCommandEvent& event)
+void SpacecraftPanel::OnCancelButton(wxCommandEvent& event)
 {
    //wxMessageBox(wxT("This is some message - everything is ok so far.")); //used for testing
    Close();
 }
 
-void Spacecraft::OnHelpButton(wxCommandEvent& event)
+void SpacecraftPanel::OnHelpButton(wxCommandEvent& event)
 {
   
 }
 
-void Spacecraft::KapElements(wxWindow *parent)
+void SpacecraftPanel::KapElements(wxWindow *parent)
 {
 
     wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
@@ -308,7 +330,7 @@ void Spacecraft::KapElements(wxWindow *parent)
 
 }
 
-void Spacecraft::CartElements(wxWindow *parent)
+void SpacecraftPanel::CartElements(wxWindow *parent)
 {
     wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
 
