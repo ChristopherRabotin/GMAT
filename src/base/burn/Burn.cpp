@@ -199,13 +199,13 @@ Integer Burn::GetParameterID(const std::string &str) const
     if (str == "VectorFormat") 
         return coordSystemID;
         
-    if (str == "Element1") 
+    if ((str == "Element1") || (str == dvLabels[0]))
         return deltaV1ID;
         
-    if (str == "Element2") 
+    if ((str == "Element2") || (str == dvLabels[1])) 
         return deltaV2ID;
         
-    if (str == "Element3") 
+    if ((str == "Element3") || (str == dvLabels[2])) 
         return deltaV3ID;
         
     if (str == "Element1Label") 

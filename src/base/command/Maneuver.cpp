@@ -7,13 +7,13 @@
 // **Legal**
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G
+// number NNG04CC06P
 //
 // Author: Darrel J. Conway
-// Created: 2003/09/23
+// Created: 2004/01/20
 //
 /**
-* Definition for the Maneuver command class
+ * Definition for the Maneuver command class
  */
 //------------------------------------------------------------------------------
 

@@ -17,12 +17,17 @@
  *  creating Command objects.
  */
 //------------------------------------------------------------------------------
+
+
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CommandFactory.hpp"
 #include "Propagate.hpp"   // for Propagate command
 #include "Toggle.hpp"      // for Toggle command
 #include "Maneuver.hpp"    // for Maneuver command
+#include "Target.hpp"      // for Target command
+#include "Endtarget.hpp"   // for EndTarget command
+
 
 //---------------------------------
 //  public methods
@@ -49,6 +54,10 @@ Command* CommandFactory::CreateCommand(std::string ofType,
         return new Toggle;
     else if (ofType == "Maneuver")
         return new Maneuver;
+    else if (ofType == "Target")
+        return new Target;
+    else if (ofType == "EndTarget")
+        return new EndTarget;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -74,6 +83,9 @@ Factory(Gmat::COMMAND)
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
       creatables.push_back("Maneuver");
+      // Commands related to the targeter
+      creatables.push_back("Target");
+      creatables.push_back("EndTarget");
    }
 }
 
@@ -110,6 +122,9 @@ Factory(fact)
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
       creatables.push_back("Maneuver");
+      // Commands related to the targeter
+      creatables.push_back("Target");
+      creatables.push_back("EndTarget");
    }
 }
 

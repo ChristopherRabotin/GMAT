@@ -338,6 +338,21 @@ void Command::SetPublisher(Publisher *p)
 //------------------------------------------------------------------------------
 bool Command::Initialize(void)
 {
+    // Check to be sure the basic infrastructure is in place
+    if (objectMap == NULL) {
+        std::string errorstr("Object map has not been initialized for ");
+        errorstr += GetTypeName();
+        throw CommandException(errorstr);
+    }
+  
+// Uncomment the following when we have a solar system to initialize
+//    if (solarSys == NULL) {
+//        std::string errorstr("Solar system has not been initialized for ");
+//        errorstr += GetTypeName();
+//        throw CommandException(errorstr);
+//    }
+
+
     initialized = AssignObjects();
     if (publisher == NULL)
         publisher = Publisher::Instance();

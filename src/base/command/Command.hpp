@@ -77,15 +77,15 @@ class Command : public GmatBase
                                       const Gmat::ObjectType type);
         virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
                                       const std::string objName = "");
-        void                SetSolarSystem(SolarSystem *ss);
-        void                SetObjectMap(std::map<std::string, GmatBase *> *map);
-        void                SetPublisher(Publisher *p);
+        virtual void        SetSolarSystem(SolarSystem *ss);
+        virtual void        SetObjectMap(std::map<std::string, GmatBase *> *map);
+        virtual void        SetPublisher(Publisher *p);
         
         // Sequence methods
         virtual bool        Initialize(void);
         virtual Command*    GetNext(void);
-        bool                Append(Command *cmd);
-        bool                Insert(Command *cmd, Command *prev);
+        virtual bool        Append(Command *cmd);
+        virtual bool        Insert(Command *cmd, Command *prev);
 
         virtual void        InterpretAction(void)
         {}
