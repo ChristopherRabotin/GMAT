@@ -13,15 +13,17 @@
 #                          SphericalTwo to SphericalRADEC
 #             2005/02/08 - Added ModKeplerian
 #             2005/02/09 - W. Shoan - added TimeSystemConverter
+#             2005/02/17 - Added Anomaly
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
-	DateUtil.cpp ElapsedTime.cpp EopFile.cpp EphemerisUtil.cpp \
-	GregorianDate.cpp Keplerian.cpp LeapSecsFileReader.cpp Linear.cpp \
+SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Anomaly.cpp Cartesian.cpp \
+	CoordUtil.cpp Date.cpp DateUtil.cpp ElapsedTime.cpp EopFile.cpp \
+	EphemerisUtil.cpp GregorianDate.cpp Keplerian.cpp \
+	LeapSecsFileReader.cpp Linear.cpp \
 	ModKeplerian.cpp RgbColor.cpp RealUtilities.cpp Rmatrix.cpp \
 	Rmatrix33.cpp Rvector.cpp Rvector3.cpp Rvector6.cpp Spherical.cpp \
 	SphericalAZFPA.cpp SphericalRADEC.cpp StringTokenizer.cpp \
