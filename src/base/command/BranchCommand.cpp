@@ -149,6 +149,24 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       //branch[which]->Append(cmd);
 }
 
+void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
+{
+   // Increase the size of the vector if it's not big enough
+   if (which >= (Integer)branch.capacity())
+      branch.reserve(which+1);
+   
+   if (which == (Integer)(branch.size()))
+      branch.push_back(cmd);   
+   else if (branch.at(which) == NULL)
+      branch.at(which) = cmd;
+   else
+   {
+      GmatCommand* tmp = branch.at(which);
+      branch.at(which) = cmd;
+      cmd->Append(tmp);
+   }
+}
+
 
 bool BranchCommand::Append(GmatCommand *cmd)
 {
@@ -176,6 +194,25 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       branch[0] = cmd;
       cmd->Append(current);
       return true;
+   }
+   // see if we're supposed to add it to the front of a branch
+   // i.e. the prev = the last command in the previous branch
+   // (e.g. an Else command)
+   // check all but the last branch - End*** should take care of it
+   // at that point
+   for (Integer br = 0; br < (Integer) (branch.size() - 1); ++br)
+   {
+      current = branch.at(br);
+      if (current != NULL)
+      {
+         while (current->GetNext() != this)
+            current = current->GetNext();
+         if (current == prev) 
+         {
+            AddToFrontOfBranch(cmd,br+1);
+            return true;
+         }
+      }
    }
    // If we have branches, try to insert there first
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
