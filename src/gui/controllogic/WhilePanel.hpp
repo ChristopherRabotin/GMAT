@@ -4,11 +4,11 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
-// Author: 
-// Created: 
-// Modified: 
+// Author: Waka Waktola
+// Created: 2003/09/08
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
- * 
+ * This class contains the Propagator command setup window.
  */
 //------------------------------------------------------------------------------
 
@@ -17,21 +17,30 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
-#include "GmatPanel.hpp"
+#include "Command.hpp"
+#include "While.hpp"
 
 class WhilePanel : public GmatPanel
 {
 public:
     // constructors
-    WhilePanel( wxWindow *parent );
+    WhilePanel(wxWindow *parent, GmatCommand *cmd);
     ~WhilePanel();  
 
 private:
     wxGrid *conditionGrid;
 
+    static const int COMMAND_COL = 0;
+    static const int LHS_COL = 1;
+    static const int COND_COL = 2;
+    static const int RHS_COL = 3;
+    
+    While *theWhileCommand;
+    
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
@@ -44,9 +53,8 @@ private:
     void Setup(wxWindow *parent);
 
     // Grid table event methods
-    void OnCellLeftClick(wxGridEvent& event);
-//    void OnCellRightClick(wxGridEvent& event);
     void OnCellDoubleLeftClick(wxGridEvent& event);
+    void OnCellValueChange(wxGridEvent& event);
                 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
@@ -61,8 +69,13 @@ private:
         MENU_DELETE_P,
         MENU_CLEAR_P
     };
+    
+   Integer mNumberOfConditions;
+   Integer mNumberOfLogicalOps;
+   StringArray mLhsList;
+   StringArray mOpStrings;
+   StringArray mRhsList;
+   StringArray mLogicalOpStrings;
 };
 
 #endif // WhilePanel_hpp
-
-
