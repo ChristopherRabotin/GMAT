@@ -39,13 +39,15 @@ END_EVENT_TABLE()
 // MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& title, ...)
 //------------------------------------------------------------------------------
 MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
-                                     const wxString& title, const wxPoint& pos,
-                                     const wxSize& size, const long style)
+                                     const wxString& plotName, const wxString& title,
+                                     const wxPoint& pos, const wxSize& size,
+                                     const long style)
    : wxMDIChildFrame(parent, -1, title, pos, size,
                      style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
+   mPlotName = plotName;
    MdiGlPlot::mdiChildren.Append(this);
     
     // Give it an icon
@@ -130,19 +132,6 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 MdiChildTrajFrame::~MdiChildTrajFrame()
 {
    MdiGlPlot::mdiChildren.DeleteObject(this);
-}
-
-//loj: 3/8/04 added
-//------------------------------------------------------------------------------
-// bool DeletePlot()
-//------------------------------------------------------------------------------
-bool MdiChildTrajFrame::DeletePlot()
-{
-   // This will call OnClose()
-   if (mIsMainFrame)
-      MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
-
-   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -323,5 +312,17 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
       if (updateCanvas)
          Update();
    }
+}
+
+//------------------------------------------------------------------------------
+// bool DeletePlot()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::DeletePlot()
+{
+   // This will call OnClose()
+   if (mIsMainFrame)
+      MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
+
+   return true;
 }
 

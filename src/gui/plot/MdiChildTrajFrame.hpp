@@ -36,12 +36,11 @@ public:
    bool mIsMainFrame;
     
    MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
-                     const wxString& title, const wxPoint& pos,
-                     const wxSize& size, const long style);
+                     const wxString& plotName, const wxString& title,
+                     const wxPoint& pos, const wxSize& size,
+                     const long style);
    ~MdiChildTrajFrame();
 
-   bool DeletePlot();
-    
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
    void OnShowDefaultView(wxCommandEvent& event);
@@ -56,15 +55,23 @@ public:
    void OnSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
    void OnClose(wxCloseEvent& event);
-
+   
    //loj: 5/6/04 added drawWireFrame
    void UpdateSpacecraft(const Real &time, const Real &posX,
                          const Real &posY, const Real &posZ,
                          const UnsignedInt orbitColor,
                          const UnsignedInt targetColor,
                          bool updateCanvas, bool drawWireFrame = false);
+   bool DeletePlot();
+
+   // getter
+   wxString GetPlotName() {return mPlotName;}
    
+   // setter
+   void SetPlotName(const wxString &str) {mPlotName = str;}
+
 protected:
+   wxString mPlotName;
 
    DECLARE_EVENT_TABLE();
 };
