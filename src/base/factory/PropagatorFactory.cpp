@@ -64,6 +64,8 @@ Propagator* PropagatorFactory::CreatePropagator(std::string ofType,
 PropagatorFactory::PropagatorFactory() :
 Factory(Gmat::PROPAGATOR)
 {
+   if (creatables.empty())
+      creatables.push_back("RungeKutta89");
 }
 
 //------------------------------------------------------------------------------
