@@ -34,7 +34,8 @@ public:
     MdiParentXyFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style);
-
+    ~MdiParentXyFrame();
+    
     void OnSize(wxSizeEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnQuit(wxCommandEvent& event);

@@ -30,7 +30,7 @@ public:
 
     //wxString GetXAxisTitle();
     //wxString GetYAxisTitle();
-    wxString GetCurveTitle();
+    //loj: 2/20/04 moved to wxPlotCurve wxString GetCurveTitle();
     
     double GetFirstX();
     void SetFirstX(double x);
@@ -49,7 +49,7 @@ public:
 
     //wxString mXAxisTitle;
     //wxString mYAxisTitle;
-    wxString mCurveTitle;
+    //loj: 2/20/04 moved to wxPlotCurve wxString mCurveTitle;
     
     Interpolator *mInterp;
     

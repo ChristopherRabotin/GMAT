@@ -34,6 +34,7 @@ public:
     MdiParentGlFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
                      const wxSize& size, const long style);
+    ~MdiParentGlFrame();
 
     void UpdateUI();
     void OnSize(wxSizeEvent& event);

@@ -21,12 +21,12 @@
 XyPlotCurve::XyPlotCurve(int offsetY, double startY, double endY, //double defaultY,
                          //const wxString &xAxisTitle, const wxString &yAxisTitle,
                          const wxString &curveTitle)
-    : wxPlotCurve(offsetY, startY, endY)
+    : wxPlotCurve(offsetY, startY, endY, curveTitle)
 {
     //mDefaultY = defaultY;
     //mXAxisTitle = xAxisTitle;
     //mYAxisTitle = yAxisTitle;
-    mCurveTitle = curveTitle;
+    //mCurveTitle = curveTitle;
     
     //mInterp = NULL;
     mInterp = new LinearInterpolator(); //loj: should I allow user to use his own?
@@ -56,13 +56,14 @@ XyPlotCurve::~XyPlotCurve()
 //      return mYAxisTitle;
 //  }
 
-//------------------------------------------------------------------------------
-// wxString GetCurveTitle()
-//------------------------------------------------------------------------------
-wxString XyPlotCurve::GetCurveTitle()
-{
-    return mCurveTitle;
-}
+//loj: 2/20/04 moved to wxPlotCurve
+//  //------------------------------------------------------------------------------
+//  // wxString GetCurveTitle()
+//  //------------------------------------------------------------------------------
+//  wxString XyPlotCurve::GetCurveTitle()
+//  {
+//      return mCurveTitle;
+//  }
 
 //------------------------------------------------------------------------------
 // double GetFirstX()
@@ -111,7 +112,10 @@ void XyPlotCurve::SetInterpolator(Interpolator *interp)
 //------------------------------------------------------------------------------
 wxInt32 XyPlotCurve::GetStartX()
 {
-    return mXdata.front();
+    if (mXdata.size() == 0)
+        return 0;
+    else
+        return mXdata.front();
 }
 
 //------------------------------------------------------------------------------
@@ -119,7 +123,10 @@ wxInt32 XyPlotCurve::GetStartX()
 //------------------------------------------------------------------------------
 wxInt32 XyPlotCurve::GetEndX()
 {
-    return mXdata.back();
+    if (mXdata.size() == 0)
+        return 0;
+    else
+        return mXdata.back();
 }
 
 //------------------------------------------------------------------------------

@@ -110,7 +110,7 @@ private:
 class WXDLLEXPORT wxPlotCurve: public wxObject
 {
 public:
-    wxPlotCurve( int offsetY, double startY, double endY );
+    wxPlotCurve( int offsetY, double startY, double endY, const wxString &title);
 
     virtual wxInt32 GetStartX() = 0;
     virtual wxInt32 GetEndX() = 0;
@@ -126,27 +126,32 @@ public:
     double GetEndY()
         { return m_endY; }
     void SetOffsetY( int offsetY )
-       { m_offsetY = offsetY; }
+        { m_offsetY = offsetY; }
     int GetOffsetY()
-       { return m_offsetY; }
+        { return m_offsetY; }
 
     //loj: added for GMAT project
     wxPen& GetPenNormal()
-       { return m_penNormal; }
+        { return m_penNormal; }
     wxPen& GetPenSelected()
-       { return m_penSelected; }
+        { return m_penSelected; }
     void SetPenNormal( const wxPen &pen )
-       { m_penNormal = pen; }
+        { m_penNormal = pen; }
     void SetPenSelected( const wxPen &pen )
-       { m_penSelected = pen; }
-
+        { m_penSelected = pen; }
+    wxString& GetCurveTitle()
+        { return m_curveTitle; }
+    void SetCurveTitle(const wxString &title)
+        { m_curveTitle = title; }
+    
 private:
     int     m_offsetY;
     double  m_startY;
     double  m_endY;
     wxPen   m_penNormal;
     wxPen   m_penSelected;
-
+    wxString m_curveTitle;
+    
     DECLARE_ABSTRACT_CLASS(wxPlotCurve)
 };
 

@@ -29,8 +29,6 @@ public:
     XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    wxWindow *theParent;
-    GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
     Subscriber *theSubscriber;
     wxString *theParamList;
     
@@ -42,7 +40,6 @@ protected:
     wxBoxSizer *xSelelectedBoxSizer;
     wxBoxSizer *ySelelectedBoxSizer;
     wxBoxSizer *optionBoxSizer;
-    wxBoxSizer *bottomSizer;
     
     wxStaticText *titleAvailbleText;
     wxStaticText *titleXText;
@@ -71,7 +68,7 @@ protected:
     void OnPlotCheckBoxChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
-    virtual void Create(wxWindow *parent);
+    virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
     virtual void OnHelp();

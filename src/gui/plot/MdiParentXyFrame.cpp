@@ -81,6 +81,14 @@ MdiParentXyFrame::MdiParentXyFrame(wxWindow *parent,
 }
 
 //------------------------------------------------------------------------------
+// ~MdiParentXyFrame()
+//------------------------------------------------------------------------------
+MdiParentXyFrame::~MdiParentXyFrame()
+{
+    MdiXyPlot::mdiParentXyFrame = NULL;
+}
+
+//------------------------------------------------------------------------------
 // void OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiParentXyFrame::OnSize(wxSizeEvent& event)

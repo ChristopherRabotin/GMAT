@@ -18,14 +18,13 @@
 #include "XyPlotSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-#include "GuiItemManager.hpp"
 
 #include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
-BEGIN_EVENT_TABLE(XyPlotSetupPanel, wxPanel)
+BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
     EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
     EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
@@ -58,18 +57,16 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
                                    const wxString &subscriberName)
     : GmatPanel(parent)
 {
-    //MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
-    //MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
-    //                              std::string(subscriberName.c_str()) + "\n");
+    MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
+    MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
+                                  std::string(subscriberName.c_str()) + "\n");
     
-    theParent = parent;
     theSubscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-    theGuiManager = GuiItemManager::GetInstance();
     theParamList = NULL;
     
-    Create(this);
+    Create();
 }
 
 //-------------------------------
@@ -143,44 +140,37 @@ void XyPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
 //----------------------------------
 
 //------------------------------------------------------------------------------
-// void Create(wxWindow *parent)
+// void Create()
 //------------------------------------------------------------------------------
-/**
- * @param <parent> input parent.
- * @param <scName> input spacecraft name.
- *
- * @note Creates the notebook for spacecraft information
- */
-//------------------------------------------------------------------------------
-void XyPlotSetupPanel::Create(wxWindow *parent)
+void XyPlotSetupPanel::Create()
 {
-    //MessageInterface::ShowMessage("XyPlotSetupPanel::Create() entering...\n");
-    unsigned int i;
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() entering...\n");
     wxString emptyList[] = {};
 
     pageBoxSizer = new wxBoxSizer(wxVERTICAL);
     paramGridSizer = new wxFlexGridSizer(6, 0, 0);
 
     // empty text for spacing line
-    emptyText = new wxStaticText(parent, XY_PLOT_TEXT, wxT(""),
+    emptyText = new wxStaticText(this, XY_PLOT_TEXT, wxT(""),
                                  wxDefaultPosition, wxSize(100, -1), 0);
     
     //------------------------------------------------------
     // plot option, (1st column)
     //------------------------------------------------------
-    plotCheckBox = new wxCheckBox(parent, XY_PLOT_CHECKBOX, wxT("Show Plot"),
+    plotCheckBox = new wxCheckBox(this, XY_PLOT_CHECKBOX, wxT("Show Plot"),
                                   wxDefaultPosition, wxSize(100, -1), 0);
             
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
         
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 2nd col...\n");
     //------------------------------------------------------
     // X box label (2nd column)
     //------------------------------------------------------
-    titleXText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Selected X"),
+    titleXText = new wxStaticText(this, XY_PLOT_TEXT, wxT("Selected X"),
                                   wxDefaultPosition, wxSize(80,-1), 0);
     
-    xSelectedListBox = new wxListBox(parent, XY_PLOT_LISTBOX, wxDefaultPosition,
+    xSelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE);
 
     
@@ -194,13 +184,14 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     xSelelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, 5);
     xSelelectedBoxSizer->Add(xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5);
             
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 3rd col...\n");
     //------------------------------------------------------
     // add, remove X buttons (3rd column)
     //------------------------------------------------------
-    addXButton = new wxButton(parent, XY_PLOT_ADD_X, wxT("<--"),
+    addXButton = new wxButton(this, XY_PLOT_ADD_X, wxT("<--"),
                               wxDefaultPosition, wxSize(20,20), 0);
 
-    removeXButton = new wxButton(parent, XY_PLOT_REMOVE_X, wxT("-->"),
+    removeXButton = new wxButton(this, XY_PLOT_REMOVE_X, wxT("-->"),
                                  wxDefaultPosition, wxSize(20,20), 0);
 
     xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -208,32 +199,34 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     xButtonsBoxSizer->Add(addXButton, 0, wxALIGN_CENTRE|wxALL, 5);
     xButtonsBoxSizer->Add(removeXButton, 0, wxALIGN_CENTRE|wxALL, 5);
       
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 4th col...\n");
     //------------------------------------------------------
     // parameters box (4th column)
     //------------------------------------------------------
     paramBoxSizer = new wxBoxSizer(wxVERTICAL);
     
-    titleAvailbleText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Variables"),
+    titleAvailbleText = new wxStaticText(this, XY_PLOT_TEXT, wxT("Variables"),
                                          wxDefaultPosition, wxSize(80,-1), 0);
     
-    theGuiManager->UpdateConfigParameter();
+    theGuiManager->UpdateParameter();
     
     paramListBox =
-        theGuiManager->GetConfigParameterListBox(parent, wxSize(140,125));
+        theGuiManager->GetConfigParameterListBox(this, wxSize(140,125));
     
     paramBoxSizer->Add(titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5);
     paramBoxSizer->Add(paramListBox, 0, wxALIGN_CENTRE|wxALL, 5);
     
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 5th col...\n");
     //------------------------------------------------------
     // add, remove, clear Y buttons (5th column)
     //------------------------------------------------------
-    addYButton = new wxButton(parent, XY_PLOT_ADD_Y, wxT("-->"),
+    addYButton = new wxButton(this, XY_PLOT_ADD_Y, wxT("-->"),
                               wxDefaultPosition, wxSize(20,20), 0);
 
-    removeYButton = new wxButton(parent, XY_PLOT_REMOVE_Y, wxT("<--"),
+    removeYButton = new wxButton(this, XY_PLOT_REMOVE_Y, wxT("<--"),
                                  wxDefaultPosition, wxSize(20,20), 0);
     
-    clearYButton = new wxButton(parent, XY_PLOT_CLEAR_Y, wxT("<="),
+    clearYButton = new wxButton(this, XY_PLOT_CLEAR_Y, wxT("<="),
                                 wxDefaultPosition, wxSize(20,20), 0);
     
     yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -241,13 +234,14 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     yButtonsBoxSizer->Add(removeYButton, 0, wxALIGN_CENTRE|wxALL, 5);
     yButtonsBoxSizer->Add(clearYButton, 0, wxALIGN_CENTRE|wxALL, 5);
     
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 6th col...\n");
     //------------------------------------------------------
     // Y box label (6th column)
     //------------------------------------------------------
-    titleYText = new wxStaticText(parent, XY_PLOT_TEXT, wxT("Selected Y"),
+    titleYText = new wxStaticText(this, XY_PLOT_TEXT, wxT("Selected Y"),
                                   wxDefaultPosition, wxSize(80,-1), 0);
 
-    ySelectedListBox = new wxListBox(parent, XY_PLOT_LISTBOX, wxDefaultPosition,
+    ySelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE);
     
     //loj: for B2, 1 Y axis parameter
@@ -259,27 +253,6 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     ySelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
     ySelelectedBoxSizer->Add(titleYText, 0, wxALIGN_CENTRE|wxALL, 5);
     ySelelectedBoxSizer->Add(ySelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5);
-
-    //------------------------------------------------------
-    // Ok, Apply, Cancel, Help buttons
-    //------------------------------------------------------
-    //loj: recreate buttons here until GmatPanel works!!
-    theOkButton = new wxButton(parent, ID_BUTTON_OK, "OK", 
-                               wxDefaultPosition, wxDefaultSize, 0);
-    theApplyButton = new wxButton(parent, ID_BUTTON_APPLY, "Apply", 
-                                  wxDefaultPosition, wxDefaultSize, 0);
-    theCancelButton = new wxButton(parent, ID_BUTTON_CANCEL, "Cancel", 
-                                   wxDefaultPosition, wxDefaultSize, 0);
-    theHelpButton = new wxButton(parent, ID_BUTTON_HELP, "Help", 
-                              wxDefaultPosition, wxDefaultSize, 0);
-    
-    bottomSizer = new wxBoxSizer(wxHORIZONTAL);
-    
-    // adds the buttons to button sizer    
-    bottomSizer->Add(theOkButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    bottomSizer->Add(theApplyButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    bottomSizer->Add(theCancelButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    bottomSizer->Add(theHelpButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
     
     //------------------------------------------------------
     // put in the order
@@ -292,7 +265,8 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     paramGridSizer->Add(ySelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     
     pageBoxSizer->Add(paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    pageBoxSizer->Add(bottomSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+    
+    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before adding to parent sizer...\n");
     
     //------------------------------------------------------
     // add to parent sizer
@@ -322,8 +296,11 @@ void XyPlotSetupPanel::SaveData()
     // save data to core engine
     theSubscriber->Activate(plotCheckBox->IsChecked());
 
+    // set X parameter
+    // set Y parameters
+    
     //loj: for B2, do not plot, it doesn't work!!!
-    theSubscriber->Activate(false);
+    //theSubscriber->Activate(false);
 }
 
 //------------------------------------------------------------------------------

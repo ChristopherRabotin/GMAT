@@ -42,6 +42,7 @@
 
 #include <math.h>
 
+
 // ----------------------------------------------------------------------------
 // XPMs
 // ----------------------------------------------------------------------------
@@ -116,11 +117,14 @@ wxPlotEvent::wxPlotEvent( wxEventType commandType, int id )
 
 IMPLEMENT_ABSTRACT_CLASS(wxPlotCurve, wxObject)
 
-wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY )
+//loj: 2/20/04 added title
+wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY,
+                          const wxString &title)
 {
     m_offsetY = offsetY;
     m_startY = startY;
     m_endY = endY;
+    m_curveTitle = title;
 }
 
 //-----------------------------------------------------------------------------
@@ -825,15 +829,19 @@ wxPlotWindow::~wxPlotWindow()
 {
 }
 
+#include "MessageInterface.hpp"
 //------------------------------------------------------------------------------
 // void wxPlotWindow::Add( wxPlotCurve *curve )
 //------------------------------------------------------------------------------
 void wxPlotWindow::Add( wxPlotCurve *curve )
 {
+    MessageInterface::ShowMessage("wxPlotWindow::Add() before appending curve... \n");
     m_curves.Append( curve );
     if (!m_current) m_current = curve;
     
+    MessageInterface::ShowMessage("wxPlotWindow::Add() before ResetScrollbar... \n");
     ResetScrollbar();
+    MessageInterface::ShowMessage("wxPlotWindow::Add() exit... \n");
 }
 
 //------------------------------------------------------------------------------
@@ -1076,16 +1084,21 @@ void wxPlotWindow::SetZoom( double zoom )
 //------------------------------------------------------------------------------
 void wxPlotWindow::ResetScrollbar()
 {
+    MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() entered \n");
     wxInt32 max = 0;
     wxNode *node = m_curves.First();
     while (node)
     {
+        MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
         wxPlotCurve *curve = (wxPlotCurve*) node->Data();
+        MessageInterface::ShowMessage("title = %s \n", curve->GetCurveTitle().c_str());
         if (curve->GetEndX() > max)
             max = curve->GetEndX();
         node = node->Next();
+        MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
     }
-    
+
+    MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() before SetScrollbars \n");
     SetScrollbars( wxPLOT_SCROLL_STEP, wxPLOT_SCROLL_STEP, 
                    (int)(((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1), 0 );
 }

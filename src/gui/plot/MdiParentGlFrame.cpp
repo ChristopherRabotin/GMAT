@@ -89,6 +89,14 @@ MdiParentGlFrame::MdiParentGlFrame(wxWindow *parent,
 }
 
 //------------------------------------------------------------------------------
+// ~MdiParentGlFrame()
+//------------------------------------------------------------------------------
+MdiParentGlFrame::~MdiParentGlFrame()
+{
+    MdiGlPlot::mdiParentGlFrame = NULL;
+}
+
+//------------------------------------------------------------------------------
 // void UpdateUI()
 //------------------------------------------------------------------------------
 void MdiParentGlFrame::UpdateUI()

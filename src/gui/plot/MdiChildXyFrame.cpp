@@ -26,6 +26,8 @@
 #include "wx/intl.h"
 #include "wx/gdicmn.h" // for color
 
+#include "MessageInterface.hpp"
+
 BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
     EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
     EVT_MENU(GmatPlot::MDI_XY_CHANGE_TITLE, MdiChildXyFrame::OnChangeTitle)
@@ -137,10 +139,12 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
 
     // Create log window
+    //loj: 2/24/04 Do we need this TextCtrl? - Yes, it will crash otherwise
     mLog = new wxTextCtrl( this, -1, "This is the log window.\n",
-                           wxPoint(0,0), wxSize(100,100), wxTE_MULTILINE );
-    wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLog ) );
-    delete oldLog;
+                           wxPoint(0,0), wxSize(100,50), wxTE_MULTILINE );
+    mLog->Hide();
+    //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLog ) );
+    //delete oldLog;
     
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
     
@@ -324,26 +328,42 @@ void MdiChildXyFrame::AddPlotCurve(int yOffset, double yMin, double yMax,
                                    const wxString &curveTitle,
                                    const wxString &penColorName)
 {
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
+                                  yMin, yMax);
+    
     // Create XyPlotCurve
-    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax,
-                                         curveTitle);
+    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
+    
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() XyPlotCurve created... \n");
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() title = %s\n",
+                                  curve->GetCurveTitle().c_str());
+    
     // Find the color
     wxColour *color = wxTheColourDatabase->FindColour(penColorName);
     if (color == NULL)
     {
         // Set normal pen to black dashed pen
         curve->SetPenNormal(*wxBLACK_DASHED_PEN);
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
     }
     else
     {
         wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
         curve->SetPenNormal(*pen);
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
     }
 
     // Set selected pen to black for now (build2)
     curve->SetPenSelected(*wxBLACK_PEN);
 
-    mXyPlot->Add(curve);
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() before adding curve... \n");
+
+    if (mXyPlot != NULL)
+        mXyPlot->Add(curve);
+    else
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
+        
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() exit... \n");
 
 }
 
@@ -450,6 +470,8 @@ void MdiChildXyFrame::AddDataPoints(int curveNum, double xData, double yData)
 {
     if (mXyPlot)
     {
+        MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() X = %f"
+                                      "Y = %f\n", xData, yData);
         XyPlotCurve *curve = (XyPlotCurve*)(mXyPlot->GetAt(curveNum));
         curve->AddData(xData, yData); //loj: should I check for curve title?
     }

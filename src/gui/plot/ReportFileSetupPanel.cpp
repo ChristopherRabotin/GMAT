@@ -25,13 +25,12 @@
 //------------------------------
 // event tables for wxWindows
 //------------------------------
-BEGIN_EVENT_TABLE(ReportFileSetupPanel, wxPanel)
+BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
     EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
     EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
     EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
     EVT_BUTTON(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
-
     EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
 END_EVENT_TABLE()
 
@@ -64,7 +63,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 
     theGuiManager = GuiItemManager::GetInstance();
     
-    Create(this);
+    Create();
 }
 
 //-------------------------------
@@ -84,16 +83,15 @@ void ReportFileSetupPanel::OnWriteCheckBoxChange(wxCommandEvent& event)
 //----------------------------------
 
 //------------------------------------------------------------------------------
-// void Create(wxWindow *parent)
+// void Create()
 //------------------------------------------------------------------------------
 /**
- * @param <parent> input parent.
  * @param <scName> input spacecraft name.
  *
  * @note Creates the notebook for spacecraft information
  */
 //------------------------------------------------------------------------------
-void ReportFileSetupPanel::Create(wxWindow *parent)
+void ReportFileSetupPanel::Create()
 {
     //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
 
@@ -102,41 +100,16 @@ void ReportFileSetupPanel::Create(wxWindow *parent)
     //------------------------------------------------------
     // plot option, (1st column)
     //------------------------------------------------------
-    writeCheckBox = new wxCheckBox(parent, RF_WRITE_CHECKBOX, wxT("Write Report"),
+    writeCheckBox = new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Write Report"),
                                    wxDefaultPosition, wxSize(100, -1), 0);
             
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
-        
-    //------------------------------------------------------
-    // Ok, Apply, Cancel, Help buttons
-    //------------------------------------------------------
-    //loj: recreate buttons here until GmatPanel works!!
-    theOkButton = new wxButton(parent, ID_BUTTON_OK, "OK", 
-                               wxDefaultPosition, wxDefaultSize, 0);
-    theApplyButton = new wxButton(parent, ID_BUTTON_APPLY, "Apply", 
-                                  wxDefaultPosition, wxDefaultSize, 0);
-    theCancelButton = new wxButton(parent, ID_BUTTON_CANCEL, "Cancel", 
-                                   wxDefaultPosition, wxDefaultSize, 0);
-    theHelpButton = new wxButton(parent, ID_BUTTON_HELP, "Help", 
-                                 wxDefaultPosition, wxDefaultSize, 0);
-    
-    //loj: recreate buttons here until GmatPanel works!!
-    theBottomSizer = new wxBoxSizer(wxHORIZONTAL);
-    
-    // adds the buttons to button sizer    
-    theBottomSizer->Add(theOkButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    theBottomSizer->Add(theApplyButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    theBottomSizer->Add(theCancelButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    theBottomSizer->Add(theHelpButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
-    
+            
     //------------------------------------------------------
     // put in the order
     //------------------------------------------------------
     pageBoxSizer->Add(optionBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    
-    //loj: add the theBottomSizer here until GmatPanel works!!
-    pageBoxSizer->Add(theBottomSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     
     //------------------------------------------------------
     // add to parent sizer

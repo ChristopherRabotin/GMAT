@@ -42,7 +42,7 @@ protected:
     void OnWriteCheckBoxChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
-    virtual void Create(wxWindow *parent);
+    virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
     virtual void OnHelp();
