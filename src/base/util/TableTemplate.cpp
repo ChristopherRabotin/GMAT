@@ -29,8 +29,8 @@
 //------------------------------------------------------------------------------
 template <class T>
 TableTemplate<T>::TableTemplate()
-  :
-  elementD((T*) 0), rowsD(0), colsD(0), isSizedD(false)
+   :
+   elementD((T*) 0), rowsD(0), colsD(0), isSizedD(false)
 {
 }
 
@@ -41,12 +41,12 @@ TableTemplate<T>::TableTemplate()
 template <class T>
 TableTemplate<T>::TableTemplate(int r, int c)
 {
-    if ((r < 0) || (c < 0))
-    {
-        throw TableTemplateExceptions::IllegalSize();
-    }
+   if ((r < 0) || (c < 0))
+   {
+      throw TableTemplateExceptions::IllegalSize();
+   }
 
-    init(r, c);
+   init(r, c);
 }
 
 //------------------------------------------------------------------------------
@@ -57,31 +57,31 @@ TableTemplate<T>::TableTemplate(int r, int c)
 //         proper C++. Hopefully, a future compiler will.
 //------------------------------------------------------------------------------
 /*
-template <class T>
-TableTemplate<T>::TableTemplate(int r, int c, const T &a11,...)
-{
-    int i,j;
-    va_list ap;        // argument list
+  template <class T>
+  TableTemplate<T>::TableTemplate(int r, int c, const T &a11,...)
+  {
+  int i,j;
+  va_list ap;        // argument list
 
-    if ((r < 0) || (c < 0)
-    {
-        throw TableTemplateExceptions::IllegalSize();
-    }
+  if ((r < 0) || (c < 0)
+  {
+  throw TableTemplateExceptions::IllegalSize();
+  }
     
-    init(r,c);        // allocate memory and set size
+  init(r,c);        // allocate memory and set size
 
-    va_start(ap,all);        // make ap point to first argument in list
-    elementD[0] = all;         // first element is all
+  va_start(ap,all);        // make ap point to first argument in list
+  elementD[0] = all;         // first element is all
 
-    // remaining elements are in arg list
-    for( i = 0;i < r; i++)
-    {
-        for(j = 0; j < r; j++)
-        {
-            elementD[i,j} = va_arg(ap, const T*);
-        }
-    }
-}
+  // remaining elements are in arg list
+  for( i = 0;i < r; i++)
+  {
+  for(j = 0; j < r; j++)
+  {
+  elementD[i,j} = va_arg(ap, const T*);
+  }
+  }
+  }
 */
 
 //------------------------------------------------------------------------------
@@ -91,18 +91,18 @@ TableTemplate<T>::TableTemplate(int r, int c, const T &a11,...)
 template <class T>
 TableTemplate<T>::TableTemplate(int r, int c, const T* array) 
 {
-    if ((r < 0) || (c < 0))
-    {
-        throw TableTemplateExceptions::IllegalSize();
-    }
+   if ((r < 0) || (c < 0))
+   {
+      throw TableTemplateExceptions::IllegalSize();
+   }
 
-    init(r, c);
+   init(r, c);
 
-    int i;
-    for(i = 0; i < rowsD*colsD; i++)
-    {
-        elementD[i] = array[i];
-    }
+   int i;
+   for(i = 0; i < rowsD*colsD; i++)
+   {
+      elementD[i] = array[i];
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -112,17 +112,17 @@ TableTemplate<T>::TableTemplate(int r, int c, const T* array)
 template <class T>
 TableTemplate<T>::TableTemplate(const TableTemplate<T> &Table) 
 {
-    if (Table.IsSized() == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (Table.IsSized() == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    init(Table.rowsD, Table.colsD);
+   init(Table.rowsD, Table.colsD);
     
-    for (int i = 0; i < rowsD*colsD; i++)
-    {
-        elementD[i] = Table.elementD[i];
-     }
+   for (int i = 0; i < rowsD*colsD; i++)
+   {
+      elementD[i] = Table.elementD[i];
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ TableTemplate<T>::TableTemplate(const TableTemplate<T> &Table)
 template <class T>
 TableTemplate<T>::~TableTemplate() 
 {
-    delete[] elementD;    
+   delete[] elementD;    
 }
 
 //------------------------------------------------------------------------------
@@ -142,29 +142,30 @@ template <class T>
 bool
 TableTemplate<T>::operator==(const TableTemplate<T> &table) const
 {
-    int i;
+   int i;
 
-    if ((isSizedD == false) || (table.IsSized() == false))
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if ((isSizedD == false) || (table.IsSized() == false))
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if(this!=& table)
-    {
-        if((rowsD == table.rowsD)&&(colsD == table.colsD))
-        for (i = 0; i < rowsD*colsD; i++)
-        {
+   if(this!=& table)
+   {
+      if((rowsD == table.rowsD)&&(colsD == table.colsD))
+         for (i = 0; i < rowsD*colsD; i++)
+         {
             if(elementD[i] != table.elementD[i])
             {
-                return false;
+               return false;
             }
-        }
-        else
-        {
-            return false;
-        }
-     }
-     return true;
+         }
+      else
+      {
+         return false;
+      }
+   }
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -174,7 +175,7 @@ template <class T>
 bool
 TableTemplate<T>::operator!=(const TableTemplate<T> &table) const
 {
-     return (bool)(!(*this == table));
+   return (bool)(!(*this == table));
 }
 
 //------------------------------------------------------------------------------
@@ -183,14 +184,15 @@ TableTemplate<T>::operator!=(const TableTemplate<T> &table) const
 template <class T>
 T&
 TableTemplate<T>::operator()(int r, int c) {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
-        throw TableTemplateExceptions::OutOfBounds();
-    return elementD[r*colsD + c];
+   if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
+      throw TableTemplateExceptions::OutOfBounds();
+   
+   return elementD[r*colsD + c];
 }
 
 //------------------------------------------------------------------------------
@@ -200,14 +202,14 @@ template <class T>
 const T&
 TableTemplate<T>::operator()(int r, int c) const 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
-        throw TableTemplateExceptions::OutOfBounds();
-    return elementD[r*colsD + c];
+   if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
+      throw TableTemplateExceptions::OutOfBounds();
+   return elementD[r*colsD + c];
 }
 
 //------------------------------------------------------------------------------
@@ -220,25 +222,26 @@ template <class T>
 TableTemplate<T>&
 TableTemplate<T>::operator=(const TableTemplate<T> &table) 
 {
-    if (table.IsSized() == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (table.IsSized() == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if (isSizedD == false)
-    {
-        init(table.rowsD, table.colsD);
-    }
+   if (isSizedD == false)
+   {
+      init(table.rowsD, table.colsD);
+   }
 
-    if (*this != table) {
-        if((rowsD != table.rowsD) ||(colsD != table.colsD))
-            throw TableTemplateExceptions::DimensionError();
-        for (int i = 0; i < rowsD*colsD; i++)
-        {
-            elementD[i] = table.elementD[i];
-        }
-    }
-    return *this;
+   if (*this != table) {
+      if((rowsD != table.rowsD) ||(colsD != table.colsD))
+         throw TableTemplateExceptions::DimensionError();
+      for (int i = 0; i < rowsD*colsD; i++)
+      {
+         elementD[i] = table.elementD[i];
+      }
+   }
+   
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -250,14 +253,15 @@ template <class T>
 T
 TableTemplate<T>::GetElement(int r, int c) const 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
-        throw TableTemplateExceptions::OutOfBounds();
-    return elementD[r*colsD + c];
+   if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
+      throw TableTemplateExceptions::OutOfBounds();
+   
+   return elementD[r*colsD + c];
 }
 
 //------------------------------------------------------------------------------
@@ -269,14 +273,15 @@ template <class T>
 void
 TableTemplate<T>::SetElement(int r, int c, const T &value) 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
-        throw TableTemplateExceptions::OutOfBounds();
-    elementD[r*colsD + c] = value;
+   if((r >= rowsD) || (r < 0) || (c >= colsD) || (c < 0))
+      throw TableTemplateExceptions::OutOfBounds();
+   
+   elementD[r*colsD + c] = value;
 }
 
 //------------------------------------------------------------------------------
@@ -286,7 +291,7 @@ template <class T>
 bool
 TableTemplate<T>::IsSized() const
 {
-    return isSizedD;
+   return isSizedD;
 }
 
 //------------------------------------------------------------------------------
@@ -296,17 +301,17 @@ template <class T>
 void
 TableTemplate<T>::SetSize(int r, int c)
 {
-    if (isSizedD == true)
-    {
-        throw TableTemplateExceptions::TableAlreadySized();
-    }
+   if (isSizedD == true)
+   {
+      throw TableTemplateExceptions::TableAlreadySized();
+   }
 
-    if ((r < 0) || (c < 0))
-    {
-        throw TableTemplateExceptions::IllegalSize();
-    }
+   if ((r < 0) || (c < 0))
+   {
+      throw TableTemplateExceptions::IllegalSize();
+   }
 
-    init(r, c);
+   init(r, c);
 }
 
 //------------------------------------------------------------------------------
@@ -316,13 +321,13 @@ template <class T>
 void
 TableTemplate<T>::GetSize(int &r, int &c) const 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    r = rowsD;
-    c = colsD;
+   r = rowsD;
+   c = colsD;
 }
 
 //------------------------------------------------------------------------------
@@ -332,12 +337,12 @@ template <class T>
 int
 TableTemplate<T>::GetNumColumns() const 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    return colsD;
+   return colsD;
 }
 
 //------------------------------------------------------------------------------
@@ -347,12 +352,12 @@ template <class T>
 int
 TableTemplate<T>::GetNumRows() const 
 {
-    if (isSizedD == false)
-    {
-        throw TableTemplateExceptions::UnsizedTable();
-    }
+   if (isSizedD == false)
+   {
+      throw TableTemplateExceptions::UnsizedTable();
+   }
 
-    return rowsD;
+   return rowsD;
 }
 
 //------------------------------------------------------------------------------
@@ -364,18 +369,23 @@ template <class T>
 void
 TableTemplate<T>::init(int r, int c) 
 {
-    rowsD = r;
-    colsD = c;
+   rowsD = r;
+   colsD = c;
 
-    if ((rowsD == 0) || (colsD == 0))
-    {
-        rowsD = colsD = 0;
-        elementD = (T *) 0;
-    }
-    else
-    {
-        elementD = new T[rowsD*colsD];
-    }
-    isSizedD = true;
+   if ((rowsD == 0) || (colsD == 0))
+   {
+      rowsD = colsD = 0;
+      elementD = (T *) 0;
+   }
+   else
+   {
+      elementD = new T[rowsD*colsD];
+
+      //loj: 9/20/04 added to initialize to 0.0
+      for (int i=0; i<rowsD*colsD; i++)
+         elementD[i] = 0.0;
+   }
+   
+   isSizedD = true;
 }
 
