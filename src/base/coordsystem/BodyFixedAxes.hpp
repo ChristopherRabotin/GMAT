@@ -98,7 +98,8 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
    //                                                DynamicAxesParamCount];
    
-   static const Real  JD_OF_JANUARY_1_1997 = 2450449.5;  // correct????
+   static const Real  JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????
+   static const Real  DETERMINANT_TOLERANCE = 1.0e-15;
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
 

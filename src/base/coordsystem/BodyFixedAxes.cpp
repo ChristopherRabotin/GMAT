@@ -702,7 +702,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       rotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
                      (ST.Transpose() * PM.Transpose()));
       Real determinant = rotMatrix.Determinant();
-      if (Abs(determinant - 1.0) > GmatRealConst::REAL_EPSILON)
+      if (Abs(determinant - 1.0) > DETERMINANT_TOLERANCE)
          throw CoordinateSystemException(
                "Computed rotation matrix has a determinant not equal to 1.0");
       rotDotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
