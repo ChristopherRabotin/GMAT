@@ -18,7 +18,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CommandFactory.hpp"
@@ -29,11 +28,11 @@
 #include "Vary.hpp"           // for Vary command
 #include "Achieve.hpp"        // for Achieve command
 #include "EndTarget.hpp"      // for EndTarget command
-#include "ForCommand.hpp"     // for FOR command
-#include "EndForCommand.hpp"  // for EndFor command
-#include "If.hpp"      // for IF command
-#include "ElseCommand.hpp"    // for Else command
-#include "EndIfCommand.hpp"   // for EndIf command
+#include "For.hpp"            // for FOR command
+#include "EndFor.hpp"         // for EndFor command
+#include "If.hpp"             // for IF command
+#include "Else.hpp"           // for Else command
+#include "EndIf.hpp"          // for EndIf command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Save.hpp"           // for Save command  
 
@@ -72,15 +71,15 @@ GmatCommand* CommandFactory::CreateCommand(std::string ofType,
     else if (ofType == "EndTarget")
         return new EndTarget;
     else if (ofType == "For")
-        return new ForCommand;
+        return new For;
     else if (ofType == "EndFor")
-        return new EndForCommand;
+        return new EndFor;
     else if (ofType == "If")
         return new If;
     else if (ofType == "Else")
-        return new ElseCommand;
+        return new Else;
     else if (ofType == "EndIf")
-        return new EndIfCommand;
+        return new EndIf;
     else if (ofType == "GMAT")
         return new Assignment;
     else if (ofType == "save")
