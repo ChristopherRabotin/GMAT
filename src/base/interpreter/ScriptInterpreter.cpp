@@ -262,7 +262,8 @@ bool ScriptInterpreter::Parse(void)
                 name = **phrase;
 
             if (!InterpretObject(type, name))
-                throw InterpreterException("Unable to create object: " + name); //loj: added name
+                throw InterpreterException("Unable to create object " + name +
+                                           " of type " + type);
         }
         // Next try for object parameter setup or assignment
         else if ((**phrase == "GMAT") && (!sequenceStarted)) {
