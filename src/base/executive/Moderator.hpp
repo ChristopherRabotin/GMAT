@@ -212,7 +212,10 @@ public:
    SolarSystem* CreateSolarSystem(const std::string &name);
    SolarSystem* GetSolarSystemInUse();
    bool SetSolarSystemInUse(const std::string &name);
-    
+
+   // CoordinateSystem (loj: 1/31/05 Added)
+   CoordinateSystem* GetInternalCoordinateSystem();
+   
    // Planetary files
    StringArray& GetPlanetaryFileTypes();
    StringArray& GetPlanetaryFileNames();
@@ -264,6 +267,7 @@ private:
 
    // initialization
    void InitializePlanetarySource();
+   void CreateDefaultCoordSystems();
    void CreateDefaultMission();
    bool CreateSlpFile(const std::string &fileName);
    bool CreateDeFile(const Integer id, const std::string &fileName,

@@ -131,8 +131,7 @@ bool Moderator::Initialize(bool fromGui)
          // Create internal CoordinateSystem with noname, so that it will not
          // be configured
          theInternalCoordSystem = CreateCoordinateSystem("", true);
-         //MessageInterface::ShowMessage
-         //   ("Moderator::Initialize() theInternalCoordSystem:%s created\n")
+         theInternalCoordSystem->SetName("EarthMJ2000Eq"); //loj: 1/28/05 Added
          
          // Read startup file
          theFileManager->ReadStartupFile();
@@ -155,7 +154,7 @@ bool Moderator::Initialize(bool fromGui)
       MessageInterface::PopupMessage(Gmat::WARNING_,
                                      "Unknown Error occured during initialization");
    }
-    
+   
    MessageInterface::ShowMessage("Moderator successfully created core engine\n");
    isInitialized = true;
    return isInitialized;
@@ -307,21 +306,22 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                                      const std::string &newName)
 {
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
-#endif
+   #endif
    
    bool renamed = theConfigManager->RenameItem(type, oldName, newName);
    
    //--------------------------------------------------
    // rename object name used in mission sequence
    //--------------------------------------------------
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameConfiguredItem() ===> Change Command ref object names\n");
-#endif
+   #endif
+   
    int sandboxIndex = 0; //handles one sandbox for now
    GmatCommand *cmd = commands[sandboxIndex]->GetNext();
    GmatCommand *child;
@@ -330,9 +330,9 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
    while (renamed && cmd != NULL)
    {
       typeName = cmd->GetTypeName();
-#if DEBUG_RENAME
+      #if DEBUG_RENAME
       MessageInterface::ShowMessage("--typeName=%s\n", typeName.c_str());
-#endif
+      #endif
       
       renamed = cmd->RenameRefObject(type, oldName, newName);
       child = cmd->GetChildCommand(0);
@@ -340,9 +340,9 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
       while (renamed && (child != NULL) && (child != cmd))
       {
          typeName = child->GetTypeName();
-#if DEBUG_RENAME
+         #if DEBUG_RENAME
          MessageInterface::ShowMessage("----typeName=%s\n", typeName.c_str());
-#endif
+         #endif
          // if command is not End* (loj: 11/22/04 - added)
          if (typeName.find("End") == typeName.npos)
             renamed = child->RenameRefObject(type, oldName, newName);
@@ -353,12 +353,11 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
       cmd = cmd->GetNext();
    }
    
-#if DEBUG_RENAME
+   #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameConfiguredItem() rename status=%d\n", renamed);
-#endif
+   #endif
 
-   
    return renamed;
 }
 
@@ -394,11 +393,11 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
 //------------------------------------------------------------------------------
 SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateSpacecraft() type = %s, name = %s\n",
        type.c_str(), name.c_str());
-#endif
+   #endif
 
    if (GetSpacecraft(name) == NULL)
    {
@@ -429,11 +428,11 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::str
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSpacecraft() Unable to create Spacecraft "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetSpacecraft(name);
    }
 }
@@ -473,11 +472,11 @@ SpaceObject* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Hardware* Moderator::CreateHardware(const std::string &type, const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateHardware() type = %s, name = %s\n",
        type.c_str(), name.c_str());
-#endif
+   #endif
 
    if (GetHardware(name) == NULL)
    {
@@ -508,11 +507,11 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateHardware() Unable to create Hardware "
           "name: \"%s\" already exists\n", name.c_str());
-#endif
+      #endif
       return GetHardware(name);
    }
 }
@@ -554,11 +553,11 @@ Hardware* Moderator::GetHardware(const std::string &name)
 Propagator* Moderator::CreatePropagator(const std::string &type,
                                         const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreatePropagator() type = %s, name = %s\n",
        type.c_str(), name.c_str());
-#endif
+   #endif
    
    if (GetPropagator(name) == NULL)
    {
@@ -589,11 +588,11 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropagator() Unable to create Propagator "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetPropagator(name);
    }
 }
@@ -662,11 +661,11 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetPhysicalModel(name);
    }
 }
@@ -710,11 +709,11 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
                                                   const std::string &name,
                                                   const std::string &body)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateAtmosphereModel() entered: type = " +
        type + ", name = " + name + "\n");
-#endif
+   #endif
 
    // if AtmosphereModel name doesn't exist, create AtmosphereModel
    if (GetAtmosphereModel(name) == NULL)
@@ -747,11 +746,11 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateAtmosphereModel() Unable to create AtmosphereModel "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetAtmosphereModel(name);
    }
 }
@@ -791,10 +790,10 @@ AtmosphereModel* Moderator::GetAtmosphereModel(const std::string &name)
 Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateBurn() entered: type = " +
                                  type + ", name = " + name + "\n");
-#endif
+   #endif
 
    // if Burn name doesn't exist, create Burn
    if (GetBurn(name) == NULL)
@@ -826,11 +825,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateBurn() Unable to create Burn "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetBurn(name);
    }
 }
@@ -871,15 +870,15 @@ bool Moderator::IsParameter(const std::string &type)
    StringArray sar = theFactoryManager->GetListOfItems(Gmat::PARAMETER);
       
    if (find(sar.begin(), sar.end(), type) != sar.end()) {
-#ifdef DEBUG_LOOKUP_RESOURCE
+      #ifdef DEBUG_LOOKUP_RESOURCE
       MessageInterface::ShowMessage("Found parameter \"%s\"\n", type.c_str());
-#endif
+      #endif
       return true;
    }
 
-#ifdef DEBUG_LOOKUP_RESOURCE
+   #ifdef DEBUG_LOOKUP_RESOURCE
    MessageInterface::ShowMessage("Could not find parameter \"%s\"\n", type.c_str());
-#endif
+   #endif
 
    return false;   
 }
@@ -900,10 +899,10 @@ bool Moderator::IsParameter(const std::string &type)
 Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateParameter() type = %s, "
                                  "name = %s\n", type.c_str(), name.c_str());
-#endif
+   #endif
    
    // if Parameter name doesn't exist, create Parameter
    if (GetParameter(name) == NULL)
@@ -935,11 +934,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateParameter() Unable to create Parameter "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetParameter(name);
    }
 }
@@ -1028,18 +1027,18 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
                                  "name = %s\n", type.c_str(), name.c_str());
-#endif
+   #endif
    
    StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
    
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateStopCondition() *stopCond type = %s\n",
        stopCond->GetTypeName().c_str());
-#endif
+   #endif
     
    if (stopCond ==  NULL)
    {
@@ -1079,10 +1078,10 @@ StopCondition* Moderator::GetStopCondition(const std::string &name)
 //------------------------------------------------------------------------------
 Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateSolver() type = %s, "
                                  "name = %s\n", type.c_str(), name.c_str());
-#endif
+   #endif
 
    if (GetSolver(name) == NULL)
    {
@@ -1113,11 +1112,11 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSolver() Unable to create Solver "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetSolver(name);
    }
 }
@@ -1147,11 +1146,11 @@ Solver* Moderator::GetSolver(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
    MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
                                  name.c_str());
-#endif
+   #endif
    
    // PropSetup creates default Integrator(RungeKutta89)
    // and default force (PointMassForce body=Earth)
@@ -1180,11 +1179,11 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
                                       const std::string &propagatorName,
                                       const std::string &forceModelName)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
    MessageInterface::ShowMessage("Moderator::CreatePropSetup() name=%s\n",
                                  name.c_str());
-#endif
+   #endif
 
    if (GetPropSetup(name) == NULL)
    {
@@ -1206,11 +1205,11 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreatePropSetup() Unable to create PropSetup "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetPropSetup(name);
    }
 }
@@ -1272,11 +1271,11 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateCelestialBody() Unable to create CelestialBody "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
       return GetCelestialBody(name);
    }
 }
@@ -1443,10 +1442,10 @@ CoordinateSystem* Moderator::GetCoordinateSystem(const std::string &name)
 AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
                                         const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = %s, "
                                  "name = %s\n", type.c_str(), name.c_str());
-#endif
+   #endif
    
    AxisSystem *axisSystem = theFactoryManager->CreateAxisSystem(type, name);
    
@@ -1488,10 +1487,10 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &fileName,
                                         bool createDefault)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " +
                                  type + ", name = " + name + "\n");
-#endif
+   #endif
 
    if (GetSubscriber(name) == NULL)
    {
@@ -1511,17 +1510,18 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          if (sub->GetName() != "")
             theConfigManager->AddSubscriber(sub);
       
-#if DEBUG_CREATE_RESOURCE
+         #if DEBUG_CREATE_RESOURCE
          MessageInterface::ShowMessage
             ("Moderator::CreateSubscriber() Creating default subscriber...\n");
-#endif
+         #endif
          
          if (createDefault)
          {
             if (type == "OpenGLPlot")
             {
-               // add default spacecraft to OpenGLPlot
-               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0); 
+               // add default spacecraft and coordinate system
+               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0);
+               sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq"); //loj: 1/28/05 Added
             }
             else if (type == "XYPlot")
             {
@@ -1553,11 +1553,12 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateSubscriber() Unable to create Subscriber "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
+      
       return GetSubscriber(name);
    }
 }
@@ -1597,10 +1598,11 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 Function* Moderator::CreateFunction(const std::string &type,
                                     const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateFunction() entered: type = " +
                                  type + ", name = " + name + "\n");
-#endif
+   #endif
+   
    if (GetFunction(name) == NULL)
    {
       Function *function = theFactoryManager->CreateFunction(type, name);
@@ -1630,11 +1632,12 @@ Function* Moderator::CreateFunction(const std::string &type,
    }
    else
    {
-#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() Unable to create Function "
           "name: %s already exist\n", name.c_str());
-#endif
+      #endif
+      
       return GetFunction(name);
    }
 }
@@ -1665,10 +1668,10 @@ Function* Moderator::GetFunction(const std::string &name)
 GmatCommand* Moderator::CreateCommand(const std::string &type,
                                       const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("Moderator::CreateCommand() entered: type = " +
                                  type + ", name = " + name + "\n");
-#endif
+   #endif
 
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
    return cmd;
@@ -1680,11 +1683,11 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
 GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
                                              const std::string &name)
 {
-#if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateDefaultCommand() entered: type = " +
        type + ", name = " + name + "\n");
-#endif
+   #endif
 
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
    Integer id;
@@ -1836,6 +1839,19 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
    return theConfigManager->SetSolarSystemInUse(name);
 }
 
+// CoordinateSystem
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetInternalCoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * @return internal CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* Moderator::GetInternalCoordinateSystem()
+{
+   return theInternalCoordSystem;
+}
+
 //Planetary files
 //------------------------------------------------------------------------------
 // StringArray& GetPlanetaryFileTypes()
@@ -1937,11 +1953,11 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
 Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 {
-#if DEBUG_PLANETARY_FILE
+   #if DEBUG_PLANETARY_FILE
    MessageInterface::
       ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
                   fileTypes.size());
-#endif
+   #endif
    
    bool status = false;
    Integer fileTypeInUse = -1;
@@ -1950,10 +1966,11 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
    // update planetary file types
    if (&thePlanetaryFileTypesInUse != &fileTypes)
    {
-#if DEBUG_PLANETARY_FILE
+      #if DEBUG_PLANETARY_FILE
       MessageInterface::ShowMessage
          ("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
-#endif
+      #endif
+      
       thePlanetaryFileTypesInUse.clear();
     
       for (unsigned int i=0; i<fileTypes.size(); i++)
@@ -1983,10 +2000,11 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
       }
       else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
       {
-#if DEBUG_PLANETARY_FILE
+         #if DEBUG_PLANETARY_FILE
          MessageInterface::
             ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
-#endif
+         #endif
+         
          thePlanetarySourcePriority[DE200] = 0;
          status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
          if (status)
@@ -2012,10 +2030,11 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
       //}
       else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
       {
-#if DEBUG_PLANETARY_FILE
+         #if DEBUG_PLANETARY_FILE
          MessageInterface::
             ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE405\n");
-#endif
+         #endif
+         
          thePlanetarySourcePriority[DE405] = 0;
          status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
          if (status)
@@ -2037,11 +2056,11 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
    }
    else
    {
-#if DEBUG_PLANETARY_FILE
+      #if DEBUG_PLANETARY_FILE
       MessageInterface::
          ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
                      "Set Planetary file to use:%d\n", fileTypeInUse);
-#endif
+      #endif
       switch (fileTypeInUse)
       {
       case SLP:
@@ -2098,23 +2117,21 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
          }
       }
       
-#if DEBUG_PLANETARY_FILE
+      #if DEBUG_PLANETARY_FILE
       for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
       {
          MessageInterface::ShowMessage
             ("thePlanetaryFileTypesInUse[%d]=%s\n", i,
              thePlanetaryFileTypesInUse[i].c_str());
       }
-#endif
+      #endif
    }
    
-   //#if DEBUG_PLANETARY_FILE
    if (retCode > 0)
       MessageInterface::
       ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
                   "set Planetary file to use: %s\n",
                   PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
-   //#endif
    return retCode;
 }
 
@@ -2339,25 +2356,26 @@ Integer Moderator::RunMission(Integer sandboxNum)
          AddParameterToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
          
-#if DEBUG_RUN
+         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after AddCommandToSandbox() \n");
-#endif
+         #endif
+         
          InitializeSandbox(sandboxNum-1);
          
-#if DEBUG_RUN
+         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after InitializeSanbox() \n");
-#endif
+         #endif
 
          // execute sandbox
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          
-#if DEBUG_RUN
+         #if DEBUG_RUN
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox() \n");
-#endif
+         #endif
          
          // clear sandbox
          sandboxes[sandboxNum-1]->Clear();
@@ -2411,9 +2429,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
-#if DEBUG_USER_INTERRUPT
+   #if DEBUG_USER_INTERRUPT
    MessageInterface::ShowMessage("Moderator::ChangeRunState() entered\n");
-#endif
+   #endif
    
    if (state == "Stop")   
       runState = Gmat::IDLE;
@@ -2445,9 +2463,9 @@ Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetUserInterrupt()
 {
-#if DEBUG_USER_INTERRUPT
+   #if DEBUG_USER_INTERRUPT
    MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
-#endif
+   #endif
 
    // give MainFrame input focus
    theGuiInterpreter->SetInputFocus();
@@ -2486,6 +2504,23 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       status = theScriptInterpreter->Interpret(scriptFileName);
       if (status)
       {
+         StringArray csNames = theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
+   
+         if (csNames.size() == 0)
+         {
+            //----------------------------------------------------
+            //loj: 1/26/05 temp. fix until ScriptInterpreter can
+            //     handle CoordinateSystem
+            //----------------------------------------------------
+            #if DEBUG_RUN
+            MessageInterface::ShowMessage
+               ("Moderator::AddCoordSystemToSandbox() ===>temp. fix for B3 Script."
+                "creating EarthMJ2000Eq and EarthMJ2000Ec\n");
+            #endif
+            
+            CreateDefaultCoordSystems();
+         }
+         
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          isRunReady = true;
@@ -2638,6 +2673,36 @@ void Moderator::InitializePlanetarySource()
 }
 
 //------------------------------------------------------------------------------
+// void CreateDefaultCoordSystems()
+//------------------------------------------------------------------------------
+void Moderator::CreateDefaultCoordSystems()
+{
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator creating default coordinate systems...\n");
+
+   try
+   {
+      // EarthMJ2000Eq
+      CreateCoordinateSystem("EarthMJ2000Eq", true);
+      
+      // EarthMJ2000Ec
+      CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
+      AxisSystem *axis = CreateAxisSystem("MJ2000Ec", "");
+      cs->SetStringParameter("OriginName", "Earth");
+      cs->SetStringParameter("J2000BodyName", "Earth");
+      cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "Moderator::CreateDefaultCoordSystems() Error occurred during default "
+          "coordinate system creation. " +  e.GetMessage());
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void CreateDefaultMission()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
@@ -2651,25 +2716,22 @@ void Moderator::CreateDefaultMission()
       // Create default resource
       //----------------------------------------------------
 
-      // CoordinateSystem
-      CreateCoordinateSystem("EarthMJ2000Eq", true);
-      
-      CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
-      AxisSystem *axis = CreateAxisSystem("MJ2000Ec", "");
-      cs->SetStringParameter("OriginName", "Earth");
-      cs->SetStringParameter("J2000BodyName", "Earth");
-      cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+      //Create default coordinate systems
+      CreateDefaultCoordSystems();
       
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
-#if DEBUG_DEFAULT_MISSION
+      
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Spacecraft created\n");
-#endif
+      #endif
+      
       // PropSetup
       CreateDefaultPropSetup("DefaultProp");
-#if DEBUG_DEFAULT_MISSION
+      
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default PropSetup created\n");
-#endif
+      #endif
 
       // Burn
       GetDefaultBurn();
@@ -2742,9 +2804,9 @@ void Moderator::CreateDefaultMission()
       var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
       var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
       
-#if DEBUG_DEFAULT_MISSION
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default parameters created\n");
-#endif
+      #endif
       
       // Set parameter description and object name
       StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
@@ -2772,9 +2834,9 @@ void Moderator::CreateDefaultMission()
          }
       }
       
-#if DEBUG_DEFAULT_MISSION
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
-#endif   
+      #endif   
 
       // StopCondition
       StopCondition *stopOnElapsedSecs =
@@ -2782,9 +2844,10 @@ void Moderator::CreateDefaultMission()
       stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
-#if DEBUG_DEFAULT_MISSION
+      
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default StopCondition created\n");
-#endif
+      #endif
       
       // Subscribers
       // ReportFile
@@ -2794,25 +2857,30 @@ void Moderator::CreateDefaultMission()
       Subscriber *sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
-#if DEBUG_ACTION_REMOVE
+      
+      #if DEBUG_ACTION_REMOVE
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
       sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
-#endif
+      #endif
+      
       sub->Activate(true);
       
       // OpenGLPlot
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
       sub->SetStringParameter("Add", "DefaultSC", 0);
-#if DEBUG_ACTION_REMOVE
-      sub->SetStringParameter("Add", "Spacecraft1", 1);
-      sub->TakeAction("Remove", "Spacecraft1");
-#endif
+      sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq"); //loj: 1/29/05 Added
+      
+      #if DEBUG_ACTION_REMOVE
+         sub->SetStringParameter("Add", "Spacecraft1", 1);
+         sub->TakeAction("Remove", "Spacecraft1");
+      #endif
+         
       sub->Activate(true);
       
-#if DEBUG_DEFAULT_MISSION
-      MessageInterface::ShowMessage("-->default Subscribers created\n");
-#endif
+      #if DEBUG_DEFAULT_MISSION
+         MessageInterface::ShowMessage("-->default Subscribers created\n");
+      #endif
       
       //----------------------------------------------------
       // Create default mission sequence
@@ -2826,7 +2894,7 @@ void Moderator::CreateDefaultMission()
       
       propCommand->SetSolarSystem(theDefaultSolarSystem);
       
-#if DEBUG_MULTI_STOP
+      #if DEBUG_MULTI_STOP
       //----------------------------------------------------
       //just for testing multiple stopping condition
       //----- StopCondition 2
@@ -2836,20 +2904,20 @@ void Moderator::CreateDefaultMission()
       stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetRealParameter("Goal", 5000.0);
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
-#endif
+      #endif
       
-#if DEBUG_MULTI_STOP > 1
+      #if DEBUG_MULTI_STOP > 1
       StopCondition *stopOnPeriapsis =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.Earth.Periapsis");
       stopOnPeriapsis->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnPeriapsis->SetStringParameter("StopVar", "DefaultSC.Earth.Periapsis");
       propCommand->SetRefObject(stopOnPeriapsis, Gmat::STOP_CONDITION, "", 2);
       //----------------------------------------------------
-#endif
+      #endif
 
-#if DEBUG_DEFAULT_MISSION
+      #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Propagate command created\n");
-#endif
+      #endif
       
       // Add propagate command
       AppendCommand(propCommand);
@@ -2928,12 +2996,12 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
          return false;
       }
       
-#if DEBUG_PLANETARY_FILE
+      #if DEBUG_PLANETARY_FILE
       MessageInterface::ShowMessage
          ("Moderator::CreateDeFile() creating DeFile. type=%d, "
           "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
           format);
-#endif
+      #endif
 
       FILE *defile = fopen(fileName.c_str(), "rb");
       if (defile == NULL)
@@ -3089,11 +3157,11 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    std::string epochVar = scName + ".CurrA1MJD";
    std::string stopVar = scName + ".ElapsedSecs";
 
-#ifdef DEBUG_DEFAULT_MISSION
+   #ifdef DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage
       ("Moderator::CreateDefaultStopCondition() scName=%s, epochVar=%s, stopVar=%s\n",
        scName.c_str(), epochVar.c_str(), stopVar.c_str());
-#endif
+   #endif
    
 //     if (GetParameter(epochVar) == NULL)
 //        CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
@@ -3163,10 +3231,10 @@ Parameter* Moderator::GetDefaultY()
 //------------------------------------------------------------------------------
 void Moderator::AddSolarSystemToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddSolarSystemToSandbox() entered\n");
-#endif
+   #endif
    
    //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
    //sandboxes[index]->AddSolarSystem(solarSys);
@@ -3178,10 +3246,10 @@ void Moderator::AddSolarSystemToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddInternalCoordSystemToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddInternalCoordSystemToSandbox() entered.\n");
-#endif
+   #endif
    
    sandboxes[index]->SetInternalCoordSystem(theInternalCoordSystem);
    
@@ -3192,10 +3260,10 @@ void Moderator::AddInternalCoordSystemToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPublisherToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddPublisherToSandbox() entered.\n");
-#endif
+   #endif
    
    thePublisher->UnsubscribeAll();
    sandboxes[index]->SetPublisher(thePublisher);
@@ -3209,29 +3277,10 @@ void Moderator::AddCoordSystemToSandbox(Integer index)
    CoordinateSystem *cs;
    StringArray csNames = theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
    
-   if (csNames.size() == 0)
+   for (Integer i=0; i<(Integer)csNames.size(); i++)
    {
-
-   //----------------------------------------------------
-   //loj: 1/26/05 temp. fix until ScriptInterpreter can
-   //     handle CoordinateSystem
-   //----------------------------------------------------
-#if DEBUG_RUN
-      MessageInterface::ShowMessage
-         ("Moderator::AddCoordSystemToSandbox() ===>temp. fix for B3 Script."
-          "creating EarthMJ2000Eq\n");
-#endif
-      
-      cs = CreateCoordinateSystem("EarthMJ2000Eq", true);
+      cs = theConfigManager->GetCoordinateSystem(csNames[i]);
       sandboxes[index]->AddObject(cs);
-   }
-   else
-   {
-      for (Integer i=0; i<(Integer)csNames.size(); i++)
-      {
-         cs = theConfigManager->GetCoordinateSystem(csNames[i]);
-         sandboxes[index]->AddObject(cs);
-      }
    }
 }
 
@@ -3246,10 +3295,10 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
    for (Integer i=0; i<(Integer)scNames.size(); i++)
    {
       sc = (Spacecraft*)theConfigManager->GetSpacecraft(scNames[i]);
-#ifdef DEBUG_RUN
+      #ifdef DEBUG_RUN
       MessageInterface::ShowMessage
          ("Moderator::AddSpacecraftToSandbox() sc[%d] = %s\n", i, sc->GetName().c_str());
-#endif
+      #endif
       sandboxes[index]->AddObject(sc);
    }
 
@@ -3268,10 +3317,10 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddFormationToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddFormationToSandbox() entered\n");
-#endif
+   #endif
    
    Formation *form;
    StringArray formNames = theConfigManager->GetListOfItems(Gmat::FORMATION);
@@ -3288,10 +3337,10 @@ void Moderator::AddFormationToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropSetupToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddPropSetupToSandbox() entered\n");
-#endif
+   #endif
    
    PropSetup *propSetup;
    StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
@@ -3308,10 +3357,10 @@ void Moderator::AddPropSetupToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropagatorToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddPropagatorToSandbox() entered\n");
-#endif
+   #endif
    
    Propagator *prop;
    StringArray propNames = theConfigManager->GetListOfItems(Gmat::PROPAGATOR);
@@ -3328,10 +3377,10 @@ void Moderator::AddPropagatorToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddForceModelToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddPropagatorToSandbox() entered\n");
-#endif
+   #endif
    
    ForceModel *fm;
    StringArray fmNames = theConfigManager->GetListOfItems(Gmat::FORCE_MODEL);
@@ -3348,10 +3397,10 @@ void Moderator::AddForceModelToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddBurnToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddBurnToSandbox() entered\n");
-#endif
+   #endif
    
    Burn *burn;
    StringArray burnNames = theConfigManager->GetListOfItems(Gmat::BURN);
@@ -3368,10 +3417,10 @@ void Moderator::AddBurnToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSolverToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddSolverToSandbox() entered\n");
-#endif
+   #endif
    
    Solver *solver;
    StringArray solverNames = theConfigManager->GetListOfItems(Gmat::SOLVER);
@@ -3388,10 +3437,10 @@ void Moderator::AddSolverToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddSubscriberToSandbox() entered\n");
-#endif
+   #endif
    
    Subscriber *sub;
    StringArray subNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
@@ -3407,10 +3456,10 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddParameterToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddParameterToSandbox() entered\n");
-#endif
+   #endif
    
    Parameter *param;
    StringArray paramNames = theConfigManager->GetListOfItems(Gmat::PARAMETER);
@@ -3426,10 +3475,10 @@ void Moderator::AddParameterToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
-#if DEBUG_RUN
+   #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::AddCommandToSandbox() entered\n");
-#endif
+   #endif
    
    GmatCommand *cmd = commands[index]->GetNext();
 

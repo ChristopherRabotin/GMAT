@@ -117,6 +117,11 @@ public:
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
 
+   // CoordinateSystem (loj: 1/31/05 Added)
+   CoordinateSystem* CreateCoordinateSystem(const std::string &name);
+   CoordinateSystem* GetCoordinateSystem(const std::string &name);
+   CoordinateSystem* GetInternalCoordinateSystem();
+   
    // Planetary files
    StringArray& GetPlanetaryFileTypes();
    StringArray& GetPlanetaryFileNames();

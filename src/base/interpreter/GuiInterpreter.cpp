@@ -571,6 +571,35 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
    return moderator->GetDefaultSolarSystem();
 }
 
+// CoordinateSystem (loj: 1/31/05 Added)
+//------------------------------------------------------------------------------
+// CoordinateSystem* CreateCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+CoordinateSystem* GuiInterpreter::CreateCoordinateSystem(const std::string &name)
+{
+   return moderator->CreateCoordinateSystem(name);
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+CoordinateSystem* GuiInterpreter::GetCoordinateSystem(const std::string &name)
+{
+   return moderator->GetCoordinateSystem(name);
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetInternalCoordinateSystem()
+//------------------------------------------------------------------------------
+/**
+ * @return a internal coordinate system pointer
+ */
+//------------------------------------------------------------------------------
+CoordinateSystem* GuiInterpreter::GetInternalCoordinateSystem()
+{
+   return moderator->GetInternalCoordinateSystem();
+}
+
 // Planetary files
 //------------------------------------------------------------------------------
 // StringArray& GetPlanetaryFileTypes()
