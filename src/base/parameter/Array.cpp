@@ -20,8 +20,10 @@
 #include "gmatdefs.hpp"
 #include "Array.hpp"
 #include "ParameterException.hpp"
+#include "MessageInterface.hpp"
 #include <sstream>
 
+//#define DEBUG_ARRAY 1
 
 //---------------------------------
 // static data
@@ -29,9 +31,13 @@
 const std::string
 Array::PARAMETER_TEXT[ArrayParamCount - ParameterParamCount] =
 {
+   "Size",
    "NumCol",
    "NumRow",
-   "Param1",
+   "RmatValue",
+   "SingleValue",
+   "RowValue",
+   "ColValue",
 }; 
 
 const Gmat::ParameterType
@@ -39,7 +45,11 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 {
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::RMATRIX_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::RVECTOR_TYPE,
+   Gmat::RVECTOR_TYPE,
 };
 
 //---------------------------------
@@ -64,7 +74,6 @@ Array::Array(const std::string &name, const std::string &desc,
              const std::string &unit)
    : Parameter(name, "Array", USER_PARAM, NULL, desc, unit, false)
 {  
-   mRmatValue = Rmatrix();
    // GmatBase data
    parameterCount = ArrayParamCount;
 }
@@ -141,6 +150,213 @@ bool Array::operator!=(const Array &right) const
    return Parameter::operator!=(right);
 }
 
+//------------------------------------------------
+//----- Real parameter need be added to GmatBase
+//------------------------------------------------
+
+//----- Integer parameter
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const Integer id, const Integer row,
+//                             const Integer col)
+//------------------------------------------------------------------------------
+Integer Array::SetIntegerParameter(const Integer id, const Integer row,
+                                   const Integer col)
+{
+   switch (id)
+   {
+   case SIZE:
+      MessageInterface::ShowMessage
+         ("Array::SetIntegerParameter() SetSize to %d,%d\n", row, col);
+      mRmatValue.SetSize(row, col);
+      return row;
+   default:
+      throw ParameterException
+         ("Array::SetIntegerParameter() Unknown Parameter Name" +
+          PARAMETER_TEXT[id]);
+      //return Parameter::SetIntegerParameter(id, row, col);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const std:string &label, const Integer row,
+//                             const Integer col)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer Array::SetIntegerParameter(const std::string &label, const Integer row,
+                                   const Integer col)
+{
+   return SetIntegerParameter(GetParameterID(label), row, col);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer row,
+//                       const Integer col) const
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const Integer id, const Integer row,
+                             const Integer col) const
+{
+   switch (id)
+   {
+   case SINGLE_VALUE:
+      return mRmatValue.GetElement(row, col);
+   default:
+      throw ParameterException
+         ("Array::GetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::GetRealParameter(id, row, col);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label, const Integer row,
+//                       const Integer col) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real Array::GetRealParameter(const std::string &label, const Integer row,
+                             const Integer col) const
+{
+   return GetRealParameter(GetParameterID(label), row, col);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer row,
+//                       const Integer col)
+//------------------------------------------------------------------------------
+Real Array::SetRealParameter(const Integer id, const Real value,
+                             const Integer row, const Integer col)
+{
+   switch (id)
+   {
+   case ROW_VALUE:
+      mRmatValue.SetElement(row, col, value);
+      return value;
+   default:
+      throw ParameterException
+         ("Array::SetRealParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::SetRealParameter(id, value, row, col);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std:string &label, const Real value,
+//                       const Integer row, const Integer col)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real Array::SetRealParameter(const std::string &label, const Real value,
+                             const Integer row, const Integer col)
+{
+   return SetRealParameter(GetParameterID(label), value, row, col);
+}
+
+//----- Rvector parameter
+
+//------------------------------------------------------------------------------
+// Rvector GetRvectorParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+Rvector Array::GetRvectorParameter(const Integer id, const Integer index) const
+{
+   Integer row, col;
+   mRmatValue.GetSize(row, col);
+   
+   switch (id)
+   {
+   case ROW_VALUE:
+      {
+         Rvector rvec(col);
+      
+         for (int i=0; i<col; i++)
+            rvec.SetElement(i, mRmatValue.GetElement(index, i));
+
+         return rvec;
+      }
+   case COL_VALUE:
+      {
+         Rvector rvec(row);
+      
+         for (int i=0; i<row; i++)
+            rvec.SetElement(i, mRmatValue.GetElement(i, index));
+
+         return rvec;
+      }
+   default:
+      throw ParameterException
+         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::GetRvectorParameter(id, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// Rvector GetRvectorParameter(const std::string &label,
+//                                    const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Rvector Array::GetRvectorParameter(const std::string &label,
+                                   const Integer index) const
+{
+   return GetRvectorParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const Integer id, const Rvector &value,
+//                                    const Integer index)
+//------------------------------------------------------------------------------
+const Rvector& Array::SetRvectorParameter(const Integer id, const Rvector &value,
+                                          const Integer index)
+{
+   Integer row, col;
+   mRmatValue.GetSize(row, col);
+   
+#if DEBUG_ARRAY
+   MessageInterface::ShowMessage
+      ("Array::SetRvectorParameter() index=%d, row=%d, col=%d\n", index, row, col);
+#endif
+   
+   switch (id)
+   {
+   case ROW_VALUE:
+      for (int i=0; i<col; i++)
+         mRmatValue.SetElement(index, i, value(i));
+      
+      return value;
+   case COL_VALUE:
+      for (int i=0; i<row; i++)
+         mRmatValue.SetElement(i, index, value(i));
+      
+      return value;
+   default:
+      throw ParameterException
+         ("Array::GetRvectorParameter() Unknown Parameter Name" + PARAMETER_TEXT[id]);
+      //return Parameter::SetRvectorParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// const Rvector& SetRvectorParameter(const std:string &label,
+//                                    const Rvector &value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+const Rvector& Array::SetRvectorParameter(const std::string &label,
+                                          const Rvector &value,
+                                          const Integer index)
+{
+   return SetRvectorParameter(GetParameterID(label), value, index);
+}
+
 //------------------------------------
 // methods inherited from Parameter
 //------------------------------------
@@ -163,13 +379,13 @@ std::string Array::ToString()
 }
 
 //------------------------------------------------------------------------------
-// Rmatrix GetMatrix() const
+// const Rmatrix& GetMatrix() const
 //------------------------------------------------------------------------------
 /**
  * Retrieves Rmatrix value of parameter without evaluating.
  */
 //------------------------------------------------------------------------------
-Rmatrix Array::GetMatrix() const
+const Rmatrix& Array::GetMatrix() const
 {
    return mRmatValue;
 }
@@ -232,116 +448,40 @@ std::string Array::GetParameterTypeString(const Integer id) const
 //----- Integer parameter
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id) const
+// Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
-Real Array::GetRealParameter(const Integer id) const
+Integer Array::GetIntegerParameter(const Integer id) const
 {
+   Integer row, col;
+   mRmatValue.GetSize(row, col);
+
    switch (id)
    {
-   case PARAM_1:
-      return mRmatValue;
+   case NUM_ROWS:
+      return row;
+   case NUM_COLS:
+      return col;
    default:
-      return Parameter::GetRealParameter(id);
+      return Parameter::GetIntegerParameter(id);
    }
 }
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label) const
+// Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real Array::GetRealParameter(const std::string &label) const
+Integer Array::GetIntegerParameter(const std::string &label) const
 {
-   return GetRealParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const Integer id, const Real value)
-{
-   switch (id)
-   {
-   case PARAM_1:
-      mRmatValue = value;
-      return mRmatValue;
-   default:
-      return Parameter::SetRealParameter(id, value);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const std:string &label, const Real value)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const std::string &label, const Real value)
-{
-   return SetRealParameter(GetParameterID(label), value);
-}
-
-//----- Real parameter
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id) const
-//------------------------------------------------------------------------------
-Real Array::GetRealParameter(const Integer id) const
-{
-   switch (id)
-   {
-   case PARAM_1:
-      return mRmatValue.GetElement(0, 0); // return 1st element
-   default:
-      return Parameter::GetRealParameter(id);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real Array::GetRealParameter(const std::string &label) const
-{
-   return GetRealParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const Integer id, const Real value)
-{
-   switch (id)
-   {
-   case PARAM_1:
-      mRmatValue.SetElement(0,0) = value; // Set 1st element
-      return value;
-   default:
-      return Parameter::SetRealParameter(id, value);
-   }
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const std:string &label, const Real value)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real Array::SetRealParameter(const std::string &label, const Real value)
-{
-   return SetRealParameter(GetParameterID(label), value);
+   return GetIntegerParameter(GetParameterID(label));
 }
 
 //----- Rmatrix parameter
 
 //------------------------------------------------------------------------------
+// const Rmatrix& GetRmatrixParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
@@ -352,10 +492,9 @@ const Rmatrix& Array::GetRmatrixParameter(const Integer id) const
    switch (id)
    {
    case RMAT_VALUE:
-      mRmatValue.SetElement(0,0) = value; // Set 1st element
-      return value;
+      return mRmatValue;
    default:
-      return Parameter::SetRealParameter(id, value);
+      return Parameter::GetRmatrixParameter(id);
    }
 }
 
@@ -367,8 +506,9 @@ const Rmatrix& Array::GetRmatrixParameter(const Integer id) const
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-const Rvector& Array::GetRvectorParameter(const std::string &label) const
+const Rmatrix& Array::GetRmatrixParameter(const std::string &label) const
 {
+   return GetRmatrixParameter(GetParameterID(label));
 }
 
 
@@ -386,10 +526,10 @@ const Rmatrix& Array::SetRmatrixParameter(const Integer id,
    switch (id)
    {
    case RMAT_VALUE:
-      mRmatValue.SetElement(0,0) = value; // Set 1st element
+      mRmatValue = value;
       return value;
    default:
-      return Parameter::SetRealParameter(id, value);
+      return Parameter::SetRmatrixParameter(id, value);
    }
 }
 
@@ -405,6 +545,7 @@ const Rmatrix& Array::SetRmatrixParameter(const Integer id,
 const Rmatrix& Array::SetRmatrixParameter(const std::string &label,
                                           const Rmatrix &value)
 {
+   return SetRmatrixParameter(GetParameterID(label), value);
 }
 
 
