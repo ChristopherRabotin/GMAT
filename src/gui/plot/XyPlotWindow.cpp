@@ -5,13 +5,17 @@
 // Author:      Robert Roebling
 // Modified by: Linda Jun (NASA/GSFC)  2004/01/20
 //              - added GetNormalPen() to wxPlotCurve
-//              - modified to enlarge, shrink, move up, and move down all curves instead
-//                of selected curve
+//              - modified to enlarge, shrink, move up, and move down all curves
+//                instead of selected curve
 // Created:     12/01/2000
-// RCS-ID:      $Id$
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
+
+//------------------------------------------------------------------------------
+//loj: 5/13/04 sets scroll area to frame instead of plot area. The vertical
+//             scroll bar moves only plot area so YAxis label does not match.
+//------------------------------------------------------------------------------
 
 #ifdef __GNUG__
 #pragma implementation "XyPlotWindow.hpp"
@@ -49,12 +53,12 @@
 // ----------------------------------------------------------------------------
 
 #if !defined(__WXMSW__) && !defined(__WXPM__)
-    #include "wx/plot/plot_enl.xpm"
-    #include "wx/plot/plot_shr.xpm"
-    #include "wx/plot/plot_zin.xpm"
-    #include "wx/plot/plot_zot.xpm"
-    #include "wx/plot/plot_up.xpm"
-    #include "wx/plot/plot_dwn.xpm"
+   #include "wx/plot/plot_enl.xpm"
+   #include "wx/plot/plot_shr.xpm"
+   #include "wx/plot/plot_zin.xpm"
+   #include "wx/plot/plot_zot.xpm"
+   #include "wx/plot/plot_up.xpm"
+   #include "wx/plot/plot_dwn.xpm"
 #endif
 
 //----------------------------------------------------------------------------
@@ -111,7 +115,7 @@ namespace GmatPlot
 //-----------------------------------------------------------------------------
 
 wxPlotEvent::wxPlotEvent( wxEventType commandType, int id )
-    : wxNotifyEvent( commandType, id )
+   : wxNotifyEvent( commandType, id )
 { 
    m_curve = (wxPlotCurve*) NULL;
    m_zoom = 1.0;
@@ -767,7 +771,8 @@ BEGIN_EVENT_TABLE(wxPlotWindow, wxScrolledWindow)
 
    //loj: 2/27/04 added
    //loj: 4/29/04 Do we really need this? Since scrolling on plot area
-   //EVT_SIZE(wxPlotWindow::OnSize)
+   //loj: 5/13/04 Changed back to scrolling on frame
+   EVT_SIZE(wxPlotWindow::OnSize)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -793,14 +798,15 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
    wxPanel *topPanel = new wxPanel(this, -1, wxPoint(0,0), wxSize(200,40)); //loj: long title not shown
    //wxPanel *topPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(-1, -1)); //loj: title not shown
    topPanel->SetBackgroundColour(*wxWHITE);
-    
-   mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle));
+
+   mPlotTitle = plotTitle; //loj: 5/13/04 added
+   //mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle)); //loj: 5/13/04
+   mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle), wxPoint(-1,-1),
+                                 wxSize(200, -1), wxALIGN_CENTRE);
    mTopPanelSizer = new wxBoxSizer(wxVERTICAL);
 
    topPanel->SetSizer(mTopPanelSizer); //loj: do this before mTopPanelSizer->Add()
-   //loj: centers the title but not showing whole title
    mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxALL, 10);
-   //loj: shows whole title but not centering if wxEXPAND
    //mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxEXPAND);
     
    //loj: 3/11/04 added legend area
@@ -1258,15 +1264,24 @@ void wxPlotWindow::RedrawPlotArea()
    m_area->Refresh( TRUE );
 }
 
-//loj: 3/11/04 added
+//loj: 5/13/04 added
+//------------------------------------------------------------------------------
+// wxString wxPlotWindow::GetPlotTitle()
+//------------------------------------------------------------------------------
+wxString wxPlotWindow::GetPlotTitle()
+{
+   return mPlotTitle;
+}
+
 //------------------------------------------------------------------------------
 // void wxPlotWindow::SetPlotTitle(const wxString &title)
 //------------------------------------------------------------------------------
 void wxPlotWindow::SetPlotTitle(const wxString &title)
 {
+   //MessageInterface::ShowMessage("wxPlotWindow::SetPlotTitle() title = %s\n",
+   //                              title.c_str());
+   mPlotTitle = title;
    mTitleText->SetLabel(title);
-   //@fixme
-   // loj: Fit() doesn't expand the sizer to show whole title
    mTopPanelSizer->Fit(mTitleText);
 }
 
@@ -1275,7 +1290,7 @@ void wxPlotWindow::SetPlotTitle(const wxString &title)
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 {
-   SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: 4/29/04 added
    SetZoom( m_xZoom * 1.5 );
 }
 
@@ -1284,7 +1299,7 @@ void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomOut( wxCommandEvent& WXUNUSED(event) )
 {
-   SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: 4/29/04 added
    SetZoom( m_xZoom * 0.6666 );
 }
 
@@ -1293,7 +1308,7 @@ void wxPlotWindow::OnZoomOut( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnEnlarge( wxCommandEvent& WXUNUSED(event) )
 {
-   SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: 4/29/04 added
    //loj: commented out
    //if (!m_current) return;
    //Enlarge( m_current, 1.5 );
@@ -1313,7 +1328,7 @@ void wxPlotWindow::OnEnlarge( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnShrink( wxCommandEvent& WXUNUSED(event) )
 {
-   SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: 4/29/04 added
    //loj: commented out
    //if (!m_current) return;
    //Enlarge( m_current, 0.6666666 );
