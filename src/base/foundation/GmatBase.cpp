@@ -362,6 +362,7 @@ std::string GmatBase::GetStringParameter(const Integer id) const
     return "";
 }
 
+
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
@@ -376,6 +377,25 @@ std::string GmatBase::GetStringParameter(const Integer id) const
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
 {
     return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
+{
+    std::string errorText = "No StringArrays defined for the ID ";
+    errorText += id;
+    throw GmatBaseException(errorText);
 }
 
 
@@ -395,7 +415,9 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
  */
 bool GmatBase::GetBooleanParameter(const Integer id) const
 {
-    return false;
+    std::string errorText = "No Boolean data defined for the ID ";
+    errorText += id;
+    throw GmatBaseException(errorText);
 }
 
 
@@ -523,6 +545,25 @@ bool GmatBase::SetStringParameter(const std::string &label,
 {
     Integer id = GetParameterID(label);
     return SetStringParameter(id, value);
+}
+
+
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+StringArray& GmatBase::GetStringArrayParameter(const std::string &label) const
+{
+    Integer id = GetParameterID(label);
+    return GetStringArrayParameter(id);
 }
 
 

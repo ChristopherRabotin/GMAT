@@ -44,6 +44,7 @@
 #define GmatBase_hpp
 
 #include "gmatdefs.hpp"
+#include "GmatBaseException.hpp"
 
 
 class GMAT_API GmatBase
@@ -79,6 +80,8 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
+    virtual StringArray& 
+                        GetStringArrayParameter(const Integer id) const; 
     virtual bool        GetBooleanParameter(const Integer id) const;
     virtual bool        SetBooleanParameter(const Integer id,
                                             const bool value);
@@ -92,6 +95,8 @@ public:
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const std::string &label, 
                                            const std::string &value);
+    virtual StringArray& 
+                        GetStringArrayParameter(const std::string &label)const;
     virtual bool        GetBooleanParameter(const std::string &label) const;
     virtual bool        SetBooleanParameter(const std::string &label,
                                             const bool value);

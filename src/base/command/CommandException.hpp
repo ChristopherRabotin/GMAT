@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  ClassName
+//                                  CommandException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -31,7 +31,7 @@ class CommandException : public BaseException
 		CommandException(std::string details);
 		// class destructor
 		~CommandException();
-		// Copy constructor -- hidden from other classes
+		// Copy constructor
 		CommandException(const CommandException &);
 };
 

@@ -330,3 +330,25 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
         
     return GmatBase::SetStringParameter(id, value);
 }
+
+
+
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+StringArray& Burn::GetStringArrayParameter(const Integer id) const
+{
+    if (id == coordFrameID)
+        return frameman->GetSupportedFrames();
+
+    return GmatBase::GetStringArrayParameter(id);
+}

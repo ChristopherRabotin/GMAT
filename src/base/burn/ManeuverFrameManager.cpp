@@ -47,7 +47,7 @@ ManeuverFrameManager::~ManeuverFrameManager()
 }
 
 
-const StringArray& ManeuverFrameManager::GetSupportedFrames(void)
+StringArray& ManeuverFrameManager::GetSupportedFrames(void)
 {
     return frames;
 }

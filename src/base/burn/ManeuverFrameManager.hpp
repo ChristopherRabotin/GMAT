@@ -37,7 +37,7 @@ public:
 	ManeuverFrameManager();
 	virtual ~ManeuverFrameManager();
 
-    const StringArray&          GetSupportedFrames(void);
+    StringArray&                GetSupportedFrames(void);
     ManeuverFrame*              GetFrameInstance(std::string frameType);
 
 protected:
