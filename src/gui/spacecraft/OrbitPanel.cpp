@@ -22,7 +22,7 @@
 #include "OrbitPanel.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_ORBIT_PANEL 1
+// #define DEBUG_ORBIT_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -97,7 +97,7 @@ void OrbitPanel::Create()
    wxBoxSizer *orbitSizer = new wxBoxSizer(wxVERTICAL);
    //static box for the state
    wxStaticBox *item9 = new wxStaticBox( this, ID_STATIC_ORBIT,
-      wxT("Orbit State") );
+      wxT("State") );
    wxStaticBoxSizer *item8 = new wxStaticBoxSizer( item9, wxVERTICAL );
    // gridsizer for inside the orbit state static box
    wxGridSizer *item10 = new wxGridSizer( 2, 0, 0 );
@@ -687,7 +687,7 @@ void OrbitPanel::OnAnomalyChange()
 {
    std::string anomalyType;
 
-   wxString description;
+   wxString description, stateValue;
    
    int anomalySelected = anomalyCB->GetSelection();
 
@@ -713,6 +713,10 @@ void OrbitPanel::OnAnomalyChange()
    description6->SetLabel(description);
    
    theSpacecraft->SetStringParameter(anomalyID, anomalyType);
+   
+   Real anomaly = theSpacecraft->GetRealParameter(anomalyType);
+   stateValue.Printf("%.9f", anomaly);
+   textCtrl6->SetValue(stateValue);    
 
    theApplyButton->Enable();
 }
