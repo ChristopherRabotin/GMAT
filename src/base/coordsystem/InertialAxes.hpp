@@ -40,18 +40,7 @@ public:
    // destructor
    virtual ~InertialAxes();
    
-   
-   //---------------------------------------------------------------------------
-   //  void InertialAxes::Initialize()
-   //---------------------------------------------------------------------------
-   /**
-    * Initialization method for the InertialAxes classes.
-    *
-    * @note This method is pure virtual and must be implemented by deriving 
-    *       classes (at least at the leaf level).
-    */
-   //---------------------------------------------------------------------------
-   virtual void Initialize() = 0; 
+   virtual void Initialize(); 
       
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

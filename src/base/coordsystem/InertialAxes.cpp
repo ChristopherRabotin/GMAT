@@ -56,7 +56,7 @@ InertialAxes::PARAMETER_TYPE[InertialAxesParamCount - AxisSystemParamCount] =
  * @param itsName Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for InertialAxes.  Derived 
- *       classes must pass in the typeId and typeStr parameters.
+ *       classes must pass in the itsType and itsName parameters.
  */
 //---------------------------------------------------------------------------
 InertialAxes::InertialAxes(const std::string &itsType,
@@ -113,14 +113,16 @@ InertialAxes::~InertialAxes()
 //  void InertialAxes::Initialize()
 //---------------------------------------------------------------------------
 /**
- * Initialization method for this InertialAxes.
+ * Initialization method for the InertialAxes classes.
  *
+ * @note This method is pure virtual and must be implemented by deriving 
+ *       classes (at least at the leaf level).
  */
 //---------------------------------------------------------------------------
-//void InertialAxes::Initialize()
-//{
-//   AxisSystem::Initialize();
-//}
+void InertialAxes::Initialize()
+{
+   AxisSystem::Initialize();
+}
 
 
 //------------------------------------------------------------------------------
