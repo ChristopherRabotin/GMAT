@@ -1,0 +1,15 @@
+# Project:    GMAT
+# Module:     Makefile.mac for burn directory 
+# Created:    Joey Gurgnaus 
+# Date:       2004/01/14
+
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = Burn.cpp ImpulsiveBurn.cpp ManeuverFrame.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
