@@ -14,14 +14,16 @@
 #                          Else; ForCommand to For; EndForCommand
 #                          to EndFor
 #             2004/09/27 - W. Shoan - added ConditionalBranch
+#             2004/10/21 - W. Shoan - addeed ElseIf
+#             2004/10/26 - W. Shoan - added CallFunction
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp Command.cpp \
-	CommandException.cpp ConditionalBranch.cpp Else.cpp EndIf.cpp \
+SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp CallFunction.cpp Command.cpp \
+	CommandException.cpp ConditionalBranch.cpp Else.cpp ElseIf.cpp EndIf.cpp \
 	EndFor.cpp EndTarget.cpp EndWhile.cpp For.cpp If.cpp \
 	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Save.cpp Toggle.cpp \
 	Vary.cpp While.cpp
