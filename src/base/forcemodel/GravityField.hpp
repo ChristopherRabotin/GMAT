@@ -145,6 +145,10 @@ protected:
 //   Real               **dSbar;
    ///
    bool               gfInitialized;
+   /// Flag used to keep from scrolling the "truncating to order" message
+   bool               orderTruncateReported;
+   /// Flag used to keep from scrolling the "truncating to degree" message
+   bool               degreeTruncateReported;
    
    bool          gravity_init(void);
 

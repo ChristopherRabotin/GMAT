@@ -65,8 +65,8 @@
 //#include "SolarSystemException.hpp"
 
 
-//#define DEBUG_GRAVITY_FIELD
-//#define DEBUG_GRAVITY_FIELD_DETAILS
+// #define DEBUG_GRAVITY_FIELD
+// #define DEBUG_GRAVITY_FIELD_DETAILS
 
 
 using namespace GmatMathUtil;
@@ -254,11 +254,14 @@ GravityField& GravityField::operator=(const GravityField &gf)
 //------------------------------------------------------------------------------
 bool GravityField::Initialize(void)
 {
-    if (!HarmonicField::Initialize())
-    {
-       throw ForceModelException(
-             "GravityField: Legendre Polynomial initialization failed!");
-    }
+   if (!HarmonicField::Initialize())
+   {
+      throw ForceModelException(
+            "GravityField: Legendre Polynomial initialization failed!");
+   }
+    
+   degreeTruncateReported = false;
+   orderTruncateReported  = false;
 
    return gravity_init();
 }
@@ -777,67 +780,84 @@ bool GravityField::gravity_init(void)
 //      }
 //   }
 
-   if (!ReadFile())
-   {
-      // try to get default coefficients from the body
-      MessageInterface::ShowMessage("Using default coefficients from the body.\n");
-      mu     = body->GetGravitationalConstant();
-      a      = body->GetEquatorialRadius();
-      Rmatrix sij = body->GetHarmonicCoefficientsSij();
-      Rmatrix cij = body->GetHarmonicCoefficientsCij();
-      Integer idx,jdx;
-      Integer srows, scolumns, crows, ccolumns;
-      sij.GetSize(srows, scolumns);
-      cij.GetSize(crows, ccolumns);
-      for (idx=0; idx<srows; idx++)
-         for (jdx=0; jdx<scolumns; jdx++)
-            Sbar[idx][jdx] = sij.GetElement(idx,jdx);
-      for (idx=0; idx<crows; idx++)
-         for (jdx=0; jdx<ccolumns; jdx++)
-            Cbar[idx][jdx] = cij.GetElement(idx,jdx);
-
-      // zero out the drift values, as there are no default values in the body - should there be?
-      for (idx=0; idx<GRAV_MAX_DRIFT_DEGREE+1;idx++)
+   if (!fileRead) {        // Only read the file if the name has changed or it 
+                           // was not yet read
+      if (!ReadFile())
       {
-         for (jdx=0; jdx<GRAV_MAX_DRIFT_DEGREE+1;jdx++)
+         // try to get default coefficients from the body
+         MessageInterface::ShowMessage("Using default coefficients from the body.\n");
+         mu     = body->GetGravitationalConstant();
+         a      = body->GetEquatorialRadius();
+         Rmatrix sij = body->GetHarmonicCoefficientsSij();
+         Rmatrix cij = body->GetHarmonicCoefficientsCij();
+         Integer idx,jdx;
+         Integer srows, scolumns, crows, ccolumns;
+         sij.GetSize(srows, scolumns);
+         cij.GetSize(crows, ccolumns);
+         for (idx=0; idx<srows; idx++)
+            for (jdx=0; jdx<scolumns; jdx++)
+               Sbar[idx][jdx] = sij.GetElement(idx,jdx);
+         for (idx=0; idx<crows; idx++)
+            for (jdx=0; jdx<ccolumns; jdx++)
+               Cbar[idx][jdx] = cij.GetElement(idx,jdx);
+   
+         // zero out the drift values, as there are no default values in the body - should there be?
+         for (idx=0; idx<GRAV_MAX_DRIFT_DEGREE+1;idx++)
          {
-            dSbar[idx][jdx] = 0.0;
-            dCbar[idx][jdx] = 0.0;
+            for (jdx=0; jdx<GRAV_MAX_DRIFT_DEGREE+1;jdx++)
+            {
+               dSbar[idx][jdx] = 0.0;
+               dCbar[idx][jdx] = 0.0;
+            }
          }
+   
+         defDegree = body->GetDegree();
+         defOrder  = body->GetOrder();
+         // truncate the degree and/or order, if necessary
+   //      if ((defDegree > degree) && !degreeTruncateReported) {
+   //      {
+   //         MessageInterface::ShowMessage(
+   //            "In GravityField, truncating to degree = %d\n",degree);
+   //         degreeTruncateReported = true;
+   //
+   //      }
+   //      else 
+         if (defDegree < degree)
+         {
+            MessageInterface::ShowMessage(
+                           "In GravityField, truncating to degree = %d\n",degree);
+         }
+         else if (defDegree < degree)
+         {
+            degree = defDegree;
+            MessageInterface::ShowMessage(
+                           "In GravityField, truncating to degree = %d\n", degree);
+         }
+   //      if ((defOrder > order) && !orderTruncateReported)
+   //      {
+   //         MessageInterface::ShowMessage(
+   //                        "In GravityField, truncating to order = %d\n",order);
+   //      }
+   //      else 
+         if ((defOrder < order) && !orderTruncateReported)
+         {
+            MessageInterface::ShowMessage(
+                           "In GravityField, truncating to order = %d\n",order);
+         }
+         else if (defOrder < order)
+         {
+            order = defOrder;
+            MessageInterface::ShowMessage(
+                           "In GravityField, truncating to order = %d\n", order);
+         }
+         if (order > degree)
+         {
+            order = degree;
+            MessageInterface::ShowMessage(
+                           "In GravityField, truncating to order = %d\n", order);
+         }
+         //return false;
       }
-
-      defDegree = body->GetDegree();
-      defOrder  = body->GetOrder();
-      // truncate the degree and/or order, if necessary
-      if (defDegree > degree)
-      {
-         MessageInterface::ShowMessage(
-                        "In GravityField, truncating to degree = %d\n",degree);
-      }
-      else if (defDegree < degree)
-      {
-         degree = defDegree;
-         MessageInterface::ShowMessage(
-                        "In GravityField, truncating to degree = %d\n", degree);
-      }
-      if (defOrder > order)
-      {
-         MessageInterface::ShowMessage(
-                        "In GravityField, truncating to order = %d\n",order);
-      }
-      else if (defOrder < order)
-      {
-         order = defOrder;
-         MessageInterface::ShowMessage(
-                        "In GravityField, truncating to order = %d\n", order);
-      }
-      if (order > degree)
-      {
-         order = degree;
-         MessageInterface::ShowMessage(
-                        "In GravityField, truncating to order = %d\n", order);
-      }
-      //return false;
    }
    
    /* transform from tide free to zero tide system */ /* <<<<-- took out to match STK (SQ)*/
@@ -864,7 +884,6 @@ bool GravityField::gravity_init(void)
          dCbar[2][1], dSbar[2][1]);
    #endif
    
-
    return true;
 }
 
@@ -939,23 +958,25 @@ bool GravityField::ReadFile()
    }
 
    // truncate the degree and/or order, if necessary
-   if (fileDegree > degree)
-   {
-     MessageInterface::ShowMessage(
-                        "In GravityField, truncating to degree = %d\n",degree);
-   }
-   else if (fileDegree < degree)
+//   if (fileDegree > degree)
+//   {
+//     MessageInterface::ShowMessage(
+//                        "In GravityField, truncating to degree = %d\n",degree);
+//   }
+//   else 
+   if (fileDegree < degree)
    {
       degree = fileDegree;
       MessageInterface::ShowMessage(
                         "In GravityField, truncating to degree = %d\n", degree);
    }
-   if (fileOrder > order)
-   {
-      MessageInterface::ShowMessage(
-                        "In GravityField, truncating to order = %d\n",order);
-   }
-   else if (fileOrder < order)
+//   if (fileOrder > order)
+//   {
+//      MessageInterface::ShowMessage(
+//                        "In GravityField, truncating to order = %d\n",order);
+//   }
+//   else 
+   if (fileOrder < order)
    {
       order = fileOrder;
       MessageInterface::ShowMessage(
@@ -967,6 +988,12 @@ bool GravityField::ReadFile()
       MessageInterface::ShowMessage(
                         "In GravityField, truncating to order = %d\n", order);
    }
+
+   if (degree < 0)
+      throw ForceModelException("Invalid degree in GravityField: Degree < 0");
+   if (order < 0)
+      throw ForceModelException("Invalid degree in GravityField: Degree < 0");
+
    fileRead = true;
    return true;
 }
@@ -1132,15 +1159,21 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             }
          else
          {
+            // DJC changes, 11/9/04
+            // Ensure that m and n fall in the allowed ranges
             n = (Integer) atoi(firstStr.c_str());
-            lineStr >> m >> Cnm >> Snm;
-            if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-            {
-               Cbar[n][m] = (Real)Cnm;
-               Sbar[n][m] = (Real)Snm;
+            if ((n > 0) && (n < HF_MAX_DEGREE)) {
+               lineStr >> m;
+               if ((m > 0) && (m < n)) {            
+                  lineStr >> Cnm >> Snm;
+//                  if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
+//                  {
+                  Cbar[n][m] = (Real)Cnm;
+                  Sbar[n][m] = (Real)Snm;
+//                  }
+               }
             }
          }
-
       }
    }
 
