@@ -69,6 +69,7 @@
 #include "GmatMdiChildFrame.hpp"
 #include "FormationSetupPanel.hpp"
 #include "CallFunctionPanel.hpp"
+#include "CoordSystemConfigPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -536,15 +537,25 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
-         sizer->Add (new CallFunctionPanel (panel, item->GetDesc()),
+         sizer->Add (new CallFunctionPanel (panel, item->GetCommand()),
                      0, wxGROW|wxALL, 0 );
      }
-      else
-      {
+     else if ((dataType == GmatTree::DEFAULT_COORD_SYSTEM)   ||
+              (dataType == GmatTree::CREATED_COORD_SYSTEM))
+     {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new CoordSystemConfigPanel(panel),
+                    0, wxGROW|wxALL, 0);
+     }
+     else
+     {
          // if no panel set up then just exit function
          // instead of opening blank panel
-         return;
-      }
+        return;
+     }
          
       // maximize window
       //newChild->Maximize();

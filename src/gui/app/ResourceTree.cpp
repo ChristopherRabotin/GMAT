@@ -73,6 +73,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
    EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
    EVT_MENU(POPUP_ADD_MATLAB_FUNCT, ResourceTree::OnAddMatlabFunction)
+   EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSys)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -118,6 +119,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumDiffCorr = 0;
    mNumVariable = 0;
    mNumMatlabFunct = 0;
+   mNumCoordSys = 0;
 
    theGuiManager->UpdateAll();
 }
@@ -147,6 +149,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumDiffCorr = 0;
       mNumVariable = 0;
       mNumMatlabFunct = 0;
+      mNumCoordSys = 0;
    }
    
    // ag: collapse, so folder icon is closed
@@ -158,6 +161,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mSubscriberItem);
    Collapse(mVariableItem);
    Collapse(mMatlabFunctItem);
+   Collapse(mCoordSysItem);
 
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mFormationItem);
@@ -167,6 +171,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mSubscriberItem);
    DeleteChildren(mVariableItem);
    DeleteChildren(mMatlabFunctItem);
+   DeleteChildren(mCoordSysItem);
 
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultFormations(mFormationItem);
@@ -176,6 +181,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultVariables(mVariableItem);
    AddDefaultMatlabFunctions(mMatlabFunctItem);
+   AddDefaultCoordSys(mCoordSysItem);
 
    theGuiManager->UpdateAll();
 }
@@ -296,9 +302,12 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(mVariableItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
+   mCoordSysItem =
    AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Coordinate Systems"), GmatTree::COORD_SYS_FOLDER));
-   
+   SetItemImage(mCoordSysItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
    //----- Matlab functions
    mMatlabFunctItem =
       AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
@@ -322,6 +331,7 @@ void ResourceTree::AddDefaultResources()
    AddDefaultInterfaces(interfaceItem);
    AddDefaultVariables(mVariableItem);
    AddDefaultMatlabFunctions(mMatlabFunctItem);
+   AddDefaultCoordSys(mCoordSysItem);
 }
 
 //------------------------------------------------------------------------------
@@ -677,6 +687,36 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
 
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultCoordSys(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default interfaces
+ *
+ * @param <itemId> tree item for the interfaces folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
+{
+/// @todo add default coordinate systems from gui interpreter
+//   StringArray itemNames = GmatAppData::GetGuiInterpreter()
+//                     ->GetListOfConfiguredItems(Gmat::COORD_SYS);
+//   int size = itemNames.size();
+//   wxString objName;
+//
+//   for (int i = 0; i<size; i++)
+//   {
+//      objName = wxString(itemNames[i].c_str());
+//      AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+//                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_COORD_SYS));
+//   };
+//
+//   if (size > 0)
+//      Expand(itemId);
+//
+}
+
+
 //==============================================================================
 //                         On Action Events
 //==============================================================================
@@ -759,7 +799,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (dataType == GmatTree::COORD_SYS_FOLDER)
    {
       menu.Append(POPUP_ADD_COORD_SYS, wxT("Add Coordinate System"));
-      menu.Enable(POPUP_ADD_COORD_SYS, FALSE);
+//      menu.Enable(POPUP_ADD_COORD_SYS, FALSE);
    }   
    else
    {
@@ -1444,11 +1484,41 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    if (GmatAppData::GetGuiInterpreter()->
       CreateFunction("MatlabFunction", stdWithName))
    {
-      AppendItem(item, withName, GmatTree::ICON_REPORT, -1,
+      AppendItem(item, withName, GmatTree::ICON_FILE, -1,
                  new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
 
       Expand(item);
    }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddCoordSys(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a coordinate system to the folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxString withName;
+   withName.Printf("CoordinateSystem%d", ++mNumCoordSys);
+
+   const std::string stdWithName = withName.c_str();
+
+   /// @todo check gui interpreter if coordinate system is created
+//   if (GmatAppData::GetGuiInterpreter()->
+//      CreateFunction("MatlabFunction", stdWithName))
+//   {
+      AppendItem(item, withName, GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(withName, GmatTree::CREATED_COORD_SYSTEM));
+
+      Expand(item);
+//   }
+
 }
 
 //---------------------------------

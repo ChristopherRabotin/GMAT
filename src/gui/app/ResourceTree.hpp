@@ -51,6 +51,8 @@ private:
    wxTreeItemId mSolverItem;
    wxTreeItemId mVariableItem;
    wxTreeItemId mMatlabFunctItem;
+   wxTreeItemId mCoordSysItem;
+
 
    int mNumSpacecraft;
    int mNumFormation;
@@ -62,6 +64,7 @@ private:
    int mNumOpenGlPlot;
    int mNumVariable;
    int mNumMatlabFunct;
+   int mNumCoordSys;
 
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
@@ -75,6 +78,7 @@ private:
    void AddDefaultInterfaces(wxTreeItemId itemId);
    void AddDefaultVariables(wxTreeItemId itemId);
    void AddDefaultMatlabFunctions(wxTreeItemId itemId);
+   void AddDefaultCoordSys(wxTreeItemId itemId);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -104,6 +108,7 @@ private:
    void OnAddDiffCorr(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
    void OnAddMatlabFunction(wxCommandEvent &event);
+   void OnAddCoordSys(wxCommandEvent &event);
 
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
