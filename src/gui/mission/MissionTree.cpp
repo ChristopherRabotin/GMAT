@@ -42,7 +42,7 @@
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
    EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
-   EVT_LEFT_DCLICK(MissionTree::OnItemActivated) 
+  //   EVT_LEFT_DCLICK(MissionTree::OnItemActivated) 
 
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
