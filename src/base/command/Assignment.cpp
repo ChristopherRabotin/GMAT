@@ -160,12 +160,23 @@ bool Assignment::Execute(void)
             break;
             
         case Gmat::STRING_TYPE:
+        case Gmat::STRINGARRAY_TYPE:
             parmOwner->SetStringParameter(parmID, value);
             retval = true;
             break;
             
         default:
             break;
+    }
+    
+    // "Add" parameters could also mean to set reference objects
+    if (parmName == "Add") {
+       if (objectMap->find(value) != objectMap->end())
+       {
+          GmatBase *obj = (*objectMap)[value];
+          if (obj)
+             parmOwner->SetRefObject(obj, obj->GetType(), value);
+       }
     }
     
     return retval;
