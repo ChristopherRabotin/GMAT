@@ -16,27 +16,10 @@
  * Defines opeartions of the GMAT executive.
  */
 //------------------------------------------------------------------------------
-
 #include "gmatdefs.hpp"
 #include "BaseException.hpp"
 #include "Moderator.hpp"
-#include "GuiInterpreter.hpp"
-#include "ScriptInterpreter.hpp"
-#include "Sandbox.hpp"
-#include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
-#include "Propagator.hpp"
-#include "Spacecraft.hpp"
-#include "Parameter.hpp"
-#include "StopCondition.hpp"
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
-#include "PropSetup.hpp"
-#include "Command.hpp"
-#include "CommandSequence.hpp"
-#include "Subscriber.hpp"
-#include "FactoryManager.hpp"
-#include "ConfigManager.hpp"
+#include "NoOp.hpp"
 
 //---------------------------------
 // static data
@@ -99,14 +82,36 @@ Moderator* Moderator::Instance()
 //------------------------------------------------------------------------------
 bool Moderator::Initialize()
 {
-   // Create GuiInterpreter, ScriptInterpreter (assuming singleton)
-   // Do we need more than one interpretes?
+   // Create interpreters and managers
    theGuiInterpreter = GuiInterpreter::Instance();
    theScriptInterpreter = ScriptInterpreter::Instance();
    theFactoryManager = FactoryManager::Instance();
    theConfigManager = ConfigManager::Instance();
+
+   // Create publisher
+   thePublisher = new Publisher();
+
+   // Create factories
+   theCommandFactory = new CommandFactory();
+   theForceModelFactory = new ForceModelFactory();
+   thePhysicalModelFactory = new PhysicalModelFactory();
+   thePropSetupFactory = new PropSetupFactory();
+   thePropagatorFactory = new PropagatorFactory();
+   theSpacecraftFactory = new SpacecraftFactory();
+   theStopConditionFactory = new StopConditionFactory();
+   theSubscriberFactory = new SubscriberFactory();
    
-   //loj: reads in initial files, such as, system parameters, default mission senario in script format
+   // Register factories
+   theFactoryManager->RegisterFactory(theCommandFactory);
+   theFactoryManager->RegisterFactory(theForceModelFactory);
+   theFactoryManager->RegisterFactory(thePhysicalModelFactory);
+   theFactoryManager->RegisterFactory(thePropSetupFactory);
+   theFactoryManager->RegisterFactory(thePropagatorFactory);
+   theFactoryManager->RegisterFactory(theSpacecraftFactory);
+   theFactoryManager->RegisterFactory(theStopConditionFactory);
+   theFactoryManager->RegisterFactory(theSubscriberFactory);
+   
+   //loj: reads in initial files, such as, system parameters, default mission script file.
    //loj: calls ScriptInterpreter to interpret initial script and create necessary objects
    //loj: creates initial commands and add to sandbox
    //loj: at this point the sandbox is ready to run without GUI.
@@ -189,13 +194,13 @@ StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 
 // Spacecraft
 //------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(std::string type, const std::string &name)
+// Spacecraft* CreateSpacecraft(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Spacecraft* Moderator::CreateSpacecraft(std::string type, const std::string &name)
+Spacecraft* Moderator::CreateSpacecraft(const std::string type, const std::string &name)
 {
    Spacecraft *sc =
       theFactoryManager->CreateSpacecraft(type, name);
-   theConfigManager->AddSpacecraft(sc, name);
+   theConfigManager->AddSpacecraft(sc);
    return sc;
 }
 
@@ -209,12 +214,12 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 
 // Propagator
 //------------------------------------------------------------------------------
-// Propagator* CreatePropagator(std::string type, const std::string &name)
+// Propagator* CreatePropagator(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Propagator* Moderator::CreatePropagator(std::string type, const std::string &name)
+Propagator* Moderator::CreatePropagator(const std::string type, const std::string &name)
 {
    Propagator *prop = theFactoryManager->CreatePropagator(type, name);
-   theConfigManager->AddPropagator(prop, name);
+   theConfigManager->AddPropagator(prop);
    return prop;
 }
 
@@ -228,13 +233,13 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 
 // PhysicalModel
 //------------------------------------------------------------------------------
-// PhysicalModel* CreatePhysicalModel(std::string type, const std::string &name)
+// PhysicalModel* CreatePhysicalModel(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-PhysicalModel* Moderator::CreatePhysicalModel(std::string type,
+PhysicalModel* Moderator::CreatePhysicalModel(const std::string type,
                                               const std::string &name)
 {
    PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
-   theConfigManager->AddPhysicalModel(physicalModel, name);
+   theConfigManager->AddPhysicalModel(physicalModel);
    return physicalModel;
 }
 
@@ -248,13 +253,13 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 
 // Parameter
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(std::string type, const std::string &name)
+// Parameter* CreateParameter(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Parameter* Moderator::CreateParameter(std::string type, const std::string &name)
+Parameter* Moderator::CreateParameter(const std::string type, const std::string &name)
 {
    //loj: not implemented in build 1
 //     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
-//     theConfigManager->AddParameter(parameter, name);
+//     theConfigManager->AddParameter(parameter);
 //     return parameter;
    return NULL;
 }
@@ -276,7 +281,7 @@ Parameter* Moderator::GetParameter(const std::string &name)
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
    ForceModel *fm = theFactoryManager->CreateForceModel(name);
-   theConfigManager->AddForceModel(fm, name);
+   theConfigManager->AddForceModel(fm);
    return fm;
 }
 
@@ -289,9 +294,9 @@ ForceModel* Moderator::GetForceModel(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// bool AddToForceModel(std::string forceModelName, std::string forceName)
+// bool AddToForceModel(const std::string forceModelName, std::string forceName)
 //------------------------------------------------------------------------------
-bool Moderator::AddToForceModel(std::string forceModelName, std::string forceName)
+bool Moderator::AddToForceModel(const std::string forceModelName, std::string forceName)
 {
    bool status = true;
    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
@@ -306,7 +311,7 @@ bool Moderator::AddToForceModel(std::string forceModelName, std::string forceNam
 StopCondition* Moderator::CreateStopCondition(const std::string &name)
 {
    StopCondition *stopCond = theFactoryManager->CreateStopCondition(name);
-   theConfigManager->AddStopCondition(stopCond, name);
+   theConfigManager->AddStopCondition(stopCond);
    return stopCond;
 }
 
@@ -331,7 +336,7 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name, std::string propa
    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
    propSetup->SetPropagator(prop);
    propSetup->SetForceModel(fm);
-   theConfigManager->AddPropSetup(propSetup, name);
+   theConfigManager->AddPropSetup(propSetup);
    return propSetup;
 }
 
@@ -345,14 +350,14 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 
 // celestial body
 //------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(std::string type, const std::string &name)
+// CelestialBody* CreateCelestialBody(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-CelestialBody* Moderator::CreateCelestialBody(std::string type,
+CelestialBody* Moderator::CreateCelestialBody(const std::string type,
                                               const std::string &name)
 {
    // type is such as "Earth", "Moon" - we need const string EarthString etc.
    CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
-   theConfigManager->AddCelestialBody(body, name);
+   theConfigManager->AddCelestialBody(body);
    return body;
 }
 
@@ -379,7 +384,7 @@ SolarSystem* Moderator::GetDefaultSolarSystem()
 SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 {
    SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
-   theConfigManager->AddSolarSystem(solarSys, name);
+   theConfigManager->AddSolarSystem(solarSys);
    return solarSys;
 }
 
@@ -401,12 +406,12 @@ SolarSystem* Moderator::GetSolarSystemInUse()
 
 // subscriber
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(std::string type, const std::string &name)
+// Subscriber* CreateSubscriber(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::CreateSubscriber(std::string type, const std::string &name)
+Subscriber* Moderator::CreateSubscriber(const std::string type, const std::string &name)
 {
    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name);
-   theConfigManager->AddSubscriber(subs, name);
+   theConfigManager->AddSubscriber(subs);
    return subs;
 }
 
@@ -420,12 +425,12 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 
 // command
 //------------------------------------------------------------------------------
-// Command* CreateCommand(std::string type, const std::string &name)
+// Command* CreateCommand(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Command* Moderator::CreateCommand(std::string type, const std::string &name)
+Command* Moderator::CreateCommand(const std::string type, const std::string &name)
 {
    Command *cmd = theFactoryManager->CreateCommand(type, name);
-   theConfigManager->AddCommand(cmd, name);
+   theConfigManager->AddCommand(cmd);
    return cmd;
 }
 
@@ -443,9 +448,10 @@ Command* Moderator::GetCommand(const std::string &name)
 //------------------------------------------------------------------------------
 Command* Moderator::GetNextCommand(Integer sandboxNum)
 {
-   return commandSeqs[sandboxNum-1]->GetNextCommand();
+   return commands[sandboxNum-1]->GetNext();
 }
 
+//loj: future build implementation
 //------------------------------------------------------------------------------
 // bool DeleteCommand(const std::string &name, Integer position,
 //                    Integer sandboxNum)
@@ -454,20 +460,36 @@ bool Moderator::DeleteCommand(const std::string &name, Integer position,
                               Integer sandboxNum)
 {
    // delete command from default sandbox 1
-   commandSeqs[sandboxNum-1]->DeleteCommand(name, position);
+   //commands[sandboxNum-1]->DeleteCommand(name, position);
+   return false;
+}
+
+//loj: future build implementation
+//------------------------------------------------------------------------------
+// Command* InsertCommand(const std::string type, const std::string &name,
+//                        Integer position, bool addAbove, Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* Moderator::InsertCommand(const std::string type, const std::string &name,
+                                  Integer position, bool addAbove,
+                                  Integer sandboxNum)
+{
+//     bool status = false;
+//     Command *cmd = theFactoryManager->CreateCommand(type, name);
+//     status = commands[sandboxNum-1]->Insert(cmd, position, addAbove);
+//     return cmd;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
-// Command* InsertCommand(std::string type, const std::string &name,
-//                        Integer position, bool addAbove, Integer sandboxNum)
+// Command* AppendCommand(const std::string type, const std::string &name,
+//                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::InsertCommand(std::string type, const std::string &name,
-                                  Integer position, bool addAbove,
+Command* Moderator::AppendCommand(const std::string type, const std::string &name,
                                   Integer sandboxNum)
 {
    bool status;
    Command *cmd = theFactoryManager->CreateCommand(type, name);
-   status = commandSeqs[sandboxNum-1]->InsertCommand(cmd, position, addAbove);
+   status = commands[sandboxNum-1]->Append(cmd);
    return cmd;
 }
 
@@ -582,12 +604,14 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 void Moderator::AddCommandToSandbox(Integer index)
 {
    Command *cmd;
-   Integer numCommand = commandSeqs[index]->GetNumCommands();
 
-   for (int i=0; i<numCommand; i++)
+   while (true)
    {
-      cmd = commandSeqs[index]->GetNextCommand();
-      sandboxes[index]->AddCommand(cmd);
+      cmd = commands[index]->GetNext();
+      if (cmd != NULL)
+         sandboxes[index]->AddCommand(cmd);
+      else
+         break;
    }
 }
 
@@ -620,11 +644,11 @@ Moderator::Moderator()
    theFactoryManager = FactoryManager::Instance();
    theConfigManager = ConfigManager::Instance();
    sandboxes.reserve(Gmat::MAX_SANDBOX);
-   commandSeqs.reserve(Gmat::MAX_SANDBOX);
+   commands.reserve(Gmat::MAX_SANDBOX);
 
-   // create atleast 1 Sandbox and CommandSeq
+   // create atleast 1 Sandbox and Command
    sandboxes.push_back(new Sandbox());
-   commandSeqs.push_back(new CommandSequence());
+   commands.push_back(new NoOp());
 }
 
 //------------------------------------------------------------------------------
@@ -632,14 +656,36 @@ Moderator::Moderator()
 //------------------------------------------------------------------------------
 Moderator::~Moderator()
 {
-   if (theFactoryManager != NULL)
-      delete theFactoryManager;
+   if (instance != NULL)
+      delete instance;
    if (theConfigManager != NULL)
       delete theConfigManager;
+   if (theFactoryManager != NULL)
+      delete theFactoryManager;
    if (theGuiInterpreter != NULL)
       delete theGuiInterpreter;
    if (theScriptInterpreter != NULL)
       delete theScriptInterpreter;
+   
+   if (thePublisher != NULL)
+      delete thePublisher;
+   if (theCommandFactory != NULL)
+      delete theCommandFactory;
+   if (theForceModelFactory != NULL)
+      delete theForceModelFactory;
+   if (thePhysicalModelFactory != NULL)
+      delete thePhysicalModelFactory;
+   if (thePropSetupFactory != NULL)
+      delete thePropSetupFactory;
+   if (thePropagatorFactory != NULL)
+      delete thePropagatorFactory;
+   if (theSpacecraftFactory != NULL)
+      delete theSpacecraftFactory;
+   if (theStopConditionFactory != NULL)
+      delete theStopConditionFactory;
+   if (theSubscriberFactory != NULL)
+      delete theSubscriberFactory;
+   
 }
 
 
