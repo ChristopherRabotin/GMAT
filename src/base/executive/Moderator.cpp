@@ -360,8 +360,9 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
-    //MessageInterface::ShowMessage("Moderator::CreatePropagator() name = %s\n",
-    //                              name.c_str());
+    MessageInterface::ShowMessage("Moderator::CreatePropagator() type = %s, name = %s\n",
+                                  type.c_str(), name.c_str());
+    
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
     if (prop ==  NULL)
@@ -439,7 +440,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
     }
     catch (BaseException &e)
     {
-        MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
+        MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
                                       e.GetMessage());
     }
         
@@ -740,7 +741,7 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
     Propagator *prop = CreatePropagator("RungeKutta89", propName);
     
     // creates empty ForceModel
-    std::string fmName = name + "ForceModel";
+    std::string fmName = propName + "ForceModel"; //loj: 3/19/04 changed name to propName
     ForceModel *fm = CreateForceModel(fmName);
 
     // create PropSetup
@@ -778,15 +779,19 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
                                       const std::string &propagatorName,
                                       const std::string &forceModelName)
 {
-    // assumes propagatorName and forceModelName exist already.
     Propagator *prop = theConfigManager->GetPropagator(propagatorName);
     ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
+    
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+    
     if (prop)
         propSetup->SetPropagator(prop);
+    
     if (fm)
         propSetup->SetForceModel(fm);
+    
     theConfigManager->AddPropSetup(propSetup);
+    
     return propSetup;
 }
 
@@ -1215,6 +1220,7 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
+    MessageInterface::ShowMessage("========================================\n");
     MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
                                   "file: " + scriptFilename + "\n");
 
@@ -1229,7 +1235,7 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
     catch (BaseException &e)
     {
         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
-                                       "\n Check type in the appropriate Factory");
+                                       "\n Check Type in the appropriate Factory or parameter text");
         return false;
     }
 }
