@@ -15,10 +15,11 @@
 #include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "gmatdefs.hpp"           //put this one after GUI includes
+#include "Parameter.hpp"
 #include "MessageInterface.hpp"
 #include <algorithm>              // for sort(), set_difference()
 
-#define DEBUG_GUI_ITEM 0
+//#define DEBUG_GUI_ITEM 1
 
 //------------------------------
 // static data
@@ -322,7 +323,7 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 
 //------------------------------------------------------------------------------
 // wxListBox* GetParameterListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
-//                                const wxString &objName, int numObj)
+//                                const wxString &objName)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
@@ -330,10 +331,14 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, wxWindowID id,
                                                const wxSize &size,
-                                               const wxString &objName, int numObj)
+                                               const wxString &objName)
 {
    wxString emptyList[] = {};
-        
+   int numObj = 0;
+   
+   if (objName == "Spacecraft")
+      numObj = theNumSpacecraft;
+   
    if (numObj > 0)
    {       
       theParamListBox =
@@ -401,6 +406,87 @@ wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
    }
    
    return theConfigParamListBox;
+}
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetUserParameterComboBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return configured user parameter combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox*
+GuiItemManager::GetUserParameterComboBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size)
+{
+   // combo box for configured user parameters
+
+   int numUserVar = theNumUserParam;
+    
+   if (theNumUserParam == 0)
+      numUserVar = 1;
+    
+   theUserParamComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     numUserVar, theUserParamList, wxCB_DROPDOWN);
+   
+   // show first spacecraft
+   theUserParamComboBox->SetSelection(0);
+   
+   return theUserParamComboBox;
+}
+
+//------------------------------------------------------------------------------
+// wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
+//                                    const wxSize &size,
+//                                    const wxString &nameToExclude = "")
+//------------------------------------------------------------------------------
+/**
+ * @return Configured User Parameter ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent,
+                                                   wxWindowID id,
+                                                   const wxSize &size,
+                                                   const wxString &nameToExclude)
+{       
+   wxString emptyList[] = {};
+   wxString *newUserParamList;
+   int numParams = 0;
+    
+   if (nameToExclude != "" && theNumUserParam >= 2)
+   {
+      newUserParamList = new wxString[theNumUserParam-1];
+        
+      for (int i=0; i<theNumUserParam; i++)
+      {
+         if (theUserParamList[i] != nameToExclude)
+            newUserParamList[numParams++] = theUserParamList[i];
+      }
+      
+      theUserParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserParam,
+                       newUserParamList, wxLB_SINGLE|wxLB_SORT);
+      
+      delete newUserParamList;
+   }
+   else
+   {
+      if (theNumUserParam > 0)
+      {       
+         theUserParamListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumUserParam,
+                          theUserParamList, wxLB_SINGLE|wxLB_SORT);
+      }
+      else
+      {       
+         theUserParamListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
+      }
+   }
+   
+   return theUserParamListBox;
 }
 
 //------------------------------------------------------------------------------
@@ -678,7 +764,9 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
 //  void UpdateParameterList(const wxString &objName, bool firstTime = false)
 //------------------------------------------------------------------------------
 /**
- * Updates available parameter list
+ * Updates available parameter list associated with objName.
+ *
+ * @note Only plottable parameters (returning single value) are added to the list.
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime)
@@ -686,25 +774,49 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
    //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
    //                              std::string(objName.c_str()) + "\n");
     
-    //loj: How do I know which parameter belong to which object type?
-    //loj: for B2 show all paramters
+   //loj: How do I know which parameter belong to which object type?
+   //loj: for B2 show all paramters
    StringArray items =
       theGuiInterpreter->GetListOfFactoryItems(Gmat::PARAMETER);
-   theNumParam = items.size();
+   int numParams = items.size();
+   
+   //MessageInterface::ShowMessage
+   //   ("GuiItemManager::UpdateParameterList() numParams=%d\n", numParams);
 
-   int len;
-   for (int i=0; i<theNumParam; i++)
+   theNumParam = 0;
+   
+   for (int i=0; i<numParams; i++)
    {
-      theParamList[i] = items[i].c_str();
-      len = theParamList[i].Length();
+      if (theNumParam < MAX_PARAM_SIZE)
+      {
+         // add to list only system parameters returning single value (loj: 9/22/04)
+         if (items[i].find("CartState") == std::string::npos &&
+             items[i].find("KepElem") == std::string::npos &&
+             items[i].find("SphElem") == std::string::npos &&
+             items[i].find("Variable") == std::string::npos &&
+             items[i].find("Array") == std::string::npos)
+         {
+            theParamList[theNumParam] = items[i].c_str();
+            theNumParam++;
+         }
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "The number of parameters exceeds the maximum: %d",
+             MAX_PARAM_SIZE);
+      }
    }
+   //MessageInterface::ShowMessage
+   //   ("GuiItemManager::UpdateParameterList() theNumParam=%d\n", theNumParam);
 }
 
 //------------------------------------------------------------------------------
 //  void UpdateConfigParameterList(const wxString &objName = "", bool firstTime = false)
 //------------------------------------------------------------------------------
 /**
- * Updates confugured parameter list
+ * Updates confugured parameter list (theConfigParamList, theSystemParamList,
+ * and theUserParamList).
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateConfigParameterList(const wxString &objName, bool firstTime)
@@ -716,16 +828,47 @@ void GuiItemManager::UpdateConfigParameterList(const wxString &objName, bool fir
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
    theNumConfigParam = items.size();
 
+   Parameter *param;
+
+   int userParamCount = 0;
+   int systemParamCount = 0;
+   
    for (int i=0; i<theNumConfigParam; i++)
    {
-      if (objName == "")
-         theConfigParamList[i] = items[i].c_str();
-      else
-         theConfigParamList[i] = objName + "." + items[i].c_str();
-        
+      param = theGuiInterpreter->GetParameter(items[i]);
+      
+      // add if parameter plottable (returning single value)
+      if (param->IsPlottable())
+      {
+         // All configured parameters
+         if (objName == "")
+            theConfigParamList[systemParamCount] = items[i].c_str();
+         else
+            theConfigParamList[systemParamCount] = objName + "." + items[i].c_str();
+
+         // Identify sytem and user parameters
+         if (param->GetKey() == Parameter::USER_PARAM)
+         {
+            theUserParamList[userParamCount] = items[i].c_str();
+            userParamCount++;
+         }
+         else
+         {
+            if (objName == "")
+               theSystemParamList[systemParamCount] = items[i].c_str();
+            else
+               theSystemParamList[systemParamCount] = objName + "." + items[i].c_str();
+
+            systemParamCount++;
+         }
+      }
+      
       //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigParameterList() " +
       //                             std::string(theConfigParamList[i].c_str()) + "\n");
    }
+
+   theNumSystemParam = systemParamCount;
+   theNumUserParam = userParamCount;
 }
 
 //------------------------------------------------------------------------------

@@ -33,7 +33,9 @@
 class GuiItemManager
 {
 public:
-   static const int MAX_LIST_SIZE = 30;
+   static const int MAX_OBJECT_SIZE = 30;
+   static const int MAX_PARAM_SIZE = 150;
+   
    static GuiItemManager* GetInstance();
    
    void UpdateAll();
@@ -52,6 +54,12 @@ public:
    int GetNumConfigParameter()
       { return theNumConfigParam; }
     
+   int GetNumSystemParameter()
+      { return theNumSystemParam; }
+    
+   int GetNumUserParameter()
+      { return theNumUserParam; }
+    
    int GetNumConfigBody()
       { return theNumConfigBody; }
    
@@ -60,6 +68,12 @@ public:
    
    wxString* GetConfigParameterList()
       { return theConfigParamList; }
+   
+   wxString* GetSystemParameterList()
+      { return theSystemParamList; }
+   
+   wxString* GetUserParameterList()
+      { return theUserParamList; }
    
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
@@ -78,11 +92,18 @@ public:
    
    wxListBox* GetParameterListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
-                                  const wxString &objName, int numObj);
+                                  const wxString &objName);
    
    wxListBox* GetConfigParameterListBox(wxWindow *parent, wxWindowID id,
                                         const wxSize &size,
                                         const wxString &nameToExclude = "");
+   
+   wxComboBox* GetUserParameterComboBox(wxWindow *parent, wxWindowID id,
+                                        const wxSize &size);
+   
+   wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size,
+                                      const wxString &nameToExclude = "");
    
    wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
@@ -101,7 +122,6 @@ private:
    void UpdateSpacecraftList(bool firstTime = false);
    void UpdateParameterList(const wxString &objName, bool firstTime = false);
    void UpdateConfigParameterList(const wxString &objName, bool firstTime = false);
-   void UpdateConfigUserVarList(const wxString &objName, bool firstTime = false);
    void UpdateConfigBodyList(bool firstTime = false);
    
    static GuiItemManager *theInstance;
@@ -113,21 +133,27 @@ private:
    int theNumSpacecraft;
    int theNumParam;
    int theNumConfigParam;
+   int theNumSystemParam;
+   int theNumUserParam;
    int theNumConfigBody;
    
-   wxString theSpaceObjectList[MAX_LIST_SIZE];
-   wxString theFormationList[MAX_LIST_SIZE];
-   wxString theSpacecraftList[MAX_LIST_SIZE];
-   wxString theParamList[MAX_LIST_SIZE];
-   wxString theConfigParamList[MAX_LIST_SIZE];
-   wxString theConfigBodyList[MAX_LIST_SIZE];
+   wxString theSpaceObjectList[MAX_OBJECT_SIZE];
+   wxString theFormationList[MAX_OBJECT_SIZE];
+   wxString theSpacecraftList[MAX_OBJECT_SIZE];
+   wxString theParamList[MAX_PARAM_SIZE];
+   wxString theConfigParamList[MAX_PARAM_SIZE];
+   wxString theSystemParamList[MAX_PARAM_SIZE];
+   wxString theUserParamList[MAX_PARAM_SIZE];
+   wxString theConfigBodyList[MAX_OBJECT_SIZE];
    
    wxComboBox *theSpacecraftComboBox;
+   wxComboBox *theUserParamComboBox;
    wxListBox  *theSpaceObjectListBox;
    wxListBox  *theFormationListBox;
    wxListBox  *theSpacecraftListBox;
    wxListBox  *theParamListBox;
    wxListBox  *theConfigParamListBox;
+   wxListBox  *theUserParamListBox;
    wxListBox  *theConfigBodyListBox;
    
 };
