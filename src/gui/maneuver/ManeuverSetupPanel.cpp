@@ -14,6 +14,7 @@
 //------------------------------------------------------------------------------
 
 #include "ManeuverSetupPanel.hpp"
+//#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -195,13 +196,14 @@ void ManeuverSetupPanel::LoadData()
     int index;
     
     // default values
-    burnCB->SetSelection(0);
-    satCB->SetSelection(0);
+    //burnCB->SetSelection(0);
+    //satCB->SetSelection(0);
 
     // burn 
     id = theCommand->GetParameterID("Burn");
     std::string burn = theCommand->GetStringParameter(id);
-//    StringArray burnList = theCommand->GetStringArrayParameter(id);
+    //StringArray burnList = theCommand->GetStringArrayParameter(id);
+    //MessageInterface::ShowMessage("ManeuverSetupPanel::LoadData() burn=%s\n", burn.c_str());
     StringArray burnList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
     index = 0;
     for (StringArray::iterator iter = burnList.begin(); 
@@ -213,9 +215,15 @@ void ManeuverSetupPanel::LoadData()
             ++index;
     }
 
+    if (burn == "")
+    {
+        burnCB->SetValue("Select a burn");
+    }
+    
     // spacecraft
     id = theCommand->GetParameterID("Spacecraft");
     std::string sat = theCommand->GetStringParameter(id);
+    //MessageInterface::ShowMessage("ManeuverSetupPanel::LoadData() sat=%s\n", sat.c_str());
     StringArray satList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
     index = 0;
     for (StringArray::iterator iter = satList.begin(); 
@@ -226,6 +234,12 @@ void ManeuverSetupPanel::LoadData()
         else
             ++index;
     }
+
+    if (sat == "")
+    {
+        satCB->SetValue("Select a spacecraft");
+    }
+
 }
 
 //------------------------------------------------------------------------------
