@@ -42,6 +42,8 @@ public:
         { mWindowMode = mode; };
     wxString GetWindowMode()
         { return mWindowMode; };
+    wxTextCtrl *GetTextCtrl()
+        { return mTextCtrl; };
     
 private:
 

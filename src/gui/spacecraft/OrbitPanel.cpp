@@ -93,45 +93,45 @@ void OrbitPanel::Create()
     wxStaticBoxSizer *item1 = new wxStaticBoxSizer( item2, wxVERTICAL );
 
     // gridsizer for inside the Coordinate System static box
-    wxGridSizer *item3 = new wxGridSizer( 2, 0, 0 );
+//    wxGridSizer *item3 = new wxGridSizer( 2, 0, 0 );
 
-    wxStaticText *referenceBodyStaticText = new wxStaticText( this, ID_TEXT, 
-                          wxT("Reference Body"), wxDefaultPosition, 
-                          wxDefaultSize, 0 );
-    item3->Add( referenceBodyStaticText, 0, wxALIGN_CENTER, 5 );
-    
-    wxStaticText *referenceFrameStaticText = new wxStaticText( this, ID_TEXT, 
-                           wxT("Reference Frame"), wxDefaultPosition,
-                           wxDefaultSize, 0 );
-    item3->Add( referenceFrameStaticText, 0, wxALIGN_CENTER, 5 );
-
-    StringArray items = theSolarSystem->GetBodiesInUse();
-    int theNumConfigBody = items.size();
-
-    for (int i=0; i<theNumConfigBody; i++)
-    {
-      bodiesArray[i] = items[i].c_str();
-    }    
-      
-    referenceBodyComboBox = new wxComboBox( this, ID_COMBO, wxT(""), 
-                         wxDefaultPosition, wxSize(110, -1), 
-                         theNumConfigBody, bodiesArray, 
-                         wxCB_DROPDOWN | wxCB_READONLY);        
-                         
-    item3->Add( referenceBodyComboBox, 0, wxALIGN_CENTER, 5 );
-
-    // hard coded for now
-    wxString strs7[] =
-    {
-        wxT("Mean-of-J2000.0")
-    };
-    wxComboBox *referenceFrameComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                         wxDefaultPosition, wxSize(130,-1), 1, strs7, 
-                         wxCB_DROPDOWN | wxCB_READONLY );
-    referenceFrameComboBox->SetValue(wxT("Mean-of-J2000.0"));
-    item3->Add( referenceFrameComboBox, 0, wxALIGN_CENTER, 5 );
-
-    item1->Add( item3, 0, wxALIGN_CENTER, 5 );
+//    wxStaticText *referenceBodyStaticText = new wxStaticText( this, ID_TEXT, 
+//                          wxT("Reference Body"), wxDefaultPosition, 
+//                          wxDefaultSize, 0 );
+//    item3->Add( referenceBodyStaticText, 0, wxALIGN_CENTER, 5 );
+//    
+//    wxStaticText *referenceFrameStaticText = new wxStaticText( this, ID_TEXT, 
+//                           wxT("Reference Frame"), wxDefaultPosition,
+//                           wxDefaultSize, 0 );
+//    item3->Add( referenceFrameStaticText, 0, wxALIGN_CENTER, 5 );
+//
+//    StringArray items = theSolarSystem->GetBodiesInUse();
+//    int theNumConfigBody = items.size();
+//
+//    for (int i=0; i<theNumConfigBody; i++)
+//    {
+//      bodiesArray[i] = items[i].c_str();
+//    }    
+//      
+//    referenceBodyComboBox = new wxComboBox( this, ID_COMBO, wxT(""), 
+//                         wxDefaultPosition, wxSize(110, -1), 
+//                         theNumConfigBody, bodiesArray, 
+//                         wxCB_DROPDOWN | wxCB_READONLY);        
+//                         
+//    item3->Add( referenceBodyComboBox, 0, wxALIGN_CENTER, 5 );
+//
+//    // hard coded for now
+//    wxString strs7[] =
+//    {
+//        wxT("Mean-of-J2000.0")
+//    };
+//    wxComboBox *referenceFrameComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
+//                         wxDefaultPosition, wxSize(130,-1), 1, strs7, 
+//                         wxCB_DROPDOWN | wxCB_READONLY );
+//    referenceFrameComboBox->SetValue(wxT("Mean-of-J2000.0"));
+//    item3->Add( referenceFrameComboBox, 0, wxALIGN_CENTER, 5 );
+//
+//    item1->Add( item3, 0, wxALIGN_CENTER, 5 );
 
     //static box for the orbit state
     wxStaticBox *item9 = new wxStaticBox( this, ID_STATIC_ORBIT, 
@@ -158,14 +158,14 @@ void OrbitPanel::Create()
     
     // combo box for the date type
    dateComboBox = new wxComboBox( this, ID_CB_EPOCH, wxT(""), 
-             wxDefaultPosition, wxSize(110,-1), 4, strs12, 
+             wxDefaultPosition, wxSize(130,-1), 4, strs12, 
              wxCB_DROPDOWN | wxCB_READONLY );
    item10->Add( dateComboBox, 0, wxALIGN_CENTER, 5 );
 //    dateComboBox->Disable();
 
    // textfield for the epochvalue
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                 wxDefaultPosition, wxSize(130,-1), 0 );
+                 wxDefaultPosition, wxSize(150,-1), 0 );
    
    item10->Add( epochValue, 0, wxALIGN_CENTER, 5 );
    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
@@ -188,7 +188,7 @@ void OrbitPanel::Create()
     
     // combo box for the state
     stateComboBox = new wxComboBox( this, ID_CB_STATE, wxT(""), 
-              wxDefaultPosition, wxSize(130,-1), 2, strs15, 
+              wxDefaultPosition, wxSize(150,-1), 2, strs15, 
               wxCB_DROPDOWN | wxCB_READONLY);
 
 //      stateComboBox = new wxComboBox( orbitPanel, ID_CB_STATE, wxT(""), 
@@ -337,9 +337,9 @@ void OrbitPanel::LoadData()
   //      stateComboBox->SetSelection(1);
   
     // Get availible bodies for reference body
-    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
-    std::string refBody = theSpacecraft->GetStringParameter(refBodyId);
-    referenceBodyComboBox->SetValue(wxT(refBody.c_str()));
+//    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
+//    std::string refBody = theSpacecraft->GetStringParameter(refBodyId);
+//    referenceBodyComboBox->SetValue(wxT(refBody.c_str()));
 
     // Reference Frame   
 //    std::string refFrame = theSpacecraft->GetStringParameter(8);
@@ -614,10 +614,10 @@ void OrbitPanel::SaveData()
     // save state type
     wxString stateStr = stateComboBox->GetStringSelection();
     
-    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
-    wxString refBodyStr = referenceBodyComboBox->GetStringSelection();
-    theSpacecraft->SetStringParameter(refBodyId,
-                   std::string(refBodyStr.c_str()));
+//    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
+//    wxString refBodyStr = referenceBodyComboBox->GetStringSelection();
+//    theSpacecraft->SetStringParameter(refBodyId,
+//                   std::string(refBodyStr.c_str()));
     
     // refFrame id = 8
 //    theSpacecraft->SetStringParameter(8, std::string (stateStr.c_str()));
