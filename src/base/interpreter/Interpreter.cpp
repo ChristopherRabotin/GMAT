@@ -403,7 +403,7 @@ Integer Interpreter::SkipWhiteSpace(Integer start)
             (str[finish] == '%') || (str[finish] == '\0'))
             return -1;
     }
-    if (start >= strlen(str))
+    if (start >= (Integer)strlen(str))
         return -1;
     return finish;
 }
@@ -427,11 +427,11 @@ std::string Interpreter::GetToken(std::string tokstr)
         start = 0;
     }
 
-    if (start >= strlen(str.c_str()))
+    if (start >= (Integer)strlen(str.c_str()))
         token = "";
     else {
         Integer loc = str.find(".", start);
-        if (loc == std::string::npos)
+        if (loc == (Integer)std::string::npos)
             loc = strlen(str.c_str());
         token.assign(str, start, loc-start);
         start = loc+1;

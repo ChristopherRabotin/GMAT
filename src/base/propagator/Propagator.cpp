@@ -109,8 +109,8 @@ stepSize            (60.0),
 initialized         (false),
 inState             (NULL),
 outState            (NULL),
-physicalModel       (NULL),
-dimension           (0)
+dimension           (0),
+physicalModel       (NULL)
 {
     // GmatBase data
     parameterCount = PropagatorParamCount;
@@ -141,8 +141,8 @@ stepSize            (p.stepSize),
 initialized         (false),
 inState             (NULL),
 outState            (NULL),
-physicalModel       (NULL),
-dimension           (p.dimension)
+dimension           (p.dimension),
+physicalModel       (NULL)
 {
     // GmatBase data
     parameterCount = PropagatorParamCount;

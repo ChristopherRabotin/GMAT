@@ -69,11 +69,11 @@ Propagate::Propagate(const Propagate &p) :
     propName                    (p.propName),
     propCoupled                 (true),
     interruptCheckFrequency     (30),
+    baseEpoch                   (0.0),
     prop                        (NULL),
     // Set the parameter IDs
     propCoupledID               (p.propCoupledID),
     interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
-    baseEpoch                   (0.0),
     secondsToProp               (p.secondsToProp)
 {
     // Increase the number of parms by the 2 new ones
@@ -244,7 +244,7 @@ void Propagate::InterpretAction(void)
         ++loc;
         
     end = generatingString.find("(", loc);
-    if (end == std::string::npos)
+    if (end == (Integer)std::string::npos)
         throw CommandException("Propagate string does not identify propagator");
 
     std::string component = generatingString.substr(loc, end-loc);
@@ -252,7 +252,7 @@ void Propagate::InterpretAction(void)
 
     loc = end + 1;
     end = generatingString.find(",", loc);
-    if (end == std::string::npos)
+    if (end == (Integer)std::string::npos)
         throw CommandException("Propagate string does not identify spacecraft");
     
     component = generatingString.substr(loc, end-loc);
@@ -260,20 +260,20 @@ void Propagate::InterpretAction(void)
 
     loc = end + 1;
     end = generatingString.find(",", loc);
-    if (end != std::string::npos)
+    if (end != (Integer)std::string::npos)
         throw CommandException("Propagate does not yet support multiple spacecraft");
 
     end = generatingString.find("{", loc);
-    if (end == std::string::npos)
+    if (end == (Integer)std::string::npos)
         throw CommandException("Propagate does not identify stopping condition");
 
     end = generatingString.find("Duration", loc);
-    if (end == std::string::npos)
+    if (end == (Integer)std::string::npos)
         throw CommandException("'Duration' is the only supported stopping condition");
 
     loc = end + 8;
     end = generatingString.find("=", loc);
-    if (end == std::string::npos)
+    if (end == (Integer)std::string::npos)
         throw CommandException("Format: 'Duration = xxx'");
 
     loc = end + 1;

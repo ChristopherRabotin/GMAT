@@ -27,8 +27,8 @@
 
 // class constructor
 Toggle::Toggle() :
-    toggleState     (true),
     Command         ("Toggle"),
+    toggleState     (true),
     subscriberID    (parameterCount)
 {
 	++parameterCount;
@@ -69,19 +69,19 @@ void Toggle::InterpretAction(void)
     while (generatingString.find("On", cmd+1) != std::string::npos)
         cmd = generatingString.find("On", cmd+1);
         
-    if ((cmd == std::string::npos) || (cmd <= (generatingString.length() - 5))) {
+    if ((cmd == (Integer)std::string::npos) || (cmd <= (Integer)(generatingString.length() - 5))) {
         cmd = generatingString.find("Off", loc);
         while (generatingString.find("Off", cmd+1) != std::string::npos)
             cmd = generatingString.find("Off", cmd+1);
             
-        if (cmd == std::string::npos)
+        if (cmd == (Integer)std::string::npos)
             throw CommandException("Must Toggle either 'On' or 'Off'");
-        if (cmd > (generatingString.length() - 6)) {
+        if (cmd > (Integer)(generatingString.length() - 6)) {
             toggleState = false;
         }
     }
     else
-        if (cmd > (generatingString.length() - 5)) {
+        if (cmd > (Integer)(generatingString.length() - 5)) {
             toggleState = true;
         }
             

@@ -165,7 +165,7 @@ void CubicSplineInterpolator::AllocateArrays(void)
 //------------------------------------------------------------------------------
 void CubicSplineInterpolator::CleanupArrays(void)
 {
-    Integer i;
+    Integer i = 0;
     if (y2[i]) {
         for (i = 0; i < bufferSize; ++i) {
             delete [] y[i];

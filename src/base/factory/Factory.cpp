@@ -426,6 +426,7 @@ bool Factory::SetListOfCreatableObjects(StringArray itsList)
    if (!creatables.empty())
       creatables.clear();
    creatables = itsList;
+   return true;
 }
 
 //------------------------------------------------------------------------------

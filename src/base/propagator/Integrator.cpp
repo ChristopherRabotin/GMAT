@@ -372,8 +372,7 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
     else if (id == smallestTimeInterval)
         smallestTime = fabs(value);
 
-    else
-        return GmatBase::SetRealParameter(id, value);
+    return GmatBase::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -406,6 +405,8 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
             return GmatBase::SetIntegerParameter(id, value);;
         maxStepAttempts = (Integer)value;
     }
+    
+    return GmatBase::SetIntegerParameter(id, value);
 }
 
 //------------------------------------------------------------------------------

@@ -128,11 +128,11 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
     GmatBase                    (id, typeStr, nomme),   // DJC added
     dimension                   (1),
     initialized                 (false),
+    stateChanged                (false),
     modelState                  (NULL),
     elapsedTime                 (0.0),
     deriv                       (NULL),
-    relativeErrorThreshold      (0.10),
-    stateChanged                (false)
+    relativeErrorThreshold      (0.10)
 {
     parameterCount = 1;
 }
@@ -165,9 +165,9 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
     GmatBase                    (pm),
     dimension                   (pm.dimension),
     initialized                 (pm.initialized),
+    stateChanged                (pm.stateChanged),
     elapsedTime                 (pm.elapsedTime),
-    relativeErrorThreshold      (pm.relativeErrorThreshold),
-    stateChanged                (pm.stateChanged)
+    relativeErrorThreshold      (pm.relativeErrorThreshold)
 {
      if (pm.modelState != NULL) 
     {

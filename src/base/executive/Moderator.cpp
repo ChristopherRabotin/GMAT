@@ -905,7 +905,7 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
     Spacecraft *sc;
     StringArray scNames = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
 
-    for (int i=0; i<scNames.size(); i++)
+    for (Integer i=0; i<(Integer)scNames.size(); i++)
     {
         sc = theConfigManager->GetSpacecraft(scNames[i]);
         sandboxes[index]->AddSpacecraft(sc);
@@ -920,7 +920,7 @@ void Moderator::AddPropSetupToSandbox(Integer index)
     PropSetup *propSetup;
     StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
    
-    for (int i=0; i<propSetupNames.size(); i++)
+    for (Integer i=0; i<(Integer)propSetupNames.size(); i++)
     {
         propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
         sandboxes[index]->AddPropSetup(propSetup);
@@ -935,7 +935,7 @@ void Moderator::AddSubscriberToSandbox(Integer index)
     Subscriber *subs;
     StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
    
-    for (int i=0; i<subsNames.size(); i++)
+    for (Integer i=0; i<(Integer)subsNames.size(); i++)
     {
         subs = theConfigManager->GetSubscriber(subsNames[i]);
         sandboxes[index]->AddSubscriber(subs);

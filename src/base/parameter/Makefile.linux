@@ -3,7 +3,18 @@
 
 HEADERS = -I../include -I../foundation -I../util
 OBJECTS = Parameter.o \
-          ParameterDatabase.o
+          ParameterDatabase.o \
+          CartStateParam.o \
+          CartXParam.o \
+          CurrentA1MjdParam.o \
+          ElapsedDaysParam.o \
+          ElapsedSecsParam.o \
+          KepEccParam.o \
+          OrbitData.o \
+          RealParameter.o \
+          RefData.o \
+          Rvector6Parameter.o \
+          TimeData.o
 
 all: libParameter 
 	mkdir -p ../lib

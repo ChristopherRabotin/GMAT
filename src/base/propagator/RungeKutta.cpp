@@ -76,11 +76,11 @@ RungeKutta::RungeKutta(Integer st, Integer order, const std::string &typeStr,
     bij             (NULL),
     cj              (NULL),
     ee              (NULL),
-    stageState      (NULL),
-    candidateState  (NULL),
     sigma           (0.9),
     incPower        (1.0/order),
-    decPower        (1.0/(order-1))
+    decPower        (1.0/(order-1)),
+    stageState      (NULL),
+    candidateState  (NULL)
 {
 }
 
@@ -111,11 +111,11 @@ RungeKutta::RungeKutta(const RungeKutta& rk) :
     bij             (NULL),
     cj              (NULL),
     ee              (NULL),
-    stageState      (NULL),
-    candidateState  (NULL),
     sigma           (rk.sigma),
     incPower        (rk.incPower),
-    decPower        (rk.decPower)
+    decPower        (rk.decPower),
+    stageState      (NULL),
+    candidateState  (NULL)
 {
 }
 

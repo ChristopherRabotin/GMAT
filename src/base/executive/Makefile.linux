@@ -11,13 +11,15 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
 
 OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
 
-CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o
-GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o
+CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o PlotInterfaceConsole.o
+GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o PlotInterfaceGUI.o
 
-all: libExecutive libExecutiveConsole
+# all: libExecutiveConsole libExecutive
+
+all: libExecutiveConsole
 	mkdir -p ../lib
-	mv libExecutive.a ../lib
 	mv libExecutiveConsole.a ../lib
+#	mv libExecutive.a ../lib
 
 libExecutive : ../lib/libExecutive.a
 	
@@ -36,6 +38,16 @@ MessageInterfaceGUI.o : MessageInterface.cpp MessageInterface.hpp
         -c `wx-config --cppflags`\
         -o MessageInterfaceGUI.o MessageInterface.cpp
 
+PlotInterfaceConsole.o : PlotInterface.cpp PlotInterface.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -D__CONSOLE_APP__ \
+        -o PlotInterfaceConsole.o PlotInterface.cpp
+
+PlotInterfaceGUI.o : PlotInterface.cpp PlotInterface.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -I../../gui/include \
+        -I../../gui/app -I../../gui/view -I../../gui/plot \
+        -c `wx-config --cppflags`\
+        -o PlotInterfaceGUI.o PlotInterface.cpp
+
 ../lib/libExecutive.a : $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
 	ar rs libExecutive.a $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
 	ranlib libExecutive.a
@@ -43,3 +55,4 @@ MessageInterfaceGUI.o : MessageInterface.cpp MessageInterface.hpp
 ../lib/libExecutiveConsole.a : $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
 	ar rs libExecutiveConsole.a $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
 	ranlib libExecutiveConsole.a
+

@@ -123,6 +123,7 @@ Real OrbitData::GetCartReal(const std::string &str)
         if (str == "CartVz")
             return obj->GetRealParameter(6); //("CartVz");
     }
+    return ORBIT_REAL_UNDEFINED;
 }
 
 
@@ -158,6 +159,7 @@ Real OrbitData::GetKepReal(const std::string &str)
         if (str == "KepMa")
             return obj->GetRealParameter(6); //("KepMa");
     }
+    return ORBIT_REAL_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
@@ -200,6 +202,7 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
             return sqrt (2.0 * (E + grav/R));
         }
     }
+    return ORBIT_REAL_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
@@ -232,6 +235,7 @@ Real OrbitData::GetSphReal(const std::string &str)
         if (str == "SphDecV")
             return obj->GetRealParameter(6); //("SphDecV");
     }
+    return ORBIT_REAL_UNDEFINED;
 }
 
 //-------------------------------------

@@ -138,6 +138,7 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
         if (str == "Jd")
             return a1mjd + MJD_OFFSET;
     }
+    return TIME_REAL_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
@@ -160,6 +161,7 @@ Real TimeData::GetElapsedTimeReal(const std::string &str)
     //if (str == "Mins")
     if (str == "Secs")
         return (a1mjd - mInitialEpoch)* 86400;
+    return TIME_REAL_UNDEFINED;  // DJC added -- is this what we want here?
 }
 
 
@@ -195,6 +197,8 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
         else
             return false;
     }
+    
+    return false;
 }
 
 

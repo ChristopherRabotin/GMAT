@@ -89,4 +89,5 @@ bool ImpulsiveBurn::Fire(Real *burnData)
     state[5] += deltaV[0]*frameBasis[2][0] +
                 deltaV[1]*frameBasis[2][1] +
                 deltaV[2]*frameBasis[2][2];
+    return true;
 }

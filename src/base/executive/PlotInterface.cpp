@@ -143,6 +143,6 @@ bool PlotInterface::UpdateSpacecraft(const Real &time, const Real &posX,
         return true;
     }
 #endif
-
+    return true;  // Must return something for console apps -- is this what we want?
 } // end UpdateSpacecraft()
 

@@ -587,7 +587,7 @@ std::string ForceModel::GetStringParameter(const Integer id) const
 
 bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
-    Integer count = parameterCount + forceCount, i;
+    Integer count = parameterCount + forceCount;
       
     if ((id < count) && (id > 0)) {
         if (id >= parameterCount) {     // Cannot set these yet

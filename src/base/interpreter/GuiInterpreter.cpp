@@ -636,4 +636,5 @@ GuiInterpreter::GuiInterpreter(const GuiInterpreter&)
 //------------------------------------------------------------------------------
 GuiInterpreter& GuiInterpreter::operator=(const GuiInterpreter &guiInterpreter)
 {
+    return *this;
 }

@@ -4,7 +4,7 @@
 HEADERS = -I../include -I../foundation -I../parameter -I../interpolator \
           -I../refframe -I../util -I../solarsys
 
-OBJECTS = StopCondition.o SingleValueStop.o
+OBJECTS = StopCondition.o SingleValueStop.o ApoapsisStop.o
 
 all: libStopCondition
 	mkdir -p ../lib
