@@ -54,7 +54,8 @@ public:
     // data
     int  ReadTextTrajectory(const wxString &filename);
     void UpdateSpacecraft(const Real &time, const Real &posX,
-                          const Real &posY, const Real &posZ);
+                          const Real &posY, const Real &posZ,
+                          bool updateCanvas);
     
 private:
     TextTrajectoryFile *mTextTrajFile;
@@ -76,7 +77,8 @@ private:
     float mAxisLength;
     bool mShowWireFrame;
     bool mShowEquatorialPlane;
-
+    bool mShowSpacecraft;
+    
     // color
     int mEquatorialPlaneColor;
     

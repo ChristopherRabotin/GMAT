@@ -16,6 +16,7 @@
 #include "gmatdefs.hpp"
 #include "TrajPlotCanvas.hpp"
 #include "TextTrajectoryFile.hpp"
+#include <math.h>
 
 #include "wx/glcanvas.h"
 
@@ -155,6 +156,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
     mScRadius = 200; //km: make big enough to see
 
     // view options
+    mShowSpacecraft = true;
     mShowWireFrame = false;
     mShowEquatorialPlane = true;
     mUseTexture = true;
@@ -703,13 +705,26 @@ void TrajPlotCanvas::DrawEquatorialPlane()
    glPushMatrix();
    glLoadIdentity();
    
-   GLUquadricObj *qobj = gluNewQuadric();   
+   GLUquadricObj *qobj = gluNewQuadric();
+
+   double radius;
+   double distAdd;
+   
    for(i=1; i<10; i++)
    {
       gluQuadricDrawStyle(qobj, GLU_LINE  );
       gluQuadricNormals  (qobj, GLU_SMOOTH);
       gluQuadricTexture  (qobj, GL_FALSE  );
-      gluDisk(qobj, i*distance/10, i*distance/10, 50, 1);
+      distAdd = i*distance/10;
+      
+//        if (i == 1)
+//        {
+//            // draw first circle here
+//        }
+      
+      radius = distAdd + (distAdd /100.0 / log10(distAdd) * exp(double(i))); //loj: looks better
+      //gluDisk(qobj, i*distance/10, i*distance/10, 50, 1); // equal distance
+      gluDisk(qobj, radius, radius, 50, 1);
    }
    gluDeleteQuadric(qobj);
    
@@ -943,23 +958,26 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
     glPopMatrix();
 
 
-   //-------------------------------------------------------
-   //draw spacecraft with texture
-   //-------------------------------------------------------
-   if (mNumData > 1)
-   {
-       glPushMatrix();
-       glLoadIdentity();
-       
-       // put spacecraft at final position
-       glTranslatef(mTempScPos[mNumData-1][0],
-                    mTempScPos[mNumData-1][1],
-                    mTempScPos[mNumData-1][2]);
-       
-       DrawSpacecraft();
-       glPopMatrix();
-   }
+    //-------------------------------------------------------
+    //draw spacecraft with texture
+    //-------------------------------------------------------
+    if (mShowSpacecraft)
+    {
 
+        if (mNumData > 1)
+        {
+            glPushMatrix();
+            glLoadIdentity();
+       
+            // put spacecraft at final position
+            glTranslatef(mTempScPos[mNumData-1][0],
+                         mTempScPos[mNumData-1][1],
+                         mTempScPos[mNumData-1][2]);
+       
+            DrawSpacecraft();
+            glPopMatrix();
+        }
+    }
 } // end DrawSpacecraftTrajectory()
 
 
@@ -1111,7 +1129,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const Real &posX,
-//                       const Real &posY, const Real &posZ);
+//                       const Real &posY, const Real &posZ, bool updateCanvas)
 //------------------------------------------------------------------------------
 /**
  * Updates spacecraft trajectory.
@@ -1120,10 +1138,12 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
  * @param <posX> position x
  * @param <posY> position y
  * @param <posZ> position z
+ * @param <updateCanvas> updates canvas if true
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
-                                      const Real &posY, const Real &posZ)
+                                      const Real &posY, const Real &posZ,
+                                      bool updateCanvas)
 {
     if (mNumData < MAX_DATA)
     {
