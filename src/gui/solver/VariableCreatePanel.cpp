@@ -67,17 +67,7 @@ void VariableCreatePanel::Initialize()
 }
 
 void VariableCreatePanel::Setup( wxWindow *parent)
-{
-    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *item23 = new wxBoxSizer( wxHORIZONTAL );
-    wxFlexGridSizer *item1 = new wxFlexGridSizer( 3, 0, 0 );
-    item1->AddGrowableCol( 1 );
-    wxFlexGridSizer *item5 = new wxFlexGridSizer( 2, 0, 0 );
-    item5->AddGrowableRow( 1 );
-    wxFlexGridSizer *item12 = new wxFlexGridSizer( 5, 0, 0 );
-    wxStaticBox *item11 = new wxStaticBox( parent, -1, wxT("Details") );
-    wxStaticBoxSizer *item10 = new wxStaticBoxSizer( item11, wxVERTICAL );
-    
+{   
     // wxString
     wxString strArray1[] = 
     {
@@ -101,7 +91,6 @@ void VariableCreatePanel::Setup( wxWindow *parent)
     };
     
     // wxStaticText
-    nameStaticText = new wxStaticText( parent, ID_TEXT, wxT("Name"), wxDefaultPosition, wxDefaultSize, 0 );
     objStaticText = new wxStaticText( parent, ID_TEXT, wxT("Object"), wxDefaultPosition, wxDefaultSize, 0 );
     propStaticText = new wxStaticText( parent, ID_TEXT, wxT("Property"), wxDefaultPosition, wxDefaultSize, 0 );
     cbodyStaticText = new wxStaticText( parent, ID_TEXT, wxT("Central Body"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -111,7 +100,6 @@ void VariableCreatePanel::Setup( wxWindow *parent)
     indexStaticText = new wxStaticText( parent, ID_TEXT, wxT("Index"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    nameTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
     epochTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     indexTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     
@@ -131,10 +119,21 @@ void VariableCreatePanel::Setup( wxWindow *parent)
     coordComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strArray4, wxCB_DROPDOWN );
     rbodyComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strArray5, wxCB_DROPDOWN );
     
+    // wxSizers
+    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *item1 = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *item23 = new wxBoxSizer( wxHORIZONTAL );
+    wxFlexGridSizer *item5 = new wxFlexGridSizer( 2, 0, 0 );
+    item5->AddGrowableRow( 1 );
+    wxFlexGridSizer *item12 = new wxFlexGridSizer( 5, 0, 0 );
+    wxStaticBox *item11 = new wxStaticBox( parent, -1, wxT("Details") );
+    wxStaticBoxSizer *item10 = new wxStaticBoxSizer( item11, wxVERTICAL );
+    
     // Add to wx*Sizers
-    item1->Add( nameStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( nameTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( scriptButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );
 
     item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
 
@@ -304,11 +303,7 @@ void VariableCreatePanel::CreateScript()
 
 void VariableCreatePanel::OnTextUpdate(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == nameTextCtrl )  
-    {       
-        applyButton->Enable(true);
-    }
-    else if ( event.GetEventObject() == epochTextCtrl )  
+    if ( event.GetEventObject() == epochTextCtrl )  
     {
         applyButton->Enable(true);       
     }

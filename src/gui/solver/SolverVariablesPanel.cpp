@@ -144,7 +144,6 @@ void SolverVariablesPanel::Setup( wxWindow *parent)
     item16->Add( upperTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item14->Add( item16, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
-    
     item4->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
     item4->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
     item4->Add( updateButton, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
@@ -158,9 +157,8 @@ void SolverVariablesPanel::Setup( wxWindow *parent)
     item0->Add( item4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     item0->Add( item26, 0, wxALIGN_CENTER|wxALL, 5 );
  
-    parent->SetAutoLayout( TRUE );
+    parent->SetAutoLayout( true );
     parent->SetSizer( item0 );
-    
     item0->Fit( parent );
     item0->SetSizeHints( parent );
     

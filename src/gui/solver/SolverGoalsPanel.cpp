@@ -140,7 +140,6 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     item16->Add( 100, 20, 0, wxALIGN_CENTER|wxALL, 5 );
     
     item14->Add( item16, 0, wxALIGN_CENTER|wxALL, 5 );
-    
     item4->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
     item4->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
     item4->Add( updateButton, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );

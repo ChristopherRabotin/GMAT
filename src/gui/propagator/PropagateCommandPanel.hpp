@@ -21,11 +21,11 @@
 #include <wx/control.h>
 #include <wx/textctrl.h>
 #include <wx/combobox.h>
-#include <wx/checkbox.h>
 #include <wx/button.h>
 #include <wx/grid.h>
 #include <wx/docview.h>
 #include <wx/menu.h>
+#include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
@@ -40,6 +40,8 @@
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
+#include "Propagate.hpp"
+#include "StopCondition.hpp"
 
 class PropagateCommandPanel : public wxPanel
 {
@@ -50,15 +52,13 @@ public:
     PropagateCommandPanel( wxWindow *parent, const wxString &propName, Command *cmd);
     
 private:
-    wxStaticText *eventStaticText;
     wxStaticText *synchStaticText;
-    wxStaticText *valueStaticText;
+    //wxStaticText *valueStaticText;
     wxStaticText *varStaticText;
     wxStaticText *repeatStaticText;
     wxStaticText *tolStaticText;
     wxStaticText *descStaticText;
         
-    wxTextCtrl *nameTextCtrl;
     wxTextCtrl *valueTextCtrl;
     wxTextCtrl *repeatTextCtrl;
     wxTextCtrl *toleranceTextCtrl;
@@ -83,15 +83,25 @@ private:
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
     
-    wxString propNameString;
-    
     Integer numOfModes;
-    Integer numOfProps;
-    Integer numOfConds;
+    Integer numOfPropRows;
+    Integer numOfCondRows;
     Integer numOfEqualities;
+    Integer numOfProp;
+    Integer numOfSC;
+    Integer propID;
+    Integer scID;
+    
+    std::string propType;
+    wxString propNameString;
+    wxString scListString;
+    StringArray scList;
     
     GuiInterpreter *theGuiInterpreter;
-    Command *theCommand;
+    Command        *theCommand;
+    Propagate      *thePropagateCommand;
+    GmatBase       *theStopCondBase;
+    StopCondition  *theStopCond;
 
     // Layout & data handling methods
     void Initialize();
@@ -112,19 +122,21 @@ private:
     wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Popup menu event methods
-    void ShowContextMenu(const wxPoint& pos);
+    // waw: Future implementation
+    //void ShowContextMenu(const wxPoint& pos);
 
     // Grid table event methods
-    void OnCellValueChanged(wxGridEvent& event);
-    void OnCellRightClick(wxGridEvent& ev, wxMouseEvent& event);
-    void OnCellLeftClick(wxGridEvent& event);
-    void OnCellLeftDoubleClick(wxGridEvent& event);
-    void InsertPropagatorRow();
-    void InsertStopCondRow();
-    void ClearPropagatorTable();
-    void ClearStopCondTable();
-    void DeleteSelectedPropagatorRows();
-    void DeleteSelectedStopCondRows();
+    // waw: Future implementation
+    //void OnCellValueChanged(wxGridEvent& event);
+    //void OnCellRightClick(wxGridEvent& ev, wxMouseEvent& event);
+    //void OnCellLeftClick(wxGridEvent& event);
+    //void OnCellLeftDoubleClick(wxGridEvent& event);
+    //void InsertPropagatorRow();
+    //void InsertStopCondRow();
+    //void ClearPropagatorTable();
+    //void ClearStopCondTable();
+    //void DeleteSelectedPropagatorRows();
+    //void DeleteSelectedStopCondRows();
                 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

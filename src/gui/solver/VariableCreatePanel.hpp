@@ -49,7 +49,6 @@ public:
     VariableCreatePanel(wxWindow *parent, const wxString &name); 
     
 private:   
-    wxStaticText *nameStaticText;
     wxStaticText *objStaticText;
     wxStaticText *propStaticText;
     wxStaticText *cbodyStaticText;
@@ -58,7 +57,6 @@ private:
     wxStaticText *epochStaticText;
     wxStaticText *indexStaticText;
     
-    wxTextCtrl *nameTextCtrl;
     wxTextCtrl *epochTextCtrl;
     wxTextCtrl *indexTextCtrl;
     
@@ -79,12 +77,13 @@ private:
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
  
-        // Layout & data handling methods
-        void Setup(wxWindow *parent);
-        void Initialize();
+    // Layout & data handling methods
+    void Setup(wxWindow *parent);
+    void Initialize();
     void GetData();
     void SetData();
     void CreateScript();
+
     wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
 
     // Text control event method
@@ -93,8 +92,8 @@ private:
     // Combobox event method
     void OnComboSelection(wxCommandEvent& event);
 
-        // Button event methods
-        void OnButton(wxCommandEvent& event);
+    // Button event methods
+    void OnButton(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE();
 
@@ -110,4 +109,5 @@ private:
 };
 
 #endif
+
 

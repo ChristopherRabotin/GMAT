@@ -141,6 +141,42 @@ public:
 
    // strings representing the possible celestial body types
    static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
+   
+   /// IDs for the parameters
+   enum
+   {
+      bodyTypeID,
+      massID,
+      eqRadiusID,
+      polarRadiusID,
+      muID,
+      posVelSourceID,
+      analyticMethodID,
+      flatCoeffID,
+      rotationRateID,
+      zonals1ID,
+      zonals2ID,
+      zonals3ID,
+      zonals4ID,
+      zonals5ID,
+      state1ID,
+      state2ID,
+      state3ID,
+      state4ID,
+      state5ID,
+      state6ID,
+      effRangeID,
+      centralBodyID,    // ID for pointer? is this even needed?
+      potentialModelID, // ???
+      dragModelID,      // ???
+      orderID,
+      degreeID,
+      isInitializedID,
+      bodyNumberID,
+      refBodyNumberID,
+      sourceStartID, // ???????????????
+      sourceEndID   // ???????????????
+   };
 
 protected:
 
@@ -192,41 +228,7 @@ protected:
    A1Mjd                  sourceStart;
    /// date and time of end of sourcce file
    A1Mjd                  sourceEnd;
-
-   /// IDs for the parameters
-   Integer                bodyTypeID;
-   Integer                massID;
-   Integer                eqRadiusID;
-   Integer                polarRadiusID;
-   Integer                muID;
-   Integer                posVelSourceID;
-   Integer                analyticMethodID;
-   Integer                flatCoeffID;
-   Integer                rotationRateID;
-   Integer                zonals1ID;
-   Integer                zonals2ID;
-   Integer                zonals3ID;
-   Integer                zonals4ID;
-   Integer                zonals5ID;
-   Integer                state1ID;
-   Integer                state2ID;
-   Integer                state3ID;
-   Integer                state4ID;
-   Integer                state5ID;
-   Integer                state6ID;
-   Integer                effRangeID;
-   Integer                centralBodyID;    // ID for pointer? is this even needed?
-   Integer                potentialModelID; // ???
-   Integer                dragModelID;      // ???
-   Integer                orderID;
-   Integer                degreeID;
-   Integer                isInitializedID;
-   Integer                bodyNumberID;
-   Integer                refBodyNumberID;
-   Integer                sourceFilenameID;
-   Integer                sourceStartID; // ???????????????
-   Integer                sourceEndID;   // ???????????????
-
+   
    void Initialize(std::string withBodyType = "Planet");
 
 private:
