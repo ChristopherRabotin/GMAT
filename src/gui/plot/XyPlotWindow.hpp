@@ -83,27 +83,27 @@ extern const int wxEVT_PLOT_AREA_CREATE;
 class WXDLLEXPORT wxPlotEvent: public wxNotifyEvent
 {
 public:
-    wxPlotEvent( wxEventType commandType = wxEVT_NULL, int id = 0 );
+   wxPlotEvent( wxEventType commandType = wxEVT_NULL, int id = 0 );
 
-    wxPlotCurve *GetCurve()
-        { return m_curve; }
-    void SetCurve( wxPlotCurve *curve )
-        { m_curve = curve; }
+   wxPlotCurve *GetCurve()
+      { return m_curve; }
+   void SetCurve( wxPlotCurve *curve )
+      { m_curve = curve; }
 
-    double GetZoom()
-        { return m_zoom; }
-    void SetZoom( double zoom )
-        { m_zoom = zoom; }
+   double GetZoom()
+      { return m_zoom; }
+   void SetZoom( double zoom )
+      { m_zoom = zoom; }
 
-    wxInt32 GetPosition()
-        { return m_position; }
-    void SetPosition( wxInt32 pos )
-        { m_position = pos; }
+   wxInt32 GetPosition()
+      { return m_position; }
+   void SetPosition( wxInt32 pos )
+      { m_position = pos; }
 
 private:
-    wxPlotCurve   *m_curve;
-    double         m_zoom;
-    wxInt32        m_position;
+   wxPlotCurve   *m_curve;
+   double         m_zoom;
+   wxInt32        m_position;
 };
 
 //-----------------------------------------------------------------------------
@@ -113,50 +113,50 @@ private:
 class WXDLLEXPORT wxPlotCurve: public wxObject
 {
 public:
-    wxPlotCurve( int offsetY, double startY, double endY, const wxString &title);
+   wxPlotCurve( int offsetY, double startY, double endY, const wxString &title);
 
-    virtual wxInt32 GetStartX() = 0;
-    virtual wxInt32 GetEndX() = 0;
+   virtual wxInt32 GetStartX() = 0;
+   virtual wxInt32 GetEndX() = 0;
 
-    virtual double GetY( wxInt32 x ) = 0;
+   virtual double GetY( wxInt32 x ) = 0;
 
-    void SetStartY( double startY )
-        { m_startY = startY; }
-    double GetStartY()
-        { return m_startY; }
-    void SetEndY( double endY )
-        { m_endY = endY; }
-    double GetEndY()
-        { return m_endY; }
-    void SetOffsetY( int offsetY )
-        { m_offsetY = offsetY; }
-    int GetOffsetY()
-        { return m_offsetY; }
+   void SetStartY( double startY )
+      { m_startY = startY; }
+   double GetStartY()
+      { return m_startY; }
+   void SetEndY( double endY )
+      { m_endY = endY; }
+   double GetEndY()
+      { return m_endY; }
+   void SetOffsetY( int offsetY )
+      { m_offsetY = offsetY; }
+   int GetOffsetY()
+      { return m_offsetY; }
 
-    //loj: added for GMAT project
-    wxPen& GetPenNormal()
-        { return m_penNormal; }
-    wxPen& GetPenSelected()
-        { return m_penSelected; }
-    void SetPenNormal( const wxPen &pen )
-        { m_penNormal = pen; }
-    void SetPenSelected( const wxPen &pen )
-        { m_penSelected = pen; }
-    wxString& GetCurveTitle()
-        { return m_curveTitle; }
-    void SetCurveTitle(const wxString &title)
-        { m_curveTitle = title; }
-    virtual void ClearData() //loj: 3/10/04 added
-        { ; }
+   //loj: added for GMAT project
+   wxPen& GetPenNormal()
+      { return m_penNormal; }
+   wxPen& GetPenSelected()
+      { return m_penSelected; }
+   void SetPenNormal( const wxPen &pen )
+      { m_penNormal = pen; }
+   void SetPenSelected( const wxPen &pen )
+      { m_penSelected = pen; }
+   wxString& GetCurveTitle()
+      { return m_curveTitle; }
+   void SetCurveTitle(const wxString &title)
+      { m_curveTitle = title; }
+   virtual void ClearData() //loj: 3/10/04 added
+      { ; }
 private:
-    int     m_offsetY;
-    double  m_startY;
-    double  m_endY;
-    wxPen   m_penNormal;
-    wxPen   m_penSelected;
-    wxString m_curveTitle;
+   int     m_offsetY;
+   double  m_startY;
+   double  m_endY;
+   wxPen   m_penNormal;
+   wxPen   m_penSelected;
+   wxString m_curveTitle;
     
-    DECLARE_ABSTRACT_CLASS(wxPlotCurve)
+   DECLARE_ABSTRACT_CLASS(wxPlotCurve)
 };
 
 //-----------------------------------------------------------------------------
@@ -166,11 +166,11 @@ private:
 class WXDLLEXPORT wxPlotOnOff
 {
 public:
-    wxPlotOnOff() { }
+   wxPlotOnOff() { }
 
-    wxInt32   m_on;
-    wxInt32   m_off;
-    void     *m_clientData;
+   wxInt32   m_on;
+   wxInt32   m_off;
+   void     *m_clientData;
 };
 
 WX_DECLARE_EXPORTED_OBJARRAY(wxPlotOnOff, wxArrayPlotOnOff);
@@ -178,37 +178,37 @@ WX_DECLARE_EXPORTED_OBJARRAY(wxPlotOnOff, wxArrayPlotOnOff);
 class WXDLLEXPORT wxPlotOnOffCurve: public wxObject
 {
 public:
-    wxPlotOnOffCurve( int offsetY );
+   wxPlotOnOffCurve( int offsetY );
 
-    wxInt32 GetStartX()
-        { return m_minX; }
-    wxInt32 GetEndX()
-        { return m_maxX; }
+   wxInt32 GetStartX()
+      { return m_minX; }
+   wxInt32 GetEndX()
+      { return m_maxX; }
 
-    void SetOffsetY( int offsetY )
-       { m_offsetY = offsetY; }
-    int GetOffsetY()
-       { return m_offsetY; }
+   void SetOffsetY( int offsetY )
+      { m_offsetY = offsetY; }
+   int GetOffsetY()
+      { return m_offsetY; }
        
-    void Add( wxInt32 on, wxInt32 off, void *clientData = NULL );
-    size_t GetCount();
+   void Add( wxInt32 on, wxInt32 off, void *clientData = NULL );
+   size_t GetCount();
     
-    wxInt32 GetOn( size_t index );
-    wxInt32 GetOff( size_t index );
-    void* GetClientData( size_t index );
-    wxPlotOnOff *GetAt( size_t index );
+   wxInt32 GetOn( size_t index );
+   wxInt32 GetOff( size_t index );
+   void* GetClientData( size_t index );
+   wxPlotOnOff *GetAt( size_t index );
 
-    virtual void DrawOnLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end, void *clientData );
-    virtual void DrawOffLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end );
+   virtual void DrawOnLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end, void *clientData );
+   virtual void DrawOffLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end );
 
 private:
-    int               m_offsetY;
-    wxInt32           m_minX;
-    wxInt32           m_maxX;
+   int               m_offsetY;
+   wxInt32           m_minX;
+   wxInt32           m_maxX;
     
-    wxArrayPlotOnOff   m_marks;
+   wxArrayPlotOnOff   m_marks;
 
-    DECLARE_CLASS(wxPlotOnOffCurve)
+   DECLARE_CLASS(wxPlotOnOffCurve)
 };
 
 //-----------------------------------------------------------------------------
@@ -218,24 +218,24 @@ private:
 class WXDLLEXPORT wxPlotArea: public wxWindow
 {
 public:
-    wxPlotArea() {}
-    wxPlotArea( wxPlotWindow *parent );
+   wxPlotArea() {}
+   wxPlotArea( wxPlotWindow *parent );
 
-    void OnPaint( wxPaintEvent &event );
-    void OnMouse( wxMouseEvent &event );
+   void OnPaint( wxPaintEvent &event );
+   void OnMouse( wxMouseEvent &event );
 
-    void DrawCurve( wxDC *dc, wxPlotCurve *curve, int from = -1, int to = -1 );
-    void DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from = -1, int to = -1 );
-    void DeleteCurve( wxPlotCurve *curve, int from = -1, int to = -1 );
+   void DrawCurve( wxDC *dc, wxPlotCurve *curve, int from = -1, int to = -1 );
+   void DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from = -1, int to = -1 );
+   void DeleteCurve( wxPlotCurve *curve, int from = -1, int to = -1 );
 
-    virtual void ScrollWindow( int dx, int dy, const wxRect *rect );
+   virtual void ScrollWindow( int dx, int dy, const wxRect *rect );
 
 private:
-    wxPlotWindow     *m_owner;
-    bool              m_zooming;
+   wxPlotWindow     *m_owner;
+   bool              m_zooming;
 
-    DECLARE_CLASS(wxPlotArea)
-    DECLARE_EVENT_TABLE()
+   DECLARE_CLASS(wxPlotArea)
+   DECLARE_EVENT_TABLE()
 };
 
 //-----------------------------------------------------------------------------
@@ -245,17 +245,17 @@ private:
 class WXDLLEXPORT wxPlotXAxisArea: public wxWindow
 {
 public:
-    wxPlotXAxisArea() {}
-    wxPlotXAxisArea( wxPlotWindow *parent );
+   wxPlotXAxisArea() {}
+   wxPlotXAxisArea( wxPlotWindow *parent );
 
-    void OnPaint( wxPaintEvent &event );
-    void OnMouse( wxMouseEvent &event );
+   void OnPaint( wxPaintEvent &event );
+   void OnMouse( wxMouseEvent &event );
 
 private:
-    wxPlotWindow   *m_owner;
+   wxPlotWindow   *m_owner;
 
-    DECLARE_CLASS(wxPlotXAxisArea)
-    DECLARE_EVENT_TABLE()
+   DECLARE_CLASS(wxPlotXAxisArea)
+   DECLARE_EVENT_TABLE()
 };
 
 //-----------------------------------------------------------------------------
@@ -265,17 +265,17 @@ private:
 class WXDLLEXPORT wxPlotYAxisArea: public wxWindow
 {
 public:
-    wxPlotYAxisArea() {}
-    wxPlotYAxisArea( wxPlotWindow *parent );
+   wxPlotYAxisArea() {}
+   wxPlotYAxisArea( wxPlotWindow *parent );
 
-    void OnPaint( wxPaintEvent &event );
-    void OnMouse( wxMouseEvent &event );
+   void OnPaint( wxPaintEvent &event );
+   void OnMouse( wxMouseEvent &event );
 
 private:
-    wxPlotWindow   *m_owner;
+   wxPlotWindow   *m_owner;
 
-    DECLARE_CLASS(wxPlotYAxisArea)
-    DECLARE_EVENT_TABLE()
+   DECLARE_CLASS(wxPlotYAxisArea)
+   DECLARE_EVENT_TABLE()
 };
 
 //-----------------------------------------------------------------------------
@@ -285,112 +285,113 @@ private:
 class WXDLLEXPORT wxPlotWindow: public wxScrolledWindow
 {
 public:
-    wxPlotWindow() {}
-    wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
-                  const wxSize &size, int flags = wxPLOT_DEFAULT,
-                  const wxString &plotTitle = "");
-    ~wxPlotWindow();
+   wxPlotWindow() {}
+   wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
+                 const wxSize &size, int flags = wxPLOT_DEFAULT,
+                 const wxString &plotTitle = "");
+   ~wxPlotWindow();
 
-    // curve accessors
-    // ---------------
+   // curve accessors
+   // ---------------
 
-    void Add( wxPlotCurve *curve );
-    void Delete( wxPlotCurve* curve );
-    void ClearAllCurveData(); //loj: 3/10/04 added
+   void Add( wxPlotCurve *curve );
+   void Delete( wxPlotCurve* curve );
+   void ClearAllCurveData(); //loj: 3/10/04 added
     
-    size_t GetCount();
-    wxPlotCurve *GetAt( size_t n );
+   size_t GetCount();
+   wxPlotCurve *GetAt( size_t n );
 
-    void SetCurrent( wxPlotCurve* current );
-    wxPlotCurve *GetCurrent();
+   void SetCurrent( wxPlotCurve* current );
+   wxPlotCurve *GetCurrent();
 
-    // mark list accessors
-    // -------------------
+   // mark list accessors
+   // -------------------
 
-    void Add( wxPlotOnOffCurve *curve );
-    void Delete( wxPlotOnOffCurve* curve );
+   void Add( wxPlotOnOffCurve *curve );
+   void Delete( wxPlotOnOffCurve* curve );
     
-    size_t GetOnOffCurveCount();
-    wxPlotOnOffCurve *GetOnOffCurveAt( size_t n );
+   size_t GetOnOffCurveCount();
+   wxPlotOnOffCurve *GetOnOffCurveAt( size_t n );
 
-    // vertical representation
-    // -----------------------
+   // vertical representation
+   // -----------------------
 
-    void Move( wxPlotCurve* curve, int pixels_up );
-    void Enlarge( wxPlotCurve *curve, double factor );
+   void Move( wxPlotCurve* curve, int pixels_up );
+   void Enlarge( wxPlotCurve *curve, double factor );
 
-    // horizontal representation
-    // -------------------------
+   // horizontal representation
+   // -------------------------
 
-    void SetUnitsPerValue( double upv );
-    double GetUnitsPerValue()
-        { return m_xUnitsPerValue; }
+   void SetUnitsPerValue( double upv );
+   double GetUnitsPerValue()
+      { return m_xUnitsPerValue; }
 
-    void SetZoom( double zoom );
-    double GetZoom()
-        { return m_xZoom; }
+   void SetZoom( double zoom );
+   double GetZoom()
+      { return m_xZoom; }
+   void ZoomOut();
+   
+   // options
+   // -------
 
-    // options
-    // -------
+   void SetScrollOnThumbRelease( bool scrollOnThumbRelease = TRUE )
+      { m_scrollOnThumbRelease = scrollOnThumbRelease; }
+   bool GetScrollOnThumbRelease()
+      { return m_scrollOnThumbRelease; }
 
-    void SetScrollOnThumbRelease( bool scrollOnThumbRelease = TRUE )
-        { m_scrollOnThumbRelease = scrollOnThumbRelease; }
-    bool GetScrollOnThumbRelease()
-        { return m_scrollOnThumbRelease; }
+   void SetEnlargeAroundWindowCentre( bool enlargeAroundWindowCentre = TRUE )
+      { m_enlargeAroundWindowCentre = enlargeAroundWindowCentre; }
+   bool GetEnlargeAroundWindowCentre()
+      { return m_enlargeAroundWindowCentre; }
 
-    void SetEnlargeAroundWindowCentre( bool enlargeAroundWindowCentre = TRUE )
-        { m_enlargeAroundWindowCentre = enlargeAroundWindowCentre; }
-    bool GetEnlargeAroundWindowCentre()
-        { return m_enlargeAroundWindowCentre; }
+   // events (may be overridden)
+   // --------------------------
 
-    // events (may be overridden)
-    // --------------------------
+   void OnMoveUp( wxCommandEvent& event );
+   void OnMoveDown( wxCommandEvent& event );
 
-    void OnMoveUp( wxCommandEvent& event );
-    void OnMoveDown( wxCommandEvent& event );
+   void OnEnlarge( wxCommandEvent& event );
+   void OnShrink( wxCommandEvent& event );
+   void OnZoomIn( wxCommandEvent& event );
+   void OnZoomOut( wxCommandEvent& event );
 
-    void OnEnlarge( wxCommandEvent& event );
-    void OnShrink( wxCommandEvent& event );
-    void OnZoomIn( wxCommandEvent& event );
-    void OnZoomOut( wxCommandEvent& event );
+   void OnScroll2( wxScrollWinEvent& event );
+   void OnSize( wxSizeEvent& event );
 
-    void OnScroll2( wxScrollWinEvent& event );
-    void OnSize( wxSizeEvent& event );
+   // utilities
+   // ---------
 
-    // utilities
-    // ---------
-
-    void RedrawEverything();
-    void RedrawPlotArea(); //loj: 3/10/04 added
-    void RedrawXAxis();
-    void RedrawYAxis();
-    void SetPlotTitle(const wxString &title); //loj: 3/11/04 added
-    void ResetScrollbar();
+   void RedrawEverything();
+   void RedrawPlotArea(); //loj: 3/10/04 added
+   void RedrawXAxis();
+   void RedrawYAxis();
+   void SetPlotTitle(const wxString &title); //loj: 3/11/04 added
+   void ResetScrollbar();
 
 private:
-    friend class wxPlotArea;
-    friend class wxPlotXAxisArea;
-    friend class wxPlotYAxisArea;
+   friend class wxPlotArea;
+   friend class wxPlotXAxisArea;
+   friend class wxPlotYAxisArea;
     
-    wxStaticText *mTitleText; //loj: 3/11/04 added
-    wxBoxSizer *mTopPanelSizer; //loj: 3/11/04 added
+   wxStaticText *mTitleText; //loj: 3/11/04 added
+   wxBoxSizer *mTopPanelSizer; //loj: 3/11/04 added
     
-    double             m_xUnitsPerValue;
-    double             m_xZoom;
+   double             m_xUnitsPerValue;
+   double             m_xZoom;
 
-    wxList             m_curves;
-    wxList             m_onOffCurves;
+   wxList             m_curves;
+   wxList             m_onOffCurves;
     
-    wxPlotArea        *m_area;
-    wxPlotXAxisArea   *m_xaxis;
-    wxPlotYAxisArea   *m_yaxis;
-    wxPlotCurve       *m_current;
+   wxPlotArea        *m_area;
+   wxPlotXAxisArea   *m_xaxis;
+   wxPlotYAxisArea   *m_yaxis;
+   wxPlotCurve       *m_current;
 
-    bool               m_scrollOnThumbRelease;
-    bool               m_enlargeAroundWindowCentre;
+   bool               m_scrollOnThumbRelease;
+   bool               m_enlargeAroundWindowCentre;
 
-    DECLARE_CLASS(wxPlotWindow)
-    DECLARE_EVENT_TABLE()
+   DECLARE_CLASS(wxPlotWindow)
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
