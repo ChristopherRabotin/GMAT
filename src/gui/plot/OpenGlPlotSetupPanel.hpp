@@ -46,8 +46,9 @@ protected:
    wxColour mScOrbitColor;
    wxColour mScTargetColor;
    
-   wxListBox *mScAvailableListBox;
-   wxListBox *mScSelectedListBox;
+   wxListBox *mSpacecraftListBox;
+   wxListBox *mSelectedObjListBox;
+   wxListBox *mCelesObjectListBox;
    
    wxButton *addScButton;
    wxButton *removeScButton;
@@ -58,35 +59,55 @@ protected:
    wxCheckBox *mPlotCheckBox;
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mTargetStatusCheckBox;
+   wxCheckBox *mEclipticPlaneCheckBox;
+   wxCheckBox *mEquatorialPlaneCheckBox;
    wxCheckBox *mOverlapCheckBox;
    
    wxComboBox *mCoordSysComboBox;
+   wxComboBox *mViewPointRefComboBox;
+   wxComboBox *mViewPointVecComboBox;
+   wxComboBox *mViewDirectionComboBox;
+
+   wxStaticText *mTargetColorLabel;
+   
+   wxTextCtrl *mViewScaleFactorTextCtrl;
+   wxTextCtrl *mViewPoint1TextCtrl;
+   wxTextCtrl *mViewPoint2TextCtrl;
+   wxTextCtrl *mViewPoint3TextCtrl;
+   wxTextCtrl *mViewDir1TextCtrl;
+   wxTextCtrl *mViewDir2TextCtrl;
+   wxTextCtrl *mViewDir3TextCtrl;
    
    wxFlexGridSizer *mFlexGridSizer;
+   wxFlexGridSizer *mPlotOptionSizer;
    wxBoxSizer *mScOptionBoxSizer;
+   wxBoxSizer *mViewPointVecSizer;
+   wxBoxSizer *mViewDirVecSizer;
    
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+
+   // event handler
    void OnAddSpacecraft(wxCommandEvent& event);
    void OnRemoveSpacecraft(wxCommandEvent& event);
    void OnClearSpacecraft(wxCommandEvent& event);
+   void OnSelectAvailObject(wxCommandEvent& event);
    void OnSelectSpacecraft(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnOrbitColorClick(wxCommandEvent& event);
    void OnTargetColorClick(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event); //loj: 1/27/05 Added
    
-   // methods inherited from GmatPanel
-   virtual void Create();
-   virtual void LoadData();
-   virtual void SaveData();
-   
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands
    enum
    {     
-      TEXTCTRL = 93000,
+      ID_TEXTCTRL = 93000,
       ID_COMBOBOX,
-      LISTBOX,
+      ID_LISTBOX,
       SC_SEL_LISTBOX,
       CHECKBOX,
       ADD_SC_BUTTON,
