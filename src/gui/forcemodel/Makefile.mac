@@ -5,13 +5,14 @@
 # Modified:   2004/04/19 - Removed PointMassSelectionDialog.cpp.
 #                          Added ExponentialDragDialog.cpp, MSISE90Panel.cpp,
 #                          and MSISE90Dialog.cpp.
+#             2004/05/10 - Replaced list of *.cpp with wildcard.
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = ExponentialDragDialog.cpp MSISE90Panel.cpp MSISE90Dialog.cpp
+SRC := $(wildcard *.cpp)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
