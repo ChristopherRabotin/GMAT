@@ -21,6 +21,7 @@
 
 #include "Else.hpp"
 
+
 //------------------------------------------------------------------------------
 //  Else(void)
 //------------------------------------------------------------------------------
@@ -93,22 +94,30 @@ Else& Else::operator=(const Else& ic)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Else::Append(GmatCommand *cmd)
-{
+//bool Else::Append(GmatCommand *cmd)
+//{
     //if (!BranchCommand::Append(cmd))
     //    return false;
 
     // Check for the end of "Else" branch, point that end back to this command
-    if (cmd->GetTypeName() == "EndIf")
-    {
-       cmd->Append(this);
+    //if (cmd->GetTypeName() == "EndIf")
+    //{
+    //   cmd->Append(this);
        // Targeter loop is complete; -1 points us back to the main sequence. 
     //   branchToFill = -1;
-    }
+    //}
 
-    return true;
+    //return true;
+//}
+
+bool Else::Insert(GmatCommand *cmd, GmatCommand *prev)
+{
+   // if we've gotten to this point, we should have inserted it into the front
+   // of the next branch
+
+   return false;
 }
-
+    
 //------------------------------------------------------------------------------
 //  bool Initialize(void)
 //------------------------------------------------------------------------------

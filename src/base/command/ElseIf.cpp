@@ -91,21 +91,31 @@ ElseIf& ElseIf::operator=(const ElseIf& ic)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool ElseIf::Append(GmatCommand *cmd)
-{
+//bool ElseIf::Append(GmatCommand *cmd)
+//{
     //if (!BranchCommand::Append(cmd))
     //    return false;
 
     // Check for the end of "ElseIf" branch, point that end back to this command
-    if (cmd->GetTypeName() == "EndIf")
-    {
-       cmd->Append(this);
+    //if (cmd->GetTypeName() == "EndIf")
+    //{
+    //   cmd->Append(this);
        // Targeter loop is complete; -1 points us back to the main sequence. 
     //   branchToFill = -1;
-    }
+    //}
 
-    return true;
+    //return true;
+//}
+
+
+bool ElseIf::Insert(GmatCommand *cmd, GmatCommand *prev)
+{
+   // if we've gotten to this point, we should have inserted it into the front
+   // of the next branch
+   
+   return false;
 }
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize(void)

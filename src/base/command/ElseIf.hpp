@@ -50,7 +50,8 @@ public:
     ElseIf&             operator=(const ElseIf& ec);
     
     // Inherited methods that need some enhancement from the base class
-    virtual bool        Append(GmatCommand *cmd);
+    //virtual bool        Append(GmatCommand *cmd);
+    virtual bool        Insert(GmatCommand *cmd, GmatCommand *prev);
     
     // Methods used to run the command
     virtual bool        Initialize(void);
