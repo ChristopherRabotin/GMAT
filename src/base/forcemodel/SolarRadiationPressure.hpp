@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 // *** File Name : SolarRadiationPressure.hpp
 // *** Created   : February 27, 2003
 // **************************************************************************
@@ -201,4 +201,3 @@ private:
 
 #endif
 
-@

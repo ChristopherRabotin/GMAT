@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 // *** File Name : SolarRadiationPressure.cpp
 // *** Created   : February 27, 2003
 // **************************************************************************
@@ -740,4 +740,3 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
     return 1.0 - area / (M_PI * a2);
 }
 
-@
