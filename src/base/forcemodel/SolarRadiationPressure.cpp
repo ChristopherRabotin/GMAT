@@ -446,6 +446,7 @@ bool SolarRadiationPressure::Initialize(void)
       if (!theSun)
          throw ForceModelException("Solar system does not contain the Sun for SRP force.");
 
+      /// @todo: Update to get the central body for solar radiation pressure
       theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
 
       if (!theCentralBody)
@@ -484,7 +485,10 @@ bool SolarRadiationPressure::SetCentralBody()
    if (!theSun)
       throw ForceModelException("Solar system does not contain the Sun for SRP force.");
    
-   theCentralBody = theSun->GetCentralBody();
+   // DJC: Changed to use the Earth as the SRP central body for now
+   /// @todo: Update to get the central body for solar radiation pressure
+//   theCentralBody = theSun->GetCentralBody();
+   theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
    
    if (!theCentralBody)
       throw ForceModelException("Central body not set for SRP force.");
