@@ -7,7 +7,8 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Burn.cpp ImpulsiveBurn.cpp ManeuverFrame.cpp
+SRC = Burn.cpp BurnException.cpp ImpulsiveBurn.cpp InertialManeuverFrame.cpp \
+	ManeuverFrame.cpp ManeuverFrameManager.cpp VnbManeuverFrame.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
