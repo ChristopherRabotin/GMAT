@@ -57,6 +57,12 @@ bool MdiTextDocument::Save()
 //------------------------------------------------------------------------------
 bool MdiTextDocument::OnSaveDocument(const wxString& filename)
 {
+//   wxString filename = GetFilename();
+   
+   MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
+   if (!view->textsw->SaveFile(filename))
+      return FALSE;
+   
    Modify(FALSE);
    return TRUE;
 }

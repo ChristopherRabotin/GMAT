@@ -23,7 +23,7 @@
 #define MdiTextEditView_hpp
 
 #include "gmatwxdefs.hpp"
-#include "wx/docview.h"
+//#include "wx/docview.h"
 #include "MdiTextSubFrame.hpp"
 
 class MdiTextEditView: public wxView

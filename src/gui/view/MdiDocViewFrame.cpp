@@ -39,16 +39,15 @@
 #include "bitmaps/open.xpm"
 #endif
 
-
-
 /*
 * This is the top-level window of the application.
 */
 
-IMPLEMENT_CLASS(MdiDocViewFrame, wxDocParentFrame)
-//  BEGIN_EVENT_TABLE(MdiDocViewFrame, wxDocParentFrame)
+IMPLEMENT_CLASS(MdiDocViewFrame, wxDocMDIParentFrame)
+BEGIN_EVENT_TABLE(MdiDocViewFrame, wxDocMDIParentFrame)
 //      EVT_MENU(DOCVIEW_ABOUT, MdiDocViewFrame::OnAbout)
-//  END_EVENT_TABLE()
+   EVT_CLOSE(MdiDocViewFrame::OnClose)
+END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // MdiDocViewFrame(wxDocManager *manager, wxFrame *frame, 
@@ -99,3 +98,12 @@ MdiDocViewFrame *GetMdiMainFrame(void)
     return mdiDocMainFrame;
 }
 
+void MdiDocViewFrame::OnClose(wxCloseEvent& event)
+{
+   // check if window is dirty?
+  
+   // remove from list of frames
+   GmatAppData::GetMainFrame()->scriptMdiShown = false;
+
+   event.Skip();
+}

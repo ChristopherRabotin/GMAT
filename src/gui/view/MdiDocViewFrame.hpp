@@ -26,6 +26,8 @@
 #include "wx/docview.h"
 #include "wx/docmdi.h"
 
+#include "GmatAppData.hpp"
+
 // Define a new frame
 class MdiDocViewFrame: public wxDocMDIParentFrame
 {
@@ -38,8 +40,9 @@ public:
                     const wxSize& size, const long type);
     
     void OnAbout(wxCommandEvent& event);
-    
-//      DECLARE_EVENT_TABLE();
+    void OnClose(wxCloseEvent& event);
+        
+    DECLARE_EVENT_TABLE();
 //      enum
 //      {
 //          DOCVIEW_CUT = 1,
