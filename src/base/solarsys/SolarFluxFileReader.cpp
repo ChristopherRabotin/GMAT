@@ -24,7 +24,8 @@
  *  Constructor.
  */
 //------------------------------------------------------------------------------
-SolarFluxFileReader::SolarFluxFileReader()
+SolarFluxFileReader::SolarFluxFileReader() :
+   solarFluxFile   (NULL)
 {
 }
 
@@ -52,7 +53,8 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
 }
 
 //------------------------------------------------------------------------------
-//  Integer Load(Real a1_time, FILE *tkptr, bool new_file, GEOPARMS *tkparms)
+//  Integer LoadSolarFluxFile
+//                 (Real a1_time, FILE *tkptr, bool new_file, GEOPARMS *tkparms)
 //------------------------------------------------------------------------------
 /**
  *  To access the Jacchia-Roberts binary data file using a time index value.  
@@ -78,14 +80,15 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
  *                                  preexisting Fortran code.
  *                                  (Release 1 SMR 23)
  * D. Ginn           1/26/94        DSPSE OPS:  Added new_file argument, logic
- * W. Waktola        06/08/04       Code 583: Renamed from jaccwf() to Load()
+ * W. Waktola        06/08/04       Code 583: Renamed from jaccwf() to 
+ *                                            LoadSolarFluxFile()
  * 
  * Notes:  This function was converted from preexisting Fortran code
  *         written by Ken Aronson of CSC on 09/25/86.
  */ 
 //------------------------------------------------------------------------------
-Integer SolarFluxFileReader::Load(Real a1_time, FILE *tkptr, 
-                                  bool new_file, GEOPARMS *tkparms)
+Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr, 
+                                               bool new_file, GEOPARMS *tkparms)
 {
    Integer it;          // Time of first day of TC data
    Integer kp[21][8];   // Magnetic activity, 3-hour indices
@@ -212,6 +215,58 @@ Integer SolarFluxFileReader::Load(Real a1_time, FILE *tkptr,
       tp1 = (kp[i3_day][i3_hour] * 3 + 5) / 10;
       tkparms->tkp = tp1 / 3.0;
    }
-   return (status);
+   return status;
+}
+
+//------------------------------------------------------------------------------
+//  OpenSolarFluxFile(std::string file)
+//------------------------------------------------------------------------------
+/**
+ *  Open solar flux file.
+ *
+ *  @return true if successful, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SolarFluxFileReader::OpenSolarFluxFile(std::string filename)
+{
+   solarFluxFile = fopen(filename.c_str(), "rb");
+   
+   if (solarFluxFile != NULL)
+      return true;
+   else
+      return false;
+}
+
+//------------------------------------------------------------------------------
+//  FILE* GetSolarFluxFile()
+//------------------------------------------------------------------------------
+/**
+ *  Get solar flux file.
+ *
+ *  @return solar flux file pointer
+ */
+//------------------------------------------------------------------------------
+FILE* SolarFluxFileReader::GetSolarFluxFile()
+{
+   return solarFluxFile;
+}
+
+//------------------------------------------------------------------------------
+//  bool CloseSolarFluxFile()
+//------------------------------------------------------------------------------
+/**
+ *  Close file correctly so that it becomes available again
+ *
+ *  @return true if successful, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SolarFluxFileReader::CloseSolarFluxFile()
+{
+   Integer status = fclose(solarFluxFile);
+   
+   if (status == 0)
+      return true;
+   else
+      return false;
 }
 
