@@ -344,22 +344,20 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
    {
    case ACCURACY:
       if (value <= 0.0)
-         throw PropagatorException("Integrator::SetRealParameter -- 
-		                                       Accuracy value is set to <= 0.0");
+         throw PropagatorException(
+         "Integrator::SetRealParameter -- Accuracy value is set to <= 0.0");
       tolerance = value;
       return value;
    case MIN_STEP:
       if (value == 0.0)
-         throw PropagatorException("Minimum step is set to 0.0");
-	  else (fabs(value) > maximumStep)
-	     throw PropagatorException("Integrator::SetRealParameter -- 
-		                       Minimum step is set greater than maximum step.");
+         throw PropagatorException(
+                   "Integrator::SetRealParameter --Minimum step is set to 0.0");
       minimumStep = fabs(value);
       return value;
    case MAX_STEP:
       if (fabs(value) < minimumStep)
-         throw PropagatorException("Integrator::SetRealParameter -- 
-								  Maximum step is set less than minimum step.");
+         throw PropagatorException(
+      "Integrator::SetRealParameter -- Maximum step is set less than minimum step.");
       maximumStep = fabs(value);
       return value;
    case ERROR_THRESHOLD:
@@ -367,8 +365,8 @@ Real Integrator::SetRealParameter(const Integer id, const Real value)
       if (physicalModel)
          physicalModel->SetErrorThreshold(errorThreshold);
 	  else
-	     throw PropagatorException("Integrator::SetRealParameter -- 
-		                                              PhysicalModel is NULL.");
+	     throw PropagatorException(
+                      "Integrator::SetRealParameter -- PhysicalModel is NULL.");
       return value;
    case SMALLEST_INTERVAL:
       smallestTime = fabs(value);
@@ -468,7 +466,8 @@ void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
     if (physicalModel != NULL) 
         physicalModel->SetErrorThreshold(errorThreshold);
 	else
-	   throw PropagatorException("Integrator::SetPhysicalModel -- PhyscialModel is NULL.");
+	   throw PropagatorException(
+                      "Integrator::SetPhysicalModel -- PhyscialModel is NULL.");
 }
 
 
@@ -488,4 +487,16 @@ void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
 Real Integrator::GetStepTaken()
 {
    return stepTaken;
+}
+
+//------------------------------------------------------------------------------
+// Integer Integrator::GetPropagatorOrder() const
+//------------------------------------------------------------------------------
+/**
+ * Returns derivative order needed by the integrator; 1 by default
+ */
+//------------------------------------------------------------------------------
+Integer Integrator::GetPropagatorOrder() const
+{
+    return 1;
 }

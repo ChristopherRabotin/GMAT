@@ -155,6 +155,7 @@ public:
     virtual void Initialize() = 0;
     
     virtual bool RawStep() = 0;
+    virtual Integer GetPropagatorOrder(void) const; 
 
 protected:
 
