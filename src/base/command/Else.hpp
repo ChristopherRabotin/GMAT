@@ -21,7 +21,7 @@
 #ifndef Else_hpp
 #define Else_hpp
  
-#include "BranchCommand.hpp"
+#include "Command.hpp"
 
 /**
  * Command that manages processing for entry to the ELSE statement 
