@@ -281,7 +281,7 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
-                                    const Integer index)
+                                     const Integer index)
 {
    switch (type)
    {
@@ -339,15 +339,15 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool ConditionalBranch::EvaluateCondition(Integer which)
 {
-   if ((which < 0) || (which >= (Integer) (lhsList.size())))
+   //if ((which < 0) || (which >= (Integer) (lhsList.size())))
+   if ((which < 0) || (which >= numberOfConditions))
    {
       return false;
    }
    Real        lhsValue;
    Real        rhsValue;
    std::string theParmName = lhsList.at(which);
-   std::istringstream rhsStr(rhsList.at(which));
-   //rhsStr.str(rhsList.at(which));
+   std::istringstream rhsStr(rhsList.at(which)); // todo: change to a parameter
    rhsStr >> rhsValue;
 
    // iterate over the list of reference objects to find the parameter
