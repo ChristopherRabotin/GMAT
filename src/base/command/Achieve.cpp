@@ -22,7 +22,7 @@
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
 
-// #define DEBUG_ACHIEVE 1
+//#define DEBUG_ACHIEVE 1
 
 //------------------------------------------------------------------------------
 //  Achieve(void)
@@ -226,7 +226,8 @@ Gmat::ParameterType Achieve::GetParameterType(const Integer id) const
       return Gmat::STRING_TYPE;
         
    if (id == goalID)
-      return Gmat::REAL_TYPE;
+//      return Gmat::REAL_TYPE;
+      return Gmat::STRING_TYPE;
         
    if (id == toleranceID)
       return Gmat::REAL_TYPE;
@@ -244,7 +245,8 @@ std::string Achieve::GetParameterTypeString(const Integer id) const
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
    if (id == goalID)
-      return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
+//      return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
+      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
    if (id == toleranceID)
       return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
@@ -255,8 +257,8 @@ std::string Achieve::GetParameterTypeString(const Integer id) const
 
 Real Achieve::GetRealParameter(const Integer id) const
 {
-   if (id == goalID)
-      return goal;
+//   if (id == goalID)
+//      return goal;
         
    if (id == toleranceID)
       return tolerance;
@@ -267,10 +269,10 @@ Real Achieve::GetRealParameter(const Integer id) const
 
 Real Achieve::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == goalID) {
-      goal = value;
-      return goal;
-   }
+//   if (id == goalID) {
+//      goal = value;
+//      return goal;
+//   }
         
    if (id == toleranceID) {
       tolerance = value;
@@ -289,6 +291,10 @@ std::string Achieve::GetStringParameter(const Integer id) const
    if (id == goalNameID)
       return goalName;
         
+   if (id == goalID) {
+      return goalString;
+   }
+
    return GmatCommand::GetStringParameter(id);
 }
 
@@ -297,11 +303,16 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == targeterNameID) {
       targeterName = value;
-       return true;
+      return true;
    }
 
    if (id == goalNameID) {
       goalName = value;
+      return true;
+   }
+
+   if (id == goalID) {
+      goalString = value;
       return true;
    }
 
@@ -337,6 +348,7 @@ bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       return false;
    }
+
    return GmatCommand::SetRefObject(obj, type, name);
 }
 
@@ -397,6 +409,11 @@ bool Achieve::InterpretAction(void)
    // Get an instance if this is a Parameter
    Moderator *mod = Moderator::Instance();
 
+#if DEBUG_ACHIEVE
+   MessageInterface::ShowMessage
+      ("Achieve::InterpretAction() goalName = %s\n", goalName.c_str());
+#endif
+
    loc = goalName.find(".");
    std::string parmObj = goalName.substr(0, loc);
    std::string parmType = goalName.substr(loc+1, goalName.length() - (loc+1));
@@ -419,8 +436,9 @@ bool Achieve::InterpretAction(void)
       value = 42160.0;
    else
       value = atof(&str[loc]);
-   SetRealParameter(goalID, value);
-
+//   SetRealParameter(goalID, value);
+   goal = value;
+      
    // Find perts
    loc = generatingString.find("Tolerance", strend);
    end = generatingString.find("=", loc);
@@ -555,9 +573,7 @@ bool Achieve::Initialize()
    }
     
    if (goalParm != NULL) {
-      // temporary exit
-      goalParm->AddRefObject(obj);//loj: 9/13/04 changed AddObject() to AddRefObject()
-//        throw CommandException("Parameter access not yet built");
+      goalParm->AddRefObject(obj);
    }
    else {
       id = obj->GetParameterID(parmName);

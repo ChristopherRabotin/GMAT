@@ -77,6 +77,8 @@ protected:
    std::string         goalName;
    /// Target value for the goal
    Real                goal;
+   /// String form of target value for the goal
+   std::string         goalString;
    /// Parameter used for floating end point goals
    Parameter           *goalTarget;
    /// Accuracy needed for the goal
