@@ -75,7 +75,7 @@ protected:
     Integer                     variableCount;
     /// The number of goals in the targeting problem
     Integer                     goalCount;
-    /// The number of iterations taken (increments hen the matrix is inverted)
+    /// The number of iterations taken (increments when the matrix is inverted)
     Integer                     iterationsTaken;
     /// Maximum number of iterations allowed
     Integer                     maxIterations;

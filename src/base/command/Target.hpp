@@ -71,7 +71,8 @@ protected:
     /// Local store of the objects that we'll need to reset
     std::vector<GmatBase *>
                         localStore;
-    
+    /// Counter to track how deep the Target nesting is
+    Integer             nestLevel;
     
     // Parameter IDs 
     /// ID for the burn object

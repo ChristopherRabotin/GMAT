@@ -138,7 +138,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
     if (cmd == this)
-        return GmatCommand::Remove(cmd);    // Use base method to remove this cmd
+        return GmatCommand::Remove(cmd);    // Use base method to remove cmd
 
     GmatCommand *fromBranch = NULL;
     GmatCommand *current = NULL;

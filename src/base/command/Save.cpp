@@ -2,9 +2,9 @@
 
 
 Save::Save() :
-    GmatCommand("Save"),
+    GmatCommand("save"),
     filename    (""),
-    append      (true),     // should be false...
+    append      (false),
     written     (false),
     objName     (""),
     obj         (NULL)
@@ -43,7 +43,7 @@ void Save::InterpretAction(void)
     // Sample string:  "Save Sat1;" or
     
     // Set starting location to the space following the command string
-    Integer loc = generatingString.find("Save", 0) + 4, end;
+    Integer loc = generatingString.find("save", 0) + 4, end;
     const char *str = generatingString.c_str();
     
     // Skip white space

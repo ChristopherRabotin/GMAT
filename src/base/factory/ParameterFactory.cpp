@@ -36,6 +36,11 @@
 #include "KepAopParam.hpp"
 #include "KepTaParam.hpp"
 
+#include "SMA.hpp"
+#include "Ecc.hpp"
+#include "Inc.hpp"
+
+
 // add others here for future builds
 
 //---------------------------------
@@ -85,6 +90,12 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new KepAopParam(withName);
     if (ofType == "KepTaParam")
       return new KepTaParam(withName);
+    if (ofType == "SMA")
+      return new SMA(withName);
+    if (ofType == "Ecc")
+      return new Ecc(withName);
+    if (ofType == "Inc")
+      return new Inc(withName);
     // add others here
     else
         return NULL;
@@ -121,6 +132,9 @@ Factory(Gmat::PARAMETER)
       creatables.push_back("KepRaanParam");
       creatables.push_back("KepAopParam");
       creatables.push_back("KepTaParam");
+      creatables.push_back("SMA");
+      creatables.push_back("Ecc");
+      creatables.push_back("Inc");
    }
 }
 

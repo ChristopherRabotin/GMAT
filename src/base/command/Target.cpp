@@ -33,6 +33,7 @@ Target::Target(void) :
     BranchCommand   ("Target"),
     targeterName    (""),
     targeter        (NULL),
+    nestLevel       (0),
     targeterNameID  (parameterCount)
 {
     parameterCount += 1;
@@ -63,6 +64,7 @@ Target::Target(const Target& t) :
     BranchCommand   (t),
     targeterName    (t.targeterName),
     targeter        (NULL),
+    nestLevel       (0),
     targeterNameID  (t.parameterCount)
 {
     parameterCount = t.parameterCount;
@@ -103,15 +105,29 @@ Target& Target::operator=(const Target& t)
 //------------------------------------------------------------------------------
 bool Target::Append(GmatCommand *cmd)
 {
+// Need to fix the nested branching...
+//    if (nestLevel > 0) {
+//        Command *cmd = branch[0];
+//    }
+    
     if (!BranchCommand::Append(cmd))
         return false;
     
     // If at the end of a targeter branch, point that end back to this comand.
     if (cmd->GetTypeName() == "EndTarget") {
-        cmd->Append(this);
-        // Targeter loop is complete; -1 points us back to the main sequence.
-        branchToFill = -1;
+        if (nestLevel == 0) {
+            cmd->Append(this);
+            // Targeter loop is complete; -1 pops to the next higher sequence.
+            branchToFill = -1;
+        }
+        else
+            --nestLevel;
     }
+
+    // If it's a nested targeter branch, add to the nest level.
+    if (cmd->GetTypeName() == "Target")
+        ++nestLevel;
+
     return true;
 }
 
@@ -322,7 +338,6 @@ bool Target::Initialize(void)
  *         occurs.
  */
 //------------------------------------------------------------------------------
-#include <iostream>
 bool Target::Execute(void)
 {
     bool retval = BranchCommand::Execute();
@@ -333,7 +348,6 @@ bool Target::Execute(void)
     
     switch (state) {
         case Solver::INITIALIZING:
-std::cout << "Target Command State:  Solver::INITIALIZING\n";
             // Finalize initialization of the targeter data
             current = branch[0];
             while (current != this)  {
@@ -346,7 +360,6 @@ std::cout << "Target Command State:  Solver::INITIALIZING\n";
             break;
             
         case Solver::NOMINAL:
-std::cout << "Target Command State:  Solver::NOMINAL\n";
             // Execute the nominal sequence
             if (!commandComplete) {
                 ResetLoopData();
@@ -355,25 +368,21 @@ std::cout << "Target Command State:  Solver::NOMINAL\n";
             break;
             
         case Solver::CHECKINGRUN:
-std::cout << "Target Command State:  Solver::CHECKINGRUN\n";
             // Check for convergence; this is done in the targeter state 
             // machine, so this case is a NoOp for the Target command
             break;
             
         case Solver::PERTURBING:
-std::cout << "Target Command State:  Solver::PERTURBING\n";
             ResetLoopData();
             retval = ExecuteBranch();
             break;
             
         case Solver::CALCULATING:
-std::cout << "Target Command State:  Solver::CALCULATING\n";
             // Calculate the next set of variables to use; this is performed in
             // the targeter -- nothing to be done here
             break;
             
         case Solver::FINISHED:
-std::cout << "Target Command State:  Solver::FINISHED\n";
             // Final clean-up
             commandComplete = true;
             break;

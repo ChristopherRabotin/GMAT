@@ -38,8 +38,10 @@ OBJECTS = Parameter.o \
           SphRaParam.o \
           SphDecParam.o \
           VelApoapsisParam.o \
-          VelPeriapsisParam.o
-
+          VelPeriapsisParam.o \
+          SMA.o \
+          Ecc.o \
+          Inc.o
 
 all: libParameter 
 	mkdir -p ../lib

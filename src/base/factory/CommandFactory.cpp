@@ -83,7 +83,7 @@ GmatCommand* CommandFactory::CreateCommand(std::string ofType,
         return new EndIfCommand;
     else if (ofType == "GMAT")
         return new Assignment;
-    else if (ofType == "Save")
+    else if (ofType == "save")
         return new Save;
    // add more here .......
    else {
@@ -121,7 +121,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Else");
       creatables.push_back("EndIf");
       creatables.push_back("GMAT");
-      creatables.push_back("Save");
+      creatables.push_back("save");
    }
 }
 
@@ -169,7 +169,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Else");
       creatables.push_back("EndIf");
       creatables.push_back("GMAT");
-      creatables.push_back("Save");
+      creatables.push_back("save");
    }
 }
 

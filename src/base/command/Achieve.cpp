@@ -403,7 +403,7 @@ bool Achieve::Execute(void)
         goalData[0] = goal;
         goalData[1] = tolerance;
         goalId = targeter->SetSolverResults(goalData, goalName);
-      
+
         targeterDataFinalized = true;
         return retval;
     }
