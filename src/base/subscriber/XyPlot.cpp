@@ -399,6 +399,8 @@ bool XyPlot::GetBooleanParameter(const Integer id) const
    {
    case DRAW_GRID:
       return mDrawGrid;
+   case CLEAR_DEP_VAR_LIST: //loj: 8/5/04 added
+      return false;
    default:
       return Subscriber::GetBooleanParameter(id);
    }
