@@ -14,19 +14,13 @@
 // Modified: Wendy Shoan 2004/04/01 added OrbitPeriod
 //
 /**
- * Declares Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, 
- *   KepMM, VelApoapsis, VelPeriapsis, OrbitPeriod
+ * Declares other Keplerian related parameter classes.
+ *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitalParameters_hpp
 #define OrbitalParameters_hpp
 
-#include "gmatdefs.hpp"
-#include "RealVar.hpp"
-#include "Rvec6Var.hpp"
-#include "Rvector6.hpp"
-#include "OrbitData.hpp"
 #include "OrbitReal.hpp"
 
 //==============================================================================
@@ -41,17 +35,20 @@ class GMAT_API VelApoapsis : public OrbitReal
 {
 public:
 
-    VelApoapsis(const std::string &name = "",
-                GmatBase *obj = NULL,
-                const std::string &desc = "",
-                const std::string &unit = "Km/Sec");
-    VelApoapsis(const VelApoapsis &copy);
-    const VelApoapsis& operator=(const VelApoapsis &right);
-    virtual ~VelApoapsis();
+   VelApoapsis(const std::string &name = "",
+               GmatBase *obj = NULL,
+               const std::string &desc = "",
+               const std::string &unit = "Km/Sec");
+   VelApoapsis(const VelApoapsis &copy);
+   const VelApoapsis& operator=(const VelApoapsis &right);
+   virtual ~VelApoapsis();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -68,17 +65,20 @@ class GMAT_API VelPeriapsis : public OrbitReal
 {
 public:
 
-    VelPeriapsis(const std::string &name = "",
-                 GmatBase *obj = NULL,
-                 const std::string &desc = "",
-                 const std::string &unit = "Km/Sec");
-    VelPeriapsis(const VelPeriapsis &copy);
-    const VelPeriapsis& operator=(const VelPeriapsis &right);
-    virtual ~VelPeriapsis();
+   VelPeriapsis(const std::string &name = "",
+                GmatBase *obj = NULL,
+                const std::string &desc = "",
+                const std::string &unit = "Km/Sec");
+   VelPeriapsis(const VelPeriapsis &copy);
+   const VelPeriapsis& operator=(const VelPeriapsis &right);
+   virtual ~VelPeriapsis();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -95,17 +95,20 @@ class GMAT_API Apoapsis : public OrbitReal
 {
 public:
 
-    Apoapsis(const std::string &name = "",
-             GmatBase *obj = NULL,
-             const std::string &desc = "",
-             const std::string &unit = "Km/Sec");
-    Apoapsis(const Apoapsis &copy);
-    const Apoapsis& operator=(const Apoapsis &right);
-    virtual ~Apoapsis();
+   Apoapsis(const std::string &name = "",
+            GmatBase *obj = NULL,
+            const std::string &desc = "",
+            const std::string &unit = "Km/Sec");
+   Apoapsis(const Apoapsis &copy);
+   const Apoapsis& operator=(const Apoapsis &right);
+   virtual ~Apoapsis();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -114,7 +117,7 @@ protected:
 //                              Periapsis
 //==============================================================================
 /**
-* Declares Periapsis class.
+ * Declares Periapsis class.
 */
 //------------------------------------------------------------------------------
 
@@ -133,6 +136,9 @@ public:
    // The inherited methods from Parameter
    virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -141,8 +147,8 @@ protected:
 //                              OrbitPeriod
 //==============================================================================
 /**
-* Declares OrbitPeriod class.
-*/
+ * Declares OrbitPeriod class.
+ */
 //------------------------------------------------------------------------------
 
 class GMAT_API OrbitPeriod : public OrbitReal
@@ -150,9 +156,9 @@ class GMAT_API OrbitPeriod : public OrbitReal
 public:
 
    OrbitPeriod(const std::string &name = "",
-             GmatBase *obj = NULL,
-             const std::string &desc = "",
-             const std::string &unit = "");
+               GmatBase *obj = NULL,
+               const std::string &desc = "",
+               const std::string &unit = "");
    OrbitPeriod(const OrbitPeriod &copy);
    const OrbitPeriod& operator=(const OrbitPeriod &right);
    virtual ~OrbitPeriod();
@@ -160,6 +166,9 @@ public:
    // The inherited methods from Parameter
    virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };

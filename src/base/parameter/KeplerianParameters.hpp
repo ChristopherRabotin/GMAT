@@ -45,8 +45,11 @@ public:
    const KepSMA& operator=(const KepSMA &right);
    virtual ~KepSMA();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -70,8 +73,11 @@ public:
    const KepEcc& operator=(const KepEcc &right);
    virtual ~KepEcc();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -96,8 +102,11 @@ public:
    const KepInc& operator=(const KepInc &right);
    virtual ~KepInc();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -121,8 +130,11 @@ public:
    const KepAOP& operator=(const KepAOP &right);
    virtual ~KepAOP();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -146,8 +158,11 @@ public:
    const KepRAAN& operator=(const KepRAAN &right);
    virtual ~KepRAAN();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -172,8 +187,11 @@ public:
    const KepTA& operator=(const KepTA &right);
    virtual ~KepTA();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -197,8 +215,11 @@ public:
    const KepMA& operator=(const KepMA &right);
    virtual ~KepMA();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -222,9 +243,12 @@ public:
    const KepMM& operator=(const KepMM &right);
    virtual ~KepMM();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -248,10 +272,10 @@ public:
    const KepElem& operator=(const KepElem &right);
    virtual ~KepElem();
 
-   // The inherited methods from Rvec6Var
+   // methods inherited from Rvec6Var
    virtual Rvector6 EvaluateRvector6();
     
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual Integer GetNumObjects() const;
    virtual GmatBase* GetObject(const std::string &objTypeName);
     
@@ -262,6 +286,9 @@ public:
    virtual bool AddObject(GmatBase *obj);
    virtual bool Validate();
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
     

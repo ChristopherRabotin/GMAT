@@ -145,7 +145,7 @@ Integer TimeReal::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* TimeReal::GetObject(const std::string &objTypeName)
 {
-   return RefData::GetRefObject(objTypeName);
+   return TimeData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ bool TimeReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
    //Initialize(); //loj: 4/28/04 Initialize() will be called during run setup
    //loj: 3/31/04 do not check for NULL so it can reset object
    //if (obj != NULL) 
-   return RefData::SetRefObject(objType, objName, obj);
+   return TimeData::SetRefObject(objType, objName, obj);
    //else
    //return false;
 }

@@ -14,7 +14,7 @@
 //
 /**
  * Implements Orbital related parameter classes.
- *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis
+ *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod
  */
 //------------------------------------------------------------------------------
 #include "OrbitalParameters.hpp"
@@ -118,6 +118,22 @@ bool VelApoapsis::Evaluate()
         return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* VelApoapsis::Clone(void) const
+{
+   return new VelApoapsis(*this);
+}
+
 //==============================================================================
 //                              VelPeriapsis
 //==============================================================================
@@ -216,6 +232,21 @@ bool VelPeriapsis::Evaluate()
         return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* VelPeriapsis::Clone(void) const
+{
+   return new VelPeriapsis(*this);
+}
 
 //==============================================================================
 //                              Apoapsis
@@ -326,6 +357,22 @@ bool Apoapsis::Evaluate()
     return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* Apoapsis::Clone(void) const
+{
+   return new Apoapsis(*this);
+}
+
 
 //==============================================================================
 //                              Periapsis
@@ -434,6 +481,21 @@ bool Periapsis::Evaluate()
    return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* Periapsis::Clone(void) const
+{
+   return new Periapsis(*this);
+}
 
 
 //==============================================================================
@@ -534,3 +596,19 @@ bool OrbitPeriod::Evaluate()
       return true;
 }
 
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* OrbitPeriod::Clone(void) const
+{
+   return new OrbitPeriod(*this);
+}

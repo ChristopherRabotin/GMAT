@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "CartesianParameters.hpp"
-
+#include "ColorTypes.hpp"
 
 //==============================================================================
 //                              CartX
@@ -46,6 +46,7 @@ CartX::CartX(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "X", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::BLUE32;
    AddObject(obj);
 }
 
@@ -92,7 +93,7 @@ CartX::~CartX()
 }
 
 //-------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //-------------------------------------
 
 //------------------------------------------------------------------------------
@@ -112,6 +113,22 @@ bool CartX::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartX::Clone(void) const
+{
+   return new CartX(*this);
 }
 
 
@@ -140,6 +157,7 @@ CartY::CartY(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "Y", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::GREEN32;
    AddObject(obj);
 }
 
@@ -186,7 +204,7 @@ CartY::~CartY()
 }
 
 //-------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //-------------------------------------
 
 //------------------------------------------------------------------------------
@@ -206,6 +224,22 @@ bool CartY::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartY::Clone(void) const
+{
+   return new CartY(*this);
 }
 
 
@@ -234,6 +268,7 @@ CartZ::CartZ(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "Z", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::YELLOW32;
    AddObject(obj);
 }
 
@@ -280,7 +315,7 @@ CartZ::~CartZ()
 }
 
 //--------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //--------------------------------------
 
 //------------------------------------------------------------------------------
@@ -300,6 +335,22 @@ bool CartZ::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartZ::Clone(void) const
+{
+   return new CartZ(*this);
 }
 
 
@@ -328,6 +379,7 @@ CartVx::CartVx(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VX", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::BLUE32;
    AddObject(obj);
 }
 
@@ -374,7 +426,7 @@ CartVx::~CartVx()
 }
 
 //--------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //--------------------------------------
 
 //------------------------------------------------------------------------------
@@ -394,6 +446,22 @@ bool CartVx::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartVx::Clone(void) const
+{
+   return new CartVx(*this);
 }
 
 //==============================================================================
@@ -421,6 +489,7 @@ CartVy::CartVy(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VY", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::GREEN32;
    AddObject(obj);
 }
 
@@ -467,7 +536,7 @@ CartVy::~CartVy()
 }
 
 //-------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //-------------------------------------
 
 //------------------------------------------------------------------------------
@@ -487,6 +556,22 @@ bool CartVy::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartVy::Clone(void) const
+{
+   return new CartVy(*this);
 }
 
 
@@ -515,6 +600,7 @@ CartVz::CartVz(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VZ", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   mColor = GmatColor::YELLOW32;
    AddObject(obj);
 }
 
@@ -561,7 +647,7 @@ CartVz::~CartVz()
 }
 
 //--------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //--------------------------------------
 
 //------------------------------------------------------------------------------
@@ -581,6 +667,22 @@ bool CartVz::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartVz::Clone(void) const
+{
+   return new CartVz(*this);
 }
 
 
@@ -656,7 +758,7 @@ CartState::~CartState()
 }
 
 //-----------------------------------------
-// Inherited methods from Rvec6Var
+// methods inherited from Rvec6Var
 //-----------------------------------------
 
 //------------------------------------------------------------------------------
@@ -674,7 +776,7 @@ Rvector6 CartState::EvaluateRvector6()
 
 
 //--------------------------------------
-// Inherited methods from Parameter
+// methods inherited from Parameter
 //--------------------------------------
 
 //------------------------------------------------------------------------------
@@ -694,8 +796,7 @@ Integer CartState::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* CartState::GetObject(const std::string &objTypeName)
 {
-   return RefData::GetRefObject(objTypeName);
-   // DJC ^^^^^^^^^ added so code will compile
+   return OrbitData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -713,8 +814,7 @@ bool CartState::SetObject(Gmat::ObjectType objType,
                           GmatBase *obj)
 {
    if (obj != NULL)
-      return RefData::SetRefObject(objType, objName, obj);
-   // DJC    ^^^^^^^ added so code will compile
+      return OrbitData::SetRefObject(objType, objName, obj);
    else
       return false;
 }
@@ -774,5 +874,21 @@ bool CartState::Evaluate()
                    GetCartReal("CartVz"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CartState::Clone(void) const
+{
+   return new CartState(*this);
 }
 

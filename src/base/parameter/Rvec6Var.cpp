@@ -28,23 +28,23 @@
 const std::string
 Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount] =
 {
-    "Param1",
-    "Param2",
-    "Param3",
-    "Param4",
-    "Param5",
-    "Param6"
+   "Param1",
+   "Param2",
+   "Param3",
+   "Param4",
+   "Param5",
+   "Param6"
 }; 
 
 const Gmat::ParameterType
 Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
 {
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
 };
 
 //---------------------------------
@@ -76,11 +76,11 @@ Rvec6Var::Rvec6Var(const std::string &name,
                    const std::string &desc,
                    const std::string &unit,
                    bool isTimeParam)
-    : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
+   : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
 {  
-    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
-    // GmatBase data
-    parameterCount = Rvec6VarParamCount;
+   mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
+   // GmatBase data
+   parameterCount = Rvec6VarParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -93,9 +93,9 @@ Rvec6Var::Rvec6Var(const std::string &name,
  */
 //------------------------------------------------------------------------------
 Rvec6Var::Rvec6Var(const Rvec6Var &copy)
-    : Parameter(copy)
+   : Parameter(copy)
 {
-    mRvec6Value = copy.mRvec6Value;
+   mRvec6Value = copy.mRvec6Value;
 }
 
 //------------------------------------------------------------------------------
@@ -111,13 +111,13 @@ Rvec6Var::Rvec6Var(const Rvec6Var &copy)
 //------------------------------------------------------------------------------
 Rvec6Var& Rvec6Var::operator= (const Rvec6Var& right)
 {
-    if (this != &right)
-    {
-        Parameter::operator=(right);
-        mRvec6Value = right.mRvec6Value;
-    }
+   if (this != &right)
+   {
+      Parameter::operator=(right);
+      mRvec6Value = right.mRvec6Value;
+   }
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ Rvec6Var::~Rvec6Var()
 //------------------------------------------------------------------------------
 bool Rvec6Var::operator==(const Rvec6Var &right) const
 {
-    return Parameter::operator==(right);
+   return Parameter::operator==(right);
 }
 
 //------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ bool Rvec6Var::operator==(const Rvec6Var &right) const
 //------------------------------------------------------------------------------
 bool Rvec6Var::operator!=(const Rvec6Var &right) const
 {
-    return Parameter::operator!=(right);
+   return Parameter::operator!=(right);
 }
 
 //------------------------------------------------------------------------------
@@ -165,21 +165,21 @@ bool Rvec6Var::operator!=(const Rvec6Var &right) const
 //------------------------------------------------------------------------------
 Rvector6 Rvec6Var::EvaluateRvector6()
 {
-    if (mKey == SYSTEM_PARAM)
-    {
-        throw ParameterException("Parameter: EvaluateReal() should be implemented "
-                                 "for Parameter Type:" + GetTypeName());
-    }
-    else
-    {
-        //loj: Parse the expresstion, then evaluate
-        //loj: Should we use mDesc field instead of creating new exp. field?
-        return mRvec6Value; //loj: temp code
-    }
+   if (mKey == SYSTEM_PARAM)
+   {
+      throw ParameterException("Parameter: EvaluateReal() should be implemented "
+                               "for Parameter Type:" + GetTypeName());
+   }
+   else
+   {
+      //loj: Parse the expresstion, then evaluate
+      //loj: Should we use mDesc field instead of creating new exp. field?
+      return mRvec6Value; //loj: temp code
+   }
 
-    return Rvector6(REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
-                    REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
-                    REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED);
+   return Rvector6(REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
+                   REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
+                   REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED);
 }
 
 
@@ -192,7 +192,7 @@ Rvector6 Rvec6Var::EvaluateRvector6()
 //------------------------------------------------------------------------------
 Rvector6 Rvec6Var::GetRvector6() const
 {
-    return mRvec6Value;
+   return mRvec6Value;
 }
 
 //------------------------------------
@@ -204,7 +204,7 @@ Rvector6 Rvec6Var::GetRvector6() const
 //------------------------------------------------------------------------------
 const std::string* Rvec6Var::GetParameterList() const
 {
-    return PARAMETER_TEXT;
+   return PARAMETER_TEXT;
 }
 
 
@@ -213,36 +213,14 @@ const std::string* Rvec6Var::GetParameterList() const
 //------------------------------------
 
 //------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType Rvec6Var::GetParameterType(const Integer id) const
-{
-    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-        return PARAMETER_TYPE[id - ParameterParamCount];
-    else
-        return Parameter::GetParameterType(id);
-}
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Rvec6Var::GetParameterTypeString(const Integer id) const
-{
-    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-        return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
-    else
-        return Parameter::GetParameterTypeString(id);
-}
-
-//------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Rvec6Var::GetParameterText(const Integer id) const
 {
-    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-        return PARAMETER_TEXT[id - ParameterParamCount];
-    else
-        return Parameter::GetParameterText(id);
+   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
+      return PARAMETER_TEXT[id - ParameterParamCount];
+   else
+      return Parameter::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -250,13 +228,35 @@ std::string Rvec6Var::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Rvec6Var::GetParameterID(const std::string str) const
 {
-    for (int i=ParameterParamCount; i<Rvec6VarParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - ParameterParamCount])
-            return i;
-    }
+   for (int i=ParameterParamCount; i<Rvec6VarParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
+         return i;
+   }
    
-    return Parameter::GetParameterID(str);
+   return Parameter::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType Rvec6Var::GetParameterType(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
+      return PARAMETER_TYPE[id - ParameterParamCount];
+   else
+      return Parameter::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Rvec6Var::GetParameterTypeString(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
+      return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
+   else
+      return Parameter::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -264,10 +264,10 @@ Integer Rvec6Var::GetParameterID(const std::string str) const
 //------------------------------------------------------------------------------
 Real Rvec6Var::GetRealParameter(const Integer id) const
 {
-    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-        return mRvec6Value(id - ParameterParamCount);
-    else
-        return Parameter::GetRealParameter(id);
+   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
+      return mRvec6Value(id - ParameterParamCount);
+   else
+      return Parameter::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -275,13 +275,13 @@ Real Rvec6Var::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Rvec6Var::SetRealParameter(const Integer id, const Real value)
 {
-    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-    {
-        mRvec6Value(id - ParameterParamCount) = value;
-        return value;
-    }
-    else
-    {
-        return Parameter::SetRealParameter(id, value);
-    }
+   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
+   {
+      mRvec6Value(id - ParameterParamCount) = value;
+      return value;
+   }
+   else
+   {
+      return Parameter::SetRealParameter(id, value);
+   }
 }

@@ -47,6 +47,9 @@ public:
 
    // The inherited methods from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
     
 protected:
 
@@ -63,16 +66,19 @@ class GMAT_API SphRA : public OrbitReal
 {
 public:
 
-    SphRA(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "Deg");
-    SphRA(const SphRA &copy);
-    SphRA& operator=(const SphRA &right);
-    virtual ~SphRA();
+   SphRA(const std::string &name = "",
+         GmatBase *obj = NULL,
+         const std::string &desc = "",
+         const std::string &unit = "Deg");
+   SphRA(const SphRA &copy);
+   SphRA& operator=(const SphRA &right);
+   virtual ~SphRA();
 
     // The inherited methods from Parameter
-    virtual bool Evaluate();
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -90,17 +96,20 @@ class GMAT_API SphDec : public OrbitReal
 {
 public:
 
-    SphDec(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = "Deg");
-    SphDec(const SphDec &copy);
-    SphDec& operator=(const SphDec &right);
-    virtual ~SphDec();
-
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
-
+   SphDec(const std::string &name = "",
+          GmatBase *obj = NULL,
+          const std::string &desc = "",
+          const std::string &unit = "Deg");
+   SphDec(const SphDec &copy);
+   SphDec& operator=(const SphDec &right);
+   virtual ~SphDec();
+   
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };
@@ -125,6 +134,9 @@ public:
     
    // The inherited methods from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
     
 protected:
 
@@ -150,6 +162,9 @@ public:
    // The inherited methods from Parameter
    virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
 protected:
 
 };
@@ -173,6 +188,9 @@ public:
 
    // The inherited methods from Parameter
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 
@@ -212,6 +230,9 @@ public:
    virtual bool AddObject(GmatBase *obj);
    virtual bool Validate();
    virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
 protected:
 

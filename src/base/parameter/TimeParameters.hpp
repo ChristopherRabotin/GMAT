@@ -39,9 +39,12 @@ public:
    CurrA1MJD& operator= (const CurrA1MJD &right); 
    virtual ~CurrA1MJD();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
     
 private:
@@ -64,10 +67,12 @@ public:
    const ElapsedDays& operator= (const ElapsedDays &right); 
    virtual ~ElapsedDays();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
 
-   // The inherited methods from GmatBase
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual std::string GetParameterText(const Integer id);
@@ -85,8 +90,10 @@ protected:
       ElapsedDaysParamCount
    };
 
-   static const Gmat::ParameterType PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount];
-   static const std::string PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount];
+   static const std::string
+      PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount];
     
 private:
 };
@@ -107,10 +114,12 @@ public:
    const ElapsedSecs& operator= (const ElapsedSecs &right); 
    virtual ~ElapsedSecs();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
    virtual bool Evaluate();
 
-   // The inherited methods from GmatBase
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual std::string GetParameterText(const Integer id);
@@ -128,8 +137,10 @@ protected:
       ElapsedSecsParamCount
    };
 
-   static const Gmat::ParameterType PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount];
-   static const std::string PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount];
+   static const std::string
+      PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount];
     
 private:
 };

@@ -112,3 +112,19 @@ bool SemilatusRectum::Evaluate()
     else
         return true;
 }
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SemilatusRectum::Clone(void) const
+{
+   return new SemilatusRectum(*this);
+}

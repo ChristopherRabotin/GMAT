@@ -13,7 +13,7 @@
 // Created: 2004/03/12
 //
 /**
- * Declares base class of Rvector6 parameters.
+ * Declares base class of parameters returning Rvector6.
  */
 //------------------------------------------------------------------------------
 #ifndef Rvec6Var_hpp
@@ -44,14 +44,15 @@ public:
     virtual Rvector6 EvaluateRvector6();
     virtual Rvector6 GetRvector6() const;
 
-    // The inherited methods from Parameter
+    // methods inherited from Parameter
     virtual const std::string* GetParameterList() const;
     
-    // The inherited methods from GmatBase
+    // methods inherited from GmatBase
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string str) const;
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string str) const; //loj: 3/25 const was missing
+   
     virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
 
@@ -70,8 +71,10 @@ protected:
 
     Rvector6 mRvec6Value;
         
-    static const Gmat::ParameterType PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
-    static const std::string PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
+    static const Gmat::ParameterType
+       PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
+    static const std::string
+       PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
     
 private:
 

@@ -145,7 +145,7 @@ Integer OrbitReal::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
 {
-   return RefData::GetRefObject(objTypeName);
+   return OrbitData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -167,11 +167,10 @@ bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
    //Initialize(); //loj: 4/28/04 Initialize() will be called during run setup
    //loj: 3/31/04 do not check for NULL so it can reset object
    //if (obj != NULL) 
-   return RefData::SetRefObject(objType, objName, obj);
+   return OrbitData::SetRefObject(objType, objName, obj);
    //else
    //return false;
 }
-
 
 //------------------------------------------------------------------------------
 // virtual bool AddObject(GmatBase *obj)

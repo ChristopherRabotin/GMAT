@@ -13,7 +13,7 @@
 // Created: 2004/01/08
 //
 /**
- * Declares base class of parameters.
+ * Declares base class of parameters returning Real.
  */
 //------------------------------------------------------------------------------
 #ifndef RealVar_hpp
@@ -43,14 +43,15 @@ public:
     virtual Real EvaluateReal() = 0;
     virtual Real GetReal() const;
     
-    // The inherited methods from Parameter
+    // methods inherited from Parameter
     virtual const std::string* GetParameterList() const;
 
-    // The inherited methods from GmatBase
+    // methods inherited from GmatBase
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string str) const;
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string str) const; //loj: 3/25 const was missing
+   
     virtual Real GetRealParameter(const std::string &label) const;
     virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
@@ -66,8 +67,10 @@ protected:
         RealVarParamCount
     };
     
-    static const Gmat::ParameterType PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
-    static const std::string PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
+    static const Gmat::ParameterType
+       PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
+    static const std::string
+       PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
     
 private:
 

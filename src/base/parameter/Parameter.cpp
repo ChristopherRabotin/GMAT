@@ -21,6 +21,8 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_PARAMETER 0
+
 #if !defined __UNIT_TEST__
 #include "Moderator.hpp"
 #endif
@@ -39,6 +41,9 @@ const std::string
 Parameter::PARAMETER_TEXT[ParameterParamCount] =
 {
    "Object",       //loj: 4/23/04 this will be removed later (need for current script)
+   "Expression",
+   "Description",
+   "Unit",
    "Color",
 };
 
@@ -47,6 +52,9 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::UNSIGNED_INT_TYPE,
 };
 
 //---------------------------------
@@ -55,7 +63,7 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 
 //------------------------------------------------------------------------------
 // Parameter(const std::string &name, const std::string &typeStr,
-//           ParameterKey key, GmatBase *obj, const std::string &desc
+//           ParameterKey key, GmatBase *obj, const std::string &desc,
 //           const std::string &unit, bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
@@ -103,8 +111,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    else
       mDesc = desc;
 
+   mExpr = "";
    mUnit = unit;
+   mColor = 0; // black
+   
    mIsTimeParam = isTimeParam;
+   mIsPlottable = true;
 }
 
 //------------------------------------------------------------------------------
@@ -120,9 +132,11 @@ Parameter::Parameter(const Parameter &copy)
    : GmatBase(copy)
 {
    mKey = copy.mKey;
+   mExpr = copy.mExpr;
    mDesc = copy.mDesc;
    mUnit = copy.mUnit;
    mIsTimeParam = copy.mIsTimeParam;
+   mIsPlottable = copy.mIsPlottable;
 }
 
 //------------------------------------------------------------------------------
@@ -142,8 +156,10 @@ Parameter& Parameter::operator= (const Parameter& right)
    {
       GmatBase::operator=(right);
       mKey = right.mKey;
+      mExpr = right.mExpr;
       mDesc = right.mDesc;
       mIsTimeParam = right.mIsTimeParam;
+      mIsPlottable = right.mIsPlottable;
    }
 
    return *this;
@@ -164,8 +180,6 @@ Parameter::~Parameter()
 // ParameterKey GetKey() const
 //------------------------------------------------------------------------------
 /**
- * Retrieves parameter key.
- *
  * @return enumeration value of parameter key.
  */
 //------------------------------------------------------------------------------
@@ -175,39 +189,9 @@ Parameter::ParameterKey Parameter::GetKey() const
 }
 
 //------------------------------------------------------------------------------
-// std::string GetDesc() const
-//------------------------------------------------------------------------------
-/**
- * Retrieves parameter description.
- *
- * @return parameter description.
- */
-//------------------------------------------------------------------------------
-std::string Parameter::GetDesc() const
-{
-   return mDesc;
-}
-
-//------------------------------------------------------------------------------
-// std::string GetUnit() const
-//------------------------------------------------------------------------------
-/**
- * Retrieves parameter unit.
- *
- * @return parameter description.
- */
-//------------------------------------------------------------------------------
-std::string Parameter::GetUnit() const
-{
-   return mUnit;
-}
-
-//------------------------------------------------------------------------------
 // bool IsTimeParameter() const
 //------------------------------------------------------------------------------
 /**
- * Retrieves parameter unit.
- *
  * @return parameter description.
  */
 //------------------------------------------------------------------------------
@@ -228,34 +212,6 @@ bool Parameter::IsTimeParameter() const
 void Parameter::SetKey(const ParameterKey &key)
 {
    mKey = key;
-}
-
-//------------------------------------------------------------------------------
-// void SetDesc(cosnt std::string &desc)
-//------------------------------------------------------------------------------
-/**
- * Sets parameter description.
- *
- * @param <desc> description of parameter.
- */
-//------------------------------------------------------------------------------
-void Parameter::SetDesc(const std::string &desc)
-{
-   mDesc = desc;
-}
-
-//------------------------------------------------------------------------------
-// void SetUnit(cosnt std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Sets parameter unit.
- *
- * @param <unit> unit of parameter.
- */
-//------------------------------------------------------------------------------
-void Parameter::SetUnit(const std::string &unit)
-{
-   mUnit = unit;
 }
 
 //------------------------------------------------------------------------------
@@ -471,15 +427,52 @@ void Parameter::Initialize()
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   return "UNDEFINED_REF_OBJECT";
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+//                               const std::string &name)
+//------------------------------------------------------------------------------
+bool Parameter::SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Parameter::GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
+//------------------------------------------------------------------------------
+bool Parameter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterText(const Integer id) const
 {
-   if (id >= OBJECT && id < ParameterParamCount)
-      return PARAMETER_TEXT[id];
+   if (id >= GmatBaseParamCount && id < ParameterParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterText(id);
-    
 }
 
 //------------------------------------------------------------------------------
@@ -487,9 +480,9 @@ std::string Parameter::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Parameter::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<ParameterParamCount; i++)
+   for (int i=GmatBaseParamCount; i<ParameterParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    
@@ -501,8 +494,8 @@ Integer Parameter::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 {
-   if (id >= OBJECT && id < ParameterParamCount)
-      return PARAMETER_TYPE[id];
+   if (id >= GmatBaseParamCount && id < ParameterParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterType(id);
 }
@@ -512,12 +505,73 @@ Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterTypeString(const Integer id) const
 {
-   if (id >= OBJECT && id < ParameterParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   if (id >= GmatBaseParamCount && id < ParameterParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - GmatBaseParamCount)];
    else
       return GmatBase::GetParameterTypeString(id);
     
 }
+
+//----- UnsignedInt parameters
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const Integer id) const
+//------------------------------------------------------------------------------
+UnsignedInt Parameter::GetUnsignedIntParameter(const Integer id) const
+{
+#if DEBUG_PARAMETER
+   MessageInterface::ShowMessage("Parameter::GetUnsignedIntParameter() "
+                                 "id=%d\n", id);
+#endif
+   
+   switch (id)
+   {
+   case COLOR:
+      return mColor;
+   default:
+      return GmatBase::GetUnsignedIntParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+UnsignedInt Parameter::GetUnsignedIntParameter(const std::string &label) const
+{
+   return GetUnsignedIntParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const Integer id, const UnsignedInt value)
+//------------------------------------------------------------------------------
+UnsignedInt Parameter::SetUnsignedIntParameter(const Integer id,
+                                               const UnsignedInt value)
+{
+#if DEBUG_PARAMETER
+   MessageInterface::ShowMessage("Parameter::SetUnsignedIntParameter() "
+                                 "id=%d value=%d\n", id, value);
+#endif
+   switch (id)
+   {
+   case COLOR: 
+      mColor = value;
+      return mColor;
+   default:
+      return GmatBase::SetUnsignedIntParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                     const UnsignedInt &value)
+//------------------------------------------------------------------------------
+UnsignedInt Parameter::SetUnsignedIntParameter(const std::string &label,
+                                               const UnsignedInt value)
+{
+   return SetUnsignedIntParameter(GetParameterID(label), value);
+}
+
+//----- std::string parameters
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -531,8 +585,12 @@ std::string Parameter::GetStringParameter(const Integer id) const
          return mObjectNames[0];
       else
          return GmatBase::GetStringParameter(id);
-   case COLOR:
-      return mColorName;
+   case EXPRESSION:
+      return mExpr;
+   case DESCRIPTION:
+      return mDesc;
+   case UNIT:
+      return mUnit;
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -555,8 +613,14 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
    {
    case OBJECT:
       return AddObject(value);
-   case COLOR:
-      mColorName = value;
+   case EXPRESSION:
+      mExpr = value;
+      return true;
+   case DESCRIPTION:
+      mDesc = value;
+      return true;
+   case UNIT:
+      mUnit = value;
       return true;
    default:
       return GmatBase::SetStringParameter(id, value);

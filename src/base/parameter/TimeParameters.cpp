@@ -104,6 +104,18 @@ bool CurrA1MJD::Evaluate()
         return true;
 }
 
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* CurrA1MJD::Clone(void) const
+{
+   return new CurrA1MJD(*this);
+}
+
 //==============================================================================
 //                              ElapsedDays
 //==============================================================================
@@ -219,6 +231,18 @@ bool ElapsedDays::Evaluate()
 //--------------------------------------
 // Inherited methods from GmatBase
 //--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* ElapsedDays::Clone(void) const
+{
+   return new ElapsedDays(*this);
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
@@ -474,6 +498,18 @@ bool ElapsedSecs::Evaluate()
 //--------------------------------------
 // Inherited methods from GmatBase
 //--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* ElapsedSecs::Clone(void) const
+{
+   return new ElapsedSecs(*this);
+}
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const

@@ -20,9 +20,6 @@
 #ifndef AngularParameters_hpp
 #define AngularParameters_hpp
 
-#include "gmatdefs.hpp"
-#include "RealVar.hpp"
-#include "OrbitData.hpp"
 #include "OrbitReal.hpp"
 
 //==============================================================================
@@ -37,17 +34,20 @@ class GMAT_API SemilatusRectum : public OrbitReal
 {
 public:
 
-    SemilatusRectum(const std::string &name = "",
-                    GmatBase *obj = NULL,
-                    const std::string &desc = "",
-                    const std::string &unit = "Km");
-    SemilatusRectum(const SemilatusRectum &copy);
-    const SemilatusRectum& operator=(const SemilatusRectum &right);
-    virtual ~SemilatusRectum();
+   SemilatusRectum(const std::string &name = "",
+                   GmatBase *obj = NULL,
+                   const std::string &desc = "",
+                   const std::string &unit = "Km");
+   SemilatusRectum(const SemilatusRectum &copy);
+   const SemilatusRectum& operator=(const SemilatusRectum &right);
+   virtual ~SemilatusRectum();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // methods inherited from Parameter
+   virtual bool Evaluate();
 
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
 protected:
 
 };

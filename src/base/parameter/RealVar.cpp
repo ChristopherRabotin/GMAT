@@ -28,13 +28,13 @@
 const std::string
 RealVar::PARAMETER_TEXT[RealVarParamCount - ParameterParamCount] =
 {
-    "Param1"
+   "Param1"
 }; 
 
 const Gmat::ParameterType
 RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 {
-    Gmat::REAL_TYPE
+   Gmat::REAL_TYPE
 };
 
 //---------------------------------
@@ -63,11 +63,11 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 RealVar::RealVar(const std::string &name, const std::string &typeStr, 
                  ParameterKey key, GmatBase *obj, const std::string &desc,
                  const std::string &unit, bool isTimeParam)
-    : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
+   : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
 {  
-    mRealValue = REAL_PARAMETER_UNDEFINED;
-    // GmatBase data
-    parameterCount = RealVarParamCount;
+   mRealValue = REAL_PARAMETER_UNDEFINED;
+   // GmatBase data
+   parameterCount = RealVarParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -80,9 +80,9 @@ RealVar::RealVar(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 RealVar::RealVar(const RealVar &copy)
-    : Parameter(copy)
+   : Parameter(copy)
 {
-    mRealValue = copy.mRealValue;
+   mRealValue = copy.mRealValue;
 }
 
 //------------------------------------------------------------------------------
@@ -98,13 +98,13 @@ RealVar::RealVar(const RealVar &copy)
 //------------------------------------------------------------------------------
 RealVar& RealVar::operator= (const RealVar& right)
 {
-    if (this != &right)
-    {
-        Parameter::operator=(right);
-        mRealValue = right.mRealValue;
-    }
+   if (this != &right)
+   {
+      Parameter::operator=(right);
+      mRealValue = right.mRealValue;
+   }
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ RealVar::~RealVar()
 //------------------------------------------------------------------------------
 bool RealVar::operator==(const RealVar &right) const
 {
-    return Parameter::operator==(right);
+   return Parameter::operator==(right);
 }
 
 //------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ bool RealVar::operator==(const RealVar &right) const
 //------------------------------------------------------------------------------
 bool RealVar::operator!=(const RealVar &right) const
 {
-    return Parameter::operator!=(right);
+   return Parameter::operator!=(right);
 }
 
 //------------------------------------------------------------------------------
@@ -152,19 +152,19 @@ bool RealVar::operator!=(const RealVar &right) const
 //------------------------------------------------------------------------------
 Real RealVar::EvaluateReal()
 {
-    if (mKey == SYSTEM_PARAM)
-    {
-        throw ParameterException("Parameter: EvaluateReal() should be implemented "
-                                 "for Parameter Type:" + GetTypeName());
-    }
-    else
-    {
-        //loj: Parse the expresstion, then evaluate
-        //loj: Should we use mDesc field instead of creating new exp. field?
-        return mRealValue; //loj: temp code
-    }
+   if (mKey == SYSTEM_PARAM)
+   {
+      throw ParameterException("Parameter: EvaluateReal() should be implemented "
+                               "for Parameter Type:" + GetTypeName());
+   }
+   else
+   {
+      //loj: Parse the expresstion, then evaluate
+      //loj: Should we use mDesc field instead of creating new exp. field?
+      return mRealValue; //loj: temp code
+   }
 
-    return REAL_PARAMETER_UNDEFINED;
+   return REAL_PARAMETER_UNDEFINED;
 }
 
 
@@ -177,7 +177,7 @@ Real RealVar::EvaluateReal()
 //------------------------------------------------------------------------------
 Real RealVar::GetReal() const
 {
-    return mRealValue;
+   return mRealValue;
 }
 
 //------------------------------------
@@ -189,7 +189,7 @@ Real RealVar::GetReal() const
 //------------------------------------------------------------------------------
 const std::string* RealVar::GetParameterList() const
 {
-    return PARAMETER_TEXT;
+   return PARAMETER_TEXT;
 }
 
 
@@ -198,36 +198,14 @@ const std::string* RealVar::GetParameterList() const
 //------------------------------------
 
 //------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType RealVar::GetParameterType(const Integer id) const
-{
-    if (id >= ParameterParamCount && id <= RealVarParamCount)
-        return PARAMETER_TYPE[id - ParameterParamCount];
-    else
-        return Parameter::GetParameterType(id);
-}
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string RealVar::GetParameterTypeString(const Integer id) const
-{
-    if (id >= ParameterParamCount && id <= RealVarParamCount)
-        return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
-    else
-        return Parameter::GetParameterTypeString(id);
-}
-
-//------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 std::string RealVar::GetParameterText(const Integer id) const
 {
-    if (id >= ParameterParamCount && id <= RealVarParamCount)
-        return PARAMETER_TEXT[id - ParameterParamCount];
-    else
-        return Parameter::GetParameterText(id);
+   if (id >= ParameterParamCount && id < RealVarParamCount)
+      return PARAMETER_TEXT[id - ParameterParamCount];
+   else
+      return Parameter::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -235,13 +213,35 @@ std::string RealVar::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer RealVar::GetParameterID(const std::string str) const
 {
-    for (int i=ParameterParamCount; i<RealVarParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - ParameterParamCount])
-            return i;
-    }
+   for (int i=ParameterParamCount; i<RealVarParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
+         return i;
+   }
    
-    return Parameter::GetParameterID(str);
+   return Parameter::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType RealVar::GetParameterType(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < RealVarParamCount)
+      return PARAMETER_TYPE[id - ParameterParamCount];
+   else
+      return Parameter::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string RealVar::GetParameterTypeString(const Integer id) const
+{
+   if (id >= ParameterParamCount && id < RealVarParamCount)
+      return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
+   else
+      return Parameter::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -249,13 +249,13 @@ Integer RealVar::GetParameterID(const std::string str) const
 //------------------------------------------------------------------------------
 Real RealVar::GetRealParameter(const Integer id) const
 {
-    switch (id)
-    {
-    case PARAM_1:
-        return mRealValue;
-    default:
-        return Parameter::GetRealParameter(id);
-    }
+   switch (id)
+   {
+   case PARAM_1:
+      return mRealValue;
+   default:
+      return Parameter::GetRealParameter(id);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -267,7 +267,7 @@ Real RealVar::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real RealVar::GetRealParameter(const std::string &label) const
 {
-    return GetRealParameter(GetParameterID(label));
+   return GetRealParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -275,14 +275,14 @@ Real RealVar::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real RealVar::SetRealParameter(const Integer id, const Real value)
 {
-    switch (id)
-    {
-    case PARAM_1:
-        mRealValue = value;
-        return mRealValue;
-    default:
-        return Parameter::SetRealParameter(id, value);
-    }
+   switch (id)
+   {
+   case PARAM_1:
+      mRealValue = value;
+      return mRealValue;
+   default:
+      return Parameter::SetRealParameter(id, value);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -294,5 +294,5 @@ Real RealVar::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real RealVar::SetRealParameter(const std::string &label, const Real value)
 {
-    return SetRealParameter(GetParameterID(label), value);
+   return SetRealParameter(GetParameterID(label), value);
 }

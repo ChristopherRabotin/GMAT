@@ -114,6 +114,22 @@ bool SphRMag::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphRMag::Clone(void) const
+{
+   return new SphRMag(*this);
+}
+
 //==============================================================================
 //                              SphRA
 //==============================================================================
@@ -205,6 +221,22 @@ bool SphRA::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphRA::Clone(void) const
+{
+   return new SphRA(*this);
 }
 
 
@@ -301,6 +333,22 @@ bool SphDec::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphDec::Clone(void) const
+{
+   return new SphDec(*this);
+}
+
 //==============================================================================
 //                              SphVMag
 //==============================================================================
@@ -392,6 +440,22 @@ bool SphVMag::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphVMag::Clone(void) const
+{
+   return new SphVMag(*this);
 }
 
 //==============================================================================
@@ -487,6 +551,22 @@ bool SphRAV::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphRAV::Clone(void) const
+{
+   return new SphRAV(*this);
+}
+
 
 //==============================================================================
 //                              SphDecV
@@ -579,6 +659,22 @@ bool SphDecV::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphDecV::Clone(void) const
+{
+   return new SphDecV(*this);
 }
 
 //==============================================================================
@@ -691,7 +787,7 @@ Integer SphElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* SphElem::GetObject(const std::string &objTypeName)
 {
-   return RefData::GetRefObject(objTypeName);
+   return OrbitData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -709,7 +805,7 @@ bool SphElem::SetObject(Gmat::ObjectType objType,
                         GmatBase *obj)
 {
    if (obj != NULL)
-      return RefData::SetRefObject(objType, objName, obj);
+      return OrbitData::SetRefObject(objType, objName, obj);
    else
       return false;
 }
@@ -771,3 +867,19 @@ bool SphElem::Evaluate()
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
 
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphElem::Clone(void) const
+{
+   return new SphElem(*this);
+}

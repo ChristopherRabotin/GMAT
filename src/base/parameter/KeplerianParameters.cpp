@@ -113,6 +113,22 @@ bool KepSMA::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepSMA::Clone(void) const
+{
+   return new KepSMA(*this);
+}
+
 //==============================================================================
 //                              KepEcc
 //==============================================================================
@@ -205,6 +221,22 @@ bool KepEcc::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepEcc::Clone(void) const
+{
+   return new KepEcc(*this);
 }
 
 
@@ -302,6 +334,22 @@ bool KepInc::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepInc::Clone(void) const
+{
+   return new KepInc(*this);
+}
+
 //==============================================================================
 //                              KepAOP
 //==============================================================================
@@ -394,6 +442,22 @@ bool KepAOP::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepAOP::Clone(void) const
+{
+   return new KepAOP(*this);
 }
 
 //==============================================================================
@@ -490,6 +554,22 @@ bool KepRAAN::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepRAAN::Clone(void) const
+{
+   return new KepRAAN(*this);
+}
+
 //==============================================================================
 //                              KepTA
 //==============================================================================
@@ -582,6 +662,22 @@ bool KepTA::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepTA::Clone(void) const
+{
+   return new KepTA(*this);
 }
 
 //==============================================================================
@@ -678,6 +774,22 @@ bool KepMA::Evaluate()
       return true;
 }
 
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepMA::Clone(void) const
+{
+   return new KepMA(*this);
+}
+
 //==============================================================================
 //                              KepMM
 //==============================================================================
@@ -770,6 +882,22 @@ bool KepMM::Evaluate()
       return false;
    else
       return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepMM::Clone(void) const
+{
+   return new KepMM(*this);
 }
 
 
@@ -884,7 +1012,7 @@ Integer KepElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* KepElem::GetObject(const std::string &objTypeName)
 {
-   return RefData::GetRefObject(objTypeName);
+   return OrbitData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -902,7 +1030,7 @@ bool KepElem::SetObject(Gmat::ObjectType objType,
                         GmatBase *obj)
 {
    if (obj != NULL)
-      return RefData::SetRefObject(objType, objName, obj);
+      return OrbitData::SetRefObject(objType, objName, obj);
    else
       return false;
 }
@@ -962,4 +1090,20 @@ bool KepElem::Evaluate()
                    GetKepReal("KepTA"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepElem::Clone(void) const
+{
+   return new KepElem(*this);
 }
