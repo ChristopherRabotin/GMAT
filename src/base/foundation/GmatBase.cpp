@@ -50,7 +50,7 @@ const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
 /// Build the list of type names
 const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
       {
-        "Integer", "Real", "String", "StringArray", "Boolean", "Rvector",
+        "Integer", "UnsignedInt", "Real", "String", "StringArray", "Boolean", "Rvector",
         "Rvector3", "Rvector6", "Rmatrix", "Rmatrix33", "Cartesian",
          "Keplerian", "A1Mjd", "UtcDate", "Object"
       };
