@@ -31,7 +31,7 @@ class ReportFile :
 {
 public:
 //    ReportFile(char * filename = NULL);
-    ReportFile(const std::string &fileName);
+    ReportFile(const std::string &name, const std::string &fileName);
     virtual ~ReportFile(void);
 
 protected:

@@ -28,7 +28,7 @@ ReportFile::ReportFile(char * filename)
         dstream.open("ReportFile.txt");
 }
 */
-ReportFile::ReportFile(const std::string &fileName)
+ReportFile::ReportFile(const std::string &name, const std::string &fileName)
 {
     if (fileName != "")
         dstream.open(fileName.c_str());
