@@ -16,7 +16,7 @@
 #define FunctionSetupPanel_hpp
 
 #include "GmatPanel.hpp"
-#include "Parameter.hpp"
+#include "GmatFunction.hpp"
 
 class FunctionSetupPanel: public GmatPanel
 {
@@ -25,7 +25,11 @@ public:
    FunctionSetupPanel(wxWindow *parent, const wxString &name); 
     
 private:
-   
+   GmatFunction *theGmatFunction;
+
+   bool mEnableLoad;
+   bool mEnableSave;
+
    wxStaticBoxSizer *mTopSizer;
    wxBoxSizer *mMiddleSizer;
    wxGridSizer *mBottomSizer;
@@ -37,7 +41,8 @@ private:
    
    wxButton *mBrowseButton;
    wxButton *mLoadButton;
-    
+   wxButton *mSaveButton;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
