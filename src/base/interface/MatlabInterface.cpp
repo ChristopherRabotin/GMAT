@@ -133,7 +133,6 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
       //printf("MatlabInterface::GetArray():output value[0:2] = %g, %g, %g\n",
       //       outArray[0], outArray[1], outArray[2]);
       mxDestroyArray(mxArrayOutputPtrD);
-//      MessageInterface::ShowMessage("Copied array over...\n");
       return 1;
    }
 #endif
