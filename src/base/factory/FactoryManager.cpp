@@ -75,10 +75,8 @@ bool FactoryManager::RegisterFactory(Factory* fact)
    return true;
 }
 
-
-
 //------------------------------------------------------------------------------
-//  Spacecraft* CreateSpacecraft(std::string ofType,std::string withName)
+//  Spacecraft* CreateSpacecraft(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Spacecraft, with the name withName.
@@ -90,8 +88,8 @@ bool FactoryManager::RegisterFactory(Factory* fact)
  * @return pointer to the newly-created Spacecraft object
  */
 //------------------------------------------------------------------------------
-SpaceObject* FactoryManager::CreateSpacecraft(std::string ofType,
-                                              std::string withName)
+SpaceObject* FactoryManager::CreateSpacecraft(const std::string &ofType,
+                                              const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::SPACECRAFT, ofType);
    if (f != NULL)
@@ -100,27 +98,8 @@ SpaceObject* FactoryManager::CreateSpacecraft(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  GroundStation* CreateGroundStation(std::string withName)
-//------------------------------------------------------------------------------
-/**
- * Create an object of type GroundStation, with the name withName.
- *
- * @param <withName> name of the new GroundStation object.
- *
- * @return pointer to the newly-created GroundStation object
- */
-//------------------------------------------------------------------------------
-//GroundStation* FactoryManager::CreateGroundStation(std::string withName)
-//{
-//   Factory* f = FindFactory(Gmat::GROUND_STATION, "GroundStation");
-//   if (f != NULL)
-//      return f->CreateGroundStation("GroundStation",withName);
-//   return NULL;
-//}
-
-
-//------------------------------------------------------------------------------
-//  Parameter* CreateParameter(std::string ofType, std::string withName)
+//  Parameter* CreateParameter(const std::string &ofType,
+//                             const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Parameter, with the name withName, and of the
@@ -131,8 +110,8 @@ SpaceObject* FactoryManager::CreateSpacecraft(std::string ofType,
  * @return pointer to the newly-created Parameter object
  */
 //------------------------------------------------------------------------------
-Parameter* FactoryManager::CreateParameter(std::string ofType,
-                                           std::string withName)
+Parameter* FactoryManager::CreateParameter(const std::string &ofType,
+                                           const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::PARAMETER, ofType);
    if (f != NULL)
@@ -141,7 +120,8 @@ Parameter* FactoryManager::CreateParameter(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  Propagator* CreatePropagator(std::string ofType, std::string withName)
+//  Propagator* CreatePropagator(const std::string &ofType,
+//                               const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Propagator, with the name withName, and of the
@@ -152,8 +132,8 @@ Parameter* FactoryManager::CreateParameter(std::string ofType,
  * @return pointer to the newly-created Propagator object
  */
 //------------------------------------------------------------------------------
-Propagator* FactoryManager::CreatePropagator(std::string ofType,
-                                             std::string withName)
+Propagator* FactoryManager::CreatePropagator(const std::string &ofType,
+                                             const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::PROPAGATOR, ofType);
    if (f != NULL)
@@ -162,7 +142,7 @@ Propagator* FactoryManager::CreatePropagator(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  ForceModel* CreateForceModel(std::string withName)
+//  ForceModel* CreateForceModel(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type ForceModel, with the name withName.
@@ -172,7 +152,7 @@ Propagator* FactoryManager::CreatePropagator(std::string ofType,
  * @return pointer to the newly-created ForceModel object
  */
 //------------------------------------------------------------------------------
-ForceModel* FactoryManager::CreateForceModel(std::string withName)
+ForceModel* FactoryManager::CreateForceModel(const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::FORCE_MODEL, "ForceModel");
    if (f != NULL)
@@ -181,7 +161,7 @@ ForceModel* FactoryManager::CreateForceModel(std::string withName)
 }
 
 //------------------------------------------------------------------------------
-//  Force* CreatePhysicalModel(std::string ofType, std::string withName)
+//  Force* CreatePhysicalModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type PhysicalModel, with the name withName, and of the
@@ -192,8 +172,8 @@ ForceModel* FactoryManager::CreateForceModel(std::string withName)
  * @return pointer to the newly-created PhysicalModel object
  */
 //------------------------------------------------------------------------------
-PhysicalModel* FactoryManager::CreatePhysicalModel(std::string ofType,
-                                                   std::string withName)
+PhysicalModel* FactoryManager::CreatePhysicalModel(const std::string &ofType,
+                                                   const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::PHYSICAL_MODEL, ofType);
    if (f != NULL)
@@ -202,7 +182,7 @@ PhysicalModel* FactoryManager::CreatePhysicalModel(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  PropSetup* CreatePropSetup(std::string withName)
+//  PropSetup* CreatePropSetup(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type PropSetup, with the name withName.
@@ -212,7 +192,7 @@ PhysicalModel* FactoryManager::CreatePhysicalModel(std::string ofType,
  * @return pointer to the newly-created PropSetup object
  */
 //------------------------------------------------------------------------------
-PropSetup* FactoryManager::CreatePropSetup(std::string withName)
+PropSetup* FactoryManager::CreatePropSetup(const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::PROP_SETUP, "PropSetup");
    if (f != NULL)
@@ -221,30 +201,7 @@ PropSetup* FactoryManager::CreatePropSetup(std::string withName)
 }
 
 //------------------------------------------------------------------------------
-//  CalculatedParameter* CreateCalculatedParameter(std::string ofType,
-//                                                 std::string withName)
-//------------------------------------------------------------------------------
-/**
- * Create an object of type CalculatedParameter, with the name withName,
- * and of the type ofType.
- *
- * @param <withName> name of the new CalculatedParameter object.
- *
- * @return pointer to the newly-created CalculatedParameter object
- */
-//------------------------------------------------------------------------------
-//CalculatedParameter* FactoryManager::CreateCalculatedParameter(
-//                                     std::string ofType,
-//                                     std::string withName)
-//{
-//   Factory* f = FindFactory(Gmat::PARAMETER, ofType);
-//   if (f != NULL)
-//      return f->CreateCalculatedParameter(ofType, withName);
-//   return NULL;
-//}
-
-//------------------------------------------------------------------------------
-//  StopCondition* CreateStopCondition(std::string withName)
+//  StopCondition* CreateStopCondition(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type StopCondition, with the name withName.
@@ -254,8 +211,8 @@ PropSetup* FactoryManager::CreatePropSetup(std::string withName)
  * @return pointer to the newly-created StopCondition object
  */
 //------------------------------------------------------------------------------
-   StopCondition* FactoryManager::CreateStopCondition(std::string ofType,
-                                                      std::string withName)
+StopCondition* FactoryManager::CreateStopCondition(const std::string &ofType,
+                                                   const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::STOP_CONDITION, ofType);
    if (f != NULL)
@@ -264,8 +221,8 @@ PropSetup* FactoryManager::CreatePropSetup(std::string withName)
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody* CreateCelestialBody(std::string ofType,
-//                                     std::string withName)
+//  CelestialBody* CreateCelestialBody(const std::string &ofType,
+//                                     const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type CelestialBody, with the name withName,
@@ -276,8 +233,8 @@ PropSetup* FactoryManager::CreatePropSetup(std::string withName)
  * @return pointer to the newly-created CelestialBody object
  */
 //------------------------------------------------------------------------------
-CelestialBody* FactoryManager::CreateCelestialBody(std::string ofType,
-                                                   std::string withName)
+CelestialBody* FactoryManager::CreateCelestialBody(const std::string &ofType,
+                                                   const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::CELESTIAL_BODY, ofType);
    if (f != NULL)
@@ -286,7 +243,7 @@ CelestialBody* FactoryManager::CreateCelestialBody(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  SolarSystem* CreateSolarSystem(std::string withName)
+//  SolarSystem* CreateSolarSystem(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type SolarSystem, with the name withName.
@@ -296,7 +253,7 @@ CelestialBody* FactoryManager::CreateCelestialBody(std::string ofType,
  * @return pointer to the newly-created SolarSystem object
  */
 //------------------------------------------------------------------------------
-SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
+SolarSystem* FactoryManager::CreateSolarSystem(const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::SOLAR_SYSTEM, "SolarSystem");
    if (f != NULL)
@@ -305,8 +262,8 @@ SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
 }
 
 //------------------------------------------------------------------------------
-//  Solver* CreateSolver(std::string ofType,
-//                       std::string withName)
+//  Solver* CreateSolver(const std::string &ofType,
+//                       const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Solver, with the name withName,
@@ -317,8 +274,8 @@ SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
  * @return pointer to the newly-created Solver object
  */
 //------------------------------------------------------------------------------
-Solver* FactoryManager::CreateSolver(std::string ofType,
-                                     std::string withName)
+Solver* FactoryManager::CreateSolver(const std::string &ofType,
+                                     const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::SOLVER, ofType);
    if (f != NULL)
@@ -327,8 +284,9 @@ Solver* FactoryManager::CreateSolver(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  Subscriber* CreateSubscriber(std::string ofType, std::string withname,
-//                               std::string fileName)
+//  Subscriber* CreateSubscriber(const std::string &ofType,
+//                               const std::string &withName,
+//                               const std::string &fileName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Subscriber, with the name withName.
@@ -338,9 +296,9 @@ Solver* FactoryManager::CreateSolver(std::string ofType,
  * @return pointer to the newly-created Subscriber object
  */
 //------------------------------------------------------------------------------
-   Subscriber* FactoryManager::CreateSubscriber(std::string ofType,
-                                                std::string withName,
-                                                std::string fileName)
+Subscriber* FactoryManager::CreateSubscriber(const std::string &ofType,
+                                             const std::string &withName,
+                                             const std::string &fileName)
 {
    Factory* f = FindFactory(Gmat::SUBSCRIBER, ofType);
    if (f != NULL)
@@ -349,7 +307,7 @@ Solver* FactoryManager::CreateSolver(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  GmatCommand* CreateCommand(std::string ofType, std::string withName)
+//  GmatCommand* CreateCommand(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type GmatCommand, with the name withName.
@@ -359,7 +317,8 @@ Solver* FactoryManager::CreateSolver(std::string ofType,
  * @return pointer to the newly-created GmatCommand object
  */
 //------------------------------------------------------------------------------
-GmatCommand* FactoryManager::CreateCommand(std::string ofType, std::string withName)
+GmatCommand* FactoryManager::CreateCommand(const std::string &ofType,
+                                           const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::COMMAND, ofType);
    if (f != NULL)
@@ -368,7 +327,7 @@ GmatCommand* FactoryManager::CreateCommand(std::string ofType, std::string withN
 }
 
 //------------------------------------------------------------------------------
-//  Burn* CreateBurn(std::string ofType, std::string withName)
+//  Burn* CreateBurn(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Burn, with the name withName.
@@ -378,7 +337,8 @@ GmatCommand* FactoryManager::CreateCommand(std::string ofType, std::string withN
  * @return pointer to the newly-created Burn object
  */
 //------------------------------------------------------------------------------
-Burn* FactoryManager::CreateBurn(std::string ofType, std::string withName)
+Burn* FactoryManager::CreateBurn(const std::string &ofType,
+                                 const std::string &withName)
 {
    Factory* f = FindFactory(Gmat::BURN, ofType);
    if (f != NULL)
@@ -387,7 +347,30 @@ Burn* FactoryManager::CreateBurn(std::string ofType, std::string withName)
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfItems(Gmat::ObjectType byType) const;
+//  AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
+//                                         const std::string &withName,
+//                                         const std::string &forBody)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type AtmosphereModel, with the name withName.
+ *
+ * @param <withName> name of the new AtmosphereModel object.
+ *
+ * @return pointer to the newly-created AtmosphereModel object
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* FactoryManager::CreateAtmosphereModel(const std::string &ofType,
+                                                       const std::string &withName,
+                                                       const std::string &forBody)
+{
+   Factory* f = FindFactory(Gmat::ATMOSPHERE, ofType);
+   if (f != NULL)
+      return f->CreateAtmosphereModel(ofType, withName, forBody);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfItems(Gmat::ObjectType byType) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that can be created.
@@ -397,13 +380,13 @@ Burn* FactoryManager::CreateBurn(std::string ofType, std::string withName)
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
+StringArray  FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
 {
    return GetList(byType);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfSpacecraft(void) const;
+// StringArray  GetListOfSpacecraft(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Spacecraft that can be created.
@@ -411,7 +394,7 @@ StringArray FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
  * @return list of creatable items of type Spacecraft.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSpacecraft(void)// const
+StringArray  FactoryManager::GetListOfSpacecraft(void)// const
 {
    return GetList(Gmat::SPACECRAFT);
 }
@@ -431,7 +414,7 @@ StringArray FactoryManager::GetListOfSpacecraft(void)// const
 //}
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfPropagator(void) const;
+// StringArray  GetListOfPropagator(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Propagator that can be created.
@@ -439,13 +422,13 @@ StringArray FactoryManager::GetListOfSpacecraft(void)// const
  * @return list of creatable items of type Propagator.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPropagator(void)// const
+StringArray  FactoryManager::GetListOfPropagator(void)// const
 {
    return GetList(Gmat::PROPAGATOR);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfForceModel(void) const;
+// StringArray  GetListOfForceModel(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ForceModel that can be created.
@@ -453,13 +436,13 @@ StringArray FactoryManager::GetListOfPropagator(void)// const
  * @return list of creatable items of type ForceModel.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfForceModel(void)// const
+StringArray  FactoryManager::GetListOfForceModel(void)// const
 {
    return GetList(Gmat::FORCE_MODEL);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfPhysicalModel(void) const;
+// StringArray  GetListOfPhysicalModel(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type PhysicalModel that can be created.
@@ -467,13 +450,13 @@ StringArray FactoryManager::GetListOfForceModel(void)// const
  * @return list of creatable items of type Force.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPhysicalModel(void)// const
+StringArray  FactoryManager::GetListOfPhysicalModel(void)// const
 {
    return GetList(Gmat::PHYSICAL_MODEL);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfPropSetup(void) const;
+// StringArray  GetListOfPropSetup(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type PropSetup that can be created.
@@ -481,27 +464,13 @@ StringArray FactoryManager::GetListOfPhysicalModel(void)// const
  * @return list of creatable items of type PropSetup.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPropSetup(void)// const
+StringArray  FactoryManager::GetListOfPropSetup(void)// const
 {
    return GetList(Gmat::PROP_SETUP);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfCalculatedParameter(void) const;
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type CalculatedParameter that can be created.
- *
- * @return list of creatable items of type CalculatedParameter.
- */
-//------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfCalculatedParameter(void) const
-//{
-//   return GetList(Gmat::PARAMETER);
-//}
-
-//------------------------------------------------------------------------------
-// StringArray GetListOfStopCondition(void) const;
+// StringArray  GetListOfStopCondition(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type StopCondition that can be created.
@@ -509,13 +478,13 @@ StringArray FactoryManager::GetListOfPropSetup(void)// const
  * @return list of creatable items of type StopCondition.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfStopCondition(void)// const
+StringArray  FactoryManager::GetListOfStopCondition(void)// const
 {
    return GetList(Gmat::STOP_CONDITION);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfCelestialBody(void) const;
+// StringArray  GetListOfCelestialBody(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type CelestialBody that can be created.
@@ -523,13 +492,13 @@ StringArray FactoryManager::GetListOfStopCondition(void)// const
  * @return list of creatable items of type CelestialBody.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfCelestialBody(void)
+StringArray  FactoryManager::GetListOfCelestialBody(void)
 {
    return GetList(Gmat::CELESTIAL_BODY);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfSolarSystem(void) const;
+// StringArray  GetListOfSolarSystem(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type SolarSystem that can be created.
@@ -537,13 +506,13 @@ StringArray FactoryManager::GetListOfCelestialBody(void)
  * @return list of creatable items of type SolarSystem.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSolarSystem(void)
+StringArray  FactoryManager::GetListOfSolarSystem(void)
 {
    return GetList(Gmat::SOLAR_SYSTEM);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfSolver(void) const;
+// StringArray  GetListOfSolver(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Solver that can be created.
@@ -551,13 +520,13 @@ StringArray FactoryManager::GetListOfSolarSystem(void)
  * @return list of creatable items of type Solver.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSolver(void)// const
+StringArray  FactoryManager::GetListOfSolver(void)// const
 {
    return GetList(Gmat::SOLVER);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfSubscriber(void) const;
+// StringArray  GetListOfSubscriber(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Subscriber that can be created.
@@ -565,13 +534,13 @@ StringArray FactoryManager::GetListOfSolver(void)// const
  * @return list of creatable items of type Subscriber.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSubscriber(void)// const
+StringArray  FactoryManager::GetListOfSubscriber(void)// const
 {
    return GetList(Gmat::SUBSCRIBER);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfCommand(void) const;
+// StringArray  GetListOfCommand(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type GmatCommand that can be created.
@@ -579,13 +548,13 @@ StringArray FactoryManager::GetListOfSubscriber(void)// const
  * @return list of creatable items of type GmatCommand.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfCommand(void)// const
+StringArray  FactoryManager::GetListOfCommand(void)// const
 {
    return GetList(Gmat::COMMAND);
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfBurn(void) const;
+// StringArray  GetListOfBurn(void) const;
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type Burn that can be created.
@@ -593,9 +562,23 @@ StringArray FactoryManager::GetListOfCommand(void)// const
  * @return list of creatable items of type Burn.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfBurn(void)// const
+StringArray  FactoryManager::GetListOfBurn(void)// const
 {
    return GetList(Gmat::BURN);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfAtmosphereModel(void) const;
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type AtmosphereModel that can be created.
+ *
+ * @return list of creatable items of type AtmosphereModel.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfAtmosphereModel(void)// const
+{
+   return GetList(Gmat::ATMOSPHERE);
 }
 
 //------------------------------------------------------------------------------
@@ -673,7 +656,7 @@ FactoryManager::FactoryManager()
 //}
 
 //------------------------------------------------------------------------------
-// Factory* FindFactory(Gmat::ObjectType ofType, std::string forType)
+// Factory* FindFactory(Gmat::ObjectType ofType, const std::string forType)
 //------------------------------------------------------------------------------
 /**
  * Return a pointer to a factory that can create objects of type forType.
@@ -685,7 +668,7 @@ FactoryManager::FactoryManager()
  */
 //------------------------------------------------------------------------------
 Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
-                                     std::string forType)
+                                     const std::string &forType)
 {
    // Search through factoryList for the factory that creates objects of type
    // ofType, specifically of type forType
@@ -703,7 +686,11 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
             while (s != listObj.end())
             {
                if ((*s).compare(forType) == 0)
+               {
+                  MessageInterface::ShowMessage
+                     ("FactoryManager::FindFactory() Found factory:%s\n", forType.c_str());
                   return (*f);
+               }
                ++s;
             }
          }
@@ -715,7 +702,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetList(Gmat::ObjectType ofType) const
+// StringArray  GetList(Gmat::ObjectType ofType) const
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ofType that can be created.
@@ -725,7 +712,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetList(Gmat::ObjectType ofType)// const
+StringArray  FactoryManager::GetList(Gmat::ObjectType ofType)// const
 {
     entireList.clear();
 
@@ -757,5 +744,3 @@ StringArray FactoryManager::GetList(Gmat::ObjectType ofType)// const
    }
    return entireList;
 }
-
-

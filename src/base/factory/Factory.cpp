@@ -25,7 +25,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  Spacecraft* CreateSpacecraft(std::string ofType, std::string withName)
+//  Spacecraft* CreateSpacecraft(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create Spacecraft objects -
@@ -42,14 +42,14 @@
  * objects of type Spacecraft.
  */
 //------------------------------------------------------------------------------
-SpaceObject* Factory::CreateSpacecraft(std::string ofType,
-                                       std::string withName)
+SpaceObject* Factory::CreateSpacecraft(const std::string &ofType,
+                                       const std::string &withName)
 {
    throw FactoryException("requested object must be of type SpaceObject");
 }
 
 //------------------------------------------------------------------------------
-//  GroundStation* CreateGroundStation(std::string ofType, std::string withName)
+//  GroundStation* CreateGroundStation(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create GroundStation objects -
@@ -66,14 +66,14 @@ SpaceObject* Factory::CreateSpacecraft(std::string ofType,
  * objects of type GroundStation.
  */
 //------------------------------------------------------------------------------
-//   GroundStation* Factory::CreateGroundStation(std::string ofType,
-//                                                   std::string withName);
+//   GroundStation* Factory::CreateGroundStation(const std::string &ofType,
+//                                                   const std::string &withName);
 //{
 //   throw FactoryException("requested object must be of type GroundStation");
 //}
 
 //------------------------------------------------------------------------------
-//  Propagator* CreatePropagator(std::string ofType, std::string withName)
+//  Propagator* CreatePropagator(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create Propagator objects -
@@ -90,15 +90,15 @@ SpaceObject* Factory::CreateSpacecraft(std::string ofType,
  * objects of type Propagator.
  */
 //------------------------------------------------------------------------------
-Propagator* Factory::CreatePropagator(std::string ofType,
-                                              std::string withName)
+Propagator* Factory::CreatePropagator(const std::string &ofType,
+                                      const std::string &withName)
 {
    throw FactoryException("requested object must be of type Propagator");
 }
 
 
 //------------------------------------------------------------------------------
-//  Parameter* CreateParameter(std::string ofType, std::string withName)
+//  Parameter* CreateParameter(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create Parameter objects -
@@ -115,13 +115,13 @@ Propagator* Factory::CreatePropagator(std::string ofType,
  * objects of type Parameter.
  */
 //------------------------------------------------------------------------------
-Burn* Factory::CreateBurn(std::string ofType, std::string withName)
+Burn* Factory::CreateBurn(const std::string &ofType, const std::string &withName)
 {
    throw FactoryException("requested object must be of type Burn");
 }
 
 //------------------------------------------------------------------------------
-//  Propagator* CreateParameter(std::string ofType, std::string withName)
+//  Propagator* CreateParameter(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create Parameter objects -
@@ -138,13 +138,14 @@ Burn* Factory::CreateBurn(std::string ofType, std::string withName)
  * objects of type Parameter.
  */
 //------------------------------------------------------------------------------
-Parameter* Factory::CreateParameter(std::string ofType, std::string withName)
+Parameter* Factory::CreateParameter(const std::string &ofType,
+                                    const std::string &withName)
 {
    throw FactoryException("requested object must be of type Parameter");
 }
 
 //------------------------------------------------------------------------------
-//  ForceModel* CreateForceModel(std::string ofType, std::string withName)
+//  ForceModel* CreateForceModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  ForceModel objects -
@@ -161,14 +162,14 @@ Parameter* Factory::CreateParameter(std::string ofType, std::string withName)
  * objects of type  ForceModel.
  */
 //------------------------------------------------------------------------------
-ForceModel* Factory::CreateForceModel(std::string ofType,
-                                              std::string withName)
+ForceModel* Factory::CreateForceModel(const std::string &ofType,
+                                      const std::string &withName)
 {
    throw FactoryException("requested object must be of type ForceModel");
 }
 
 //------------------------------------------------------------------------------
-//  PhysicalModel* CreatePhysicalModel(std::string ofType, std::string withName)
+//  PhysicalModel* CreatePhysicalModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  PhysicalModel objects -
@@ -185,14 +186,14 @@ ForceModel* Factory::CreateForceModel(std::string ofType,
  * objects of type PhysicalModel.
  */
 //------------------------------------------------------------------------------
-PhysicalModel* Factory::CreatePhysicalModel(std::string ofType,
-                                                    std::string withName)
+PhysicalModel* Factory::CreatePhysicalModel(const std::string &ofType,
+                                            const std::string &withName)
 {
    throw FactoryException("requested object must be of type PhysicalModel");
 }
 
 //------------------------------------------------------------------------------
-//  PropSetup* CreatePropSetup(std::string ofType, std::string withName)
+//  PropSetup* CreatePropSetup(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  PropSetup objects -
@@ -209,15 +210,15 @@ PhysicalModel* Factory::CreatePhysicalModel(std::string ofType,
  * objects of type  PropSetup.
  */
 //------------------------------------------------------------------------------
-PropSetup* Factory::CreatePropSetup(std::string ofType,
-                                            std::string withName)
+PropSetup* Factory::CreatePropSetup(const std::string &ofType,
+                                    const std::string &withName)
 {
    throw FactoryException("requested object must be of type PropSetup");
 }
 
 //------------------------------------------------------------------------------
-//  CalculatedParameter* CreateCalculatedParameter(std::string ofType,
-//                                                 std::string withName)
+//  CalculatedParameter* CreateCalculatedParameter(const std::string &ofType,
+//                                                 const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  CalculatedParameter
@@ -236,16 +237,16 @@ PropSetup* Factory::CreatePropSetup(std::string ofType,
  */
 //------------------------------------------------------------------------------
 //CalculatedParameter* Factory::CreateCalculatedParameter(
-//                                                      std::string ofType,
-//                                                      std::string withName)
+//                                                      const std::string &ofType,
+//                                                      const std::string &withName)
 //{
 //   throw FactoryException(
    //                  "requested object must be of type CalculatedParameter");
 //}
 
 //------------------------------------------------------------------------------
-//  StopCondition* CreateStopCondition(std::string ofType,
-//                                     std::string withName)
+//  StopCondition* CreateStopCondition(const std::string &ofType,
+//                                     const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  StopCondition objects -
@@ -262,15 +263,15 @@ PropSetup* Factory::CreatePropSetup(std::string ofType,
  * objects of type  StopCondition.
  */
 //------------------------------------------------------------------------------
-StopCondition* Factory::CreateStopCondition(std::string ofType,
-                                                    std::string withName)
+StopCondition* Factory::CreateStopCondition(const std::string &ofType,
+                                            const std::string &withName)
 {
    throw FactoryException("requested object must be of type StopCondition");
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody* CreateCelestialBody(std::string ofType,
-//                                     std::string withName)
+//  CelestialBody* CreateCelestialBody(const std::string &ofType,
+//                                     const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  CelestialBody objects -
@@ -287,15 +288,15 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  * objects of type  CelestialBody.
  */
 //------------------------------------------------------------------------------
-CelestialBody* Factory::CreateCelestialBody(std::string ofType,
-                                                    std::string withName)
+CelestialBody* Factory::CreateCelestialBody(const std::string &ofType,
+                                            const std::string &withName)
 {
    throw FactoryException("requested object must be of type CelestialBody");
 }
 
 //------------------------------------------------------------------------------
-//  SolarSystem* CreateSolarSystem(std::string ofType,
-//                                 std::string withName)
+//  SolarSystem* CreateSolarSystem(const std::string &ofType,
+//                                 const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  SolarSystem objects -
@@ -312,15 +313,15 @@ CelestialBody* Factory::CreateCelestialBody(std::string ofType,
  * objects of type  SolarSystem.
  */
 //------------------------------------------------------------------------------
-SolarSystem* Factory::CreateSolarSystem(std::string ofType,
-                                                std::string withName)
+SolarSystem* Factory::CreateSolarSystem(const std::string &ofType,
+                                        const std::string &withName)
 {
    throw FactoryException("requested object must be of type SolarSystem");
 }
 
 //------------------------------------------------------------------------------
-//  Solver* CreateSolver(std::string ofType,
-//                       std::string withName)
+//  Solver* CreateSolver(const std::string &ofType,
+//                       const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create Solver objects -
@@ -337,15 +338,16 @@ SolarSystem* Factory::CreateSolarSystem(std::string ofType,
  * objects of type  Solver.
  */
 //------------------------------------------------------------------------------
-Solver* Factory::CreateSolver(std::string ofType,
-                                         std::string withName)
+Solver* Factory::CreateSolver(const std::string &ofType,
+                              const std::string &withName)
 {
    throw FactoryException("requested object must be of type Solver");
 }
 
 //------------------------------------------------------------------------------
-//  Subscriber* CreateSubscriber(std::string ofType,
-//                               std::string withName)
+//  Subscriber* CreateSubscriber(const std::string &ofType, 
+//                               const std::string &withName,
+//                               const std::string &fileName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  Subscriber objects -
@@ -355,6 +357,7 @@ Solver* Factory::CreateSolver(std::string ofType,
  *
  * @param <ofType>   specific type of  Subscriber object to create.
  * @param <withName> name to give to the newly created  Subscriber object.
+ * @param <fileName> file name if subscriber is ReportFile, ignored otherwise
  *
  * @return pointer to a new  Subscriber object.
  *
@@ -362,16 +365,16 @@ Solver* Factory::CreateSolver(std::string ofType,
  * objects of type  Subscriber.
  */
 //------------------------------------------------------------------------------
-Subscriber* Factory::CreateSubscriber(std::string ofType,
-                                      std::string withName,
-                                      std::string fileName)
+Subscriber* Factory::CreateSubscriber(const std::string &ofType,
+                                      const std::string &withName,
+                                      const std::string &fileName)
 {
    throw FactoryException("requested object must be of type Subscriber");
 }
 
 //------------------------------------------------------------------------------
-//  GmatCommand* CreateCommand(std::string ofType,
-//                         std::string withName)
+//  GmatCommand* CreateCommand(const std::string &ofType,
+//                             const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  Command objects -
@@ -388,10 +391,40 @@ Subscriber* Factory::CreateSubscriber(std::string ofType,
  * objects of type  GmatCommand.
  */
 //------------------------------------------------------------------------------
-GmatCommand* Factory::CreateCommand(std::string ofType,
-                                        std::string withName)
+GmatCommand* Factory::CreateCommand(const std::string &ofType,
+                                    const std::string &withName)
 {
    throw FactoryException("requested object must be of type GmatCommand");
+}
+
+//loj: 9/14/04 - added
+//------------------------------------------------------------------------------
+//  AtmosphereModel* CreateAtmosphereModel(const std::string &ofType,
+//                                         const std::string &withName,
+//                                         const std::string &forBody)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create  AtmosphereModel objects -
+ * in that case, it returns a new  AtmosphereModel object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type  AtmosphereModel.
+ *
+ * @param <ofType>   specific type of  AtmosphereModel object to create.
+ * @param <forBody>  body of specific type of AtmosphereModel object to create.
+ * @param <withName> name to give to the newly created  AtmosphereModel object.
+ *
+ * @return pointer to a new  AtmosphereModel object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type  AtmosphereModel.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* Factory::CreateAtmosphereModel(const std::string &ofType,
+                                                const std::string &withName,
+                                                const std::string &forBody)
+{
+   throw FactoryException
+      ("Factory::CreateAtmosphereModel() must be implemented by AtmosphereFactory()\n");
 }
 
 //------------------------------------------------------------------------------
