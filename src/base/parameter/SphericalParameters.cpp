@@ -46,7 +46,7 @@ SphRMag::SphRMag(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
    : OrbitReal(name, "RMAG", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ SphRA::SphRA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "RA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ SphDec::SphDec(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "DEC", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -374,7 +374,7 @@ SphVMag::SphVMag(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VMAG", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -483,7 +483,7 @@ SphRAV::SphRAV(const std::string &name, GmatBase *obj,
          const std::string &desc, const std::string &unit)
    : OrbitReal(name, "RAV", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -593,7 +593,7 @@ SphDecV::SphDecV(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
    : OrbitReal(name, "DECV", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -706,7 +706,7 @@ SphElem::SphElem(const std::string &name, GmatBase *obj,
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
 
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

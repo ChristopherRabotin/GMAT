@@ -19,9 +19,10 @@
 //------------------------------------------------------------------------------
 
 #include "OrbitReal.hpp"
+#include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_ORBITREAL 0
+//#define DEBUG_ORBITREAL 1
 
 //---------------------------------
 // public methods
@@ -49,7 +50,7 @@ OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr,
                      const std::string &unit, bool isTimeParam)
    : RealVar(name, typeStr, key, obj, desc, unit, isTimeParam)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -124,10 +125,9 @@ Real OrbitReal::EvaluateReal()
 }
 
 //-------------------------------------
-// Inherited methods from Parameter
+// Methods inherited from Parameter
 //-------------------------------------
 
-//loj: 6/24/04 added
 //------------------------------------------------------------------------------
 // virtual void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
@@ -139,66 +139,31 @@ void OrbitReal::SetSolarSystem(SolarSystem *ss)
 {
 #if DEBUG_ORBITREAL
    MessageInterface::ShowMessage
-      ("OrbitReal::SetSolarSystem() ss=%s", ss->GetTypeName().c_str());
+      ("OrbitReal::SetSolarSystem() ss=%s to %s\n", ss->GetTypeName().c_str(),
+       this->GetName().c_str());
 #endif
    
-   if (OrbitData::GetRefObject("SolarSystem") == NULL)
-      OrbitData::AddRefObject(ss);
+   if (OrbitData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
+      OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
    else
-      OrbitData::SetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName(), ss);
+      OrbitData::SetRefObject(ss, Gmat::SOLAR_SYSTEM, ss->GetName());
+   
 }
 
 //------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
+// virtual Integer GetNumRefObjects() const
 //------------------------------------------------------------------------------
 /**
  * @return number of reference objects set.
  */
 //------------------------------------------------------------------------------
-Integer OrbitReal::GetNumObjects() const
+Integer OrbitReal::GetNumRefObjects() const
 {
-   return GetNumRefObjects();
+   return OrbitData::GetNumRefObjects();
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-/**
- * @return reference object pointer of given object type
- */
-//------------------------------------------------------------------------------
-GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
-{
-   return OrbitData::GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @param <objType> object type
- * @param <objName> object name
- * @param <obj> object pointer
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
-                          GmatBase *obj)
-{
-   //Initialize(); //loj: 4/28/04 Initialize() will be called during run setup
-   //loj: 3/31/04 do not check for NULL so it can reset object
-   //if (obj != NULL) 
-   return OrbitData::SetRefObject(objType, objName, obj);
-   //else
-   //return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -208,17 +173,12 @@ bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool OrbitReal::AddObject(GmatBase *obj)
+bool OrbitReal::AddRefObject(GmatBase *obj)
 {
    if (obj != NULL)
-   {
-      if (AddRefObject(obj))
-         ManageObject(obj);
-
-      return true;
-   }
-
-   return false;
+      return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+   else
+      return false;
 }
 
 //------------------------------------------------------------------------------
@@ -247,5 +207,107 @@ bool OrbitReal::Validate()
 void OrbitReal::Initialize()
 {
    InitializeRefObjects();
+}
+
+//-------------------------------------
+// Methods inherited from GmatBase
+//-------------------------------------
+
+//loj: 9/10/04 added
+//------------------------------------------------------------------------------
+// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to get reference object name for given type.
+ *
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   std::string objName = OrbitData::GetRefObjectName(type);
+   
+   if (objName == "INVALID_OBJECT_TYPE")
+   {
+      throw ParameterException
+         ("OrbitReal::GetRefObjectName() " + GmatBase::GetObjectTypeString(type) +
+          " is not valid object type of " + this->GetTypeName() + "\n");
+   }
+   
+   return objName;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+//                               const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets reference object name to given object type.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ */
+//------------------------------------------------------------------------------
+bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   OrbitData::SetRefObjectName(type, name);
+}
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to get object pointer of given type and name
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return reference object pointer for given object type and name
+ */
+//------------------------------------------------------------------------------
+GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   GmatBase *obj = OrbitData::GetRefObject(type, name);
+   
+   if (obj == NULL)
+   {
+      throw ParameterException
+         ("OrbitReal::GetRefObject() Cannot find ref. object of type:" +
+          GmatBase::GetObjectTypeString(type) + ", name:" + name + "in " +
+          this->GetName());
+   }
+   
+   return obj;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to set reference object pointer to given type and name.
+ *
+ * @param <obj>  reference object pointer
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return true if object pointer is successfully set.
+ *
+ */
+//------------------------------------------------------------------------------
+bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name)
+{
+#if DEBUG_ORBITREAL
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetRefObject() setting type=%d, name=%s to %s\n",
+       type, name.c_str(), this->GetName().c_str());
+#endif
+   
+   return OrbitData::SetRefObject(obj, type, name);
 }
 

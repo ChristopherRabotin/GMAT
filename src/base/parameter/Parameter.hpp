@@ -58,37 +58,27 @@ public:
    virtual Rvector6 EvaluateRvector6();
    
    virtual const std::string* GetParameterList() const;
-
-   virtual StringArray& GetObjectTypeNames();
-   virtual StringArray& GetObjectNames();
-   virtual GmatBase* GetObject(const std::string &objTypeName);
-   //virtual GmatBase* GetObject(Gmat::ObjectType objType,
-   //                            const std::string &objName);
-   virtual bool SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj);
+  
+   virtual void SetSolarSystem(SolarSystem *ss);
    
-   virtual void SetSolarSystem(SolarSystem *ss); //loj: 6/24/04 added
+   //================== loj: 9/13/04 obsolete ===================
+   //virtual GmatBase* GetObject(const std::string &objTypeName);
+   //virtual bool SetObject(Gmat::ObjectType objType,
+   //                       const std::string &objName,
+   //                       GmatBase *obj);
+   //virtual bool AddObject(const std::string &name);
+   //============================================================
+
+   virtual void Initialize();
+   virtual bool Evaluate();
    
    // methods all SYSTEM_PARAM should implement
-   virtual bool AddObject(const std::string &name); //loj: 5/26/04 will be removed
-   virtual bool AddObject(GmatBase *object);
-   //virtual bool AddObject(const std::string &objType,
-   //                       const std::string &objName, GmatBase *object);
-   virtual Integer GetNumObjects() const;
-   virtual bool Evaluate();
+   virtual bool AddRefObject(GmatBase *object);
+   virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
-   virtual void Initialize();
+   
    
    // methods inherited from GmatBase
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual bool SetRefObjectName(const Gmat::ObjectType type,
-                                 const std::string &name);
-   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
-                                  const std::string &name);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                             const std::string &name = "");
-
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -107,9 +97,7 @@ public:
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
 protected:
-
-   void ManageObject(GmatBase *obj);
-    
+   
    static const std::string PARAMETER_KEY_STRING[KeyCount];
 
    ParameterKey  mKey;
@@ -117,18 +105,15 @@ protected:
    std::string   mUnit;
    std::string   mExpr;
    
-   UnsignedInt   mColor; //loj: 5/26/04 use UnsignedInt instead of string
+   UnsignedInt   mColor;
    
    bool mIsTimeParam;
-   bool mIsPlottable; //loj: 5/26/04 added
+   bool mIsPlottable;
    
-   StringArray mObjectTypeNames;
-   StringArray mObjectNames;
-   Integer mNumObjects;
-
    enum
    {
-      OBJECT = GmatBaseParamCount,
+      OBJECT = GmatBaseParamCount, //loj: this will be removed eventually
+      SPACECRAFT, //loj: 9/13/04 added
       EXPRESSION,
       DESCRIPTION,
       UNIT,

@@ -49,7 +49,7 @@ VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
     : OrbitReal(name, "VelApoapsis", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+    AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj,
                            const std::string &desc, const std::string &unit)
     : OrbitReal(name, "VelPeriapsis", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+    AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -277,7 +277,7 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj,
                    const std::string &desc, const std::string &unit)
     : OrbitReal(name, "Apoapsis", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+    AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -403,7 +403,7 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
 : OrbitReal(name, "Periapsis", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -525,9 +525,9 @@ GmatBase* Periapsis::Clone(void) const
 //------------------------------------------------------------------------------
 OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
-: OrbitReal(name, "OrbitPeriod", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "OrbitPeriod", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -540,7 +540,7 @@ OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj,
 */
 //------------------------------------------------------------------------------
 OrbitPeriod::OrbitPeriod(const OrbitPeriod &copy)
-: OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -557,7 +557,7 @@ const OrbitPeriod&
 OrbitPeriod::operator=(const OrbitPeriod &right)
 {
    if (this != &right)
-OrbitReal::operator=(right);
+      OrbitReal::operator=(right);
 
    return *this;
 }

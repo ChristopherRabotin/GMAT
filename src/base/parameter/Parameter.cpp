@@ -21,11 +21,7 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_PARAMETER 0
-
-#if !defined __UNIT_TEST__
-#include "Moderator.hpp"
-#endif
+//#define DEBUG_PARAMETER 1
 
 //---------------------------------
 // static data
@@ -41,6 +37,7 @@ const std::string
 Parameter::PARAMETER_TEXT[ParameterParamCount] =
 {
    "Object",       //loj: 4/23/04 this will be removed later (need for current script)
+   "Spacecraft",
    "Expression",
    "Description",
    "Unit",
@@ -50,6 +47,7 @@ Parameter::PARAMETER_TEXT[ParameterParamCount] =
 const Gmat::ParameterType
 Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -349,130 +347,11 @@ const std::string* Parameter::GetParameterList() const
 }
 
 //------------------------------------------------------------------------------
-// StringArray& GetObjectTypeNames()
-//------------------------------------------------------------------------------
-StringArray& Parameter::GetObjectTypeNames()
-{
-   return mObjectTypeNames;
-}
-
-//------------------------------------------------------------------------------
-// StringArray& GetObjectNames()
-//------------------------------------------------------------------------------
-StringArray& Parameter::GetObjectNames()
-{
-   return mObjectNames;
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* Parameter::GetObject(const std::string &objTypeName)
-{
-   return NULL;
-}
-
-//------------------------------------------------------------------------------
-// bool SetObject(Gmat::ObjectType objType,
-//                const std::string &objName, GmatBase *obj)
-//------------------------------------------------------------------------------
-bool Parameter::SetObject(Gmat::ObjectType objType,
-                          const std::string &objName, GmatBase *obj)
-{
-   return false;
-}
-
-//loj: 6/24/04 added
-//------------------------------------------------------------------------------
 // void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void Parameter::SetSolarSystem(SolarSystem *ss)
 {
    ; // do nothing here
-}
-
-//------------------------------------------------------------------------------
-// bool AddObject(const std::string &name)
-//------------------------------------------------------------------------------
-bool Parameter::AddObject(const std::string &name)
-{
-   bool status = false;
-
-#if !defined __UNIT_TEST__
-    
-   Moderator *theModerator = Moderator::Instance();
-    
-   //MessageInterface::ShowMessage("Parameter::AddObject entered: "
-   //                              "name = %s typename = %s\n", name.c_str());
-                                    
-   if (name != "")
-   {
-      //loj: should check name first to see if it's already added - do this later
-        
-      GmatBase *obj = theModerator->GetConfiguredItem(name);
-      if (obj != NULL)
-      {
-         //mObjectNames.push_back(name);
-         //mObjectTypeNames.push_back(obj->GetTypeName());
-         //mNumObjects = mObjectNames.size();
-         AddObject(obj);
-         status = true;
-      }
-   }
-#endif
-   return status;
-}
-
-//------------------------------------------
-// methods All SYSTEM_PARAM should implement
-//------------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *object)
-//------------------------------------------------------------------------------
-bool Parameter::AddObject(GmatBase *object)
-{
-   if (mKey == SYSTEM_PARAM)
-      throw ParameterException("Parameter: AddObject() should be implemented "
-                               "for Parameter Type:" + GetTypeName());
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-Integer Parameter::GetNumObjects() const
-{
-   if (mKey == SYSTEM_PARAM)
-      throw ParameterException("Parameter: GetNumObjects() should be implemented"
-                               "for Parameter Type: " + GetTypeName());
-
-   return 0;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-bool Parameter::Evaluate()
-{
-   if (mKey == SYSTEM_PARAM)
-      throw ParameterException("Parameter: Evaluate() should be implemented "
-                               "for Parameter Type: " + GetTypeName());
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-bool Parameter::Validate()
-{
-   if (mKey == SYSTEM_PARAM)
-      throw ParameterException("Parameter: Validate() should be implemented "
-                               "for Parameter Type: " + GetTypeName());
-
-   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -485,47 +364,62 @@ void Parameter::Initialize()
    //                            "for Parameter Type: " + GetTypeName());
 }
 
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+bool Parameter::Evaluate()
+{
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: Evaluate() should be implemented "
+                               "for Parameter Type: " + GetTypeName() + "\n");
+
+   return false;
+}
+
+//------------------------------------------
+// methods All SYSTEM_PARAM should implement
+//------------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool AddRefObject(GmatBase *object)
+//------------------------------------------------------------------------------
+bool Parameter::AddRefObject(GmatBase *object)
+{
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: AddObject() should be implemented "
+                               "for Parameter Type:" + GetTypeName() + "\n");
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual Integer GetNumRefObjects() const
+//------------------------------------------------------------------------------
+Integer Parameter::GetNumRefObjects() const
+{
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: GetNumRefObjects() should be implemented"
+                               "for Parameter Type: " + GetTypeName() + "\n");
+
+   return 0;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool Validate()
+//------------------------------------------------------------------------------
+bool Parameter::Validate()
+{
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: Validate() should be implemented "
+                               "for Parameter Type: " + GetTypeName() + "\n");
+
+   return false;
+}
+
+
 //---------------------------------
 // methods inherited from GmatBase
 //---------------------------------
-
-//------------------------------------------------------------------------------
-// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
-//------------------------------------------------------------------------------
-std::string Parameter::GetRefObjectName(const Gmat::ObjectType type) const
-{
-   return "UNDEFINED_REF_OBJECT";
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetRefObjectName(const Gmat::ObjectType type,
-//                               const std::string &name)
-//------------------------------------------------------------------------------
-bool Parameter::SetRefObjectName(const Gmat::ObjectType type,
-                                 const std::string &name)
-{
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
-//                                const std::string &name)
-//------------------------------------------------------------------------------
-GmatBase* Parameter::GetRefObject(const Gmat::ObjectType type,
-                                  const std::string &name)
-{
-   return NULL;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                           const std::string &name = "")
-//------------------------------------------------------------------------------
-bool Parameter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                             const std::string &name)
-{
-   return false;
-}
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -643,11 +537,13 @@ std::string Parameter::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case OBJECT: //loj: return first object name for now
-      if (mNumObjects > 0)
-         return mObjectNames[0];
+   case OBJECT: //loj: 9/13/04 return first object name of spacecraft
+      if (GetNumRefObjects() > 0)
+         return GetRefObjectName(Gmat::SPACECRAFT);
       else
          return GmatBase::GetStringParameter(id);
+   case SPACECRAFT: //loj: 9/13/04 dded
+      return GetRefObjectName(Gmat::SPACECRAFT);
    case EXPRESSION:
       return mExpr;
    case DESCRIPTION:
@@ -674,8 +570,10 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
    switch (id)
    {
-   case OBJECT:
-      return AddObject(value);
+   case OBJECT: //loj: 9/13/04 only spacecraft is allowed for now
+      return SetRefObjectName(Gmat::SPACECRAFT, value);
+   case SPACECRAFT: //loj: 9/13/04 added
+      return SetRefObjectName(Gmat::SPACECRAFT, value);
    case EXPRESSION:
       mExpr = value;
       return true;
@@ -697,24 +595,15 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 bool Parameter::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-   //      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
-   //                                    "label = " + label + ", value = " + value + "\n");
+#if DEBUG_PARAMETER
+   MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
+                                 "label = " + label + ", value = " + value + "\n");
+#endif
+   
    return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------
 // protected methods
 //---------------------------------
-
-//------------------------------------------------------------------------------
-// void Parameter::ManageObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-void Parameter::ManageObject(GmatBase *obj)
-{
-   mObjectNames.push_back(obj->GetName());
-   mObjectTypeNames.push_back(obj->GetTypeName());
-   mNumObjects = mObjectNames.size();
-   //MessageInterface::ShowMessage("Parameter::ManageObject() param name = %s mNumObjects = %d\n",
-   //                              obj->GetName().c_str(), mNumObjects);
-}
 

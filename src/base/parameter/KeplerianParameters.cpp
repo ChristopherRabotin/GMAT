@@ -44,7 +44,7 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "SMA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "ECC", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ KepInc::KepInc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "INC", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "AOP", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -485,7 +485,7 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
    : OrbitReal(name, "RAAN", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -595,7 +595,7 @@ KepTA::KepTA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "TA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -705,7 +705,7 @@ KepMA::KepMA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "MA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -815,7 +815,7 @@ KepMM::KepMM(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "MM", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -930,7 +930,7 @@ KepElem::KepElem(const std::string &name, GmatBase *obj,
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
    
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

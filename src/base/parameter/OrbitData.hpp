@@ -44,7 +44,7 @@ public:
    Real GetOtherKepReal(const std::string &str);
    Real GetSphReal(const std::string &str);
    Real GetAngularReal(const std::string &str);
-    
+   
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
@@ -56,7 +56,8 @@ protected:
     
    // The inherited methods from RefData
    virtual void InitializeRefObjects();
-   virtual bool IsValidObject(GmatBase *obj);
+   //loj: 9/10/04 virtual bool IsValidObject(GmatBase *obj);
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
 
    Rvector6 mCartState;
    Rvector6 mKepState;

@@ -50,7 +50,7 @@ CartX::CartX(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "X", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::RED32; //loj: 7/13/04 changed from BLUE32
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ CartY::CartY(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "Y", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::GREEN32;
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -272,7 +272,7 @@ CartZ::CartZ(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "Z", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::BLUE32;
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -383,7 +383,7 @@ CartVx::CartVx(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "VX", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::RED32;
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -493,7 +493,7 @@ CartVy::CartVy(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "VY", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::GREEN32;
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -604,7 +604,7 @@ CartVz::CartVz(const std::string &name, GmatBase *obj,
    : OrbitReal(name, "VZ", SYSTEM_PARAM, obj, desc, unit, false)
 {
    mColor = GmatColor::BLUE32;
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -718,7 +718,7 @@ CartState::CartState(const std::string &name, GmatBase *obj,
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
    
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

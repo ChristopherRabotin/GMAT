@@ -36,20 +36,25 @@ public:
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();
 
-   // The inherited methods from RealVar
+   // methods inherited from RealVar
    virtual Real GetReal();
    virtual Real EvaluateReal();
 
-   // The inherited methods from Parameter
+   // methods inherited from Parameter
+   virtual Integer GetNumRefObjects() const;
    virtual void SetSolarSystem(SolarSystem *ss); //loj: 6/24/04 added
-   virtual Integer GetNumObjects() const;
-   virtual GmatBase* GetObject(const std::string &objTypeName);
-   virtual bool SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj);
-   virtual bool AddObject(GmatBase *obj);
+   virtual bool AddRefObject(GmatBase*obj);
    virtual bool Validate();
    virtual void Initialize();
+   
+   // methods inherited from GmatBase //loj: 9/10/04 added
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name);
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
 
 protected:
 

@@ -27,6 +27,7 @@
 //---------------------------------
 // static data
 //---------------------------------
+
 const std::string
 TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 {
@@ -252,7 +253,7 @@ void TimeData::InitializeRefObjects()
 {
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
-      throw ParameterException("OrbitData::InitializeRefObjects() Cannot find Spacecraft object");
+      throw ParameterException("TimeData::InitializeRefObjects() Cannot find Spacecraft object");
    else
       if (!mIsInitialEpochSet)
       {
@@ -264,33 +265,54 @@ void TimeData::InitializeRefObjects()
 }
 
 //------------------------------------------------------------------------------
-// bool IsValidObject(GmatBase *obj)
+// virtual bool IsValidObjectType(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
+ *
+ * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool TimeData::IsValidObject(GmatBase *obj)
+bool TimeData::IsValidObjectType(Gmat::ObjectType type)
 {
-   bool valid = false;
-    
-   // check for object type if not NULL
-   if (obj != NULL)
+   for (int i=0; i<TimeDataObjectCount; i++)
    {
-      for (int i=0; i<TimeDataObjectCount; i++)
-      {
-         if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
-         {
-            valid = true;
-            break;
-         }
-      }
+      if (GmatBase::GetObjectTypeString(type) == VALID_OBJECT_TYPE_LIST[i])
+         return true;
    }
-   else
-   {
-      valid = false;
-   }
+   
+   return false;
 
-   return valid;
 }
+
+//  //------------------------------------------------------------------------------
+//  // bool IsValidObject(GmatBase *obj)
+//  //------------------------------------------------------------------------------
+//  /**
+//   * Checks reference object type.
+//   */
+//  //------------------------------------------------------------------------------
+//  bool TimeData::IsValidObject(GmatBase *obj)
+//  {
+//     bool valid = false;
+    
+//     // check for object type if not NULL
+//     if (obj != NULL)
+//     {
+//        for (int i=0; i<TimeDataObjectCount; i++)
+//        {
+//           if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
+//           {
+//              valid = true;
+//              break;
+//           }
+//        }
+//     }
+//     else
+//     {
+//        valid = false;
+//     }
+
+//     return valid;
+//  }
 

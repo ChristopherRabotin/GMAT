@@ -18,10 +18,9 @@
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "RefData.hpp"
-#include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_REFDATA_OBJECT 0
+//#define DEBUG_REFDATA_OBJECT 1
 
 //---------------------------------
 // public methods
@@ -36,27 +35,42 @@
 //------------------------------------------------------------------------------
 RefData::RefData()
 {
+   for (int i=0; i<MAX_OBJ_COUNT; i++)
+   {
+      mRefObjList[i].objType = Gmat::UNKNOWN_OBJECT;
+      mRefObjList[i].objName = "";
+      mRefObjList[i].obj = NULL;
+   }
+
    mNumRefObjects = 0;
-   mObjTypeObjMap = new std::map<std::string, GmatBase*>;
+   //loj: 9/10/04 old:
+   //mObjTypeObjMap = new std::map<std::string, GmatBase*>;
 }
 
 //------------------------------------------------------------------------------
-// RefData(const RefData &data)
+// RefData(const RefData &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <data> the RefData object being copied.
+ * @param <copy> the RefData object being copied.
  */
 //------------------------------------------------------------------------------
-RefData::RefData(const RefData &data)
+RefData::RefData(const RefData &copy)
 {
-   mNumRefObjects = data.mNumRefObjects;
-   mObjTypeObjMap = data.mObjTypeObjMap;
+   for (int i=0; i<MAX_OBJ_COUNT; i++)
+   {
+      mRefObjList[i].objType = copy.mRefObjList[i].objType;
+      mRefObjList[i].objName = copy.mRefObjList[i].objName;
+      mRefObjList[i].obj = NULL;
+   }
+   
+   mNumRefObjects = copy.mNumRefObjects;
+   //loj: 9/10/04 old:mObjTypeObjMap = copy.mObjTypeObjMap;
 }
 
 //------------------------------------------------------------------------------
-// RefData& operator= (const RefData& right)
+// RefData& operator= (const RefData &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -68,8 +82,15 @@ RefData::RefData(const RefData &data)
 //------------------------------------------------------------------------------
 RefData& RefData::operator= (const RefData& right)
 {
+   for (int i=0; i<MAX_OBJ_COUNT; i++)
+   {
+      mRefObjList[i].objType = right.mRefObjList[i].objType;
+      mRefObjList[i].objName = right.mRefObjList[i].objName;
+      mRefObjList[i].obj = NULL;
+   }
+   
    mNumRefObjects = right.mNumRefObjects;
-   mObjTypeObjMap = right.mObjTypeObjMap;
+   //loj: 9/10/04 old:mObjTypeObjMap = right.mObjTypeObjMap;
    return *this;
 }
 
@@ -82,7 +103,7 @@ RefData& RefData::operator= (const RefData& right)
 //------------------------------------------------------------------------------
 RefData::~RefData()
 {
-   delete mObjTypeObjMap;
+   //loj: 9/10/04 old:delete mObjTypeObjMap;
 }
 
 //------------------------------------------------------------------------------
@@ -94,16 +115,73 @@ Integer RefData::GetNumRefObjects() const
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const std::string &objType)
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
-GmatBase* RefData::GetRefObject(const std::string &objType)
+std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   return FindFirstObject(objType);
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObjectName() type=%d\n", type);
+#endif
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      if (mRefObjList[i].objType == type)
+      {
+         //loj:
+         //Notes: will return first object name.
+         //       How do we handle multiple objects with same type?
+         return mRefObjList[i].objName; 
+      }
+   }
+
+   return "INVALID_OBJECT_TYPE";
 }
 
 //------------------------------------------------------------------------------
-// bool SetRefObject(Gmat::ObjectType objType, const std::string &objName,
-//                   GmatBase *obj)
+// bool SetRefObjectName(Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Adds type and name to reference object list.
+ *
+ * @param <type> reference object type
+ * @param <name> reference object name
+ *
+ * @return true if type and name has successfully added to the list
+ *
+ */
+//------------------------------------------------------------------------------
+bool RefData::SetRefObjectName(Gmat::ObjectType type,
+                               const std::string &name)
+{
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::SetRefObjectName() type=%d, name=%s\n", type, name.c_str());
+#endif
+   return AddRefObject(type, name);
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                        const std::string &name);
+//------------------------------------------------------------------------------
+GmatBase* RefData::GetRefObject(const Gmat::ObjectType type,
+                                const std::string &name)
+{
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      if (mRefObjList[i].objType == type)
+      {
+         if (mRefObjList[i].objName == name)
+            return mRefObjList[i].obj; 
+      }
+   }
+
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name = "");
 //------------------------------------------------------------------------------
 /**
  * Sets object which is used in evaluation.
@@ -111,79 +189,37 @@ GmatBase* RefData::GetRefObject(const std::string &objType)
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool RefData::SetRefObject(Gmat::ObjectType objType,
-                           const std::string &objName, GmatBase *obj)
+bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                           const std::string &name)
 {
-   bool status = false;
-
 #if DEBUG_REFDATA_OBJECT
-   MessageInterface::ShowMessage("RefData::SetRefObject() objName=%s\n", objName.c_str());
+   MessageInterface::ShowMessage
+      ("RefData::SetRefObject() numRefObjects=%d, type=%d, name=%s\n",
+       mNumRefObjects, type, name.c_str());
 #endif
    
-   if (obj->GetType() == objType)
+   for (int i=0; i<mNumRefObjects; i++)
    {
-
-      std::string objTypeName = obj->GetTypeName();
-
-      std::map<std::string, GmatBase*>::iterator pos;
-      pos = mObjTypeObjMap->find(objTypeName);
-      if (pos != mObjTypeObjMap->end())
+      if (mRefObjList[i].objType == type)
       {
-         pos->second = obj;
-         status = true;
-
+         if (mRefObjList[i].objName == name)
+         {
+            mRefObjList[i].obj = obj;
 #if DEBUG_REFDATA_OBJECT
-         MessageInterface::ShowMessage("RefData::SetRefObject() obj set to %s\n",
-                                       obj->GetName().c_str());
+            MessageInterface::ShowMessage
+               ("RefData::SetRefObject() obj set to %s\n",
+                obj->GetName().c_str());
 #endif
+            return true;
+         }
       }
    }
-    
-   return status;
-}
 
-
-//------------------------------------------------------------------------------
-// bool AddRefObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds object which is used in evaluation.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool RefData::AddRefObject(GmatBase*obj)
-{
-   bool added;
-   
 #if DEBUG_REFDATA_OBJECT
-   MessageInterface::ShowMessage("RefData::AddRefObject() objType=%s, objName=%s\n",
-                                 obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("RefData::SetRefObject() Cannot find type=%d, name=%s\n", type, name.c_str());
 #endif
-   
-   if (IsValidObject(obj))
-   {
-      std::string objTypeName = obj->GetTypeName();
-      if (HasObjectType(objTypeName))
-      {
-         added = false;
-      }
-      else
-      {
-         mObjTypeObjMap->insert(std::pair<std::string, GmatBase*>(objTypeName, obj));
-         mNumRefObjects = mObjTypeObjMap->size();
-         added = true;
-#if DEBUG_REFDATA_OBJECT
-         MessageInterface::ShowMessage("RefData::AddRefObject() object added\n");
-#endif
-      }
-   }
-   else
-   {
-      added = false;
-   }
-
-   return added;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -199,6 +235,38 @@ const std::string* RefData::GetValidObjectList() const
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// bool AddRefObject(const Gmat::ObjectType type,
+//                   const std::string &name, GmatBase *obj = NULL)
+//------------------------------------------------------------------------------
+/**
+ * Adds object which is used in evaluation.
+ *
+ * @return true if the object has been added.
+ */
+//------------------------------------------------------------------------------
+bool RefData::AddRefObject(const Gmat::ObjectType type,
+                           const std::string &name, GmatBase *obj)
+{
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::AddRefObject() type=%d, name=%s\n", type, name.c_str());
+#endif
+   if (IsValidObjectType(type))
+   {
+      if (mNumRefObjects < MAX_OBJ_COUNT)
+      {
+         mRefObjList[mNumRefObjects].objType = type;
+         mRefObjList[mNumRefObjects].objName = name;
+         mRefObjList[mNumRefObjects].obj = obj;
+         mNumRefObjects++;
+         return true;
+      }
+   }
+
+   return false;
+}
+
+//------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
 void RefData::InitializeRefObjects()
@@ -206,49 +274,68 @@ void RefData::InitializeRefObjects()
 }
 
 //------------------------------------------------------------------------------
-// bool HasObjectType(const std::string &objType) const
+// bool HasObjectType(const std::string &type) const
 //------------------------------------------------------------------------------
 /**
- * @return true if the map has the object, false otherwise
+ * @return true if it has the given object type, false otherwise
  */
 //------------------------------------------------------------------------------
-bool RefData::HasObjectType(const std::string &objType) const
+bool RefData::HasObjectType(const std::string &type) const
 {
-   bool found = false;
-   std::map<std::string, GmatBase*>::iterator pos;
+
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      if (GmatBase::GetObjectTypeString(mRefObjList[i].objType) == type)
+         return true;
+   }
+
+   return false;
    
-   pos = mObjTypeObjMap->find(objType);
+   //loj: 9/10/04 old code
+   //bool found = false;
+   //std::map<std::string, GmatBase*>::iterator pos;
    
-   if (pos != mObjTypeObjMap->end())
-      found = true;
+   //pos = mObjTypeObjMap->find(objType);
    
-   return found;
+   //if (pos != mObjTypeObjMap->end())
+   //   found = true;
+   
+   //return found;
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* FindFirstObject(const std::string &objType) const
+// GmatBase* FindFirstObject(const std::string &type) const
 //------------------------------------------------------------------------------
 /**
  * @return forst object found for given type name.
  */
 //------------------------------------------------------------------------------
-GmatBase* RefData::FindFirstObject(const std::string &objType) const
+GmatBase* RefData::FindFirstObject(const std::string &type) const
 {
-   std::map<std::string, GmatBase*>::iterator pos;
    
-   pos = mObjTypeObjMap->find(objType);
-   
-   if (pos != mObjTypeObjMap->end())
+   for (int i=0; i<mNumRefObjects; i++)
    {
-#if DEBUG_REFDATA_OBJECT
-      MessageInterface::ShowMessage
-         ("RefData::FindFirstObject(): objType=%s "
-          "objName=%s\n", (pos->second->GetTypeName()).c_str(),
-          (pos->second->GetName()).c_str());
-#endif
-      return pos->second;
+      if (GmatBase::GetObjectTypeString(mRefObjList[i].objType) == type)
+         return mRefObjList[i].obj;
    }
-   
+
    return NULL;
+   
+//     std::map<std::string, GmatBase*>::iterator pos;
+   
+//     pos = mObjTypeObjMap->find(type);
+   
+//     if (pos != mObjTypeObjMap->end())
+//     {
+//  #if DEBUG_REFDATA_OBJECT
+//        MessageInterface::ShowMessage
+//           ("RefData::FindFirstObject(): type=%s "
+//            "objName=%s\n", (pos->second->GetTypeName()).c_str(),
+//            (pos->second->GetName()).c_str());
+//  #endif
+//        return pos->second;
+//     }
+   
+//     return NULL;
 }
 

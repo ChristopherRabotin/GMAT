@@ -36,23 +36,27 @@ public:
    TimeReal& operator=(const TimeReal &right);
    virtual ~TimeReal();
 
-   // The inherited methods from RealVar
+   // methods inherited from RealVar
    virtual Real GetReal();
    virtual Real EvaluateReal();
 
-   // The inherited methods from Parameter
-   virtual Integer GetNumObjects() const;
-   virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-   virtual bool SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj);
-    
-   virtual bool AddObject(GmatBase *obj);
+   // methods inherited from Parameter
+   virtual Integer GetNumRefObjects() const;
    virtual bool Validate();
    virtual void Initialize();
-
+   virtual bool AddRefObject(GmatBase *obj);
+   
+   
+   // methods inherited from GmatBase //loj: 9/10/04 added
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name);
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
 protected:
+   
 
 };
 

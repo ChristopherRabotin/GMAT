@@ -49,7 +49,7 @@ OrbitRvec6::OrbitRvec6(const std::string &name, const std::string &typeStr,
                        const std::string &unit, bool isTimeParam)
    : Rvec6Var(name, typeStr, key, obj, desc, unit, isTimeParam)
 {
-   AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ OrbitRvec6::~OrbitRvec6()
 }
 
 //-------------------------------------
-// Inherited methods from Rvec6Var
+// methods inherited from Rvec6Var
 //-------------------------------------
 
 //------------------------------------------------------------------------------
@@ -124,8 +124,20 @@ Rvector6 OrbitRvec6::EvaluateRvector6()
 }
 
 //-------------------------------------
-// Inherited methods from Parameter
+// methods nherited from Parameter
 //-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual Integer GetNumRefObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer OrbitRvec6::GetNumRefObjects() const
+{
+   return OrbitData::GetNumRefObjects();
+}
 
 //------------------------------------------------------------------------------
 // virtual void SetSolarSystem(SolarSystem *ss)
@@ -141,58 +153,52 @@ void OrbitRvec6::SetSolarSystem(SolarSystem *ss)
       ("OrbitRvec6::SetSolarSystem() ss=%s", ss->GetTypeName().c_str());
 #endif
    
-   if (OrbitData::GetRefObject("SolarSystem") == NULL)
-      OrbitData::AddRefObject(ss);
+   if (OrbitData::GetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName()) == NULL)
+      OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
    else
-      OrbitData::SetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName(), ss);
+      OrbitData::SetRefObject(ss, Gmat::SOLAR_SYSTEM, ss->GetName());
+
+   //loj: 9/10/04
+//     if (OrbitData::GetRefObject("SolarSystem") == NULL)
+//        OrbitData::AddRefObject(ss);
+//     else
+//        OrbitData::SetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName(), ss);
 }
 
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer OrbitRvec6::GetNumObjects() const
-{
-   return GetNumRefObjects();
-}
+//  //------------------------------------------------------------------------------
+//  // GmatBase* GetObject(const std::string &objTypeName)
+//  //------------------------------------------------------------------------------
+//  /**
+//   * @return reference object pointer of given object type
+//   */
+//  //------------------------------------------------------------------------------
+//  GmatBase* OrbitRvec6::GetObject(const std::string &objTypeName)
+//  {
+//     return OrbitData::GetRefObject(objTypeName);
+//  }
+
+//  //------------------------------------------------------------------------------
+//  // virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
+//  //                        GmatBase *obj
+//  //------------------------------------------------------------------------------
+//  /**
+//   * Sets reference object.
+//   *
+//   * @param <objType> object type
+//   * @param <objName> object name
+//   * @param <obj> object pointer
+//   *
+//   * @return true if the object has been set.
+//   */
+//  //------------------------------------------------------------------------------
+//  bool OrbitRvec6::SetObject(Gmat::ObjectType objType, const std::string &objName,
+//                            GmatBase *obj)
+//  {
+//     return OrbitData::SetRefObject(objType, objName, obj);
+//  }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-/**
- * @return reference object pointer of given object type
- */
-//------------------------------------------------------------------------------
-GmatBase* OrbitRvec6::GetObject(const std::string &objTypeName)
-{
-   return OrbitData::GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @param <objType> object type
- * @param <objName> object name
- * @param <obj> object pointer
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool OrbitRvec6::SetObject(Gmat::ObjectType objType, const std::string &objName,
-                          GmatBase *obj)
-{
-   return OrbitData::SetRefObject(objType, objName, obj);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
+// virtual bool AddRefObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference object.
@@ -202,17 +208,12 @@ bool OrbitRvec6::SetObject(Gmat::ObjectType objType, const std::string &objName,
  * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
-bool OrbitRvec6::AddObject(GmatBase *obj)
+bool OrbitRvec6::AddRefObject(GmatBase *obj)
 {
    if (obj != NULL)
-   {
-      if (AddRefObject(obj))
-         ManageObject(obj);
-
-      return true;
-   }
-
-   return false;
+      return OrbitData::AddRefObject(obj->GetType(), obj->GetName(), obj);
+   else
+      return false;
 }
 
 //------------------------------------------------------------------------------
@@ -241,5 +242,83 @@ bool OrbitRvec6::Validate()
 void OrbitRvec6::Initialize()
 {
    InitializeRefObjects();
+}
+
+//-------------------------------------
+// Methods inherited from GmatBase
+//-------------------------------------
+
+//loj: 9/10/04 added
+
+//------------------------------------------------------------------------------
+// virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to get reference object name for given type.
+ *
+ * @return reference object name.
+ */
+//------------------------------------------------------------------------------
+std::string OrbitRvec6::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   return OrbitData::GetRefObjectName(type);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObjectName(const Gmat::ObjectType type,
+//                               const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets reference object name to given object type.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ */
+//------------------------------------------------------------------------------
+bool OrbitRvec6::SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   OrbitData::SetRefObjectName(type, name);
+}
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to get object pointer of given type and name
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return reference object pointer for given object type and name
+ */
+//------------------------------------------------------------------------------
+GmatBase* OrbitRvec6::GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   return OrbitData::GetRefObject(type, name);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Calls OrbitData to set reference object pointer to given type and name.
+ *
+ * @param <obj>  reference object pointer
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return true if object pointer is successfully set.
+ *
+ */
+//------------------------------------------------------------------------------
+bool OrbitRvec6::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name)
+{
+   return OrbitData::SetRefObject(obj, type, name);
 }
 

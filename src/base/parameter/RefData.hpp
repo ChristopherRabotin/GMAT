@@ -28,31 +28,47 @@ class GMAT_API RefData
 public:
 
    RefData();
-   RefData(const RefData &data);
-   RefData& operator= (const RefData& right);
+   RefData(const RefData &copy);
+   RefData& operator= (const RefData &right);
    virtual ~RefData();
 
    Integer GetNumRefObjects() const;
-   virtual GmatBase* GetRefObject(const std::string &objType);
-    
-   virtual bool SetRefObject(Gmat::ObjectType objType,
-                             const std::string &objName,
-                             GmatBase *obj);
-    
-   bool AddRefObject(GmatBase *obj);
-
+   
+   std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   bool SetRefObjectName(const Gmat::ObjectType type,
+                         const std::string &name);
+   GmatBase* GetRefObject(const Gmat::ObjectType type,
+                          const std::string &name);
+   bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                     const std::string &name = "");
+   
    virtual bool ValidateRefObjects(GmatBase *param) = 0;
    virtual const std::string* GetValidObjectList() const;
 
 protected:
-   bool HasObjectType(const std::string &objType) const;
-   GmatBase* FindFirstObject(const std::string &objType) const; //loj: 4/27/04 added
-     
-   virtual void InitializeRefObjects(); //loj: 3/31/04 added
-   virtual bool IsValidObject(GmatBase *obj) = 0;
-   std::map<std::string, GmatBase*> *mObjTypeObjMap;
+
+   static const int MAX_OBJ_COUNT = 10;
+   
+   struct RefObjType
+   {
+      Gmat::ObjectType objType;
+      std::string objName;
+      GmatBase *obj;
+   };
+
+   RefObjType mRefObjList[MAX_OBJ_COUNT];
+   
    StringArray mObjectTypeNames;
    Integer mNumRefObjects;
+   
+   bool AddRefObject(const Gmat::ObjectType type,
+                     const std::string &name, GmatBase *obj = NULL);
+
+   bool HasObjectType(const std::string &type) const;
+   GmatBase* FindFirstObject(const std::string &type) const;
+   
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type) = 0;
 };
 #endif // RefData_hpp
 

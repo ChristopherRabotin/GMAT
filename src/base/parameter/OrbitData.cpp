@@ -370,7 +370,7 @@ Real OrbitData::GetKepReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherKepReal(const std::string &str)
 {
-    
+
    //if (mSpacecraft == NULL || mSolarSystem == NULL)
    //   InitializeRefObjects();
    
@@ -552,26 +552,29 @@ void OrbitData::InitializeRefObjects()
 {
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
-      throw ParameterException("OrbitData::InitializeRefObjects() Cannot find Spacecraft object");
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object.\n"
+          "Make sure Spacecraft is set to any unnamed parameters\n");
    
    mSolarSystem = (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);
    if (mSolarSystem == NULL)
-      throw ParameterException("OrbitData::InitializeRefObjects() Cannot find SolarSystem object");
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
    Integer id = mSpacecraft->GetParameterID("ReferenceBody");
    std::string bodyName = mSpacecraft->GetStringParameter(id);
    CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
-            
+   
    if (!centralBody)
       throw ParameterException("OrbitData::GetCartState() Body not found in the "
-                               "SolarSystem: " + bodyName);
+                               "SolarSystem: " + bodyName + "\n");
 
    //assume gravitational constant doesn't change through the mission run
    mGravConst = centralBody->GetGravitationalConstant();
 }
 
 //------------------------------------------------------------------------------
-// virtual bool IsValidObject(GmatBase *obj)
+// virtual bool IsValidObjectType(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
@@ -579,28 +582,50 @@ void OrbitData::InitializeRefObjects()
  * @return return true if object is valid object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitData::IsValidObject(GmatBase *obj)
+bool OrbitData::IsValidObjectType(Gmat::ObjectType type)
 {
-   bool valid = false;
-    
-   // check for object type if not NULL
-   if (obj != NULL)
-   {      
-      for (int i=0; i<OrbitDataObjectCount; i++)
-      {
-         if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
-         {
-            valid = true;
-            break;
-         }
-      }
-   }
-   else
+   for (int i=0; i<OrbitDataObjectCount; i++)
    {
-      valid = false;
+      if (GmatBase::GetObjectTypeString(type) == VALID_OBJECT_TYPE_LIST[i])
+         return true;
    }
-
-   return valid;
+   
+   return false;
 
 }
+
+//  //------------------------------------------------------------------------------
+//  // virtual bool IsValidObject(GmatBase *obj)
+//  //------------------------------------------------------------------------------
+//  /**
+//   * Checks reference object type.
+//   *
+//   * @return return true if object is valid object, false otherwise
+//   */
+//  //------------------------------------------------------------------------------
+//  bool OrbitData::IsValidObject(GmatBase *obj)
+//  {
+//     bool valid = false;
+    
+//     // check for object type if not NULL
+//     if (obj != NULL)
+//     {      
+//        for (int i=0; i<OrbitDataObjectCount; i++)
+//        {
+//           if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
+//           {
+//              valid = true;
+//              break;
+//           }
+//        }
+//     }
+//     else
+//     {
+//        valid = false;
+//     }
+
+//     return valid;
+
+//  }
+
 

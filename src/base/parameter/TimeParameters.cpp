@@ -38,9 +38,9 @@
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
-    : TimeReal(name, "CurrA1MJD", SYSTEM_PARAM, obj, desc, unit, true)
+   : TimeReal(name, "CurrA1MJD", SYSTEM_PARAM, obj, desc, unit, true)
 {
-    AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const CurrA1MJD &param)
-    : TimeReal(param)
+   : TimeReal(param)
 {
 }
 
@@ -68,10 +68,10 @@ CurrA1MJD::CurrA1MJD(const CurrA1MJD &param)
 //------------------------------------------------------------------------------
 CurrA1MJD& CurrA1MJD::operator=(const CurrA1MJD &right)
 {
-    if (this != &right)
-        TimeReal::operator=(right);
+   if (this != &right)
+      TimeReal::operator=(right);
       
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -96,12 +96,12 @@ CurrA1MJD::~CurrA1MJD()
 //------------------------------------------------------------------------------
 bool CurrA1MJD::Evaluate()
 {
-    mRealValue = GetCurrentTimeReal("A1MJD");
+   mRealValue = GetCurrentTimeReal("A1MJD");
     
-    if (mRealValue == TIME_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == TIME_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //------------------------------------------------------------------------------
@@ -126,13 +126,13 @@ GmatBase* CurrA1MJD::Clone(void) const
 const std::string
 ElapsedDays::PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount] =
 {
-    "InitialEpoch"
+   "InitialEpoch"
 };
 
 const Gmat::ParameterType
 ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
 {
-    Gmat::REAL_TYPE
+   Gmat::REAL_TYPE
 };
 
 //---------------------------------
@@ -154,12 +154,12 @@ ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
 //------------------------------------------------------------------------------
 ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
-    : TimeReal(name, "ElapsedDays", SYSTEM_PARAM, obj, desc, unit, true)
+   : TimeReal(name, "ElapsedDays", SYSTEM_PARAM, obj, desc, unit, true)
 {
-    // GmatBase data
-    parameterCount = ElapsedDaysParamCount;
+   // GmatBase data
+   parameterCount = ElapsedDaysParamCount;
 
-    AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -187,11 +187,11 @@ ElapsedDays::ElapsedDays(const ElapsedDays &copy)
 //------------------------------------------------------------------------------
 const ElapsedDays& ElapsedDays::operator=(const ElapsedDays &right)
 {
-    if (this != &right)
-    {
-        TimeReal::operator=(right);
-    }
-    return *this;
+   if (this != &right)
+   {
+      TimeReal::operator=(right);
+   }
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -220,12 +220,12 @@ ElapsedDays::~ElapsedDays()
 //------------------------------------------------------------------------------
 bool ElapsedDays::Evaluate()
 {
-    mRealValue = GetElapsedTimeReal("Days");
+   mRealValue = GetElapsedTimeReal("Days");
     
-    if (mRealValue == TIME_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == TIME_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //--------------------------------------
@@ -253,10 +253,10 @@ GmatBase* ElapsedDays::Clone(void) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 {
-    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-        return PARAMETER_TYPE[id - RealVarParamCount];
-    else
-        return TimeReal::GetParameterType(id);
+   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+      return PARAMETER_TYPE[id - RealVarParamCount];
+   else
+      return TimeReal::GetParameterType(id);
 
 }
 
@@ -269,10 +269,10 @@ Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 {
-    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
-    else
-        return TimeReal::GetParameterTypeString(id);
+   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+   else
+      return TimeReal::GetParameterTypeString(id);
 
 }
 
@@ -285,10 +285,10 @@ std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterText(const Integer id)
 {
-    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-        return PARAMETER_TEXT[id - RealVarParamCount];
-    else
-        return TimeReal::GetParameterText(id);
+   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+      return PARAMETER_TEXT[id - RealVarParamCount];
+   else
+      return TimeReal::GetParameterText(id);
 
 }
 
@@ -301,13 +301,13 @@ std::string ElapsedDays::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedDays::GetParameterID(const std::string &str)
 {
-    for (int i = RealVarParamCount; i < ElapsedDaysParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - RealVarParamCount])
-            return i;
-    }
+   for (int i = RealVarParamCount; i < ElapsedDaysParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - RealVarParamCount])
+         return i;
+   }
    
-    return TimeReal::GetParameterID(str);
+   return TimeReal::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -338,9 +338,9 @@ Real ElapsedDays::GetRealParameter(const Integer id)
 Real ElapsedDays::GetRealParameter(const std::string &label)
 {
    if (label == "InitialEpoch")
-       return GetInitialEpoch();
+      return GetInitialEpoch();
    else
-       return TimeReal::GetRealParameter(label);
+      return TimeReal::GetRealParameter(label);
 }
 
 //------------------------------------------------------------------------------
@@ -355,10 +355,10 @@ Real ElapsedDays::SetRealParameter(const Integer id, const Real value)
    switch (id)
    {
    case INITIAL_EPOCH:
-       SetInitialEpoch(value);
-       return value;
+      SetInitialEpoch(value);
+      return value;
    default:
-       return TimeReal::SetRealParameter(id, value);
+      return TimeReal::SetRealParameter(id, value);
    }
 }
 
@@ -371,15 +371,15 @@ Real ElapsedDays::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
 {
-    if (label == "InitialEpoch")
-    {
-        SetInitialEpoch(value);
-        return value;
-    }
-    else
-    {
-       return TimeReal::SetRealParameter(label, value);
-    }
+   if (label == "InitialEpoch")
+   {
+      SetInitialEpoch(value);
+      return value;
+   }
+   else
+   {
+      return TimeReal::SetRealParameter(label, value);
+   }
 }
 
 //==============================================================================
@@ -392,13 +392,13 @@ Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
 const std::string
 ElapsedSecs::PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount] =
 {
-    "InitialEpoch"
+   "InitialEpoch"
 };
 
 const Gmat::ParameterType
 ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
 {
-    Gmat::REAL_TYPE
+   Gmat::REAL_TYPE
 };
 
 //---------------------------------
@@ -420,12 +420,12 @@ ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
 //------------------------------------------------------------------------------
 ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
-    : TimeReal(name, "ElapsedSecs", SYSTEM_PARAM, obj, desc, unit, true)
+   : TimeReal(name, "ElapsedSecs", SYSTEM_PARAM, obj, desc, unit, true)
 {
-    // GmatBase data
-    parameterCount = ElapsedSecsParamCount;
+   // GmatBase data
+   parameterCount = ElapsedSecsParamCount;
 
-    AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 ElapsedSecs::ElapsedSecs(const ElapsedSecs &copy)
-    : TimeReal(copy)
+   : TimeReal(copy)
 {
 }
 
@@ -453,11 +453,11 @@ ElapsedSecs::ElapsedSecs(const ElapsedSecs &copy)
 //------------------------------------------------------------------------------
 const ElapsedSecs& ElapsedSecs::operator=(const ElapsedSecs &right)
 {
-    if (this != &right)
-    {
-        TimeReal::operator=(right);
-    }
-    return *this;
+   if (this != &right)
+   {
+      TimeReal::operator=(right);
+   }
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -486,12 +486,12 @@ ElapsedSecs::~ElapsedSecs()
 //------------------------------------------------------------------------------
 bool ElapsedSecs::Evaluate()
 {
-    mRealValue = GetElapsedTimeReal("Secs");
+   mRealValue = GetElapsedTimeReal("Secs");
     
-    if (mRealValue == TIME_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == TIME_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -520,19 +520,11 @@ GmatBase* ElapsedSecs::Clone(void) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 {
-    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-        return PARAMETER_TYPE[id - RealVarParamCount];
-    else
-        return TimeReal::GetParameterType(id);
+   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+      return PARAMETER_TYPE[id - RealVarParamCount];
+   else
+      return TimeReal::GetParameterType(id);
 
-    //loj: 3/23/04
-//      switch (id)
-//      {
-//      case INITIAL_EPOCH:
-//          return ElapsedSecs::PARAMETER_TYPE[id - RealVarParamCount];
-//      default:
-//          return TimeReal::GetParameterType(id);
-//      }
 }
 
 //------------------------------------------------------------------------------
@@ -544,10 +536,10 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 {
-    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
-    else
-        return TimeReal::GetParameterTypeString(id);
+   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+   else
+      return TimeReal::GetParameterTypeString(id);
 
 }
 
@@ -560,10 +552,10 @@ std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterText(const Integer id)
 {
-    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-        return PARAMETER_TEXT[id - RealVarParamCount];
-    else
-        return TimeReal::GetParameterText(id);
+   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+      return PARAMETER_TEXT[id - RealVarParamCount];
+   else
+      return TimeReal::GetParameterText(id);
 
 }
 
@@ -576,13 +568,13 @@ std::string ElapsedSecs::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedSecs::GetParameterID(const std::string &str)
 {
-    for (int i = RealVarParamCount; i < ElapsedSecsParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - RealVarParamCount])
-            return i;
-    }
+   for (int i = RealVarParamCount; i < ElapsedSecsParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - RealVarParamCount])
+         return i;
+   }
    
-    return TimeReal::GetParameterID(str);
+   return TimeReal::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -597,9 +589,9 @@ Real ElapsedSecs::GetRealParameter(const Integer id)
    switch (id)
    {
    case INITIAL_EPOCH:
-       return GetInitialEpoch();
+      return GetInitialEpoch();
    default:
-       return TimeReal::GetRealParameter(id);
+      return TimeReal::GetRealParameter(id);
    }
 }
 
@@ -613,9 +605,9 @@ Real ElapsedSecs::GetRealParameter(const Integer id)
 Real ElapsedSecs::GetRealParameter(const std::string &label)
 {
    if (label == "InitialEpoch")
-       return GetInitialEpoch();
+      return GetInitialEpoch();
    else
-       return TimeReal::GetRealParameter(label);
+      return TimeReal::GetRealParameter(label);
 }
 
 //------------------------------------------------------------------------------
@@ -630,10 +622,10 @@ Real ElapsedSecs::SetRealParameter(const Integer id, const Real value)
    switch (id)
    {
    case INITIAL_EPOCH:
-       SetInitialEpoch(value);
-       return value;
+      SetInitialEpoch(value);
+      return value;
    default:
-       return TimeReal::SetRealParameter(id, value);
+      return TimeReal::SetRealParameter(id, value);
    }
 }
 
@@ -646,13 +638,13 @@ Real ElapsedSecs::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real ElapsedSecs::SetRealParameter(const std::string &label, const Real value)
 {
-    if (label == "InitialEpoch")
-    {
-        SetInitialEpoch(value);
-        return value;
-    }
-    else
-    {
-       return TimeReal::SetRealParameter(label, value);
-    }
+   if (label == "InitialEpoch")
+   {
+      SetInitialEpoch(value);
+      return value;
+   }
+   else
+   {
+      return TimeReal::SetRealParameter(label, value);
+   }
 }

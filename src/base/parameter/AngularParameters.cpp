@@ -17,6 +17,7 @@
  *   SemilatusRectum
  */
 //------------------------------------------------------------------------------
+
 #include "AngularParameters.hpp"
 
 //==============================================================================
@@ -42,9 +43,9 @@
 //------------------------------------------------------------------------------
 SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj,
                                  const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "SemilatusRectum", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "SemilatusRectum", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SemilatusRectum::SemilatusRectum(const SemilatusRectum &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
@@ -73,10 +74,10 @@ SemilatusRectum::SemilatusRectum(const SemilatusRectum &copy)
 const SemilatusRectum&
 SemilatusRectum::operator=(const SemilatusRectum &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -105,12 +106,12 @@ SemilatusRectum::~SemilatusRectum()
 //------------------------------------------------------------------------------
 bool SemilatusRectum::Evaluate()
 {
-    mRealValue = OrbitData::GetAngularReal("SemilatusRectum");    
+   mRealValue = OrbitData::GetAngularReal("SemilatusRectum");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 //-------------------------------------
