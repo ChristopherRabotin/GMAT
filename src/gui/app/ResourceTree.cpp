@@ -772,7 +772,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_BODY, wxT("Add Body..."));
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
-   else if (strcmp(title, wxT("Variables")) == 0)
+   else if (strcmp(title, wxT("Variables/Arrays")) == 0) //loj: 11/03/04 added Arrays
       menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
 //   else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
 //            (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
