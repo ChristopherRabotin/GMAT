@@ -23,10 +23,6 @@
 #include "MJ2000EqAxes.hpp"
 #include "InertialAxes.hpp"
 
-//*********************//
-#include <iostream>
-using namespace std;
-
 //---------------------------------
 // static data
 //---------------------------------
@@ -147,7 +143,6 @@ void MJ2000EqAxes::Initialize()
 bool MJ2000EqAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                               Rvector &outState) //, SpacePoint *j2000Body)
 {
-   cout << "---------------- In MJ2000Eq::ToMJ2000Eq ...." << endl;
    outState = inState;
    return true;
 }
@@ -173,9 +168,6 @@ bool MJ2000EqAxes::RotateFromMJ2000Eq(const A1Mjd &epoch,
                                       const Rvector &inState,
                                       Rvector &outState) //, SpacePoint *j2000Body)
 {
-   cout << "---------------- In MJ2000Eq::FromMJ2000Eq ...." << endl;
-   cout << "Size of inState = " << inState.GetSize() << endl;
-   cout << "Size of outState = " << outState.GetSize() << endl;
    outState = inState;
    return true;
 }
