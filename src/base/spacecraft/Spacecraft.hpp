@@ -94,7 +94,7 @@ protected:
 
 private:
     void InitializeValues();
-
+    std::string GetElementName(const Integer id) const;
 };
 
 #endif // Spacecraft_hpp

@@ -218,12 +218,11 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
     if (id == epochID) return "Epoch";
-    if (id == state1ID) return "Element1";
-    if (id == state2ID) return "Element2";
-    if (id == state3ID) return "Element3";
-    if (id == state4ID) return "Element4";
-    if (id == state5ID) return "Element5";
-    if (id == state6ID) return "Element6";
+
+    if (id == state1ID || id == state2ID || id == state3ID || id == state4ID
+        || id == state5ID || id == state6ID)
+        return GetElementName(id);
+    
     if (id == refBodyID) return "ReferenceBody";
     if (id == refFrameID) return "CoordinateRepresentation";
     if (id == refPlaneID) return "PrincipalPlane";
@@ -769,3 +768,64 @@ void Spacecraft::InitializeValues()
 
     mass = 0.0;
 }
+
+//  std::string GetElementName(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Get the string of element name
+ *
+ * @param <id>   State id
+ */
+std::string Spacecraft::GetElementName(const Integer id) const
+{
+    if (refFrame == "Cartesian")
+    {
+       if (id == state1ID) return("X");
+       if (id == state2ID) return("Y");
+       if (id == state3ID) return("Z");
+       if (id == state4ID) return("Vx");
+       if (id == state5ID) return("Vy");
+       if (id == state6ID) return("Vz");
+    }
+    else if (refFrame == "Keplerian")
+    {
+       if (id == state1ID) return("SMA");
+       if (id == state2ID) return("ECC");
+       if (id == state3ID) return("INC");
+       if (id == state4ID) return("RAAN");
+       if (id == state5ID) return("AOP");
+       if (id == state6ID) return("MA");
+    }
+    else if (refFrame == "Spherical1" || refFrame == "Spherical2")
+    {
+       if (id == state1ID) return("RMAG");
+       if (id == state2ID) return("RA");
+       if (id == state3ID) return("DEC");
+       if (id == state4ID) return("VMAG");
+       if (id == state5ID)
+       {
+          if (refFrame == "Spherical1")
+             return("AZ");
+          else
+             return("RAV");
+       }
+       if (id == state6ID)
+       {
+          if (refFrame == "Spherical1")
+             return("FPA");
+          else
+             return("DECV");
+       }
+    }
+    else
+    {
+       if (id == state1ID) return("Element1");
+       if (id == state2ID) return("Element2");
+       if (id == state3ID) return("Element3");
+       if (id == state4ID) return("Element4");
+       if (id == state5ID) return("Element5");
+       if (id == state6ID) return("Element6");
+    }
+    return("Unknown");
+}
+
