@@ -143,39 +143,6 @@ public:
    static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
 
 protected:
-
-   /// IDs for the parameters
-   Integer bodyTypeID;
-   Integer massID;
-   Integer eqRadiusID;
-   Integer polarRadiusID;
-   Integer muID;
-   Integer posVelSourceID;
-   Integer analyticMethodID;
-   Integer flatCoeffID;
-   Integer rotationRateID;
-   Integer zonals1ID;
-   Integer zonals2ID;
-   Integer zonals3ID;
-   Integer zonals4ID;
-   Integer zonals5ID;
-   Integer state1ID;
-   Integer state2ID;
-   Integer state3ID;
-   Integer state4ID;
-   Integer state5ID;
-   Integer state6ID;
-   Integer effRangeID;
-   Integer centralBodyID;    // ID for pointer? is this even needed?
-   Integer potentialModelID; // ???
-   Integer dragModelID;      // ???
-   Integer orderID;
-   Integer degreeID;
-   Integer isInitializedID;
-   Integer bodyNumberID;
-   Integer refBodyNumberID;
-   Integer sourceStartID; // ???????????????
-   Integer sourceEndID;   // ???????????????
    
    // body type of the body
    Gmat::BodyType         bodyType;
@@ -225,6 +192,40 @@ protected:
    A1Mjd                  sourceStart;
    /// date and time of end of sourcce file
    A1Mjd                  sourceEnd;
+
+   /// IDs for the parameters
+   Integer                bodyTypeID;
+   Integer                massID;
+   Integer                eqRadiusID;
+   Integer                polarRadiusID;
+   Integer                muID;
+   Integer                posVelSourceID;
+   Integer                analyticMethodID;
+   Integer                flatCoeffID;
+   Integer                rotationRateID;
+   Integer                zonals1ID;
+   Integer                zonals2ID;
+   Integer                zonals3ID;
+   Integer                zonals4ID;
+   Integer                zonals5ID;
+   Integer                state1ID;
+   Integer                state2ID;
+   Integer                state3ID;
+   Integer                state4ID;
+   Integer                state5ID;
+   Integer                state6ID;
+   Integer                effRangeID;
+   Integer                centralBodyID;    // ID for pointer? is this even needed?
+   Integer                potentialModelID; // ???
+   Integer                dragModelID;      // ???
+   Integer                orderID;
+   Integer                degreeID;
+   Integer                isInitializedID;
+   Integer                bodyNumberID;
+   Integer                refBodyNumberID;
+   Integer                sourceFilenameID;
+   Integer                sourceStartID; // ???????????????
+   Integer                sourceEndID;   // ???????????????
    
    void Initialize(std::string withBodyType = "Planet");
 
