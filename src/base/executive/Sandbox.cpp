@@ -78,10 +78,9 @@ bool Sandbox::AddObject(GmatBase *obj)
       // If not, store the new object pointer
       /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
       if ((obj->GetType() == Gmat::SPACECRAFT) ||
-          (obj->GetType() == Gmat::FORMATION)) {
-         //loj: 1/13/05 Cloning causes problem rerunning
-         //objectMap[name] = obj->Clone(); // new Spacecraft(*((Spacecraft*)obj));
-         objectMap[name] = obj;
+          (obj->GetType() == Gmat::FORMATION))
+      {
+         objectMap[name] = obj->Clone();
          
          if(obj->GetType() == Gmat::SPACECRAFT)
          {
@@ -465,15 +464,13 @@ void Sandbox::Clear()
    state     = IDLE;
     
    // Delete the clones (currently only Spacecraft and Formations get cloned)
-   //loj: 1/13/05 comment this out. Cloning object causes problem rerunning.
-//     std::map<std::string, GmatBase *>::iterator omi;
-//     for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
-//     {
-//  //        if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
-//  //            ((omi->second)->GetType() == Gmat::FORMATION))
-//        if ((omi->second)->GetType() == Gmat::SPACECRAFT)
-//           delete omi->second;
-//     }
+   std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+      if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
+          ((omi->second)->GetType() == Gmat::FORMATION))
+         delete omi->second;
+   }
    
    objectMap.clear();
 }
