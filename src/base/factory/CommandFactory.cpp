@@ -50,12 +50,16 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateCommand(const std::string &ofType, const std::string &withName)
+//  GmatCommand* CreateCommand(const std::string &ofType, 
+//                             const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested command class 
  *
- * @param <ofType> the command object to create and return.
+ * @param <ofType>   type of command object to create and return.
+ * @param <withName> name of the command (currently not used).
+ *
+ * @return command object
  *
  * @note As of 2003/10/14, we are ignoring the withname parameter.  Use of this
  *       parameter may be added later.

@@ -33,15 +33,19 @@
 //  CreateCelestialBody(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates and returns an object of the requested CelestialBody class
+ * This method creates and returns an object of the requested CelestialBody 
+ * class.
  *
  * @param <ofType> the CelestialBody object to create and return.
  * @param <withName> the name to give the newly-created CelestialBody object.
  *
+ * @return a new 
+ *
  */
 //------------------------------------------------------------------------------
-CelestialBody* CelestialBodyFactory::CreateCelestialBody(const std::string &ofType,
-                                                         const std::string &withName)
+CelestialBody* CelestialBodyFactory::CreateCelestialBody(
+                                     const std::string &ofType,
+                                     const std::string &withName)
 {
    if (ofType == "Star")
       return new Star(withName);

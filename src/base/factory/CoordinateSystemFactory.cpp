@@ -26,18 +26,17 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateCoordinateSystem(const std::string &ofType, const std::string &withName)
+//  CoordinateSystem* CreateCoordinateSystem(const std::string &ofType, 
+//                                           const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested CoordinateSystem class 
  *
- * @param <ofType> the CoordinateSystem object to create and return.
+ * @param <ofType>   type of CoordinateSystem object to create and return.
  * @param <withName> the name to give the newly-created CoordinateSystem object.
  *
- * @note As of 2003/10/14, we are ignoring the withName parameter.  Use of this
- *       parameter may be added later.
- * @note As of 2003/10/14, we are ignoring the ofType parameter.  Use of this
- *       parameter may be added later.
+ * @return new CoordinateSystem object
+ *
  */
 //------------------------------------------------------------------------------
 CoordinateSystem*

@@ -39,7 +39,7 @@ public:
    CommandFactory& operator= (const CommandFactory& fact);
 
    // destructor
-   virtual ~CommandFactory();
+   ~CommandFactory();
 
 protected:
    // protected data
