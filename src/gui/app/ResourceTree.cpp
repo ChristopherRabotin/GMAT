@@ -35,6 +35,13 @@
 #include "bitmaps/network.xpm"
 #include "bitmaps/burn.xpm"
 #include "bitmaps/moon.xpm"
+#include "bitmaps/matlabfunction.xpm"
+#include "bitmaps/array.xpm"
+#include "bitmaps/coordinatesystem.xpm"
+#include "bitmaps/openglplot.xpm"
+#include "bitmaps/propagator.xpm"
+#include "bitmaps/variable.xpm"
+#include "bitmaps/xyplot.xpm"
 #include <wx/string.h> // for wxArrayString
 
 #include "GuiInterpreter.hpp"
@@ -487,7 +494,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
-      AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+      AppendItem(itemId, wxT(objName), GmatTree::ICON_PROPAGATOR, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_PROPAGATOR));
    };
 
@@ -591,11 +598,11 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_REPORT_FILE));
       else if (objTypeName == "XYPlot")
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_XY_PLOT));
       else if (objTypeName == "OpenGLPlot")
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_OPEN_GL_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_OPENGL_PLOT));
    };
@@ -647,7 +654,7 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
       // all system parameters works as Object.Property
       if (param->GetKey() == Parameter::USER_PARAM)
       {
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_VARIABLE, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_VARIABLE));
       }
@@ -678,7 +685,7 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
-      AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
+      AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_MATLAB_FUNCT));
    };
 
@@ -707,7 +714,7 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 //   for (int i = 0; i<size; i++)
 //   {
 //      objName = wxString(itemNames[i].c_str());
-//      AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+//      AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
 //                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_COORD_SYS));
 //   };
 //
@@ -1115,7 +1122,7 @@ void ResourceTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
   
    wxBusyCursor wait;
-   wxIcon icons[18];
+   wxIcon icons[25];
 
    icons[0] = wxIcon ( folder_xpm );
    icons[1] = wxIcon ( file_xpm );
@@ -1135,7 +1142,14 @@ void ResourceTree::AddIcons()
    icons[15] = wxIcon ( network_xpm );
    icons[16] = wxIcon ( burn_xpm );
    icons[17] = wxIcon ( moon_xpm );
- 
+   icons[18] = wxIcon ( matlabfunction_xpm );
+   icons[19] = wxIcon ( array_xpm );
+   icons[20] = wxIcon ( coordinatesystem_xpm );
+   icons[21] = wxIcon ( openglplot_xpm );
+   icons[22] = wxIcon ( propagator_xpm );
+   icons[23] = wxIcon ( variable_xpm );
+   icons[24] = wxIcon ( xyplot_xpm );
+
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
@@ -1294,7 +1308,7 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 
    if (propSetup != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_FILE, -1,
+      AppendItem(item, name, GmatTree::ICON_PROPAGATOR, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_PROPAGATOR));
 
       Expand(item);
@@ -1403,7 +1417,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("XYPlot", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+      AppendItem(item, name, GmatTree::ICON_XY_PLOT, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
       
       Expand(item);
@@ -1429,7 +1443,7 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("OpenGLPlot", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+      AppendItem(item, name, GmatTree::ICON_OPEN_GL_PLOT, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
 
       Expand(item);
@@ -1460,7 +1474,7 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
 
       for (unsigned int i=0; i<names.GetCount(); i++)
       {
-         AppendItem(item, names[i], GmatTree::ICON_FILE, -1,
+         AppendItem(item, names[i], GmatTree::ICON_VARIABLE, -1,
                     new GmatTreeItemData(names[i], GmatTree::CREATED_VARIABLE));
       }
       
@@ -1489,7 +1503,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    if (GmatAppData::GetGuiInterpreter()->
       CreateFunction("MatlabFunction", stdWithName))
    {
-      AppendItem(item, withName, GmatTree::ICON_FILE, -1,
+      AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
                  new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
 
       Expand(item);
@@ -1521,7 +1535,7 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 //   if (GmatAppData::GetGuiInterpreter()->
 //      CreateFunction("MatlabFunction", stdWithName))
 //   {
-      AppendItem(item, withName, GmatTree::ICON_REPORT, -1,
+      AppendItem(item, withName, GmatTree::ICON_COORDINATE_SYSTEM, -1,
                  new GmatTreeItemData(withName, GmatTree::CREATED_COORD_SYSTEM));
 
       Expand(item);
@@ -1629,7 +1643,6 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
       // error
       return;
    }
-    
 
    // Get info from selected item
    GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(itemDst);

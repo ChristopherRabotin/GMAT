@@ -45,6 +45,9 @@ namespace GmatTree
 {
     enum IconType
     {
+        ICON_PROPAGATE_EVENT,
+        ICON_TARGET,
+
         ICON_FOLDER,
         ICON_FILE,
         ICON_OPENFOLDER,
@@ -65,8 +68,16 @@ namespace GmatTree
         ICON_NETWORK,
         ICON_BURN,
         ICON_MOON,
+
+        ICON_MATLAB_FUNCTION,
+        ICON_ARRAY,
+        ICON_COORDINATE_SYSTEM,
+        ICON_OPEN_GL_PLOT,
+        ICON_PROPAGATOR,
+        ICON_VARIABLE,
+        ICON_XY_PLOT,
     };
-    
+
     enum ItemType
     {
         // Resource Tree
