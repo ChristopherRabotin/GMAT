@@ -18,35 +18,37 @@
 #include "gmatwxdefs.hpp"
 //#include "wx/plot/plot.h"
 #include "XyPlotWindow.hpp" // for wxPlotCurve
-#include <vector>
 #include "Interpolator.hpp"
+#include <vector>
 
 class XyPlotCurve: public wxPlotCurve
 {
 public:
-    XyPlotCurve(int offsetY, double startY, double endY,
-                const wxString &curveTitle);
-    ~XyPlotCurve();
+   XyPlotCurve(int offsetY, double startY, double endY,
+               const wxString &curveTitle);
+   ~XyPlotCurve();
     
-    double GetFirstX();
-    void SetFirstX(double x);
-    void SetEndX(double x);
-    void AddData(double x, double y);
+   double GetFirstX();
+   void SetFirstX(double x);
+   void SetEndX(double x);
+   void AddData(double x, double y);
+   
+   void SetInterpolator(Interpolator *interp);
     
-    void SetInterpolator(Interpolator *interp);
-    
-    // methods inherited from wxPlotCurve
-    virtual wxInt32 GetStartX();
-    virtual wxInt32 GetEndX();
-    virtual double GetY(wxInt32 x);
-    virtual void ClearData(); //loj: 3/10/04 added
+   // methods inherited from wxPlotCurve
+   virtual wxInt32 GetStartX();
+   virtual wxInt32 GetEndX();
+   virtual double GetY(wxInt32 x);
+   virtual void ClearData(); //loj: 3/10/04 added
+   virtual double GetYMin(); //loj: 7/23/04 added
+   virtual double GetYMax(); //loj: 7/23/04 added
 
-    double mFirstX;
+   double mFirstX;
     
-    Interpolator *mInterp;
+   Interpolator *mInterp;
     
-    std::vector<wxInt32> mXdata;
-    std::vector<double>  mYdata;
+   std::vector<wxInt32> mXdata;
+   std::vector<double>  mYdata;
 };
 
 #endif

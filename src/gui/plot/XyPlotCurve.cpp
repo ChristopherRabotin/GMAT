@@ -15,24 +15,22 @@
 #include "XyPlotCurve.hpp"
 #include "LinearInterpolator.hpp"
 #include "MessageInterface.hpp"
+#include <algorithm>              //for min_element, max_element
+
+#define DEBUG_XY_PLOT_CURVE_ADD 0
+#define DEBUG_XY_PLOT_CURVE_GET 0
+#define DEBUG_XY_PLOT_CURVE_MAX 0
 
 //------------------------------------------------------------------------------
 // XyPlotCurve(int offsetY, double startY, double endY, double defaultY)
 //------------------------------------------------------------------------------
-XyPlotCurve::XyPlotCurve(int offsetY, double startY, double endY, //double defaultY,
-                         //const wxString &xAxisTitle, const wxString &yAxisTitle,
+XyPlotCurve::XyPlotCurve(int offsetY, double startY, double endY,
                          const wxString &curveTitle)
-    : wxPlotCurve(offsetY, startY, endY, curveTitle)
+   : wxPlotCurve(offsetY, startY, endY, curveTitle)
 {
-    //mDefaultY = defaultY;
-    //mXAxisTitle = xAxisTitle;
-    //mYAxisTitle = yAxisTitle;
-    //mCurveTitle = curveTitle;
-    
-    //mInterp = NULL;
-    mInterp = new LinearInterpolator(); //loj: should I allow user to use his own?
-    mXdata.clear();
-    mYdata.clear();
+   mInterp = new LinearInterpolator(); //loj: should I allow user to use his own?
+   mXdata.clear();
+   mYdata.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -40,7 +38,7 @@ XyPlotCurve::XyPlotCurve(int offsetY, double startY, double endY, //double defau
 //------------------------------------------------------------------------------
 XyPlotCurve::~XyPlotCurve()
 {
-    delete mInterp;
+   delete mInterp;
 }
 
 //------------------------------------------------------------------------------
@@ -48,7 +46,7 @@ XyPlotCurve::~XyPlotCurve()
 //------------------------------------------------------------------------------
 double XyPlotCurve::GetFirstX()
 {
-    return mFirstX;
+   return mFirstX;
 }
 
 //------------------------------------------------------------------------------
@@ -56,7 +54,7 @@ double XyPlotCurve::GetFirstX()
 //------------------------------------------------------------------------------
 void XyPlotCurve::SetFirstX(double x)
 {
-    mFirstX = x;
+   mFirstX = x;
 }
 
 //------------------------------------------------------------------------------
@@ -64,15 +62,22 @@ void XyPlotCurve::SetFirstX(double x)
 //------------------------------------------------------------------------------
 void XyPlotCurve::AddData(double x, double y)
 {
-    //loj: for build2 x has to be time
-    //loj: save a1mjd time as (21545xxx) for build 2, X has to be integer
-    wxInt32 intTime = (wxInt32)(x * 1000); 
+   //---------------------------------------------
+   //Notes:
+   // loj: for build2 x has to be time
+   //      save a1mjd time as (21545xxx) for build 2,
+   //      X has to be integer
+   //---------------------------------------------
+   wxInt32 intTime = (wxInt32)(x * 1000); 
     
-    mXdata.push_back(intTime);
-    mYdata.push_back(y);
+   mXdata.push_back(intTime);
+   mYdata.push_back(y);
 
-    //MessageInterface::ShowMessage("XyPlotCurve::AddData() size = %d, x = %d, y = %f\n",
-    //                              mXdata.size(), mXdata.back(), mYdata.back());
+#if DEBUG_XY_PLOT_CURVE_ADD
+   MessageInterface::ShowMessage
+      ("XyPlotCurve::AddData() size = %d, x = %d, y = %f\n",
+       mXdata.size(), mXdata.back(), mYdata.back());
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -80,8 +85,8 @@ void XyPlotCurve::AddData(double x, double y)
 //------------------------------------------------------------------------------
 void XyPlotCurve::SetInterpolator(Interpolator *interp)
 {
-    if (mInterp == NULL)
-        mInterp = interp;
+   if (mInterp == NULL)
+      mInterp = interp;
 }
 
 //------------------------------------
@@ -93,10 +98,10 @@ void XyPlotCurve::SetInterpolator(Interpolator *interp)
 //------------------------------------------------------------------------------
 wxInt32 XyPlotCurve::GetStartX()
 {
-    if (mXdata.size() == 0)
-        return 0;
-    else
-        return mXdata.front();
+   if (mXdata.size() == 0)
+      return 0;
+   else
+      return mXdata.front();
 }
 
 //------------------------------------------------------------------------------
@@ -104,10 +109,10 @@ wxInt32 XyPlotCurve::GetStartX()
 //------------------------------------------------------------------------------
 wxInt32 XyPlotCurve::GetEndX()
 {
-    if (mXdata.size() == 0)
-        return 0;
-    else
-        return mXdata.back();
+   if (mXdata.size() == 0)
+      return 0;
+   else
+      return mXdata.back();
 }
 
 //------------------------------------------------------------------------------
@@ -115,31 +120,34 @@ wxInt32 XyPlotCurve::GetEndX()
 //------------------------------------------------------------------------------
 double XyPlotCurve::GetY(wxInt32 x)
 {
-    double yVal = 0.0; // should be undefined?
-    unsigned int i;
+   double yVal = 0.0; // should be undefined?
+   unsigned int i;
     
-    for (i=0; i<mXdata.size(); i++)
-    {
-        if (mXdata[i] == x)
-        {
-            yVal = mYdata[i];
-            break;
-        }
-        else if (mXdata[i] > x)
-        {
-            // interpolate
-            mInterp->Clear();
-            mInterp->AddPoint(mXdata[i-1], &mYdata[i-1]);
-            mInterp->AddPoint(mXdata[i], &mYdata[i]);
-            mInterp->Interpolate(x, &yVal);
-            break;
-        }
-    }
+   for (i=0; i<mXdata.size(); i++)
+   {
+      if (mXdata[i] == x)
+      {
+         yVal = mYdata[i];
+         break;
+      }
+      else if (mXdata[i] > x)
+      {
+         // interpolate
+         mInterp->Clear();
+         mInterp->AddPoint(mXdata[i-1], &mYdata[i-1]);
+         mInterp->AddPoint(mXdata[i], &mYdata[i]);
+         mInterp->Interpolate(x, &yVal);
+         break;
+      }
+   }
     
-    //MessageInterface::ShowMessage("XyPlotCurve::GetY() size = %d, x = %d, y = %f\n",
-    //                              mXdata.size(), x, yVal);
-    
-    return yVal;
+#if DEBUG_XY_PLOT_CURVE_GET
+   MessageInterface::ShowMessage
+      ("XyPlotCurve::GetY() size = %d, x = %d, y = %f\n",
+       mXdata.size(), x, yVal);
+#endif
+   
+   return yVal;
 }
 
 //loj: 3/10/04 added
@@ -148,7 +156,37 @@ double XyPlotCurve::GetY(wxInt32 x)
 //------------------------------------------------------------------------------
 void XyPlotCurve::ClearData()
 {
-    mXdata.clear();
-    mYdata.clear();
+   mXdata.clear();
+   mYdata.clear();
+}
+
+//loj: 7/23/04 added
+//------------------------------------------------------------------------------
+// virtual double GetYMin()
+//------------------------------------------------------------------------------
+double XyPlotCurve::GetYMin()
+{
+   std::vector<double>::iterator pos;
+   pos = min_element (mYdata.begin(), mYdata.end());
+
+   return *pos;
+}
+
+//loj: 7/23/04 added
+//------------------------------------------------------------------------------
+// virtual double GetYMax()
+//------------------------------------------------------------------------------
+double XyPlotCurve::GetYMax()
+{
+   std::vector<double>::iterator pos;
+   pos = max_element (mYdata.begin(), mYdata.end());
+
+#if DEBUG_XY_PLOT_CURVE_MAX
+   MessageInterface::ShowMessage
+      ("XyPlotCurve::GetYMax() size = %d, max=%f\n",
+       mYdata.size(), *pos);
+#endif
+   
+   return *pos;
 }
 

@@ -16,20 +16,20 @@
 #include "MdiChildXyFrame.hpp"
 #include "MdiXyPlotData.hpp"
 #include "XyPlotCurve.hpp"
-
-#include <fstream>    // for ifstream (plot input file)
+#include "RealUtilities.hpp" // for Abs(), Min(), Max()
+#include <fstream>           // for ifstream (plot input file)
 
 #include "wx/image.h"
 #include "wx/listctrl.h"
 #include "wx/sizer.h"
 #include "wx/log.h"
 #include "wx/intl.h"
-#include "wx/gdicmn.h" // for color
+#include "wx/gdicmn.h"       // for color
 
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_XY_FRAME 0
+#define DEBUG_XY_MDI_FRAME 0
 
 BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
@@ -286,7 +286,7 @@ bool MdiChildXyFrame::DeletePlot()
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::SetPlotTitle(const wxString &title)
 {
-#if DEBUG_XY_FRAME
+#if DEBUG_XY_MDI_FRAME
    MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
                                  title.c_str());
 #endif
@@ -305,7 +305,7 @@ void MdiChildXyFrame::SetPlotTitle(const wxString &title)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::ShowPlotLegend()
 {
-#if DEBUG_XY_FRAME
+#if DEBUG_XY_MDI_FRAME
    MessageInterface::ShowMessage("MdiChildXyFrame::ShowPlotLegend() entered\n");
 #endif
       
@@ -322,7 +322,7 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
                                    double yMax, const wxString &curveTitle,
                                    UnsignedInt penColor)
 {
-#if DEBUG_XY_FRAME
+#if DEBUG_XY_MDI_FRAME
    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
                                  yMin, yMax);
 #endif
@@ -332,7 +332,7 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
    // Create XyPlotCurve
    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
     
-#if DEBUG_XY_FRAME
+#if DEBUG_XY_MDI_FRAME
    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
                                  curve->GetCurveTitle().c_str());
 #endif
@@ -370,7 +370,7 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
    if (mXyPlot != NULL)
    {
       mXyPlot->Add(curve);
-#if DEBUG_XY_FRAME
+#if DEBUG_XY_MDI_FRAME
       MessageInterface::ShowMessage
          ("MdiChildXyFrame::AddPlotCurve() curve count = %d added\n",
           mXyPlot->GetCount());
@@ -487,6 +487,8 @@ void MdiChildXyFrame::RedrawCurve()
 {
    if (mXyPlot)
    {
+      AdjustYScale(); //loj: 7/23/04 added
+      
       //mXyPlot->SetFocus(); // If SetFocus() is called OpenGl plot flickers
       //mXyPlot->RedrawEverything();
       mXyPlot->RedrawPlotArea(); // 4/29/04 redraw plot area only since X/Y axis don't change
@@ -688,5 +690,120 @@ void MdiChildXyFrame::OnClose(wxCloseEvent& event)
       MdiXyPlot::mdiParentXyFrame->subframe = NULL;
     
    event.Skip();
+}
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void AdjustYScale()
+//------------------------------------------------------------------------------
+/*
+ * Automaticlly adjusts y scale to y minimum and maximum value
+ */
+//------------------------------------------------------------------------------
+void MdiChildXyFrame::AdjustYScale()
+{
+   using namespace GmatMathUtil;
+   
+   double ymin = GetYMin();
+   double ymax = GetYMax();
+   double yMaxScale = Max(Abs(ymin), Abs(ymax));
+   double yMargin = yMaxScale * 0.1;
+   
+#if DEBUG_XY_MDI_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildXyFrame::AdjustYScale() ymin=%f ymax=%f yMaxScale=%f yMargin=%f\n",
+       ymin, ymax, yMaxScale, yMargin);
+#endif
+
+   for (unsigned int i=0; i<mXyPlot->GetCount(); i++)
+   {
+      mXyPlot->GetAt(i)->SetStartY(-yMaxScale - yMargin);
+      mXyPlot->GetAt(i)->SetEndY(yMaxScale + yMargin);
+   }
+}
+
+//------------------------------------------------------------------------------
+// double GetYMin()
+//------------------------------------------------------------------------------
+/*
+ * Returns minimum y value of all curves
+ */
+//------------------------------------------------------------------------------
+double MdiChildXyFrame::GetYMin()
+{
+   double minVal = -123456789.0; //loj: return some other value?
+   
+   if (mXyPlot)
+   {
+      std::vector<double> yMinVals;
+      std::vector<double>::iterator pos;
+   
+      for (unsigned int i=0; i<mXyPlot->GetCount(); i++)
+      {
+         yMinVals.push_back(mXyPlot->GetAt(i)->GetYMin());
+      }
+
+#if DEBUG_XY_MDI_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildXyFrame::GetYMin() yMinVals.size()=%d\n",
+          yMinVals.size());;
+#endif
+      
+      if (yMinVals.size() == 1)
+      {
+         minVal = yMinVals[0];
+      }
+      else if (yMinVals.size() >= 2)
+      {
+         pos = min_element(yMinVals.begin(), yMinVals.end());
+         minVal = *pos;
+      }
+   }
+
+   return minVal;
+}
+
+//------------------------------------------------------------------------------
+// double GetYMax()
+//------------------------------------------------------------------------------
+/*
+ * Returns minimum y value of all curves
+ */
+//------------------------------------------------------------------------------
+double MdiChildXyFrame::GetYMax()
+{
+   double maxVal = 123456789.0; //loj: return some other value?
+   
+   if (mXyPlot)
+   {
+      std::vector<double> yMaxVals;
+      std::vector<double>::iterator pos;
+   
+      for (unsigned int i=0; i<mXyPlot->GetCount(); i++)
+      {
+         yMaxVals.push_back(mXyPlot->GetAt(i)->GetYMax());
+      }
+
+#if DEBUG_XY_MDI_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildXyFrame::GetYMax() yMaxVals.size()=%d\n",
+          yMaxVals.size());;
+#endif
+      
+      if (yMaxVals.size() == 1)
+      {
+         maxVal = yMaxVals[0];
+      }
+      else if (yMaxVals.size() >= 2)
+      {
+         pos = max_element(yMaxVals.begin(), yMaxVals.end());
+         maxVal = *pos;
+      }
+   }
+
+   return maxVal;
 }
 

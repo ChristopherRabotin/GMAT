@@ -149,6 +149,11 @@ public:
       { m_curveTitle = title; }
    virtual void ClearData() //loj: 3/10/04 added
       { ; }
+   virtual double GetYMin() //loj: 7/23/04 added
+      { return 0.0; }
+   virtual double GetYMax() //loj: 7/23/04 added
+      { return 0.0; }
+   
 private:
    int     m_offsetY;
    double  m_startY;
@@ -321,7 +326,7 @@ public:
 
    void Move(wxPlotCurve* curve, int pixels_up);
    void Enlarge(wxPlotCurve *curve, double factor);
-
+   
    // horizontal representation
    // -------------------------
 

@@ -470,7 +470,8 @@ void wxPlotArea::DrawGrid(wxDC *dc)
       if (yUpper+yStep < yEnd) yUpper += yStep;
    }
 
-   dc->SetPen( *wxBLACK_PEN );
+   //dc->SetPen( *wxBLACK_PEN );
+   dc->SetPen( *wxLIGHT_GREY_PEN );
    
    double yCurrent = yLower;
    while (yCurrent < yUpper+(yStep/2))
@@ -1378,9 +1379,7 @@ void wxPlotWindow::Enlarge( wxPlotCurve *curve, double factor )
       curve->SetStartY( (curve->GetStartY() - offset)/factor + new_offset );
       curve->SetEndY( (curve->GetEndY() - offset)/factor + new_offset );
    }
-    
-   //m_area->Refresh( FALSE );
-   //loj: 7/19/04 set to true; grid will not be updated otherwise
+   
    m_area->Refresh( FALSE );
    RedrawYAxis();
 }

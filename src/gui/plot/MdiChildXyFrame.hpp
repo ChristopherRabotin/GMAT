@@ -80,7 +80,7 @@ public:
    void OnDrawDottedLine(wxCommandEvent& event);
    void OnHelpView(wxCommandEvent& event);
    void OnQuit(wxCommandEvent& event);
-    
+   
    // window events
    void OnPlotClick(wxPlotEvent &event);
    void OnActivate(wxActivateEvent& event);
@@ -90,7 +90,11 @@ public:
 
     
 protected:
-
+   
+   void AdjustYScale();
+   double GetYMin();
+   double GetYMax();
+   
    static const int MAX_NUM_CURVE = 6;
     
    wxString mPlotName;
