@@ -40,6 +40,8 @@
 /// Set the static "undefined" parameters
 const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
 const Integer     GmatBase::INTEGER_PARAMETER_UNDEFINED = -987654321;
+const UnsignedInt GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED = 987654321;
+const std::string GmatBase::STRING_PARAMETER_UNDEFINED = "STRING_PARAMETER_UNDEFINED";
 const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
@@ -51,7 +53,10 @@ const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
         "Integer", "Real", "String", "StringArray", "Boolean", "Rvector",
         "Rvector3", "Rvector6", "Rmatrix", "Rmatrix33", "Cartesian",
          "Keplerian", "A1Mjd", "UtcDate", "Object"
-      }; 
+      };
+
+/// initialize the count of instances
+Integer GmatBase::instanceCount = 0; 
 
 
 //-------------------------------------
@@ -73,11 +78,13 @@ const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
  */
 GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr, 
                    const std::string &nomme) :
-    parameterCount  (0),
+    parameterCount  (GmatBaseParamCount),
     typeName        (typeStr),
     instanceName    (nomme),
     type            (typeId)
 {
+   // one more instance - add to the instanceCount
+   instanceCount++;
 }
 
 
@@ -89,6 +96,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
  */
 GmatBase::~GmatBase(void)
 {
+   // subtract this instance from the instanceCount
+   instanceCount--;
 }
 
 
@@ -107,6 +116,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     instanceName    (a.instanceName),
     type            (a.type)
 {
+   // one more instance - add to the instanceCount
+   instanceCount++;
 }
 
 
@@ -162,6 +173,39 @@ std::string GmatBase::GetTypeName(void) const
 
 
 //---------------------------------------------------------------------------
+//  std::string GetName(void) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the name of the instance.
+ *
+ * @return This object's name, or the empty string ("").
+ *
+ * @note Some classes are unnamed.
+ */
+std::string GmatBase::GetName(void) const
+{
+   return instanceName;
+}
+
+//---------------------------------------------------------------------------
+//  bool SetName(std::string &who)
+//---------------------------------------------------------------------------
+/**
+* Set the name for this instance.
+ *
+ * @param <who> the object's name.
+ *
+ * @return true if the name was changed, false if an error was encountered.
+ *
+ * @note Some classes are unnamed.
+ */
+bool GmatBase::SetName(const std::string &who)
+{
+   instanceName = who;
+   return true;
+}
+
+//---------------------------------------------------------------------------
 //  Integer GetParameterCount(void) const
 //---------------------------------------------------------------------------
 /**
@@ -174,20 +218,48 @@ Integer GmatBase::GetParameterCount(void) const
     return parameterCount;
 }
 
-
 //---------------------------------------------------------------------------
-//  std::string GetName(void) const
+//  std::string GetRefObjectName() const
 //---------------------------------------------------------------------------
 /**
- * Retrieve the name of the instance.
+ * Returns the name of the reference object. (Derived classes should implement
+ * this as needed.)
  *
- * @return This object's name, or the empty string ("").
- *
- * @note Some classes are unnamed.
+ * @return The name of the reference object.
  */
-std::string GmatBase::GetName(void) const
+std::string GmatBase::GetRefObjectName() const
 {
-    return instanceName;
+   return STRING_PARAMETER_UNDEFINED;
+}
+
+//---------------------------------------------------------------------------
+//  bool SetRefObjectName(const std::string &nm) 
+//---------------------------------------------------------------------------
+/**
+ * Sets the name of the reference object.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <nm> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+bool GmatBase::SetRefObjectName(const std::string &nm)
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  static Integer GetInstanceCount()
+//---------------------------------------------------------------------------
+/**
+ * Find out how many GmatBase objects have been instantiated.
+ *
+ * @return The number of instantiated objects.
+ */
+Integer GmatBase::GetInstanceCount()
+{
+   return GmatBase::instanceCount;
 }
 
 
@@ -228,24 +300,6 @@ std::string GmatBase::GetParameterTypeString(const Integer id) const
     return retval;
 }
 
-
-//---------------------------------------------------------------------------
-//  bool SetName(std::string &who)
-//---------------------------------------------------------------------------
-/**
- * Set the name for this instance.
- *
- * @param <who> the object's name.
- *
- * @return true if the name was changed, false if an error was encountered.
- *
- * @note Some classes are unnamed.
- */
-bool GmatBase::SetName(const std::string &who)
-{
-    instanceName = who;
-    return true;
-}
 
 
 //---------------------------------------------------------------------------
@@ -318,10 +372,10 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value)
 
 
 //---------------------------------------------------------------------------
-//  Real GetIntegerParameter(const Integer id) const
+//  Integer GetIntegerParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
- * Retrieve the value for an Integer parameter.
+* Retrieve the value for an Integer parameter.
  *
  * @param <id> The integer ID for the parameter.
  *
@@ -329,7 +383,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value)
  */
 Integer GmatBase::GetIntegerParameter(const Integer id) const
 {
-    return INTEGER_PARAMETER_UNDEFINED;
+   return INTEGER_PARAMETER_UNDEFINED;
 }
 
 
@@ -337,18 +391,54 @@ Integer GmatBase::GetIntegerParameter(const Integer id) const
 //  Integer SetIntegerParameter(const Integer id, const Integer value)
 //---------------------------------------------------------------------------
 /**
- * Set the value for an Integer parameter.
+* Set the value for an Integer parameter.
  *
  * @param <id> The integer ID for the parameter.
  * @param <value> The new parameter value.
  *
- * @return the parameter value at the end of this call, or 
- *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+ * @return the parameter value at the end of this call, or
+ *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the
  *         parameter type is not an Integer.
  */
 Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
 {
-    return INTEGER_PARAMETER_UNDEFINED;
+   return INTEGER_PARAMETER_UNDEFINED;
+}
+
+//---------------------------------------------------------------------------
+//  UnsignedInt GetUnsignedIntParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an UnsignedInt parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
+UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id) const
+{
+   return UNSIGNED_INT_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                      const UnsignedInt value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an UnsignedInt parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new parameter value.
+ *
+ * @return the parameter value at the end of this call, or
+ *         UNSIGNED_INT_PARAMETER_UNDEFINED if the parameter id is invalid or
+ *         the parameter type is not an UnsignedInt.
+ */
+UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
+                                              const UnsignedInt value)
+{
+   return UNSIGNED_INT_PARAMETER_UNDEFINED;
 }
 
 //---------------------------------------------------------------------------
@@ -434,7 +524,7 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
  */
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
-    return "STRING_PARAMETER_UNDEFINED";
+    return STRING_PARAMETER_UNDEFINED;
 }
 
 
@@ -554,7 +644,7 @@ Real GmatBase::SetRealParameter(const std::string &label, const Real value)
 //  Integer GetIntegerParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
- * Retrieve the value for an Integer parameter.
+* Retrieve the value for an Integer parameter.
  *
  * @param <label> The (string) label for the parameter.
  *
@@ -562,8 +652,8 @@ Real GmatBase::SetRealParameter(const std::string &label, const Real value)
  */
 Integer GmatBase::GetIntegerParameter(const std::string &label) const
 {
-    Integer id = GetParameterID(label);
-    return GetIntegerParameter(id);
+   Integer id = GetParameterID(label);
+   return GetIntegerParameter(id);
 }
 
 
@@ -571,20 +661,58 @@ Integer GmatBase::GetIntegerParameter(const std::string &label) const
 //  Integer SetIntegerParameter(const std::string &label, const Integer value)
 //---------------------------------------------------------------------------
 /**
- * Set the value for an Integer parameter.
+* Set the value for an Integer parameter.
  *
  * @param <label> The (string) label for the parameter.
  * @param <value> The new parameter value.
  *
- * @return the parameter value at the end of this call, or 
- *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+ * @return the parameter value at the end of this call, or
+ *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the
  *         parameter type is not an Integer.
  */
-Integer GmatBase::SetIntegerParameter(const std::string &label, 
+Integer GmatBase::SetIntegerParameter(const std::string &label,
                                       const Integer value)
 {
-    Integer id = GetParameterID(label);
-    return SetIntegerParameter(id, value);
+   Integer id = GetParameterID(label);
+   return SetIntegerParameter(id, value);
+}
+
+//---------------------------------------------------------------------------
+//  UnsignedInt GetUnsignedIntParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for an UnsignedInt parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The parameter's value.
+ */
+UnsignedInt GmatBase::GetUnsignedIntParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetUnsignedIntParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                      const UnsignedInt value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an UnsignedInt parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new parameter value.
+ *
+ * @return the parameter value at the end of this call, or
+ *         UNSIGNED_INT_PARAMETER_UNDEFINED if the parameter id is invalid
+ *         or the parameter type is not an UnsignedInt.
+ */
+UnsignedInt GmatBase::SetUnsignedIntParameter(const std::string &label,
+                                              const UnsignedInt value)
+{
+   Integer id = GetParameterID(label);
+   return SetUnsignedIntParameter(id, value);
 }
 
 //---------------------------------------------------------------------------
