@@ -20,10 +20,11 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "SubscriberFactory.hpp"
-#include "ReportFile.hpp"         // for ReportFile class
+#include "ReportFile.hpp"
 #include "MessageWindow.hpp"
 #include "OpenGlPlot.hpp"
 #include "XyPlot.hpp"
+#include "MatlabWs.hpp" //loj: 9/4/04 added
 
 //---------------------------------
 //  public methods
@@ -52,6 +53,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
       return new OpenGlPlot(withName);
    else if (ofType == "XyPlot")
       return new XyPlot(withName);
+   else if (ofType == "MatlabWs")
+      return new MatlabWs(withName);
    return NULL;
 }
 
@@ -75,6 +78,7 @@ Factory(Gmat::SUBSCRIBER)
       creatables.push_back("MessageWindow");
       creatables.push_back("OpenGlPlot");
       creatables.push_back("XyPlot");
+      creatables.push_back("MatlabWs");
    }
 }
 
