@@ -1563,10 +1563,11 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    
    if (type == "Propagate")
    {
-      //loj: 10/4/04 switched PROP_SETUP AND SPACECRAFT
       cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
       cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
-      cmd->SetObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION);
+      //cmd->SetObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION);
+      //loj: 12/6/04 call SetRefObject() instead of SetObject() on StopCondition
+      cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
       cmd->SetSolarSystem(theDefaultSolarSystem);
    }
    else if (type == "Maneuver")
