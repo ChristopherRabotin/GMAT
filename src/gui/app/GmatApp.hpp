@@ -21,10 +21,14 @@
 
 #include "gmatwxdefs.hpp"
 #include "Moderator.hpp"
+#include "wx/docview.h"   // for wxDocument
+
+class wxDocManager;
 
 class GmatApp : public wxApp
 {
 public:
+    GmatApp();
     // override base class virtuals
     // ----------------------------
 
@@ -33,9 +37,18 @@ public:
     // return: if OnInit() returns false, the application terminates)
     virtual bool OnInit();
 
+    //loj: added
+    int OnExit(void);
+    wxFrame *CreateChildFrame(wxDocument *doc, wxView *view, bool isCanvas,
+                              bool isScript);
+    
+protected:
+
 private:
     Moderator *theModerator;
-    
+
 };
+
+DECLARE_APP(GmatApp)
 
 #endif // GmatApp_hpp

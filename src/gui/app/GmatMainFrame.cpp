@@ -26,11 +26,9 @@
 #include "ViewTextFrame.hpp"
 #include "BatchRunFromGui.hpp"
 #include "ConsoleAppException.hpp"
-
-//------------------------------
-// static data
-//------------------------------
-ViewTextFrame* GmatMainFrame::mTextFrame = (ViewTextFrame *)NULL;
+#include "DocViewFrame.hpp"
+#include "TextDocument.hpp"
+#include "TextEditView.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -50,6 +48,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
     EVT_MENU(MENU_DEMO_BATCH_RUN, GmatMainFrame::OnDemoBatchRun)    
+    EVT_MENU(MENU_SCRIPT_OPEN_FRAME, GmatMainFrame::OnScriptOpenFrame)    
 END_EVENT_TABLE()
 
 //------------------------------
@@ -77,36 +76,37 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
               : wxFrame(NULL, -1, title, pos, size, style)
 
 {
-  //mTextFrame = (ViewTextFrame *)NULL;
-  GmatSplitterWindow *splitter;
-  GmatNotebook *leftTabs;
+    mDocManager = (wxDocManager *) NULL;
+    //mTextFrame = (ViewTextFrame *)NULL;
+    GmatSplitterWindow *splitter;
+    GmatNotebook *leftTabs;
      
-  #if wxUSE_MENUS
+#if wxUSE_MENUS
     // create a menu bar 
     SetMenuBar(CreateMainMenu());
-  #endif // wxUSE_MENUS
+#endif // wxUSE_MENUS
 
-  #if wxUSE_STATUSBAR
+#if wxUSE_STATUSBAR
     // create a status bar
     CreateStatusBar(2);
     SetStatusText(_T("Welcome to GMAT! This currently has no functionality "));
-  #endif // wxUSE_STATUSBAR
+#endif // wxUSE_STATUSBAR
 
-  CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
-  InitToolBar(GetToolBar());
+    CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
+    InitToolBar(GetToolBar());
   
-  splitter = new GmatSplitterWindow(this);
+    splitter = new GmatSplitterWindow(this);
 
-  // create the tabs for Resources, Mission, Output
-  leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
-                             wxDefaultSize, wxCLIP_CHILDREN);
+    // create the tabs for Resources, Mission, Output
+    leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
+                                 wxDefaultSize, wxCLIP_CHILDREN);
 
-  rightTabs = new GmatMainNotebook( splitter, -1, wxDefaultPosition,
-                             wxDefaultSize, wxCLIP_CHILDREN);
+    rightTabs = new GmatMainNotebook( splitter, -1, wxDefaultPosition,
+                                      wxDefaultSize, wxCLIP_CHILDREN);
 
-  // add the left and right side to splitter
-  leftTabs->SetMainNotebook(rightTabs);
-  splitter->SplitVertically( leftTabs, rightTabs, 175 );
+    // add the left and right side to splitter
+    leftTabs->SetMainNotebook(rightTabs);
+    splitter->SplitVertically( leftTabs, rightTabs, 175 );
 }
 
 //-------------------------------
@@ -183,6 +183,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
            *helpMenu = new wxMenu;
     //loj: added
     wxMenu *demoMenu = new wxMenu;
+    wxMenu *scriptMenu = new wxMenu;
     
     wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
     
@@ -217,6 +218,9 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     fileMenu->Append(MENU_PROJECT_PRINT, wxT("Print"), wxT(""), FALSE);
     fileMenu->AppendSeparator();
     fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
+
+    //loj: added
+    scriptMenu->Append(MENU_SCRIPT_OPEN_FRAME, wxT("Open Window"), wxT(""), FALSE);
     
     editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
     editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
@@ -282,6 +286,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     demoMenu->Append(MENU_DEMO_BATCH_RUN, wxT("Batch Run"), wxT(""), FALSE);
     
     menuBar->Append(fileMenu, wxT("File"));
+    menuBar->Append(scriptMenu, wxT("Script"));
     menuBar->Append(editMenu, wxT("Edit"));
     menuBar->Append(parametersMenu, wxT("Parameters"));
     menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
@@ -409,3 +414,91 @@ void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
         mTextFrame->WriteText("*** Some other Error occurred in BatchRunFromGui! ");
     }
 }
+
+//------------------------------------------------------------------------------
+// void OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event))
+{   
+    // Create a document manager
+    mDocManager = new wxDocManager;
+
+    // Create a template relating text documents to their views
+    mDocTemplate = 
+        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+                          CLASSINFO(TextDocument), CLASSINFO(TextEditView));
+    //loj: why void?
+//      // Create a template relating text documents to their views
+//      (void) new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+//                               _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+//                               CLASSINFO(TextDocument), CLASSINFO(TextEditView));
+    
+    // Create the main frame window    
+    //loj: pass "this" so that this frame closes when the main frame closes
+    docMainFrame =
+        new DocViewFrame(mDocManager, this, -1, _T("Script Window"),
+                         wxPoint(0, 0), wxSize(600, 500), wxDEFAULT_FRAME_STYLE);
+    
+    // Give it an icon (this is ignored in MDI mode: uses resources)
+#ifdef __WXMSW__
+    docMainFrame->SetIcon(wxIcon(_T("doc_icn")));
+#endif
+    
+    // Make a menubar
+    wxMenu *file_menu = new wxMenu;
+    wxMenu *edit_menu = (wxMenu *) NULL;
+    
+    file_menu->Append(wxID_NEW, _T("&New..."));
+    file_menu->Append(wxID_OPEN, _T("&Open..."));
+    
+    file_menu->Append(wxID_CLOSE, _T("&Close"));
+    file_menu->Append(wxID_SAVE, _T("&Save"));
+    file_menu->Append(wxID_SAVEAS, _T("Save &As..."));
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_PRINT, _T("&Print..."));
+    file_menu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
+    file_menu->Append(wxID_PREVIEW, _T("Print Pre&view"));
+    
+    edit_menu = new wxMenu;
+    edit_menu->Append(wxID_UNDO, _T("&Undo"));
+    edit_menu->Append(wxID_REDO, _T("&Redo"));
+    edit_menu->AppendSeparator();
+    //edit_menu->Append(DOCVIEW_CUT, _T("&Cut last segment"));
+    
+    docMainFrame->editMenu = edit_menu;
+    
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_EXIT, _T("E&xit"));
+    
+    // A nice touch: a history of files visited. Use this menu.
+    mDocManager->FileHistoryUseMenu(file_menu);
+    
+    //wxMenu *help_menu = new wxMenu;
+    //help_menu->Append(DOCVIEW_ABOUT, _T("&About"));
+    
+    wxMenuBar *menu_bar = new wxMenuBar;
+    
+    menu_bar->Append(file_menu, _T("&File"));
+    
+    if (edit_menu)
+        menu_bar->Append(edit_menu, _T("&Edit"));
+    
+    //menu_bar->Append(help_menu, _T("&Help"));
+        
+    //// Associate the menu bar with the frame
+    docMainFrame->SetMenuBar(menu_bar);
+    
+    docMainFrame->Centre(wxBOTH);
+    docMainFrame->Show(TRUE);
+    
+    //loj:compile error:
+    //SetTopWindow(docMainFrame);
+}
+
