@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "MJ2000EqAxes.hpp"
 #include "MJ2000EcAxes.hpp"
+#include "BodyFixedAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -116,9 +117,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "BodyFixed")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "BodyFixedAxes not yet imnplemented.\n");
-      //withAxes = new BodyFixedAxes(withName);
+      withAxes = new BodyFixedAxes(withName);
    }
    return withAxes;
 }
