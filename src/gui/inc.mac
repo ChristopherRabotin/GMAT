@@ -3,6 +3,7 @@
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
 # Modified:   2004/05/21 - Added controllogic directory
+#             2004/09/23 - W. Shoan - added function directory
 #
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
@@ -20,6 +21,7 @@ B_EXECUTIVE  = $(PROJECT_ROOT)/base/executive
 B_FACTORY    = $(PROJECT_ROOT)/base/factory
 B_FOUNDATION = $(PROJECT_ROOT)/base/foundation
 B_FORCEMODEL = $(PROJECT_ROOT)/base/forcemodel
+B_FUNCTION   = $(PROJECT_ROOT)/base/function
 B_INTERFACE  = $(PROJECT_ROOT)/base/interface
 B_INTERPOL   = $(PROJECT_ROOT)/base/interpolator
 B_INTERPRET  = $(PROJECT_ROOT)/base/interpreter
@@ -55,7 +57,8 @@ SPACECRAFT = $(PROJECT_ROOT)/gui/spacecraft
 VIEW       = $(PROJECT_ROOT)/gui/view
 
 BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
-	-I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) -I$(B_INCLUDE) -I$(B_INTERFACE) \
+	-I$(B_FACTORY) -I$(B_FORCEMODEL) -I$(B_FOUNDATION) -I$(B_FUNCTION) \
+	-I$(B_INCLUDE) -I$(B_INTERFACE) \
 	-I$(B_INTERPOL) -I$(B_INTERPRET) -I$(B_PARAM) -I$(B_PROPAG) \
 	-I$(B_REFFRAME) -I$(B_SOLARSYS) -I$(B_SOLVER) -I$(B_SPACECRAFT) \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
