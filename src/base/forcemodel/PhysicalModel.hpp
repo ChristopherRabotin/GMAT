@@ -172,10 +172,7 @@ public:
                                           const std::string &value);
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool        SetStringParameter(const std::string &label,
-                                          const std::string &value);
-   virtual bool           GetBooleanParameter(const Integer id) const;
-   virtual bool           SetBooleanParameter(const Integer id,
-                                              const bool value);   
+                                          const std::string &value); 
 protected:
       
    /// pointer to the body for which this force is computed
@@ -188,7 +185,6 @@ protected:
    bool initialized;
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
-   bool isPrimaryBody;
 
    /// Array of data parameters containing the model data
    Real *modelState;
@@ -213,7 +209,6 @@ protected:
       EPOCH = GmatBaseParamCount, 
       ELAPSED_SECS,
       BODY_NAME,
-      PRIMARY_BODY,
       PhysicalModelParamCount
    };
 
