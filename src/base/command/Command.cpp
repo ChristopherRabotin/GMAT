@@ -462,6 +462,27 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
+//  GmatCommand* GetChildCommand(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Returns nested commands.
+ *
+ * This method returns the entry point for the commands in a branch off of the
+ * main command sequence.  The base implementation here always returns NULL; 
+ * see the BranchCommand implementation for a less trivial example.
+ *
+ * @param whichOne Determines which child command entry point is returned.  
+ * 
+ * @return The pointer to the first GmatCommand in the branch.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GmatCommand::GetChildCommand(Integer whichOne)
+{
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool AssignObjects()
 //------------------------------------------------------------------------------
 /**

@@ -90,6 +90,8 @@ public:
    virtual bool         Insert(GmatCommand *cmd, GmatCommand *prev);
    virtual GmatCommand* Remove(GmatCommand *cmd);
    
+   virtual GmatCommand* GetChildCommand(Integer whichOne = 0);
+   
    virtual bool         InterpretAction()
    {
       return false;

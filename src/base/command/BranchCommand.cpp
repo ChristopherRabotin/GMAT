@@ -72,6 +72,14 @@ GmatCommand* BranchCommand::GetNext(void)
 }
 
 
+GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
+{
+   if (whichOne > (Integer)(branch.size())-1)
+      return NULL;
+   return branch[whichOne];
+}
+
+
 bool BranchCommand::Initialize(void)
 {
     std::vector<GmatCommand*>::iterator node;

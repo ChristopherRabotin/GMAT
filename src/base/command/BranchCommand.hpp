@@ -46,11 +46,12 @@ public:
     virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
     
     virtual const std::string&  
-                            GetGeneratingString(void);
+                            GetGeneratingString();
     
-    virtual GmatCommand*        GetNext(void);
-    virtual bool            Initialize(void);
-    virtual bool            Execute(void);
+    virtual GmatCommand*    GetNext();
+    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
+    virtual bool            Initialize();
+    virtual bool            Execute();
     
 protected:
     /// The managed branch(es).  A vector so Case can use it unchanged in build 3.

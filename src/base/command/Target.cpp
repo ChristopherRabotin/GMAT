@@ -329,7 +329,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &na
       targeterName = name;
       return true;
    }
-   return false;
+   return GmatCommand::SetRefObjectName(type, name);
 }
 
 
