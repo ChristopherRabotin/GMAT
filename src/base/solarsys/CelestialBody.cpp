@@ -22,7 +22,8 @@
 #include "CelestialBody.hpp" // class's header file
 
 // class constructor
-CelestialBody::CelestialBody()
+CelestialBody::CelestialBody(std::string name) :
+    GmatBase        (Gmat::CELESTIAL_BODY, "CelestialBody", name)
 {
 	// insert your code here
 }
@@ -31,5 +32,16 @@ CelestialBody::CelestialBody()
 CelestialBody::~CelestialBody()
 {
 	// insert your code here
+}
+
+CelestialBody::CelestialBody(const CelestialBody &cb) :
+    GmatBase        (cb)
+{
+}
+
+
+CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
+{
+    return *this;
 }
 

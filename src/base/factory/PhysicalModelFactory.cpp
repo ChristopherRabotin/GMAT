@@ -62,6 +62,8 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(std::string ofType,
 PhysicalModelFactory::PhysicalModelFactory() :
 Factory(Gmat::PHYSICAL_MODEL)
 {
+   if (creatables.empty())
+      creatables.push_back("PointMassForce");
 }
 
 //------------------------------------------------------------------------------

@@ -312,7 +312,7 @@ bool Moderator::AddToForceModel(const std::string forceModelName, std::string fo
 StopCondition* Moderator::CreateStopCondition(const std::string &name)
 {
    StopCondition *stopCond = theFactoryManager->CreateStopCondition(name);
-   theConfigManager->AddStopCondition(stopCond);
+//   theConfigManager->AddStopCondition(stopCond);
    return stopCond;
 }
 

@@ -22,16 +22,18 @@
 #ifndef CELESTIALBODY_HPP
 #define CELESTIALBODY_HPP
 
+#include "GmatBase.hpp"
+
 /**
  * Shell for celestial bodies
  */
-class CelestialBody
+class CelestialBody : public GmatBase
 {
 	public:
-		// class constructor
-		CelestialBody();
-		// class destructor
+		CelestialBody(std::string name = "Earth");
 		~CelestialBody();
+		CelestialBody(const CelestialBody &cb);
+		CelestialBody&        operator=(const CelestialBody &cb);
 };
 
 #endif // CELESTIALBODY_HPP
