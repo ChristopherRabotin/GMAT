@@ -1037,6 +1037,18 @@ std::string Spacecraft::GetDisplayDateFormat() const
  */
 void Spacecraft::SetDisplayDateFormat(const std::string &dateType) 
 {
+  // Check invalid date type then throw exception
+  if (dateType != "TAIModJulian" && dateType != "UTCModJulian" &&
+      dateType != "TAIGregorian" && dateType != "UTCGregorian")
+  {
+     std::string msg = "Invalid Epoch's parameter is \"" + dateType + "\"";
+     throw SpaceObjectException(msg);
+
+//     @todo:   May use this code below later???
+//     Integer id = GetParameterID("Epoch");
+//     return (void)GmatBase::SetStringParameter(id, dateType);
+  }
+
    std::string tempType  = dateType;
    std::string tempEpoch = displayEpoch;
 
