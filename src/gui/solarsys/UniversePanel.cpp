@@ -63,6 +63,11 @@ UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
     Show();
 }
 
+UniversePanel::~UniversePanel()
+{
+}
+
+
 //-------------------------------
 // private methods
 //-------------------------------

@@ -573,6 +573,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
         menu.AppendSeparator();
         menu.Append(POPUP_RENAME, wxT("Rename"));
         menu.Append(POPUP_DELETE, wxT("Delete"));
+        
+        menu.Enable(POPUP_DELETE, FALSE);
     }
 
     //loj: 2/13/04 I just thought about this for the future build
@@ -720,18 +722,18 @@ void ResourceTree::OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnDelete(wxCommandEvent &event)
 {
-//    event.Skip();
-    wxTreeItemId item = GetSelection();
-    wxTreeItemId parentId = GetPrevVisible(item);
-    this->Collapse(parentId);
-    
-    // delete from gui interpreter
-    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
-//    theGuiInterpreter->RemoveConfiguredItem("Spacecraft", gmatItem->GetDesc());
-    
-    this->Delete(item);
-    
-
+    event.Skip();
+//    wxTreeItemId item = GetSelection();
+//    wxTreeItemId parentId = GetPrevVisible(item);
+//    this->Collapse(parentId);
+//    
+//    // delete from gui interpreter
+//    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
+////    theGuiInterpreter->RemoveConfiguredItem("Spacecraft", gmatItem->GetDesc());
+//    
+//    this->Delete(item);
+//    
+//
     
     // need to decrease counter
     // Should an open tab close too?

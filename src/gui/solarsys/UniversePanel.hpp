@@ -37,6 +37,8 @@ class UniversePanel: public GmatPanel
 {
 public:
     UniversePanel(wxWindow *parent);
+    ~UniversePanel();
+    
    
 private:
 
