@@ -85,11 +85,11 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------
 
-   //------------------------------------------------------------------------------
-   // MissionTree(wxWindow *parent, const wxWindowID id,
-   //              const wxPoint &pos, const wxSize &size, long style)
-   //------------------------------------------------------------------------------
-   /**
+//------------------------------------------------------------------------------
+// MissionTree(wxWindow *parent, const wxWindowID id,
+//              const wxPoint &pos, const wxSize &size, long style)
+//------------------------------------------------------------------------------
+/**
  * Constructs MissionTree object.
  *
  * @param <parent> input parent.
@@ -101,15 +101,15 @@ END_EVENT_TABLE()
  * @note Creates the tree for missions and adds a default mission.
  */
 //------------------------------------------------------------------------------
-   MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
-                            const wxPoint &pos, const wxSize &size, long style)
-      : DecoratedTree(parent, id, pos, size, style)
+MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
+                         const wxPoint &pos, const wxSize &size, long style)
+   : DecoratedTree(parent, id, pos, size, style)
 {
    parent = parent;
-   //    mainNotebook = GmatAppData::GetMainNotebook();
+   // mainNotebook = GmatAppData::GetMainNotebook();
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
-   //    SetNodes();
+   // SetNodes();
    SetParameter(BOXCOUNT, 2);
    SetParameter(BOXWIDTH, 20);
 
@@ -139,30 +139,34 @@ END_EVENT_TABLE()
    //    ExpandAll();
 }
 
+//loj: 6/29/04 added resetCounter
 //------------------------------------------------------------------------------
-// void UpdateMission()
+// void UpdateMission(bool resetCounter)
 //------------------------------------------------------------------------------
 /**
  * Updates Mission Sequence
  */
 //------------------------------------------------------------------------------
-void MissionTree::UpdateMission()
+void MissionTree::UpdateMission(bool resetCounter)
 {
 #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("MissionTree::UpdateCommandSeq() entered\n");
+   MessageInterface::ShowMessage("MissionTree::UpdateMission() entered\n");
 #endif
-   
-   numManeuver = 0;
-   mNumMissionSeq = 0;
-   mNumPropagate = 0;
-   mNumManeuver = 0;
-   mNumTarget = 0;
-   mNumIfStatement = 0;
-   mNumWhileLoop = 0;
-   mNumForLoop = 0;
-   mNumDoWhile = 0;
-   mNumSwitchCase = 0;
 
+   if (resetCounter)
+   {
+      numManeuver = 0;
+      mNumMissionSeq = 0;
+      mNumPropagate = 0;
+      mNumManeuver = 0;
+      mNumTarget = 0;
+      mNumIfStatement = 0;
+      mNumWhileLoop = 0;
+      mNumForLoop = 0;
+      mNumDoWhile = 0;
+      mNumSwitchCase = 0;
+   }
+   
    DeleteChildren(mMissionSeqSubItem);
 
    UpdateCommand();
@@ -211,39 +215,49 @@ void MissionTree::UpdateCommand()
 void MissionTree::UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd)
 {
    wxString objTypeName = cmd->GetTypeName().c_str();
-
+   wxString objName = cmd->GetName().c_str(); //loj: 6/29/04 added
+   
 #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("MissionTree::UpdateCommand() objTypeName = " +
-                                 std::string(objTypeName.c_str()) + "\n");
+   MessageInterface::ShowMessage
+      ("MissionTree::UpdateCommand() objTypeName = %s objName=%s\n",
+       objTypeName.c_str(), objName.c_str());
 #endif
    
    if (objTypeName == "Propagate")
    {
-      AppendItem(treeId, objTypeName, GmatTree::ICON_FILE, -1,
-                 new MissionTreeItemData(objTypeName,
+      if (objName == "" || objName == " ")
+            objName.Printf("Propagate%d", ++mNumPropagate);
+
+      AppendItem(treeId, objName, GmatTree::ICON_FILE, -1,
+                 new MissionTreeItemData(objName,
                                          GmatTree::PROPAGATE_COMMAND,
-                                         objTypeName, cmd));
+                                         objName, cmd));
    }
    else if (objTypeName == "Maneuver")
    {
-      AppendItem(treeId, objTypeName, GmatTree::ICON_FILE, -1,
-                 new MissionTreeItemData(objTypeName,
+      if (objName == "" || objName == " ")
+            objName.Printf("Maneuver%d", ++mNumManeuver);
+
+      AppendItem(treeId, objName, GmatTree::ICON_FILE, -1,
+                 new MissionTreeItemData(objName,
                                          GmatTree::MANEUVER_COMMAND,
-                                         objTypeName, cmd));
+                                         objName, cmd));
    }
    else if (objTypeName == "Target")
    {
+      if (objName == "" || objName == " ")
+            objName.Printf("Target%d", ++mNumTarget);
+
       wxTreeItemId newId =
-         AppendItem(treeId, objTypeName, GmatTree::ICON_FOLDER, -1,
-                    new MissionTreeItemData(objTypeName,
+         AppendItem(treeId, objName, GmatTree::ICON_FOLDER, -1,
+                    new MissionTreeItemData(objName,
                                             GmatTree::TARGET_COMMAND,
-                                            objTypeName, cmd));
+                                            objName, cmd));
         
       SetItemImage(newId, GmatTree::ICON_OPENFOLDER, 
                    wxTreeItemIcon_Expanded);
 
       Expand(treeId);
-                
    }
 }
 

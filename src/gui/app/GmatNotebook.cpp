@@ -78,10 +78,10 @@ void GmatNotebook::OnNotebookSelChange(wxNotebookEvent &event)
    
    if (sel == 0)
    {
-      resourceTree->UpdateResource();
+      resourceTree->UpdateResource(false); //loj: 6/29/04 added false
    }
 
-   event.Skip();
+   event.Skip(); // need this
 }
 
 //-------------------------------
