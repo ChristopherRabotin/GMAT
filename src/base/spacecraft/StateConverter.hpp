@@ -55,6 +55,10 @@ public:
    Real     GetMu() const;
    bool     SetMu(SolarSystem *solarSystem, const std::string &body);
 
+   //loj: 10/21/04 added
+   Rvector6 Convert(const Rvector6 &state, const std::string &fromElementType,
+                    const std::string &toElementType);
+
    Rvector6 Convert(const Real *state, const std::string &fromElementType,
                     const std::string &toElementType);
 

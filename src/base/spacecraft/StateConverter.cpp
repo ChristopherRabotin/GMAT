@@ -18,6 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include "StateConverter.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_STATE_CONVERTER 1
 
 //-------------------------------------
 // public methods
@@ -151,9 +154,35 @@ bool StateConverter::SetMu(SolarSystem *solarSystem,
 }
 
 
+//loj: 10/21/04 added
+//---------------------------------------------------------------------------
+//  Rvector6 StateConverter::Convert(const Rvector6 &state,   
+//                                   const std::string &fromElementType,
+//                                   const std::string &toElementType)
+//---------------------------------------------------------------------------
+/**
+ * Assignment operator for StateConverter structures.
+ *
+ * @param <state> Element states 
+ * @param <fromElementType>  Element Type 
+ * @param <toElementType> Element Type
+ *
+ * @return Converted states from the specific element type 
+ */
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::Convert(const Rvector6 &state,   
+                                 const std::string &fromElementType,
+                                 const std::string &toElementType)
+{
+   Real tempState[6];
+   for (int i=0; i<6; i++)
+      tempState[i] = state.Get(i);
+
+   return Convert(tempState, fromElementType, toElementType);
+}
+
 //---------------------------------------------------------------------------
 //  Rvector6 StateConverter::Convert(const Real *state,   
-//                                   const std::string &fromElementType,
 //                                   const std::string &toElementType)
 //---------------------------------------------------------------------------
 /**
@@ -167,11 +196,11 @@ bool StateConverter::SetMu(SolarSystem *solarSystem,
 Rvector6 StateConverter::Convert(const Real *state,
                                  const std::string &toElementType)
 {
-   return Convert(state,type,toElementType);
+   return Convert(state, type, toElementType);
 }
 
 //---------------------------------------------------------------------------
-//  Rvector6 StateConverter::Convert(const Real *state,   
+//  Rvector6 StateConverter::Convert(Real *state,   
 //                                   const std::string &fromElementType,
 //                                   const std::string &toElementType)
 //---------------------------------------------------------------------------
@@ -191,6 +220,14 @@ Rvector6 StateConverter::Convert(const Real *state,
     Rvector6 newState;
     newState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
 
+#if DEBUG_STATE_CONVERTER
+    MessageInterface::ShowMessage
+       ("StateConverter::Convert() fromElementType=%s, toElementType=%s,"
+        " state=\n %f %f %f %f %f %f\n", fromElementType.c_str(),
+        toElementType.c_str(), state[0], state[1], state[2], state[3],
+        state[4], state[5]);
+#endif
+    
     // Determine the input of coordinate representation 
     if (fromElementType == "Cartesian" && toElementType != "Cartesian")
     {
@@ -201,7 +238,7 @@ Rvector6 StateConverter::Convert(const Real *state,
        } 
     }
     else if (fromElementType == "Keplerian" && toElementType != "Keplerian")
-    {
+    {       
        if (toElementType == "Cartesian")
           return(KeplerianToCartesian(newState,mu,CoordUtil::TA));
     }
