@@ -80,7 +80,8 @@ public:
 //    Solver *              CreateSolver(std::string ofType,
 //                                       std::string withName = "");
     Subscriber *          CreateSubscriber(std::string ofType,
-                                           std::string withName = "");
+                                           std::string withName = "",
+                                           std::string fileName = "");
     Command *             CreateCommand(std::string ofType,
                                         std::string withName = "");
 

@@ -62,7 +62,8 @@ public:
 //   virtual Solver*            CreateSolver(std::string ofType,
 //                                           std::string withName = ""); 
    virtual Subscriber*          CreateSubscriber(std::string ofType,
-                                                 std::string withName = "");
+                                                 std::string withname = "",
+                                                 std::string fileName = "");
    virtual Command*             CreateCommand(std::string ofType,
                                               std::string withName = "");
 

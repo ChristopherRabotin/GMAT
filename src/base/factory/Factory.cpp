@@ -316,7 +316,8 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  */
 //------------------------------------------------------------------------------
 Subscriber* Factory::CreateSubscriber(std::string ofType,
-                                              std::string withName)
+                                      std::string withName,
+                                      stfd::string fileName)
 {
    throw FactoryException("requested object must be of type Subscriber");
 }

@@ -305,7 +305,8 @@ SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
 //}
 
 //------------------------------------------------------------------------------
-//  Subscriber* CreateSubscriber(std::string ofType, std::string withName)
+//  Subscriber* CreateSubscriber(std::string ofType, std::string withname,
+//                               std::string fileName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Subscriber, with the name withName.
@@ -316,11 +317,12 @@ SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
  */
 //------------------------------------------------------------------------------
    Subscriber* FactoryManager::CreateSubscriber(std::string ofType,
-                                                std::string withName)
+                                                std::string withName,
+                                                std::string fileName)
 {
    Factory* f = FindFactory(Gmat::SUBSCRIBER, ofType);
    if (f != NULL)
-      return f->CreateSubscriber(ofType, withName);
+      return f->CreateSubscriber(ofType, withName, fileName);
    return NULL;
 }
 
