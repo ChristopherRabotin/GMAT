@@ -17,10 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-#include <iostream>
-#include <iomanip>
 #include "TimeConverter.hpp"
-#include <exception>
 
 //-------------------------------------
 // public methods
@@ -109,7 +106,6 @@ TimeConverter& TimeConverter::operator=(const TimeConverter &timeConverter)
  *
  * @return Converted time from the specific data format 
  */
-// Real TimeConverter::Convert(const Real time,   
 std::string TimeConverter::Convert(const std::string &time,   
                                    const std::string &fromDateFormat,
                                    const std::string &toDateFormat)
@@ -137,22 +133,32 @@ std::string TimeConverter::Convert(const std::string &time,
        else if (toDateFormat == "UTCGregorian")
        {
           UtcDate utcDate = jd.ToUtcDate();
-          newTime = utcDate.ToPackedCalendarString();
+
+          GregorianDate gregorianDate(&utcDate);
+          newTime = gregorianDate.GetDate();   
        }
 
        else if (toDateFormat == "TAIGregorian")
        {
           A1Date a1Date = jd.ToA1Date();
-          newTime = a1Date.ToPackedCalendarString();
+
+          GregorianDate gregorianDate(&a1Date);
+          newTime = gregorianDate.GetDate();   
        }
+
     }
 
     else if (fromDateFormat == "TAIGregorian" && toDateFormat != "TAIGregorian")
     {
        Real mjd;  
+       GregorianDate gregorianDate(time);
+
+       if (!gregorianDate.IsValid())
+          throw TimeConverterException();
+
        try
        {
-          A1Date a1Date(time);
+          A1Date a1Date(gregorianDate.GetYMDHMS());
 
           mjd = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
                                    a1Date.GetDay(),a1Date.GetHour(),
@@ -175,7 +181,14 @@ std::string TimeConverter::Convert(const std::string &time,
        if (toDateFormat == "UTCGregorian")
        {
           UtcDate utcDate = a1Mjd.ToUtcDate();
-          newTime = utcDate.ToPackedCalendarString();
+          gregorianDate.SetDate(&utcDate);
+  
+          if (!gregorianDate.IsValid())
+             throw TimeConverterException();
+  
+          newTime = gregorianDate.GetDate();
+
+          // newTime = utcDate.ToPackedCalendarString();
        }
        else if (toDateFormat == "UTCModJulian")  
        {
@@ -190,6 +203,8 @@ std::string TimeConverter::Convert(const std::string &time,
 
     else if (fromDateFormat == "UTCModJulian" && toDateFormat != "UTCModJulian")
     {
+       GregorianDate gregorianDate;
+
        if (toDateFormat == "TAIGregorian")
        {
           // Convert to A1 MJD and then A1 Date 
@@ -197,7 +212,13 @@ std::string TimeConverter::Convert(const std::string &time,
           Real mjd =  a1Mjd.UtcMjdToA1Mjd(realTime); 
           a1Mjd.Set(mjd);
           A1Date a1Date = a1Mjd.ToA1Date();
-          newTime = a1Date.ToPackedCalendarString();
+
+          gregorianDate.SetDate(&a1Date);
+  
+          if (!gregorianDate.IsValid())
+             throw TimeConverterException();
+  
+          newTime = gregorianDate.GetDate();
        }
 
        else if (toDateFormat == "TAIModJulian")
@@ -215,20 +236,24 @@ std::string TimeConverter::Convert(const std::string &time,
           Real a1mjd = a1Mjd.UtcMjdToA1Mjd(realTime);
           a1Mjd.Set(a1mjd);  
           UtcDate utcDate = a1Mjd.ToUtcDate();
-          newTime = utcDate.ToPackedCalendarString();
+
+          gregorianDate.SetDate(&utcDate);
+  
+          if (!gregorianDate.IsValid())
+             throw TimeConverterException();
+  
+          newTime = gregorianDate.GetDate();
        }
     }
 
     else if (fromDateFormat == "UTCGregorian" && toDateFormat != "UTCGregorian")
     {
-#if 0
-       std::ostringstream timeBuffer;
-       timeBuffer.precision(9);
-       timeBuffer.setf(std::ios::fixed);
-       timeBuffer << realTime; 
-#endif
-      
-       UtcDate utcDate(time);
+       GregorianDate gregorianDate(time);
+
+       if (!gregorianDate.IsValid())
+          throw TimeConverterException();
+ 
+       UtcDate utcDate(gregorianDate.GetYMDHMS());
 
        // Get UTC MJD 
        Real mjd = ModifiedJulianDate(utcDate.GetYear(),
@@ -254,7 +279,9 @@ std::string TimeConverter::Convert(const std::string &time,
           mjd =  a1Mjd.UtcMjdToA1Mjd(mjd); 
           a1Mjd.Set(mjd);
           A1Date a1Date = a1Mjd.ToA1Date();
-          newTime = a1Date.ToPackedCalendarString();
+         
+          gregorianDate.SetDate(&a1Date);
+          newTime = gregorianDate.GetDate();
        }
        
     }

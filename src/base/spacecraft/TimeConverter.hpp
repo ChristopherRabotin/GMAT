@@ -20,6 +20,8 @@
 #ifndef TimeConverter_hpp
 #define TimeConverter_hpp
 
+#include <iostream>
+#include <iomanip>
 #include <sstream>
 #include "BaseException.hpp"
 #include "Converter.hpp"
@@ -27,6 +29,7 @@
 #include "A1Mjd.hpp"
 #include "UtcDate.hpp"
 #include "DateUtil.hpp"
+#include "GregorianDate.hpp"
 
 class GMAT_API TimeConverter : public Converter
 {
