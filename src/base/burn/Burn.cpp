@@ -71,28 +71,27 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const std::string &typeStr, const std::string &nomme) :
-    GmatBase        (Gmat::BURN, typeStr, nomme),
-    coordFrame      ("Inertial"),
-    coordSystem     ("Cartesian"),
-    satName         (""),
-    sc              (NULL)
+   GmatBase        (Gmat::BURN, typeStr, nomme),
+   coordFrame      ("Inertial"),
+   coordSystem     ("Cartesian"),
+   satName         (""),
+   sc              (NULL)
 {
-    parameterCount += 9;
+   parameterCount = BurnParamCount;
     
-    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
-    frameman = new ManeuverFrameManager;
+   deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+   frameman = new ManeuverFrameManager;
 
-    /// Load the default maneuver frame
-    frame = frameman->GetFrameInstance(coordFrame);
+   /// Load the default maneuver frame
+   frame = frameman->GetFrameInstance(coordFrame);
 
-    dvLabels[0] = frame->GetFrameLabel(1);
-    dvLabels[1] = frame->GetFrameLabel(2);
-    dvLabels[2] = frame->GetFrameLabel(3);
+   dvLabels[0] = frame->GetFrameLabel(1);
+   dvLabels[1] = frame->GetFrameLabel(2);
+   dvLabels[2] = frame->GetFrameLabel(3);
     
-    frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
-    frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] = 
-    frameBasis[0][2] = frameBasis[1][2] = frameBasis[2][1] = 0.0;
-     
+   frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
+   frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] =
+   frameBasis[0][2] = frameBasis[1][2] = frameBasis[2][1] = 0.0;
 }
 
 
@@ -119,20 +118,20 @@ Burn::~Burn()
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
-    GmatBase        (b),
-    coordFrame      (b.coordFrame),
-    coordSystem     (b.coordSystem),
-    satName         (b.satName),
-    sc              (NULL)
+   GmatBase        (b),
+   coordFrame      (b.coordFrame),
+   coordSystem     (b.coordSystem),
+   satName         (b.satName),
+   sc              (NULL)
 {
-    deltaV[0] = b.deltaV[0];
-    deltaV[1] = b.deltaV[1];
-    deltaV[2] = b.deltaV[2];
-    dvLabels[0] = b.dvLabels[0];
-    dvLabels[1] = b.dvLabels[1];
-    dvLabels[2] = b.dvLabels[2];
+   deltaV[0] = b.deltaV[0];
+   deltaV[1] = b.deltaV[1];
+   deltaV[2] = b.deltaV[2];
+   dvLabels[0] = b.dvLabels[0];
+   dvLabels[1] = b.dvLabels[1];
+   dvLabels[2] = b.dvLabels[2];
     
-    parameterCount = b.parameterCount;
+   parameterCount = b.parameterCount;
 }
 
 
@@ -149,23 +148,23 @@ Burn::Burn(const Burn &b) :
 //------------------------------------------------------------------------------
 Burn& Burn::operator=(const Burn &b)
 {
-    if (this == &b)
-        return *this;
+   if (this == &b)
+      return *this;
         
-    GmatBase::operator=(b);
+   GmatBase::operator=(b);
 
-    coordFrame  = b.coordFrame;
-    coordSystem = b.coordSystem;
-    satName     = b.satName;
-    sc          = NULL;
-    deltaV[0]   = b.deltaV[0];
-    deltaV[1]   = b.deltaV[1];
-    deltaV[2]   = b.deltaV[2];
-    dvLabels[0] = b.dvLabels[0];
-    dvLabels[1] = b.dvLabels[1];
-    dvLabels[2] = b.dvLabels[2];
+   coordFrame  = b.coordFrame;
+   coordSystem = b.coordSystem;
+   satName     = b.satName;
+   sc          = NULL;
+   deltaV[0]   = b.deltaV[0];
+   deltaV[1]   = b.deltaV[1];
+   deltaV[2]   = b.deltaV[2];
+   dvLabels[0] = b.dvLabels[0];
+   dvLabels[1] = b.dvLabels[1];
+   dvLabels[2] = b.dvLabels[2];
 
-    return *this;
+   return *this;
 }
 
 
@@ -201,16 +200,16 @@ std::string Burn::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Burn::GetParameterID(const std::string &str) const
 {
-    // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates) 
-    // directly
-    if (str == dvLabels[0])
-        return DELTAV1;
+   // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates)
+   // directly
+   if (str == dvLabels[0])
+      return DELTAV1;
         
-    if (str == dvLabels[1]) 
-        return DELTAV2;
+   if (str == dvLabels[1])
+      return DELTAV2;
         
-    if (str == dvLabels[2])
-        return DELTAV3;
+   if (str == dvLabels[2])
+      return DELTAV3;
    
    for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
    {
@@ -272,16 +271,16 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real Burn::GetRealParameter(const Integer id) const
 {
-    if (id == DELTAV1) 
-        return deltaV[0];
+   if (id == DELTAV1)
+      return deltaV[0];
         
-    if (id == DELTAV2) 
-        return deltaV[1];
+   if (id == DELTAV2)
+      return deltaV[1];
         
-    if (id == DELTAV3) 
-        return deltaV[2];
+   if (id == DELTAV3)
+      return deltaV[2];
         
-    return GmatBase::GetRealParameter(id);
+   return GmatBase::GetRealParameter(id);
 }
 
       
@@ -299,22 +298,25 @@ Real Burn::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Burn::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == DELTAV1) {
-        deltaV[0] = value;
-        return deltaV[0];
-    }
+   if (id == DELTAV1)
+   {
+      deltaV[0] = value;
+      return deltaV[0];
+   }
         
-    if (id == DELTAV2) {
-        deltaV[1] = value;
-        return deltaV[1];
-    }
+   if (id == DELTAV2)
+   {
+      deltaV[1] = value;
+      return deltaV[1];
+   }
         
-    if (id == DELTAV3) {
-        deltaV[2] = value;
-        return deltaV[2];
-    } 
+   if (id == DELTAV3)
+   {
+      deltaV[2] = value;
+      return deltaV[2];
+   }
 
-    return GmatBase::SetRealParameter(id, value);
+   return GmatBase::SetRealParameter(id, value);
 }
 
 
@@ -331,25 +333,25 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 std::string Burn::GetStringParameter(const Integer id) const
 {
-    if (id == COORDFRAME) 
-        return coordFrame;
+   if (id == COORDFRAME)
+      return coordFrame;
         
-    if (id == COORDSYSTEM) 
-        return coordSystem;
+   if (id == COORDSYSTEM)
+      return coordSystem;
         
-    if (id == DELTAV1LABEL) 
-        return dvLabels[0];
+   if (id == DELTAV1LABEL)
+      return dvLabels[0];
         
-    if (id == DELTAV2LABEL) 
-        return dvLabels[1];
+   if (id == DELTAV2LABEL)
+      return dvLabels[1];
         
-    if (id == DELTAV3LABEL) 
-        return dvLabels[2];
+   if (id == DELTAV3LABEL)
+      return dvLabels[2];
         
-    if (id == SATNAME) 
-        return satName;
+   if (id == SATNAME)
+      return satName;
         
-    return GmatBase::GetStringParameter(id);
+   return GmatBase::GetStringParameter(id);
 }
 
 
@@ -367,43 +369,46 @@ std::string Burn::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Burn::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == COORDFRAME) {
-        /// @todo validate the input value
-        // if (!IsValidFrame(value))
-        //    return false;    
-        coordFrame = value;
-        frame = frameman->GetFrameInstance(coordFrame);
+   if (id == COORDFRAME)
+   {
+      /// @todo validate the input value when the CS code is incorporated.
+      // if (!IsValidFrame(value))
+      //    return false;
+      coordFrame = value;
+      frame = frameman->GetFrameInstance(coordFrame);
 
-        dvLabels[0] = frame->GetFrameLabel(1);
-        dvLabels[1] = frame->GetFrameLabel(2);
-        dvLabels[2] = frame->GetFrameLabel(3);
-        return true;
-    }
+      dvLabels[0] = frame->GetFrameLabel(1);
+      dvLabels[1] = frame->GetFrameLabel(2);
+      dvLabels[2] = frame->GetFrameLabel(3);
+      return true;
+   }
         
-    if (id == COORDSYSTEM) {
-        /// @todo validate the input value
-        // if (!IsValidSystem(value))
-        //     return false;
-        coordSystem = value;
-        return true;
-    }
+   if (id == COORDSYSTEM)
+   {
+      /// @todo validate the input value when the CS code is incorporated.
+      // if (!IsValidSystem(value))
+      //     return false;
+      coordSystem = value;
+      return true;
+   }
         
-    // Cannot change the labels -- they are set internally
-    if (id == DELTAV1LABEL) 
-        return false;
+   // Cannot change the labels -- they are set internally
+   if (id == DELTAV1LABEL)
+      return false;
         
-    if (id == DELTAV2LABEL) 
-        return false;
+   if (id == DELTAV2LABEL)
+      return false;
         
-    if (id == DELTAV3LABEL) 
-        return false;
+   if (id == DELTAV3LABEL)
+      return false;
         
-    if (id == SATNAME) {
-        satName = value;
-        return true;
-    }
+   if (id == SATNAME)
+   {
+      satName = value;
+      return true;
+   }
         
-    return GmatBase::SetStringParameter(id, value);
+   return GmatBase::SetStringParameter(id, value);
 }
 
 
@@ -428,9 +433,9 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const Integer id) const
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Access an array of string data.
  * 
@@ -442,27 +447,27 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value,
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 {
-    if (id == COORDFRAME)
-        return frameman->GetSupportedFrames();
+   if (id == COORDFRAME)
+      return frameman->GetSupportedFrames();
 
-    return GmatBase::GetStringArrayParameter(id);
+   return GmatBase::GetStringArrayParameter(id);
 }
 
 
 // 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  void SetSpacecraftToManeuver(Spacecraft *sat)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Accessor method used by Maneuver to pass in the spacecraft pointer
  * 
  * @param sat the Spacecraft
  */
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
 {
-    sc = sat;
+   sc = sat;
 }

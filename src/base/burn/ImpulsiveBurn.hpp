@@ -28,14 +28,15 @@
 class GMAT_API ImpulsiveBurn : public Burn
 {
 public:
-   ImpulsiveBurn(std::string nomme = "");
+   ImpulsiveBurn(const std::string &nomme = "");
+	virtual ~ImpulsiveBurn();
    ImpulsiveBurn(const ImpulsiveBurn &copy);
-	virtual ~ImpulsiveBurn(void);
- 
+   ImpulsiveBurn&          operator=(const ImpulsiveBurn &orig);
+
    virtual bool            Fire(Real *burnData = NULL);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*       Clone() const;
 };
 
 #endif // ImpulsiveBurn_hpp

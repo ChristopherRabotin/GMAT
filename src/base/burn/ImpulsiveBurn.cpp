@@ -26,7 +26,7 @@
 
 
 //------------------------------------------------------------------------------
-//  Burn(std::string typeStr, std::string nomme)
+//  Burn(const std::string &nomme)
 //------------------------------------------------------------------------------
 /**
  * Constructs the impulsive burn (default constructor).
@@ -34,11 +34,22 @@
  * @param <nomme> Name for the object
  */
 //------------------------------------------------------------------------------
-ImpulsiveBurn::ImpulsiveBurn(std::string nomme) :
+ImpulsiveBurn::ImpulsiveBurn(const std::string &nomme) :
     Burn            ("ImpulsiveBurn", nomme)
 {
 }
 
+
+//------------------------------------------------------------------------------
+//  ImpulsiveBurn()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the impulsive burn (destructor).
+ */
+//------------------------------------------------------------------------------
+ImpulsiveBurn::~ImpulsiveBurn()
+{
+}
 
 //------------------------------------------------------------------------------
 //  ImpulsiveBurn(const ImpulsiveBurn &copy)
@@ -55,14 +66,22 @@ Burn            (copy)
 }
 
 //------------------------------------------------------------------------------
-//  Burn(void)
+//  ImpulsiveBurn& operator=(const ImpulsiveBurn &orig)
 //------------------------------------------------------------------------------
 /**
- * Destroys the impulsive burn (destructor).
+ * Assignment operator for impulsive burns.
+ *
+ * @param <orig> ImpulsiveBurn object to copy
+ *
+ * @return this instance, configured like the imput instance.
  */
 //------------------------------------------------------------------------------
-ImpulsiveBurn::~ImpulsiveBurn()
+ImpulsiveBurn& ImpulsiveBurn::operator=(const ImpulsiveBurn &orig)
 {
+   if (this != &orig)
+      Burn::operator=(orig);
+
+   return *this;
 }
 
 
@@ -77,8 +96,11 @@ ImpulsiveBurn::~ImpulsiveBurn()
  * that needs to incorporate the burn.  If the class has an assigned Spacecraft,
  * that spacecraft is used instead of the input state.
  * 
- * @param <burnData>    Array of data specific to the derived burn class. 
+ * @param <burnData>    Array of data specific to the derived burn class.
+ *
+ * @return true on success, throws on failure.
  */
+//------------------------------------------------------------------------------
 bool ImpulsiveBurn::Fire(Real *burnData)
 {
    #ifdef DEBUG_IMPULSIVE_BURN
@@ -91,7 +113,9 @@ bool ImpulsiveBurn::Fire(Real *burnData)
       throw BurnException("Maneuver frame undefined");
     
    PropState *state;
-   if (sc)    
+
+   /// @todo Consolidate Finite & Impulsive burn initialization into base class
+   if (sc)
       state = &sc->GetState();
    else
       throw BurnException("Maneuver initial state undefined (No spacecraft?)");

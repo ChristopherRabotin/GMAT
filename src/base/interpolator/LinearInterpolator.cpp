@@ -16,7 +16,6 @@
 //------------------------------------------------------------------------------
 
 
-
 #include "LinearInterpolator.hpp" // class's header file
 
 //------------------------------------------------------------------------------
@@ -25,7 +24,8 @@
 /**
  * Creates an instance of a LinearInterpolator (default constructor).
  * 
- * @param dim   Dimension of the data that will be interpolated (defaults to 1).
+ * @param <name> Name for this interpolator.
+ * @param <dim>  Dimension of data that will be interpolated (defaults to 1).
  */
 //------------------------------------------------------------------------------
 LinearInterpolator::LinearInterpolator(const std::string &name, Integer dim) :
@@ -35,13 +35,13 @@ LinearInterpolator::LinearInterpolator(const std::string &name, Integer dim) :
 
 
 //------------------------------------------------------------------------------
-//  LinearInterpolator(Integer dim)
+//  ~LinearInterpolator()
 //------------------------------------------------------------------------------
 /**
  * Removes instance of a LinearInterpolator from memory (destructor).
  */
 //------------------------------------------------------------------------------
-LinearInterpolator::~LinearInterpolator(void)
+LinearInterpolator::~LinearInterpolator()
 {
 }
 
@@ -97,8 +97,10 @@ bool LinearInterpolator::Interpolate(const Real ind, Real *results)
     if (pointCount < requiredPoints)
         return false;
         
-    Integer index = latestPoint, previousPoint = latestPoint-1,
-            valid = pointCount, i;
+    Integer index         = latestPoint;
+    Integer previousPoint = latestPoint-1;
+    Integer valid         = pointCount;
+    Integer i;
     Real delta;
     
     while ((previousPoint != latestPoint) && valid > 0) {
@@ -134,16 +136,15 @@ bool LinearInterpolator::Interpolate(const Real ind, Real *results)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the LinearInterpolator.
  *
  * @return clone of the LinearInterpolator.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* LinearInterpolator::Clone(void) const
+GmatBase* LinearInterpolator::Clone() const
 {
    return (new LinearInterpolator(*this));
 }

@@ -16,17 +16,18 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef BURNEXCEPTION_H
-#define BURNEXCEPTION_H
+#ifndef BurnException_hpp
+#define BurnException_hpp
 
 #include "BaseException.hpp"
+#include "gmatdefs.hpp"          // For GMAT_API
 
-class BurnException : public BaseException{
+class GMAT_API BurnException : public BaseException
+{
 public:
-
-	BurnException(std::string details);
-	virtual ~BurnException();
-    BurnException(const BurnException &be);
+   BurnException(const std::string &details);
+   virtual ~BurnException();
+   BurnException(const BurnException &be);
 };
 
-#endif // BURNEXCEPTION_H
+#endif // BurnException_hpp

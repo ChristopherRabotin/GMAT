@@ -19,6 +19,7 @@
 
 
 #include "VnbManeuverFrame.hpp"
+#include <math.h>
 
 
 //------------------------------------------------------------------------------
@@ -51,7 +52,7 @@ VnbManeuverFrame::~VnbManeuverFrame()
 /**
  * Constructs the VNB maneuver frame based on another one (copy constructor).
  * 
- * @param <imf> The frame that is being copied.
+ * @param <vmf> The frame that is being copied.
  */
 //------------------------------------------------------------------------------
 VnbManeuverFrame::VnbManeuverFrame(const VnbManeuverFrame& vmf) :

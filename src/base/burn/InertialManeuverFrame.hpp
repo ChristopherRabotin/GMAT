@@ -23,18 +23,16 @@
 
 #include "ManeuverFrame.hpp"
 
-class InertialManeuverFrame : public ManeuverFrame{
+class GMAT_API InertialManeuverFrame : public ManeuverFrame
+{
 public:
-
-    InertialManeuverFrame();
-    virtual ~InertialManeuverFrame();
-    InertialManeuverFrame(const InertialManeuverFrame& imf);
-    InertialManeuverFrame&  operator=(const InertialManeuverFrame& imf);
+   InertialManeuverFrame();
+   virtual ~InertialManeuverFrame();
+   InertialManeuverFrame(const InertialManeuverFrame& imf);
+   InertialManeuverFrame&  operator=(const InertialManeuverFrame& imf);
  
-    std::string             GetFrameLabel(Integer id);
-
 protected:
-    void                    CalculateBasis(void);
+   void                    CalculateBasis(void);
 };
 
 #endif // InertialManeuverFrame_hpp

@@ -23,79 +23,82 @@
 
 
 //------------------------------------------------------------------------------
-//  Interpolator(const std::string &name, const std::string &typestr, Integer dim)
+//  Interpolator(const std::string &name, const std::string &typestr,
+//               Integer dim)
 //------------------------------------------------------------------------------
 /**
  * Constructs the core elements of an Interpolator.
  * 
- * @param typestr   Text string identifying the type of interpolator.
- * @param dim       Dimension of data that gets interpolated (defaults to 1).
+ * @param <name>    Name for this interpolator.
+ * @param <typestr> Text string identifying the type of interpolator.
+ * @param <dim>     Dimension of data that gets interpolated (defaults to 1).
  */
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const std::string &name, const std::string &typestr,
                            Integer dim) :
-    GmatBase        (Gmat::INTERPOLATOR, typestr, name),
-    independent     (NULL),
-    dependent       (NULL),
-    previousX       (-9.9999e65),
-    dimension       (dim),
-    requiredPoints  (2),
-    bufferSize      (2),
-    pointCount      (0),
-    latestPoint     (-1),
-    rangeCalculated (false),
-    dataIncreases   (true)
+   GmatBase        (Gmat::INTERPOLATOR, typestr, name),
+   independent     (NULL),
+   dependent       (NULL),
+   previousX       (-9.9999e65),
+   dimension       (dim),
+   requiredPoints  (2),
+   bufferSize      (2),
+   pointCount      (0),
+   latestPoint     (-1),
+   rangeCalculated (false),
+   dataIncreases   (true)
 {
-    range[0] = range[1] = 0.0;
+   range[0] = range[1] = 0.0;
 }
 
 
 
 //------------------------------------------------------------------------------
-//  ~Interpolator(void)
+//  ~Interpolator()
 //------------------------------------------------------------------------------
 /**
  * Destroys the core elements of an Interpolator.
  */
 //------------------------------------------------------------------------------
-Interpolator::~Interpolator(void)
+Interpolator::~Interpolator()
 {
-    CleanupArrays();
+   CleanupArrays();
 }
 
 
 //------------------------------------------------------------------------------
-//  Interpolator(const std::string &typestr, Integer dim)
+//  Interpolator(const Interpolator &i)
 //------------------------------------------------------------------------------
 /**
  * Constructs the core elements of an Interpolator (Copy Constructor).
  * 
- * @param i   The interpolator that is copied.
+ * @param <i> The interpolator that is copied.
  */
 //------------------------------------------------------------------------------
 Interpolator::Interpolator(const Interpolator &i) :
-    GmatBase        (i),
-    previousX       (i.previousX),
-    dimension       (i.dimension),
-    requiredPoints  (i.requiredPoints),
-    bufferSize      (i.bufferSize),
-    pointCount      (i.pointCount),
-    latestPoint     (i.latestPoint),
-    rangeCalculated (i.rangeCalculated),
-    dataIncreases   (i.dataIncreases)
+   GmatBase        (i),
+   previousX       (i.previousX),
+   dimension       (i.dimension),
+   requiredPoints  (i.requiredPoints),
+   bufferSize      (i.bufferSize),
+   pointCount      (i.pointCount),
+   latestPoint     (i.latestPoint),
+   rangeCalculated (i.rangeCalculated),
+   dataIncreases   (i.dataIncreases)
 {
-    if (i.independent)
-        CopyArrays(i);
-    else
-    {
-        independent = NULL;
-        dependent = NULL;
-    }
+   if (i.independent)
+      CopyArrays(i);
+   else
+   {
+      independent = NULL;
+      dependent = NULL;
+   }
 
-    if (rangeCalculated) {
-        range[0] = i.range[0];
-        range[1] = i.range[1];
-    }
+   if (rangeCalculated)
+   {
+      range[0] = i.range[0];
+      range[1] = i.range[1];
+   }
 }
 
 
@@ -105,38 +108,41 @@ Interpolator::Interpolator(const Interpolator &i) :
 /**
  * Assignment operator
  * 
- * @param i Interpolator that is used to set the values for this one.
+ * @param <i> Interpolator that is used to set the values for this one.
+ *
+ * @return this instance, configured like the input instance.
  */
 //------------------------------------------------------------------------------
 Interpolator& Interpolator::operator=(const Interpolator &i)
 {
-    if (&i == this)
-        return *this;
+   if (&i == this)
+      return *this;
         
-    GmatBase::operator=(i);
+   GmatBase::operator=(i);
 
-    // Free any allocated memory
-    if (independent)
-        CleanupArrays();
+   // Free any allocated memory
+   if (independent)
+      CleanupArrays();
         
-    // Now set the member data to the new values
-    dimension = i.dimension;
-    requiredPoints = i.requiredPoints;
-    bufferSize = i.bufferSize;
-    pointCount = i.pointCount;
-    latestPoint = i.latestPoint;
+   // Now set the member data to the new values
+   dimension      = i.dimension;
+   requiredPoints = i.requiredPoints;
+   bufferSize     = i.bufferSize;
+   pointCount     = i.pointCount;
+   latestPoint    = i.latestPoint;
 
-    // Copy over the memory from i
-    if (i.independent)
-        CopyArrays(i);
+   // Copy over the memory from i
+   if (i.independent)
+      CopyArrays(i);
         
-    rangeCalculated = i.rangeCalculated;
-    if (rangeCalculated) {
-        range[0] = i.range[0];
-        range[1] = i.range[1];
-    }
+   rangeCalculated = i.rangeCalculated;
+   if (rangeCalculated)
+   {
+      range[0] = i.range[0];
+      range[1] = i.range[1];
+   }
 
-    return *this;
+   return *this;
 }
 
 
@@ -151,42 +157,45 @@ Interpolator& Interpolator::operator=(const Interpolator &i)
  * interpolation routine (Interpolate(const Real, Real*)) to generate the 
  * estimated parameter values.
  * 
- * @param ind   Value of the independent (domain) variable.
- * @param data  Array of dependent data associated with the independent value
- *              in the first variable.  This array should have the same size as
- *              the dimension of the interpolator instance.
+ * @param <ind>  Value of the independent (domain) variable.
+ * @param <data> Array of dependent data associated with the independent value
+ *               in the first variable.  This array must not be smaller than
+ *               the dimension of the interpolator instance, or a memory access
+ *               violation will occur.
  * 
  * @return  True if the data was added to the buffer, false if a problem was 
  *          encountered.
+ *
+ * @todo Handle memory access violations when the input array is too small.
  */
 //------------------------------------------------------------------------------
 bool Interpolator::AddPoint(const Real ind, const Real *data)
 {
-    Integer i;
+   Integer i;
     
-    if (!independent) 
-        AllocateArrays();
+   if (!independent)
+      AllocateArrays();
 
-    // Reset the index into the array if at the end
-    if (latestPoint == bufferSize-1)
-        latestPoint = -1;
+   // Reset the index into the array if at the end
+   if (latestPoint == bufferSize-1)
+      latestPoint = -1;
         
-    dataIncreases = (ind > previousX ? true : false);
-    previousX = ind;
+   dataIncreases = (ind > previousX ? true : false);
+   previousX = ind;
 
-    independent[++latestPoint] = ind;
-    for (i = 0; i < dimension; ++i)
-        dependent[latestPoint][i] = data[i];
+   independent[++latestPoint] = ind;
+   for (i = 0; i < dimension; ++i)
+      dependent[latestPoint][i] = data[i];
         
-    ++pointCount;
-    rangeCalculated = false;
+   ++pointCount;
+   rangeCalculated = false;
     
-    return true;
+   return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  void Clear(void)
+//  void Clear()
 //------------------------------------------------------------------------------
 /**
  * Resets the buffer for the interpolator.  
@@ -195,59 +204,59 @@ bool Interpolator::AddPoint(const Real ind, const Real *data)
  * data counts so that the interpolation can be restarted.
  */
 //------------------------------------------------------------------------------
-void Interpolator::Clear(void)
+void Interpolator::Clear()
 {
-    latestPoint = -1;
-    pointCount = 0;
+   latestPoint = -1;
+   pointCount = 0;
 }
 
 
 //------------------------------------------------------------------------------
-//  void AllocateArrays(void)
+//  void AllocateArrays()
 //------------------------------------------------------------------------------
 /**
  * Allocates the data structures used by the ring buffer.  
  */
 //------------------------------------------------------------------------------
-void Interpolator::AllocateArrays(void)
+void Interpolator::AllocateArrays()
 {
-    Integer i;
+   Integer i;
 
-    CleanupArrays();    
+   CleanupArrays();
     
-    independent = new Real[bufferSize];
-    dependent = new Real*[bufferSize];
-    for (i = 0; i < bufferSize; ++i)
-        dependent[i] = new Real[dimension];
-    latestPoint = -1;
+   independent = new Real[bufferSize];
+   dependent = new Real*[bufferSize];
+   for (i = 0; i < bufferSize; ++i)
+      dependent[i] = new Real[dimension];
+   latestPoint = -1;
 }
 
 
 //------------------------------------------------------------------------------
-//  void CleanupArrays(void)
+//  void CleanupArrays()
 //------------------------------------------------------------------------------
 /**
  * Frees the memory used by the data arrays in the ring buffer, and resets the
  * counters used to manage the buffer.
  */
 //------------------------------------------------------------------------------
-void Interpolator::CleanupArrays(void)
+void Interpolator::CleanupArrays()
 {
-    Integer i;
+   Integer i;
     
-    if (independent)
-        delete [] independent;
+   if (independent)
+      delete [] independent;
         
-    if (dependent) {
-        for (i = 0; i < bufferSize; ++i)
-            delete [] dependent[i];
-        delete [] dependent;
-    }
+   if (dependent) {
+      for (i = 0; i < bufferSize; ++i)
+         delete [] dependent[i];
+      delete [] dependent;
+   }
     
-    independent = NULL;
-    dependent = NULL;
-    latestPoint = -1;
-    pointCount = 0;
+   independent = NULL;
+   dependent = NULL;
+   latestPoint = -1;
+   pointCount = 0;
 }
 
 
@@ -262,48 +271,48 @@ void Interpolator::CleanupArrays(void)
 //------------------------------------------------------------------------------
 void Interpolator::CopyArrays(const Interpolator &i)
 {
-    Integer j;
+   Integer j;
     
-    AllocateArrays();
-    memcpy(independent, i.independent, bufferSize*sizeof(Real));
-    for (j = 0; j < bufferSize; ++j)
-        memcpy(dependent[j], i.dependent[j], dimension*sizeof(Real));
+   AllocateArrays();
+   memcpy(independent, i.independent, bufferSize*sizeof(Real));
+   for (j = 0; j < bufferSize; ++j)
+      memcpy(dependent[j], i.dependent[j], dimension*sizeof(Real));
 }
 
 
 //------------------------------------------------------------------------------
-//  void SetRange(void)
+//  void SetRange()
 //------------------------------------------------------------------------------
 /**
  * Finds the minimum and maximum values of the independent variable.
  */
 //------------------------------------------------------------------------------
-void Interpolator::SetRange(void)
+void Interpolator::SetRange()
 {
-    if (rangeCalculated)
-        return;
+   if (rangeCalculated)
+      return;
         
-    // Not enough points -- just continue
-    if (requiredPoints > pointCount)
-        return;
+   // Not enough points -- just continue
+   if (requiredPoints > pointCount)
+      return;
         
-    range[0] = range[1] = independent[0];
+   range[0] = range[1] = independent[0];
     
-    Integer i, max = (pointCount > bufferSize ? bufferSize : pointCount);
+   Integer i, max = (pointCount > bufferSize ? bufferSize : pointCount);
 
-    for (i = 1; i < max; ++i) {
-        if (independent[i] < range[0])
-            range[0] = independent[i];
-        if (independent[i] > range[1])
-            range[1] = independent[i];
-    }
+   for (i = 1; i < max; ++i) {
+      if (independent[i] < range[0])
+         range[0] = independent[i];
+      if (independent[i] > range[1])
+         range[1] = independent[i];
+   }
     
-    rangeCalculated = true;
+   rangeCalculated = true;
 }
 
 
 //------------------------------------------------------------------------------
-//  Integer GetBufferSize(void)
+//  Integer GetBufferSize()
 //------------------------------------------------------------------------------
 /**
  * Access method for the bufferSize parameter.
@@ -311,7 +320,7 @@ void Interpolator::SetRange(void)
  * @return  The buffer size.
  */
 //------------------------------------------------------------------------------
-Integer Interpolator::GetBufferSize(void)
+Integer Interpolator::GetBufferSize()
 {
-    return bufferSize;
+   return bufferSize;
 }

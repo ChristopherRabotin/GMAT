@@ -30,7 +30,7 @@
  class GMAT_API FiniteBurn : public Burn
 {
 public:
-   FiniteBurn(std::string nomme = "");
+   FiniteBurn(const std::string &nomme = "");
    virtual ~FiniteBurn();
    FiniteBurn(const FiniteBurn& fb);
    FiniteBurn&             operator=(const FiniteBurn& fb);

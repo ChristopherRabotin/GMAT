@@ -21,7 +21,6 @@
 #ifndef VnbManeuverFrame_hpp
 #define VnbManeuverFrame_hpp
 
-
 #include "ManeuverFrame.hpp"
 
 

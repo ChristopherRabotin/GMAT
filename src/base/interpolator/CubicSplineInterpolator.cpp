@@ -32,28 +32,34 @@
 /**
  * Constructs cubic spline interpolator (default constructor).
  * 
- * @param dim The dimension of the vector that is interpolated
+ * @param <name> Name for this interpolator.
+ * @param <dim>  The dimension of the vector that is interpolated.
  */
 //------------------------------------------------------------------------------
-CubicSplineInterpolator::CubicSplineInterpolator(const std::string &name, Integer dim) :
-    Interpolator        (name, "CubicSplineInterpolator", dim),
-    lastX               (-9.9999e75)
+CubicSplineInterpolator::CubicSplineInterpolator(const std::string &name,
+                                                 Integer dim) :
+   Interpolator        (name, "CubicSplineInterpolator", dim),
+   lastX               (-9.9999e75)
 {
-    bufferSize = 5;
-    Integer i;
-    for (i = 0; i < bufferSize; ++i)
-        y2[i] = NULL;
+   bufferSize = 5;
+   Integer i;
+   for (i = 0; i < bufferSize; ++i)
+   {
+      x[i]  = -9.9999e75;
+      y[i]  = NULL;
+      y2[i] = NULL;
+   }
 }
 
 
 //------------------------------------------------------------------------------
-//  ~CubicSplineInterpolator(void)
+//  ~CubicSplineInterpolator()
 //------------------------------------------------------------------------------
 /**
  * Destroys cubic spline interpolator (destructor).
  */
 //------------------------------------------------------------------------------
-CubicSplineInterpolator::~CubicSplineInterpolator(void)
+CubicSplineInterpolator::~CubicSplineInterpolator()
 {
 }
 
@@ -69,12 +75,16 @@ CubicSplineInterpolator::~CubicSplineInterpolator(void)
 //------------------------------------------------------------------------------
 CubicSplineInterpolator::CubicSplineInterpolator
                                           (const CubicSplineInterpolator &csi) :
-     Interpolator       (csi),
-     lastX              (csi.lastX)
+   Interpolator       (csi),
+   lastX              (csi.lastX)
 {
-    Integer i;
-    for (i = 0; i < bufferSize; ++i)
-        y2[i] = NULL;
+   Integer i;
+   for (i = 0; i < bufferSize; ++i)
+   {
+      x[i]  = -9.9999e75;
+      y[i]  = NULL;
+      y2[i] = NULL;
+   }
 }
 
 
@@ -92,11 +102,11 @@ CubicSplineInterpolator::CubicSplineInterpolator
 CubicSplineInterpolator& CubicSplineInterpolator::operator=
                                             (const CubicSplineInterpolator &csi)
 {
-    if (&csi == this)
-        return *this;
+   if (&csi == this)
+      return *this;
         
-    CopyArrays(csi);
-    return *this;
+   CopyArrays(csi);
+   return *this;
 }
 
 
@@ -118,14 +128,14 @@ CubicSplineInterpolator& CubicSplineInterpolator::operator=
 //------------------------------------------------------------------------------
 bool CubicSplineInterpolator::Interpolate(const Real ind, Real *results)
 {
-    if (pointCount < requiredPoints)
-        return false;
+   if (pointCount < requiredPoints)
+      return false;
         
-    bool retval = BuildSplines();
-    if (retval)
-        retval = Estimate(ind, results);
+   bool retval = BuildSplines();
+   if (retval)
+      retval = Estimate(ind, results);
 
-    return retval;
+   return retval;
 }
 
 
@@ -135,47 +145,49 @@ bool CubicSplineInterpolator::Interpolate(const Real ind, Real *results)
 
 
 //------------------------------------------------------------------------------
-//  void AllocateArrays(void)
+//  void AllocateArrays()
 //------------------------------------------------------------------------------
 /**
  * Allocates spline buffers and calls the base method to build the ring buffer.  
  */
 //------------------------------------------------------------------------------
-void CubicSplineInterpolator::AllocateArrays(void)
+void CubicSplineInterpolator::AllocateArrays()
 {
-    Interpolator::AllocateArrays();
+   Interpolator::AllocateArrays();
 
-    Integer i;
-    for (i = 0; i < bufferSize; ++i) {
-        y[i] = new Real[dimension];
-        y2[i] = new Real[dimension];
-    }
+   Integer i;
+   for (i = 0; i < bufferSize; ++i)
+   {
+      y[i]  = new Real[dimension];
+      y2[i] = new Real[dimension];
+   }
     
-    latestPoint = -1;
+   latestPoint = -1;
 }
 
 
 //------------------------------------------------------------------------------
-//  void CleanupArrays(void)
+//  void CleanupArrays()
 //------------------------------------------------------------------------------
 /**
  * Frees the memory used by the spline buffer and calls the base method to 
  * manage the ring buffer.
  */
 //------------------------------------------------------------------------------
-void CubicSplineInterpolator::CleanupArrays(void)
+void CubicSplineInterpolator::CleanupArrays()
 {
-    Integer i = 0;
-    if (y2[i]) {
-        for (i = 0; i < bufferSize; ++i) {
-            delete [] y[i];
-            y[i] = NULL;
-            delete [] y2[i];
-            y2[i] = NULL;
-        }
-    }
+   Integer i = 0;
+   if (y2[i]) {
+      for (i = 0; i < bufferSize; ++i)
+      {
+         delete [] y[i];
+         y[i] = NULL;
+         delete [] y2[i];
+         y2[i] = NULL;
+      }
+   }
     
-    Interpolator::CleanupArrays();
+   Interpolator::CleanupArrays();
 }
 
 
@@ -190,15 +202,19 @@ void CubicSplineInterpolator::CleanupArrays(void)
 //------------------------------------------------------------------------------
 void CubicSplineInterpolator::CopyArrays(const CubicSplineInterpolator &i)
 {
-    Interpolator::CopyArrays(i);
-    Integer j;
-    for (j = 0; j < bufferSize; ++j)
-        memcpy(y2[j], i.y2[j], dimension*sizeof(Real));
+   Interpolator::CopyArrays(i);
+   Integer j;
+   for (j = 0; j < bufferSize; ++j)
+   {
+      x[j] = i.x[j];
+      memcpy( y[j],  i.y[j], dimension*sizeof(Real));
+      memcpy(y2[j], i.y2[j], dimension*sizeof(Real));
+   }
 }
 
 
 //------------------------------------------------------------------------------
-//  bool BuildSplines(void)
+//  bool BuildSplines()
 //------------------------------------------------------------------------------
 /**
  * Uses the data in the ring buffer to build the cubic splines.
@@ -232,61 +248,68 @@ void CubicSplineInterpolator::CopyArrays(const CubicSplineInterpolator &i)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool CubicSplineInterpolator::BuildSplines(void)
+bool CubicSplineInterpolator::BuildSplines()
 {
-    Integer i, j, k;
-    Real    p, qn, sig, u[4], un;
+   Integer i, j, k;
+   Real    p, sig, u[4];
     
-    // Set x and y from the ring buffer
-    LoadArrays();
+   // Set x and y from the ring buffer
+   LoadArrays();
 
-    // Only update the splines if the data has changed
-    if (x[4] == lastX)
-        return true;
-    lastX = x[4];
+   // Only update the splines if the data has changed
+   if (x[4] == lastX)
+      return true;
+   lastX = x[4];
     
-    // Check monotonicity -- the spline algorithm requires it.  I could throw an
-    // exception here, but the calling code might prefer to drop back to an 
-    // alternative interpolator (e.g. a linear interpolator) or to generate more
-    // densely packed data for the buffer if the cubic spline fails at this 
-    // stage.
-    for (i = 1; i < 5; ++i) {
-        if (dataIncreases) {
-            if (x[i] < x[i-1]) {
-                return false;
-            }
-        }
-        else {
-            if (x[i] > x[i-1]) {
-                return false;
-            }
-        }
-    }
+   // Check monotonicity -- the spline algorithm requires it.  I could throw an
+   // exception here, but the calling code might prefer to drop back to an
+   // alternative interpolator (e.g. a linear interpolator) or to generate more
+   // densely packed data for the buffer if the cubic spline fails at this
+   // stage.
+   for (i = 1; i < 5; ++i)
+   {
+      if (dataIncreases)
+      {
+         if (x[i] < x[i-1]) {
+            return false;
+         }
+      }
+      else
+      {
+         if (x[i] > x[i-1])
+         {
+            return false;
+         }
+      }
+   }
     
-    // Loop through the dependent variables
-    for (j = 0; j < dimension; ++j) {
-        y2[0][j] = u[0] = 0.0;       // Natural spline constraints
+   // Loop through the dependent variables
+   for (j = 0; j < dimension; ++j)
+   {
+      y2[0][j] = u[0] = 0.0;       // Natural spline constraints
         
-        // Decomposition loop of the tridiagonal algorithm
-        for (i = 1; i < 4; ++i) 
-        {
-            sig = (x[i] - x[i-1]) / (x[i+1] - x[i-1]);
-            p = sig * y2[i-1][j] + 2.0;
-            y2[i][j] = (sig - 1.0) / p;
-            u[i] = (y[i+1][j] - y[i][j]) / (x[i+1] - x[i]) - 
-                   (y[i][j] - y[i-1][j]) / (x[i] - x[i-1]);
-            u[i] = (6.0*u[i] / (x[i+1] - x[i-1]) - sig*u[i-1]) / p;
-        }
-        un = qn = 0.0;       // Natural spline constraints
-        y2[4][j] = 0.0;
+      // Decomposition loop of the tridiagonal algorithm
+      for (i = 1; i < 4; ++i)
+      {
+         sig = (x[i] - x[i-1]) / (x[i+1] - x[i-1]);
+         p = sig * y2[i-1][j] + 2.0;
+         y2[i][j] = (sig - 1.0) / p;
+         u[i] = (y[i+1][j] - y[i][j]) / (x[i+1] - x[i]) -
+                (y[i][j] - y[i-1][j]) / (x[i] - x[i-1]);
+         u[i] = (6.0*u[i] / (x[i+1] - x[i-1]) - sig*u[i-1]) / p;
+      }
+      // This implementation uses "natural" spline constaraints, so the second
+      // derivatives vanish at the endpoint;
+      y2[4][j] = 0.0;
         
-        // Backsubstitution loop of the tridiagonal algorithm
-        for (k = 3; k >= 0; --k) {
-            y2[k][j] = y2[k][j] * y2[k+1][j] + u[k];
-        }  
-    }
+      // Backsubstitution loop of the tridiagonal algorithm
+      for (k = 3; k >= 0; --k)
+      {
+         y2[k][j] = y2[k][j] * y2[k+1][j] + u[k];
+      }
+   }
     
-    return true;
+   return true;
 }
 
 
@@ -299,25 +322,27 @@ bool CubicSplineInterpolator::BuildSplines(void)
 //------------------------------------------------------------------------------
 void CubicSplineInterpolator::LoadArrays(void)
 {
-    Integer i, j, start = 0;
-    Real sign = (dataIncreases ? 1.0 : -1.0);
-    Real temp = sign * independent[0];
+   Integer i, j, start = 0;
+   Real sign = (dataIncreases ? 1.0 : -1.0);
+   Real temp = sign * independent[0];
 
-    for (i = 1; i < bufferSize; ++i)
-    {
-        if (sign*independent[i] < temp) {
-            start = i;
-            temp = sign*independent[i];
-        }
-    }
+   for (i = 1; i < bufferSize; ++i)
+   {
+      if (sign*independent[i] < temp)
+      {
+         start = i;
+         temp = sign*independent[i];
+      }
+   }
     
-    for (i = 0; i < bufferSize; ++i, ++start) {
-        if (start == bufferSize)
-            start = 0;
-        x[i] = independent[start];
-        for (j = 0; j < dimension; ++j)
-            y[i][j] = dependent[start][j];
-    }
+   for (i = 0; i < bufferSize; ++i, ++start)
+   {
+      if (start == bufferSize)
+         start = 0;
+      x[i] = independent[start];
+      for (j = 0; j < dimension; ++j)
+         y[i][j] = dependent[start][j];
+   }
 }
 
 
@@ -339,59 +364,62 @@ void CubicSplineInterpolator::LoadArrays(void)
 //------------------------------------------------------------------------------
 bool CubicSplineInterpolator::Estimate(const Real ind, Real *results)
 {
-    Integer i, kl = -1, kh;
-    Real h, a, b;
+   Integer i, kl = -1, kh;
+   Real h, a, b;
 
-    // First find the spline we want -- for GMAT, this is more likely to be the
-    // last one, so we'll start at the end and work backwards
-    for (i = 3; i >= 0; --i)
-    { 
-        if (dataIncreases) {
-            if ((x[i] <= ind) && (x[i+1] >= ind)) {
-                kl = i;
-                break;
-            }
-        }
-        else
-        {
-            if ((x[i] >= ind) && (x[i+1] <= ind)) {
-                kl = i;
-                break;
-            }
-        }
-    }
-    if (kl == -1)
-        return false;       // Calls for extrapolation rather than interpolation
+   // First find the spline we want -- for GMAT, this is more likely to be the
+   // last one, so we'll start at the end and work backwards
+   for (i = 3; i >= 0; --i)
+   {
+      if (dataIncreases)
+      {
+         if ((x[i] <= ind) && (x[i+1] >= ind))
+         {
+            kl = i;
+            break;
+         }
+      }
+      else
+      {
+         if ((x[i] >= ind) && (x[i+1] <= ind))
+         {
+            kl = i;
+            break;
+         }
+      }
+   }
+   if (kl == -1)
+      return false;       // Calls for extrapolation rather than interpolation
         
-    kh = kl + 1;
-    h = x[kh] - x[kl];
-    if (h == 0)
-        return false;       // Coincident points are not allowed
+   kh = kl + 1;
+   h = x[kh] - x[kl];
+   if (h == 0)
+      return false;       // Coincident points are not allowed
     
-    a = (x[kh] - ind) / h;
-    b = (ind - x[kl]) / h;
+   a = (x[kh] - ind) / h;
+   b = (ind - x[kl]) / h;
     
-    // Finally, evaluate the spline!
-    for (i = 0; i < dimension; ++i) {
-        results[i] = a * y[kl][i] + b * y[kh][i] + 
-                     ((a*a*a - a) * y2[kl][i] + (b*b*b - b) * y2[kh][i]) *
-                     (h*h)/6.0;
-    }
+   // Finally, evaluate the spline!
+   for (i = 0; i < dimension; ++i)
+   {
+      results[i] = a * y[kl][i] + b * y[kh][i] +
+                   ((a*a*a - a) * y2[kl][i] + (b*b*b - b) * y2[kh][i]) *
+                   (h*h)/6.0;
+   }
     
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the CubicSplineInterpolator.
  *
  * @return clone of the CubicSplineInterpolator.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* CubicSplineInterpolator::Clone(void) const
+GmatBase* CubicSplineInterpolator::Clone() const
 {
    return (new CubicSplineInterpolator(*this));
 }

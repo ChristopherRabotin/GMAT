@@ -20,7 +20,7 @@
 
 
 //------------------------------------------------------------------------------
-//  BurnException(std::string details)
+//  BurnException(const std::string &details)
 //------------------------------------------------------------------------------
 /**
  * Constructs BurnException instance (default constructor).
@@ -28,8 +28,8 @@
  * @param details A message providing the details of the exception. 
  */
 //------------------------------------------------------------------------------
-BurnException::BurnException(std::string details) :
-    BaseException           ("Burn Exception Thrown: ", details)
+BurnException::BurnException(const std::string &details) :
+   BaseException           ("Burn Exception Thrown: ", details)
 {
 }
 
@@ -47,10 +47,12 @@ BurnException::~BurnException()
 
 
 //------------------------------------------------------------------------------
-//  BurnException(const BurnException &ce)
+//  BurnException(const BurnException &be)
 //------------------------------------------------------------------------------
 /**
- * Constructs BurnException instance (copy constructor). 
+ * Constructs BurnException instance (copy constructor).
+ *
+ * @param <be> The instance that is copied.
  */
 //------------------------------------------------------------------------------
 BurnException::BurnException(const BurnException &be) :

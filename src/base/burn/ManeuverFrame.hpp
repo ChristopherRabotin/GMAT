@@ -22,7 +22,6 @@
 #define ManeuverFrame_hpp
 
 
-#include <math.h>
 #include "gmatdefs.hpp"
 #include "BurnException.hpp"
 
@@ -51,7 +50,13 @@ protected:
    Real                *position;
    /// Velocity vector used to calculate the basis
    Real                *velocity;
-    
+
+   /// @todo Determine if basisMatrix can be replaced with an Rmatrix33, and if
+   ///       position and velocity can be replaced with Rvector3's
+
+   //---------------------------------------------------------------------------
+   //  void CalculateBasis()
+   //---------------------------------------------------------------------------
    /**
     * Calculates the principal directions for the maneuver frame.
     *
@@ -59,6 +64,7 @@ protected:
     * basisMatrix member.  Derived classes need to implement this method, along
     * with the default methods.
     */
+   //---------------------------------------------------------------------------
    virtual void        CalculateBasis() = 0;
 };
 

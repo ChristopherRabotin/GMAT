@@ -77,10 +77,10 @@ StringArray& ManeuverFrameManager::GetSupportedFrames()
 
 
 //------------------------------------------------------------------------------
-//  ManeuverFrame* GetFrameInstance(std::string frameType)
+//  ManeuverFrame* GetFrameInstance(const std::string &frameType)
 //------------------------------------------------------------------------------
 /**
- * Obtains a the requested maneuver frame.
+ * Obtains a requested maneuver frame.
  * 
  * @param <frameType> The maneuver frame that is needed.
  * 
@@ -88,10 +88,13 @@ StringArray& ManeuverFrameManager::GetSupportedFrames()
  * 
  * @todo GetFrameInstance can be made more efficient by buffering the frame 
  *       type; the current implementation always destroys and reconstructs the 
- *       frame
+ *       frame.
+ *
+ * @todo Add coordinate system support.
  */
 //------------------------------------------------------------------------------
-ManeuverFrame* ManeuverFrameManager::GetFrameInstance(std::string frameType)
+ManeuverFrame* ManeuverFrameManager::GetFrameInstance(
+                                        const std::string &frameType)
 {
     if (currentFrame)
     {

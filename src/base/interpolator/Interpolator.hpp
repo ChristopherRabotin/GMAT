@@ -28,20 +28,38 @@
 /**
  * Base class for the GMAT Interpolators
  */
-class Interpolator : public GmatBase
+class GMAT_API Interpolator : public GmatBase
 {
 public:
     Interpolator(const std::string &name, const std::string &typestr,
                  Integer dim = 1);
-    virtual ~Interpolator(void);
+    virtual ~Interpolator();
 
     Interpolator(const Interpolator &i);
     Interpolator&   operator=(const Interpolator &i);
 
     virtual bool    AddPoint(const Real ind, const Real *data);
+    virtual void    Clear();
+    virtual Integer GetBufferSize();
+
+   //---------------------------------------------------------------------------
+   // bool Interpolate(const Real ind, Real *results)
+   //---------------------------------------------------------------------------
+   /**
+    * Interpolate the data.
+    *
+    * Derived classes implement this method to provide the mathematics that
+    * perform the data interpolation, resulint in an array of interpolated data
+    * valid at the desired value of the independent variable.
+    *
+    * @param <ind>     Value of the independent variable at which the data is
+    *                  interpolated.
+    * @param <results> Array of interpolated data.
+    *
+    * @return true on success, false (or throw) on failure.
+    */
+   //---------------------------------------------------------------------------
     virtual bool    Interpolate(const Real ind, Real *results) = 0;
-    virtual void    Clear(void);
-    virtual Integer GetBufferSize(void);
 
 protected:
     /// Data array used for the independent variable
@@ -69,10 +87,10 @@ protected:
     /// Flag used to determine if independent variable increases or decreases
     bool dataIncreases;
     
-    virtual void AllocateArrays(void);
-    virtual void CleanupArrays(void);
+    virtual void AllocateArrays();
+    virtual void CleanupArrays();
     virtual void CopyArrays(const Interpolator &i);
-    void SetRange(void);
+    void SetRange();
 };
 
 
