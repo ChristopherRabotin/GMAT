@@ -31,9 +31,12 @@
 #include "GuiInterpreter.hpp"
 #include "Propagator.hpp"
 #include "PropSetup.hpp"
-#include "PointMassForce.hpp"
 #include "ForceModel.hpp"
-#include "Planet.hpp"
+#include "DragForce.hpp"
+#include "PointMassForce.hpp"
+#include "SolarRadiationPressure.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
 class PropagationConfigPanel : public wxPanel
@@ -130,13 +133,16 @@ private:
     bool isForceModelChanged;
     bool isIntegratorChanged;
     
-    GuiInterpreter *theGuiInterpreter;
-    Propagator     *thePropagator;
-    Propagator     *newProp;
-    PropSetup      *thePropSetup;
-    ForceModel     *theForceModel;
-    std::vector<PointMassForce *> thePMForces;
-    std::vector<Planet *> thePlanets;
+    GuiInterpreter                 *theGuiInterpreter;
+    Propagator                     *thePropagator;
+    Propagator                     *newProp;
+    PropSetup                      *thePropSetup;
+    ForceModel                     *theForceModel;
+    SolarRadiationPressure         *theSRP;
+    DragForce                      *theDragForce;
+    SolarSystem                    *theSolarSystem;
+    std::vector<PointMassForce *>  thePMForces;
+    std::vector<CelestialBody *>   theBodies;
       
     // Layout & data handling methods
     void Initialize();

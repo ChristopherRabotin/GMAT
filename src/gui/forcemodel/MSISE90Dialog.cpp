@@ -15,6 +15,8 @@
 #include "MSISE90Dialog.hpp"
 #include "MessageInterface.hpp"
 
+#include <wx/variant.h>
+
 //------------------------------------------------------------------------------
 // Event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -23,6 +25,7 @@ BEGIN_EVENT_TABLE(MSISE90Dialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
+   EVT_RADIOBUTTON(ID_RADIOBUTTON, MSISE90Dialog::OnRadioButtonChange)
    EVT_TEXT(ID_TEXTCTRL, MSISE90Dialog::OnTextChange)
 END_EVENT_TABLE()
 
@@ -31,7 +34,7 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// MSISE90Dialog(wxWindow *parent, const wxString name)
+// MSISE90Dialog(wxWindow *parent, const wxString name, DragForce *dragForce)
 //------------------------------------------------------------------------------
 /**
  * Constructs MSISE90 object.
@@ -42,9 +45,12 @@ END_EVENT_TABLE()
  * @note Creates the MSISE90 drag panel
  */
 //------------------------------------------------------------------------------
-MSISE90Dialog::MSISE90Dialog(wxWindow *parent, wxString name)
+MSISE90Dialog::MSISE90Dialog(wxWindow *parent, wxString name, DragForce *dragForce)
     : GmatDialog(parent, -1, wxString(_T("MSISE90DragDialog")))
-{    
+{
+//    if (dragForce != NULL)    
+//        theDragForce = dragForce;
+       
     Create();
     Show();
 }
@@ -61,41 +67,59 @@ MSISE90Dialog::~MSISE90Dialog()
 //-------------------------------
 
 //------------------------------------------------------------------------------
+// void Initialize()
+//------------------------------------------------------------------------------
+void MSISE90Dialog::Initialize()
+{  
+//    if (theDragForce == NULL)
+//        theDragForce = new DragForce();
+}
+
+//------------------------------------------------------------------------------
 // virtual void Create()
 //------------------------------------------------------------------------------
 void MSISE90Dialog::Create()
 {
     // wxStaticText
-    wxStaticText *msise90Drag1StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 1"), wxDefaultPosition, wxDefaultSize, 0 );
-    wxStaticText *msise90Drag2StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 2"), wxDefaultPosition, wxDefaultSize, 0 );
-    wxStaticText *msise90Drag3StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 3"), wxDefaultPosition, wxDefaultSize, 0 );
-    wxStaticText *msise90Drag4StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 4"), wxDefaultPosition, wxDefaultSize, 0 );
-    wxStaticText *msise90Drag5StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 5"), wxDefaultPosition, wxDefaultSize, 0 );
-    wxStaticText *msise90Drag6StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 6"), wxDefaultPosition, wxDefaultSize, 0 );
+    solarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
+    avgSolarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Average Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
+    geomagneticIndexStaticText = new wxStaticText( this, ID_TEXT, wxT("Geomagnetic Index"), wxDefaultPosition, wxDefaultSize, 0 );
+    fileNameStaticText = new wxStaticText( this, ID_TEXT, wxT("File Name"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    msise90Drag1TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    msise90Drag2TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    msise90Drag3TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    msise90Drag4TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );;
-    msise90Drag5TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );;
-    msise90Drag6TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );;
+    solarFluxTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    avgSolarFluxTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    geomagneticIndexTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    fileNameTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(160,-1), 0 );
+    
+    // wxButton
+    browseButton = new wxButton( this, ID_BUTTON, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
+    
+    // wxRadioButton
+    userInputRadioButton = new wxRadioButton(this, ID_RADIOBUTTON, wxT("User Input"), wxDefaultPosition, wxDefaultSize, 0 );
+    fileInputRadioButton = new wxRadioButton(this, ID_RADIOBUTTON, wxT("File Input"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxSizer
-    wxFlexGridSizer *pageFlexGridSizer = new wxFlexGridSizer( 3, 2, 0, 0 );
+    wxFlexGridSizer *pageFlexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
+    wxFlexGridSizer *innerPageFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
 
-    pageFlexGridSizer->Add( msise90Drag1StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag1TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag2StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag2TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag3StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag3TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag4StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag4TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag5StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag5TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag6StaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    pageFlexGridSizer->Add( msise90Drag6TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( userInputRadioButton, 0, wxALIGN_LEFT|wxALL, 5 );
+    pageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( solarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( solarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( avgSolarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( avgSolarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( geomagneticIndexStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( geomagneticIndexTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( innerPageFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5 );
+    pageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    innerPageFlexGridSizer->Add( fileInputRadioButton, 0, wxALIGN_CENTER|wxALL, 5 );
+    innerPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    innerPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    innerPageFlexGridSizer->Add( fileNameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    innerPageFlexGridSizer->Add( fileNameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    innerPageFlexGridSizer->Add( browseButton, 0, wxALIGN_CENTER|wxALL, 5 );
     
     theMiddleSizer->Add(pageFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
 }
@@ -105,7 +129,15 @@ void MSISE90Dialog::Create()
 //------------------------------------------------------------------------------
 void MSISE90Dialog::LoadData()
 {
-
+//    solarFluxID = theDragForce->GetParameterID("SolarFlux");
+//    avgSolarFluxID = theDragForce->GetParameterID("AverageSolarFlux");
+//    geomagnecticIndexID = theDragForce->GetParameterID("MagneticIndex");
+//    solarFluxFileID = theDragForce->GetParameterID("SolarFluxFile");
+//    
+//    solarFluxTextCtrl->SetValue(wxVariant(theDragForce->GetRealParameter(solarFluxID)));
+//    avgSolarFluxTextCtrl->SetValue(wxVariant(theDragForce->GetRealParameter(avgSolarFluxID)));
+//    geomagneticIndexTextCtrl->SetValue(wxVariant(theDragForce->GetRealParameter(geomagnecticIndexID)));
+//    fileNameTextCtrl->SetValue(theDragForce->GetStringParameter(solarFluxFileID).c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -113,7 +145,8 @@ void MSISE90Dialog::LoadData()
 //------------------------------------------------------------------------------
 void MSISE90Dialog::SaveData()
 {
-
+//    if (applyButton->IsEnabled())
+//        ;
 }
 
 //------------------------------------------------------------------------------
@@ -129,6 +162,45 @@ void MSISE90Dialog::ResetData()
 //------------------------------------------------------------------------------
 void MSISE90Dialog::OnTextChange()
 {
+//    applyButton->Enable(true);
+}
 
+//------------------------------------------------------------------------------
+// void OnRadioButtonChange()
+//------------------------------------------------------------------------------
+void MSISE90Dialog::OnRadioButtonChange(wxCommandEvent& event)
+{
+    if ( event.GetEventObject() == userInputRadioButton )  
+    {
+        fileNameStaticText->Enable(false);
+        fileNameTextCtrl->Enable(false);
+        browseButton->Enable(false);
+        
+        solarFluxStaticText->Enable(true);
+        avgSolarFluxStaticText->Enable(true);
+        geomagneticIndexStaticText->Enable(true);
+    
+        solarFluxTextCtrl->Enable(true);
+        avgSolarFluxTextCtrl->Enable(true);
+        geomagneticIndexTextCtrl->Enable(true);
+        
+//        applyButton->Enable(true);
+    }
+    else if ( event.GetEventObject() == fileInputRadioButton )
+    {
+        fileNameStaticText->Enable(true);
+        fileNameTextCtrl->Enable(true);
+        browseButton->Enable(true);
+        
+        solarFluxStaticText->Enable(false);
+        avgSolarFluxStaticText->Enable(false);
+        geomagneticIndexStaticText->Enable(false);
+        
+        solarFluxTextCtrl->Enable(false);
+        avgSolarFluxTextCtrl->Enable(false);
+        geomagneticIndexTextCtrl->Enable(false); 
+        
+//        applyButton->Enable(true);
+    }
 }
 

@@ -21,19 +21,36 @@
 #include "GmatAppData.hpp"
 #include "GmatDialog.hpp"
 
+#include "DragForce.hpp"
+
 class MSISE90Dialog : public GmatDialog
 {
 public:
-    MSISE90Dialog(wxWindow *parent, wxString name);
+    MSISE90Dialog(wxWindow *parent, wxString name, DragForce *dragForce);
     ~MSISE90Dialog();
     
 private:   
-    wxTextCtrl *msise90Drag1TextCtrl;
-    wxTextCtrl *msise90Drag2TextCtrl;
-    wxTextCtrl *msise90Drag3TextCtrl;
-    wxTextCtrl *msise90Drag4TextCtrl;
-    wxTextCtrl *msise90Drag5TextCtrl;
-    wxTextCtrl *msise90Drag6TextCtrl;
+    wxStaticText *solarFluxStaticText;
+    wxStaticText *avgSolarFluxStaticText;
+    wxStaticText *geomagneticIndexStaticText;
+    wxStaticText *fileNameStaticText;
+    
+    wxTextCtrl *solarFluxTextCtrl;
+    wxTextCtrl *avgSolarFluxTextCtrl;
+    wxTextCtrl *geomagneticIndexTextCtrl;
+    wxTextCtrl *fileNameTextCtrl;
+    
+    wxButton *browseButton;
+    
+    wxRadioButton *userInputRadioButton;
+    wxRadioButton *fileInputRadioButton;
+    
+    DragForce *theDragForce;
+    
+    Integer solarFluxID;
+    Integer avgSolarFluxID;
+    Integer geomagnecticIndexID;
+    Integer solarFluxFileID;
     
     // Methods inherited from GmatDialog
     virtual void Create();
@@ -43,14 +60,19 @@ private:
     
     // Event-handling Methods
     void OnTextChange();
+    void OnRadioButtonChange(wxCommandEvent& event);
+    
+    void Initialize();
 
     DECLARE_EVENT_TABLE();
 
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 10003,
-        ID_TEXTCTRL
+        ID_TEXT = 45000,
+        ID_TEXTCTRL,
+        ID_BUTTON,
+        ID_RADIOBUTTON
     };
 };
 
