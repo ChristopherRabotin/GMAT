@@ -22,6 +22,7 @@
 #include "SubscriberFactory.hpp"
 #include "ReportFile.hpp"         // for ReportFile class
 #include "MessageWindow.hpp"
+#include "OpenGlPlot.hpp"
 
 //---------------------------------
 //  public methods
@@ -46,6 +47,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
       return new ReportFile(withName, fileName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
+   else if (ofType == "OpenGlPlot")
+      return new OpenGlPlot(withName);
    return NULL;
 }
 
@@ -67,6 +70,7 @@ Factory(Gmat::SUBSCRIBER)
    {
       creatables.push_back("ReportFile");
       creatables.push_back("MessageWindow");
+      creatables.push_back("OpenGlPlot");
    }
 }
 
