@@ -47,6 +47,7 @@ SphRMag::SphRMag(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
+
 //------------------------------------------------------------------------------
 // SphRMag(const SphRMag &copy)
 //------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ SphRMag::SphRMag(const SphRMag &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphRMag& operator=(const SphRMag &right)
@@ -78,6 +80,7 @@ SphRMag& SphRMag::operator=(const SphRMag &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SphRMag()
 //------------------------------------------------------------------------------
@@ -88,6 +91,7 @@ SphRMag& SphRMag::operator=(const SphRMag &right)
 SphRMag::~SphRMag()
 {
 }
+
 
 //--------------------------------------
 // Inherited methods from Parameter
@@ -104,13 +108,14 @@ SphRMag::~SphRMag()
 //------------------------------------------------------------------------------
 bool SphRMag::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphRMag");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphRMag");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -127,6 +132,7 @@ GmatBase* SphRMag::Clone(void) const
 {
    return new SphRMag(*this);
 }
+
 
 //==============================================================================
 //                              SphRA
@@ -153,6 +159,7 @@ SphRA::SphRA(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // SphRA(const SphRA &copy)
 //------------------------------------------------------------------------------
@@ -166,6 +173,7 @@ SphRA::SphRA(const SphRA &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphRA& operator=(const SphRA &right)
@@ -184,6 +192,7 @@ SphRA& SphRA::operator=(const SphRA &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SphRA()
 //------------------------------------------------------------------------------
@@ -194,6 +203,7 @@ SphRA& SphRA::operator=(const SphRA &right)
 SphRA::~SphRA()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -210,13 +220,14 @@ SphRA::~SphRA()
 //------------------------------------------------------------------------------
 bool SphRA::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphRA");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphRA");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -260,6 +271,7 @@ SphDec::SphDec(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // SphDec(const SphDec &copy)
 //------------------------------------------------------------------------------
@@ -273,6 +285,7 @@ SphDec::SphDec(const SphDec &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphDec& operator=(const SphDec &right)
@@ -291,6 +304,7 @@ SphDec& SphDec::operator=(const SphDec &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SphDec()
 //------------------------------------------------------------------------------
@@ -301,6 +315,7 @@ SphDec& SphDec::operator=(const SphDec &right)
 SphDec::~SphDec()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -317,13 +332,14 @@ SphDec::~SphDec()
 //------------------------------------------------------------------------------
 bool SphDec::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphDec");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphDec");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -340,6 +356,7 @@ GmatBase* SphDec::Clone(void) const
 {
    return new SphDec(*this);
 }
+
 
 //==============================================================================
 //                              SphVMag
@@ -366,6 +383,7 @@ SphVMag::SphVMag(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // SphVMag(const SphVMag &copy)
 //------------------------------------------------------------------------------
@@ -379,6 +397,7 @@ SphVMag::SphVMag(const SphVMag &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphVMag& operator=(const SphVMag &right)
@@ -397,6 +416,7 @@ SphVMag& SphVMag::operator=(const SphVMag &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SphVMag()
 //------------------------------------------------------------------------------
@@ -407,6 +427,7 @@ SphVMag& SphVMag::operator=(const SphVMag &right)
 SphVMag::~SphVMag()
 {
 }
+
 
 //--------------------------------------
 // Inherited methods from Parameter
@@ -423,13 +444,14 @@ SphVMag::~SphVMag()
 //------------------------------------------------------------------------------
 bool SphVMag::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphVMag");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphVMag");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -446,6 +468,7 @@ GmatBase* SphVMag::Clone(void) const
 {
    return new SphVMag(*this);
 }
+
 
 //==============================================================================
 //                              SphRAV
@@ -472,6 +495,7 @@ SphRAV::SphRAV(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // SphRAV(const SphRAV &copy)
 //------------------------------------------------------------------------------
@@ -485,6 +509,7 @@ SphRAV::SphRAV(const SphRAV &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphRAV& operator=(const SphRAV &right)
@@ -503,6 +528,7 @@ SphRAV& SphRAV::operator=(const SphRAV &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SphRAV()
 //------------------------------------------------------------------------------
@@ -513,6 +539,7 @@ SphRAV& SphRAV::operator=(const SphRAV &right)
 SphRAV::~SphRAV()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -529,13 +556,14 @@ SphRAV::~SphRAV()
 //------------------------------------------------------------------------------
 bool SphRAV::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphRAV");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphRAV");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -579,6 +607,7 @@ SphDecV::SphDecV(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // SphDecV(const SphDecV &copy)
 //------------------------------------------------------------------------------
@@ -592,6 +621,7 @@ SphDecV::SphDecV(const SphDecV &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // SphDecV& operator=(const SphDecV &right)
@@ -636,13 +666,14 @@ SphDecV::~SphDecV()
 //------------------------------------------------------------------------------
 bool SphDecV::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("SphDecV");    
+   mRealValue = OrbitData::GetSphRaDecReal("SphDecV");    
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -660,17 +691,18 @@ GmatBase* SphDecV::Clone(void) const
    return new SphDecV(*this);
 }
 
+
+//loj: 2/15/05 Added
 //==============================================================================
-//                              SphElem
+//                              SphAzi
 //==============================================================================
 /**
- * Implements Spherical Elements class.
- *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
+ * Implements Spherical Right Ascension of Velocity parameter class.
  */
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphElem(const std::string &name, GmatBase *obj)
+// SphAzi(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -679,17 +711,16 @@ GmatBase* SphDecV::Clone(void) const
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-SphElem::SphElem(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "SphElem", obj, "Spherical Elements", " ", GmatParam::COORD_SYS)
+SphAzi::SphAzi(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "AZI", obj, "Sph. RA of Velocity", "Deg", GmatParam::COORD_SYS)
 {
-   // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
-   mIsPlottable = false;
 }
 
+
 //------------------------------------------------------------------------------
-// SphElem(const SphElem &copy)
+// SphAzi(const SphAzi &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -697,13 +728,14 @@ SphElem::SphElem(const std::string &name, GmatBase *obj)
  * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-SphElem::SphElem(const SphElem &copy)
-   : OrbitRvec6(copy)
+SphAzi::SphAzi(const SphAzi &copy)
+   : OrbitReal(copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
-// SphElem& operator=(const SphElem &right)
+// SphAzi& operator=(const SphAzi &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -711,7 +743,236 @@ SphElem::SphElem(const SphElem &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-SphElem& SphElem::operator=(const SphElem &right)
+SphAzi& SphAzi::operator=(const SphAzi &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SphAzi()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphAzi::~SphAzi()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SphAzi::Evaluate()
+{
+   mRealValue = OrbitData::GetSphAzFpaReal("SphAzi");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphAzi::Clone(void) const
+{
+   return new SphAzi(*this);
+}
+
+
+//loj: 2/15/05 Added
+//==============================================================================
+//                              SphFPA
+//==============================================================================
+/**
+ * Implements Spherical Declination of Velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphFPA(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+SphFPA::SphFPA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "FPA", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
+{
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+}
+
+
+//------------------------------------------------------------------------------
+// SphFPA(const SphFPA &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphFPA::SphFPA(const SphFPA &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// SphFPA& operator=(const SphFPA &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphFPA& SphFPA::operator=(const SphFPA &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SphFPA()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphFPA::~SphFPA()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool SphFPA::Evaluate()
+{
+   mRealValue = OrbitData::GetSphAzFpaReal("SphFPA");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphFPA::Clone(void) const
+{
+   return new SphFPA(*this);
+}
+
+
+//loj: 2/15/05 Changed from SphElem
+//==============================================================================
+//                              SphRaDecElem
+//==============================================================================
+/**
+ * Implements Spherical RA/DEC type Elements class.
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphRaDecElem(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+SphRaDecElem::SphRaDecElem(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "SphericalRADEC", obj, "Spherical Elements", " ",
+                GmatParam::COORD_SYS)
+{
+   // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsPlottable = false;
+}
+
+
+//------------------------------------------------------------------------------
+// SphRaDecElem(const SphRaDecElem &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphRaDecElem::SphRaDecElem(const SphRaDecElem &copy)
+   : OrbitRvec6(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// SphRaDecElem& operator=(const SphRaDecElem &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphRaDecElem& SphRaDecElem::operator=(const SphRaDecElem &right)
 {
    if (this != &right)
       OrbitRvec6::operator=(right);
@@ -719,16 +980,18 @@ SphElem& SphElem::operator=(const SphElem &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
-// ~SphElem()
+// ~SphRaDecElem()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-SphElem::~SphElem()
+SphRaDecElem::~SphRaDecElem()
 {
 }
+
 
 //--------------------------------------
 // Inherited methods from Parameter
@@ -743,14 +1006,15 @@ SphElem::~SphElem()
  * @return true if parameter value successfully evaluated.
  */
 //------------------------------------------------------------------------------
-bool SphElem::Evaluate()
+bool SphRaDecElem::Evaluate()
 {
-   mRvec6Value.Set(GetSphReal("SphRMag"),
-                   GetSphReal("SphRA"),
-                   GetSphReal("SphDec"),
-                   GetSphReal("SphVMag"),
-                   GetSphReal("SphRAV"),
-                   GetSphReal("SphDecV"));
+   mRvec6Value = GetSphRaDecState();
+//     mRvec6Value.Set(GetSphReal("SphRMag"),
+//                     GetSphReal("SphRA"),
+//                     GetSphReal("SphDec"),
+//                     GetSphReal("SphVMag"),
+//                     GetSphReal("SphRAV"),
+//                     GetSphReal("SphDecV"));
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
@@ -767,7 +1031,127 @@ bool SphElem::Evaluate()
  * Method used to create a copy of the object
  */
 //------------------------------------------------------------------------------
-GmatBase* SphElem::Clone(void) const
+GmatBase* SphRaDecElem::Clone(void) const
 {
-   return new SphElem(*this);
+   return new SphRaDecElem(*this);
+}
+
+
+//loj: 2/15/05 Added
+//==============================================================================
+//                              SphAzFpaElem
+//==============================================================================
+/**
+ * Implements Spherical AZI/FPA type Elements class.
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphAzi, SphFPA
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// SphAzFpaElem(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+SphAzFpaElem::SphAzFpaElem(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "SphericalAZFPA", obj, "Spherical Elements", " ",
+                GmatParam::COORD_SYS)
+{
+   // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsPlottable = false;
+}
+
+
+//------------------------------------------------------------------------------
+// SphAzFpaElem(const SphAzFpaElem &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphAzFpaElem::SphAzFpaElem(const SphAzFpaElem &copy)
+   : OrbitRvec6(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// SphAzFpaElem& operator=(const SphAzFpaElem &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+SphAzFpaElem& SphAzFpaElem::operator=(const SphAzFpaElem &right)
+{
+   if (this != &right)
+      OrbitRvec6::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~SphAzFpaElem()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+SphAzFpaElem::~SphAzFpaElem()
+{
+}
+
+
+//--------------------------------------
+// Inherited methods from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated.
+ */
+//------------------------------------------------------------------------------
+bool SphAzFpaElem::Evaluate()
+{
+   mRvec6Value = GetSphAzFpaState();
+//     mRvec6Value.Set(GetSphAzFpaReal("SphRMag"),
+//                     GetSphAzFpaReal("SphRA"),
+//                     GetSphAzFpaReal("SphDec"),
+//                     GetSphAzFpaReal("SphVMag"),
+//                     GetSphAzFpaReal("SphAzi"),
+//                     GetSphAzFpaReal("SphFPA"));
+
+   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* SphAzFpaElem::Clone(void) const
+{
+   return new SphAzFpaElem(*this);
 }

@@ -22,7 +22,8 @@
 
 #include "gmatdefs.hpp"
 #include "OrbitReal.hpp"
-#include "OrbitRvec6.hpp" //loj: 9/8/04 added
+#include "OrbitRvec6.hpp"
+
 
 //==============================================================================
 //                              SphRMag
@@ -50,6 +51,7 @@ public:
 protected:
 
 };
+
 
 //==============================================================================
 //                              SphRA
@@ -104,6 +106,7 @@ protected:
 
 };
 
+
 //==============================================================================
 //                              SphVMag
 //==============================================================================
@@ -131,6 +134,7 @@ protected:
 
 };
 
+
 //==============================================================================
 //                              SphRAV
 //==============================================================================
@@ -156,6 +160,7 @@ public:
 protected:
 
 };
+
 
 //==============================================================================
 //                              SphDecV
@@ -183,22 +188,109 @@ protected:
 
 };
 
+
+//loj: 2/15/05 Added
 //==============================================================================
-//                              SphElem
+//                              SphAzi
 //==============================================================================
 /**
- * Declares Spherical Elements class.
- *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
+ * Declares Spherical Right Ascension of velocity parameter class.
  */
 //------------------------------------------------------------------------------
-class GMAT_API SphElem : public OrbitRvec6
+class GMAT_API SphAzi : public OrbitReal
 {
 public:
 
-   SphElem(const std::string &name = "", GmatBase *obj = NULL);
-   SphElem(const SphElem &copy);
-   SphElem& operator=(const SphElem &right);
-   virtual ~SphElem();
+   SphAzi(const std::string &name = "", GmatBase *obj = NULL);
+   SphAzi(const SphAzi &copy);
+   SphAzi& operator=(const SphAzi &right);
+   virtual ~SphAzi();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//loj: 2/15/05 Added
+//==============================================================================
+//                              SphFPA
+//==============================================================================
+/**
+ * Declares Spherical Declination of Velocity parameter class.
+ */
+//------------------------------------------------------------------------------
+class GMAT_API SphFPA : public OrbitReal
+{
+public:
+
+   SphFPA(const std::string &name = "", GmatBase *obj = NULL);
+   SphFPA(const SphFPA &copy);
+   SphFPA& operator=(const SphFPA &right);
+   virtual ~SphFPA();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//loj: 2/15/05 Changed from SphElem
+//==============================================================================
+//                              SphRaDecElem
+//==============================================================================
+/**
+ * Declares Spherical RA/DEC type Elements class.
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphRAV, SphDecV
+ */
+//------------------------------------------------------------------------------
+class GMAT_API SphRaDecElem : public OrbitRvec6
+{
+public:
+
+   SphRaDecElem(const std::string &name = "", GmatBase *obj = NULL);
+   SphRaDecElem(const SphRaDecElem &copy);
+   SphRaDecElem& operator=(const SphRaDecElem &right);
+   virtual ~SphRaDecElem();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//loj: 2/15/05 Added
+//==============================================================================
+//                              SphAzFpaElem
+//==============================================================================
+/**
+ * Declares Spherical AZ/FPA type Elements class.
+ *   Elements are SphRMag, SphRA, SphDec, SphVMag, SphAzi, SphFPA
+ */
+//------------------------------------------------------------------------------
+class GMAT_API SphAzFpaElem : public OrbitRvec6
+{
+public:
+
+   SphAzFpaElem(const std::string &name = "", GmatBase *obj = NULL);
+   SphAzFpaElem(const SphAzFpaElem &copy);
+   SphAzFpaElem& operator=(const SphAzFpaElem &right);
+   virtual ~SphAzFpaElem();
 
    // The inherited methods from Parameter
    virtual bool Evaluate();
