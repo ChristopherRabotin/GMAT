@@ -32,6 +32,9 @@ public:
    Formation(const Formation& orig);
    Formation&           operator=(const Formation& orig);
    
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    virtual GmatBase*    Clone() const;
    
    // Access methods derived classes can override

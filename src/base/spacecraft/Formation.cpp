@@ -83,6 +83,36 @@ Formation& Formation::operator=(const Formation& orig)
 }
 
 
+//loj: 2/22/05 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Formation::RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName)
+{
+   //#if DEBUG_RENAME
+   //MessageInterface::ShowMessage
+   //   ("Formation::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+   //    GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   //#endif
+   
+   // Formation needs to know about spacecraft or other formation only
+   if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION )
+      return true;
+   
+   //@todo replace any object name here
+   for (unsigned int i=0; i<componentNames.size(); i++)
+   {
+      if (componentNames[i] == oldName)
+         componentNames[i] = newName;
+   }
+   
+   return true;
+}
+
+
 GmatBase* Formation::Clone() const
 {
    return new Formation(*this);

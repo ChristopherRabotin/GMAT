@@ -33,36 +33,40 @@
 class Assignment : public GmatCommand
 {
 public:
-	Assignment();
-	virtual ~Assignment();
-    Assignment(const Assignment& a);
-    Assignment&         operator=(const Assignment& a);
+   Assignment();
+   virtual ~Assignment();
+   Assignment(const Assignment& a);
+   Assignment&         operator=(const Assignment& a);
     
-    virtual bool        Initialize(void);
-    virtual bool        InterpretAction(void);
-    virtual bool        Execute(void);
+   virtual bool        Initialize(void);
+   virtual bool        InterpretAction(void);
+   virtual bool        Execute(void);
 
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+   // inherited from GmatBase
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
+   
+   virtual GmatBase* Clone(void) const;
 
 protected:
-    /// Name of the object that appears on the left side of the equals sign
-    std::string         ownerName;
-    /// Parameter associated with that object
-    std::string         parmName;
-    /// Object named by pwnerName
-    GmatBase            *parmOwner;
-    /// The object used for object assignment
-    GmatBase            *rhsObject;
-    /// Flag indicating if this is object assignment
-    bool                objToObj;
-    /// For parameter version, the parm's ID
-    Integer             parmID;
-    ///  The parm's data type
-    Gmat::ParameterType parmType;
-    /// The value that is assigned, or the name of the object providing the data
-    std::string         value;
+   /// Name of the object that appears on the left side of the equals sign
+   std::string         ownerName;
+   /// Parameter associated with that object
+   std::string         parmName;
+   /// Object named by pwnerName
+   GmatBase            *parmOwner;
+   /// The object used for object assignment
+   GmatBase            *rhsObject;
+   /// Flag indicating if this is object assignment
+   bool                objToObj;
+   /// For parameter version, the parm's ID
+   Integer             parmID;
+   ///  The parm's data type
+   Gmat::ParameterType parmType;
+   /// The value that is assigned, or the name of the object providing the data
+   std::string         value;
 };
 
 #endif // Assignment_hpp

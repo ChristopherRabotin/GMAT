@@ -26,7 +26,9 @@
 
 
 #include "Assignment.hpp"
+#include "MessageInterface.hpp"
 
+//#define DEBUG_RENAME 1
 
 Assignment::Assignment() :
     GmatCommand         ("GMAT"),
@@ -249,6 +251,37 @@ bool Assignment::Execute(void)
     }
     
     return retval;
+}
+
+//loj: 2/22/05 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Assignment::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Assignment::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   #endif
+
+   // Assignment needs to know about spacecraft, formation
+   if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION )
+      return true;
+
+   if (ownerName == oldName)
+      ownerName = newName;
+
+   if (parmName == oldName)
+      parmName = newName;
+
+   if (value == oldName)
+      value = newName;
+   
+   return true;
 }
 
 
