@@ -28,10 +28,6 @@
 #include "CoordinateBase.hpp"
 #include "Rmatrix33.hpp"
 
-//*****************
-#include <iostream>
-using namespace std;
-
 
 //---------------------------------
 // static data
@@ -372,8 +368,6 @@ std::string CoordinateSystem::GetParameterTypeString(const Integer id) const
 GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
                                          const std::string &name)
 {
-   cout << "In GetRefObject -------------------------" << endl;
-   cout << "--------- and type = " << (Integer) type << endl;
    switch (type)
    {
       case Gmat::AXIS_SYSTEM:
