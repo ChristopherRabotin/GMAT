@@ -70,6 +70,8 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "PhysicalModel.hpp"
+#include "PropagatorException.hpp"      // Propagator Exceptions
+
 
 class GMAT_API Propagator : public GmatBase
 {

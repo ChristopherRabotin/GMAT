@@ -701,11 +701,32 @@ Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
  *                      value can be used to indicate that the requested map is not 
  *                      available, and verefore that the model may not be appropriate for the
  *                      requested operations.
+ * 
+ * @todo This method needs serious rework for the formation pieces in build 3.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::GetComponentMap(Integer * map, Integer order) const
 {
-    return false;
+//    return false;
+    int i6;
+
+    if (order == 1) {
+        // Calculate how many spacecraft are in the model
+        int satCount = (int)(dimension / 6);
+        for (int i = 0; i < satCount; i++) {
+            i6 = i * 6;
+    
+            map[ i6 ] = i6 + 3;
+            map[i6+1] = i6 + 4;
+            map[i6+2] = i6 + 5;
+            map[i6+3] = -1;
+            map[i6+4] = -1;
+            map[i6+5] = -1;
+        }
+    }
+    
+    return true;
+
 }
 
 //------------------------------------------------------------------------------

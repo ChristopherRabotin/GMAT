@@ -85,13 +85,14 @@ Propagator* DormandElMikkawyPrince68::Clone(void) const
     return new DormandElMikkawyPrince68(*this);
 }
 
-/** \brief Sets coefficients for Dormand-Prince RK-Nystrom 6(7) Integrator */
+
+/** \brief Sets coefficients for Dormand-ElMikkawy-Prince 6(8) Integrator */
 void DormandElMikkawyPrince68::SetCoefficients(void)
 {
     if (!initialized || (ai == NULL) || (bij == NULL) || (cj == NULL) ||
-        (cdotj == NULL) || (ee == NULL) || (ki == NULL)) {
+        (ee == NULL) || (cdotj == NULL) || (ki == NULL)) {
         initialized = false;
-        return;
+        throw PropagatorException("DormandElMikkawyPrince68 cannot set coefficients");
     }
 
     // Fill in ai, bij, and cj

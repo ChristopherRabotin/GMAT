@@ -63,7 +63,7 @@
 //    RungeKutta (9, 8, "RungeKuttaNystrom", nomme)
 RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::string &typeStr,
                                            const std::string &nomme) :
-    RungeKutta          (9, 8, typeStr, nomme),
+    RungeKutta          (st, order, typeStr, nomme),
     cdotj               (NULL),
     derivativeMap       (NULL),
     inverseMap          (NULL),
@@ -166,19 +166,24 @@ char * RungeKuttaNystrom::GetType(void) const
 //------------------------------------------------------------------------------
 void RungeKuttaNystrom::Initialize(void)
 {
-    RungeKutta::Initialize();
-    if (initialized == false)
-        return;
+    initialized = true;
+    
+    if (cdotj) {
+        delete [] cdotj;
+        cdotj = NULL;
+    }
+
+    // Set the Nystrom-specific structures
+    if ((cdotj = new double [stages]) == NULL) {
+        RungeKutta::ClearArrays();
+        initialized = false;
+        throw PropagatorException("Could not allocate cdotj");
+    }
 
     /// \todo: Make this consistent with SetupAccumulator in the RK code
     if (physicalModel == NULL) {
         initialized = false;
-        return;
-    }
-
-    if (cdotj) {
-        delete [] cdotj;
-        cdotj = NULL;
+        throw PropagatorException("PhysicalModel was not set");
     }
 
     if (derivativeMap) {
@@ -196,19 +201,12 @@ void RungeKuttaNystrom::Initialize(void)
         eeDeriv = NULL;
     }
 
-    // Set the Nystrom-specific structures
-    if ((cdotj = new double [stages]) == NULL) {
-        RungeKutta::ClearArrays();
-        initialized = false;
-        return;
-    }
-
     if ((derivativeMap = new int [dimension]) == NULL) {
         RungeKutta::ClearArrays();
         delete [] cdotj;
         cdotj = NULL;
         initialized = false;
-        return;
+        throw PropagatorException("Could not allocate derivativeMap");
     }
 
     if ((inverseMap = new int [dimension]) == NULL) {
@@ -218,7 +216,7 @@ void RungeKuttaNystrom::Initialize(void)
         delete [] derivativeMap;
         derivativeMap = NULL;
         initialized = false;
-        return;
+        throw PropagatorException("Could not allocate inverseMap");
     }
 
     if (!physicalModel->GetComponentMap(derivativeMap)) {
@@ -228,7 +226,7 @@ void RungeKuttaNystrom::Initialize(void)
         delete [] derivativeMap;
         derivativeMap = NULL;
         initialized = false;
-        return;
+        throw PropagatorException("Could not set the component map");
     }
 
     if (derivativeError) {
@@ -241,8 +239,14 @@ void RungeKuttaNystrom::Initialize(void)
             delete [] inverseMap;
             inverseMap = NULL;
             initialized = false;
-            return;
+            throw PropagatorException("Encountered derivative error");
         }
+    }
+
+
+    RungeKutta::Initialize();
+    if (initialized == false) {
+        throw PropagatorException("RungeKutta base did not initialize for the RKN class");
     }
 
     // Fill the inverse map from the derivative map
@@ -252,43 +256,54 @@ void RungeKuttaNystrom::Initialize(void)
     for (int i = 0; i < dimension; ++i)
         if (derivativeMap[i] != -1)
             inverseMap[derivativeMap[i]] = i;
-
+            
     SetCoefficients();
     SetupAccumulator();
 }
 
+
 bool RungeKuttaNystrom::Step(void)
 {
-    if (!initialized)
-        return false;
+    if (!initialized) {
+        Initialize();
+        if (!initialized)
+            throw PropagatorException("Cannot Step: RKN is not initialized");
+    }
 
     bool goodStepTaken = false;
     double maxerror;
     
     do {
-        if (!RawStep())
+        if (!RawStep()) {
+            throw PropagatorException("RKN::RawStep() failed");
             return false;
+        }
 
         maxerror = EstimateError();
         stepTaken = stepSize;
         if (AdaptStep(maxerror))
             goodStepTaken = true;
 
-        if (stepAttempts >= maxStepAttempts)
+        if (stepAttempts >= maxStepAttempts) {
+            throw PropagatorException("Too many step attempts in RKN Propagator");
             return false;
+        }
     } while (!goodStepTaken);
 
     physicalModel->IncrementTime(stepTaken);
     return true;
 }
 
+
 bool RungeKuttaNystrom::Step(double dt)
 {
     bool stepFinished = false;
     timeleft = dt;
     do {
-        if (!Propagator::Step(timeleft))
+        if (!Propagator::Step(timeleft)) {
+            throw PropagatorException("Propagator::Step(timeleft) failed in RKN");
             return false;
+        }
         if (timeleft == stepTaken)
             stepFinished = true;
         timeleft -= stepTaken;
@@ -324,6 +339,7 @@ bool RungeKuttaNystrom::RawStep(void)
         }
 
         if (!physicalModel->GetDerivatives(stageState, stepSize * ai[i], 2)) {
+            throw PropagatorException("Call to GetDerivatives() Failed for RKN Propagator");
             return false;
         }
         for (j = 0; j < dimension; j++)
