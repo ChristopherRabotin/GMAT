@@ -85,8 +85,12 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
    if (firstYParam != NULL)
       AddYParameter(firstYParam);
 
+   mPlotTitle = plotTitle;
+   mXAxisTitle = xAxisTitle;
+   mYAxisTitle = yAxisTitle;
+   
    mIsXyPlotWindowSet = false;
-   mAddNewCurve = true;
+   //mAddNewCurve = true; //loj: 5/13/04 not used, remove later
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
 }
@@ -108,48 +112,43 @@ bool XyPlot::Initialize()
    bool status = false;
    DeletePlotCurves(); //loj: 5/3/04 added to fix index out of range
    
+   //loj: 5/12/04 always add new curves to show curves when running a mission
+   //     without rebuilding objects
+   //mAddNewCurve = true; 
+
+   //MessageInterface::ShowMessage("XyPlot::Initialize() active=%d\n", active);
+   
    if (active)
    {
-      if (!mIsXyPlotWindowSet)
-      {
-         BuildPlotTitle();
-                        
-         // Create XyPlotWindow
-         //MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
-         PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
-                                           mXAxisTitle, mYAxisTitle);
+      // build plot title
+      BuildPlotTitle();
+      
+      // Create XyPlotWindow, if not exist
+      //MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
+      PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
+                                        mXAxisTitle, mYAxisTitle);
 
-         mAddNewCurve = true;
-         mIsXyPlotWindowSet = true;
-      }
-
-      if (mAddNewCurve)
-      {
-         // update plot title
-         BuildPlotTitle();
-         PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
+      mIsXyPlotWindowSet = true; //loj: 5/12/04 Do I need this flag?
             
-         // add to Y params to XyPlotWindow
-         //loj: temp code
-         int yOffset = 0; //loj: I don't know how this is used
-         Real yMin = -40000.0; //loj: should parameter provide minimum value?
-         Real yMax =  40000.0; //loj: should parameter provide maximum value?
+      // add to Y params to XyPlotWindow
+      //loj: temp code
+      int yOffset = 0; //loj: I don't know how this is used
+      Real yMin = -40000.0; //loj: should parameter provide minimum value?
+      Real yMax =  40000.0; //loj: should parameter provide maximum value?
 
-         for (int i=0; i<mNumYParams; i++)
-         {
-            std::string curveTitle = mYParams[i]->GetName();
-            std::string penColor = "RED"; //loj: should parameter provide pen color?
+      for (int i=0; i<mNumYParams; i++)
+      {
+         std::string curveTitle = mYParams[i]->GetName();
+         std::string penColor = "RED"; //loj: should parameter provide pen color?
 
-            //MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-            //                              curveTitle.c_str());
+         //MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+         //                              curveTitle.c_str());
                 
-            PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                          curveTitle, penColor);
-         }
-
-         mAddNewCurve = false;
-         status = true;
+         PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
+                                       curveTitle, penColor);
       }
+
+      status = true;
         
       //MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
       PlotInterface::ClearXyPlotData(instanceName);
@@ -159,7 +158,7 @@ bool XyPlot::Initialize()
       if (mIsXyPlotWindowSet)
       {        
          mIsXyPlotWindowSet = false;
-         mAddNewCurve = true;
+         //mAddNewCurve = true;
          status = PlotInterface::DeleteXyPlot(true);
       }
       else
@@ -477,16 +476,14 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
 //------------------------------------------------------------------------------
 void XyPlot::BuildPlotTitle()
 {
-   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() entered\n");
-   
    //set X and Y axis title
-   if (mXAxisTitle == "" || mAddNewCurve)
+   if (mXAxisTitle == "")// || mAddNewCurve)
       mXAxisTitle = mXParam->GetName();
             
    //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
    //                              mXAxisTitle.c_str());
    
-   if (mYAxisTitle == "" || mAddNewCurve)
+   if (mYAxisTitle == "")// || mAddNewCurve)
    {
       mYAxisTitle = "";
       for (int i= 0; i<mNumYParams-1; i++)
@@ -499,13 +496,13 @@ void XyPlot::BuildPlotTitle()
    //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
    //                              mYAxisTitle.c_str());
     
-   if (mPlotTitle == "" || mAddNewCurve)
+   if (mPlotTitle == "")// || mAddNewCurve)
    {
       mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
    }
     
-   //MessageInterface::ShowMessage("mXAxisTitle = %s, mYAxisTitle = %s   mPlotTitle = %s\n",
-   //                              mXAxisTitle.c_str(), mPlotTitle.c_str());
+   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
+   //                              mPlotTitle.c_str());
 }
 
 //loj: 5/4/04 added
@@ -518,7 +515,10 @@ void XyPlot::ClearYParameters()
    mYParams.clear();
    mYParamNames.clear();
    mNumYParams = 0;
-   mAddNewCurve = true;
+   //mAddNewCurve = true;
+   mPlotTitle = "";
+   mXAxisTitle = "";
+   mYAxisTitle = "";
    mIsXyPlotWindowSet = false;
 }
 
@@ -582,6 +582,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                mNumCollected++;
                bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
 
+               //MessageInterface::ShowMessage
+               //   ("XyPlot::Distribute() calling PlotInterface::UpdateXyPlot()\n");
+               
                return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
                                                   mPlotTitle, mXAxisTitle, mYAxisTitle,
                                                   update);
