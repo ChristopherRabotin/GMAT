@@ -114,9 +114,6 @@ private:
 //      ViewTextFrame *mTextFrame;
     
     Integer numOfModes;
-    //loj: 3/1/04 used const MAX_PROP_ROW, MAX_STOPCOND_ROW
-    //Integer numOfPropRows;
-    //Integer numOfCondRows;
     Integer numOfEqualities;
     Integer numOfProp;
     Integer numOfSC;
@@ -147,8 +144,8 @@ private:
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void GetData();
-    void SetData();
+    void LoadData();
+    void SaveData();
     void DisplayPropagator();
     void DisplayStopCondition();
     void UpdateStopCondition();
@@ -170,23 +167,10 @@ private:
     //loj: 3/1/04 commented out for build2
     //void CreateScript();
     //wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
-    
-    // Popup menu event methods
-    // waw: Future implementation
-    //void ShowContextMenu(const wxPoint& pos);
 
     // Grid table event methods
-    // waw: Future implementation
-    //void OnCellValueChanged(wxGridEvent& event);
     void OnCellLeftClick(wxGridEvent& event);
     void OnCellRightClick(wxGridEvent& event);
-    //void OnCellLeftDoubleClick(wxGridEvent& event);
-    //void InsertPropagatorRow();
-    //void InsertStopCondRow();
-    //void ClearPropagatorTable();
-    //void ClearStopCondTable();
-    //void DeleteSelectedPropagatorRows();
-    //void DeleteSelectedStopCondRows();
                 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
