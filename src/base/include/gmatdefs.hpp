@@ -66,6 +66,13 @@ typedef std::vector<std::string> StringArray;
 class GmatBase;                            // Forward reference for ObjectArray
 typedef std::vector<GmatBase*> ObjectArray;
 
+typedef struct geoparms
+{
+   Real xtemp;  /// minimum global exospheric temperature (degrees K)
+   Real tkp;    /// geomagnetic index 
+
+} GEOPARMS; 
+
 
 namespace Gmat
 {
@@ -113,7 +120,6 @@ namespace Gmat
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };
-
 }
 
 #endif //GMATDEFS_HPP
