@@ -28,8 +28,8 @@
 //                             Original delivery
 //
 //                           : 10/02/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                               Changes:
+//                                   - Updated style using GMAT cpp style guide
 //
 // **************************************************************************
 
@@ -125,7 +125,7 @@ DerivativeList& DerivativeList::operator=(const DerivativeList& dl)
  * the forces, and destroys them (via delete) when the list is destroyed.
  *
  *
- @param pPhysicalModel     The new force for the force model
+ * @param pPhysicalModel     The new force for the force model
  */
 //------------------------------------------------------------------------------
 void DerivativeList::AddForce(PhysicalModel *pPhysicalModel)
@@ -153,7 +153,7 @@ void DerivativeList::AddForce(PhysicalModel *pPhysicalModel)
 // PhysicalModel * DerivativeList::GetDerivative(void)
 //------------------------------------------------------------------------------
 /**
- * Returns the pointer to the owned force
+ * @return Returns the pointer to the owned force
  */
 //------------------------------------------------------------------------------
 PhysicalModel* DerivativeList::GetDerivative(void)
@@ -165,7 +165,7 @@ PhysicalModel* DerivativeList::GetDerivative(void)
 // DerivativeList * DerivativeList::Next(void)
 //------------------------------------------------------------------------------
 /**
- * Returns the next force in the list
+ * @return Returns the next force in the list
  */
 //------------------------------------------------------------------------------
 DerivativeList* DerivativeList::Next(void)

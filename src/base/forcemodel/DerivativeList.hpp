@@ -28,8 +28,8 @@
 //                             Original delivery
 //
 //                           : 10/02/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                               Changes:
+//                                   - Updated style using GMAT cpp style guide
 //
 // **************************************************************************
 /**
@@ -62,7 +62,9 @@ public:
     DerivativeList* Next(void);
 
 protected:
+    /// Owned force from the PhysicalModel
     PhysicalModel *derivative;
+    /// Derivative list member
     DerivativeList *next;
 
     void SetDerivative(PhysicalModel *pPhysicalModel);
