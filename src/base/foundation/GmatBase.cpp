@@ -47,7 +47,12 @@ const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
 const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 
-/// Build the list of type names
+/**
+ * Build the list of type names
+ * 
+ * This list needs to be synchronized with the Gmat::ParameterType list found in 
+ * base/include/gmatdefs.hpp
+ */
 const std::string
 GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
 {
@@ -57,18 +62,23 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
    "UtcDate",     "Object"
 };
 
-/// Build the list of object type names
+/**
+ * Build the list of object type names
+ * 
+ * This list needs to be synchronized with the Gmat::ObjectType list found in 
+ * base/include/gmatdefs.hpp
+ */
 const std::string
 GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 {
    "Spacecraft",    "Formation",     "SpaceObject",   "GroundStation",
    "Burn",          "Command",       "Propagator",    "ForceModel",
-   "PhysicalModel", "Interpolator",  "SolarSystem",   "SpacePoint",
-   "CelestialBody", "CalculatedPoint","LibrationPoint","Barycenter",
-   "Atmosphere",    "Parameter",     "StopCondition", "Solver",
-   "Subscriber",    "PropSetup",     "RefFrame",      "Function",
-   "FuelTank",      "Thruster",      "Hardware",      "CoordinateSystem",
-   "AxisSystem",    "UnknownObject"
+   "PhysicalModel", "TransientForce","Interpolator",  "SolarSystem",   
+   "SpacePoint",    "CelestialBody", "CalculatedPoint","LibrationPoint",
+   "Barycenter",    "Atmosphere",    "Parameter",     "StopCondition", 
+   "Solver",        "Subscriber",    "PropSetup",     "RefFrame",      
+   "Function",      "FuelTank",      "Thruster",      "Hardware",      
+   "CoordinateSystem","AxisSystem",  "UnknownObject"
 };
 
 

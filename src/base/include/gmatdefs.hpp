@@ -78,6 +78,12 @@ typedef struct geoparms
 
 namespace Gmat
 {
+   /**
+    * The list of object types
+    * 
+    * This list needs to be synchronized with the GmatBase::OBJECT_TYPE_STRING 
+    * list found in base/Foundation/GmatBase.cpp
+    */
    enum ObjectType
    {
       SPACECRAFT= 1001,
@@ -89,6 +95,7 @@ namespace Gmat
       PROPAGATOR,
       FORCE_MODEL,
       PHYSICAL_MODEL,
+      TRANSIENT_FORCE,
       INTERPOLATOR,
       SOLAR_SYSTEM,
       SPACE_POINT,
@@ -113,6 +120,12 @@ namespace Gmat
    };
 
 
+   /**
+    * The list of data types
+    * 
+    * This list needs to be synchronized with the GmatBase::PARAM_TYPE_STRING 
+    * list found in base/Foundation/GmatBase.cpp
+    */
    enum ParameterType
    {
       INTEGER_TYPE,
