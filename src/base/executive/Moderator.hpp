@@ -260,6 +260,7 @@ private:
    Spacecraft* GetDefaultSpacecraft();
    PropSetup* GetDefaultPropSetup();
    Burn* GetDefaultBurn();
+   Solver* GetDefaultSolver(); //11/16/04 loj: added
    StopCondition* CreateDefaultStopCondition();
    Parameter* GetDefaultX();
    Parameter* GetDefaultY();
