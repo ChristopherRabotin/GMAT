@@ -66,11 +66,14 @@ private:
    bool mInitialized;
    Propagator *mPropagator;
    ForceModel *mForceModel;
+   
+   bool usedrag;
 
    enum
    {
       FORCE_MODEL_NAME = 0,
       PROPAGATOR_NAME,
+      USE_DRAG,
       PropSetupParamCount
    };
 
