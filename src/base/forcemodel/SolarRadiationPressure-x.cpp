@@ -535,7 +535,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     if (!initialized)
         return false;
 
-    Real now = elapsedTime + dt;
     Real distancefactor = 1.0, mag = 0.0;
 
     bool inSunlight = true, inShadow = false;
@@ -564,7 +563,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
             mag = percentSun * cr * fluxPressure * area / 
                                  mass * distancefactor;
 
-            if (order = 1) 
+            if (order == 1) 
             {
                 deriv[i*6] = deriv[i*6 + 1] = deriv[i*6 + 2] = 0.0;
                 deriv[i*6 + 3] = mag * forceVector[0];
