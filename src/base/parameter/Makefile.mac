@@ -1,0 +1,16 @@
+# Project:    GMAT
+# Module:     Makefile.mac for parameter directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/13
+
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = CurrentTimeParam.cpp Parameter.cpp SpacecraftStateParam.cpp \
+	ElapsedTimeParam.cpp ParameterDatabase.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
