@@ -34,10 +34,13 @@ public:
                         const wxString& name = "");
     ~GmatMdiChildFrame();
     wxString GetTitle();
+    int GetDataType();
+    void SetDataType(int type) {dataType = type;};
     void OnClose();
    
 protected:
     wxString title;
+    int dataType;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

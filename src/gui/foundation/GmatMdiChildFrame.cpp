@@ -42,6 +42,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent,
                  :wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
    this->title.Printf("%s", title.c_str());
+
 }
 
 GmatMdiChildFrame::~GmatMdiChildFrame()
@@ -62,4 +63,9 @@ void GmatMdiChildFrame::OnClose()
 wxString GmatMdiChildFrame::GetTitle()
 {
    return title;
+}
+
+int GmatMdiChildFrame::GetDataType()
+{
+   return dataType;
 }
