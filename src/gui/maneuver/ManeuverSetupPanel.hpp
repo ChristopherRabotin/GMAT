@@ -17,42 +17,34 @@
 #define ManeuverSetupPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 #include "Command.hpp"
-#include "Burn.hpp"
+#include "GuiItemManager.hpp"
 
-class ManeuverSetupPanel : public wxPanel
+class ManeuverSetupPanel : public GmatPanel
 {
 public:
     // constructors
     ManeuverSetupPanel(wxWindow *parent, GmatCommand *cmd);
     
-private:
-    // member functions
-    void CreateManeuver(wxWindow *parent);
-
-    void OnScript();
-    void OnApply();
-    void OnOK();
-    void OnCancel();
-
+protected:
     // member data
-    GuiInterpreter *theGuiInterpreter;
+    GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
     GmatCommand *theCommand;
-    Burn *theBurn;
-
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
-    wxButton *scriptButton;
 
     wxComboBox *burnCB;
-    wxComboBox *vectorCB;
-    wxComboBox *coordCB;
     wxComboBox *satCB;
     
+    // member functions
+    void OnBurnComboBoxChange(wxCommandEvent& event);
+    void OnSatComboBoxChange(wxCommandEvent& event);
+
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
     
@@ -60,18 +52,9 @@ private:
     enum
     {     
         ID_TEXT = 80000,
-        ID_TEXTCTRL,
-
-        ID_BUTTON_OK,
-        ID_BUTTON_APPLY,
-        ID_BUTTON_CANCEL,
-        ID_BUTTON_HELP,
-        ID_BUTTON_SCRIPT,
-
-        ID_COMBO,
-
-        ID_STATIC_VECTOR
-
+        
+        ID_BURN_COMBOBOX,
+        ID_SAT_COMBOBOX
     };
 };
 

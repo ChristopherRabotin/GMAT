@@ -18,40 +18,22 @@
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 #include "Burn.hpp"
 
-class ImpulsiveBurnSetupPanel : public wxPanel
+class ImpulsiveBurnSetupPanel : public GmatPanel
 {
 public:
     // constructors
     ImpulsiveBurnSetupPanel( wxWindow *parent, const wxString &burnName);
     
 private:
-    // member functions
-    void CreateBurn(wxWindow *parent, const wxString &burnName);
-
-    void AddVector(wxWindow *parent);
-    void OnVectorChange();
-    void OnTextChange();
-    void UpdateValues();
-
-    void OnScript();
-    void OnApply();
-    void OnOK();
-    void OnCancel();
-
     // member data
     GuiInterpreter *theGuiInterpreter;
     Burn *theBurn;
 
-    wxButton *scriptButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
-
-    wxComboBox *vectorCB;
-    wxComboBox *coordCB;
+    wxComboBox *frameCB;
+    wxComboBox *formatCB;
     
     wxPanel *vectorPanel;
 
@@ -66,6 +48,18 @@ private:
     wxTextCtrl *textCtrl2;
     wxTextCtrl *textCtrl3;
 
+    // member functions
+    void AddVector(wxWindow *parent);
+    void LabelsUnits();
+    void OnTextChange(wxCommandEvent& event);
+    void OnFrameComboBoxChange(wxCommandEvent& event);
+    void OnFormatComboBoxChange(wxCommandEvent& event);
+
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
     
@@ -75,18 +69,10 @@ private:
         ID_TEXT = 81000,
         ID_TEXTCTRL,
 
-        ID_CB_COORD,
-        ID_CB_VECTOR,
+        ID_FORMAT_COMBOBOX,
+        ID_FRAME_COMBOBOX,
 
-        ID_STATIC_COORD,
-        ID_STATIC_VECTOR,
-
-        ID_BUTTON_SCRIPT,
-        ID_BUTTON_OK,
-        ID_BUTTON_APPLY,
-        ID_BUTTON_CANCEL,
-        ID_BUTTON_HELP
-
+        ID_STATIC_VECTOR
     };
 };
 
