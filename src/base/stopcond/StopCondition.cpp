@@ -25,9 +25,7 @@
 #include "AngleUtil.hpp"               // for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 
-#if !defined __UNIT_TEST__
-#include "Moderator.hpp"
-#endif
+#define DEBUG_STOPCOND 0
 
 //---------------------------------
 // public methods
@@ -139,11 +137,13 @@ bool StopCondition::Evaluate()
    if (mStopParam->IsTimeParameter())
    {
       rval = mStopParam->EvaluateReal();
-        
-      //MessageInterface::ShowMessage("StopCondition::Evaluate() mUseInternalEpoch = %d, "
-      //                              "epoch = %f, mGoal = %f, rval = %f\n",
-      //                              mUseInternalEpoch, epoch, mGoal, rval);
-        
+
+#if DEBUG_STOPCOND
+      MessageInterface::ShowMessage("StopCondition::Evaluate() mUseInternalEpoch = %d, "
+                                    "epoch = %f, mGoal = %f, rval = %f\n",
+                                    mUseInternalEpoch, epoch, mGoal, rval);
+#endif
+      
       if (rval >= mGoal)
       {
          //mStopEpoch = rval; //Should we return this?
@@ -159,9 +159,11 @@ bool StopCondition::Evaluate()
       mNumValidPoints = (mNumValidPoints < mBufferSize) ?
          mNumValidPoints + 1 : mNumValidPoints;
 
-      //MessageInterface::ShowMessage("StopCondition::Evaluate() mNumValidPoints=%d, "
-      //                              "mBufferSize=%d\n", mNumValidPoints, mBufferSize);
-        
+#if DEBUG_STOPCOND
+      MessageInterface::ShowMessage("StopCondition::Evaluate() mNumValidPoints=%d, "
+                                    "mBufferSize=%d\n", mNumValidPoints, mBufferSize);
+#endif
+      
       // shift values to make room for newest value
       for (int i=0; i<mBufferSize-1; i++)
       {
@@ -173,8 +175,10 @@ bool StopCondition::Evaluate()
       mEpochBuffer[mBufferSize - 1] = epoch;
       mValueBuffer[mBufferSize - 1] = rval;
         
-      //MessageInterface::ShowMessage("StopCondition::Evaluate() epoch=%f, rval=%f\n",
-      //                              epoch, rval);
+#if DEBUG_STOPCOND
+      MessageInterface::ShowMessage("StopCondition::Evaluate() epoch=%f, rval=%f\n",
+                                    epoch, rval);
+#endif
 
       //------------------------------------------------------------
       // Should handle Apoapsis, Periapsis parameters which need 
@@ -218,16 +222,22 @@ bool StopCondition::Evaluate()
          mInterpolator->Clear();
          for (int i=0; i<mBufferSize; i++)
          {
-            //MessageInterface::ShowMessage("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
-            //                              "mEpochBuffer=%f\n", i, mValueBuffer[i],
-            //                              mEpochBuffer[i]);
+            
+#if DEBUG_STOPCOND
+            MessageInterface::ShowMessage("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
+                                          "mEpochBuffer=%f\n", i, mValueBuffer[i],
+                                          mEpochBuffer[i]);
+#endif
+            
             mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
          }
             
          if (mInterpolator->Interpolate(mGoal, &stopEpoch))
             mStopEpoch = stopEpoch;
             
-         //MessageInterface::ShowMessage("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
+#if DEBUG_STOPCOND
+         MessageInterface::ShowMessage("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
+#endif
       }
    }
 
@@ -258,10 +268,25 @@ GmatBase* StopCondition::Clone(void) const
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
 {
+   static int count = 0;
+   count++;
+
+   if (count > 100)
+   {
+      count = 0;
+      return true;
+   }
+   
    bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    Real rmag = mRmagParam->EvaluateReal();
-                
+   
+#if DEBUG_STOPCOND
+   MessageInterface::ShowMessage
+      ("CheckOnPeriapsis() ecc=%f mEccTol=%f rmag=%f mRange=%f\n",
+       ecc, mEccTol, rmag, mRange);
+#endif
+   
    //----------------------------------------------------------------------
    // stop if at least <mBufferSize> points set, and either
    //   1) propagating backwards, and R*V goes + to -,
@@ -281,6 +306,12 @@ bool StopCondition::CheckOnPeriapsis()
          return true;
       }
    }
+
+#if DEBUG_STOPCOND
+   MessageInterface::ShowMessage("CheckOnPeriapsis() mGoal=%f last=%f curr=%f\n",
+                                 mGoal, mValueBuffer[mBufferSize-2],
+                                 mValueBuffer[mBufferSize-1]);
+#endif
 
    return false;
 }
@@ -330,9 +361,11 @@ bool StopCondition::CheckOnAnomaly(Real anomaly)
       (GmatMathUtil::Abs(tempGoal - mValueBuffer[mBufferSize-1]),
        0.0, GmatMathUtil::TWO_PI_DEG);
 
-   //MessageInterface::ShowMessage("mGoal=%f tempGoal=%f diff=%f last=%f curr=%f\n",
-   //                              mGoal, tempGoal, diff, mValueBuffer[mBufferSize-2],
-   //                              mValueBuffer[mBufferSize-1]);
+#if DEBUG_STOPCOND
+   MessageInterface::ShowMessage("CheckOnAnomaly() mGoal=%f tempGoal=%f diff=%f last=%f curr=%f\n",
+                                 mGoal, tempGoal, diff, mValueBuffer[mBufferSize-2],
+                                 mValueBuffer[mBufferSize-1]);
+#endif
    
    //----------------------------------------------------------------------   
    // Stop if at least <mBufferSize> points set and difference is <= pi/2, and either

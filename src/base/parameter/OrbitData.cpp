@@ -24,9 +24,11 @@
 #include "CoordUtil.hpp"         // for Cartesian to Keplerian conversion
 #include "AngleUtil.hpp"
 #include "UtilityException.hpp"
+#include "SphericalTwo.hpp"      // for friend ToSphericalTwo()
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
-//#include "Moderator.hpp"
+
+#define DEBUG_ORBITDATA 0
 
 #if !defined __UNIT_TEST__
 #include "SolarSystem.hpp"
@@ -255,10 +257,29 @@ Rvector6 OrbitData::GetSphState()
 
    if (elemType == "Cartesian")
    {
+      //Real *statePtr = mSpacecraft->GetState(); // should be cartesian state
+      //for (int i=0; i<6; i++)
+      //   mCartState[i] = statePtr[i];
+      
+      //Rvector6 cartState = mCartState;
+      
       Rvector6 cartState = mSpacecraft->GetCartesianState(); //loj: 4/19/04 use new method
-                
+
+#if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphState() cartState=%s\n",
+          cartState.ToString().c_str());
+#endif
+      
       // update SphericalTwo state
       SphericalTwo sph2 = ToSphericalTwo(Cartesian(cartState));
+
+#if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphState() sph2=%s\n",
+          sph2.ToString().c_str());
+#endif
+      
       mSphState[0] = sph2.GetPositionMagnitude();
       mSphState[1] = sph2.GetRightAscension();
       mSphState[2] = sph2.GetDeclination();
@@ -419,6 +440,12 @@ Real OrbitData::GetSphReal(const std::string &str)
 {
    Rvector6 state = GetSphState();
 
+#if DEBUG_ORBITDATA
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphReal() str=%s state=%s\n",
+       str.c_str(), state.ToString().c_str());
+#endif
+   
    if (str == "SphRMag")
       return mSphState[RMAG];
    else if (str == "SphRA")

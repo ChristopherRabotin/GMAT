@@ -22,6 +22,8 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_TIMEDATA 0
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -130,8 +132,11 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
    mInitialEpoch = initialEpoch;
    mIsInitialEpochSet = true;
    
-   //MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
-   //                              mInitialEpoch);
+#if DEBUG_TIMEDATA
+   MessageInterface::ShowMessage
+      ("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
+       mInitialEpoch);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -149,8 +154,12 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
       InitializeRefObjects();
 
    Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
-   //MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
-   //                              a1mjd);
+
+#if DEBUG_TIMEDATA
+   MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
+                                 a1mjd);
+#endif
+   
    if (str == "A1MJD")
       return a1mjd;
    else if (str == "JD")
