@@ -17,6 +17,7 @@ OBJECTS = A1Date.o \
           EphemerisUtil.o \
           GregorianDate.o \
           Keplerian.o \
+          LeapSecsFileReader.o \
           Linear.o \
           RealUtilities.o \
           RgbColor.o \
