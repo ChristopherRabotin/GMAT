@@ -25,6 +25,7 @@
 #define DEBUG_CREATE_RESOURCE 0
 #define DEBUG_PLANETARY_FILE 0
 #define DEBUG_MULTI_STOP 0
+#define DEBUG_USER_INTERRUPT 0
 
 //---------------------------------
 // static data
@@ -1633,13 +1634,13 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 #endif
    }
    
-#if DEBUG_PLANETARY_FILE
+   //#if DEBUG_PLANETARY_FILE
    if (retCode > 0)
       MessageInterface::
       ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
                   "set Planetary file to use: %s\n",
                   PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
-#endif
+   //#endif
    return retCode;
 }
 
@@ -1808,10 +1809,11 @@ void Moderator::ClearAllSandboxes()
 }
 
 //------------------------------------------------------------------------------
-// Integer RunMission(Integer sandboxNum, bool isFromGui = false)
+// Integer RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
-Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
+Integer Moderator::RunMission(Integer sandboxNum)
 {
+   MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    Integer status = 0;
 
@@ -1849,7 +1851,7 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
          InitializeSandbox(sandboxNum-1);
          //MessageInterface::ShowMessage("Moderator::RunMission() after InitializeSanbox() \n");
 
-         SetupRun(sandboxNum, isFromGui);
+         SetupRun(sandboxNum);
          //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
          runState = Gmat::RUNNING;
@@ -1879,6 +1881,39 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
    return status;
 }
 
+//------------------------------------------------------------------------------
+// Integer ChangeRunState(const std::string &state, Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * Changes run state.
+ *
+ * @param <state> run state string ("Stop", "Pause", "Resume")
+ * @param <snadobxNum> sandbox number
+ *
+ * @return a status code
+ *    0 = successful, <0 = error (tbd)
+ */
+//------------------------------------------------------------------------------
+Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
+{
+#if DEBUG_USER_INTERRUPT
+   MessageInterface::ShowMessage("Moderator::ChangeRunState() entered\n");
+#endif
+   
+   if (state == "Stop")   
+      runState = Gmat::IDLE;
+
+   //else if (state == "Pause")  // Commented until build 4
+   //   runState = Gmat::PAUSED;
+   //
+   //else if (state == "Resume") // Commented until build 4
+   //   runState = Gmat::RUNNING;
+   
+   else
+      ; // no action
+   
+   return 0;
+}
 
 //------------------------------------------------------------------------------
 // Gmat::RunState GetUserInterrupt()
@@ -1890,10 +1925,18 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
  * if the user has requested that the run terminate before the mission sequence
  * has finished executing.
  * 
- * @retval The expected state of the system (RUNNING, PAUSED, or IDLE).
+ * @return The expected state of the system (RUNNING, PAUSED, or IDLE).
  */
+//------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetUserInterrupt()
 {
+#if DEBUG_USER_INTERRUPT
+   MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
+#endif
+
+   //loj: 8/17/04 added
+   // give MainFrame input focus
+   theGuiInterpreter->SetInputFocus();
    Gmat::RunState status = runState;
    
    //// Test code for the polling function -- stop on the 5th call
@@ -1902,16 +1945,6 @@ Gmat::RunState Moderator::GetUserInterrupt()
    //if (tester == 5)
    //   status = Gmat::IDLE;
    
-   // DJC: This part needs to be filled out for polling the UI
-   // if (the stop button was pressed)   // Should uncomment in build 3
-   //    status = Gmat::IDLE;            // when GUI is ready 
-   //
-   // if (the pause button was pressed)  // Commented until build 4
-   //    status = Gmat::PAUSED;
-   //
-   // if (the resume button was pressed) // Commented until build 4
-   //    status = Gmat::RUNNING;
-   //
    return status;
 }
 
@@ -1989,7 +2022,7 @@ bool Moderator::SaveScript(const std::string &scriptFileName)
 }
 
 //------------------------------------------------------------------------------
-// Integer RunScript(Integer sandboxNum = 1, bool isFromGui = false)
+// Integer RunScript(Integer sandboxNum = 1)
 //------------------------------------------------------------------------------
 /**
  * Executes commands built from the script file.
@@ -2000,10 +2033,10 @@ bool Moderator::SaveScript(const std::string &scriptFileName)
  *    0 = successful, <0 = error (tbd)
  */
 //------------------------------------------------------------------------------
-Integer Moderator::RunScript(Integer sandboxNum, bool isFromGui)
+Integer Moderator::RunScript(Integer sandboxNum)
 {
    MessageInterface::ShowMessage("Moderator::RunScript() entered\n");
-   return RunMission(sandboxNum, isFromGui);
+   return RunMission(sandboxNum);
 }
 
 //---------------------------------
@@ -2181,15 +2214,13 @@ void Moderator::CreateDefaultMission()
                                      "occurred during default mission creation. "
                                      "Default mission will not run");
    }
-    
 }
 
 //------------------------------------------------------------------------------
-// void SetupRun(Integer sandboxNum, bool isFromGui)
+// void SetupRun(Integer sandboxNum)
 //------------------------------------------------------------------------------
-void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
+void Moderator::SetupRun(Integer sandboxNum)
 {
-   MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator setting up for a run...\n");
    std::string objName;
    std::string objTypeName;
@@ -2427,8 +2458,9 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
-   StringArray &configList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+//     StringArray &configList =
+//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray &configList = GetListOfConfiguredItems(Gmat::SPACECRAFT);
    
    if (configList.size() > 0)
    {
@@ -2451,8 +2483,9 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetDefaultPropSetup()
 {
-   StringArray &configList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+//     StringArray &configList =
+//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+   StringArray &configList = GetListOfConfiguredItems(Gmat::PROP_SETUP);
    
    if (configList.size() > 0)
    {
@@ -2471,8 +2504,9 @@ PropSetup* Moderator::GetDefaultPropSetup()
 //------------------------------------------------------------------------------
 Burn* Moderator::GetDefaultBurn()
 {
-   StringArray &configList =
-      theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+//     StringArray &configList =
+//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+   StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
    
    if (configList.size() > 0)
    {

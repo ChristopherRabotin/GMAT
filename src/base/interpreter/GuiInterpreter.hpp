@@ -144,7 +144,7 @@ public:
 
    // Resource
    bool ClearResource();
-    
+   
    // Command sequence
    bool LoadDefaultMission();
    bool ClearCommandSeq(Integer sandboxNum = 1);
@@ -161,12 +161,16 @@ public:
    // Sandbox
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
+   Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
 
    // Script
    bool InterpretScript(const std::string &scriptFilename);
    bool SaveScript(const std::string &scriptFilename);
    Integer RunScript(Integer sandboxNum = 1);
-    
+
+   // GUI control
+   void SetInputFocus();
+   
 private:
 
    GuiInterpreter();
@@ -175,7 +179,6 @@ private:
 
    // member data
    bool isInitialized;
-   //Moderator *theModerator;
 
    static GuiInterpreter *instance;
 };

@@ -218,20 +218,21 @@ public:
 
    // Sandbox
    void ClearAllSandboxes();
-   Integer RunMission(Integer sandboxNum = 1, bool isFromGui = false);
+   Integer RunMission(Integer sandboxNum = 1);
+   Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    Gmat::RunState GetUserInterrupt();
 
    // Script
    bool InterpretScript(const std::string &scriptFileName);
    bool SaveScript(const std::string &scriptFileName);
-   Integer RunScript(Integer sandboxNum = 1, bool isFromGui = false);
+   Integer RunScript(Integer sandboxNum = 1);
     
 private:
 
    // initialization
    void InitializePlanetarySource();
    void CreateDefaultMission();
-   void SetupRun(Integer sandboxNum, bool isFromGui = false);
+   void SetupRun(Integer sandboxNum);
    bool CreateSlpFile(const std::string &fileName);
    bool CreateDeFile(const Integer id, const std::string &fileName,
                      Gmat::DeFileFormat format = Gmat::DE_BINARY);

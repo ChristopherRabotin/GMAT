@@ -16,6 +16,10 @@
  * Implements the operations between GUI subsystem and the Moderator.
  */
 //------------------------------------------------------------------------------
+#if !defined __CONSOLE_APP__
+#include "GmatAppData.hpp"
+#endif
+
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Moderator.hpp"
@@ -776,7 +780,7 @@ GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 // Integer RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 /**
- * Runs mission sequence.
+ * Calls Moderator to run mission sequence.
  *
  * @param <snadobxNum> sandbox number
  *
@@ -786,7 +790,25 @@ GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunMission(Integer sandboxNum)
 {
-   return moderator->RunMission(sandboxNum, true);
+   return moderator->RunMission(sandboxNum);
+}
+
+//------------------------------------------------------------------------------
+// Integer ChangeRunState(const std::string &state, Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * Calls Moderator to change run state.
+ *
+ * @param <state> run state string ("Stop", "Pause", "Resume")
+ * @param <snadobxNum> sandbox number
+ *
+ * @return a status code
+ *    0 = successful, <0 = error (tbd)
+ */
+//------------------------------------------------------------------------------
+Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandboxNum)
+{
+   return moderator->ChangeRunState(state, sandboxNum);
 }
 
 // Script
@@ -836,9 +858,18 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunScript(Integer sandboxNum)
 {
-   return moderator->RunScript(sandboxNum, true);
+   return moderator->RunScript(sandboxNum);
 }
 
+//------------------------------------------------------------------------------
+// void SetInputFocus()
+//------------------------------------------------------------------------------
+void GuiInterpreter::SetInputFocus()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::GetMainFrame()->SetFocus();
+#endif
+}
 
 //---------------------------------
 // private

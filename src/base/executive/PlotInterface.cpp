@@ -635,7 +635,9 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             frame->RedrawCurve();
-            frame->SetFocus(); //loj: 7/26/04 added
+            //loj: 8/17/04 commented out so that MainFrame gets user input focus
+            // during the run
+            //frame->SetFocus();
          }
       }
    }

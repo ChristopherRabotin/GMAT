@@ -304,7 +304,10 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX
 {
    if (mCanvas)
    {
-      mCanvas->SetFocus();
+      //loj: 8/17/04 commented out so that MainFrame gets user input focus during
+      // the run
+      //mCanvas->SetFocus();
+      
       mCanvas->UpdateSpacecraft(time, posX, posY, posZ, color);
 
       if (updateCanvas)
