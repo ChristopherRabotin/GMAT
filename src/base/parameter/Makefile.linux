@@ -17,6 +17,7 @@ OBJECTS = Parameter.o \
           OrbitalParameters.o \
           OrbitData.o \
           OrbitReal.o \
+          OrbitRvec6.o \
           RealVar.o \
           RefData.o \
           Rvec6Var.o \

@@ -329,6 +329,11 @@ bool GmatCommand::SetCondition(std::string lhs, std::string operation,
    return false;
 }
 
+bool GmatCommand::SetConditionOperator(std::string& op)
+{
+   return false;
+}
+
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------

@@ -19,8 +19,8 @@ all: libInterpreter
 	mv libInterpreter.a ../lib
 
 clean:
-	rm *.o
-	rm ../lib/libInterpreter.a
+	rm -f *.o
+	rm -f ../lib/libInterpreter.a
 
 libInterpreter : ../lib/libInterpreter.a
 

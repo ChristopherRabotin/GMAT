@@ -15,7 +15,8 @@ OBJECTS = Subscriber.o \
         ReportFile.o \
         MessageWindow.o \
         OpenGlPlot.o \
-        XyPlot.o
+        XyPlot.o \
+        MatlabWs.o
 
 all: libSubscriber
 	mkdir -p ../lib

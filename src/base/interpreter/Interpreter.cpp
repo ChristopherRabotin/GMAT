@@ -444,9 +444,18 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    StringArray sublevel[10];  // Allow up to 10 deep for now
    Integer     cl = 0;        // Current level of decomposition
    GmatBase    *object[10];   // Up to 10 reference objects
+   GmatBase    *temp;
    Integer     ol = 0;        // Current object level (depth when drilling into 
                               // owned objects)
    Gmat::ObjectType type;
+   
+   #ifdef DEBUG_TOKEN_PARSING
+      std::cout << "Top level command decomposition:\n   size = " 
+                << topLevel.size() << "\n   ";
+      for (StringArray::iterator i = topLevel.begin(); i != topLevel.end(); ++i)
+         std::cout << *i << "\n   ";
+      std::cout << std::endl;
+   #endif
    
    // First construct the Command if the input is NULL
    if (cmd == NULL) {
@@ -464,17 +473,98 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    }
    if (!cmd)  
       return false;
+      
+   // Perform Command specific tasks: Setting string data, and so forth
+   std::string cmdCase = cmd->GetTypeName();
+   Integer condNumber = 1, index = 0;
+   if (cmdCase == "If") {
+      // chain through the conditions
+      while (condNumber < (Integer)topLevel.size()) {
+         #ifdef DEBUG_TOKEN_PARSING
+            std::cout << "Setting If condition:\n   lhs = " 
+                      << topLevel[condNumber]
+                      << "\n   op  = " << topLevel[condNumber+1]
+                      << "\n   rhs = " << topLevel[condNumber+2] 
+                      << std::endl;
+         #endif
+         if (!cmd->SetCondition(topLevel[condNumber], topLevel[condNumber+1], 
+                                topLevel[condNumber+2]))
+               throw CommandException("Cannot set conditions on command " + 
+                                      scriptline);
+         if (condNumber+3 < (Integer)topLevel.size()) {
+            #ifdef DEBUG_TOKEN_PARSING
+               std::cout << "Setting If condition operator: "
+                         << topLevel[condNumber+3] << std::endl;
+            #endif
+            if (!cmd->SetConditionOperator(topLevel[condNumber+3]))
+               throw CommandException("Cannot set condition operator on command " + 
+                                      scriptline);
+         }
+      
+         sublevel[cl] = Decompose(topLevel[condNumber]);
+         #ifdef DEBUG_TOKEN_PARSING
+            std::cout << "Decomposing \"" << topLevel[condNumber] << "\"\n";
+         #endif
+         if (sublevel[cl].size() == 1) {
+            // Size 1 implies an object reference or parm string
+            object[ol] = moderator->GetConfiguredItem(sublevel[cl][0]);
+            if (object[ol]) {
+               type = object[ol]->GetType();
+               try {
+                  if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
+                     throw InterpreterException("Cannot set object " + object[ol]->GetName() + 
+                                                " for command " + (cmd->GetTypeName()));
+               }
+               catch (BaseException &ex) {
+                  if (!cmd->SetRefObject(object[ol], type, object[ol]->GetName(), 0))
+                     throw CommandException("Cannot set reference object " + 
+                                            object[ol]->GetName());
+               }
+            }
+            else {
+               
+            }
+         }
+         else {
+            temp = AssemblePhrase(sublevel[cl], cmd);
+            if (!temp)
+               throw InterpreterException("Cannot Assemble construct " + 
+                                          sublevel[cl][0] + " for command " + 
+                                          (cmd->GetTypeName()));
+            temp->SetName(topLevel[condNumber]);
+            cmd->SetRefObject(temp, temp->GetType(), temp->GetName(), index);
+         }
+         condNumber += 4;
+         ++index;
+      }
+
+      return true;
+   }
+      
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
-//std::cout << "Decomposing \"" << (*i) << "\"\n";
+      #ifdef DEBUG_TOKEN_PARSING
+         std::cout << "Decomposing \"" << (*i) << "\"\n";
+      #endif
       if (sublevel[cl].size() == 1) {
-         // Size 1 implies an object reference
+         // Size 1 implies an object reference or parm string
          object[ol] = moderator->GetConfiguredItem(*i);
-         type = object[ol]->GetType();
-         if (!cmd->SetRefObjectName(type, *i))
-            throw InterpreterException("Cannot set object " + (*i) + 
-                                       " for command " + (cmd->GetTypeName()));
+         if (object[ol]) {
+            type = object[ol]->GetType();
+            try {
+               if (!cmd->SetRefObjectName(type, *i))
+                  throw InterpreterException("Cannot set object " + (*i) + 
+                                             " for command " + (cmd->GetTypeName()));
+            }
+            catch (BaseException &ex) {
+               if (!cmd->SetRefObject(object[ol], type, object[ol]->GetName(), 0))
+                  throw;
+            }
+         }
+         else {
+            throw InterpreterException("Cannot find object named " + *i);
+         }
       }
       else {
          if (!AssemblePhrase(sublevel[cl], cmd))
@@ -487,21 +577,83 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
 
 GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 {
+   #ifdef DEBUG_TOKEN_PARSING
+      std::cout << "Entered Interpreter::AssemblePhrase\n";
+   #endif
    StringArray breakdown;
    GmatBase *ref = NULL;
-   
-   for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
-      breakdown = Decompose(*i);
+   ObjectArray objectlist;
+   if (phrase.size() == 1) {
+
+      breakdown = Decompose(phrase[0]);
       if (breakdown.size() == 1) {
-         ref = moderator->GetConfiguredItem(*i);
+         ref = moderator->GetConfiguredItem(phrase[0]);
       }
       else {
+         for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
+            #ifdef DEBUG_TOKEN_PARSING
+               std::cout << "   Breaking down subphrase " << *i << "\n";
+            #endif
+            breakdown = Decompose(*i);
+            if (breakdown.size() == 1) {
+               ref = moderator->GetConfiguredItem(*i);
+            }
+            else {
+               #ifdef DEBUG_TOKEN_PARSING
+                  std::cout << "   Size != 1\n";
+               #endif
+            }
+         }
+      }
+   }
+   // Not an object reference -- check the other options
+   else {
+      // Is it a Parameter?
+      if (phrase.size() == 2) {
+         ref = moderator->GetParameter(phrase[1]);
+         if (ref == NULL) {
+            std::string name = phrase[0];
+            name += ".";
+            name += phrase[1];
+            ref = moderator->CreateParameter(phrase[1], name);
+            if (ref) {
+               #ifdef DEBUG_TOKEN_PARSING
+                  std::cout << "Parameter configuration:\n   Parm = " << phrase[1]
+                            << "\n   obj  = " << phrase[0] << std::endl; 
+               #endif
+               GmatBase *refobj = moderator->GetConfiguredItem(phrase[0]);
+               Gmat::ObjectType ot = refobj->GetType();
+               ref->SetRefObjectName(ot, phrase[0]);
+            }
+         }
+         else // NOT a Parameter
+            throw InterpreterException("Could not parse " + phrase[1]);
       }
    }
    return ref;
 }
 
 
+//GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
+//{
+//std::cout << "Entered Interpreter::AssemblePhrase\n";
+//   StringArray breakdown;
+//   GmatBase *ref = NULL;
+//   for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
+//std::cout << "   Breaking down subphrase " << *i << "\n";
+//      breakdown = Decompose(*i);
+//      if (breakdown.size() == 1) {
+//         ref = moderator->GetConfiguredItem(*i);
+//      }
+//      else {
+//std::cout << "   Size != 1\n";
+////         ref = BuildMultipartItem();
+//      }
+//   }
+//   return ref;
+//}
+//
+//
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(std::string commandtype)
 //------------------------------------------------------------------------------

@@ -81,6 +81,7 @@ public:
    
    virtual bool         SetCondition(std::string lhs, std::string operation, 
                                      std::string rhs);
+   virtual bool         SetConditionOperator(std::string& op);
    
    // Sequence methods
    virtual bool         Initialize();
