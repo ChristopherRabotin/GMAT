@@ -73,13 +73,15 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mUpdatePlotFrequency = 10;
    mNumData = 0;
    mNumCollected = 0;
+   mScList.clear();
+   mScCount = 0;
 }
 
 //------------------------------------------------------------------------------
 // OpenGlPlot(const OpenGlPlot &ogl)
 //------------------------------------------------------------------------------
-OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
-: Subscriber      (ogl)
+OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
+   Subscriber(ogl)
 {
    // GmatBase data
    //parameterCount = OpenGlPlotParamCount;
@@ -89,6 +91,10 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mDrawWireFrame = ogl.mDrawWireFrame;
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
+   mScCount = ogl.mScCount;
+   mScList = ogl.mScList;
+   mOrbitColorMap = ogl.mOrbitColorMap;
+   mTargetColorMap = ogl.mTargetColorMap;
    mNumData = 0;
    mNumCollected = 0;
 }
@@ -109,17 +115,30 @@ OpenGlPlot::~OpenGlPlot(void)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Initialize()
 {
-   //MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered\n");
-    
-   if (active)
+#if DEBUG_OPENGL
+   MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered mScCount = %d\n",
+                                 mScCount);
+#endif
+   if (mScCount > 0)
    {
-      //MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
-      return PlotInterface::CreateGlPlotWindow();
+      if (active)
+      {
+         //MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+         return PlotInterface::CreateGlPlotWindow();
+      }
+      else
+      {
+         //MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+         return PlotInterface::DeleteGlPlot();
+      }
    }
    else
    {
-      //MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
-      return PlotInterface::DeleteGlPlot();
+      active = false;
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+                                     "OpenGlPlot is turned off. No spacecraft "
+                                     "has been added to OpenGlPlot");
+      return false;
    }
 }
 
@@ -137,31 +156,39 @@ bool OpenGlPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Distribute(const Real * dat, Integer len)
 {
-   if (len > 0)
+   if (mScCount > 0)
    {
-      mNumData++;
-    
-      if ((mNumData % mDataCollectFrequency) == 0)
+      if (len > 0)
       {
-         mNumData = 0;
-         mNumCollected++;
-         bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+         mNumData++;
+    
+         if ((mNumData % mDataCollectFrequency) == 0)
+         {
+            mNumData = 0;
+            mNumCollected++;
+            bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
 
-         //loj: assumes data in time, x, y, z order
-         //loj: 6/8/04 try color
-         
-         return PlotInterface::
-            UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
-                               mOrbitColorMap[mScList[0]],
-                               mTargetColorMap[mScList[0]],
-                               update, mDrawWireFrame);
-//           return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
-//                                                    update, mDrawWireFrame);
-         if (update)
-            mNumCollected = 0;
+            //loj: assumes data in time, x, y, z order
+            //loj: 6/8/04 try color
+
+#if DEBUG_OPENGL
+            MessageInterface::
+               ShowMessage("OpenGlPlot::Distribute() time=%f pos = %f %f %f\n",
+                           dat[0], dat[1], dat[2], dat[3]);
+#endif
+            
+            return PlotInterface::
+               UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+                                  mOrbitColorMap[mScList[0]],
+                                  mTargetColorMap[mScList[0]],
+                                  update, mDrawWireFrame);
+            //return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+            //                                         update, mDrawWireFrame);
+            if (update)
+               mNumCollected = 0;
+         }
       }
    }
-    
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()
    return true;
