@@ -1,5 +1,6 @@
+//$Header:
 //------------------------------------------------------------------------------
-//                            BallisticsMassPanel
+//                            OrbitPanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -11,7 +12,7 @@
 //
 //
 // Author: Allison Greene
-// Created: 2004/04/01
+// Created: 2004/04/08
 /**
  * This class contains information needed to setup users spacecraft ballistics
  * and mass through GUI
