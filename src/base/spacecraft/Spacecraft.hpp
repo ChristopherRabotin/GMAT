@@ -21,9 +21,19 @@
 #define Spacecraft_hpp
 
 #include "GmatBase.hpp"
+#include "SolarSystem.hpp"
 #include "Rvector6.hpp"
 #include "StateConverter.hpp"
 #include "TimeConverter.hpp"
+#include "MessageInterface.hpp"
+
+enum SC_Param_ID 
+{
+   EPOCH_ID, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
+   ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
+   DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
+   REFLECT_COEFF_ID, NO_NAME, SC_ParameterIDs
+};
 
 class GMAT_API Spacecraft : public GmatBase
 {
@@ -85,6 +95,9 @@ public:
     void SetDisplayState(const Real *s);
     void SetDisplayState(const Rvector6 s);
     void SaveDisplay();
+
+    virtual SolarSystem* GetSolarSystem() const;
+    virtual void SetSolarSystem(SolarSystem *ss);
    
     // Default values for spacecraft 
     static const Real EPOCH; 
@@ -95,6 +108,7 @@ public:
     static const Real ELEMENT5; 
     static const Real ELEMENT6; 
     static const std::string DATEFORMAT; 
+    static const std::string STATE_TYPE; 
     static const std::string REF_BODY; 
     static const std::string REF_FRAME; 
     static const std::string REF_PLANE; 
@@ -110,6 +124,7 @@ protected:
     Real           reflectCoeff;
     std::string    subType;      // @todo will add it later
     std::string    dateFormat;
+    std::string    stateType;   
     std::string    refBody; 
     std::string    refFrame;   
     std::string    refPlane; 
@@ -121,6 +136,7 @@ protected:
     Integer        state5ID;
     Integer        state6ID;       
     Integer        subTypeID;     // @todo will add it later
+    Integer        stateTypeID;
     Integer        refBodyID; 
     Integer        refFrameID; 
     Integer        refPlaneID; 
@@ -132,6 +148,7 @@ protected:
     Integer        reflectCoeffID;
 
     // for non-internal spacecraft information
+    SolarSystem    *solarSystem;
     StateConverter stateConverter;
     TimeConverter  timeConverter;
     Rvector6       cartesianState;
@@ -139,8 +156,6 @@ protected:
     Rvector6       modifiedKeplerainState;
     Rvector6       sphericalOneState;
     Rvector6       sphericalTwoState;
-    Real           cartesianEpoch;
-    Real           keplerianEpoch;
     bool           isForDisplay;
     Real           displayEpoch;
     Real           displayState[6];

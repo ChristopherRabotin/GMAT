@@ -24,15 +24,16 @@
 
 /// Set the default values for spacecraft 
 const Real        Spacecraft::EPOCH      = 21545.0; 
-const Real        Spacecraft::ELEMENT1 = 7100.0;
-const Real        Spacecraft::ELEMENT2 = 0.0;
-const Real        Spacecraft::ELEMENT3 = 1300.0; 
-const Real        Spacecraft::ELEMENT4 = 0.0;
-const Real        Spacecraft::ELEMENT5 = 7.35; 
-const Real        Spacecraft::ELEMENT6 = 1.0;
+const Real        Spacecraft::ELEMENT1   = 7100.0;
+const Real        Spacecraft::ELEMENT2   = 0.0;
+const Real        Spacecraft::ELEMENT3   = 1300.0; 
+const Real        Spacecraft::ELEMENT4   = 0.0;
+const Real        Spacecraft::ELEMENT5   = 7.35; 
+const Real        Spacecraft::ELEMENT6   = 1.0;
 const std::string Spacecraft::DATEFORMAT = "TAIModJulian";
+const std::string Spacecraft::STATE_TYPE = "Cartesian"; 
 const std::string Spacecraft::REF_BODY   = "Earth"; 
-const std::string Spacecraft::REF_FRAME  = "Cartesian"; 
+const std::string Spacecraft::REF_FRAME  = "MJ2000"; 
 const std::string Spacecraft::REF_PLANE  = "Equatorial"; 
 
 //-------------------------------------
@@ -48,24 +49,26 @@ const std::string Spacecraft::REF_PLANE  = "Equatorial";
  */
 Spacecraft::Spacecraft() : 
     GmatBase       (Gmat::SPACECRAFT,"Spacecraft",""),
-    epochID        (parameterCount),
-    state1ID       (parameterCount + 1),
-    state2ID       (parameterCount + 2),
-    state3ID       (parameterCount + 3),
-    state4ID       (parameterCount + 4),
-    state5ID       (parameterCount + 5),
-    state6ID       (parameterCount + 6),
-    refBodyID      (parameterCount + 7),
-    refFrameID     (parameterCount + 8),
-    refPlaneID     (parameterCount + 9),
-    dryMassID      (parameterCount + 10),
-    dateFormatID   (parameterCount + 11),
-    coeffDragID    (parameterCount + 12),
-    dragAreaID     (parameterCount + 13),
-    srpAreaID      (parameterCount + 14),
-    reflectCoeffID (parameterCount + 15)
+    epochID        (parameterCount + EPOCH_ID),
+    state1ID       (parameterCount + ELEMENT1_ID),
+    state2ID       (parameterCount + ELEMENT2_ID),
+    state3ID       (parameterCount + ELEMENT3_ID),
+    state4ID       (parameterCount + ELEMENT4_ID),
+    state5ID       (parameterCount + ELEMENT5_ID),
+    state6ID       (parameterCount + ELEMENT6_ID),
+    stateTypeID    (parameterCount + STATE_TYPE_ID),
+    refBodyID      (parameterCount + BODY_ID),
+    refFrameID     (parameterCount + FRAME_ID),
+    refPlaneID     (parameterCount + PLANE_ID),
+    dryMassID      (parameterCount + DRY_MASS_ID),
+    dateFormatID   (parameterCount + DATE_FORMAT_ID),
+    coeffDragID    (parameterCount + COEFF_DRAG_ID),
+    dragAreaID     (parameterCount + DRAG_AREA_ID),
+    srpAreaID      (parameterCount + SRP_AREA_ID),
+    reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    solarSystem    (NULL)
 {
-    parameterCount += 16;
+    parameterCount += SC_ParameterIDs;
     InitializeValues();
 }
 
@@ -80,24 +83,26 @@ Spacecraft::Spacecraft() :
  */
 Spacecraft::Spacecraft(const std::string &name) :
     GmatBase       (Gmat::SPACECRAFT, "Spacecraft", name),
-    epochID        (parameterCount),
-    state1ID       (parameterCount + 1),
-    state2ID       (parameterCount + 2),
-    state3ID       (parameterCount + 3),
-    state4ID       (parameterCount + 4),
-    state5ID       (parameterCount + 5),
-    state6ID       (parameterCount + 6),
-    refBodyID      (parameterCount + 7),
-    refFrameID     (parameterCount + 8),
-    refPlaneID     (parameterCount + 9),
-    dryMassID      (parameterCount + 10),
-    dateFormatID   (parameterCount + 11),
-    coeffDragID    (parameterCount + 12),
-    dragAreaID     (parameterCount + 13),
-    srpAreaID      (parameterCount + 14),
-    reflectCoeffID (parameterCount + 15)
+    epochID        (parameterCount + EPOCH_ID),
+    state1ID       (parameterCount + ELEMENT1_ID),
+    state2ID       (parameterCount + ELEMENT2_ID),
+    state3ID       (parameterCount + ELEMENT3_ID),
+    state4ID       (parameterCount + ELEMENT4_ID),
+    state5ID       (parameterCount + ELEMENT5_ID),
+    state6ID       (parameterCount + ELEMENT6_ID),
+    stateTypeID    (parameterCount + STATE_TYPE_ID),
+    refBodyID      (parameterCount + BODY_ID),
+    refFrameID     (parameterCount + FRAME_ID),
+    refPlaneID     (parameterCount + PLANE_ID),
+    dryMassID      (parameterCount + DRY_MASS_ID),
+    dateFormatID   (parameterCount + DATE_FORMAT_ID),
+    coeffDragID    (parameterCount + COEFF_DRAG_ID),
+    dragAreaID     (parameterCount + DRAG_AREA_ID),
+    srpAreaID      (parameterCount + SRP_AREA_ID),
+    reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    solarSystem    (NULL)
 {
-    parameterCount += 16;
+    parameterCount += SC_ParameterIDs;
     InitializeValues();
 }
 
@@ -113,24 +118,26 @@ Spacecraft::Spacecraft(const std::string &name) :
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
     GmatBase       (Gmat::SPACECRAFT, typeStr, name),
-    epochID        (parameterCount),
-    state1ID       (parameterCount + 1),
-    state2ID       (parameterCount + 2),
-    state3ID       (parameterCount + 3),
-    state4ID       (parameterCount + 4),
-    state5ID       (parameterCount + 5),
-    state6ID       (parameterCount + 6),
-    refBodyID      (parameterCount + 7),
-    refFrameID     (parameterCount + 8),
-    refPlaneID     (parameterCount + 9),
-    dryMassID      (parameterCount + 10),
-    dateFormatID   (parameterCount + 11),
-    coeffDragID    (parameterCount + 12),
-    dragAreaID     (parameterCount + 13),
-    srpAreaID      (parameterCount + 14),
-    reflectCoeffID (parameterCount + 15)
+    epochID        (parameterCount + EPOCH_ID),
+    state1ID       (parameterCount + ELEMENT1_ID),
+    state2ID       (parameterCount + ELEMENT2_ID),
+    state3ID       (parameterCount + ELEMENT3_ID),
+    state4ID       (parameterCount + ELEMENT4_ID),
+    state5ID       (parameterCount + ELEMENT5_ID),
+    state6ID       (parameterCount + ELEMENT6_ID),
+    stateTypeID    (parameterCount + STATE_TYPE_ID),
+    refBodyID      (parameterCount + BODY_ID),
+    refFrameID     (parameterCount + FRAME_ID),
+    refPlaneID     (parameterCount + PLANE_ID),
+    dryMassID      (parameterCount + DRY_MASS_ID),
+    dateFormatID   (parameterCount + DATE_FORMAT_ID),
+    coeffDragID    (parameterCount + COEFF_DRAG_ID),
+    dragAreaID     (parameterCount + DRAG_AREA_ID),
+    srpAreaID      (parameterCount + SRP_AREA_ID),
+    reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    solarSystem    (NULL)
 {
-    parameterCount += 16;
+    parameterCount += SC_ParameterIDs;
     InitializeValues();
 }
 
@@ -147,6 +154,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     GmatBase       (a),
     epoch          (a.epoch),
     dateFormat     (a.dateFormat),
+    stateType      (a.stateType),
     refBody        (a.refBody),
     refFrame       (a.refFrame),
     refPlane       (a.refPlane),
@@ -157,6 +165,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     state4ID       (a.state4ID),
     state5ID       (a.state5ID),
     state6ID       (a.state6ID),
+    stateTypeID    (a.stateTypeID),
     refBodyID      (a.refBodyID),
     refFrameID     (a.refFrameID),
     refPlaneID     (a.refPlaneID),
@@ -165,8 +174,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     coeffDragID    (a.coeffDragID),
     dragAreaID     (a.dragAreaID),
     srpAreaID      (a.srpAreaID),
-    reflectCoeffID (a.reflectCoeffID)
-
+    reflectCoeffID (a.reflectCoeffID),
+    solarSystem    (a.solarSystem)
 {
     parameterCount = a.parameterCount;
     for (int i = 0; i < 6; ++i)
@@ -214,9 +223,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
         return *this;
 
     // Duplicate the member data        
-    epoch    = a.epoch;
+    epoch = a.epoch;
     dateFormat = a.dateFormat;
-    refBody  = a.refBody;
+    stateType = a.stateType;
+    refBody = a.refBody;
     refFrame = a.refFrame;
     refPlane = a.refPlane;
 
@@ -291,17 +301,16 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
         || str == "DECV") 
        return state6ID;
 
+    if (str == "StateType") return stateTypeID;
     if (str == "ReferenceBody") return refBodyID;
-    if (str == "CoordinateRepresentation") return refFrameID;
+    if (str == "ReferenceFrame") return refFrameID;
     if (str == "PrincipalPlane") return refPlaneID;
 
     // Drag Coefficient  
-    // @todo - "Cd" will be replaced later
-    if (str == "CoefficientDrag") return coeffDragID;    
+    if (str == "Cd") return coeffDragID;    
 
     // Reflectivity Coefficient
-    // @todo - "Cr" will be replaced later
-    if (str == "ReflectivityCoefficient") return reflectCoeffID;
+    if (str == "Cr") return reflectCoeffID;
 
     if (str == "DragArea") return dragAreaID;
 
@@ -333,19 +342,20 @@ std::string Spacecraft::GetParameterText(const Integer id) const
         || id == state5ID || id == state6ID)
         return GetElementName(id);
 
+    if (id == stateTypeID) return "StateType";
     if (id == refBodyID) return "ReferenceBody";
-    if (id == refFrameID) return "CoordinateRepresentation";
+    if (id == refFrameID) return "ReferenceFrame";
     if (id == refPlaneID) return "PrincipalPlane";
 
     if (id == dryMassID) return "DryMass";
     
-    if (id == coeffDragID) return "CoefficientDrag" ;
+    if (id == coeffDragID) return "Cd" ;
 
     if (id == dragAreaID) return "DragArea";
 
     if (id == srpAreaID) return "SRPArea";
 
-    if (id == reflectCoeffID) return "ReflectivityCoefficient";
+    if (id == reflectCoeffID) return "Cr";
 
     return GmatBase::GetParameterText(id);
 }
@@ -371,6 +381,7 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
     if (id == state4ID) return Gmat::REAL_TYPE;
     if (id == state5ID) return Gmat::REAL_TYPE;
     if (id == state6ID) return Gmat::REAL_TYPE;
+    if (id == stateTypeID) return Gmat::STRING_TYPE;
     if (id == refBodyID) return Gmat::STRING_TYPE;
     if (id == refFrameID) return Gmat::STRING_TYPE;
     if (id == refPlaneID) return Gmat::STRING_TYPE;
@@ -483,7 +494,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
     if (id == epochID) return SetRealParameter("Epoch", value);
 
     // Check for the coordinate representation then set the value
-    if (refFrame == "Cartesian")
+    if (stateType == "Cartesian")
     {
        if (id == state1ID) return SetRealParameter("X",value); 
        if (id == state2ID) return SetRealParameter("Y",value); 
@@ -492,11 +503,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state5ID) return SetRealParameter("Vy",value); 
        if (id == state6ID) return SetRealParameter("Vz",value); 
     }
-    else if (refFrame == "Keplerian" || refFrame == "ModifiedKeplerian") 
+    else if (stateType == "Keplerian" || stateType == "ModifiedKeplerian") 
     {
        if (id == state1ID) 
        {
-          if (refFrame == "Keplerian")
+          if (stateType == "Keplerian")
              return SetRealParameter("SMA",value); 
           else
              return SetRealParameter("RadPer",value); 
@@ -504,7 +515,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
        if (id == state2ID) 
        {
-          if (refFrame == "Keplerian")
+          if (stateType == "Keplerian")
              return SetRealParameter("ECC",value); 
           else
              return SetRealParameter("RadApo",value); 
@@ -515,7 +526,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state5ID) return SetRealParameter("AOP",value); 
        if (id == state6ID) return SetRealParameter("TA",value); 
     }
-    else if (refFrame == "Spherical1" || refFrame == "Spherical2")
+    else if (stateType == "Spherical1" || stateType == "Spherical2")
     {
        if (id == state1ID) return SetRealParameter("RMAG",value); 
        if (id == state2ID) return SetRealParameter("RA",value); 
@@ -523,14 +534,14 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state4ID) return SetRealParameter("VMAG",value); 
        if (id == state5ID) 
        {
-          if (refFrame == "Spherical1")
+          if (stateType == "Spherical1")
              return SetRealParameter("AZI",value); 
           else 
              return SetRealParameter("RAV",value); 
        }   
        if (id == state6ID) 
        {
-          if (refFrame == "Spherical1")
+          if (stateType == "Spherical1")
              return SetRealParameter("FPA",value); 
           else 
              return SetRealParameter("DECV",value); 
@@ -539,11 +550,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
     if (id == dryMassID) return SetRealParameter("DryMass", value);
 
-    if (id == coeffDragID) return SetRealParameter("CoefficientDrag",value);
+    if (id == coeffDragID) return SetRealParameter("Cd",value);
     if (id == dragAreaID) return SetRealParameter("DragArea",value);
     if (id == srpAreaID) return SetRealParameter("SRPArea",value);
     if (id == reflectCoeffID) 
-        return SetRealParameter("ReflectivityCoefficient",value);
+        return SetRealParameter("Cr",value);
 
     return GmatBase::SetRealParameter(id, value);
 }
@@ -585,10 +596,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
     if (label == "DryMass") return dryMass = value;
 
-    if (label == "CoefficientDrag") return coeffDrag = value;
+    if (label == "Cd") return coeffDrag = value;
     if (label == "DragArea") return dragArea = value;
     if (label == "SRPArea") return srpArea = value;
-    if (label == "ReflectivityCoefficient") return reflectCoeff = value;
+    if (label == "Cr") return reflectCoeff = value;
 
     return GmatBase::SetRealParameter(label, value);
 }
@@ -607,6 +618,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 {
     if (id == dateFormatID)
        return dateFormat;
+
+    if (id == stateTypeID)
+       return stateType; 
 
     if (id == refBodyID)
        return refBody; 
@@ -633,8 +647,8 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id != dateFormatID && id != refBodyID && id != refFrameID && 
-        id != refPlaneID)
+    if (id != dateFormatID && id != stateTypeID && id != refBodyID 
+        && id != refFrameID && id != refPlaneID)
        return GmatBase::SetStringParameter(id, value);
 
     if (id == dateFormatID)
@@ -646,9 +660,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
        }
        dateFormat = value;
     }
-    else if (id == refBodyID)
-       refBody = value; 
-    else if (id == refFrameID)
+    else if (id == stateTypeID)
     {  
        // Check for invalid input then return unknown value from GmatBase 
        if (value != "Cartesian" && value != "Keplerian" && 
@@ -657,6 +669,22 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
           return GmatBase::SetStringParameter(id, value);
        }
   
+       stateType = value;
+    }
+    else if (id == refBodyID)
+    {
+       // Set the mu based on the reference body if no error
+       if (stateConverter.SetMu(solarSystem,value))   
+          refBody = value; 
+       else
+       {
+          MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
+                "Spacecraft is not able to set mu so it uses original value:",
+                 stateConverter.GetMu());
+       }
+    }
+    else if (id == refFrameID)
+    {  
        refFrame = value;
     }
     else 
@@ -666,14 +694,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //---------------------------------------------------------------------------
-//  void SetState(const std::string elementType, Real *instate)
+//  void SetEpoch()
 //---------------------------------------------------------------------------
 /**
- * Set the elements to Cartesian states.
+ * Set the epoch.
  * 
- * @param <elementType>  Element Type
- * @param <instate>      element states
- *
  */
 void Spacecraft::SetEpoch()
 {
@@ -682,7 +707,6 @@ void Spacecraft::SetEpoch()
                                      "TAIModJulian");
     else
        epoch = displayEpoch;
-
 }
 
 //---------------------------------------------------------------------------
@@ -715,13 +739,13 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
 
     newState.Set(instate[0],instate[1],instate[2],
                  instate[3],instate[4],instate[5]);
-              
+
     if (elementType == "Keplerian")
     {
        newState = stateConverter.Convert(instate,elementType,"Cartesian");
     }
     cartesianState = newState;
-     
+
     SetState(newState.Get(0),newState.Get(1),newState.Get(2),
              newState.Get(3),newState.Get(4),newState.Get(5));
 }
@@ -763,14 +787,7 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  */
 Rvector6 Spacecraft::GetCartesianState() 
 {
-#if 0
-   if (cartesianEpoch < epoch)
-   {
-
-   }
-#endif
-      cartesianState = stateConverter.Convert(state,refFrame,"Cartesian"); 
-      cartesianEpoch = epoch;
+   cartesianState = stateConverter.Convert(state,stateType,"Cartesian"); 
 
    return cartesianState;
 }
@@ -786,14 +803,7 @@ Rvector6 Spacecraft::GetCartesianState()
  */
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-#if 0
-   if (keplerianEpoch < epoch)
-   {
-
-   }
-#endif
-      keplerianState = stateConverter.Convert(state,refFrame,"Keplerian"); 
-      keplerianEpoch = epoch;
+   keplerianState = stateConverter.Convert(state,stateType,"Keplerian"); 
 
    return keplerianState;
 }
@@ -995,6 +1005,44 @@ void Spacecraft::SaveDisplay()
     SetState(displayCoordType,displayState);
 }
 
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystem()
+//------------------------------------------------------------------------------
+/**
+ * Gets the solar system pointer
+ *
+ * @return Pointer to the solar system.
+ */
+//------------------------------------------------------------------------------
+SolarSystem* Spacecraft::GetSolarSystem() const
+{
+   return solarSystem;
+}
+
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer
+ *
+ * @param ss Pointer to the solar system.
+ */
+//------------------------------------------------------------------------------
+void Spacecraft::SetSolarSystem(SolarSystem *ss)
+{
+    // Get new value of mu; if fails, send out message and use old value 
+    if (!stateConverter.SetMu(ss,refBody))
+    {
+       MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
+              "Spacecraft is not able to set Mu so it uses original value:",
+              stateConverter.GetMu());
+    } 
+
+    solarSystem = ss;
+}
+
+
 //-------------------------------------
 // private methods
 //-------------------------------------
@@ -1018,6 +1066,7 @@ void Spacecraft::InitializeValues()
     state[5] = Spacecraft::ELEMENT6;
 
     dateFormat = Spacecraft::DATEFORMAT;
+    stateType = Spacecraft::STATE_TYPE;
     refBody = Spacecraft::REF_BODY;
     refFrame = Spacecraft::REF_FRAME;
     refPlane = Spacecraft::REF_PLANE;
@@ -1039,13 +1088,20 @@ void Spacecraft::InitializeValues()
 
     displayEpoch = epoch; 
     displayDateFormat = dateFormat; 
-    displayCoordType = refFrame;
+    displayCoordType = stateType;
 
-    cartesianEpoch = epoch;
     cartesianState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
     
-    keplerianEpoch = 0; 
     keplerianState.Set(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+    // Initialize mu if it has SolarSystem; otherwise, use default value
+    if (!stateConverter.SetMu(solarSystem,refBody))
+    {
+       MessageInterface::ShowMessage("\n*** Warning ***\n%s (%lf)\n\n",
+              "Spacecraft is not able to set Mu so it uses original value:", 
+              stateConverter.GetMu());
+    }
+
 }
 
 //---------------------------------------------------------------------------
@@ -1129,7 +1185,7 @@ std::string Spacecraft::GetLocalCoordType() const
     if (isForDisplay)
        return displayCoordType;
     else 
-       return refFrame;
+       return stateType;
 }
 
 //---------------------------------------------------------------------------
@@ -1147,6 +1203,6 @@ void Spacecraft::SetInitialDisplay()
 
     displayEpoch = epoch;
     displayDateFormat = dateFormat;
-    displayCoordType = refFrame;
+    displayCoordType = stateType;
     initialDisplay = false;
 }
