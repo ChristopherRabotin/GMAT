@@ -143,8 +143,9 @@ bool StopCondition::Evaluate()
                                     "epoch = %f, mGoal = %f, rval = %f\n",
                                     mUseInternalEpoch, epoch, mGoal, rval);
 #endif
-      
-      if (rval >= mGoal)
+      // handler for time based stopping for backwards prop
+      Real mult = (mGoal >= 0.0 ? 1.0 : -1.0);
+      if (mult*rval >= mult*mGoal)
       {
          std::string stopParamType = mStopParam->GetTypeName();
          

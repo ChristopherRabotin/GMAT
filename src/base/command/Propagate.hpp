@@ -108,6 +108,8 @@ public:
 protected:
    /// Name of the propagator setup(s) used in this command
    StringArray             propName;
+   /// Step direction multipliers used to switch btwn forwards & backwards prop
+   std::vector<Real>       direction;
    /// The (1 or more) spacecraft associated with this propagation, grouped by
    /// propagator
    std::vector<StringArray *>  

@@ -25,6 +25,7 @@
 
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_INIT 1
+#define DEBUG_PROPAGATE_DIRECTION 1
 //#define DEBUG_PROPAGATE_EXE 1
 //#define DEBUG_STOPPING_CONDITIONS 1
 //#define DEBUG_RENAME 1
@@ -875,6 +876,13 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          throw CommandException("Propagate::AssemblePropagators: Propagate"
                                 " string does not identify propagator\n");
       
+      if (generatingString[currentLoc] == '-') {
+         ++currentLoc;
+         direction.push_back(-1.0);
+      }
+      else
+         direction.push_back(1.0);
+      
       pieces.push_back(generatingString.substr(currentLoc, end-currentLoc));
       currentLoc = end+1;
       // Skip trailing comma or white space
@@ -885,11 +893,13 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          scanning = false;
    }
       
-   #ifdef DEBUG_PROPAGATE_EXE
+   #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
                                     " Propagators Identified:\n");
-      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) 
-         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+      std::vector<Real>::iterator j = direction.begin();
+      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++j) 
+         MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
+         ((*j) > 0.0 ? "forwards" : "backwards"));
    #endif
    
    Integer satEnd;
@@ -1197,7 +1207,9 @@ bool Propagate::Initialize(void)
       }
    
       streamID = publisher->RegisterPublishedData(owners, elements);
-      p->SetPhysicalModel(fm); 
+      p->SetPhysicalModel(fm);
+      p->SetRealParameter("StepSize", 
+         fabs(p->GetRealParameter("StepSize"))*direction[index]);
       p->Initialize();
       ++index;
    }
@@ -1554,8 +1566,16 @@ bool Propagate::Execute(void)
    
    
    Real secsToStep = (stopEpoch - currEpoch[trigger]) * 86400.0;
+   #ifdef DEBUG_PROPAGATE_DIRECTION
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() secsToStep at stop = %15lf\n",
+          secsToStep);
+      MessageInterface::ShowMessage
+         ("   stopEpoch = %15lf\n   currEpoch = %15lf\n",
+          stopEpoch, currEpoch[trigger]);
+   #endif
    
-   if (secsToStep > 0.0)
+   if (secsToStep * direction[trigger] > 0.0)
    {
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
