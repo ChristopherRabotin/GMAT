@@ -339,38 +339,35 @@ Real Integrator::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real Integrator::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == ACCURACY)
-    {
-        if (value <= 0.0)
-            return false;
-        tolerance = value;
-    }
-
-    else if (id == MIN_STEP)
-    {
-        if (value == 0.0)
-            return false;
-        minimumStep = fabs(value);
-    }
-
-    else if (id == MAX_STEP)
-    {
-        if (fabs(value) < minimumStep)
-            return false;
-        maximumStep = fabs(value);
-    }
-
-    else if (id == ERROR_THRESHOLD)
-    {
-        errorThreshold = fabs(value);
-        if (physicalModel)
-            physicalModel->SetErrorThreshold(errorThreshold);
-    }
-
-    else if (id == SMALLEST_INTERVAL)
-        smallestTime = fabs(value);
-
-    return Propagator::SetRealParameter(id, value);
+   //loj: 8/6/04 added return statement
+   switch (id)
+   {
+   case ACCURACY:
+      if (value <= 0.0)
+         return false;
+      tolerance = value;
+      return value;
+   case MIN_STEP:
+      if (value == 0.0)
+         return false;
+      minimumStep = fabs(value);
+      return value;
+   case MAX_STEP:
+      if (fabs(value) < minimumStep)
+         return false;
+      maximumStep = fabs(value);
+      return value;
+   case ERROR_THRESHOLD:
+      errorThreshold = fabs(value);
+      if (physicalModel)
+         physicalModel->SetErrorThreshold(errorThreshold);
+      return value;
+   case SMALLEST_INTERVAL:
+      smallestTime = fabs(value);
+      return value;
+   default:
+      return Propagator::SetRealParameter(id, value);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -426,6 +423,7 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
         if (value < 1)
             return GmatBase::INTEGER_PARAMETER_UNDEFINED;
         maxStepAttempts = (Integer)value;
+        return value;
     }
     
     return Propagator::SetIntegerParameter(id, value);
