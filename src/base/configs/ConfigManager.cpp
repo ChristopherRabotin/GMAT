@@ -309,6 +309,15 @@ bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
 //------------------------------------------------------------------------------
 bool ConfigManager::RemoveAllItems()
 {
+    // delete objects
+
+    //loj: 3/10/04 added
+    for (int i=0; i<objects.size(); i++)
+    {
+        delete objects[i];
+        objects[i] = NULL;
+    }
+    
     objects.clear();
     mapping.clear();
 
@@ -347,6 +356,10 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
         if (obj->GetType() == type)
         {
             mapping.erase(name);
+            
+            // delete object loj:3/10/04 added
+            delete obj;
+            
             status = true;
         }
     }
