@@ -132,6 +132,7 @@ RealArray  Star::GetState(A1Mjd atTime)
 Star* Star::Clone(void) const
 {
    // TBD
+    return NULL;
 }
 
 //------------------------------------------------------------------------------

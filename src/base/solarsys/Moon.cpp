@@ -151,6 +151,7 @@ RealArray  Moon::GetState(A1Mjd atTime)
 Moon* Moon::Clone(void) const
 {
    // TBD
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
