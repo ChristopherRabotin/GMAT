@@ -30,7 +30,7 @@
 #include "PropState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
-
+#include "Anomaly.hpp"
 
 class GMAT_API Spacecraft : public SpaceObject
 {
@@ -151,7 +151,7 @@ protected:
    Real           reflectCoeff;
    std::string    dateFormat;
    std::string    stateType;
-   std::string    anomalyType;
+   Anomaly        anomaly;
    std::string    refBody;
    std::string    refFrame;
    std::string    refPlane;
