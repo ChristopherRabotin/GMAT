@@ -19,18 +19,6 @@
 
 #include "PlanetaryEphem.hpp"
 
-// maximum length of path name
-const Integer PlanetaryEphem::MAX_PATH_LEN        = 260;
-
-// Max number of bodies that can be modeled
-//const Integer PlanetaryEphem::MAX_BODIES          = 3;             // increase later -> 20;
-// Max number of zonal values that are enterable
-const Integer PlanetaryEphem::MAX_ZONALS          =  5;
-// Max length of the name of a potential field name
-const Integer PlanetaryEphem::MAX_POTENTIAL_NAME  = 72;
-// The number of bodies normally found on the SLP file
-const Integer PlanetaryEphem::NUM_STANDARD_BODIES = 11;
-
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -50,6 +38,7 @@ PlanetaryEphem::PlanetaryEphem(std::string withFileName)
    strcpy(g_pef_dcb.full_path,withFileName.c_str());
    g_pef_dcb.recl           = 0;
    g_pef_dcb.fptr           = NULL;
+   jdMjdOffset              = 2430000.0;  // will be set by subclasses
 }
 
 //------------------------------------------------------------------------------
@@ -67,6 +56,7 @@ PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef)
    // set class data
    itsName         = pef.itsName;
    g_pef_dcb       = pef.g_pef_dcb;
+   jdMjdOffset     = pef.jdMjdOffset;
 }
 
 //------------------------------------------------------------------------------
@@ -86,6 +76,7 @@ PlanetaryEphem& PlanetaryEphem::operator=(const PlanetaryEphem& pef)
    if (this == &pef) return *this;
    itsName = pef.itsName;
    g_pef_dcb       = pef.g_pef_dcb;
+   jdMjdOffset     = pef.jdMjdOffset;
    return *this;
 }
 
@@ -102,7 +93,7 @@ PlanetaryEphem::~PlanetaryEphem()
 }
 
 //------------------------------------------------------------------------------
-//  std:;string GetName()
+//  std::string GetName()
 //------------------------------------------------------------------------------
 /**
  * Returns the name of the file (full path name).

@@ -60,26 +60,44 @@ public:
    // method to return the full path name of the planetary ephem file.
    std::string GetName() const;
 
-   // method to return the position and velocity of the specified body
-   // at the specified time
+   //------------------------------------------------------------------------------
+   //  Integer GetBodyID(std::string bodyName)
+   //------------------------------------------------------------------------------
+   /**
+    * Returns the body ID number for the specified body.
+    *
+    * @param <bodyName> body whose ID is requested.
+    *
+    * @return the body ID number for the specified body.
+    */
+   //------------------------------------------------------------------------------
+   virtual Integer GetBodyID(std::string bodyName) = 0;
+   
+   //------------------------------------------------------------------------------
+   //  Real* GetPosVel(Integer forBody, A1Mjd atTime)
+   //------------------------------------------------------------------------------
+   /**
+    * Returns the the position and velocity of the specified body
+    * at the specified time.
+    *
+    * @return the position and velocity of the specified body at the rerquested
+    *         time.
+    */
+   //------------------------------------------------------------------------------
    virtual Real* GetPosVel(Integer forBody, A1Mjd atTime) = 0;
 
    // method to return the day-of-year and year of the start time of the
-   // SLP file.
+   // file.
+   //------------------------------------------------------------------------------
+   //  Integer* GetStartDayAndYear()
+   //------------------------------------------------------------------------------
+   /**
+    * Returns the day-of-year and year of the start time of the file.
+    *
+    * @return the day-of-year and year of the start time of the file..
+    */
+   //------------------------------------------------------------------------------
    virtual Integer* GetStartDayAndYear() = 0;
-
-   // maximum length of path name
-   static const Integer MAX_PATH_LEN;
-
-   // from Swingby bodies_types.h
-   // Max number of bodies that can be modeled
-   static const Integer MAX_BODIES = 3;
-   // Max number of zonal values that are enterable
-   static const Integer MAX_ZONALS;
-   // Max length of the name of a potential field name
-   static const Integer MAX_POTENTIAL_NAME;
-   // The number of bodies normally found on the planetary ephemeris file
-   static const Integer NUM_STANDARD_BODIES;
 
   
 protected:
@@ -112,13 +130,7 @@ protected:
 
    };
 
-   // from slp_data_types.h
-   // length of planetary ephemeris header records
-   Integer lengthOfHeaderRecord;
-   // length of planetary ephemeris data records
-   Integer lengthOfDataRecord;
-   // ??????
-   Integer ibepm;
+   double      jdMjdOffset;
 
    std::string itsName;
 
