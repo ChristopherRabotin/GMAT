@@ -430,7 +430,7 @@ void PropagationConfigPanel::Initialize()
    dragModelArray.push_back("None");
    dragModelArray.push_back("Exponential");
    dragModelArray.push_back("MSISE90");
-   dragModelArray.push_back("Jacchia-Roberts");
+   dragModelArray.push_back("JacchiaRoberts");
       
    // initialize mag. filed model type array
    magfModelArray.push_back("None");
