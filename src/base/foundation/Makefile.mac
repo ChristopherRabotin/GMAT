@@ -2,12 +2,13 @@
 # Module:     Makefile.mac for foundation directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-
+# Modified:   2004/01/16 - Added GmatBaseException.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = GmatBase.cpp
+SRC = GmatBase.cpp GmatBaseException.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
