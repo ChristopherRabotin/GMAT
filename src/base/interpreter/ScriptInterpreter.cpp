@@ -454,13 +454,24 @@ bool ScriptInterpreter::WriteScript(void)
     
    // Hardware
    objs = moderator->GetListOfConfiguredItems(Gmat::HARDWARE);
-
    #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
-      std::cout << "Found " << objs.size() << " Hardware Components\n";
+      std::cout << "Found " << objs.size() << " hardware Components\n";
    #endif
-   for (current = objs.begin(); current != objs.end(); ++current)
-      if (!BuildObject(*current))
-         return false;
+
+   // Write out tanks first, then thrusters   
+   GmatBase *object;
+   for (current = objs.begin(); current != objs.end(); ++current) {
+      object = FindObject(*current);
+      if (object->GetTypeName() == "FuelTank")
+         if (!BuildObject(*current))
+            return false;
+   }
+   for (current = objs.begin(); current != objs.end(); ++current) {
+      object = FindObject(*current);
+      if (object->GetTypeName() == "Thruster")
+         if (!BuildObject(*current))
+            return false;
+   }
             
    // Spacecraft
    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
