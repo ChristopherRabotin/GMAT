@@ -351,10 +351,11 @@ bool Interpreter::BuildObject(std::string &objectname)
 //    WriteParameters(prefix, obj);
 
     std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
-    *outstream << genstring << "\n\n\n***MATLAB Version:\n\n";
-    genstring = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
-    *outstream << genstring << "\n***\n\n";
-    
+    *outstream << genstring << "\n";
+//    \n\n***MATLAB Version:\n\n";
+//    genstring = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
+//    *outstream << genstring << "\n***\n\n";
+
     *outstream << "\n";
     return true;
 }
