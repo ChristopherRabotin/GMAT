@@ -436,7 +436,7 @@ std::string* A1Mjd::ToValueStrings()
 //------------------------------------------------------------------------------
 // Real ToUtcMjd()
 //------------------------------------------------------------------------------
-Real A1Mjd::ToUtcMjd()
+UtcMjd A1Mjd::ToUtcMjd()
 {
    Real a1mjd = mMjd;
    UtcMjd utcmjd;
@@ -466,6 +466,8 @@ Real A1Mjd::ToUtcMjd()
          utcmjd = a1mjd - a1utc3/SECS_PER_DAY;
       }
    }
+
+   return utcmjd;
 }
 
 //------------------------------------------------------------------------------

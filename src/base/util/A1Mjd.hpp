@@ -75,7 +75,7 @@ public:
 protected:
 private:
 
-   Real ToUtcMjd();
+   UtcMjd ToUtcMjd();
    Real GetA1UtcDiff(const UtcMjd &utcmjd);
    Real GetA1UtcDiffAnalytic(const UtcMjd &utcmjd);
    GmatTimeUtil::CalDate A1MjdToCalDate(const A1Mjd &a1mjd);
