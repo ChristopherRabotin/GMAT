@@ -211,11 +211,12 @@ void ParameterMultiSelectDialog::LoadData()
 {
   if (mShowSysVars)
   {
-   mObjectComboBox->SetSelection(0);
-   mPropertyListBox->SetSelection(0);
+     mObjectComboBox->SetSelection(0);
+     mPropertyListBox->SetSelection(0);
+     mUserParamListBox->Deselect(0);
   }
   else
-     mUserParamListBox->SetSelection(0);
+     mUserParamListBox->Deselect(0); // force user to manually select
 }
 
 //------------------------------------------------------------------------------
