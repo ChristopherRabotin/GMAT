@@ -1055,6 +1055,32 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
 
 
 //---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id, 
+//                                             const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index The index when multiple StringArrays are supported.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+const StringArray& GmatBase::GetStringArrayParameter(const Integer id, 
+                                               const Integer index) const
+{
+   char errortext[256];
+   std::string me = instanceName;
+   if (instanceName == "")
+      me = typeName;
+   sprintf(errortext, "No indexed string array parameter with ID %d on %s", 
+           id, me.c_str());
+   throw GmatBaseException(errortext);
+}
+
+
+//---------------------------------------------------------------------------
 //  bool GetBooleanParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -1574,7 +1600,7 @@ bool GmatBase::SetStringParameter(const std::string &label,
 /**
  * Access an array of string data.
  *
- * @param <label> The (string) label for the parameter.
+ * @param label The (string) label for the parameter.
  *
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
@@ -1586,6 +1612,26 @@ const StringArray& GmatBase::GetStringArrayParameter(
    return GetStringArrayParameter(id);
 }
 
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const std::string &label, 
+//                                             const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param label The (string) label for the parameter.
+ * @param index Which string array if more than one is supported.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+const StringArray& GmatBase::GetStringArrayParameter(const std::string &label, 
+                                               const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetStringArrayParameter(id, index);
+}
 
 //---------------------------------------------------------------------------
 //  bool GetBooleanParameter(const std::string &label) const

@@ -144,6 +144,10 @@ public:
                                           const Integer index);
    virtual const StringArray& 
                        GetStringArrayParameter(const Integer id) const; 
+   virtual const StringArray& 
+                       GetStringArrayParameter(const Integer id, 
+                                               const Integer index) const; 
+
                        
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
@@ -202,6 +206,9 @@ public:
                                           
    virtual const StringArray& 
                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray& 
+                       GetStringArrayParameter(const std::string &label, 
+                                               const Integer index) const; 
                        
    virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const std::string &label,
