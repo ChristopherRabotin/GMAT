@@ -1,0 +1,18 @@
+# Makefile for GMAT Burn library
+# Initial Version - D. Conway - 2003/12/17
+
+HEADERS = -I../include -I../foundation -I../spacecraft -I../solarsys
+OBJECTS = Burn.o ImpulsiveBurn.o ManeuverFrame.o
+
+all: libBurn
+	mkdir -p ../lib
+	mv libBurn.a ../lib
+
+libBurn : ../lib/libBurn.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libBurn.a : $(OBJECTS)
+	ar rs libBurn.a $(OBJECTS)
+	ranlib libBurn.a
