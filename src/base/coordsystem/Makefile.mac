@@ -7,12 +7,10 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-#SRC =	AxisSystem.cpp CoordinateBase.cpp CoordinateConverter.cpp \
-#	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
-#	InertialAxes.cpp
 SRC =	AxisSystem.cpp CoordinateBase.cpp CoordinateConverter.cpp \
-	CoordinateSystem.cpp CoordinateSystemException.cpp 
-#
+	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
+	InertialAxes.cpp
+
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
 include ${INCMK}
