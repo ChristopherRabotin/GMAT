@@ -187,9 +187,10 @@ ForceModel* ConfigManager::GetForceModel(const std::string &name)
     ForceModel *fm = NULL;
     if (mapping.find(name) != mapping.end()) {
         if (mapping[name]->GetType() != Gmat::FORCE_MODEL) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a force model";
-            throw ConfigManagerException(str);
+            //std::string str = mapping[name]->GetName() +
+            //                  " is not a force model";
+            //throw ConfigManagerException(str);
+            return NULL;
         }
         fm = (ForceModel *)mapping[name];
     }
@@ -202,9 +203,10 @@ Spacecraft* ConfigManager::GetSpacecraft(const std::string &name)
     Spacecraft *sc = NULL;
     if (mapping.find(name) != mapping.end()) {
         if (mapping[name]->GetType() != Gmat::SPACECRAFT) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a spacecraft";
-            throw ConfigManagerException(str);
+            //std::string str = mapping[name]->GetName() +
+            //                  " is not a spacecraft";
+            //throw ConfigManagerException(str);
+            return NULL;
         }
         sc = (Spacecraft *)mapping[name];
     }
@@ -217,9 +219,10 @@ PropSetup* ConfigManager::GetPropSetup(const std::string &name)
     PropSetup *ps = NULL;
     if (mapping.find(name) != mapping.end()) {
         if (mapping[name]->GetType() != Gmat::PROP_SETUP) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a spacecraft";
-            throw ConfigManagerException(str);
+            //std::string str = mapping[name]->GetName() +
+            //                  " is not a PropSetup";
+            //throw ConfigManagerException(str);
+            return NULL;
         }
         ps = (PropSetup *)mapping[name];
     }

@@ -26,24 +26,14 @@
 #include <map>
 
 #include "gmatdefs.hpp"
-
-// Headers for the GMAT core components
-//#include "Spacecraft.hpp"
-//#include "Propagator.hpp"
-//#include "ForceModel.hpp"
-//#include "Force.hpp"
-//#include "PropSetup.hpp"
-//#include "SolarSystem.hpp"
-//#include "CelestialBody.hpp"
-//#include "Parameter.hpp"
-//#include "StopCond.hpp"
-//#include "Command.hpp"
-//#include "Subscriber.hpp"
+#include "InterpreterException.hpp"
+#include "GmatBase.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
 class Propagator;
 class ForceModel;
+class PropSetup;
 class PhysicalModel;
 class SolarSystem;
 class CelestialBody;
@@ -90,15 +80,28 @@ protected:
     std::ostream                    *outstream;
     /// Pointer to the Moderator for access to the factories and other services
     Moderator                       *moderator;
+    /// Flag to tell is the mappings are defined yet
+    bool                            initialized;
     
     /// Mapping between the object base class strings and the objecttypes enum
     std::map<std::string, Integer>  typemap;
+    
     /// Available commands, obtained from the FactoryManager via the Moderator
     StringArray                     cmdmap;
-    
+    /// Available propagators
+    StringArray                     propmap;
+    /// Available forces
+    StringArray                     forcemap;
+    /// Available subscribers
+    StringArray                     subscribermap;
+    /// Available parameters
+    StringArray                     parametermap;
+    /// Available stopping conditionss
+    StringArray                     stopcondmap;
+
     /// Current line from the script
-    std::string                 line;
-    StringArray                 chunks;
+    std::string                     line;
+    std::vector<std::string *>      chunks;
 
     /// Identifies the different types of script lines possible
     enum linetype               { CREATEOBJECT = 7001,
@@ -109,7 +112,8 @@ protected:
                                   UNKNOWN };
 
 
-    
+    void                            Initialize(void);
+
     // The "Create" methods make calls, through the Moderator, to the Factories
     // to get new instances of the requested objects
     Spacecraft*                     CreateSpacecraft(std::string satname);
@@ -129,17 +133,17 @@ protected:
     // The following method signature depends on an open scripting issue: if
     // props and force models are named, the following Create method should use
     // the names rather than the object pointers
-//    PropagatorSetup*                CreatePropSetup(std::string name,
-//                                                    Propagator *prop,
-//                                                    ForceModel *fm);
+    PropSetup*                      CreatePropSetup(std::string name);
                                                 
     // Methods used to break apart lines of script
     void                            ChunkLine(void);
     Integer                         SkipWhiteSpace(Integer start = 0);
     Integer                         FindDelimiter(std::string str,
                                                   std::string specChar = "");
-//    std::string                     GetToken(void);
-    
+    std::string                     GetToken(std::string tokstr = "");
+    GmatBase*                       FindObject(std::string objName);
+    bool                            SetParameter(GmatBase *obj, Integer id,
+                                                 std::string value);
 };
 
 #endif // INTERPRETER_HPP

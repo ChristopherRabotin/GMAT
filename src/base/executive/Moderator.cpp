@@ -323,7 +323,8 @@ Parameter* Moderator::GetParameter(const std::string &name)
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
    ForceModel *fm = theFactoryManager->CreateForceModel(name);
-   theConfigManager->AddForceModel(fm);
+   if (name != "")
+       theConfigManager->AddForceModel(fm);
    return fm;
 }
 
