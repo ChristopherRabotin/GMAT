@@ -135,6 +135,29 @@ bool BranchCommand::Insert(Command *cmd, Command *prev)
 }
 
 
+Command* BranchCommand::Remove(Command *cmd)
+{
+    if (cmd == this)
+        return Command::Remove(cmd);    // Use base method to remove this cmd
+
+    Command *fromBranch = NULL;
+    Command *current = NULL;
+    
+    // If we have branches, try to insert there first
+    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
+        current = branch[which];
+        if (current != NULL) {
+            fromBranch = current->Remove(cmd);
+            if (fromBranch != NULL)
+                return fromBranch;
+        }
+    }
+    
+    // Not in the branches, so continue with the sequence
+    return Command::Remove(cmd);
+}
+
+
 void BranchCommand::SetSolarSystem(SolarSystem *ss)
 {
     Command::SetSolarSystem(ss);

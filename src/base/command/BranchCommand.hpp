@@ -40,6 +40,8 @@ public:
     // Inherited methods that need refinements to handle the branching
     virtual bool            Append(Command *cmd);
     virtual bool            Insert(Command *cmd, Command *prev);
+    virtual Command*        Remove(Command *cmd);
+    
     virtual void            SetSolarSystem(SolarSystem *ss);
     virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
     

@@ -423,6 +423,38 @@ bool Command::Insert(Command *cmd, Command *prev)
 
 
 //------------------------------------------------------------------------------
+//  Command* Remove(Command *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Removes command from the command sequence
+ * 
+ * @param <cmd> Pointer to command that is inserted
+ * 
+ * @return Pointer to the removed command or NULL if the command was not found.
+ */
+//------------------------------------------------------------------------------
+Command* Command::Remove(Command *cmd)
+{
+    if (this == cmd) {  // NULL the next pointer
+        next = NULL;
+        return this;
+    }
+    
+    if (next == NULL)
+        return NULL;
+        
+    if (next == cmd) {
+        Command *temp = next;
+        next = next->GetNext();
+        temp->Remove(cmd);
+        return temp;            
+    }
+    
+    return next->Remove(cmd);
+}
+
+
+//------------------------------------------------------------------------------
 //  bool AssignObjects(void)
 //------------------------------------------------------------------------------
 /**

@@ -18,11 +18,13 @@ OBJECTS = Command.o CommandException.o \
           Target.o \
           Vary.o \
           Achieve.o \
-          EndTarget.o 
-          
-          #\
-          #Vary.o \
-          #Achieve.o
+          EndTarget.o \
+          ForCommand.o \
+          EndForCommand.o \
+          IfCommand.o \
+          ElseCommand.o \
+          EndIfCommand.o
+
 
 all: libCommand 
 	mkdir -p ../lib

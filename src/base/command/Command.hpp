@@ -87,6 +87,7 @@ class Command : public GmatBase
         virtual Command*    GetNext(void);
         virtual bool        Append(Command *cmd);
         virtual bool        Insert(Command *cmd, Command *prev);
+        virtual Command*    Remove(Command *cmd);
 
         virtual void        InterpretAction(void)
         {}
