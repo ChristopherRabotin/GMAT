@@ -63,7 +63,7 @@ public:
    Gmat::ObjectType    GetType(void) const;
    std::string         GetTypeName(void) const;
    std::string         GetName(void) const;
-   bool                SetName(const std::string &who);
+   virtual bool        SetName(const std::string &who);
    virtual Integer     GetParameterCount(void) const;
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
