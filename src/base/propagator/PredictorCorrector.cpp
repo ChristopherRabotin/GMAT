@@ -50,7 +50,7 @@
 // static data
 //---------------------------------
 const std::string
-PredictorCorrector::PARAMETER_TEXT[PredictorCorrectorParamCount - GmatBaseParamCount] =
+PredictorCorrector::PARAMETER_TEXT[PredictorCorrectorParamCount - IntegratorParamCount] =
 {
    "StepCount",
    "MaximumError",
@@ -63,7 +63,7 @@ PredictorCorrector::PARAMETER_TEXT[PredictorCorrectorParamCount - GmatBaseParamC
 };
 
 const Gmat::ParameterType
-PredictorCorrector::PARAMETER_TYPE[PredictorCorrectorParamCount - GmatBaseParamCount] =
+PredictorCorrector::PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorParamCount] =
 {
 	Gmat::INTEGER_TYPE,
 	Gmat::REAL_TYPE,
@@ -575,9 +575,9 @@ bool PredictorCorrector::AdaptStep(Real maxError)
 std::string PredictorCorrector::GetParameterText(const Integer id) const
 {
     if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
-        return PARAMETER_TEXT[id - GmatBaseParamCount];
+        return PARAMETER_TEXT[id - IntegratorParamCount];
     else
-        return GmatBase::GetParameterText(id);
+        return Integrator::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -591,11 +591,11 @@ Integer PredictorCorrector::GetParameterID(const std::string &str) const
 {
     for (Integer i = STEP_COUNT; i < PredictorCorrectorParamCount; i++)
     {
-        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+        if (str == PARAMETER_TEXT[i - IntegratorParamCount])
             return i;
     }
 
-    return GmatBase::GetParameterID(str);
+    return Integrator::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -608,9 +608,9 @@ Integer PredictorCorrector::GetParameterID(const std::string &str) const
 Gmat::ParameterType PredictorCorrector::GetParameterType(const Integer id) const
 {
     if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
-        return PARAMETER_TYPE[id - GmatBaseParamCount];
+        return PARAMETER_TYPE[id - IntegratorParamCount];
     else
-        return GmatBase::GetParameterType(id);
+        return Integrator::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -623,9 +623,9 @@ Gmat::ParameterType PredictorCorrector::GetParameterType(const Integer id) const
 std::string PredictorCorrector::GetParameterTypeString(const Integer id) const
 {
    if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+      return Integrator::PARAM_TYPE_STRING[GetParameterType(id)];
    else
-      return GmatBase::GetParameterTypeString(id);
+      return Integrator::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -643,7 +643,7 @@ Real PredictorCorrector::GetRealParameter(const Integer id) const
 	else if (id == STEP_SIGN)	return stepSign;
 	else if (id == INV_ORDER)				return invOrder;
 
-   return GmatBase::GetRealParameter(id);
+   return Integrator::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -700,7 +700,7 @@ Real PredictorCorrector::SetRealParameter(const Integer id, const Real value)
 		return invOrder;
 	}
 
-   return GmatBase::SetRealParameter(id, value);
+   return Integrator::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -733,7 +733,7 @@ Integer PredictorCorrector::GetIntegerParameter(const Integer id) const
    if (id == STEP_COUNT)			     	return stepCount;
 	else if (id == STARTUP_COUNT)				return startupCount;
 
-	return GmatBase::GetIntegerParameter(id);
+	return Integrator::GetIntegerParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -763,7 +763,7 @@ Integer PredictorCorrector::SetIntegerParameter(const Integer id,
 		startupCount = value;
 		return startupCount;
 	}
-	return GmatBase::SetIntegerParameter(id,value);
+	return Integrator::SetIntegerParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -783,7 +783,7 @@ bool PredictorCorrector::GetBooleanParameter(const Integer id) const
 {
 	if (id == STARTUP_COMPLETE)	return startupComplete;
 
-	return GmatBase::GetBooleanParameter(id);
+	return Integrator::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -808,7 +808,7 @@ bool PredictorCorrector::SetBooleanParameter(const Integer id, const bool value)
 		return startupComplete;
 	}
 
-	return GmatBase::SetBooleanParameter(id,value);
+	return Integrator::SetBooleanParameter(id,value);
 }
 
 ////------------------------------------------------------------------------------

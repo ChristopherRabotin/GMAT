@@ -116,22 +116,6 @@ public:
     virtual bool    SetBooleanParameter(const Integer id, const bool value);
 
 protected:
-    enum
-    {
-		STEP_COUNT = IntegratorParamCount,
-      MAXIMUM_ERROR,
-      LOWEVER_ERROR,
-      TARGET_ERROR,
-      STEP_SIGN,
-      STARTUP_COMPLETE,
-      STARTUP_COUNT,
-      INV_ORDER,
-      PredictorCorrectorParamCount  /// Count of the parameters for this class
-    };
-    
-    static const std::string PARAMETER_TEXT[PredictorCorrectorParamCount - GmatBaseParamCount];
-	 static const Gmat::ParameterType PARAMETER_TYPE[PredictorCorrectorParamCount - GmatBaseParamCount];
-
     /// Number of steps (including current state) needed for the algorithm
     Integer stepCount;
     /// Array used to capture the derivative information
@@ -219,6 +203,25 @@ protected:
 //    const Integer PREDICTORCORRECTOR_LOWERERROR;
     /// Target error for a predictor-corrector
 //    const Integer PREDICTORCORRECTOR_TARGETERROR;
+
+private:
+    enum
+    {
+		STEP_COUNT = IntegratorParamCount,
+      MAXIMUM_ERROR,
+      LOWEVER_ERROR,
+      TARGET_ERROR,
+      STEP_SIGN,
+      STARTUP_COMPLETE,
+      STARTUP_COUNT,
+      INV_ORDER,
+      PredictorCorrectorParamCount  /// Count of the parameters for this class
+    };
+    
+    static const std::string PARAMETER_TEXT[PredictorCorrectorParamCount - IntegratorParamCount];
+	 static const Gmat::ParameterType PARAMETER_TYPE[PredictorCorrectorParamCount - IntegratorParamCount];
+
+
 };
 
 #endif //PredictorCorrector_hpp
