@@ -18,7 +18,10 @@
 //------------------------------------------------------------------------------
 #include "CallFunction.hpp"
 #include "Moderator.hpp"         // for GetParameter()
+
+#if __USE_MATLAB__
 #include "MatlabInterface.hpp"   // for Matlab Engine functions
+#endif
 
 #define DEBUG_CALL_FUNCTION 1
 //---------------------------------
@@ -27,7 +30,7 @@
 const std::string
 CallFunction::PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount] =
 {
-   "MatlabFunctionName",
+   "FunctionName",
 };
 
 const Gmat::ParameterType
@@ -474,13 +477,13 @@ bool CallFunction::Execute()
    bool status = false;
 
 //   MessageInterface::ShowMessage("CallFunction::Execute()\n");
-
+#if __USE_MATLAB__
    if (mFunction->GetTypeName() == "MatlabFunction")
    {
 //      MessageInterface::ShowMessage("Function Type is Matlab\n");
       return ExecuteMatlabFunction();
    }
-
+#endif
 
    return status;
 }
@@ -492,6 +495,7 @@ bool CallFunction::ExecuteMatlabFunction()
 {
    bool status = false;
 
+#if __USE_MATLAB__
 //   MessageInterface::ShowMessage("CallFunction::ExecuteMatlabFunction()\n");
 
    // check if we have a pointer to matlab engine
@@ -526,8 +530,9 @@ bool CallFunction::ExecuteMatlabFunction()
       param->SetRealParameter("Param1", outArray[0]);
    }
 
-   return status;
+#endif
 
+   return status;
 }
 
 
