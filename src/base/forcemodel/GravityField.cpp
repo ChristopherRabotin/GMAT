@@ -1021,7 +1021,8 @@ bool GravityField::IsBlank(char* aLine)
    Integer i;
    for (i=0;i<(int)strlen(aLine);i++)
    {
-      if (!isblank(aLine[i])) return false;
+      //loj: 5/18/04 if (!isblank(aLine[i])) return false;
+      if (!isspace(aLine[i])) return false;
    }
    return true;
 }
