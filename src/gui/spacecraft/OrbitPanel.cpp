@@ -586,7 +586,7 @@ void OrbitPanel::OnEpochChange()
 //    epochValue->SetValue(epochStr);
 
    std::string epochStr = theSpacecraft->GetDisplayEpoch();
-   MessageInterface::ShowMessage("\nnew value of epoch is %s\n", epochStr.c_str());
+//   MessageInterface::ShowMessage("\nnew value of epoch is %s\n", epochStr.c_str());
    epochValue->SetValue(epochStr.c_str());
 
 }
