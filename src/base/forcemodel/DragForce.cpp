@@ -171,7 +171,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
 {
     unsigned parmNumber = (unsigned)(i+1);
     
-    if (parmName == "Mass")
+    if (parmName == "DryMass")
         if (parmNumber < mass.size())
             mass[i] = parm;
         else
