@@ -456,7 +456,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //   wxMenu *viewsMenu = new wxMenu;
    wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
-   wxMenu *scriptMenu = new wxMenu;
+//   wxMenu *scriptMenu = new wxMenu;
  
    wxMenu *propagatorMenu;
 //   wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
