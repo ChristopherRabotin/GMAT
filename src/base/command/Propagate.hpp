@@ -77,14 +77,15 @@ public:
    virtual Integer     GetIntegerParameter(const Integer id) const;
    virtual Integer     SetIntegerParameter(const Integer id,
                                            const Integer value);
-   virtual bool        GetBooleanParameter(const Integer id) const;
-   virtual bool        SetBooleanParameter(const Integer id,
-                                           const bool value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
    virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id) const; 
+                       GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray& 
+                       GetStringArrayParameter(const Integer id, 
+                                               const Integer index) const; 
+    
 
    // Methods used to run the command
    virtual bool        InterpretAction();
@@ -103,7 +104,7 @@ protected:
    std::vector<StringArray *>  
                            satName;
    /// Flag used to determine if the spacecraft are propagated coupled
-   bool                    propCoupled;
+   std::string             currentPropMode;
    /// Frequency used to check for user interrupts of the run
    Integer                 interruptCheckFrequency;
    /// Flag that specifies if we are rejoining a run in progress
@@ -125,6 +126,8 @@ protected:
    ObjectArray objectArray;
    
    // For convenience, set variables for the parameter IDs
+   /// ID for available propagation modes
+   const Integer           availablePropModesID;
    /// ID for the boolean flag used for the prop mode
    const Integer           propCoupledID;
    /// ID for the number of iterations before calling to check for interrupts

@@ -39,23 +39,24 @@ std::string Propagate::PropModeList[PROP_MODE_COUNT] =
  * Constructs the Propagate Command (default constructor).
  */
 //------------------------------------------------------------------------------
-Propagate::Propagate(void) :
+Propagate::Propagate() :
    GmatCommand                 ("Propagate"),
-   propCoupled                 (true),
+   currentPropMode             (""),
    interruptCheckFrequency     (30),
    inProgress                  (false),
    // Set the parameter IDs
-   propCoupledID               (parameterCount),
-   interruptCheckFrequencyID   (parameterCount+1),
-   satNameID                   (parameterCount+2),
-   propNameID                  (parameterCount+3),
+   availablePropModesID        (parameterCount),
+   propCoupledID               (parameterCount+1),
+   interruptCheckFrequencyID   (parameterCount+2),
+   satNameID                   (parameterCount+3),
+   propNameID                  (parameterCount+4),
    secondsToProp               (8640.0),
-   secondsToPropID             (parameterCount+4),
+   secondsToPropID             (parameterCount+5),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT)
 {
    // Increase the number of parms by the 2 new ones
-   parameterCount += 5;
+   parameterCount += 6;
 }
 
 
@@ -66,7 +67,7 @@ Propagate::Propagate(void) :
  * Destroys the Propagate Command.
  */
 //------------------------------------------------------------------------------
-Propagate::~Propagate(void)
+Propagate::~Propagate()
 {
    /// todo: clean memory for satName.push_back(new StringArray);
  
@@ -86,10 +87,11 @@ Propagate::~Propagate(void)
 //------------------------------------------------------------------------------
 Propagate::Propagate(const Propagate &p) :
    GmatCommand                 (p),
-   propCoupled                 (true),
+   currentPropMode             (p.currentPropMode),
    interruptCheckFrequency     (p.interruptCheckFrequency),
    inProgress                  (false),
    // Set the parameter IDs
+   availablePropModesID        (p.availablePropModesID),
    propCoupledID               (p.propCoupledID),
    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
    satNameID                   (p.satNameID),
@@ -397,7 +399,7 @@ ObjectArray& Propagate::GetRefObjectArray(const Gmat::ObjectType type)
 std::string Propagate::GetParameterText(const Integer id) const
 {
    if (id == propCoupledID)
-      return "PropagateCoupled";
+      return "PropagateMode";
 
    if (id == interruptCheckFrequencyID)
       return "InterruptFrequency";
@@ -423,7 +425,10 @@ std::string Propagate::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagate::GetParameterID(const std::string &str) const
 {
-   if (str == "PropagateCoupled")
+   if (str == "AvailablePropModes")
+      return availablePropModesID;
+
+   if (str == "PropagateMode")
       return propCoupledID;
 
    if (str == "InterruptFrequency")
@@ -447,8 +452,11 @@ Integer Propagate::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 {
+   if (id == availablePropModesID)
+      return Gmat::STRINGARRAY_TYPE;
+
    if (id == propCoupledID)
-      return Gmat::BOOLEAN_TYPE;
+      return Gmat::STRING_TYPE;
 
    if (id == interruptCheckFrequencyID)
       return Gmat::INTEGER_TYPE;
@@ -471,8 +479,11 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Propagate::GetParameterTypeString(const Integer id) const
 {
+   if (id == availablePropModesID)
+      return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
+
    if (id == propCoupledID)
-      return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
+      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
 
    if (id == interruptCheckFrequencyID)
       return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
@@ -543,32 +554,6 @@ Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
 
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
-//------------------------------------------------------------------------------
-bool Propagate::GetBooleanParameter(const Integer id) const
-{
-   if (id == propCoupledID)
-      return propCoupled;
-
-   return GmatCommand::GetBooleanParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
-//------------------------------------------------------------------------------
-bool Propagate::SetBooleanParameter(const Integer id, const bool value)
-{
-   if (id == propCoupledID) {
-      propCoupled = value;
-      return propCoupled;
-   }
-
-   return GmatCommand::SetBooleanParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Propagate::GetStringParameter(const Integer id) const
@@ -577,6 +562,9 @@ std::string Propagate::GetStringParameter(const Integer id) const
    if (id == propNameID)
       return propName[0];
    
+   if (id == propCoupledID)
+      return currentPropMode;
+
    return GmatCommand::GetStringParameter(id);
 }
 
@@ -586,6 +574,16 @@ std::string Propagate::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 {
+   if (id == propCoupledID) {
+      const StringArray pmodes = GetStringArrayParameter(availablePropModesID);
+      if (find(pmodes.begin(), pmodes.end(), value) != pmodes.end()) {
+         currentPropMode = value;
+         for (Integer i = 0; i < PROP_MODE_COUNT; ++i)
+            if (value == pmodes[i])
+               currentMode = (PropModes)i;
+      }
+   }
+ 
    if (id == satNameID) {
 //       if (satName.empty())
 //          satName.push_back(value);
@@ -610,6 +608,15 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 {
+   static StringArray modeList;
+   
+   if (id == availablePropModesID) {
+      modeList.clear();
+      for (Integer i = 0; i < PROP_MODE_COUNT; ++i)
+         modeList.push_back(PropModeList[i]);
+      return modeList;
+   }
+ 
    if (id == satNameID)
       return *satName[0];
  
@@ -620,6 +627,18 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
    return GmatCommand::GetStringArrayParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id, 
+//                                            const Integer index) const
+//------------------------------------------------------------------------------
+const StringArray& Propagate::GetStringArrayParameter(const Integer id, 
+                                               const Integer index) const
+{
+   if (id == satNameID)
+      return *satName[index];
+
+   return GmatCommand::GetStringArrayParameter(id, index);
+}
 
 //------------------------------------------------------------------------------
 // void InterpretAction(void)
@@ -666,6 +685,7 @@ void Propagate::CheckForOptions(Integer &loc, std::string& generatingString)
       Integer end = generatingString.find(modeStr, loc);
       if (end != (Integer)std::string::npos) {
          currentMode = (PropModes)modeId;
+         currentPropMode = PropModeList[modeId];
          #ifdef DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage("\nLocated at %d\n", end);
             MessageInterface::ShowMessage("Mode is now %d\n", currentMode);
