@@ -38,7 +38,7 @@ public:
                                    const std::string &plotTitle,
                                    const std::string &xAxisTitle,
                                    const std::string &yAxisTitle);
-    static bool AddXyPlotCurve(const std::string &plotName,
+    static bool AddXyPlotCurve(const std::string &plotName, int cuveNum,
                                int yOffset, Real yMin, Real yMax,
                                const std::string &curveTitle,
                                const std::string &penColor);

@@ -241,7 +241,7 @@ bool PlotInterface::CreateXyPlotWindow(bool canvasOnly,
  * Adds a plot curve to XY plow window.
  */
 //------------------------------------------------------------------------------
-bool PlotInterface::AddXyPlotCurve(const std::string &plotName,
+bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveNum,
                                    int yOffset, Real yMin, Real yMax,
                                    const std::string &curveTitle,
                                    const std::string &penColor)
@@ -262,7 +262,7 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName,
         
         if (frame->GetPlotName() == wxString(plotName.c_str()))
         {
-            frame->AddPlotCurve(yOffset, yMin, yMax,
+            frame->AddPlotCurve(curveNum, yOffset, yMin, yMax,
                                 wxString(curveTitle.c_str()),
                                 wxString(penColor.c_str()));
             added = true;

@@ -51,11 +51,15 @@ public:
     virtual bool GetBooleanParameter(const std::string &label) const;
     virtual bool SetBooleanParameter(const std::string &label,
                                      const bool value);
+    
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool SetStringParameter(const Integer id, const std::string &value);
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool SetStringParameter(const std::string &label,
                                     const std::string &value);
+    
+    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
     
@@ -89,6 +93,8 @@ protected:
     {
         X_PARAM_NAME = 0,
         Y_PARAM_NAME,
+        Y_PARAM_NAME_LIST,
+        CLEAR_Y_PARAM_LIST,
         PLOT_TITLE,
         X_AXIS_TITLE,
         Y_AXIS_TITLE,

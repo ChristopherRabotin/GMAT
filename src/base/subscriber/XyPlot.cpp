@@ -30,25 +30,29 @@ XyPlot::PARAMETER_TEXT[XyPlotParamCount] =
 {
     "XParamName",
     "YParamName",
+    "YParamNameList",
+    "ClearYParamList",
     "PlotTitle",
     "XAxisTitle",
     "YAxisTitle",
-    "DrawGrid"
+    "DrawGrid",
     "DataCollectFrequency",
-    "UpdatePlotFrequency"
+    "UpdatePlotFrequency",
 }; 
 
 const Gmat::ParameterType
 XyPlot::PARAMETER_TYPE[XyPlotParamCount] =
 {
     Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,    
+    Gmat::STRING_TYPE,
+    Gmat::STRINGARRAY_TYPE,
+    Gmat::BOOLEAN_TYPE,
     Gmat::STRING_TYPE,
     Gmat::STRING_TYPE,
     Gmat::STRING_TYPE,
     Gmat::BOOLEAN_TYPE,
     Gmat::INTEGER_TYPE,
-    Gmat::INTEGER_TYPE
+    Gmat::INTEGER_TYPE,
 };
 
 //---------------------------------
@@ -180,23 +184,13 @@ bool XyPlot::AddYParameter(Parameter *param)
     //loj: Do I really need to validate parameter before add?
     if (param->Validate())
     {
+        //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
+        //                              param->GetName().c_str());
         mYParamNames.push_back(param->GetName());
         mYParams.push_back(param);
         mNumYParams = mYParams.size();
 
-        //loj:2/20/04 moved to Distribute(), because XyPlotFrame has not been
-        //created at this point
-//          // add to xy plot window
-//          //loj: temp code
-//          int yOffset = 0; //loj: I don't how this is used
-//          Real yMin = -40000.0; //loj: should parameter provide minimum value?
-//          Real yMax =  40000.0; //loj: should parameter provide maximum value?
-//          std::string curveTitle = param->GetName();
-//          std::string penColor = "RED"; //loj: should parameter provide pen color?
-
-//          if (PlotInterface::AddXyPlotCurve(instanceName, yOffset, yMin, yMax,
-//                                            curveTitle, penColor))
-            added = true;
+        added = true;
     }
 
     return added;
@@ -279,6 +273,11 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
     case DRAW_GRID:
         mDrawGrid = value;
         return mDrawGrid;
+    case CLEAR_Y_PARAM_LIST:
+        mYParams.clear();
+        mYParamNames.clear();
+        mNumYParams = 0;
+        return true;
     default:
         return Subscriber::SetBooleanParameter(id, value);
     }
@@ -322,9 +321,9 @@ std::string XyPlot::GetStringParameter(const Integer id) const
             return mXParamName;
         else
             return Subscriber::GetStringParameter(id);
-    case Y_PARAM_NAME: //loj: return first Y parameter name for now
+    case Y_PARAM_NAME:
         if (mNumYParams > 0)
-            return mYParamNames[0];
+            return mYParamNames[0]; // first Y param name
         else
             return Subscriber::GetStringParameter(id);
     case PLOT_TITLE:
@@ -389,6 +388,32 @@ bool XyPlot::SetStringParameter(const std::string &label,
     return Subscriber::SetStringParameter(label, value);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& XyPlot::GetStringArrayParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case Y_PARAM_NAME_LIST:
+        return mYParamNames;
+    default:
+        return Subscriber::GetStringArrayParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) const
+{
+    for (int i=0; i<XyPlotParamCount; i++)
+        if (label == PARAMETER_TEXT[i])
+            return GetStringArrayParameter(i);
+
+    return Subscriber::GetStringArrayParameter(label);
+}
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -414,9 +439,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
         if (mXParam != NULL && mNumYParams > 0)
         {
             // get x param
-            //Real xval = mXParam->EvaluateReal();
+            Real xval = mXParam->EvaluateReal();
             //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
-            Real xval = dat[0]; // loj: temp code to test XY plot dat[0] is time
+            //xval = dat[0]; // loj: temp code to test XY plot dat[0] is time
             //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
             
             // get y params
@@ -427,9 +452,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             // put yvals in the order of parameters added
             for (int i=0; i<mNumYParams; i++)
             {
-                //yvals[i] = mYParams[i]->EvaluateReal();
+                yvals[i] = mYParams[i]->EvaluateReal();
                 //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
-                yvals[i] = dat[1]; //loj: temp code to test XY plot dat[1] is pos X
+                //yvals[i] = dat[1]; //loj: temp code to test XY plot dat[1] is pos X
                 //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
             }
 
@@ -455,7 +480,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                     std::string curveTitle = mYParams[i]->GetName();
                     std::string penColor = "RED"; //loj: should parameter provide pen color?
 
-                    if (PlotInterface::AddXyPlotCurve(instanceName, yOffset, yMin, yMax,
+                    MessageInterface::ShowMessage("XyPlot::Distribute() curveTitle = %s\n",
+                                                  curveTitle.c_str());
+                    if (PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
                                                       curveTitle, penColor))
                     {
                         mIsXyPlotWindowSet = true;
