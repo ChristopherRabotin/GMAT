@@ -28,8 +28,8 @@
 class CubicSplineInterpolator : public Interpolator
 {
 public:
-	CubicSplineInterpolator(Integer dim = 1);
-	virtual ~CubicSplineInterpolator();
+    CubicSplineInterpolator(const std::string &name = "", Integer dim = 1); //loj: 3/22/04 added name
+    virtual ~CubicSplineInterpolator();
     CubicSplineInterpolator(const CubicSplineInterpolator &csi);
     CubicSplineInterpolator&    operator=(const CubicSplineInterpolator &csi);
 

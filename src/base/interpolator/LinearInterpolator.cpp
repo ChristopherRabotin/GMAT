@@ -20,7 +20,7 @@
 #include "LinearInterpolator.hpp" // class's header file
 
 //------------------------------------------------------------------------------
-//  LinearInterpolator(Integer dim)
+//  LinearInterpolator(const std::string &name, Integer dim)
 //------------------------------------------------------------------------------
 /**
  * Creates an instance of a LinearInterpolator (default constructor).
@@ -28,8 +28,8 @@
  * @param dim   Dimension of the data that will be interpolated (defaults to 1).
  */
 //------------------------------------------------------------------------------
-LinearInterpolator::LinearInterpolator(Integer dim) :
-    Interpolator        ("LinearInterpolator", dim)
+LinearInterpolator::LinearInterpolator(const std::string &name, Integer dim) :
+    Interpolator        (name, "LinearInterpolator", dim)
 {
 }
 

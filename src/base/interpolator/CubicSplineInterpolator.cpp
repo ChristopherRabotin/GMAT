@@ -27,7 +27,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CubicSplineInterpolator(Integer dim)
+//  CubicSplineInterpolator(const std::string &name, Integer dim)
 //------------------------------------------------------------------------------
 /**
  * Constructs cubic spline interpolator (default constructor).
@@ -35,8 +35,8 @@
  * @param dim The dimension of the vector that is interpolated
  */
 //------------------------------------------------------------------------------
-CubicSplineInterpolator::CubicSplineInterpolator(Integer dim) :
-    Interpolator        ("CubicSplineInterpolator", dim),
+CubicSplineInterpolator::CubicSplineInterpolator(const std::string &name, Integer dim) :
+    Interpolator        (name, "CubicSplineInterpolator", dim),
     lastX               (-9.9999e75)
 {
     bufferSize = 5;

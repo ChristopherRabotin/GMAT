@@ -23,7 +23,7 @@
 
 
 //------------------------------------------------------------------------------
-//  Interpolator(const std::string &typestr, Integer dim)
+//  Interpolator(const std::string &name, const std::string &typestr, Integer dim)
 //------------------------------------------------------------------------------
 /**
  * Constructs the core elements of an Interpolator.
@@ -32,8 +32,9 @@
  * @param dim       Dimension of data that gets interpolated (defaults to 1).
  */
 //------------------------------------------------------------------------------
-Interpolator::Interpolator(const std::string &typestr, Integer dim) :
-    GmatBase        (Gmat::INTERPOLATOR, typestr),
+Interpolator::Interpolator(const std::string &name, const std::string &typestr,
+                           Integer dim) :
+    GmatBase        (Gmat::INTERPOLATOR, typestr, name),
     independent     (NULL),
     dependent       (NULL),
     previousX       (-9.9999e65),

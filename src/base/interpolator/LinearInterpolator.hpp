@@ -30,13 +30,13 @@
  */
 class LinearInterpolator : public Interpolator
 {
-	public:
-		LinearInterpolator(Integer dim = 1);
-		~LinearInterpolator(void);
-		LinearInterpolator(const LinearInterpolator &l);
-		LinearInterpolator&        operator=(const LinearInterpolator &li);
+public:
+    LinearInterpolator(const std::string &name = "", Integer dim = 1); //loj: 3/22/04 added name
+    ~LinearInterpolator(void);
+    LinearInterpolator(const LinearInterpolator &l);
+    LinearInterpolator& operator=(const LinearInterpolator &li);
 
-        virtual bool               Interpolate(const Real ind, Real *results);
+    virtual bool Interpolate(const Real ind, Real *results);
 };
 
 
