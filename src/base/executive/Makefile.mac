@@ -2,13 +2,14 @@
 # Module:     Makefile.mac for executive directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
+# Modified:   2004/01/14 - Added PlotInterface.cpp
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = MessageInterface.cpp Moderator.cpp Publisher.cpp Sandbox.cpp \
-	SandboxException.cpp
+SRC = MessageInterface.cpp Moderator.cpp PlotInterface.cpp Publisher.cpp \
+	Sandbox.cpp SandboxException.cpp
 #
 TESTFLAGS = -D__CONSOLE_APP__
 #
