@@ -50,6 +50,7 @@ private:
    wxTreeItemId mSubscriberItem;
    wxTreeItemId mSolverItem;
    wxTreeItemId mVariableItem;
+   wxTreeItemId mMatlabFunctItem;
 
    int mNumSpacecraft;
    int mNumFormation;
@@ -60,7 +61,8 @@ private:
    int mNumXyPlot;
    int mNumOpenGlPlot;
    int mNumVariable;
-    
+   int mNumMatlabFunct;
+
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultSpacecraft(wxTreeItemId itemId);
@@ -72,7 +74,8 @@ private:
    void AddDefaultSubscribers(wxTreeItemId itemId);
    void AddDefaultInterfaces(wxTreeItemId itemId);
    void AddDefaultVariables(wxTreeItemId itemId);
-    
+   void AddDefaultMatlabFunctions(wxTreeItemId itemId);
+
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
@@ -100,7 +103,8 @@ private:
    void OnAddOpenGlPlot(wxCommandEvent &event);
    void OnAddDiffCorr(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
-  
+   void OnAddMatlabFunction(wxCommandEvent &event);
+
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
    DECLARE_EVENT_TABLE();

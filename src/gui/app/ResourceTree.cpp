@@ -72,6 +72,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
    EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
+   EVT_MENU(POPUP_ADD_MATLAB_FUNCT, ResourceTree::OnAddMatlabFunction)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -116,6 +117,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumOpenGlPlot = 0;
    mNumDiffCorr = 0;
    mNumVariable = 0;
+   mNumMatlabFunct = 0;
 
    theGuiManager->UpdateAll();
 }
@@ -144,6 +146,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumOpenGlPlot = 0;
       mNumDiffCorr = 0;
       mNumVariable = 0;
+      mNumMatlabFunct = 0;
    }
    
    // ag: collapse, so folder icon is closed
@@ -154,7 +157,8 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mSolverItem);
    Collapse(mSubscriberItem);
    Collapse(mVariableItem);
-    
+   Collapse(mMatlabFunctItem);
+
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mFormationItem);
    DeleteChildren(mPropagatorItem);
@@ -162,6 +166,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mSolverItem);
    DeleteChildren(mSubscriberItem);
    DeleteChildren(mVariableItem);
+   DeleteChildren(mMatlabFunctItem);
 
    AddDefaultSpacecraft(mSpacecraftItem);
    AddDefaultFormations(mFormationItem);
@@ -170,7 +175,8 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultSolvers(mSolverItem);
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultVariables(mVariableItem);
-   
+   AddDefaultMatlabFunctions(mMatlabFunctItem);
+
    theGuiManager->UpdateAll();
 }
 
@@ -293,9 +299,14 @@ void ResourceTree::AddDefaultResources()
    AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Coordinate Systems"), GmatTree::COORD_SYS_FOLDER));
    
-   AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
+   //----- Matlab functions
+   mMatlabFunctItem =
+      AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("MATLAB Functions"), GmatTree::MATLAB_FUNCT_FOLDER));
-    
+
+   SetItemImage(mMatlabFunctItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
    //----- GroundStations
    AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
               -1, new GmatTreeItemData(wxT("Ground Stations"),
@@ -310,6 +321,7 @@ void ResourceTree::AddDefaultResources()
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultInterfaces(interfaceItem);
    AddDefaultVariables(mVariableItem);
+   AddDefaultMatlabFunctions(mMatlabFunctItem);
 }
 
 //------------------------------------------------------------------------------
@@ -637,6 +649,34 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
    //        Expand(itemId);
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultMatlabFunctions(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default interfaces
+ *
+ * @param <itemId> tree item for the interfaces folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
+{
+   StringArray itemNames = GmatAppData::GetGuiInterpreter()
+                     ->GetListOfConfiguredItems(Gmat::FUNCTION);
+   int size = itemNames.size();
+   wxString objName;
+
+   for (int i = 0; i<size; i++)
+   {
+      objName = wxString(itemNames[i].c_str());
+      AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_MATLAB_FUNCT));
+   };
+
+   if (size > 0)
+      Expand(itemId);
+
+}
+
 //==============================================================================
 //                         On Action Events
 //==============================================================================
@@ -715,7 +755,6 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (dataType == GmatTree::MATLAB_FUNCT_FOLDER)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
-      menu.Enable(POPUP_ADD_MATLAB_FUNCT, FALSE);
    }   
    else if (dataType == GmatTree::COORD_SYS_FOLDER)
    {
@@ -860,6 +899,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       case GmatTree::DEFAULT_OPENGL_PLOT:
       case GmatTree::CREATED_OPENGL_PLOT:
          objType = Gmat::SUBSCRIBER;
+         break;
+      case GmatTree::DEFAULT_MATLAB_FUNCT:
+      case GmatTree::CREATED_MATLAB_FUNCT:
+         objType = Gmat::FUNCTION;
          break;
       default:
          objType = Gmat::UNKNOWN_OBJECT;
@@ -1376,6 +1419,34 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
                     new GmatTreeItemData(names[i], GmatTree::CREATED_VARIABLE));
       }
       
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddMatlabFunction(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a matlab function to the folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxString withName;
+   withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
+
+   const std::string stdWithName = withName.c_str();
+
+   if (GmatAppData::GetGuiInterpreter()->
+      CreateFunction("MatlabFunction", stdWithName))
+   {
+      AppendItem(item, withName, GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
+
       Expand(item);
    }
 }
