@@ -91,13 +91,13 @@ PrinceDormand78 & PrinceDormand78::operator=(const PrinceDormand78& rk)
 
 
 //------------------------------------------------------------------------------
-// char * PrinceDormand78::GetType(void) const
+// std::string PrinceDormand78::GetType(void) const
 //------------------------------------------------------------------------------
 /**
  * Method used to return the name of the object
  */
 //------------------------------------------------------------------------------
-char * PrinceDormand78::GetType(void) const
+std::string PrinceDormand78::GetType(void) const
 {
     return "Prince-Dormand 7(8)";
 }

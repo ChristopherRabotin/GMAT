@@ -45,10 +45,10 @@ public:
     virtual ~PrinceDormand78(void);
 
     PrinceDormand78(const PrinceDormand78&);
-    PrinceDormand78 &       operator=(const PrinceDormand78&);
+    PrinceDormand78 & operator=(const PrinceDormand78&);
 
-    virtual char*           GetType(void) const;
-    virtual Propagator*     Clone(void) const;
+    virtual std::string GetType(void) const;
+    virtual Propagator* Clone(void) const;
 protected:
     void                        SetCoefficients(void);
 
