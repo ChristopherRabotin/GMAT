@@ -2,12 +2,14 @@
 # Module:     Makefile.mac for forcemodel directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-
+# Modified:   2004/03/05 - Added DragForce.cpp and ForceModelException.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = DerivativeList.cpp ForceModel.cpp PhysicalModel.cpp PointMassForce.cpp
+SRC = DerivativeList.cpp DragForce.cpp ForceModel.cpp ForceModelException.cpp \
+	PhysicalModel.cpp PointMassForce.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
