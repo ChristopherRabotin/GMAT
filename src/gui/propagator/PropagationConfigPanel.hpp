@@ -29,7 +29,8 @@
 #include "PointMassForce.hpp"
 #include "SolarRadiationPressure.hpp"
 #include "SolarSystem.hpp"
-//#include "CelestialBody.hpp"
+#include "CelestialBody.hpp"
+#include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "GmatPanel.hpp"
 
@@ -56,7 +57,7 @@ private:
    
    enum GravModelType
    {
-      POINT_MASS = 0,
+      NONE_GM = 0,
       JGM2,
       JGM3,
       OTHER,
@@ -194,8 +195,9 @@ private:
    GravityField                   *theGravForce;
    SolarRadiationPressure         *theSRP;
    SolarSystem                    *theSolarSystem;
+   CelestialBody                  *theCelestialBody;
+   AtmosphereModel                *theAtmosphereModel;
    std::vector<PointMassForce *>  thePMForces;
-   //std::vector<CelestialBody *>   theBodies;
    std::vector<ForceType*> forceList;
    std::vector<ForceType*> pmForceList;
 
