@@ -271,13 +271,16 @@ void ParameterCreateDialog::SaveData()
         if (theGuiInterpreter->GetParameter(varName) == NULL)
         {
             Parameter *param;
+
+            //loj: 3/12/04 Parameters does not have "Param" suffix anymore
+            param = theGuiInterpreter->CreateParameter(varType, varName);
             
-            //loj: 3/1/04 temp fix, because not all the parameters has suffix "Param"
-            if (varType == "SMA" || varType == "Ecc" || varType =="Inc")
-                param = theGuiInterpreter->CreateParameter(varType, varName);
-            else
-            //loj: because "Param" was removed from the name, add back
-                param = theGuiInterpreter->CreateParameter(varType+"Param", varName);
+//              //loj: 3/1/04 temp fix, because not all the parameters has suffix "Param"
+//              if (varType == "SMA" || varType == "Ecc" || varType =="Inc")
+//                  param = theGuiInterpreter->CreateParameter(varType, varName);
+//              else
+//              //loj: because "Param" was removed from the name, add back
+//                  param = theGuiInterpreter->CreateParameter(varType+"Param", varName);
             
             param->AddObject(objName);
             param->SetDesc(varDesc);
