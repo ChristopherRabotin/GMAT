@@ -482,6 +482,7 @@ bool TrajPlotCanvas::InitGL()
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
     
+#ifdef __WXMSW__
     // initalize devIL library
     ilInit();
     ilutRenderer(ILUT_OPENGL);
@@ -491,6 +492,7 @@ bool TrajPlotCanvas::InitGL()
         return false;
 
     mInitialized = true;
+#endif
     
     return true;
 }
@@ -505,6 +507,7 @@ bool TrajPlotCanvas::InitGL()
 //------------------------------------------------------------------------------
 bool TrajPlotCanvas::LoadGLTextures()
 {     
+#ifdef __WXMSW__
     // always load Earth texture
     ILboolean status = ilLoadImage("earth-0512.jpg");
    
@@ -514,6 +517,9 @@ bool TrajPlotCanvas::LoadGLTextures()
     mBodyTextureIndex[EARTH] = ilutGLBindTexImage();
     
     return true;
+#else
+    return false;
+#endif
 }
 
 
