@@ -20,6 +20,10 @@
 
 #include "GmatDialog.hpp"
 
+#ifndef ShowScriptDialog_hpp
+#define ShowScriptDialog_hpp
+
+
 /** The modal dialog used to display scripting for a component. 
  *
  * At user request, this dialog was constructed so that the user can select text 
@@ -43,3 +47,5 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
 };
+
+#endif //ShowScriptDialog_hpp
