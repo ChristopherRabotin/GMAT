@@ -21,7 +21,7 @@
 
 #include "FunctionFactory.hpp"
 #include "MatlabFunction.hpp"
-
+#include "GmatFunction.hpp"
 
 //---------------------------------
 //  public methods
@@ -41,8 +41,8 @@ Function* FunctionFactory::CreateFunction(const std::string &ofType,
 {
    if (ofType == "MatlabFunction")
       return new MatlabFunction(withName);
-//   else if (ofType == "GmatFactory")
-//      return new GmatFactory;
+   else if (ofType == "GmatFunction")
+      return new GmatFunction(withName);
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of Function
@@ -66,7 +66,7 @@ FunctionFactory::FunctionFactory() :
    if (creatables.empty())
    {
       creatables.push_back("MatlabFunction");
-//      creatables.push_back("GmatFunction");
+      creatables.push_back("GmatFunction");
    }
 }
 
@@ -101,7 +101,7 @@ FunctionFactory::FunctionFactory(const FunctionFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("MatlabFunction");
-//      creatables.push_back("GmatFunction");
+      creatables.push_back("GmatFunction");
    }
 }
 

@@ -38,7 +38,7 @@
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Save.hpp"           // for Save command  
 #include "CallFunction.hpp"   // for CallFunction command
-
+#include "Assignment.hpp"     // for Assignment command
 
 //---------------------------------
 //  public methods
@@ -93,6 +93,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new Save;
     else if (ofType == "CallFunction")
         return new CallFunction;
+    else if (ofType == "Assignment")
+         return new Assignment;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -133,6 +135,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("GMAT");
       creatables.push_back("save");
       creatables.push_back("CallFunction");
+      creatables.push_back("Assignment");
    }
 }
 
@@ -184,6 +187,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("GMAT");
       creatables.push_back("save");
       creatables.push_back("CallFunction");
+      creatables.push_back("Assignment");
    }
 }
 
