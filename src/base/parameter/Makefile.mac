@@ -12,14 +12,27 @@
 #             2004/01/16 - Added CartStateParam.cpp, ElapsedSecsParam.cpp,
 #                          KepEccParam.cpp, and Rvector6Parameter.cpp
 #
+#             2004/02/03 - Added CartVxParam, CartVyParam, CartVzParam,
+#                          CartYParam, CartZParam, KepAopParam, KepElemParam
+#                          KepIncParam, KepMaParam, KepMmParam, KepRaanParam,
+#                          KepSmaParam, KepTaParam, SemilatRecParam, 
+#                          SphDecParam, SphElemParam, SphRaParam, 
+#                          VelApoapsisParam, and VelPeriapsisParam
+#
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = CartStateParam.cpp CartXParam.cpp CurrentA1MjdParam.cpp \
-	ElapsedDaysParam.cpp ElapsedSecsParam.cpp KepEccParam.cpp \
-	OrbitData.cpp Parameter.cpp ParameterDatabase.cpp \
-	RealParameter.cpp RefData.cpp Rvector6Parameter.cpp TimeData.cpp
+SRC = CartStateParam.cpp CartVxParam.cpp CartVyParam.cpp CartVzParam.cpp \
+	CartXParam.cpp CartYParam.cpp CartZParam.cpp CurrentA1MjdParam.cpp \
+	ElapsedDaysParam.cpp ElapsedSecsParam.cpp KepAopParam.cpp \
+	KepEccParam.cpp KepElemParam.cpp KepIncParam.cpp KepMaParam.cpp \
+	KepMmParam.cpp KepRaanParam.cpp KepSmaParam.cpp KepTaParam.cpp \
+	OrbitData.cpp Parameter.cpp ParameterDatabase.cpp RealParameter.cpp \
+	RefData.cpp Rvector6Parameter.cpp SemilatRecParam.cpp SphDecParam.cpp \
+	SphElemParam.cpp SphRaParam.cpp VelApoapsisParam.cpp \
+	VelPeriapsisParam.cpp TimeData.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac

@@ -2,16 +2,19 @@
 # Module:     Makefile.mac for factory directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-# Modified:   2004/01/16 - Added BurnFactory.cpp
+# Modified:   2004/01/16 - Added BurnFactory.cpp, CelestialBodyFactory.cpp, 
+#                          SolverFactory.cpp, and SolarSystemFactory.cpp 
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = BurnFactory.cpp CommandFactory.cpp Factory.cpp FactoryException.cpp \
-	FactoryManager.cpp ForceModelFactory.cpp ParameterFactory.cpp \
-	PhysicalModelFactory.cpp PropSetupFactory.cpp PropagatorFactory.cpp \
-	SpacecraftFactory.cpp StopConditionFactory.cpp SubscriberFactory.cpp
+# Will add CelestialBodyFactory.cpp in SRC when fixed
+SRC = BurnFactory.cpp CommandFactory.cpp Factory.cpp \
+	FactoryException.cpp FactoryManager.cpp ForceModelFactory.cpp \
+	ParameterFactory.cpp PhysicalModelFactory.cpp PropSetupFactory.cpp \
+	PropagatorFactory.cpp SolverFactory.cpp SpacecraftFactory.cpp \
+	StopConditionFactory.cpp SolarSystemFactory.cpp SubscriberFactory.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac

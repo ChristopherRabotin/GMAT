@@ -3,12 +3,13 @@
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
 # Modified:   2004/01/16 - Added ApoapsisStop.cpp
+#             2004/02/03 - Added PeriapsisStop.cpp
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = ApoapsisStop.cpp SingleValueStop.cpp StopCondition.cpp
+SRC = ApoapsisStop.cpp PeriapsisStop.cpp SingleValueStop.cpp StopCondition.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
