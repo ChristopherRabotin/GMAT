@@ -26,18 +26,6 @@
 /**
  * Command that manages processing for entry to the ELSE statement 
  *
- * The IfCommand command manages the ELSE statement.  All targeters implement a 
- * state machine that evaluates the current state of the targeting process, and 
- * provides data to the command sequence about the next step to be taken in the 
- * targeting process.  As far as the Target command is concerned, there are 3 
- * possible steps to take: 
- *
- * 1.  Fire the ELSE Statement to perform a calculation.
- *
- * 2.  Run through the Commands in the for ELSE statement.
- *
- * 3.  On convergence, continue with the command sequence following the 
- *     ELSE statement. 
  *
  */
 class Else : public GmatCommand
@@ -61,7 +49,6 @@ public:
 
     
 protected:
-    //Integer             numberOfConditions; add later for ElseIf
     
 };
 #endif  // Else_hpp
