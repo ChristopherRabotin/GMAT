@@ -81,7 +81,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    parameterCount  (GmatBaseParamCount),
    typeName        (typeStr),
    instanceName    (nomme),
-   type            (typeId)
+   type            (typeId),
+   ownedObjectCount(0)
 {
    // one more instance - add to the instanceCount
    instanceCount++;
@@ -114,7 +115,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     typeName        (a.typeName),
 //    instanceName    ("CopyOf"+a.instanceName),
     instanceName    (a.instanceName),
-    type            (a.type)
+    type            (a.type),
+    ownedObjectCount(a.ownedObjectCount)
 {
    // one more instance - add to the instanceCount
    instanceCount++;
@@ -378,6 +380,57 @@ ObjectArray& GmatBase::GetRefObjectArray(const Gmat::ObjectType type)
 ObjectArray& GmatBase::GetRefObjectArray(const std::string& typeString)
 {
    return GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
+}
+
+
+//---------------------------------------------------------------------------
+//  Integer GetOwnedObjectCount()
+//---------------------------------------------------------------------------
+/**
+ * Find out how many GmatBase objects belong to this instance.
+ *
+ * This method is used find out how many unnamed objects belong to the current 
+ * instance.  The Interpreter subsystem used this method to count these objects,
+ * so that it can access them one by one for reading and writing.  
+ * 
+ * One example of this use is the PropSetup class; each PropSetup contains an 
+ * unnamed Integrator.  The Integrator parameters are accessed for reading and
+ * writing scripts. This method determines how many objects are available for 
+ * access.  The objects are then accessed using GetOwnedObject(Integer).  The 
+ * input parameter to GetOwnedObject method is found by calling this method, 
+ * and then looping through all of the owned objects, accessing the related 
+ * parameters for each.
+ * 
+ * @return The number of owned objects.
+ */
+Integer GmatBase::GetOwnedObjectCount()
+{
+   return ownedObjectCount;
+}
+
+
+//---------------------------------------------------------------------------
+//  static Integer GetInstanceCount()
+//---------------------------------------------------------------------------
+/**
+ * Access GmatBase objects belonging to this instance.
+ *
+ * This method is used to access the unnamed objects owned by a class derived 
+ * from GmatBase.  The Interpreter subsystem used this method to access 
+ * parameters for these objects.  
+ * 
+ * One example of this use is the PropSetup class; each PropSetup contains an 
+ * unnamed Integrator.  The Integrator parameters are accessed for reading and
+ * writing scripts using this method.  
+ * 
+ * The input parameter to GetOwnedObject an integer that identifies which owned
+ * object is requested.
+ * 
+ * @return Pointer to the owned object.
+ */
+GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
+{
+   throw GmatBaseException("No owned objects for this instance");
 }
 
 

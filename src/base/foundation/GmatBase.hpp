@@ -81,6 +81,9 @@ public:
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
    
+   virtual Integer     GetOwnedObjectCount();
+   virtual GmatBase*   GetOwnedObject(Integer whichOne);
+   
    // Method to return the current number of instantaited objects
    static Integer      GetInstanceCount();
    
@@ -239,6 +242,8 @@ protected:
    std::string         instanceName;
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
+   /// Number of owned objects that belong to this instance
+   Integer             ownedObjectCount;
    
    void                CopyParameters(const GmatBase &a);
 };
