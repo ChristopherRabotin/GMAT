@@ -24,7 +24,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// StopCondition(const std::string &name, const std::string typeStr,
+// StopCondition(const std::string &name, const std::string &typeStr,
 //               Parameter *epochParam, Parameter *stopParam, const Real &goal,
 //               const Real &tol, const Integer repeatCount, RefFrame *refFrame,
 //               Interpolator *interp)
@@ -33,9 +33,9 @@
  * Constructor.
  */
 //------------------------------------------------------------------------------
-StopCondition::StopCondition(const std::string &name, const std::string typeStr,
-                             Parameter *epochParam, Parameter *stopParam,
-                             const Real &goal, const Real &tol,
+StopCondition::StopCondition(const std::string &name, const std::string &typeStr,
+                             const std::string &desc, Parameter *epochParam,
+                             Parameter *stopParam, const Real &goal, const Real &tol,
                              const Integer repeatCount, RefFrame *refFrame,
                              Interpolator *interp)
     : GmatBase(Gmat::STOP_CONDITION, typeStr, name)
@@ -46,6 +46,7 @@ StopCondition::StopCondition(const std::string &name, const std::string typeStr,
     mRefFrame = refFrame;
     mInterpolator = interp;
     mEpochParam = epochParam;
+    mDescription = desc;
     
     mNumParams = 0;
     mNumValidPoints = 0;

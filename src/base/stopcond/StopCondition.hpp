@@ -31,8 +31,10 @@ class GMAT_API StopCondition : public GmatBase
 public:
 
     StopCondition(const std::string &name,
-                  const std::string typeStr = "StopCondition",
-                  Parameter *epochParam = NULL, Parameter *stopParam = NULL,
+                  const std::string &typeStr = "StopCondition",
+                  const std::string &desc = "",
+                  Parameter *epochParam = NULL,
+                  Parameter *stopParam = NULL,
                   const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                   const Real &tol = GmatRealConst::REAL_TOL,
                   const Integer repeatCount = 1,
@@ -55,6 +57,8 @@ public:
         { return mTolerance; }
     Integer GetRepeatCount()
         { return mRepeatCount; }
+    std::string& GetDescription()
+        { return mDescription; }
     
     ParameterPtrArray GetParameters() const
         { return mParameters; }
@@ -67,6 +71,10 @@ public:
         { mGoal = goal; }
     void SetTolerance(const Real &tol)
         { mTolerance = tol; }
+    void SetRepeatCount(const Integer &repeatCount)
+        { mRepeatCount = repeatCount; }
+    void SetDescription(const std::string &desc)
+        { mDescription = desc; }
     
     bool SetInterpolator(Interpolator *interp);
     bool SetRefFrame(RefFrame *refFrame);
@@ -97,7 +105,8 @@ protected:
     Integer mRepeatCount;
     RefFrame *mRefFrame;
     Interpolator *mInterpolator;
-
+    std::string mDescription;
+    
     Parameter *mEpochParam;
     ParameterPtrArray mParameters;
     Integer mNumParams;

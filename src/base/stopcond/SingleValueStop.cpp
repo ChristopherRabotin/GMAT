@@ -24,7 +24,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// SingleValueStop(const std::string &name,
+// SingleValueStop(const std::string &name, const std::string &desc,
 //                 Parameter *epochParam, Parameter *stopParam,
 //                 const Real &goal, const Real &tol,
 //                 const Integer repeatCount,
@@ -44,13 +44,13 @@
  * @param <interp> Interpolator object pointer for interpolating stop epoch
  */
 //------------------------------------------------------------------------------
-SingleValueStop::SingleValueStop(const std::string &name,
+SingleValueStop::SingleValueStop(const std::string &name, const std::string &desc,
                                  Parameter *epochParam, Parameter *stopParam,
                                  const Real &goal, const Real &tol,
                                  const Integer repeatCount,
                                  RefFrame *refFrame,
                                  Interpolator *interp)
-    : StopCondition(name, "SingleValueStop", epochParam, stopParam, goal, tol,
+    : StopCondition(name, "SingleValueStop", desc, epochParam, stopParam, goal, tol,
                     repeatCount, refFrame, interp)
 {
 }
@@ -92,6 +92,30 @@ SingleValueStop& SingleValueStop::operator= (const SingleValueStop &right)
 SingleValueStop::~SingleValueStop()
 {
 }
+
+//------------------------------------------------------------------------------
+// bool SetSingleParameter(Parameter *param)
+//------------------------------------------------------------------------------
+/*
+ * Sets single parameter. This method is another way of setting the parameter.
+ */
+//------------------------------------------------------------------------------
+bool SingleValueStop::SetSingleParameter(Parameter *param)
+{
+    bool status = false;
+    
+    //loj: Do I really need to validate parameter before add?
+    if (param->Validate())
+    {
+        if (mNumParams > 0)
+            mParameters[0] = param;
+        SetParameter(param);
+        status = true;
+    }
+
+    return status;
+}
+
 
 //-------------------------------------
 // Inherited methods from StopCondition
@@ -203,4 +227,22 @@ bool SingleValueStop::Validate()
     }
     
     return valid;
+}
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool SetParameter(Parameter *param)
+//------------------------------------------------------------------------------
+/**
+ * Sets parameter used in checking stop condition.
+ */
+//------------------------------------------------------------------------------
+bool SingleValueStop::SetParameter(Parameter *param)
+{
+    // There is no extra parameters to set for single parameter
+
+    return true;
 }

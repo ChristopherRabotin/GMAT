@@ -26,7 +26,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// PeriapsisStop(const std::string &name,
+// PeriapsisStop(const std::string &name, const std::string &desc,
 //               Parameter *epochParam, Parameter *stopParam,
 //               const Real &goal, const Real &tol,
 //               const Integer repeatCount,
@@ -46,13 +46,12 @@
  * @param <interp> Interpolator object pointer for interpolating stop epoch
  */
 //------------------------------------------------------------------------------
-PeriapsisStop::PeriapsisStop(const std::string &name,
+PeriapsisStop::PeriapsisStop(const std::string &name, const std::string &desc,
                              Parameter *epochParam, Parameter *stopParam,
                              const Real &goal, const Real &tol,
-                             const Integer repeatCount,
-                             RefFrame *refFrame,
+                             const Integer repeatCount, RefFrame *refFrame,
                              Interpolator *interp)
-    : StopCondition(name, "PeriapsisStop", epochParam, stopParam, goal, tol,
+    : StopCondition(name, "PeriapsisStop", desc, epochParam, stopParam, goal, tol,
                     repeatCount, refFrame, interp)
 {
     mCartStateParam = NULL;

@@ -28,7 +28,7 @@ class GMAT_API PeriapsisStop : public StopCondition
 {
 public:
 
-    PeriapsisStop(const std::string &name = "",
+    PeriapsisStop(const std::string &name = "", const std::string &desc = "",
                   Parameter *epochParam = NULL, Parameter *stopParam = NULL,
                   const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                   const Real &tol = GmatRealConst::REAL_TOL,

@@ -28,7 +28,7 @@ class GMAT_API ApoapsisStop : public StopCondition
 {
 public:
 
-    ApoapsisStop(const std::string &name = "",
+    ApoapsisStop(const std::string &name = "", const std::string &desc = "",
                  Parameter *epochParam = NULL, Parameter *stopParam = NULL,
                  const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                  const Real &tol = GmatRealConst::REAL_TOL,
