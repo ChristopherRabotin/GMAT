@@ -1,4 +1,4 @@
-//$Header Exp $
+//$Header$
 //------------------------------------------------------------------------------
 //                              ImpulsiveBurnSetupPanel
 //------------------------------------------------------------------------------
@@ -6,7 +6,6 @@
 //
 // Author: LaMont Ruley
 // Created: 2004/02/04
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Impulsive Burn Setup window.
