@@ -69,11 +69,11 @@ public:
    static const CelestialBody*        CENTRAL_BODY;
    static const Integer               BODY_NUMBER;
    static const Integer               REF_BODY_NUMBER;
-   static const Integer               ORDER;
-   static const Integer               DEGREE;
-   static const Integer               COEFFICIENT_SIZE;
-   static const Rmatrix               SIJ;
-   static const Rmatrix               CIJ;
+   //static const Integer               ORDER;
+   //static const Integer               DEGREE;
+   //static const Integer               COEFFICIENT_SIZE;
+   //static const Rmatrix               SIJ;
+   //static const Rmatrix               CIJ;
 
 protected:
 

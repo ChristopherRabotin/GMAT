@@ -29,16 +29,16 @@ const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Buil
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
-const Integer               Star::ORDER               = 4;      
-const Integer               Star::DEGREE              = 4;
-const Integer               Star::COEFFICIENT_SIZE    = 4;
-const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
-const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
-      1.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0,
-      0.0, 0.0,             0.0,             0.0,             0.0); 
+//const Integer               Star::ORDER               = 4;      
+//const Integer               Star::DEGREE              = 4;
+//const Integer               Star::COEFFICIENT_SIZE    = 4;
+//const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
+//const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
+//      1.0, 0.0,             0.0,             0.0,             0.0,
+//      0.0, 0.0,             0.0,             0.0,             0.0,
+//      0.0, 0.0,             0.0,             0.0,             0.0,
+//      0.0, 0.0,             0.0,             0.0,             0.0,
+//      0.0, 0.0,             0.0,             0.0,             0.0); 
 
 
 const Real                  Star::RADIANT_POWER       = 1358.0;       // W / m^2
@@ -61,7 +61,7 @@ const Real                  Star::REFERENCE_DISTANCE  = 1.49597870e8; // km (1 A
  */
 //------------------------------------------------------------------------------
 Star::Star(std::string name) :
-CelestialBody       (name),
+CelestialBody       ("Star",name),
 radiantPowerID      (parameterCount),
 referenceDistanceID (parameterCount +1)
 {
@@ -186,8 +186,9 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
 //------------------------------------------------------------------------------
 Star* Star::Clone(void) const
 {
-   Star* theClone = new Star(*this);
-   return theClone;   // huh??????????????????????????????
+   //Star* theClone = new Star(*this);
+   //return theClone;   // huh??????????????????????????????
+   return (new Star(*this));
 }
 
 //------------------------------------------------------------------------------
@@ -333,8 +334,8 @@ void Star::InitializeStar()
    centralBody         = NULL;
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
-   order               = Star::ORDER;
-   degree              = Star::DEGREE;
+   //order               = Star::ORDER;
+   //degree              = Star::DEGREE;
 
    atmManager          = NULL;
    
@@ -342,14 +343,14 @@ void Star::InitializeStar()
    radiantPower        = Star::RADIANT_POWER;
    referenceDistance   = Star::REFERENCE_DISTANCE;
 
-   coefficientSize     = Star::COEFFICIENT_SIZE;
-   sij                 = Star::SIJ;
-   cij                 = Star::CIJ;  
-   defaultSij          = Star::SIJ;
-   defaultCij          = Star::CIJ;
+   //coefficientSize     = Star::COEFFICIENT_SIZE;
+   //sij                 = Star::SIJ;
+   //cij                 = Star::CIJ;  
+   //defaultSij          = Star::SIJ;
+   //defaultCij          = Star::CIJ;
+   //defaultCoefSize     = Star::COEFFICIENT_SIZE;
    defaultMu           = Star::MU;
    defaultEqRadius     = Star::EQUATORIAL_RADIUS;
-   defaultCoefSize     = Star::COEFFICIENT_SIZE;
 
    //if (instanceName != SolarSystem::SUN_NAME)
       //MessageInterface::ShowMessage(
