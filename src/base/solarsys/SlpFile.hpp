@@ -40,6 +40,9 @@ public:
    // destructor
    ~SlpFile();
 
+   // method to return the body ID number, given the name of the body
+   Integer GetBodyID(std::string bodyName);
+
    // method to return the position and velocity of the specified body
    // at the specified time
    Real* GetPosVel(Integer forBody, A1Mjd atTime);
@@ -59,7 +62,34 @@ public:
    static const Integer SLP_LEN;
    // ??????
    static const Integer TIM_LEN;
-   
+
+   static const Integer SUN_ID;
+   static const Integer MERCURY_ID;
+   static const Integer VENUS_ID;
+   static const Integer EARTH_ID;
+   static const Integer MOON_ID;
+   static const Integer MARS_ID;
+   static const Integer JUPITER_ID;
+   static const Integer SATURN_ID;
+   static const Integer URANUS_ID;
+   static const Integer NEPTUNE_ID;
+   static const Integer PLUTO_ID;
+
+   static const Real    JD_MJD_OFFSET = 2430000.0;  // NOTE - SLP code uses this as a long int!!!!
+
+   // maximum length of path name
+   static const Integer MAX_PATH_LEN;
+
+   // from Swingby bodies_types.h
+   // Max number of bodies that can be modeled
+   static const Integer MAX_BODIES = 3;
+   // Max number of zonal values that are enterable
+   static const Integer MAX_ZONALS;
+   // Max length of the name of a potential field name
+   static const Integer MAX_POTENTIAL_NAME;
+   // The number of bodies normally found on the planetary ephemeris file
+   static const Integer NUM_STANDARD_BODIES;
+
 protected:
    //------------------------------------------------------------------------------
    //  SLP_HEADER:
@@ -140,6 +170,14 @@ private:
    void InitializeSlpFile();
 
    std::string itsName;
+
+   // from slp_data_types.h
+   // length of planetary ephemeris header records
+   Integer lengthOfHeaderRecord;
+   // length of planetary ephemeris data records
+   Integer lengthOfDataRecord;
+   // ??????
+   Integer ibepm;
 
    // NOTE: these were externs in Swingby; should use constants instead of
    // 566 and 1132 here

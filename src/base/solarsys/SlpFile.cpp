@@ -23,6 +23,7 @@
 #include <memory.h>          // for memcpy()
 #include <stdio.h>           // for fopen()
 #include <math.h>            // for floor()
+#include "SolarSystem.hpp"   // for body names
 #include "SlpFile.hpp"
 #include "PlanetaryEphem.hpp"
 #include "PlanetaryEphemException.hpp"
@@ -38,6 +39,30 @@ const Integer SlpFile::IBEPM               = 9;
 const Integer SlpFile::SLP_LEN             = 2264;
 // ??????
 const Integer SlpFile::TIM_LEN             = 248;
+
+const Integer SlpFile::SUN_ID              = 3;
+const Integer SlpFile::MERCURY_ID          = 10;
+const Integer SlpFile::VENUS_ID            = 11;
+const Integer SlpFile::EARTH_ID            = 1;
+const Integer SlpFile::MOON_ID             = 2;
+const Integer SlpFile::MARS_ID             = 4;
+const Integer SlpFile::JUPITER_ID          = 5;
+const Integer SlpFile::SATURN_ID           = 6;
+const Integer SlpFile::URANUS_ID           = 7;
+const Integer SlpFile::NEPTUNE_ID          = 8;
+const Integer SlpFile::PLUTO_ID            = 9;
+
+// maximum length of path name
+const Integer SlpFile::MAX_PATH_LEN        = 260;
+
+// Max number of bodies that can be modeled
+//const Integer PlanetaryEphem::MAX_BODIES          = 3;             // increase later -> 20;
+// Max number of zonal values that are enterable
+const Integer SlpFile::MAX_ZONALS          =  5;
+// Max length of the name of a potential field name
+const Integer SlpFile::MAX_POTENTIAL_NAME  = 72;
+// The number of bodies normally found on the SLP file
+const Integer SlpFile::NUM_STANDARD_BODIES = 11;
 
 //------------------------------------------------------------------------------
 // public methods
@@ -77,6 +102,7 @@ PlanetaryEphem(slpf)
       g_slp_header[i] = slpf.g_slp_header[i];
    for (i=0;i<lengthOfDataRecord;i++)
       g_slp_data[i] = slpf.g_slp_data[i];
+   ibepm            = slpf.ibepm;
 }
 
 //------------------------------------------------------------------------------
@@ -100,6 +126,7 @@ SlpFile& SlpFile::operator=(const SlpFile& slpf)
       g_slp_header[i] = slpf.g_slp_header[i];
    for (i=0;i<lengthOfDataRecord;i++)
       g_slp_data[i] = slpf.g_slp_data[i];
+   ibepm            = slpf.ibepm;
    // set class data
    return *this;
 }
@@ -115,6 +142,34 @@ SlpFile::~SlpFile()
 {
 }
 
+//------------------------------------------------------------------------------
+//  Integer GetBodyID(std::string bodyName)
+//------------------------------------------------------------------------------
+/**
+* This method returns the body ID for the specified body.
+ *
+ * @param <bodyName> body whose ID is requested.
+ *
+ * @return body ID for the specified body. Returns -1 if invalid body name.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SlpFile::GetBodyID(std::string bodyName)
+{
+   if (bodyName == SolarSystem::SUN_NAME)     return SlpFile::SUN_ID;
+   if (bodyName == SolarSystem::MERCURY_NAME) return SlpFile::MERCURY_ID;
+   if (bodyName == SolarSystem::VENUS_NAME)   return SlpFile::VENUS_ID;
+   if (bodyName == SolarSystem::EARTH_NAME)   return SlpFile::EARTH_ID;
+   if (bodyName == SolarSystem::MOON_NAME)    return SlpFile::MOON_ID;
+   if (bodyName == SolarSystem::MARS_NAME)    return SlpFile::MARS_ID;
+   if (bodyName == SolarSystem::JUPITER_NAME) return SlpFile::JUPITER_ID;
+   if (bodyName == SolarSystem::SATURN_NAME)  return SlpFile::SATURN_ID;
+   if (bodyName == SolarSystem::URANUS_NAME)  return SlpFile::URANUS_ID;
+   if (bodyName == SolarSystem::NEPTUNE_NAME) return SlpFile::NEPTUNE_ID;
+   if (bodyName == SolarSystem::PLUTO_NAME)   return SlpFile::PLUTO_ID;
+
+   return -1;
+}
 
 //------------------------------------------------------------------------------
 //  Real* GetPosVel(Integer forBody, A1Mjd atTime)
@@ -1146,7 +1201,8 @@ void SlpFile::time_array_to_utcmjd(double starray[6], double *utcmjd)
       12-3*((i+4900+(j-14)/12)/100)/4;
 
    // subtract standard modification factor
-   julday -= 2430000;
+   //julday -= 2430000;
+   julday -= (long int) jdMjdOffset;    // wcs
 
    // remove 12 hour gregorian to julian offset and calculate fractional
    //    part of day
@@ -1173,6 +1229,7 @@ void SlpFile::InitializeSlpFile()
    lengthOfHeaderRecord = SlpFile::LRECLHD;
    lengthOfDataRecord   = SlpFile::LRECLDT;
    ibepm                = SlpFile::IBEPM;
+   jdMjdOffset          = (double) SlpFile::JD_MJD_OFFSET;
    int i;
    for (i=0;i<lengthOfHeaderRecord;i++)
       g_slp_header[i] = 0;
