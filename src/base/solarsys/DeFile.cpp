@@ -323,8 +323,8 @@ Integer* DeFile::GetStartDayAndYear()
    Integer y, doy, h, min;
    Real    sec;
    uTime.ToYearDOYHourMinSec(y,doy,h,min,sec);
-   res[0]   = y;
-   res[1]   = doy;
+   res[0]   = doy;
+   res[1]   = y;
    return res;
 }
 
