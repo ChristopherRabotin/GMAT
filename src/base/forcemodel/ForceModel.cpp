@@ -210,6 +210,9 @@ bool ForceModel::AddSpacecraft(Spacecraft *sc)
     if (find(spacecraft.begin(), spacecraft.end(), sc) != spacecraft.end())
         return false;
     spacecraft.push_back(sc);
+    
+    // Quick fix for the epoch update
+    epoch = sc->GetRealParameter(sc->GetParameterID("Epoch"));
     return true;
 }
 
@@ -232,9 +235,13 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
             state = (*sat)->GetState();
             memcpy(state, &modelState[j*stateSize], stateSize * sizeof(Real));
             ++j;
-            // Update the epoch if it was passed in
-            if (newEpoch != -1.0)
-                (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newEpoch);
+//            // Update the epoch if it was passed in
+//            if (newEpoch != -1.0)
+//                (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newEpoch);
+              // Quick fix to get the epoch updated
+              Real newepoch = epoch + elapsedTime / 86400.0;      
+              (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
+            
         }
     }
 }
