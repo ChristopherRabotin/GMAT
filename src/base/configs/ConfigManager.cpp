@@ -43,7 +43,7 @@ ConfigManager* ConfigManager::Instance(void)
 //------------------------------------------------------------------------------
 ConfigManager::ConfigManager()
 {
-        // insert your code here
+    // insert your code here
 }
 
 // class destructor
@@ -52,7 +52,8 @@ ConfigManager::ConfigManager()
 //------------------------------------------------------------------------------
 ConfigManager::~ConfigManager()
 {
-        // insert your code here
+    //loj: 3/24/04 added
+    RemoveAllItems();
 }
 
 
@@ -312,7 +313,7 @@ bool ConfigManager::RemoveAllItems()
     // delete objects
 
     //loj: 3/10/04 added
-    for (int i=0; i<objects.size(); i++)
+    for (unsigned int i=0; i<objects.size(); i++)
     {
         delete objects[i];
         objects[i] = NULL;
