@@ -71,6 +71,9 @@ public:
    virtual void               Copy(const GmatBase* inst);
    
 protected:
+   /// Finite burn instances access thruster data directly
+   friend class FiniteBurn;
+   
    /// Tank names
    StringArray                tankNames;
    /// The tanks
