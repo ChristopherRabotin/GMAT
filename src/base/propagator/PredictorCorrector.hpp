@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                              PredictorCorrector
 //------------------------------------------------------------------------------
@@ -89,17 +89,49 @@ public:
 
     PredictorCorrector(const PredictorCorrector&);
     PredictorCorrector& operator=(const PredictorCorrector&);
+
+//    virtual GmatBase* Clone(void) const;
     
-    virtual std::string GetParameterName(const Integer parm) const;
-    virtual Real GetParameter(const int id) const;
-    virtual bool SetParameter(const int id, const Real val);
+//    virtual std::string GetParameterName(const Integer parm) const;
+//    virtual Real GetParameter(const int id) const;
+//    virtual bool SetParameter(const int id, const Real val);
 
     virtual void Initialize(void);
     virtual bool  Step(void);
     virtual bool  Step(Real dt);
     virtual bool  RawStep(void);
+    
+    	// Parameter accessor methods -- overridden from GmatBase
+    virtual std::string         GetParameterText(const Integer id) const;
+    virtual Integer             GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+    virtual std::string         GetParameterTypeString(const Integer id) const;
+    virtual Real    GetRealParameter(const Integer id) const;
+    virtual Real    GetRealParameter(const std::string &label) const;
+    virtual Real    SetRealParameter(const Integer id, const Real value);
+    virtual Real    SetRealParameter(const std::string &label, const Real value);
+    virtual Integer GetIntegerParameter(const Integer id) const;
+    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+	 virtual bool    GetBooleanParameter(const Integer id) const; 
+    virtual bool    SetBooleanParameter(const Integer id, const bool value);
 
 protected:
+    enum
+    {
+		STEP_COUNT = IntegratorParamCount,
+      MAXIMUM_ERROR,
+      LOWEVER_ERROR,
+      TARGET_ERROR,
+      STEP_SIGN,
+      STARTUP_COMPLETE,
+      STARTUP_COUNT,
+      INV_ORDER,
+      PredictorCorrectorParamCount  /// Count of the parameters for this class
+    };
+    
+    static const std::string PARAMETER_TEXT[PredictorCorrectorParamCount - GmatBaseParamCount];
+	 static const Gmat::ParameterType PARAMETER_TYPE[PredictorCorrectorParamCount - GmatBaseParamCount];
+
     /// Number of steps (including current state) needed for the algorithm
     Integer stepCount;
     /// Array used to capture the derivative information
@@ -182,12 +214,11 @@ protected:
     //------------------------------------------------------------------------------
     virtual bool Reset(void) = 0;
 
-private:
     // Parameter IDs 
     /// Least error expected for a predictor-corrector
-    const Integer PREDICTORCORRECTOR_LOWERERROR;
+//    const Integer PREDICTORCORRECTOR_LOWERERROR;
     /// Target error for a predictor-corrector
-    const Integer PREDICTORCORRECTOR_TARGETERROR;
+//    const Integer PREDICTORCORRECTOR_TARGETERROR;
 };
 
 #endif //PredictorCorrector_hpp

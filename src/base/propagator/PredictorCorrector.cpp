@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                              PredictorCorrector
 //------------------------------------------------------------------------------
@@ -46,6 +46,34 @@
 #include "PredictorCorrector.hpp"
 #include <fstream>
 
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+PredictorCorrector::PARAMETER_TEXT[PredictorCorrectorParamCount - GmatBaseParamCount] =
+{
+   "StepCount",
+   "MaximumError",
+   "LowerError",
+   "TargetError",
+   "StepSign",
+   "StartupComplete",
+   "StartupCount",
+   "InvOrder"
+};
+
+const Gmat::ParameterType
+PredictorCorrector::PARAMETER_TYPE[PredictorCorrectorParamCount - GmatBaseParamCount] =
+{
+	Gmat::INTEGER_TYPE,
+	Gmat::REAL_TYPE,
+	Gmat::REAL_TYPE,
+	Gmat::REAL_TYPE,
+	Gmat::REAL_TYPE,
+	Gmat::BOOLEAN_TYPE,
+	Gmat::INTEGER_TYPE,
+	Gmat::REAL_TYPE,
+};
 
 //---------------------------------
 // public
@@ -86,11 +114,9 @@ PredictorCorrector::PredictorCorrector(Integer sc, Integer order,
     startupComplete                 (false),
     startupCount                    (0),
     starter                         (NULL),
-    invOrder                        (1.0/order),
-    PREDICTORCORRECTOR_LOWERERROR   (parameterCount + 1),
-    PREDICTORCORRECTOR_TARGETERROR  (parameterCount + 2)
+    invOrder                        (1.0/order)
 {
-    parameterCount = PREDICTORCORRECTOR_TARGETERROR;
+    parameterCount = PredictorCorrectorParamCount;
     tolerance = 1.0e-10;
 }
 
@@ -151,11 +177,9 @@ PredictorCorrector::PredictorCorrector(const PredictorCorrector& pc) :
     startupComplete                 (false),
     startupCount                    (0),
     starter                         (NULL),
-    invOrder                        (pc.invOrder),
-    PREDICTORCORRECTOR_LOWERERROR   (parameterCount + 1),
-    PREDICTORCORRECTOR_TARGETERROR  (parameterCount + 2)
+    invOrder                        (pc.invOrder)
 {
-    parameterCount = PREDICTORCORRECTOR_TARGETERROR;
+    parameterCount = PredictorCorrectorParamCount;
     tolerance = pc.tolerance;
     initialized = false;
 }
@@ -188,85 +212,22 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
 }
 
 //------------------------------------------------------------------------------
-// std::string PredictorCorrector::GetParameterName(const int parm) const
+// Clone(void) const
 //------------------------------------------------------------------------------
 /**
- * Helper method used to find the text name for the class parameters
+ * Used to create a copy of the object.
+ * This method returns a copy of the current instance.  The copy has all of the
+ * parameters set to the current values, but is not yet initialized becuse the 
+ * PhysicalModel pointer is not set, nor are the internal arrays that depend on 
+ * the PhysicalModel allocated.
  *
- * This static method is used to obtain text descriptions for the parameters 
- * defined by the class.  These strings can be used to fill in the descriptors
- * for user interface elements, so that those elements have labels that match 
- * the intent of each of the user selectable parameters.
- *
- * @param parm ID of the parameter that needs the text string
+ * @return <Propagator*>
  */
 //------------------------------------------------------------------------------
-std::string PredictorCorrector::GetParameterName(const int parm) const
-{
-    if (parm == PREDICTORCORRECTOR_LOWERERROR)
-        return "Minimum Allowed Error";
-
-    else if (parm == PREDICTORCORRECTOR_TARGETERROR)
-        return "Nominal Allowed Error";
-
-    else return Integrator::GetParameterText(parm);
-}
-
-//------------------------------------------------------------------------------
-// Real PredictorCorrector::GetParameter(const int id) const
-//------------------------------------------------------------------------------
-/**
- * Method used to retrieve predictor-corrector parameters 
- */
-//------------------------------------------------------------------------------
-Real PredictorCorrector::GetParameter(const int id) const
-{
-    if (id == PREDICTORCORRECTOR_LOWERERROR)
-        return lowerError;
-
-    if (id == PREDICTORCORRECTOR_TARGETERROR)
-        return targetError;
-
-    return Integrator::GetRealParameter(id);
-}
-
-//------------------------------------------------------------------------------
-// bool PredictorCorrector::SetParameter(const int id, const Real val)
-//------------------------------------------------------------------------------
-/**
- * Method used to set predictor-corrector parameters
- *
- * This is the SetParameter method for the Predictor-Corrector implementations.
- * Each Predictor-Corrector has a startup propagator, starter, that may also 
- * have the parameters passed into this method.  The starter is given the 
- * opportunity to accept the parameters that correspond to the Integrator
- * parameters (but not the Predictor-Corrector parameters).  The return value 
- * from the starter setup is not checked for validity.
- *
- * @ param id     ID for the parameter
- * @ param val    New value for the parameter
- *
- * @ return true if the id is valid and the Predictor-Corrector accepts the value
- */
-//------------------------------------------------------------------------------
-bool PredictorCorrector::SetParameter(const int id, const Real val)
-{
-    if (id == PREDICTORCORRECTOR_LOWERERROR)
-        lowerError = val;
-    else if (id == PREDICTORCORRECTOR_TARGETERROR)
-        targetError = val;
-    else {
-        if (id == GetParameterID("StepSize"))   // ag: was STEP_SIZE_PARAMETER
-            if (val == 0.0)
-                return false;
-        
-        stepSign = (val < 0.0 ? -1.0 : 1.0);
-        starter->SetRealParameter(id, val);
-
-        return Integrator::SetRealParameter(id, val);
-    }
-    return true;
-}
+//GmatBase* PredictorCorrector::Clone(void) const
+//{
+//    return new PredictorCorrector(*this);
+//}
 
 //------------------------------------------------------------------------------
 // void PredictorCorrector::Initialize(void)
@@ -597,4 +558,317 @@ bool PredictorCorrector::AdaptStep(Real maxError)
     }
     return Reset();
 }
+//------------------------------------------------------------------------------
+// std::string PredictorCorrector::GetParameterText(const int id) const
+//------------------------------------------------------------------------------
+/**
+ * Helper method used to find the text name for the class parameters
+ *
+ * This static method is used to obtain text descriptions for the parameters 
+ * defined by the class.  These strings can be used to fill in the descriptors
+ * for user interface elements, so that those elements have labels that match 
+ * the intent of each of the user selectable parameters.
+ *
+ * @param parm ID of the parameter that needs the text string
+ */
+//------------------------------------------------------------------------------
+std::string PredictorCorrector::GetParameterText(const Integer id) const
+{
+    if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
+        return PARAMETER_TEXT[id - GmatBaseParamCount];
+    else
+        return GmatBase::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer PredictorCorrector::GetParameterID(const std::string &str) const
+{
+    for (Integer i = STEP_COUNT; i < PredictorCorrectorParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+            return i;
+    }
+
+    return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType PredictorCorrector::GetParameterType(const Integer id) const
+{
+    if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
+        return PARAMETER_TYPE[id - GmatBaseParamCount];
+    else
+        return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PredictorCorrector::GetParameterTypeString(const Integer id) const
+{
+   if (id >= STEP_COUNT && id < PredictorCorrectorParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return GmatBase::GetParameterTypeString(id);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real PredictorCorrector::GetRealParameter(const Integer id) const
+{
+	if (id == MAXIMUM_ERROR)					return maxError;
+	else if (id == LOWEVER_ERROR)				return lowerError;
+	else if (id == TARGET_ERROR)	return targetError;
+	else if (id == STEP_SIGN)	return stepSign;
+	else if (id == INV_ORDER)				return invOrder;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real PredictorCorrector::GetRealParameter(const std::string &label) const
+{
+    Integer id = GetParameterID(label);
+
+    return GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Method used to Set parameters for the BS Integrator.
+ * This method sets the tolerance and tolerance limit for the Bulirsch-Stoer 
+ * integrator, and calls Integrator::SetParameter() for other parameters.  The
+ * implementation here prevents setting tolerances of more than 100%.  If the
+ * minimum tolerance is set to a value larger than the current tolerance, the
+ * current value is raised to the minimum value.
+ * 
+ * @param <id>  ID for the parameter being set
+ * @param <value>  New value for the parameter
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real PredictorCorrector::SetRealParameter(const Integer id, const Real value)
+{
+	if (id == MAXIMUM_ERROR)
+	{
+		maxError = value;
+		return maxError;
+	}
+	else if (id == LOWEVER_ERROR)
+	{
+		lowerError = value;
+		return lowerError;
+	}
+	else if (id == TARGET_ERROR)
+	{
+		targetError = value;
+		return targetError;
+	}
+	else if (id == STEP_SIGN)
+	{
+		stepSign = value;
+		return stepSign;
+	}
+	else if (id == INV_ORDER)
+	{
+		invOrder = value;
+		return invOrder;
+	}
+
+   return GmatBase::SetRealParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real PredictorCorrector::SetRealParameter(const std::string &label, const Real value)
+{
+    return SetRealParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Integer parameter value, given the input
+ * parameter ID.
+ * @see GmatBase
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer PredictorCorrector::GetIntegerParameter(const Integer id) const
+{
+   if (id == STEP_COUNT)			     	return stepCount;
+	else if (id == STARTUP_COUNT)				return startupCount;
+
+	return GmatBase::GetIntegerParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Integer parameter value, given the input
+ * parameter ID.
+ * @see GmatBase
+ * @param <id> ID for the requested parameter.
+ * @param <value> Integer value for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer PredictorCorrector::SetIntegerParameter(const Integer id,
+											   const Integer value) // const?
+{
+	if (id == STEP_COUNT)
+	{
+		stepCount = value;
+		return stepCount;
+	}
+	else if (id == STARTUP_COUNT)
+	{
+		startupCount = value;
+		return startupCount;
+	}
+	return GmatBase::SetIntegerParameter(id,value);
+}
+
+//------------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  bool value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PredictorCorrector::GetBooleanParameter(const Integer id) const
+{
+	if (id == STARTUP_COMPLETE)	return startupComplete;
+
+	return GmatBase::GetBooleanParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+* This method sets the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> bool value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PredictorCorrector::SetBooleanParameter(const Integer id, const bool value)
+{
+	if (id ==  STARTUP_COMPLETE)
+	{
+		startupComplete = value;
+		return startupComplete;
+	}
+
+	return GmatBase::SetBooleanParameter(id,value);
+}
+
+////------------------------------------------------------------------------------
+//// Real PredictorCorrector::GetParameter(const Integer id) const
+////------------------------------------------------------------------------------
+///**
+// * Helper method used to find the text name for the class parameters.
+// * This static method is used to obtain text descriptions for the parameters 
+// * defined by the class.  These strings can be used to fill in the descriptors
+// * for user interface elements, so that those elements have labels that match 
+// * the intent of each of the user selectable parameters.
+// * 
+// */
+////------------------------------------------------------------------------------
+//Real PredictorCorrector::GetParameter(const Integer id) const
+//{
+//    if (id == PREDICTORCORRECTOR_LOWERERROR)
+//        return lowerError;
+//
+//    if (id == PREDICTORCORRECTOR_TARGETERROR)
+//        return targetError;
+//
+//    return Integrator::GetRealParameter(id);
+//}
+//
+////------------------------------------------------------------------------------
+//// bool PredictorCorrector::SetParameter(const int id, const Real val)
+////------------------------------------------------------------------------------
+///**
+// * Method used to set predictor-corrector parameters
+// *
+// * This is the SetParameter method for the Predictor-Corrector implementations.
+// * Each Predictor-Corrector has a startup propagator, starter, that may also 
+// * have the parameters passed into this method.  The starter is given the 
+// * opportunity to accept the parameters that correspond to the Integrator
+// * parameters (but not the Predictor-Corrector parameters).  The return value 
+// * from the starter setup is not checked for validity.
+// *
+// * @ param id     ID for the parameter
+// * @ param val    New value for the parameter
+// *
+// * @ return true if the id is valid and the Predictor-Corrector accepts the value
+// */
+////------------------------------------------------------------------------------
+//bool PredictorCorrector::SetParameter(const int id, const Real val)
+//{
+//    if (id == PREDICTORCORRECTOR_LOWERERROR)
+//        lowerError = val;
+//    else if (id == PREDICTORCORRECTOR_TARGETERROR)
+//        targetError = val;
+//    else {
+//        if (id == GetParameterID("StepSize"))   // ag: was STEP_SIZE_PARAMETER
+//            if (val == 0.0)
+//                return false;
+//        
+//        stepSign = (val < 0.0 ? -1.0 : 1.0);
+//        starter->SetRealParameter(id, val);
+//
+//        return Integrator::SetRealParameter(id, val);
+//    }
+//    return true;
+//}
 
