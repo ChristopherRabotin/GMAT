@@ -27,7 +27,6 @@
 #include "SolarFluxFileReader.hpp"
 #include "AtmosphereException.hpp"
 
-
 class SolarSystem;          // Forward reference
 
 /**
@@ -57,25 +56,24 @@ public:
      *  @param epoch     The current TAIJulian epoch
      *  @param count     The number of spacecraft contained in position
      */
-    virtual bool            Density(Real *position, Real *density, 
-                                    Real epoch = 21545.0,
-                                    Integer count = 1) = 0;
-    void                    SetSunVector(Real *sv);
-    void                    SetCentralBodyVector(Real *cv);
-    
-    // waw: Added 06/29/04
-    void                    SetSolarFluxFile(std::string file);
-    void                    SetFileFlag(bool flag);
-    virtual void            SetSolarSystem(SolarSystem *solsys);
+    virtual bool Density(Real *position, Real *density, Real epoch = 21545.0,
+                         Integer count = 1) = 0;
+    void SetSunVector(Real *sv);
+    void SetCentralBodyVector(Real *cv);
+    virtual void SetSolarSystem(SolarSystem *ss);    
+    void SetSolarFluxFile(std::string file);
+    void SetNewFileFlag(bool flag);
+    void SetOpenFileFlag(bool flag);
+    void CloseFile();
 protected:
     /// Solar flux binary file reader
     SolarFluxFileReader *fileReader;
-    /// Solar flux binary file
-    FILE *sfFileName;
+    /// The solarsystem
+    SolarSystem *solarSystem;
+    /// Pointer to the binary file
+    FILE *solarFluxFile;
     /// Solar flux file name 
     std::string fileName;  // waw: Added 06/29/04
-    /// New file?
-    bool newFile;
     /// Vector from the central body to the sun
     Real                    *sunVector;
     /// Name of the central body
@@ -84,7 +82,10 @@ protected:
     Real                    *centralBodyLocation;
     /// Central body radius
     Real                    cbRadius;
-
+    /// New file?
+    bool newFile;
+    /// File read?
+    bool fileRead;
 private:  
     
 };

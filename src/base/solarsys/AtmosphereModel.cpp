@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "AtmosphereModel.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 //  AtmosphereModel()
@@ -32,8 +33,11 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
     sunVector           (NULL),
     centralBody         ("Earth"),
     centralBodyLocation (NULL),
-    cbRadius            (6378.14)
+    cbRadius            (6378.14),
+    newFile             (false),
+    fileRead            (false)
 {
+    fileName = "";
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +64,9 @@ fileReader          (NULL),
 sunVector           (NULL),
 centralBody         (am.centralBody),
 centralBodyLocation (NULL),
-cbRadius            (am.cbRadius)
+cbRadius            (am.cbRadius),
+newFile             (am.newFile),
+fileRead            (am.fileRead)
 {
 }
 
@@ -104,7 +110,6 @@ void AtmosphereModel::SetSunVector(Real *sv)
     sunVector = sv;
 }
 
-
 //------------------------------------------------------------------------------
 //  void SetCentralBodyVector(Real *cv)
 //------------------------------------------------------------------------------
@@ -120,6 +125,20 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 }
 
 //------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer
+ * 
+ * @param ss Pointer to the solar system used in the modeling.
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetSolarSystem(SolarSystem *ss)
+{
+   solarSystem = ss;
+}
+
+//------------------------------------------------------------------------------
 //  void SetSolarFluxFile(std::string file)
 //------------------------------------------------------------------------------
 /**
@@ -128,11 +147,17 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetSolarFluxFile(std::string file)
 {
-
+   if (strcmp(fileName.c_str(), file.c_str()) == 0)
+      SetOpenFileFlag(true);
+   else
+   {
+      fileName = file;
+      SetOpenFileFlag(false);
+   }   
 }
 
 //------------------------------------------------------------------------------
-// void SetFileFlag(bool flag)
+// void SetNewFileFlag(bool flag)
 //------------------------------------------------------------------------------
 /**
  * Sets the new file flag
@@ -140,12 +165,38 @@ void AtmosphereModel::SetSolarFluxFile(std::string file)
  * @param flag
  */
 //------------------------------------------------------------------------------
-void AtmosphereModel::SetFileFlag(bool flag)
+void AtmosphereModel::SetNewFileFlag(bool flag)
 {
    newFile = flag;
 }
 
-
-void AtmosphereModel::SetSolarSystem(SolarSystem *solsys)
+//------------------------------------------------------------------------------
+// void SetOpenFileFlag(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Sets the file opened flag
+ * 
+ * @param flag
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetOpenFileFlag(bool flag)
 {
+   fileRead = flag;
+}
+
+//------------------------------------------------------------------------------
+// void CloseFile()
+//------------------------------------------------------------------------------
+/**
+ * Sets the new file flag
+ * 
+ * @param flag
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::CloseFile()
+{
+   if (fileReader->CloseSolarFluxFile(solarFluxFile))
+       fileRead = false;
+    else
+       throw AtmosphereException("Error closing Atmosphere Model data file.\n");   
 }
