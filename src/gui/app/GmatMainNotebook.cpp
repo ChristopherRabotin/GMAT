@@ -19,10 +19,10 @@
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagateCommandPanel.hpp"
-#include "BurnSetupPanel.hpp"
+#include "ImpulsiveBurnSetupPanel.hpp"
+#include "DCSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
-#include "DCSetupPanel.hpp"
 #include "GmatTreeItemData.hpp"
 #include "MessageInterface.hpp"
 
@@ -88,80 +88,91 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
 
     if (OpenPage(item))
     {
-      curPages->Append( (wxObject *) item);
+        curPages->Append( (wxObject *) item);
       
-      if (dataType == GmatTree::UNIVERSE_FOLDER)
-      {
-        sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
-      }
-      // invisible for build 2
-//      else if ((dataType == GmatTree::DEFAULT_BODY)   ||
-//               (dataType == GmatTree::CREATED_BODY))
-//      {
-//         sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
-//      }
-      else if ((dataType == GmatTree::DEFAULT_SPACECRAFT )  ||
-               (dataType == GmatTree::CREATED_SPACECRAFT ))
-      {
-        sizer->Add( new SpacecraftPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if ((dataType == GmatTree::DEFAULT_BURN )  ||
-               (dataType == GmatTree::CREATED_BURN ))
-      {
-          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Burn\n");
-          sizer->Add( new BurnSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
-               (dataType == GmatTree::CREATED_PROPAGATOR))
-      {
-        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if ((dataType == GmatTree::DEFAULT_SOLVER)   ||
-               (dataType == GmatTree::CREATED_SOLVER))
-      {
-          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Solver\n");
-          sizer->Add( new DCSetupPanel(panel));
-      }
-      else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
-               (dataType == GmatTree::CREATED_REPORT_FILE))
-      {
-          //loj: ReportFileSetupPanel is not ready yet.
-          // sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
-               (dataType == GmatTree::CREATED_XY_PLOT))
-      {
-        sizer->Add( new XyPlotSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );          
-      }
-      else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
-               (dataType == GmatTree::CREATED_OPENGL_PLOT))
-      {
-          //loj: OpenGlSetupPanel is not ready yet.
-          // sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
-      {
-          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
-          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
-      }
-      else if (dataType == GmatTree::PROPAGATE_COMMAND)
-      {
-          //loj: what should I pass for the 2nd arg
-          MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
-          sizer->Add( new PropagateCommandPanel(panel, ""), 0, wxGROW|wxALL, 0 );
-      }
-      else if (dataType == GmatTree::MANEUVER_COMMAND)
-      {
-        sizer->Add( new ManeuverSetupPanel(panel), 0, wxGROW|wxALL, 0 );
-      }
+        if (dataType == GmatTree::UNIVERSE_FOLDER)
+        {
+            sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
+        }
+        // invisible for build 2
+        // else if ((dataType == GmatTree::DEFAULT_BODY)   ||
+        //           (dataType == GmatTree::CREATED_BODY))
+        // {
+        //     sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
+        // }
+        else if ((dataType == GmatTree::DEFAULT_SPACECRAFT )  ||
+                 (dataType == GmatTree::CREATED_SPACECRAFT ))
+        {
+            sizer->Add( new SpacecraftPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if ((dataType == GmatTree::DEFAULT_IMPULSIVE_BURN )  ||
+                 (dataType == GmatTree::CREATED_IMPULSIVE_BURN ))
+        {
+            sizer->Add( new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
+                 (dataType == GmatTree::CREATED_PROPAGATOR))
+        {
+            sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if ((dataType == GmatTree::DEFAULT_DIFF_CORR)   ||
+                 (dataType == GmatTree::CREATED_DIFF_CORR))
+        {
+            sizer->Add( new DCSetupPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
+                 (dataType == GmatTree::CREATED_REPORT_FILE))
+        {
+            //loj: ReportFileSetupPanel is not ready yet.
+//              sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()),
+//                          0, wxGROW|wxALL, 0 );
+        }
+        else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
+                 (dataType == GmatTree::CREATED_XY_PLOT))
+        {
+            sizer->Add( new XyPlotSetupPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );          
+        }
+        else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
+                 (dataType == GmatTree::CREATED_OPENGL_PLOT))
+        {
+            //loj: OpenGlSetupPanel is not ready yet.
+//              sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()),
+//                          0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
+        {
+            MessageInterface::ShowMessage
+                ("GmatMainNotebook::CreatePage() creating MISSION_SEQ_COMMAND\n");
+        }
+        else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
+        {
+            //MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
+            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::PROPAGATE_COMMAND)
+        {
+            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::MANEUVER_COMMAND)
+        {
+            sizer->Add( new ManeuverSetupPanel(panel),
+                        0, wxGROW|wxALL, 0 );
+        }
 
-      panel->SetScrollRate( 5, 5 );
-      panel->SetAutoLayout( TRUE );
-      panel->SetSizer( sizer );
-      sizer->Fit( panel );
-      sizer->SetSizeHints( panel );
+        panel->SetScrollRate( 5, 5 );
+        panel->SetAutoLayout( TRUE );
+        panel->SetSizer( sizer );
+        sizer->Fit( panel );
+        sizer->SetSizeHints( panel );
 
-      AddPage( panel, item->GetDesc(), TRUE, -1);
+        AddPage( panel, item->GetDesc(), TRUE, -1);
 
     }
 }
@@ -221,7 +232,11 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
       (dataType == GmatTree::DEFAULT_FORMATION_FOLDER)    ||
       (dataType == GmatTree::CREATED_FORMATION_FOLDER)    ||
       (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER)||
-      (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER))
+      (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER)||
+      (dataType == GmatTree::MISSIONS_FOLDER)             ||
+      (dataType == GmatTree::MISSION_SEQ_TOP_FOLDER)      ||
+      (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER))
+      
   {
     result = FALSE;
   }

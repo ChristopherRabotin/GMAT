@@ -13,7 +13,7 @@
 // Created: 2003/10/29
 //
 /**
- * Declares GuiInterpreter pointer.
+ * Declares GuiInterpreter and other GUI compoment pointers.
  */
 //------------------------------------------------------------------------------
 #ifndef GmatAppData_hpp
@@ -55,8 +55,10 @@ public:
     
 private:
     static GuiInterpreter *theGuiInterpreter;
+#if !defined __CONSOLE_APP__
     static ResourceTree *theResourceTree;
     static GmatMainNotebook *theMainNotebook;
+#endif
     
 };
 #endif // GmatAppData_hpp

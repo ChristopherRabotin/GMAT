@@ -47,14 +47,15 @@ private:
     wxTreeItemId mSubscriberItem;
     wxTreeItemId mSolverItem;
 
-    int numSc;
+    int mNumSpacecraft;
     int mNumPropagator;
-    int mNumBurn;
+    int mNumImpulsiveBurn;
+    int mNumDiffCorr;
     int mNumReportFile;
     int mNumXyPlot;
     int mNumOpenGlPlot;
-    int mNumSolver;
     
+    // event handlers
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
     void AddDefaultSpacecraft(wxTreeItemId spacecraft);
@@ -76,41 +77,20 @@ private:
     void OnRename(wxCommandEvent &event);
     
     void OnAddBody(wxCommandEvent &event);
-    void OnAddBurn(wxCommandEvent &event);
+    void OnAddImpulsiveBurn(wxCommandEvent &event);
     void OnAddPropagator(wxCommandEvent &event);
     void OnAddConstellation(wxCommandEvent &event);
     void OnAddFormation(wxCommandEvent &event);
-    void OnAddSc(wxCommandEvent &event);
+    void OnAddSpacecraft(wxCommandEvent &event);
     void OnAddReportFile(wxCommandEvent &event);
     void OnAddXyPlot(wxCommandEvent &event);
     void OnAddOpenGlPlot(wxCommandEvent &event);
-    void OnAddSolver(wxCommandEvent &event);
+    void OnAddDiffCorr(wxCommandEvent &event);
     
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
     DECLARE_EVENT_TABLE();
    
-    enum
-    {
-        ICON_FOLDER,
-        ICON_FILE,
-        ICON_OPENFOLDER,
-        ICON_SPACECRAFT,
-        
-        ICON_SUN,
-        ICON_MERCURY,
-        ICON_VENUS,
-        ICON_EARTH,
-        ICON_MARS,
-        ICON_JUPITER,
-        ICON_SATURN,
-        ICON_URANUS,
-        ICON_NEPTUNE,
-        ICON_PLUTO,
-        
-        ICON_REPORT,
-        ICON_NETWORK,
-    };
 
     // for popup menu
     enum
@@ -118,16 +98,22 @@ private:
         POPUP_ADD_SC = 23000,
         POPUP_ADD_FORMATION,
         POPUP_ADD_CONSTELLATION,
+        
+        POPUP_ADD_PROPAGATOR,
+        POPUP_ADD_BODY,
+        
         POPUP_ADD_BURN,
         POPUP_ADD_IMPULSIVE_BURN,
         POPUP_ADD_FINITE_BURN,
-        POPUP_ADD_PROPAGATOR,
-        POPUP_ADD_BODY,
+        
+        POPUP_ADD_SOLVER,
+        POPUP_ADD_DIFF_CORR,
+        
         POPUP_ADD_SUBSCRIBER,
         POPUP_ADD_REPORT_FILE,
         POPUP_ADD_XY_PLOT,
         POPUP_ADD_OPENGL_PLOT,
-        POPUP_ADD_SOLVER,
+        
         POPUP_OPEN,
         POPUP_CLOSE,
         POPUP_RENAME,

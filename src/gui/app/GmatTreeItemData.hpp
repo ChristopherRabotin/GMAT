@@ -37,7 +37,29 @@ private:
 
 namespace GmatTree
 {
-    enum
+    enum IconType
+    {
+        ICON_FOLDER,
+        ICON_FILE,
+        ICON_OPENFOLDER,
+        ICON_SPACECRAFT,
+        
+        ICON_SUN,
+        ICON_MERCURY,
+        ICON_VENUS,
+        ICON_EARTH,
+        ICON_MARS,
+        ICON_JUPITER,
+        ICON_SATURN,
+        ICON_URANUS,
+        ICON_NEPTUNE,
+        ICON_PLUTO,
+        
+        ICON_REPORT,
+        ICON_NETWORK,
+    };
+    
+    enum ItemType
     {
         // Resource Tree
         RESOURCES_FOLDER = 20000,
@@ -70,14 +92,14 @@ namespace GmatTree
         DEFAULT_PROPAGATOR,
         CREATED_PROPAGATOR,
 
-        DEFAULT_BURN,
-        CREATED_BURN,
+        DEFAULT_IMPULSIVE_BURN,
+        CREATED_IMPULSIVE_BURN,
 
         DEFAULT_BODY,
         CREATED_BODY,
 
-        DEFAULT_SOLVER,
-        CREATED_SOLVER,
+        DEFAULT_DIFF_CORR,
+        CREATED_DIFF_CORR,
 
         DEFAULT_REPORT_FILE,
         CREATED_REPORT_FILE,
@@ -102,6 +124,10 @@ namespace GmatTree
 
         //Mission Tree
         MISSIONS_FOLDER,
+        MISSION_SEQ_TOP_FOLDER,
+        MISSION_SEQ_SUB_FOLDER,
+
+        MISSION_SEQ_COMMAND,
         DEFAULT_PROPAGATE_COMMAND,
         MANEUVER_COMMAND,
         PROPAGATE_COMMAND,
