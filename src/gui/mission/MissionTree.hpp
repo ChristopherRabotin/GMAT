@@ -15,7 +15,7 @@
 #ifndef MissionTree_hpp
 #define MissionTree_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 #include "wx/treectrl.h"
 #include "wx/image.h"

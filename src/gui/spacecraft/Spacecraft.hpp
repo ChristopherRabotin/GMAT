@@ -15,7 +15,7 @@
 #ifndef Spacecraft_hpp
 #define Spacecraft_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 #include "wx/sizer.h"
 #include "wx/splitter.h"
 #include "wx/listctrl.h"

@@ -25,7 +25,7 @@
 #ifndef GmatMainFrame_hpp
 #define GmatMainFrame_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 #include "GmatSplitterWindow.hpp"
 #include "GmatNotebook.hpp"

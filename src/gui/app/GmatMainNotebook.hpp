@@ -15,7 +15,7 @@
 #ifndef GmatMainNotebook_hpp
 #define GmatMainNotebook_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 #include "wx/notebook.h"
 
 #include "GmatTreeItemData.hpp"

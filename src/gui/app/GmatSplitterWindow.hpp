@@ -17,7 +17,7 @@
 #ifndef GmatSplitterWindow_hpp
 #define GmatSplitterWindow_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 #include "wx/splitter.h"
 
 class GmatSplitterWindow : public wxSplitterWindow

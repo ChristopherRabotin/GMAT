@@ -15,7 +15,7 @@
 #ifndef GmatNotebook_hpp
 #define GmatNotebook_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 #include "ResourceTree.hpp"
 #include "MissionTree.hpp"

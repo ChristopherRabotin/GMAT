@@ -14,7 +14,7 @@
 #ifndef ResourceTree_hpp
 #define ResourceTree_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 #include "GmatMainNotebook.hpp"
 

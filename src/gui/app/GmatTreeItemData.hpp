@@ -15,7 +15,7 @@
 #ifndef GmatTreeItemData_hpp
 #define GmatTreeItemData_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 #include "wx/treectrl.h"
 
 class GmatTreeItemData : public wxTreeItemData
