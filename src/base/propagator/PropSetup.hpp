@@ -40,11 +40,11 @@ public:
    ForceModel* GetForceModel();
    void SetPropagator(Propagator *propagator);
    void SetForceModel(ForceModel *forceModel);
+   void SetUseDrag(bool flag);
 
    void AddForce(PhysicalModel *force);
-   void DeleteForce(const std::string &name);
-   PhysicalModel* GetForce(const std::string &name);
-   PhysicalModel* GetForce(Integer index); //loj: 2/11/04 added
+   //loj: 3/16/04 void RemoveForce(const std::string &name); // future implementation
+   PhysicalModel* GetForce(Integer index);
    Integer GetNumForces();
 
    virtual const std::string* GetParameterList() const;

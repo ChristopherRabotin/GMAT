@@ -83,6 +83,7 @@ ForceModel::ForceModel(const std::string &nomme) :
     forceCount        (0),  
     estimationMethod  (2.0)
 {
+    numForces = 0;
     dimension = 6;
 }
 
@@ -137,16 +138,56 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
     return *this;
 }
 
-//  //------------------------------------------------------------------------------
-//  // PhysicalModel* GetForce(Integer index)
-//  //------------------------------------------------------------------------------
-//  PhysicalModel* ForceModel::GetForce(Integer index)
-//  {
-//      if (forceList.size() == 0)
-//          return NULL;
-//      else
-//          return forceList[index];
-//  }
+//------------------------------------------------------------------------------
+// Integer GetNumForces()
+//------------------------------------------------------------------------------
+Integer ForceModel::GetNumForces()
+{
+    return numForces;
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetForceTypeNames()
+//------------------------------------------------------------------------------
+StringArray& ForceModel::GetForceTypeNames()
+{
+    forceTypeNames.clear();
+
+    for (int i=0; i<numForces; i++)
+    {
+        forceTypeNames.push_back(forceList[i]->GetTypeName());
+    }
+        
+    return forceTypeNames;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetForceTypeName(Integer index)
+//------------------------------------------------------------------------------
+std::string ForceModel::GetForceTypeName(Integer index)
+{
+    StringArray typeList = GetForceTypeNames();
+    
+    if (index >= 0 && index < numForces)
+    {
+        return typeList[index];
+    }
+
+    return "UNDEFINED_FORCE_TYPE";
+}
+
+//------------------------------------------------------------------------------
+// PhysicalModel* GetForce(Integer index)
+//------------------------------------------------------------------------------
+PhysicalModel* ForceModel::GetForce(Integer index)
+{
+    if (index >= 0 && index < numForces)
+    {
+        return forceList[index];
+    }
+    
+    return NULL;
+}
 
 //------------------------------------------------------------------------------
 // void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
@@ -184,8 +225,8 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     if (initialized)
         pPhysicalModel->Initialize();
 
-    //loj: 2/11/04 added
     forceList.push_back(pPhysicalModel);
+    numForces = forceList.size();
     
     ++forceCount;  
 }

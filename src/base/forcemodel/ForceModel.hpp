@@ -85,28 +85,11 @@ public:
     bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
     Real EstimateError(Real *diffs, Real *answer) const;
 
-    // new methods for future implementation
-    bool HasForce(const std::string &name) // should check if list has the name
-      { return false; }
-    void DeleteForce(const std::string &name) // should delete the force
-      { }
+    Integer GetNumForces();
+    StringArray& GetForceTypeNames(); //loj: 3/4/04 added
+    std::string GetForceTypeName(Integer index);
     
-    StringArray& GetForceTypeNames(); //loj: 2/11/04 added
-    
-    PhysicalModel* GetForce(const std::string &name) // should return the correct force
-      { return NULL; }
-
-    //loj: 2/11/04 added
-    PhysicalModel* GetForce(Integer index)
-        { if (forceList.size() == 0)
-              return NULL;
-          else
-              return forceList[index];
-        }
-    
-    Integer GetNumForces() // should return the correct number of force
-      { return forceCount; }
-      //loj: 2/11/04 { return 1; }
+    PhysicalModel* GetForce(Integer index);
       
     virtual Integer GetParameterCount(void) const;
     
@@ -122,12 +105,17 @@ public:
                                            const std::string &value);
 
 protected:
+    
     DerivativeList * derivatives;
     Integer          forceCount;
+    Integer          numForces;
+    
     Real estimationMethod;
     /// List of spacecraft that get propagated
     std::vector<Spacecraft *> spacecraft;
+    StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
+    
 };
 
 #endif  // ForceModel_hpp

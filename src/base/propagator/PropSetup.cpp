@@ -30,16 +30,13 @@
 //---------------------------------
 
 const std::string
-
 PropSetup::PARAMETER_TEXT[PropSetupParamCount] =
 
 {
-//   "PropagatorName",
    "ForceModelName",
    "Type",              // To match the script spec
    "Drag"               // Place holder until we decide how to do this
 };
-
 
 
 const Gmat::ParameterType
@@ -222,6 +219,14 @@ void PropSetup::SetForceModel(ForceModel *forceModel)
 }
 
 //------------------------------------------------------------------------------
+// void SetUseDrag(bool flag)
+//------------------------------------------------------------------------------
+void PropSetup::SetUseDrag(bool flag)
+{
+    usedrag = flag;
+}
+
+//------------------------------------------------------------------------------
 // void AddForce(PhysicalModel *force)
 //------------------------------------------------------------------------------
 /**
@@ -230,32 +235,21 @@ void PropSetup::SetForceModel(ForceModel *forceModel)
 //------------------------------------------------------------------------------
 void PropSetup::AddForce(PhysicalModel *force)
 {
-   //loj: if ForceModel::AddForce(...) throws an exception I don't need to throw
-   // an exception here. Just call mForceModel->AddForce(...)
-   if (mForceModel->HasForce(force->GetName()))
-      throw PropSetupException("The force: " + force->GetName() + " already in the "
-                               "force model: " + mForceModel->GetName());
-   else
-      mForceModel->AddForce(force);
+    mForceModel->AddForce(force);
 }
 
+
+// future implementation
 //------------------------------------------------------------------------------
-// void DeleteForce(const std::string &name)
+// void RemoveForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Deletes a force from force model.
+ * Removes a force from force model.
  */
 //------------------------------------------------------------------------------
-void PropSetup::DeleteForce(const std::string &name)
-{  
-   //loj: if ForceModel::DeleteForce(...) throws an exception I don't need to throw
-   // an exception here. Just call mForceModel->DeleteForce(...)
-   if (mForceModel->HasForce(name))
-      mForceModel->DeleteForce(name);
-   else
-      throw PropSetupException("The force: " + name + " not in the "
-                               "force model: " + mForceModel->GetName());
-}
+//  void PropSetup::RemoveForce(const std::string &name)
+//  {  
+//  }
 
 //------------------------------------------------------------------------------
 // PhysicalModel* GetForce(Integer index)
@@ -267,25 +261,6 @@ void PropSetup::DeleteForce(const std::string &name)
 PhysicalModel* PropSetup::GetForce(Integer index)
 {
     return mForceModel->GetForce(index);      
-}
-
-//------------------------------------------------------------------------------
-// PhysicalModel* GetForce(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * @return Force pointer give by force name
- */
-//------------------------------------------------------------------------------
-PhysicalModel* PropSetup::GetForce(const std::string &name)
-{
-   //loj: if ForceModel::GetForce(...) throws an exception I don't need to throw
-   // an exception here. Just call mForceModel->GetForce(...)
-   if (mForceModel->HasForce(name))
-      return mForceModel->GetForce(name);
-   else
-      throw PropSetupException("The force: " + name + " not in the "
-                               "force model: " + mForceModel->GetName());
-      
 }
 
 //------------------------------------------------------------------------------
