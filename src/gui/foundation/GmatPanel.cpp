@@ -138,8 +138,9 @@ void GmatPanel::OnOK()
         OnApply();
     
     // Close page from main notebook    
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
+//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+//    gmatMainNotebook->ClosePage();
+    GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------
@@ -152,8 +153,9 @@ void GmatPanel::OnOK()
 void GmatPanel::OnCancel()
 {
     // Close page from main notebook
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
+//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+//    gmatMainNotebook->ClosePage();
+   GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------
