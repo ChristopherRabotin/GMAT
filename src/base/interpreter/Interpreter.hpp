@@ -148,6 +148,8 @@ protected:
     
    bool                          AssembleCommand(const std::string& scriptline,
                                                  GmatCommand *cmd = NULL);
+   bool                          AssembleForCommand(const StringArray topLevel, 
+                                                    GmatCommand *cmd);
    GmatBase*                     AssemblePhrase(StringArray& phrase,
                                                 GmatCommand *cmd);
    

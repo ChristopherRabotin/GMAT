@@ -12,6 +12,7 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
 OBJECTS = Burn.o \
           BurnException.o \
           ImpulsiveBurn.o \
+          FiniteBurn.o \
           ManeuverFrame.o \
           ManeuverFrameManager.o \
           InertialManeuverFrame.o \

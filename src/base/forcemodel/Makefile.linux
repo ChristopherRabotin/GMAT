@@ -18,7 +18,8 @@ OBJECTS = DerivativeList.o \
           DragForce.o \
           SolarRadiationPressure.o \
           HarmonicField.o \
-          GravityField.o
+          GravityField.o \
+          FiniteThrust.o
 
 all: libForceModel
 	mkdir -p ../lib

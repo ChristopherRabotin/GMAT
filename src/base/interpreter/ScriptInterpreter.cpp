@@ -251,6 +251,7 @@ bool ScriptInterpreter::Parse(void)
     {
         std::vector<std::string*>::iterator phrase = chunks.begin();
 
+        // First try for object creation
         if (**phrase == "Create") {
             // Instantiate the core object
             std::string type, name = "";
@@ -263,9 +264,8 @@ bool ScriptInterpreter::Parse(void)
             if (!InterpretObject(type, name))
                 throw InterpreterException("Unable to create object: " + name); //loj: added name
         }
-
-
-        if ((**phrase == "GMAT") && (!sequenceStarted)) {
+        // Next try for object parameter setup or assignment
+        else if ((**phrase == "GMAT") && (!sequenceStarted)) {
             // Look up related object(s)
             ++phrase;
 
@@ -403,8 +403,7 @@ bool ScriptInterpreter::Parse(void)
                 }
             }
         }
-
-        // Check to see if it's a command
+        // Then check to see if it's a command
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
             try
@@ -425,6 +424,14 @@ bool ScriptInterpreter::Parse(void)
                 chunks.clear();
                 throw;
             }
+        }
+        // Looks like the line was not understood
+        else {
+           MessageInterface::ShowMessage
+              ("ScriptInterpreter::Parse() cannot interpret the line\n   \"%s\"",
+              line.c_str());
+           chunks.clear();
+           return false;
         }
 
         // Clear the array of words found in the line

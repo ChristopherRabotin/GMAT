@@ -48,7 +48,8 @@ objectMap       (NULL),
 solarSys        (NULL),
 publisher       (NULL),
 streamID        (-1),
-depthChange     (0)
+depthChange     (0),
+propStateChanged(false)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -107,7 +108,8 @@ objectMap       (c.objectMap),
 solarSys        (c.solarSys),
 publisher       (c.publisher),
 streamID        (c.streamID),
-depthChange     (c.depthChange)
+depthChange     (c.depthChange),
+propStateChanged(c.propStateChanged)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -684,3 +686,25 @@ Integer GmatCommand::DepthIncrement()
    return depthChange;
 }
 
+
+//------------------------------------------------------------------------------
+//  bool PropStateChanged()
+//------------------------------------------------------------------------------
+/**
+ * Indicates that the propagation data was changed bt the command.
+ *
+ * Some commands can change propagation data in a manner that requires that the
+ * propagators and force models need to rebuild their data structures, or that 
+ * multistep integrators need to perform a restart before proceeding.  The
+ * Sandbox manages the communication to perform propagator restarts.  It checks
+ * for state changes of this type by calling this method, and then using the 
+ * reference object methods to determine which object (or objects) is affected 
+ * by the change.
+ *
+ * @return true if propagation state has changed, false if there was no change.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::PropStateChanged()
+{
+   return propStateChanged;
+}

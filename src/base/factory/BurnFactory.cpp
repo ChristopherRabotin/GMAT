@@ -21,7 +21,7 @@
 
 #include "BurnFactory.hpp"
 #include "ImpulsiveBurn.hpp"
-//#include "FiniteBurn.hpp"
+#include "FiniteBurn.hpp"
 
 
 //---------------------------------
@@ -41,8 +41,8 @@ Burn* BurnFactory::CreateBurn(const std::string &ofType, const std::string &with
 {
    if (ofType == "ImpulsiveBurn")
       return new ImpulsiveBurn(withName);
-//   else if (ofType == "FiniteBurn")
-//      return new FiniteBurn;
+   else if (ofType == "FiniteBurn")
+      return new FiniteBurn(withName);
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of burn
@@ -66,7 +66,7 @@ BurnFactory::BurnFactory() :
    if (creatables.empty())
    {
       creatables.push_back("ImpulsiveBurn");  
-//      creatables.push_back("FiniteBurn"); 
+      creatables.push_back("FiniteBurn"); 
    }
 }
 
@@ -101,7 +101,7 @@ BurnFactory::BurnFactory(const BurnFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("ImpulsiveBurn");
-//      creatables.push_back("FiniteBurn");
+      creatables.push_back("FiniteBurn");
    }
 }
 

@@ -33,12 +33,15 @@
 #include "If.hpp"             // for IF command
 #include "Else.hpp"           // for Else command
 #include "EndIf.hpp"          // for EndIf command
-#include "While.hpp"            // for FOR command
-#include "EndWhile.hpp"         // for EndFor command
+#include "While.hpp"          // for FOR command
+#include "EndWhile.hpp"       // for EndFor command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Save.hpp"           // for Save command  
 #include "CallFunction.hpp"   // for CallFunction command
 #include "Assignment.hpp"     // for Assignment command
+#include "BeginManeuver.hpp"  // for BeginManeuver command
+#include "EndManeuver.hpp"    // for EndManeuver command
+
 
 //---------------------------------
 //  public methods
@@ -95,6 +98,10 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new CallFunction;
     else if (ofType == "Assignment")
          return new Assignment;
+    else if (ofType == "BeginManeuver")
+        return new BeginManeuver;
+    else if (ofType == "EndManeuver")
+         return new EndManeuver;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -136,6 +143,8 @@ CommandFactory::CommandFactory() :
       creatables.push_back("save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
+      creatables.push_back("BeginManeuver");
+      creatables.push_back("EndManeuver");
    }
 }
 
@@ -188,6 +197,8 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
+      creatables.push_back("BeginManeuver");
+      creatables.push_back("EndManeuver");
    }
 }
 

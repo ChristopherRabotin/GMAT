@@ -32,7 +32,7 @@
 /**
  * All maneuver classes are derived from this base class.
  */
-class Burn : public GmatBase
+class GMAT_API Burn : public GmatBase
 {
 public:
    Burn(const std::string &typeStr, const std::string &nomme);

@@ -25,7 +25,7 @@
 #include "Burn.hpp"
 
 
-class ImpulsiveBurn : public Burn
+class GMAT_API ImpulsiveBurn : public Burn
 {
 public:
    ImpulsiveBurn(std::string nomme = "");
