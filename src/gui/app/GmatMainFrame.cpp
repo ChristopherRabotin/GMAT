@@ -522,7 +522,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
          
-         sizer->Add(new WhilePanel(panel), 0, wxGROW|wxALL, 0);
+         sizer->Add(new WhilePanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
 //      else if (dataType == GmatTree::DO_CONTROL)
 //      {
