@@ -31,7 +31,7 @@
  * @param <nomme>   Name for the object
  */
 //------------------------------------------------------------------------------
-Burn::Burn(std::string typeStr, std::string nomme) :
+Burn::Burn(const std::string &typeStr, const std::string &nomme) :
     GmatBase        (Gmat::BURN, typeStr, nomme),
     coordFrame      ("Inertial"),
     coordSystem     ("Cartesian"),
@@ -76,6 +76,7 @@ Burn::Burn(std::string typeStr, std::string nomme) :
 //------------------------------------------------------------------------------
 Burn::~Burn()
 {
+   delete frameman;
 }
 
 
@@ -132,6 +133,19 @@ Burn& Burn::operator=(const Burn &b)
     if (this == &b)
         return *this;
         
+    GmatBase::operator=(b);
+
+    coordFrame  = b.coordFrame;
+    coordSystem = b.coordSystem;
+    satName     = b.satName;
+    sc          = NULL;
+    deltaV[0]   = b.deltaV[0];
+    deltaV[1]   = b.deltaV[1];
+    deltaV[2]   = b.deltaV[2];
+    dvLabels[0] = b.dvLabels[0];
+    dvLabels[1] = b.dvLabels[1];
+    dvLabels[2] = b.dvLabels[2];
+
     return *this;
 }
 

@@ -35,10 +35,10 @@
 class Burn : public GmatBase
 {
 public:
-	Burn(std::string typeStr, std::string nomme);
-	virtual ~Burn();
-    Burn(const Burn &b);
-    Burn&                   operator=(const Burn &b);
+   Burn(const std::string &typeStr, const std::string &nomme);
+   virtual ~Burn();
+   Burn(const Burn &b);
+   Burn&                   operator=(const Burn &b);
     
     // Inherited (GmatBase) methods
     virtual std::string     GetParameterText(const Integer id) const;
