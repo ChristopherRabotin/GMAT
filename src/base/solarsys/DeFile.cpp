@@ -257,7 +257,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    // add to the MJD to get the absolute Julian Date
    //double absJD = atTime.Get() + 2430000.5;
    //double absJD = atTime.Get() + 2430000.0;
-   double absJD = atTime.Get() + jdMjdOffset;
+   double absJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
 
    // if we're asking for the moon state, just get it and return it, as
    // it is supposed to be a geocentric state from the DE file
@@ -294,7 +294,7 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
                         emrv->Velocity[0],emrv->Velocity[1],emrv->Velocity[2]);
    Rvector6 moonRv(mrv->Position[0],mrv->Position[1],mrv->Position[2],
                    mrv->Velocity[0],mrv->Velocity[1],mrv->Velocity[2]);
-   Rvector6 earthRv = earthMoonRv - (moonRv / R1.EMRAT);
+   Rvector6 earthRv = earthMoonRv - (moonRv / (R1.EMRAT + 1.0));
 
    // now compute the state of the requested body wrt the Earth
    Rvector6 bodyRv(rv->Position[0],rv->Position[1],rv->Position[2],

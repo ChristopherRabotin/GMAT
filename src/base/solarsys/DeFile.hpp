@@ -101,6 +101,8 @@ public:
    static const Integer LIBRATIONS_ID;
 
    static const Real    JD_MJD_OFFSET = 2430000.0;
+   // seconds offset to get from A1 to TDT (TT)
+   static const Real    TT_OFFSET     = 32.184;
 
    static const Integer ARRAY_SIZE_200 = 826;
    static const Integer ARRAY_SIZE_405 = 1018;
