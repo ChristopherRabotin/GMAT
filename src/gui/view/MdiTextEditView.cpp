@@ -117,6 +117,9 @@ bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
     // Update ResourceTree
     GmatAppData::GetResourceTree()->UpdateResource();
     GmatAppData::GetMissionTree()->UpdateMission();
+
+    //loj: 3/17/04 Should I close all plot window?
+    
     status = GmatAppData::GetGuiInterpreter()->RunScript();
 
     return status;
@@ -134,6 +137,9 @@ bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
     //MessageInterface::ClearMessage();
+    
+    //loj: 3/17/04 Should I close all plot window?
+    
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 
     return status;
