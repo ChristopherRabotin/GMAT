@@ -10,25 +10,26 @@
 /**
  * Implements ParameterSelectDialog class. This class shows dialog window where a
  * user parameter can be selected.
- * 
  */
 //------------------------------------------------------------------------------
 
 #include "ParameterSelectDialog.hpp"
 #include "ParameterCreateDialog.hpp"
+#include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-//loj: 10/19/04 removed OnApply
 BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, ParameterSelectDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
-   EVT_BUTTON(ID_BUTTON, ParameterSelectDialog::OnButton)
    EVT_COMBOBOX(ID_COMBOBOX, ParameterSelectDialog::OnComboBoxChange)
-   EVT_LISTBOX(ID_LISTBOX, ParameterSelectDialog::OnListSelect)
+   EVT_BUTTON(ADD_VAR_BUTTON, ParameterSelectDialog::OnAddVariable)
+   EVT_BUTTON(CREATE_VARIABLE, ParameterSelectDialog::OnCreateVariable)
+   EVT_LISTBOX(USER_PARAM_LISTBOX, ParameterSelectDialog::OnSelectUserParam)
+   EVT_LISTBOX(PROPERTY_LISTBOX, ParameterSelectDialog::OnSelectProperty)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -52,107 +53,62 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, bool showArray)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::Create()
 {
-   int borderSize = 2;
+   int bsize = 2;
    wxString emptyList[] = {};
 
-   //wxStaticBox
-   wxStaticBox *userParamStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBox *systemParamStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBox *selParamStaticBox = new wxStaticBox( this, -1, wxT("") );
-   
-   //wxStaticText
-   wxStaticText *userVarStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Variables"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   
-   wxStaticText *objectStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Object"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   
-   wxStaticText *propertyStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Property"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   
-   wxStaticText *paramSelectedStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Variables Selected"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   
-   //wxStaticText *emptyStaticText =
-   //   new wxStaticText( this, ID_TEXT, wxT("  "),
-   //                     wxDefaultPosition, wxDefaultSize, 0 );
-   
-   // wxButton
-   mAddParamButton = new wxButton( this, ID_BUTTON, wxT("->"),
-                                   wxDefaultPosition, wxSize(20,20), 0 );
-   mCreateParamButton = new wxButton( this, ID_BUTTON, wxT("Create"),
-                                      wxDefaultPosition, wxSize(-1,-1), 0 );
+   //------------------------------------------------------
+   // available variables list (1st column)
+   //------------------------------------------------------
+   mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
+    
+   wxButton *createVarButton;
 
-   // wxComboBox
-   mObjectComboBox =
-      theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX, wxSize(150, 20));
+   mParamBoxSizer =
+      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
+                                          &mObjectComboBox, ID_COMBOBOX,
+                                          &mUserParamListBox, USER_PARAM_LISTBOX,
+                                          &mPropertyListBox, PROPERTY_LISTBOX,
+                                          &mCoordSysComboBox, ID_COMBOBOX,
+                                          &mCentralBodyComboBox, ID_COMBOBOX,
+                                          &mCoordSysLabel, &mCoordSysSizer);
    
+   //-------------------------------------------------------
+   // add parameter button (2nd column)
+   //-------------------------------------------------------
+   mAddParamButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
+                                  wxDefaultPosition, wxSize(20,20), 0 );
+   
+   
+   //-------------------------------------------------------
+   // selected parameter list (3rd column)
+   //-------------------------------------------------------
+   wxStaticBox *selectedStaticBox = new wxStaticBox( this, -1, wxT("") );
 
-   // wxListBox
-   //loj: 11/8/04 added
-   // if add user array to the list
-   if (mShowArray)
-   {     
-      mUserParamListBox =
-         theGuiManager->GetUserParameterListBox(this, ID_LISTBOX, wxSize(150, 50));
-   }
-   else
-   {
-      mUserParamListBox =
-         theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
-   }
+   wxStaticText *selectedParamLabel =
+      new wxStaticText(this, -1, wxT("Selected"),
+                       wxDefaultPosition, wxSize(80,-1), 0);
    
-   mPropertyListBox = theGuiManager->
-      GetPropertyListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
+   mVarSelectedListBox = new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
+                                       wxSize(170,260), 0, emptyList, wxLB_SINGLE);
    
-   mParamSelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                                         wxSize(150, 250), 0, emptyList, wxLB_SINGLE);
+   wxStaticBoxSizer *mVarSelectedBoxSizer =
+      new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
+
+   mVarSelectedBoxSizer->Add(selectedParamLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   
-   // wxSizers
+   //-------------------------------------------------------
+   // put in the order
+   //-------------------------------------------------------
+   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxStaticBoxSizer *userParamBoxSizer =
-      new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *systemParamBoxSizer =
-      new wxStaticBoxSizer(systemParamStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *selParamBoxSizer =
-      new wxStaticBoxSizer(selParamStaticBox, wxVERTICAL);
-   wxBoxSizer *availParamBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxFlexGridSizer *paramGridSizer = new wxFlexGridSizer( 3, 0, 0 );
 
-   userParamBoxSizer->Add
-      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (mUserParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   userParamBoxSizer->Add
-      (mCreateParamButton, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   systemParamBoxSizer->Add
-      (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (mObjectComboBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-      (mPropertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRight|wxBOTTOM, borderSize);
+   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   availParamBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   availParamBoxSizer->Add(systemParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
-   selParamBoxSizer->Add(paramSelectedStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   selParamBoxSizer->Add(mParamSelectedListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
-   paramGridSizer->Add(availParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   paramGridSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   paramGridSizer->Add(selParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
-   
-   pageBoxSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
@@ -165,9 +121,12 @@ void ParameterSelectDialog::Create()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::LoadData()
 {
+   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
    mObjectComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
-   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+   
+   // show coordinate system or central body
+   ShowCoordSystem();
 }
 
 //------------------------------------------------------------------------------
@@ -190,9 +149,9 @@ void ParameterSelectDialog::SaveData()
    
    //loj: Can we select multiple parameters? If so we need to use wxArrayString
    // for build2, just assume one parameter selection
-   if (mParamSelectedListBox->GetCount() > 0)
+   if (mVarSelectedListBox->GetCount() > 0)
    {
-      mParamName = mParamSelectedListBox->GetString(0); // first selection
+      mParamName = mVarSelectedListBox->GetString(0); // first selection
       std::string paramName(mParamName.c_str());
       std::string objName(mObjectComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
@@ -243,67 +202,63 @@ void ParameterSelectDialog::ResetData()
 }
 
 //------------------------------------------------------------------------------
-// void OnButton(wxCommandEvent& event)
+// void OnAddVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterSelectDialog::OnButton(wxCommandEvent& event)
-{    
-   if ( event.GetEventObject() == mAddParamButton )  
-   {
-      // empty listbox first, only one parameter is allowed
-      // loj: Do we need multiple selection?
-      mParamSelectedListBox->Clear();
+void ParameterSelectDialog::OnAddVariable(wxCommandEvent& event)
+{
+   // empty listbox first, only one parameter is allowed
+   mVarSelectedListBox->Clear();
 
-      if (mUseUserParam)
-      {
-         mParamSelectedListBox->Append(mUserParamListBox->GetStringSelection());
-      }
-      else
-      {
-         wxString object = mObjectComboBox->GetStringSelection();
-         wxString property = mPropertyListBox->GetStringSelection();
-         mParamSelectedListBox->Append(object + "." + property);
-      }
-      theOkButton->Enable();
-   }
-   else if ( event.GetEventObject() == mCreateParamButton )  
+   // get string in first list and then search for it in the second list
+   wxString newParam = FormParamName();
+   
+   // Create a paramete if it does not exist
+   GetParameter(newParam);
+   
+   mVarSelectedListBox->Append(newParam);
+   mVarSelectedListBox->SetStringSelection(newParam);
+
+   theOkButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnCreateVariable(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
+{
+   ParameterCreateDialog paramDlg(this);
+   paramDlg.ShowModal();
+
+   if (paramDlg.IsParamCreated())
    {
-      ParameterCreateDialog paramDlg(this);
-      paramDlg.ShowModal();
-      
-      if (paramDlg.IsParamCreated())
-      {
-         if (mShowArray)
-         {
-            mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
-                                   theGuiManager->GetUserParameterList());
-         }
-         else
-         {
-            mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
-                                   theGuiManager->GetUserVariableList());
-         }
-         mAddParamButton->Disable();
-      }
+      mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                             theGuiManager->GetUserVariableList());
    }
 }
 
 //------------------------------------------------------------------------------
-// void OnListSelect(wxCommandEvent& event)
+// void OnSelectUserParam(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterSelectDialog::OnListSelect(wxCommandEvent& event)
-{    
-   if (event.GetEventObject() == mPropertyListBox)  
-   {
-      mAddParamButton->Enable();
-      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-      mUseUserParam = false;
-   }
-   else if (event.GetEventObject() == mUserParamListBox)  
-   {
-      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-      mAddParamButton->Enable();
-      mUseUserParam = true;
-   }
+void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
+{
+   // deselect property
+   mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+
+   mUseUserParam = true;
+}
+
+//------------------------------------------------------------------------------
+// void OnSelectProperty(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
+{
+   // deselect user param
+   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+
+   // show coordinate system or central body
+   ShowCoordSystem();
+
+   mUseUserParam = false;
 }
 
 //------------------------------------------------------------------------------
@@ -314,7 +269,119 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == mObjectComboBox)
    {
       mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-      mAddParamButton->Disable();
       mUseUserParam = false;
    }
+}
+
+//------------------------------------------------------------------------------
+// wxString FormParamName()
+//------------------------------------------------------------------------------
+wxString ParameterSelectDialog::FormParamName()
+{
+   if (mUseUserParam)
+   {
+      return mUserParamListBox->GetStringSelection();
+   }
+   else
+   {
+      wxString depObj = "";
+      
+      if (mCoordSysComboBox->IsShown())
+         depObj = mCoordSysComboBox->GetStringSelection();
+      else if (mCentralBodyComboBox->IsShown())
+         depObj = mCentralBodyComboBox->GetStringSelection();
+
+      if (depObj == "")
+         return mObjectComboBox->GetStringSelection() + "." + 
+            mPropertyListBox->GetStringSelection();
+      else
+         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+            mPropertyListBox->GetStringSelection();
+   }
+}
+
+//------------------------------------------------------------------------------
+// Parameter* GetParameter(const wxString &name)
+//------------------------------------------------------------------------------
+/*
+ * @return existing parameter pointer, return newly created parameter pointer
+ *         if it does not exist.
+ */
+//------------------------------------------------------------------------------
+Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
+{
+   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
+
+   // create a parameter if it does not exist
+   if (param == NULL)
+   {
+      std::string paramName(name.c_str());
+      std::string objName(mObjectComboBox->GetStringSelection().c_str());
+      std::string propName(mPropertyListBox->GetStringSelection().c_str());
+      std::string depObjName = "";
+            
+      if (mCoordSysComboBox->IsShown())
+         depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+      else if (mCentralBodyComboBox->IsShown())
+         depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
+
+      param = theGuiInterpreter->CreateParameter(propName, paramName);
+      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+      
+      if (depObjName != "")
+         param->SetStringParameter("DepObject", depObjName);
+      
+      if (param->NeedCoordSystem())
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
+   }
+   
+   return param;
+}
+
+//------------------------------------------------------------------------------
+// void ShowCoordSystem()
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::ShowCoordSystem()
+{
+   std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
+   GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
+
+   if (depObj == GmatParam::COORD_SYS)
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Coordinate System");
+      
+      mCoordSysComboBox->SetSelection(0);
+      
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Add(mCoordSysComboBox);
+      mCoordSysComboBox->Show();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
+   }
+   else if (depObj == GmatParam::ORIGIN)
+   {
+      mCoordSysLabel->Show();
+      mCoordSysLabel->SetLabel("Central Body");
+      
+      mCentralBodyComboBox->SetStringSelection("Earth");
+      
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Add(mCentralBodyComboBox);
+      mCentralBodyComboBox->Show();
+      mCoordSysComboBox->Hide();
+      mParamBoxSizer->Layout();
+   }
+   else
+   {
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mParamBoxSizer->Layout();
+   }
+
 }

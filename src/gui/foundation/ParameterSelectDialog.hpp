@@ -34,20 +34,30 @@ protected:
    // override methods from GmatDialog
    virtual void OnOK();
 
-private:
    wxString mParamName;
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
    bool mShowArray;
    
+   wxStaticText *mCoordSysLabel;
+   
    wxButton *mAddParamButton;
-   wxButton *mCreateParamButton;
+   wxButton *mCreateVarButton;
+   
    wxComboBox *mObjectComboBox;
+   wxComboBox *mCoordSysComboBox;
+   wxComboBox *mCentralBodyComboBox; //loj: 2/4/05 Added
+   
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
-   wxListBox *mParamSelectedListBox;
-      
+   wxListBox *mVarListBox;
+   wxListBox *mVarSelectedListBox;
+   
+   wxBoxSizer *mVarBoxSizer;
+   wxBoxSizer *mCoordSysSizer;
+   wxBoxSizer *mParamBoxSizer;
+
    // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
@@ -55,8 +65,10 @@ private:
    virtual void ResetData();
 
    // event handling
-   void OnButton(wxCommandEvent& event);
-   void OnListSelect(wxCommandEvent& event);
+   void OnAddVariable(wxCommandEvent& event);   
+   void OnCreateVariable(wxCommandEvent& event);
+   void OnSelectUserParam(wxCommandEvent& event);
+   void OnSelectProperty(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
@@ -66,9 +78,20 @@ private:
    {     
       ID_TEXT = 9300,
       ID_COMBOBOX,
-      ID_LISTBOX,
-      ID_BUTTON,
+
+      ADD_VAR_BUTTON,
+      CREATE_VARIABLE,
+      VAR_SEL_LISTBOX,
+      USER_PARAM_LISTBOX,
+      PROPERTY_LISTBOX,
+
    };
+   
+private:
+   wxString FormParamName();
+   Parameter* GetParameter(const wxString &name);
+   void ShowCoordSystem();
+   
 };
 
 #endif
