@@ -185,6 +185,8 @@ bool SphericalTwo::ToSphericalTwo(const Cartesian &cartesian)
     // radians since the second argument will be greater than or equal to zero.
     SetVelocityDeclination( GmatMathUtil::Deg( GmatMathUtil::ATan(vZ, 
        GmatMathUtil::Sqrt(vX*vX + vY*vY))) );
+    
+    return true;
 }
 
 //------------------------------------------------------------------------------
