@@ -31,8 +31,8 @@
 #include "PropSetup.hpp"
 //#include "CalculatedParameter.hpp"
 #include "StopCondition.hpp"
-//#include "CelestialBody.hpp"
-//#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
+#include "SolarSystem.hpp"
 #include "Solver.hpp"
 #include "Subscriber.hpp"
 #include "Command.hpp"
@@ -61,10 +61,10 @@ public:
 //                                                  std::string withName = "");
    virtual StopCondition*       CreateStopCondition(std::string ofType,
                                                     std::string withName = "");
-//   virtual CelestialBody*       CreateCelestialBody(std::string ofType,
-//                                                    std::string withName = "");
-//   virtual SolarSystem*         CreateSolarSystem(std::string ofType,
-//                                                  std::string withName = "");
+   virtual CelestialBody*       CreateCelestialBody(std::string ofType,
+                                                    std::string withName = "");
+   virtual SolarSystem*         CreateSolarSystem(std::string ofType,
+                                                  std::string withName = "");
    virtual Solver*              CreateSolver(std::string ofType,
                                            std::string withName = ""); 
    virtual Subscriber*          CreateSubscriber(std::string ofType,

@@ -279,9 +279,9 @@ PropSetup* FactoryManager::CreatePropSetup(std::string withName)
 CelestialBody* FactoryManager::CreateCelestialBody(std::string ofType,
                                                    std::string withName)
 {
-//   Factory* f = FindFactory(Gmat::CELESTIAL_BODY, ofType);
-//   if (f != NULL)
-//      return f->CreateCelestialBody(ofType, withName);
+   Factory* f = FindFactory(Gmat::CELESTIAL_BODY, ofType);
+   if (f != NULL)
+      return f->CreateCelestialBody(ofType, withName);
    return NULL;
 }
 
@@ -298,9 +298,9 @@ CelestialBody* FactoryManager::CreateCelestialBody(std::string ofType,
 //------------------------------------------------------------------------------
 SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
 {
-//   Factory* f = FindFactory(Gmat::SOLAR_SYSTEM, "SolarSystem");
-//   if (f != NULL)
-//      return f->CreateSolarSystem("SolarSystem", withName);
+   Factory* f = FindFactory(Gmat::SOLAR_SYSTEM, "SolarSystem");
+   if (f != NULL)
+      return f->CreateSolarSystem("SolarSystem", withName);
    return NULL;
 }
 
@@ -523,10 +523,10 @@ StringArray FactoryManager::GetListOfStopCondition(void)// const
  * @return list of creatable items of type CelestialBody.
  */
 //------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfCelestialBody(void) const
-//{
-//   return GetList(Gmat::CELESTIAL_BODY);
-//}
+StringArray FactoryManager::GetListOfCelestialBody(void)
+{
+   return GetList(Gmat::CELESTIAL_BODY);
+}
 
 //------------------------------------------------------------------------------
 // StringArray GetListOfSolarSystem(void) const;
@@ -537,10 +537,10 @@ StringArray FactoryManager::GetListOfStopCondition(void)// const
  * @return list of creatable items of type SolarSystem.
  */
 //------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfSolarSystem(void) const
-//{
-//   return GetList(Gmat::SOLAR_SYSTEM);
-//}
+StringArray FactoryManager::GetListOfSolarSystem(void)
+{
+   return GetList(Gmat::SOLAR_SYSTEM);
+}
 
 //------------------------------------------------------------------------------
 // StringArray GetListOfSolver(void) const;
@@ -595,7 +595,7 @@ StringArray FactoryManager::GetListOfCommand(void)// const
 //------------------------------------------------------------------------------
 StringArray FactoryManager::GetListOfBurn(void)// const
 {
-   return GetList(Gmat::COMMAND);
+   return GetList(Gmat::BURN);
 }
 
 //------------------------------------------------------------------------------
