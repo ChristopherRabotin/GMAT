@@ -58,11 +58,13 @@ void GuiItemManager::UpdateAll()
 {
    if (theNumScProperty == 0)
       UpdatePropertyList("Spacecraft");
-   
+
+   UpdateSpaceObject(); //loj: 1/19/05 Added
    UpdateFormation();
    UpdateSpacecraft();
    UpdateParameter();
    UpdateSolarSystem();
+   UpdateCoordSystem(); //loj: 1/19/05 Added
 }
 
 //------------------------------------------------------------------------------
