@@ -4,13 +4,14 @@
 # Date:       2003/11/13
 # Modified:   2004/01/14 - Added Spherical.cpp, SphericalOne.cpp, and
 #                          SphericalTwo.cpp.
+#             2004/05/04 - Added AngleUtil.cpp and CoordUtil.cpp.
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = A1Date.cpp A1Mjd.cpp Cartesian.cpp Date.cpp \
+SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
 	DateUtil.cpp ElapsedTime.cpp EphemerisUtil.cpp Keplerian.cpp \
 	Linear.cpp RealUtilities.cpp Rmatrix.cpp Rmatrix33.cpp Rvector.cpp \
 	Rvector3.cpp Rvector6.cpp Spherical.cpp SphericalOne.cpp \
