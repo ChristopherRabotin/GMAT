@@ -30,19 +30,22 @@
 #include "TextDocument.hpp"
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
+#include "GmatAppData.hpp"
+#include "GmatMainNotebook.hpp"
 #include "PropagationConfigPanel.hpp"
 //#include "PointMassSelectionDialog.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
-#include "GmatAppData.hpp"
 #include "Propagator.hpp"
 #include "Integrator.hpp"
 #include "RungeKutta89.hpp"
 #include "PropSetup.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
+
+#include <ctype.h>
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -101,29 +104,27 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
 void PropagationConfigPanel::Initialize()
 {  
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //loj:thePropSetup = theGuiInterpreter->CreateDefaultPropSetup(propNameString.c_str());
+    //loj: thePropSetup = theGuiInterpreter->CreateDefaultPropSetup(propNameString.c_str());
     thePropSetup = theGuiInterpreter->GetPropSetup(propNameString.c_str()); //loj: added
     
     thePropagator = thePropSetup->GetPropagator();
     theForceModel = thePropSetup->GetForceModel();
+    // waw: Build 2 implementation
     //thePhysicalModel = thePropSetup->GetForce("ForceModel");
+    //theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+    //bodiesInUse = theSolarSystem->GetBodiesInUse();
+    
+    /* waw: Will be removed from build 2
+    bodiesInUse.push_back("Earth");
+    bodiesInUse.push_back("Moon");
+    bodiesInUse.push_back("Sun");*/
     
     numOfIntegrators = 3;
-    numOfBodies = 3;  // TBD
+    numOfBodies = 3;  // waw: bodiesInUse.count(); 
     numOfAtmosTypes = 3;
     numOfForces = 1;  // TBD thePropSetup->GetNumForces();
     numOfGraFields = 3;
     numOfMagFields = 1;  // TBD - Not for Build 2
-    
-    bodiesArrayString.Add("Earth");
-    bodiesArrayString.Add("Moon");
-    bodiesArrayString.Add("Sun");
-    
-    //theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //thePropagator = theGuiInterpreter->GetPropagator(std::string(propNameString.c_str()));   
-    //thePhysicalModel = new PhysicalModel(Gmat::PHYSICAL_MODEL, "ForceModel", "ForceModel");
-    //theForceModel = new ForceModel("ForceModel");    
-    //thePropSetup = new PropSetup(std::string(propNameString.c_str()), thePropagator, theForceModel);
 }
 
 void PropagationConfigPanel::Setup(wxWindow *parent)
@@ -186,12 +187,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
         wxT("RKN 6(8)"),
         wxT("RKF 5(6)")
     };
-    wxString strArray2[] = 
-    {
-        wxT("Earth"),
-        wxT("Moon"),
-        wxT("Sun")
-    };
+    
+    wxString strArray2[numOfBodies];
+    if ( !bodiesInUse.empty() )
+        for (int i = 0; i < numOfBodies; i++)
+            strArray2[i] = bodiesInUse[i].c_str();
+    
     wxString strArray3[] = 
     {
         wxT("None"),
@@ -423,8 +424,11 @@ void PropagationConfigPanel::SetData()
         // = setting8TextCtrl->GetValue();
         // = setting9TextCtrl->GetValue();
     }
-   
+    
     // = primaryBodyString;
+    // if ( !currentSelectedBodies.empty() )
+    //     = currentSelectedBodies;
+    
     // = bodyTextCtrl->GetValue();
     
     if (gravityTypeComboBox->GetStringSelection().Cmp("None") != 0)
@@ -605,7 +609,7 @@ void PropagationConfigPanel::OnIntegratorSelection()
 
 void PropagationConfigPanel::OnBodySelection()
 {
-    usedBodiesArrayString.Add(bodyComboBox->GetStringSelection());
+    primaryBodyString = bodyComboBox->GetStringSelection();
     
     DisplayGravityFieldData();
     DisplayAtmosphereModelData();
@@ -745,7 +749,8 @@ void PropagationConfigPanel::OnScriptButton()
 void PropagationConfigPanel::OnOKButton()
 {
     SetData();
-    Close(true);
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
 }
 
 void PropagationConfigPanel::OnApplyButton()
@@ -756,7 +761,8 @@ void PropagationConfigPanel::OnApplyButton()
 
 void PropagationConfigPanel::OnCancelButton()
 {
-    Close(true);
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
 }
 
 void OnHelpButton()
@@ -766,6 +772,26 @@ void OnHelpButton()
 
 void PropagationConfigPanel::OnAddButton()
 {
+    wxString body = bodyComboBox->GetStringSelection();
+    
+    StringArray::iterator i;
+    
+    if ( !currentSelectedBodies.empty() )
+    {
+        Integer j = 0;
+        
+        for (i = currentSelectedBodies.begin(); i != currentSelectedBodies.end(); i++)
+        {
+            if ( body.IsSameAs(currentSelectedBodies[j].c_str(), false) )
+                return;
+                
+            j++;
+        }
+    }
+    
+    currentSelectedBodies.push_back(body.c_str());
+    bodyTextCtrl->AppendText(body + " ");
+    
     applyButton->Enable(true);
 }
 
@@ -809,7 +835,7 @@ void PropagationConfigPanel::OnMagSearchButton()
 void PropagationConfigPanel::OnPMEditButton()
 {
     //pmSelectionDialog = 
-    //    new PointMassSelectionDialog(this, bodiesArrayString, usedBodiesArrayString);
+    //    new PointMassSelectionDialog(this, ... use StringArray... );
     //pmSelectionDialog->Show(true);
 }   
 

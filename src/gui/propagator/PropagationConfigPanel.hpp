@@ -44,6 +44,7 @@
 #include "PropSetup.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
+//#include "SolarSystem.hpp"
 
 class PropagationConfigPanel : public wxPanel
 {
@@ -52,7 +53,6 @@ public:
     //PropagationConfigPanel(wxWindow *parent, PropSetup *propSetup;);
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
-       
 private:             
     wxStaticText *propNameStaticText;
     wxStaticText *item8;
@@ -114,9 +114,6 @@ private:
     wxString primaryBodyString;
     wxString propNameString;
     
-    wxArrayString bodiesArrayString;
-    wxArrayString usedBodiesArrayString;
-    
     wxDocManager *mDocManager;
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
@@ -130,6 +127,9 @@ private:
     
     bool useSRP;
     
+    StringArray bodiesInUse;
+    StringArray currentSelectedBodies;
+    
     //PointMassSelectionDialog *pmSelectionDialog;
     
     GuiInterpreter *theGuiInterpreter;
@@ -139,6 +139,7 @@ private:
     PropSetup      *thePropSetup;
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
+    //SolarSystem    *theSolarSystem;
    
     // Layout & data handling methods
     void Initialize();

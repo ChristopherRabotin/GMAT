@@ -23,6 +23,7 @@
 #include <wx/grid.h>
 #include <wx/docview.h>
 #include <wx/menu.h>
+#include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
@@ -31,6 +32,7 @@
 #include "TextDocument.hpp"
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
+#include "GmatMainNotebook.hpp"
 #include "PropagateCommandPanel.hpp"
 
 // base includes
@@ -48,10 +50,10 @@ BEGIN_EVENT_TABLE(PropagateCommandPanel, wxPanel)
     EVT_COMBOBOX(ID_COMBO, PropagateCommandPanel::OnComboSelection)
     EVT_TEXT(ID_TEXTCTRL, PropagateCommandPanel::OnTextUpdate)
     EVT_TEXT_MAXLEN(ID_TEXTCTRL, PropagateCommandPanel::OnTextMaxLen)
-    EVT_GRID_CELL_RIGHT_CLICK(PropagateCommandPanel::OnCellRightClick)
-    EVT_GRID_CELL_LEFT_CLICK(PropagateCommandPanel::OnCellLeftClick)
-    EVT_GRID_CELL_LEFT_DCLICK(PropagateCommandPanel::OnCellLeftDoubleClick)
-    EVT_GRID_CELL_CHANGE(PropagateCommandPanel::OnCellValueChanged)
+//    EVT_GRID_CELL_RIGHT_CLICK(PropagateCommandPanel::OnCellRightClick)
+//    EVT_GRID_CELL_LEFT_CLICK(PropagateCommandPanel::OnCellLeftClick)
+//    EVT_GRID_CELL_LEFT_DCLICK(PropagateCommandPanel::OnCellLeftDoubleClick)
+//    EVT_GRID_CELL_CHANGE(PropagateCommandPanel::OnCellValueChanged)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -69,34 +71,54 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
     propNameString = propName;
     theCommand = cmd;
 
-    GuiInterpreter *theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
+    //GuiInterpreter *theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
+    //Command *theCommand = theGuiInterpreter->GetCommand(propName.c_str());
     
-    Initialize();
+    // Default values
+    numOfModes = 1;
+    numOfPropRows = 10;
+    numOfCondRows = 10;
+    numOfEqualities = 6;
+    
     Setup(this);
+    
+    if (theCommand != NULL)
+    {
+        Initialize();    
+        GetData();
+    }
 }
 
 void PropagateCommandPanel::Initialize()
-{
-    numOfModes = 1;
-    numOfProps = 10;
-    numOfConds = 10;
-    numOfEqualities = 6;
+{  
+    thePropagateCommand = (Propagate *)theCommand;
     
+    propID = thePropagateCommand->GetParameterID("Propagator");
+    propType = thePropagateCommand->GetStringParameter(propID);
+    numOfProp = 1;  // waw: TBD
+
+    scID = thePropagateCommand->GetParameterID("Spacecraft");
+    scList = thePropagateCommand->GetStringArrayParameter(scID);
+    numOfSC = scList.size();
+    
+    theStopCondBase = thePropagateCommand->GetObject(Gmat::STOP_CONDITION);
+    theStopCond = (StopCondition *)theStopCondBase;
 }
 
 void PropagateCommandPanel::Setup( wxWindow *parent)
 {   
     // wxGrid
-    propGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(180,160), wxWANTS_CHARS );
-    propGrid->CreateGrid( numOfProps, 2, wxGrid::wxGridSelectCells );
-    propGrid->SetColSize(0, 150);
+    propGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(150,160), wxWANTS_CHARS );
+    propGrid->CreateGrid( numOfPropRows, 2, wxGrid::wxGridSelectCells );
+    propGrid->SetColSize(0, 200);
     propGrid->SetColSize(1, 585);
     propGrid->SetColLabelValue(0, _T("Propagator"));
     propGrid->SetColLabelValue(1, _T("Spacecraft List"));
     propGrid->SetRowLabelSize(0);
+    propGrid->EnableEditing(false);
     
-    stopCondGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(200,160), wxWANTS_CHARS );
-    stopCondGrid->CreateGrid( numOfConds, 3, wxGrid::wxGridSelectCells );
+    stopCondGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(100,160), wxWANTS_CHARS );
+    stopCondGrid->CreateGrid( numOfCondRows, 3, wxGrid::wxGridSelectCells );
     stopCondGrid->SetColSize(0, 150);
     stopCondGrid->SetColSize(1, 255);
     stopCondGrid->SetColSize(2, 255);
@@ -104,6 +126,7 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     stopCondGrid->SetColLabelValue(1, _T("Condition"));
     stopCondGrid->SetColLabelValue(2, _T("Description"));
     stopCondGrid->SetRowLabelSize(0);
+    stopCondGrid->EnableEditing(false);
     
     // wxString
     wxString strArray1[] = 
@@ -121,19 +144,17 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     };
     
     // wxStaticText
-    eventStaticText = new wxStaticText( parent, ID_TEXT, wxT("Event Name"), wxDefaultPosition, wxDefaultSize, 0 );
     synchStaticText = new wxStaticText( parent, ID_TEXT, wxT("Synchronization Mode"), wxDefaultPosition, wxDefaultSize, 0 );
     descStaticText = new wxStaticText( parent, ID_TEXT, wxT("Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    valueStaticText = new wxStaticText( parent, ID_TEXT, wxT("Value"), wxDefaultPosition, wxDefaultSize, 0 );
+    //valueStaticText = new wxStaticText( parent, ID_TEXT, wxT("Value"), wxDefaultPosition, wxDefaultSize, 0 );
     varStaticText = new wxStaticText( parent, ID_TEXT, wxT("Variable"), wxDefaultPosition, wxDefaultSize, 0 );
     repeatStaticText = new wxStaticText( parent, ID_TEXT, wxT("Repeat"), wxDefaultPosition, wxDefaultSize, 0 );
     tolStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tolerance"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    nameTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
-    descriptionTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(300,-1), 0 );
-    variableTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(300,-1), 0 );
-    valueTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(300,-1), 0 );
+    descriptionTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
+    variableTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
+    valueTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
     repeatTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     toleranceTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     
@@ -147,12 +168,12 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     helpButton = new wxButton( parent, ID_BUTTON, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxComboBox
-    synchComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition, wxSize(-1,-1), numOfModes, strArray1, wxCB_DROPDOWN|wxCB_READONLY );
-    equalityComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray2[0]), wxDefaultPosition, wxSize(-1,-1), numOfEqualities, strArray2, wxCB_DROPDOWN|wxCB_READONLY );
+    synchComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition, wxSize(100,-1), numOfModes, strArray1, wxCB_DROPDOWN|wxCB_READONLY );
+    equalityComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray2[0]), wxDefaultPosition, wxSize(50,-1), numOfEqualities, strArray2, wxCB_DROPDOWN|wxCB_READONLY );
     
     // wx*Sizer    
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *item1 = new wxBoxSizer( wxHORIZONTAL );
+    wxFlexGridSizer *item1 = new wxFlexGridSizer(4, 0, 0 );
     wxBoxSizer *item2 = new wxBoxSizer( wxHORIZONTAL );
     
     wxStaticBox *item3 = new wxStaticBox( parent, -1, wxT("Propagators and Spacecraft") );
@@ -163,53 +184,53 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     wxStaticBoxSizer *item7 = new wxStaticBoxSizer( item4, wxVERTICAL );
     wxStaticBoxSizer *item8 = new wxStaticBoxSizer( item5, wxVERTICAL );    
     
-    wxFlexGridSizer *item9  = new wxFlexGridSizer( 5, 0, 1 );
-    wxFlexGridSizer *item10 = new wxFlexGridSizer( 5, 0, 1 );
-    wxFlexGridSizer *item11 = new wxFlexGridSizer( 5, 0, 1 );
-    wxFlexGridSizer *item12 = new wxFlexGridSizer( 5, 0, 1 );
+    wxBoxSizer *item9 = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *item10 = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *item11 = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *item12 = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *item13 = new wxBoxSizer( wxHORIZONTAL );
     
     // Add to wx*Sizers     
-    item1->Add( eventStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( nameTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item1->Add( scriptButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );
     
     item6->Add( synchStaticText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     item6->Add( synchComboBox, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );    
     item6->Add( propGrid, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     
-    item9->Add( descStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item9->Add( descriptionTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item9->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item9->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item9->Add( valueStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( descStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( descriptionTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    //item10->Add( valueStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
     
-    item10->Add( varStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( variableTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( editButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( equalityComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( valueTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    item11->Add( repeatStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item11->Add( tolStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item11->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item11->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item11->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-
+    item11->Add( varStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item11->Add( variableTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item11->Add( editButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item11->Add( equalityComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item11->Add( valueTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    item12->Add( repeatStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
     item12->Add( repeatTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item12->Add( toleranceTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item12->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item12->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item12->Add( userDefButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item12->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item12->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item12->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    item13->Add( tolStaticText, 0, wxALIGN_RIGHT|wxALL, 5 );
+    item13->Add( toleranceTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item13->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item13->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item13->Add( userDefButton, 0, wxALIGN_RIGHT|wxALL, 5 );
+    
+    item9->Add( item10, 0, wxALIGN_CENTRE|wxALL, 5 );    
+    item9->Add( item11, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item9->Add( item12, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item9->Add( item13, 0, wxALIGN_CENTRE|wxALL, 5 );
     
     item8->Add( item9, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item8->Add( item10, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item8->Add( item11, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item8->Add( item12, 0, wxALIGN_CENTRE|wxALL, 5 );
     
     item7->Add( stopCondGrid, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     item7->Add( item8, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -232,16 +253,39 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     
     // waw: Future Implementation
     userDefButton->Enable(false);
+    editButton->Enable(false);
+    synchComboBox->Enable(false);
     helpButton->Enable(false);
     
     applyButton->Enable(false);
-    
-    //GetData();
 }
 
 void PropagateCommandPanel::GetData()
 {
-    nameTextCtrl->AppendText(propNameString);
+    // Display Propagator
+    //if ( !propType.empty() ) // waw: Error - returns type 'String'??
+    //    propGrid->SetCellValue( 0, 0, wxT(propType.c_str()) );
+    propGrid->SetCellValue( 0, 0, propNameString );
+
+    // Display Spacecraft column
+    if ( !scList.empty() )
+    {
+        /*for (int i = 0; i < numOfSC; i++)
+        {
+            scListString.Append(scList.at(i).c_str());
+            scListString.Append(" ");
+        }*/
+        scListString.Append(scList.at(0).c_str());    
+        propGrid->SetCellValue( 0, 1, scListString );
+    }
+    
+    // Display Stopping condition
+    if ( theStopCond != NULL )
+    {
+        repeatTextCtrl->SetValue( wxVariant() );
+        toleranceTextCtrl->SetValue( wxVariant(theStopCond->GetTolerance()) );
+        //stopCondGrid->SetCellValue();
+    }
 }
 
 void PropagateCommandPanel::SetData()
@@ -251,9 +295,7 @@ void PropagateCommandPanel::SetData()
 
 void PropagateCommandPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == nameTextCtrl )         
-        applyButton->Enable(true);
-    else if ( event.GetEventObject() == valueTextCtrl )           
+    if ( event.GetEventObject() == valueTextCtrl )           
         applyButton->Enable(true);
     else if ( event.GetEventObject() == repeatTextCtrl )
         applyButton->Enable(true);
@@ -291,7 +333,9 @@ void PropagateCommandPanel::OnButton(wxCommandEvent& event)
         ;
     else if ( event.GetEventObject() == okButton )  
     {
-        SetData();         
+        SetData();     
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();    
     }
     else if ( event.GetEventObject() == applyButton )
     {
@@ -300,7 +344,8 @@ void PropagateCommandPanel::OnButton(wxCommandEvent& event)
     }       
     else if ( event.GetEventObject() == cancelButton )
     {
-        Close(this);
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();
     } 
     else if ( event.GetEventObject() == helpButton )           
         ; 
@@ -418,6 +463,7 @@ void PropagateCommandPanel::CreateScript()
 #endif
 }
 
+/*
 void PropagateCommandPanel::ShowContextMenu(const wxPoint& pos)
 {
     wxMenu propMenu(_T("Test popup"));
@@ -519,3 +565,4 @@ void PropagateCommandPanel::DeleteSelectedStopCondRows()
     }
     applyButton->Enable(true);
 }
+*/
