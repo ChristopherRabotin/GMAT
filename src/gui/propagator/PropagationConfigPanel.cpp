@@ -230,7 +230,7 @@ void PropagationConfigPanel::SaveData()
       isIntegratorChanged = false;
         
       newProp->SetRealParameter("StepSize", atof(setting1TextCtrl->GetValue()));
-      newProp->SetRealParameter("ErrorThreshold", atof(setting2TextCtrl->GetValue()));
+      newProp->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
       newProp->SetRealParameter("MinStep", atof(setting3TextCtrl->GetValue()));
       newProp->SetRealParameter("MaxStep", atof(setting4TextCtrl->GetValue()));
       newProp->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()));
@@ -337,6 +337,10 @@ void PropagationConfigPanel::SaveData()
             theSRP = new SolarRadiationPressure();
             forceList[i]->srpf = theSRP;
             newFm->AddForce(theSRP);
+            
+            Integer paramId= thePropSetup->GetParameterID("SRP");
+            if (useSRP)
+               thePropSetup->SetStringParameter(paramId, "On");
          }
       }
       
@@ -602,35 +606,35 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    integratorStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE);
    setting1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Step Size: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting2StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Int Error: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting3StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Min Step Size: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting4StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max Step Size: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting5StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Max failed steps: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting6StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Minimum Integration Error: "),
-                        wxDefaultPosition, wxSize(80,20),
+      new wxStaticText( parent, ID_TEXT, wxT("Min Integration Error: "),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );
    setting7StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Nominal Integration Error: "),
-                        wxDefaultPosition, wxSize(80,20),
+                        wxDefaultPosition, wxSize(120,20),
                         wxST_NO_AUTORESIZE );    
    type1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Type"),
@@ -664,25 +668,25 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     // wxTextCtrl
    setting1TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting2TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting3TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting4TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting5TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting6TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    setting7TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), 0 );
+                      wxDefaultPosition, wxSize(120,-1), 0 );
    bodyTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(250,-1), wxTE_READONLY );
@@ -835,18 +839,32 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    // Add to wx*Sizers  
    flexGridSizer1->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
@@ -1059,7 +1077,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          
    // fill in data   
    setting1TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("StepSize")));
-   setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("ErrorThreshold")));
+   setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("Accuracy")));
    setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MinStep")));
    setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter("MaxStep")));
    setting5TextCtrl->SetValue(wxVariant((long)newProp->GetIntegerParameter("MaxStepAttempts")));
@@ -1303,17 +1321,97 @@ void PropagationConfigPanel::OnAddBodyButton()
    {
       wxArrayString &names = bodyDlg.GetBodyNames();
       
-      for(Integer i=0; i < (Integer)names.GetCount(); i++)
+      wxString s1;
+      wxString s2;
+        
+      bool deleteBody;
+         
+      //------------------------
+      // Remove deselected body
+      //------------------------
+      for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
       {
-         primaryBodiesArray.Add(names[i]);
-         bodyTextCtrl->AppendText(names[i] + " ");
-         bodyComboBox->Append(names[i]);
-         bodyComboBox->SetValue(names[i]);
-
-         currentBodyName = std::string(names[i].c_str());
-         currentBodyId = FindBody(currentBodyName);
-         forceList[currentBodyId]->bodyName = currentBodyName;
+         deleteBody = true;
+//         MessageInterface::ShowMessage("Entering - Remove deselected body \n"); 
+         for (Integer j = 0; j < (Integer)names.GetCount(); j++)
+         {
+            s1 = primaryBodiesArray.Item(i);
+            s2 = names.Item(j);
+//            MessageInterface::ShowMessage("Checking %s with %s\n", s1.c_str(),s2.c_str());
+            if (s1.CmpNoCase(s2) == 0)
+               deleteBody = false;
+         }
+            
+         if (deleteBody)
+         {
+            primaryBodiesArray.Remove(s1.c_str());
+             
+            Integer id = bodyComboBox->FindString(s1);
+            bodyComboBox->Delete(id);
+               
+//            std::vector<ForceType*>::iterator iter;
+//            Integer i = 0;
+//            for (iter = forceList.begin(); iter != forceList.end(); iter++)
+//            {
+//               MessageInterface::ShowMessage("Checking body %s\n", forceList[i]->bodyName.c_str());
+//               if ( strcmp(forceList[i]->bodyName.c_str(), s1.c_str()) == 0 )
+//               {
+//                  forceList.erase(iter); 
+//                  break;
+//                  MessageInterface::ShowMessage("Removing %s\n", forceList[i]->bodyName.c_str());
+//               }
+//               i++;
+//            } 
+//            MessageInterface::ShowMessage("Exiting - if (deleteBody)\n");                        
+         }
       }
+         
+      //-----------------------
+      // Remove duplicate body
+      //-----------------------
+      for (Integer i = 0; i < (Integer)names.GetCount(); i++)
+      {
+//         MessageInterface::ShowMessage("Entering - Remove duplicate body \n"); 
+         for (Integer j = 0; j < (Integer)primaryBodiesArray.GetCount(); j++)
+         {  
+            s1 = names.Item(i);
+            s2 = primaryBodiesArray.Item(j);
+//            MessageInterface::ShowMessage("Checking %s with %s\n", s1.c_str(),s2.c_str());
+            if (s1.CmpNoCase(s2) == 0)
+            {
+               names.Remove(s1.c_str());
+//               MessageInterface::ShowMessage("Removed %s\n", s1.c_str()); 
+            }
+         }
+      }
+         
+      //---------------------------
+      // Add newly selected bodies
+      //---------------------------
+      if (!names.IsEmpty())
+      {
+//         MessageInterface::ShowMessage("Entering - Add newly selected bodies \n");
+         for (Integer i = 0; i < (Integer)names.GetCount(); i++)
+         {
+            primaryBodiesArray.Add(names[i]);
+            bodyComboBox->Append(names[i]);
+            bodyComboBox->SetValue(names[i]);
+                 
+            currentBodyName = std::string(names[i].c_str());
+            currentBodyId = FindBody(currentBodyName);
+            forceList[currentBodyId]->bodyName = currentBodyName;
+         }
+      }
+      else
+         bodyComboBox->SetSelection(0);
+         
+      //------------------  
+      // Update text box
+      //------------------
+//      MessageInterface::ShowMessage("Entering - Update text box \n");
+      bodyTextCtrl->Clear();
+      for (Integer i = 0; i < (Integer)bodyComboBox->GetCount(); i++)
+         bodyTextCtrl->AppendText(bodyComboBox->GetString(i) + " ");
 
       DisplayGravityFieldData();
       DisplayAtmosphereModelData();
@@ -1494,6 +1592,10 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 void PropagationConfigPanel::OnSRPCheckBoxChange()
 {
    useSRP = srpCheckBox->GetValue();
+      
+   Integer id = FindBody(SolarSystem::EARTH_NAME);
+   forceList[id]->useSrp = useSRP;
+   
    isForceModelChanged = true;
    theApplyButton->Enable(true);
 }
