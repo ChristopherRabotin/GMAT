@@ -76,9 +76,9 @@ protected:
 
     // copy constructor - needed by child classes (for Clone)
     AtmosphereModel(const AtmosphereModel& am);
+    AtmosphereModel& operator=(const AtmosphereModel& am);
 
 private:  
-    AtmosphereModel& operator=(const AtmosphereModel& am);
     
 };
 
