@@ -100,6 +100,8 @@ namespace Gmat
       PROP_SETUP,
       REF_FRAME,
       FUNCTION,
+      FUEL_TANK,
+      THRUSTER,
       UNKNOWN_OBJECT
    };
 
