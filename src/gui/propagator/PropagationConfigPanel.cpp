@@ -144,12 +144,26 @@ void PropagationConfigPanel::Initialize()
                 }
                 else if (force->GetTypeName() == "SolarRadiationPressure")
                 {
-                    useSRP = true;
+                    Integer srpID = thePropSetup->GetParameterID("SRP");
+                    wxString use = thePropSetup->GetStringParameter(srpID).c_str();
+                    
+                    if (use.CmpNoCase("On") == 0)
+                        useSRP = true;
+                    else
+                        useSRP = false;
+                        
                     theSRP = (SolarRadiationPressure*)force;
                 }
                 else if (force->GetTypeName() == "DragForce")
                 {
-                    useDragForce = true;
+                    Integer dragID = thePropSetup->GetParameterID("Drag");
+                    wxString use = thePropSetup->GetStringParameter(dragID).c_str();
+                    
+                    if (use.CmpNoCase("On") == 0)
+                        useDragForce = true;
+                    else
+                        useDragForce = false;
+                        
                     theDragForce = (DragForce*)force;
                     Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
                     atmosModelString = theDragForce->GetStringParameter(atmosTypeID).c_str();
@@ -496,18 +510,31 @@ void PropagationConfigPanel::SaveData()
             //    theDragForce = (DragForce *)theGuiInterpreter->CreatePhysicalModel("DragForce", "Exponential");
             //theDragForce->SetStringParameter(atmosTypeID, "Exponential");
             //theForceModel->AddForce(theDragForce);
+            
+            // Save to the PropSetup
+            //Integer dragID = thePropSetup->GetParameterID("Drag");
+            //thePropSetup->SetStringParameter(srpID, "Off");
         }
         else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
         {
-            if (theDragForce == NULL)
+            if (!theDragForce)
                 theDragForce = (DragForce *)theGuiInterpreter->CreatePhysicalModel("DragForce", "MSISE90");
             
             theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
             theForceModel->AddForce(theDragForce);
+            
+            // Save to the PropSetup
+            Integer dragID = thePropSetup->GetParameterID("Drag");
+            thePropSetup->SetStringParameter(dragID, "On");
         }
     }
     else
     {
+        // Save to the PropSetup
+        Integer dragID = thePropSetup->GetParameterID("Drag");
+        thePropSetup->SetStringParameter(dragID, "Off");
+        
+// waw: Future implementation to remove drag force from force model
 //        PhysicalModel *force;
 //            
 //        for (Integer i = 0; i < numOfForces; i++)
@@ -531,9 +558,16 @@ void PropagationConfigPanel::SaveData()
             theSRP = (SolarRadiationPressure *)theGuiInterpreter->CreatePhysicalModel("SolarRadiationPressure", "SRP");
         }
         theForceModel->AddForce(theSRP);
+        
+        Integer srpID = thePropSetup->GetParameterID("SRP");
+        thePropSetup->SetStringParameter(srpID, "On");
    }
    else
    {
+       Integer srpID = thePropSetup->GetParameterID("SRP");
+       thePropSetup->SetStringParameter(srpID, "Off");
+       
+// waw: Future implementation to remove srp force from force model
 //       PhysicalModel *force;
 //       
 //       for (Integer i = 0; i < numOfForces; i++)
