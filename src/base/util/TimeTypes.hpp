@@ -24,6 +24,7 @@
 #include "gmatdefs.hpp"
 
 typedef Real     UtcMjd;
+typedef Real     Ut1Mjd;
 //loj: implemented ElapsedTime as a class
 //loj: typedef Real     ElapsedTime;
 //loj: 3/12/04 conflicts with ElapsedDays parameter class, use Integer
