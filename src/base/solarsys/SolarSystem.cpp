@@ -102,11 +102,18 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
 GmatBase        (ss),
 pvSrcForAll     (ss.pvSrcForAll),
 anMethodForAll  (ss.anMethodForAll),
-pE              (ss.pE),
-bodiesInUse     (ss.bodiesInUse),
+pE              (NULL),
+bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
-   // other stuff?
+   // replace body pointers with clones
+   Integer sz = bodiesInUse.size();
+   Integer i;
+   for (i = 0; i < sz; i++)
+   {
+      bodiesInUse.push_back(((CelestialBody*) ((bodiesInUse.front())->Clone())));
+      bodiesInUse.pop_front();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -126,10 +133,19 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    GmatBase::operator=(ss);
    pvSrcForAll    = ss.pvSrcForAll;
    anMethodForAll = ss.anMethodForAll;
-   pE             = ss.pE;
+   pE             = NULL;
+   bodiesInUse.clear();
+   bodyStrings.clear();
    bodiesInUse    = ss.bodiesInUse;
    bodyStrings    = ss.bodyStrings;
-   parameterCount = ss.parameterCount;
+   // replace body pointers with clones
+   Integer sz = bodiesInUse.size();
+   Integer i;
+   for (i = 0; i < sz; i++)
+   {
+      bodiesInUse.push_back(((CelestialBody*) ((bodiesInUse.front())->Clone())));
+      bodiesInUse.pop_front();
+   }
    return *this;
 }
 
@@ -373,8 +389,9 @@ StringArray SolarSystem::GetBodiesInUse() const
 //------------------------------------------------------------------------------
 SolarSystem* SolarSystem::Clone(void) const
 {
-   SolarSystem* theClone = new SolarSystem(*this);
-   return theClone;   // huh??????????????????????????????
+   // clone all objects in the Solar System as well
+   
+   return new SolarSystem(*this);
 }
 
 //------------------------------------------------------------------------------

@@ -66,8 +66,10 @@ protected:
     /// Central body radius
     Real                    cbRadius;
 
-private:
+    // copy constructor - needed by child classes (for Clone)
     AtmosphereModel(const AtmosphereModel& am);
+
+private:
     AtmosphereModel&        operator=(const AtmosphereModel& am);
 };
 

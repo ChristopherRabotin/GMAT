@@ -79,3 +79,21 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
     centralBodyLocation = cv;
 }
 
+//------------------------------------------------------------------------------
+//  AtmosphereModel(const AtmosphereModel& am)
+//------------------------------------------------------------------------------
+/**
+ *  Copy constructor.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
+GmatBase            (am),
+sunVector           (NULL),
+centralBody         (am.centralBody),
+centralBodyLocation (NULL),     // ************ NULL?
+cbRadius            (am.cbRadius)
+{
+   
+}
+
+
