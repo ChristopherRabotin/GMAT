@@ -1971,7 +1971,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    Integer status = 0;
-
+   
    if (isRunReady)
    {
       // check sandbox number
@@ -1985,7 +1985,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::PopupMessage(Gmat::ERROR_,
                                         "Invalid Sandbox number" + sandboxNum);
       }
-
+      
       try
       {
          AddSolarSysToSandbox(sandboxNum-1);
@@ -2016,8 +2016,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
 
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
-         runState = Gmat::IDLE;
-         theGuiInterpreter->NotifyRunCompleted(); //loj: 10/28/04 added
+         //loj: 11/2/04 moved below so that Frame can be set to normal size even when
+         // error occurs.
+         //runState = Gmat::IDLE;
+         //theGuiInterpreter->NotifyRunCompleted(); 
          
 #if DEBUG_RUN
          MessageInterface::ShowMessage
@@ -2044,13 +2046,16 @@ Integer Moderator::RunMission(Integer sandboxNum)
          (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
       status = -3;
    }
-
+   
+   runState = Gmat::IDLE;
+   theGuiInterpreter->NotifyRunCompleted(); //loj: 10/28/04 added
+   
    //loj: 10/13/04 added run status
    if (status == 0)
       MessageInterface::ShowMessage("Mission ran successfully.\n");
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");
-      
+   
    return status;
 }
 
