@@ -38,7 +38,7 @@
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
-    : RealVar(name, "CurrA1MJD", SYSTEM_PARAM, obj, desc, unit, true)
+    : TimeReal(name, "CurrA1MJD", SYSTEM_PARAM, obj, desc, unit, true)
 {
     AddObject(obj);
 }
@@ -53,7 +53,7 @@ CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CurrA1MJD::CurrA1MJD(const CurrA1MJD &param)
-    : RealVar(param)
+    : TimeReal(param)
 {
 }
 
@@ -69,7 +69,7 @@ CurrA1MJD::CurrA1MJD(const CurrA1MJD &param)
 CurrA1MJD& CurrA1MJD::operator=(const CurrA1MJD &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        TimeReal::operator=(right);
       
     return *this;
 }
@@ -82,101 +82,8 @@ CurrA1MJD::~CurrA1MJD()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real CurrA1MJD::EvaluateReal()
-{
-    Evaluate();
-    return mRealValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer CurrA1MJD::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* CurrA1MJD::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool CurrA1MJD::SetObject(Gmat::ObjectType objType,
-                                  const std::string &objName,
-                                  GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool CurrA1MJD::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool CurrA1MJD::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -235,7 +142,7 @@ ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
 //------------------------------------------------------------------------------
 ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
-    : RealVar(name, "ElapsedDays", SYSTEM_PARAM, obj, desc, unit, true)
+    : TimeReal(name, "ElapsedDays", SYSTEM_PARAM, obj, desc, unit, true)
 {
     // GmatBase data
     parameterCount = ElapsedDaysParamCount;
@@ -253,7 +160,7 @@ ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 ElapsedDays::ElapsedDays(const ElapsedDays &copy)
-    : RealVar(copy)
+    : TimeReal(copy)
 {
 }
 
@@ -270,7 +177,7 @@ const ElapsedDays& ElapsedDays::operator=(const ElapsedDays &right)
 {
     if (this != &right)
     {
-        RealVar::operator=(right);
+        TimeReal::operator=(right);
     }
     return *this;
 }
@@ -287,104 +194,8 @@ ElapsedDays::~ElapsedDays()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * Computes elapsed time from epoch and current time.
- *
- * @return the elapsed days
- */
-//------------------------------------------------------------------------------
-Real ElapsedDays::EvaluateReal()
-{
-    Evaluate();
-    return mRealValue;
-}
-
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer ElapsedDays::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* ElapsedDays::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool ElapsedDays::SetObject(Gmat::ObjectType objType,
-                            const std::string &objName,
-                            GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool ElapsedDays::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool ElapsedDays::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -421,7 +232,7 @@ Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
     if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
         return PARAMETER_TYPE[id - RealVarParamCount];
     else
-        return RealVar::GetParameterType(id);
+        return TimeReal::GetParameterType(id);
 
 }
 
@@ -437,7 +248,7 @@ std::string ElapsedDays::GetParameterTypeString(const Integer id) const
     if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
     else
-        return RealVar::GetParameterTypeString(id);
+        return TimeReal::GetParameterTypeString(id);
 
 }
 
@@ -453,7 +264,7 @@ std::string ElapsedDays::GetParameterText(const Integer id)
     if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
         return PARAMETER_TEXT[id - RealVarParamCount];
     else
-        return RealVar::GetParameterText(id);
+        return TimeReal::GetParameterText(id);
 
 }
 
@@ -472,7 +283,7 @@ Integer ElapsedDays::GetParameterID(const std::string &str)
             return i;
     }
    
-    return RealVar::GetParameterID(str);
+    return TimeReal::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -489,7 +300,7 @@ Real ElapsedDays::GetRealParameter(const Integer id)
    case INITIAL_EPOCH:
        return GetInitialEpoch();
    default:
-       return RealVar::GetRealParameter(id);
+       return TimeReal::GetRealParameter(id);
    }
 }
 
@@ -505,7 +316,7 @@ Real ElapsedDays::GetRealParameter(const std::string &label)
    if (label == "InitialEpoch")
        return GetInitialEpoch();
    else
-       return RealVar::GetRealParameter(label);
+       return TimeReal::GetRealParameter(label);
 }
 
 //------------------------------------------------------------------------------
@@ -523,7 +334,7 @@ Real ElapsedDays::SetRealParameter(const Integer id, const Real value)
        SetInitialEpoch(value);
        return value;
    default:
-       return RealVar::SetRealParameter(id, value);
+       return TimeReal::SetRealParameter(id, value);
    }
 }
 
@@ -543,7 +354,7 @@ Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
     }
     else
     {
-       return RealVar::SetRealParameter(label, value);
+       return TimeReal::SetRealParameter(label, value);
     }
 }
 
@@ -585,7 +396,7 @@ ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
 //------------------------------------------------------------------------------
 ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj,
                          const std::string &desc, const std::string &unit)
-    : RealVar(name, "ElapsedSecs", SYSTEM_PARAM, obj, desc, unit, true)
+    : TimeReal(name, "ElapsedSecs", SYSTEM_PARAM, obj, desc, unit, true)
 {
     // GmatBase data
     parameterCount = ElapsedSecsParamCount;
@@ -603,7 +414,7 @@ ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 ElapsedSecs::ElapsedSecs(const ElapsedSecs &copy)
-    : RealVar(copy)
+    : TimeReal(copy)
 {
 }
 
@@ -620,7 +431,7 @@ const ElapsedSecs& ElapsedSecs::operator=(const ElapsedSecs &right)
 {
     if (this != &right)
     {
-        RealVar::operator=(right);
+        TimeReal::operator=(right);
     }
     return *this;
 }
@@ -637,104 +448,8 @@ ElapsedSecs::~ElapsedSecs()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * Computes elapsed time from epoch and current time.
- *
- * @return the elapsed seconds
- */
-//------------------------------------------------------------------------------
-Real ElapsedSecs::EvaluateReal()
-{
-    Evaluate();
-    return mRealValue;
-}
-
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer ElapsedSecs::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* ElapsedSecs::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool ElapsedSecs::SetObject(Gmat::ObjectType objType,
-                                 const std::string &objName,
-                                 GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool ElapsedSecs::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool ElapsedSecs::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -772,7 +487,7 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
     if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
         return PARAMETER_TYPE[id - RealVarParamCount];
     else
-        return RealVar::GetParameterType(id);
+        return TimeReal::GetParameterType(id);
 
     //loj: 3/23/04
 //      switch (id)
@@ -780,7 +495,7 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 //      case INITIAL_EPOCH:
 //          return ElapsedSecs::PARAMETER_TYPE[id - RealVarParamCount];
 //      default:
-//          return RealVar::GetParameterType(id);
+//          return TimeReal::GetParameterType(id);
 //      }
 }
 
@@ -796,7 +511,7 @@ std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
     if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
     else
-        return RealVar::GetParameterTypeString(id);
+        return TimeReal::GetParameterTypeString(id);
 
 }
 
@@ -812,7 +527,7 @@ std::string ElapsedSecs::GetParameterText(const Integer id)
     if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
         return PARAMETER_TEXT[id - RealVarParamCount];
     else
-        return RealVar::GetParameterText(id);
+        return TimeReal::GetParameterText(id);
 
 }
 
@@ -831,7 +546,7 @@ Integer ElapsedSecs::GetParameterID(const std::string &str)
             return i;
     }
    
-    return RealVar::GetParameterID(str);
+    return TimeReal::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -848,7 +563,7 @@ Real ElapsedSecs::GetRealParameter(const Integer id)
    case INITIAL_EPOCH:
        return GetInitialEpoch();
    default:
-       return RealVar::GetRealParameter(id);
+       return TimeReal::GetRealParameter(id);
    }
 }
 
@@ -864,7 +579,7 @@ Real ElapsedSecs::GetRealParameter(const std::string &label)
    if (label == "InitialEpoch")
        return GetInitialEpoch();
    else
-       return RealVar::GetRealParameter(label);
+       return TimeReal::GetRealParameter(label);
 }
 
 //------------------------------------------------------------------------------
@@ -882,7 +597,7 @@ Real ElapsedSecs::SetRealParameter(const Integer id, const Real value)
        SetInitialEpoch(value);
        return value;
    default:
-       return RealVar::SetRealParameter(id, value);
+       return TimeReal::SetRealParameter(id, value);
    }
 }
 
@@ -902,6 +617,6 @@ Real ElapsedSecs::SetRealParameter(const std::string &label, const Real value)
     }
     else
     {
-       return RealVar::SetRealParameter(label, value);
+       return TimeReal::SetRealParameter(label, value);
     }
 }
