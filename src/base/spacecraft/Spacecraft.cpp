@@ -109,6 +109,15 @@ Spacecraft::Spacecraft(const std::string &nomme) :
     refPlaneID(parameterCount + 9)
 {
     parameterCount += 10;
+    
+    // A basic initial state
+    epoch = 21545.0;
+    state[0] = 7100.0;
+    state[1] =    0.0;
+    state[2] = 1300.0;
+    state[3] =    0.0;
+    state[4] =    7.35;
+    state[5] =    1.0;
 }
 
 //---------------------------------------------------------------------------
@@ -175,7 +184,29 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
  */
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
-    return -1;
+    if (str == "Epoch") return epochID;
+    if (str == "Element1") return state1ID;
+    if (str == "Element2") return state2ID;
+    if (str == "Element3") return state3ID;
+    if (str == "Element4") return state4ID;
+    if (str == "Element5") return state5ID;
+    if (str == "Element6") return state6ID;
+
+    if (str == "ReferenceBody") return refBodyID;
+    if (str == "CoordinateRepresentation") return refFrameID;
+    if (str == "PrincipalPlane") return refPlaneID;
+
+    // Representation specific values
+    if (str == "Position") {
+        /// @todo: Force the representation to Cartesian -- build 2
+        return state1ID;
+    }
+    if (str == "Velocity") {
+        /// @todo: Force the representation to Cartesian -- build 2
+        return state4ID;
+    }
+
+    return GmatBase::GetParameterID(str);
 }
 
 
