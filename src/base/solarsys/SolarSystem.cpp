@@ -111,7 +111,8 @@ bodyStrings     (ss.bodyStrings)
    Integer i;
    for (i = 0; i < sz; i++)
    {
-      bodiesInUse.push_back(((CelestialBody*) ((bodiesInUse.front())->Clone())));
+      bodiesInUse.push_back(((CelestialBody*)
+                           ((bodiesInUse.front())->Clone())));
       bodiesInUse.pop_front();
    }
 }
@@ -143,7 +144,8 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    Integer i;
    for (i = 0; i < sz; i++)
    {
-      bodiesInUse.push_back(((CelestialBody*) ((bodiesInUse.front())->Clone())));
+      bodiesInUse.push_back(((CelestialBody*)
+                           ((bodiesInUse.front())->Clone())));
       bodiesInUse.pop_front();
    }
    return *this;
