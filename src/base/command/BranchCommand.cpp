@@ -180,6 +180,25 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 }
 
 
+const std::string& BranchCommand::GetGeneratingString(void)
+{
+    fullString = generatingString;
+    Command *current;
+    
+    // Loop through the branches, appending the strings from commands in each
+    for (Integer which = 0; which < (Integer)branch.size(); ++which) {
+        current = branch[which];
+        while ((current != NULL) && (current != this)) {
+            fullString += "\n";
+            fullString += current->GetGeneratingString();
+            current = current->GetNext();
+        }
+    }
+    
+    return fullString;
+}
+
+
 bool BranchCommand::Execute(void)
 {
     commandExecuting = true;

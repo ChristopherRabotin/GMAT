@@ -154,7 +154,7 @@ void Command::SetGeneratingString(const std::string &gs)
 }
 
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString(void) const
+//  const std::string GetGeneratingString(void)
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this command.
@@ -168,7 +168,7 @@ void Command::SetGeneratingString(const std::string &gs)
  * @return The script line that was interpreted to define this command.
  */
 //------------------------------------------------------------------------------
-const std::string& Command::GetGeneratingString(void) const
+const std::string& Command::GetGeneratingString(void)
 {
     return generatingString;
 }

@@ -65,7 +65,8 @@ class Command : public GmatBase
         Command&            operator=(const Command &c);
         
         void                SetGeneratingString(const std::string &gs);
-        const std::string&  GetGeneratingString(void) const;
+        virtual const std::string&  
+                            GetGeneratingString(void);
 
         // Methods used to setup objects
         virtual bool        SetObject(const std::string &name,

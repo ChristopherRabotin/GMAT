@@ -150,10 +150,134 @@ void Target::InterpretAction(void)
     
     std::string component = generatingString.substr(loc, end-loc);
     if (component == "")
-        throw CommandException("Target string does not the targeter");
+        throw CommandException("Target string does not identify the targeter");
     SetStringParameter(targeterNameID, component);
 }
 
+
+// Parameter access methods
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Read accessor for parameter names.
+ *
+ * @param <id> the ID of the parameter.
+ *
+ * @return the text string for the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Target::GetParameterText(const Integer id) const
+{
+    if (id == targeterNameID)
+        return "Targeter";
+    
+    return BranchCommand::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Read accessor for parameter IDs.
+ *
+ * @param <str> the text description of the parameter.
+ *
+ * @return the integer ID for the parameter.
+ */
+//------------------------------------------------------------------------------
+Integer Target::GetParameterID(const std::string &str) const
+{
+    if (str == "Targeter")
+        return targeterNameID;
+    
+    return BranchCommand::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Read accessor for parameter types.
+ *
+ * @param <id> the integer ID of the parameter.
+ *
+ * @return the type of the parameter.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Target::GetParameterType(const Integer id) const
+{
+    if (id == targeterNameID)
+        return Gmat::STRING_TYPE;
+    
+    return BranchCommand::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Read accessor for parameter type data description.
+ *
+ * @param <id> the integer ID of the parameter.
+ *
+ * @return a string describing the type of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Target::GetParameterTypeString(const Integer id) const
+{
+    if (id == targeterNameID)
+        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+    
+    return BranchCommand::GetParameterTypeString(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Read accessor for string parameters.
+ *
+ * @param <id> the integer ID of the parameter.
+ *
+ * @return the string contained in the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Target::GetStringParameter(const Integer id) const
+{
+    if (id == targeterNameID)
+        return targeterName;
+    
+    return BranchCommand::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Write accessor for string parameters.
+ *
+ * @param <id> the integer ID of the parameter.
+ * @param <value> the new string stored in the parameter.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Target::SetStringParameter(const Integer id, const std::string &value)
+{
+    if (id == targeterNameID) {
+        targeterName = value;
+        return true;
+    }    
+    
+    return BranchCommand::SetStringParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 //  bool Initialize(void)

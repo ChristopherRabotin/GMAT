@@ -56,6 +56,18 @@ public:
     // Inherited methods that need some enhancement from the base class
     virtual bool        Append(Command *cmd);
     
+    // Parameter access methods
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+    
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+    
+    
     // Methods used to run the command
     virtual void        InterpretAction(void);
     virtual bool        Initialize(void);

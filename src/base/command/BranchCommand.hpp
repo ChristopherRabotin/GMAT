@@ -43,6 +43,9 @@ public:
     virtual void            SetSolarSystem(SolarSystem *ss);
     virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
     
+    virtual const std::string&  
+                            GetGeneratingString(void);
+    
     virtual Command*        GetNext(void);
     virtual bool            Initialize(void);
     virtual bool            Execute(void);
@@ -56,6 +59,8 @@ protected:
     bool                    commandExecuting;
     /// The branch that is being filled while the command sequence is being built
     Integer                 branchToFill;
+    /// Local container used to return the full sequence from the branches
+    std::string             fullString;
 };
 
 #endif // BRANCHCOMMAND_H
