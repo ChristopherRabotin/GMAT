@@ -54,6 +54,7 @@ private:
     int mNumTarget;
 
     void UpdateCommand();
+    void UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd);
     void AddDefaultMission();
     void AddDefaultMissionSeq(wxTreeItemId universe);
     void AddIcons();
