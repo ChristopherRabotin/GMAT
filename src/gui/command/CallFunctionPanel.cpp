@@ -207,6 +207,7 @@ void CallFunctionPanel::LoadData()
    // get input params
    if (numInput > 0)
    {
+      // for now - needs to be done in the sandbox
       Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
                            "Input", 0);
       inputStrings.Add(param->GetName().c_str());

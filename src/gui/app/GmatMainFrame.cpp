@@ -128,7 +128,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
    EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
-//   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
+   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
 
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
@@ -1697,8 +1697,7 @@ void GmatMainFrame::OnStopServer(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
 {
-   if (!MatlabInterface::IsOpen())
-      MatlabInterface::Open();
+   MatlabInterface::Open();
 }
 
 //------------------------------------------------------------------------------
@@ -1712,8 +1711,7 @@ void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
 {
-   if (MatlabInterface::IsOpen())
-      MatlabInterface::Close();
+   MatlabInterface::Close();
 }
 
 //------------------------------------------------------------------------------
@@ -1743,7 +1741,6 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
       return;
         
    win->SetDefaultSize(wxSize(event.GetDragRect().width, h));
-            
 
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
