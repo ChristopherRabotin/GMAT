@@ -120,7 +120,7 @@ bool Moderator::Initialize()
         theConfigManager = ConfigManager::Instance();
 
         // Create publisher
-        thePublisher = new Publisher();
+        thePublisher = Publisher::Instance();
 
         // Create factories
         theCommandFactory = new CommandFactory();
@@ -652,10 +652,11 @@ void Moderator::AddCommandToSandbox(Integer index)
 {
    Command *cmd = commands[index]->GetNext();
 
-   while (cmd != NULL)
+//   while (cmd != NULL)
+   if (cmd != NULL)
    {
       sandboxes[index]->AddCommand(cmd);
-      cmd = cmd->GetNext();
+//      cmd = cmd->GetNext();
    }
 }
 

@@ -19,7 +19,7 @@
 
 
 #include "Sandbox.hpp"
-
+#include "SandboxException.hpp"
 
 
 Sandbox::Sandbox(void) :
@@ -68,6 +68,9 @@ bool Sandbox::AddCommand(Command *cmd)
 
     if (!cmd)
         return false;
+        
+    if (cmd == sequence)
+        throw SandboxException("Adding command that is already in the Sandbox");
     
     if (sequence)
         return sequence->Append(cmd);
@@ -148,8 +151,11 @@ bool Sandbox::Execute(void)
             break;
         
         rv = current->Execute();
-        if (!rv)
-            return false;
+        if (!rv) {
+            std::string str = current->GetTypeName() +
+                              " Command failed to run to completion";
+            throw SandboxException(str);
+        }
         current = current->GetNext();
     }
 

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "Propagate.hpp"
+#include "Publisher.hpp"
 
 //------------------------------------------------------------------------------
 //  Propagate(void)
@@ -232,6 +233,7 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
 
 bool Propagate::Initialize(void)
 {
+    Command::Initialize();
     if (objectMap->find(propName) == objectMap->end())
         throw CommandException("Propagate command cannot find Propagator Setup");
     prop = (PropSetup *)((*objectMap)[propName]);
@@ -269,7 +271,11 @@ bool Propagate::Execute(void)
 
     Propagator *p = prop->GetPropagator();
     ForceModel *fm = prop->GetForceModel();
+    
     p->Initialize();
+    Real *state = fm->GetState();
+    Integer dim = fm->GetDimension();
+
     while (elapsedTime < desiredTime) {
         if (!p->Step())
             throw CommandException("Propagator Failed to Step");
@@ -285,12 +291,15 @@ bool Propagate::Execute(void)
             break;
         }
         // Publish the data here
+        publisher->Publish(state, dim);
     }
     
-    if (desiredTime - elapsedTime > 0.0)
+    if (desiredTime - elapsedTime > 0.0) {
         if (!p->Step(desiredTime - elapsedTime))
             throw CommandException("Propagator Failed to Step fixed interval");
-    // Publish the final data point here
+        // Publish the final data point here
+        publisher->Publish(state, dim);
+    }
 
     return true;
 }

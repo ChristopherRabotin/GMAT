@@ -47,9 +47,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new ElapsedTimeParam(withName, "", 86400.0);
    if (ofType == "CurrentTimeParam")
       return new CurrentTimeParam(withName, "", 0.0);
-// Need a default c'tor for this one
-//   if (ofType == "SpacecraftStateParam")
-//      return new SpacecraftStateParam(withName, "", 86400.0);
+   if (ofType == "SpacecraftStateParam")
+      return new SpacecraftStateParam(withName, "");
    // add others here
    else
       return NULL;

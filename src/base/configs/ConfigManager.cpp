@@ -68,18 +68,18 @@ void ConfigManager::AddForceModel(ForceModel *fm)
 
 void ConfigManager::AddSubscriber(Subscriber *subs)
 {
-    throw ConfigManagerException("Subscribers cannot be managed yet");
-//    std::string name = subs->GetName();
-//    if (name == "")
-//        throw ConfigManagerException("Unnamed objects cannot be managed");
-//    if (mapping.find(name) != mapping.end()) {
-//        name += " is already in the configuration table";
-//        throw ConfigManagerException(name);
-//    }
-//    else {
-//        objects.push_back(subs);
-//        mapping[name] = subs;
-//    }
+//    throw ConfigManagerException("Subscribers cannot be managed yet");
+    std::string name = subs->GetName();
+    if (name == "")
+        throw ConfigManagerException("Unnamed objects cannot be managed");
+    if (mapping.find(name) != mapping.end()) {
+        name += " is already in the configuration table";
+        throw ConfigManagerException(name);
+    }
+    else {
+        objects.push_back(subs);
+        mapping[name] = subs;
+    }
 }
 
 

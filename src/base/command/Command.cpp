@@ -18,7 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#include "Command.hpp" // class's header file
+#include "Command.hpp"          // class's header file
+#include "Publisher.hpp"        // For the publisher
 
 
 //---------------------------------
@@ -313,6 +314,8 @@ void Command::SetPublisher(Publisher *p)
 bool Command::Initialize(void)
 {
     initialized = AssignObjects();
+    if (publisher == NULL)
+        publisher = Publisher::Instance();
     return initialized;
 }
 
@@ -343,6 +346,8 @@ Command* Command::GetNext(void)
 //------------------------------------------------------------------------------
 bool Command::Append(Command *cmd)
 {
+    if (cmd == this)
+        throw CommandException("Attempting to add command already in list");
     if (next)
         next->Append(cmd);
     else
@@ -416,4 +421,6 @@ bool Command::ClearObjects(void)
 {
     return true;
 }
+
+
 

@@ -26,6 +26,8 @@
 #define TOGGLE_HPP
 
 #include "Command.hpp" // inheriting class's header file
+#include <list>
+
 
 /**
  * Command used to turn subscribers on and off
@@ -38,9 +40,29 @@ class Toggle : public Command
 
         Toggle(const Toggle& t);
 		Toggle&               operator=(const Toggle& t);
+		
+        // Access methods derived classes can override
+        virtual std::string GetParameterText(const Integer id) const;
+        virtual Integer     GetParameterID(const std::string &str) const;
+        virtual Gmat::ParameterType
+                            GetParameterType(const Integer id) const;
+        virtual std::string GetParameterTypeString(const Integer id) const;
 
-        virtual bool          Execute(void);
+        virtual std::string GetStringParameter(const Integer id) const;
+        virtual bool        SetStringParameter(const Integer id,
+                                               const std::string &value);
+
+        virtual bool        Execute(void);
+        
+    protected:
+        /// Subscriber list for the toggle
+        StringArray         subNames;
+        /// Corresponding subscribers
+        std::list<Subscriber *>  subs;
+        /// Parameter ID for the subscriber names
+        const Integer       subscriberID;
 };
+
 
 #endif // TOGGLE_HPP
 

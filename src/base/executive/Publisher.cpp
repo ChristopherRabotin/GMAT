@@ -21,6 +21,18 @@
 #include <string>
 
 
+// Initialize the singleton
+Publisher* Publisher::instance = NULL;
+
+
+Publisher* Publisher::Instance(void)
+{
+    if (instance == NULL)
+        instance = new Publisher;
+    return instance;
+}
+
+
 Publisher::Publisher(void)
 {
 }
@@ -65,7 +77,7 @@ bool Publisher::Publish(Real * data, Integer count)
     // Convert the data into a string for distribution
     char stream[4096] = "";
     
-    for (int i = 0; i < count; ++i) {
+    for (Integer i = 0; i < count; ++i) {
         sprintf(stream, "%s%12lf", stream, data[i]);
         if (i < count - 1)
             strcat(stream, ", ");
@@ -87,9 +99,9 @@ bool Publisher::Publish(Real * data, Integer count)
 }
 
 
-bool Publisher::Publish(char * data, int count)
+bool Publisher::Publish(char * data, Integer count)
 {
-    int i;
+    Integer i;
     
     // No subscribers
     if (subs.empty())
@@ -120,7 +132,7 @@ bool Publisher::Publish(char * data, int count)
 }
 
 
-bool Publisher::Publish(int * data, int count)
+bool Publisher::Publish(Integer * data, Integer count)
 {
     // No subscribers
     if (subs.empty())
@@ -129,7 +141,7 @@ bool Publisher::Publish(int * data, int count)
     // Convert the data into a string for distribution
     char stream[4096];
 
-    for(int i = 0; i < count; ++i) {
+    for(Integer i = 0; i < count; ++i) {
         sprintf(stream, "%s%d", stream, data[i]);
         if (i < count - 1)
             strcat(stream, ", ");

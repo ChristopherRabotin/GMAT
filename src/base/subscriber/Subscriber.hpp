@@ -35,13 +35,13 @@
 #ifndef Subscriber_hpp
 #define Subscriber_hpp
 
-#include "gmatdefs.hpp"
+#include "GmatBase.hpp"
 
-class GMAT_API Subscriber
+
+class GMAT_API Subscriber : public GmatBase
 {
 public:
-    Subscriber(void);
-//    Subscriber(std::string name = "");
+    Subscriber(std::string typeStr, std::string nomme);
     Subscriber& operator=(const Subscriber &right);
     virtual ~Subscriber(void);
 
@@ -55,6 +55,7 @@ public:
 protected:
     const char        * data;
     Subscriber        * next;
+    bool                active;
 
     virtual bool        Distribute(Integer len) = 0;
     virtual bool        Distribute(const Real * dat, Integer len);

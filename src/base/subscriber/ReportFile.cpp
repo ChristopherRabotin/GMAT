@@ -28,12 +28,20 @@ ReportFile::ReportFile(char * filename)
         dstream.open("ReportFile.txt");
 }
 */
-ReportFile::ReportFile(const std::string &name, const std::string &fileName)
+ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
+    Subscriber      ("ReportFile", name),
+    filename        (fileName),
+    precision       (12),
+    filenameID      (parameterCount),
+    precisionID     (parameterCount + 1)
 {
     if (fileName != "")
         dstream.open(fileName.c_str());
     else
         dstream.open("ReportFile.txt");
+
+    // Added 1 parameter
+    parameterCount += 2;
 }
 
 
@@ -57,3 +65,103 @@ bool ReportFile::Distribute(int len)
 
     return true;
 }
+
+
+bool ReportFile::Distribute(const Real * dat, Integer len)
+{
+    if (!dstream.is_open())
+        return false;
+        
+    dstream.precision(precision);
+
+    if (len == 0)
+        return false;
+    else {
+        for (int i = 0; i < len-1; ++i)
+            dstream << dat[i] << "  ";
+        dstream << dat[len-1] << std::endl;
+    }
+
+    return true;
+}
+
+
+std::string ReportFile::GetParameterText(const Integer id) const
+{
+    if (id == filenameID)
+        return "Filename";
+    if (id == precisionID)
+        return "Precision";
+    return Subscriber::GetParameterText(id);
+}
+
+
+Integer ReportFile::GetParameterID(const std::string &str) const
+{
+    if (str == "Filename")
+        return filenameID;
+    if (str == "Precision")
+        return precisionID;
+    return Subscriber::GetParameterID(str);
+}
+
+
+Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
+{
+    if (id == filenameID)
+        return Gmat::STRING_TYPE;
+    if (id == precisionID)
+        return Gmat::INTEGER_TYPE;
+    return Subscriber::GetParameterType(id);
+}
+
+
+std::string ReportFile::GetParameterTypeString(const Integer id) const
+{
+    if (id == filenameID)
+        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+    if (id == precisionID)
+        return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
+    return Subscriber::GetParameterTypeString(id);
+}
+
+
+
+Integer ReportFile::GetIntegerParameter(const Integer id) const
+{
+    if (id == precisionID)
+        return precision;
+    return Subscriber::GetIntegerParameter(id);
+}
+
+
+Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
+{
+    if (id == precisionID) {
+        if (value > 0)
+            precision = value;
+        return precision;
+    }
+    return Subscriber::SetIntegerParameter(id, value);
+}
+
+
+std::string ReportFile::GetStringParameter(const Integer id) const
+{
+    if (id == filenameID)
+        return filename;
+    return Subscriber::GetStringParameter(id);
+}
+
+
+bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
+{
+    if (id == filenameID) {
+        // Close the stream if it is open
+    
+        filename = value;
+        return true;
+    }
+    return Subscriber::SetStringParameter(id, value);
+}
+

@@ -41,9 +41,11 @@
 //  public methods
 //---------------------------------
 
-Subscriber::Subscriber(void) :
+Subscriber::Subscriber(std::string typeStr, std::string nomme) :
+    GmatBase        (Gmat::SUBSCRIBER, typeStr, nomme),
     data            (NULL),
-    next            (NULL)
+    next            (NULL),
+    active          (true)
 {
 }
 
@@ -53,12 +55,18 @@ Subscriber::~Subscriber(void)
 
 bool Subscriber::ReceiveData( const char * datastream)
 {
+    if (!active)        // Not currently processing data
+        return true;
+        
     data = datastream;
     return true;
 }
 
 bool Subscriber::ReceiveData( const char * datastream,  const int len)
 {
+    if (!active)        // Not currently processing data
+        return true;
+
     data = datastream;
     if (!Distribute(len)) {
         data = NULL;
@@ -72,6 +80,9 @@ bool Subscriber::ReceiveData( const char * datastream,  const int len)
 
 bool Subscriber::ReceiveData(const double * datastream, const int len)
 {
+    if (!active)        // Not currently processing data
+        return true;
+
     if (len == 0)
         return true;
 
