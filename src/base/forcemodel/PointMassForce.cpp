@@ -88,6 +88,9 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
    Gmat::STRING_TYPE,
 };
 
+#define DEBUG_PMF_BODY 0
+#define DEBUG_PMF_DERV 0
+
 //---------------------------------
 // public
 //---------------------------------
@@ -110,13 +113,7 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
    theBody = NULL;
     
    // create default body
-   theBodyName = "Earth"; //loj: 5/7/04 added
-
-   // temp fix, will be removed when default mission sets initial data
-   //if (solarSystem != NULL)
-   //{
-   //   SetBodyName("Earth");
-   //}
+   theBodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +125,7 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 //------------------------------------------------------------------------------
 PointMassForce::~PointMassForce(void)
 {
-   //delete theBody;
+   //delete theBody; //loj: 5/20/04
 }
 
 //------------------------------------------------------------------------------
@@ -201,9 +198,13 @@ bool PointMassForce::Initialize(void)
       if (theBody != NULL)
       {
          mu = theBody->GetGravitationalConstant();
-         //MessageInterface::ShowMessage
-         //   ("PointMassForce::Initialize() setting mu=%f for type=%s, "
-         //    "name=%s\n", mu, theBody->GetTypeName().c_str(), theBody->GetName().c_str());
+         
+#if DEBUG_PMF_BODY
+         MessageInterface::ShowMessage
+            ("PointMassForce::Initialize() setting mu=%f for type=%s, "
+             "name=%s\n", mu, theBody->GetTypeName().c_str(), theBody->GetName().c_str());
+#endif
+         
       }
       else
       {
@@ -284,7 +285,16 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    //waw: 04/27/04
    Real now = epoch + dt/86400.0;
    Rvector6 rv = theBody->GetState(now), relativePosition;
+   
+#if DEBUG_PMF_BODY
+   ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
+                 theBody->GetName(), now, rv);
+#endif
 
+#if DEBUG_PMF_DERV
+   ShowDerivative("PointMassForce::GetDerivatives() BEFORE compute", state, satCount);
+#endif
+   
    for (Integer i = 0; i < satCount; i++) 
    {
       i6 = i * 6;
@@ -323,6 +333,11 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
          deriv[i6+5] = 0.0; 
       }
    }
+
+#if DEBUG_PMF_DERV
+   ShowDerivative("PointMassForce::GetDerivatives() AFTER compute", state, satCount);
+#endif
+   
    return true;
 }
 
@@ -463,16 +478,6 @@ std::string PointMassForce::GetBodyName()
 //------------------------------------------------------------------------------
 void PointMassForce::SetBody(CelestialBody *body)
 {
-   //loj: 5/7/04
-   //if (body != NULL)
-   //{
-   //    if (theBody != NULL)
-   //    {
-   //         //delete theBody;
-   //         theBody = NULL;
-   //    }
-   //}
-   
    //MessageInterface::ShowMessage("PointMassForce::SetBody() body name=%s\n",
    //                              body->GetName().c_str());
    
@@ -497,16 +502,6 @@ void PointMassForce::SetBody(CelestialBody *body)
 void PointMassForce::SetBodyName(const std::string &name)
 {
    theBodyName = name;
-   
-   //     if (solarSystem != NULL)
-   //     {
-   //        CelestialBody *body = solarSystem->GetBody(name);
-   //        if (body != NULL)
-   //        {
-   //           SetBody(body);
-   //           return true;
-   //        }
-   //     }
 }
 
 //---------------------------------
@@ -540,7 +535,6 @@ Integer PointMassForce::GetParameterID(const std::string &str) const
    {
       if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
          return i;
-      //loj: 3/19/04 return i + PhysicalModelParamCount;
    }
    return PhysicalModel::GetParameterID(str);
 }
@@ -661,7 +655,6 @@ std::string PointMassForce::GetStringParameter(const Integer id) const
    {
    case BODY:
       return theBodyName;
-      //return theBody->GetTypeName(); //loj: What should we return?
    default:
       return PhysicalModel::GetStringParameter(id);
    }
@@ -703,3 +696,66 @@ bool PointMassForce::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void ShowBodyState(const std::string &header, Real time, Rvector6 &rv);
+//------------------------------------------------------------------------------
+void  PointMassForce::ShowBodyState(const std::string &header, Real time,
+                                    Rvector6 &rv)
+{
+#if DEBUG_PMF_BODY
+   static int debugCount1 = 0;
+   static bool showBodyState = true;
+   
+   if (showBodyState)
+   {
+      MessageInterface::ShowMessage("%s\n", header.c_str());
+      MessageInterface::ShowMessage(">>>>>=======================================\n");
+      MessageInterface::ShowMessage("time=%f  rv=%s\n", time, rv.ToString().c_str());
+      MessageInterface::ShowMessage("=======================================<<<<<\n");
+      
+      debugCount1++;
+      if (debugCount1 > 10)
+         showBodyState = false;
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void ShowDerivative(const std::string &header, Real *state, Integer satCount)
+//------------------------------------------------------------------------------
+void  PointMassForce::ShowDerivative(const std::string &header, Real *state,
+                                     Integer satCount)
+{
+#if DEBUG_PMF_DERV
+   static int debugCount2 = 0;
+   static bool showDeriv = true;
+   
+   if (showDeriv)
+   {
+      MessageInterface::ShowMessage("%s\n", header.c_str());
+      MessageInterface::ShowMessage(">>>>>=======================================\n");
+      Integer i6;
+      Rvector6 stateVec = Rvector6(state);
+   
+      for (Integer i = 0; i < satCount; i++) 
+      {
+         i6 = i * 6;
+         MessageInterface::ShowMessage
+            ("sc#=%d  state=%s\n", i, stateVec.ToString().c_str());
+      
+         MessageInterface::ShowMessage
+            ("deriv=%f %f %f %f %f %f\n", deriv[i6], deriv[i6+1], deriv[i6+2],
+             deriv[i6+3], deriv[i6+4], deriv[i6+5]);
+      }
+      MessageInterface::ShowMessage("=======================================<<<<<\n");
+      
+      debugCount2++;
+      if (debugCount2 > 10)
+         showDeriv = false;
+   }
+#endif
+}
