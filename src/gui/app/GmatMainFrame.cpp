@@ -44,10 +44,12 @@
 #include "SpacecraftPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
-#include "PropagateCommandPanel.hpp"
+//#include "PropagateCommandPanel.hpp" //loj: 10/20/04 renamed
+#include "PropagatePanel.hpp"
 #include "ImpulsiveBurnSetupPanel.hpp"
 #include "DCSetupPanel.hpp"
-#include "ManeuverSetupPanel.hpp"
+//#include "ManeuverSetupPanel.hpp" //loj: 10/20/04 renamed
+#include "ManeuverPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OpenGlPlotSetupPanel.hpp"
 #include "ReportFileSetupPanel.hpp"
@@ -57,6 +59,8 @@
 #include "SolverEventPanel.hpp"
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
+#include "SavePanel.hpp" //loj: 10/20/04 added
+#include "TogglePanel.hpp" //loj: 10/20/04 added
 #include "ParameterSetupPanel.hpp"
 #include "IfPanel.hpp"
 #include "ForLoopPanel.hpp"
@@ -398,7 +402,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
             ("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
 #endif
          //loj: 10/6/04 removed item->GetDesc() from the arg. list
-         sizer->Add(new PropagateCommandPanel(panel, item->GetCommand()),
+         sizer->Add(new PropagatePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::PROPAGATE_COMMAND)
@@ -408,7 +412,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
          //loj: 10/6/04 removed item->GetDesc() from the arg. list
-         sizer->Add(new PropagateCommandPanel(panel, item->GetCommand()),
+         sizer->Add(new PropagatePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::MANEUVER_COMMAND)
@@ -417,7 +421,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new ManeuverSetupPanel(panel, item->GetCommand()),
+         sizer->Add(new ManeuverPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::TARGET_COMMAND)
@@ -446,6 +450,24 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
          sizer->Add(new VaryPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if (dataType == GmatTree::SAVE_COMMAND) //loj: 10/20/04 added
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new SavePanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if (dataType == GmatTree::TOGGLE_COMMAND) //loj: 10/20/04 added
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new TogglePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::VIEW_SOLVER_GOALS)

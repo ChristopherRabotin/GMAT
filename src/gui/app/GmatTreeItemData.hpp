@@ -142,8 +142,11 @@ namespace GmatTree
         MANEUVER_COMMAND,
         PROPAGATE_COMMAND,
         TARGET_COMMAND,
-        ACHIEVE_COMMAND, //loj: 10/4/04 added ACHIEVE and VARY
+        END_TARGET_COMMAND,
+        ACHIEVE_COMMAND, //loj: 10/4/04 added ACHIEVE, VARY
         VARY_COMMAND,
+        SAVE_COMMAND,    //loj: 10/20/04 added SAVE, TOGGLE
+        TOGGLE_COMMAND,
         
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,
@@ -153,13 +156,17 @@ namespace GmatTree
         VARIABLES,
         
         IF_CONTROL,
-        WHILE_CONTROL,
-        FOR_CONTROL,
-        DO_CONTROL,
-        SWITCH_CONTROL,
-        END_IF_CONTROL,
         ELSE_IF_CONTROL,
         ELSE_CONTROL,
+        END_IF_CONTROL,
+        FOR_CONTROL,
+        END_FOR_CONTROL,   //loj: 10/13/04 added
+        WHILE_CONTROL,
+        END_WHILE_CONTROL, //loj: 10/13/04 added
+        DO_CONTROL,
+        END_DO_CONTROL,
+        SWITCH_CONTROL,
+        END_SWITCH_CONTROL,
     };
 }
 #endif // GmatTreeItemData_hpp

@@ -19,6 +19,7 @@
 #include "wx/image.h"
 #include "wx/imaglist.h"
 
+#include "MissionTreeItemData.hpp"
 #include "DecoratedTree.hpp"
 #include "GuiInterpreter.hpp"
 
@@ -53,6 +54,8 @@ private:
    int mNumTarget;
    int mNumAchieve;
    int mNumVary;
+   int mNumSave; //loj: 10/20/04 added Save, Toggle
+   int mNumToggle;
    int mNumIfStatement;
    int mNumWhileLoop;
    int mNumForLoop;
@@ -60,9 +63,16 @@ private:
    int mNumSwitchCase;
 
    void UpdateCommand();
-   wxTreeItemId& UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd);
-   void ExpandChildCommand(wxTreeItemId parentTreeId, GmatCommand *baseCmd,
+   wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
+   void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
+   wxTreeItemId AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
+                              GmatTree::ItemType type, GmatCommand *cmd,
+                              int *cmdCount, int endCount = 0);
+   wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
+                              wxTreeItemId prevId, GmatTree::IconType icon,
+                              GmatTree::ItemType type, GmatCommand *prevCmd,
+                              GmatCommand *cmd, int *cmdCount, int endCount = 0);
    void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
@@ -113,7 +123,7 @@ private:
     
    void OnOpen();
    void OnClose();
- 
+
    wxMenu* CreateAddPopupMenu();
    wxMenu* CreateInsertPopupMenu();
    wxMenu* CreateTargetPopupMenu(bool insert);
@@ -121,7 +131,11 @@ private:
    wxMenu* CreateAddControlLogicPopupMenu();
    wxMenu* CreateAddIfPopupMenu();
    wxMenu* CreateInsertControlLogicPopupMenu();
-    
+
+   // for Debug
+   void ShowCommands(const wxString &msg = "");
+   void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd);
+   
    DECLARE_EVENT_TABLE();
        
    enum
