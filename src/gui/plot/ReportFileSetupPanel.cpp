@@ -69,6 +69,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 
     Create();
     Show();
+    theApplyButton->Disable();
 }
 
 //-------------------------------
