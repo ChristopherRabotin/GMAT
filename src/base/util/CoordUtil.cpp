@@ -56,7 +56,7 @@ Real CoordUtil::MeanToTrueAnomaly(Real ma, Real ecc, Real tol)
 
    if (ret > 0 )
       throw UtilityException("CoordUtil::MeanToTrueAnomaly() Error converting "
-                             " Mean Anomaly to True Anomaly");
+                             " Mean Anomaly to True Anomaly\n");
    else
       return ta;
 }
@@ -635,7 +635,7 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
    if(grav < 1.0)
    {
       throw UtilityException("CoordUtil::CartesianToKeplerian() ravity constant "
-                             "too small for conversion to Keplerian elements");
+                             "too small for conversion to Keplerian elements\n");
    }
    else
    {
@@ -657,11 +657,11 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
          case 2:
             throw UtilityException
                ("CoordUtil::CartesianToKeplerian() "
-                "Gravity constant too small for conversion to Keplerian elements");
+                "Gravity constant too small for conversion to Keplerian elements\n");
          default:
             throw UtilityException
                ("CoordUtil::CartesianToKeplerian() "
-                "Unable to convert Cartesian elements to Keplerian");
+                "Unable to convert Cartesian elements to Keplerian\n");
          }
       }
       else
@@ -669,7 +669,7 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
          std::stringstream ss;
          ss << cartVec;
          throw UtilityException
-            ("CoordUtil::CartesianToKeplerian() Invalid Cartesian elements:" +
+            ("CoordUtil::CartesianToKeplerian() Invalid Cartesian elements:\n" +
              ss.str());
       }
    }
@@ -709,7 +709,7 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
       MessageInterface::ShowMessage
          ("CoordUtil::KeplerianToCartesian() "
           "Can't have an eccentricity less than 0.0 (%g)."
-          " Will change the sign of the eccentricity.", kepl[1]);
+          " Will change the sign of the eccentricity.\n", kepl[1]);
 
       kepl[1] *= -1.0;
    }
@@ -719,7 +719,7 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
          ("CoordUtil::KeplerianToCartesian() "
           "Can't have a positive semimajor axis (%g)"
           " with an eccentricity greater than 1.0 (%g)."
-          " Will change the sign of the semimajor axis.",
+          " Will change the sign of the semimajor axis.\n",
           kepl[0], kepl[1]);
       
       kepl[0] *= -1.0;
@@ -730,7 +730,7 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
          ("CoordUtil::KeplerianToCartesian() "
           "Can't have a negative semimajor axis (%g)"
           " with an eccentricity less than 1.0 (%g)."
-          " Will change the sign of the semimajor axis.",
+          " Will change the sign of the semimajor axis.\n",
           kepl[0], kepl[1]);
 
       kepl[0] *= -1.0;
@@ -747,14 +747,14 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
       {
          throw UtilityException
             ("CoordUtil::KeplerianToCartesian() "
-             "Gravity constant too small for conversion to Keplerian elements");
+             "Gravity constant too small for conversion to Keplerian elements\n");
       }
       else if (kepl[1] == 1.0)
       {
          throw UtilityException
             ("CoordUtil::KeplerianToCartesian() "
              "Conversion of parabolic state (ecc = 1) from "
-             "Keplerian to Cartesian not currently supported");
+             "Keplerian to Cartesian not currently supported\n");
       }
       else
       {
@@ -763,7 +763,7 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
             MessageInterface::ShowMessage
                ("CoordUtil::KeplerianToCartesian() "
                 "Probable loss of precision in conversion "
-                "of hyperbolic Keplerian elements to Cartesian.");
+                "of hyperbolic Keplerian elements to Cartesian.\n");
          }
 
          // if the return code from a call to compute_kepl_to_cart is greater than zero
@@ -771,7 +771,7 @@ Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
          {
             throw UtilityException
                ("CoordUtil::KeplerianToCartesian() "
-                "Unable to convert Keplerian elements to Cartesian");
+                "Unable to convert Keplerian elements to Cartesian\n");
          }
          else
          {
