@@ -544,6 +544,11 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
          nodeName.Printf("%s%d", cmdTypeName.c_str(), ++(*cmdCount));      
    }
 
+   if (nodeName.Contains("BeginScript"))
+   {
+      nodeName.Replace("BeginScript", "ScriptEvent");
+   }
+
 #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
       ("MissionTree::AppendCommand() cmdTypeName=%s, nodeName=%s\n",
@@ -636,7 +641,12 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    {
       nodeName.Printf("%s%d", typeName.c_str(), ++(*cmdCount));
    }
-   
+
+   if (nodeName.Contains("BeginScript"))
+   {
+      nodeName.Replace("BeginScript", "ScriptEvent");
+   }
+
 #if DEBUG_MISSION_TREE
    MessageInterface::ShowMessage
       ("MissionTree::InsertCommand() cmd=%s, nodeName=%s\n",
