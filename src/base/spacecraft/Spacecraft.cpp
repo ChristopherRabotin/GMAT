@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------------
 
 #include "Spacecraft.hpp"
+#include <iostream>     // will remove it later
+#include <sstream>     // will remove it later
 
 /// Set the default values for spacecraft 
 const Real        Spacecraft::EPOCH      = 21545.0; 
@@ -28,6 +30,7 @@ const Real        Spacecraft::ELEMENT3 = 1300.0;
 const Real        Spacecraft::ELEMENT4 = 0.0;
 const Real        Spacecraft::ELEMENT5 = 7.35; 
 const Real        Spacecraft::ELEMENT6 = 1.0;
+const std::string Spacecraft::DATEFORMAT = "Julian";
 const std::string Spacecraft::REF_BODY   = "Earth"; 
 const std::string Spacecraft::REF_FRAME  = "Cartesian"; 
 const std::string Spacecraft::REF_PLANE  = "Equatorial"; 
@@ -44,21 +47,24 @@ const std::string Spacecraft::REF_PLANE  = "Equatorial";
  *
  */
 Spacecraft::Spacecraft() : 
-    GmatBase     (Gmat::SPACECRAFT,"Spacecraft",""),
-    epochID      (parameterCount),
-    state1ID     (parameterCount + 1),
-    state2ID     (parameterCount + 2),
-    state3ID     (parameterCount + 3),
-    state4ID     (parameterCount + 4),
-    state5ID     (parameterCount + 5),
-    state6ID     (parameterCount + 6),
-    refBodyID    (parameterCount + 7),
-    refFrameID   (parameterCount + 8),
-    refPlaneID   (parameterCount + 9),
-    massID       (parameterCount + 10)
+    GmatBase       (Gmat::SPACECRAFT,"Spacecraft",""),
+    epochID        (parameterCount),
+    state1ID       (parameterCount + 1),
+    state2ID       (parameterCount + 2),
+    state3ID       (parameterCount + 3),
+    state4ID       (parameterCount + 4),
+    state5ID       (parameterCount + 5),
+    state6ID       (parameterCount + 6),
+    refBodyID      (parameterCount + 7),
+    refFrameID     (parameterCount + 8),
+    refPlaneID     (parameterCount + 9),
+    massID         (parameterCount + 10),
+    dateFormatID   (parameterCount + 11),
+    coeffDragID    (parameterCount + 12),
+    incidentAreaID (parameterCount + 13),
+    reflectCoeffID (parameterCount + 14)
 {
-    // parameterCount += 10;
-    parameterCount += 11;
+    parameterCount += 15;
     InitializeValues();
 }
 
@@ -74,20 +80,24 @@ Spacecraft::Spacecraft() :
  *
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
-    GmatBase     (Gmat::SPACECRAFT, typeStr, name),
-    epochID      (parameterCount),
-    state1ID     (parameterCount + 1),
-    state2ID     (parameterCount + 2),
-    state3ID     (parameterCount + 3),
-    state4ID     (parameterCount + 4),
-    state5ID     (parameterCount + 5),
-    state6ID     (parameterCount + 6),
-    refBodyID    (parameterCount + 7),
-    refFrameID   (parameterCount + 8),
-    refPlaneID   (parameterCount + 9),
-    massID       (parameterCount + 10)
+    GmatBase       (Gmat::SPACECRAFT, typeStr, name),
+    epochID        (parameterCount),
+    state1ID       (parameterCount + 1),
+    state2ID       (parameterCount + 2),
+    state3ID       (parameterCount + 3),
+    state4ID       (parameterCount + 4),
+    state5ID       (parameterCount + 5),
+    state6ID       (parameterCount + 6),
+    refBodyID      (parameterCount + 7),
+    refFrameID     (parameterCount + 8),
+    refPlaneID     (parameterCount + 9),
+    massID         (parameterCount + 10),
+    dateFormatID   (parameterCount + 11),
+    coeffDragID    (parameterCount + 12),
+    incidentAreaID (parameterCount + 13),
+    reflectCoeffID (parameterCount + 14)
 {
-    parameterCount += 11;
+    parameterCount += 15;
     InitializeValues();
 }
 
@@ -104,20 +114,24 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
  *
  */
 Spacecraft::Spacecraft(const std::string &name) :
-    GmatBase(Gmat::SPACECRAFT, "Spacecraft", name),
-    epochID      (parameterCount),
-    state1ID     (parameterCount + 1),
-    state2ID     (parameterCount + 2),
-    state3ID     (parameterCount + 3),
-    state4ID     (parameterCount + 4),
-    state5ID     (parameterCount + 5),
-    state6ID     (parameterCount + 6),
-    refBodyID    (parameterCount + 7),
-    refFrameID   (parameterCount + 8),
-    refPlaneID   (parameterCount + 9),
-    massID       (parameterCount + 10)
+    GmatBase       (Gmat::SPACECRAFT, "Spacecraft", name),
+    epochID        (parameterCount),
+    state1ID       (parameterCount + 1),
+    state2ID       (parameterCount + 2),
+    state3ID       (parameterCount + 3),
+    state4ID       (parameterCount + 4),
+    state5ID       (parameterCount + 5),
+    state6ID       (parameterCount + 6),
+    refBodyID      (parameterCount + 7),
+    refFrameID     (parameterCount + 8),
+    refPlaneID     (parameterCount + 9),
+    massID         (parameterCount + 10),
+    dateFormatID   (parameterCount + 11),
+    coeffDragID    (parameterCount + 12),
+    incidentAreaID (parameterCount + 13),
+    reflectCoeffID (parameterCount + 14)
 {
-    parameterCount += 11;
+    parameterCount += 15;
     InitializeValues();
 }
 
@@ -130,28 +144,36 @@ Spacecraft::Spacecraft(const std::string &name) :
  * @param <a> The original that is being copied.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
-    GmatBase    (a),
-    epoch       (a.epoch),
-    refBody     (a.refBody),
-    refFrame    (a.refFrame),
-    refPlane    (a.refPlane),
-    epochID     (a.epochID),
-    state1ID    (a.state1ID),
-    state2ID    (a.state2ID),
-    state3ID    (a.state3ID),
-    state4ID    (a.state4ID),
-    state5ID    (a.state5ID),
-    state6ID    (a.state6ID),
-    refBodyID   (a.refBodyID),
-    refFrameID  (a.refFrameID),
-    refPlaneID  (a.refPlaneID),
-    massID      (a.massID)
+    GmatBase       (a),
+    epoch          (a.epoch),
+    dateFormat     (a.dateFormat),
+    refBody        (a.refBody),
+    refFrame       (a.refFrame),
+    refPlane       (a.refPlane),
+    epochID        (a.epochID),
+    state1ID       (a.state1ID),
+    state2ID       (a.state2ID),
+    state3ID       (a.state3ID),
+    state4ID       (a.state4ID),
+    state5ID       (a.state5ID),
+    state6ID       (a.state6ID),
+    refBodyID      (a.refBodyID),
+    refFrameID     (a.refFrameID),
+    refPlaneID     (a.refPlaneID),
+    massID         (a.massID),
+    dateFormatID   (a.dateFormatID),
+    coeffDragID    (a.coeffDragID),
+    incidentAreaID (a.incidentAreaID),
+    reflectCoeffID (a.reflectCoeffID)
 {
     parameterCount = a.parameterCount;
     for (int i = 0; i < 6; ++i)
        state[i] = a.state[i];
 
     mass = a.mass;
+    coeffDrag = a.coeffDrag;
+    incidentArea = a.incidentArea;
+    reflectCoeff = a.reflectCoeff;
 }
 
 //---------------------------------------------------------------------------
@@ -182,6 +204,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
     // Duplicate the member data        
     epoch    = a.epoch;
+    dateFormat = a.dateFormat;
     refBody  = a.refBody;
     refFrame = a.refFrame;
     refPlane = a.refPlane;
@@ -190,10 +213,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
        state[i] = a.state[i];
 
     mass = a.mass;
+    coeffDrag = a.coeffDrag;
+    incidentArea = a.incidentArea;
+    reflectCoeff = a.reflectCoeff;
 
     return *this;
 }
-
 
 //---------------------------------------------------------------------------
 //  Integer GetParameterID(const std::string &str) const
@@ -208,6 +233,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
     if (str == "Epoch") return epochID;
+
+    if (str == "DateFormat") return dateFormatID;
 
     if (str == "Element1" || str == "X" || str == "SMA" || str == "RMAG")  
        return state1ID;
@@ -235,6 +262,12 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 
     if (str == "Mass") return massID;
 
+    if (str == "CoefficientDrag") return coeffDragID;
+
+    if (str == "IncidentArea") return incidentAreaID;
+
+    if (str == "ReflectivityCoefficient") return reflectCoeffID;
+
     // Representation specific values
     if (str == "Position") {
         /// @todo: Force the representation to Cartesian -- build 2
@@ -252,6 +285,8 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
     if (id == epochID) return "Epoch";
+
+    if (id == dateFormatID) return "DateFormat";
   
     if (id == state1ID || id == state2ID || id == state3ID || id == state4ID
         || id == state5ID || id == state6ID)
@@ -260,14 +295,22 @@ std::string Spacecraft::GetParameterText(const Integer id) const
     if (id == refBodyID) return "ReferenceBody";
     if (id == refFrameID) return "CoordinateRepresentation";
     if (id == refPlaneID) return "PrincipalPlane";
+
     if (id == massID) return "Mass";
     
+    if (id == coeffDragID) return "CoefficientDrag" ;
+
+    if (id == incidentAreaID) return "IncidentArea";
+
+    if (id == reflectCoeffID) return "ReflectivityCoefficient";
+
     return GmatBase::GetParameterText(id);
 }
 
 Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 {
     if (id == epochID) return Gmat::REAL_TYPE;
+    if (id == dateFormatID) return Gmat::STRING_TYPE;
     if (id == state1ID) return Gmat::REAL_TYPE;
     if (id == state2ID) return Gmat::REAL_TYPE;
     if (id == state3ID) return Gmat::REAL_TYPE;
@@ -308,7 +351,11 @@ Real Spacecraft::GetRealParameter(const Integer id) const
     if (id == state6ID) return state[5];
 
     if (id == massID) return mass;
-    
+
+    if (id == coeffDragID) return coeffDrag;
+    if (id == incidentAreaID) return incidentArea;
+    if (id == reflectCoeffID) return reflectCoeff;
+
     return GmatBase::GetRealParameter(id);
 }
 
@@ -349,9 +396,12 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
         label == "FPA" || label == "DECV")
        return state[5];
 
-    if (label == "Mass")
-       return mass;
+    if (label == "Mass") return mass;
  
+    if (label == "CoefficientDrag") return coeffDrag;
+    if (label == "IncidentArea") return incidentArea;
+    if (label == "ReflectivityCoefficient") return reflectCoeff;
+
     return GmatBase::GetRealParameter(label);
 }
 //---------------------------------------------------------------------------
@@ -414,6 +464,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 
     if (id == massID) return SetRealParameter("Mass", value);
 
+    if (id == coeffDragID) return SetRealParameter("CoefficientDrag",value);
+    if (id == incidentAreaID) return SetRealParameter("IncidentArea",value);
+    if (id == reflectCoeffID) 
+        return SetRealParameter("ReflectivityCoefficient",value);
+
     return GmatBase::SetRealParameter(id, value);
 }
 
@@ -454,6 +509,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
     if (label == "Mass") return mass = value;
 
+    if (label == "CoefficientDrag") return coeffDrag = value;
+    if (label == "IncidentArea") return incidentArea = value;
+    if (label == "ReflectivityCoefficient") return reflectCoeff = value;
+
     return GmatBase::SetRealParameter(label, value);
 }
 //---------------------------------------------------------------------------
@@ -469,6 +528,9 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
  */
 std::string Spacecraft::GetStringParameter(const Integer id) const
 {
+    if (id == dateFormatID)
+       return dateFormat;
+
     if (id == refBodyID)
        return refBody; 
 
@@ -494,13 +556,23 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id != refBodyID && id != refFrameID && id != refPlaneID)
+    if (id != dateFormatID && id != refBodyID && id != refFrameID && 
+        id != refPlaneID)
        return GmatBase::SetStringParameter(id, value);
 
-    if (id == refBodyID)
+    if (id == dateFormatID)
+    {
+       if (value != "Julian" && value != "UTC" && value != "Gregorian")
+       {
+          return GmatBase::SetStringParameter(id, value);
+       }
+       dateFormat = value;
+    }
+    else if (id == refBodyID)
        refBody = value; 
     else if (id == refFrameID)
     {  
+
        // Check for invalid input then return unknown value from GmatBase 
        if (value != "Cartesian" && value != "Keplerian" && 
            value != "Spherical1" && value != "Spherical2")
@@ -552,6 +624,85 @@ void Spacecraft::SetState(Real s1, Real s2, Real s3, Real s4, Real s5, Real s6)
     state[3] = s4;
     state[4] = s5;
     state[5] = s6;
+}
+//---------------------------------------------------------------------------
+//  void Spacecraft::ConvertDateFormat(const std::string &dateType)
+//---------------------------------------------------------------------------
+/**
+ * Converts to the epoch's date format.
+ * 
+ * @param <dateType>  Type of date format 
+ *
+ */
+void Spacecraft::ConvertDateFormat(const std::string &dateType)
+{
+#if 0
+    // Determine the input of date format 
+    if (dateFormat == "Julian" && dateType != "Julian") 
+    {
+       A1Mjd *jd = new A1Mjd(epoch);
+
+       if (dateType == "UTC")
+       {
+          UtcDate utcDate = jd->ToUtcDate();
+          epoch = utcDate.ToPackedCalendarReal();
+       }
+
+       if (dateType == "Gregorian")
+       {
+          A1Date a1Date = jd->ToA1Date();
+          epoch = a1Date.ToPackedCalendarReal();
+       }
+
+       delete jd;
+    }
+    else if (dateFormat == "UTC" && dateType != "UTC")
+    {
+       std::ostringstream epochBuffer;
+       epochBuffer.precision(9);
+       epochBuffer.setf(std::ios::fixed);
+       epochBuffer << epoch; 
+      
+       UtcDate *utcDate = new UtcDate(epochBuffer.str());
+
+       if (dateType == "Julian")
+       {
+
+       }
+
+       if (dateType == "Gregorian")
+       {
+
+       }
+
+       delete utcDate;
+    }
+    else if (dateFormat == "Gregorian" && dateType != "Gregorian")
+    {
+       std::ostringstream epochBuffer;
+       epochBuffer.precision(9);
+       epochBuffer.setf(std::ios::fixed);
+       epochBuffer << epoch; 
+      
+       A1Date *a1Date = new A1Date(epochBuffer.str());
+
+       if (dateType == "Julian")
+       {
+
+       }
+
+       if (dateType == "UTC")
+       {
+
+       }
+
+       delete a1Date;
+    }
+    else
+       return;   // do nothing
+
+    dateFormat = dateType;
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -800,11 +951,15 @@ void Spacecraft::InitializeValues()
     state[4] = Spacecraft::ELEMENT5;
     state[5] = Spacecraft::ELEMENT6;
 
+    dateFormat = Spacecraft::DATEFORMAT;
     refBody = Spacecraft::REF_BODY;
     refFrame = Spacecraft::REF_FRAME;
     refPlane = Spacecraft::REF_PLANE;
 
     mass = 0.0;
+    coeffDrag = 0.0;
+    incidentArea = 0.0;
+    reflectCoeff = 0.0;
 }
 
 //---------------------------------------------------------------------------

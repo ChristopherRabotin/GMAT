@@ -21,6 +21,9 @@
 #define Spacecraft_hpp
 
 #include "GmatBase.hpp"
+#include "A1Date.hpp"
+#include "A1Mjd.hpp"
+#include "UtcDate.hpp"
 #include "Cartesian.hpp"
 #include "Keplerian.hpp"
 #include "SphericalOne.hpp"
@@ -58,6 +61,7 @@ public:
     virtual Real* GetState(void); // { return state; }
     void SetState(Real s1, Real s2, Real s3, Real s4, Real s5, Real s6);
 
+    void  ConvertDateFormat(const std::string &dateType);
     void  ConvertRepresentation(const std::string &elementType);
 
     // Default values for spacecraft 
@@ -68,6 +72,7 @@ public:
     static const Real ELEMENT4; 
     static const Real ELEMENT5; 
     static const Real ELEMENT6; 
+    static const std::string DATEFORMAT; 
     static const std::string REF_BODY; 
     static const std::string REF_FRAME; 
     static const std::string REF_PLANE; 
@@ -77,6 +82,10 @@ protected:
     Real         epoch;
     Real         state[6];  
     Real         mass;
+    Real         coeffDrag;
+    Real         incidentArea;
+    Real         reflectCoeff;
+    std::string  dateFormat;
     std::string  refBody; 
     std::string  refFrame;   
     std::string  refPlane; 
@@ -91,10 +100,15 @@ protected:
     Integer      refFrameID; 
     Integer      refPlaneID; 
     Integer      massID;
+    Integer      dateFormatID;
+    Integer      coeffDragID;
+    Integer      incidentAreaID;
+    Integer      reflectCoeffID;
 
 private:
-    void InitializeValues();
-    std::string GetElementName(const Integer id) const;
+    void        InitializeValues();
+    std::string GetElementName(const Integer id) const; 
+
 };
 
 #endif // Spacecraft_hpp
