@@ -20,6 +20,7 @@
 #define OpenGlPlot_hpp
 
 #include "Subscriber.hpp"
+#include "SolarSystem.hpp"
 #include <map>
 
 class OpenGlPlot : public Subscriber
@@ -30,7 +31,7 @@ public:
    virtual ~OpenGlPlot(void);
    
    // methods inherited from Subscriber
-   virtual bool Initialize(); //loj: 3/8/04 added
+   virtual bool Initialize();
    
    UnsignedInt GetColor(const std::string &item, const std::string &scName);
    bool SetColor(const std::string &item, const std::string &scName,
@@ -84,6 +85,14 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
+   //loj: 12/14/04 added
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
+
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+
 protected:
    
    bool AddSpacecraft(const std::string &name, Integer index);
@@ -91,6 +100,8 @@ protected:
    bool RemoveSpacecraft(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
+
+   SolarSystem *mSolarSystem;
    
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
@@ -106,6 +117,8 @@ protected:
    
    Integer mScCount;
    StringArray mScNameArray;
+   StringArray mAllRefObjectNames;
+   
    RealArray mScXArray;
    RealArray mScYArray;
    RealArray mScZArray;

@@ -156,7 +156,7 @@ bool OpenGlPlot::Initialize()
 #endif
 
          return PlotInterface::CreateGlPlotWindow
-            (instanceName, mOldName, mDrawWireFrame, mOverlapPlot);
+            (instanceName, mOldName, mDrawWireFrame, mOverlapPlot, mSolarSystem);
          
       }
       else
@@ -709,6 +709,56 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
 const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
+}
+
+//loj: 12/14/04 added
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
+                                   const std::string &name)
+{
+   if (type == Gmat::SOLAR_SYSTEM)
+      return mSolarSystem;
+      
+   throw GmatBaseException("OpenGlPlot::GetRefObject() the object name: " + name +
+                           "not found\n");
+}
+
+//loj: 12/14/04 added
+//------------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name)
+{
+   // just check for the type
+   if (type == Gmat::SOLAR_SYSTEM)
+   {
+      mSolarSystem = (SolarSystem*)obj;
+#if DEBUG_OPENGL_INIT
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::SetRefObject() SolarSystem is set to addr=%d\n", mSolarSystem);
+#endif
+   }
+   
+   return true;
+}
+
+//loj: 12/14/04 added
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   mAllRefObjectNames.clear();
+
+   if (type == Gmat::SOLAR_SYSTEM)
+      mAllRefObjectNames.push_back(mSolarSystem->GetName());
+
+   return mAllRefObjectNames;
 }
 
 //---------------------------------
