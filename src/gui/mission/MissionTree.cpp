@@ -169,8 +169,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mNumTarget = 0;
    mNumAchieve = 0;
    mNumVary = 0;
-//   mNumSave = 0; //loj: 10/20/04 added Save, Toggle
-//   mNumToggle = 0;
+   mNumSave = 0; //loj: 10/20/04 added Save, Toggle
+   mNumToggle = 0;
    mNumIfStatement = 0;
    mNumWhileLoop = 0;
    mNumForLoop = 0;
@@ -222,8 +222,8 @@ void MissionTree::UpdateMission(bool resetCounter)
       mNumTarget = 0;
       mNumAchieve = 0;
       mNumVary = 0;
-//      mNumSave = 0;
-//      mNumToggle = 0;
+      mNumSave = 0;
+      mNumToggle = 0;
       mNumIfStatement = 0;
       mNumWhileLoop = 0;
       mNumForLoop = 0;
@@ -363,22 +363,22 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
                        cmd, &mNumVary);
       Expand(parent);
    }
-//   else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
-//   {
-//      mNewTreeId =
-//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
-//                       cmd, &mNumSave, mNumSave);
-//
-//      Expand(parent);
-//   }
-//   else if (cmdTypeName == "Toggle")
-//   {
-//      mNewTreeId =
-//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::TOGGLE_COMMAND,
-//                       cmd, &mNumToggle, mNumToggle);
-//
-//      Expand(parent);
-//   }
+   else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
+   {
+      mNewTreeId =
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
+                       cmd, &mNumSave, mNumSave);
+
+      Expand(parent);
+   }
+   else if (cmdTypeName == "Toggle")
+   {
+      mNewTreeId =
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::TOGGLE_COMMAND,
+                       cmd, &mNumToggle, mNumToggle);
+
+      Expand(parent);
+   }
    else if (cmdTypeName == "For")
    {
       mNewTreeId =
