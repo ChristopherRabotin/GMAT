@@ -16,15 +16,17 @@
 //------------------------------------------------------------------------------
 
 
-
 #include "ScriptInterpreter.hpp" // class's header file
 #include "Moderator.hpp" // class's header file
 #include "Command.hpp" //loj:added
 #include <fstream>
 
-
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 3, July 2004"
+#define REV_STRING "Build 3.2, October 2004"
+
+
+//#define DEBUG_SCRIPTINTERPRETER
+//#define DEBUG_SCRIPT_READING_AND_WRITING
 
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
@@ -400,58 +402,79 @@ bool ScriptInterpreter::Parse(void)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::WriteScript(void)
 {
-    *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
+   *outstream << "% GMAT Script File\n% GMAT Release " << REV_STRING << "\n\n";
      
-    // First write out the objects, one type at a time
-    StringArray::iterator current;
-    StringArray objs;
+   // First write out the objects, one type at a time
+   StringArray::iterator current;
+   StringArray objs;
     
-    // Spacecraft
-    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
-            
-    // Force Models
-    objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
-            
-    // Propagator setups
-    objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
-            
-    // Burn objects
-    objs = moderator->GetListOfConfiguredItems(Gmat::BURN);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
-    
-    // Solver objects
-    objs = moderator->GetListOfConfiguredItems(Gmat::SOLVER);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
-    
-    // Subscriber setups
-    objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-    for (current = objs.begin(); current != objs.end(); ++current)
-        if (!BuildObject(*current))
-            return false;
+   // Spacecraft
+   objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
 
-    // Command sequence
-    GmatCommand *cmd = moderator->GetNextCommand();
-    while (cmd != NULL) {
-        *outstream << (cmd->GetGeneratingString()) << "\n";
-        if (cmd == cmd->GetNext())
-           throw InterpreterException("Self-reference found in command stream during write.");
-        cmd = cmd->GetNext();
-    }
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
+      std::cout << "Found " << objs.size() << " Spacecraft\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+            
+   // Force Models
+   objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
+
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Force Models\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+            
+   // Propagator setups
+   objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Propagators\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+            
+   // Burn objects
+   objs = moderator->GetListOfConfiguredItems(Gmat::BURN);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Burns\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
     
-    return true;
+   // Solver objects
+   objs = moderator->GetListOfConfiguredItems(Gmat::SOLVER);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Solvers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+    
+   // Subscriber setups
+   objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      std::cout << "Found " << objs.size() << " Subscribers\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+
+   // Command sequence
+   GmatCommand *cmd = moderator->GetNextCommand();
+   while (cmd != NULL) {
+      *outstream << (cmd->GetGeneratingString()) << "\n";
+      if (cmd == cmd->GetNext())
+         throw InterpreterException("Self-reference found in command stream during write.");
+      cmd = cmd->GetNext();
+   }
+    
+   return true;
 }
 
 

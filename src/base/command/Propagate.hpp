@@ -162,6 +162,8 @@ protected:
    Real                    stopEpoch;
    /// Dimension used for (local) state vector
    Integer                 dim;
+   /// Identifies when the command is in single step mode
+   bool                    singleStepMode;
    
    /// Allowed modes of propagation
    enum PropModes {

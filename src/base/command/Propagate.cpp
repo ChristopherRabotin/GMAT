@@ -51,6 +51,7 @@ Propagate::Propagate(void) :
    propNameID                  (parameterCount+3),
    secondsToProp               (8640.0),
    secondsToPropID             (parameterCount+4),
+   singleStepMode              (false),
    currentMode                 (INDEPENDENT)
 {
    // Increase the number of parms by the 2 new ones
@@ -95,6 +96,7 @@ Propagate::Propagate(const Propagate &p) :
    propNameID                  (p.propNameID),
    secondsToProp               (p.secondsToProp),
    secondsToPropID             (p.secondsToPropID),
+   singleStepMode              (p.singleStepMode),
    currentMode                 (p.currentMode)
 {
    // Increase the number of parms by the 2 new ones
@@ -740,17 +742,24 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       if (satEnd == (Integer)std::string::npos)
          satEnd = i->find(")", loc);
       if (satEnd == (Integer)std::string::npos)
-         throw CommandException("Propagate string teminating paren \")\" missing\n");
+         throw CommandException("Propagate string terminating paren \")\" missing\n");
+
+      if (end == (Integer)std::string::npos)
+         end = satEnd;
    
       #ifdef DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage("Building list of SpaceObjects:\n");
       #endif
-      while (end < satEnd) {
+      do {
          while ((*i)[loc] == ' ')
             ++loc;
          if (end == (Integer)std::string::npos)
             throw CommandException("Propagate string \"" + (*i) +
                                    "\" does not identify spacecraft\n");
+         #ifdef DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage("i = \"%s\", loc = %d and end = %d\n",
+                                 i->c_str(), loc, end);
+         #endif
           
          component = i->substr(loc, end-loc);
          SetObject(component, Gmat::SPACECRAFT);
@@ -763,97 +772,104 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          end = i->find(",", loc);
          if (end == (Integer)std::string::npos)
             end = satEnd;
-      }
+      } while (end < satEnd);
 
       end = i->find("{", loc);
-      if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not identify stopping condition: looking for {\n");
+//      if (end == (Integer)std::string::npos)
+//         throw CommandException("Propagate does not identify stopping condition: looking for {\n");
    
-      loc = end + 1;
-      while ((*i)[loc] == ' ')
-         ++loc;
-         
-      end = i->find(".", loc);
-   
-      if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not identify stopping condition: looking for .\n");
-       
-      std::string paramObj = i->substr(loc, end-loc);
-       
-      loc = end + 1;
-      end = i->find("=", loc);
-      if (end == (Integer)std::string::npos)
-      {
-         end = i->find(",", loc);
-         if (end != (Integer)std::string::npos)
-            throw CommandException("Propagate does not yet support multiple stopping condition\n");
-           
-         end = i->find("}", loc);
+      if (end != (Integer)std::string::npos) {
+         loc = end + 1;
+         while ((*i)[loc] == ' ')
+            ++loc;
+            
+         end = i->find(".", loc);
+      
          if (end == (Integer)std::string::npos)
-            throw CommandException("Propagate does not identify stopping condition: looking for }\n");
-      }
-       
-      std::string paramType = i->substr(loc, end-loc);
-   
-      unsigned int start = 0;
-      for (unsigned int idx=start; idx<paramType.size(); ++idx)
-      {
-         if (paramType[idx] == ' ')
+            throw CommandException("Propagate does not identify stopping condition: looking for .\n");
+          
+         std::string paramObj = i->substr(loc, end-loc);
+          
+         loc = end + 1;
+         end = i->find("=", loc);
+         if (end == (Integer)std::string::npos)
          {
-            paramType.erase(idx, 1);
-            start = idx;
+            end = i->find(",", loc);
+            if (end != (Integer)std::string::npos)
+               throw CommandException("Propagate does not yet support multiple stopping condition\n");
+              
+            end = i->find("}", loc);
+            if (end == (Integer)std::string::npos)
+               throw CommandException("Propagate does not identify stopping condition: looking for }\n");
          }
-      }
-       
-      Moderator *theModerator = Moderator::Instance();
-       
-       // create parameter
-      std::string paramName = paramObj + "." + paramType;
-      //loj: if we want to see parameter via the GUI, use named parameter
-      // This will be deleted when system shuts down
-      Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
-      //stopParam->SetStringParameter("Object", paramObj);
-      stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
+          
+         std::string paramType = i->substr(loc, end-loc);
       
-      StopCondition *stopCond =
-         theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
-      
-      stopCond->SetStringParameter("StopVar", paramName);
-      
-      SetObject(stopCond, Gmat::STOP_CONDITION);
-      // Store the spacecraft name for use when setting the epoch data
-      stopSatNames.push_back(paramObj);
-//      stopSatNames[index] = paramObj;
-   
-      if (paramType != "Apoapsis" && paramType != "Periapsis")
-      {
-         loc = end + 1;
-         Real propStopVal = atof(&(i->c_str())[loc]);
-         stopCond->SetRealParameter("Goal", propStopVal);
+         unsigned int start = 0;
+         for (unsigned int idx=start; idx<paramType.size(); ++idx)
+         {
+            if (paramType[idx] == ' ')
+            {
+               paramType.erase(idx, 1);
+               start = idx;
+            }
+         }
+          
+         Moderator *theModerator = Moderator::Instance();
+          
+          // create parameter
+         std::string paramName = paramObj + "." + paramType;
+         //loj: if we want to see parameter via the GUI, use named parameter
+         // This will be deleted when system shuts down
+         Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
+         //stopParam->SetStringParameter("Object", paramObj);
+         stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
          
-         #ifdef DEBUG_PROPAGATE_EXE
-            MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
-                                          " propStopVal = %f\n", propStopVal);
-         #endif
-   
+         StopCondition *stopCond =
+            theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
+         
+         stopCond->SetStringParameter("StopVar", paramName);
+         
+         SetObject(stopCond, Gmat::STOP_CONDITION);
+         // Store the spacecraft name for use when setting the epoch data
+         stopSatNames.push_back(paramObj);
+   //      stopSatNames[index] = paramObj;
+      
+         if (paramType != "Apoapsis" && paramType != "Periapsis")
+         {
+            loc = end + 1;
+            Real propStopVal = atof(&(i->c_str())[loc]);
+            stopCond->SetRealParameter("Goal", propStopVal);
+            
+            #ifdef DEBUG_PROPAGATE_EXE
+               MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
+                                             " propStopVal = %f\n", propStopVal);
+            #endif
+      
+            loc = end + 1;
+            end = i->find(",", loc);
+            if (end != (Integer)std::string::npos)
+               throw CommandException("Propagate does not yet support multiple stopping condition\n");
+          
+            loc = end + 1;
+            end = i->find("}", loc);
+              
+            if (end == (Integer)std::string::npos)
+               throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+         }
          loc = end + 1;
-         end = i->find(",", loc);
-         if (end != (Integer)std::string::npos)
-            throw CommandException("Propagate does not yet support multiple stopping condition\n");
-       
-         loc = end + 1;
-         end = i->find("}", loc);
-           
-         if (end == (Integer)std::string::npos)
-            throw CommandException("Propagate does not identify stopping condition: looking for }\n");
       }
-       
-      loc = end + 1;
+      else
+         loc = satEnd - 1;
       end = i->find(")", loc);
-       
+          
       if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not identify stopping condition: looking for )\n");
+         throw CommandException("Propagate does not end correctly: looking for )\n");
    }
+   // NOW test to be sure there is at least one stop cond.
+   if (stopWhen.empty())
+      singleStepMode = true;
+      //throw CommandException("Propagate does not identify any stopping conditions\n");
 }
 
 
@@ -934,20 +950,35 @@ bool Propagate::TakeAStep(Real propStep)
 //------------------------------------------------------------------------------
 bool Propagate::Initialize(void)
 {
+#if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage("Propagate::Initialize() entered.\n%s\n",
+                                    generatingString.c_str());
+#endif
+
    GmatCommand::Initialize();
    
    inProgress = false;
-   Integer index = 0;
+   unsigned int index = 0;
    prop.clear();
    SpaceObject *so;
    
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i) {
+      if (satName.size() <= index)
+         throw CommandException("Size mismatch for SpaceObject names\n");
+    
       if (objectMap->find(*i) == objectMap->end())
          throw CommandException("Propagate command cannot find Propagator Setup\n");
    
-      if (stopWhen.empty())
-         throw CommandException("Propagate command does not have any stopping condition\n");
+      if (satName[index]->empty())
+         throw CommandException("Propagate command does not have a SpaceObject for "
+                                + (*i) + " in \n\"" + generatingString + "\"\n");
    
+      if (stopWhen.empty())
+         //throw CommandException("Propagate command does not have any stopping condition\n");
+         singleStepMode = true;
+      else
+         singleStepMode = false;
+
       prop.push_back((PropSetup *)((*objectMap)[*i]));
       if (!prop[index])
          return false;
@@ -1005,7 +1036,7 @@ bool Propagate::Initialize(void)
       stopSats.push_back(so);
    }
 
-   if (stopWhen.size() == 0)
+   if ((stopWhen.size() == 0) && !singleStepMode)
       throw CommandException("No stopping conditions specified!");
    if (solarSys != NULL)
    {
@@ -1031,6 +1062,10 @@ bool Propagate::Initialize(void)
       MessageInterface::ShowMessage
          ("Propagate::Initialize() SolarSystem not set in StopCondition");
    }
+
+#if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage("Propagate::Initialize() complete.\n");
+#endif
 
    return initialized;
 }
@@ -1099,6 +1134,10 @@ GmatCommand* Propagate::GetNext()
 //------------------------------------------------------------------------------
 bool Propagate::Execute(void)
 {
+#if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
+#endif
+
    if (initialized == false)
       throw CommandException("Propagate Command was not Initialized\n");
 
@@ -1130,6 +1169,8 @@ bool Propagate::Execute(void)
          baseEpoch.clear();
 
          for (Integer n = 0; n < (Integer)prop.size(); ++n) {
+            if (satName[n]->empty())
+               throw CommandException("Propagator has no associated space objects.");
             GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
             Integer epochID = sat1->GetParameterID("Epoch");
             baseEpoch.push_back(sat1->GetRealParameter(epochID));
@@ -1183,17 +1224,17 @@ bool Propagate::Execute(void)
          publisher->Publish(streamID, pubdata, dim+1);
          inProgress = true;
       }
-   
+
       /// @todo Find a more elegant way to perform epoch refresh during propagation
       for (unsigned int i = 0; i < fm.size(); ++i)
          fm[i]->UpdateInitialData();
-      
-      Integer epochID = stopSats[0]->GetParameterID("Epoch");;
+
+      Integer epochID = sats[0]->GetParameterID("Epoch");;
+         
       while (!stopCondMet)
       {
          if (!TakeAStep())
             throw CommandException("Propagate::Execute() Propagator Failed to Step\n");
-
          for (unsigned int i = 0; i < fm.size(); ++i) {
             // orbit related parameters use spacecraft for data
             elapsedTime[i] = fm[i]->GetTime();
@@ -1204,6 +1245,9 @@ bool Propagate::Execute(void)
             fm[i]->UpdateSpaceObject(currEpoch[i]);
          }
    
+         if (singleStepMode)
+            break;
+
          //------------------------------------------
          // loop through StopCondition list
          //------------------------------------------
