@@ -73,6 +73,9 @@ public:
    UtcMjd ToUtcMjd();
    Ut1Mjd ToUt1Mjd();
 
+   // additions to compute offsets for planetary orientation data (see IAU doc)
+   Real   JulianDaysFromTCBEpoch() const;
+
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
    std::string* ToValueStrings();
