@@ -18,9 +18,14 @@
 //------------------------------------------------------------------------------
 
 
+// #define DEBUG_COMMAND_DEALLOCATION
+
 #include "Command.hpp"          // class's header file
 #include "Publisher.hpp"        // For the publisher
 
+#ifdef DEBUG_COMMAND_DEALLOCATION
+  #include "MessageInterface.hpp" // MessageInterface
+#endif
 
 //---------------------------------
 //  public methods
@@ -66,8 +71,13 @@ streamID        (-1)
 GmatCommand::~GmatCommand()
 {
    // Delete the subsequent GmatCommands
-   if (next)
+   if (next) {
+      #ifdef DEBUG_COMMAND_DEALLOCATION
+         MessageInterface::ShowMessage("Deleting %s\n", 
+                                       next->GetTypeName().c_str());
+      #endif
       delete next;   
+   }
 }
 
 

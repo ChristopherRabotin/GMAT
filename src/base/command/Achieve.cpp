@@ -62,10 +62,10 @@ Achieve::Achieve() :
 //------------------------------------------------------------------------------
 Achieve::~Achieve()
 {
-   if (goalParm)
-      delete goalParm;
-   if (goalTarget)
-      delete goalTarget;
+//   if (goalParm)
+//      delete goalParm;
+//   if (goalTarget)
+//      delete goalTarget;
 }
 
     

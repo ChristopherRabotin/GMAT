@@ -19,7 +19,14 @@
 //------------------------------------------------------------------------------
 
 
+// #define DEBUG_BRANCHCOMMAND_DEALLOCATION
+
+
 #include "BranchCommand.hpp"
+
+#ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+   #include "MessageInterface.hpp"
+#endif
 
 BranchCommand::BranchCommand(const std::string &typeStr) :
    GmatCommand          (typeStr),
@@ -36,8 +43,22 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
 BranchCommand::~BranchCommand()
 {
    std::vector<GmatCommand*>::iterator node;
+   GmatCommand* current;
+   
    for (node = branch.begin(); node != branch.end(); ++node)
    {
+      // Find the end for each branch and disconnect it fron the start
+      current = *node;
+      while (current->GetNext() != this)
+         current = current->GetNext();
+         
+      // Calling Remove this way just sets the next pointer to NULL
+      #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
+         MessageInterface::ShowMessage("Removing %s\n", 
+                                       current->GetTypeName().c_str());
+      #endif
+      current->Remove(current);  
+      
       if (*node)
          delete *node;
    }
@@ -94,11 +115,15 @@ bool BranchCommand::Initialize(void)
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       current = *node;
-      while ((current != NULL) && (current != this))
+//      while ((current != NULL) && (current != this))
+      while (current != this)
       {
          if (!current->Initialize())
                retval = false;
          current = current->GetNext();
+         if (current == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
       }
    }
    
