@@ -118,7 +118,7 @@ Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
 {
    for (int i=0; i<Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT; i++)
       if (OBJECT_TYPE_STRING[i] == typeString)
-         return (Gmat::ObjectType)i;
+         return (Gmat::ObjectType)(i + Gmat::SPACECRAFT);
 
    return Gmat::UNKNOWN_OBJECT;
 }
