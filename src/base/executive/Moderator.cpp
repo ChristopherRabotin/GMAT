@@ -927,6 +927,8 @@ bool Moderator::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool Moderator::ClearResource()
 {
+    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
+
     theConfigManager->RemoveAllItems();
     return true;
 }
@@ -939,18 +941,17 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
 {
     MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
     
-    GmatCommand *cmd = commands[sandboxNum-1];
-    delete cmd;
-    
     //djc: Maybe set to NULL if you plan to do something completely different from
     // the way GMAT acts from a script?  I think you want to do this, though:
     // commands[sandboxNum-1] = NULL;
-                                    
+    GmatCommand *cmd = commands[sandboxNum-1];
+    DeleteCommand(cmd);
+    
     //djc: if you plan on adding the gui commands to the sandbox next, using 
     // the same approach used when running a script.
-    commands[sandboxNum-1] = new NoOp; 
+    cmd = new NoOp; 
 
-    //@todo Clear plot for build3
+    //@todo loj:Clear plot for build3
     //PlotInterface::ClearGlPlotWindow();
     
     return true;
@@ -1033,7 +1034,8 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 {
-    return commands[sandboxNum-1]->GetNext();
+    //loj: 3/5/04 return commands[sandboxNum-1]->GetNext();
+    return commands[sandboxNum-1];
 }
 
 // sandbox
@@ -1239,13 +1241,17 @@ void Moderator::CreateDefaultMission()
     // ReportFile
     Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
     sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+    sub->Activate(false);
+    
     // XyPlot
     sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
     sub->SetStringParameter("XParamName", "DefaultSC.CurrentTime");
     sub->SetStringParameter("YParamName", "DefaultSC.X");
-    sub->Activate(true);
+    sub->Activate(false);
+    
     // OpenGlPlot
     sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+    sub->Activate(true);
     
     // Propagate Command
     GmatCommand *propCommand = CreateCommand("Propagate");
@@ -1256,7 +1262,7 @@ void Moderator::CreateDefaultMission()
 
     // Add propagate command
     AppendCommand(propCommand);
-    
+
 }
 
 //------------------------------------------------------------------------------
@@ -1380,7 +1386,6 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 {
     Subscriber *subs;
     StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
-   
     for (Integer i=0; i<(Integer)subsNames.size(); i++)
     {
         subs = theConfigManager->GetSubscriber(subsNames[i]);
@@ -1395,11 +1400,9 @@ void Moderator::AddCommandToSandbox(Integer index)
 {
     GmatCommand *cmd = commands[index]->GetNext();
 
-    //   while (cmd != NULL)
     if (cmd != NULL)
     {
         sandboxes[index]->AddCommand(cmd);
-        //      cmd = cmd->GetNext();
     }
 }
 
