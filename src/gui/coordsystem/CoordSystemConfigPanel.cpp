@@ -145,6 +145,7 @@ void CoordSystemConfigPanel::LoadData()
             zComboBox->SetValue(zString.c_str());
          }
       }
+      mObject = theCoordSys;
    }
    catch (BaseException &e)
    {

@@ -77,6 +77,7 @@ void DCSetupPanel::Create()
 
 void DCSetupPanel::LoadData()
 {
+    mObject = theDC;
     maxTextCtrl->AppendText(wxVariant((long)maxIteration));
 
     // explicitly disable apply button
