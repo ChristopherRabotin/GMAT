@@ -43,6 +43,7 @@ private:
    //wxWindow *parent;
    wxTreeItemId mDraggedItem;
    wxTreeItemId mSpacecraftItem;
+   wxTreeItemId mFormationItem;
    wxTreeItemId mPropagatorItem;
    wxTreeItemId mReportItem;
    wxTreeItemId mBurnItem;
@@ -51,6 +52,7 @@ private:
    wxTreeItemId mVariableItem;
 
    int mNumSpacecraft;
+   int mNumFormation;
    int mNumPropagator;
    int mNumImpulsiveBurn;
    int mNumDiffCorr;
@@ -129,7 +131,9 @@ private:
       POPUP_OPEN,
       POPUP_CLOSE,
       POPUP_RENAME,
-      POPUP_DELETE
+      POPUP_DELETE,
+      
+      POPUP_ADD_MATLAB_FUNCT,
    };
 };
 
