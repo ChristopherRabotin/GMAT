@@ -1955,7 +1955,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
             ("Moderator::RunMission() %s\n", e.GetMessage().c_str());
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
          // assign status
-         // status = ?
+         status = -2;
       }
       catch (...)
       {
@@ -1967,6 +1967,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
+      status = -3;
    }
 
    return status;
