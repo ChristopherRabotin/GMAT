@@ -73,6 +73,7 @@
 #include "InteractiveMatlabDialog.hpp"
 #include "FunctionSetupPanel.hpp"
 #include "AssignmentPanel.hpp"
+//#include "FreeFormScriptPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -489,6 +490,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new TogglePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
+//      else if (dataType == GmatTree::FREE_FORM_SCRIPT_COMMAND)
+//      {
+//         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+//                                          wxPoint(-1,-1), wxSize(-1,-1),
+//                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+//         panel = new wxScrolledWindow(newChild);
+//         sizer->Add(new FreeFormScriptPanel(panel, item->GetCommand()),
+//                    0, wxGROW|wxALL, 0);
+//      }
       else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
@@ -753,123 +763,122 @@ void GmatMainFrame::CloseAllChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::MinimizeChildren(int selection)
 {
-   wxNode *node = mdiChildren->GetFirst();
-
-   switch (selection)
-   {
-      case 0:                    // resource tree page
-         // minimize resource windows
-         // activate mission windows
-         while (node)
-         {
-            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-            int dataType = theChild->GetDataType();
-
-            if ((dataType == GmatTree::DEFAULT_SPACECRAFT) ||
-                (dataType == GmatTree::CREATED_SPACECRAFT)          ||
-                (dataType == GmatTree::DEFAULT_FORMATION_SPACECRAFT)         ||
-                (dataType == GmatTree::CREATED_FORMATION_SPACECRAFT)            ||
-                (dataType == GmatTree::DEFAULT_CONSTELLATION_SATELLITE)        ||
-                (dataType == GmatTree::CREATED_CONSTELLATION_SATELLITE)           ||
-                (dataType == GmatTree::DEFAULT_PROPAGATOR)              ||
-                (dataType == GmatTree::CREATED_PROPAGATOR)              ||
-                (dataType == GmatTree::DEFAULT_IMPULSIVE_BURN)            ||
-                (dataType == GmatTree::CREATED_IMPULSIVE_BURN)     ||
-                (dataType == GmatTree::DEFAULT_FINITE_BURN)            ||
-                (dataType == GmatTree::CREATED_FINITE_BURN)     ||
-                (dataType == GmatTree::DEFAULT_BODY)                ||
-                (dataType == GmatTree::CREATED_BODY)           ||
-                (dataType == GmatTree::DEFAULT_DIFF_CORR)              ||
-                (dataType == GmatTree::CREATED_DIFF_CORR)            ||
-                (dataType == GmatTree::DEFAULT_REPORT_FILE)               ||
-                (dataType == GmatTree::CREATED_REPORT_FILE)           ||
-                (dataType == GmatTree::DEFAULT_XY_PLOT)             ||
-                (dataType == GmatTree::CREATED_XY_PLOT)         ||
-                (dataType == GmatTree::DEFAULT_OPENGL_PLOT)                ||
-                (dataType == GmatTree::CREATED_OPENGL_PLOT)            ||
-                (dataType == GmatTree::DEFAULT_INTERFACE)            ||
-                (dataType == GmatTree::CREATED_INTERFACE)            ||
-                (dataType == GmatTree::DEFAULT_SUBSCRIPT)            ||
-                (dataType == GmatTree::CREATED_SUBSCRIPT)            ||
-                (dataType == GmatTree::DEFAULT_VARIABLE)            ||
-                (dataType == GmatTree::CREATED_VARIABLE)            ||
-                (dataType == GmatTree::DEFAULT_MATLAB_FUNCTION)            ||
-                (dataType == GmatTree::CREATED_MATLAB_FUNCTION)            ||
-                (dataType == GmatTree::DEFAULT_GMAT_FUNCTION)            ||
-                (dataType == GmatTree::CREATED_GMAT_FUNCTION)            ||
-                (dataType == GmatTree::DEFAULT_COORD_SYSTEM)            ||
-                (dataType == GmatTree::CREATED_COORD_SYSTEM)            ||
-                (dataType == GmatTree::DEFAULT_GROUNDSTATION)            ||
-                (dataType == GmatTree::CREATED_GROUNDSTATION))
-            {
-               theChild->Restore();
-            }
-            else
-               theChild->Iconize(true);
-
-            node = node->GetNext();
-         }
-
-         break;
-      case 1:                    // mission tree page
-         // minimize resource windows
-         // activate mission windows
-         while (node)
-         {
-            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-            int dataType = theChild->GetDataType();
-
-            if ((dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND) ||
-                (dataType == GmatTree::MANEUVER_COMMAND)          ||
-                (dataType == GmatTree::PROPAGATE_COMMAND)         ||
-                (dataType == GmatTree::TARGET_COMMAND)            ||
-                (dataType == GmatTree::END_TARGET_COMMAND)        ||
-                (dataType == GmatTree::ACHIEVE_COMMAND)           ||
-                (dataType == GmatTree::VARY_COMMAND)              ||
-                (dataType == GmatTree::SAVE_COMMAND)              ||
-                (dataType == GmatTree::TOGGLE_COMMAND)            ||
-                (dataType == GmatTree::CALL_FUNCTION_COMMAND)     ||
-                (dataType == GmatTree::ASSIGNMENT_COMMAND)        ||
-                (dataType == GmatTree::IF_CONTROL)                ||
-                (dataType == GmatTree::ELSE_IF_CONTROL)           ||
-                (dataType == GmatTree::ELSE_CONTROL)              ||
-                (dataType == GmatTree::END_IF_CONTROL)            ||
-                (dataType == GmatTree::FOR_CONTROL)               ||
-                (dataType == GmatTree::END_FOR_CONTROL)           ||
-                (dataType == GmatTree::WHILE_CONTROL)             ||
-                (dataType == GmatTree::END_WHILE_CONTROL)         ||
-                (dataType == GmatTree::DO_CONTROL)                ||
-                (dataType == GmatTree::END_DO_CONTROL)            ||
-                (dataType == GmatTree::SWITCH_CONTROL)            ||
-                (dataType == GmatTree::END_SWITCH_CONTROL))
-            {
-               theChild->Restore();
-            }
-            else
-               theChild->Iconize(true);
-
-            node = node->GetNext();
-         }
-         break;
-      case 2:                    // output page
-         // minimize all
-         while (node)
-         {
-            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-            theChild->Iconize(true);
-            node = node->GetNext();
-         }
-         break;
-      default:
-         // minimize all
-         while (node)
-         {
-            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-            theChild->Iconize(true);
-            node = node->GetNext();
-         }
-         break;
-   }
+//   wxNode *node = mdiChildren->GetFirst();
+//
+//   switch (selection)
+//   {
+//      case 0:                    // resource tree page
+//         // minimize resource windows
+//         // activate mission windows
+//         while (node)
+//         {
+//            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+//            int dataType = theChild->GetDataType();
+//
+//            if ((dataType == GmatTree::DEFAULT_SPACECRAFT) ||
+//                (dataType == GmatTree::CREATED_SPACECRAFT)          ||
+//                (dataType == GmatTree::DEFAULT_FORMATION_SPACECRAFT)         ||
+//                (dataType == GmatTree::CREATED_FORMATION_SPACECRAFT)            ||
+//                (dataType == GmatTree::DEFAULT_CONSTELLATION_SATELLITE)        ||
+//                (dataType == GmatTree::CREATED_CONSTELLATION_SATELLITE)           ||
+//                (dataType == GmatTree::DEFAULT_PROPAGATOR)              ||
+//                (dataType == GmatTree::CREATED_PROPAGATOR)              ||
+//                (dataType == GmatTree::DEFAULT_IMPULSIVE_BURN)            ||
+//                (dataType == GmatTree::CREATED_IMPULSIVE_BURN)     ||
+//                (dataType == GmatTree::DEFAULT_BODY)                ||
+//                (dataType == GmatTree::CREATED_BODY)           ||
+//                (dataType == GmatTree::DEFAULT_DIFF_CORR)              ||
+//                (dataType == GmatTree::CREATED_DIFF_CORR)            ||
+//                (dataType == GmatTree::DEFAULT_REPORT_FILE)               ||
+//                (dataType == GmatTree::CREATED_REPORT_FILE)           ||
+//                (dataType == GmatTree::DEFAULT_XY_PLOT)             ||
+//                (dataType == GmatTree::CREATED_XY_PLOT)         ||
+//                (dataType == GmatTree::DEFAULT_OPENGL_PLOT)                ||
+//                (dataType == GmatTree::CREATED_OPENGL_PLOT)            ||
+//                (dataType == GmatTree::DEFAULT_INTERFACE)            ||
+//                (dataType == GmatTree::CREATED_INTERFACE)            ||
+//                (dataType == GmatTree::DEFAULT_SUBSCRIPT)            ||
+//                (dataType == GmatTree::CREATED_SUBSCRIPT)            ||
+//                (dataType == GmatTree::DEFAULT_VARIABLE)            ||
+//                (dataType == GmatTree::CREATED_VARIABLE)            ||
+//                (dataType == GmatTree::DEFAULT_MATLAB_FUNCTION)            ||
+//                (dataType == GmatTree::CREATED_MATLAB_FUNCTION)            ||
+//                (dataType == GmatTree::DEFAULT_GMAT_FUNCTION)            ||
+//                (dataType == GmatTree::CREATED_GMAT_FUNCTION)            ||
+//                (dataType == GmatTree::DEFAULT_COORD_SYSTEM)            ||
+//                (dataType == GmatTree::CREATED_COORD_SYSTEM)            ||
+//                (dataType == GmatTree::DEFAULT_GROUNDSTATION)            ||
+//                (dataType == GmatTree::CREATED_GROUNDSTATION))
+//            {
+//               theChild->Restore();
+//            }
+//            else
+//               theChild->Iconize(true);
+//
+//            node = node->GetNext();
+//         }
+//
+//         break;
+//      case 1:                    // mission tree page
+//         // minimize resource windows
+//         // activate mission windows
+//         while (node)
+//         {
+//            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+//            int dataType = theChild->GetDataType();
+//
+//            if ((dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND) ||
+//                (dataType == GmatTree::MANEUVER_COMMAND)          ||
+//                (dataType == GmatTree::PROPAGATE_COMMAND)         ||
+//                (dataType == GmatTree::TARGET_COMMAND)            ||
+//                (dataType == GmatTree::END_TARGET_COMMAND)        ||
+//                (dataType == GmatTree::ACHIEVE_COMMAND)           ||
+//                (dataType == GmatTree::VARY_COMMAND)              ||
+//                (dataType == GmatTree::SAVE_COMMAND)              ||
+//                (dataType == GmatTree::TOGGLE_COMMAND)            ||
+//                (dataType == GmatTree::FREE_FORM_SCRIPT_COMMAND)  ||
+//                (dataType == GmatTree::CALL_FUNCTION_COMMAND)     ||
+//                (dataType == GmatTree::ASSIGNMENT_COMMAND)        ||
+//                (dataType == GmatTree::IF_CONTROL)                ||
+//                (dataType == GmatTree::ELSE_IF_CONTROL)           ||
+//                (dataType == GmatTree::ELSE_CONTROL)              ||
+//                (dataType == GmatTree::END_IF_CONTROL)            ||
+//                (dataType == GmatTree::FOR_CONTROL)               ||
+//                (dataType == GmatTree::END_FOR_CONTROL)           ||
+//                (dataType == GmatTree::WHILE_CONTROL)             ||
+//                (dataType == GmatTree::END_WHILE_CONTROL)         ||
+//                (dataType == GmatTree::DO_CONTROL)                ||
+//                (dataType == GmatTree::END_DO_CONTROL)            ||
+//                (dataType == GmatTree::SWITCH_CONTROL)            ||
+//                (dataType == GmatTree::END_SWITCH_CONTROL))
+//            {
+//               theChild->Restore();
+//            }
+//            else
+//               theChild->Iconize(true);
+//
+//            node = node->GetNext();
+//         }
+//         break;
+//      case 2:                    // output page
+//         // minimize all
+//         while (node)
+//         {
+//            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+//            theChild->Iconize(true);
+//            node = node->GetNext();
+//         }
+//         break;
+//      default:
+//         // minimize all
+//         while (node)
+//         {
+//            GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+//            theChild->Iconize(true);
+//            node = node->GetNext();
+//         }
+//         break;
+//   }
 }
 
 

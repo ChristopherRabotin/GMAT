@@ -84,13 +84,13 @@ void GmatNotebook::OnNotebookSelChange(wxNotebookEvent &event)
 
    event.Skip(); // need this
 
-   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
-
-   if (theMainFrame != NULL)
-   {
-      theMainFrame->MinimizeChildren(sel);
-      theMainFrame->Cascade();
-   }
+//   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
+//
+//   if (theMainFrame != NULL)
+//   {
+//      theMainFrame->MinimizeChildren(sel);
+//      theMainFrame->Cascade();
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -104,16 +104,16 @@ void GmatNotebook::OnNotebookSelChange(wxNotebookEvent &event)
 //------------------------------------------------------------------------------
 void GmatNotebook::OnNotebookSelChanging(wxNotebookEvent &event)
 {
-   int sel = event.GetSelection();
-
-   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
-
-   if (theMainFrame != NULL)
-   {
-      theMainFrame->Cascade();
-      theMainFrame->MinimizeChildren(sel);
-   }
-   else
+//   int sel = event.GetSelection();
+//
+//   GmatMainFrame *theMainFrame = GmatAppData::GetMainFrame();
+//
+//   if (theMainFrame != NULL)
+//   {
+//      theMainFrame->Cascade();
+//      theMainFrame->MinimizeChildren(sel);
+//   }
+//   else
       event.Skip(); // need this
 }
 
