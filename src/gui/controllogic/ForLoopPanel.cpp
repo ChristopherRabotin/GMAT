@@ -12,6 +12,9 @@
 //------------------------------------------------------------------------------
 #include "ForLoopPanel.hpp"
 
+// gui includes
+#include "gmatwxdefs.hpp"
+
 // base includes
 #include "gmatdefs.hpp"
 #include "GmatAppData.hpp"
@@ -21,6 +24,7 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ForLoopPanel, GmatPanel)
+    EVT_TEXT(ID_TEXTCTRL, ForLoopPanel::OnTextUpdate)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -30,9 +34,15 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-ForLoopPanel::ForLoopPanel( wxWindow *parent)
+ForLoopPanel::ForLoopPanel(wxWindow *parent, GmatCommand *cmd)
     : GmatPanel(parent)
 {
+   theForCommand = (For *)cmd;
+   
+   mStartValue = 0;
+   mEndValue = 0;
+   mStepSize = 0;
+   
    Create();
    Show();
 }
@@ -51,97 +61,44 @@ void ForLoopPanel::Create()
 
 void ForLoopPanel::Setup( wxWindow *parent)
 {
-//    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-//
-//    wxFlexGridSizer *item1 = new wxFlexGridSizer( 2, 0, 0 );
-//
-//    wxStaticText *item2 = new wxStaticText( parent, ID_TEXT, wxT("Start"), 
-//               wxDefaultPosition, wxDefaultSize, 0 );
-//    item1->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    wxTextCtrl *item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
-//               wxDefaultPosition, wxSize(80,-1), 0 );
-//    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    wxStaticText *item4 = new wxStaticText( parent, ID_TEXT, wxT("End"), 
-//               wxDefaultPosition, wxDefaultSize, 0 );
-//    item1->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    wxTextCtrl *item5 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
-//               wxDefaultPosition, wxSize(80,-1), 0 );
-//    item1->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    wxStaticText *item6 = new wxStaticText( parent, ID_TEXT, wxT("Step Size"), 
-//               wxDefaultPosition, wxDefaultSize, 0 );
-//    item1->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    wxTextCtrl *item7 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
-//               wxDefaultPosition, wxSize(80,-1), 0 );
-//    item1->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
-//
-//    theMiddleSizer->Add(item0, 0, wxGROW, 5);
-
-//----------------------------------------------------------------------
-//    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-//
-//    conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
-//                     wxSize(455,54), wxWANTS_CHARS );
-//    conditionGrid->CreateGrid( 1, 4, wxGrid::wxGridSelectCells );
-//    conditionGrid->SetRowLabelSize(0);
-//    conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
-//    conditionGrid->EnableEditing(false);
-//        
-//    conditionGrid->SetColLabelValue(0, _T(""));
-//    conditionGrid->SetColSize(0, 60);
-//    conditionGrid->SetColLabelValue(1, _T("Start"));
-//    conditionGrid->SetColSize(1, 165);
-//    conditionGrid->SetColLabelValue(2, _T("Increment"));
-//    conditionGrid->SetColSize(2, 60);
-//    conditionGrid->SetColLabelValue(3, _T("End"));
-//    conditionGrid->SetColSize(3, 165);
-//    conditionGrid->SetCellValue(0, 0, "FOR");
-//    
-//    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
-//--------------------------------------------------------------------------
-    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-    wxBoxSizer *item1 = new wxBoxSizer( wxHORIZONTAL );
-
-    wxStaticText *item2 = new wxStaticText( parent, ID_TEXT, wxT("For "), 
-         wxDefaultPosition, wxDefaultSize, 0 );
-    item1->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
-         wxDefaultPosition, wxSize(150,-1), 0 );
-    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxBoxSizer *item4 = new wxBoxSizer( wxVERTICAL );
-
-    conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
-         wxSize(460, 60), wxWANTS_CHARS );
-    conditionGrid->CreateGrid( 1, 3, wxGrid::wxGridSelectCells );
-    
-    conditionGrid->SetRowLabelSize(0);
-    conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
-//    conditionGrid->EnableEditing(false);
-        
-    conditionGrid->SetColLabelValue(0, _T("Start"));
-    conditionGrid->SetColSize(0, 150);
-    conditionGrid->SetColLabelValue(1, _T("Increment"));
-    conditionGrid->SetColSize(1, 150);
-    conditionGrid->SetColLabelValue(2, _T("End"));
-    conditionGrid->SetColSize(2, 150);
-    
-    item4->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item0->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
-
-
-    theMiddleSizer->Add(item0, 0, wxGROW, 5);
+   // wxStaticText
+   startStaticText =
+      new wxStaticText(this, -1, wxT("Start"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   stepStaticText =
+      new wxStaticText(this, -1, wxT("Increment"), 
+                        wxDefaultPosition, wxDefaultSize, 0);
+   endStaticText =
+      new wxStaticText(this, -1, wxT("End"), 
+                        wxDefaultPosition, wxDefaultSize, 0);
+                        
+   // wxTextCtrl
+   startTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(250,-1), 0);
+   stepTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(150,-1), 0);
+   endTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(250,-1), 0);
+                      
+   Integer bsize = 10; // border size
    
+   // wx*Sizers
+   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
+   
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( startStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( startTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize); 
+   flexGridSizer1->Add( stepStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( stepTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( endStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( endTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   
+   theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -149,6 +106,25 @@ void ForLoopPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void ForLoopPanel::LoadData()
 {
+    if (theForCommand != NULL)
+    {
+       Integer paramId;
+       paramId = theForCommand->GetParameterID("StartValue");
+       mStartValue = theForCommand->GetRealParameter(paramId);
+       paramId = theForCommand->GetParameterID("Step");
+       mStepSize = theForCommand->GetRealParameter(paramId);
+       paramId = theForCommand->GetParameterID("EndValue");
+       mEndValue = theForCommand->GetRealParameter(paramId);
+    
+       wxString s1, s2, s3;
+       s1.Printf("%.10f", mStartValue);
+       s2.Printf("%.10f", mStepSize);
+       s3.Printf("%.10f", mEndValue);
+    
+       startTextCtrl->SetValue(s1);
+       stepTextCtrl->SetValue(s2);
+       endTextCtrl->SetValue(s3);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +132,26 @@ void ForLoopPanel::LoadData()
 //------------------------------------------------------------------------------
 void ForLoopPanel::SaveData()
 {
+    Integer paramId;
+    paramId = theForCommand->GetParameterID("StartValue");
+    theForCommand->SetRealParameter(paramId, mStartValue);
+    paramId = theForCommand->GetParameterID("Step");
+    theForCommand->SetRealParameter(paramId, mStepSize);
+    paramId = theForCommand->GetParameterID("EndValue");
+    theForCommand->SetRealParameter(paramId, mEndValue);
 }
 
-
-
+//------------------------------------------------------------------------------
+// void OnGravityTextUpdate(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ForLoopPanel::OnTextUpdate(wxCommandEvent& event)
+{
+   if (event.GetEventObject() == startTextCtrl)
+      mStartValue = atof(startTextCtrl->GetValue());
+   else if (event.GetEventObject() == stepTextCtrl)
+      mStepSize = atof(stepTextCtrl->GetValue());
+   else if (event.GetEventObject() == endTextCtrl)
+      mEndValue = atof(endTextCtrl->GetValue());
+   
+   theApplyButton->Enable(true);
+}

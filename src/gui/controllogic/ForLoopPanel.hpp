@@ -13,47 +13,56 @@
 #ifndef ForLoopPanel_hpp
 #define ForLoopPanel_hpp
 
+// gui includes
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
-#include "GmatPanel.hpp"
+#include "Command.hpp"
+#include "For.hpp"
 
 class ForLoopPanel : public GmatPanel
 {
 public:
     // constructors
-    ForLoopPanel( wxWindow *parent);
+    ForLoopPanel(wxWindow *parent, GmatCommand *cmd);
     ~ForLoopPanel();  
 
 private:
-    wxGrid *conditionGrid;
+    For *theForCommand;
+    
+    Real mStartValue;
+    Real mEndValue;
+    Real mStepSize;
+    
+    wxStaticText *startStaticText;
+    wxStaticText *stepStaticText;
+    wxStaticText *endStaticText;
+   
+    wxTextCtrl *startTextCtrl;
+    wxTextCtrl *stepTextCtrl;
+    wxTextCtrl *endTextCtrl;
    
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    //loj: 2/27/04 commented out
-    //virtual void OnHelp();
-    //virtual void OnScript();
 
     // Layout & data handling methods
     void Setup(wxWindow *parent);
-                
+    
+    void OnTextUpdate(wxCommandEvent& event); 
+               
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 46000,
-        ID_TEXTCTRL,
-        ID_GRID,
+        ID_TEXTCTRL = 46000,
     };
 };
 
 #endif // ForLoopPanel_hpp
-
-
-
