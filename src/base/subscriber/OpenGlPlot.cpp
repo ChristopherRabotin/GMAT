@@ -28,6 +28,7 @@
 //#define DEBUG_OPENGL_INIT 1
 //#define DEBUG_OPENGL_PARAM 1
 //#define DEBUG_OPENGL_UPDATE 1
+//#define DEBUG_REMOVE_ACTION 1
 
 //---------------------------------
 // static data
@@ -254,6 +255,10 @@ GmatBase* OpenGlPlot::Clone(void) const
 bool OpenGlPlot::TakeAction(const std::string &action,
                             const std::string &actionData)
 {
+#if DEBUG_REMOVE_ACTION
+   MessageInterface::ShowMessage("OpenGlPlot::TakeAction() action=%s, actionData=%s\n",
+                                 action.c_str(), actionData.c_str());
+#endif
    if (action == "Clear")
    {
       return ClearSpacecraftList();
@@ -674,8 +679,19 @@ bool OpenGlPlot::ClearSpacecraftList()
 //------------------------------------------------------------------------------
 bool OpenGlPlot::RemoveSpacecraft(const std::string &name)
 {
-   StringArray::iterator scPos;
-   scPos = find(mScNameArray.begin(), mScNameArray.end(), name);
+#if DEBUG_REMOVE_ACTION
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RemoveSpacecraft() name=%s\n--- Before remove:\n", name.c_str());
+   for (int i=0; i<mScCount; i++)
+   {
+      MessageInterface::ShowMessage("mScNameArray[%d]=%s\n", i,
+                                    mScNameArray[i].c_str());
+   }
+#endif
+   
+   StringArray::iterator scPos = 
+      find(mScNameArray.begin(), mScNameArray.end(), name);
+   
    if (scPos != mScNameArray.end())
    {
       std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
@@ -685,16 +701,17 @@ bool OpenGlPlot::RemoveSpacecraft(const std::string &name)
       if (orbColorPos != mOrbitColorMap.end() &&
           targColorPos != mTargetColorMap.end())
       {
+         // erase given spacecraft name
          mScNameArray.erase(scPos);
          mOrbitColorMap.erase(orbColorPos);
          mTargetColorMap.erase(targColorPos);
 
-         mOrbitColorArray.erase(mOrbitColorArray.end()--);
-         mTargetColorArray.erase(mTargetColorArray.end()--);
-
-         mScXArray.erase(mScXArray.end()--);
-         mScYArray.erase(mScYArray.end()--);
-         mScZArray.erase(mScZArray.end()--);
+         // reduce the size of array
+         mOrbitColorArray.erase(--mOrbitColorArray.end());
+         mTargetColorArray.erase(--mTargetColorArray.end());
+         mScXArray.erase(--mScXArray.end());
+         mScYArray.erase(--mScYArray.end());
+         mScZArray.erase(--mScZArray.end());
          
          mScCount = mScNameArray.size();
 
@@ -705,6 +722,14 @@ bool OpenGlPlot::RemoveSpacecraft(const std::string &name)
             mTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
          }
          
+#if DEBUG_REMOVE_ACTION
+         MessageInterface::ShowMessage("---After remove\n");
+         for (int i=0; i<mScCount; i++)
+         {
+            MessageInterface::ShowMessage("mScNameArray[%d]=%s\n", i,
+                                          mScNameArray[i].c_str());
+         }
+#endif
          return true;
       }
    }
