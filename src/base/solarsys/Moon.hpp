@@ -60,9 +60,10 @@ public:
 
    // default values for CelesitalBody data
    static const Gmat::BodyType        BODY_TYPE;
-   static const Real                  MASS;
+   //static const Real                  MASS;
    static const Real                  EQUATORIAL_RADIUS;
-   static const Real                  POLAR_RADIUS;
+   static const Real                  FLATTENING;
+   //static const Real                  POLAR_RADIUS;
    static const Real                  MU;
    static const Gmat::PosVelSource    POS_VEL_SOURCE;
    static const Gmat::AnalyticMethod  ANALYTIC_METHOD;

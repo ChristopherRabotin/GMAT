@@ -87,9 +87,10 @@ protected:
    static const Integer               DEFAULT_BODY_NUMBER;
    static const Integer               DEFAULT_REF_BODY_NUMBER;
 
-   static const Real                  MASS[NumberOfPlanets];
+   //static const Real                  MASS[NumberOfPlanets];
    static const Real                  EQUATORIAL_RADIUS[NumberOfPlanets];
-   static const Real                  POLAR_RADIUS[NumberOfPlanets];
+   static const Real                  FLATTENING[NumberOfPlanets];
+   //static const Real                  POLAR_RADIUS[NumberOfPlanets];
    static const Real                  MU[NumberOfPlanets];
    //static const Integer               ORDER[NumberOfPlanets];
    //static const Integer               DEGREE[NumberOfPlanets];

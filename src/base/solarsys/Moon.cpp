@@ -17,13 +17,15 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "Moon.hpp"
+#include "PhysicalConstants.hpp"
 
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-const Real                  Moon::MASS                = 7.3483e22;     // kg
+//const Real                  Moon::MASS                = 7.3483e22;     // kg
 const Real                  Moon::EQUATORIAL_RADIUS   = 1738.1;     // km
-const Real                  Moon::POLAR_RADIUS        = 1736.0;       // km - need more precision
+const Real                  Moon::FLATTENING          = 0.0;
+//const Real                  Moon::POLAR_RADIUS        = 1736.0;       // km - need more precision
 const Real                  Moon::MU                  = 4.902794e12;      // m^3 / s^2
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
@@ -171,10 +173,14 @@ void Moon::InitializeMoon(const std::string &cBody)
    CelestialBody::Initialize();
    // fill in with default values, for the Sun
    bodyType            = Moon::BODY_TYPE;
-   mass                = Moon::MASS;
-   equatorialRadius    = Moon::EQUATORIAL_RADIUS;
-   polarRadius         = Moon::POLAR_RADIUS;
    mu                  = Moon::MU;
+   mass                = mu /
+                         GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
+  // mass                = Moon::MASS;
+   equatorialRadius    = Moon::EQUATORIAL_RADIUS;
+   flattening          = Moon::FLATTENING;
+   //polarRadius         = Moon::POLAR_RADIUS;
+   polarRadius         = (1.0 - flattening) * equatorialRadius;
    posVelSrc           = Moon::POS_VEL_SOURCE;
    analyticMethod      = Moon::ANALYTIC_METHOD;
    centralBody         = cBody;

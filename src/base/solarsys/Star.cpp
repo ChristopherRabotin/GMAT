@@ -17,13 +17,15 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "Star.hpp"
+#include "PhysicalConstants.hpp"
 
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
-const Real                  Star::MASS                = 1.989E30;    // kg
+//const Real                  Star::MASS                = 1.989E30;    // kg
 const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
-const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
+const Real                  Star::FLATTENING          = 0.0; 
+//const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
 const Real                  Star::MU                  = 1.32712438e20; //m^3/s^2
 const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
@@ -325,10 +327,14 @@ void Star::InitializeStar()
    CelestialBody::Initialize();
    // fill in with default values, for the Sun (all from CelestialBody)
    bodyType            = Star::BODY_TYPE;
-   mass                = Star::MASS;
-   equatorialRadius    = Star::EQUATORIAL_RADIUS;
-   polarRadius         = Star::POLAR_RADIUS;
    mu                  = Star::MU;
+   //mass                = Star::MASS;
+   mass                = mu /
+                         GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
+   equatorialRadius    = Star::EQUATORIAL_RADIUS;
+   flattening          = Star::FLATTENING;
+  // polarRadius         = Star::POLAR_RADIUS;
+   polarRadius         = (1.0 - flattening) * equatorialRadius;
    posVelSrc           = Star::POS_VEL_SOURCE;
    analyticMethod      = Star::ANALYTIC_METHOD;
    centralBody         = "";

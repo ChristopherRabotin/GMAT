@@ -35,6 +35,7 @@
 #include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
+#include "PhysicalConstants.hpp"
 
 using namespace GmatMathUtil;
 using namespace std; 
@@ -48,6 +49,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount] =
    "BodyType",
    "Mass",
    "EquatorialRadius",
+   "Flattening",
    "PolarRadius",
    "Mu",
    "PosVelSOurce",
@@ -76,6 +78,7 @@ const Gmat::ParameterType
 CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount] =
 {
 Gmat::STRING_TYPE,
+Gmat::REAL_TYPE,
 Gmat::REAL_TYPE,
 Gmat::REAL_TYPE,
 Gmat::REAL_TYPE,
@@ -173,6 +176,7 @@ GmatBase            (cb),
 bodyType            (cb.bodyType),
 mass                (cb.mass),
 equatorialRadius    (cb.equatorialRadius),
+flattening          (cb.flattening),
 polarRadius         (cb.polarRadius),
 mu                  (cb.mu),
 posVelSrc           (cb.posVelSrc),
@@ -229,6 +233,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    bodyType            = cb.bodyType;
    mass                = cb.mass;
    equatorialRadius    = cb.equatorialRadius;
+   flattening          = cb.flattening;
    polarRadius         = cb.polarRadius;
    mu                  = cb.mu;
    posVelSrc           = cb.posVelSrc;
@@ -418,11 +423,12 @@ Real CelestialBody::GetGravitationalConstant()
          //   "Cannot read potential file to get gravitational constant.");
       }
    }
-   else
-   {
-      mu = defaultMu;
-   }
-   
+   //else
+   //{
+   //   mu = defaultMu;
+   //}
+   // recompute mass
+   mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return mu;
 }
 
@@ -457,11 +463,28 @@ Real CelestialBody::GetEquatorialRadius()
       //throw SolarSystemException(
       //   "Cannot read potential file to get equatorial radius.");
    }
+   // recompute the polar radius
+   polarRadius = (1.0 - flattening) * equatorialRadius;
    return equatorialRadius;
 }
 
 //------------------------------------------------------------------------------
-//  Real GetPolarRadius() const
+//  Real GetFlattening() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the flattening value of the body.
+ *
+ * @return flattening of the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CelestialBody::GetFlattening() const
+{
+   return flattening;
+}
+
+//------------------------------------------------------------------------------
+//  Real GetPolarRadius() 
 //------------------------------------------------------------------------------
 /**
  * This method returns the polar radius (km) of the body.
@@ -470,13 +493,15 @@ Real CelestialBody::GetEquatorialRadius()
  *
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetPolarRadius() const
+Real CelestialBody::GetPolarRadius() 
 {
+   // make sure it is computed correctly
+   polarRadius = (1.0 - flattening) * equatorialRadius;
    return polarRadius;   
 }
 
 //------------------------------------------------------------------------------
-//  Real GetMass() const
+//  Real GetMass() 
 //------------------------------------------------------------------------------
 /**
  * This method returns the mass (kg) of the body.
@@ -485,8 +510,10 @@ Real CelestialBody::GetPolarRadius() const
  *
  */
 //------------------------------------------------------------------------------
- Real CelestialBody::GetMass() const
+ Real CelestialBody::GetMass() 
 {
+   // make sure it is computed correctly
+   mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return mass;
 }
 
@@ -817,7 +844,8 @@ bool CelestialBody::SetCentralBody(const std::string &cBody)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetGravitationalConstant(Real newMu)
 {
-   mu = newMu;
+   mu   = newMu;
+   mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return true;
 }
 
@@ -836,24 +864,26 @@ bool CelestialBody::SetGravitationalConstant(Real newMu)
 bool CelestialBody::SetEquatorialRadius(Real newEqRadius)
 {
    equatorialRadius = newEqRadius;
+   polarRadius      = (1.0 - flattening) * equatorialRadius;
    return true;
 }
 
 //------------------------------------------------------------------------------
-//  bool SetPolarRadius(Real newPolarRadius)
+//  bool SetFlattening(Real flat)
 //------------------------------------------------------------------------------
 /**
- * This method sets the polar radius for the body.
+ * This method sets the flattening value for the body.
  *
- * @param <newPolarRadius> polar radius (km) for the body.
+ * @param <flat> flattening value for the body.
  *
  * @return flag indicating success of the method.
  *
  */
 //------------------------------------------------------------------------------
-bool CelestialBody::SetPolarRadius(Real newPolarRadius) 
+bool CelestialBody::SetFlattening(Real flat) 
 {
-   polarRadius = newPolarRadius;
+   flattening  = flat;
+   polarRadius = (1.0 - flattening) * equatorialRadius;
    return true;
 }
 
@@ -869,11 +899,11 @@ bool CelestialBody::SetPolarRadius(Real newPolarRadius)
  *
  */
 //------------------------------------------------------------------------------
-bool CelestialBody::SetMass(Real newMass) 
-{
-   mass = newMass;
-   return true;
-}
+//bool CelestialBody::SetMass(Real newMass) 
+//{
+//   mass = newMass;
+//   return true;
+//}
 
 //------------------------------------------------------------------------------
 //  bool SetSource(Gmat::PosVelSource pvSrc)
@@ -952,6 +982,10 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
    {
       mu               = defaultMu;
       equatorialRadius = defaultEqRadius;
+      // recompute polar radius
+      polarRadius = (1.0 - flattening) * equatorialRadius;
+      // recompute mass
+      mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
       //coefficientSize  = defaultCoefSize;
       //sij              = defaultSij;
       //cij              = defaultCij;
@@ -1149,6 +1183,7 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
 {
    if (id == MASS)               return mass;
    if (id == EQUATORIAL_RADIUS)  return equatorialRadius;
+   if (id == FLATTENING)         return flattening;
    if (id == POLAR_RADIUS)       return polarRadius;
    if (id == MU)                 return mu;
    if (id == HOUR_ANGLE)         return hourAngle;
@@ -1171,9 +1206,20 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == MASS)              return (mass               = value);
-   if (id == EQUATORIAL_RADIUS) return (equatorialRadius   = value);
-   if (id == POLAR_RADIUS)      return (polarRadius        = value);
+   //if (id == MASS)              return (mass               = value); // make sense?
+   if (id == EQUATORIAL_RADIUS)
+   {
+      equatorialRadius = value;
+      polarRadius = (1.0 - flattening) * equatorialRadius;
+      return true;
+   }
+   if (id == FLATTENING)
+   {
+      flattening = value;
+      polarRadius = (1.0 - flattening) * equatorialRadius;
+      return true;
+   }
+   //if (id == POLAR_RADIUS)      return (polarRadius        = value); // make sense?
    if (id == MU)                return (mu                 = value);
    if (id == HOUR_ANGLE)        return (hourAngle          = value);
    
@@ -1660,6 +1706,10 @@ bool CelestialBody::ReadPotentialFile()
                                 " is of unknown format.");
    }
    potentialFileRead = true;
+   // recompute polar radius
+   polarRadius = (1.0 - flattening) * equatorialRadius;
+   // recompute mass
+   mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return true;
 }
 

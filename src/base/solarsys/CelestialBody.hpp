@@ -105,8 +105,9 @@ public:
    virtual const std::string&   GetCentralBody() const;
    virtual Real                 GetGravitationalConstant();
    virtual Real                 GetEquatorialRadius();
-   virtual Real                 GetPolarRadius() const;
-   virtual Real                 GetMass() const;
+   virtual Real                 GetFlattening() const;
+   virtual Real                 GetPolarRadius();
+   virtual Real                 GetMass();
    virtual Gmat::PosVelSource   GetPosVelSource() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
@@ -129,8 +130,9 @@ public:
    virtual bool           SetCentralBody(const std::string &cBody);
    virtual bool           SetGravitationalConstant(Real newMu);
    virtual bool           SetEquatorialRadius(Real newEqRadius);
-   virtual bool           SetPolarRadius(Real newPolarRadius);
-   virtual bool           SetMass(Real newMass);
+   virtual bool           SetFlattening(Real flat);
+   //virtual bool           SetPolarRadius(Real newPolarRadius);
+   //virtual bool           SetMass(Real newMass);
    virtual bool           SetSource(Gmat::PosVelSource pvSrc);
    virtual bool           SetSourceFile(PlanetaryEphem *src);
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
@@ -209,6 +211,7 @@ protected:
       BODY_TYPE = 0, // need Gmatbase::BaseParameterCount, in case something added to GmatBase
       MASS,
       EQUATORIAL_RADIUS,
+      FLATTENING,
       POLAR_RADIUS,
       MU,
       POS_VEL_SOURCE,
@@ -243,6 +246,8 @@ protected:
    Real                   mass;
    /// radius of the body at the equator
    Real                   equatorialRadius;
+   /// flattening - used to compute polar radius
+   Real                   flattening;
    /// radius of the body from center to the pole
    Real                   polarRadius;
    /// gravitational constant in km^3/s^2

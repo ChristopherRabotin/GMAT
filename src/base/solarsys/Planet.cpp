@@ -19,6 +19,7 @@
 #include "Rmatrix.hpp"
 #include "Planet.hpp"
 #include "MessageInterface.hpp"
+#include "PhysicalConstants.hpp"
 
 // initialize static default values
 // default values for Planet data
@@ -29,21 +30,21 @@ const Integer               Planet::DEFAULT_BODY_NUMBER       = 1;
 const Integer               Planet::DEFAULT_REF_BODY_NUMBER   = 3;
 
 // default values for physical constants for each planet
-const Real                  Planet::MASS[NumberOfPlanets]                      =         // kg
-{
-   0.330217033464048e+24,
-   0.486898629521689e+25,
-   5.976e24,    // Swingby says 0.597422733923030e+25
-   0.641910770215361e+24,
-   0.189916962053049e+28,
-   0.568637885324189e+27,
-   0.866330715467283e+26,
-   0.102987226790760e+21,
-   0.153007332240150e+17
-};
+//const Real                  Planet::MASS[NumberOfPlanets]                      =         // kg
+//{
+//   0.330217033464048e+24,
+//   0.486898629521689e+25,
+//   5.976e24,    // Swingby says 0.597422733923030e+25
+//   0.641910770215361e+24,
+//   0.189916962053049e+28,
+//   0.568637885324189e+27,
+//   0.866330715467283e+26,
+//   0.102987226790760e+21,
+//   0.153007332240150e+17
+//};
 const Real                  Planet::EQUATORIAL_RADIUS[NumberOfPlanets]         =         // km
 {
-   2439.7, 
+   2439.7,
    6051.8,
    6378.1363,
    3396.200,
@@ -53,18 +54,30 @@ const Real                  Planet::EQUATORIAL_RADIUS[NumberOfPlanets]         =
    24764.0,
    1195.0
 };
-const Real                  Planet::POLAR_RADIUS[NumberOfPlanets]              =         // km 
-{     
-   2439.7,
-   6051.8, 
-   6356.755,
-   3376.189,  // North polar radius, per http://ltpwww.gsfc.nasa.gov/tharsis/geodesy.html
-   66854.0,   // per http://www.angelfire.com/sc/jstroberg/astrodata.html
-   54362.0,   // per http://members.shaw.ca/evildrganymede/art/planets/saturn.htm
-   24973.0,   // per http://www.nasm.si.edu/research/ceps/rpif/uranus/rpifuranus.html
-   24340.0,   // per http://www.geocities.com/vickyparalkar/nepstats.html
-   1195.0     // per http://nssdc.gsfc.nasa.gov/planetary/factsheet/plutofact.html
+const Real                  Planet::FLATTENING[NumberOfPlanets]         =   
+{
+   0.0,
+   0.0,
+   0.0033528,
+   0.0064763,
+   0.0648744,
+   0.0979624,
+   0.0229273,
+   0.0171,
+   0.0
 };
+//const Real                  Planet::POLAR_RADIUS[NumberOfPlanets]              =         // km 
+//{     
+//   2439.7,
+//   6051.8, 
+//   6356.755,
+//   3376.189,  // North polar radius, per http://ltpwww.gsfc.nasa.gov/tharsis/geodesy.html
+//   66854.0,   // per http://www.angelfire.com/sc/jstroberg/astrodata.html
+//   54362.0,   // per http://members.shaw.ca/evildrganymede/art/planets/saturn.htm
+//   24973.0,   // per http://www.nasm.si.edu/research/ceps/rpif/uranus/rpifuranus.html
+//   24340.0,   // per http://www.geocities.com/vickyparalkar/nepstats.html
+//   1195.0     // per http://nssdc.gsfc.nasa.gov/planetary/factsheet/plutofact.html
+//};
 const Real                  Planet::MU[NumberOfPlanets]                        =         // km^3/s^2
 {
    0.220320804727213035e+05,
@@ -347,10 +360,13 @@ void Planet::InitializePlanet(const std::string &cBody)
        "Unknown planet created - please supply potential file or physical parameter values\n");
    }
    
-   mass                = Planet::MASS[bodyIndex];
-   equatorialRadius    = Planet::EQUATORIAL_RADIUS[bodyIndex];
-   polarRadius         = Planet::POLAR_RADIUS[bodyIndex];
+   //mass                = Planet::MASS[bodyIndex];
    mu                  = Planet::MU[bodyIndex];
+   mass                = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
+   equatorialRadius    = Planet::EQUATORIAL_RADIUS[bodyIndex];
+   flattening          = Planet::FLATTENING[bodyIndex];
+   polarRadius         = (1.0 - flattening) * equatorialRadius;
+   //polarRadius         = Planet::POLAR_RADIUS[bodyIndex];
    //order               = Planet::ORDER[bodyIndex];
    //degree              = Planet::DEGREE[bodyIndex];
    //coefficientSize     = Planet::COEFFICIENT_SIZE[bodyIndex];
