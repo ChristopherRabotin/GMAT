@@ -639,6 +639,7 @@ bool CallFunction::Initialize()
       mOutputList.push_back((Parameter *)((*objectMap)[*i]));
    }
 
+if (mInputList.size() > 0)
    if (mInputList[0] == NULL)
    {
        MessageInterface::PopupMessage
@@ -648,6 +649,7 @@ bool CallFunction::Initialize()
        return false;
    }
 
+if (mOutputList.size() > 0)
    if (mOutputList[0] == NULL)
    {
        MessageInterface::PopupMessage
