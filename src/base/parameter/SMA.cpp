@@ -97,13 +97,13 @@ bool SMA::Evaluate()
         
     Integer i = 0, id;
     std::vector<Spacecraft *>::iterator current;
-    Real energy, radius, speed2, *state, dist[3];
+    Real energy, radius, speed2, dist[3];
     
     for (current = source.begin(); current != source.end(); ++current) {
         id = (*current)->GetParameterID("CoordinateRepresentation");
         if ((*current)->GetStringParameter(id) != "Cartesian")
             throw ParameterException("SMA needs a Cartesian state");
-        state = (*current)->GetState();
+        PropState state = (*current)->GetState();
         dist[0] = state[0] - cbLoc[0];
         dist[1] = state[1] - cbLoc[1];
         dist[2] = state[2] - cbLoc[2];

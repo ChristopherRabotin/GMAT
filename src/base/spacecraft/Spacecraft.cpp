@@ -48,7 +48,7 @@ const std::string Spacecraft::REF_PLANE  = "Equatorial";
  *
  */
 Spacecraft::Spacecraft() : 
-    GmatBase       (Gmat::SPACECRAFT,"Spacecraft",""),
+    SpaceObject    (Gmat::SPACECRAFT,"Spacecraft",""),
     epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
@@ -82,7 +82,7 @@ Spacecraft::Spacecraft() :
  *
  */
 Spacecraft::Spacecraft(const std::string &name) :
-    GmatBase       (Gmat::SPACECRAFT, "Spacecraft", name),
+    SpaceObject    (Gmat::SPACECRAFT, "Spacecraft", name),
     epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
@@ -117,7 +117,7 @@ Spacecraft::Spacecraft(const std::string &name) :
  *
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
-    GmatBase       (Gmat::SPACECRAFT, typeStr, name),
+    SpaceObject    (Gmat::SPACECRAFT, typeStr, name),
     epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
@@ -151,7 +151,7 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
  * @param <a> The original that is being copied.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
-    GmatBase       (a),
+    SpaceObject    (a),
     epoch          (a.epoch),
     dateFormat     (a.dateFormat),
     stateType      (a.stateType),
@@ -734,7 +734,7 @@ void Spacecraft::SetEpoch()
  * @return the state
  *
  */
-Real* Spacecraft::GetState()
+PropState& Spacecraft::GetState()
 {
     return state;
 }
@@ -807,7 +807,7 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  */
 Rvector6 Spacecraft::GetCartesianState() 
 {
-   return(cartesianState = stateConverter.Convert(state,stateType,"Cartesian"));
+   return(cartesianState = stateConverter.Convert(state.GetState(),stateType,"Cartesian"));
 }
 
 //---------------------------------------------------------------------------
@@ -821,7 +821,7 @@ Rvector6 Spacecraft::GetCartesianState()
  */
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-   return(keplerianState = stateConverter.Convert(state,stateType,"Keplerian"));
+   return(keplerianState = stateConverter.Convert(state.GetState(),stateType,"Keplerian"));
 }
 
 //---------------------------------------------------------------------------
@@ -837,7 +837,7 @@ Rvector6 Spacecraft::GetKeplerianState()
 Rvector6 Spacecraft::GetModifiedKeplerianState() 
 {
    modifiedKeplerianState = 
-      stateConverter.Convert(state,stateType,"ModifiedKeplerian");
+      stateConverter.Convert(state.GetState(),stateType,"ModifiedKeplerian");
 
 #if 0
    // @todo- this won't work

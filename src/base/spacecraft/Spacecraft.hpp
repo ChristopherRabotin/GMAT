@@ -20,12 +20,13 @@
 #ifndef Spacecraft_hpp
 #define Spacecraft_hpp
 
-#include "GmatBase.hpp"
+#include "SpaceObject.hpp"
 #include "SolarSystem.hpp"
 #include "Rvector6.hpp"
 #include "StateConverter.hpp"
 #include "TimeConverter.hpp"
 #include "MessageInterface.hpp"
+#include "PropState.hpp"
 
 enum SC_Param_ID 
 {
@@ -35,7 +36,7 @@ enum SC_Param_ID
    REFLECT_COEFF_ID, NO_NAME, SC_ParameterIDs
 };
 
-class GMAT_API Spacecraft : public GmatBase
+class GMAT_API Spacecraft : public SpaceObject
 {
 public:
     // Default constructor
@@ -67,7 +68,7 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
 
-    virtual Real* GetState(void); 
+    virtual PropState& GetState(void); 
 
     void SetState(const std::string &elementType, Real *instate);
     void SetState(const Real s1, const Real s2, const Real s3, 
@@ -116,7 +117,9 @@ public:
 protected:
     // Declare protetced method data of internal spacecraft information
     Real           epoch;
-    Real           state[6];  
+    // DJC:  7/21/04 Update for the state vector used in propagation
+//    Real           state[6];
+    PropState      state;
     Real           dryMass;
     Real           coeffDrag;
     Real           dragArea;

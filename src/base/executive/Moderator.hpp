@@ -35,6 +35,7 @@
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
 #include "Spacecraft.hpp"
+#include "Formation.hpp"
 #include "Parameter.hpp"
 #include "StopCondition.hpp"
 #include "Solver.hpp"
@@ -94,9 +95,9 @@ public:
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
     
    // Spacecraft
-   Spacecraft* CreateSpacecraft(const std::string &type,
+   SpaceObject* CreateSpacecraft(const std::string &type,
                                 const std::string &name);
-   Spacecraft* GetSpacecraft(const std::string &name);
+   SpaceObject* GetSpacecraft(const std::string &name);
    //future build:
    //GroundStation* CreateGroundStation(const std::string &type, const std::string &name);
    //GroundStation* GetGroundStation(const std::string &name);
@@ -246,6 +247,7 @@ private:
    void AddSolarSysToSandbox(Integer index);
    void AddPublisherToSandbox(Integer index);
    void AddSpacecraftToSandbox(Integer index);
+   void AddFormationToSandbox(Integer index);
    void AddPropSetupToSandbox(Integer index);
    void AddPropagatorToSandbox(Integer index);
    void AddForceModelToSandbox(Integer index);

@@ -90,8 +90,8 @@ bool FactoryManager::RegisterFactory(Factory* fact)
  * @return pointer to the newly-created Spacecraft object
  */
 //------------------------------------------------------------------------------
-Spacecraft* FactoryManager::CreateSpacecraft(std::string ofType,
-                                             std::string withName)
+SpaceObject* FactoryManager::CreateSpacecraft(std::string ofType,
+                                              std::string withName)
 {
    Factory* f = FindFactory(Gmat::SPACECRAFT, ofType);
    if (f != NULL)

@@ -41,7 +41,7 @@ class GMAT_API Factory
 {
 public:
    // methods to return objects of specified types
-   virtual Spacecraft*          CreateSpacecraft(std::string ofType,
+   virtual SpaceObject*         CreateSpacecraft(std::string ofType,
                                                  std::string withName = "");        
 //   virtual GroundStation* CreateGroundStation(std::string ofType,
 //                                              std::string withName = "");

@@ -207,6 +207,11 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
         return true;
     }
     
+    if (objecttype == "Formation") {
+        CreateFormation(objectname);
+        return true;
+    }
+    
     if (objecttype == "Propagator") {
         // PropSetup *prop =
         CreatePropSetup(objectname);
@@ -368,7 +373,24 @@ void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
 //------------------------------------------------------------------------------
 Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 {
-    return moderator->CreateSpacecraft("Spacecraft", satname);
+    return (Spacecraft *)(moderator->CreateSpacecraft("Spacecraft", satname));
+}
+
+
+//------------------------------------------------------------------------------
+// Formation* CreateFormation(std::string formname)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a new Formation object.
+ * 
+ * @param satname Name of the formation.
+ * 
+ * @return Pointer to the constructed Formation.
+ */
+//------------------------------------------------------------------------------
+Formation* Interpreter::CreateFormation(std::string formname)
+{
+    return (Formation *)(moderator->CreateSpacecraft("Formation", formname));
 }
 
 
@@ -412,6 +434,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
+std::cout << "Decomposing \"" << (*i) << "\"\n";
       if (sublevel[cl].size() == 1) {
          // Size 1 implies an object reference
          object[ol] = moderator->GetConfiguredItem(*i);
@@ -421,10 +444,28 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
                                        " for command " + (cmd->GetTypeName()));
       }
       else {
-         return false;
+         if (!AssemblePhrase(sublevel[cl], cmd))
+            return false;
       }
    }
    return true;
+}
+
+
+GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
+{
+   StringArray breakdown;
+   GmatBase *ref = NULL;
+   
+   for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
+      breakdown = Decompose(*i);
+      if (breakdown.size() == 1) {
+         ref = moderator->GetConfiguredItem(*i);
+      }
+      else {
+      }
+   }
+   return ref;
 }
 
 

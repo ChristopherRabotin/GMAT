@@ -170,7 +170,7 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
 Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
                                              const std::string &name)
 {
-   Spacecraft *sc = moderator->CreateSpacecraft(type, name);
+   Spacecraft *sc = (Spacecraft*)moderator->CreateSpacecraft(type, name);
    return sc;
 }
 
@@ -187,8 +187,45 @@ Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
 //------------------------------------------------------------------------------
 Spacecraft* GuiInterpreter::GetSpacecraft(const std::string &name)
 {
-   Spacecraft *sc = moderator->GetSpacecraft(name);
+   Spacecraft *sc = (Spacecraft*)moderator->GetSpacecraft(name);
    return sc;
+}
+
+// formation
+//------------------------------------------------------------------------------
+// Formation* CreateFormation(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a formation object by given name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return formation object pointer
+ */
+//------------------------------------------------------------------------------
+Formation* GuiInterpreter::CreateFormation(const std::string &type,
+                                           const std::string &name)
+{
+   Formation *f = (Formation*)moderator->CreateSpacecraft(type, name);
+   return f;
+}
+
+//------------------------------------------------------------------------------
+// Formation* GetFormation(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a formation object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a formation object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Formation* GuiInterpreter::GetFormation(const std::string &name)
+{
+   Formation *f = (Formation*)moderator->GetSpacecraft(name);
+   return f;
 }
 
 // Propagator

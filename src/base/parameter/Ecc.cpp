@@ -96,13 +96,14 @@ bool Ecc::Evaluate()
 
     Integer i = 0, id;
     std::vector<Spacecraft *>::iterator current;
-    Real mag, rCrossV[3], vCrossRCrossV[3], *state, dist[3], eVect[3];
+    Real mag, rCrossV[3], vCrossRCrossV[3], dist[3], eVect[3];
+    //PropState *state;
     
     for (current = source.begin(); current != source.end(); ++current) {
         id = (*current)->GetParameterID("CoordinateRepresentation");
         if ((*current)->GetStringParameter(id) != "Cartesian")
             throw ParameterException("Inc needs a Cartesian state");
-        state = (*current)->GetState();
+        PropState state = (*current)->GetState();
         dist[0] = state[0] - cbLoc[0];
         dist[1] = state[1] - cbLoc[1];
         dist[2] = state[2] - cbLoc[2];

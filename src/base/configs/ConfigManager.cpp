@@ -127,7 +127,7 @@ void ConfigManager::AddPropSetup(PropSetup* propSetup)
 //------------------------------------------------------------------------------
 // void AddSpacecraft(Spacecraft *sc)
 //------------------------------------------------------------------------------
-void ConfigManager::AddSpacecraft(Spacecraft *sc)
+void ConfigManager::AddSpacecraft(SpaceObject *sc)
 {
     std::string name = sc->GetName();
     if (name == "")
@@ -391,17 +391,18 @@ ForceModel* ConfigManager::GetForceModel(const std::string &name)
 //------------------------------------------------------------------------------
 // Spacecraft* GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
-Spacecraft* ConfigManager::GetSpacecraft(const std::string &name)
+SpaceObject* ConfigManager::GetSpacecraft(const std::string &name)
 {
-    Spacecraft *sc = NULL;
+    SpaceObject *sc = NULL;
     if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::SPACECRAFT) {
+        if ((mapping[name]->GetType() != Gmat::SPACECRAFT) &&
+            (mapping[name]->GetType() != Gmat::FORMATION)){
             //std::string str = mapping[name]->GetName() +
             //                  " is not a spacecraft";
             //throw ConfigManagerException(str);
             return NULL;
         }
-        sc = (Spacecraft *)mapping[name];
+        sc = (SpaceObject *)mapping[name];
     }
     return sc;
 }

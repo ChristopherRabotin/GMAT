@@ -81,6 +81,7 @@ namespace Gmat
    enum ObjectType
    {
       SPACECRAFT= 1001,
+      FORMATION,
       GROUND_STATION,
       BURN,
       COMMAND,

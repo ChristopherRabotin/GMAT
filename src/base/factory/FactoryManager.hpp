@@ -62,7 +62,7 @@ public:
     // bool                   RemoveFactory(Factory& fact):     // ???      
 
     // methods to create and return objects of the various types
-    Spacecraft *          CreateSpacecraft(std::string ofType = "Spacecraft",
+    SpaceObject *         CreateSpacecraft(std::string ofType,
                                            std::string withName = "");
 //    GroundStation *       CreateGroundStation(std::string withName);
     Parameter *           CreateParameter(std::string ofType,

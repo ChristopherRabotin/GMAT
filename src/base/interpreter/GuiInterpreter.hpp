@@ -24,6 +24,7 @@
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
 #include "Spacecraft.hpp"
+#include "Formation.hpp"
 #include "Parameter.hpp"
 #include "StopCondition.hpp"
 #include "SolarSystem.hpp"
@@ -69,6 +70,10 @@ public:
    Spacecraft* CreateSpacecraft(const std::string&type,
                                 const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
+   Formation* GuiInterpreter::CreateFormation(const std::string &type,
+                                           const std::string &name);
+   Formation* GuiInterpreter::GetFormation(const std::string &name);
+   
    //future build:GroundStation* CreateGroundStation(const std::string &name);
    //future build:GroundStation* GetGroundStation(const std::string &name);
 

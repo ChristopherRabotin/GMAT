@@ -129,7 +129,7 @@ Rvector6 OrbitData::GetCartState()
 
    if (elemType == "Cartesian")
    {
-      Real *statePtr = mSpacecraft->GetState(); // should be cartesian state
+      PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
       for (int i=0; i<6; i++)
          mCartState[i] = statePtr[i];
 
@@ -153,9 +153,9 @@ Rvector6 OrbitData::GetCartState()
 
       Real grav = mGravConst;
       
-      Real *statePtr = mSpacecraft->GetState(); // should be keplerian state
+      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
       Real kepl[6];
-      memcpy(kepl, statePtr, 6*sizeof(Real));
+      memcpy(kepl, statePtr.GetState(), 6*sizeof(Real));
 
       Rvector6 keplState = Rvector6(kepl);
       Rvector6 cartState;
@@ -193,7 +193,7 @@ Rvector6 OrbitData::GetKepState()
          
    if (elemType == "Keplerian")
    {
-      Real *statePtr = mSpacecraft->GetState(); // should be keplerian state
+      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
             
       for (int i=0; i<6; i++)
          mKepState[i] = statePtr[i];
@@ -201,9 +201,9 @@ Rvector6 OrbitData::GetKepState()
    }
    else if (elemType == "Cartesian")
    {
-      Real *statePtr = mSpacecraft->GetState(); // should be cartesian state
+      PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
       Real cart[6];
-      memcpy(cart, statePtr, 6*sizeof(Real));
+      memcpy(cart, statePtr.GetState(), 6*sizeof(Real));
                 
 //        Integer id = mSpacecraft->GetParameterID("ReferenceBody");
 //        std::string bodyName = mSpacecraft->GetStringParameter(id);

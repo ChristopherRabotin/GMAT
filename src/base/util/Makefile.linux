@@ -14,6 +14,7 @@ OBJECTS = A1Date.o \
           DateUtil.o \
           ElapsedTime.o \
           EphemerisUtil.o \
+          GregorianDate.o \
           Keplerian.o \
           Linear.o \
           RealUtilities.o \

@@ -29,6 +29,7 @@
 
 // Forward references for GMAT core objects
 class Spacecraft;
+class Formation;
 class Propagator;
 class ForceModel;
 class PropSetup;
@@ -113,73 +114,75 @@ protected:
                                  UNKNOWN };
 
 
-   void                            Initialize(void);
+   void                          Initialize(void);
 
    // The "Create" methods make calls, through the Moderator, to the Factories
    // to get new instances of the requested objects
-   Spacecraft*                     CreateSpacecraft(std::string satname);
-   GmatCommand*                    CreateCommand(std::string commandtype);
-   Propagator*                     CreatePropagator(std::string proptype);
-   ForceModel*                     CreateForceModel(std::string modelname);
-   PhysicalModel*                  CreatePhysicalModel(std::string forcetype);
-   SolarSystem*                    CreateSolarSystem(std::string ssname);
-   CelestialBody*                  CreateCelestialBody(std::string cbname, 
-                                                        std::string type);
-   Parameter*                      CreateParameter(std::string name, 
-                                                    std::string type);
-//   StoppingCondition*              CreateStopCond(std::string conditiontype);
-   Subscriber*                     CreateSubscriber(std::string name, 
+   Spacecraft*                   CreateSpacecraft(std::string satname);
+   Formation*                    CreateFormation(std::string formname);
+   GmatCommand*                  CreateCommand(std::string commandtype);
+   Propagator*                   CreatePropagator(std::string proptype);
+   ForceModel*                   CreateForceModel(std::string modelname);
+   PhysicalModel*                CreatePhysicalModel(std::string forcetype);
+   SolarSystem*                  CreateSolarSystem(std::string ssname);
+   CelestialBody*                CreateCelestialBody(std::string cbname, 
                                                      std::string type);
-   Burn*                           CreateBurn(std::string satname, bool isImpulsive = false);
+   Parameter*                    CreateParameter(std::string name, 
+                                                    std::string type);
+//   StoppingCondition*            CreateStopCond(std::string conditiontype);
+   Subscriber*                   CreateSubscriber(std::string name, 
+                                                  std::string type);
+   Burn*                         CreateBurn(std::string satname, bool isImpulsive = false);
                                                     
    // The following method signature depends on an open scripting issue: if
    // props and force models are named, the following Create method should use
    // the names rather than the object pointers
-   PropSetup*                      CreatePropSetup(std::string name);
+   PropSetup*                    CreatePropSetup(std::string name);
     
-   bool                            AssembleCommand(const std::string& scriptline,
-                                                   GmatCommand *cmd = NULL);
-    
-   bool                            InterpretPropSetupParameter(GmatBase *obj, 
-                                                  StringArray& items,
-                                                  std::vector<std::string*>::iterator& phrase, 
-                                                  Integer index = 1);
+   bool                          AssembleCommand(const std::string& scriptline,
+                                                 GmatCommand *cmd = NULL);
+   GmatBase*                     AssemblePhrase(StringArray& phrase,
+                                                GmatCommand *cmd);
+   
+   bool                          InterpretPropSetupParameter(GmatBase *obj, 
+                                                StringArray& items,
+                                                std::vector<std::string*>::iterator& phrase, 
+                                                Integer index = 1);
                                                 
    // Methods used to break apart lines of script
-   void                            ChunkLine(void);
-   bool                            IsGroup(const char *text);
-   Integer                         SkipWhiteSpace(Integer start = 0, 
-                                                  const std::string &text = "");
-   void                            WriteParameterValue(GmatBase *obj, Integer id);
-   Integer                         FindDelimiter(const std::string &str,
-                                                 const std::string &specChar = "");
-   std::string                     GetToken(const std::string &tokstr = "");
+   void                          ChunkLine(void);
+   bool                          IsGroup(const char *text);
+   Integer                       SkipWhiteSpace(Integer start = 0, 
+                                                const std::string &text = "");
+   void                          WriteParameterValue(GmatBase *obj, Integer id);
+   Integer                       FindDelimiter(const std::string &str,
+                                               const std::string &specChar = "");
+   std::string                   GetToken(const std::string &tokstr = "");
 
 // temporarily make public to test this piece
 public:
    // Handlers for specific constructs
-   StringArray&                    Decompose(const std::string &chunk);
+   StringArray&                  Decompose(const std::string &chunk);
 
 protected:
-   StringArray&                    SeparateSpaces(const std::string &chunk);
-   StringArray&                    SeparateDots(const std::string &chunk, 
-                                           const std::string &delimiter = ".");
-   StringArray&                    SeparateBraces(const std::string &chunk);
-   StringArray&                    SeparateBrackets(const std::string &chunk);
-   StringArray&                    SeparateParens(const std::string &chunk);
+   StringArray&                  SeparateSpaces(const std::string &chunk);
+   StringArray&                  SeparateDots(const std::string &chunk, 
+                                              const std::string &delimiter = ".");
+   StringArray&                  SeparateBraces(const std::string &chunk);
+   StringArray&                  SeparateBrackets(const std::string &chunk);
+   StringArray&                  SeparateParens(const std::string &chunk);
     
-   GmatBase*                       FindObject(std::string objName);
-   GmatBase*                       FindOwnedObject(StringArray TokenList,
-                                                   GmatBase *owner, 
-                                                   Integer index);
-   bool                            SetParameter(GmatBase *obj, Integer id,
-                                                std::string value);
+   GmatBase*                     FindObject(std::string objName);
+   GmatBase*                     FindOwnedObject(StringArray TokenList,
+                                                 GmatBase *owner, 
+                                                 Integer index);
+   bool                          SetParameter(GmatBase *obj, Integer id,
+                                              std::string value);
                                                  
-   void                            RegisterAliases(void);
-   bool                            ConfigureForce(ForceModel *obj, 
-                                                  std::string& objParm, 
-                                                  std::string& parm);
+   void                          RegisterAliases(void);
+   bool                          ConfigureForce(ForceModel *obj, 
+                                                std::string& objParm, 
+                                                std::string& parm);
 };
 
 #endif // INTERPRETER_HPP
-

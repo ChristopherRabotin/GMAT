@@ -13,15 +13,23 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
           -I../util -I../interpolator -I../parameter -I../configs \
           -I../refframe -I../burn -I../solver
 
-OBJECTS = Spacecraft.o \
+OBJECTS = SpaceObject.o \
+          PropState.o \
+          Spacecraft.o \
+          Formation.o \
           Converter.o \
           StateConverter.o \
           TextTrajectoryFile.o \
-          TimeConverter.o
+          TimeConverter.o \
+          SpaceObjectException.o
 
 all: libSpacecraft 
 	mkdir -p ../lib
 	mv libSpacecraft.a ../lib
+
+clean:
+	rm -f *.o
+	rm -f ../lib/libSpacecraft.a
 
 libSpacecraft : ../lib/libSpacecraft.a
 

@@ -401,15 +401,15 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
       Integer stateSize = 6;
       Integer vectorSize = stateSize * sizeof(Real);
       std::vector<Spacecraft *>::iterator sat;
-      Real *state;
+      PropState *state;
 
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
-         state = (*sat)->GetState();
-         memcpy(&previousState[j*stateSize], state, vectorSize);
+         state = &((*sat)->GetState());
+         memcpy(&previousState[j*stateSize], state->GetState(), vectorSize);
          previousTime = 
             ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
             * 86400.0;
-         memcpy(state, &modelState[j*stateSize], vectorSize);
+         memcpy(state->GetState(), &modelState[j*stateSize], vectorSize);
          ++j;
             
          // Quick fix to get the epoch updated
@@ -451,11 +451,11 @@ void ForceModel::UpdateFromSpacecraft(void)
         Integer j = 0;
         Integer stateSize = 6;
         std::vector<Spacecraft *>::iterator sat;
-        Real *state;
+        PropState *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
-            state = (*sat)->GetState();
-            memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
+            state = &((*sat)->GetState());
+            memcpy(&modelState[j*stateSize], state->GetState(), stateSize * sizeof(Real));
             ++j;
         }
     }
@@ -518,11 +518,11 @@ bool ForceModel::Initialize(void)
     else 
     {
         Integer j = 0;
-        Real *state;
+        PropState *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
-            state = (*sat)->GetState();
-            memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
+            state = &((*sat)->GetState());
+            memcpy(&modelState[j*stateSize], state->GetState(), stateSize * sizeof(Real));
             ++j;
         }
     }
@@ -554,7 +554,11 @@ bool ForceModel::Initialize(void)
            throw ForceModelException(msg.c_str());
         }
         currentPm->SetState(modelState);
-        
+//std::cout << "Force " << currentPm->GetTypeName() << "\n";
+//if (currentPm->GetTypeName() == "DragForce") {
+//   Integer id = currentPm->GetParameterID("AtmosphereModel");
+//   std::cout << "   Drag type = " << currentPm->GetStringParameter(id) << "\n";
+//}
         // Set spacecraft parameters for forces that need them
         i = 0;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
@@ -904,6 +908,10 @@ std::string ForceModel::GetStringParameter(const Integer id) const
     case CENTRAL_BODY:
        return "Earth";
     case  DRAG:
+       // Find the drag force
+       
+       // Get the atmosphere model from the drag force
+//       Integer id = currentPm->GetParameterID("AtmosphereModel");
        return "Exponential";
     case  SRP:
        return "On";

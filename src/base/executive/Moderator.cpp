@@ -343,7 +343,7 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
  * @return spacecraft object pointer
  */
 //------------------------------------------------------------------------------
-Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
+SpaceObject* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
 #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
@@ -353,7 +353,7 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 
    if (GetSpacecraft(name) == NULL)
    {
-      Spacecraft *sc = theFactoryManager->CreateSpacecraft(type, name);
+      SpaceObject *sc = theFactoryManager->CreateSpacecraft(type, name);
 
       if (sc == NULL)
       {
@@ -387,17 +387,17 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 }
 
 //------------------------------------------------------------------------------
-// Spacecraft* GetSpacecraft(const std::string &name)
+// SpaceObject* GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a spacecraft object pointer by given name and add to configuration.
  *
  * @param <name> object name
  *
- * @return a spacecraft object pointer, return null if name not found
+ * @return a SpaceObject object pointer, return null if name not found
  */
 //------------------------------------------------------------------------------
-Spacecraft* Moderator::GetSpacecraft(const std::string &name)
+SpaceObject* Moderator::GetSpacecraft(const std::string &name)
 {
    if (name == "")
       return NULL;
@@ -1834,6 +1834,7 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
          AddSolarSysToSandbox(sandboxNum-1);
          AddPublisherToSandbox(sandboxNum-1);        
          AddSpacecraftToSandbox(sandboxNum-1);
+         AddFormationToSandbox(sandboxNum-1);
          AddForceModelToSandbox(sandboxNum-1);
          AddPropagatorToSandbox(sandboxNum-1);
          AddPropSetupToSandbox(sandboxNum-1);
@@ -2394,13 +2395,17 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
    if (configList.size() > 0)
    {
       // return 1st Spacecraft from the list
-      return GetSpacecraft(configList[0]);
+      SpaceObject *so = GetSpacecraft(configList[0]);
+      if (so->GetType() == Gmat::SPACECRAFT)
+         return (Spacecraft*)so;
    }
    else
    {
       // create Spacecraft
-      return CreateSpacecraft("Spacecraft", "DefaultSC");
+      return (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
    }
+   
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -2528,8 +2533,23 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
 
    for (Integer i=0; i<(Integer)scNames.size(); i++)
    {
-      sc = theConfigManager->GetSpacecraft(scNames[i]);
+      sc = (Spacecraft*)theConfigManager->GetSpacecraft(scNames[i]);
       sandboxes[index]->AddObject(sc);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void AddFormationToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddFormationToSandbox(Integer index)
+{
+   Formation *form;
+   StringArray formNames = theConfigManager->GetListOfItems(Gmat::FORMATION);
+
+   for (Integer i=0; i<(Integer)formNames.size(); i++)
+   {
+      form = (Formation*)theConfigManager->GetSpacecraft(formNames[i]);
+      sandboxes[index]->AddObject(form);
    }
 }
 

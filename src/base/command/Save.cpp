@@ -139,27 +139,29 @@ void Save::WriteObject(void)
     Integer i;
     for (i = 0; i < obj->GetParameterCount(); ++i) 
     {
-        if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
-            // Fill in the l.h.s.
-            file << "GMAT " << objectname << "." 
-                 << obj->GetParameterText(i) << " = ";
-            WriteParameterValue(file, i);
-            file << ";\n";
-        }
-        else {
-            // Fill in the l.h.s.
-            file << "GMAT " << objectname << "." 
-                 << obj->GetParameterText(i) << " = ";
-            std::string desc = "{";
-            const StringArray dat = obj->GetStringArrayParameter(i);
-            for (StringArray::const_iterator i = dat.begin(); 
-                 i != dat.end(); ++i) {
-               if (desc != "{")
-                  desc += ", ";
-               desc += (*i);
-            }
-            desc += "}";
-            file << desc << "\n";   
+        if (obj->GetParameterType(i) != Gmat::UNKNOWN_PARAMETER_TYPE) {
+           if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
+               // Fill in the l.h.s.
+               file << "GMAT " << objectname << "." 
+                    << obj->GetParameterText(i) << " = ";
+               WriteParameterValue(file, i);
+               file << ";\n";
+           }
+           else {
+               // Fill in the l.h.s.
+               file << "GMAT " << objectname << "." 
+                    << obj->GetParameterText(i) << " = ";
+               std::string desc = "{";
+               const StringArray dat = obj->GetStringArrayParameter(i);
+               for (StringArray::const_iterator i = dat.begin(); 
+                    i != dat.end(); ++i) {
+                  if (desc != "{")
+                     desc += ", ";
+                  desc += (*i);
+               }
+               desc += "}";
+               file << desc << "\n";   
+           }
         }
     }
     file << "\n";

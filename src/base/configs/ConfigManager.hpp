@@ -52,7 +52,7 @@ public:
     void                AddSubscriber(Subscriber *subs);
     void                AddSolarSystem(SolarSystem *solarSys);
     void                AddPropSetup(PropSetup *propSetup);
-    void                AddSpacecraft(Spacecraft *sc);
+    void                AddSpacecraft(SpaceObject *sc);
     void                AddStopCondition(StopCondition* stopCond);
     void                AddParameter(Parameter* parameter);
     void                AddBurn(Burn* burn);
@@ -72,7 +72,7 @@ public:
     bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
         
     ForceModel*         GetForceModel(const std::string &name);
-    Spacecraft*         GetSpacecraft(const std::string &name);
+    SpaceObject*        GetSpacecraft(const std::string &name);
     PropSetup*          GetPropSetup(const std::string &name);
     Subscriber*         GetSubscriber(const std::string &name);
     SolarSystem*        GetDefaultSolarSystem();

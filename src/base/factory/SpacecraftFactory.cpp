@@ -21,6 +21,7 @@
 #include "Factory.hpp"
 #include "SpacecraftFactory.hpp"
 #include "Spacecraft.hpp"   // for Spacecraft class - add specific s/c as needed
+#include "Formation.hpp"
 
 //---------------------------------
 //  public methods
@@ -39,10 +40,14 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-Spacecraft* SpacecraftFactory::CreateSpacecraft(std::string ofType,
+SpaceObject* SpacecraftFactory::CreateSpacecraft(std::string ofType,
                                                 std::string withName)
 {
-   return new Spacecraft(withName);
+   if (ofType == "Spacecraft")
+      return new Spacecraft(withName);
+   if (ofType == "Formation")
+      return new Formation(Gmat::FORMATION, "Formation", withName);
+   return NULL;   
 }
 
 
@@ -59,7 +64,8 @@ Factory(Gmat::SPACECRAFT)
 {
    if (creatables.empty())
    {
-      creatables.push_back("Spacecraft");  // default type for this factory
+      creatables.push_back("Spacecraft");
+      creatables.push_back("Formation");
    }
 }
 
@@ -78,7 +84,8 @@ Factory(createList, Gmat::SPACECRAFT)
 {
    if (creatables.empty())
    {
-      creatables.push_back("Spacecraft");  // default type for this factory
+      creatables.push_back("Spacecraft");
+      creatables.push_back("Formation");
    }
 }
 
@@ -97,7 +104,8 @@ Factory(fact)
 {
    if (creatables.empty())
    {
-      creatables.push_back("Spacecraft");  // default type for this factory
+      creatables.push_back("Spacecraft");
+      creatables.push_back("Formation");
    }
 }
 
@@ -118,7 +126,8 @@ SpacecraftFactory& SpacecraftFactory::operator= (const SpacecraftFactory& fact)
    Factory::operator=(fact);
    if (creatables.empty())
    {
-      creatables.push_back("Spacecraft");  // default type for this factory
+      creatables.push_back("Spacecraft");
+      creatables.push_back("Formation");
    }
    return *this;
 }

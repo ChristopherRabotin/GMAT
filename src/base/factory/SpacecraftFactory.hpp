@@ -26,7 +26,7 @@
 class GMAT_API SpacecraftFactory : public Factory
 {
 public:
-   Spacecraft*  CreateSpacecraft(std::string ofType, std::string withName = "");
+   SpaceObject* CreateSpacecraft(std::string ofType, std::string withName = "");
 
    // default constructor
    SpacecraftFactory();

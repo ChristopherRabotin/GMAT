@@ -42,10 +42,10 @@
  * objects of type Spacecraft.
  */
 //------------------------------------------------------------------------------
-Spacecraft* Factory::CreateSpacecraft(std::string ofType,
-                                              std::string withName)
+SpaceObject* Factory::CreateSpacecraft(std::string ofType,
+                                       std::string withName)
 {
-   throw FactoryException("requested object must be of type Spacecraft");
+   throw FactoryException("requested object must be of type SpaceObject");
 }
 
 //------------------------------------------------------------------------------
