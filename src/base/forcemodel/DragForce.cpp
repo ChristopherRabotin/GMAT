@@ -21,8 +21,8 @@
 #include "DragForce.hpp"
 #include "ForceModelException.hpp"
 
-DragForce::DragForce() :
-    PhysicalModel          (Gmat::PHYSICAL_MODEL, "DragForce"),
+DragForce::DragForce(const std::string &name) :
+    PhysicalModel          (Gmat::PHYSICAL_MODEL, "DragForce", name),
     sun                    (NULL),
     centralBody            (NULL),
     useExternalAtmosphere  (true),
