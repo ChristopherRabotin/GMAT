@@ -82,13 +82,6 @@ public:
     Planet* GetBody();
     void SetBody(Planet *body);
     bool SetBody(const std::string &name);
-    
-    // Parameter accessor methods -- overridden from GmatBase
-    //loj: 3/19/04 why overridden?
-    //std::string PointMassForce::GetParameterText(const Integer id);
-    //Integer PointMassForce::GetParameterID(const std::string str);
-    //Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const;
-    //std::string PointMassForce::GetParameterTypeString(const Integer id) const;
 
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
@@ -133,3 +126,4 @@ protected:
 };
 
 #endif  // PointMassForce_hpp
+

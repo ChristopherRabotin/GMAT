@@ -26,19 +26,15 @@
 //#include "MdiDocViewFrame.hpp"
 #include "CelesBodySelectDialog.hpp"
 
-// base include
+// base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Propagator.hpp"
-#include "Integrator.hpp"
-#include "RungeKutta89.hpp"
 #include "PropSetup.hpp"
-#include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
 #include "PointMassForce.hpp"
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
+#include "ForceModel.hpp"
 #include "Planet.hpp"
+#include "MessageInterface.hpp"
 
 class PropagationConfigPanel : public wxPanel
 {
@@ -62,10 +58,6 @@ private:
     wxStaticText *setting3StaticText;
     wxStaticText *setting4StaticText;
     wxStaticText *setting5StaticText;
-    wxStaticText *setting6StaticText;
-    wxStaticText *setting7StaticText;
-    wxStaticText *setting8StaticText;
-    wxStaticText *setting9StaticText;
     wxStaticText *item38;
     wxStaticText *item40;
     wxStaticText *item42;
@@ -79,10 +71,6 @@ private:
     wxTextCtrl *setting3TextCtrl;
     wxTextCtrl *setting4TextCtrl;
     wxTextCtrl *setting5TextCtrl;
-    wxTextCtrl *setting6TextCtrl;
-    wxTextCtrl *setting7TextCtrl;
-    wxTextCtrl *setting8TextCtrl;
-    wxTextCtrl *setting9TextCtrl;
     wxTextCtrl *bodyTextCtrl;
     wxTextCtrl *gravityDegreeTextCtrl;
     wxTextCtrl *gravityOrderTextCtrl;
@@ -113,12 +101,6 @@ private:
     wxString integratorString;
     wxString primaryBodyString;
     wxString gravityFieldString;
-    wxString earthDegreeString;
-    wxString earthOrderString;
-    wxString sunDegreeString;
-    wxString sunOrderString;
-    wxString moonDegreeString;
-    wxString moonOrderString;
 
     std::string propSetupName;
     std::string newPropName;
@@ -127,6 +109,9 @@ private:
     wxArrayString savedBodiesArray;
     wxArrayString pointmassBodiesArray;    
     wxArrayString primaryBodiesGravityArray;
+    wxArrayString degreeArray;
+    wxArrayString orderArray;
+    wxArrayString integratorArray;
     
 //    wxDocManager *mDocManager;
 //    wxDocTemplate *mDocTemplate;
@@ -145,22 +130,14 @@ private:
     bool isForceModelChanged;
     bool isIntegratorChanged;
     
-    wxArrayString integratorArray;
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
     Propagator     *newProp;
-    Integrator     *theIntegrator;
     PropSetup      *thePropSetup;
-    PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
-    PointMassForce *thePointMass;
-    SolarSystem    *theSolarSystem;
-    CelestialBody  *theEarth;  
-    CelestialBody  *theSun;    
-    CelestialBody  *theMoon; 
     std::vector<PointMassForce *> thePMForces;
     std::vector<Planet *> thePlanets;
-   
+      
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
@@ -168,13 +145,11 @@ private:
     void SaveData();
     void DisplayIntegratorData(bool integratorChanged);
     void DisplayPrimaryBodyData();
-    void DisplayForceData(); //loj: 2/11/04 added
+    void DisplayForceData();
     void DisplayGravityFieldData();
     void DisplayAtmosphereModelData();
     void DisplayMagneticFieldData();
-    void DisplayPointMassData();
     void DisplaySRPData();
-    ForceModel* UpdateForceModel();
 //    void CreateScript();
 //    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
@@ -214,15 +189,6 @@ private:
         ID_TEXT = 42000,
         ID_TEXTCTRL,
         ID_TEXTCTRL_PROP,
-        ID_TEXTCTRL_INTG1,
-        ID_TEXTCTRL_INTG2,
-        ID_TEXTCTRL_INTG3,
-        ID_TEXTCTRL_INTG4,
-        ID_TEXTCTRL_INTG5,
-        ID_TEXTCTRL_INTG6,
-        ID_TEXTCTRL_INTG7,
-        ID_TEXTCTRL_INTG8,
-        ID_TEXTCTRL_INTG9,
         ID_TEXTCTRL_GRAV1,
         ID_TEXTCTRL_GRAV2,
         ID_TEXTCTRL_MAGN1,

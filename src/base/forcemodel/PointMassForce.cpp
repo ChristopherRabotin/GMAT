@@ -74,7 +74,7 @@ PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
     "EstimateMethod",
     "Body",
     
-    //loj: 3/18/04 field name cannot have blank space
+//loj: 3/18/04 field name cannot have blank space
 //      "Base Epoch (A.1 Modified Julian)",
 //      "Gravitational Constant (mu, km^3/s^2)",
 //      "Equatorial Radius (km)",
@@ -91,12 +91,6 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
     Gmat::STRING_TYPE,
-//      Gmat::REAL_TYPE,
-//      Gmat::REAL_TYPE,
-//      Gmat::REAL_TYPE,
-//      Gmat::REAL_TYPE,
-//      Gmat::REAL_TYPE,
-//      Gmat::REAL_TYPE
 };
 
 //---------------------------------
@@ -122,8 +116,6 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 
     if (thePlanet == NULL)
         SetBody("Earth");
-    
-    //thePlanet = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -184,7 +176,6 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 
     return *this;
 }
-
 
 //------------------------------------------------------------------------------
 // bool PointMassForce::Initialize(void)
@@ -397,7 +388,6 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
     return retval;
 }
 
-
 //------------------------------------------------------------------------------
 // Planet* GetBody()
 //------------------------------------------------------------------------------
@@ -419,15 +409,16 @@ Planet* PointMassForce::GetBody()
 //------------------------------------------------------------------------------
 void PointMassForce::SetBody(Planet *body)
 {
-    if (body != NULL)
-    {
-        if (thePlanet != NULL)
-        {
-            if (thePlanet->GetName() == "")
-                delete thePlanet;
-        }
-    }
-    
+//    if (body != NULL)
+//    {
+//        if (thePlanet != NULL)
+//        {
+//            if (thePlanet->GetName() == "")
+//                delete thePlanet;
+//
+//        }
+//
+//    }
     thePlanet = body;
     mu = thePlanet->GetGravitationalConstant();
 }
@@ -645,3 +636,4 @@ bool PointMassForce::SetStringParameter(const std::string &label,
 {
     return SetStringParameter(GetParameterID(label), value);
 }
+
