@@ -48,9 +48,9 @@ public:
     Integer GetDaysPerMonth() const;
     GmatTimeUtil::MonthName GetMonthName() const;
 
-//loj: Do this later
-//      std::string ToPackedCalendarString() const;  // "YYYYMMDD.hhmmssnnn"
-
+    Real ToPackedCalendarReal() const;
+    std::string& ToPackedCalendarString();  // "YYYYMMDD.hhmmssnnn"
+    
     void ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear, Integer& hour, 
                              Integer& minute, Real& second) const;
     void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
@@ -79,7 +79,9 @@ protected:
     Integer  dayD;
     Real     secondsOfDayD;
 
-   static const Integer NUM_DATA = 6;
+    std::string mPackedString;
+    
+    static const Integer NUM_DATA = 6;
     static const std::string DATA_DESCRIPTIONS[NUM_DATA];
     std::string stringValues[NUM_DATA];
 

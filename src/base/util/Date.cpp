@@ -78,7 +78,7 @@ Integer Date::GetHour() const
    Integer min;
    Real sec;
    
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, min, sec);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return hour;
 }
 
@@ -91,7 +91,7 @@ Integer Date::GetMinute() const
    Integer min;
    Real sec;
    
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, min, sec);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return min;
 }
 
@@ -104,7 +104,7 @@ Real Date::GetSecond() const
    Integer min;
    Real sec;
    
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, min, sec);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    return sec;
 }
 
@@ -130,7 +130,7 @@ GmatTimeUtil::DayName Date::GetDayName() const
 //------------------------------------------------------------------------------
 Integer Date::GetDaysPerMonth() const
 {
-   if (IsLeapYear(yearD))
+   if(IsLeapYear(yearD))
       return GmatTimeUtil::LEAP_YEAR_DAYS_IN_MONTH[monthD - 1];
    else
       return GmatTimeUtil::DAYS_IN_MONTH[monthD - 1];
@@ -145,60 +145,77 @@ GmatTimeUtil::MonthName Date::GetMonthName() const
 }
 
 //------------------------------------------------------------------------------
-//  std::string ToPackedCalendarString() const
+//  Real ToPackedCalendarReal() const
 //------------------------------------------------------------------------------
-//  std::string Date::ToPackedCalendarString() const
-//  {
-//     //loj: need to work on this
-//     //loj: commented out: ostrstream not supported, so return "20030101.000000000"
-//     //char timeString[18];
-//      Real ymd;
-//      Real hms;
+/*
+ * @return time in Real in the format of yyyymmdd.hhmmssnnn
+ */
+//------------------------------------------------------------------------------
+Real Date::ToPackedCalendarReal() const
+{
+   Real ymd;
+   Real hms;
    
-//      YearMonDayHourMinSec (ymd, hms);
- 
-//      ostrstream outStream(timeString, 18);
-//      outStream << (Integer)ymd << "." << (Integer)hms;
+   ToYearMonDayHourMinSec(ymd, hms);
+    
+   return ymd + (hms * 1e-9);
+}
 
-//     std::string packedTime(timeString);
-//     return packedTime;
-//  } 
+//------------------------------------------------------------------------------
+//  std::string& ToPackedCalendarString()
+//------------------------------------------------------------------------------
+std::string& Date::ToPackedCalendarString()
+{
+   std::stringstream ss("");
+   ss.precision(0);
+   ss.setf(std::ios::fixed);
+   
+   Real ymd;
+   Real hms;
+   
+   ToYearMonDayHourMinSec(ymd, hms);
+ 
+   ss << ymd << "." << hms;
+   mPackedString = ss.str();
+   
+   return mPackedString;
+} 
 
 //------------------------------------------------------------------------------
 //  void ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear,
 //                           Integer& hour, Integer& minute, Real& second) const
 //------------------------------------------------------------------------------
 void Date::ToYearDOYHourMinSec(Integer& year, Integer& dayOfYear,
-                                   Integer& hour, Integer& minute, Real& second) const
+                               Integer& hour, Integer& minute, Real& second) const
 {
    year = yearD;
    dayOfYear = ToDOYFromYearMonthDay(yearD, monthD, dayD);
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, minute, second);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, minute, second);
 }          
 
 //------------------------------------------------------------------------------
-//  void ToYearMonDayHourMinSec (Integer& year, Integer& month, Integer& day, 
-//                               Integer& hour, Integer& minute, Real& second) const
+//  void ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
+//                              Integer& hour, Integer& minute, Real& second) const
 //------------------------------------------------------------------------------
-void Date::ToYearMonDayHourMinSec (Integer& year, Integer& month, Integer& day, 
-                                       Integer& hour, Integer& minute, Real& second) const
+void Date::ToYearMonDayHourMinSec(Integer& year, Integer& month, Integer& day, 
+                                  Integer& hour, Integer& minute, Real& second) const
 {
    year = yearD;
    month = monthD;
    day = dayD;
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, minute, second);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, minute, second);
 }
 
 //------------------------------------------------------------------------------
-//  void ToYearMonDayHourMinSec (Real& ymd, Real& hms) const
+//  void ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
 //------------------------------------------------------------------------------
-void Date::ToYearMonDayHourMinSec (Real& ymd, Real& hms) const
+void Date::ToYearMonDayHourMinSec(Real& ymd, Real& hms) const
 {
    Integer h;
    Integer m;
    Real    s;
    
-   ToHMSFromSecondsOfDay (secondsOfDayD, h, m, s);
+   ToHMSFromSecondsOfDay(secondsOfDayD, h, m, s);
    ymd = (Real) (yearD * 10000.0 + monthD * 100.0 + dayD);
    hms = (Real) (h * 1.0e+07 + m * 100000.0) +  s * 1000.0;
 }
@@ -228,7 +245,7 @@ std::string* Date::ToValueStrings()
    Integer min;
    Real sec;
    
-   ToHMSFromSecondsOfDay (secondsOfDayD, hour, min, sec);
+   ToHMSFromSecondsOfDay(secondsOfDayD, hour, min, sec);
    std::stringstream ss("");
 
    ss << yearD;
@@ -271,13 +288,13 @@ Date::Date()
 
 //------------------------------------------------------------------------------
 //  Date(Integer year, Integer month, Integer day, Integer hour, 
-//           Integer minute, Real second)
+//       Integer minute, Real second)
 //------------------------------------------------------------------------------
 Date::Date(Integer year, Integer month, Integer day, Integer hour, 
-                   Integer minute, Real second)
+           Integer minute, Real second)
 {
    // check time
-   if (!IsValidTime(year, month, day, hour, minute, second))
+   if(!IsValidTime(year, month, day, hour, minute, second))
    {
       throw TimeRangeError();
    }
@@ -290,16 +307,16 @@ Date::Date(Integer year, Integer month, Integer day, Integer hour,
 
 //------------------------------------------------------------------------------
 //  Date(Integer year, Integer dayOfYear, Integer hour, Integer minute,
-//           Real second)
+//       Real second)
 //------------------------------------------------------------------------------
 Date::Date(Integer year, Integer dayOfYear, Integer hour, Integer minute,
-                   Real second)
+           Real second)
 {
    yearD = year;
-   ToMonthDayFromYearDOY (year, dayOfYear, monthD, dayD);
+   ToMonthDayFromYearDOY(year, dayOfYear, monthD, dayD);
    
    // check time
-   if (!IsValidTime(yearD, monthD, dayD, hour, minute, second))
+   if(!IsValidTime(yearD, monthD, dayD, hour, minute, second))
    {
       throw TimeRangeError();
    }
@@ -320,8 +337,8 @@ Date::Date(Integer year, Integer month, Integer day, Real secondsOfDay)
    secondsOfDayD = secondsOfDay;
    
    // check time
-   ToHMSFromSecondsOfDay (secondsOfDay, hour, minute, seconds);
-   if (!IsValidTime(yearD, monthD, dayD, hour, minute, seconds))
+   ToHMSFromSecondsOfDay(secondsOfDay, hour, minute, seconds);
+   if(!IsValidTime(yearD, monthD, dayD, hour, minute, seconds))
    {
       throw TimeRangeError();
    }
