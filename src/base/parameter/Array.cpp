@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_ARRAY 1 //loj: 11/23/04
+//#define DEBUG_ARRAY 1
 
 //---------------------------------
 // static data
@@ -206,7 +206,7 @@ Real Array::SetRealParameter(const Integer id, const Real value,
 {
    switch (id)
    {
-   case ROW_VALUE:
+   case SINGLE_VALUE: //loj: 12/30/04 Changed from ROW_VALUE
       mRmatValue.SetElement(row, col, value);
       return value;
    default:
