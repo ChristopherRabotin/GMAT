@@ -41,6 +41,7 @@ class Parameter;
 class Command;
 class Publisher;
 class Subscriber;
+class Burn;
 
 
 //#include "Moderator.hpp"
@@ -129,6 +130,7 @@ protected:
 //    StoppingCondition*              CreateStopCond(std::string conditiontype);
     Subscriber*                     CreateSubscriber(std::string name, 
                                                      std::string type);
+    Burn*                           CreateBurn(std::string satname, bool isImpulsive = false);
                                                     
     // The following method signature depends on an open scripting issue: if
     // props and force models are named, the following Create method should use

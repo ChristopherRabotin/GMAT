@@ -23,7 +23,7 @@
 
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 1, November 2003"
+#define REV_STRING "Build 2, February 2004"
 
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
@@ -246,6 +246,12 @@ bool ScriptInterpreter::WriteScript(void)
         if (!BuildObject(*current))
             return false;
             
+    // Burn objects
+    objs = moderator->GetListOfConfiguredItems(Gmat::BURN);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+    
     // Subscriber setups
     objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
     for (current = objs.begin(); current != objs.end(); ++current)

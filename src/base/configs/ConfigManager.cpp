@@ -411,9 +411,9 @@ Burn* ConfigManager::GetBurn(const std::string &name)
 {
     Burn *burn = NULL;
     if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::PARAMETER) {
+        if (mapping[name]->GetType() != Gmat::BURN) {
             std::string str = mapping[name]->GetName() +
-                              " is not a spacecraft";
+                              " is not a burn";
             throw ConfigManagerException(str);
         }
         burn = (Burn *)mapping[name];

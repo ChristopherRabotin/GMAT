@@ -413,6 +413,9 @@ Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
     Burn *burn = theFactoryManager->CreateBurn(type, name);
+    // Manage it if it is a named parameter
+    if (burn->GetName() != "")
+        theConfigManager->AddBurn(burn);
     return burn;
 }
 
