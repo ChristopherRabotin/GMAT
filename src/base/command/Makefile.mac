@@ -6,6 +6,7 @@
 #                          ElseCommand, EndIfCommand, EndForCommand, EndTarget, 
 #                          ForCommand, IfCommand, Maneuver, Target, and  
 #                          Vary 
+#             2004/02/27 - Added Save.cpp
 #
 #
 # Define the marco for the top-level directories
@@ -15,7 +16,8 @@ PROJECT_ROOT    = ../..
 SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp Command.cpp \
 	CommandException.cpp ElseCommand.cpp EndIfCommand.cpp \
 	EndForCommand.cpp EndTarget.cpp ForCommand.cpp IfCommand.cpp \
-	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Toggle.cpp Vary.cpp
+	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Save.cpp Toggle.cpp \
+	Vary.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
