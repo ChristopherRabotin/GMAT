@@ -280,12 +280,24 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    if (dimension != satCount * 6) 
       return false;
 
-   Real radius, r3, mu_r;
+   Real radius, r3, mu_r, rbb3, mu_rbb, a_indirect[3];
    Integer i6;
     
    //waw: 04/27/04
    Real now = epoch + dt/86400.0, relativePosition[3];
    const Rvector6 *rv = &(body->GetState(now));
+   
+   // Precalculations for the indirect effect term
+   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+   if (rbb3 != 0.0) {
+      rbb3 = rbb3 * sqrt(rbb3);
+      mu_rbb = mu / rbb3;
+      a_indirect[0] = mu_rbb * (*rv)[0];
+      a_indirect[1] = mu_rbb * (*rv)[1];
+      a_indirect[2] = mu_rbb * (*rv)[2];
+   }
+   else
+      a_indirect[0] = a_indirect[1] = a_indirect[2] = 0.0;
    
 #if DEBUG_PMF_BODY
    ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
@@ -324,9 +336,9 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 //         deriv[3 + i6] = relativePosition[i6]     * mu_r;
 //         deriv[4 + i6] = relativePosition[1 + i6] * mu_r;
 //         deriv[5 + i6] = relativePosition[2 + i6] * mu_r;
-         deriv[3 + i6] = relativePosition[0]     * mu_r;
-         deriv[4 + i6] = relativePosition[1] * mu_r;
-         deriv[5 + i6] = relativePosition[2] * mu_r;
+         deriv[3 + i6] = relativePosition[0] * mu_r - a_indirect[0];
+         deriv[4 + i6] = relativePosition[1] * mu_r - a_indirect[1];
+         deriv[5 + i6] = relativePosition[2] * mu_r - a_indirect[2];
          // dr/dt = v
          deriv[i6]     = state[3 + i6];
          deriv[1 + i6] = state[4 + i6];

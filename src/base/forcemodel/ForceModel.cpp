@@ -787,6 +787,12 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
       if (!current->GetDerivatives(state, dt, order))
          return false;
 
+#if DEBUG_FORCEMODEL
+         MessageInterface::ShowMessage("  ddt(%s) = %le %le %le\n", 
+            (current->GetStringParameter(current->GetParameterID("BodyName"))).c_str(), 
+            ddt[3], ddt[4], ddt[5]);
+#endif
+
       for (i = 0; i < satCount; ++i) {
          iOffset = i*stateSize;
          if (order == 1) //loj: changed from =
@@ -803,10 +809,17 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
          }
          //current = current->Next(); waw: 06/04/04
          // waw: added 06/04/04
+#if DEBUG_FORCEMODEL
+         MessageInterface::ShowMessage("  deriv = %le %le %le\n", deriv[3], 
+                                       deriv[4], deriv[5]);
+#endif
       }
       cf++;
       current = GetForce(cf);
    }
+#if DEBUG_FORCEMODEL
+   MessageInterface::ShowMessage("  ===============================\n");
+#endif
 
    return true;
 }
