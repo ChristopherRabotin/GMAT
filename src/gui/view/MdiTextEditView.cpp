@@ -31,6 +31,7 @@
 
 BEGIN_EVENT_TABLE(MdiTextEditView, wxView)
     EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, MdiTextEditView::OnScriptBuildObject)
+    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, MdiTextEditView::OnScriptBuildAndRun)
     EVT_MENU(MENU_SCRIPT_RUN, MdiTextEditView::OnScriptRun)
 END_EVENT_TABLE()
 
@@ -96,6 +97,27 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 
     // Update ResourceTree
     GmatAppData::GetResourceTree()->UpdateResources();
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
+// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+{
+    bool status;
+    
+    wxString filename = GetDocument()->GetFilename();
+    
+    status = GmatAppData::GetGuiInterpreter()->
+        InterpretScript(std::string(filename.c_str()));
+
+    // Update ResourceTree
+    GmatAppData::GetResourceTree()->UpdateResources();
+    status = GmatAppData::GetGuiInterpreter()->RunScript();
+
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -111,4 +133,6 @@ bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
     //MessageInterface::ClearMessage();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+
+    return status;
 }

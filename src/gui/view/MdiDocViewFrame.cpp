@@ -28,8 +28,11 @@
 #include "wx/docview.h"
 
 #include "MdiDocViewFrame.hpp"
-//  #include "TextDocument.hpp"
-//  #include "TextEditView.hpp"
+
+#include "wx/toolbar.h"
+
+// bitmap buttons for the toolbar
+//#include "bitmaps/open.xpm"
 
 
 /*
@@ -47,12 +50,30 @@ IMPLEMENT_CLASS(MdiDocViewFrame, wxDocParentFrame)
 //              const wxSize& size, const long type)
 //------------------------------------------------------------------------------
 MdiDocViewFrame::MdiDocViewFrame(wxDocManager *manager, wxFrame *frame, 
-                           const wxString& title, const wxPoint& pos,
-                           const wxSize& size, const long type)
+                                 const wxString& title, const wxPoint& pos,
+                                 const wxSize& size, const long type)
     : wxDocMDIParentFrame(manager, frame, -1, title, pos, size, type,
                           _T("MdiDocViewFrame"))
 {
     editMenu = (wxMenu *) NULL;
+    
+    // status bar
+    CreateStatusBar();
+    
+    // tool bar
+    wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
+    wxBitmap tbBitmaps[1];
+
+    tbBitmaps[0] = wxBITMAP(open);
+    
+    toolBar->SetMargins(5, 5);
+    toolBar->SetToolBitmapSize(wxSize(16, 16));
+
+    toolBar->AddTool(wxID_OPEN, tbBitmaps[0], wxNullBitmap, FALSE, -1, -1,
+                     (wxObject*)NULL, _T("Open"), _T("Open a script file"));
+    
+    toolBar->Realize();
+
 }
 
 //  //------------------------------------------------------------------------------
