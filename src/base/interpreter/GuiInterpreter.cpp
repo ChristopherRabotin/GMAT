@@ -238,7 +238,7 @@ Formation* GuiInterpreter::GetFormation(const std::string &name)
 Hardware* GuiInterpreter::CreateHardware(const std::string &type,
                                          const std::string &name)
 {
-   moderator->CreateHardware(type, name);
+   return moderator->CreateHardware(type, name);
 }
 
 //------------------------------------------------------------------------------
