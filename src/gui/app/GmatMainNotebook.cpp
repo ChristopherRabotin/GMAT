@@ -19,6 +19,7 @@
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatorSetupPanel.hpp"
+#include "ManeuverSetupPanel.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -116,6 +117,16 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if (dataType == DEFAULT_PROPAGATE_COMMAND)
       {
         sizer->Add( new PropagatorSetupPanel(panel),
+                    0, wxGROW|wxALL, 0 );
+      }
+      else if (dataType == PROPAGATE_COMMAND)
+      {
+        sizer->Add( new PropagatorSetupPanel(panel),
+                    0, wxGROW|wxALL, 0 );
+      }
+      else if (dataType == MANEUVER_COMMAND)
+      {
+        sizer->Add( new ManeuverSetupPanel(panel),
                     0, wxGROW|wxALL, 0 );
       }
 
