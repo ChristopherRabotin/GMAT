@@ -75,14 +75,16 @@ OpenGlPlot::~OpenGlPlot(void)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Initialize()
 {
+    MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered\n");
+    
     if (active)
     {
-        MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+        //MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
         return PlotInterface::CreateGlPlotWindow();
     }
     else
     {
-        MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+        //MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
         return PlotInterface::DeleteGlPlot();
     }
 }
