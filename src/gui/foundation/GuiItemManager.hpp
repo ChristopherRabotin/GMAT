@@ -63,7 +63,8 @@ public:
    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
     
-   wxListBox* GetSpacecraftListBox(wxWindow *parent, const wxSize &size);
+   wxListBox* GetSpacecraftListBox(wxWindow *parent, const wxSize &size,
+                                   wxArrayString &scsToExclude);
    wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size);
     
    wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,

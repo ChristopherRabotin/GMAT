@@ -136,39 +136,100 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
-// wxListBox* GetSpacecraftListBox(wxWindow *parent, const wxSize &size)
+// wxListBox* GetSpacecraftListBox(wxWindow *parent, const wxSize &size,
+//                                 wxArrayString &scsToExclude)
 //------------------------------------------------------------------------------
 /**
  * @return Available Spacecraft ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, const wxSize &size)
+wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, const wxSize &size,
+                                                wxArrayString &scsToExclude)
 {
-
-   // Spacecraft
-   //loj: 2/23/04 add other objects in the future build
-    
-   int numObj = theNumSpacecraft;
-    
-   if (theNumSpacecraft == 0)
-      numObj = 1;
-    
    wxString emptyList[] = {};
-        
-   if (numObj > 0)
-   {       
-      theSpacecraftListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, numObj,
-                       theSpacecraftList, wxLB_SINGLE);
+
+   if (scsToExclude.IsEmpty())
+   {
+      //MessageInterface::ShowMessage("GuiItemManager::GetSpacecraftListBox() scsToExclude=0\n");
+      if (theNumSpacecraft > 0)
+      {       
+         theSpacecraftListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, theNumSpacecraft,
+                          theSpacecraftList, wxLB_SINGLE);
+      }
+      else
+      {       
+         theSpacecraftListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE);
+      }
    }
    else
-   {       
-      theSpacecraftListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                       emptyList, wxLB_SINGLE);
+   {
+      int exclCount = scsToExclude.GetCount();
+      int newScCount = theNumSpacecraft - exclCount;
+      //MessageInterface::ShowMessage("GuiItemManager::GetSpacecraftListBox() newScCount = %d\n",
+      //                              newScCount);
+
+      if (newScCount > 0)
+      {
+         wxString *newScList = new wxString[newScCount];
+         bool excludeSc;
+         int numScs = 0;
+        
+         for (int i=0; i<theNumSpacecraft; i++)
+         {
+            excludeSc = false;
+            for (int j=0; j<exclCount; j++)
+            {
+               if (theSpacecraftList[i] == scsToExclude[j])
+               {
+                  excludeSc = true;
+                  break;
+               }
+            }
+            
+            if (!excludeSc)
+               newScList[numScs++] = theSpacecraftList[i];
+         }
+
+         theSpacecraftListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, newScCount,
+                          newScList, wxLB_SINGLE);
+         delete newScList;
+      }
+      else
+      {
+         //MessageInterface::ShowMessage("GuiItemManager::GetSpacecraftListBox() emptyList\n");
+         theSpacecraftListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE);
+      }
    }
-   
+
    return theSpacecraftListBox;
+
+//     int numObj = theNumSpacecraft;
+    
+//     if (theNumSpacecraft == 0)
+//        numObj = 1;
+    
+//     wxString emptyList[] = {};
+        
+//     if (numObj > 0)
+//     {       
+//        theSpacecraftListBox =
+//           new wxListBox(parent, -1, wxDefaultPosition, size, numObj,
+//                         theSpacecraftList, wxLB_SINGLE);
+//     }
+//     else
+//     {       
+//        theSpacecraftListBox =
+//           new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+//                         emptyList, wxLB_SINGLE);
+//     }
+   
+//     return theSpacecraftListBox;
 }
 
 //------------------------------------------------------------------------------
