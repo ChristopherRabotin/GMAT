@@ -90,6 +90,8 @@ public:
    static const CelestialBody*        CENTRAL_BODY;
    static const Integer               BODY_NUMBER;
    static const Integer               REF_BODY_NUMBER;
+   static const Integer               ORDER;
+   static const Integer               DEGREE;
    // add other ones as needed
 
 protected:

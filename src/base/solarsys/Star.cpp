@@ -30,6 +30,8 @@ const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Star::CENTRAL_BODY        = NULL;
 const Integer               Star::BODY_NUMBER         = 1;           // don't know this!!!!!!
 const Integer               Star::REF_BODY_NUMBER     = 1;           // don't know this!!!!!!
+const Integer               Star::ORDER               = 4;           // don't know this!!!!!!
+const Integer               Star::DEGREE              = 4;           // don't know this!!!!!!
 // add other ones as needed
 
 
@@ -161,6 +163,8 @@ void Star::InitializeStar()
    centralBody         = NULL;
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
+   order               = Star::ORDER;
+   degree              = Star::DEGREE;
 }
 
 //------------------------------------------------------------------------------

@@ -30,6 +30,8 @@ const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Moon::CENTRAL_BODY        = NULL;        // doesn't make sense?
 const Integer               Moon::BODY_NUMBER         = 3;           // don't know this!!!!!!
 const Integer               Moon::REF_BODY_NUMBER     = 3;           // don't know this!!!!!!
+const Integer               Moon::ORDER               = 4;           // don't know this!!!!!!
+const Integer               Moon::DEGREE              = 4;           // don't know this!!!!!!
 // add other ones as needed
 
 
@@ -182,6 +184,8 @@ void Moon::InitializeMoon(CelestialBody* cBody)
    centralBody         = cBody;
    bodyNumber          = Moon::BODY_NUMBER;
    referenceBodyNumber = Moon::REF_BODY_NUMBER;
+   order               = Moon::ORDER;
+   degree              = Moon::DEGREE;
 }
 
 //------------------------------------------------------------------------------
