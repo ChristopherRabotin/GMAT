@@ -477,13 +477,19 @@ bool ScriptInterpreter::Parse(void)
                ++phrase;
 
                bool hasEquals = (line.find("=") != std::string::npos ? true : false);
+               bool isSinglet = true;
+               
+               if (SeparateDots(**phrase).size() != 1)
+                  isSinglet = false;
+               
                // Check to see if this is a function return
-               if (((**phrase)[0] == '[') || !hasEquals) {
+               if (((**phrase)[0] == '[') || (!hasEquals && isSinglet)) {
                   // It's one or more return parameters, so line is a function call
                   #ifdef DEBUG_GMAT_LINE
                      MessageInterface::ShowMessage("This line is a function interface\n",
                                                 line.c_str());
                   #endif
+                  
                   return InterpretFunctionCall();
                }
                // Reset phrase and continue
