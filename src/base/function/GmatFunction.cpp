@@ -13,17 +13,21 @@
 // Created: 2004/12/16
 //
 /**
- * Definition for the GmatFunction class.
+ * Implementation for the GmatFunction class.
  */
 //------------------------------------------------------------------------------
 
 
 #include "GmatFunction.hpp"
-#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
-// GmatFunction(std::string &name)
+// GmatFunction(std::string &nomme)
 //------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <nomme> function name
+ */
 GmatFunction::GmatFunction(const std::string &nomme) :
      Function("GmatFunction", nomme)
 {
@@ -33,48 +37,59 @@ GmatFunction::GmatFunction(const std::string &nomme) :
 
 
 //------------------------------------------------------------------------------
-// ~GmatFunction(void)
+// ~GmatFunction()
 //------------------------------------------------------------------------------
-GmatFunction::~GmatFunction(void)
+/**
+ * Destructor.
+ */
+GmatFunction::~GmatFunction()
 {
 }
 
 //------------------------------------------------------------------------------
-// GmatFunction(const GmatFunction &rf)
+// GmatFunction(const GmatFunction &copy)
 //------------------------------------------------------------------------------
-GmatFunction::GmatFunction(const GmatFunction &gf) :
-   Function      (gf)
+/**
+ * Copy constructor.
+ *
+ * @param <copy> object being copied
+ */
+GmatFunction::GmatFunction(const GmatFunction &copy) :
+   Function      (copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// GmatFunction& GmatFunction::operator=(const GmatFunction& rf)
+// GmatFunction& GmatFunction::operator=(const GmatFunction& right)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
+ *
+ * @param <right> object being copied
+ *
+ * @return reference to this object
  */
-//------------------------------------------------------------------------------
-GmatFunction& GmatFunction::operator=(const GmatFunction& gf)
+GmatFunction& GmatFunction::operator=(const GmatFunction& right)
 {
-    if (this == &gf)
+    if (this == &right)
         return *this;
 
-    Function::operator=(gf);
+    Function::operator=(right);
 
     return *this;
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the GmatFunction.
+ * Clone of the GmatFunction.
  *
  * @return clone of the GmatFunction.
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* GmatFunction::Clone(void) const
+GmatBase* GmatFunction::Clone() const
 {
    return (new GmatFunction(*this));
 }

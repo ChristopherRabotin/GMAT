@@ -23,18 +23,18 @@
 
 #include "Function.hpp"
 
-class GmatFunction : public Function
+class GMAT_API GmatFunction : public Function
 {
 public:
    GmatFunction(const std::string &nomme);
 
    virtual ~GmatFunction(void);
 
-   GmatFunction(const GmatFunction &);
-   GmatFunction& operator=(const GmatFunction&);
+   GmatFunction(const GmatFunction &copy);
+   GmatFunction& operator=(const GmatFunction &right);
                  
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
 
 };
 

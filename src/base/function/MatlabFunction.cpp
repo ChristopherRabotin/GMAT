@@ -19,13 +19,16 @@
 
 
 #include "MatlabFunction.hpp"
-#include "MessageInterface.hpp"
-
-#define DEBUG_MATLABFUNCTION 0
 
 //------------------------------------------------------------------------------
-// MatlabFunction(std::string &name)
+// MatlabFunction(std::string &nomme)
 //------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <nomme> name of the MatlabFunction.
+ *
+ */
 MatlabFunction::MatlabFunction(const std::string &nomme) :
      Function("MatlabFunction", nomme)
 {
@@ -35,48 +38,60 @@ MatlabFunction::MatlabFunction(const std::string &nomme) :
 
 
 //------------------------------------------------------------------------------
-// ~MatlabFunction(void)
+// ~MatlabFunction()
 //------------------------------------------------------------------------------
-MatlabFunction::~MatlabFunction(void)
+/**
+ * Destructor.
+ *
+ */
+MatlabFunction::~MatlabFunction()
 {
 }
 
 //------------------------------------------------------------------------------
-// MatlabFunction(const MatlabFunction &rf)
+// MatlabFunction(const MatlabFunction &copy)
 //------------------------------------------------------------------------------
-MatlabFunction::MatlabFunction(const MatlabFunction &mf) :
-   Function      (mf)
+/**
+ * Copy constructor.
+ *
+ * @param <copy> object being copied
+ */
+MatlabFunction::MatlabFunction(const MatlabFunction &copy) :
+   Function      (copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// MatlabFunction& MatlabFunction::operator=(const MatlabFunction& rf)
+// MatlabFunction& MatlabFunction::operator=(const MatlabFunction &right)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
+ *
+ * @param <right> object being copied
+ *
+ * @return reference to this object
  */
 //------------------------------------------------------------------------------
-MatlabFunction& MatlabFunction::operator=(const MatlabFunction& mf)
+MatlabFunction& MatlabFunction::operator=(const MatlabFunction& right)
 {
-    if (this == &mf)
+    if (this == &right)
         return *this;
 
-    Function::operator=(mf);
+    Function::operator=(right);
 
     return *this;
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the MatlabFunction.
  *
  * @return clone of the MatlabFunction.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* MatlabFunction::Clone(void) const
+GmatBase* MatlabFunction::Clone() const
 {
    return (new MatlabFunction(*this));
 }
