@@ -2296,7 +2296,9 @@ GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ClearAllSandboxes()
 {
-   for (int i=0; i<Gmat::MAX_SANDBOX; i++)
+   //loj: 4/4/05 To fix runtime error
+   //for (int i=0; i<Gmat::MAX_SANDBOX; i++)
+   for (UnsignedInt i=0; i<sandboxes.size(); i++)
       if (sandboxes[i])
          sandboxes[i]->Clear();
 }
@@ -3656,3 +3658,4 @@ Moderator::~Moderator()
         delete theSubscriberFactory;
    */
 }
+
