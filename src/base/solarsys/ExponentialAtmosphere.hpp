@@ -50,15 +50,16 @@
  * @todo Replace the spherical Earth model with an oblate Earth model.
  * @test Check to see if the band disconituities merit smoothing.
  */
-class ExponentialAtmosphere : public AtmosphereModel
+class GMAT_API ExponentialAtmosphere : public AtmosphereModel
 {
 public:
-	ExponentialAtmosphere();
-	virtual ~ExponentialAtmosphere();
+   ExponentialAtmosphere();
+   virtual ~ExponentialAtmosphere();
     
    virtual bool            Density(Real *position, Real *density, 
                                    Real epoch=21545.0,
                                    Integer count = 1);
+
 protected: 
    /// Table of scale heights, \f$H\f$.
    Real                    *scaleHeight;
@@ -77,6 +78,7 @@ protected:
    Real                    Smooth(Real height, Integer index);
 
    virtual GmatBase*       Clone() const; // inherited from GmatBase
+
 private:
    ExponentialAtmosphere(const ExponentialAtmosphere& atm);
    ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);

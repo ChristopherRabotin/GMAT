@@ -55,7 +55,8 @@ EndScript::~EndScript()
 //------------------------------------------------------------------------------
 EndScript::EndScript(const EndScript& noop) :
     GmatCommand (noop)
-{}
+{
+}
 
 
 //------------------------------------------------------------------------------
@@ -69,7 +70,10 @@ EndScript::EndScript(const EndScript& noop) :
 //------------------------------------------------------------------------------
 EndScript& EndScript::operator=(const EndScript& noop)
 {
-    return *this;
+   if (this != &noop)
+      GmatCommand::operator=(noop);
+      
+   return *this;
 }
 
 
@@ -85,9 +89,9 @@ EndScript& EndScript::operator=(const EndScript& noop)
  * ScriptEvent panel.
  */
 //------------------------------------------------------------------------------
-bool EndScript::Execute(void)
+bool EndScript::Execute()
 {
-    return true;
+   return true;
 }
 
 
@@ -100,7 +104,7 @@ bool EndScript::Execute(void)
  * @return clone of the EndScript.
  */
 //------------------------------------------------------------------------------
-GmatBase* EndScript::Clone(void) const
+GmatBase* EndScript::Clone() const
 {
    return (new EndScript(*this));
 }

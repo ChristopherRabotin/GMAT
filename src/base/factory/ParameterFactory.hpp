@@ -34,9 +34,9 @@ public:
    // constructor
    ParameterFactory(StringArray createList);
    // copy constructor
-   ParameterFactory(const ParameterFactory& fact);
+   ParameterFactory(const ParameterFactory &fact);
    // assignment operator
-   ParameterFactory& operator= (const ParameterFactory& fact);
+   ParameterFactory& operator= (const ParameterFactory &fact);
 
    // destructor
    ~ParameterFactory();
@@ -47,11 +47,6 @@ protected:
 private:
    // private data
 
-
 };
 
 #endif // ParameterFactory_hpp
-
-
-
-

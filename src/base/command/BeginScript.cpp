@@ -58,7 +58,8 @@ BeginScript::~BeginScript()
 //------------------------------------------------------------------------------
 BeginScript::BeginScript(const BeginScript& noop) :
     GmatCommand (noop)
-{}
+{
+}
 
 
 //------------------------------------------------------------------------------
@@ -68,16 +69,24 @@ BeginScript::BeginScript(const BeginScript& noop) :
  * Sets this BeginScript to match another one (assignment operator).
  * 
  * @param noop The original used to set parameters for this one.
+ *
+ * @return this object.
  */
 //------------------------------------------------------------------------------
 BeginScript& BeginScript::operator=(const BeginScript& noop)
 {
-    return *this;
+   if (this == &noop)
+      return *this;
+
+   GmatCommand::operator=(noop);
+   generatingString = noop.generatingString;
+   
+   return *this;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Executes the BeginScript command (copy constructor).
@@ -86,37 +95,47 @@ BeginScript& BeginScript::operator=(const BeginScript& noop)
  * in this command.  It functions as a marker in the script, indicating to the
  * GUI where a block of commands starts that should all be grouped together on a
  * ScriptEvent panel.
+ *
+ * @return true on success.
  */
 //------------------------------------------------------------------------------
-bool BeginScript::Execute(void)
+bool BeginScript::Execute()
 {
     return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the BeginScript.
  *
  * @return clone of the BeginScript.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* BeginScript::Clone(void) const
+GmatBase* BeginScript::Clone() const
 {
    return (new BeginScript(*this));
 }
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the BeginScript.
  *
- * @return clone of the BeginScript.
+ * @param <mode>    Specifies the type of serialization requested. (Not yet
+ *                  used in commands)
+ * @param <prefix>  Optional prefix appended to the object's name.  (Not yet
+ *                  used in commands)
+ * @param <useName> Name that replaces the object's name.  (Not yet used in
+ *                  commands)
+ *
+ * @return The string that reproduces this command.
  */
 //------------------------------------------------------------------------------
 const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
@@ -130,8 +149,10 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    gen << "BeginScript\n";
    
    GmatCommand *current = next;
-   while (current != NULL) {
-      if (current->GetTypeName() != "EndScript") {
+   while (current != NULL)
+   {
+      if (current->GetTypeName() != "EndScript")
+      {
          cmdstr = current->GetGeneratingString();
          start = 0;
          while (cmdstr[start] == ' ')
@@ -148,7 +169,8 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                current->GetTypeName().c_str(),
                ((child == NULL) ? "does not have" : "has"));
          #endif
-         while ((child != NULL) && (child != current)) {
+         while ((child != NULL) && (child != current))
+         {
             gen << GetChildString(indent + "   ", child, current);
             ++whichOne;
             child = current->GetChildCommand(whichOne);
@@ -158,7 +180,8 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
          if (current == NULL)
             gen << "EndScript;\n";
       }
-      else {
+      else
+      {
          gen << "EndScript;\n";
          current = NULL;
       }
@@ -169,6 +192,23 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
+//------------------------------------------------------------------------------
+// const std::string BeginScript::GetChildString(const std::string &prefix,
+//                                               GmatCommand *cmd,
+//                                               GmatCommand *parent)
+//------------------------------------------------------------------------------
+/**
+ * Iteratively recurses through the command tree, building the strings to build
+ * the child commands.
+ *
+ * @param <prefix> Prefix appended to the child command's string (typically used
+ *                 to indent the child command strings).
+ * @param <cmd>    The first child command in the current nesting level.
+ * @param <parent> The command that has this command as a child.
+ *
+ * @return The string that reproduces the commands at the child's level.
+ */
+//------------------------------------------------------------------------------
 const std::string BeginScript::GetChildString(const std::string &prefix,
                                               GmatCommand *cmd,
                                               GmatCommand *parent)
@@ -182,7 +222,8 @@ const std::string BeginScript::GetChildString(const std::string &prefix,
    Integer whichOne, start;
    GmatCommand *current = cmd;
    
-   while ((current != parent) && (current != NULL)) {
+   while ((current != parent) && (current != NULL))
+   {
       cmdstr = current->GetGeneratingString();
       start = 0;
       while (cmdstr[start] == ' ')
@@ -191,7 +232,8 @@ const std::string BeginScript::GetChildString(const std::string &prefix,
       sstr << prefix << cmdstr << "\n";
       whichOne = 0;
       GmatCommand* child = current->GetChildCommand(whichOne);
-      while ((child != NULL) && (child != cmd)) {
+      while ((child != NULL) && (child != cmd))
+      {
          sstr << GetChildString(prefix + "   ", child, current);
          ++whichOne;
          child = current->GetChildCommand(whichOne);

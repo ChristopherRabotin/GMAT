@@ -34,20 +34,22 @@
 /**
  * This method creates and returns an object of the requested Burn class 
  *
- * @param <ofType> the burn object to create and return.
+ * @param <ofType>   the burn object to create and return.
+ * @param <withName> the name of the new object.
+ *
+ * @return The new object.
  */
 //------------------------------------------------------------------------------
-Burn* BurnFactory::CreateBurn(const std::string &ofType, const std::string &withName)
+Burn* BurnFactory::CreateBurn(const std::string &ofType,
+                              const std::string &withName)
 {
    if (ofType == "ImpulsiveBurn")
       return new ImpulsiveBurn(withName);
    else if (ofType == "FiniteBurn")
       return new FiniteBurn(withName);
    // add more here .......
-   else {
-      return NULL;   // doesn't match any known type of burn
-   }
-   
+
+   return NULL;   // doesn't match any known type of burn
 }
 
 
@@ -57,11 +59,10 @@ Burn* BurnFactory::CreateBurn(const std::string &ofType, const std::string &with
 /**
  * This method creates an object of the class BurnFactory.
  * (default constructor)
- *
  */
 //------------------------------------------------------------------------------
 BurnFactory::BurnFactory() :
-    Factory     (Gmat::BURN)
+   Factory     (Gmat::BURN)
 {
    if (creatables.empty())
    {
@@ -77,25 +78,24 @@ BurnFactory::BurnFactory() :
  * This method creates an object of the class BurnFactory.
  *
  * @param <createList> list of creatable burn objects
- *
  */
 //------------------------------------------------------------------------------
 BurnFactory::BurnFactory(StringArray createList) :
-    Factory     (createList, Gmat::BURN)
+   Factory     (createList, Gmat::BURN)
 {
 }
 
 //------------------------------------------------------------------------------
-//  BurnFactory(const BurnFactory& fact)
+//  BurnFactory(const BurnFactory &fact)
 //------------------------------------------------------------------------------
 /**
-   * This method creates an object of the class BurnFactory (called by
-   * copy constructors of derived classes).  (copy constructor)
-   *
-   * @param <fact> the factory object to copy to "this" factory.
-   */
+ * This method creates an object of the class BurnFactory (called by
+ * copy constructors of derived classes).  (copy constructor)
+ *
+ * @param <fact> the factory object to copy to "this" factory.
+ */
 //------------------------------------------------------------------------------
-BurnFactory::BurnFactory(const BurnFactory& fact) :
+BurnFactory::BurnFactory(const BurnFactory &fact) :
     Factory     (fact)
 {
    if (creatables.empty())
@@ -106,17 +106,17 @@ BurnFactory::BurnFactory(const BurnFactory& fact) :
 }
 
 //------------------------------------------------------------------------------
-//  BurnFactory& operator= (const BurnFactory& fact)
+//  BurnFactory& operator= (const BurnFactory &fact)
 //------------------------------------------------------------------------------
 /**
-   * Assignment operator for the BurnFactory base class.
-   *
-   * @param <fact> the BurnFactory object whose data to assign to "this" factory.
-   *
-   * @return "this" BurnFactory with data of input factory fact.
-   */
+ * Assignment operator for the BurnFactory base class.
+ *
+ * @param <fact> the BurnFactory object whose data to assign to "this" factory.
+ *
+ * @return "this" BurnFactory with data of input factory fact.
+ */
 //------------------------------------------------------------------------------
-BurnFactory& BurnFactory::operator=(const BurnFactory& fact)
+BurnFactory& BurnFactory::operator=(const BurnFactory &fact)
 {
    Factory::operator=(fact);
    return *this;
@@ -126,9 +126,8 @@ BurnFactory& BurnFactory::operator=(const BurnFactory& fact)
 // ~BurnFactory()
 //------------------------------------------------------------------------------
 /**
-   * Destructor for the BurnFactory class.
-   *
-   */
+ * Destructor for the BurnFactory class.
+ */
 //------------------------------------------------------------------------------
 BurnFactory::~BurnFactory()
 {

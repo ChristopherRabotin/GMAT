@@ -10,7 +10,7 @@
 // number NNG04CI63P
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
-// Created: 2004/7/24
+// Created: 2004/07/24
 //
 /**
  * Defines the state used in propagation. 
@@ -18,17 +18,17 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef PROPSTATE_HPP
-#define PROPSTATE_HPP
+#ifndef PropState_hpp
+#define PropState_hpp
 
-#include "GmatBase.hpp"
+#include "gmatdefs.hpp"
 
-class PropState // : public GmatBase
+class GMAT_API PropState
 {
 public:
 
-	PropState(const Integer dim = 6);
-	virtual ~PropState();
+   PropState(const Integer dim = 6);
+   virtual ~PropState();
    PropState(const PropState& ps);
    PropState&        operator=(const PropState& ps);
  
@@ -37,8 +37,7 @@ public:
    Real              operator[](const Integer el) const;
    
    // Sizing manipulation
-   void              Grow(const Integer size);
-   void              Shrink(const Integer size);
+   void              SetSize(const Integer size);
    
    // Access methods
    Integer           GetDimension() const;
@@ -55,7 +54,6 @@ protected:
    Integer           dimension;
    /// Raw epoch data for the state
    Real              epoch;
-   
 };
 
-#endif // PROPSTATE_HPP
+#endif // PropState_hpp

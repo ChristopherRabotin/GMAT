@@ -25,17 +25,17 @@
 #include "Factory.hpp"
 #include "Burn.hpp"
 
-class BurnFactory : public Factory
+class GMAT_API BurnFactory : public Factory
 {
 public:
-   Burn* CreateBurn(const std::string &ofType, const std::string &withName = "");
+   Burn* CreateBurn(const std::string &ofType,
+                    const std::string &withName = "");
 
    BurnFactory();
    virtual ~BurnFactory();
    BurnFactory(StringArray createList);
-   BurnFactory(const BurnFactory& fact);
-   BurnFactory& operator= (const BurnFactory& fact);
-
+   BurnFactory(const BurnFactory &fact);
+   BurnFactory& operator= (const BurnFactory &fact);
 };
 
 

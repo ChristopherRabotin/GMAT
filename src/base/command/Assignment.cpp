@@ -32,6 +32,13 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
 
+//------------------------------------------------------------------------------
+//  Assignment()
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Assignment command (default constructor).
+ */
+//------------------------------------------------------------------------------
 Assignment::Assignment  () :
    GmatCommand          ("GMAT"),
    ownerName            (""),
@@ -52,11 +59,27 @@ Assignment::Assignment  () :
 }
 
 
+//------------------------------------------------------------------------------
+//  ~Assignment()
+//------------------------------------------------------------------------------
+/**
+ * Destroys the Assignment command (destructor).
+ */
+//------------------------------------------------------------------------------
 Assignment::~Assignment()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  Assignment(const Assignment& a)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Assignment command (copy constructor).
+ *
+ * @param <a> The instance that is copied.
+ */
+//------------------------------------------------------------------------------
 Assignment::Assignment  (const Assignment& a) :
    GmatCommand          (a),
    ownerName            (a.ownerName),
@@ -76,6 +99,17 @@ Assignment::Assignment  (const Assignment& a) :
 }
 
 
+//------------------------------------------------------------------------------
+//  Assignment& operator=(const Assignment& a)
+//------------------------------------------------------------------------------
+/**
+ * Assignment assignment operator.
+ *
+ * @param <a> The instance that is copied.
+ *
+ * @return This instance, set to match the input instance.
+ */
+//------------------------------------------------------------------------------
 Assignment& Assignment::operator=(const Assignment& a)
 {
    if (this == &a)
@@ -100,18 +134,38 @@ Assignment& Assignment::operator=(const Assignment& a)
 }
 
 
+//------------------------------------------------------------------------------
+// bool InterpretAction()
+//------------------------------------------------------------------------------
+/**
+ * Parses the command string and builds the corresponding command structures.
+ *
+ * Assignment lines have the form
+ *
+ *    GMAT Sat.Element1 = 7654.321;
+ *
+ * or
+ *
+ *    GMAT object1 = object2;
+ *
+ * This method breaks this line into its constituent pieces.
+ *
+ * @return true on successful parsing of the command.
+ *
+ * @todo: Determine if Assignment::InterpretAction can be moved into the
+ *        Interpreter
+ */
+//------------------------------------------------------------------------------
 bool Assignment::InterpretAction()
 {
-   /// @todo: Clean up this hack for the Assignment::InterpretAction method
-   // Assignment lines have the form GMAT Sat.Element1 = 7654.321; or
-   // GMAT object1 = object2;
    Integer loc = generatingString.find("GMAT", 0) + 4, end;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
     
    end = generatingString.find(".", loc);
-   if (end == (Integer)std::string::npos) {
+   if (end == (Integer)std::string::npos)
+   {
       // Must be object = object assignment or Variable = value assignment
       Integer eqloc = generatingString.find("=", loc);
       if (eqloc == (Integer)std::string::npos)
@@ -172,6 +226,15 @@ bool Assignment::InterpretAction()
 }
 
 
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the Assignment command.
+ *
+ * @return true if the GmatCommand is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
 bool Assignment::Initialize()
 {
    // Find the object
@@ -180,13 +243,17 @@ bool Assignment::Initialize()
                              ownerName + "\" for line \n" + generatingString);
 
    parmOwner = (*objectMap)[ownerName];
-   if (objToObj) {
-      if (objectMap->find(value) != objectMap->end()) {
+   if (objToObj)
+   {
+      if (objectMap->find(value) != objectMap->end())
+      {
          rhsObject = (*objectMap)[value];
          return true;
       }
-      else {
-         if (parmOwner->GetTypeName() == "Variable") {
+      else
+      {
+         if (parmOwner->GetTypeName() == "Variable")
+         {
             parmName = "Expression";
             objToObj = false;
             #ifdef DEBUG_PARM_ASSIGNMENT
@@ -205,6 +272,9 @@ bool Assignment::Initialize()
 }
 
 
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
 /**
  * The method that is fired to perform the command.
  *
@@ -214,6 +284,7 @@ bool Assignment::Initialize()
  * @return true if the GmatCommand runs to completion, false if an error 
  *         occurs. 
  */
+//------------------------------------------------------------------------------
 bool Assignment::Execute()
 {
    #ifdef DEBUG_PARM_ASSIGNMENT
@@ -222,11 +293,13 @@ bool Assignment::Execute()
    bool retval = false;
 
    // Get the parameter ID and ID type
-   try {
+   try
+   {
       if (parmOwner == NULL)
          throw CommandException("Parameter Owner Not Initialized");
        
-      if (objToObj) {
+      if (objToObj)
+      {
          #ifdef DEBUG_PARM_ASSIGNMENT
             MessageInterface::ShowMessage(
                "Assignment::Execute running object to object\n");
@@ -251,15 +324,14 @@ bool Assignment::Execute()
             parmOwner->GetParameterTypeString(parmID).c_str());
       #endif
 
-      switch (parmType) {
+      switch (parmType)
+      {
          case Gmat::INTEGER_TYPE:
-//            parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
             parmOwner->SetIntegerParameter(parmID, (Integer)EvaluateRHS());
             retval = true;
             break;
                
          case Gmat::REAL_TYPE:
-//            parmOwner->SetRealParameter(parmID, atof(value.c_str()));
             parmOwner->SetRealParameter(parmID, EvaluateRHS());
             retval = true;
             break;
@@ -289,7 +361,8 @@ bool Assignment::Execute()
       }
 
        // "Add" parameters could also mean to set reference objects
-      if (parmName == "Add") {
+      if (parmName == "Add")
+      {
          if (objectMap->find(value) != objectMap->end())
          {
             GmatBase *obj = (*objectMap)[value];
@@ -315,11 +388,20 @@ bool Assignment::Execute()
    return retval;
 }
 
-//loj: 2/22/05 added
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param <type> Type of the object that is renamed.
+ * @param <oldName> The current name for the object.
+ * @param <newName> The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
 bool Assignment::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &oldName,
                                  const std::string &newName)
@@ -354,7 +436,6 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
  * This method returns a clone of the Assignment.
  *
  * @return clone of the Assignment.
- *
  */
 //------------------------------------------------------------------------------
 GmatBase* Assignment::Clone() const
@@ -363,6 +444,19 @@ GmatBase* Assignment::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id,
+//                                            const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index The index when multiple StringArrays are supported.
+ *
+ * @return The requested StringArray.
+ */
+//------------------------------------------------------------------------------
 const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
@@ -382,6 +476,19 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 
+//------------------------------------------------------------------------------
+// bool InitializeRHS(const std::string &rhs)
+//------------------------------------------------------------------------------
+/**
+ * Initializes the objects used on the right side of the assignemnt.
+ *
+ * @param <rhs> The string on the right side of the equals sign.
+ *
+ * @return true on success, false on failure.
+ *
+ * @todo Handle RHS Variables and Parameters
+ */
+//------------------------------------------------------------------------------
 bool Assignment::InitializeRHS(const std::string &rhs)
 {
    #ifdef DEBUG_PARM_ASSIGNMENT
@@ -412,7 +519,8 @@ bool Assignment::InitializeRHS(const std::string &rhs)
          subchunk.c_str());
    #endif
    
-   if (objectMap->find(chunk) != objectMap->end()) {
+   if (objectMap->find(chunk) != objectMap->end())
+   {
       rhsObject = (*objectMap)[chunk];
       kind = rhsObject->GetTypeName();
 
@@ -423,7 +531,8 @@ bool Assignment::InitializeRHS(const std::string &rhs)
       #endif
 
       // Determine what type of object handling is needed
-      if (kind == "Array") {
+      if (kind == "Array")
+      {
          rhsType = ARRAY_ELEMENT;
          std::string rowStr, colStr = "1";
          
@@ -438,7 +547,8 @@ bool Assignment::InitializeRHS(const std::string &rhs)
                       "Assignment::InitializeRHS encountered mismatched "
                       "parenthesis\n   Command text is \"" +
                       (GetGeneratingString()) + "\"");
-         if (comma != std::string::npos) {
+         if (comma != std::string::npos)
+         {
             colStr = subchunk.substr(comma+1, closeParen - (comma+1));
             closeParen = comma;
          }
@@ -469,36 +579,38 @@ bool Assignment::InitializeRHS(const std::string &rhs)
                colStr.c_str());
          #endif
 
-         if (objectMap->find(rowStr) == objectMap->end()) {
+         if (objectMap->find(rowStr) == objectMap->end())
+         {
             row = atoi(rowStr.c_str()) - 1;
          }
          else
             throw CommandException(
                "Assignment commands cannot handle dynamic row indices yet.");
 
-         if (objectMap->find(colStr) == objectMap->end()) {
+         if (objectMap->find(colStr) == objectMap->end())
+         {
             col = atoi(colStr.c_str()) - 1;
          }
          else
             throw CommandException(
                "Assignment commands cannot handle dynamic column indices yet.");
       }
-      else {
-         if (kind == "Variable") {
+      else
+      {
+         if (kind == "Variable")
+         {
             throw CommandException(
-               "Assignment commands cannot handle variables yet.");
+               "Assignment commands cannot handle Variables yet.");
          }
-         else if (rhsObject->GetType() == Gmat::PARAMETER) {
+         else if (rhsObject->GetType() == Gmat::PARAMETER)
+         {
             throw CommandException(
                "Assignment commands cannot handle Parameters yet.");
          }
-//         else {
-//            throw CommandException(
-//               "Assignment commands cannot handle object parms yet.");
-//         }
       }
    }
-   else {
+   else
+   {
       #ifdef DEBUG_PARM_ASSIGNMENT
          MessageInterface::ShowMessage(
             "Assignment RHS object is the number %le\n", atof(rhs.c_str()));
@@ -510,10 +622,24 @@ bool Assignment::InitializeRHS(const std::string &rhs)
 }
 
 
+//------------------------------------------------------------------------------
+// Real EvaluateRHS()
+//------------------------------------------------------------------------------
+/**
+ * Initializes the objects used on the right side of the assignemnt.
+ *
+ * @return The floating point number corresponding to the right hand side.
+ *
+ * @todo Handle RHS Variables and Parameters
+ *
+ * @tod0 Determine how to handle strings in Assignment commands.
+ */
+//------------------------------------------------------------------------------
 Real Assignment::EvaluateRHS()
 {
    // RHS could be a parameter, an array element, a variable, or just a number
-   switch (rhsType) {
+   switch (rhsType)
+   {
       case PARAMETER:
       case VARIABLE:
          return ((Parameter*)rhsObject)->EvaluateReal();

@@ -27,7 +27,7 @@
  * Default command used to initialize the command sequence lists in the 
  * Moderator
  */
-class BeginScript : public GmatCommand
+class GMAT_API BeginScript : public GmatCommand
 {
 	public:
 		BeginScript();
@@ -35,14 +35,14 @@ class BeginScript : public GmatCommand
 		BeginScript(const BeginScript& noop);
       BeginScript&                  operator=(const BeginScript&);
 
-		bool                          Execute(void);
+		bool                          Execute();
 
       // inherited from GmatBase
-      virtual GmatBase* Clone(void) const;
-      virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                            const std::string &prefix = "",
-                                            const std::string &useName = "");
+      virtual GmatBase*             Clone() const;
+      virtual const std::string&    GetGeneratingString(
+                                       Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                       const std::string &prefix = "",
+                                       const std::string &useName = "");
 
       const std::string GetChildString(const std::string &prefix,
                                        GmatCommand *child, GmatCommand *parent);

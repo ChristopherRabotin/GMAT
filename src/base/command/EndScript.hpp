@@ -26,7 +26,7 @@
  * Default command used to initialize the command sequence lists in the 
  * Moderator
  */
-class EndScript : public GmatCommand
+class GMAT_API EndScript : public GmatCommand
 {
 	public:
 		EndScript();
@@ -35,12 +35,11 @@ class EndScript : public GmatCommand
       EndScript&                    operator=(const EndScript&);
 
 		
-		bool                          Execute(void);
+		bool                          Execute();
 
       // inherited from GmatBase
-      virtual GmatBase* Clone(void) const;
+      virtual GmatBase*             Clone() const;
 
 };
-
 
 #endif // EndScript_hpp

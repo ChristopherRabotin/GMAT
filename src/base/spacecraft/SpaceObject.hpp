@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef SPACEOBJECT_HPP
-#define SPACEOBJECT_HPP
+#ifndef SpaceObject_hpp
+#define SpaceObject_hpp
 
 #include "GmatBase.hpp"
 #include "SpacePoint.hpp"
@@ -29,9 +29,9 @@
 class GMAT_API SpaceObject : public SpacePoint
 {
 public:
-	SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr, 
-               const std::string &nomme);
-	virtual ~SpaceObject();
+   SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+               const std::string &instName);
+   virtual ~SpaceObject();
    SpaceObject(const SpaceObject& so);
    SpaceObject&         operator=(const SpaceObject& so);
    
@@ -46,8 +46,6 @@ public:
    virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
-//   virtual std::string GetStringParameter(const Integer id) const;
-//   virtual bool SetStringParameter(const Integer id, const std::string &value);
    
    // temporarily here *************************************************
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
@@ -81,4 +79,4 @@ protected:
    
 };
 
-#endif // SPACEOBJECT_HPP
+#endif // SpaceObject_hpp

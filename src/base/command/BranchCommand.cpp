@@ -19,17 +19,22 @@
 //------------------------------------------------------------------------------
 
 
+#include "BranchCommand.hpp"
+#include "MessageInterface.hpp"
+
+// #define DEBUG_BRANCHCOMMAND_DEALLOCATION
 // #define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
 
-#include "BranchCommand.hpp"
-
-//#define DEBUG_BRANCHCOMMAND_DEALLOCATION
-
-#ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-   #include "MessageInterface.hpp"
-#endif
-
+//------------------------------------------------------------------------------
+//  BranchCommand(const std::string &typeStr)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the BranchCommand command (default constructor).
+ *
+ * @param <typeStr> Strinf setting the type name of the command.
+ */
+//------------------------------------------------------------------------------
 BranchCommand::BranchCommand(const std::string &typeStr) :
    GmatCommand          (typeStr),
    branch               (1),
@@ -43,6 +48,13 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
 }
 
 
+//------------------------------------------------------------------------------
+// ~BranchCommand(const std::string &typeStr)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the BranchCommand.
+ */
+//------------------------------------------------------------------------------
 BranchCommand::~BranchCommand()
 {
    #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
@@ -55,14 +67,16 @@ BranchCommand::~BranchCommand()
    {
       // Find the end for each branch and disconnect it fron the start
       current = *node;
-      while (current->GetNext() != this) {
+      while (current->GetNext() != this)
+      {
          current = current->GetNext();
          if (current == NULL)
             break;
       }
          
       // Calling Remove this way just sets the next pointer to NULL
-      if (current) {
+      if (current)
+      {
          #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
             MessageInterface::ShowMessage("Removing %s\n", 
                                        current->GetTypeName().c_str());
@@ -79,6 +93,15 @@ BranchCommand::~BranchCommand()
 }
 
 
+//------------------------------------------------------------------------------
+//  BranchCommand(const BranchCommand& bc)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the BranchCommand command (copy constructor).
+ *
+ * @param <bc> The instance that is copied.
+ */
+//------------------------------------------------------------------------------
 BranchCommand::BranchCommand(const BranchCommand& bc) :
    GmatCommand       (bc),
    branch            (1),
@@ -92,17 +115,39 @@ BranchCommand::BranchCommand(const BranchCommand& bc) :
 }
 
 
+//------------------------------------------------------------------------------
+//  BranchCommand& operator=(const BranchCommand& bc)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <bc> The instance that is copied.
+ *
+ * @return This instance, set to match the input instance.
+ */
+//------------------------------------------------------------------------------
 BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
 {
-   if (this == &bc)
-      return *this;
+   if (this != &bc)
+      GmatCommand::operator=(bc);
 
-   GmatCommand::operator=(bc);
    return *this;
 }
 
 
-GmatCommand* BranchCommand::GetNext(void)
+//------------------------------------------------------------------------------
+//  GmatCommand* GetNext()
+//------------------------------------------------------------------------------
+/**
+ * Access the next command in the mission sequence.
+ *
+ * For BranchCommands, this method returns its own pointer while the child
+ * commands are executing.
+ *
+ * @return The next command, or NULL if the sequence has finished executing.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* BranchCommand::GetNext()
 {
    // Return the next pointer in the command sequence if this command -- 
    // includng its branches -- has finished executing.
@@ -113,6 +158,18 @@ GmatCommand* BranchCommand::GetNext(void)
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatCommand* GetChildCommand(Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * Access the children of this command.
+ *
+ * @param <whichOne> Identifies which child branch is needed.
+ *
+ * @return The child command starting the indicated branch, or NULL if there is
+ *         no such child.
+ */
+//------------------------------------------------------------------------------
 GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
 {
    if (whichOne > (Integer)(branch.size())-1)
@@ -121,7 +178,16 @@ GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
 }
 
 
-bool BranchCommand::Initialize(void)
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the BranchCommand command.
+ *
+ * @return true if the GmatCommand is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::Initialize()
 {
    std::vector<GmatCommand*>::iterator node;
    GmatCommand *current;
@@ -130,7 +196,6 @@ bool BranchCommand::Initialize(void)
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       current = *node;
-//      while ((current != NULL) && (current != this))
       while (current != this)
       {
          if (!current->Initialize())
@@ -147,6 +212,16 @@ bool BranchCommand::Initialize(void)
 }
 
 
+//------------------------------------------------------------------------------
+// void AddBranch(GmatCommand *cmd, Integer which)
+//------------------------------------------------------------------------------
+/**
+ * Adds commands to a branch, starting a new branch if needed.
+ *
+ * @param <cmd>   The command that is added.
+ * @param <which> Identifies which child branch is used.
+ */
+//------------------------------------------------------------------------------
 void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
    // Increase the size of the vector if it's not big enough
@@ -157,12 +232,20 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       branch.push_back(cmd);   
    else if (branch[which] == NULL)
       branch.at(which) = cmd;
-      //branch[which] = cmd;
    else
       (branch.at(which))->Append(cmd);
-      //branch[which]->Append(cmd);
 }
 
+//------------------------------------------------------------------------------
+// void AddToFrontOfBranch(GmatCommand *cmd, Integer which)
+//------------------------------------------------------------------------------
+/**
+ * Adds commands to the beginning of a branch, starting a new branch if needed.
+ *
+ * @param <cmd>   The command that is added.
+ * @param <which> Identifies which child branch is used.
+ */
+//------------------------------------------------------------------------------
 void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 {
    // Increase the size of the vector if it's not big enough
@@ -182,6 +265,21 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 }
 
 
+//------------------------------------------------------------------------------
+// bool BranchCommand::Append(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Appends a command to the mission sequence.
+ *
+ * Appends commands to the end of the current command stream, either by adding
+ * them to a branch, or by adding them after this command based on the internal
+ * BranchCommand flags.
+ *
+ * @param <cmd>   The command that is added.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool BranchCommand::Append(GmatCommand *cmd)
 {
    // If we are still filling in a branch, append on that branch
@@ -196,6 +294,21 @@ bool BranchCommand::Append(GmatCommand *cmd)
 }
 
 
+//------------------------------------------------------------------------------
+// bool Insert(GmatCommand *cmd, GmatCommand *prev)
+//------------------------------------------------------------------------------
+/**
+ * Inserts a command into the mission sequence.
+ *
+ * Inserts commands into the command stream immediately after another command,
+ * and updates the command list accordingly.
+ *
+ * @param <cmd>  The command that is added.
+ * @param <prev> The command preceding the added one.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    GmatCommand *current = NULL;
@@ -242,6 +355,17 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatCommand* Remove(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Removes a command from the mission sequence.
+ *
+ * @param <cmd>  The command that is to be removed.
+ *
+ * @return the removed command.
+ */
+//------------------------------------------------------------------------------
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
    if (cmd == this)
@@ -250,7 +374,7 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    GmatCommand *fromBranch = NULL;
    GmatCommand *current = NULL;
    
-   // If we have branches, try to insert there first
+   // If we have branches, try to remove there first
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
       current = branch[which];
@@ -266,6 +390,17 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    return GmatCommand::Remove(cmd);
 }
 
+//------------------------------------------------------------------------------
+// bool InsertRightAfter(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Inserts a command into the mission sequence right after this one.
+ *
+ * @param <cmd>  The command that is inserted.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool BranchCommand::InsertRightAfter(GmatCommand *cmd)
 {
    if (!next) 
@@ -274,10 +409,19 @@ bool BranchCommand::InsertRightAfter(GmatCommand *cmd)
       return true;
    }
    
-   return GmatCommand::Insert(cmd,this);
+   return GmatCommand::Insert(cmd, this);
 }
 
 
+//------------------------------------------------------------------------------
+// void BranchCommand::SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets teh solar system pointer for the child commands.
+ *
+ * @param <ss>  The SolarSystem instance.
+ */
+//------------------------------------------------------------------------------
 void BranchCommand::SetSolarSystem(SolarSystem *ss)
 {
    GmatCommand::SetSolarSystem(ss);
@@ -327,7 +471,25 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 }
 
 
-const std::string& BranchCommand::GetGeneratingString(void)
+//------------------------------------------------------------------------------
+//  const std::string GetGeneratingString()
+//------------------------------------------------------------------------------
+/**
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
+ *
+ * @param <mode>    Specifies the type of serialization requested (Not yet used
+ *                  in commands).
+ * @param <prefix>  Optional prefix appended to the object's name (Not yet used
+ *                  in commands).
+ * @param <useName> Name that replaces the object's name (Not yet used
+ *                  in commands).
+ *
+ * @return The script line that defines this GmatCommand.
+ */
+//------------------------------------------------------------------------------
+const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName)
 {
    fullString = generatingString;
    GmatCommand *current;
@@ -339,7 +501,7 @@ const std::string& BranchCommand::GetGeneratingString(void)
       while ((current != NULL) && (current != this))
       {
          fullString += "\n";
-         fullString += current->GetGeneratingString();
+         fullString += current->GetGeneratingString(mode, prefix, useName);
          current = current->GetNext();
       }
    }
@@ -348,13 +510,35 @@ const std::string& BranchCommand::GetGeneratingString(void)
 }
 
 
-bool BranchCommand::Execute(void)
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
+/**
+ * Executes the command.
+ *
+ * @return true if the Command runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::Execute()
 {
    commandExecuting = true;
    return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool ExecuteBranch(Integer which)
+//------------------------------------------------------------------------------
+/**
+ * Executes a specific branch.
+ *
+ * @param <which>  Specifies which branch is executed.
+ *
+ * @return true if the branch runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
 bool BranchCommand::ExecuteBranch(Integer which)
 {
    bool retval = true;

@@ -22,14 +22,14 @@
 #define ForceModelException_hpp
 
 #include "BaseException.hpp"
+#include "gmatdefs.hpp"
 
-class ForceModelException : public BaseException
+class GMAT_API ForceModelException : public BaseException
 {
 public:
-
-    ForceModelException(std::string details);
-    virtual ~ForceModelException();
-    ForceModelException(const ForceModelException &fme);
+   ForceModelException(const std::string &details);
+   virtual ~ForceModelException();
+   ForceModelException(const ForceModelException &fme);
 };
 
 #endif // ForceModelException_hpp

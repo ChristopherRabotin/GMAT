@@ -26,7 +26,7 @@
 #include <vector>
 
 
-class BranchCommand : public GmatCommand
+class GMAT_API BranchCommand : public GmatCommand
 {
 public:
    BranchCommand(const std::string &typeStr);
@@ -35,7 +35,8 @@ public:
    BranchCommand&          operator=(const BranchCommand& bc);
    
    void                    AddBranch(GmatCommand *cmd, Integer which = 0);
-   void                    AddToFrontOfBranch(GmatCommand *cmd, Integer which = 0);
+   void                    AddToFrontOfBranch(GmatCommand *cmd,
+                                              Integer which = 0);
    bool                    ExecuteBranch(Integer which = 0);
    
    // Inherited methods that need refinements to handle the branching
@@ -48,9 +49,12 @@ public:
    virtual void            SetSolarSystem(SolarSystem *ss);
    virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
    
-   virtual const std::string&  
-                           GetGeneratingString();
-   
+   virtual const std::string&
+                           GetGeneratingString(Gmat::WriteMode mode =
+                                               Gmat::SCRIPTING,
+                                               const std::string &prefix = "",
+                                               const std::string &useName = "");
+
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
    virtual bool            Initialize();
@@ -64,7 +68,7 @@ protected:
       BranchCommandParamCount = GmatCommandParamCount,
    };
    
-   /// The managed branch(es).  A vector so Case can use it unchanged in build 3.
+   /// The managed branch(es).
    std::vector <GmatCommand *> branch;
    /// Flag used to indicate if the command is finished executing
    bool                    commandComplete;

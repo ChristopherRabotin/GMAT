@@ -17,8 +17,8 @@
  *  for creating Parameter objects.
  */
 //------------------------------------------------------------------------------
-#include "gmatdefs.hpp"
-#include "Factory.hpp"
+
+
 #include "ParameterFactory.hpp"
 
 #include "TimeParameters.hpp"
@@ -66,7 +66,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "CurrA1MJD")
       return new CurrA1MJD(withName);
 
-    // Cartesian paramters
+   // Cartesian parameters
    if (ofType == "X")
       return new CartX(withName);
    if (ofType == "Y")
@@ -79,7 +79,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new CartVy(withName);
    if (ofType == "VZ")
       return new CartVz(withName);
-   if (ofType == "Cartesian") //loj: 2/16/05 Changed from CartState
+   if (ofType == "Cartesian")
       return new CartState(withName);
 
     // Keplerian parameters
@@ -101,9 +101,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepMA(withName);
    if (ofType == "MM")
       return new KepMM(withName);
-   if (ofType == "Keplerian")    //loj: 2/16/05 Chagned from KepElem
+   if (ofType == "Keplerian")
       return new KepElem(withName);
-   if (ofType == "ModKeplerian") //loj: 2/16/05 Added
+   if (ofType == "ModKeplerian")
       return new ModKepElem(withName);
 
    // Spherical parameters
@@ -119,9 +119,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SphRAV(withName);
    if (ofType == "DECV")
       return new SphDecV(withName);
-   if (ofType == "SphericalRADEC") //loj: 2/16/05 changed from SphElem
+   if (ofType == "SphericalRADEC") 
       return new SphRaDecElem(withName);
-   if (ofType == "SphericalAZFPA") //loj: 2/16/05 Added
+   if (ofType == "SphericalAZFPA") 
       return new SphAzFpaElem(withName);
    if (ofType == "Altitude")
       return new Altitude(withName);
@@ -285,22 +285,22 @@ ParameterFactory::ParameterFactory(StringArray createList) :
 }
 
 //------------------------------------------------------------------------------
-//  PropagatorFactory(const PropagatorFactory& fact)
+//  ParameterFactory(const ParameterFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the class ParameterFactory
  * (copy constructor).
-   *
-   * @param <fact> the factory object to copy to "this" factory.
-   */
+ *
+ * @param <fact> the factory object to copy to "this" factory.
+ */
 //------------------------------------------------------------------------------
-ParameterFactory::ParameterFactory(const ParameterFactory& fact) :
+ParameterFactory::ParameterFactory(const ParameterFactory &fact) :
    Factory(fact)
 {
 }
 
 //------------------------------------------------------------------------------
-//  ParameterFactory& operator= (const ParameterFactory& fact)
+//  ParameterFactory& operator= (const ParameterFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the ParameterFactory base class.
@@ -311,7 +311,7 @@ ParameterFactory::ParameterFactory(const ParameterFactory& fact) :
  * @return "this" ParameterFactory with data of input factory fact.
  */
 //------------------------------------------------------------------------------
-ParameterFactory& ParameterFactory::operator= (const ParameterFactory& fact)
+ParameterFactory& ParameterFactory::operator= (const ParameterFactory &fact)
 {
    Factory::operator=(fact);
    return *this;
@@ -322,8 +322,7 @@ ParameterFactory& ParameterFactory::operator= (const ParameterFactory& fact)
 //------------------------------------------------------------------------------
 /**
  * Destructor for the ParameterFactory base class.
-   *
-   */
+ */
 //------------------------------------------------------------------------------
 ParameterFactory::~ParameterFactory()
 {

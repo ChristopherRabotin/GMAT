@@ -30,7 +30,7 @@
 
 #include "Command.hpp"
 
-class Assignment : public GmatCommand
+class GMAT_API Assignment : public GmatCommand
 {
 public:
    Assignment();
@@ -42,17 +42,6 @@ public:
    virtual bool         InterpretAction();
    virtual bool         Execute();
 
-//   // Parameter access methods
-//   virtual std::string  GetParameterText(const Integer id) const;
-//   virtual Integer      GetParameterID(const std::string &str) const;
-//   virtual Gmat::ParameterType
-//                        GetParameterType(const Integer id) const;
-//   virtual std::string  GetParameterTypeString(const Integer id) const;
-//
-//   virtual std::string  GetStringParameter(const Integer id) const;
-//   virtual bool         SetStringParameter(const Integer id,
-//                                          const std::string &value);
-
    // inherited from GmatBase
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
@@ -61,9 +50,10 @@ public:
    virtual GmatBase*    Clone() const;
    
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                            const std::string &prefix = "",
-                                            const std::string &useName = "");
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
 
 
 protected:

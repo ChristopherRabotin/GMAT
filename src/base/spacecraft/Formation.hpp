@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef FORMATION_HPP
-#define FORMATION_HPP
+#ifndef Formation_hpp
+#define Formation_hpp
 
 #include "SpaceObject.hpp"
 
@@ -27,7 +27,7 @@ class GMAT_API Formation : public SpaceObject
 {
 public:
    Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
-             const std::string &nomme);
+             const std::string &instName);
    virtual ~Formation();
    Formation(const Formation& orig);
    Formation&           operator=(const Formation& orig);
@@ -38,7 +38,6 @@ public:
    virtual GmatBase*    Clone() const;
    
    // Access methods derived classes can override
-   virtual Integer      GetParameterCount(void) const;
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -53,7 +52,7 @@ public:
    
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
-                                          const Integer index) const;
+                                           const Integer index) const;
    virtual Real         SetRealParameter(const Integer id, const Real value);
    virtual Real         SetRealParameter(const std::string &label, 
                                          const Real value);
@@ -65,18 +64,6 @@ public:
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
                        
-//   virtual std::string GetStringParameter(const std::string &label) const;
-//   virtual std::string GetStringParameter(const std::string &label,
-//                                          const Integer index) const;
-//
-//   virtual bool        SetStringParameter(const std::string &label, 
-//                                          const std::string &value);
-//   virtual bool        SetStringParameter(const std::string &label, 
-//                                          const std::string &value,
-//                                          const Integer index);
-//   virtual const StringArray& 
-//                       GetStringArrayParameter(const std::string &label)const;
-
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name,
                                     const Integer index);
@@ -100,8 +87,6 @@ protected:
    std::vector <SpaceObject *>      components;
    /// Size of the state vector used in propagation
    Integer                          dimension;
-//   /// Flag indicating if the PropState is ready for propagation
-//   bool                             initialized;
 
    /// Enumerated parameter IDs   
    enum
@@ -122,4 +107,4 @@ protected:
    bool                 RemoveSpacecraft(const std::string &name);
 };
 
-#endif // FORMATION_HPP
+#endif // Formation_hpp

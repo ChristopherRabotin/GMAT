@@ -21,7 +21,11 @@
 #include "SpaceObject.hpp"
 
 
-const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount - 
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string SpaceObject::PARAMETER_TEXT[SpaceObjectParamCount -
                                               SpacePointParamCount] =
    {
       "Epoch"
@@ -35,19 +39,51 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
    };
 
 
-SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr, 
-                         const std::string &nomme) :
-   SpacePoint       (typeId, typeStr, nomme),
+//---------------------------------
+// public methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+//             const std::string &instName)
+//------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ *
+ * @param <typeId>   Gmat::ObjectType of the constructed object.
+ * @param <typeStr>  String describing the type of object created.
+ * @param <instName> Name of the constructed instance.
+ */
+//------------------------------------------------------------------------------
+SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
+                         const std::string &instName) :
+   SpacePoint       (typeId, typeStr, instName),
    isManeuvering    (false)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// ~SpaceObject()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
 SpaceObject::~SpaceObject()
 {
 }
 
 
+//------------------------------------------------------------------------------
+// SpaceObject(const SpaceObject& so)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <so> SpaceObject that is copied onto this one.
+ */
+//------------------------------------------------------------------------------
 SpaceObject::SpaceObject(const SpaceObject& so) :
    SpacePoint     (so),
    state          (so.state),
@@ -56,29 +92,75 @@ SpaceObject::SpaceObject(const SpaceObject& so) :
 }
 
 
+//------------------------------------------------------------------------------
+// SpaceObject& operator=(const SpaceObject& so)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <so> SpaceObject that is copied onto this one.
+ *
+ * @return this instance, configured like the input instance.
+ */
+//------------------------------------------------------------------------------
 SpaceObject& SpaceObject::operator=(const SpaceObject& so)
 {
    if (this == &so)
       return *this;
       
+   SpacePoint::operator=(so);
    state = so.state;
    isManeuvering = so.isManeuvering;
+
    return *this;
 }
 
 
+//------------------------------------------------------------------------------
+// PropState& GetState()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the PropState of the object.
+ *
+ * @return The embedded PropState.
+ */
+//------------------------------------------------------------------------------
 PropState& SpaceObject::GetState()
 {
    return state;
 }
 
 
+//------------------------------------------------------------------------------
+// Real GetEpoch()
+//------------------------------------------------------------------------------
+/**
+ * Accessor for the current epoch of the object, in A.1 Modified Julian format.
+ *
+ * @return The A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::GetEpoch()
 {
    return state.GetEpoch();
 }
 
 
+//------------------------------------------------------------------------------
+// Real SetEpoch(const Real ep)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set epoch (in A.1 Modified Julian format) of the object.
+ *
+ * @param <ep> The new A.1 epoch.
+ *
+ * @return The updated A.1 epoch.
+ *
+ * @todo The epoch probably should be TAI throughout GMAT.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::SetEpoch(const Real ep)
 {
    return state.SetEpoch(ep);
@@ -89,8 +171,9 @@ Real SpaceObject::SetEpoch(const Real ep)
 // bool IsManeuvering()
 //------------------------------------------------------------------------------
 /**
- * Function that checks to see if finite burn needs to be applied to this object.
- * 
+ * Function that checks to see if a finite burn needs to be applied to this 
+ * object.
+ *
  * @return true if a finite burn is active, false otherwise.
  */
 //------------------------------------------------------------------------------
@@ -98,6 +181,7 @@ bool SpaceObject::IsManeuvering()
 {
    return isManeuvering;
 }
+
 
 //------------------------------------------------------------------------------
 // void IsManeuvering(bool mnvrFlag)
@@ -108,7 +192,7 @@ bool SpaceObject::IsManeuvering()
  * Derived classes may override this method so that the flag is updated based on
  * the state of the hardware attached to the SpaceObjects.
  * 
- * @param mnvrFlag The new value for the flag.
+ * @param <mnvrFlag> The new value for the flag.
  */
 //------------------------------------------------------------------------------
 void SpaceObject::IsManeuvering(bool mnvrFlag)
@@ -118,6 +202,21 @@ void SpaceObject::IsManeuvering(bool mnvrFlag)
 
 
 // temporarily here *************************************************
+
+//------------------------------------------------------------------------------
+// const Rvector6 GetMJ2000State(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
+/**
+ * Access the MJ2000 state for this SpaceObject.
+ *
+ * @param <atTime> Epoch for the state data.
+ *
+ * @return The Cartesian MJ2000 state.
+ *
+ * @todo Implement GetMJ2000State in the derived classes, and remove this
+ *       implementation.
+ */
+//------------------------------------------------------------------------------
 const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
 {
    PropState ps = GetState();
@@ -125,6 +224,21 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
    return Rvector6(ps.GetState()); // temporary
 }
 
+
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Position(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
+/**
+ * Access the MJ2000 position for this SpaceObject.
+ *
+ * @param <atTime> Epoch for the state data.
+ *
+ * @return The Cartesian MJ2000 position.
+ *
+ * @todo Implement GetMJ2000Position in the derived classes, and remove this
+ *       implementation.
+ */
+//------------------------------------------------------------------------------
 const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
 {
    PropState ps    = GetState();
@@ -133,6 +247,20 @@ const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
    return (itsState.GetR());  // temporary
 }
 
+//------------------------------------------------------------------------------
+// const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime)
+//------------------------------------------------------------------------------
+/**
+ * Access the MJ2000 velocity for this SpaceObject.
+ *
+ * @param <atTime> Epoch for the state data.
+ *
+ * @return The Cartesian MJ2000 velocity.
+ *
+ * @todo Implement GetMJ2000Velocity in the derived classes, and remove this
+ *       implementation.
+ */
+//------------------------------------------------------------------------------
 const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
 {
    PropState ps = GetState();
@@ -142,6 +270,18 @@ const Rvector3 SpaceObject::GetMJ2000Velocity(const A1Mjd &atTime)
 }
 // temporarily here *************************************************
 
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer SpaceObject::GetParameterID(const std::string &str) const
 {
    for (Integer i = SpacePointParamCount; i < SpaceObjectParamCount; i++)
@@ -154,6 +294,17 @@ Integer SpaceObject::GetParameterID(const std::string &str) const
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ */
+//------------------------------------------------------------------------------
 std::string SpaceObject::GetParameterText(const Integer id) const
 {
    if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
@@ -162,6 +313,17 @@ std::string SpaceObject::GetParameterText(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType SpaceObject::GetParameterType(const Integer id) const
 {
    if (id >= SpacePointParamCount && id < SpaceObjectParamCount)
@@ -171,12 +333,34 @@ Gmat::ParameterType SpaceObject::GetParameterType(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 std::string SpaceObject::GetParameterTypeString(const Integer id) const
 {
    return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Real parameter value, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter value.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::GetRealParameter(const Integer id) const
 {
    if (id == EPOCH_PARAM)
@@ -185,12 +369,35 @@ Real SpaceObject::GetRealParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Real parameter value, given the input parameter ID.
+ *
+ * @param <label> String description for the requested parameter value.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Real parameter value, given the input parameter ID.
+ *
+ * @param <id>    ID for the parameter whose value to change.
+ * @param <value> value for the parameter.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 {
    if (id == EPOCH_PARAM)
@@ -199,6 +406,18 @@ Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Real parameter value, given the input parameter ID.
+ *
+ * @param <label> String description for the parameter value.
+ * @param <value> value for the parameter.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);

@@ -30,7 +30,7 @@
  * @param details A message providing the details of the exception. 
  */
 //------------------------------------------------------------------------------
-ForceModelException::ForceModelException(std::string details) :
+ForceModelException::ForceModelException(const std::string &details) :
     BaseException           ("ForceModel Exception Thrown: ", details)
 {
 }
