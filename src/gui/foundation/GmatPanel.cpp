@@ -166,6 +166,7 @@ void GmatPanel::OnCancel()
 void GmatPanel::OnApply()
 {
     SaveData();
+    theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
