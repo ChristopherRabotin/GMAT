@@ -169,7 +169,9 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real decRad = ATan(state[2], Sqrt(state[0]*state[0] +
                                         state[1]*state[1]));
       Real decDeg = GmatMathUtil::RadToDeg(decRad, true);
-      Real latitude = AngleUtil::PutAngleInDegRange(decDeg, 0.0, 360.0);
+      //loj: 1/5/04 Latitude shoule be between -90 and 90
+      //Real latitude = AngleUtil::PutAngleInDegRange(decDeg, 0.0, 360.0);
+      Real latitude = AngleUtil::PutAngleInDegRange(decDeg, -90.0, 90.0);
 
 #ifdef DEBUG_PLANET_DATA
       MessageInterface::ShowMessage
@@ -189,6 +191,10 @@ Real PlanetData::GetReal(const std::string &dataType)
       Real lst = gmst + GetReal("Longitude");
       lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
 
+      //loj: 1/5/04
+      // convert it to hours (1h = 15 deg according to Vallado 3.5)
+      lst = lst / 15.0;
+      
 #ifdef DEBUG_PLANET_DATA
       MessageInterface::ShowMessage
          ("PlanetData::GetReal() lst=%f\n", lst);
