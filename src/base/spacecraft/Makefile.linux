@@ -21,7 +21,11 @@ OBJECTS = SpaceObject.o \
           StateConverter.o \
           TextTrajectoryFile.o \
           TimeConverter.o \
-          SpaceObjectException.o
+          SpaceObjectException.o \
+          Hardware.o \
+          HardwareException.o \
+          FuelTank.o \
+          Thruster.o
 
 all: libSpacecraft 
 	mkdir -p ../lib

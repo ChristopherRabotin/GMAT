@@ -40,9 +40,11 @@
 #include "Solver.hpp"
 #include "AtmosphereModel.hpp"
 #include "Function.hpp"
+#include "Hardware.hpp"
 
 //loj: 9/14/04 - added AtmosphereModel
 //loj: 9/27/04 - added Function
+//djc: 11/10/04 - added Hardware
 
 /**
  * Configuration Manager Stub -- a hack until the real code is ready
@@ -59,6 +61,7 @@ public:
    void                AddSolarSystem(SolarSystem *solarSys);
    void                AddPropSetup(PropSetup *propSetup);
    void                AddSpacecraft(SpaceObject *sc);
+   void                AddHardware(Hardware *hw);
    void                AddStopCondition(StopCondition* stopCond);
    void                AddParameter(Parameter* parameter);
    void                AddBurn(Burn* burn);
@@ -83,6 +86,7 @@ public:
    Propagator*         GetPropagator(const std::string &name);
    ForceModel*         GetForceModel(const std::string &name);
    SpaceObject*        GetSpacecraft(const std::string &name);
+   Hardware*           GetHardware(const std::string &name);
    PropSetup*          GetPropSetup(const std::string &name);
    Subscriber*         GetSubscriber(const std::string &name);
    SolarSystem*        GetDefaultSolarSystem();

@@ -179,6 +179,25 @@ void ConfigManager::AddSpacecraft(SpaceObject *sc)
 
 
 //------------------------------------------------------------------------------
+// void AddHardware(Hardware *hw)
+//------------------------------------------------------------------------------
+void ConfigManager::AddHardware(Hardware *hw)
+{
+   std::string name = hw->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(hw);
+      mapping[name] = hw;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void AddStopCondition(StopCondition* stopCond)
 //------------------------------------------------------------------------------
 void ConfigManager::AddStopCondition(StopCondition* stopCond)
@@ -518,6 +537,21 @@ SpaceObject* ConfigManager::GetSpacecraft(const std::string &name)
       sc = (SpaceObject *)mapping[name];
    }
    return sc;
+}
+
+
+//------------------------------------------------------------------------------
+// Hardware* GetHardware(const std::string &name)
+//------------------------------------------------------------------------------
+Hardware* ConfigManager::GetHardware(const std::string &name)
+{
+   Hardware *hw = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() == Gmat::HARDWARE) {
+         hw = (Hardware *)mapping[name];
+      }
+   }
+   return hw;
 }
 
 
