@@ -26,6 +26,7 @@ LIBRARIES = lib/libUtilities.a \
             lib/libForceModel.a \
             lib/libPropagator.a \
             lib/libParameter.a \
+            lib/libFunction.a \
             lib/libBurn.a	\
             lib/libInterpolator.a \
             lib/libRefFrame.a \
@@ -35,7 +36,7 @@ LIBRARIES = lib/libUtilities.a \
             lib/libCommand.a \
             lib/libFactory.a \
             lib/libConfiguration.a \
-            lib/libInterpreter.a 
+            lib/libInterpreter.a
 
 GUILIBRARIES = lib/libExecutive.a
 CONSOLELIBRARIES = lib/libExecutiveConsole.a
@@ -81,6 +82,9 @@ lib/libBurn.a :
 
 lib/libParameter.a :
 	cd parameter ; $(MAKE) -f Makefile.linux all
+
+lib/libFunction.a :
+	cd function ; $(MAKE) -f Makefile.linux all
 
 lib/libInterpolator.a :
 	cd interpolator ; $(MAKE) -f Makefile.linux all

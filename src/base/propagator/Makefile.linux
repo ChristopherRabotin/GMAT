@@ -6,11 +6,26 @@ TARGET = ../lib/libPropagator.a
 #HEADERS = -I../include -I../foundation -I../forcemodel -I../spacecraft \
 #          -I../util -I../solarsys
 
-HEADERS = -I../include -I../foundation -I../spacecraft -I../util \
-          -I../solarsys -I../burn -I../command -I../configs -I../executive \
-          -I../factory -I../interpolator -I../interpreter -I../parameter \
-          -I../propagator -I../refframe -I../solver -I../stopcond \
-          -I../subscriber -I../forcemodel
+HEADERS = -I../include \
+          -I../foundation \
+          -I../spacecraft \
+          -I../util \
+          -I../solarsys \
+          -I../burn \
+          -I../command \
+          -I../configs \
+          -I../executive \
+          -I../factory \
+          -I../interpolator \
+          -I../interpreter \
+          -I../parameter \
+          -I../propagator \
+          -I../refframe \
+          -I../solver \
+          -I../stopcond \
+          -I../subscriber \
+          -I../forcemodel \
+          -I../function
 
 OBJECTS = PropSetup.o \
           Propagator.o \

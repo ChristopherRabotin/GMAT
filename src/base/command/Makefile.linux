@@ -10,7 +10,7 @@ HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
           -I../solarsys -I../solver -I../burn \
           \
           \
-          -I../interpreter -I../command -I../factory -I../configs
+          -I../interpreter -I../command -I../factory -I../configs -I../function
 
 OBJECTS = Command.o CommandException.o \
           NoOp.o \
