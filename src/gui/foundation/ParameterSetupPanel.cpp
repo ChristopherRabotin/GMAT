@@ -13,7 +13,6 @@
 //------------------------------------------------------------------------------
 
 #include "ParameterSetupPanel.hpp"
-#include "GmatMainNotebook.hpp"
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
