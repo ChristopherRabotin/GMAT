@@ -52,6 +52,10 @@ public:
    // destructor
    ~DeFile();
 
+    //loj: added so that constructor won't throw an exception
+   // method to initialize the DeFile - must be done before De file can be read
+   bool Initialize();
+
    // method to return the body ID for the requested body
    Integer  GetBodyID(std::string bodyName);
 
@@ -120,6 +124,7 @@ protected:
    // structs representing the format of the header records
    // (from JPL/JSC code - Hoffman)
    // wcs - added constructors, and operator=
+#pragma pack(push, 1)
    struct recOneData {
       recOneData()  // default constructor
    {
@@ -180,6 +185,7 @@ protected:
       long int coeffPtr[12][3];
       long int DENUM;
       long int libratPtr[3];
+       long int RSize; //loj: 4/14/04 added
    };
 
    struct recTwoData {
@@ -205,7 +211,8 @@ protected:
       //data
       double constValue[400];
    };
-
+#pragma pack(pop)
+    
    typedef struct recOneData recOneType;
    typedef struct recTwoData recTwoType;
 
