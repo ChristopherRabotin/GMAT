@@ -15,10 +15,11 @@ PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
 SRC = AtmosphereException.cpp AtmosphereManager.cpp AtmosphereModel.cpp \
-	CelestialBody.cpp DeFile.cpp ExponentialAtmosphere.cpp Moon.cpp \
+	CelestialBody.cpp DeFile.cpp ExponentialAtmosphere.cpp \
+	JacchiaRobertsAtmosphere.cpp Moon.cpp \
 	Msise90Atmosphere.cpp msise90.cpp Planet.cpp \
 	PlanetaryEphemException.cpp PlanetaryEphem.cpp SlpFile.cpp \
-	SolarSystem.cpp SolarSystemException.cpp Star.cpp
+	SolarFluxFileReader.cpp SolarSystem.cpp SolarSystemException.cpp Star.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
