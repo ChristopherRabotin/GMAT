@@ -407,18 +407,34 @@ CelestialBody* CelestialBody::GetCentralBody() const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetGravitationalConstant() 
 {
-   if ((usePotentialFile == true) & (!potentialFileRead))
+   //loj: 5/6/04 temp. code to show message only first time
+   static bool firstTimeMu = true;
+   
+   if (usePotentialFile == true)
    {
-      if (!ReadPotentialFile())
+      if (!potentialFileRead)
       {
-         MessageInterface::ShowMessage(
-                "Cannot read file %s, so using default value for mu\n",
-                 potentialFileName.c_str());
-         mu = defaultMu;
+         if (!ReadPotentialFile())
+         {
+            if (firstTimeMu)
+            {
+            MessageInterface::ShowMessage
+               ("Cannot read file %s, so using default value for mu\n",
+                potentialFileName.c_str());
+            firstTimeMu = false;
+            }
+         
+            mu = defaultMu;
+         }
+         //throw SolarSystemException(
+         //   "Cannot read potential file to get gravitational constant.");
       }
-      //         throw SolarSystemException(
-//                  "Cannot read potential file to get gravitational constant.");
    }
+   else
+   {
+      mu = defaultMu;
+   }
+   
    return mu;
 }
 
@@ -434,17 +450,24 @@ Real CelestialBody::GetGravitationalConstant()
 //------------------------------------------------------------------------------
 Real CelestialBody::GetEquatorialRadius() 
 {
-   if ((usePotentialFile == true) & (!potentialFileRead))
+   //loj: 5/6/04 temp. code to show message only first time
+   static bool firstTimeRadius = true;
+   
+   if ((usePotentialFile == true) && (!potentialFileRead))
    {
       if (!ReadPotentialFile())
       {
-         MessageInterface::ShowMessage(
-              "Cannot read file %s, so using default value for radius\n",
-               potentialFileName.c_str());
+         if (firstTimeRadius)
+         {
+            MessageInterface::ShowMessage
+               ("Cannot read file %s, so using default value for radius\n",
+                potentialFileName.c_str());
+            firstTimeRadius = false;
+         }
          equatorialRadius = defaultEqRadius;
       }
- //        throw SolarSystemException(
-//                  "Cannot read potential file to get equatorial radius.");
+      //throw SolarSystemException(
+      //   "Cannot read potential file to get equatorial radius.");
    }
    return equatorialRadius;
 }
