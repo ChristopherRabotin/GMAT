@@ -313,8 +313,14 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (components.size() == 0)
             state.SetEpoch(newepoch);
          else
-            if (state.GetEpoch() != newepoch)
-               throw SpaceObjectException("Epochs are not synchronized in the formation " + instanceName);
+            if (state.GetEpoch() != newepoch) {
+               char errorMsg[256];
+               sprintf(errorMsg, "Epochs (%lf) and (%lf) are not synchronized "
+                       "in the formation %s", newepoch, state.GetEpoch(),
+                       instanceName.c_str());
+              
+               throw SpaceObjectException(errorMsg);
+            }
          components.push_back(so);
       }
       
