@@ -82,7 +82,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
 
 void PropagationConfigPanel::Initialize()
 {  
-MessageInterface::ShowMessage("Entering PropagationConfigPanel::Initialize()\n");
+    //MessageInterface::ShowMessage("Entering PropagationConfigPanel::Initialize()\n");
     // Default integrator values
     newPropName      = "";
     thePropSetup     = NULL;
@@ -105,27 +105,27 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::Initialize()\n")
     {        
         thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
-        //loj: 3/12/04 debug ================================
-//        
-//        MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() propTypeName = %s\n",
-//                                      thePropSetup->GetStringParameter("Type").c_str());
-//        MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() fmName = %s\n",
-//                                      thePropSetup->GetStringParameter("FM").c_str());
-//                                      
-//        numOfForces = thePropSetup->GetNumForces();
-//        MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() numOfForces = %d\n",
-//                                      numOfForces);
-//        
-//        ForceModel *fm = thePropSetup->GetForceModel();
-//        MessageInterface::ShowMessage("ForceModel name = %s\n", fm->GetName().c_str());
-//       
-//        for (int i=0; i<numOfForces; i++)
-//        {
-//            MessageInterface::ShowMessage("Force Type = %s, Name = %s\n",
-//                                          fm->GetForce(i)->GetTypeName().c_str(),
-//                                          fm->GetForce(i)->GetName().c_str());
-//        }
-        //===================================================
+//          //loj: 3/12/04 debug ================================
+      
+//          MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() propTypeName = %s\n",
+//                                        thePropSetup->GetStringParameter("Type").c_str());
+//          MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() fmName = %s\n",
+//                                        thePropSetup->GetStringParameter("FM").c_str());
+                                    
+//          numOfForces = thePropSetup->GetNumForces();
+//          MessageInterface::ShowMessage("PropagationConfigPanel::Initialize() numOfForces = %d\n",
+//                                        numOfForces);
+      
+//          ForceModel *fm = thePropSetup->GetForceModel();
+//          MessageInterface::ShowMessage("ForceModel name = %s\n", fm->GetName().c_str());
+     
+//          for (int i=0; i<numOfForces; i++)
+//          {
+//              MessageInterface::ShowMessage("Force Type = %s, Name = %s\n",
+//                                            fm->GetForce(i)->GetTypeName().c_str(),
+//                                            fm->GetForce(i)->GetName().c_str());
+//          }
+//          //===================================================
 
         // initialize integrator type array
         integratorArray.Add("RKV 8(9)");
@@ -138,17 +138,26 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::Initialize()\n")
             theForceModel = thePropSetup->GetForceModel();
             numOfForces   = thePropSetup->GetNumForces();
 
+            PhysicalModel *force;
+            
             for (Integer i = 0; i < numOfForces; i++)
             {
-                thePMForces.push_back((PointMassForce *)theForceModel->GetForce(i));
-                thePlanets.push_back(thePMForces[i]->GetBody());
-                primaryBodiesArray.Add(thePlanets[i]->GetName().c_str());
-                primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());
+                force = theForceModel->GetForce(i);
+                //MessageInterface::ShowMessage("forcetype=%s\n", force->GetTypeName().c_str());
+                //loj: 3/30/04 added check for PointMassForce
+                if (force->GetTypeName() == "PointMassForce")
+                {
+                    thePMForces.push_back((PointMassForce *)force);
                 
-                degreeID = thePlanets[i]->GetParameterID("Degree");
-                orderID = thePlanets[i]->GetParameterID("Order");
-                degreeArray.Add(wxVariant((long)thePlanets[i]->GetIntegerParameter(degreeID)));
-                orderArray.Add(wxVariant((long)thePlanets[i]->GetIntegerParameter(orderID)));
+                    thePlanets.push_back(thePMForces[i]->GetBody());
+                    primaryBodiesArray.Add(thePlanets[i]->GetName().c_str());
+                    primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());
+                
+                    degreeID = thePlanets[i]->GetParameterID("Degree");
+                    orderID = thePlanets[i]->GetParameterID("Order");
+                    degreeArray.Add(wxVariant((long)thePlanets[i]->GetIntegerParameter(degreeID)));
+                    orderArray.Add(wxVariant((long)thePlanets[i]->GetIntegerParameter(orderID)));
+                }
             }
 
             primaryBodyString = primaryBodiesArray.Item(0).c_str();
@@ -165,7 +174,9 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::Initialize()\n")
         {
             MessageInterface::ShowMessage("PropagationConfigPanel():Initialize() thePropSetup is NULL\n");
         }
-    }                     
+    }
+    
+    //MessageInterface::ShowMessage("Exiting PropagationConfigPanel::Initialize()\n");
 }
 
 void PropagationConfigPanel::Setup(wxWindow *parent)
@@ -403,7 +414,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 
 void PropagationConfigPanel::LoadData()
 {
-MessageInterface::ShowMessage("Entering PropagationConfigPanel::LoadData()\n");
+    //MessageInterface::ShowMessage("Entering PropagationConfigPanel::LoadData()\n");
   
     std::string propType = thePropagator->GetTypeName();
         
@@ -418,7 +429,7 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::LoadData()\n");
 
     integratorComboBox->SetSelection(typeId);
     integratorString = integratorArray[typeId];
-MessageInterface::ShowMessage("Calling DisplayIntegratorData() from PropagationConfigPanel::LoadData()\n");    
+    //MessageInterface::ShowMessage("Calling DisplayIntegratorData() from PropagationConfigPanel::LoadData()\n");    
     DisplayIntegratorData(false);
     DisplayForceData();
 }
@@ -437,8 +448,8 @@ void PropagationConfigPanel::SaveData()
         newProp->SetIntegerParameter("MaxStepAttempts", atoi(setting5TextCtrl->GetValue()) );
         
         thePropSetup->SetPropagator(newProp);
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() newPropType = %s name = %s\n",
-            newProp->GetTypeName().c_str(), newProp->GetName().c_str());
+        //MessageInterface::ShowMessage("PropagationConfigPanel():SetData() newPropType = %s name = %s\n",
+        //    newProp->GetTypeName().c_str(), newProp->GetName().c_str());
     }
     
     //------------------------
@@ -499,7 +510,7 @@ void PropagationConfigPanel::SaveData()
 
 void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 {               
-MessageInterface::ShowMessage("Entering PropagationConfigPanel::DisplayIntegratorData()\n");
+    //MessageInterface::ShowMessage("Entering PropagationConfigPanel::DisplayIntegratorData()\n");
         
     if (integratorChanged)
     {
@@ -510,8 +521,8 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::DisplayIntegrato
             newProp = theGuiInterpreter->GetPropagator(newPropName);
             if (newProp == NULL)
             {
-                MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
-                                              "Creating RungeKutta89\n");
+                //MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
+                //                              "Creating RungeKutta89\n");
                 newProp = theGuiInterpreter->CreatePropagator("RungeKutta89", newPropName);
             }
         }
@@ -522,15 +533,10 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::DisplayIntegrato
         
             if (newProp == NULL)
             {
-                MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
-                                              "Creating DormandElMikkawyPrince68\n");
+                //MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
+                //                              "Creating DormandElMikkawyPrince68\n");
                 newProp = theGuiInterpreter->CreatePropagator("DormandElMikkawyPrince68", newPropName);
             }
-
-//            //loj: 3/19/04 added but need to test this
-//            ForceModel *fm = theGuiInterpreter->CreateForceModel(newPropName + "ForceModel");
-//            PhysicalModel *earthGrav = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "");
-//            fm->AddForce(earthGrav);
         }
         else if (integratorString.IsSameAs(integratorArray[RKF56_ID]))
         {   
@@ -539,10 +545,10 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel::DisplayIntegrato
         
             if (newProp == NULL)
             {
-                MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
-                                              "Creating RungeKuttaFehlberg56\n");
+                //MessageInterface::ShowMessage("PropConfigPanel::DisplayIntegratorData() "
+                //                              "Creating RungeKuttaFehlberg56\n");
                 newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
-            }
+            }            
         }
     }
     else
