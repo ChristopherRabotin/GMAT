@@ -38,4 +38,21 @@
 #pragma hdrstop
 #endif
 
+#ifndef wxUSE_GLCANVAS
+#define wxUSE_GLCANVAS 1
+#endif
+
+#ifdef wxUSE_GLCANVAS
+#  ifdef __WXMAC__
+#    ifdef __DARWIN__
+#      include <OpenGL/glu.h>
+#    else
+#      include <glu.h>
+#    endif
+#  else
+#    include <GL/glu.h>
+#  endif
+#  include "wx/glcanvas.h"
+#endif
+
 #endif // gmatwxdefs_h
