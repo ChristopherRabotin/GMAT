@@ -637,7 +637,7 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
 //                          const Integer index) const
 //------------------------------------------------------------------------------
  /**
- * This method gets a string parameter value of a StringArray, for the input
+ * This method sets a string parameter value of a StringArray, for the input
  * parameter ID, at the input index into the array.
  *
  * @param <id>    ID for the requested parameter.
@@ -648,7 +648,7 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
  *
  */
 //------------------------------------------------------------------------------
-/*bool ConditionalBranch::SetStringParameter(const Integer id, 
+bool ConditionalBranch::SetStringParameter(const Integer id, 
                                            const std::string &value,
                                            const Integer index)
 {
@@ -662,7 +662,9 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      return SetStringArrayValue(id, value, index);
+      lhsList.at(index) = value;
+      return true;
+      //return SetStringArrayValue(id, value, index);
    }
    if (id == OPERATOR_STRINGS)   
    {
@@ -671,7 +673,9 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "operator string list.";
          throw CommandException(errorString);
       }
-      return SetStringArrayValue(id, value, index);
+      opStrings.at(index) = value;
+      return true;
+      //return SetStringArrayValue(id, value, index);
    }
    if (id == RIGHT_HAND_STRINGS) 
    {
@@ -680,7 +684,9 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      return SetStringArrayValue(id, value, index);
+      rhsList.at(index) = value;
+      return true;
+      //return SetStringArrayValue(id, value, index);
    }
    if (id == LOGICAL_OPERATORS)  
    {
@@ -689,13 +695,15 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "logical operator string list.";
          throw CommandException(errorString);
       }
-      return SetStringArrayValue(id, value, index);
+      logicalOpStrings.at(index) = value;
+      return true;
+      //return SetStringArrayValue(id, value, index);
    }
    //if (id == PARAMETER_NAMES)  return ??;
    
    return BranchCommand::SetStringParameter(id, value, index);
 }
-*/
+
 //------------------------------------------------------------------------------
 //  std::string GetStringParameter(const std::string &label, 
 //                                 const Integer index) const
@@ -734,13 +742,13 @@ std::string ConditionalBranch::GetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
-/*bool ConditionalBranch::SetStringParameter(const std::string &label, 
+bool ConditionalBranch::SetStringParameter(const std::string &label, 
                                         const std::string &value,
                                         const Integer index)
 {
    return SetStringParameter(GetParameterID(label), value, index);
 }
-*/
+
 //------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -900,7 +908,7 @@ bool ConditionalBranch::EvaluateAllConditions()
    }
    return soFar;
 }
-
+// remove this?
 bool ConditionalBranch::SetStringArrayValue(Integer forArray, 
                                             const std::string &toValue,
                                             Integer forIndex)

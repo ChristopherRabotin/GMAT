@@ -79,14 +79,14 @@ public:
 //                                            const Integer value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
-   //virtual bool         SetStringParameter(const Integer id, 
-   //                                        const std::string &value,
-   //                                        const Integer index);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index);
    virtual std::string  GetStringParameter(const std::string &label,
                                            const Integer index) const;
-   //virtual bool         SetStringParameter(const std::string &label, 
-   //                                        const std::string &value,
-   //                                        const Integer index);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const; 
    //virtual const StringArray& 
