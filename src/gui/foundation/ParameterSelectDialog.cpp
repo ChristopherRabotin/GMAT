@@ -18,6 +18,8 @@
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 
+//#define DEBUG_PARAM_SELECT_DIALOG 1
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -26,26 +28,66 @@ BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, ParameterSelectDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_COMBOBOX(ID_COMBOBOX, ParameterSelectDialog::OnComboBoxChange)
-   EVT_BUTTON(ADD_VAR_BUTTON, ParameterSelectDialog::OnAddVariable)
+   EVT_BUTTON(ID_BUTTON, ParameterSelectDialog::OnButtonClick)
    EVT_BUTTON(CREATE_VARIABLE, ParameterSelectDialog::OnCreateVariable)
    EVT_LISTBOX(USER_PARAM_LISTBOX, ParameterSelectDialog::OnSelectUserParam)
    EVT_LISTBOX(PROPERTY_LISTBOX, ParameterSelectDialog::OnSelectProperty)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// ParameterSelectDialog(wxWindow *parent, bool showArray = false)
+// ParameterSelectDialog(wxWindow *parent, 
+//                       bool showArray = false, bool showSysVars = true,
+//                       bool canSelectMultiVars = false)
 //------------------------------------------------------------------------------
-ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, bool showArray)
+ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, 
+                                             bool showArray,  bool showSysVars,
+                                             bool canSelectMultiVars)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
-   mParamName = "";
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
    mShowArray = showArray;
-   
+   mShowSysVars = showSysVars;
+   mCanSelectMultiVars = canSelectMultiVars;
+   mParamNameArray.Clear();
+
    Create();
    ShowData();
+}
+
+//loj: 2/8/05 Added
+//------------------------------------------------------------------------------
+//void SetParamNameArray(const wxArrayString &paramNames)
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
+{
+   mParamNameArray = paramNames;
+
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage
+      ("SetParamNameArray() param count=%d\n", mParamNameArray.GetCount());
+   #endif
+   
+   // show selected parameter
+   for (unsigned int i=0; i<mParamNameArray.GetCount(); i++)
+   {
+      mVarSelectedListBox->Append(mParamNameArray[i]);
+      #if DEBUG_PARAM_SELECT_DIALOG
+      MessageInterface::ShowMessage("param=%s\n", mParamNameArray[i].c_str());
+      #endif
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual void OnOK()
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::OnOK()
+{
+   SaveData();
+   
+   if (mCanClose)
+      Close();
 }
 
 //------------------------------------------------------------------------------
@@ -53,6 +95,10 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, bool showArray)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::Create()
 {
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage("ParameterSelectDialog::Create() entered.\n");
+   #endif
+   
    int bsize = 2;
    wxString emptyList[] = {};
 
@@ -63,26 +109,46 @@ void ParameterSelectDialog::Create()
     
    wxButton *createVarButton;
 
-   mParamBoxSizer =
-      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
-                                          &mObjectComboBox, ID_COMBOBOX,
-                                          &mUserParamListBox, USER_PARAM_LISTBOX,
-                                          &mPropertyListBox, PROPERTY_LISTBOX,
-                                          &mCoordSysComboBox, ID_COMBOBOX,
-                                          &mCentralBodyComboBox, ID_COMBOBOX,
-                                          &mCoordSysLabel, &mCoordSysSizer);
+   if (mShowSysVars)
+   {
+      mParamBoxSizer = theGuiManager->
+         CreateParameterSizer(this,
+                              &mUserParamListBox, USER_PARAM_LISTBOX,
+                              &createVarButton, CREATE_VARIABLE,
+                              &mObjectComboBox, ID_COMBOBOX,
+                              &mPropertyListBox, PROPERTY_LISTBOX,
+                              &mCoordSysComboBox, ID_COMBOBOX,
+                              &mCentralBodyComboBox, ID_COMBOBOX,
+                              &mCoordSysLabel, &mCoordSysSizer);
+   }
+   else
+   {
+      mParamBoxSizer = theGuiManager->
+         CreateUserVarSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
+                            &createVarButton, CREATE_VARIABLE);
+   }
    
    //-------------------------------------------------------
    // add parameter button (2nd column)
    //-------------------------------------------------------
-   mAddParamButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
-                                  wxDefaultPosition, wxSize(20,20), 0 );
+   mAddParamButton = new wxButton(this, ID_BUTTON, wxT("->"),
+                                  wxDefaultPosition, wxSize(20,20), 0);
    
+   mRemoveParamButton = new wxButton(this, ID_BUTTON, wxT("<-"),
+                                      wxDefaultPosition, wxSize(20,20), 0);
+   
+   mRemoveAllParamButton = new wxButton(this, ID_BUTTON, wxT("<="),
+                                        wxDefaultPosition, wxSize(20,20), 0);
+   
+   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+   arrowButtonsBoxSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(mRemoveParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(mRemoveAllParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-------------------------------------------------------
    // selected parameter list (3rd column)
    //-------------------------------------------------------
-   wxStaticBox *selectedStaticBox = new wxStaticBox( this, -1, wxT("") );
+   wxStaticBox *selectedStaticBox = new wxStaticBox(this, -1, wxT(""));
 
    wxStaticText *selectedParamLabel =
       new wxStaticText(this, -1, wxT("Selected"),
@@ -100,11 +166,11 @@ void ParameterSelectDialog::Create()
    //-------------------------------------------------------
    // put in the order
    //-------------------------------------------------------
-   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(3, 0, 0);
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
 
    mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mAddParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -120,24 +186,25 @@ void ParameterSelectDialog::Create()
 // virtual void LoadData()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::LoadData()
-{
-   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-   mObjectComboBox->SetSelection(0);
-   mPropertyListBox->SetSelection(0);
+{   
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage("ParameterSelectDialog::LoadData() entered.\n");
+   #endif
    
-   // show coordinate system or central body
-   ShowCoordSystem();
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnOK()
-//------------------------------------------------------------------------------
-void ParameterSelectDialog::OnOK()
-{
-   SaveData();
-   
-   if (mCanClose)
-      Close();
+   if (mShowSysVars)
+   {
+      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+      mObjectComboBox->SetSelection(0);
+      mPropertyListBox->SetSelection(0);
+      
+      // show coordinate system or central body
+      ShowCoordSystem();
+   }
+   else
+   {
+      mUserParamListBox->SetSelection(0);
+      mUseUserParam = true;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -146,50 +213,18 @@ void ParameterSelectDialog::OnOK()
 void ParameterSelectDialog::SaveData()
 {
    mCanClose = true;
-   
-   //loj: Can we select multiple parameters? If so we need to use wxArrayString
-   // for build2, just assume one parameter selection
+   mParamNameArray.Clear();
+   mIsParamSelected = false;
+
    if (mVarSelectedListBox->GetCount() > 0)
    {
-      mParamName = mVarSelectedListBox->GetString(0); // first selection
-      std::string paramName(mParamName.c_str());
-      std::string objName(mObjectComboBox->GetStringSelection().c_str());
-      std::string propName(mPropertyListBox->GetStringSelection().c_str());
-
-      // create parameter if it is new
-      Parameter *param = theGuiInterpreter->GetParameter(paramName);
-
-      if (param == NULL)
+      mIsParamSelected = true;
+      mParamName = mVarSelectedListBox->GetString(0);
+      
+      for(int i=0; i<mVarSelectedListBox->GetCount(); i++)
       {
-         param = theGuiInterpreter->CreateParameter(propName, paramName);
-         param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+         mParamNameArray.Add(mVarSelectedListBox->GetString(i));
       }
-
-      // check if pararameter is returning single value (plottable)
-
-      if (param->IsPlottable())
-      {
-         mIsParamSelected = true;
-      }
-      else
-      {
-         if (mShowArray)
-         {
-            mIsParamSelected = true;
-         }
-         else
-         {
-            wxLogMessage("Selected parameter:%s is not returning single value. "
-                         "Please select another parameter\n", paramName.c_str());
-         
-            mIsParamSelected = false;
-            mCanClose = false;
-         }
-      }
-   }
-   else
-   {
-      mIsParamSelected = false;
    }
 }
 
@@ -202,23 +237,53 @@ void ParameterSelectDialog::ResetData()
 }
 
 //------------------------------------------------------------------------------
-// void OnAddVariable(wxCommandEvent& event)
+// void OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterSelectDialog::OnAddVariable(wxCommandEvent& event)
+void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
 {
-   // empty listbox first, only one parameter is allowed
-   mVarSelectedListBox->Clear();
+   if (event.GetEventObject() == mAddParamButton)
+   {
+      // if only one parameter is allowed
+      if (!mCanSelectMultiVars)
+         mVarSelectedListBox->Clear();
 
-   // get string in first list and then search for it in the second list
-   wxString newParam = FormParamName();
-   
-   // Create a paramete if it does not exist
-   GetParameter(newParam);
-   
-   mVarSelectedListBox->Append(newParam);
-   mVarSelectedListBox->SetStringSelection(newParam);
+      // get string in first list
+      wxString newParam = FormParamName();
+      
+      // Create a system paramete if it does not exist
+      if (mShowSysVars)
+         GetParameter(newParam);
+      
+      int found = mVarSelectedListBox->FindString(newParam);
+      
+      // if the string wasn't found in the second list, insert it
+      if (found == wxNOT_FOUND)
+      {
+         mVarSelectedListBox->Append(newParam);
+         mVarSelectedListBox->SetStringSelection(newParam);
+         theOkButton->Enable();
+      }
+   }
+   else if (event.GetEventObject() == mRemoveParamButton)
+   {
+      int sel = mVarSelectedListBox->GetSelection();
+      mVarSelectedListBox->Delete(sel);
 
-   theOkButton->Enable();
+      if (sel-1 < 0)
+         mVarSelectedListBox->SetSelection(0);
+      else
+         mVarSelectedListBox->SetSelection(sel-1);
+
+      if (mVarSelectedListBox->GetCount() > 0)
+         theOkButton->Enable();
+      else
+         theOkButton->Disable();
+   }
+   else if (event.GetEventObject() == mRemoveAllParamButton)
+   {
+      mVarSelectedListBox->Clear();
+      theOkButton->Disable();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -241,9 +306,12 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
 {
-   // deselect property
-   mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
-
+   if (mShowSysVars)
+   {
+      // deselect property
+      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+   }
+   
    mUseUserParam = true;
 }
 

@@ -23,26 +23,37 @@ class ParameterSelectDialog : public GmatDialog
 {
 public:
     
-   ParameterSelectDialog(wxWindow *parent, bool showArray = false);
+   ParameterSelectDialog(wxWindow *parent, bool showArray = false,
+                         bool showSysVars = true,
+                         bool canSelectMultiVars = false);
 
-   wxString GetParamName()
-      { return mParamName; }
    bool IsParamSelected()
       { return mIsParamSelected; }
-
+   wxString GetParamName()
+      { return mParamName; }
+   wxArrayString& GetParamNameArray()
+      { return mParamNameArray; }
+   void SetParamNameArray(const wxArrayString &paramNames);
+   
 protected:
    // override methods from GmatDialog
    virtual void OnOK();
 
    wxString mParamName;
+   wxArrayString mParamNameArray;
+   
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
    bool mShowArray;
+   bool mShowSysVars;
+   bool mCanSelectMultiVars;
    
    wxStaticText *mCoordSysLabel;
    
    wxButton *mAddParamButton;
+   wxButton *mRemoveParamButton;
+   wxButton *mRemoveAllParamButton;
    wxButton *mCreateVarButton;
    
    wxComboBox *mObjectComboBox;
@@ -65,7 +76,7 @@ protected:
    virtual void ResetData();
 
    // event handling
-   void OnAddVariable(wxCommandEvent& event);   
+   void OnButtonClick(wxCommandEvent& event);   
    void OnCreateVariable(wxCommandEvent& event);
    void OnSelectUserParam(wxCommandEvent& event);
    void OnSelectProperty(wxCommandEvent& event);
@@ -78,7 +89,7 @@ protected:
    {     
       ID_TEXT = 9300,
       ID_COMBOBOX,
-
+      ID_BUTTON,
       ADD_VAR_BUTTON,
       CREATE_VARIABLE,
       VAR_SEL_LISTBOX,
