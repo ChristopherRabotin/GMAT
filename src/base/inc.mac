@@ -4,13 +4,12 @@
 # Date:       2003/11/18
 # Modified:   2004/01/14 - added burn directory and compiler option -Wall
 #             2004/09/23 - W. Shoan - added function directory
+#             2004/09/24 - J. Gurganus - cleaned up and added 'testing' target 
 
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
 LIB = $(LIBDIR)/libgmatbase.a
-TESTFLAGS = -D__CONSOLE_APP__ -Wall -dynamic
-#TESTFLAGS = -D__DEBUG__ -D__CONSOLE_APP__ -D__UNIT_TEST__ -Wall -dynamic
-#TESTFLAGS = -Wall -dynamic
+#
 #
 # Define macros for the base directory
 BURN       = $(PROJECT_ROOT)/base/burn
@@ -44,7 +43,7 @@ INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(EXECUTIVE) -I$(FACTORY) \
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-CXXFLAGS = $(INCS) $(TESTFLAGS) -Wall
+CXXFLAGS = $(INCS) $(TESTFLAGS) -dynamic -Wall
 CPP = g++ $(CXXFLAGS)
 #
 # Default suffix rule
@@ -57,7 +56,6 @@ all: $(LIB)
 
 $(LIB): $(OBJ) 
 	@if [ ! -x $(LIBDIR) ]; then mkdir $(LIBDIR); echo 'Creating $(LIBDIR)'; fi
-
 	ar cr $@ $(OBJ)
 	@ranlib $@
 	@chmod -R 755 $(LIBDIR)
@@ -70,3 +68,6 @@ clean:
 
 bare: clean
 	rm -f $(LIB)
+
+testing:
+	${MAKE} -f Makefile.mac "TESTFLAGS = -D__CONSOLE_APP__"
