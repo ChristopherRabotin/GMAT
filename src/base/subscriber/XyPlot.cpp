@@ -106,12 +106,12 @@ bool XyPlot::Initialize()
 {
    //MessageInterface::ShowMessage("XyPlot::Initialize() entered\n");
    bool status = false;
-    
+   DeletePlotCurves(); //loj: 5/3/04 added to fix index out of range
+   
    if (active)
    {
       if (!mIsXyPlotWindowSet)
       {
-
          BuildPlotTitle();
                         
          // Create XyPlotWindow
@@ -353,12 +353,7 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
       mDrawGrid = value;
       return mDrawGrid;
    case CLEAR_DEP_VAR_LIST:
-      DeletePlotCurves();
-      mYParams.clear();
-      mYParamNames.clear();
-      mNumYParams = 0;
-      mAddNewCurve = true;
-      mIsXyPlotWindowSet = false;
+      ClearYParameters();
       return true;
    default:
       return Subscriber::SetBooleanParameter(id, value);
@@ -478,15 +473,6 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void DeletePlotCurves()
-//------------------------------------------------------------------------------
-void XyPlot::DeletePlotCurves()
-{
-   // delete exiting curves
-   PlotInterface::DeleteAllXyPlotCurves(instanceName);
-}
-
-//------------------------------------------------------------------------------
 // void BuildPlotTitle()
 //------------------------------------------------------------------------------
 void XyPlot::BuildPlotTitle()
@@ -521,6 +507,30 @@ void XyPlot::BuildPlotTitle()
    //MessageInterface::ShowMessage("mXAxisTitle = %s, mYAxisTitle = %s   mPlotTitle = %s\n",
    //                              mXAxisTitle.c_str(), mPlotTitle.c_str());
 }
+
+//loj: 5/4/04 added
+//------------------------------------------------------------------------------
+// void ClearYParameters()
+//------------------------------------------------------------------------------
+void XyPlot::ClearYParameters()
+{
+   DeletePlotCurves();
+   mYParams.clear();
+   mYParamNames.clear();
+   mNumYParams = 0;
+   mAddNewCurve = true;
+   mIsXyPlotWindowSet = false;
+}
+
+//------------------------------------------------------------------------------
+// void DeletePlotCurves()
+//------------------------------------------------------------------------------
+void XyPlot::DeletePlotCurves()
+{
+   // delete exiting curves
+   PlotInterface::DeleteAllXyPlotCurves(instanceName);
+}
+
 
 // methods inherited from Subscriber
 //------------------------------------------------------------------------------
