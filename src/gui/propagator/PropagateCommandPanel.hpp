@@ -44,10 +44,10 @@ private:
    struct PropType
    {
       bool isChanged;
+      int  soCount;
       wxString propName;
       wxString soNames;
       wxArrayString soNameList;
-      PropSetup *propSetupPtr;
    };
    
    struct StopCondType
@@ -80,7 +80,7 @@ private:
    wxButton *deleteButton;
    wxButton *viewButton;
    
-   wxComboBox *synchComboBox;
+   wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
    
    wxGrid *propGrid;
@@ -88,8 +88,12 @@ private:
    
    wxBoxSizer *mMiddleBoxSizer;
    wxStaticBoxSizer *mStopSizer;
+
+   bool    mPropModeChanged;
+   bool    mPropChanged;
+   bool    mStopCondChanged;
    
-   Integer numOfModes;
+   Integer mPropModeCount;
    Integer numOfEqualities;
    Integer mPropCount;
    Integer mSpaceObjectCount;
@@ -99,7 +103,7 @@ private:
    PropType mTempProp[MAX_PROP_ROW];
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
-   Propagate *thePropagateCommand;
+   Propagate *thePropCmd;
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -114,16 +118,18 @@ private:
    void ClearStopCondition(int selRow);
    void ShowDetailedStopCond(int stopRow);
    void ActivateUpdateButton();
-   wxString FormatStopCondDesc(const wxString &varName,
-                               const wxString &relOpStr,
-                               Real &goal);
    
    // event handling method
    void OnTextChange(wxCommandEvent &event);
-   void OnComboSelection(wxCommandEvent &event);
-   void OnButton(wxCommandEvent &event);
+   void OnComboBoxChange(wxCommandEvent &event);
+   void OnButtonClick(wxCommandEvent &event);
    void OnCellLeftClick(wxGridEvent &event);
    void OnCellRightClick(wxGridEvent &event);
+
+   wxString FormatStopCondDesc(const wxString &varName,
+                               const wxString &relOpStr,
+                               Real &goal);
+   void MoveUpPropData();
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -132,13 +138,10 @@ private:
    enum
    {     
       ID_TEXTCTRL = 44000,
-      ID_COMBO,
+      ID_COMBOBOX,
       ID_BUTTON,
       ID_CHECKBOX,
       ID_GRID,
-      MENU_INSERT_P,
-      MENU_DELETE_P,
-      MENU_CLEAR_P
    };
 };
 
