@@ -38,6 +38,9 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     achieved                (NULL),
     jacobian                (NULL),
     inverseJacobian         (NULL),
+    indx                    (NULL),
+    b                       (NULL),
+    ludMatrix               (NULL),
     useCentralDifferences   (false),
     initialized             (false),
     solverTextFile          ("targeter.data"),
@@ -74,6 +77,9 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
     achieved                (NULL),
     jacobian                (NULL),
     inverseJacobian         (NULL),
+    indx                    (NULL),
+    b                       (NULL),
+    ludMatrix               (NULL),
     useCentralDifferences   (dc.useCentralDifferences),
     initialized             (false),
     solverTextFile          (dc.solverTextFile),
@@ -383,10 +389,12 @@ bool DifferentialCorrector::Initialize(void)
     achieved        = new Real*[localVariableCount];
     jacobian        = new Real*[localVariableCount];
     inverseJacobian = new Real*[localVariableCount];
+    ludMatrix       = new Real*[localVariableCount];
     for (i = 0; i < localVariableCount; ++i) {
         jacobian[i] = new Real[localVariableCount];
         inverseJacobian[i] = new Real[localVariableCount];
         achieved[i] = new Real[localGoalCount];
+        ludMatrix[i] = new Real[localVariableCount];
         
         // Initialize to the identity matrix
         jacobian[i][i] = 1.0;
@@ -405,7 +413,12 @@ bool DifferentialCorrector::Initialize(void)
         WriteToTextFile();
     }
     
+    // Allocate the LU arrays
+    indx = new Integer[variableCount];
+    b = new Real[variableCount];
+    
     initialized = true;
+    iterationsTaken = 0;
     return true;
 }
 
@@ -432,6 +445,9 @@ Solver::SolverState DifferentialCorrector::AdvanceState(void)
         
         case CHECKINGRUN:
             CheckCompletion();
+            ++iterationsTaken;
+            if (iterationsTaken > maxIterations)
+                currentState = FINISHED;
             break;
         
         case FINISHED:
@@ -533,14 +549,23 @@ void DifferentialCorrector::CalculateJacobian(void)
 {
     textFile << "Calculating the Jacobian\n";
     
-    textFile << "Nominal[0]     = " << nominal[0] << "\n";
-    textFile << "Achieved[0][0] = " << achieved[0][0] << "\n";
+    Integer i, j;
     
-    jacobian[0][0] = nominal[0] - achieved[0][0];
-    textFile << "Difference     = " << jacobian[0][0] << "\n";
+    for (i = 0; i < variableCount; ++i) {
     
-    jacobian[0][0] /= perturbation[0];
-    textFile << "Jacobian[0][0] = " << jacobian[0][0] << "\n";
+        for (j = 0; j < goalCount; ++j) {
+            textFile << "Nominal[" << j << "]     = " << nominal[j] << "\n";
+            textFile << "Achieved[" << i << "][" << j << "] = " 
+                     << achieved[i][j] << "\n";
+            
+            jacobian[i][j] = nominal[j] - achieved[i][j];
+            textFile << "Difference     = " << jacobian[i][j] << "\n";
+            
+            jacobian[i][j] /= perturbation[i];
+            textFile << "Jacobian[" << i << "][" << j << "] = " 
+                     << jacobian[i][j] << "\n";
+        }
+    }
 }
 
 
@@ -550,8 +575,17 @@ void DifferentialCorrector::CalculateJacobian(void)
  */
 void DifferentialCorrector::InvertJacobian(void)
 {
-    inverseJacobian[0][0] = 1.0 / jacobian[0][0];
-    textFile << "InverseJacobian[0][0] = " << inverseJacobian[0][0] << "\n";
+//    inverseJacobian[0][0] = 1.0 / jacobian[0][0];
+//    textFile << "InverseJacobian[0][0] = " << inverseJacobian[0][0] << "\n";
+    LUDecompose();
+    for (Integer j = 0; j < variableCount; ++j) {
+        for (Integer i = 0; i < variableCount; ++i)
+            b[i] = 0.0;
+        b[j] = 1.0;
+        LUBackSubstitute();
+        for (Integer i = 0; i < variableCount; ++i)
+            inverseJacobian[i][j] = b[i];
+    }
 }
 
 
@@ -626,6 +660,23 @@ void DifferentialCorrector::FreeArrays(void)
             delete [] inverseJacobian[i];
         delete [] inverseJacobian;
         inverseJacobian = NULL;
+    }
+    
+    if (indx) {
+        delete [] indx;
+        indx = NULL;
+    }
+    
+    if (b) {
+        delete [] b;
+        b = NULL;
+    }
+    
+    if (ludMatrix) {
+        for (Integer i = 0; i < variableCount; ++i)
+            delete [] ludMatrix[i];
+        delete [] ludMatrix;
+        ludMatrix = NULL;
     }
 }
 
@@ -738,3 +789,87 @@ void DifferentialCorrector::WriteToTextFile(void)
         }
     }
 }
+
+
+void DifferentialCorrector::LUDecompose(void)
+{
+    // Implementation as in Numerical Recipes -- needs to be reworked to real C
+    Integer i, j, imax, k;
+    Real big, dum, sum, temp, d;
+    Real *vv = new Real[variableCount];
+    
+    d = 1.0;
+    for (i = 0; i < variableCount; ++i) {
+        big = 0.0;
+        for (j = 0; j <= variableCount; ++j)
+            if ((temp = fabs(jacobian[i][j])) > big)
+                big = temp;
+        if (big == 0.0)
+            throw SolverException("Singular matrix in DifferentialCorrector::LUDecompose");
+        vv[i] = 1.0 / big;
+    }
+    for (j = 0; j < variableCount; ++j) {
+        for (i = 0; i < j; ++i) {
+            sum = jacobian[i][j];
+            for (k = 0; k < i; ++k)
+                sum -= jacobian[i][k]*jacobian[k][j];
+            // ludMatrix[i][j] = sum;
+            jacobian[i][j] = sum;
+        }
+        big = 0.0;
+        for (i = j; i < variableCount; ++i) {
+            sum = jacobian[i][j];
+            for (k = 0; k < j; ++k)
+                sum -= jacobian[i][k] * jacobian[k][j];
+            jacobian[i][j] = sum;
+            if ((dum = vv[i]*fabs(sum)) >= big) {
+                big = dum;
+                imax = i;
+            }
+        }
+        if (j != imax) {
+           for (k = 0; k < variableCount; ++k) {
+               dum = jacobian[imax][k];
+               jacobian[imax][k] = jacobian[j][k];
+               jacobian[j][k] = dum;
+           }
+           d = -d;
+           vv[imax] = vv[j];
+        }
+        indx[j] = imax;
+        if (jacobian[j][j] == 0.0)
+            jacobian[j][j] = 1.0e-20;           // Handle singular matrix
+        if (j != variableCount-1) {
+            dum = 1.0 / jacobian[j][j];
+            for (i = j+1; i < variableCount; ++i)
+                jacobian[i][j] *= dum;
+        }
+    }
+    delete [] vv;
+}
+
+    
+void DifferentialCorrector::LUBackSubstitute(void)
+{
+    Integer i, ii=0, ip, j;
+    Real sum;
+    
+    for (i = 0; i < variableCount; ++i) {
+        ip = indx[i];
+        sum = b[ip];
+        b[ip] = b[i];
+        if (ii)
+            for (j = ii; j <= i-1; ++j)
+                sum -= jacobian[i][j] * b[j];
+        else if (sum)
+            ii = i;
+        b[i] = sum;
+    }
+    for (i = variableCount-1; i >= 0; --i) {    // Back-substitute
+        sum = b[i];
+        for (j = i+1; j < variableCount; ++j)
+            sum -= jacobian[i][j] * b[j];
+        b[i] = sum / jacobian[i][i];
+    }
+}
+

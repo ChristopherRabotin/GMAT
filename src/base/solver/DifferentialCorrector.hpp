@@ -103,8 +103,14 @@ protected:
     Real                        **inverseJacobian;
     /// Current perturbation being run.
     Integer                     pertNumber;
+
+    /// Permutation vector used by the LU Decomposition routine.    
+    Integer                     *indx;
+    /// Vector used for the back substitution
+    Real                        *b;
+    /// LU Decomposition of the Jacobian
+    Real                        **ludMatrix;
     
-   
     // Control parameters
     /// Used to turn on central differencing.  Currently not implemented. 
     bool                        useCentralDifferences;
@@ -146,6 +152,10 @@ protected:
 
     void                        FreeArrays(void);
     virtual void                WriteToTextFile(void);
+    
+    // Methods used to implement LU decomposition
+    void                        LUDecompose(void);
+    void                        LUBackSubstitute(void);
 };
 
 #endif // DifferentialCorrector_hpp
