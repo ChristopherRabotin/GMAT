@@ -25,6 +25,10 @@
 #include "PhysicalModel.hpp"
 #include "FiniteBurn.hpp"
 
+
+/**
+ * The force used for finite burns.
+ */
 class GMAT_API FiniteThrust : public PhysicalModel
 {
 public:
@@ -63,13 +67,6 @@ protected:
    std::vector<SpaceObject *>    *spacecraft;
    /// Indexes (in the spacecraft vector) for the Spacecraft used by this force
    std::vector<Integer>          scIndices;
-   
-   // Pieces needed to actually do the finite burn
-//   /// The state pointer (a convenience -- it could just be passed around)
-//   Real                          *state;
-   
-//   void                    CalculateAcceleration(Spacecraft* sc);
-//   void                    CalculateMDot(Spacecraft *sc);
 };
 
 #endif // FiniteThrust_hpp

@@ -29,23 +29,59 @@
 #include <sstream>               // for stringstream
 
 
+//------------------------------------------------------------------------------
+// FiniteThrust(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Constructor for forces from finite burns.
+ * 
+ * @param name Name of the constructed instance.
+ */
+//------------------------------------------------------------------------------
 FiniteThrust::FiniteThrust(const std::string &name) :
    PhysicalModel        (Gmat::PHYSICAL_MODEL, "FiniteThrust", name)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// ~FiniteThrust()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for forces from finite burns.
+ */
+//------------------------------------------------------------------------------
 FiniteThrust::~FiniteThrust()
 {
 }
 
 
+//------------------------------------------------------------------------------
+// FiniteThrust(const FiniteThrust& ft)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor for forces from finite burns.
+ * 
+ * @param ft The oroginal that gets copied.
+ */
+//------------------------------------------------------------------------------
 FiniteThrust::FiniteThrust(const FiniteThrust& ft) :
    PhysicalModel        (ft)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// FiniteThrust& operator=(const FiniteThrust& ft)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ * 
+ * @param ft Instance that provides the parameter values.
+ * 
+ * @return This instance, set to match the input instance.
+ */
+//------------------------------------------------------------------------------
 FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 {
    if (this == &ft)
@@ -58,6 +94,15 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * AOverridden Clone method used to make copies from a GmatBase pointer.
+ * 
+ * @return New instance, set to look like this one.
+ */
+//------------------------------------------------------------------------------
 GmatBase* FiniteThrust::Clone() const
 {
    return new FiniteThrust(*this);
@@ -87,6 +132,21 @@ void FiniteThrust::Clear(const Gmat::ObjectType type)
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets the names for referenced objects.
+ * 
+ * FiniteThrust instances use Spacecraft and FiniteThrust objects.  This method
+ * sets the names for those objects.
+ * 
+ * @param type The type of object that has the name.
+ * @param name The object's name
+ * 
+ * @return true on success, false otherwise.
+ */
+//------------------------------------------------------------------------------
 bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
                                   const std::string &name)
 {
@@ -106,6 +166,17 @@ bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses the names for referenced objects.
+ * 
+ * @param type The type of object requested.
+ * 
+ * @return The vector of names.
+ */
+//------------------------------------------------------------------------------
 const StringArray& FiniteThrust::GetRefObjectNameArray(
                                                    const Gmat::ObjectType type)
 {
@@ -115,6 +186,21 @@ const StringArray& FiniteThrust::GetRefObjectNameArray(
    return PhysicalModel::GetRefObjectNameArray(type);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+//                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced object pointers.
+ * 
+ * @param obj The onject.
+ * @param type The type of the object.
+ * @param name The object's name.
+ * 
+ * @return true if the object is set, false if not.
+ */
+//------------------------------------------------------------------------------
 bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
                                 const std::string &name)
 {
@@ -131,10 +217,12 @@ bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return PhysicalModel::SetRefObject(obj, type, name);
 }
 
-//bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-//                                const std::string &name, const Integer index)
-//{
-//}
+// In case it's needed later
+// bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                 const std::string &name, const Integer index)
+// {
+//    return PhysicalModel::SetRefObject(obj, type, name, index);
+// }
 
 //------------------------------------------------------------------------------
 // bool IsTransient()
@@ -266,7 +354,6 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
          mDot = accel[0] = accel[1] = accel[2] = 0.0;
 
          // Accumulate thrust and mass flow for each active thruster
-//         accel[1] = 0.5;
          for (std::vector <FiniteBurn*>::iterator fb = burns.begin();
               fb != burns.end(); ++fb)
          {

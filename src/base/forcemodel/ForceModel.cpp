@@ -693,7 +693,8 @@ void ForceModel::UpdateInitialData()
  * acceleration for a finite burn is calculated and applied only when a 
  * spacecraft has a thruster that has been turned on.
  * 
- * @param transientSats The list of spacecraft that report active transient forces. 
+ * @param transientSats The list of spacecraft that report active transient 
+ *                      forces. 
  */
 //------------------------------------------------------------------------------
 void ForceModel::UpdateTransientForces()

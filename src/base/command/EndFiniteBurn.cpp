@@ -105,6 +105,17 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Accesses names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the referenced object's name.
+ */
+//------------------------------------------------------------------------------
 std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type) {
@@ -123,6 +134,17 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the StringArray containing the referenced object names.
+ */
+//------------------------------------------------------------------------------
 const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    switch (type) {
@@ -141,6 +163,18 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType t
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets names for referenced objects.
+ * 
+ * @param type Type of the object.
+ * @param name Name of the object.
+ * 
+ * @return true if the name was set, false if not.
+ */
+//------------------------------------------------------------------------------
 bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
                                      const std::string &name)
 {
@@ -190,10 +224,20 @@ GmatBase* EndFiniteBurn::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+//  void BeginFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the array of transient forces for the command.
+ *
+ * @param tf The transient force vector.
+ */
+//------------------------------------------------------------------------------
 void EndFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    transientForces = tf;
 }
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize()

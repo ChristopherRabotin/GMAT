@@ -24,7 +24,10 @@
 #include "Burn.hpp"
 
 
-class GMAT_API FiniteBurn : public Burn
+/**
+ * Class used to configure finite burns.
+ */
+ class GMAT_API FiniteBurn : public Burn
 {
 public:
    FiniteBurn(std::string nomme = "");

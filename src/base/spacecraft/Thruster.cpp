@@ -201,6 +201,20 @@ Thruster& Thruster::operator=(const Thruster& th)
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+//                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced objects.
+ * 
+ * @param obj The object.
+ * @param type Type of the object.
+ * @param name Name of the object.
+ * 
+ * @return true if the name was set, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                             const std::string &name)
 {
@@ -227,6 +241,18 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return Hardware::SetRefObject(obj, type, name);
 }
 
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers by type.
+ * 
+ * @param type The type of objects requested
+ *
+ * @return Reference to the array.
+ */
+//---------------------------------------------------------------------------
 ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
 {
 //   if (type == Gmat::HARDWARE)
@@ -236,6 +262,17 @@ ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
 }
 
 
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const std::string& typeString)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
+ * 
+ * @param typeString The string used to find the objects requested.
+ *
+ * @return Reference to the array.  This default method returns an empty vector.
+ */
+//---------------------------------------------------------------------------
 ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
 {
 //   if ((typeString == "FuelTank") || (typeString == "Tanks"))
@@ -254,7 +291,6 @@ ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
  * @param <id> Id for the requested parameter text.
  *
  * @return parameter text for the requested parameter.
- *
  */
 //------------------------------------------------------------------------------
 std::string Thruster::GetParameterText(const Integer id) const
