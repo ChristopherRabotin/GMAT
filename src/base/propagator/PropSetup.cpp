@@ -154,10 +154,12 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
 //------------------------------------------------------------------------------
 PropSetup::~PropSetup()
 {
-   if (mPropagator->GetName() == "InternalRKV89")
-      delete mPropagator;
-   if (mForceModel->GetName() == "InternalForceModel")
-      delete mForceModel;
+   if (mPropagator)
+      if (mPropagator->GetName() == "InternalRKV89")
+         delete mPropagator;
+   if (mForceModel)
+      if (mForceModel->GetName() == "InternalForceModel")
+         delete mForceModel;
 }
 
 //------------------------------------------------------------------------------
