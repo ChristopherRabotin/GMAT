@@ -107,9 +107,9 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type, const std::stri
 
 // asset
 //------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(std::string type, const std::string &name)
+// Spacecraft* CreateSpacecraft(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Spacecraft* GuiInterpreter::CreateSpacecraft(std::string type,
+Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string type,
                                              const std::string &name)
 {
    //loj: for creating another Spacecraft
@@ -242,18 +242,18 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 
 // command
 //------------------------------------------------------------------------------
-// Command* CreateCommand(std::string type, const std::string &name)
+// Command* CreateCommand(const std::string type, const std::string &name)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::CreateCommand(std::string type, const std::string &name)
+Command* GuiInterpreter::CreateCommand(const std::string type, const std::string &name)
 {
    //loj: for creating a new Command, such as "MyNewCommand", "DoMyLittleThing"
    return theModerator->CreateCommand(type, name);
 }
 
 //------------------------------------------------------------------------------
-// Command* GetCommand(std::string command)
+// Command* GetCommand(const std::string command)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::GetCommand(std::string command)
+Command* GuiInterpreter::GetCommand(const std::string command)
 {
    //loj: for getting a Command object by command
    return theModerator->GetCommand(command);
@@ -271,10 +271,10 @@ Command* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 }
 
 //------------------------------------------------------------------------------
-// bool DeleteCommand(std::string command, Integer position,
-//                                    Integer sandboxNum)
+// bool DeleteCommand(const std::string command, Integer position,
+//                    Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::DeleteCommand(std::string command, Integer position,
+bool GuiInterpreter::DeleteCommand(const std::string command, Integer position,
                                    Integer snadboxNum)
 {
    //deletes command at current position
@@ -282,16 +282,27 @@ bool GuiInterpreter::DeleteCommand(std::string command, Integer position,
 }
 
 //------------------------------------------------------------------------------
-// bool InsertCommand(std::string type, std::string name, Integer position,
-//                    bool addAbove, Integer sandboxNum)
+// Command* InsertCommand(const std::string type, const std::string name,
+//                        Integer position, bool addAbove, Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::InsertCommand(std::string type, std::string name,
-                                   Integer position, bool addAbove,
-                                   Integer sandboxNum)
+Command* GuiInterpreter::InsertCommand(const std::string type, const std::string name,
+                                       Integer position, bool addAbove,
+                                       Integer sandboxNum)
 {
    //inserts command above or below current position
    return theModerator->InsertCommand(type, name, position, addAbove, sandboxNum);
 }
+
+//------------------------------------------------------------------------------
+// Command* AppendCommand(const std::string type, const std::string name,
+//                        Integer sandboxNum)
+//------------------------------------------------------------------------------
+//  Command* GuiInterpreter::AppendCommand(const std::string type, const std::string name,
+//                                         Integer sandboxNum)
+//  {
+//     //appends command
+//     return theModerator->AppendCommand(type, name, sandboxNum);
+//  }
 
 // sandbox
 //------------------------------------------------------------------------------

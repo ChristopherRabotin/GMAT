@@ -52,7 +52,7 @@ public:
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
    // Spacecraft
-   Spacecraft* CreateSpacecraft(std::string type, const std::string &name);
+   Spacecraft* CreateSpacecraft(const std::string type, const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
    //future build:GroundStation* CreateGroundStation(const std::string &name);
    //future build:GroundStation* GetGroundStation(const std::string &name);
@@ -81,13 +81,16 @@ public:
    Subscriber* GetSubscriber(const std::string &name);
 
    // Command
-   Command* CreateCommand(std::string type, const std::string &name);
-   Command* GetCommand(std::string name);
+   Command* CreateCommand(const std::string type, const std::string &name);
+   Command* GetCommand(const std::string name);
    Command* GetNextCommand(Integer sandboxNum = 1);
-   bool DeleteCommand(std::string name, Integer position, Integer sandboxNum = 1);
-   bool InsertCommand(std::string type, std::string name,
-                      Integer position, bool addAbove = true,
+   bool DeleteCommand(const std::string name, Integer position,
                       Integer sandboxNum = 1);
+   Command* InsertCommand(const std::string type, const std::string name,
+                          Integer position, bool addAbove = true,
+                          Integer sandboxNum = 1);
+//     Command* AppendCommand(const std::string type, const std::string &name,
+//                            Integer sandboxNum = 1);
 
    // Sandbox
    void ClearAllSandboxes();
