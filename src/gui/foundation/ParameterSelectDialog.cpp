@@ -34,6 +34,7 @@ BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
    EVT_LISTBOX(PROPERTY_LISTBOX, ParameterSelectDialog::OnSelectProperty)
 END_EVENT_TABLE()
 
+   
 //------------------------------------------------------------------------------
 // ParameterSelectDialog(wxWindow *parent, 
 //                       bool showArray = false, bool showSysVars = true,
@@ -55,6 +56,7 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
    Create();
    ShowData();
 }
+
 
 //loj: 2/8/05 Added
 //------------------------------------------------------------------------------
@@ -79,6 +81,7 @@ void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void OnOK()
 //------------------------------------------------------------------------------
@@ -89,6 +92,7 @@ void ParameterSelectDialog::OnOK()
    if (mCanClose)
       Close();
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void Create()
@@ -182,6 +186,7 @@ void ParameterSelectDialog::Create()
 
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
@@ -207,6 +212,7 @@ void ParameterSelectDialog::LoadData()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
@@ -228,6 +234,7 @@ void ParameterSelectDialog::SaveData()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void ResetData()
 //------------------------------------------------------------------------------
@@ -235,6 +242,7 @@ void ParameterSelectDialog::ResetData()
 {
    mIsParamSelected = false;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnButtonClick(wxCommandEvent& event)
@@ -286,6 +294,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnCreateVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -301,6 +310,7 @@ void ParameterSelectDialog::OnCreateVariable(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnSelectUserParam(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -314,6 +324,7 @@ void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
    
    mUseUserParam = true;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSelectProperty(wxCommandEvent& event)
@@ -329,6 +340,7 @@ void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
    mUseUserParam = false;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -340,6 +352,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       mUseUserParam = false;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // wxString FormParamName()
@@ -368,6 +381,7 @@ wxString ParameterSelectDialog::FormParamName()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
@@ -383,28 +397,36 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
    // create a parameter if it does not exist
    if (param == NULL)
    {
+      #if DEBUG_PARAM_SELECT_DIALOG
+      MessageInterface::ShowMessage
+         ("ParameterSelectDialog::GetParameter() Creating parameter:<%s>\n",
+          name.c_str());
+      #endif
+      
       std::string paramName(name.c_str());
       std::string objName(mObjectComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
-            
+      
       if (mCoordSysComboBox->IsShown())
          depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
       else if (mCentralBodyComboBox->IsShown())
          depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
-
+      
       param = theGuiInterpreter->CreateParameter(propName, paramName);
       param->SetRefObjectName(Gmat::SPACECRAFT, objName);
       
       if (depObjName != "")
          param->SetStringParameter("DepObject", depObjName);
-      
-      if (param->NeedCoordSystem())
+
+      //loj: 2/10/05 Changed from NeedCoordSystem()
+      if (param->IsCoordSysDependent())
          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
    }
    
    return param;
 }
+
 
 //------------------------------------------------------------------------------
 // void ShowCoordSystem()
@@ -451,5 +473,4 @@ void ParameterSelectDialog::ShowCoordSystem()
       mCentralBodyComboBox->Hide();
       mParamBoxSizer->Layout();
    }
-
 }
