@@ -200,6 +200,11 @@ bool For::Execute(void)
       //if (!commandComplete) {
       retval = ExecuteBranch();
       currentValue += stepSize;
+      if (indexParam)
+         indexParam->SetRealParameter("Param1",currentValue);
+      //else
+      //   throw CommandException(
+      //         "Index parameter has not been set for For loop.");
    }
    else
    {
@@ -231,6 +236,63 @@ GmatBase* For::Clone(void) const
    return (new For(*this));
 }
 
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                         const std::string &name) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a pointer to the Parameter ref object (used as
+ * the index for the For command).
+ *
+ * @return pointer to the index Parmeter.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* For::GetRefObject(const Gmat::ObjectType type,
+                            const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::PARAMETER:
+            return indexParam;
+      default:
+         break;
+   }
+   
+   // Not handled here -- invoke the next higher GetRefObject call
+   return BranchCommand::GetRefObject(type, name);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(const Gmat::ObjectType type,
+//                    const std::string &name) const
+//------------------------------------------------------------------------------
+/**
+ * This method sets a pointer to the Parameter ref object (used as
+ * the index for the For command).
+ *
+ * @return success of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                       const std::string &name)
+{
+   switch (type)
+   {
+      case Gmat::PARAMETER:
+      {
+         indexParam = (Parameter*) obj;
+         return true;
+      }
+      default:
+         break;
+   }
+   
+   // Not handled here -- invoke the next higher SetRefObject call
+   return BranchCommand::SetRefObject(obj, type, name);
+}
+
 //loj: 11/22/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
@@ -240,6 +302,13 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
                           const std::string &oldName,
                           const std::string &newName)
 {
+   /* ---------- do I need to add indexParamName? ------------
+   if (type == Gmat::PARAMETER)
+   {
+      if (indexParamName == oldName)
+         indexParamName = newName;
+   }
+    */
    return true;
 }
 
@@ -400,6 +469,11 @@ bool For::StillLooping()
                "For loop values incorrect - will result in infinite loop.");
       
       currentValue = startValue;
+      if (indexParam)
+         indexParam->SetRealParameter("Param1", currentValue);
+      //else
+      //   throw CommandException(
+      //         "Index parameter has not been set for For loop.");
       commandComplete  = false;      
    }
    if (((stepSize > 0.0) && (currentValue <= endValue)) ||

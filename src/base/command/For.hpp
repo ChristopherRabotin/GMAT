@@ -25,6 +25,7 @@
  
 
 #include "BranchCommand.hpp"
+#include "Parameter.hpp"
 
 
 /**
@@ -56,9 +57,13 @@ public:
    // inherited from GmatBase
    virtual GmatBase*   Clone(void) const;
 
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name);
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
    
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -94,15 +99,17 @@ protected:
    static const Real DEFAULT_END;
    static const Real DEFAULT_INCREMENT;
 
-   std::string         forName;
+   std::string  forName;
    /// Start value for the For loop
-   Real                startValue;
+   Real         startValue;
    /// End value for the For loop
-   Real                endValue;
+   Real         endValue;
    /// Step value for the For loop
-   Real                stepSize;
+   Real         stepSize;
    /// Current value for the For loop counter
-   Real                currentValue;
+   Real         currentValue;
+   /// the parameter object(s) used by the For 
+   Parameter*   indexParam;
    
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();
