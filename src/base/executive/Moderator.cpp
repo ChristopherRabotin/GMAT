@@ -23,6 +23,7 @@
 
 //#define DEBUG_SETUP_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
+//#define DEBUG_DEFAULT_MISSION 1
 //#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 1
 //#define DEBUG_USER_INTERRUPT 1
@@ -2203,11 +2204,14 @@ void Moderator::CreateDefaultMission()
    {
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
-      //MessageInterface::ShowMessage("-->default Spacecraft created\n");
-
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default Spacecraft created\n");
+#endif
       // PropSetup
       CreateDefaultPropSetup("DefaultProp");
-      //MessageInterface::ShowMessage("-->default PropSetup created\n");
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default PropSetup created\n");
+#endif
 
       // Burn
       GetDefaultBurn();
@@ -2251,8 +2255,9 @@ void Moderator::CreateDefaultMission()
 
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.SemilatusRectum");
-      //MessageInterface::ShowMessage("-->default parameters created\n");
-    
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default parameters created\n");
+#endif   
       // Set parameter description and object name
       StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
       Parameter *param;
@@ -2271,8 +2276,9 @@ void Moderator::CreateDefaultMission()
       stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
-      //MessageInterface::ShowMessage("-->default StopCondition created\n");
-
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default StopCondition created\n");
+#endif
       // Subscribers
       // ReportFile
       Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
@@ -2289,17 +2295,19 @@ void Moderator::CreateDefaultMission()
       sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
       sub->SetStringParameter("Add", "DefaultSC");
       sub->Activate(true);
-      //MessageInterface::ShowMessage("-->default Subscribers created\n");
-
+      
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default Subscribers created\n");
+#endif
+      
       // Propagate Command
       GmatCommand *propCommand = CreateCommand("Propagate");
-      propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
       propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);
-      //loj: 6/25/04 use new method SetRefObject()
-      //propCommand->SetRefObject(stopOnElapsedSecs, Gmat::STOP_CONDITION);
+      propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
       propCommand->SetRefObject(stopOnElapsedSecs, Gmat::STOP_CONDITION, "", 0);
+      
       propCommand->SetSolarSystem(theDefaultSolarSystem);
-
+      
 #if DEBUG_MULTI_STOP
       //----------------------------------------------------
       //just for testing multiple stopping condition
@@ -2313,7 +2321,10 @@ void Moderator::CreateDefaultMission()
       //----------------------------------------------------
 #endif
 
-      //MessageInterface::ShowMessage("-->default Propagate command created\n");
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default Propagate command created\n");
+#endif
+      
       // Add propagate command
       AppendCommand(propCommand);
 
