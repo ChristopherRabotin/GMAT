@@ -91,7 +91,13 @@ protected:
    Integer mNumCollected;
    
    Integer mScCount;
-   StringArray mScList;
+   StringArray mScNameArray;
+   RealArray mScXArray;
+   RealArray mScYArray;
+   RealArray mScZArray;
+   UnsignedIntArray mOrbitColorArray;
+   UnsignedIntArray mTargetColorArray;
+   
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
 

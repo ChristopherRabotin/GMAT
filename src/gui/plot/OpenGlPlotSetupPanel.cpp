@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlotSetupPanel.hpp"
+#include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
 #include "wx/colordlg.h"   // for wxColourDialog
@@ -479,15 +480,23 @@ void OpenGlPlotSetupPanel::ShowSpacecraftOption(const wxString &name, bool show)
    if (!name.IsSameAs(""))
    {
       mSelScName = std::string(name.c_str());
+
+      // if spacecraft name not found, insert
+      if (mOrbitColorMap.find(mSelScName) == mOrbitColorMap.end())
+      {
+         mOrbitColorMap[mSelScName] = RgbColor(GmatColor::RED32);
+         mTargetColorMap[mSelScName] = RgbColor(GmatColor::ORANGE32);
+      }
+      
       RgbColor orbColor = mOrbitColorMap[mSelScName];
       RgbColor targColor = mTargetColorMap[mSelScName];
-
+      
 #if DEBUG_OPENGL_PANEL
       MessageInterface::ShowMessage("ShowSpacecraftOption() mSelScName=%s\n",
                                     mSelScName.c_str());
       MessageInterface::ShowMessage
-         ("ShowSpacecraftOption() orbColor=%d targColor=%d\n",
-          orbColor.GetIntColor(),targColor.GetIntColor());
+         ("ShowSpacecraftOption() orbColor=%08x targColor=%08x\n",
+          orbColor.GetIntColor(), targColor.GetIntColor());
 #endif
       
       mScOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());

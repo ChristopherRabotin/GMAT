@@ -314,6 +314,29 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
    }
 }
 
+//------------------------------------------------------------------------------
+// void UpdateSpacecraft(const Real &time, const RealArray &posX,
+//                       const RealArray &posY, const RealArray &posZ,
+//                       bool updateCanvas, bool drawWireFrame = false)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX,
+                                         const RealArray &posY, const RealArray &posZ,
+                                         const UnsignedIntArray &orbitColor,
+                                         const UnsignedIntArray &targetColor,
+                                         bool updateCanvas, bool drawWireFrame)
+{
+   //loj: 5/6/04 added drawWireFrame
+   if (mCanvas)
+   {
+      mCanvas->SetFocus();
+      mCanvas->ShowWireFrame(drawWireFrame);
+      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
+                                targetColor);
+      if (updateCanvas)
+         Update();
+   }
+}
+
 //loj: 6/22/04 added
 //------------------------------------------------------------------------------
 // void RefreshPlot()

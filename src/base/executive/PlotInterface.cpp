@@ -105,7 +105,6 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
 #endif
    }
     
-   //loj: 6/21/04 added for multiple OpenGl frame
    //-------------------------------------------------------
    // check if new MDI child frame is needed
    //-------------------------------------------------------
@@ -221,10 +220,12 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 #endif
 }
 
-//loj: 6/2104 added plotName
 //------------------------------------------------------------------------------
 //  bool UpdateGlSpacecraft(const std::string &plotName, const Real &time,
-//                          const Real &posX, const Real &posY, const Real &posZ,
+//                          const RealArray &posX, const RealArray &posY,
+//                          const RealArray &posZ,
+//                          const UnsignedIntArray &orbitColor,
+//                          const UnsignedIntArray &targetColor,
 //                          bool updateCanvas, bool drawWireFrame)
 //------------------------------------------------------------------------------
 /*
@@ -232,10 +233,10 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
-                                       const Real &time, const Real &posX,
-                                       const Real &posY, const Real &posZ,
-                                       const UnsignedInt orbitColor,
-                                       const UnsignedInt targetColor,
+                                       const Real &time, const RealArray &posX,
+                                       const RealArray &posY, const RealArray &posZ,
+                                       const UnsignedIntArray &orbitColor,
+                                       const UnsignedIntArray &targetColor,
                                        bool updateCanvas, bool drawWireFrame)
 {   
 #if defined __CONSOLE_APP__
@@ -314,7 +315,6 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
 #endif
    }
 
-   //loj: 3/11/04 added for multiple xyplot frame
    //-------------------------------------------------------
    // check if new MDI child frame needed
    //-------------------------------------------------------
@@ -359,9 +359,9 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
 
       MdiXyPlot::mdiParentXyFrame->mainSubframe->RedrawCurve();
    }
-    
+   
    MdiXyPlot::mdiParentXyFrame->Show(true);
-   MdiXyPlot::mdiParentXyFrame->Raise(); //loj: 6/8/04 added
+   MdiXyPlot::mdiParentXyFrame->Raise();
     
    return true;
 #endif

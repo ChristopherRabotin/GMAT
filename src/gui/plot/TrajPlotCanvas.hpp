@@ -18,6 +18,7 @@
 #include "gmatwxdefs.hpp"
 #include "MdiGlPlotData.hpp"
 #include "TextTrajectoryFile.hpp"
+#include "gmatdefs.hpp"
 
 const int MAX_DATA = 20000;
 const int MAX_EARTH_ZOOM_IN = 12756;
@@ -56,6 +57,10 @@ public:
                          const Real &posY, const Real &posZ,
                          const UnsignedInt orbitColor,
                          const UnsignedInt targetColor);
+   void UpdateSpacecraft(const Real &time, const RealArray &posX,
+                         const RealArray &posY, const RealArray &posZ,
+                         const UnsignedIntArray &orbitColor,
+                         const UnsignedIntArray &targetColor);
     
 private:
    
@@ -160,7 +165,7 @@ private:
    void DrawPicture();
    void DrawEarth();
    void DrawEarthTrajectory();
-   void DrawSpacecraft();
+   void DrawSpacecraft(UnsignedInt scColor);
    void DrawSpacecraftTrajectory();
    void DrawEquatorialPlane();
 

@@ -17,7 +17,6 @@
 #include "MessageInterface.hpp"
 
 #include <math.h>
-#include "gmatdefs.hpp"
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -255,15 +254,17 @@ void TrajPlotCanvas::ShowDefaultView()
 void TrajPlotCanvas::ZoomIn()
 {
    double realDist = (mAxisLength - mZoomAmount) / log(mAxisLength);
-   mAxisLength = mAxisLength - realDist;
 
-   //mAxisLength = mAxisLength - mZoomAmount;
-    
-   if (mAxisLength < mMaxZoomIn)
-      mAxisLength = mMaxZoomIn;
-
-   ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
-
+   if (mAxisLength > mMaxZoomIn)
+   {
+      mAxisLength = mAxisLength - realDist;
+   
+      if (mAxisLength < mMaxZoomIn)
+         mAxisLength = mMaxZoomIn;
+   
+      ChangeProjection(mCanvasSize.x, mCanvasSize.y, mAxisLength);
+   }
+   
    Refresh(false);
 }
 
@@ -408,8 +409,8 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
       (m_fRightPos - m_fLeftPos);
    GLfloat fEndY = m_fBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
       (m_fTopPos - m_fBottomPos);
-    
-   //for rotating
+   
+   //if mouse dragging
    if (event.Dragging())
    {
   
@@ -446,29 +447,36 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          double y2 = pow(mouseY - mLastMouseY, 2);
          double length = sqrt(x2 + y2);
          mZoomAmount = length * 100;
-
-         // if mouse moves toward the upper left, then zoom in
-         if (mouseX < mLastMouseX || mouseY < mLastMouseY)
+         
+         // if mouse moves toward left, then zoom in
+         if (mouseX < mLastMouseX)
             ZoomIn();
          else
             ZoomOut();
+         
+         //loj: 7/12/04 commented out
+         //// if mouse moves toward the upper left, then zoom in
+         //if (mouseX < mLastMouseX || mouseY < mLastMouseY)
+         //   ZoomIn();
+         //else
+         //   ZoomOut();
             
       }
-                
    } // end if (event.Dragging())
-        
+   
    // save last position
    mLastMouseX = mouseX;
    mLastMouseY = mouseY;
-    
-   m_fStartX = m_fLeftPos + ((GLfloat)mouseX / (GLfloat)clientWidth) *
-      (m_fRightPos - m_fLeftPos);
-   m_fStartY = m_fBottomPos + ((GLfloat)flippedY / (GLfloat)clientHeight) *
-      (m_fTopPos - m_fBottomPos);
-    
+   
+   //loj: 7/12/04 commented out
+   //m_fStartX = m_fLeftPos + ((GLfloat)mouseX / (GLfloat)clientWidth) *
+   //   (m_fRightPos - m_fLeftPos);
+   //m_fStartY = m_fBottomPos + ((GLfloat)flippedY / (GLfloat)clientHeight) *
+   //   (m_fTopPos - m_fBottomPos);
+   
    m_fStartX = fEndX;
    m_fStartY = fEndY;
-    
+   
    wxLogStatus(MdiGlPlot::mdiParentGlFrame,
                wxT("X = %d Y = %d"), event.GetX(), event.GetY());
    //loj: 6/14/04 do not show debug info
@@ -857,61 +865,69 @@ void TrajPlotCanvas::DrawEarthTrajectory()
 
 
 //------------------------------------------------------------------------------
-//  void DrawSpacecraft()
+//  void DrawSpacecraft(UnsignedInt scColor)
 //------------------------------------------------------------------------------
 /**
  * Draws spacecraft.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawSpacecraft()
+void TrajPlotCanvas::DrawSpacecraft(UnsignedInt scColor)
 {
-   if( mGlList == 0 )
+   //loj: 7/2/04 commented out so that each spacecraft can have different color
+   //if (mGlList == 0)
+   //{
+   //mGlList = glGenLists( 1 );
+   //glNewList( mGlList, GL_COMPILE_AND_EXECUTE );
+        
+   // draw six faces of a long cube
+   glBegin(GL_QUADS);
+   //loj: 7/2/04 *sIntColor = YELLOW32;
+   *sIntColor = scColor;
+   glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+        
+   glNormal3f( 0.0F, 0.0F, 1.0F);
+   glVertex3f( mScRadius, mScRadius, mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+   glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+
+   glNormal3f( 0.0F, 0.0F,-1.0F);
+   glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+   glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+
+   glNormal3f( 0.0F, 1.0F, 0.0F);
+   glVertex3f( mScRadius, mScRadius, mScRadius*2);
+   glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+
+   glNormal3f( 0.0F,-1.0F, 0.0F);
+   glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+   glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+
+   glNormal3f( 1.0F, 0.0F, 0.0F);
+   glVertex3f( mScRadius, mScRadius, mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+   glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+   glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+
+   glNormal3f(-1.0F, 0.0F, 0.0F);
+   glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+   glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+   glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+   glEnd();
+
+   // spacecraft with same color, use Display List
+   if (mGlList == 0)
    {
       mGlList = glGenLists( 1 );
       glNewList( mGlList, GL_COMPILE_AND_EXECUTE );
-        
-      // draw six faces of a long cube
-      glBegin(GL_QUADS);
-      *sIntColor = YELLOW32;
-      glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-        
-      glNormal3f( 0.0F, 0.0F, 1.0F);
-      glVertex3f( mScRadius, mScRadius, mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius, mScRadius*2);
-      glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius, mScRadius*2);
-
-      glNormal3f( 0.0F, 0.0F,-1.0F);
-      glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
-      glVertex3f( mScRadius, mScRadius,-mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
-
-      glNormal3f( 0.0F, 1.0F, 0.0F);
-      glVertex3f( mScRadius, mScRadius, mScRadius*2);
-      glVertex3f( mScRadius, mScRadius,-mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius, mScRadius*2);
-
-      glNormal3f( 0.0F,-1.0F, 0.0F);
-      glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius, mScRadius*2);
-      glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
-
-      glNormal3f( 1.0F, 0.0F, 0.0F);
-      glVertex3f( mScRadius, mScRadius, mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius, mScRadius*2);
-      glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
-      glVertex3f( mScRadius, mScRadius,-mScRadius*2);
-
-      glNormal3f(-1.0F, 0.0F, 0.0F);
-      glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
-      glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius, mScRadius*2);
-      glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
-      glEnd();
-        
+      
       // draw six faces of a thin wide cube
       glBegin(GL_QUADS);
       *sIntColor = YELLOW32;
@@ -1006,19 +1022,31 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
 
       if (mNumData > 0) //loj: 6/22/04 changed 1 to 0
       {
-         glPushMatrix();
-         glLoadIdentity();
+         //loj: 7/2/04 moved inside of the loop for multiple spacecraft
+         //glPushMatrix();
+         //glLoadIdentity();
 
          for (int sc=0; sc<mScCount; sc++)
          {
+            glPushMatrix();
+            glLoadIdentity();
+            
             // put spacecraft at final position
             glTranslatef(mTempScPos[sc][mNumData-1][0],
                          mTempScPos[sc][mNumData-1][1],
                          mTempScPos[sc][mNumData-1][2]);
+
+            //MessageInterface::ShowMessage
+            //   ("TrajPlotCanvas::DrawSpacecraftTrajectory() scColor=%d\n",
+            //    mScTrajColor[sc][mNumData-1]);
+            
+            DrawSpacecraft(mScTrajColor[sc][mNumData-1]);
+            glPopMatrix();
          }
-         
-         DrawSpacecraft();
-         glPopMatrix();
+
+         //loj: 7/2/04 moved inside of the loop for multiple spacecraft
+         //DrawSpacecraft();
+         //glPopMatrix();
       }
    }
 } // end DrawSpacecraftTrajectory()
@@ -1138,7 +1166,8 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       }
 
       mTextTrajFile->Close();
-      wxLogStatus(MdiGlPlot::mdiParentGlFrame, wxT("Number of data points: %d"), numDataPoints);
+      wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+                  wxT("Number of data points: %d"), numDataPoints);
    }
    else
    {
@@ -1154,13 +1183,15 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
    // initialize GL
    if (!InitGL())
    {
-      wxMessageDialog msgDialog(this, _T("InitGL() failed"), _T("ReadTextTrajectory File"));
+      wxMessageDialog msgDialog(this, _T("InitGL() failed"),
+                                _T("ReadTextTrajectory File"));
       msgDialog.ShowModal();
       return false;
    }
    //      else
    //      {
-   //          wxMessageDialog msgDialog(this, _T("InitGL() successful"), _T("ReadTextTrajectory File"));
+   //          wxMessageDialog msgDialog(this, _T("InitGL() successful"),
+   //                                   _T("ReadTextTrajectory File"));
    //          msgDialog.ShowModal();
    //      }
 
@@ -1192,7 +1223,6 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
    int sc = 0;
    if (mNumData < MAX_DATA)
    {
-      //mScTrajColor[sc][mNumData] = RED32;
       mScTrajColor[sc][mNumData] = orbitColor;
       mTime[mNumData] = time;
       mTempScPos[sc][mNumData][0] = posX;
@@ -1201,6 +1231,52 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
       mTempEarthPos[mNumData][0] = 0.0;
       mTempEarthPos[mNumData][1] = 0.0;
       mTempEarthPos[mNumData][2] = 0.0;
+      mNumData++;
+   }
+   
+   Refresh(false);
+}
+
+//------------------------------------------------------------------------------
+// void UpdateSpacecraft(const Real &time, const RealArray &posX,
+//                       const RealArray &posY, const RealArray &posZ,
+//                       const UnsignedIntArray &orbitColor,
+//                       const UnsignedIntArray &targetColor)
+//------------------------------------------------------------------------------
+/**
+ * Updates spacecraft trajectory.
+ *
+ * @param <time> time
+ * @param <posX> position x array
+ * @param <posY> position y array
+ * @param <posZ> position z array
+ * @param <orbitColor> orbit color array
+ * @param <targetColor> target color array
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
+                                      const RealArray &posY, const RealArray &posZ,
+                                      const UnsignedIntArray &orbitColor,
+                                      const UnsignedIntArray &targetColor)
+{
+   mScCount = posX.size();
+   if (mScCount > MAX_SCS)
+      mScCount = MAX_SCS;
+   
+   if (mNumData < MAX_DATA)
+   {
+      for (int i=0; i<mScCount; i++)
+      {
+         mTime[mNumData] = time;
+         mTempScPos[i][mNumData][0] = posX[i];
+         mTempScPos[i][mNumData][1] = posY[i];
+         mTempScPos[i][mNumData][2] = posZ[i];
+         mScTrajColor[i][mNumData]  = orbitColor[i];
+         mTempEarthPos[mNumData][0] = 0.0;
+         mTempEarthPos[mNumData][1] = 0.0;
+         mTempEarthPos[mNumData][2] = 0.0;
+      }
+      
       mNumData++;
    }
    

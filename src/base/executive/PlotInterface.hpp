@@ -29,12 +29,14 @@ public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName);
    static bool DeleteGlPlot();
-   static bool RefreshGlPlot(const std::string &plotName); //loj: 6/22/04 added
+   static bool RefreshGlPlot(const std::string &plotName);
+   
+   //loj: 7/13/04 handles multiple spacecraft postion and color
    static bool UpdateGlSpacecraft(const std::string &plotName,
-                                  const Real &time, const Real &posX,
-                                  const Real &posY, const Real &posZ,
-                                  const UnsignedInt orbitColor,
-                                  const UnsignedInt targetColor,
+                                  const Real &time, const RealArray &posX,
+                                  const RealArray &posY, const RealArray &posZ,
+                                  const UnsignedIntArray &orbitColor,
+                                  const UnsignedIntArray &targetColor,
                                   bool updateCanvas, bool drawWireFrame);
 
    // for XY plot

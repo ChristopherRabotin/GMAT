@@ -16,6 +16,7 @@
 #define MdiChildTrajFrame_hpp
 
 #include "TrajPlotCanvas.hpp"
+#include "gmatdefs.hpp"
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -61,6 +62,11 @@ public:
                          const Real &posY, const Real &posZ,
                          const UnsignedInt orbitColor,
                          const UnsignedInt targetColor,
+                         bool updateCanvas, bool drawWireFrame = false);
+   void UpdateSpacecraft(const Real &time, const RealArray &posX,
+                         const RealArray &posY, const RealArray &posZ,
+                         const UnsignedIntArray &orbitColor,
+                         const UnsignedIntArray &targetColor,
                          bool updateCanvas, bool drawWireFrame = false);
    void RefreshPlot(); //loj: 6/22/04 added
    void DeletePlot();

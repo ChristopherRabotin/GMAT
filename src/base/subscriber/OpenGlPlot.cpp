@@ -21,10 +21,12 @@
 #include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
 #include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "MessageInterface.hpp"  // for ShowMessage()
+#include "GmatBaseException.hpp"
 
-#define DEBUG_OPENGL_INIT   0
-#define DEBUG_OPENGL_PARAM  0
+#define DEBUG_OPENGL_INIT 0
+#define DEBUG_OPENGL_PARAM 0
 #define DEBUG_OPENGL_UPDATE 0
+#define TEST_MULTI_SC 0
 
 //---------------------------------
 // static data
@@ -75,7 +77,12 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    mUpdatePlotFrequency = 10;
    mNumData = 0;
    mNumCollected = 0;
-   mScList.clear();
+   mScNameArray.clear();
+   mScXArray.clear();
+   mScYArray.clear();
+   mScZArray.clear();
+   mOrbitColorArray.clear();
+   mTargetColorArray.clear();
    mScCount = 0;
 }
 
@@ -91,7 +98,12 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
    mScCount = ogl.mScCount;
-   mScList = ogl.mScList;
+   mScNameArray = ogl.mScNameArray;
+   mScXArray = ogl.mScXArray;
+   mScYArray = ogl.mScYArray;
+   mScZArray = ogl.mScZArray;
+   mOrbitColorArray = ogl.mOrbitColorArray;
+   mTargetColorArray = ogl.mTargetColorArray;
    mOrbitColorMap = ogl.mOrbitColorMap;
    mTargetColorMap = ogl.mTargetColorMap;
    mNumData = 0;
@@ -416,7 +428,7 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
    switch (id)
    {
    case SPACECRAFT_LIST:
-      return mScList;
+      return mScNameArray;
    default:
       return Subscriber::GetStringArrayParameter(id);
    }
@@ -443,8 +455,13 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
     
    if (name != "")
    {
-      mScList.push_back(name);
-      mScCount = mScList.size();
+      mScNameArray.push_back(name);
+      mScXArray.push_back(0.0);
+      mScYArray.push_back(0.0);
+      mScZArray.push_back(0.0);
+      mOrbitColorArray.push_back(0);
+      mTargetColorArray.push_back(0);
+      mScCount = mScNameArray.size();
 
       mOrbitColorMap[name] = GmatColor::RED32;
       mTargetColorMap[name] = GmatColor::ORANGE32;
@@ -465,7 +482,10 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 void OpenGlPlot::ClearSpacecraftList()
 {
-   mScList.clear();
+   mScNameArray.clear();
+   mScXArray.clear();
+   mScYArray.clear();
+   mScZArray.clear();
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mScCount = 0;
@@ -515,14 +535,52 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                ("OpenGlPlot::Distribute() time=%f pos=%f %f %f update=%d\n",
                 dat[0], dat[1], dat[2], dat[3], update);
 #endif
-            
-            return PlotInterface::
-               UpdateGlSpacecraft(instanceName,
-                                  dat[0], dat[1], dat[2], dat[3],
-                                  mOrbitColorMap[mScList[0]],
-                                  mTargetColorMap[mScList[0]],
-                                  update, mDrawWireFrame);
 
+#if TEST_MULTI_SC
+            //--------------------------------------------------------
+            // multiple spacecraft
+            //--------------------------------------------------------
+            for (int i=0; i<mScCount; i++)
+            {
+               // increment data by 500 just for testing
+               mScXArray[i] = dat[1] + i*500;
+               mScYArray[i] = dat[2] + i*500;
+               mScZArray[i] = dat[3] + i*500;
+               mOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
+               mTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
+               
+#if DEBUG_OPENGL_UPDATE
+               MessageInterface::ShowMessage
+                  ("OpenGlPlot::Distribute() scNo=%d x=%f y=%f z=%f\n",
+                   i, mScXArray[i], mScYArray[i], mScZArray[i]);
+#endif
+            }
+            
+            PlotInterface::
+               UpdateGlSpacecraft(instanceName,
+                                  dat[0], mScXArray, mScYArray, mScZArray,
+                                  mOrbitColorArray, mTargetColorArray,
+                                  update, mDrawWireFrame);
+#else
+            //--------------------------------------------------------
+            // single spacecraft
+            //--------------------------------------------------------
+
+            mScXArray[0] = dat[1];
+            mScYArray[0] = dat[2];
+            mScZArray[0] = dat[3];
+            mOrbitColorArray[0] = mOrbitColorMap[mScNameArray[0]];
+            mTargetColorArray[0] = mTargetColorMap[mScNameArray[0]];
+
+            //loj: 7/13/04 used new method taking arrays
+            PlotInterface::
+               UpdateGlSpacecraft(instanceName,
+                                  dat[0], mScXArray, mScYArray, mScZArray,
+                                  mOrbitColorArray, mTargetColorArray,
+                                  update, mDrawWireFrame);
+                        
+#endif
+            
             if (update)
                mNumCollected = 0;
          }
