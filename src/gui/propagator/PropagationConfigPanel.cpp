@@ -31,8 +31,8 @@
 #include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainNotebook.hpp"
+#include "CelesBodySelectDialog.hpp"
 #include "PropagationConfigPanel.hpp"
-//#include "PointMassSelectionDialog.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -47,12 +47,9 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-//loj: why? #include <ctype.h>
-
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(PropagationConfigPanel, wxPanel)
     EVT_BUTTON(ID_BUTTON_SCRIPT, PropagationConfigPanel::OnScriptButton)
     EVT_BUTTON(ID_BUTTON_OK, PropagationConfigPanel::OnOKButton)
@@ -105,20 +102,18 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
 
 void PropagationConfigPanel::Initialize()
 {  
-    //MessageInterface::ShowMessage("PropagationConfigPanel():Initialize() entered\n");
-
-    //loj: 2/12/04 moved here to debug crashing when cereating this panel for the second time
-    // waw: TBD
-    primaryBodyString = SolarSystem::EARTH_NAME.c_str();
-    
     // Default values
     numOfIntegrators = 3;
-    numOfBodies = bodiesInUse.size(); 
     numOfAtmosTypes = 3;
     numOfForces = 1;  // TBD thePropSetup->GetNumForces();
-    numOfGraFields = 3;
+    numOfGraFields = 4;
     numOfMagFields = 1;  // TBD - Not for Build 2
+    
+    //MessageInterface::ShowMessage("PropagationConfigPanel():Initialize() entered\n");
 
+    // waw: TBD - future implementation gets the pri.body from the solar system
+    primaryBodyString = SolarSystem::EARTH_NAME.c_str();
+    
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
 
     if (theGuiInterpreter != NULL)
@@ -139,12 +134,17 @@ void PropagationConfigPanel::Initialize()
 
         if (theSolarSystem != NULL)
         {
-            theCelestialBody = theSolarSystem->GetBody(SolarSystem::EARTH_NAME);
-            bodiesInUse = theSolarSystem->GetBodiesInUse();
-            numOfBodies = bodiesInUse.size(); 
-    
-            orderID = theCelestialBody->GetParameterID("Order");
-            degreeID = theCelestialBody->GetParameterID("Degree");
+            theEarth = theSolarSystem->GetBody(SolarSystem::EARTH_NAME);  
+            theSun = theSolarSystem->GetBody(SolarSystem::SUN_NAME);    
+            theMoon = theSolarSystem->GetBody(SolarSystem::MOON_NAME);
+             
+            StringArray bodies = theSolarSystem->GetBodiesInUse();
+            
+            numOfBodies = bodies.size();
+            for (int i = 0; i < numOfBodies; i++)
+            {
+                allBodiesArray.Add(bodies[i].c_str());
+            }
         }
         else
         {
@@ -245,13 +245,14 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     };
     
     wxString strArray2[numOfBodies];
-    if ( !bodiesInUse.empty() )
+    if ( !allBodiesArray.IsEmpty() )
         for (int i = 0; i < numOfBodies; i++)
-            strArray2[i] = bodiesInUse[i].c_str();
+            strArray2[i] = allBodiesArray[i].c_str();
     
     wxString strArray3[] = 
     {
         wxT("None"),
+        wxT("Point Mass"),
         wxT("JGM-2"),
         wxT("JGM-3")
     };
@@ -411,6 +412,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     magneticOrderTextCtrl->Enable(false);
     searchMagneticButton->Enable(false);
     atmosComboBox->Enable(false);
+    searchGravityButton->Enable(false);
     setupButton->Enable(false);
     editMassButton->Enable(false);
     editPressureButton->Enable(false);
@@ -431,6 +433,7 @@ void PropagationConfigPanel::GetData()
 void PropagationConfigPanel::SetData()
 {
     MessageInterface::ShowMessage("PropagationConfigPanel():SetData() entered\n");
+    
     integratorString = integratorComboBox->GetStringSelection();
         
     if (integratorString.Cmp("RKV 8(9)") == 0)
@@ -442,25 +445,88 @@ void PropagationConfigPanel::SetData()
         theRK89->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
     }
     
-    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saved Integrator\n");
-    
+    // Saving the primary body data
     if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
     {   
-        theCelestialBody->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
-        theCelestialBody->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
-    
-        //theCelestialBody->SetCentralBody(??);  Ask Wendy
+        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Earth primary body\n");
+        
+        theEarth->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
+        theEarth->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+        
+        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "EarthGravity");
+        theForceModel->AddForce(thePhysicalModel);
+    }
+    else if ( primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0 )
+    {   
+        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Sun primary body\n");
+        
+        theSun->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
+        theSun->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+        
+        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "SunGravity");
+        theForceModel->AddForce(thePhysicalModel);
+    }
+    else if ( primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0 )
+    {   
+        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Moon primary body\n");
+        
+        theMoon->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
+        theMoon->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+        
+        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "MoonGravity");
+        theForceModel->AddForce(thePhysicalModel);
     }
     
-    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saved primary body\n");
+    // Saving the secondary body data
+    /*
+    StringArray::iterator i;
+    if ( !secondaryBodiesStrArray.empty() )
+    {
+        Integer j = 0;
+        
+        for (i = secondaryBodiesStrArray.begin(); i != secondaryBodiesStrArray.end(); i++)
+        {
+            // If it's not a primary body but a secondary body
+            if ( !primaryBodyString.IsSameAs(secondaryBodiesStrArray[j].c_str(), false)) 
+            {
+                wxString body = secondaryBodiesStrArray[j].c_str();
+            
+                if ( body.IsSameAs(SolarSystem::EARTH_NAME.c_str(), false) )
+                {
+                    thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "EarthGravity");
+                    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Earth secondary body\n");
+                    theForceModel->AddForce(thePhysicalModel);
+                }
+                else if ( body.IsSameAs(SolarSystem::MOON_NAME.c_str(), false) )
+                {
+                    thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "MoonGravity");
+                    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Moon secondary body\n");
+                    theForceModel->AddForce(thePhysicalModel);
+                }
+                else if ( body.IsSameAs(SolarSystem::SUN_NAME.c_str(), false) )
+                {
+                    thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "SunGravity");
+                    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Sun secondary body\n");
+                    theForceModel->AddForce(thePhysicalModel);
+                }
+            }
+            j++;
+        }
+    }
+    */
+    if (theForceModel != NULL)
+    {
+        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving force model\n");
+        thePropSetup->SetForceModel(theForceModel);
+    }
     
-    thePropSetup->SetPropagator(theRK89);
+    if (theRK89 != NULL)
+    {
+        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving propagator\n");
+        thePropSetup->SetPropagator(theRK89);
+    }
     
-    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saved to the PropSetup\n");
-    
-    /*  waw: Future implementation
-    thePropSetup->SetForceModel(theForceModel);
-    
+    /*  waw: Future implementation   
     else if (integratorString.Cmp("RKN 6(8)") == 0)
     {
         // = setting1TextCtrl->GetValue();
@@ -517,9 +583,6 @@ void PropagationConfigPanel::SetData()
     }
     
     // = useSRP;
-    
-    //thePropSetup->SetPropagator(thePropagator);
-    //thePropSetup->SetForceModel(theForceModel);
     */
 }
 
@@ -555,6 +618,8 @@ void PropagationConfigPanel::DisplayIntegratorData()
     }
     else if (integratorString.Cmp("RKN 6(8)") == 0)
     {
+        //theRK68 = (RungeKutta89 *)thePropagator;
+        
         setting1StaticText->SetLabel("Step Size: ");
         setting2StaticText->SetLabel("Max Int Error: ");
         setting3StaticText->SetLabel("Min Step Size: ");
@@ -614,6 +679,7 @@ void PropagationConfigPanel::DisplayIntegratorData()
 //loj: 02/11/04 added
 void PropagationConfigPanel::DisplayForceData()
 {
+    /*
     if (thePropSetup != NULL)
     {
         theForceModel = thePropSetup->GetForceModel();
@@ -630,7 +696,7 @@ void PropagationConfigPanel::DisplayForceData()
 
                 if (forceName == "PointMassForce")
                 {
-                    //loj: for B2, can se assume the Earth is the only body for PointMass?
+                    //loj: for B2, can we assume the Earth is the only body for PointMass?
                     thePointMassBodies.Clear();
                     thePointMassBodies.Add("Earth");
                     DisplayPointMassData();
@@ -638,49 +704,76 @@ void PropagationConfigPanel::DisplayForceData()
             }
         }
     }
+    */
     
     DisplayPrimaryBodyData();
     DisplayGravityFieldData();
     DisplayAtmosphereModelData();
     DisplayMagneticFieldData();
+    DisplayPointMassData();
     DisplaySRPData();
 }
 
 void PropagationConfigPanel::DisplayPrimaryBodyData()
 {
+    bodyComboBox->SetValue(primaryBodyString);
+    
+    /*
     int earthIndex;
     
     //loj: for B2, the Earth is the primary body
     for (int i=0; i<numOfBodies; i++)
     {
-        if (bodiesInUse[i] == SolarSystem::EARTH_NAME)
+        wxString str = allBodiesArray.Item(i);
+        if ( str.CmpNoCase(SolarSystem::EARTH_NAME.c_str()) )
         {
             earthIndex = i;
             break;
         }
     }
     
-    bodyComboBox->SetSelection(earthIndex);
+    bodyComboBox->SetSelection(earthIndex);*/
 }
 
 void PropagationConfigPanel::DisplayGravityFieldData()
-{
+{            
     primaryBodyString = bodyComboBox->GetStringSelection();
     
     if (primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0)
     {
-        gravityDegreeTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(degreeID)));
-        gravityOrderTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(orderID)));
+        orderID = theEarth->GetParameterID("Order");
+        degreeID = theEarth->GetParameterID("Degree");
+            
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
     }
     else if (primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0)
     {
-        gravityDegreeTextCtrl->SetValue(wxVariant());
-        gravityOrderTextCtrl->SetValue(wxVariant());
+        orderID = theSun->GetParameterID("Order");
+        degreeID = theSun->GetParameterID("Degree");
+        
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
     }
     else if (primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0)
     {
-        gravityDegreeTextCtrl->SetValue(wxVariant());
-        gravityOrderTextCtrl->SetValue(wxVariant());
+        orderID = theMoon->GetParameterID("Order");
+        degreeID = theMoon->GetParameterID("Degree");
+        
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
+    }
+    
+    // For Point Mass Edit
+    wxString gravityTypeString = gravityTypeComboBox->GetStringSelection();
+    
+    if (gravityTypeString.Cmp("Point Mass") == 0)
+    {
+        editMassButton->Enable(true);
+    }
+    else
+    {
+        editMassButton->Enable(false);
     }
 }
 
@@ -702,7 +795,7 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
             atmosComboBox->Append("Exponential");
 
         if (z == -1)
-                atmosComboBox->Append("MISISE-90");    
+            atmosComboBox->Append("MISISE-90");    
         
         atmosComboBox->SetSelection(0); // TBD
         //setupButton->Enable(true);  waw: uncomment out after build 2
@@ -723,11 +816,7 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 }
 
 void PropagationConfigPanel::DisplayPointMassData()
-{
-    for (unsigned int i=0; i<thePointMassBodies.GetCount(); i++)
-    {
-        pmEditTextCtrl->AppendText(thePointMassBodies.Item(i));
-    }
+{   
 }
 
 void PropagationConfigPanel::DisplaySRPData()
@@ -755,6 +844,17 @@ void PropagationConfigPanel::OnBodySelection()
 
 void PropagationConfigPanel::OnGravitySelection()
 {
+    wxString gravityTypeString = gravityTypeComboBox->GetStringSelection();
+    
+    if (gravityTypeString.Cmp("Point Mass") == 0)
+    {
+        editMassButton->Enable(true);
+    }
+    else
+    {
+        editMassButton->Enable(false);
+    }
+    
     applyButton->Enable(true);
 }
 
@@ -913,27 +1013,53 @@ void OnHelpButton()
 
 void PropagationConfigPanel::OnAddButton()
 {
+    /*wxArrayString emptyString = new wxArrayString();
+    
+    CelesBodySelectDialog bodyDlg(this, emptyString);
+    bodyDlg.ShowModal();
+    
+    if (bodyDlg.IsBodySelected())
+    {        
+        wxArrayString &names = bodyDlg.GetBodyNames();
+        
+        int index = primaryBodiesArray.GetCount();
+        
+        for (int i = 0; i < names.GetCount(); i++)
+        {
+           primaryBodiesArray.Insert(names.Item(i), index);
+           index++;
+        }
+        bodyTextCtrl->Clear();
+        bodyComboBox->Clear();
+        bodyComboBox->Append(primaryBodyString);
+        bodyComboBox->SetSelection(0);
+        
+        applyButton->Enable(true);
+    }*/
+    
+    /*
     wxString body = bodyComboBox->GetStringSelection();
     
     StringArray::iterator i;
     
-    if ( !currentSelectedBodies.empty() )
+    if ( !pointmassBodiesArray.empty() )
     {
         Integer j = 0;
         
-        for (i = currentSelectedBodies.begin(); i != currentSelectedBodies.end(); i++)
+        for (i = pointmassBodiesArray.begin(); i != pointmassBodiesArray.end(); i++)
         {
-            if ( body.IsSameAs(currentSelectedBodies[j].c_str(), false) )
+            if ( body.IsSameAs(pointmassBodiesArray[j].c_str(), false) )
                 return;
                 
             j++;
         }
     }
     
-    currentSelectedBodies.push_back(body.c_str());
+    secondaryBodiesStrArray.push_back(body.c_str());
     bodyTextCtrl->AppendText(body + " ");
     
     applyButton->Enable(true);
+    */
 }
 
 void PropagationConfigPanel::OnGravSearchButton()
@@ -975,9 +1101,51 @@ void PropagationConfigPanel::OnMagSearchButton()
 
 void PropagationConfigPanel::OnPMEditButton()
 {
-    //pmSelectionDialog = 
-    //    new PointMassSelectionDialog(this, ... use StringArray... );
-    //pmSelectionDialog->Show(true);
+    CelesBodySelectDialog bodyDlg(this, primaryBodiesArray);
+    bodyDlg.ShowModal();
+    
+    if (bodyDlg.IsBodySelected())
+    {        
+        wxArrayString &names = bodyDlg.GetBodyNames();
+        
+        int index = primaryBodiesArray.GetCount();
+        
+        for (int i = 0; i < names.GetCount(); i++)
+        {
+           pointmassBodiesArray.Insert(names.Item(i), index);
+           index++;
+        }
+        pmEditTextCtrl->Clear();
+        
+        
+        if (!pointmassBodiesArray.IsEmpty())
+        {
+            // Take out the primary bodies from the point mass bodies, if any exist
+            if (!pointmassBodiesArray.IsEmpty())
+            {
+                for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
+                {
+                    wxString pbStr = primaryBodiesArray.Item(i);
+                    for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
+                    {
+                        wxString pmStr = pointmassBodiesArray.Item(j);
+                        if (pmStr.CmpNoCase(pbStr))
+                        {
+                            pointmassBodiesArray.Remove(pmStr);
+                        }
+                    }
+                } 
+            }
+            
+            // Display point mass bodies
+            for (int i = 0; i < pointmassBodiesArray.GetCount(); i++)
+            {            
+                pmEditTextCtrl->AppendText(pointmassBodiesArray[i].c_str());
+                bodyTextCtrl->AppendText(" ");
+            }
+        }
+        applyButton->Enable(true);
+    }
 }   
 
 void PropagationConfigPanel::OnSRPEditButton()

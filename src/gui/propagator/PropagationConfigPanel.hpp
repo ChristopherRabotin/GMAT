@@ -33,7 +33,7 @@
 #include "TextDocument.hpp"
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
-//#include "PointMassSelectionDialog.hpp"
+#include "CelesBodySelectDialog.hpp"
 
 // base include
 #include "gmatdefs.hpp"
@@ -109,8 +109,6 @@ private:
     wxButton *helpButton;
     wxButton *scriptButton;
     
-    wxArrayString  thePointMassBodies;
-    
     wxString integratorString;
     wxString primaryBodyString;
     wxString propNameString;
@@ -130,10 +128,9 @@ private:
     
     bool useSRP;
     
-    StringArray bodiesInUse;
-    StringArray currentSelectedBodies;
-    
-    //PointMassSelectionDialog *pmSelectionDialog;
+    wxArrayString allBodiesArray;
+    wxArrayString primaryBodiesArray;
+    wxArrayString pointmassBodiesArray;
     
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
@@ -143,7 +140,9 @@ private:
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
     SolarSystem    *theSolarSystem;
-    CelestialBody  *theCelestialBody;    
+    CelestialBody  *theEarth;  
+    CelestialBody  *theSun;    
+    CelestialBody  *theMoon;    
    
     // Layout & data handling methods
     void Initialize();

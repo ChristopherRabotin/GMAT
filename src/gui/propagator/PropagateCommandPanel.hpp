@@ -42,6 +42,7 @@
 #include "Command.hpp"
 #include "Propagate.hpp"
 #include "StopCondition.hpp"
+#include "SingleValueStop.hpp"
 
 class PropagateCommandPanel : public wxPanel
 {
@@ -53,21 +54,22 @@ public:
     
 private:
     wxStaticText *synchStaticText;
-    //wxStaticText *valueStaticText;
     wxStaticText *varStaticText;
     wxStaticText *repeatStaticText;
     wxStaticText *tolStaticText;
-    wxStaticText *descStaticText;
+    wxStaticText *nameStaticText;
+    wxStaticText *condTypeStaticText;
         
     wxTextCtrl *valueTextCtrl;
     wxTextCtrl *repeatTextCtrl;
     wxTextCtrl *toleranceTextCtrl;
-    wxTextCtrl *descriptionTextCtrl;
+    wxTextCtrl *nameTextCtrl;
     wxTextCtrl *variableTextCtrl;
 
     wxButton *scriptButton;
-    wxButton *userDefButton;
-    wxButton *editButton;
+    wxButton *updateButton;
+    wxButton *deleteButton;
+    wxButton *viewButton;
     wxButton *okButton;
     wxButton *applyButton;
     wxButton *cancelButton;
@@ -75,6 +77,7 @@ private:
 
     wxComboBox *synchComboBox;
     wxComboBox *equalityComboBox;
+    wxComboBox *condTypeComboBox;
 
     wxGrid *propGrid;
     wxGrid *stopCondGrid;
@@ -91,6 +94,9 @@ private:
     Integer numOfSC;
     Integer propID;
     Integer scID;
+    Integer numOfStopCond;
+    Integer currentRowStopCond;
+    Integer currentRowProp;
     
     std::string propSetupName;
     wxString propNameString;
@@ -103,12 +109,16 @@ private:
     Propagate      *thePropagateCommand;
     GmatBase       *theStopCondBase;
     StopCondition  *theStopCond;
+    //std::vector<StopCondition *> theStopCondVector;
 
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
     void GetData();
     void SetData();
+    void DisplayPropagator();
+    void DisplayStopCondition();
+    void UpdateStopCondition();
     
     // Text control event method
     void OnTextUpdate(wxCommandEvent& event);
