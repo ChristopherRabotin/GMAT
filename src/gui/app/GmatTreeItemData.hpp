@@ -90,6 +90,7 @@ namespace GmatTree
         MISSION_ICON_ACHIEVE,
         MISSION_ICON_DELTA_V,
         MISSION_ICON_FUNCTION,
+        MISSION_ICON_NEST_RETURN,
 
         MISSION_NO_ICON,
     };
@@ -160,7 +161,8 @@ namespace GmatTree
         CALL_FUNCTION_COMMAND,
         ASSIGNMENT_COMMAND,
         FREE_FORM_SCRIPT_COMMAND, //arg: 1/12/05 added FREE_FORM_SCRIPT
-        
+        SCRIPT_COMMAND,
+
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,
         VIEW_SOLVER_GOALS, 
