@@ -712,6 +712,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) 
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
    #endif
+   
+   Integer satEnd;
 
    for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) {
       loc = 0;
@@ -723,19 +725,38 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       SetObject(component, Gmat::PROP_SETUP);
    
       loc = end + 1;
+      satEnd = loc;
       end = i->find(",", loc);
-      if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate string does not identify spacecraft\n");
-       
-      component = i->substr(loc, end-loc);
-      SetObject(component, Gmat::SPACECRAFT);
+      
+      // Find the location of the end of the list of SpaceObjects
+      satEnd = i->find("{", loc);
+      if (satEnd == (Integer)std::string::npos)
+         satEnd = i->find(")", loc);
+      if (satEnd == (Integer)std::string::npos)
+         throw CommandException("Propagate string teminating paren \")\" missing\n");
    
-      loc = end + 1;
-      end = i->find(",", loc);
-      if (end != (Integer)std::string::npos)
-         throw CommandException("Propagate does not yet support multiple spacecraft\n");
-   
-       //loj: 3/24/04 for b3 "," also valid for multiple spacecraft
+      #ifdef DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage("Building list of SpaceObjects:\n");
+      #endif
+      while (end < satEnd) {
+         while ((*i)[loc] == ' ')
+            ++loc;
+         if (end == (Integer)std::string::npos)
+            throw CommandException("Propagate string does not identify spacecraft\n");
+          
+         component = i->substr(loc, end-loc);
+         SetObject(component, Gmat::SPACECRAFT);
+         #ifdef DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage("   \"%s\"\n", 
+                                          component.c_str());
+         #endif
+      
+         loc = end + 1;
+         end = i->find(",", loc);
+         if (end == (Integer)std::string::npos)
+            end = satEnd;
+      }
+
       end = i->find("{", loc);
       if (end == (Integer)std::string::npos)
          throw CommandException("Propagate does not identify stopping condition: looking for {\n");

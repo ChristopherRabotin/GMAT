@@ -22,7 +22,10 @@ OBJECTS = Parameter.o \
           SphericalParameters.o \
           TimeData.o \
           TimeParameters.o \
-          TimeReal.o
+          TimeReal.o \
+          Array.o \
+          Variable.o \
+          ExpressionParser.o
 
 all: libParameter 
 	mkdir -p ../lib
