@@ -19,6 +19,7 @@
 #include "XyPlotSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
+#include "PlotTypes.hpp"         // for MAX_XY_CURVE
 #include "MessageInterface.hpp"
 
 #include "wx/colordlg.h"   // for wxColourDialog
@@ -498,12 +499,14 @@ void XyPlotSetupPanel::SaveData()
          wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
          mSubscriber->Activate(false);
       }
-      else if (numYParams > 6)
+      else if (numYParams > GmatPlot::MAX_XY_CURVE)
+         //loj: 7/14/04 changed to use GmatPlot::MAX_XY_CURVE instead of 6
       {
-         wxLogMessage(wxT("Selected Y parameter count is greater than 6.\n"
-                          "First 6 parameters will be plotted"));
+         wxLogMessage("Selected Y parameter count is greater than %d.\n"
+                      "First %d parameters will be plotted", GmatPlot::MAX_XY_CURVE,
+                      GmatPlot::MAX_XY_CURVE);
 
-         mNumYParams = 6;
+         mNumYParams = GmatPlot::MAX_XY_CURVE;
       }
       else
       {
