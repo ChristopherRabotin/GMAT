@@ -52,7 +52,8 @@ namespace GmatPhysicalConst
     const Real f = 0.00335281;
         
     const Real EARTH_GRAVITATION_CONSTANT = 3.986005e14;  // m^3/s^2
-    const Real mu = 3.986005e14;  // m^3/s^2
+    const Real mu = 0.398600448073446198e+06;  // km^3/s^2
+    //ag:  3.986005e14;  // m^3/s^2
         
     const Real EARTH_ORBITAL_SPEED = 29790.0;  // m/s
     
