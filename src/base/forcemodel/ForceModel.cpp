@@ -223,22 +223,22 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 //------------------------------------------------------------------------------
 void ForceModel::DeleteForce(const std::string &name)
 {
-    std::vector<PhysicalModel *>::iterator force;
-    Integer i = 0;
-    for (force = forceList.begin(); force != forceList.end(); ++force) 
-    {
-        PhysicalModel *pm = forceList[i];
-        std::string pmName = pm->GetName().c_str();
-        
-        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
-        {
-            forceList.erase(force);
-            //delete pm;
-            numForces = forceList.size();
-            return;
-        }
-        i++;
-    }
+//    std::vector<PhysicalModel *>::iterator force;
+//    Integer i = 0;
+//    for (force = forceList.begin(); force != forceList.end(); ++force) 
+//    {
+//        PhysicalModel *pm = forceList[i];
+//        std::string pmName = pm->GetName().c_str();
+//        
+//        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
+//        {
+//            forceList.erase(force);
+//            //delete pm;
+//            numForces = forceList.size();
+//            return;
+//        }
+//        i++;
+//    }
 }
 
 //------------------------------------------------------------------------------
