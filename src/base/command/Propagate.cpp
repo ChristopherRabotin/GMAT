@@ -158,6 +158,9 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 void Propagate::ClearObject(const Gmat::ObjectType type)
 {
     switch (type) {
+        case Gmat::SPACECRAFT: //loj: 6/9/04 added
+            satName.clear();
+            break;
         case Gmat::STOP_CONDITION:
             stopWhen.clear();
             break;
