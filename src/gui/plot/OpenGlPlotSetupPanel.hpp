@@ -58,6 +58,8 @@ protected:
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mOverlapCheckBox;
+   
+   wxComboBox *mCoordSysComboBox; //loj: 12/22/04 Added
 
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mScOptionBoxSizer;
@@ -81,6 +83,7 @@ protected:
    enum
    {     
       TEXTCTRL = 93000,
+      ID_COMBOBOX,
       LISTBOX,
       SC_SEL_LISTBOX,
       CHECKBOX,

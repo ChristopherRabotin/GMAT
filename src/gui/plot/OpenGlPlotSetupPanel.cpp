@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlotSetupPanel.hpp"
+
 #include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
@@ -212,7 +213,6 @@ void OpenGlPlotSetupPanel::OnTargetColorClick(wxCommandEvent& event)
    {
       mSelScName = std::string(mScSelectedListBox->GetStringSelection().c_str());
       
-      MessageInterface::ShowMessage("OnTargetColorClick()\n");
       mScTargetColor = dialog.GetColourData().GetColour();
       mScTargetColorButton->SetBackgroundColour(mScTargetColor);
       mTargetColorMap[mSelScName].Set(mScTargetColor.Red(),
@@ -237,6 +237,13 @@ void OpenGlPlotSetupPanel::Create()
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
 #endif
 
+   // empty StaticText
+   wxStaticText *emptyStaticText =
+      new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );
+
+   // default coordindate system
+   wxString strCoordArray[] = { wxT("") };
+   
    wxString emptyList[] = {};
    Integer bsize = 3; // border size
    
@@ -261,12 +268,34 @@ void OpenGlPlotSetupPanel::Create()
    mOverlapCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
+
+   wxStaticText *titleCoordSys =
+      new wxStaticText(this, -1, wxT("Coordinate System"),
+                       wxDefaultPosition, wxSize(100,-1), 0);
    
-   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   plotOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   plotOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   mCoordSysComboBox =
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
+                     wxSize(100,-1), 1, strCoordArray, wxCB_DROPDOWN);
+   
+   //wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   //loj: 12/22/04 Added Coordinate System
+   wxFlexGridSizer *plotOptionSizer = new wxFlexGridSizer(3, 0, 0);
+
+   plotOptionSizer->Add(mPlotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(titleCoordSys, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   plotOptionSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(mCoordSysComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   plotOptionSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   plotOptionSizer->Add(mOverlapCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionSizer->Add(emptyStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // available spacecraft list (2th column)
@@ -350,7 +379,7 @@ void OpenGlPlotSetupPanel::Create()
    mFlexGridSizer->Show(mScOptionBoxSizer, false);
    
    pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   pageBoxSizer->Add(plotOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
