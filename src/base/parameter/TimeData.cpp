@@ -19,15 +19,16 @@
 
 #include "gmatdefs.hpp"
 #include "TimeData.hpp"
+#include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
 //---------------------------------
 const std::string
-TimeData::VALID_OBJECT_LIST[TimeDataObjectCount] =
+TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 {
-    "Spacecraft"
+   "Spacecraft" //loj: use spacecraft to get current time?
 }; 
 
 //---------------------------------
@@ -42,9 +43,11 @@ TimeData::VALID_OBJECT_LIST[TimeDataObjectCount] =
  */
 //------------------------------------------------------------------------------
 TimeData::TimeData()
-    : RefData()
+   : RefData()
 {
-    Initialize();
+   mInitialEpoch = 0.0;
+   mIsInitialEpochSet = false;
+   mSpacecraft = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +60,7 @@ TimeData::TimeData()
  */
 //------------------------------------------------------------------------------
 TimeData::TimeData(const TimeData &td)
-    : RefData(td)
+   : RefData(td)
 {
 }
 
@@ -74,10 +77,10 @@ TimeData::TimeData(const TimeData &td)
 //------------------------------------------------------------------------------
 TimeData& TimeData::operator= (const TimeData& right)
 {
-    if (this != &right)
-        RefData::operator=(right);
+   if (this != &right)
+      RefData::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +103,7 @@ TimeData::~TimeData()
 //------------------------------------------------------------------------------
 bool TimeData::IsInitialEpochSet()
 {
-    return mIsInitialEpochSet;
+   return mIsInitialEpochSet;
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +115,7 @@ bool TimeData::IsInitialEpochSet()
 //------------------------------------------------------------------------------
 Real TimeData::GetInitialEpoch()
 {
-    return mInitialEpoch;
+   return mInitialEpoch;
 }
 
 //------------------------------------------------------------------------------
@@ -124,10 +127,10 @@ Real TimeData::GetInitialEpoch()
 //------------------------------------------------------------------------------
 void TimeData::SetInitialEpoch(const Real &initialEpoch)
 {
-    mInitialEpoch = initialEpoch;
-    mIsInitialEpochSet = true;
-    //MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
-    //                              mInitialEpoch);
+   mInitialEpoch = initialEpoch;
+   mIsInitialEpochSet = true;
+   //MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
+   //                              mInitialEpoch);
 }
 
 //------------------------------------------------------------------------------
@@ -139,24 +142,21 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 //------------------------------------------------------------------------------
 Real TimeData::GetCurrentTimeReal(const std::string &str)
 {
-    //loj: where do I get current time? - from Spacecraft (loj: for now)
-    GmatBase *obj = FindObject("Spacecraft");
-    
-    if (obj == NULL)
-    {
-        return TIME_REAL_UNDEFINED;
-    }
-    else
-    {
-        Real a1mjd = obj->GetRealParameter("Epoch");
-        //MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
-        //                              a1mjd);
-        if (str == "A1MJD")
-            return a1mjd;
-        if (str == "JD")
-            return a1mjd + MJD_OFFSET;
-    }
-    return TIME_REAL_UNDEFINED;
+   //loj: where do I get current time? - from Spacecraft (loj: for now)
+   //GmatBase *obj = FindFirstObject("Spacecraft");
+   if (mSpacecraft == NULL)
+      InitializeRefObjects();
+
+   Real a1mjd = mSpacecraft->GetRealParameter("Epoch");
+   //MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
+   //                              a1mjd);
+   if (str == "A1MJD")
+      return a1mjd;
+   else if (str == "JD")
+      return a1mjd + MJD_OFFSET;
+   else
+      throw ParameterException("TimeData::GetCurrentTimeReal() Unknown parameter name: " +
+                               str);
 }
 
 //------------------------------------------------------------------------------
@@ -168,18 +168,21 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real TimeData::GetElapsedTimeReal(const std::string &str)
 {
-    Real a1mjd = GetCurrentTimeReal("A1MJD");
+   Real a1mjd = GetCurrentTimeReal("A1MJD");
     
-    //loj: future build
-    //if (str == "Years")
-    //if (str == "Months")
-    if (str == "Days")
-        return a1mjd - mInitialEpoch;
-    //if (str == "Hours")
-    //if (str == "Mins")
-    if (str == "Secs")
-        return (a1mjd - mInitialEpoch)* 86400;
-    return TIME_REAL_UNDEFINED;  // DJC added -- is this what we want here?
+   //loj: future build
+   //if (str == "Years")
+   //if (str == "Months")
+   if (str == "Days")
+      return a1mjd - mInitialEpoch;
+   //else if (str == "Hours")
+   //else if (str == "Mins")
+   else if (str == "Secs")
+      return (a1mjd - mInitialEpoch)* 86400;
+   else
+      throw ParameterException("TimeData::GetElapsedTimeReal() Unknown parameter name: " +
+                               str);
+   
 }
 
 
@@ -192,7 +195,7 @@ Real TimeData::GetElapsedTimeReal(const std::string &str)
 //------------------------------------------------------------------------------
 const std::string* TimeData::GetValidObjectList() const
 {
-    return VALID_OBJECT_LIST;
+   return VALID_OBJECT_TYPE_LIST;
 }
 
 
@@ -205,41 +208,42 @@ const std::string* TimeData::GetValidObjectList() const
 //------------------------------------------------------------------------------
 bool TimeData::ValidateRefObjects(GmatBase *param)
 {
-    //loj: 3/23/04 removed checking for type
-    bool status = false;
+   //loj: 3/23/04 removed checking for type
+   bool status = false;
     
-    if (HasObject(VALID_OBJECT_LIST[SPACECRAFT]))
-    {
-        if (mIsInitialEpochSet)
-        {
+   if (HasObjectType(VALID_OBJECT_TYPE_LIST[SPACECRAFT]))
+   {
+      if (mIsInitialEpochSet)
+      {
+         status = true;
+      }
+      else
+      {
+         Real rval = FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT])->
+            GetRealParameter("Epoch");
+
+         if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
+         {
+            mInitialEpoch =
+               FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT])->GetRealParameter("Epoch");
+            mIsInitialEpochSet = true;
             status = true;
-        }
-        else
-        {
-            Real rval = FindObject(VALID_OBJECT_LIST[SPACECRAFT])->
-                GetRealParameter("Epoch");
+         }
+      }
+   }
 
-            if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
-            {
-                mInitialEpoch =
-                    FindObject(VALID_OBJECT_LIST[SPACECRAFT])->GetRealParameter("Epoch");
-                mIsInitialEpochSet = true;
-                status = true;
-            }
-        }
-    }
-
-    return status;
+   return status;
 }
 
 //loj: 3/31/04 added
 //------------------------------------------------------------------------------
-// virtual void Initialize()
+// virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
-void TimeData::Initialize()
+void TimeData::InitializeRefObjects()
 {
-    mInitialEpoch = 0.0;
-    mIsInitialEpochSet = false;
+   mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+   if (mSpacecraft == NULL)
+      throw ParameterException("OrbitData::InitializeRefObjects() Cannot find Spacecraft object");
 }
 
 //------------------------------------------------------------------------------
@@ -251,25 +255,25 @@ void TimeData::Initialize()
 //------------------------------------------------------------------------------
 bool TimeData::IsValidObject(GmatBase *obj)
 {
-    bool valid = false;
+   bool valid = false;
     
-    // check for object type if not NULL
-    if (obj != NULL)
-    {
-        for (int i=0; i<TimeDataObjectCount; i++)
-        {
-            if (obj->GetTypeName() == VALID_OBJECT_LIST[i])
-            {
-                valid = true;
-                break;
-            }
-        }
-    }
-    else
-    {
-        valid = false;
-    }
+   // check for object type if not NULL
+   if (obj != NULL)
+   {
+      for (int i=0; i<TimeDataObjectCount; i++)
+      {
+         if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
+         {
+            valid = true;
+            break;
+         }
+      }
+   }
+   else
+   {
+      valid = false;
+   }
 
-    return valid;
+   return valid;
 }
 
