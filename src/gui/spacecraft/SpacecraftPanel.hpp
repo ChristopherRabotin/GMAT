@@ -66,10 +66,10 @@ class SpacecraftPanel: public wxPanel
 {
 public:
     // SpacecraftPanel(wxWindow *parent, bool call_fit = TRUE, bool set_sizer = TRUE);
-    SpacecraftPanel(wxWindow *parent);
+    SpacecraftPanel(wxWindow *parent, const wxString &scName);
    
 private:
-    void CreateNotebook(wxWindow *parent);
+    void CreateNotebook(wxWindow *parent, const wxString &scName);
     wxPanel *CreateOrbit(wxWindow *parent);
     void CartElements(wxWindow *parent);
     void KapElements(wxWindow *parent);
