@@ -88,35 +88,39 @@ bool Moderator::Initialize(bool fromGui)
         
          // Create factories
          theAtmosphereFactory = new AtmosphereFactory();
+         theAxisSystemFactory = new AxisSystemFactory(); //loj: 01/18/05 - added
          theBurnFactory = new BurnFactory();
          theCommandFactory = new CommandFactory();
+         theCoordinateSystemFactory = new CoordinateSystemFactory(); //loj: 01/18/05 - added
          theForceModelFactory = new ForceModelFactory();
          theFunctionFactory = new FunctionFactory();
          theHardwareFactory = new HardwareFactory(); //djc: 11/10/04 - added
          theParameterFactory = new ParameterFactory();
          thePhysicalModelFactory = new PhysicalModelFactory();
-         thePropSetupFactory = new PropSetupFactory();
          thePropagatorFactory = new PropagatorFactory();
+         thePropSetupFactory = new PropSetupFactory();
+         theSolverFactory = new SolverFactory();
          theSpacecraftFactory = new SpacecraftFactory();
          theStopConditionFactory = new StopConditionFactory();
          theSubscriberFactory = new SubscriberFactory();
-         theSolverFactory = new SolverFactory();
 
          // Register factories
          theFactoryManager->RegisterFactory(theAtmosphereFactory);
+         theFactoryManager->RegisterFactory(theAxisSystemFactory);
          theFactoryManager->RegisterFactory(theBurnFactory);
          theFactoryManager->RegisterFactory(theCommandFactory);
+         theFactoryManager->RegisterFactory(theCoordinateSystemFactory);
          theFactoryManager->RegisterFactory(theForceModelFactory);
          theFactoryManager->RegisterFactory(theFunctionFactory);
          theFactoryManager->RegisterFactory(theHardwareFactory);
          theFactoryManager->RegisterFactory(theParameterFactory);
          theFactoryManager->RegisterFactory(thePhysicalModelFactory);
-         theFactoryManager->RegisterFactory(thePropSetupFactory);
          theFactoryManager->RegisterFactory(thePropagatorFactory);
+         theFactoryManager->RegisterFactory(thePropSetupFactory);
+         theFactoryManager->RegisterFactory(theSolverFactory);
          theFactoryManager->RegisterFactory(theSpacecraftFactory);
          theFactoryManager->RegisterFactory(theStopConditionFactory);
          theFactoryManager->RegisterFactory(theSubscriberFactory);
-         theFactoryManager->RegisterFactory(theSolverFactory);
 
          // Create default SolarSystem
          theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
@@ -128,7 +132,7 @@ bool Moderator::Initialize(bool fromGui)
          // Read startup file
          theFileManager->ReadStartupFile();
          InitializePlanetarySource();
-            
+         
          if (fromGui)
          {
             CreateDefaultMission();
@@ -961,17 +965,17 @@ Parameter* Moderator::GetParameter(const std::string &name)
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
    ForceModel *fm = theFactoryManager->CreateForceModel(name);
-
+   
    if (fm == NULL)
    {
       MessageInterface::ShowMessage
          ("Moderator::CreateForceModel() Error Creating %s.  Make sure "
-          "ForceModelFactory is registered and has correct type. \n", name.c_str());
+          "ForceModelFactory is registered. \n", name.c_str());
 
       throw GmatBaseException("Error Creating ForceModel");
    }
-    
-   // Manage it if it is a named parameter
+   
+   // Manage it if it is a named ForceModel
    try
    {
       if (fm->GetName() != "")
@@ -982,7 +986,7 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
       MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
                                     e.GetMessage());
    }
-
+   
    return fm;
 }
 
@@ -1306,7 +1310,6 @@ CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 Interpolator* Moderator::CreateInterpolator(const std::string &type,
                                             const std::string &name)
 {
-
    //loj: 3/22/04 theFactoryManager->CreateInterpolator() not implemented
    return NULL;
 }
@@ -1327,11 +1330,12 @@ Interpolator* Moderator::GetInterpolator(const std::string &name)
    return NULL;
 }
 
+//loj: 1/18/05 RefFrame will removed later. (This was replaced by CoordinateSystem)
 //------------------------------------------------------------------------------
 // RefFrame* CreateRefFrame(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Creates a celestial body object by given type and name.
+ * Creates a RefFrame object by given type and name.
  *
  * @param <type> object type
  * @param <name> object name
@@ -1360,6 +1364,101 @@ RefFrame* Moderator::CreateRefFrame(const std::string &type,
 RefFrame* Moderator::GetRefFrame(const std::string &name)
 {
    return NULL;
+}
+
+//loj: 1/18/05 Added
+// CoordinateSystem
+//------------------------------------------------------------------------------
+// CoordinateSystem* CreateCoordinateSystem(const std::string &name,
+//                                          bool createDefault = false)
+//------------------------------------------------------------------------------
+CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
+                                                    bool createDefault)
+{
+   CoordinateSystem *cs = theFactoryManager->CreateCoordinateSystem(name);
+
+   if (cs == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::CreateCoordinateSystem() Error Creating %s.  Make sure "
+          "CoordinateSystemFactory is registered. \n", name.c_str());
+
+      throw GmatBaseException("Error Creating CoordinateSystem");
+   }
+   
+   // Manage it if it is a named CoordinateSystem
+   try
+   {
+      if (cs->GetName() != "")
+         theConfigManager->AddCoordinateSystem(cs);
+      
+      if (createDefault)
+      {
+         // create MJ2000Eq AxisSystem with Earth as origin
+         AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
+         //cs->SetStringParameter("Origin", "Earth"); //loj: 1/18/05 Not available yet
+         if (axis)
+            cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem()\n" +
+                                    e.GetMessage());
+   }
+
+   return cs;
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetCoordinateSystem(const std::string &name)
+//------------------------------------------------------------------------------
+CoordinateSystem* Moderator::GetCoordinateSystem(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return theConfigManager->GetCoordinateSystem(name);
+}
+
+//loj: 1/18/05 Added
+//------------------------------------------------------------------------------
+// AxisSystem* CreateAxisSystem(const std::string &type,
+//                              const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a AxisSystem object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a AxisSystem object pointer
+ */
+//------------------------------------------------------------------------------
+AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
+                                        const std::string &name)
+{
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+#endif
+   
+   AxisSystem *axisSystem = theFactoryManager->CreateAxisSystem(type, name);
+   
+   if (axisSystem == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::CreateAxisSystem() Error Creating %s.  Make sure "
+          "AxisSystemFactory is registered and has correct type. \n", type.c_str());
+
+      throw GmatBaseException("Error Creating AxisSystem: " + type);
+   }
+   
+   //loj: 1/18/05
+   // Notes: AxisSystem is not configured. It is local to CoordinateSystem
+   // and gets deleted when CoordinateSystem is deleted.
+   
+   return axisSystem;
 }
 
 // Subscriber
@@ -2202,7 +2301,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    
    if (isRunReady)
    {
-      // check sandbox number
+      // clear sandbox
       if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
       {
          sandboxes[sandboxNum-1]->Clear();
@@ -2212,6 +2311,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          status = -1;
          MessageInterface::PopupMessage(Gmat::ERROR_,
                                         "Invalid Sandbox number" + sandboxNum);
+         return status;
       }
       
       try
@@ -2249,6 +2349,11 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox() \n");
 #endif
+         
+         // clear sandbox
+         if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
+            sandboxes[sandboxNum-1]->Clear();
+      
       }
       catch (BaseException &e)
       {
@@ -2533,6 +2638,18 @@ void Moderator::CreateDefaultMission()
 
    try
    {
+      //----------------------------------------------------
+      // Create default resource
+      //----------------------------------------------------
+      
+      // CoordinateSystem
+      CreateCoordinateSystem("EarthMJ2000Eq", true);
+      CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
+      AxisSystem *axis = CreateAxisSystem("MJ2000Ec", "");
+      //cs->SetStringParameter("Origin", "Earth"); //loj: 1/18/05 Not available yet
+      if (axis)
+         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+      
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
 #if DEBUG_DEFAULT_MISSION
@@ -2679,6 +2796,10 @@ void Moderator::CreateDefaultMission()
 #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default Subscribers created\n");
 #endif
+      
+      //----------------------------------------------------
+      // Create default mission sequence
+      //----------------------------------------------------
       
       // Propagate Command
       GmatCommand *propCommand = CreateCommand("Propagate");
@@ -3042,6 +3163,10 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
    for (Integer i=0; i<(Integer)scNames.size(); i++)
    {
       sc = (Spacecraft*)theConfigManager->GetSpacecraft(scNames[i]);
+#ifdef DEBUG_RUN
+      MessageInterface::ShowMessage
+         ("Moderator::AddSpacecraftToSandbox() sc[%d] = %s\n", i, sc->GetName().c_str());
+#endif
       sandboxes[index]->AddObject(sc);
    }
 

@@ -30,11 +30,16 @@
 #include "FileManager.hpp"
 // core
 #include "AtmosphereModel.hpp"
+#include "AxisSystem.hpp"
 #include "Burn.hpp"
 #include "Command.hpp"
+#include "CoordinateSystem.hpp"
+#include "Function.hpp"
+#include "Hardware.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
+#include "RefFrame.hpp"
 #include "Spacecraft.hpp"
 #include "Formation.hpp"
 #include "Parameter.hpp"
@@ -45,20 +50,19 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "Interpolator.hpp"
-#include "RefFrame.hpp"
-#include "Function.hpp"
-#include "Hardware.hpp"
 // factories
 #include "AtmosphereFactory.hpp"
+#include "AxisSystemFactory.hpp"
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
+#include "CoordinateSystemFactory.hpp"
 #include "ForceModelFactory.hpp"
 #include "FunctionFactory.hpp"
 #include "HardwareFactory.hpp"
 #include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
-#include "PropSetupFactory.hpp"
 #include "PropagatorFactory.hpp"
+#include "PropSetupFactory.hpp"
 #include "SolverFactory.hpp"
 #include "SpacecraftFactory.hpp"
 #include "StopConditionFactory.hpp"
@@ -171,10 +175,19 @@ public:
                                     const std::string &name);
    Interpolator* GetInterpolator(const std::string &name);
 
-   // RefFrame
+   // RefFrame (loj: 1/18/05 This will be removed later)
    RefFrame* CreateRefFrame(const std::string &type,
                             const std::string &name);
    RefFrame* GetRefFrame(const std::string &name);
+
+   // CoordinateSystem (loj: 1/18/05 Added)
+   CoordinateSystem* CreateCoordinateSystem(const std::string &name,
+                                            bool createDefault = false);
+   CoordinateSystem* GetCoordinateSystem(const std::string &name);
+
+   // AxisSystem (loj: 1/18/05 Added)
+   AxisSystem* CreateAxisSystem(const std::string &type,
+                                const std::string &name);
 
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
@@ -316,6 +329,8 @@ private:
    SolverFactory *theSolverFactory;
    AtmosphereFactory *theAtmosphereFactory;
    FunctionFactory *theFunctionFactory;
+   AxisSystemFactory *theAxisSystemFactory;
+   CoordinateSystemFactory *theCoordinateSystemFactory;
    
    SolarSystem *theDefaultSolarSystem;
    SlpFile *theDefaultSlpFile;
