@@ -2,13 +2,16 @@
 # Module:     Makefile.mac for forcemodel directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/18
+# Modified:   2004/04/19 - Removed PointMassSelectionDialog.cpp.
+#                          Added ExponentialDragDialog.cpp, MSISE90Panel.cpp,
+#                          and MSISE90Dialog.cpp.
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = PointMassSelectionDialog.cpp
+SRC = ExponentialDragDialog.cpp MSISE90Panel.cpp MSISE90Dialog.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
