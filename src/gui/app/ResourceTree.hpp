@@ -41,6 +41,7 @@ private:
     GmatMainNotebook *mainNotebook;
     wxWindow *parent;
     wxTreeItemId mSpacecraftItem;
+    wxTreeItemId mPropagatorItem;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
