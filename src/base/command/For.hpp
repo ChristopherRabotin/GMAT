@@ -87,17 +87,15 @@ protected:
    
    static const Real UNINITIALIZED_VALUE;
 
-    std::string         forName;
-    /// Start value for the For loop
-    Real                startValue;
-    /// End value for the For loop
-    Real                endValue;
-    /// Step value for the For loop
-    Real                stepSize;
-    /// Current value for the For loop counter
-    Real                currentValue;
-   /// Counter to track how deep the If nesting is
-   Integer              nestLevel;
+   std::string         forName;
+   /// Start value for the For loop
+   Real                startValue;
+   /// End value for the For loop
+   Real                endValue;
+   /// Step value for the For loop
+   Real                stepSize;
+   /// Current value for the For loop counter
+   Real                currentValue;
    
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();

@@ -71,6 +71,8 @@ protected:
    Integer                 branchToFill;
    /// Local container used to return the full sequence from the branches
    std::string             fullString;
+   /// Counter to track how deep the nesting is
+   Integer                 nestLevel;
 };
 
 #endif // BranchCommand_hpp

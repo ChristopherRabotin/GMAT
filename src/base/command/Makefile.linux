@@ -18,6 +18,7 @@ OBJECTS = Command.o CommandException.o \
           Toggle.o \
           Maneuver.o \
           BranchCommand.o \
+          ConditionalBranch.o \
           Target.o \
           Vary.o \
           Achieve.o \

@@ -37,61 +37,59 @@
 class Target : public BranchCommand
 {
 public:
-    Target(void);
-    virtual ~Target(void);
+   Target();
+   virtual ~Target();
     
-    Target(const Target& t);
-    Target&             operator=(const Target& t);
+   Target(const Target& t);
+   Target&             operator=(const Target& t);
     
-    // Inherited methods that need some enhancement from the base class
-    virtual bool        Append(GmatCommand *cmd);
+   // Inherited methods that need some enhancement from the base class
+   virtual bool        Append(GmatCommand *cmd);
 
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone() const;
 
-    // Parameter access methods
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer     GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType
-                        GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
+   // Parameter access methods
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                       GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value);
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                        const std::string &name);
     
-    virtual std::string GetStringParameter(const Integer id) const;
-    virtual bool        SetStringParameter(const Integer id, 
-                                           const std::string &value);
-    virtual bool        GetBooleanParameter(const Integer id) const;
-    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
-    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                         const std::string &name);
-    
-    // Methods used to run the command
+   // Methods used to run the command
 //    virtual bool        InterpretAction(void);
-    virtual bool        Initialize(void);
-    virtual bool        Execute(void);
+   virtual bool        Initialize(void);
+   virtual bool        Execute(void);
 
 protected:
-    /// The name of the spacecraft that gets maneuvered
-    std::string         targeterName;
-    /// The targeter instance used to manage the targeter state machine
-    Solver              *targeter;
-    /// Local store of the objects that we'll need to reset
-    std::vector<GmatBase *>
-                        localStore;
-    /// Counter to track how deep the Target nesting is
-    Integer             nestLevel;
-    /// Flag indicating is the targeter has converged
-    bool                targeterConverged;
+   /// The name of the spacecraft that gets maneuvered
+   std::string         targeterName;
+   /// The targeter instance used to manage the targeter state machine
+   Solver              *targeter;
+   /// Local store of the objects that we'll need to reset
+   std::vector<GmatBase *>
+                       localStore;
+   /// Flag indicating is the targeter has converged
+   bool                targeterConverged;
     
-    // Parameter IDs 
-    /// ID for the burn object
-    Integer             targeterNameID;
-    Integer             TargeterConvergedID;
+   // Parameter IDs 
+   /// ID for the burn object
+   Integer             targeterNameID;
+   Integer             TargeterConvergedID;
     
-    // Methods used to save the starting point for the loops
-    virtual void        StoreLoopData(void);
-    virtual void        ResetLoopData(void);
-    virtual void        FreeLoopData(void);
+   // Methods used to save the starting point for the loops
+   virtual void        StoreLoopData(void);
+   virtual void        ResetLoopData(void);
+   virtual void        FreeLoopData(void);
 };
 
 

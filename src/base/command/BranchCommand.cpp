@@ -23,11 +23,12 @@
 
 
 BranchCommand::BranchCommand(const std::string &typeStr) :
-    GmatCommand         (typeStr),
-    branch          (1),
-    commandComplete (false),
-    commandExecuting(false),
-    branchToFill    (0)
+   GmatCommand          (typeStr),
+   branch               (1),
+   commandComplete      (false),
+   commandExecuting     (false),
+   branchToFill         (0),
+   nestLevel            (0)
 {
    parameterCount = BranchCommandParamCount;
 }
@@ -45,11 +46,12 @@ BranchCommand::~BranchCommand()
 
 
 BranchCommand::BranchCommand(const BranchCommand& bc) :
-    GmatCommand         (bc),
-    branch          (1),
-    commandComplete (false),
-    commandExecuting(false),
-    branchToFill    (0)
+   GmatCommand       (bc),
+   branch            (1),
+   commandComplete   (false),
+   commandExecuting  (false),
+   branchToFill      (0),
+    nestLevel        (bc.nestLevel)
 {
    parameterCount = BranchCommandParamCount;
 }

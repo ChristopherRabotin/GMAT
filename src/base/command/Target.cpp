@@ -22,6 +22,10 @@
 #include "Spacecraft.hpp"
 
 
+// #define DEBUG_TARGETER_PARSING
+// #define DEBUG_TARGETER
+
+
 //------------------------------------------------------------------------------
 //  Target(void)
 //------------------------------------------------------------------------------
@@ -29,14 +33,13 @@
  * Creates a Target command.  (default constructor)
  */
 //------------------------------------------------------------------------------
-Target::Target(void) :
-    BranchCommand      ("Target"),
-    targeterName       (""),
-    targeter           (NULL),
-    nestLevel          (0),
-    targeterConverged  (false),
-    targeterNameID     (parameterCount),
-    TargeterConvergedID(parameterCount+1)
+Target::Target() :
+   BranchCommand      ("Target"),
+   targeterName       (""),
+   targeter           (NULL),
+   targeterConverged  (false),
+   targeterNameID     (parameterCount),
+   TargeterConvergedID(parameterCount+1)
 {
     parameterCount += 2;
 }
@@ -49,7 +52,7 @@ Target::Target(void) :
  * Destroys the Target command.  (destructor)
  */
 //------------------------------------------------------------------------------
-Target::~Target(void)
+Target::~Target()
 {}
 
     
@@ -66,7 +69,6 @@ Target::Target(const Target& t) :
     BranchCommand       (t),
     targeterName        (t.targeterName),
     targeter            (NULL),
-    nestLevel           (0),
     targeterNameID      (t.targeterNameID),
     TargeterConvergedID (t.TargeterConvergedID)
 {
@@ -112,26 +114,40 @@ bool Target::Append(GmatCommand *cmd)
 //    if (nestLevel > 0) {
 //        Command *cmd = branch[0];
 //    }
+
+   #ifdef DEBUG_TARGETER_PARSING
+       MessageInterface::ShowMessage("\nTarget::Append received \"%s\" command",
+                                     cmd->GetTypeName().c_str());
+   #endif
     
-    if (!BranchCommand::Append(cmd))
+   if (!BranchCommand::Append(cmd))
         return false;
     
-    // If at the end of a targeter branch, point that end back to this comand.
-    if (cmd->GetTypeName() == "EndTarget") {
-        if (nestLevel == 0) {
-            cmd->Append(this);
-            // Targeter loop is complete; -1 pops to the next higher sequence.
-            branchToFill = -1;
-        }
-        else
-            --nestLevel;
-    }
+   // If at the end of a targeter branch, point that end back to this comand.
+   if (cmd->GetTypeName() == "EndTarget") {
+      if ((nestLevel == 0) && (branchToFill != -1))  {
+         cmd->Append(this);
+         // Targeter loop is complete; -1 pops to the next higher sequence.
+         branchToFill = -1;
+         #ifdef DEBUG_TARGETER_PARSING
+             MessageInterface::ShowMessage("\nTarget::Append closing \"%s\"",
+                                           generatingString.c_str());
+         #endif
+      }
+      else
+         --nestLevel;
+   }
 
-    // If it's a nested targeter branch, add to the nest level.
-    if (cmd->GetTypeName() == "Target")
-        ++nestLevel;
+   // If it's a nested targeter branch, add to the nest level.
+   if (cmd->GetTypeName() == "Target")
+      ++nestLevel;
 
-    return true;
+   #ifdef DEBUG_TARGETER_PARSING
+       MessageInterface::ShowMessage("\nTarget::Append for \"%s\" nest level = %d",
+                                     generatingString.c_str(), nestLevel);
+   #endif
+
+   return true;
 }
 
 

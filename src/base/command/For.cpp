@@ -139,7 +139,7 @@ bool For::Append(GmatCommand *cmd)
    // If at the end of a for branch, point that end back to this comand.
    if (cmd->GetTypeName() == "EndFor") 
    {
-      if (nestLevel== 0)
+      if ((nestLevel== 0) && (branchToFill != -1))
       {
         cmd->Append(this);
         // for loop is complete; -1 points us back to the main sequence.
