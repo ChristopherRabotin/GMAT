@@ -68,23 +68,23 @@ Integer ParameterDatabase::GetNumParameters() const
 }
 
 //------------------------------------------------------------------------------
-// StringArray GetNamesOfParameters() const
+// const StringArray& GetNamesOfParameters()
 //------------------------------------------------------------------------------
 /**
  * @return names of parameters
  */
 //------------------------------------------------------------------------------
-StringArray ParameterDatabase::GetNamesOfParameters() const
+const StringArray& ParameterDatabase::GetNamesOfParameters()
 {
-   StringArray paramNames;
+   mParamNames.clear();
    StringParamPtrMap::iterator pos;
 
    for (pos = mStringParamPtrMap->begin(); pos != mStringParamPtrMap->end(); ++pos)
    {
-      paramNames.push_back(pos->first);
+      mParamNames.push_back(pos->first);
    }
    
-   return paramNames;
+   return mParamNames;
 }
 
 //------------------------------------------------------------------------------

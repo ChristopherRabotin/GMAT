@@ -32,7 +32,7 @@ public:
    ~ParameterDatabase();
 
    Integer GetNumParameters() const;
-   StringArray GetNamesOfParameters() const;
+   const StringArray& GetNamesOfParameters();
    ParameterPtrArray GetParameters() const;
 
    bool HasParameter(const std::string &name) const;
@@ -51,6 +51,7 @@ protected:
 private:
 
    StringParamPtrMap *mStringParamPtrMap;
+   StringArray mParamNames; //loj: 9/22/04 added
    Integer mNumParams;
 
 };
