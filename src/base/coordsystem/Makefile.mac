@@ -9,7 +9,8 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
-	InertialAxes.cpp ItrfCoefficientsFile.cpp MJ2000EcAxes.cpp MJ2000EqAxes.cpp
+	EquatorAxes.cpp InertialAxes.cpp ItrfCoefficientsFile.cpp \
+	MJ2000EcAxes.cpp MJ2000EqAxes.cpp
 
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
