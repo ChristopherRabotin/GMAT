@@ -21,7 +21,7 @@
 #include "SpaceObjectSelectDialog.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROPCMD_PANEL 0
+//#define DEBUG_PROPCMD_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -42,15 +42,14 @@ BEGIN_EVENT_TABLE(PropagateCommandPanel, GmatPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// PropagateCommandPanel()
+// PropagateCommandPanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName,
-                                              GmatCommand *cmd )
-   : GmatPanel(parent)
+PropagateCommandPanel::PropagateCommandPanel(wxWindow *parent, GmatCommand *cmd)
+   : GmatPanel(parent) //loj: 10/6/04 removed propName
 {
 #if DEBUG_PROPCMD_PANEL
    MessageInterface::ShowMessage
@@ -120,9 +119,9 @@ void PropagateCommandPanel::Create()
     
    // wxGrid
    propGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(700,100), wxWANTS_CHARS );
+      new wxGrid(this, -1, wxDefaultPosition, wxSize(700,100), wxWANTS_CHARS);
    
-   propGrid->CreateGrid( MAX_PROP_ROW, 2, wxGrid::wxGridSelectRows );
+   propGrid->CreateGrid(MAX_PROP_ROW, 2, wxGrid::wxGridSelectRows);
    propGrid->SetColSize(0, 200);
    propGrid->SetColSize(1, 488);
    propGrid->SetColLabelValue(0, _T("Propagator"));
@@ -131,9 +130,9 @@ void PropagateCommandPanel::Create()
    propGrid->EnableEditing(false);
    
    stopCondGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(700,120), wxWANTS_CHARS);
+      new wxGrid(this, -1, wxDefaultPosition, wxSize(700,120), wxWANTS_CHARS);
    
-   stopCondGrid->CreateGrid( MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectRows);
+   stopCondGrid->CreateGrid(MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectRows);
    stopCondGrid->SetColSize(0, 200);
    stopCondGrid->SetColSize(1, 488);
    stopCondGrid->SetColLabelValue(0, _T("Name"));
@@ -775,11 +774,11 @@ void PropagateCommandPanel::OnComboSelection(wxCommandEvent& event)
    wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
    int stopRow = stopRows[0];
     
-   if (event.GetEventObject() == synchComboBox )
+   if (event.GetEventObject() == synchComboBox)
    {
       theApplyButton->Enable(true);
    }
-   else if (event.GetEventObject() == equalityComboBox )
+   else if (event.GetEventObject() == equalityComboBox)
    {
       wxString str = FormatStopCondDesc(mTempStopCond[stopRow].varName,
                                         mTempStopCond[stopRow].relOpStr,
@@ -798,7 +797,7 @@ void PropagateCommandPanel::OnComboSelection(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void PropagateCommandPanel::OnButton(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == viewButton )
+   if (event.GetEventObject() == viewButton)
    {
       // show dialog to select parameter
       ParameterSelectDialog paramDlg(this);
@@ -830,12 +829,12 @@ void PropagateCommandPanel::OnButton(wxCommandEvent& event)
          theApplyButton->Enable(true);
       }
    }
-   else if (event.GetEventObject() == updateButton )
+   else if (event.GetEventObject() == updateButton)
    {
       UpdateStopCondition();
       theApplyButton->Enable(true);
    }
-   else if (event.GetEventObject() == deleteButton )
+   else if (event.GetEventObject() == deleteButton)
    {
       RemoveStopCondition();
       theApplyButton->Enable(true);

@@ -29,8 +29,7 @@ class PropagateCommandPanel : public GmatPanel
 {
 public:
    // constructors
-   PropagateCommandPanel( wxWindow *parent, const wxString &propName, 
-                          GmatCommand *cmd);
+   PropagateCommandPanel(wxWindow *parent, GmatCommand *cmd); //loj: 10/6/04 removed propName
    ~PropagateCommandPanel();  
    
 private:
@@ -100,7 +99,7 @@ private:
    PropType mTempProp[MAX_PROP_ROW];
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
-   Propagate      *thePropagateCommand;
+   Propagate *thePropagateCommand;
    
    // methods inherited from GmatPanel
    virtual void Create();

@@ -34,12 +34,10 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-SolverEventPanel::SolverEventPanel(wxWindow *parent, const wxString &name,
-                                   GmatCommand *cmd)
+SolverEventPanel::SolverEventPanel(wxWindow *parent, GmatCommand *cmd)
     : GmatPanel(parent)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //loj: 2/9/04 GmatCommand *theCommand = theGuiInterpreter->GetCommand(name.c_str());
     theCommand = cmd;
     
     if (theCommand != NULL)
