@@ -34,106 +34,116 @@
 class GMAT_API Propagate : public GmatCommand
 {
 public:
-    Propagate(void);
-    virtual ~Propagate(void);
-    Propagate(const Propagate &p);
-    Propagate&          operator=(const Propagate &p);
+   Propagate(void);
+   virtual ~Propagate(void);
+   Propagate(const Propagate &p);
+   Propagate&          operator=(const Propagate &p);
 
-    // Methods used for configuration
-    virtual bool        SetObject(const std::string &name,
-                                  const Gmat::ObjectType type,
-                                  const std::string &associate = "",
-                                  const Gmat::ObjectType associateType =
-                                                      Gmat::UNKNOWN_OBJECT);
-    virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
-    virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
-                                  const std::string objName = "");
-    virtual void        ClearObject(const Gmat::ObjectType type); //loj: 3/31/04 added
+   // Methods used for configuration
+   virtual bool        SetObject(const std::string &name,
+                                 const Gmat::ObjectType type,
+                                 const std::string &associate = "",
+                                 const Gmat::ObjectType associateType =
+                                 Gmat::UNKNOWN_OBJECT);
+   virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
+   virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
+                                 const std::string objName = "");
+   virtual void        ClearObject(const Gmat::ObjectType type);
     
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 
-    // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer     GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType
-                        GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
+   // Reference object accessor methods
+   //loj: 6/25/04 added
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name,
+                                    const Integer index);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name,
+                                    const Integer index);
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   
+   // Parameter accessor methods
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                       GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
     
-    virtual Integer     GetIntegerParameter(const Integer id) const;
-    virtual Integer     SetIntegerParameter(const Integer id,
-                                            const Integer value);
-    virtual bool        GetBooleanParameter(const Integer id) const;
-    virtual bool        SetBooleanParameter(const Integer id,
-                                            const bool value);
-    virtual std::string GetStringParameter(const Integer id) const;
-    virtual bool        SetStringParameter(const Integer id, 
-                                           const std::string &value);
-    virtual const StringArray& 
-                        GetStringArrayParameter(const Integer id) const; 
+   virtual Integer     GetIntegerParameter(const Integer id) const;
+   virtual Integer     SetIntegerParameter(const Integer id,
+                                           const Integer value);
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        SetBooleanParameter(const Integer id,
+                                           const bool value);
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value);
+   virtual const StringArray& 
+                       GetStringArrayParameter(const Integer id) const; 
 
-    // Methods used to run the command
-    virtual void            InterpretAction(void);
+   // Methods used to run the command
+   virtual void        InterpretAction(void);
     
-    virtual bool            Initialize(void);
-    virtual bool            Execute(void);
+   virtual bool        Initialize(void);
+   virtual bool        Execute(void);
 
 protected:
-    // We may eventually want to make this a list of propagator names for the
-    // propagators driven by this command, like this:
-    //    /// List of the names of propagator setups used in this command
-    //    std::vector<std::string>  propName;
+   // We may eventually want to make this a list of propagator names for the
+   // propagators driven by this command, like this:
+   //    /// List of the names of propagator setups used in this command
+   //    std::vector<std::string>  propName;
 
-    /// Name of the propagator setup used in this command
-    std::string             propName;
-    /// The (1 or more) spacecraft associated with this propagation
-    StringArray             satName;
-    /// Flag used to determine if the spacecraft are propagated coupled
-    bool                    propCoupled;
-    /// Frequency used to check for user interrupts of the run
-    Integer                 interruptCheckFrequency;
-    /// Starting epoch for the propagation
-    Real                    baseEpoch;
+   /// Name of the propagator setup used in this command
+   std::string             propName;
+   /// The (1 or more) spacecraft associated with this propagation
+   StringArray             satName;
+   /// Flag used to determine if the spacecraft are propagated coupled
+   bool                    propCoupled;
+   /// Frequency used to check for user interrupts of the run
+   Integer                 interruptCheckFrequency;
+   /// Starting epoch for the propagation
+   Real                    baseEpoch;
 
-    // We may eventually want to make this a list of propagators all driven by
-    // this command, like this:
-    //    /// List of the propagator setups used in this command
-    //    std::vector<Propagator>  prop;
+   // We may eventually want to make this a list of propagators all driven by
+   // this command, like this:
+   //    /// List of the propagator setups used in this command
+   //    std::vector<Propagator>  prop;
     
-    /// The propagator used by this command
-    PropSetup               *prop;      // Likely to change when the propagator
-                                        // infrastructure is coded -- might
-                                        // just be a Propagator *
-    /// The spacecraft that are propagated
-    std::vector<Spacecraft*>
-                            sats;
-    /// The stopping conditions
-    std::vector<StopCondition *>
-                            stopWhen;
-
-    // For convenience, set variables for the parameter IDs
-    /// ID for the boolean flag used for the prop mode
-    const Integer           propCoupledID;
-    /// ID for the number of iterations before calling to check for interrupts
-    const Integer           interruptCheckFrequencyID;
-    /// ID for the satellite name array
-    const Integer           satNameID;
-    /// ID for the propagator name
-    const Integer           propNameID;
-    /// ID used to get the stopping conditions
-    const Integer           stopWhenID;
+   /// The propagator used by this command
+   PropSetup               *prop;      // Likely to change when the propagator
+   // infrastructure is coded -- might
+   // just be a Propagator *
+   /// The spacecraft that are propagated
+   std::vector<Spacecraft*> sats;
+   /// The stopping conditions
+   std::vector<StopCondition *> stopWhen;
+   /// The object array used in GetRefObjectArray()
+   ObjectArray objectArray;
+   
+   // For convenience, set variables for the parameter IDs
+   /// ID for the boolean flag used for the prop mode
+   const Integer           propCoupledID;
+   /// ID for the number of iterations before calling to check for interrupts
+   const Integer           interruptCheckFrequencyID;
+   /// ID for the satellite name array
+   const Integer           satNameID;
+   /// ID for the propagator name
+   const Integer           propNameID;
+   /// ID used to get the stopping conditions
+   const Integer           stopWhenID;
     
-    /// Temporary parameter used to stop on time
-    Real                    secondsToProp;
-    /// ID for the temporary parameter
-    const Integer           secondsToPropID;
+   /// Temporary parameter used to stop on time
+   Real                    secondsToProp;
+   /// ID for the temporary parameter
+   const Integer           secondsToPropID;
 
 public:    
-    // Accessors (Temporary, to support internal prop duration)
-    virtual Real        GetRealParameter(const Integer id) const;
-    virtual Real        SetRealParameter(const Integer id,
-                                         const Real value);
+   // Accessors (Temporary, to support internal prop duration)
+   virtual Real        GetRealParameter(const Integer id) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value);
     
 private:
     
