@@ -40,3 +40,9 @@ void AtmosphereModel::SetSunVector(Real *sv)
     sunVector = sv;
 }
 
+
+void AtmosphereModel::SetCentralBodyVector(Real *cv)
+{
+    centralBodyLocation = cv;
+}
+

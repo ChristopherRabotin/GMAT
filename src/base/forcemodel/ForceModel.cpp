@@ -325,6 +325,12 @@ bool ForceModel::Initialize(void)
         i = 0;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
+            parmName = "Epoch";
+            id = (*sat)->GetParameterID(parmName);
+            parm = (*sat)->GetRealParameter(id);
+            id = currentPm->GetParameterID(parmName);
+            currentPm->SetRealParameter(id, parm);
+        
             parmName = "ReferenceBody";
             id = (*sat)->GetParameterID(parmName);
             stringParm = (*sat)->GetStringParameter(id);

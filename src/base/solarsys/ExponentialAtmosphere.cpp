@@ -86,7 +86,7 @@ bool ExponentialAtmosphere::Density(Real *position, Real *density, Integer count
             
         ra  = atan2(loc[1], loc[0]);
         dec = asin(loc[2] / mag);
-        mag = sin(dec)*sin(sunDec) + cos(dec)*cos(sunDec)*cos(ra-sunRa-lagAngle);
+        mag = sin(dec)*sin(sunDec)+cos(dec)*cos(sunDec)*cos(ra-sunRa-lagAngle);
         if (fabs(mag) > 1.0 + 1.0e-13)
             throw AtmosphereException("Arg for bulge calculation not physical");
         if (fabs(mag) > 1.0)

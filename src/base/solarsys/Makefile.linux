@@ -14,6 +14,9 @@ OBJECTS = CelestialBody.o SolarSystem.o Moon.o Planet.o Star.o \
 all: libSolarSystem 
 	mkdir -p ../lib
 	mv libSolarSystem.a ../lib
+	
+clean:
+	rm -f *.o ../lib/libSolarSystem.a
 
 libSolarSystem : ../lib/libSolarSystem.a
 

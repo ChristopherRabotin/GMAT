@@ -96,13 +96,14 @@
 const std::string
 PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount] =
 {
-//    "Elapsed Time (sec)"
+    "Epoch",
     "ElapsedSeconds"            // DJC changed to make script parsing work
 };
 
 const Gmat::ParameterType
 PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount] =
 {
+    Gmat::REAL_TYPE,
     Gmat::REAL_TYPE
 };
 
@@ -130,6 +131,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
     initialized                 (false),
     stateChanged                (false),
     modelState                  (NULL),
+    epoch                       (21545.0),
     elapsedTime                 (0.0),
     deriv                       (NULL),
     relativeErrorThreshold      (0.10),
@@ -167,6 +169,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
     dimension                   (pm.dimension),
     initialized                 (pm.initialized),
     stateChanged                (pm.stateChanged),
+    epoch                       (pm.epoch),
     elapsedTime                 (pm.elapsedTime),
     relativeErrorThreshold      (pm.relativeErrorThreshold),
     solarSystem                 (pm.solarSystem)
@@ -210,6 +213,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
 
     dimension   = pm.dimension;
     initialized = pm.initialized;
+    epoch       = pm.epoch;
     elapsedTime = pm.elapsedTime;
 
     if (pm.modelState) 
@@ -256,6 +260,7 @@ std::string PhysicalModel::GetParameterText(const Integer id) const
 {
     switch (id)
     {
+        case epochParameter:        // Intentional fall-through
         case elapsedTimeParameter:
             return PhysicalModel::PARAMETER_TEXT[id];
         default:
@@ -291,6 +296,7 @@ Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 {
     switch (id)
     {
+        case epochParameter:
         case elapsedTimeParameter:
             return PhysicalModel::PARAMETER_TYPE[id];
         default:
@@ -309,6 +315,7 @@ std::string PhysicalModel::GetParameterTypeString(const Integer id) const
 {
     switch (id)
     {
+        case epochParameter:
         case elapsedTimeParameter:
             return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
         default:
@@ -325,6 +332,8 @@ std::string PhysicalModel::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real PhysicalModel::GetRealParameter(const Integer id) const
 {
+    if (id == epochParameter)
+        return epoch + elapsedTime / 86400.0;
     if (id == elapsedTimeParameter)
         return elapsedTime;
 
@@ -344,6 +353,12 @@ Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
     {
         elapsedTime = value;
         return elapsedTime;
+    }
+    if (id == epochParameter) 
+    {
+        epoch = value;
+        elapsedTime = 0.0;
+        return epoch;
     }
     return GmatBase::SetRealParameter(id, value);
 }

@@ -36,6 +36,7 @@ public:
     virtual bool            Density(Real *position, Real *density, 
                                     Integer count = 1) = 0;
     void                    SetSunVector(Real *sv);
+    void                    SetCentralBodyVector(Real *cv);
     
 protected:
     /// Vector from the central body to the sun
@@ -53,4 +54,3 @@ private:
 };
 
 #endif // AtmosphereModel_hpp
-

@@ -161,6 +161,8 @@ protected:
 
     /// Array of data parameters containing the model data
     Real *modelState;
+    /// The base epoch
+    Real epoch;
     /// Number of seconds elapsed from the base epoch
     Real elapsedTime;
     /// Array containing the most recent derivative calculation, when needed
@@ -173,7 +175,8 @@ protected:
     /// Parameter IDs
     enum
     {
-        elapsedTimeParameter = 0,
+        epochParameter = 0,
+        elapsedTimeParameter,
         PhysicalModelParamCount  // Count of the parameters for this class (including all of its ancestors)
     };
 

@@ -58,18 +58,20 @@ public:
     virtual Real        SetRealParameter(const Integer id, const Real value);    
 
 protected:
+    /// Sun pointer for bulge calculations
+    CelestialBody       *sun;
     /// Position of the Sun
-    Real                *sunPosition;
+    Real                sunLoc[3];
+    /// Central body pointer for bulge calculations
+    CelestialBody       *centralBody;
     /// Position of the body with the atmosphere
-    Real                *cbPosition;
+    Real                cbLoc[3];
     /// Angular velocity of the central body
-    Real                *angVel;
+    Real                angVel[3];
     /// Flag to indicate if the atmosphere model is externally owned or internal
     bool                useExternalAtmosphere;
     /// Pointer to the atmosphere model used
     AtmosphereModel     *atmos;
-    /// Solar system pointer for sun and body locations
-    SolarSystem         *ss;
     /// Array of densities
     Real                *density;
     /// Array of products of spacecraft properties

@@ -23,29 +23,24 @@
 
 DragForce::DragForce() :
     PhysicalModel           (Gmat::PHYSICAL_MODEL, "DragForce"),
-    sunPosition             (NULL),
-    cbPosition              (NULL),
-    angVel                  (NULL),
+    sun                     (NULL),
+    centralBody             (NULL),
     useExternalAtmosphere   (true),
     atmos                   (NULL),
-    ss                      (NULL),
     density                 (NULL),
     prefactor               (NULL)
 {
     dimension = 6;
     
     /// @todo Remove hard coded central body parms in DragForce
-    sunPosition = new Real[3];
-    cbPosition  = new Real[3];
-    angVel      = new Real[3];
-       
-    sunPosition[0] = 138276412034.25;
-    sunPosition[1] = -71626341186.98;
-    sunPosition[2] =    119832241.16;
+    // Sun location at MJD 21545.0, from the SLP file:
+    sunLoc[0] =  2.65e+07; 
+    sunLoc[1] = -1.32757e+08;
+    sunLoc[2] = -5.75566e+07;
     
-    cbPosition[0]  = 0.0;
-    cbPosition[1]  = 0.0;
-    cbPosition[2]  = 0.0;
+    cbLoc[0]  = 0.0;
+    cbLoc[1]  = 0.0;
+    cbLoc[2]  = 0.0;
     
     angVel[0]      = 0.0;
     angVel[1]      = 0.0;
@@ -63,37 +58,28 @@ DragForce::~DragForce()
         
     if (prefactor)
         delete [] prefactor;
-
-    /// @todo Remove the following delet calls when SS is integrated
-    delete [] sunPosition;
-    delete [] cbPosition;
-    delete [] angVel;
 }
 
 
 DragForce::DragForce(const DragForce& df) :
     PhysicalModel           (df),
-    sunPosition             (NULL),
-    cbPosition              (NULL),
-    angVel                  (NULL),
+    sun                     (NULL),
+    centralBody             (NULL),
     useExternalAtmosphere   (true),
     atmos                   (NULL),
-    ss                      (NULL),
     density                 (NULL),
     prefactor               (NULL)
 {
+    dimension = df.dimension;
+
     /// @todo Remove hard coded central body parms in DragForce
-    sunPosition = new Real[3];
-    cbPosition  = new Real[3];
-    angVel      = new Real[3];
-       
-    sunPosition[0] = 138276412034.25;
-    sunPosition[1] = -71626341186.98;
-    sunPosition[2] =    119832241.16;
+    sunLoc[0] = 138276412034.25;
+    sunLoc[1] = -71626341186.98;
+    sunLoc[2] =    119832241.16;
     
-    cbPosition[0]  = 0.0;
-    cbPosition[1]  = 0.0;
-    cbPosition[2]  = 0.0;
+    cbLoc[0]  = 0.0;
+    cbLoc[1]  = 0.0;
+    cbLoc[2]  = 0.0;
     
     angVel[0]      = 0.0;
     angVel[1]      = 0.0;
@@ -213,10 +199,33 @@ bool DragForce::Initialize(void)
 
     if (mass.size() > 0)
         BuildPrefactors();
-    else 
-        for (Integer i = 0; i < satCount; ++i) {
-            prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
+    else
+        if (mass.size() == 0) 
+            for (Integer i = 0; i < satCount; ++i) {
+                prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
+            }
+        
+    // Set the atmosphere model
+    if (solarSystem) {
+        sun = solarSystem->GetBody("Sun");
+        if (!sun)
+            throw ForceModelException("The Sun is not in solar system");
+        
+        std::string bodyName;
+        if (dragBody.size() > 0)
+            bodyName = dragBody[0];
+        else
+            bodyName = "Earth";
+        centralBody = solarSystem->GetBody(bodyName);
+
+        if (!centralBody)
+            throw ForceModelException("Central body (for Drag) not in solar system");
+        atmos = centralBody->GetAtmosphereModel();
+        if (atmos) {
+            atmos->SetSunVector(sunLoc);
+            atmos->SetCentralBodyVector(cbLoc);
         }
+    }
     
     return true;
 }
@@ -341,6 +350,22 @@ void DragForce::GetDensity(Real *state)
         for (Integer i = 0; i < satCount; ++i)
             density[i] = 4.0e-13;
     }
-    else
+    else {
+        if (atmos) {
+            if (sun && centralBody) {
+                // Update the Sun vector
+                Real now = epoch + elapsedTime / 86400.0; 
+                Rvector sunV = sun->GetState(now);
+                Rvector cbV  = centralBody->GetState(now);
+                
+                sunLoc[0] = sunV[0];
+                sunLoc[1] = sunV[1];
+                sunLoc[2] = sunV[2];
+                cbLoc[0]  = cbV[0];
+                cbLoc[1]  = cbV[1];
+                cbLoc[2]  = cbV[2];
+            }
+        }
         atmos->Density(state, density, satCount);
+    }
 }
