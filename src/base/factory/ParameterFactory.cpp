@@ -28,9 +28,9 @@
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 
-#include "SMA.hpp"
-#include "Ecc.hpp"
-#include "Inc.hpp"
+//#include "SMA.hpp"
+//#include "Ecc.hpp"
+//#include "Inc.hpp"
 
 
 // add others here for future builds
@@ -61,48 +61,56 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
         return new CurrA1MJD(withName);
 
     // Cartesian paramters
-    if (ofType == "CartX")
+    if (ofType == "X")
         return new CartX(withName);
-    if (ofType == "CartY")
+    if (ofType == "Y")
         return new CartY(withName);
-    if (ofType == "CartZ")
+    if (ofType == "Z")
         return new CartZ(withName);
-    if (ofType == "CartVx")
+    if (ofType == "VX")
         return new CartVx(withName);
-    if (ofType == "CartVy")
+    if (ofType == "VY")
         return new CartVy(withName);
-    if (ofType == "CartVz")
+    if (ofType == "VZ")
         return new CartVz(withName);
 
     // Keplerian parameters
-    if (ofType == "KepSMA")
-        return new KepSMA(withName);
-    if (ofType == "KepEcc")
-        return new KepEcc(withName);
-    if (ofType == "KepInc")
-        return new KepInc(withName);
-    if (ofType == "KepRAAN")
-        return new KepRAAN(withName);
-    if (ofType == "KepAOP")
-        return new KepAOP(withName);
-    if (ofType == "KepTA")
-        return new KepTA(withName);
-    if (ofType == "KepMA")
-        return new KepMA(withName);
-    if (ofType == "KepMM")
-        return new KepMM(withName);
     if (ofType == "SMA")
-        return new SMA(withName);
-    if (ofType == "Ecc")
-        return new Ecc(withName);
-    if (ofType == "Inc")
-        return new Inc(withName);
+        return new KepSMA(withName);
+    if (ofType == "ECC")
+        return new KepEcc(withName);
+    if (ofType == "INC")
+        return new KepInc(withName);
+    if (ofType == "RAAN")
+        return new KepRAAN(withName);
+    if (ofType == "AOP")
+        return new KepAOP(withName);
+    if (ofType == "TA")
+        return new KepTA(withName);
+    if (ofType == "MA")
+        return new KepMA(withName);
+    if (ofType == "MM")
+        return new KepMM(withName);
+    //if (ofType == "SMA")
+    //    return new SMA(withName);
+    //if (ofType == "Ecc")
+    //    return new Ecc(withName);
+    //if (ofType == "Inc")
+    //    return new Inc(withName);
 
     // Spherical parameters
-    if (ofType == "SphRA")
+    if (ofType == "RMAG")
+        return new SphRMag(withName);
+    if (ofType == "RA")
         return new SphRA(withName);
-    if (ofType == "SphDec")
+    if (ofType == "DEC")
         return new SphDec(withName);
+    if (ofType == "VMAG")
+        return new SphVMag(withName);
+    if (ofType == "RAV")
+        return new SphRAV(withName);
+    if (ofType == "DECV")
+        return new SphDecV(withName);
 
     // Orbital parameters
     if (ofType == "VelApoapsis")
@@ -145,25 +153,25 @@ ParameterFactory::ParameterFactory()
         creatables.push_back("CurrA1MJD");
 
         // Cartesian parameters
-        creatables.push_back("CartX");
-        creatables.push_back("CartY");
-        creatables.push_back("CartZ");
-        creatables.push_back("CartVx");
-        creatables.push_back("CartVy");
-        creatables.push_back("CartVz");
+        creatables.push_back("X");
+        creatables.push_back("Y");
+        creatables.push_back("Z");
+        creatables.push_back("VX");
+        creatables.push_back("VY");
+        creatables.push_back("VZ");
 
         // Keplerian parameters
-        creatables.push_back("KepSMA");
-        creatables.push_back("KepEcc");
-        creatables.push_back("KepInc");
-        creatables.push_back("KepRAAN");
-        creatables.push_back("KepAOP");
-        creatables.push_back("KepTA");
         creatables.push_back("SMA");
-        creatables.push_back("Ecc");
-        creatables.push_back("Inc");
-        creatables.push_back("KepMA");
-        creatables.push_back("KepMM");
+        creatables.push_back("ECC");
+        creatables.push_back("INC");
+        creatables.push_back("RAAN");
+        creatables.push_back("AOP");
+        creatables.push_back("TA");
+        creatables.push_back("MA");
+        creatables.push_back("MM");
+        //creatables.push_back("SMA");
+        //creatables.push_back("Ecc");
+        //creatables.push_back("Inc");
 
         // Orbital parameters
         creatables.push_back("VelApoapsis");
@@ -172,8 +180,12 @@ ParameterFactory::ParameterFactory()
         creatables.push_back("Periapsis");
 
         // Spherical parameters
-        creatables.push_back("SphRA");
-        creatables.push_back("SphDec");
+        creatables.push_back("RMAG");
+        creatables.push_back("RA");
+        creatables.push_back("DEC");
+        creatables.push_back("VMAG");
+        creatables.push_back("RAV");
+        creatables.push_back("DECV");
 
         // Angular parameters
         creatables.push_back("SemilatusRectum");
