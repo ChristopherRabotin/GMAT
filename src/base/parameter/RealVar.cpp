@@ -20,8 +20,10 @@
 #include "gmatdefs.hpp"
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
+#include "MessageInterface.hpp"
 #include <sstream>
 
+//#define DEBUG_REALVAR 1
 
 //---------------------------------
 // static data
@@ -177,6 +179,22 @@ Real RealVar::GetReal() const
    return mRealValue;
 }
 
+//------------------------------------
+// methods inherited from GmatBase
+//------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* RealVar::Clone() const
+{
+   return new RealVar(*this);
+}
+
 //------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
 //------------------------------------------------------------------------------
@@ -263,6 +281,10 @@ Real RealVar::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real RealVar::SetRealParameter(const Integer id, const Real value)
 {
+#if DEBUG_REALVAR
+   MessageInterface::ShowMessage("RealVar::SetRealParameter() id=%d, value=%f\n",
+                                 id, value);
+#endif
    switch (id)
    {
    case PARAM_1:
@@ -285,19 +307,43 @@ Real RealVar::SetRealParameter(const std::string &label, const Real value)
    return SetRealParameter(GetParameterID(label), value);
 }
 
-//------------------------------------
-// methods inherited from GmatBase
-//------------------------------------
+//loj: 11/4/04 added to handle expression equals some number
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool RealVar::SetStringParameter(const Integer id, const std::string &value)
+{
+#if DEBUG_REALVAR
+   MessageInterface::ShowMessage("RealVar::SetStringParameter() id=%d, value=%s\n",
+                                 id, value.c_str());
+#endif
+   
+   switch (id)
+   {
+   case EXPRESSION:
+      {
+         // if expression is just a number set value to expression
+         double temp = atof(value.c_str());
+         mRealValue = temp;
+         return Parameter::SetStringParameter(id, value);
+      }
+   default:
+      return Parameter::SetStringParameter(id, value);
+   }
+}
 
 //------------------------------------------------------------------------------
-// virtual GmatBase* Clone() const
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
 //------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-GmatBase* RealVar::Clone() const
+bool RealVar::SetStringParameter(const std::string &label,
+                                 const std::string &value)
 {
-   return new RealVar(*this);
+#if DEBUG_REALVAR
+   MessageInterface::ShowMessage("RealVar::SetStringParameter() label=%s value=%s\n",
+                                 label.c_str(), value.c_str());
+#endif
+   
+   return SetStringParameter(GetParameterID(label), value);
 }
 

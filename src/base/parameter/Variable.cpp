@@ -147,8 +147,9 @@ Real Variable::GetReal()
 //------------------------------------------------------------------------------
 Real Variable::EvaluateReal()
 {
-   // if expression is variable itself or empty
-   if (this->GetName() == mExpr || mExpr == "")
+   // if expression is variable itself or empty or first char is digit
+   //loj: 11/4/04 added isdigit
+   if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]))
       return mRealValue;
       
 #if DEBUG_VARIABLE
