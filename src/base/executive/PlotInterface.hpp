@@ -27,7 +27,7 @@ class PlotInterface
 
 public:
 
-    static bool CreatePlotWindow();
+    static bool CreatePlotWindow(bool canvasOnly);
     static bool UpdateSpacecraft(const Real &time, const Real &posX,
                                  const Real &posY, const Real &posZ);
     

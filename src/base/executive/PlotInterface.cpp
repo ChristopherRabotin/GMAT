@@ -51,40 +51,46 @@ PlotInterface::~PlotInterface()
 }
 
 //------------------------------------------------------------------------------
-//  bool CreatePlotWindow()
+//  bool CreatePlotWindow(bool canvasOnly)
 //------------------------------------------------------------------------------
-bool PlotInterface::CreatePlotWindow()
-{
-    MdiPlot::mdiParentGlFrame =
-        new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-                             wxPoint(300, 200), wxSize(600, 500),
-                             wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-    // Give it an icon
+bool PlotInterface::CreatePlotWindow(bool canvasOnly)
+{    
+    if (!canvasOnly)
+    {
+        MdiGlPlot::mdiParentGlFrame =
+            new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
+                                 wxPoint(300, 200), wxSize(600, 500),
+                                 wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+        // Give it an icon
 #ifdef __WXMSW__
-    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
+        MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
 #else
-    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+        MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
 #endif
-        
+    }
+    
     // create a frame, containing a opengl canvas
-    MdiPlot::mdiParentGlFrame->subframe = 
-        new MdiChildTrajFrame(MdiPlot::mdiParentGlFrame, _T("OpenGL Canvas Frame"),
+    MdiGlPlot::mdiParentGlFrame->mainSubframe =
+        new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
+                              _T("Main Canvas Frame"),
                               wxPoint(-1, -1), wxSize(-1, -1),
                               wxDEFAULT_FRAME_STYLE);
-        
-    wxString title;
-    title.Printf(_T("Canvas Frame %d"), ++MdiPlot::gs_nFrames);
-    MdiPlot::mdiParentGlFrame->subframe->SetTitle(title);
+    
+    ++MdiGlPlot::numChildFrames;
+    
+    MdiGlPlot::mdiParentGlFrame->mainSubframe->SetTitle(_T("Main 3D Plot"));
 
     // initialize GL
-    if (!MdiPlot::mdiParentGlFrame->subframe->mCanvas->InitGL())
+    if (!MdiGlPlot::mdiParentGlFrame->mainSubframe->mCanvas->InitGL())
     {
-        wxMessageDialog msgDialog(MdiPlot::mdiParentGlFrame,
+        wxMessageDialog msgDialog(MdiGlPlot::mdiParentGlFrame,
                                   _T("InitGL() failed"), _T("CreatePlotWindow"));
         msgDialog.ShowModal();
         return false;
     }
 
+    MdiGlPlot::mdiParentGlFrame->UpdateUI();
+    
     return true;
 }
 
@@ -96,23 +102,42 @@ bool PlotInterface::UpdateSpacecraft(const Real &time, const Real &posX,
                                      const Real &posY, const Real &posZ)
 {   
 #if !defined __CONSOLE_APP__
-    if (MdiPlot::mdiParentGlFrame != NULL)
+    if (MdiGlPlot::mdiParentGlFrame != NULL)
     {
-        MdiPlot::mdiParentGlFrame->Show(true);
-        MdiPlot::mdiParentGlFrame->subframe->mCanvas->UpdateSpacecraft(time, posX, posY, posZ);
+        if (MdiGlPlot::numChildFrames > 0 &&
+            MdiGlPlot::mdiParentGlFrame->mainSubframe != NULL)
+        {
+            MdiGlPlot::mdiParentGlFrame->mainSubframe->SetFocus();
+            MdiGlPlot::mdiParentGlFrame->mainSubframe->
+                UpdateSpacecraft(time, posX, posY, posZ);
+        }
+        else
+        {
+            if (!CreatePlotWindow(true))
+                return false;
+            
+            MdiGlPlot::mdiParentGlFrame->mainSubframe->SetFocus();
+            MdiGlPlot::mdiParentGlFrame->mainSubframe->
+                UpdateSpacecraft(time, posX, posY, posZ);
+        }
+        
         return true;
     }
     else
     {
-        wxLogWarning("PlotWindow was not created. Creating a new PlotWindow...");
-        wxLog::FlushActive();
+        //wxLogWarning("PlotWindow was not created. Creating a new PlotWindow...");
+        //wxLog::FlushActive();
 
-        if (!CreatePlotWindow())
+        if (!CreatePlotWindow(false))
             return false;
+        
+        MdiGlPlot::mdiParentGlFrame->Show(true);
         
         // Update spacecraft trajectory (for now just one spacecraft)
         // later there will be UpdateUniverse()
-        MdiPlot::mdiParentGlFrame->subframe->mCanvas->UpdateSpacecraft(time, posX, posY, posZ);
+        MdiGlPlot::mdiParentGlFrame->mainSubframe->
+            UpdateSpacecraft(time, posX, posY, posZ);
+       
         return true;
     }
 #endif
