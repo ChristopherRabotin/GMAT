@@ -17,7 +17,7 @@
 #include <wx/control.h>
 #include <wx/textctrl.h>
 #include <wx/button.h>
-#include <wx/notebook.h>
+#include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
@@ -27,6 +27,9 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiInterpreter.hpp"
+#include "Solver.hpp"
+#include "DifferentialCorrector.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -51,29 +54,25 @@ DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
     
     theSolver =
         theGuiInterpreter->GetSolver(std::string(name.c_str()));
+        
+    theDC = (DifferentialCorrector *)theSolver;
 
-    //loj added
     if (theSolver != NULL)
     {
-        Initialize();
+        maxIterationID = theDC->GetParameterID("MaximumIterations");
+        maxIteration = theDC->GetIntegerParameter(maxIterationID);
+        
         Setup(this);
         GetData();
     }
 }
 
-void DCSetupPanel::Initialize()
-{
-
-}
-
 void DCSetupPanel::Setup( wxWindow *parent)
 {   
     // wxStaticText
-    nameStaticText = new wxStaticText( parent, ID_TEXT, wxT("Solver Name"), wxDefaultPosition, wxDefaultSize, 0 );
     maxStaticText = new wxStaticText( parent, ID_TEXT, wxT("Max Iterations"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    nameTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     maxTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     
     // wx*Sizer
@@ -90,8 +89,6 @@ void DCSetupPanel::Setup( wxWindow *parent)
     helpButton = new wxButton( parent, ID_BUTTON, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // Add to wx*Sizer
-    flexGridSizer1->Add( nameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    flexGridSizer1->Add( nameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     flexGridSizer1->Add( maxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
     flexGridSizer1->Add( maxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     
@@ -105,6 +102,11 @@ void DCSetupPanel::Setup( wxWindow *parent)
     boxsizerMain->Add( boxsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
     boxsizerMain->Add( boxsizer2, 0, wxALIGN_CENTER|wxALL, 5 );
 
+    applyButton->Enable(false);
+    
+    //waw: Future implementation
+    helpButton->Enable(false);
+    
     parent->SetAutoLayout( true );
     parent->SetSizer( boxsizerMain );
     boxsizerMain->Fit( parent );
@@ -113,22 +115,23 @@ void DCSetupPanel::Setup( wxWindow *parent)
 
 void DCSetupPanel::GetData()
 {    
-    //nameTextCtrl->Append();
-    //maxTextCtrl->Append();
+    maxTextCtrl->AppendText(wxVariant((long)maxIteration));
 }
 
 void DCSetupPanel::SetData()
 {
-    // = nameTextCtrl->GetValue();
-    // = maxTextCtrl->GetValue();
+     theDC->SetIntegerParameter(maxIterationID, maxIteration);
 }
 
 void DCSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == nameTextCtrl )         
+    if ( event.GetEventObject() == maxTextCtrl )   
+    {   
+        wxString value = maxTextCtrl->GetValue();
+        
+        maxIteration = atoi(value);
         applyButton->Enable(true);
-    else if ( event.GetEventObject() == maxTextCtrl )      
-        applyButton->Enable(true);
+    }
     else
         event.Skip();
 }
@@ -151,7 +154,6 @@ void DCSetupPanel::OnButton(wxCommandEvent& event)
         GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
         gmatMainNotebook->ClosePage();
     }
-        
     else
         event.Skip();
 }

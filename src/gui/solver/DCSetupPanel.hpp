@@ -20,13 +20,15 @@
 #include <wx/control.h>
 #include <wx/textctrl.h>
 #include <wx/button.h>
-#include <wx/notebook.h>
+#include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "Solver.hpp"
+#include "DifferentialCorrector.hpp"
 
 class DCSetupPanel : public wxPanel
 {
@@ -34,34 +36,25 @@ public:
     // constructors
     DCSetupPanel(wxWindow *parent, const wxString &name);
        
-protected:
-
-    GuiInterpreter *theGuiInterpreter;
-    Solver *theSolver;
-    
-    // Main notebook
-    wxNotebook *solverNotebook;
-    
-    wxPanel *dcPanel;
-    wxPanel *bmPanel;
-    wxPanel *qnPanel;
-    
+protected:     
     wxButton *okButton;
     wxButton *applyButton;
     wxButton *cancelButton;
     wxButton *helpButton;
     
-    // DC 
-    wxStaticText *nameStaticText;
     wxStaticText *maxStaticText;
     
-    wxTextCtrl *nameTextCtrl;
     wxTextCtrl *maxTextCtrl;
+    
+    Integer maxIteration;
+    Integer maxIterationID;
+    
+    GuiInterpreter *theGuiInterpreter;
+    Solver *theSolver;
+    DifferentialCorrector *theDC;
    
     // Layout & data handling methods
     void Setup(wxWindow *parent);
-    void SetupDC(wxWindow *parent);
-    void Initialize();
     void GetData();
     void SetData();
     
