@@ -75,6 +75,7 @@ static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
 
 using namespace GmatPlot;
+//loj: 1/14/05 Used BodyInfo::BODY_NAME, BodyInfo::BODY_COLOR
 
 //------------------------------------------------------------------------------
 // TrajPlotCanvas(wxWindow *parent, wxWindowID id,
@@ -179,14 +180,14 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
       {
          if (mBodyInUse[body])
          {
-            bodyPtr = mSolarSystem->GetBody(GmatPlot::BODY_NAME[body]);
+            bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[body]);
             if (bodyPtr != NULL)
             {
                mBodyRadius[body] = bodyPtr->GetEquatorialRadius();
                mBodyMaxZoomIn[body] = mBodyRadius[body] * RADIUS_ZOOM_RATIO;
 #if DEBUG_TRAJCANVAS_INIT
                MessageInterface::ShowMessage
-                  ("TrajPlotCanvas() %s Radius=%f maxZoomIn=%f\n", GmatPlot::BODY_NAME[body].c_str(),
+                  ("TrajPlotCanvas() %s Radius=%f maxZoomIn=%f\n", BodyInfo::BODY_NAME[body].c_str(),
                    mBodyRadius[body], mBodyMaxZoomIn[body]);
 #endif
             }
@@ -690,7 +691,7 @@ bool TrajPlotCanvas::LoadGLTextures()
          default:
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::LoadGLTextures() Texture file is not supported for body: %s\n",
-                GmatPlot::BODY_NAME[body].c_str());
+                BodyInfo::BODY_NAME[body].c_str());
             status = 0;
             break;
          }
@@ -699,7 +700,7 @@ bool TrajPlotCanvas::LoadGLTextures()
          {
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::LoadGLTextures() Unable to load texture file for %s\n"
-                "file name:%s\n", GmatPlot::BODY_NAME[body].c_str(), textureFile.c_str());
+                "file name:%s\n", BodyInfo::BODY_NAME[body].c_str(), textureFile.c_str());
          }
          else
          {
@@ -999,7 +1000,7 @@ void TrajPlotCanvas::DrawEarth()
 void TrajPlotCanvas::DrawEarthTrajectory()
 {
    // set color
-   *sIntColor = GmatPlot::BODY_COLOR[EARTH];
+   *sIntColor = BodyInfo::BODY_COLOR[EARTH];
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
 
    // Draw Earth trajectory line based on points
@@ -1093,7 +1094,7 @@ void TrajPlotCanvas::DrawBodyTrajectory(int bodyIndex)
 {
 #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawBodyTrajectory() drawing %s\n", GmatPlot::BODY_NAME[bodyIndex].c_str());
+      ("TrajPlotCanvas::DrawBodyTrajectory() drawing %s\n", BodyInfo::BODY_NAME[bodyIndex].c_str());
 #endif
    
    // Draw anybody trajectory line based on points
@@ -1102,7 +1103,7 @@ void TrajPlotCanvas::DrawBodyTrajectory(int bodyIndex)
    glBegin(GL_LINES);
 
    // set color
-   *sIntColor = GmatPlot::BODY_COLOR[bodyIndex];
+   *sIntColor = BodyInfo::BODY_COLOR[bodyIndex];
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
 
    for (int i=1; i<mNumData; i++)
@@ -1516,7 +1517,7 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
          {
             if (mBodyInUse[body])
             {
-               CelestialBody *bodyPtr = mSolarSystem->GetBody(GmatPlot::BODY_NAME[body]);
+               CelestialBody *bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[body]);
                
                Rvector6 bodyState = bodyPtr->GetState(time);
                mBodyGciPos[body][mNumData][0] = bodyState[0];
@@ -1528,7 +1529,7 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
 #if DEBUG_TRAJCANVAS_UPDATE
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas::UpdateSpacecraft() %s pos = %f, %f, %f\n",
-                   GmatPlot::BODY_NAME[body].c_str(), mTempBodyPos[body][mNumData][0],
+                   BodyInfo::BODY_NAME[body].c_str(), mTempBodyPos[body][mNumData][0],
                    mTempBodyPos[body][mNumData][1], mTempBodyPos[body][mNumData][2]);
 #endif
             }
@@ -1564,16 +1565,16 @@ void TrajPlotCanvas::AddBody(const wxArrayString &bodyNames,
       {
          mOtherBodyCount++;
          bodyId = LAST_STD_BODY_ID + mOtherBodyCount;
-         GmatPlot::BODY_NAME[bodyId] = bodyNames[i];
+         BodyInfo::BODY_NAME[bodyId] = bodyNames[i];
       }
       
       mBodyInUse[bodyId] = true;
-      GmatPlot::BODY_COLOR[bodyId] = bodyColors[i];
+      BodyInfo::BODY_COLOR[bodyId] = bodyColors[i];
          
 #if DEBUG_TRAJCANVAS_BODY
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::AddBody() body=%s, bodyId=%d, color=%d\n",
-          GmatPlot::BODY_NAME[bodyId].c_str(), bodyId, GmatPlot::BODY_COLOR[bodyId]);
+          BodyInfo::BODY_NAME[bodyId].c_str(), bodyId, BodyInfo::BODY_COLOR[bodyId]);
 #endif
    }
    
@@ -1595,7 +1596,7 @@ void TrajPlotCanvas::GotoStdBody(int bodyId)
    if (!mBodyHasData[bodyId])
    {
       mBodyHasData[bodyId] = true;
-      CelestialBody *bodyPtr = mSolarSystem->GetBody(GmatPlot::BODY_NAME[bodyId]);
+      CelestialBody *bodyPtr = mSolarSystem->GetBody(BodyInfo::BODY_NAME[bodyId]);
       mBodyRadius[bodyId] = bodyPtr->GetEquatorialRadius();
       mBodyMaxZoomIn[bodyId] = mBodyRadius[bodyId] * RADIUS_ZOOM_RATIO;
 
@@ -1648,7 +1649,7 @@ void TrajPlotCanvas::GotoOtherBody(const wxString &body)
 int TrajPlotCanvas::GetStdBodyId(const std::string &name)
 {
    for (int i=0; i<=LAST_STD_BODY_ID; i++)
-      if (GmatPlot::BODY_NAME[i] == name)
+      if (BodyInfo::BODY_NAME[i] == name)
          return i;
 
    MessageInterface::PopupMessage
