@@ -690,6 +690,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
             SetItemText(item, newName);
             GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
             selItem->SetDesc(newName);
+            theGuiManager->UpdateSpacecraft();
         }
     }
 
