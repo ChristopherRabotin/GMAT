@@ -95,7 +95,7 @@ Converter& Converter::operator=(const Converter &converter)
 }
 
 //---------------------------------------------------------------------------
-//  Real* GetType()
+//  std::string GetType()
 //---------------------------------------------------------------------------
 /**
  * Get the type name.
