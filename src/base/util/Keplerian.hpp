@@ -78,7 +78,7 @@ public :
     friend Radians MeanToTrueAnomaly(Radians meanAnomaly,
                                      Real eccentricity);
     friend Keplerian ToKeplerian(const Cartesian &c,
-                                 Real mu=PhysicalConstants::mu);
+                                 Real mu=GmatPhysicalConst::mu);
 
     friend std::ostream& operator<<(std::ostream& output, Keplerian& k);
     friend std::istream& operator>>(std::istream& input, Keplerian& k);
