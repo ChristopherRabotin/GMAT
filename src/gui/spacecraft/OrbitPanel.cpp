@@ -1,3 +1,4 @@
+//$Header:
 //------------------------------------------------------------------------------
 //                           OrbitPanel
 //------------------------------------------------------------------------------
@@ -159,31 +160,31 @@ void OrbitPanel::Create()
    dateComboBox = new wxComboBox( this, ID_CB_EPOCH, wxT(""), 
              wxDefaultPosition, wxSize(110,-1), 4, strs12, 
              wxCB_DROPDOWN | wxCB_READONLY );
-    item10->Add( dateComboBox, 0, wxALIGN_CENTER, 5 );
+   item10->Add( dateComboBox, 0, wxALIGN_CENTER, 5 );
 //    dateComboBox->Disable();
 
-    // textfield for the epochvalue
-    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
+   // textfield for the epochvalue
+   epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
                  wxDefaultPosition, wxSize(130,-1), 0 );
    
-    item10->Add( epochValue, 0, wxALIGN_CENTER, 5 );
-    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
+   item10->Add( epochValue, 0, wxALIGN_CENTER, 5 );
+   item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
 
-    wxStaticText *item14 = new wxStaticText( this, ID_TEXT, 
+   wxStaticText *item14 = new wxStaticText( this, ID_TEXT, 
                             wxT("State Type"), wxDefaultPosition,
                             wxDefaultSize, 0 );
-    item10->Add( item14, 0, wxALIGN_CENTER, 5 );
+   item10->Add( item14, 0, wxALIGN_CENTER, 5 );
 
-    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
+   item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
 
-    wxString strs15[] =
-    {
-        wxT("Cartesian"),
-        wxT("Keplerian"),
-//          wxT("Modified Keplerian"),
-//          wxT("Spherical"),
-//          wxT("Equinotical")
-    };
+   wxString strs15[] =
+   {
+       wxT("Cartesian"),
+       wxT("Keplerian"),
+//         wxT("Modified Keplerian"),
+//         wxT("Spherical"),
+//         wxT("Equinotical")
+   };
     
     // combo box for the state
     stateComboBox = new wxComboBox( this, ID_CB_STATE, wxT(""), 
@@ -389,11 +390,6 @@ void OrbitPanel::LoadData()
        label6->SetLabel("deg");
       }
 
-//    dateComboBox->SetSelection(2);
-    std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
-    dateComboBox->SetValue(wxT(dateFormat.c_str()));
-
-
     //loj: get element type first
     //loj: if element type is Cartesian, the combobox should show Cartesian
     //loj: if Keplerian, the combobox should show Keplerian, etc
@@ -402,7 +398,14 @@ void OrbitPanel::LoadData()
     //loj: do not readback from the elements field unless user enters the new value
     
     // get elements
-    Real epoch = theSpacecraft->GetRealParameter(0);
+//    Real epoch = theSpacecraft->GetRealParameter(0);
+    std::string epochStr = theSpacecraft->GetDisplayEpoch();
+    MessageInterface::ShowMessage("\nLoaded epoch as %s", epochStr.c_str());
+
+//    dateComboBox->SetSelection(2);
+    std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
+    dateComboBox->SetValue(wxT(dateFormat.c_str()));
+
 //    Real element1 = theSpacecraft->GetRealParameter(1);
 //    Real element2 = theSpacecraft->GetRealParameter(2);
 //    Real element3 = theSpacecraft->GetRealParameter(3);
@@ -417,10 +420,11 @@ void OrbitPanel::LoadData()
     Real element5 = displayState[4];
     Real element6 = displayState[5];
 
-    wxString epochStr;
-    epochStr.Printf("%18.9f", epoch);
-    epochValue->SetValue(epochStr);
-    
+//    wxString epochStr;
+//    epochStr.Printf("%18.9f", epoch);
+//    epochValue->SetValue(epochStr);
+    epochValue->SetValue(epochStr.c_str());
+     
     wxString el1;
     el1.Printf("%.9f", element1);
     textCtrl1->SetValue(el1);
@@ -574,12 +578,14 @@ void OrbitPanel::OnEpochChange()
     theSpacecraft->SetDisplayDateFormat(dateFormat.c_str());
 
     // get elements
-    Real epoch = theSpacecraft->GetDisplayEpoch();  
-//    MessageInterface::ShowMessage("new value %f\n", epoch);
+//    Real epoch = theSpacecraft->GetDisplayEpoch();  
+//    wxString epochStr;
+//    epochStr.Printf("%18.9f", epoch);
+//    epochValue->SetValue(epochStr);
 
-    wxString epochStr;
-    epochStr.Printf("%18.9f", epoch);
-    epochValue->SetValue(epochStr);
+   std::string epochStr = theSpacecraft->GetDisplayEpoch();
+   MessageInterface::ShowMessage("\nnew value of epoch is %s\n", epochStr.c_str());
+   epochValue->SetValue(epochStr.c_str());
 
 }
 
@@ -595,12 +601,19 @@ void OrbitPanel::SaveData()
     
     // refFrame id = 8
 //    theSpacecraft->SetStringParameter(8, std::string (stateStr.c_str()));
+    wxString epochStr = epochValue->GetValue();
+    MessageInterface::ShowMessage("Going to save epoch as %s", epochStr.c_str());
+//    theSpacecraft->SetRealParameter(0, atof(epochStr));
+ //   theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+
     
     wxString dateFormatStr = dateComboBox->GetStringSelection();
 //    theSpacecraft->SetStringParameter(11, std::string (dateFormatStr.c_str()));
     theSpacecraft->SetDisplayDateFormat(dateFormatStr.c_str());
 
-    wxString epochStr = epochValue->GetValue();
+    MessageInterface::ShowMessage("theSpacecraft->GetDisplayEpoch: %s", 
+                                  theSpacecraft->GetDisplayEpoch().c_str());
+
     wxString el1 = textCtrl1->GetValue();
     wxString el2 = textCtrl2->GetValue();
     wxString el3 = textCtrl3->GetValue();
@@ -608,8 +621,6 @@ void OrbitPanel::SaveData()
     wxString el5 = textCtrl5->GetValue();
     wxString el6 = textCtrl6->GetValue(); 
     
-    theSpacecraft->SetRealParameter(0, atof(epochStr));
-    theSpacecraft->SetDisplayEpoch(atof(epochStr));
 
 //    theSpacecraft->SetRealParameter(1, atof(el1));
 //    theSpacecraft->SetRealParameter(2, (double)atof(el2));
