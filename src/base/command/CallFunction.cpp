@@ -34,12 +34,16 @@ const std::string
 CallFunction::PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount] =
 {
    "FunctionName",
+   "AddInput",
+   "AddOutput",
 };
 
 const Gmat::ParameterType
 CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
 {
-   Gmat::STRING_TYPE,
+	Gmat::STRING_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRINGARRAY_TYPE,
 };
 
 CallFunction::CallFunction() :
@@ -47,6 +51,9 @@ CallFunction::CallFunction() :
    mFunction       (NULL),
    mFunctionName   ("")
 {
+   mNumInputParams = 0;
+   mNumOutputParams = 0;
+
    parameterCount = GmatCommandParamCount;
 }
 
@@ -59,6 +66,9 @@ CallFunction::CallFunction(const CallFunction& cf) :
    mFunction       (cf.mFunction),
    mFunctionName   (cf.mFunctionName)
 {
+   mNumInputParams = cf.mNumInputParams;
+   mNumOutputParams = cf.mNumOutputParams;
+
    parameterCount = GmatCommandParamCount;
 }
 
@@ -225,7 +235,13 @@ bool CallFunction::SetStringParameter(const std::string &label,
 bool CallFunction::TakeAction(const std::string &action,
                         const std::string &actionData)
 {
-   if (action == "Clear")
+   if (action == "ClearInput")
+   {
+   }
+   else if (action == "ClearOutput")
+   {
+   }
+   else if (action == "Clear")
    {
    }
 
@@ -574,11 +590,11 @@ bool CallFunction::ExecuteMatlabFunction()
 
 #if defined __USE_MATLAB__
 
-   // check if we have a pointer to matlab engine
-   if (!MatlabInterface::IsOpen())
-   {
-      MatlabInterface::Open();
-   }
+#if DEBUG_CALL_FUNCTION
+    MessageInterface::ShowMessage("opening matlab\n");
+#endif
+
+    MatlabInterface::Open();
 
    // ag:  having trouble getting the string parameter and typename
    // for input params
@@ -589,6 +605,13 @@ bool CallFunction::ExecuteMatlabFunction()
 #endif
 
       Parameter *param = (Parameter *)mInputList[i];
+
+      if (param == NULL)
+      {
+         MessageInterface::ShowMessage("Parameter was null");
+         break;
+      }
+
 
 #if DEBUG_CALL_FUNCTION
    MessageInterface::ShowMessage("After getting param  ");
@@ -662,6 +685,7 @@ bool CallFunction::ExecuteMatlabFunction()
 #if DEBUG_UPDATE_VAR
       MessageInterface::ShowMessage("Sent string %s to matlab\n",
                         inParamString.c_str());
+      MessageInterface::ShowMessage("Status is %d\n", status);
 #endif
          }
          catch (BaseException &ex)

@@ -99,9 +99,15 @@ private:
    ObjectArray objectArray;
    std::vector<Parameter*> mInputList;
    std::vector<Parameter*> mOutputList;
+   std::vector<Parameter*> mParamList;
 
    StringArray mInputListNames;
    StringArray mOutputListNames;
+   StringArray mparamListNames;
+
+
+   Integer mNumInputParams;
+   Integer mNumOutputParams;
 
    Function *mFunction;
    std::string mFunctionName;
@@ -111,12 +117,14 @@ private:
    enum
    {
       FUNCTION_NAME = GmatCommandParamCount,
+      ADD_INPUT,
+      ADD_OUTPUT,
       CallFunctionParamCount  /// Count of the parameters for this class
    };
 
    static const std::string PARAMETER_TEXT[
             CallFunctionParamCount - GmatCommandParamCount];
-        static const Gmat::ParameterType PARAMETER_TYPE[
+   static const Gmat::ParameterType PARAMETER_TYPE[
             CallFunctionParamCount - GmatCommandParamCount];
 
 };
