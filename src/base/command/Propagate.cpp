@@ -25,7 +25,7 @@
 
 //#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_EXE 1
-
+//#define DEBUG_STOPPING_CONDITIONS 1
 
 std::string Propagate::PropModeList[PROP_MODE_COUNT] =
 {
@@ -1282,21 +1282,31 @@ bool Propagate::Execute(void)
          Integer epochID;
          Real stopEpochBase;
          
-         for (unsigned int i = 0; i<stopWhen.size(); i++)
-         {
-            epochID = stopSats[i]->GetParameterID("Epoch");
-            stopEpochBase = stopSats[i]->GetRealParameter(epochID);
-            // StopCondition need new base epoch
-            stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
-
-            // ElapsedTime parameters need new initial epoch
-            stopVar = stopWhen[i]->GetStringParameter("StopVar");
-            if (stopVar.find("Elapsed") != stopVar.npos)
+         try {
+            
+            for (unsigned int i = 0; i<stopWhen.size(); i++)
             {
-               stopWhen[i]->GetStopParameter()->
-                  SetRealParameter("InitialEpoch", stopEpochBase);
+               epochID = stopSats[i]->GetParameterID("Epoch");
+               stopEpochBase = stopSats[i]->GetRealParameter(epochID);
+               // StopCondition need new base epoch
+               stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
+   
+               // ElapsedTime parameters need new initial epoch
+               stopVar = stopWhen[i]->GetStringParameter("StopVar");
+               if (stopVar.find("Elapsed") != stopVar.npos)
+               {
+                  stopWhen[i]->GetStopParameter()->
+                     SetRealParameter("InitialEpoch", stopEpochBase);
+               }
             }
          }
+         catch (BaseException &ex) {
+            MessageInterface::ShowMessage
+               ("Propagate::Execute() Exception while initializing stopping conditions\n");
+            inProgress = false;
+            throw;
+         }
+         
 
          // Publish the initial data
          pubdata[0] = currEpoch[0];
@@ -1331,24 +1341,43 @@ bool Propagate::Execute(void)
          //------------------------------------------
          // loop through StopCondition list
          //------------------------------------------
-         for (unsigned int i=0; i<stopWhen.size(); i++)
-         {
-            // StopCondition need epoch for the Interpolator
-            stopWhen[i]->SetRealParameter("Epoch", 
-                                        stopSats[i]->GetRealParameter(epochID));
-            
-            if (stopWhen[i]->Evaluate())
+         #ifdef DEBUG_STOPPING_CONDITIONS
+         try {
+         #endif
+            for (unsigned int i=0; i<stopWhen.size(); i++)
             {
-               stopCondMet = true;
-               stopEpoch = (stopWhen[i]->GetStopEpoch());
-               #if DEBUG_PROPAGATE_EXE
-                  MessageInterface::ShowMessage
-                     ("Propagate::Execute() %s met\n", 
+               // StopCondition need epoch for the Interpolator
+               stopWhen[i]->SetRealParameter("Epoch", 
+                                           stopSats[i]->GetRealParameter(epochID));
+               
+               #ifdef DEBUG_STOPPING_CONDITIONS
+                  MessageInterface::ShowMessage(
+                     "Evaluating \"%s\" Stopping condition\n",
                      stopWhen[i]->GetName().c_str());
                #endif
-               break; // exit if any stop condition met
+               
+               if (stopWhen[i]->Evaluate())
+               {
+                  stopCondMet = true;
+                  stopEpoch = (stopWhen[i]->GetStopEpoch());
+                  #if DEBUG_PROPAGATE_EXE
+                     MessageInterface::ShowMessage
+                        ("Propagate::Execute() %s met\n", 
+                        stopWhen[i]->GetName().c_str());
+                  #endif
+                  break; // exit if any stop condition met
+               }
             }
+            
+         #ifdef DEBUG_STOPPING_CONDITIONS
          }
+         catch (BaseException &ex) {
+            MessageInterface::ShowMessage
+               ("Propagate::Execute() Exception while evaluating stopping conditions\n");
+            inProgress = false;
+            throw;
+         }
+         #endif
          
          if (!stopCondMet)
          {

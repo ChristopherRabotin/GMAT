@@ -183,7 +183,18 @@ bool StopCondition::Evaluate()
          mValueBuffer[i] = mValueBuffer[i+1];
       }
         
+#if DEBUG_STOPCOND
+      MessageInterface::ShowMessage("StopCondition::Evaluate() Calling EvaluateReal on %s\n",
+                                    mStopParam->GetName().c_str());
+#endif
+
       rval = mStopParam->EvaluateReal();
+        
+#if DEBUG_STOPCOND
+      MessageInterface::ShowMessage("StopCondition::Evaluate() Parameter is %s\n",
+                                    mStopParam->GetName().c_str());
+#endif
+
       mEpochBuffer[mBufferSize - 1] = epoch;
       mValueBuffer[mBufferSize - 1] = rval;
         

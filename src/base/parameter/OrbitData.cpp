@@ -29,6 +29,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITDATA 1
+//#define DEBUG_ORBITDATA_DETAILS 1
 
 using namespace GmatMathUtil;
 
@@ -202,14 +203,30 @@ Rvector6 OrbitData::GetKepState()
 
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
-         
+
+      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+            
+#ifdef DEBUG_ORBITDATA_DETAILS
+   PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+   std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
+   std::cout << "   elemType == " << elemType <<"\n";
+   for (int i=0; i<6; i++)
+   {
+      std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+   }            
+#endif
+
    if (elemType == "Keplerian")
    {
       PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
             
       for (int i=0; i<6; i++)
+      {
+#ifdef DEBUG_ORBITDATA_DETAILS
+         std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+#endif
          mKepState[i] = statePtr[i];
-            
+      }            
    }
    else if (elemType == "Cartesian")
    {
@@ -583,6 +600,7 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 void OrbitData::InitializeRefObjects()
 {
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
+
    if (mSpacecraft == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find Spacecraft object.\n"

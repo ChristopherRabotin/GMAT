@@ -30,6 +30,10 @@ OBJECTS = Parameter.o \
 all: libParameter 
 	mkdir -p ../lib
 	mv libParameter.a ../lib
+	
+clean:
+	rm -f *.o
+	rm -f ../lib/libParameter.a
 
 libParameter : ../lib/libParameter.a
 

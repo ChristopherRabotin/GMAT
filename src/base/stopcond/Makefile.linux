@@ -31,6 +31,10 @@ OBJECTS = BaseStopCondition.o \
 all: libStopCondition
 	mkdir -p ../lib
 	mv libStopCondition.a ../lib
+	
+clean:
+	rm -f *.o
+	rm -f ../lib/libStopCondition.a
 
 libStopCondition : ../lib/libStopCondition.a
 
