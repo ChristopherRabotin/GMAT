@@ -34,6 +34,9 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
     
     EVT_BUTTON(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
     EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
+    
+    EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
+
 END_EVENT_TABLE()
 
 //------------------------------
@@ -112,9 +115,28 @@ void ReportFileSetupPanel::Create()
     pageBoxSizer->Add(optionBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     
     //------------------------------------------------------
+    // file option
+    //------------------------------------------------------   
+    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
+    // will need to change
+    fileStaticText = new wxStaticText( this, ID_TEXT, 
+                                       wxT("File: "), 
+                                       wxDefaultPosition, wxSize(80,-1), 0 );
+    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                              wxDefaultPosition, 
+                                              wxSize(250, -1),  0);
+    browseButton = new wxButton( this, ID_BROWSE_BUTTON, wxT("Browse"), 
+                                              wxDefaultPosition, wxDefaultSize, 0 );
+ 
+    fileSizer->Add(fileStaticText, 0, wxALIGN_CENTER|wxALL, 5);
+    fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
+    fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
+
+    //------------------------------------------------------
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+    theMiddleSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, 5);
 
 }
 
@@ -136,4 +158,21 @@ void ReportFileSetupPanel::SaveData()
     // save data to core engine
     theSubscriber->Activate(writeCheckBox->IsChecked());
 }
+
+//------------------------------------------------------------------------------
+// void OnBrowseButton()
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
+{
+    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+    
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString filename;
+        
+        filename = dialog.GetPath().c_str();
+        fileTextCtrl->SetValue(filename); 
+    }
+}
+
 

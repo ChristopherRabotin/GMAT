@@ -37,8 +37,14 @@ protected:
     wxBoxSizer *optionBoxSizer;
 
     wxCheckBox *writeCheckBox;
+    
+    wxStaticText *fileStaticText;
+    wxTextCtrl *fileTextCtrl;
+    wxButton *browseButton; 
+
 
     void OnWriteCheckBoxChange(wxCommandEvent& event);
+    void OnBrowseButton(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -52,6 +58,10 @@ protected:
     {     
         RF_TEXT = 93000,
         RF_WRITE_CHECKBOX,
+        
+        ID_TEXT,
+        ID_TEXT_CTRL,
+        ID_BROWSE_BUTTON,
     };
 };
 #endif
