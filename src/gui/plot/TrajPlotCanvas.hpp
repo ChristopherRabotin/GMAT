@@ -16,7 +16,6 @@
 #define TrajPlotCanvas_hpp
 
 #include "gmatwxdefs.hpp"
-#include "OpenGlShapes.hpp"
 #include "MdiGlPlotData.hpp"
 #include "GuiInterpreter.hpp"
 #include "TextTrajectoryFile.hpp"
