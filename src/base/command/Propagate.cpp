@@ -23,7 +23,7 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PROPAGATE_OBJ 0
+//#define DEBUG_PROPAGATE_OBJ 1
 //#define DEBUG_PROPAGATE_EXE 1
 
 
@@ -328,17 +328,14 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (stopWhen.empty() && index == 0)
          {
             stopWhen.push_back((StopCondition *)obj);
-            return true;
          }
          else if (index == size)
          {
             stopWhen.push_back((StopCondition *)obj);
-            return true;
          }
          else if (index < size)
          {
             stopWhen[index] = (StopCondition *)obj;
-            return true;
          }
          else
          {
@@ -348,6 +345,16 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                 obj->GetTypeName().c_str(), obj->GetName().c_str());
             return false;
          }
+         
+         std::string satName = obj->GetName();
+         Integer strt = satName.find("StopOn") + 6;
+         if (strt == (Integer)std::string::npos)
+            strt = 0;
+         Integer ndx = satName.find(".",0);
+         if (ndx != (Integer)std::string::npos)
+            satName = satName.substr(strt, ndx-strt);
+         stopSatNames.push_back(satName);
+         return true;
       }
    default:
       break;
@@ -808,9 +815,11 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
       
       stopCond->SetStringParameter("StopVar", paramName);
+      
       SetObject(stopCond, Gmat::STOP_CONDITION);
       // Store the spacecraft name for use when setting the epoch data
       stopSatNames.push_back(paramObj);
+//      stopSatNames[index] = paramObj;
    
       if (paramType != "Apoapsis" && paramType != "Periapsis")
       {
@@ -991,7 +1000,9 @@ bool Propagate::Initialize(void)
       so = (SpaceObject*)(*objectMap)[*sc];
       stopSats.push_back(so);
    }
-   
+
+   if (stopWhen.size() == 0)
+      throw CommandException("No stopping conditions specified!");
    if (solarSys != NULL)
    {
       for (unsigned int i=0; i<stopWhen.size(); i++)
@@ -1097,6 +1108,7 @@ bool Propagate::Execute(void)
          dim = 0;
          p.clear();
          fm.clear();
+
          for (Integer n = 0; n < (Integer)prop.size(); ++n) {
             elapsedTime.push_back(0.0);
             currEpoch.push_back(0.0);
@@ -1109,7 +1121,9 @@ bool Propagate::Execute(void)
             state = fm[n]->GetState();
             dim += fm[n]->GetDimension();
          }   
+
          pubdata = new Real[dim+1];
+
          for (Integer n = 0; n < (Integer)prop.size(); ++n) {
             GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
             Integer epochID = sat1->GetParameterID("Epoch");
@@ -1158,11 +1172,11 @@ bool Propagate::Execute(void)
                   SetRealParameter("InitialEpoch", stopEpochBase);
             }
          }
+
          // Publish the initial data
          pubdata[0] = currEpoch[0];
          memcpy(&pubdata[1], state, dim*sizeof(Real));
          publisher->Publish(streamID, pubdata, dim+1);
-
          inProgress = true;
       }
    
@@ -1173,7 +1187,6 @@ bool Propagate::Execute(void)
       Integer epochID = stopSats[0]->GetParameterID("Epoch");;
       while (!stopCondMet)
       {
-//         if (!p->Step())
          if (!TakeAStep())
             throw CommandException("Propagate::Execute() Propagator Failed to Step\n");
 
