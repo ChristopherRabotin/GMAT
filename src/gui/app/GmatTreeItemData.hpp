@@ -142,7 +142,9 @@ namespace GmatTree
         MANEUVER_COMMAND,
         PROPAGATE_COMMAND,
         TARGET_COMMAND,
-
+        ACHIEVE_COMMAND, //loj: 10/4/04 added ACHIEVE and VARY
+        VARY_COMMAND,
+        
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,
         VIEW_SOLVER_GOALS, 
