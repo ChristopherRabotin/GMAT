@@ -452,6 +452,16 @@ bool ScriptInterpreter::WriteScript(void)
    StringArray::iterator current;
    StringArray objs;
     
+   // Hardware
+   objs = moderator->GetListOfConfiguredItems(Gmat::HARDWARE);
+
+   #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
+      std::cout << "Found " << objs.size() << " Hardware Components\n";
+   #endif
+   for (current = objs.begin(); current != objs.end(); ++current)
+      if (!BuildObject(*current))
+         return false;
+            
    // Spacecraft
    objs = moderator->GetListOfConfiguredItems(Gmat::SPACECRAFT);
 
