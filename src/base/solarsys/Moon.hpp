@@ -40,7 +40,7 @@ public:
    // default constructor, with optional name
    Moon(std::string name = SolarSystem::MOON_NAME);
    // additional constructor
-   Moon(std::string name, CelestialBody* cBody);
+   Moon(std::string name, const std::string &cBody);
    // copy constructor
    Moon(const Moon &m);
    // operator=
@@ -79,7 +79,7 @@ protected:
 
    // what other star-specifi parameters do I need?
 
-   void InitializeMoon(CelestialBody* cBody);
+   void InitializeMoon(const std::string &cBody);
 
 private:
 

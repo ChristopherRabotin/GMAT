@@ -72,7 +72,7 @@ CelestialBody     ("Moon",name)
 }
 
 //------------------------------------------------------------------------------
-//  Moon(std::string name, CelestialBody* cBody)
+//  Moon(std::string name, const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
 * This method creates an object of the Moon class
@@ -83,7 +83,7 @@ CelestialBody     ("Moon",name)
  * @param <cBody> pointer to a central body.
  */
 //------------------------------------------------------------------------------
-Moon::Moon(std::string name, CelestialBody* cBody) :
+Moon::Moon(std::string name, const std::string &cBody) :
 CelestialBody     ("Moon",name)
 {
    InitializeMoon(cBody); 
@@ -157,7 +157,7 @@ Moon* Moon::Clone(void) const
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-//  void  InitializeMoon(CelestialBody* cBody)
+//  void  InitializeMoon(const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
  * This method initializes the data values for the body.
@@ -166,7 +166,7 @@ Moon* Moon::Clone(void) const
  *
  */
 //------------------------------------------------------------------------------
-void Moon::InitializeMoon(CelestialBody* cBody)
+void Moon::InitializeMoon(const std::string &cBody)
 {
    CelestialBody::Initialize();
    // fill in with default values, for the Sun
