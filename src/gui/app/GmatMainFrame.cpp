@@ -42,7 +42,7 @@
 #include "GmatTreeItemData.hpp"
 #include "SolarSystemWindow.hpp"
 #include "SpacecraftPanel.hpp"
-//#include "TankPanel.hpp" //loj: different name?
+#include "TankConfigPanel.hpp"
 //#include "ThrusterPanel.hpp"//loj: different name?
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
@@ -324,12 +324,13 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       }
       else if (dataType == GmatTree::FUELTANK)
       {
-         wxLogMessage("This panel is coming soon...");
-//           newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
-//                                            wxPoint(-1,-1), wxSize(-1,-1),
-//                                            wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
-//           panel = new wxScrolledWindow(newChild);  
-//           sizer->Add(new TankPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);
+         //wxLogMessage("This panel is coming soon...");
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                            wxPoint(-1,-1), wxSize(-1,-1),
+                                            wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);  
+         sizer->Add(new TankConfigPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);
+
       }
       else if (dataType == GmatTree::THRUSTER)
       {
