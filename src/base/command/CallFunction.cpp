@@ -331,17 +331,17 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          Integer size = mInputList.size();
          if (mInputList.empty() && index == 0)
          {
-            mInputList.push_back((Variable *)obj);
+            mInputList.push_back((Parameter *)obj);
             mInputListNames.push_back(obj->GetName());
          }
          else if (index == size)
          {
-            mInputList.push_back((Variable *)obj);
+            mInputList.push_back((Parameter *)obj);
             mInputListNames.push_back(obj->GetName());
          }
          else if (index < size)
          {
-            mInputList[index] = (Variable *)obj;
+            mInputList[index] = (Parameter *)obj;
             mInputListNames[index] = obj->GetName();
          }
          else
@@ -359,17 +359,17 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          Integer size = mOutputList.size();
          if (mOutputList.empty() && index == 0)
          {
-            mOutputList.push_back((Variable *)obj);
+            mOutputList.push_back((Parameter *)obj);
             mOutputListNames.push_back(obj->GetName());
          }
          else if (index == size)
          {
-            mOutputList.push_back((Variable *)obj);
+            mOutputList.push_back((Parameter *)obj);
             mOutputListNames.push_back(obj->GetName());
          }
          else if (index < size)
          {
-            mOutputList[index] = (Variable *)obj;
+            mOutputList[index] = (Parameter *)obj;
             mOutputListNames[index] = obj->GetName();
          }
          else
@@ -430,7 +430,7 @@ bool CallFunction::SetObject(GmatBase *obj, const Gmat::ObjectType type)
    {
    case Gmat::PARAMETER:
       /// @todo what about output list?
-      mInputList.push_back((Variable *)obj);
+      mInputList.push_back((Parameter *)obj);
       return true;
    case Gmat::FUNCTION:
       mFunction = (Function *)obj;
@@ -501,7 +501,7 @@ bool CallFunction::Initialize()
       if (objectMap->find(*i)  == objectMap->end())
         throw CommandException("CallFunction command cannot find Parameter");
 
-      mInputList.push_back((Variable *)((*objectMap)[*i]));
+      mInputList.push_back((Parameter *)((*objectMap)[*i]));
    }
 
     // need to initialize parameters
@@ -512,7 +512,7 @@ bool CallFunction::Initialize()
       if (objectMap->find(*i)  == objectMap->end())
         throw CommandException("CallFunction command cannot find Parameter");
 
-      mOutputList.push_back((Variable *)((*objectMap)[*i]));
+      mOutputList.push_back((Parameter *)((*objectMap)[*i]));
    }
 
 
@@ -523,6 +523,9 @@ bool CallFunction::Initialize()
 bool CallFunction::Execute()
 {
    bool status = false;
+
+   if (mFunction == NULL)
+      throw CommandException("Function is not defined for CallFunction");
 
 #if DEBUG_CALL_FUNCTION
    MessageInterface::ShowMessage("CallFunction::Execute()\n");
@@ -557,31 +560,33 @@ bool CallFunction::ExecuteMatlabFunction()
    // for input params
    for (unsigned int i=0; i<mInputList.size(); i++)
    {
-      Variable *param = (Variable *)mInputList[i];
-      std::string varName =  param->GetName();
-      double arrayToSend[] = {param->GetReal()};
-#if DEBUG_UPDATE_VAR
-//      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
-//      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
-//      MessageInterface::ShowMessage("The type for this parameter is %f\n", param->GetTypeName().c_str());
-//      MessageInterface::ShowMessage("The string parameter is %f\n", param->GetStringParameter("Expression").c_str());
-#endif
-      status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
-#if DEBUG_UPDATE_VAR
-      MessageInterface::ShowMessage("Put %s with value %f in matlab\n", varName.c_str(),
-                  arrayToSend[0]);
+      Parameter *param = (Parameter *)mInputList[i];
 
-      // try updating variable to 5
-//      param->SetRealParameter("Param1", 5);
-//      MessageInterface::ShowMessage("The parameter should be updated to 5...\n");
-//      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
-//      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
+//      if (param->GetTypeName() == "Variable")
+//         MessageInterface::ShowMessage("Parameter is variable\n");
+//      else if (param->GetTypeName() == "Array")
+//         MessageInterface::ShowMessage("Parameter is an array\n");
+//      else
+//         MessageInterface::ShowMessage("not sure what param is \n");
+
+      // ag: Send string to add variable to workspace rather than using "PutVariable"
+      //     so that there is no problem parsing variables with a "." in the name
+      //     like "DefaultSC.X"
+      // status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
+      std::ostringstream os;
+      os << param->EvaluateReal();
+      std::string inParamString = param->GetName() +" = " + os.str() +";";
+      status =  MatlabInterface::EvalString(inParamString);
+
+#if DEBUG_UPDATE_VAR
+      MessageInterface::ShowMessage("Sent string %s to matlab\n",
+                        inParamString.c_str());
 #endif
    }
 
    //  Eval String
    std::string evalString = FormEvalString();
-#if DEBUG_CALL_FUNCTION
+#if DEBUG_UPDATE_VAR
    MessageInterface::ShowMessage("Eval string is %s\n", evalString.c_str());
 #endif
    status =  MatlabInterface::EvalString(evalString);
@@ -590,7 +595,7 @@ bool CallFunction::ExecuteMatlabFunction()
    // for output params
    for (unsigned int i=0; i<mOutputList.size(); i++)
    {
-      Variable *param = (Variable *)mOutputList[i];
+      Parameter *param = (Parameter *)mOutputList[i];
       std::string varName = param->GetName();
       double outArray[500];   // array size???
 #if DEBUG_UPDATE_VAR
@@ -602,7 +607,7 @@ bool CallFunction::ExecuteMatlabFunction()
 #endif
       param->SetRealParameter("Param1", outArray[0]);
 #if DEBUG_UPDATE_VAR
-      MessageInterface::ShowMessage("The GetReal is %f\n", param->GetReal());
+      MessageInterface::ShowMessage("The GetReal is %f\n", param->EvaluateReal());
 //      MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
 //      MessageInterface::ShowMessage("The parameter value is %f\n", param->GetRealParameter("Param1"));
 #endif
@@ -627,12 +632,12 @@ std::string CallFunction::FormEvalString()
    if (mOutputList.size() > 1)
    {
       evalString = evalString + "[";
-      Variable *param = (Variable *)mOutputList[0];
+      Parameter *param = (Parameter *)mOutputList[0];
       evalString = evalString + param->GetName();
 
       for (unsigned int i=1; i<mOutputList.size(); i++)
       {
-         param = (Variable *)mOutputList[i];
+         param = (Parameter *)mOutputList[i];
          evalString = evalString +", " + param->GetName();
       }
 
@@ -640,7 +645,7 @@ std::string CallFunction::FormEvalString()
    }
    else if (mOutputList.size() == 1)
    {
-      Variable *param = (Variable *)mOutputList[0];
+      Parameter *param = (Parameter *)mOutputList[0];
       evalString = evalString + param->GetName();
       evalString = evalString +" = ";
    }
@@ -660,12 +665,12 @@ std::string CallFunction::FormEvalString()
    // input parameters
    if (mInputList.size() > 0)
    {
-      Variable *param = (Variable *)mInputList[0];
+      Parameter *param = (Parameter *)mInputList[0];
       evalString = evalString + param->GetName();
 
       for (unsigned int i=1; i<mInputList.size(); i++)
       {
-         param = (Variable *)mInputList[i];
+         param = (Parameter *)mInputList[i];
          evalString = evalString + ", " + param->GetName();
       }
    }
