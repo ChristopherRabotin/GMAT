@@ -183,6 +183,7 @@ void FormationSetupPanel::SaveData()
    }
 
    theGuiManager->UpdateFormation();
+   GmatAppData::GetResourceTree()->UpdateResource(false);
 }
 
 //------------------------------------------------------------------------------
