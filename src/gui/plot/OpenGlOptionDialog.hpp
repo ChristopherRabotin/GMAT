@@ -87,6 +87,7 @@ protected:
    bool mHasEqPlaneColorChanged;
    bool mHasEcPlaneColorChanged;
    bool mHasEcLineColorChanged;
+   bool mHasRotateAboutXYChanged;
    
    bool mDrawEqPlane;
    bool mDrawEcPlane;
@@ -113,6 +114,7 @@ protected:
    wxCheckBox *mEcPlaneCheckBox;
    wxCheckBox *mEcLineCheckBox;
    wxCheckBox *mDrawAxesCheckBox;
+   wxCheckBox *mRotateAboutXYCheckBox;
 
    wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;

@@ -179,6 +179,7 @@ MdiChildTrajFrame::~MdiChildTrajFrame()
    MdiGlPlot::mdiChildren.DeleteObject(this);
 }
 
+
 //------------------------------------------------------------------------------
 // bool GetDrawWireFrame()
 //------------------------------------------------------------------------------
@@ -189,6 +190,19 @@ bool MdiChildTrajFrame::GetDrawWireFrame()
 
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// bool GetRotateAboutXY()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetRotateAboutXY()
+{
+   if (mCanvas)
+      return mCanvas->GetRotateAboutXY();
+
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 // bool GetDrawEqPlane()
@@ -404,6 +418,20 @@ void MdiChildTrajFrame::SetDrawAxes(bool flag)
       //loj: the event ID is not in the GmatPlot yet
       //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_AXES, flag);
       mCanvas->SetDrawAxes(flag);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRotateAboutXY(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetRotateAboutXY(bool flag)
+{
+   if (mCanvas)
+   {
+      //loj: the event ID is not in the GmatPlot yet
+      //mViewOptionMenu->Check(GmatPlot::MDI_GL_ROTATE_ABOUT_XY, flag);
+      mCanvas->SetRotateAboutXY(flag);
    }
 }
 

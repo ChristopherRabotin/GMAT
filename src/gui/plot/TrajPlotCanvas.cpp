@@ -443,6 +443,7 @@ void TrajPlotCanvas::ZoomOut()
    Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void DrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
@@ -456,6 +457,7 @@ void TrajPlotCanvas::DrawWireFrame(bool flag)
    Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void DrawEqPlane(bool flag)
 //------------------------------------------------------------------------------
@@ -468,6 +470,7 @@ void TrajPlotCanvas::DrawEqPlane(bool flag)
    mDrawEqPlane = flag;
    Refresh(false);
 }
+
 
 //------------------------------------------------------------------------------
 // void DrawEcPlane(bool flag)
@@ -1395,13 +1398,20 @@ void TrajPlotCanvas::ChangeView(float viewX, float viewY, float viewZ)
 void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
 {    
    GLfloat fAspect = (GLfloat) height / (GLfloat) width;
-        
+   
    m_fViewLeft   = -axisLength/2;
    m_fViewRight  =  axisLength/2;
    m_fViewTop    =  axisLength/2;
    m_fViewBottom = -axisLength/2;
    m_fViewNear   = -axisLength/2;
    m_fViewFar    =  axisLength/2;
+   
+//     m_fViewLeft   =  axisLength/2;
+//     m_fViewRight  = -axisLength/2;
+//     m_fViewTop    =  axisLength/2;
+//     m_fViewBottom = -axisLength/2;
+//     m_fViewNear   = -axisLength/2;
+//     m_fViewFar    =  axisLength/2;
    
    // save the size we are setting the projection for later use
    if (width <= height)
@@ -1458,27 +1468,27 @@ void TrajPlotCanvas::DrawPicture()
 
    // draw equatorial plane
    if (mDrawEqPlane)
-      DrawEquatorialPlane();
-   
-   // draw ecliptic plane
-   if (mDrawEcPlane)
-      DrawEclipticPlane();
+      DrawEquatorialPlane(mEqPlaneColor);
    
    // draw Earth-Sun line
    if (mDrawEcLine)
       DrawEarthSunLine();
 
-   // draw axes - draw this last
-   if (mDrawAxes)
-      DrawAxes();
-   
    if (mNeedEarthConversion)
    {
       glPopMatrix();
    }
    
+   // draw axes
+   if (mDrawAxes)
+      DrawAxes();
+   
    // draw spacecraft orbit
    DrawSpacecraftOrbit();
+   
+   // draw ecliptic plane
+   if (mDrawEcPlane)
+      DrawEclipticPlane();
    
    // draw other bodies orbit
    for (int body=0; body<MAX_BODIES; body++)
@@ -1504,14 +1514,7 @@ void TrajPlotCanvas::DrawEarth()
 {
    if (mCenterViewBody == EARTH)
    {
-     
-      // tilt Earth rotation axis if needed
-//        if (mNeedEarthConversion)
-//        {
-//           glPushMatrix();
-//           TiltEarthZAxis();
-//        }
-      
+           
       glColor3f(1.0, 1.0, 1.0);
 
       if (mUseTexture)
@@ -1864,13 +1867,13 @@ void TrajPlotCanvas::DrawSpacecraftOrbit()
 
 
 //------------------------------------------------------------------------------
-//  void DrawEquatorialPlane()
+//  void DrawEquatorialPlane(UnsignedInt color)
 //------------------------------------------------------------------------------
 /**
  * Draws equatorial plane circles.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawEquatorialPlane()
+void TrajPlotCanvas::DrawEquatorialPlane(UnsignedInt color)
 {
    int i;
    float endPos[3];
@@ -1887,7 +1890,8 @@ void TrajPlotCanvas::DrawEquatorialPlane()
    glBegin(GL_LINES);
    
    // set color
-   *sIntColor = mEqPlaneColor;
+   *sIntColor = color;
+   //*sIntColor = mEqPlaneColor;
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
 
    //-----------------------------------
@@ -1941,7 +1945,7 @@ void TrajPlotCanvas::DrawEquatorialPlane()
    
    glPopMatrix();
    
-} // end DrawEqatorialPlane()
+} // end DrawEquatorialPlane()
 
 
 //------------------------------------------------------------------------------
@@ -1953,15 +1957,15 @@ void TrajPlotCanvas::DrawEquatorialPlane()
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawEclipticPlane()
 {
-   // Can I first rotate the system to obliquity of the ecliptic (23.5) and
-   // draw equatorial plane?
-   // But it doesn't work!!!
+   // First rotate the grand coordinate system to obliquity of the ecliptic
+   // (23.5) and draw equatorial plane
    
-   //glPushMatrix();
-   //glRotatef(23.5, 1, 0, 0);
-   //DrawEquatorialPlane();
-   //glPopMatrix();
-   
+   glMatrixMode(GL_PROJECTION);
+   glPushMatrix();
+   glRotatef(23.5, 1, 0, 0);
+   glMatrixMode(GL_MODELVIEW);
+   DrawEquatorialPlane(mEcPlaneColor);
+   glPopMatrix();
 } // end DrawEclipticPlane()
 
 
@@ -2036,7 +2040,7 @@ void TrajPlotCanvas::DrawAxes()
    glLoadIdentity();
    
    //viewDist = mCurrViewDist/2; //zooms in and out
-   viewDist = mAxisLength/2; // stays the same
+   viewDist = mAxisLength/2.2; // stays the same
    glBegin(GL_LINES);
    
    glColor3f(0, 1, 0);   // x
@@ -2061,18 +2065,18 @@ void TrajPlotCanvas::DrawAxes()
    glPushMatrix();
    glLoadIdentity();
    glColor3f(0, 1, 0);   // x
-   glTranslatef(viewDist, 0.0, 0.0);
-   DrawStringAt("+X", 1.0, 0.0, 0.0);
+   glTranslatef(-viewDist, 0.0, 0.0);
+   DrawStringAt("+x", 1.0, 0.0, 0.0);
 
    glLoadIdentity();
    glColor3f(0, 0, 1);   // y
    glTranslatef(0.0, -viewDist, 0.0);
-   DrawStringAt("+Y", 0.0, 1.0, 0.0);
+   DrawStringAt("+y", 0.0, 1.0, 0.0);
 
    glLoadIdentity();
    glColor3f(1, 1, 0);   // z
    glTranslatef(0.0, 0.0, viewDist);
-   DrawStringAt("+Z", 0.0, 0.0, 1.0);
+   DrawStringAt("+z", 0.0, 0.0, 1.0);
    
    glPopMatrix();   
 }
@@ -2112,29 +2116,6 @@ bool TrajPlotCanvas::TiltEarthZAxis()
       #endif
 
       // rotate Earth Z axis
-//        double rotMatrix[4][4];
-//        rotMatrix[0][0] = 1.0;
-//        rotMatrix[0][1] = 0.0;
-//        rotMatrix[0][2] = 0.0;
-//        rotMatrix[0][3] = 0.0;
-      
-//        rotMatrix[1][0] = 0.0;
-//        rotMatrix[1][1] = 0.917482062076895741;
-//        rotMatrix[1][2] = -0.397777155914121383;
-//        rotMatrix[1][3] = -0.397777155914121383;
-      
-//        rotMatrix[2][0] = 0.0;
-//        rotMatrix[2][1] = 0.397777155914121383;
-//        rotMatrix[2][2] = 0.917482062076895741;
-//        rotMatrix[2][3] = 0.917482062076895741;
-      
-//        rotMatrix[3][0] = 1.0;
-//        rotMatrix[3][1] = 0.0;
-//        rotMatrix[3][2] = 0.0;
-//        rotMatrix[3][3] = 0.0;
-
-//        glMultMatrixd(&rotMatrix[0][0]); //loj: This doesn't work!!!
-      
       //glRotatef(23.5, 0.0, 1.0, 0.0);
       glRotatef(23.5, 1.0, 0.0, 0.0);
    }

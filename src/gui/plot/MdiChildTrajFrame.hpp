@@ -55,6 +55,7 @@ public:
    bool GetDrawEcPlane();
    bool GetDrawEcLine();
    bool GetDrawAxes();
+   bool GetRotateAboutXY();
    unsigned int GetEqPlaneColor();
    unsigned int GetEcPlaneColor();
    unsigned int GetEcLineColor();
@@ -71,6 +72,7 @@ public:
    void SetDrawEcPlane(bool flag);
    void SetDrawEcLine(bool flag);
    void SetDrawAxes(bool flag);
+   void SetRotateAboutXY(bool flag);
    void SetEqPlaneColor(unsigned int color);
    void SetEcPlaneColor(unsigned int color);
    void SetEcLineColor(unsigned int color);

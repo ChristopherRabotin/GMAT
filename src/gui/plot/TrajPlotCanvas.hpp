@@ -44,6 +44,7 @@ public:
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
    bool  GetDrawEcLine() {return mDrawEcLine;}
    bool  GetDrawAxes() {return mDrawAxes;}
+   bool  GetRotateAboutXY() {return mRotateXy;}
    unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
    unsigned int GetEcLineColor() {return mEcLineColor;}
@@ -58,6 +59,7 @@ public:
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
    void SetDrawEcLine(bool flag) {mDrawEcLine = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
+   void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
@@ -250,7 +252,7 @@ private:
    void DrawOtherBodyOrbit(int bodyIndex);
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawSpacecraftOrbit();
-   void DrawEquatorialPlane();
+   void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane();
    void DrawEarthSunLine();
    void DrawAxes();  //loj: 3/8/05 Added

@@ -81,6 +81,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasEqPlaneColorChanged = false;
    mHasEcPlaneColorChanged = false;
    mHasEcLineColorChanged = false;
+   mHasRotateAboutXYChanged = false;
    
    mDistance = 30000;
    mGotoBodyName = "";
@@ -230,6 +231,10 @@ void OpenGlOptionDialog::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Axes"),
                      wxDefaultPosition, wxSize(150, 20), 0);
 
+   mRotateAboutXYCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Rotate XY"),
+                     wxDefaultPosition, wxSize(150, 20), 0);
+
    // equatorial plane color
    mEqPlaneColorButton =
       new wxButton(this, ID_EQPLANE_COLOR_BUTTON, "", wxDefaultPosition,
@@ -256,6 +261,8 @@ void OpenGlOptionDialog::Create()
 
    borderSize = 1;
    wxFlexGridSizer *drawGridSizer = new wxFlexGridSizer(2, 0, 0);
+   drawGridSizer->Add(mRotateAboutXYCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mDrawAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
@@ -398,10 +405,11 @@ void OpenGlOptionDialog::LoadData()
    
    // wire frame
    mWireFrameCheckBox->SetValue(mTrajFrame->GetDrawWireFrame());
+   mRotateAboutXYCheckBox->SetValue(mTrajFrame->GetRotateAboutXY());
    
    mCreateCoordSysButton->Disable();
-   mEcPlaneCheckBox->Disable();
-   mEcPlaneColorButton->Disable();
+   mEcPlaneCheckBox->Enable();
+   mEcPlaneColorButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -483,6 +491,15 @@ void OpenGlOptionDialog::SaveData()
    {
       mHasDrawAxesChanged = false;
       mTrajFrame->SetDrawAxes(mDrawAxes);
+   }
+   
+   if (mHasRotateAboutXYChanged)
+   {
+      mHasRotateAboutXYChanged = false;
+      if (mRotateAboutXYCheckBox->GetValue())
+         mTrajFrame->SetRotateAboutXY(true);
+      else
+         mTrajFrame->SetRotateAboutXY(false);
    }
    
    if (mHasEqPlaneColorChanged)
@@ -579,6 +596,7 @@ void OpenGlOptionDialog::OnTextChange(wxCommandEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -613,9 +631,14 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
       mHasDrawAxesChanged = true;
       mDrawAxes = mDrawAxesCheckBox->GetValue();
    }
+   else if (event.GetEventObject() == mRotateAboutXYCheckBox)
+   {
+      mHasRotateAboutXYChanged = true;
+   }
    
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
@@ -634,11 +657,15 @@ void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == mCoordSysComboBox)
    {
-      mHasCoordSysChanged = true;
-      mCoordSysName = mCoordSysComboBox->GetStringSelection();
-      theApplyButton->Enable();
+      if (!mCoordSysName.IsSameAs(mCoordSysComboBox->GetStringSelection()))
+      {
+         mHasCoordSysChanged = true;
+         mCoordSysName = mCoordSysComboBox->GetStringSelection();
+         theApplyButton->Enable();
+      }
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnColorButtonClick(wxCommandEvent& event)
