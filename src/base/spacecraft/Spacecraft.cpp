@@ -708,9 +708,10 @@ void Spacecraft::SetEpoch()
    {
       try
       {
-         displayEpoch = timeConverter.Convert(displayEpoch,displayDateFormat,
-                                              "TAIModJulian");
-         epoch = atof(displayEpoch.c_str());
+         std::string newEpoch = timeConverter.Convert(displayEpoch,
+                                displayDateFormat,"TAIModJulian");
+
+         epoch = atof(newEpoch.c_str());
       }
       catch (TimeConverter::TimeConverterException& e)
       {
@@ -911,7 +912,7 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
       {
          std::string newEpoch = timeConverter.Convert(displayEpoch,
                                 displayDateFormat,dateType);
-                                            
+
          SetDisplayEpoch(newEpoch);
       }
       catch (TimeConverter::TimeConverterException e)
