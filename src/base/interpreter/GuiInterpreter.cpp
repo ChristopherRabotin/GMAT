@@ -642,7 +642,7 @@ GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunMission(Integer sandboxNum)
 {
-    return theModerator->RunMission(sandboxNum);
+    return theModerator->RunMission(sandboxNum, true);
 }
 
 // Script
