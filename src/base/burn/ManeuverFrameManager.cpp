@@ -31,6 +31,13 @@
 // #include "LvlhManeuverFrame.hpp"
 
 
+//------------------------------------------------------------------------------
+//  ManeuverFrameManager(void)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the maneuver frame manager object (default constructor).
+ */
+//------------------------------------------------------------------------------
 ManeuverFrameManager::ManeuverFrameManager() :
     currentFrame            (NULL)
 {
@@ -40,6 +47,13 @@ ManeuverFrameManager::ManeuverFrameManager() :
 }
 
 
+//------------------------------------------------------------------------------
+//  ~ManeuverFrameManager(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the maneuver frame manager object (destructor).
+ */
+//------------------------------------------------------------------------------
 ManeuverFrameManager::~ManeuverFrameManager()
 {
     if (currentFrame)
@@ -47,12 +61,36 @@ ManeuverFrameManager::~ManeuverFrameManager()
 }
 
 
+//------------------------------------------------------------------------------
+//  StringArray& GetSupportedFrames(void)
+//------------------------------------------------------------------------------
+/**
+ * Obtains a list of the maneuver frames available for use.
+ * 
+ * @return A StringArray containing the list of frames that can be used.
+ */
+//------------------------------------------------------------------------------
 StringArray& ManeuverFrameManager::GetSupportedFrames(void)
 {
     return frames;
 }
 
 
+//------------------------------------------------------------------------------
+//  ManeuverFrame* GetFrameInstance(std::string frameType)
+//------------------------------------------------------------------------------
+/**
+ * Obtains a the requested maneuver frame.
+ * 
+ * @param <frameType> The maneuver frame that is needed.
+ * 
+ * @return A pointer to the requested frame.
+ * 
+ * @todo GetFrameInstance can be made more efficient by buffering the frame 
+ *       type; the current implementation always destroys and reconstructs the 
+ *       frame
+ */
+//------------------------------------------------------------------------------
 ManeuverFrame* ManeuverFrameManager::GetFrameInstance(std::string frameType)
 {
     if (currentFrame) {

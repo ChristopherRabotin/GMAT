@@ -21,6 +21,13 @@
 #include "ManeuverFrame.hpp"
 
 
+//------------------------------------------------------------------------------
+//  ManeuverFrame(void)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the maneuver frame object (default constructor).
+ */
+//------------------------------------------------------------------------------
 ManeuverFrame::ManeuverFrame() :
     position        (NULL),
     velocity        (NULL)
@@ -31,16 +38,43 @@ ManeuverFrame::ManeuverFrame() :
 }
 
 
+//------------------------------------------------------------------------------
+//  ~ManeuverFrame(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the maneuver frame object (destructor).
+ */
+//------------------------------------------------------------------------------
 ManeuverFrame::~ManeuverFrame()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  ManeuverFrame(const ManeuverFrame& mf)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the maneuver frame object (copy constructor).
+ * 
+ * @param <mf> Object that is copied.
+ */
+//------------------------------------------------------------------------------
 ManeuverFrame::ManeuverFrame(const ManeuverFrame& mf)
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  ManeuverFrame& operator=(const ManeuverFrame& mf)
+//------------------------------------------------------------------------------
+/**
+ * Sets one maneuver frame object to match another (assignment operator).
+ * 
+ * @param <mf> The object that is copied.
+ * 
+ * @return this object, with the parameters set as needed.
+ */
+//------------------------------------------------------------------------------
 ManeuverFrame& ManeuverFrame::operator=(const ManeuverFrame& mf)
 {
     if (this == &mf)
@@ -50,6 +84,18 @@ ManeuverFrame& ManeuverFrame::operator=(const ManeuverFrame& mf)
 }
 
 
+//------------------------------------------------------------------------------
+//  void SetState(Real *pos, Real *vel)
+//------------------------------------------------------------------------------
+/**
+ * Sets the pointers for the state data that need to incorporate the maneuver.
+ * 
+ * @param <pos> The starting address of the position data.
+ * @param <vel> The starting address of the velocity data.  If this pointer is
+ *              NULL, the code interpretes pos as a pointer to position data 
+ *              followed by velocity data.
+ */
+//------------------------------------------------------------------------------
 void ManeuverFrame::SetState(Real *pos, Real *vel)
 {
     position = pos;
@@ -60,6 +106,19 @@ void ManeuverFrame::SetState(Real *pos, Real *vel)
 }
 
 
+//------------------------------------------------------------------------------
+//  void CalculateBasis(Real basis[3][3])
+//------------------------------------------------------------------------------
+/**
+ * Fills the input matrix with the orthonormal basis vectors used for the 
+ * maneuver frame.
+ * 
+ * This method calls the protected CalculateBasis(void) method to perform the 
+ * actual calculations.
+ * 
+ * @param <basis> The matrix that gets filled with the data.
+ */
+//------------------------------------------------------------------------------
 void ManeuverFrame::CalculateBasis(Real basis[3][3])
 {
     CalculateBasis();
@@ -71,6 +130,17 @@ void ManeuverFrame::CalculateBasis(Real basis[3][3])
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetFrameLabel(Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Gets the label for the maneuver frame principal axes.
+ * 
+ * @param <id> Integer ID of the axis -- 1, 2, or 3.
+ * 
+ * @return The label for the corresponding reference vector.
+ */
+//------------------------------------------------------------------------------
 std::string ManeuverFrame::GetFrameLabel(Integer id)
 {
     switch (id) {

@@ -54,7 +54,7 @@ public:
     virtual bool            SetStringParameter(const Integer id, 
                                            const std::string &value);
     virtual StringArray&    GetStringArrayParameter(const Integer id) const;
-                                           
+
     /**
      * Applies the burn.  
      * 

@@ -21,6 +21,16 @@
 #include "Burn.hpp"
 
 
+//------------------------------------------------------------------------------
+//  Burn(std::string typeStr, std::string nomme)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Burn object (default constructor).
+ * 
+ * @param <typeStr> String text identifying the object type
+ * @param <nomme>   Name for the object
+ */
+//------------------------------------------------------------------------------
 Burn::Burn(std::string typeStr, std::string nomme) :
     GmatBase        (Gmat::BURN, typeStr, nomme),
     coordFrame      ("Inertial"),
@@ -57,11 +67,27 @@ Burn::Burn(std::string typeStr, std::string nomme) :
 }
 
 
+//------------------------------------------------------------------------------
+//  ~Burn(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the Burn object (destructor).
+ */
+//------------------------------------------------------------------------------
 Burn::~Burn()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  Burn(const Burn &b)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Burn object (copy constructor).
+ * 
+ * @param <b> Object that is copied
+ */
+//------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
     GmatBase        (b),
     coordFrame      (b.coordFrame),
@@ -89,6 +115,17 @@ Burn::Burn(const Burn &b) :
 }
 
 
+//------------------------------------------------------------------------------
+//  Burn& operator=(const Burn &b)
+//------------------------------------------------------------------------------
+/**
+ * Sets one burn object to match another (assignment operator).
+ * 
+ * @param <b> The object that is copied.
+ * 
+ * @return this object, with the parameters set as needed.
+ */
+//------------------------------------------------------------------------------
 Burn& Burn::operator=(const Burn &b)
 {
     if (this == &b)
@@ -98,6 +135,17 @@ Burn& Burn::operator=(const Burn &b)
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the name of the parameter with the input id.
+ * 
+ * @param <id> Integer id for the parameter.
+ * 
+ * @return The string name of the parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Burn::GetParameterText(const Integer id) const
 {
     if (id == coordFrameID) 
@@ -131,6 +179,17 @@ std::string Burn::GetParameterText(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the id corresponding to a named parameter.
+ * 
+ * @param <str> Name of the parameter.
+ * 
+ * @return The ID.
+ */
+//------------------------------------------------------------------------------
 Integer Burn::GetParameterID(const std::string &str) const
 {
     if (str == "CoordinateFrame") 
@@ -164,6 +223,17 @@ Integer Burn::GetParameterID(const std::string &str) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the type of a parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The type of the parameter.
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType Burn::GetParameterType(const Integer id) const
 {
     if (id == coordFrameID) 
@@ -197,6 +267,17 @@ Gmat::ParameterType Burn::GetParameterType(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the text description for the type of a parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The text description of the type of the parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Burn::GetParameterTypeString(const Integer id) const
 {
     if (id == coordFrameID) 
@@ -230,6 +311,17 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the value for a Real parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
 Real Burn::GetRealParameter(const Integer id) const
 {
     if (id == deltaV1ID) 
@@ -245,6 +337,18 @@ Real Burn::GetRealParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a Real parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
 Real Burn::SetRealParameter(const Integer id, const Real value)
 {
     if (id == deltaV1ID) {
@@ -266,6 +370,17 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 }
 
 
+//------------------------------------------------------------------------------
+//  Real GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the value for a std::string parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Burn::GetStringParameter(const Integer id) const
 {
     if (id == coordFrameID) 
@@ -290,6 +405,18 @@ std::string Burn::GetStringParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
 bool Burn::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id == coordFrameID) {
@@ -332,13 +459,14 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
-
-
 //---------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Access an array of string data.
+ * 
+ * For the Burn classes, calls to this method get passed to the maneuver frame
+ * manager when the user requests the frames that are available for the system.
  *
  * @param <id> The integer ID for the parameter.
  *

@@ -55,5 +55,5 @@ BurnException::~BurnException()
 //------------------------------------------------------------------------------
 BurnException::BurnException(const BurnException &be) :
     BaseException       (be)
-{}
-
+{
+}

@@ -21,15 +21,46 @@
 #include "ImpulsiveBurn.hpp"
 
 
+//------------------------------------------------------------------------------
+//  Burn(std::string typeStr, std::string nomme)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the impulsive burn (default constructor).
+ * 
+ * @param <nomme> Name for the object
+ */
+//------------------------------------------------------------------------------
 ImpulsiveBurn::ImpulsiveBurn(std::string nomme) :
     Burn            ("ImpulsiveBurn", nomme)
-{}
+{
+}
 
 
+//------------------------------------------------------------------------------
+//  Burn(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the impulsive burn (destructor).
+ */
+//------------------------------------------------------------------------------
 ImpulsiveBurn::~ImpulsiveBurn()
-{}
+{
+}
 
 
+//------------------------------------------------------------------------------
+//  bool Fire(Real *burnData)
+//------------------------------------------------------------------------------
+/**
+ * Applies the burn.  
+ * 
+ * Provides the mathematics that model an impulsive burn.  The parameter 
+ * (burnData) can be used to pass in a Cartesian state (x, y, z, Vx, Vy, Vz) 
+ * that needs to incorporate the burn.  If the class has an assigned Spacecraft,
+ * that spacecraft is used instead of the input state.
+ * 
+ * @param <burnData>    Array of data specific to the derived burn class. 
+ */
 bool ImpulsiveBurn::Fire(Real *burnData)
 {
     frame = frameman->GetFrameInstance(coordFrame);

@@ -21,22 +21,56 @@
 #include "VnbManeuverFrame.hpp"
 
 
+//------------------------------------------------------------------------------
+//  VnbManeuverFrame(void)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the VNB maneuver frame (default constructor).
+ */
+//------------------------------------------------------------------------------
 VnbManeuverFrame::VnbManeuverFrame()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  ~VnbManeuverFrame(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the VNB maneuver frame (destructor).
+ */
+//------------------------------------------------------------------------------
 VnbManeuverFrame::~VnbManeuverFrame()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  VnbManeuverFrame(const InertialManeuverFrame& vmf)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the VNB maneuver frame based on another one (copy constructor).
+ * 
+ * @param <imf> The frame that is being copied.
+ */
+//------------------------------------------------------------------------------
 VnbManeuverFrame::VnbManeuverFrame(const VnbManeuverFrame& vmf) :
     ManeuverFrame       (vmf)
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  VnbManeuverFrame& operator=(const InertialManeuverFrame& vmf)
+//------------------------------------------------------------------------------
+/**
+ * Sets one VNB maneuver frame object to match another (assignment operator).
+ * 
+ * @param <vmf> The object that is copied.
+ * 
+ * @return this object, with the parameters set as needed.
+ */
+//------------------------------------------------------------------------------
 VnbManeuverFrame& VnbManeuverFrame::operator=(const VnbManeuverFrame& vmf)
 {
     if (this == &vmf)
@@ -47,6 +81,19 @@ VnbManeuverFrame& VnbManeuverFrame::operator=(const VnbManeuverFrame& vmf)
 }
 
 
+//------------------------------------------------------------------------------
+//  void CalculateBasis(void)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the orthonormal basis vectors used for the maneuver frame.
+ * 
+ * For the VNB frame, the basis vectors are calculated from the spacecraft 
+ * position and velocity.  This method should be generalized so that the VNB
+ * calculations can use any central body in the calculations.
+ * 
+ * @todo Generalize the basis vector calculations for the VNB maneuver frame.
+ */
+//------------------------------------------------------------------------------
 void VnbManeuverFrame::CalculateBasis(void)
 {
     if (!position || !velocity)
@@ -89,6 +136,17 @@ void VnbManeuverFrame::CalculateBasis(void)
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetFrameLabel(Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Gets the label for the maneuver frame principal axes.
+ * 
+ * @param <id> Integer ID of the axis -- 1, 2, or 3.
+ * 
+ * @return The label for the corresponding reference vector.
+ */
+//------------------------------------------------------------------------------
 std::string VnbManeuverFrame::GetFrameLabel(Integer id)
 {
     switch (id) {
