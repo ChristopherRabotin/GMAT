@@ -253,7 +253,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    if (cmdTypeName == "Propagate")
    {
       mNewTreeId = 
-         AppendCommand(parent, GmatTree::ICON_PROPAGATE_EVENT, GmatTree::PROPAGATE_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_PROPAGATE_EVENT,
+                       GmatTree::PROPAGATE_COMMAND,
                        cmd, &mNumPropagate);
 
       Expand(parent);
@@ -261,7 +262,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "Maneuver")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::MANEUVER_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE,
+                       GmatTree::MANEUVER_COMMAND,
                        cmd, &mNumManeuver);
    
       Expand(parent);
@@ -269,10 +271,11 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "Target")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_TARGET, GmatTree::TARGET_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_TARGET,
+                       GmatTree::TARGET_COMMAND,
                        cmd, &mNumTarget);
       
-//      SetItemImage(mNewTreeId, GmatTree::ICON_OPENFOLDER,
+//      SetItemImage(mNewTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
 //                   wxTreeItemIcon_Expanded);
 
       Expand(parent);
@@ -280,7 +283,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndTarget")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::END_TARGET_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_TARGET_COMMAND,
                        cmd, &mNumTarget, mNumTarget);
       
       Expand(parent);
@@ -288,21 +291,21 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "Achieve")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::ACHIEVE_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::ACHIEVE_COMMAND,
                        cmd, &mNumAchieve);
       Expand(parent);
    }
    else if (cmdTypeName == "Vary")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::VARY_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::VARY_COMMAND,
                        cmd, &mNumVary);
       Expand(parent);
    }
    else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::SAVE_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
                        cmd, &mNumSave, mNumSave);
       
       Expand(parent);
@@ -310,7 +313,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName.CmpNoCase("Toggle") == 0)
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::TOGGLE_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::TOGGLE_COMMAND,
                        cmd, &mNumToggle, mNumToggle);
       
       Expand(parent);
@@ -318,10 +321,10 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "For")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FOLDER, GmatTree::FOR_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FOLDER, GmatTree::FOR_CONTROL,
                        cmd, &mNumForLoop);
         
-      SetItemImage(mNewTreeId, GmatTree::ICON_OPENFOLDER,
+      SetItemImage(mNewTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
                    wxTreeItemIcon_Expanded);
 
       Expand(parent);
@@ -329,7 +332,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndFor")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::END_FOR_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_FOR_CONTROL,
                        cmd, &mNumForLoop, mNumForLoop);
       
       Expand(parent);
@@ -337,10 +340,10 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "If")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FOLDER, GmatTree::IF_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FOLDER, GmatTree::IF_CONTROL,
                        cmd, &mNumIfStatement);
         
-      SetItemImage(mNewTreeId, GmatTree::ICON_OPENFOLDER,
+      SetItemImage(mNewTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
                    wxTreeItemIcon_Expanded);
 
       Expand(parent);
@@ -348,7 +351,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndIf")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::END_IF_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_IF_CONTROL,
                        cmd, &mNumIfStatement, mNumIfStatement);
         
       Expand(parent);
@@ -356,10 +359,10 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "While")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FOLDER, GmatTree::WHILE_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FOLDER, GmatTree::WHILE_CONTROL,
                        cmd, &mNumWhileLoop);
         
-      SetItemImage(mNewTreeId, GmatTree::ICON_OPENFOLDER,
+      SetItemImage(mNewTreeId, GmatTree::MISSION_ICON_OPENFOLDER,
                    wxTreeItemIcon_Expanded);
 
       Expand(parent);
@@ -367,7 +370,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndWhile")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::END_WHILE_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_WHILE_CONTROL,
                        cmd, &mNumWhileLoop, mNumWhileLoop);
       
       Expand(parent);
@@ -375,7 +378,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "CallFunction")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::CALL_FUNCTION_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::CALL_FUNCTION_COMMAND,
                        cmd, &mNumFunct, mNumFunct);
 
       Expand(parent);
@@ -423,7 +426,7 @@ void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
 }
 
 //------------------------------------------------------------------------------
-// MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
+// MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
 //                            GmatTree::ItemType type, GmatCommand *cmd,
 //                            int *cmdCount, int endCount)
 //------------------------------------------------------------------------------
@@ -432,7 +435,7 @@ void MissionTree::ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
  */
 //------------------------------------------------------------------------------
 wxTreeItemId
-MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
+MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
                            GmatTree::ItemType type, GmatCommand *cmd,
                            int *cmdCount, int endCount)
 {
@@ -467,7 +470,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
 
 //------------------------------------------------------------------------------
 // wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
-//                            wxTreeItemId prevId, GmatTree::IconType icon,
+//                            wxTreeItemId prevId, GmatTree::MissionIconType icon,
 //                            GmatTree::ItemType type, GmatCommand *prevCmd,
 //                            GmatCommand *cmd, int *cmdCount, int endCount = 0)
 //------------------------------------------------------------------------------
@@ -477,7 +480,7 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
 //------------------------------------------------------------------------------
 wxTreeItemId
 MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
-                           wxTreeItemId prevId, GmatTree::IconType icon,
+                           wxTreeItemId prevId, GmatTree::MissionIconType icon,
                            GmatTree::ItemType type, GmatCommand *prevCmd,
                            GmatCommand *cmd, int *cmdCount, int endCount)
 {
@@ -598,11 +601,12 @@ void MissionTree::AddDefaultMission()
 
    //----- Mission Sequence
    mMissionSeqTopItem =
-      AppendItem(mission, wxT("MissionSequence"), GmatTree::ICON_FOLDER,
+      AppendItem(mission, wxT("MissionSequence"), GmatTree::MISSION_ICON_FOLDER,
                  -1, new MissionTreeItemData(wxT("MissionSequence"),
                                              GmatTree::MISSION_SEQ_TOP_FOLDER));
     
-   SetItemImage(mMissionSeqTopItem, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+   SetItemImage(mMissionSeqTopItem, GmatTree::MISSION_ICON_OPENFOLDER,
+               wxTreeItemIcon_Expanded);
 
    AddDefaultMissionSeq(mMissionSeqTopItem);
 
@@ -626,7 +630,7 @@ void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
    //for (int i = 0; i<size; i++)
    //{
    //    wxString objName = wxString(itemNames[i].c_str());
-   //    AppendItem(item, wxT(objName), GmatTree::ICON_FOLDER, -1,
+   //    AppendItem(item, wxT(objName), GmatTree::MISSION_ICON_FOLDER, -1,
    //                     new MissionTreeItemData(wxT(objName), GmatTree::MISSION_SEQ_COMMAND));
    //};
 
@@ -635,11 +639,11 @@ void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
    name.Printf("Sequence%d", ++mNumMissionSeq);
   
    mMissionSeqSubItem =
-      AppendItem(item, name, GmatTree::ICON_FOLDER, -1,
+      AppendItem(item, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, 
                                          GmatTree::MISSION_SEQ_SUB_FOLDER));
     
-   SetItemImage(mMissionSeqSubItem, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(mMissionSeqSubItem, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
    Expand(item);
@@ -879,10 +883,10 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
    name.Printf("Sequence%d", ++mNumMissionSeq);
   
    mMissionSeqSubItem =
-      AppendItem(item, name, GmatTree::ICON_FOLDER, -1,
+      AppendItem(item, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
     
-   SetItemImage(mMissionSeqSubItem, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(mMissionSeqSubItem, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
    Expand(item);
@@ -909,7 +913,7 @@ void MissionTree::OnAddPropagate(wxCommandEvent &event)
 
       if (cmd != NULL)
       {
-         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_PROPAGATE_EVENT,
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_PROPAGATE_EVENT,
                        GmatTree::PROPAGATE_COMMAND, prevCmd, cmd, &mNumPropagate);
       
          Expand(itemId);
@@ -947,7 +951,7 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
 
       if (cmd != NULL)
       {
-         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::MANEUVER_COMMAND, prevCmd, cmd, &mNumManeuver);
       
          Expand(itemId);
@@ -988,13 +992,13 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_TARGET,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_TARGET,
                           GmatTree::TARGET_COMMAND, prevCmd, cmd, &mNumTarget);
       
-//         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+//         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndTarget
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_TARGET_COMMAND,
                        cmd, endCmd, &mNumTarget, mNumTarget);
 
@@ -1028,7 +1032,7 @@ void MissionTree::OnAddAchieve(wxCommandEvent &event)
     
       if (cmd != NULL)
       {
-         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::ACHIEVE_COMMAND, prevCmd, cmd, &mNumAchieve);
 
          Expand(itemId);
@@ -1060,7 +1064,7 @@ void MissionTree::OnAddVary(wxCommandEvent &event)
    
       if (cmd != NULL)
       {
-         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::VARY_COMMAND, prevCmd, cmd, &mNumVary);
 
          Expand(itemId);
@@ -1095,13 +1099,13 @@ void MissionTree::OnAddIfStatement(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::IF_CONTROL, prevCmd, cmd, &mNumIfStatement);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded); 
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndIf 
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_IF_CONTROL,
                        cmd, endCmd, &mNumIfStatement, mNumIfStatement);
       
@@ -1138,13 +1142,13 @@ void MissionTree::OnAddWhileLoop(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::WHILE_CONTROL, prevCmd, cmd, &mNumWhileLoop);
       
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded); 
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndWhile
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_WHILE_CONTROL, 
                        cmd, endCmd, &mNumWhileLoop, mNumWhileLoop);
          
@@ -1181,13 +1185,13 @@ void MissionTree::OnAddForLoop(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::FOR_CONTROL, prevCmd, cmd, &mNumForLoop);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded); 
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndFor
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_FOR_CONTROL, 
                        cmd, endCmd, &mNumForLoop, mNumForLoop);
          
@@ -1224,13 +1228,13 @@ void MissionTree::OnAddDoWhile(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::DO_CONTROL, prevCmd, cmd, &mNumDoWhile);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded); 
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndDo
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_DO_CONTROL, 
                        cmd, endCmd, &mNumDoWhile, mNumDoWhile);
          
@@ -1267,13 +1271,13 @@ void MissionTree::OnAddSwitchCase(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::SWITCH_CONTROL, prevCmd, cmd, &mNumSwitchCase);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded); 
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
          
          // Append EndSwitch
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_SWITCH_CONTROL, 
                        cmd, endCmd, &mNumSwitchCase, mNumSwitchCase);
          
@@ -1322,12 +1326,12 @@ void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
    //        if (theGuiInterpreter->AppendCommand(cmd))
    //        {   
    wxTreeItemId targetId =
-      InsertItem(parent, itemId, name, GmatTree::ICON_FOLDER, -1,
+      InsertItem(parent, itemId, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::ELSE_IF_CONTROL, 
                                          name, NULL));
-   SetItemImage(targetId, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(item, endName, GmatTree::ICON_FILE, -1,
+   //            AppendItem(item, endName, GmatTree::MISSION_ICON_FILE, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
@@ -1376,12 +1380,12 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
    //        if (theGuiInterpreter->AppendCommand(cmd))
    //        {   
    wxTreeItemId targetId =
-      InsertItem(parent, itemId, name, GmatTree::ICON_FOLDER, -1,
+      InsertItem(parent, itemId, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::ELSE_CONTROL, 
                                          name, NULL));
-   SetItemImage(targetId, GmatTree::ICON_OPENFOLDER, 
+   SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(itemId, endName, GmatTree::ICON_FILE, -1,
+   //            AppendItem(itemId, endName, GmatTree::MISSION_ICON_FILE, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
@@ -1408,7 +1412,7 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
 //      if (theGuiInterpreter->AppendCommand(cmd))
 //      {
 //         wxTreeItemId targetId =
-//            AppendItem(item, name, GmatTree::ICON_FILE, -1,
+//            AppendItem(item, name, GmatTree::MISSION_ICON_FILE, -1,
 //                       new MissionTreeItemData(name, GmatTree::CALL_FUNCTION_COMMAND,
 //                                               name, NULL));
 //
@@ -1433,7 +1437,7 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
 
       if (cmd != NULL)
       {
-         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::CALL_FUNCTION_COMMAND, prevCmd, cmd, &mNumFunct);
 
          Expand(itemId);
@@ -1468,7 +1472,7 @@ void MissionTree::OnInsertPropagate(wxCommandEvent &event)
 
       if (cmd != NULL)
       {
-         InsertCommand(parentId, itemId, prevId, GmatTree::ICON_PROPAGATE_EVENT,
+         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_PROPAGATE_EVENT,
                        GmatTree::PROPAGATE_COMMAND, prevCmd, cmd, &mNumPropagate);
       }
    }
@@ -1498,7 +1502,7 @@ void MissionTree::OnInsertManeuver(wxCommandEvent &event)
       
       if (cmd != NULL)
       {  
-         InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::MANEUVER_COMMAND, prevCmd, cmd, &mNumManeuver);
       }
    }
@@ -1530,13 +1534,13 @@ void MissionTree::OnInsertTarget(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_TARGET,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_TARGET,
                           GmatTree::TARGET_COMMAND, prevCmd, cmd, &mNumTarget);
       
-//         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+//         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndTarget
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_TARGET_COMMAND,
                        cmd, endCmd, &mNumTarget, mNumTarget);
 
@@ -1569,7 +1573,7 @@ void MissionTree::OnInsertAchieve(wxCommandEvent &event)
       
       if (cmd != NULL)
       {  
-         InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::ACHIEVE_COMMAND, prevCmd, cmd, &mNumAchieve);
       }
    }
@@ -1599,7 +1603,7 @@ void MissionTree::OnInsertVary(wxCommandEvent &event)
             
       if (cmd != NULL)
       {  
-         InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FILE,
+         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
                        GmatTree::VARY_COMMAND, prevCmd, cmd, &mNumVary);
       }
    }
@@ -1632,13 +1636,13 @@ void MissionTree::OnInsertIfStatement(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::IF_CONTROL, prevCmd, cmd, &mNumIfStatement);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndIf
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_IF_CONTROL,
                        cmd, endCmd, &mNumIfStatement, mNumIfStatement);
 
@@ -1674,14 +1678,14 @@ void MissionTree::OnInsertWhileLoop(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::WHILE_CONTROL,
                           prevCmd, cmd, &mNumWhileLoop);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndWhile
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_WHILE_CONTROL,
                        cmd, endCmd, &mNumWhileLoop, mNumWhileLoop);
 
@@ -1717,13 +1721,13 @@ void MissionTree::OnInsertForLoop(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::FOR_CONTROL, prevCmd, cmd, &mNumForLoop);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndFor
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_FOR_CONTROL,
                        cmd, endCmd, &mNumForLoop, mNumForLoop);
 
@@ -1759,13 +1763,13 @@ void MissionTree::OnInsertDoWhile(wxCommandEvent &event)
       if (cmd != NULL && endCmd != NULL)
       {
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::DO_CONTROL, prevCmd, cmd, &mNumDoWhile);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
          // Append EndDo
-         InsertCommand(node, node, node, GmatTree::ICON_FILE,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE,
                        GmatTree::END_DO_CONTROL,
                        cmd, endCmd, &mNumDoWhile, mNumDoWhile);
 
@@ -1802,12 +1806,12 @@ void MissionTree::OnInsertSwitchCase(wxCommandEvent &event)
       {
          // ag: switch the GmatTree type to SWITCH_CONTROL from DO_CONTROL 11/10/04
          wxTreeItemId node =
-            InsertCommand(parentId, itemId, prevId, GmatTree::ICON_FOLDER,
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FOLDER,
                           GmatTree::SWITCH_CONTROL, prevCmd, cmd, &mNumSwitchCase);
          
-         SetItemImage(node, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
-         InsertCommand(node, node, node, GmatTree::ICON_FILE, GmatTree::END_DO_CONTROL,
+         InsertCommand(node, node, node, GmatTree::MISSION_ICON_FILE, GmatTree::END_DO_CONTROL,
                        cmd, endCmd, &mNumSwitchCase, mNumSwitchCase);
 
          Expand(node);

@@ -67,11 +67,11 @@ private:
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
-   wxTreeItemId AppendCommand(wxTreeItemId parent, GmatTree::IconType icon,
+   wxTreeItemId AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
                               GmatTree::ItemType type, GmatCommand *cmd,
                               int *cmdCount, int endCount = 0);
    wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
-                              wxTreeItemId prevId, GmatTree::IconType icon,
+                              wxTreeItemId prevId, GmatTree::MissionIconType icon,
                               GmatTree::ItemType type, GmatCommand *prevCmd,
                               GmatCommand *cmd, int *cmdCount, int endCount = 0);
    void AddDefaultMission();
