@@ -13,15 +13,15 @@
 // Created: 2003/10/22
 //
 /**
-*  Implementation code for the SubscriberFactory class, responsible for
+ *  Implementation code for the SubscriberFactory class, responsible for
  *  creating Subscriber objects.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "SubscriberFactory.hpp"
-#include "ReportFile.hpp"   // for ReportFile class
-
+#include "ReportFile.hpp"         // for ReportFile class
+#include "MessageWindow.hpp"
 
 //---------------------------------
 //  public methods
@@ -44,6 +44,8 @@ Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
 {
    if (ofType == "ReportFile")
       return new ReportFile(withName, fileName);
+   else if (ofType == "MessageWindow")
+      return new MessageWindow(withName);
    return NULL;
 }
 
@@ -62,7 +64,10 @@ SubscriberFactory::SubscriberFactory() :
 Factory(Gmat::SUBSCRIBER)
 {
    if (creatables.empty())
+   {
       creatables.push_back("ReportFile");
+      creatables.push_back("MessageWindow");
+   }
 }
 
 //------------------------------------------------------------------------------
