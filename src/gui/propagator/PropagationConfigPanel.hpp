@@ -18,13 +18,6 @@
 
 // gui includes
 #include "gmatwxdefs.hpp"
-//#include "ViewTextFrame.hpp"
-//#include "DocViewFrame.hpp"
-//#include "TextEditView.hpp"
-//#include "TextDocument.hpp"
-//#include "MdiTextEditView.hpp"
-//#include "MdiDocViewFrame.hpp"
-//#include "CelesBodySelectDialog.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -63,13 +56,13 @@ private:
    wxStaticText *setting3StaticText;
    wxStaticText *setting4StaticText;
    wxStaticText *setting5StaticText;
-   wxStaticText *item38;
-   wxStaticText *item40;
-   wxStaticText *item42;
-   wxStaticText *item47;
-   wxStaticText *item52;
-   wxStaticText *item54;
-   wxStaticText *item56;
+   wxStaticText *degree1StaticText;
+   wxStaticText *order1StaticText;
+   wxStaticText *type1StaticText;
+   wxStaticText *type2StaticText;
+   wxStaticText *degree2StaticText;
+   wxStaticText *order2StaticText;
+   wxStaticText *type3StaticText;
                 
    wxTextCtrl *setting1TextCtrl;
    wxTextCtrl *setting2TextCtrl;
@@ -97,11 +90,6 @@ private:
    wxButton *searchMagneticButton;
    wxButton *editMassButton;
    wxButton *editPressureButton;
-   //    wxButton *okButton;
-   //    wxButton *applyButton;
-   //    wxButton *cancelButton;
-   //    wxButton *helpButton;
-   //    wxButton *scriptButton;
     
    wxString integratorString;
    wxString primaryBodyString;
@@ -118,10 +106,6 @@ private:
    wxArrayString degreeArray;
    wxArrayString orderArray;
    wxArrayString integratorArray;
-    
-   //    wxDocManager *mDocManager;
-   //    wxDocTemplate *mDocTemplate;
-   //    ViewTextFrame *mTextFrame;
     
    //Integer numOfIntegrators;
    Integer numOfBodies;
@@ -159,8 +143,6 @@ private:
    // Layout & data handling methods
    void Initialize();
    void Setup(wxWindow *parent);
-   //    void LoadData();
-   //    void SaveData();
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
@@ -168,12 +150,10 @@ private:
    void DisplayAtmosphereModelData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
-   //    void CreateScript();
-   //    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
    // Text control event method
    void OnIntegratorTextUpdate();
-   void OnGravityTextUpdate();
+   //void OnGravityTextUpdate();
    void OnMagneticTextUpdate();
     
    // Checkbox event method
@@ -186,11 +166,6 @@ private:
    void OnAtmosphereSelection();
     
    // Button event methods
-   //    void OnScriptButton();
-   //    void OnOKButton();
-   //    void OnApplyButton();
-   //    void OnCancelButton();
-   //    void OnHelpButton();
    void OnAddButton();
    void OnGravSearchButton();
    void OnSetupButton();

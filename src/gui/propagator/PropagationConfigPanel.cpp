@@ -16,14 +16,7 @@
 #include "gmatwxdefs.hpp"
 #include <string.h>
 #include <wx/variant.h>
-//#include "ViewTextFrame.hpp"
-//#include "DocViewFrame.hpp"
-//#include "TextEditView.hpp"
-//#include "TextDocument.hpp"
-//#include "MdiTextEditView.hpp"
-//#include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
-//#include "GmatMainNotebook.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "ExponentialDragDialog.hpp"
 #include "MSISE90Dialog.hpp"
@@ -56,8 +49,8 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_PM_EDIT, PropagationConfigPanel::OnPMEditButton)
    EVT_BUTTON(ID_BUTTON_SRP_EDIT, PropagationConfigPanel::OnSRPEditButton)
    EVT_TEXT(ID_TEXTCTRL_PROP, PropagationConfigPanel::OnIntegratorTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_GRAV1, PropagationConfigPanel::OnGravityTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_GRAV2, PropagationConfigPanel::OnGravityTextUpdate)
+//   EVT_TEXT(ID_TEXTCTRL_GRAV1, PropagationConfigPanel::OnGravityTextUpdate)
+//   EVT_TEXT(ID_TEXTCTRL_GRAV2, PropagationConfigPanel::OnGravityTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_MAGN1, PropagationConfigPanel::OnMagneticTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_MAGN2, PropagationConfigPanel::OnMagneticTextUpdate)
    EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorSelection)
@@ -78,11 +71,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
    : GmatPanel(parent)
 {
    propSetupName = std::string(propName.c_str());
-   //    Initialize();
-   //    Setup(this);
-   //    LoadData();
-   //    
-   //    applyButton->Enable(false);
    Create();
    Show();
    theApplyButton->Disable(); //loj: 5/11/04 added
@@ -275,13 +263,13 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         wxDefaultPosition, wxSize(250,30),
                         wxST_NO_AUTORESIZE );
                            
-   item42 = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
-   item47 = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
-   item38 = new wxStaticText( parent, ID_TEXT, wxT("Degree"), wxDefaultPosition, wxDefaultSize, 0 );
-   item40 = new wxStaticText( parent, ID_TEXT, wxT("Order"), wxDefaultPosition, wxDefaultSize, 0 );
-   item54 = new wxStaticText( parent, ID_TEXT, wxT("Order"), wxDefaultPosition, wxDefaultSize, 0 );
-   item56 = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
-   item52 = new wxStaticText( parent, ID_TEXT, wxT("Degree"), wxDefaultPosition, wxDefaultSize, 0 );
+   type1StaticText = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
+   type2StaticText = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
+   degree1StaticText = new wxStaticText( parent, ID_TEXT, wxT("Degree"), wxDefaultPosition, wxDefaultSize, 0 );
+   order1StaticText = new wxStaticText( parent, ID_TEXT, wxT("Order"), wxDefaultPosition, wxDefaultSize, 0 );
+   type3StaticText = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
+   degree2StaticText = new wxStaticText( parent, ID_TEXT, wxT("Degree"), wxDefaultPosition, wxDefaultSize, 0 );
+   order2StaticText = new wxStaticText( parent, ID_TEXT, wxT("Order"), wxDefaultPosition, wxDefaultSize, 0 );
 
     // wxTextCtrl
    setting1TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
@@ -297,15 +285,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    magneticOrderTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_MAGN2, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
 
    // wxButton
-   //    scriptButton = new wxButton( parent, ID_BUTTON_SCRIPT, wxT("Create Script"), wxDefaultPosition, wxDefaultSize, 0 );
    bodyButton = new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add Body"), wxDefaultPosition, wxDefaultSize, 0 );
    searchGravityButton = new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"), wxDefaultPosition, wxDefaultSize, 0 );
    setupButton = new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"), wxDefaultPosition, wxDefaultSize, 0 );
    editMassButton = new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
-   //    okButton = new wxButton( parent, ID_BUTTON_OK, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-   //    applyButton = new wxButton( parent, ID_BUTTON_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-   //    cancelButton = new wxButton( parent, ID_BUTTON_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-   //    helpButton = new wxButton( parent, ID_BUTTON_HELP, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
    searchMagneticButton = new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"), wxDefaultPosition, wxDefaultSize, 0 );
    editPressureButton = new wxButton( parent, ID_BUTTON_SRP_EDIT, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
    
@@ -371,10 +354,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-   //    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxHORIZONTAL );
-    
-//    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 5, 0, 0 );
-   wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 0 );
+
+   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 2 );
         
    wxStaticBox *staticBox1 = new wxStaticBox( parent, -1, wxT("Numerical Integrator") );
@@ -394,48 +375,42 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
    wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
     
-   // Add to wx*Sizers    
-   //    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    flexGridSizer1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );    
-    
-   flexGridSizer2->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
-   flexGridSizer2->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   // Add to wx*Sizers  
+   flexGridSizer1->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
+   flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
 
    boxSizer3->Add( bodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
    boxSizer3->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
    boxSizer3->Add( bodyButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
     
-   item36->Add( item42, 0, wxALIGN_CENTRE|wxALL, 5 );
+   item36->Add( type1StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item36->Add( gravityTypeComboBox, 0, wxALIGN_CENTRE|wxALL, 5 ); 
-   item36->Add( item38, 0, wxALIGN_CENTRE|wxALL, 5 );
+   item36->Add( degree1StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item36->Add( gravityDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item36->Add( item40, 0, wxALIGN_CENTRE|wxALL, 5 );
+   item36->Add( order1StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item36->Add( gravityOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
    item36->Add( searchGravityButton, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-   item45->Add( item47, 0, wxALIGN_CENTRE|wxALL, 5 );   
+   item45->Add( type2StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );   
    item45->Add( atmosComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
    item45->Add( setupButton, 0, wxALIGN_CENTRE|wxALL, 5 );   
     
+   item50->Add( type3StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item50->Add( magneticTypeComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item50->Add( item52, 0, wxALIGN_CENTRE|wxALL, 5 );
+   item50->Add( degree2StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item50->Add( magneticDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item50->Add( item54, 0, wxALIGN_CENTRE|wxALL, 5 );
+   item50->Add( order2StaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
    item50->Add( magneticOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-   item50->Add( item56, 0, wxALIGN_CENTRE|wxALL, 5 ); 
    item50->Add( searchMagneticButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     
    flexGridSizer3->Add( pmEditTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -453,7 +428,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     
    staticBoxSizer7->Add( flexGridSizer3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     
-   staticBoxSizer1->Add( flexGridSizer2, 0, wxALIGN_CENTRE|wxALL, 5 );
+   staticBoxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, 5 );
     
    staticBoxSizer2->Add( staticBoxSizer3, 0, wxALIGN_CENTRE|wxALL, 5 );
    staticBoxSizer2->Add( staticBoxSizer7, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -461,25 +436,23 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     
    boxSizer2->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
    boxSizer2->Add( staticBoxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
-           
-   //    boxSizer4->Add( okButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    boxSizer4->Add( applyButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    boxSizer4->Add( cancelButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    boxSizer4->Add( helpButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     
-   //    boxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, 5 );
    boxSizer1->Add( boxSizer2, 0, wxALIGN_CENTRE|wxALL, 5 );
-   //    boxSizer1->Add( boxSizer4, 0, wxALIGN_CENTRE|wxALL, 5 );
 
    theMiddleSizer->Add(boxSizer1, 0, wxGROW, 5);
     
-   // waw: future implementation
-   //    helpButton->Enable(false);
-    
-   //    parent->SetAutoLayout(true);
-   //    parent->SetSizer( boxSizer1 );
-   //    boxSizer1->Fit( parent );
-   //    boxSizer1->SetSizeHints( parent );
+   // waw: 05/17/04
+   bodyButton->Enable(false);
+   searchGravityButton->Enable(false);
+   setupButton->Enable(false);
+   searchMagneticButton->Enable(false);
+   editMassButton->Enable(false);
+   editPressureButton->Enable(false);
+   srpCheckBox->Enable(false);
+   gravityDegreeTextCtrl->Enable(false);
+   gravityOrderTextCtrl->Enable(false);
+   magneticDegreeTextCtrl->Enable(false);
+   magneticOrderTextCtrl->Enable(false);
 }
 
 void PropagationConfigPanel::LoadData()
@@ -747,17 +720,18 @@ void PropagationConfigPanel::DisplayGravityFieldData()
          else
          {
             gravityTypeComboBox->SetValue("None");
-            gravityDegreeTextCtrl->Enable(true);
-            gravityOrderTextCtrl->Enable(true);
-                
-            if (degreeArray.IsEmpty())
-               gravityDegreeTextCtrl->SetValue("0");
-            else
-               gravityDegreeTextCtrl->SetValue(degreeArray.Item(i));
-            if (orderArray.IsEmpty())
-               gravityOrderTextCtrl->SetValue("0");
-            else
-               gravityOrderTextCtrl->SetValue(orderArray.Item(i));
+// waw: 05/17/04
+//            gravityDegreeTextCtrl->Enable(true);
+//            gravityOrderTextCtrl->Enable(true);
+//                
+//            if (degreeArray.IsEmpty())
+//               gravityDegreeTextCtrl->SetValue("0");
+//            else
+//               gravityDegreeTextCtrl->SetValue(degreeArray.Item(i));
+//            if (orderArray.IsEmpty())
+//               gravityOrderTextCtrl->SetValue("0");
+//            else
+//               gravityOrderTextCtrl->SetValue(orderArray.Item(i));
          }
       }
    }
@@ -771,7 +745,7 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
       //( primaryBodyString.Cmp(SolarSystem::MARS_NAME.c_str()) == 0 )
    {                   
       atmosComboBox->SetValue(atmosModelString.c_str());
-      setupButton->Enable(true); 
+      //setupButton->Enable(true); 
    }
    else
    {
@@ -1150,41 +1124,41 @@ void PropagationConfigPanel::OnIntegratorTextUpdate()
    theApplyButton->Enable(true);
 }
 
-void PropagationConfigPanel::OnGravityTextUpdate()
-{
-   wxString deg = gravityDegreeTextCtrl->GetValue();
-   wxString ord = gravityOrderTextCtrl->GetValue();
-    
-   if (!deg.IsNumber())
-   {
-      gravityDegreeTextCtrl->Clear();
-      return;
-   }
-   else if (!ord.IsNumber())
-   {
-      gravityOrderTextCtrl->Clear();
-      return;
-   }
-   else
-   {
-      for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-      {
-         if ( primaryBodiesArray[i].CmpNoCase(primaryBodyString) == 0 )
-         {
-            if ( primaryBodiesGravityArray[i].CmpNoCase("PointMassForce") == 0 )
-            {
-               degreeArray[i] = "NULL";
-               orderArray[i] = "NULL";
-            }
-            else
-            {
-               degreeArray[i] = deg;
-               orderArray[i] = ord;
-            }
-         }
-      }      
-   }
-}
+//void PropagationConfigPanel::OnGravityTextUpdate()
+//{
+//   wxString deg = gravityDegreeTextCtrl->GetValue();
+//   wxString ord = gravityOrderTextCtrl->GetValue();
+//    
+//   if (!deg.IsNumber())
+//   {
+//      gravityDegreeTextCtrl->Clear();
+//      return;
+//   }
+//   else if (!ord.IsNumber())
+//   {
+//      gravityOrderTextCtrl->Clear();
+//      return;
+//   }
+//   else
+//   {
+//      for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
+//      {
+//         if ( primaryBodiesArray[i].CmpNoCase(primaryBodyString) == 0 )
+//         {
+//            if ( primaryBodiesGravityArray[i].CmpNoCase("PointMassForce") == 0 )
+//            {
+//               degreeArray[i] = "NULL";
+//               orderArray[i] = "NULL";
+//            }
+//            else
+//            {
+//               degreeArray[i] = deg;
+//               orderArray[i] = ord;
+//            }
+//         }
+//      }      
+//   }
+//}
 
 void PropagationConfigPanel::OnMagneticTextUpdate()
 {
