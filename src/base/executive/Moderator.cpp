@@ -1531,9 +1531,9 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                sub->SetStringParameter(sub->GetParameterID("Filename"),
                                        name + ".txt");
                sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-               sub->SetStringParameter("Add", "DefaultSC.X");
-               sub->SetStringParameter("Add", "DefaultSC.Y");
-               sub->SetStringParameter("Add", "DefaultSC.Z");
+               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X");
+               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y");
+               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z");
                sub->Activate(true);
             }
          }
@@ -2351,8 +2351,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
 #endif
          
          // clear sandbox
-         if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
-            sandboxes[sandboxNum-1]->Clear();
+         sandboxes[sandboxNum-1]->Clear();
       
       }
       catch (BaseException &e)
@@ -2641,7 +2640,7 @@ void Moderator::CreateDefaultMission()
       //----------------------------------------------------
       // Create default resource
       //----------------------------------------------------
-      
+
       // CoordinateSystem
       CreateCoordinateSystem("EarthMJ2000Eq", true);
       CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
@@ -2669,23 +2668,23 @@ void Moderator::CreateDefaultMission()
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
-      //loj: 1/3/05 Added CentralBody info
-      // CoordinateSystem info is not ready yet
+      //loj: 1/03/05 Added CentralBody info
+      //loj: 1/18/05 Added CoordinateSystem info
       
       // Cartesian parameters
-      CreateParameter("X", "DefaultSC.X");
-      CreateParameter("Y", "DefaultSC.Y");
-      CreateParameter("Z", "DefaultSC.Z");
-      CreateParameter("VX", "DefaultSC.VX");
-      CreateParameter("VY", "DefaultSC.VY");
-      CreateParameter("VZ", "DefaultSC.VZ");
+      CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
+      CreateParameter("Y", "DefaultSC.EarthMJ2000Eq.Y");
+      CreateParameter("Z", "DefaultSC.EarthMJ2000Eq.Z");
+      CreateParameter("VX", "DefaultSC.EarthMJ2000Eq.VX");
+      CreateParameter("VY", "DefaultSC.EarthMJ2000Eq.VY");
+      CreateParameter("VZ", "DefaultSC.EarthMJ2000Eq.VZ");
 
       // Keplerian parameters
       CreateParameter("SMA", "DefaultSC.Earth.SMA");
       CreateParameter("ECC", "DefaultSC.Earth.ECC");
       CreateParameter("INC", "DefaultSC.Earth.INC");
       CreateParameter("RAAN", "DefaultSC.Earth.RAAN");
-      CreateParameter("AOP", "DefaultSC.AOP");
+      CreateParameter("AOP", "DefaultSC.EarthMJ2000Eq.AOP");
       CreateParameter("TA", "DefaultSC.Earth.TA");
       CreateParameter("MA", "DefaultSC.Earth.MA");
       CreateParameter("MM", "DefaultSC.Earth.MM");
@@ -2699,17 +2698,17 @@ void Moderator::CreateDefaultMission()
       // Spherical parameters
       CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
       CreateParameter("RA", "DefaultSC.Earth.RA");
-      CreateParameter("DEC", "DefaultSC.DEC");
-      CreateParameter("VMAG", "DefaultSC.VMAG");
-      CreateParameter("RAV", "DefaultSC.RAV");
-      CreateParameter("DECV", "DefaultSC.DECV");
+      CreateParameter("DEC", "DefaultSC.EarthMJ2000Eq.DEC");
+      CreateParameter("VMAG", "DefaultSC.EarthMJ2000Eq.VMAG");
+      CreateParameter("RAV", "DefaultSC.EarthMJ2000Eq.RAV");
+      CreateParameter("DECV", "DefaultSC.EarthMJ2000Eq.DECV");
 
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
       CreateParameter("HMAG", "DefaultSC.HMAG");
-      CreateParameter("HX", "DefaultSC.HX");
-      CreateParameter("HY", "DefaultSC.HY");
-      CreateParameter("HZ", "DefaultSC.HZ");
+      CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
+      CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
+      CreateParameter("HZ", "DefaultSC.EarthMJ2000Eq.HZ");
 
       // Environmental parameters
       CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
@@ -2722,9 +2721,9 @@ void Moderator::CreateDefaultMission()
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
       // User variable
-      Parameter *var = CreateParameter("Variable", "DefaultSC.Xx2");
-      var->SetStringParameter("Expression", "DefaultSC.X * 2.0");
-      var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.X");
+      Parameter *var = CreateParameter("Variable", "DefaultSC.EarthMJ2000Eq.Xx2");
+      var->SetStringParameter("Expression", "DefaultSC.EarthMJ2000Eq.X * 2.0");
+      var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.EarthMJ2000Eq.X");
       
 #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default parameters created\n");
@@ -2743,7 +2742,9 @@ void Moderator::CreateDefaultMission()
             param->SetStringParameter("Expression", param->GetName());
             param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
             if (param->IsOriginDependent())
-               param->SetStringParameter("DepObject", "Earth"); // Earth is the default
+               param->SetStringParameter("DepObject", "Earth");
+            else if (param->IsCoordSysDependent())
+               param->SetStringParameter("DepObject", "EarthMJ2000Eq");
          }
       }
       
@@ -2760,27 +2761,15 @@ void Moderator::CreateDefaultMission()
       // Subscribers
       // ReportFile
       GetDefaultSubscriber();
-
-      //loj: 1/5/05 Moved the code to GetDefaultSubscriber()
-//        Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
-//        sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-//        sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-//        sub->SetStringParameter("Add", "DefaultSC.X");
-//        sub->SetStringParameter("Add", "DefaultSC.Y");
-//        sub->SetStringParameter("Add", "DefaultSC.Z");
-//        sub->SetStringParameter("Add", "DefaultSC.VX");
-//        sub->SetStringParameter("Add", "DefaultSC.VY");
-//        sub->SetStringParameter("Add", "DefaultSC.VZ");
-//        sub->Activate(true);
       
       // XYPlot
       Subscriber *sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.X", 0);
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);
 #if DEBUG_ACTION_REMOVE
-      sub->SetStringParameter("Add", "DefaultSC.Y", 1);
-      sub->SetStringParameter("Add", "DefaultSC.Z", 2);
-      sub->TakeAction("Remove", "DefaultSC.Y");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z", 2);
+      sub->TakeAction("Remove", "DefaultSC.EarthMJ2000Eq.Y");
 #endif
       sub->Activate(true);
       
@@ -2814,9 +2803,9 @@ void Moderator::CreateDefaultMission()
       //just for testing multiple stopping condition
       //----- StopCondition 2
       StopCondition *stopOnX =
-         CreateStopCondition("StopCondition", "StopOnDefaultSC.X");
+         CreateStopCondition("StopCondition", "StopOnDefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
-      stopOnX->SetStringParameter("StopVar", "DefaultSC.X");
+      stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetRealParameter("Goal", 5000.0);
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
       //----------------------------------------------------
@@ -3020,12 +3009,12 @@ Subscriber* Moderator::GetDefaultSubscriber()
       Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
       sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
       sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.X");
-      sub->SetStringParameter("Add", "DefaultSC.Y");
-      sub->SetStringParameter("Add", "DefaultSC.Z");
-      sub->SetStringParameter("Add", "DefaultSC.VX");
-      sub->SetStringParameter("Add", "DefaultSC.VY");
-      sub->SetStringParameter("Add", "DefaultSC.VZ");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VX");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VY");
+      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VZ");
       sub->Activate(true);
       return sub;
    }
@@ -3121,11 +3110,11 @@ Parameter* Moderator::GetDefaultX()
 Parameter* Moderator::GetDefaultY()
 {
    Spacecraft *sc = GetDefaultSpacecraft();
-   Parameter* param = GetParameter(sc->GetName() + ".X");
+   Parameter* param = GetParameter(sc->GetName() + "EarthMJ2000Eq.X");
    
    if (param == NULL)
    {
-      param = CreateParameter("X", sc->GetName() + ".X");
+      param = CreateParameter("X", sc->GetName() + "EarthMJ2000Eq.X");
       param->SetRefObjectName(Gmat::SPACECRAFT, sc->GetName());
    }
    
