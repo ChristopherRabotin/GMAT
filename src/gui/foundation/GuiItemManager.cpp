@@ -1563,12 +1563,14 @@ void GuiItemManager::UpdateSpacePointList()
    int numScs = scList.size();
    int numBodies = bodyList.size();
    theNumSpacePoint = numBodies + numScs; // 1 for Vector
-   
-   if (theNumSpacePoint > MAX_OBJECT_SIZE)
+
+   //loj: 3/2/05 Changed MAX_OBJECT_SIZE to MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE
+   if (theNumSpacePoint > MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE)
    {
       MessageInterface::ShowMessage
          ("GuiItemManager::UpdateSpacePointList() GUI will handle up to %d bodies."
-          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE, theNumSpacePoint);
+          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE + MAX_SPACECRAFT_SIZE,
+          theNumSpacePoint);
       theNumSpacePoint = MAX_OBJECT_SIZE;
    }
 
