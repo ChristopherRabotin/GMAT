@@ -103,6 +103,7 @@ void GuiItemManager::UpdateSpacecraft()
 {
    UpdateSpacecraftList();
    UpdateSpaceObjectList();
+   UpdateSpacePointList();
 }
 
 //------------------------------------------------------------------------------
@@ -127,6 +128,7 @@ void GuiItemManager::UpdateParameter()
 void GuiItemManager::UpdateSolarSystem()
 {
    UpdateConfigBodyList();
+   UpdateSpacePointList();
 }
 
 //------------------------------------------------------------------------------
@@ -250,6 +252,62 @@ wxComboBox* GuiItemManager::GetConfigBodyComboBox(wxWindow *parent, wxWindowID i
    
    return theConfigBodyComboBox;
 }
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size, bool addVector = false)
+//------------------------------------------------------------------------------
+/**
+ * @return Configured ConfigBodyListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size, bool addVector)
+{
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage("GuiItemManager::GetSpacePointComboBox() entered\n");
+   #endif
+   
+   int numSpacePoint = theNumSpacePoint;
+   
+   if (theNumSpacePoint == 0)
+      numSpacePoint = 1;
+
+   if (addVector)
+   {
+      if (theNumSpacePoint == 0)
+         numSpacePoint = 1;
+      else
+         numSpacePoint = theNumSpacePoint + 1;
+
+      wxString *newSpacePointList = new wxString[numSpacePoint];
+
+      // add "Vector" first
+      newSpacePointList[0] = "Vector";
+      
+      for (int i=0; i<theNumSpacePoint; i++)
+         newSpacePointList[i+1] = theSpacePointList[i];
+
+      theSpacePointComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        numSpacePoint, newSpacePointList, wxCB_READONLY);
+
+      delete newSpacePointList;
+   }
+   else
+   {
+      theSpacePointComboBox =
+         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                        numSpacePoint, theSpacePointList, wxCB_READONLY);
+   }
+   
+   // select first item
+   theSpacePointComboBox->SetSelection(0);
+   
+   return theSpacePointComboBox;
+}
+
 
 //------------------------------------------------------------------------------
 // wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
@@ -785,6 +843,7 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
    return theUserParamListBox;
 }
 
+
 //------------------------------------------------------------------------------
 // wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 //                                 const wxSize &size,
@@ -863,6 +922,7 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 
    return theConfigBodyListBox;
 }
+
 
 //------------------------------------------------------------------------------
 // wxBoxSizer* CreateParameterSizer(...)
@@ -1454,6 +1514,7 @@ void GuiItemManager::UpdateParameterList()
    theNumUserParam = userParamCount;
 }
 
+
 //------------------------------------------------------------------------------
 // void UpdateConfigBodyList()
 //------------------------------------------------------------------------------
@@ -1483,6 +1544,40 @@ void GuiItemManager::UpdateConfigBodyList()
       //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigBodyList() " +
       //                              std::string(theConfigBodyList[i].c_str()) + "\n");
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateSpacePointList()
+//------------------------------------------------------------------------------
+/**
+ * Updates confugured celestial body list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateSpacePointList()
+{
+   //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacePointList() entered\n");
+   
+   StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   StringArray bodyList = theSolarSystem->GetBodiesInUse();
+   int numScs = scList.size();
+   int numBodies = bodyList.size();
+   theNumSpacePoint = numBodies + numScs; // 1 for Vector
+   
+   if (theNumSpacePoint > MAX_OBJECT_SIZE)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSpacePointList() GUI will handle up to %d bodies."
+          "The number of bodies configured: %d\n", MAX_OBJECT_SIZE, theNumSpacePoint);
+      theNumSpacePoint = MAX_OBJECT_SIZE;
+   }
+
+   for (int i=0; i<numScs; i++)
+      theSpacePointList[i] = scList[i].c_str();
+   
+   for (int i=0; i<numBodies; i++)
+      theSpacePointList[i+numScs] = bodyList[i].c_str();
+   
 }
 
 
@@ -1539,6 +1634,7 @@ GuiItemManager::GuiItemManager()
    theNumUserArray = 0;
    theNumUserParam = 0;
    theNumConfigBody = 0;
+   theNumSpacePoint = 0;
    
    theSpacecraftComboBox = NULL;
    theUserParamComboBox = NULL;
@@ -1556,6 +1652,7 @@ GuiItemManager::GuiItemManager()
    theUserArrayListBox = NULL;
    theUserParamListBox = NULL;
    theConfigBodyListBox = NULL;
+   theSpacePointComboBox = NULL;
 }
 
 //------------------------------------------------------------------------------
