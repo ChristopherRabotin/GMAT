@@ -133,8 +133,7 @@ void PropagationConfigPanel::Initialize()
                 {
                     thePMForces.push_back((PointMassForce *)force);
                     theBodies.push_back(thePMForces[i]->GetBody());
-                    //primaryBodiesArray.Add(theBodies[i]->GetName().c_str());
-                    primaryBodiesArray.Add("Earth");
+                    primaryBodiesArray.Add(theBodies[i]->GetName().c_str());
                     primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());
                     // waw: Future implementation
                     //degreeID = theBodies[i]->GetParameterID("Degree");
