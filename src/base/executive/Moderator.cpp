@@ -86,11 +86,11 @@ bool Moderator::Initialize(bool fromGui)
          thePublisher = Publisher::Instance();
         
          // Create factories
-         theAtmosphereFactory = new AtmosphereFactory(); //loj: 9/14/04 - added
+         theAtmosphereFactory = new AtmosphereFactory();
          theBurnFactory = new BurnFactory();
          theCommandFactory = new CommandFactory();
          theForceModelFactory = new ForceModelFactory();
-         theFunctionFactory = new FunctionFactory(); //loj: 9/27/04 - added
+         theFunctionFactory = new FunctionFactory();
          theHardwareFactory = new HardwareFactory(); //djc: 11/10/04 - added
          theParameterFactory = new ParameterFactory();
          thePhysicalModelFactory = new PhysicalModelFactory();
@@ -786,7 +786,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
                                  type + ", name = " + name + "\n");
 #endif
 
-   // if Burn name doesn't exist, create Burn -- loj: 6/30/04
+   // if Burn name doesn't exist, create Burn
    if (GetBurn(name) == NULL)
    {
       Burn *burn = theFactoryManager->CreateBurn(type, name);
@@ -895,7 +895,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                  "name = %s\n", type.c_str(), name.c_str());
 #endif
    
-   // if Parameter name doesn't exist, create Parameter -- loj: 6/30/04
+   // if Parameter name doesn't exist, create Parameter
    if (GetParameter(name) == NULL)
    {
       Parameter *parameter = theFactoryManager->CreateParameter(type, name);
@@ -1143,8 +1143,8 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
                                  name.c_str());
 #endif
    
-   //loj: 5/11/04 since PropSetup creates default Integrator(RungeKutta89)
-   // and default force (PointMassForce body=Eargh)
+   // PropSetup creates default Integrator(RungeKutta89)
+   // and default force (PointMassForce body=Earth)
    PropSetup *propSetup = CreatePropSetup(name);
 
    // create default force model with Earth primary body
@@ -1362,7 +1362,6 @@ RefFrame* Moderator::GetRefFrame(const std::string &name)
 }
 
 // Subscriber
-//loj: 6/21/04 added createDefault
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
 //                              const std::string &fileName = "",
@@ -1414,14 +1413,14 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          
          if (createDefault)
          {
-            if (type == "OpenGLPlot") //loj: 10/28/04 Changed from OpenGlPlot
+            if (type == "OpenGLPlot")
             {
-               // add default spacecraft to OpenGLPlot (loj: 9/28/04 added index)
+               // add default spacecraft to OpenGLPlot
                sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0); 
             }
-            else if (type == "XYPlot") //loj: 10/28/04 Changed from XyPlot
+            else if (type == "XYPlot")
             {
-               // add default x,y parameter to XYPlot (loj: 9/29/04 added index)
+               // add default x,y parameter to XYPlot
                sub->SetStringParameter("IndVar", GetDefaultX()->GetName());
                sub->SetStringParameter("Add", GetDefaultY()->GetName(), 0);
                sub->Activate(true);
@@ -1593,21 +1592,19 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       id = cmd->GetParameterID("Spacecraft");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
    }
-   else if (type == "Target") //loj: 11/4/04 added
+   else if (type == "Target")
    {
       // set solver
       Solver *solver = CreateSolver("DifferentialCorrector",
                                     GetDefaultSolver()->GetName());
-                                    //"DefaultDC");
       id = cmd->GetParameterID("Targeter");
       cmd->SetStringParameter(id, solver->GetName());
    }
-   else if (type == "Vary") //loj: 10/6/04 added
+   else if (type == "Vary")
    {
       // set solver
       Solver *solver = CreateSolver("DifferentialCorrector",
                                     GetDefaultSolver()->GetName());
-                                    //"DefaultDC");
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
 
@@ -1642,12 +1639,12 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       cmd->SetRealParameter(id, 9.000e30);
       cmd->SetRealParameter(id, 9.000e30);
    }
-   else if (type == "Achieve") //loj: 10/6/04 added
+   else if (type == "Achieve")
    {
       // set solver
       Solver *solver = CreateSolver("DifferentialCorrector",
                                     GetDefaultSolver()->GetName());
-                                    //"DefaultDC");
+
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
       
@@ -1798,7 +1795,6 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
       return "Unknown Potential File Type:" + fileType;
 }
 
-//loj: 6/14/04 changed bool to Integer
 //------------------------------------------------------------------------------
 // Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 //------------------------------------------------------------------------------
@@ -2224,10 +2220,6 @@ Integer Moderator::RunMission(Integer sandboxNum)
 
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
-         //loj: 11/2/04 moved below so that Frame can be set to normal size even when
-         // error occurs.
-         //runState = Gmat::IDLE;
-         //theGuiInterpreter->NotifyRunCompleted(); 
          
 #if DEBUG_RUN
          MessageInterface::ShowMessage
@@ -2241,7 +2233,6 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
          // assign status
          status = -2;
-         //throw; //loj: 11/03/04 added to debug
       }
       catch (...)
       {
@@ -2257,9 +2248,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
    }
    
    runState = Gmat::IDLE;
-   theGuiInterpreter->NotifyRunCompleted(); //loj: 10/28/04 added
+   theGuiInterpreter->NotifyRunCompleted();
    
-   //loj: 10/13/04 added run status
    if (status == 0)
       MessageInterface::ShowMessage("Mission ran successfully.\n");
    else
@@ -2321,16 +2311,9 @@ Gmat::RunState Moderator::GetUserInterrupt()
    MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
 #endif
 
-   //loj: 8/17/04 added
    // give MainFrame input focus
    theGuiInterpreter->SetInputFocus();
    Gmat::RunState status = runState;
-   
-   //// Test code for the polling function -- stop on the 5th call
-   //static Integer tester = 0;
-   //++tester;
-   //if (tester == 5)
-   //   status = Gmat::IDLE;
    
    return status;
 }
@@ -2381,7 +2364,6 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    return status;
 }
 
-//loj: 9/8/04 added
 //------------------------------------------------------------------------------
 // bool InterpretScript(std::istringstream *ss, bool clearObjs)
 //------------------------------------------------------------------------------
@@ -2542,7 +2524,7 @@ void Moderator::CreateDefaultMission()
       GetDefaultBurn();
       
       // Time parameters
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); //loj: 9/24/04 changed from CurrentTime
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
@@ -2580,8 +2562,15 @@ void Moderator::CreateDefaultMission()
 
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.SemilatusRectum");
+      CreateParameter("HMAG", "DefaultSC.HMAG"); //loj: 12/10/04 added HMAG, HX, HY, HZ
+      CreateParameter("HX", "DefaultSC.HX");
+      CreateParameter("HY", "DefaultSC.HY");
+      CreateParameter("HZ", "DefaultSC.HZ");
 
-      // User variable (9/22/04 added)
+      // Environmental parameters (loj: 12/10/04 Added)
+      CreateParameter("AtmosDensity", "DefaultSC.AtmosDensity");
+
+      // User variable
       Parameter *var = CreateParameter("Variable", "DefaultSC.Xx2");
       var->SetStringParameter("Expression", "DefaultSC.X * 2.0");
       var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.X");
@@ -2597,14 +2586,11 @@ void Moderator::CreateDefaultMission()
       {
          param = GetParameter(params[i]);
 
-         // need spacecraft if system parameter (loj: 9/22/04)
-         if (param->GetKey() == Parameter::SYSTEM_PARAM)
+         // need spacecraft if system parameter
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
          {
-            //param->SetStringParameter("Description", param->GetName());
-            //loj: 9/22/04 set user Expression from now on
             param->SetStringParameter("Expression", param->GetName());
             param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-            //loj: 9/13/04 param->SetStringParameter("Object", "DefaultSC");
          }
       }
       
@@ -2633,7 +2619,7 @@ void Moderator::CreateDefaultMission()
       // XYPlot
       sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.X", 0); //loj: 9/29/04 added index
+      sub->SetStringParameter("Add", "DefaultSC.X", 0);
 #if DEBUG_ACTION_REMOVE
       sub->SetStringParameter("Add", "DefaultSC.Y", 1);
       sub->SetStringParameter("Add", "DefaultSC.Z", 2);
@@ -2643,7 +2629,7 @@ void Moderator::CreateDefaultMission()
       
       // OpenGLPlot
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
-      sub->SetStringParameter("Add", "DefaultSC", 0); //loj: 9/28/04 added index
+      sub->SetStringParameter("Add", "DefaultSC", 0);
 #if DEBUG_ACTION_REMOVE
       sub->SetStringParameter("Add", "Spacecraft1", 1);
       sub->TakeAction("Remove", "Spacecraft1");
@@ -2912,7 +2898,6 @@ Parameter* Moderator::GetDefaultX()
    Spacecraft *sc = GetDefaultSpacecraft();
    Parameter* param = GetParameter(sc->GetName() + ".CurrA1MJD");
 
-   //loj: 10/1/04 SetRefObjectName to param
    if (param == NULL)
    {
       param = CreateParameter("CurrA1MJD", sc->GetName() + ".CurrA1MJD");
@@ -2930,7 +2915,6 @@ Parameter* Moderator::GetDefaultY()
    Spacecraft *sc = GetDefaultSpacecraft();
    Parameter* param = GetParameter(sc->GetName() + ".X");
    
-   //loj: 10/1/04  SetRefObjectName to param
    if (param == NULL)
    {
       param = CreateParameter("X", sc->GetName() + ".X");

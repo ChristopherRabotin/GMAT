@@ -27,6 +27,7 @@
 #include "SphericalParameters.hpp"
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
+#include "EnvParameters.hpp" //loj: 12/10/04 Added
 #include "Variable.hpp"
 #include "Array.hpp"
 
@@ -86,6 +87,8 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepInc(withName);
    if (ofType == "RAAN")
       return new KepRAAN(withName);
+   if (ofType == "RADN") //loj: 12/10/04 Added
+      return new KepRADN(withName);
    if (ofType == "AOP")
       return new KepAOP(withName);
    if (ofType == "TA")
@@ -113,7 +116,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    if (ofType == "SphElem")
       return new SphElem(withName);
    if (ofType == "Altitude")
-      return new Altitude(withName); //loj: 11/4/04 added
+      return new Altitude(withName);
 
    // Orbital parameters
    if (ofType == "VelApoapsis")
@@ -126,7 +129,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Periapsis(withName);
    if (ofType == "OrbitPeriod")
       return new OrbitPeriod(withName);
-   if (ofType == "RadApo")  //loj: 10/6/04 added RadApo, RadPer, C3Energy, Energy
+   if (ofType == "RadApo")
       return new RadApoapsis(withName);
    if (ofType == "RadPer")
       return new RadPeriapsis(withName);
@@ -138,7 +141,19 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    // Angular parameters
    if (ofType == "SemilatusRectum")
       return new SemilatusRectum(withName);
+   if (ofType == "HMAG") //loj: 12/10/04 Added HMAG, HX, HY, HZ
+      return new AngularMomentumMag(withName);
+   if (ofType == "HX")
+      return new AngularMomentumX(withName);
+   if (ofType == "HY")
+      return new AngularMomentumY(withName);
+   if (ofType == "HZ")
+      return new AngularMomentumZ(withName);
 
+   // Environmental parameters
+   if (ofType == "AtmosDensity") //loj: 12/10/04 Added AtmosDensity
+      return new AtmosDensity(withName);
+   
    // add others here
    else
       return NULL;
@@ -183,6 +198,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ECC");
       creatables.push_back("INC");
       creatables.push_back("RAAN");
+      creatables.push_back("RADN");
       creatables.push_back("AOP");
       creatables.push_back("TA");
       creatables.push_back("MA");
@@ -197,7 +213,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("RAV");
       creatables.push_back("DECV");
       creatables.push_back("SphElem");
-      creatables.push_back("Altitude"); //loj: 11/4/04 added
+      creatables.push_back("Altitude");
 
       // Orbital parameters
       creatables.push_back("VelApoapsis");
@@ -205,13 +221,20 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Apoapsis");
       creatables.push_back("Periapsis");
       creatables.push_back("OrbitPeriod");
-      creatables.push_back("RadApo"); //loj: 10/6/04 added RadApo, RadPer, C3Energy, Energy
+      creatables.push_back("RadApo");
       creatables.push_back("RadPer");
       creatables.push_back("C3Energy");
       creatables.push_back("Energy");
 
       // Angular parameters
       creatables.push_back("SemilatusRectum");
+      creatables.push_back("HMAG");
+      creatables.push_back("HX");
+      creatables.push_back("HY");
+      creatables.push_back("HZ");
+      
+      // Environmental parameters
+      creatables.push_back("AtmosDensity");
    }
 }
 
