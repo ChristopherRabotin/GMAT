@@ -18,6 +18,7 @@
  */
 //------------------------------------------------------------------------------
 #if !defined __CONSOLE_APP__
+
 #include "gmatwxdefs.hpp"
 #include "gmatwxrcs.hpp"
 #include "GmatAppData.hpp"
@@ -30,11 +31,12 @@
 #include "MdiXyPlotData.hpp"
 #include "MdiChildXyFrame.hpp"
 
+#endif
+
 #include <iostream>                // for cout, endl
 #include "PlotInterface.hpp"       // for PlotInterface functions
 #include "Rvector.hpp"
 #include "MessageInterface.hpp"    // for ShowMessage()
-#endif
 
 //---------------------------------
 //  static data

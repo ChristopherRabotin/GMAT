@@ -92,6 +92,7 @@ DragForce& DragForce::operator=(const DragForce& df)
     if (this == &df)
         return *this;
         
+    PhysicalModel::operator=(df);        
     return *this;
 }
 
@@ -207,7 +208,7 @@ bool DragForce::Initialize(void)
         
     // Set the atmosphere model
     if (solarSystem) {
-        sun = solarSystem->GetBody("Sun");
+        sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
         if (!sun)
             throw ForceModelException("The Sun is not in solar system");
         

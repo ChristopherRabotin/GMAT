@@ -9,39 +9,21 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
 
 OBJECTS = Parameter.o \
           ParameterDatabase.o \
-          CurrentA1MjdParam.o \
-          ElapsedDaysParam.o \
-          ElapsedSecsParam.o \
-          OrbitData.o \
-          RealParameter.o \
-          RefData.o \
-          Rvector6Parameter.o \
-          TimeData.o \
-          CartStateParam.o \
-          CartXParam.o \
-          CartYParam.o \
-          CartZParam.o \
-          CartVxParam.o \
-          CartVyParam.o \
-          CartVzParam.o \
-          KepElemParam.o \
-          KepSmaParam.o \
-          KepEccParam.o \
-          KepIncParam.o \
-          KepRaanParam.o \
-          KepAopParam.o \
-          KepMaParam.o \
-          KepMmParam.o \
-          KepTaParam.o \
-          SemilatRecParam.o \
-          SphElemParam.o \
-          SphRaParam.o \
-          SphDecParam.o \
-          VelApoapsisParam.o \
-          VelPeriapsisParam.o \
-          SMA.o \
+          AngularParameters.o \
+          CartesianParameters.o \
           Ecc.o \
-          Inc.o
+          Inc.o \
+          KeplerianParameters.o \
+          OrbitalParameters.o \
+          OrbitData.o \
+          OrbitReal.o \
+          RealVar.o \
+          RefData.o \
+          Rvec6Var.o \
+          SMA.o \
+          SphericalParameters.o \
+          TimeData.o \
+          TimeParameters.o
 
 all: libParameter 
 	mkdir -p ../lib

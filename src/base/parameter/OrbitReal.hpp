@@ -25,7 +25,7 @@
 #include "OrbitData.hpp"
 
 
-class GMAT_API OrbitReal : public RealVar, OrbitData
+class GMAT_API OrbitReal : public RealVar, public OrbitData
 {
 public:
 

@@ -1,10 +1,17 @@
 # Makefile for GMAT Stopping Condition library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../foundation -I../parameter -I../interpolator \
-          -I../refframe -I../util -I../solarsys -I../forcemodel -I../spacecraft
+#HEADERS = -I../include -I../foundation -I../parameter -I../interpolator \
+#          -I../refframe -I../util -I../solarsys -I../forcemodel -I../spacecraft
 
-OBJECTS = StopCondition.o SingleValueStop.o ApoapsisStop.o
+HEADERS = -I../include -I../foundation -I../spacecraft -I../util \
+          -I../solarsys -I../burn -I../command -I../configs -I../executive \
+          -I../factory -I../interpolator -I../interpreter -I../parameter \
+          -I../propagator -I../refframe -I../solver -I../stopcond \
+          -I../subscriber -I../forcemodel
+
+OBJECTS = BaseStopCondition.o \
+          StopCondition.o
 
 all: libStopCondition
 	mkdir -p ../lib
