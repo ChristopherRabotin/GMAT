@@ -14,11 +14,198 @@
 //
 /**
  * Implements Spacecraft Spehrical parameter classes.
- *   SphRA, SphDec, SphElem
+ *   RMag, VMag, SphRA, SphDec, SphElem
  */
 //------------------------------------------------------------------------------
+
 #include "SphericalParameters.hpp"
 
+
+//==============================================================================
+//                              RMag
+//==============================================================================
+/**
+ * Implements Magnitude of Position.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// RMag(const std::string &name, GmatBase *obj,
+//        const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+RMag::RMag(const std::string &name, GmatBase *obj,
+           const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "RMag", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// RMag(const RMag &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+RMag::RMag(const RMag &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// RMag& operator=(const RMag &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+RMag& RMag::operator=(const RMag &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~RMag()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+RMag::~RMag()
+{
+}
+
+//--------------------------------------
+// Inherited methods from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool RMag::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("SphRMag");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//==============================================================================
+//                              VMag
+//==============================================================================
+/**
+ * Implements Magnitude of Velocity.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// VMag(const std::string &name, GmatBase *obj,
+//        const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+VMag::VMag(const std::string &name, GmatBase *obj,
+           const std::string &desc, const std::string &unit)
+   : OrbitReal(name, "VMag", SYSTEM_PARAM, obj, desc, unit, false)
+{
+   AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// VMag(const VMag &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+VMag::VMag(const VMag &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// VMag& operator=(const VMag &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+VMag& VMag::operator=(const VMag &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~VMag()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+VMag::~VMag()
+{
+}
+
+//--------------------------------------
+// Inherited methods from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool VMag::Evaluate()
+{
+   mRealValue = OrbitData::GetSphReal("SphVMag");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
 
 //==============================================================================
 //                              SphRA
@@ -43,9 +230,9 @@
 //------------------------------------------------------------------------------
 SphRA::SphRA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "SphRA", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "SphRA", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -58,12 +245,12 @@ SphRA::SphRA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphRA::SphRA(const SphRA &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const SphRA& operator=(const SphRA &right)
+// SphRA& operator=(const SphRA &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -71,13 +258,12 @@ SphRA::SphRA(const SphRA &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const SphRA&
-SphRA::operator=(const SphRA &right)
+SphRA& SphRA::operator=(const SphRA &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -106,12 +292,12 @@ SphRA::~SphRA()
 //------------------------------------------------------------------------------
 bool SphRA::Evaluate()
 {
-    mRealValue = OrbitData::GetSphReal("SphRA");    
+   mRealValue = OrbitData::GetSphReal("SphRA");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -138,9 +324,9 @@ bool SphRA::Evaluate()
 //------------------------------------------------------------------------------
 SphDec::SphDec(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : OrbitReal(name, "SphDec", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "SphDec", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -153,12 +339,12 @@ SphDec::SphDec(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphDec::SphDec(const SphDec &copy)
-    : OrbitReal(copy)
+   : OrbitReal(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const SphDec& operator=(const SphDec &right)
+// SphDec& operator=(const SphDec &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -166,13 +352,12 @@ SphDec::SphDec(const SphDec &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const SphDec&
-SphDec::operator=(const SphDec &right)
+SphDec& SphDec::operator=(const SphDec &right)
 {
-    if (this != &right)
-        OrbitReal::operator=(right);
+   if (this != &right)
+      OrbitReal::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -201,12 +386,12 @@ SphDec::~SphDec()
 //------------------------------------------------------------------------------
 bool SphDec::Evaluate()
 {
-    mRealValue = OrbitData::GetSphReal("SphDec");    
+   mRealValue = OrbitData::GetSphReal("SphDec");    
     
-    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
 }
 
 
@@ -234,9 +419,9 @@ bool SphDec::Evaluate()
 //------------------------------------------------------------------------------
 SphElem::SphElem(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
-    : Rvec6Var(name, "SphElem", SYSTEM_PARAM, obj, desc, unit, false)
+   : Rvec6Var(name, "SphElem", SYSTEM_PARAM, obj, desc, unit, false)
 {
-    AddObject(obj);
+   AddObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -249,12 +434,12 @@ SphElem::SphElem(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphElem::SphElem(const SphElem &copy)
-    : Rvec6Var(copy)
+   : Rvec6Var(copy)
 {
 }
 
 //------------------------------------------------------------------------------
-// const SphElem& operator=(const SphElem &right)
+// SphElem& operator=(const SphElem &right)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -262,13 +447,12 @@ SphElem::SphElem(const SphElem &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const SphElem&
-SphElem::operator=(const SphElem &right)
+SphElem& SphElem::operator=(const SphElem &right)
 {
-    if (this != &right)
-        Rvec6Var::operator=(right);
+   if (this != &right)
+      Rvec6Var::operator=(right);
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -295,8 +479,8 @@ SphElem::~SphElem()
 //------------------------------------------------------------------------------
 Rvector6 SphElem::EvaluateRvector6()
 {
-    Evaluate();
-    return mRvec6Value;
+   Evaluate();
+   return mRvec6Value;
 }
 
 
@@ -313,7 +497,7 @@ Rvector6 SphElem::EvaluateRvector6()
 //------------------------------------------------------------------------------
 Integer SphElem::GetNumObjects() const
 {
-    return GetNumRefObjects();
+   return GetNumRefObjects();
 }
 
 //------------------------------------------------------------------------------
@@ -321,7 +505,7 @@ Integer SphElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* SphElem::GetObject(const std::string &objTypeName)
 {
-    return GetRefObject(objTypeName);
+   return GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -338,10 +522,10 @@ bool SphElem::SetObject(Gmat::ObjectType objType,
                         const std::string &objName,
                         GmatBase *obj)
 {
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
+   if (obj != NULL)
+      return SetRefObject(objType, objName, obj);
+   else
+      return false;
 }
 
 //------------------------------------------------------------------------------
@@ -355,15 +539,15 @@ bool SphElem::SetObject(Gmat::ObjectType objType,
 //------------------------------------------------------------------------------
 bool SphElem::AddObject(GmatBase *obj)
 {
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
+   if (obj != NULL)
+   {
+      if (AddRefObject(obj))
+         ManageObject(obj);
         
-        return true;
-    }
+      return true;
+   }
 
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -377,7 +561,7 @@ bool SphElem::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool SphElem::Validate()
 {
-    return ValidateRefObjects(this);
+   return ValidateRefObjects(this);
 }
 
 //------------------------------------------------------------------------------
@@ -391,13 +575,13 @@ bool SphElem::Validate()
 //------------------------------------------------------------------------------
 bool SphElem::Evaluate()
 {
-    mRvec6Value.Set(GetSphReal("SphRMag"),
-                    GetSphReal("SphRA"),
-                    GetSphReal("SphDec"),
-                    GetSphReal("SphVMag"),
-                    GetSphReal("SphVRA"),
-                    GetSphReal("SphVDec"));
+   mRvec6Value.Set(GetSphReal("SphRMag"),
+                   GetSphReal("SphRA"),
+                   GetSphReal("SphDec"),
+                   GetSphReal("SphVMag"),
+                   GetSphReal("SphVRA"),
+                   GetSphReal("SphVDec"));
 
-    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
 

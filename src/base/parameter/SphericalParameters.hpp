@@ -14,7 +14,7 @@
 //
 /**
  * Declares Spacecraft Spehrical parameter classes.
- *   SphRA, SphDec, SphElem
+ *   RMag, VMag, SphRA, SphDec, SphElem
  */
 //------------------------------------------------------------------------------
 #ifndef SphericalParameters_hpp
@@ -26,6 +26,60 @@
 #include "Rvector6.hpp"
 #include "OrbitData.hpp"
 #include "OrbitReal.hpp"
+
+//==============================================================================
+//                              RMag
+//==============================================================================
+/**
+ * Declares Magnitude of Position class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API RMag : public OrbitReal
+{
+public:
+
+    RMag(const std::string &name = "",
+         GmatBase *obj = NULL,
+         const std::string &desc = "",
+         const std::string &unit = "Km/Sec");
+    RMag(const RMag &copy);
+    RMag& operator=(const RMag &right);
+    virtual ~RMag();
+
+    // The inherited methods from Parameter
+    virtual bool Evaluate();
+    
+protected:
+
+};
+
+//==============================================================================
+//                              VMag
+//==============================================================================
+/**
+ * Declares Magnitude of Velocity class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API VMag : public OrbitReal
+{
+public:
+
+    VMag(const std::string &name = "",
+         GmatBase *obj = NULL,
+         const std::string &desc = "",
+         const std::string &unit = "Km/Sec");
+    VMag(const VMag &copy);
+    VMag& operator=(const VMag &right);
+    virtual ~VMag();
+    
+    // The inherited methods from Parameter
+    virtual bool Evaluate();
+    
+protected:
+
+};
 
 //==============================================================================
 //                              SphRA
@@ -43,7 +97,7 @@ public:
           const std::string &desc = "",
           const std::string &unit = "Deg");
     SphRA(const SphRA &copy);
-    const SphRA& operator=(const SphRA &right);
+    SphRA& operator=(const SphRA &right);
     virtual ~SphRA();
 
     // The inherited methods from Parameter
@@ -70,7 +124,7 @@ public:
            const std::string &desc = "",
            const std::string &unit = "Deg");
     SphDec(const SphDec &copy);
-    const SphDec& operator=(const SphDec &right);
+    SphDec& operator=(const SphDec &right);
     virtual ~SphDec();
 
     // The inherited methods from Parameter
@@ -98,7 +152,7 @@ public:
             const std::string &desc = "",
             const std::string &unit = "");
     SphElem(const SphElem &copy);
-    const SphElem& operator=(const SphElem &right);
+    SphElem& operator=(const SphElem &right);
     virtual ~SphElem();
 
     // The inherited methods from Rvec6Var
@@ -119,6 +173,5 @@ public:
 protected:
 
 };
-
 
 #endif // SphericalParameters_hpp
