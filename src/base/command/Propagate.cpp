@@ -1124,6 +1124,7 @@ bool Propagate::Execute(void)
          }   
 
          pubdata = new Real[dim+1];
+         baseEpoch.clear();
 
          for (Integer n = 0; n < (Integer)prop.size(); ++n) {
             GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
@@ -1132,7 +1133,6 @@ bool Propagate::Execute(void)
             elapsedTime[n] = fm[n]->GetTime();
             currEpoch[n] = baseEpoch[n] + elapsedTime[n] / 86400.0;
          }
-         
          // Now setup the stopping condition elements
          #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage

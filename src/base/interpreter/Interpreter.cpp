@@ -1232,12 +1232,19 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
    char closebrace = '\0';
    std::string token;
    Integer pos = 0, end;
-   
+
+   #ifdef DEBUG_TOKEN_PARSING
+      std::cout << "In SeparateSpaces: string = \"" << chunk << "\"\n   ";
+   #endif
+
    // Examine the string character by character, skipping grouping elements
    char str[4096];
    strcpy(str, chunk.c_str());
    for (unsigned i = 0; i < chunk.length(); ++i) {
       if ((str[i] == '{') || (str[i] == '(') || (str[i] == '[')) {
+         #ifdef DEBUG_TOKEN_PARSING
+            std::cout << " found \"" << str[i] << "\" ";
+         #endif
          token.assign(str, pos, i-pos);
          chunkArray.push_back(token);
          pos = i;
@@ -1255,11 +1262,26 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
          }
          token.assign(str, pos, i-pos+1);
          chunkArray.push_back(token);
-         ++i;
-         pos = i;
+//         ++i;
+         pos = i+1;
+      }
+      else if ((str[i] == '<') || (str[i] == '>') || (str[i] == '~')) {
+         #ifdef DEBUG_TOKEN_PARSING
+            std::cout << " found \"" << str[i] << "\" ";
+         #endif
+         if (str[i+1] == '=') {
+            ++i;
+         }
+         token.assign(str, pos, i-pos+1);
+         chunkArray.push_back(token);
+//         ++i;
+         pos = i+1;
       }
       else if ((str[i] == ' ') || (str[i] == ',') ||
                (str[i] == '=') || (str[i] == ':') ) {
+         #ifdef DEBUG_TOKEN_PARSING
+            std::cout << " found \"" << str[i] << "\" ";
+         #endif
          token.assign(str, pos, i-pos);
          if ((token != " ") && (token.length() > 0))
             chunkArray.push_back(token);
@@ -1267,9 +1289,13 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
             token.assign(str, i, 1);
             chunkArray.push_back(token);
          }
-         ++i;
-         pos = i;
+//         ++i;
+         pos = i+1;
       }
+      #ifdef DEBUG_TOKEN_PARSING
+         std::cout << "str[i] = \"" << str[i] << "\"; \"" << token 
+                   << "\" found\n   ";
+      #endif
    }
    // Push the last piece onto the array, unless it is a semicolon
    token.assign(str, pos, chunk.length());
@@ -1279,6 +1305,15 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
    }
    if ((token != ";") && (token != ""))
          chunkArray.push_back(token);   
+         
+   #ifdef DEBUG_TOKEN_PARSING
+      std::cout << "Strings parsed:\n   ";
+      for (StringArray::iterator i = chunkArray.begin(); i != chunkArray.end(); 
+           ++i)
+         std::cout << *i << "\n   ";
+      std::cout << std::endl;
+   #endif
+
    return chunkArray;
 }
 
