@@ -66,10 +66,10 @@ public:
    static std::string logFileName;
    static FILE *logFile;
    static bool logEnabled;
-   
+   static std::ostream *msgStream;
+
    MessageInterface();
    ~MessageInterface();
-
 };
 
 #endif
