@@ -33,8 +33,10 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-IfPanel::IfPanel( wxWindow *parent ) : GmatPanel(parent)
+IfPanel::IfPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
 {
+   theIfCommand = (If *)cmd;
+   
    Create();
    Show();
 }
@@ -82,6 +84,7 @@ void IfPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void IfPanel::LoadData()
 {
+
 }
 
 //------------------------------------------------------------------------------
@@ -194,5 +197,3 @@ void IfPanel::OnCellDoubleLeftClick(wxGridEvent& event)
 //      }
 //    }       
 //}
-
-

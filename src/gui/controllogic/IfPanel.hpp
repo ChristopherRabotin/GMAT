@@ -17,21 +17,25 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
-#include "GmatPanel.hpp"
+#include "Command.hpp"
+#include "If.hpp"
 
 class IfPanel : public GmatPanel
 {
 public:
     // constructors
-    IfPanel( wxWindow *parent );
+    IfPanel(wxWindow *parent, GmatCommand *cmd);
     ~IfPanel();  
 
 private:
     wxGrid *conditionGrid;
 
+    If *theIfCommand;
+    
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
@@ -64,5 +68,3 @@ private:
 };
 
 #endif // IfPanel_hpp
-
-
