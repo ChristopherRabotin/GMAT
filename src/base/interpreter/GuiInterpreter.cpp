@@ -720,7 +720,7 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunScript(Integer sandboxNum)
 {
-    return theModerator->RunScript(sandboxNum);
+    return theModerator->RunScript(sandboxNum, true); //loj: 3/11/04 added true
 }
 
 
