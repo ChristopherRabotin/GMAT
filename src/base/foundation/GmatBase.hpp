@@ -77,7 +77,7 @@ public:
    static Integer      GetInstanceCount();
    
    // required method for all subclasses
-   //virtual GmatBase*   Clone() const = 0;
+   virtual GmatBase*   Clone() const = 0;
    
    // Access methods derived classes can override
    virtual std::string GetParameterText(const Integer id) const;
