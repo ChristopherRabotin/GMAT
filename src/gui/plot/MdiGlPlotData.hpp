@@ -24,6 +24,7 @@ namespace GmatPlot
    static const int MAX_BODIES = 20;
    static const int MAX_SCS = 30;
    static const int UNKNOWN_BODY = -1;
+   static const int UNKNOWN_COLOR = GmatColor::WHITE32;
    
    enum BodyId
    {
@@ -34,23 +35,15 @@ namespace GmatPlot
       BODY6,    BODY7,    BODY8,   BODY9,
    };
    
-   static std::string BODY_NAME[MAX_BODIES] =
+   struct BodyInfo
    {
-      "Sun",      "Mercury",  "Venus",   "Earth",
-      "Mars",     "Jupiter",  "Saturn",  "Uranus",
-      "Neptune",  "Pluto",    "Luna",    "Body1",
-      "Body2",    "Body3",    "Body4",   "Body5",
-      "Body6",    "Body7",    "Body8",   "Body9"
+      static std::string BODY_NAME[MAX_BODIES];
+      static unsigned int BODY_COLOR[MAX_BODIES];
    };
-
-   static unsigned int BODY_COLOR[MAX_BODIES] =
-   {
-      GmatColor::YELLOW32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::GREEN32,
-      GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
-      GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::L_BROWN32, GmatColor::SILVER32,
-      GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
-      GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32, GmatColor::SILVER32,
-   };
+   
+   std::string& GetBodyName(int bodyId);
+   int GetBodyId(const wxString &bodyName);
+   unsigned int GetBodyColor(const wxString &bodyName);
    
    enum GlEventType
    {
@@ -86,9 +79,8 @@ namespace GmatPlot
       MDI_GL_SHOW_EQUATORIAL_PLANE,
       MDI_GL_HELP_VIEW
    };
+};
 
-   int GetBodyId(const wxString &bodyName);
-}
 
 struct MdiGlPlot
 {
