@@ -541,7 +541,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
       // chain through the conditions
       while (condNumber < (Integer)topLevel.size()) {
          #ifdef DEBUG_TOKEN_PARSING
-            std::cout << "Setting If condition:\n   lhs = " 
+            std::cout << "Setting " << cmdCase << " condition:\n   lhs = " 
                       << topLevel[condNumber]
                       << "\n   op  = " << topLevel[condNumber+1]
                       << "\n   rhs = " << topLevel[condNumber+2] 
@@ -572,11 +572,14 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
                type = object[ol]->GetType();
                try {
                   if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
-                     throw InterpreterException("Cannot set object " + object[ol]->GetName() + 
-                                                " for command " + (cmd->GetTypeName()));
+                     throw InterpreterException("Cannot set object " + 
+                                                object[ol]->GetName() + 
+                                                " for command " + 
+                                                (cmd->GetTypeName()));
                }
                catch (BaseException &ex) {
-                  if (!cmd->SetRefObject(object[ol], type, object[ol]->GetName(), 0))
+                  if (!cmd->SetRefObject(object[ol], type, 
+                                         object[ol]->GetName(), index))
                      throw CommandException("Cannot set reference object " + 
                                             object[ol]->GetName());
                }
