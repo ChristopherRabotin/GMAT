@@ -232,6 +232,7 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
 
 bool Propagate::Initialize(void)
 {
+
     return false;
 }
 
