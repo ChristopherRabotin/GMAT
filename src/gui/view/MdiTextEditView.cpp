@@ -101,8 +101,14 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 // bool OnScriptRun(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
+/**
+ * @note We should have an option to clear message each run. If it runs for
+ *       a long time (days, months, etc), we will not see all the output written
+ *       to the message window.
+ */
+//------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-    MessageInterface::ClearMessage();
+    //MessageInterface::ClearMessage();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }
