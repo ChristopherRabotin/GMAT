@@ -284,7 +284,23 @@ Integer GmatBase::GetParameterCount(void) const
  */
 std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   throw GmatBaseException("Reference Object not defined");
+   throw GmatBaseException("Reference Object not defined\n");
+}
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Returns the names of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> reference object type.
+ *
+ * @return The names of the reference object.
+ */
+const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   throw GmatBaseException("Reference Object not defined\n");
 }
 
 //---------------------------------------------------------------------------
@@ -481,7 +497,7 @@ Integer GmatBase::GetOwnedObjectCount()
  */
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
-   throw GmatBaseException("No owned objects for this instance");
+   throw GmatBaseException("No owned objects for this instance\n");
 }
 
 
@@ -553,7 +569,7 @@ std::string GmatBase::GetParameterTypeString(const Integer id) const
 std::string GmatBase::GetParameterText(const Integer id) const
 {
    char errortext[256];
-   std::sprintf(errortext, "Parameter id = %d not defined on object %s", id, 
+   std::sprintf(errortext, "Parameter id = %d not defined on object %s\n", id, 
            instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -576,7 +592,7 @@ Integer GmatBase::GetParameterID(const std::string &str) const
    desc = instanceName;
    if (desc == "")
       desc = typeName;
-   sprintf(errortext, "No parameter defined with description \"%s\" on %s", 
+   sprintf(errortext, "No parameter defined with description \"%s\" on %s\n", 
            str.c_str(), desc.c_str());
    throw GmatBaseException(errortext);
 }
@@ -595,7 +611,7 @@ Integer GmatBase::GetParameterID(const std::string &str) const
 Real GmatBase::GetRealParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No real parameter with ID %d on %s", 
+   sprintf(errortext, "No real parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -617,7 +633,7 @@ Real GmatBase::GetRealParameter(const Integer id) const
 Real GmatBase::SetRealParameter(const Integer id, const Real value)
 {
    char errortext[256];
-   sprintf(errortext, "No real parameter with ID %d on %s", 
+   sprintf(errortext, "No real parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -637,7 +653,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value)
 Real GmatBase::GetRealParameter(const Integer id, const Integer index) const
 {
    char errortext[256];
-   sprintf(errortext, "No real parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No real parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -662,7 +678,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value,
                                 const Integer index)
 {
    char errortext[256];
-   sprintf(errortext, "No real parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No real parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -681,7 +697,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value,
 Integer GmatBase::GetIntegerParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No integer parameter with ID %d on %s", 
+   sprintf(errortext, "No integer parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -703,7 +719,7 @@ Integer GmatBase::GetIntegerParameter(const Integer id) const
 Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
 {
    char errortext[256];
-   sprintf(errortext, "No integer parameter with ID %d on %s", 
+   sprintf(errortext, "No integer parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -723,7 +739,7 @@ Integer GmatBase::GetIntegerParameter(const Integer id,
                                       const Integer index) const
 {
    char errortext[256];
-   sprintf(errortext, "No integer parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No integer parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -749,7 +765,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value,
                                       const Integer index)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set integer parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "Cannot set integer parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -768,7 +784,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value,
 UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No unsigned integer parameter with ID %d on %s", 
+   sprintf(errortext, "No unsigned integer parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -792,7 +808,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
                                               const UnsignedInt value)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set unsigned integer parameter with ID %d on %s", 
+   sprintf(errortext, "Cannot set unsigned integer parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -813,7 +829,7 @@ UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id,
                                               const Integer index) const
 {
    char errortext[256];
-   sprintf(errortext, "No unsigned integer parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No unsigned integer parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -841,7 +857,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
                                               const Integer index)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set unsigned integer parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "Cannot set unsigned integer parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -861,7 +877,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
 const UnsignedIntArray& GmatBase::GetUnsignedIntArrayParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No unsigned int array parameter with ID %d on %s", 
+   sprintf(errortext, "No unsigned int array parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -880,7 +896,7 @@ const UnsignedIntArray& GmatBase::GetUnsignedIntArrayParameter(const Integer id)
 const Rvector& GmatBase::GetRvectorParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No RVector parameter with ID %d on %s", 
+   sprintf(errortext, "No RVector parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -903,7 +919,7 @@ const Rvector& GmatBase::SetRvectorParameter(const Integer id,
                                              const Rvector& value)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set RVector parameter with ID %d on %s", 
+   sprintf(errortext, "Cannot set RVector parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -921,7 +937,7 @@ const Rvector& GmatBase::SetRvectorParameter(const Integer id,
 const Rmatrix& GmatBase::GetRmatrixParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No Rmatrix parameter with ID %d on %s", 
+   sprintf(errortext, "No Rmatrix parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -961,7 +977,7 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No string parameter with ID %d on %s", 
+   sprintf(errortext, "No string parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -981,7 +997,7 @@ std::string GmatBase::GetStringParameter(const Integer id) const
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set string parameter with ID %d on %s", 
+   sprintf(errortext, "Cannot set string parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1004,7 +1020,7 @@ std::string GmatBase::GetStringParameter(const Integer id,
                                          const Integer index) const
 {
    char errortext[256];
-   sprintf(errortext, "No string parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No string parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1028,7 +1044,7 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value,
                                   const Integer index)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set string parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "Cannot set string parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1048,7 +1064,7 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value,
 const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No string array parameter with ID %d on %s", 
+   sprintf(errortext, "No string array parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1074,7 +1090,7 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
    std::string me = instanceName;
    if (instanceName == "")
       me = typeName;
-   sprintf(errortext, "No indexed string array parameter with ID %d on %s", 
+   sprintf(errortext, "No indexed string array parameter with ID %d on %s\n", 
            id, me.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1097,7 +1113,7 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
 bool GmatBase::GetBooleanParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No boolean parameter with ID %d on %s", 
+   sprintf(errortext, "No boolean parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1118,7 +1134,7 @@ bool GmatBase::GetBooleanParameter(const Integer id) const
 bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set boolean parameter with ID %d on %s", 
+   sprintf(errortext, "Cannot set boolean parameter with ID %d on %s\n", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1143,7 +1159,7 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
 bool GmatBase::GetBooleanParameter(const Integer id, const Integer index) const
 {
    char errortext[256];
-   sprintf(errortext, "No boolean parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "No boolean parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
@@ -1168,7 +1184,7 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value,
                                    const Integer index)
 {
    char errortext[256];
-   sprintf(errortext, "Cannot set boolean parameter with ID %d and index %d on %s", 
+   sprintf(errortext, "Cannot set boolean parameter with ID %d and index %d on %s\n", 
            id, index, instanceName.c_str());
    throw GmatBaseException(errortext);
 }

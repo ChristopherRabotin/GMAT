@@ -66,6 +66,8 @@ public:
    bool                SetName(const std::string &who);
    virtual Integer     GetParameterCount(void) const;
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
