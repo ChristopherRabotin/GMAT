@@ -1352,97 +1352,144 @@ void PropagationConfigPanel::OnAddBodyButton()
    {
       wxArrayString &names = bodyDlg.GetBodyNames();
       
-      wxString s1;
-      wxString s2;
-        
-      bool deleteBody;
-         
-      //------------------------
-      // Remove deselected body
-      //------------------------
-      for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-      {
-         deleteBody = true;
-//         MessageInterface::ShowMessage("Entering - Remove deselected body \n"); 
-         for (Integer j = 0; j < (Integer)names.GetCount(); j++)
-         {
-            s1 = primaryBodiesArray.Item(i);
-            s2 = names.Item(j);
-//            MessageInterface::ShowMessage("Checking %s with %s\n", s1.c_str(),s2.c_str());
-            if (s1.CmpNoCase(s2) == 0)
-               deleteBody = false;
-         }
-            
-         if (deleteBody)
-         {
-            primaryBodiesArray.Remove(s1.c_str());
-             
-            Integer id = bodyComboBox->FindString(s1);
-            bodyComboBox->Delete(id);
+      std::vector<ForceType*> fl;
+      
+      std::string bodyName;
+      std::string gravType;
+      std::string dragType;
+      std::string magfType;
+      wxString gravDegree;
+      wxString gravOrder;
+      wxString magfDegree;
+      wxString magfOrder;
+      std::string potFilename;
+      PointMassForce *pmf;
+      GravityField *gravf;
+      DragForce *dragf;
+      SolarRadiationPressure *srpf;
+      bool useSrp;
+                 
+      fl = forceList;
+      forceList.clear();
+      primaryBodiesArray.Clear();
                
-//            std::vector<ForceType*>::iterator iter;
-//            Integer i = 0;
-//            for (iter = forceList.begin(); iter != forceList.end(); iter++)
-//            {
-//               MessageInterface::ShowMessage("Checking body %s\n", forceList[i]->bodyName.c_str());
-//               if ( strcmp(forceList[i]->bodyName.c_str(), s1.c_str()) == 0 )
-//               {
-//                  forceList.erase(iter); 
-//                  break;
-//                  MessageInterface::ShowMessage("Removing %s\n", forceList[i]->bodyName.c_str());
-//               }
-//               i++;
-//            } 
-//            MessageInterface::ShowMessage("Exiting - if (deleteBody)\n");                        
-         }
-      }
-         
-      //-----------------------
-      // Remove duplicate body
-      //-----------------------
-      for (Integer i = 0; i < (Integer)names.GetCount(); i++)
-      {
-//         MessageInterface::ShowMessage("Entering - Remove duplicate body \n"); 
-         for (Integer j = 0; j < (Integer)primaryBodiesArray.GetCount(); j++)
-         {  
-            s1 = names.Item(i);
-            s2 = primaryBodiesArray.Item(j);
-//            MessageInterface::ShowMessage("Checking %s with %s\n", s1.c_str(),s2.c_str());
-            if (s1.CmpNoCase(s2) == 0)
-            {
-               names.Remove(s1.c_str());
-//               MessageInterface::ShowMessage("Removed %s\n", s1.c_str()); 
-            }
-         }
-      }
-         
-      //---------------------------
-      // Add newly selected bodies
-      //---------------------------
-      if (!names.IsEmpty())
-      {
-//         MessageInterface::ShowMessage("Entering - Add newly selected bodies \n");
+      //----------------------------
+      // when user addes more bodies
+      //----------------------------
+      if (names.GetCount() > fl.size())
+      {                  
          for (Integer i = 0; i < (Integer)names.GetCount(); i++)
          {
-            primaryBodiesArray.Add(names[i]);
-            bodyComboBox->Append(names[i]);
-            bodyComboBox->SetValue(names[i]);
-                 
-            currentBodyName = std::string(names[i].c_str());
-            currentBodyId = FindBody(currentBodyName);
-            forceList[currentBodyId]->bodyName = currentBodyName;
+            bodyName = names[i].c_str();
+                        
+            for (Integer j = 0; j < (Integer)fl.size(); j++)
+            {
+               if (strcmp(bodyName.c_str(), fl[j]->bodyName.c_str()) == 0)
+               {
+                  gravType = fl[j]->gravType;
+                  dragType = fl[j]->dragType;
+                  magfType = fl[j]->magfType;
+                  gravDegree = fl[j]->gravDegree;
+                  gravOrder = fl[j]->gravOrder;
+                  magfDegree = fl[j]->magfDegree;
+                  magfOrder = fl[j]->magfOrder;
+                  potFilename = fl[j]->potFilename;
+                  pmf = fl[j]->pmf;
+                  gravf = fl[j]->gravf;
+                  dragf = fl[j]->dragf;
+                  srpf = fl[j]->srpf;
+                  useSrp = fl[j]->useSrp;
+               }            
+               else
+               {
+                  gravType = gravModelArray[POINT_MASS];
+                  dragType = dragModelArray[NONE_DM];
+                  magfType = magfModelArray[NONE_MM];   
+                  gravDegree = "4";
+                  gravOrder = "4";
+                  magfDegree = "0";
+                  magfOrder = "0";
+                  potFilename = "";
+                  pmf = NULL;
+                  gravf = NULL;
+                  dragf = NULL;
+                  srpf = NULL;
+                  useSrp = false;            
+               }
+            }
+            forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
+            
+            forceList[i]->gravDegree = gravDegree;
+            forceList[i]->gravOrder = gravOrder;
+            forceList[i]->magfDegree = magfDegree;
+            forceList[i]->magfOrder = magfOrder;
+            forceList[i]->potFilename = potFilename;
+            forceList[i]->pmf = pmf;
+            forceList[i]->gravf = gravf;
+            forceList[i]->dragf = dragf;
+            forceList[i]->srpf = srpf;
+            forceList[i]->useSrp = useSrp;
+            
+            primaryBodiesArray.Add(bodyName.c_str());
          }
       }
+      //---------------------------------------------
+      // when user removes a body or bodies from list
+      //---------------------------------------------
       else
-         bodyComboBox->SetSelection(0);
-         
-      //------------------  
-      // Update text box
-      //------------------
-//      MessageInterface::ShowMessage("Entering - Update text box \n");
+      {
+         for (Integer i = 0; i < (Integer)fl.size(); i++)
+         {
+            bodyName = fl[i]->bodyName.c_str();
+                        
+            for (Integer j = 0; j < (Integer)names.GetCount(); j++)
+            {
+               if (strcmp(bodyName.c_str(), names[j].c_str()) == 0)
+               {
+                  gravType = fl[j]->gravType;
+                  dragType = fl[j]->dragType;
+                  magfType = fl[j]->magfType;
+                  gravDegree = fl[j]->gravDegree;
+                  gravOrder = fl[j]->gravOrder;
+                  magfDegree = fl[j]->magfDegree;
+                  magfOrder = fl[j]->magfOrder;
+                  potFilename = fl[j]->potFilename;
+                  pmf = fl[j]->pmf;
+                  gravf = fl[j]->gravf;
+                  dragf = fl[j]->dragf;
+                  srpf = fl[j]->srpf;
+                  useSrp = fl[j]->useSrp;
+                  
+                  forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
+                  
+                  forceList[i]->gravDegree = gravDegree;
+                  forceList[i]->gravOrder = gravOrder;
+                  forceList[i]->magfDegree = magfDegree;
+                  forceList[i]->magfOrder = magfOrder;
+                  forceList[i]->potFilename = potFilename;
+                  forceList[i]->pmf = pmf;
+                  forceList[i]->gravf = gravf;
+                  forceList[i]->dragf = dragf;
+                  forceList[i]->srpf = srpf;
+                  forceList[i]->useSrp = useSrp;
+                  
+                  primaryBodiesArray.Add(bodyName.c_str());
+               }            
+            }            
+         }
+      }
+      
+      //----------------------------------------------
+      // Append body names to combobox and text field
+      //----------------------------------------------
+      bodyComboBox->Clear();
       bodyTextCtrl->Clear();
-      for (Integer i = 0; i < (Integer)bodyComboBox->GetCount(); i++)
+      for (Integer i = 0; i < (Integer)forceList.size(); i++)
+      {
+         bodyComboBox->Append(forceList[i]->bodyName.c_str());
+         bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
          bodyTextCtrl->AppendText(bodyComboBox->GetString(i) + " ");
+      }
 
       DisplayGravityFieldData();
       DisplayAtmosphereModelData();
