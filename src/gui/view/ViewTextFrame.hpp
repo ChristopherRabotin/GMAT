@@ -28,7 +28,7 @@ public:
     ViewTextFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h);
 
     // operations
-    void WriteText(const wxString& text) { mTextCtrl->WriteText(text); }
+    void WriteText(const wxString& text);
 
 private:
 

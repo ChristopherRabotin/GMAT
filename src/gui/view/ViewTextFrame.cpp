@@ -48,6 +48,14 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
 }
 
 //------------------------------------------------------------------------------
+// void WriteText(const wxString& text)
+//------------------------------------------------------------------------------
+void ViewTextFrame::WriteText(const wxString& text)
+{
+    mTextCtrl->WriteText(text);
+}
+
+//------------------------------------------------------------------------------
 // void OnClose(wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void ViewTextFrame::OnClose(wxCommandEvent& WXUNUSED(event) )
