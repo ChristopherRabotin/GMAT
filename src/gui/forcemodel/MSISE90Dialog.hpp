@@ -26,9 +26,9 @@
 class MSISE90Dialog : public GmatDialog
 {
 public:
-    MSISE90Dialog(wxWindow *parent, wxString name, DragForce *dragForce);
+    MSISE90Dialog(wxWindow *parent, DragForce *dragForce);
     ~MSISE90Dialog();
-    
+    DragForce* GetForce();
 private:   
     wxStaticText *solarFluxStaticText;
     wxStaticText *avgSolarFluxStaticText;
@@ -45,12 +45,18 @@ private:
     wxRadioButton *userInputRadioButton;
     wxRadioButton *fileInputRadioButton;
     
-    DragForce *theDragForce;
+    DragForce *theForce;
     
     Integer solarFluxID;
     Integer avgSolarFluxID;
     Integer geomagnecticIndexID;
     Integer solarFluxFileID;
+    
+    bool useFile;
+    
+    // Private methods
+    void Initialize();
+    void Update();
     
     // Methods inherited from GmatDialog
     virtual void Create();
@@ -61,8 +67,7 @@ private:
     // Event-handling Methods
     void OnTextChange();
     void OnRadioButtonChange(wxCommandEvent& event);
-    
-    void Initialize();
+    void OnBrowse();
 
     DECLARE_EVENT_TABLE();
 
