@@ -45,6 +45,7 @@ protected:
 
     void OnWriteCheckBoxChange(wxCommandEvent& event);
     void OnBrowseButton(wxCommandEvent& event);
+    void OnTextChange();
 
     // methods inherited from GmatPanel
     virtual void Create();

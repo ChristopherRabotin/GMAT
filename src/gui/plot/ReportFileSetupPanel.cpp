@@ -36,6 +36,8 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
     EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
     
     EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
+    EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
+    EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
 
 END_EVENT_TABLE()
 
@@ -148,6 +150,11 @@ void ReportFileSetupPanel::LoadData()
     // load data from the core engine
     writeCheckBox->SetValue(theSubscriber->IsActive());
 
+    // load file name data from core engine
+    int filenameId = theSubscriber->GetParameterID("Filename");
+    std::string filename = theSubscriber->GetStringParameter(filenameId);
+    fileTextCtrl->SetValue(wxT(filename.c_str()));
+    
 }
 
 //------------------------------------------------------------------------------
@@ -157,6 +164,12 @@ void ReportFileSetupPanel::SaveData()
 {
     // save data to core engine
     theSubscriber->Activate(writeCheckBox->IsChecked());
+    
+    // save file name data to core engine
+    wxString filename = fileTextCtrl->GetValue();
+    int filenameId = theSubscriber->GetParameterID("Filename");
+    theSubscriber->SetStringParameter(filenameId, 
+                  std::string (filename.c_str()));
 }
 
 //------------------------------------------------------------------------------
@@ -175,4 +188,15 @@ void ReportFileSetupPanel::OnBrowseButton(wxCommandEvent& event)
     }
 }
 
+//------------------------------------------------------------------------------
+// void OnTextChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when text is changed
+ */
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnTextChange()
+{
+    theApplyButton->Enable();
+}
 
