@@ -801,6 +801,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
         AddSolarSysToSandbox(sandboxNum-1);
         AddSpacecraftToSandbox(sandboxNum-1);
         AddPropSetupToSandbox(sandboxNum-1);
+        AddBurnToSandbox(sandboxNum-1);        
         AddSubscriberToSandbox(sandboxNum-1);
         AddCommandToSandbox(sandboxNum-1);
         InitializeSandbox(sandboxNum-1);
@@ -922,11 +923,26 @@ void Moderator::AddPropSetupToSandbox(Integer index)
 {
     PropSetup *propSetup;
     StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
-   
+    
     for (Integer i=0; i<(Integer)propSetupNames.size(); i++)
     {
         propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
         sandboxes[index]->AddPropSetup(propSetup);
+    }
+}
+
+//------------------------------------------------------------------------------
+// void AddBurnToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddBurnToSandbox(Integer index)
+{
+    Burn *burn;
+    StringArray burnNames = theConfigManager->GetListOfItems(Gmat::BURN);
+    
+    for (Integer i=0; i<(Integer)burnNames.size(); i++)
+    {
+        burn = theConfigManager->GetBurn(burnNames[i]);
+        sandboxes[index]->AddBurn(burn);
     }
 }
 

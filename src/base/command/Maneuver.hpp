@@ -63,12 +63,9 @@ public:
                             GetParameterType(const Integer id) const;
     virtual std::string     GetParameterTypeString(const Integer id) const;
     
-    virtual Integer         GetIntegerParameter(const Integer id) const;
-    virtual Integer         SetIntegerParameter(const Integer id,
-                                            const Integer value);
-    virtual bool            GetBooleanParameter(const Integer id) const;
-    virtual bool            SetBooleanParameter(const Integer id,
-                                                const bool value);
+    virtual std::string     GetStringParameter(const Integer id) const;
+    virtual bool            SetStringParameter(const Integer id, 
+                                               const std::string &value);
     
     // Methods used to run the command
     virtual void            InterpretAction(void);
@@ -78,6 +75,8 @@ public:
     
 protected:
     /// The burn object used for the maneuver
+    std::string              burnName;
+    /// The burn object used for the maneuver
     Burn                    *burn;
     /// The name of the spacecraft that gets maneuvered
     std::string             satName;
@@ -86,7 +85,7 @@ protected:
     
     // Parameter IDs 
     /// ID for the burn object
-    Integer                 burnID;
+    Integer                 burnNameID;
     /// ID for the spacecraft name
     Integer                 satNameID;
 };

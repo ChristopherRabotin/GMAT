@@ -34,6 +34,7 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
+#include "Burn.hpp"
 
 
 class GMAT_API Sandbox
@@ -46,6 +47,7 @@ public:
     bool				AddObject(GmatBase *obj);
     bool				AddSpacecraft(Spacecraft *obj);
     bool                AddPropSetup(PropSetup *propSetup);
+    bool                AddBurn(Burn *burn);
     bool				AddCommand(Command *cmd);
     bool				AddSolarSystem(SolarSystem *ss);
     bool                AddSubscriber(Subscriber *sub);

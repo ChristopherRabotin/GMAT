@@ -162,6 +162,7 @@ private:
     void AddSolarSysToSandbox(Integer index);
     void AddSpacecraftToSandbox(Integer index);
     void AddPropSetupToSandbox(Integer index);
+    void AddBurnToSandbox(Integer index);
     void AddSubscriberToSandbox(Integer index);
     void AddCommandToSandbox(Integer index);
     void InitializeSandbox(Integer index);

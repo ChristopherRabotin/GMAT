@@ -206,9 +206,14 @@ bool Sandbox::AddSpacecraft(Spacecraft *obj)
 
 
 bool Sandbox::AddPropSetup(PropSetup *propSetup)
-
 {
     return AddObject(propSetup);
+}
+
+
+bool Sandbox::AddBurn(Burn *burn)
+{
+    return AddObject(burn);
 }
 
 

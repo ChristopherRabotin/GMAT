@@ -54,6 +54,9 @@ public:
     virtual bool            SetStringParameter(const Integer id, 
                                            const std::string &value);
     virtual StringArray&    GetStringArrayParameter(const Integer id) const;
+    
+    // Accessor method used by Maneuver to pass in the spacecraft pointer
+    void                    SetSpacecraftToManeuver(Spacecraft *sat);
 
     /**
      * Applies the burn.  

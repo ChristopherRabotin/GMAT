@@ -93,6 +93,7 @@ Burn::Burn(const Burn &b) :
     coordFrame      (b.coordFrame),
     coordSystem     (b.coordSystem),
     satName         (b.satName),
+    sc              (NULL),
     // Parameter IDs, for convenience
     coordFrameID    (b.coordFrameID),
     coordSystemID   (b.coordSystemID),
@@ -479,4 +480,17 @@ StringArray& Burn::GetStringArrayParameter(const Integer id) const
         return frameman->GetSupportedFrames();
 
     return GmatBase::GetStringArrayParameter(id);
+}
+
+
+// 
+//---------------------------------------------------------------------------
+//  void SetSpacecraftToManeuver(Spacecraft *sat)
+//---------------------------------------------------------------------------
+/**
+ * Accessor method used by Maneuver to pass in the spacecraft pointer
+ */
+void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
+{
+    sc = sat;
 }
