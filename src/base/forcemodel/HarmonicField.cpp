@@ -330,7 +330,23 @@ bool HarmonicField::legendreP_init(void)
 {
    Integer  n;
    Integer  cc;
+   Integer  i;
 
+   // if re-initializing, delete the old arrays first
+   if (Abar)
+   {
+      for (i = 0; i <= maxDegree+1; ++i)
+         delete [] Abar[i];
+      
+      delete [] Abar;
+   }
+   
+   if (re)
+      delete [] re;
+   
+   if (im)
+      delete [] im;
+   
    Abar = new Real*[maxDegree+3];
    if ( !Abar ) {
       throw ForceModelException("legendreP_init: memory allocation failed for Abar!");
