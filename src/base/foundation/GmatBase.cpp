@@ -65,7 +65,8 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Burn",          "Command",       "Propagator",    "ForceModel",
    "PhysicalModel", "Interpolator",  "SolarSystem",   "CelestialBody",
    "Atmosphere",    "Parameter",     "StopCondition", "Solver",
-   "Subscriber",    "PropSetup",     "RefFrame",      "UnknownObject"
+   "Subscriber",    "PropSetup",     "RefFrame",      "Function",
+   "UnknownObject"
 };
 
 /// initialize the count of instances

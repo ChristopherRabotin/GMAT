@@ -99,6 +99,7 @@ namespace Gmat
       SUBSCRIBER,
       PROP_SETUP,
       REF_FRAME,
+      FUNCTION,
       UNKNOWN_OBJECT
    };
 
