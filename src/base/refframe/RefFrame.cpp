@@ -20,7 +20,10 @@
 #include "CelestialBody.hpp"
 #include "A1Mjd.hpp"
 #include "SolarSystem.hpp"
+
+#if !defined __UNIT_TEST__
 #include "Moderator.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -82,6 +85,8 @@ bool RefFrame::SetCentralBody(const std::string &name)
 {
     bool status = false;
 
+#if !defined __UNIT_TEST__
+    
     Moderator *theModerator = Moderator::Instance();
     
     if (name != "")
@@ -93,7 +98,8 @@ bool RefFrame::SetCentralBody(const std::string &name)
             SetCentralBody(body);
         }
     }
-
+#endif
+    
     return status;
 }
 
