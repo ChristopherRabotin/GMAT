@@ -10,6 +10,8 @@ all: $(TARGETS)
 
 console: $(CONSOLETARGET)
 
+gui: $(WXTARGET)
+
 CPP = g++
 
 OPTIMIZATIONS = -O9
@@ -36,7 +38,8 @@ LIBRARIES = lib/libUtilities.a \
             lib/libCommand.a \
             lib/libFactory.a \
             lib/libConfiguration.a \
-            lib/libInterpreter.a
+            lib/libInterpreter.a \
+            lib/libInterface.a
 
 GUILIBRARIES = lib/libExecutive.a
 CONSOLELIBRARIES = lib/libExecutiveConsole.a
@@ -112,6 +115,9 @@ lib/libConfiguration.a :
 
 lib/libInterpreter.a :
 	cd interpreter ; $(MAKE) -f Makefile.linux all
+
+lib/libInterface.a :
+	cd interface ; $(MAKE) -f Makefile.linux all
 
 lib/libExecutive.a :
 	cd executive ; $(MAKE) -f Makefile.linux all

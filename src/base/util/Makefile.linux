@@ -18,6 +18,7 @@ OBJECTS = A1Date.o \
           Keplerian.o \
           Linear.o \
           RealUtilities.o \
+          RgbColor.o \
           Rmatrix33.o \
           Rmatrix.o \
           Rvector3.o \

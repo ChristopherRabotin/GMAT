@@ -10,7 +10,8 @@ HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
           -I../solarsys -I../solver -I../burn \
           \
           \
-          -I../interpreter -I../command -I../factory -I../configs -I../function
+          -I../interpreter -I../command -I../factory -I../configs \
+          -I../function -I../interface
 
 OBJECTS = Command.o CommandException.o \
           NoOp.o \
@@ -31,7 +32,8 @@ OBJECTS = Command.o CommandException.o \
           While.o \
           EndWhile.o \
           Assignment.o \
-          Save.o
+          Save.o \
+          CallFunction.o
 
 all: libCommand 
 	mkdir -p ../lib
