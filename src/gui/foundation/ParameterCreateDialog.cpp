@@ -331,12 +331,13 @@ void ParameterCreateDialog::SaveData()
       if (theGuiInterpreter->GetParameter(varName) == NULL)
       {
          Parameter *param;
-
+         
          param = theGuiInterpreter->CreateParameter(varType, varName);
-            
-         param->AddObject(objName);
+         
+         //loj: 9/13/04 changed AddObject() to SetRefObjectName()
+         param->SetRefObjectName(GmatBase::GetObjectType(varType), objName);
          param->SetStringParameter("Description", varDesc);
-
+         
          RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
          param->SetUnsignedIntParameter("Color", color.GetIntColor());
          
