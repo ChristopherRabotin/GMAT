@@ -11,11 +11,17 @@ OBJECTS = Parameter.o \
           ParameterDatabase.o \
           AngularParameters.o \
           CartesianParameters.o \
+          EnvData.o \
+          EnvParameters.o \
+          EnvReal.o \
           KeplerianParameters.o \
           OrbitalParameters.o \
           OrbitData.o \
           OrbitReal.o \
           OrbitRvec6.o \
+          PlanetData.o \
+          PlanetParameters.o \
+          PlanetReal.o \
           RealVar.o \
           RefData.o \
           Rvec6Var.o \
