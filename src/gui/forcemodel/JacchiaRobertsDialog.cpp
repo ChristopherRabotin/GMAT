@@ -119,7 +119,6 @@ void JacchiaRobertsDialog::Create()
     theMiddleSizer->Add(mainFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
     
     // waw: Future build implementation
-    solarFluxTextCtrl->Enable(false);
     fileNameTextCtrl->Enable(false);
     browseButton->Enable(false);
 }
