@@ -96,15 +96,12 @@ public:
    virtual bool        Execute();
 
 protected:
-   // We may eventually want to make this a list of propagator names for the
-   // propagators driven by this command, like this:
-   //    /// List of the names of propagator setups used in this command
-   //    std::vector<std::string>  propName;
-
-   /// Name of the propagator setup used in this command
-   std::string             propName;
-   /// The (1 or more) spacecraft associated with this propagation
-   StringArray             satName;
+   /// Name of the propagator setup(s) used in this command
+   StringArray             propName;
+   /// The (1 or more) spacecraft associated with this propagation, grouped by
+   /// propagator
+   std::vector<StringArray *>  
+                           satName;
    /// Flag used to determine if the spacecraft are propagated coupled
    bool                    propCoupled;
    /// Frequency used to check for user interrupts of the run
@@ -112,17 +109,10 @@ protected:
    /// Flag that specifies if we are rejoining a run in progress
    bool                    inProgress;
    /// Starting epoch for the propagation
-   Real                    baseEpoch;
+   std::vector<Real>       baseEpoch;
 
-   // We may eventually want to make this a list of propagators all driven by
-   // this command, like this:
-   //    /// List of the propagator setups used in this command
-   //    std::vector<Propagator>  prop;
-    
-   /// The propagator used by this command
-   PropSetup               *prop;      // Likely to change when the propagator
-   // infrastructure is coded -- might
-   // just be a Propagator *
+   /// The propagator(s) used by this command
+   std::vector<PropSetup*> prop;
    /// The spacecraft that are propagated
    std::vector<SpaceObject *> sats;
    /// The stopping conditions
@@ -149,13 +139,13 @@ protected:
    
    // Parameters moved from Execute so that it can be reentrant
    /// Time elapsed during this Propagate
-   Real                    elapsedTime;
+   std::vector<Real>       elapsedTime;
    /// Start epoch for the step
-   Real                    currEpoch;
+   std::vector<Real>       currEpoch;
    /// The Propagator
-   Propagator              *p;
+   std::vector<Propagator*> p;
    /// The ForceModel
-   ForceModel              *fm;
+   std::vector<ForceModel*> fm;
 
 
    /// The state that is propagated
@@ -169,9 +159,24 @@ protected:
    /// Dimension used for (local) state vector
    Integer                 dim;
    
+   /// Allowed modes of propagation
+   enum PropModes {
+                     INDEPENDENT, 
+                     SYNCHRONIZED,
+                     PROP_MODE_COUNT
+   };
+   /// Variable that tracks the current propagation mode
+   PropModes         currentMode;
+   /// Array of allowed propagation modes
+   static std::string      PropModeList[PROP_MODE_COUNT];
+   
    virtual void            SetNames(const std::string& name, 
                                     StringArray& owners, StringArray& elements);
-   
+   virtual void            CheckForOptions(Integer &loc, 
+                                           std::string& generatingString);
+   virtual void            AssemblePropagators(Integer &loc, 
+                                               std::string& generatingString);
+   virtual bool            TakeAStep(Real propStep = 0.0);
 
 public:    
    // Accessors (Temporary, to support internal prop duration)

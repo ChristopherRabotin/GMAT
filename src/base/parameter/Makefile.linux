@@ -11,8 +11,6 @@ OBJECTS = Parameter.o \
           ParameterDatabase.o \
           AngularParameters.o \
           CartesianParameters.o \
-          Ecc.o \
-          Inc.o \
           KeplerianParameters.o \
           OrbitalParameters.o \
           OrbitData.o \
@@ -21,7 +19,6 @@ OBJECTS = Parameter.o \
           RealVar.o \
           RefData.o \
           Rvec6Var.o \
-          SMA.o \
           SphericalParameters.o \
           TimeData.o \
           TimeParameters.o \

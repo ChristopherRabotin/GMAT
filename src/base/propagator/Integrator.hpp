@@ -135,6 +135,8 @@ public:
     virtual Integer GetPropagatorOrder(void) const;
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     
+    virtual Real                GetStepTaken();
+    
     //------------------------------------------------------------------------------
     // virtual void Initialize(void)
     //------------------------------------------------------------------------------

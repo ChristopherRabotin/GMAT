@@ -454,7 +454,7 @@ Integer Integrator::GetPropagatorOrder(void) const
 }
 
 //------------------------------------------------------------------------------
-// void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
+// void SetPhysicalModel(PhysicalModel *pPhyscialModel)
 //------------------------------------------------------------------------------
 /**
  * Connects the propagation system to the physical model 
@@ -472,3 +472,21 @@ void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
         physicalModel->SetErrorThreshold(errorThreshold);
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetStepTaken()
+//------------------------------------------------------------------------------
+/**
+ * Returns the most recent step taken by the integrator.
+ * 
+ * This method is used to coordinate the steps taken by multiple integrators 
+ * running concurrently.  An example of this usage can be found in 
+ * the Propagate command -- see Propagate::TakeAStep.
+ *
+ * @return The step taken, in seconds.
+ */
+//------------------------------------------------------------------------------
+Real Integrator::GetStepTaken()
+{
+   return stepTaken;
+}

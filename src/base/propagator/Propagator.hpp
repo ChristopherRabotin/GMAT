@@ -127,7 +127,7 @@ public:
      * next call.
      */
     //------------------------------------------------------------------------------
-    virtual bool Step(void) = 0;
+    virtual bool Step() = 0;
 
     //------------------------------------------------------------------------------
     // virtual bool RawStep(void)
@@ -135,7 +135,16 @@ public:
     /**
      * Method to take a raw propagation step without error control
      */
-    virtual bool RawStep(void) = 0;
+    virtual bool RawStep() = 0;
+
+    //------------------------------------------------------------------------------
+    // virtual bool GetStepTaken()
+    //------------------------------------------------------------------------------
+    /**
+     * Method to report the size of the most recent propagation step.
+     */
+    virtual Real                GetStepTaken() = 0;
+    
 
     virtual bool RawStep(Real dt);
     
