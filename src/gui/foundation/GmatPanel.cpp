@@ -16,6 +16,8 @@
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
+#include "ShowScriptDialog.hpp"
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -191,13 +193,13 @@ void GmatPanel::OnHelp()
 //------------------------------------------------------------------------------
 void GmatPanel::OnScript()
 {
+   wxString title = "Object Script";
    // open separate window to show scripts?
-   if (mObject == NULL)
-      MessageInterface::PopupMessage(Gmat::INFO_,
-         "Script not yet available for this panel");
-   else {
-      std::string genString = mObject->GetGeneratingString();
-      MessageInterface::PopupMessage(Gmat::INFO_, genString);
+   if (mObject != NULL) {
+      title = "Scripting for ";
+      title += mObject->GetName().c_str();
    }
+   ShowScriptDialog ssd(this, -1, title, mObject);
+   ssd.ShowModal();   
 }
 
