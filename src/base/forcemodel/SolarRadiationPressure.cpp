@@ -234,7 +234,7 @@ std::string SolarRadiationPressure::GetParameterText(const Integer id) const
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return SolarRadiationPressure::PARAMETER_TEXT[id];
    else
-      return GmatBase::GetParameterText(id);
+      return PhysicalModel::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -251,7 +251,7 @@ Integer SolarRadiationPressure::GetParameterID(const std::string &str) const
       if (str == SolarRadiationPressure::PARAMETER_TEXT[i])
          return i;
    }
-   return GmatBase::GetParameterID(str);
+   return PhysicalModel::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ Gmat::ParameterType SolarRadiationPressure::GetParameterType(const Integer id) c
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return PARAMETER_TYPE[id];
    else
-      return GmatBase::GetParameterType(id);
+      return PhysicalModel::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -281,7 +281,7 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
-      return GmatBase::GetParameterTypeString(id);
+      return PhysicalModel::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ Real SolarRadiationPressure::GetRealParameter(const Integer id) const
     if (id == PERCENT_SUN)
         return percentSun;
 
-    return GmatBase::GetRealParameter(id);
+    return PhysicalModel::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -391,7 +391,7 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
       return percentSun;
    }
        
-   return GmatBase::SetRealParameter(id, value);
+   return PhysicalModel::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ bool SolarRadiationPressure::GetBooleanParameter(const Integer id) const
     if (id == HAS_MOONS)
         return hasMoons;
 
-    return GmatBase::GetBooleanParameter(id);
+    return PhysicalModel::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ bool SolarRadiationPressure::SetBooleanParameter(const Integer id, const bool va
       return hasMoons;
    }
        
-   return GmatBase::SetBooleanParameter(id, value);
+   return PhysicalModel::SetBooleanParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -448,7 +448,7 @@ Integer SolarRadiationPressure::GetIntegerParameter(const Integer id) const
    if (id == VECTOR_MODEL)
       return vectorModel;
 
-   return GmatBase::GetIntegerParameter(id);
+   return PhysicalModel::GetIntegerParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -471,7 +471,7 @@ Integer SolarRadiationPressure::SetIntegerParameter(const Integer id, const Inte
       return vectorModel;
    }
        
-   return GmatBase::SetIntegerParameter(id, value);
+   return PhysicalModel::SetIntegerParameter(id, value);
 }
 
 //------------------------------------------------------------------------------

@@ -468,8 +468,12 @@ std::string GmatBase::GetParameterText(const Integer id) const
 Integer GmatBase::GetParameterID(const std::string &str) const
 {
    char errortext[256];
+   std::string desc;
+   desc = instanceName;
+   if (desc == "")
+      desc = typeName;
    sprintf(errortext, "No parameter defined with description \"%s\" on %s", 
-           str.c_str(), instanceName.c_str());
+           str.c_str(), desc.c_str());
    throw GmatBaseException(errortext);
 }
 
@@ -752,7 +756,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
 const Rvector& GmatBase::GetRvectorParameter(const Integer id) const
 {
    char errortext[256];
-   sprintf(errortext, "No RVectot parameter with ID %d on %s", 
+   sprintf(errortext, "No RVector parameter with ID %d on %s", 
            id, instanceName.c_str());
    throw GmatBaseException(errortext);
 }
