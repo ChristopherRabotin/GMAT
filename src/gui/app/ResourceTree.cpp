@@ -287,6 +287,9 @@ void ResourceTree::AddDefaultResources()
 
    SetItemImage(mVariableItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
+
+   AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
+              -1, new GmatTreeItemData(wxT("Coordinate Systems"), GmatTree::COORD_SYS_FOLDER));
    
    AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("MATLAB Functions"), GmatTree::MATLAB_FUNCT_FOLDER));
@@ -706,6 +709,11 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
       menu.Enable(POPUP_ADD_MATLAB_FUNCT, FALSE);
+   }   
+   else if (dataType == GmatTree::COORD_SYS_FOLDER)
+   {
+      menu.Append(POPUP_ADD_COORD_SYS, wxT("Add Coordinate System"));
+      menu.Enable(POPUP_ADD_COORD_SYS, FALSE);
    }   
    else
    {

@@ -134,6 +134,7 @@ private:
       POPUP_DELETE,
       
       POPUP_ADD_MATLAB_FUNCT,
+      POPUP_ADD_COORD_SYS,
    };
 };
 
