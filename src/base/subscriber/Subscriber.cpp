@@ -25,7 +25,7 @@
 //                             Original delivery
 //                             Source code not yet transferred to GSFC
 //                           : 10/01/2003 - L. Ruley, Missions Applications Branch
-//			       Updated style using GMAT cpp style guide
+//                             Updated style using GMAT cpp style guide
 // **************************************************************************
 //
 /**
@@ -127,6 +127,11 @@ bool Subscriber::Remove(Subscriber * s, const bool del)
 void Subscriber::Activate(bool state)
 {
     active = state;
+}
+
+bool Subscriber::IsActive()
+{
+    return active;
 }
 
 bool Subscriber::Distribute(const double * dat, int len)
