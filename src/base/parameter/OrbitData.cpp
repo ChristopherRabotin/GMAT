@@ -146,19 +146,19 @@ Real OrbitData::GetKepReal(const std::string &str)
     }
     else
     {
-        if (str == "KepSma")
+        if (str == "KepSMA")
             return obj->GetRealParameter("SMA");
         if (str == "KepEcc")
             return obj->GetRealParameter("ECC");
         if (str == "KepInc")
             return obj->GetRealParameter("INC");
-        if (str == "KepRaan")
+        if (str == "KepRAAN")
             return obj->GetRealParameter("RAAN");
-        if (str == "KepAop")
+        if (str == "KepAOP")
             return obj->GetRealParameter("AOP");
-        if (str == "KepTa")
+        if (str == "KepTA")
             return obj->GetRealParameter("TA");
-        if (str == "KepMa")
+        if (str == "KepMA")
             return obj->GetRealParameter("MA");
     }
     return ORBIT_REAL_UNDEFINED;
@@ -226,18 +226,18 @@ Real OrbitData::GetSphReal(const std::string &str)
     }
     else
     {
-        if (str == "SphRmag")
-            return obj->GetRealParameter(1); //("SphRmag");
-        if (str == "SphRa")
-            return obj->GetRealParameter(2); //("SphRa");
+        if (str == "SphRMag")
+            return obj->GetRealParameter(1);
+        if (str == "SphRA")
+            return obj->GetRealParameter(2);
         if (str == "SphDec")
-            return obj->GetRealParameter(3); //("SphDec");
-        if (str == "SphVmag")
-            return obj->GetRealParameter(4); //("SphVmag");
-        if (str == "SphRaV")
-            return obj->GetRealParameter(5); //("SphRaV");
-        if (str == "SphDecV")
-            return obj->GetRealParameter(6); //("SphDecV");
+            return obj->GetRealParameter(3);;
+        if (str == "SphVMag")
+            return obj->GetRealParameter(4);;
+        if (str == "SphVRA")
+            return obj->GetRealParameter(5);
+        if (str == "SphVDec")
+            return obj->GetRealParameter(6);
     }
     return ORBIT_REAL_UNDEFINED;
 }
@@ -275,7 +275,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
         }
         else
         {
-            if (str == "SemilatRectum")
+            if (str == "SemilatusRectum")
                 result = (h / grav) * h;      // B M W; eq. 1.6-1
         }
     }
