@@ -627,6 +627,7 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 {
     MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
                                   "file: " + scriptFilename + "\n");
+    MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFilename);
     return theScriptInterpreter->Build(scriptFilename);
 }
 
