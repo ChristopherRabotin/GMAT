@@ -26,22 +26,29 @@ class PlotInterface
 {
 
 public:
+#if !defined __CONSOLE_APP__
     // for OpenGL Plot
-    static bool CreateGlPlotWindow(bool canvasOnly); 
+    static bool CreateGlPlotWindow();
+    static bool DeleteGlPlot(); //loj: 3/8/04 added
     static bool UpdateGlSpacecraft(const Real &time, const Real &posX,
                                    const Real &posY, const Real &posZ,
                                    bool updateCanvas);
 
     // for XY plot
-    static bool CreateXyPlotWindow(bool canvasOnly,
-                                   const std::string &plotName,
+    static bool CreateXyPlotWindow(const std::string &plotName,
                                    const std::string &plotTitle,
                                    const std::string &xAxisTitle,
                                    const std::string &yAxisTitle);
-    static bool AddXyPlotCurve(const std::string &plotName, int cuveNum,
+    static bool DeleteXyPlot(bool hideFrame); //loj: 3/8/04 added
+    static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                                int yOffset, Real yMin, Real yMax,
                                const std::string &curveTitle,
                                const std::string &penColor);
+    static bool DeleteAllXyPlotCurves(const std::string &plotName); //loj: 3/10/04 added
+    static bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);
+    static void ClearXyPlotData(const std::string &plotName); //loj: 3/10/04 added
+    static void SetXyPlotTitle(const std::string &plotName, //loj: 3/11/04 added
+                               const std::string &plotTitle);
     static bool UpdateXyPlot(const std::string &plotName,
                              const Real &xval, const Rvector &yvals,
                              const std::string &plotTitle,
@@ -49,6 +56,7 @@ public:
                              const std::string &yAxisTitle,
                              bool updateCanvas);
                              
+#endif
     
 private:
     
