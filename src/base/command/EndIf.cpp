@@ -19,6 +19,7 @@
 
 
 #include "EndIf.hpp"
+#include "BranchCommand.hpp"
 
 
 EndIf::EndIf(void) :
@@ -64,6 +65,13 @@ bool EndIf::Execute(void)
     return true;
 }
 
+bool EndIf::Insert(GmatCommand *cmd, GmatCommand *prev)
+{
+   // if inserting after End statement for branch command, we want to 
+   // insert right after the entire If command
+   if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
+   return false;
+}
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
