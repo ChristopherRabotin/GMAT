@@ -17,12 +17,13 @@
 
 
 #include "Thruster.hpp"
+#include <math.h>          // for pow(real, real)
 
-//#define DEBUG_THRUSTER
+#define DEBUG_THRUSTER
 
 
 #ifdef DEBUG_THRUSTER
-   #include <iostream>
+   #include "MessageInterface.hpp"
 #endif
 
 //---------------------------------
@@ -163,11 +164,13 @@ Thruster::Thruster(const Thruster& th) :
  * @return this object, with parameters set to the input object's parameters.
  */
 //------------------------------------------------------------------------------
+#include <iostream>
 Thruster& Thruster::operator=(const Thruster& th)
 {
+   std::cout << "Calling Thruster::operator= for " << instanceName << "\n";
    if (&th == this)
       return *this;
-      
+
    Hardware::operator=(th);
 
    memcpy(cCoefficients, th.cCoefficients, 14 * sizeof(Real));
@@ -200,12 +203,21 @@ bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    if (obj->GetTypeName() == "FuelTank") {
       #ifdef DEBUG_THRUSTER
-         std::cout << "Setting tank \"" << name 
-                   << "\" on thruster \"" << instanceName << "\"\n";
+         MessageInterface::ShowMessage("Setting tank \"%s\" on thruster \"%s\"\n",
+                                       name.c_str(), instanceName.c_str());
       #endif
       
       if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
          tanks.push_back((FuelTank*)obj);
+
+      #ifdef DEBUG_THRUSTER
+         // Peek at the mass flow data
+         bool temp = thrusterFiring;
+         thrusterFiring = true;
+         CalculateMassFlow();
+         thrusterFiring = temp;
+      #endif
+      
       return true;
    }
    
@@ -409,26 +421,66 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
       case C1:
          return cCoefficients[0] = value;
       case C2:
+         if (value != 0.0)
+            constantExpressions = false;
          return cCoefficients[1] = value;
       case C3:
+         if (value != 0.0)
+            constantExpressions = false;
          return cCoefficients[2] = value;
       case C4:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[3] = value;
       case C5:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[4] = value;
       case C6:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[5] = value;
       case C7:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[6] = value;
       case C8:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[7] = value;
       case C9:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[8] = value;
       case C10:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[9] = value;
       case C11:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[10] = value;
       case C12:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return cCoefficients[11] = value;
       case C13:
          return cCoefficients[12] = value;
@@ -437,26 +489,66 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
       case K1:
          return kCoefficients[0] = value;
       case K2:
+         if (value != 0.0)
+            constantExpressions = false;
          return kCoefficients[1] = value;
       case K3:
+         if (value != 0.0)
+            constantExpressions = false;
          return kCoefficients[2] = value;
       case K4:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[3] = value;
       case K5:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[4] = value;
       case K6:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[5] = value;
       case K7:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[6] = value;
       case K8:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[7] = value;
       case K9:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[8] = value;
       case K10:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[9] = value;
       case K11:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[10] = value;
       case K12:
+         if (value != 0.0) {
+            constantExpressions = false;
+            simpleExpressions = false;
+         }
          return kCoefficients[11] = value;
       case K13:
          return kCoefficients[12] = value;
@@ -610,6 +702,23 @@ GmatBase* Thruster::Clone() const
 
 
 //---------------------------------------------------------------------------
+//  void Copy(GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ *
+ * @return A GmatBase pointer to the cloned thruster.
+ */
+//---------------------------------------------------------------------------
+void Thruster::Copy(const GmatBase* orig)
+{
+   operator=(*((Thruster *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
 //  bool CalculateThrustAndIsp()
 //---------------------------------------------------------------------------
 /**
@@ -652,16 +761,45 @@ bool Thruster::CalculateThrustAndIsp()
    if (tanks.empty())
       throw HardwareException("Thruster \"" + instanceName + 
                                  "\" does not have a fuel tank");
-                          
+   
+   // Require that the tanks all be at the same pressure and temperature
+   Integer pressID = tanks[0]->GetParameterID("Pressure");
+   Integer tempID = tanks[0]->GetParameterID("Temperature");
+   Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
+   
+   pressure = tanks[0]->GetRealParameter(pressID);
+   temperatureRatio = tanks[0]->GetRealParameter(tempID) / 
+                      tanks[0]->GetRealParameter(refTempID);
+   
+   thrust = cCoefficients[0];
+   impulse = kCoefficients[0];
+   
    if (!constantExpressions) {
-      
-          
+
+      thrust  += pressure*(cCoefficients[1] + pressure*cCoefficients[2]);
+      impulse += pressure*(kCoefficients[1] + pressure*kCoefficients[2]);
+   
       // For efficiency, if thrust and Isp are simple, don't bother evaluating 
       // higher order terms
       if (!simpleExpressions) {
-         
+         thrust  += cCoefficients[3] * pow(pressure, cCoefficients[4]) +
+                    cCoefficients[5] * pow(pressure, cCoefficients[6]) +
+                    cCoefficients[7] * pow(pressure, cCoefficients[8]) +
+                    cCoefficients[9] * pow(cCoefficients[10], 
+                                           pressure * cCoefficients[11]);
+                    
+         impulse += kCoefficients[3] * pow(pressure, kCoefficients[4]) +
+                    kCoefficients[5] * pow(pressure, kCoefficients[6]) +
+                    kCoefficients[7] * pow(pressure, kCoefficients[8]) +
+                    kCoefficients[9] * pow(kCoefficients[10], 
+                                           pressure * kCoefficients[11]);
       }
    }
+
+   thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[12] + 
+                  pressure*cCoefficients[13]));
+   impulse *= pow(temperatureRatio, (1.0 + kCoefficients[12] + 
+                  pressure*kCoefficients[13]));
    
    return true;
 }
@@ -687,15 +825,17 @@ Real Thruster::CalculateMassFlow()
       if (!CalculateThrustAndIsp())
          throw HardwareException("Thruster \"" + instanceName + 
                                  "\" could not calculate dm/dt");
-      if (thrust == 0.0)
-         mDot = 0.0;
-      else {
-         if (impulse == 0.0)
-            throw HardwareException("Thruster \"" + instanceName + 
+      if (impulse == 0.0)
+         throw HardwareException("Thruster \"" + instanceName + 
                                  "\" has specific impulse == 0.0");
-         mDot = thrust / impulse;
-      }
+      mDot = thrust / impulse;
    }
+
+   #ifdef DEBUG_THRUSTER
+      MessageInterface::ShowMessage(
+            "   Thrust = %15lf, Isp = %15lf, MassFlow = %15lf  %lf\n", thrust, 
+            impulse, mDot, thrust/impulse);
+   #endif
    
    return mDot;
 }
