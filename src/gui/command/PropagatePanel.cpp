@@ -619,6 +619,8 @@ void PropagatePanel::DisplayPropagator()
    {
       propGrid->SetCellValue(i, PROP_NAME_COL, mTempProp[i].propName);
       propGrid->SetCellValue(i, PROP_SOS_COL, mTempProp[i].soNames);
+      propGrid->SetReadOnly(i, PROP_NAME_COL, true);
+      propGrid->SetReadOnly(i, PROP_SOS_COL, true);
       
       name = mTempProp[i].propName;
       int x = name.Find("-");
@@ -626,12 +628,10 @@ void PropagatePanel::DisplayPropagator()
       if (x == -1)
       {
           propGrid->SetCellValue(i, PROP_BK_COL, "");
-          MessageInterface::ShowMessage("PropagatePanel::DisplayPropagator(1)\n");
       }
       else
       {
           propGrid->SetCellValue(i, PROP_BK_COL, "1");
-          MessageInterface::ShowMessage("PropagatePanel::DisplayPropagator(2)\n");
       }            
    }
 
@@ -1061,22 +1061,13 @@ void PropagatePanel::OnCellValueChange(wxGridEvent &event)
            
            if (temp == "1")
            {
-               MessageInterface::ShowMessage
-               ("PropagatePanel::OnCellValueChange(1) temp = %s\n", temp.c_str());
-               mTempProp[row].propName.Prepend("-");
-               
+               mTempProp[row].propName.Prepend("-");  
            }
            else
            {
               wxString name = mTempProp[row].propName;
-              MessageInterface::ShowMessage
-              ("PropagatePanel::OnCellValueChange(2) name = %s\n", name.c_str());
               name.Replace("-", "", false);
-              MessageInterface::ShowMessage
-              ("PropagatePanel::OnCellValueChange(3) name = %s\n", name.c_str());
-              mTempProp[row].propName = name;
-              MessageInterface::ShowMessage
-              ("PropagatePanel::OnCellValueChange(4) propName = %s\n", mTempProp[row].propName.c_str());    
+              mTempProp[row].propName = name;    
            }                 
            theApplyButton->Enable(true); 
            mPropChanged = true;    
