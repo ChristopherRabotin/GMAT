@@ -42,7 +42,7 @@ MissionTreeItemData::MissionTreeItemData(wxString desc, int type,
 }
 
 //------------------------------------------------------------------------------
-// GmatCommand* GetCommand()
+// virtual GmatCommand* GetCommand()
 //------------------------------------------------------------------------------
 /**
  * @return Command pointer
@@ -54,7 +54,19 @@ GmatCommand* MissionTreeItemData::GetCommand()
 }
 
 //------------------------------------------------------------------------------
-// wxString GetCommandName()
+// virtual void SetCommand(GmatCommand* cmd)
+//------------------------------------------------------------------------------
+/**
+ * Sets command
+ */
+//------------------------------------------------------------------------------
+void MissionTreeItemData::SetCommand(GmatCommand* cmd)
+{
+    theCommand = cmd;
+}
+
+//------------------------------------------------------------------------------
+// virtual wxString GetCommandName()
 //------------------------------------------------------------------------------
 /**
  * @return command name

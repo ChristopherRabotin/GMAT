@@ -26,6 +26,7 @@ public:
     MissionTreeItemData(const wxString desc, const int type, const wxString &name = "",
                         GmatCommand *cmd = NULL);
     virtual GmatCommand* GetCommand();
+    virtual void SetCommand(GmatCommand *cmd);
     virtual wxString GetCommandName();
     
 protected:
