@@ -21,7 +21,7 @@
 #include <string>
 #include "MessageInterface.hpp"
 
-#define DEBUG_SUBSCRIBER 1
+#define DEBUG_SUBSCRIBER 0
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
