@@ -238,6 +238,8 @@ Spacecraft::~Spacecraft(void)
  * @param <a> The original that is being copied.
  *
  * @return Reference to this object
+ * 
+ * @todo Determine how to handle hardware when copying Spacecraft objects.
  */
 Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 {
@@ -290,6 +292,21 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 GmatBase* Spacecraft::Clone(void) const
 {
    return (new Spacecraft(*this));
+}
+
+
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void Spacecraft::Copy(const GmatBase* orig)
+{
+   operator=(*((Spacecraft *)(orig)));
 }
 
 
@@ -650,7 +667,6 @@ Real Spacecraft::GetRealParameter(const Integer id) const
        return UpdateTotalMass();
     }
     
-
     return SpaceObject::GetRealParameter(id);
 }
 

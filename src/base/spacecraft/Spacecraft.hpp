@@ -63,6 +63,7 @@ public:
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   virtual void Copy(const GmatBase* orig);
    
    //  Tanks and thrusters (and, eventually, other hardware) are owned objects,
    // and therefore need these methods from GmatBase
