@@ -752,6 +752,7 @@ bool CallFunction::ExecuteMatlabFunction()
 
 void CallFunction::SendInParam(Parameter *param)
 {
+#if defined __USE_MATLAB__     
   if (param == NULL)
   {
      MessageInterface::ShowMessage("Parameter was null");
@@ -819,10 +820,12 @@ void CallFunction::SendInParam(Parameter *param)
         throw CommandException("Unknown parameter type\n");
      }
   }
+#endif  //__USE_MATLAB__
 }
 
 void CallFunction::GetOutParams()
 {
+#if defined __USE_MATLAB__     
    for (unsigned int i=0; i<mOutputList.size(); i++)
    {
       Parameter *param = (Parameter *)mOutputList[i];
@@ -896,7 +899,7 @@ void CallFunction::GetOutParams()
 //         throw CommandException("Unknown parameter type\n");
 //      }
    }
-
+#endif  //__USE_MATLAB__
 }
 
 
