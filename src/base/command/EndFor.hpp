@@ -11,6 +11,7 @@
 //
 // Author:  Joey Gurganus 
 // Created: 2004/01/29
+// Modified: W. Shoan 2004.09.13 - Updated for use in Build 3
 //
 /**
  * Definition for the closing line of a for loop

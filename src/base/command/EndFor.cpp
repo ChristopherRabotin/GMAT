@@ -11,6 +11,7 @@
 //
 // Author:  Joey Gurganus
 // Created: 2004/01/29
+// Modified: W. Shoan 2004.09.13 - Updated for use in Build 3
 //
 /**
  * Definition for the closing line of a for loop
@@ -23,44 +24,48 @@
 
 EndFor::EndFor(void) :
     GmatCommand         ("EndFor")
-{}
+{
+}
 
 
 EndFor::~EndFor(void)
-{}
+{
+}
     
 
 EndFor::EndFor(const EndFor& ef) :
     GmatCommand         (ef)
-{}
+{
+}
 
 
 EndFor& EndFor::operator=(const EndFor& ef)
 {
-    if (this == &ef)
-        return *this;
-    
-    return *this;
+   if (this == &ef)
+     return *this;
+
+   GmatCommand::operator=(ef);
+   return *this;
 }
     
 
 bool EndFor::Initialize(void)
 {
-    // Validate that next points to the owning for command
-    if (!next)
-        throw CommandException("EndFor Command not properly reconnected");
-    
-    if (next->GetTypeName() != "For")
-        throw CommandException("EndFor Command not connected to For Command");
-                             
-    
-    return true;    
+   // Validate that next points to the owning for command
+   if (!next)
+     throw CommandException("EndFor Command not properly reconnected");
+
+   if (next->GetTypeName() != "For")
+     throw CommandException("EndFor Command not connected to For Command");
+                          
+
+   return true;    
 }
 
 
 bool EndFor::Execute(void)
 {
-    return true;
+   return true;
 }
 
 
@@ -75,7 +80,7 @@ bool EndFor::Execute(void)
  */
 //------------------------------------------------------------------------------
 GmatBase* EndFor::Clone(void) const
-{
+{   
    return (new EndFor(*this));
 }
 
