@@ -112,6 +112,9 @@ void Interpreter::Initialize(void)
     StringArray svers = moderator->GetListOfFactoryItems(Gmat::SOLVER);
     copy(svers.begin(), svers.end(), back_inserter(solvermap));
     
+    StringArray funs = moderator->GetListOfFactoryItems(Gmat::FUNCTION);
+    copy(funs.begin(), funs.end(), back_inserter(functionmap));
+    
     #ifdef DEBUG_OBJECT_LISTS
         std::cout << "\nCommands:\n   ";
         for (std::vector<std::string>::iterator c = cmds.begin(); c != cmds.end(); ++c)
@@ -286,6 +289,13 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     if (find(solvermap.begin(), solvermap.end(), objecttype) != 
                                                           solvermap.end()) {
         moderator->CreateSolver(objecttype, objectname);
+        return true;
+    }
+    
+    // Handle Functions
+    if (find(functionmap.begin(), functionmap.end(), objecttype) != 
+                                                          functionmap.end()) {
+        moderator->CreateFunction(objecttype, objectname);
         return true;
     }
 

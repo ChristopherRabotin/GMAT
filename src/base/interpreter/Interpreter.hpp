@@ -105,6 +105,8 @@ protected:
    StringArray                     stopcondmap;
    /// Available solvers
    StringArray                     solvermap;
+   /// Available function containers
+   StringArray                     functionmap;
 
    /// Current line from the script
    std::string                     line;
