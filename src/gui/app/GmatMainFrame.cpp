@@ -60,6 +60,8 @@
 #include "ForLoopPanel.hpp"
 #include "GmatMdiChildFrame.hpp"
 
+#define DEBUG_MAINFRAME 0
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -1089,9 +1091,12 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
   while (node)
   {
     GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-    MessageInterface::ShowMessage("child %s  this %s\n", theChild->GetTitle().c_str(),
-                                    item->GetDesc().c_str());
 
+#if DEBUG_MAINFRAME
+    MessageInterface::ShowMessage("child %s  this %s\n", theChild->GetTitle().c_str(),
+                                  item->GetDesc().c_str());
+#endif
+    
     if (theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))
     {
       // move child to the front
