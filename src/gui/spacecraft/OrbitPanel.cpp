@@ -52,8 +52,8 @@ OrbitPanel::OrbitPanel(wxWindow *parent,
                        :wxPanel(parent)
 {
 
-   MessageInterface::ShowMessage
-         ("In OrbitPanel\n");
+//   MessageInterface::ShowMessage
+//         ("In OrbitPanel\n");
 
     this->theSpacecraft = spacecraft;
     this->theSolarSystem = solarsystem;
@@ -157,7 +157,7 @@ void OrbitPanel::Create()
     
     // combo box for the date type
    dateComboBox = new wxComboBox( this, ID_CB_EPOCH, wxT(""), 
-             wxDefaultPosition, wxSize(100,-1), 3, strs12, 
+             wxDefaultPosition, wxSize(100,-1), 4, strs12, 
              wxCB_DROPDOWN | wxCB_READONLY );
     item10->Add( dateComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
 //    dateComboBox->Disable();
@@ -564,18 +564,18 @@ void OrbitPanel::OnEpochChange()
     theApplyButton->Enable();
  
     Real epoch1 = theSpacecraft->GetDisplayEpoch(); 
-    MessageInterface::ShowMessage("epoch value %f\n", epoch1);
+//    MessageInterface::ShowMessage("epoch value %f\n", epoch1);
 
     wxString dateFormat = dateComboBox->GetStringSelection();
     
-    MessageInterface::ShowMessage("date format is %s\n", dateFormat.c_str());
+//    MessageInterface::ShowMessage("date format is %s\n", dateFormat.c_str());
 //    theSpacecraft->SetDisplayDateFormat("UTC");
     
     theSpacecraft->SetDisplayDateFormat(dateFormat.c_str());
 
     // get elements
     Real epoch = theSpacecraft->GetDisplayEpoch();  
-    MessageInterface::ShowMessage("new value %f\n", epoch);
+//    MessageInterface::ShowMessage("new value %f\n", epoch);
 
     wxString epochStr;
     epochStr.Printf("%f", epoch);

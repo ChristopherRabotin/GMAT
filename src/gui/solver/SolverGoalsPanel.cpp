@@ -15,7 +15,6 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
-#include "GmatMainNotebook.hpp"
 #include "SolverGoalsPanel.hpp"
 
 // base includes

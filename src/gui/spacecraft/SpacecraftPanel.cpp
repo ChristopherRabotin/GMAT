@@ -86,8 +86,8 @@ void SpacecraftPanel::Create()
     sizer = new wxNotebookSizer( spacecraftNotebook );
  
     SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-    MessageInterface::ShowMessage
-         ("SpacecraftPanel:: got the solar sys\n");
+//    MessageInterface::ShowMessage
+//         ("SpacecraftPanel:: got the solar sys\n");
     theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft, 
                                    theSolarSystem,
                                    theApplyButton);

@@ -267,8 +267,8 @@ void UniversePanel::SaveData()
     for (int i=0; i<selectedListBox->GetCount(); i++)
     {
         theFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
-        MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
-                                      theFileTypesInUse[i].c_str());
+//        MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
+//                                      theFileTypesInUse[i].c_str());
     }
 
     theGuiInterpreter->SetPlanetaryFileTypesInUse(theFileTypesInUse);
