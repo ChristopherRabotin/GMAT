@@ -246,22 +246,27 @@ void OpenGlPlotSetupPanel::Create()
    //------------------------------------------------------
    // plot option, (1st column)
    //------------------------------------------------------
-   plotCheckBox =
+   mPlotCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
-   wireFrameCheckBox =
+   mWireFrameCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw WireFrame"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
-   targetStatusCheckBox =
+   mTargetStatusCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
+   mOverlapCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Overlap Plot"),
+                     wxDefaultPosition, wxSize(100, -1), 0);
+   
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   plotOptionBoxSizer->Add(plotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   plotOptionBoxSizer->Add(wireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionBoxSizer->Add(mOverlapCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // available spacecraft list (2th column)
@@ -367,44 +372,52 @@ void OpenGlPlotSetupPanel::LoadData()
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
 #endif
 
-   // load data from the core engine
-   plotCheckBox->SetValue(mOpenGlPlot->IsActive());
-   wireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
-   targetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
+   try
+   {
+      // load data from the core engine
+      mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
+      mWireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
+      mTargetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
+      mOverlapCheckBox->SetValue(mOpenGlPlot->GetStringParameter("Overlap") == "On");
 
-   // get spacecraft list to plot
-   //StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("SpacecraftList");
-   StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
-   mScCount = scNameList.size();
+      // get spacecraft list to plot
+      StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
+      mScCount = scNameList.size();
    
-   if (mScCount > 0)
-   {
-      wxString *scNames = new wxString[mScCount];
-      for (int i=0; i<mScCount; i++)
+      if (mScCount > 0)
       {
-         scNames[i] = scNameList[i].c_str();
+         wxString *scNames = new wxString[mScCount];
+         for (int i=0; i<mScCount; i++)
+         {
+            scNames[i] = scNameList[i].c_str();
          
-         mOrbitColorMap[scNameList[i]]
-            = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameList[i]));
-         mTargetColorMap[scNameList[i]]
-            = RgbColor(mOpenGlPlot->GetColor("Target", scNameList[i]));
+            mOrbitColorMap[scNameList[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameList[i]));
+            mTargetColorMap[scNameList[i]]
+               = RgbColor(mOpenGlPlot->GetColor("Target", scNameList[i]));
          
-         //mOrbitColorMap[scNameList[i]]
-         //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("OrbitColor", scNameList[i]));
-         //mTargetColorMap[scNameList[i]]
-         //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("TargetColor", scNameList[i]));
+            //mOrbitColorMap[scNameList[i]]
+            //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("OrbitColor", scNameList[i]));
+            //mTargetColorMap[scNameList[i]]
+            //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("TargetColor", scNameList[i]));
+         }
+      
+         mScSelectedListBox->Set(mScCount, scNames);
+         delete scNames;
+      
+         // show spacecraft option
+         mScSelectedListBox->SetSelection(0);
+         ShowSpacecraftOption(mScSelectedListBox->GetStringSelection(), true);
       }
-    
-      mScSelectedListBox->Set(mScCount, scNames);
-      delete scNames;
-
-      // show spacecraft option
-      mScSelectedListBox->SetSelection(0);
-      ShowSpacecraftOption(mScSelectedListBox->GetStringSelection(), true);
+      else
+      {
+         ShowSpacecraftOption("", false);
+      }
    }
-   else
+   catch (BaseException &e)
    {
-      ShowSpacecraftOption("", false);
+      MessageInterface::ShowMessage
+         ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
    
 #if DEBUG_OPENGL_PANEL
@@ -419,16 +432,21 @@ void OpenGlPlotSetupPanel::SaveData()
 {
    
    // save data to core engine
-   mOpenGlPlot->Activate(plotCheckBox->IsChecked());
-   if (wireFrameCheckBox->IsChecked())
+   mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
+   if (mWireFrameCheckBox->IsChecked())
       mOpenGlPlot->SetStringParameter("WireFrame", "On");
    else
       mOpenGlPlot->SetStringParameter("WireFrame", "Off");
    
-   if (targetStatusCheckBox->IsChecked())
+   if (mTargetStatusCheckBox->IsChecked())
       mOpenGlPlot->SetStringParameter("TargetStatus", "On");
    else
       mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
+
+   if (mOverlapCheckBox->IsChecked())
+      mOpenGlPlot->SetStringParameter("Overlap", "On");
+   else
+      mOpenGlPlot->SetStringParameter("Overlap", "Off");
 
    // save spacecraft list
    if (mIsScChanged)
@@ -438,7 +456,7 @@ void OpenGlPlotSetupPanel::SaveData()
       
       mScCount = mScSelectedListBox->GetCount();
       
-      if (mScCount == 0 && plotCheckBox->IsChecked())
+      if (mScCount == 0 && mPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("Spacecraft not selected. The plot will not be activated."));
          mOpenGlPlot->Activate(false);

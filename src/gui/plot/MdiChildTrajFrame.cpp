@@ -338,14 +338,25 @@ void MdiChildTrajFrame::DeletePlot()
 }
 
 //------------------------------------------------------------------------------
-// void SetDrawWireFrame(bool draw)
+// void SetDrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawWireFrame(bool draw)
+void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, draw);
-      mCanvas->SetShowWireFrame(draw);
+      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
+      mCanvas->SetShowWireFrame(flag);
    }
 }
 
+//------------------------------------------------------------------------------
+// void SetOverlapPlot(bool overlap)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
+{
+   if (mCanvas)
+   {
+      if (!overlap)
+         mCanvas->ClearPlot();
+   }
+}

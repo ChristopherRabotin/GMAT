@@ -42,21 +42,23 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "EquatorialPlane",
    "WireFrame",
    "TargetStatus",
+   "Overlap",
    "DataCollectFrequency",
-   "UpdatePlotFrequency"
+   "UpdatePlotFrequency",
 }; 
 
 const Gmat::ParameterType
 OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
-   Gmat::STRINGARRAY_TYPE,
-   Gmat::UNSIGNED_INTARRAY_TYPE,
-   Gmat::UNSIGNED_INTARRAY_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE
+   Gmat::STRINGARRAY_TYPE,       //"Add"
+   Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor"
+   Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor"
+   Gmat::STRING_TYPE,            //"EquatorialPlane"
+   Gmat::STRING_TYPE,            //"WireFrame"
+   Gmat::STRING_TYPE,            //"TargetStatus"
+   Gmat::STRING_TYPE,            //"Overlap"
+   Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
+   Gmat::INTEGER_TYPE            //"DataCollectFrequency"
 };
 
 const UnsignedInt
@@ -81,6 +83,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    mDrawEquatorialPlane = true;
    mDrawWireFrame = false;
    mDrawTarget = false;
+   mOverlapPlot = false;
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
    mNumData = 0;
@@ -103,6 +106,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    mDrawEquatorialPlane = ogl.mDrawEquatorialPlane;
    mDrawWireFrame = ogl.mDrawWireFrame;
    mDrawTarget = ogl.mDrawTarget;
+   mOverlapPlot = ogl.mOverlapPlot;
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
    mScCount = ogl.mScCount;
@@ -147,7 +151,8 @@ bool OpenGlPlot::Initialize()
 #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
 #endif
-         return PlotInterface::CreateGlPlotWindow(instanceName, mDrawWireFrame);
+         return PlotInterface::CreateGlPlotWindow(instanceName, mDrawWireFrame,
+                                                  mOverlapPlot);
       }
       else
       {
@@ -466,6 +471,11 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
          return "On";
       else
          return "Off";
+   case OVERLAP_PLOT:
+      if (mOverlapPlot)
+         return "On";
+      else
+         return "Off";
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -478,8 +488,7 @@ std::string OpenGlPlot::GetStringParameter(const std::string &label) const
 {
 #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::GetStringParameter() label = %s\n",
-       label.c_str());
+      ("OpenGlPlot::GetStringParameter() label = %s\n", label.c_str());
 #endif
    return GetStringParameter(GetParameterID(label));
 }
@@ -530,6 +539,20 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 #if DEBUG_OPENGL_PARAM
          MessageInterface::ShowMessage
             ("OpenGlPlot::SetStringParameter() mDrawTarget=%d\n", mDrawTarget);
+#endif
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   case OVERLAP_PLOT:
+      if (value == "On" || value == "Off")
+      {
+         mOverlapPlot = (value == "On");
+#if DEBUG_OPENGL_PARAM
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::SetStringParameter() mOverlapPlot=%d\n", mOverlapPlot);
 #endif
          return true;
       }

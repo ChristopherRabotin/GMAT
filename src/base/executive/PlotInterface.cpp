@@ -66,7 +66,8 @@ PlotInterface::~PlotInterface()
 }
 
 //------------------------------------------------------------------------------
-//  bool CreateGlPlotWindow(const std::string &plotName, bool drawWireFrame)
+//  bool CreateGlPlotWindow(const std::string &plotName, bool drawWireFrame = flase,
+//                          bool overlapPlot = false)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -75,7 +76,7 @@ PlotInterface::~PlotInterface()
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
-                                       bool drawWireFrame)
+                                       bool drawWireFrame, bool overlapPlot)
 {    
 #if defined __CONSOLE_APP__
    return true;
@@ -149,6 +150,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    }
 
    MdiGlPlot::mdiParentGlFrame->mainSubframe->SetDrawWireFrame(drawWireFrame);
+   MdiGlPlot::mdiParentGlFrame->mainSubframe->SetOverlapPlot(overlapPlot);
    MdiGlPlot::mdiParentGlFrame->Show(true);
    MdiGlPlot::mdiParentGlFrame->UpdateUI();
 

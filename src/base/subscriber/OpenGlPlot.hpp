@@ -90,6 +90,7 @@ protected:
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
    bool mDrawTarget;
+   bool mOverlapPlot;
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -116,6 +117,7 @@ protected:
       EQUATORIAL_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
+      OVERLAP_PLOT,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount

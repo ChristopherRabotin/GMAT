@@ -69,14 +69,17 @@ public:
    // getter
    wxString GetPlotName() {return mPlotName;}
    bool GetDrawWireFrame() {return mDrawWireFrame;}
+   bool GetOverlapPlot() {return mOverlapPlot;}
    
    // setter
    void SetPlotName(const wxString &str) {mPlotName = str;}
-   void SetDrawWireFrame(bool draw);
+   void SetDrawWireFrame(bool flag);
+   void SetOverlapPlot(bool overlap);
 
 protected:
    wxString mPlotName;
    bool mDrawWireFrame;
+   bool mOverlapPlot;
    
    DECLARE_EVENT_TABLE();
 };

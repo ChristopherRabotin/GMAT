@@ -54,9 +54,10 @@ protected:
    wxButton *mScOrbitColorButton;
    wxButton *mScTargetColorButton;
    
-   wxCheckBox *plotCheckBox;
-   wxCheckBox *wireFrameCheckBox;
-   wxCheckBox *targetStatusCheckBox;
+   wxCheckBox *mPlotCheckBox;
+   wxCheckBox *mWireFrameCheckBox;
+   wxCheckBox *mTargetStatusCheckBox;
+   wxCheckBox *mOverlapCheckBox;
 
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mScOptionBoxSizer;

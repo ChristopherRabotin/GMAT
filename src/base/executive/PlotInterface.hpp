@@ -28,7 +28,8 @@ class PlotInterface
 public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName,
-                                  bool drawWireFrame = false);
+                                  bool drawWireFrame = false,
+                                  bool overlapPlot = false);
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    
