@@ -25,7 +25,7 @@
 
 #include "wx/colordlg.h"                // for wxColourDialog
 
-#define DEBUG_XYPLOT_PANEL 0
+//#define DEBUG_XYPLOT_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -128,7 +128,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
       else
       {
          wxLogMessage("Selected X parameter:%s is not plottable. Please select "
-                      "another variable\n", newParam.c_str());
+                      "another parameter\n", newParam.c_str());
       }
    }
 }
@@ -161,7 +161,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
       else
       {
          wxLogMessage("Selected X parameter:%s is not plottable. Please select "
-                      "another variable\n", newParam.c_str());
+                      "another parameter\n", newParam.c_str());
       }
    }
 }
