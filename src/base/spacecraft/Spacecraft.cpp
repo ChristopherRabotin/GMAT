@@ -188,12 +188,26 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
     if (str == "Epoch") return epochID;
-    if (str == "Element1") return state1ID;
-    if (str == "Element2") return state2ID;
-    if (str == "Element3") return state3ID;
-    if (str == "Element4") return state4ID;
-    if (str == "Element5") return state5ID;
-    if (str == "Element6") return state6ID;
+
+    if (str == "Element1" || str == "X" || str == "SMA" || str == "RMAG")  
+       return state1ID;
+
+    if (str == "Element2" || str == "Y" || str == "ECC" || str == "RA") 
+       return state2ID;
+
+    if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
+       return state3ID;
+
+    if (str == "Element4" || str == "Vx" || str == "RAAN" || str == "VMAG") 
+       return state4ID;
+
+    if (str == "Element5" || str == "Vy" || str == "AOP" || str == "AZI" 
+        || str == "RAV")
+       return state5ID;
+
+    if (str == "Element6" || str == "Vz" || str == "TA" || str == "FPA" 
+        || str == "DECV") 
+       return state6ID;
 
     if (str == "ReferenceBody") return refBodyID;
     if (str == "CoordinateRepresentation") return refFrameID;
@@ -218,11 +232,11 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
     if (id == epochID) return "Epoch";
-
+  
     if (id == state1ID || id == state2ID || id == state3ID || id == state4ID
         || id == state5ID || id == state6ID)
         return GetElementName(id);
-    
+
     if (id == refBodyID) return "ReferenceBody";
     if (id == refFrameID) return "CoordinateRepresentation";
     if (id == refPlaneID) return "PrincipalPlane";
@@ -293,22 +307,26 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
     if (label == "Epoch") 
        return epoch;
 
-    if (label == "X" || label == "SMA" || label == "RMAG") 
+    if (label == "Element1" || label == "X" || label == "SMA"  ||
+        label == "RMAG")
        return state[0];
 
-    if (label == "Y" || label == "ECC" || label == "RA") 
+    if (label == "Element2" || label == "Y" || label == "ECC" || label == "RA") 
        return state[1];
 
-    if (label == "Z" || label == "INC" || label == "DEC") 
+    if (label == "Element3" || label == "Z" || label == "INC" || label == "DEC")
        return state[2];
 
-    if (label == "Vx" || label == "RAAN" || label == "VMAG") 
+    if (label == "Element4" || label == "Vx" || label == "RAAN" || 
+        label == "VMAG") 
        return state[3];
  
-    if (label == "Vy" || label == "AOP" || label == "AZI" || label == "RAV")
+    if (label == "Element5" || label == "Vy" || label == "AOP" || 
+        label == "AZI" || label == "RAV")
        return state[4];
 
-    if (label == "Vz" || label == "TA" || label == "FPA" || label == "DECV")
+    if (label == "Element6" || label == "Vz" || label == "TA" || 
+        label == "FPA" || label == "DECV")
        return state[5];
 
     if (label == "Mass")
@@ -769,10 +787,11 @@ void Spacecraft::InitializeValues()
     mass = 0.0;
 }
 
+//---------------------------------------------------------------------------
 //  std::string GetElementName(const Integer id) const
 //---------------------------------------------------------------------------
 /**
- * Get the string of element name
+ * Get the string of element name 
  *
  * @param <id>   State id
  */
@@ -780,52 +799,51 @@ std::string Spacecraft::GetElementName(const Integer id) const
 {
     if (refFrame == "Cartesian")
     {
-       if (id == state1ID) return("X");
-       if (id == state2ID) return("Y");
-       if (id == state3ID) return("Z");
-       if (id == state4ID) return("Vx");
-       if (id == state5ID) return("Vy");
-       if (id == state6ID) return("Vz");
+       if (id == state1ID) return("X");  
+       if (id == state2ID) return("Y");  
+       if (id == state3ID) return("Z");  
+       if (id == state4ID) return("Vx");  
+       if (id == state5ID) return("Vy");  
+       if (id == state6ID) return("Vz");  
     }
     else if (refFrame == "Keplerian")
     {
-       if (id == state1ID) return("SMA");
-       if (id == state2ID) return("ECC");
-       if (id == state3ID) return("INC");
-       if (id == state4ID) return("RAAN");
-       if (id == state5ID) return("AOP");
-       if (id == state6ID) return("MA");
+       if (id == state1ID) return("SMA");  
+       if (id == state2ID) return("ECC");  
+       if (id == state3ID) return("INC");  
+       if (id == state4ID) return("RAAN");  
+       if (id == state5ID) return("AOP");  
+       if (id == state6ID) return("MA");  
     }
     else if (refFrame == "Spherical1" || refFrame == "Spherical2")
     {
-       if (id == state1ID) return("RMAG");
-       if (id == state2ID) return("RA");
-       if (id == state3ID) return("DEC");
-       if (id == state4ID) return("VMAG");
-       if (id == state5ID)
+       if (id == state1ID) return("RMAG");  
+       if (id == state2ID) return("RA");  
+       if (id == state3ID) return("DEC");  
+       if (id == state4ID) return("VMAG");  
+       if (id == state5ID) 
        {
           if (refFrame == "Spherical1")
-             return("AZ");
+             return("AZI");  
           else
              return("RAV");
        }
-       if (id == state6ID)
+       if (id == state6ID) 
        {
           if (refFrame == "Spherical1")
-             return("FPA");
+             return("FPA");  
           else
              return("DECV");
        }
     }
     else
     {
-       if (id == state1ID) return("Element1");
-       if (id == state2ID) return("Element2");
-       if (id == state3ID) return("Element3");
-       if (id == state4ID) return("Element4");
-       if (id == state5ID) return("Element5");
-       if (id == state6ID) return("Element6");
+       if (id == state1ID) return("Element1");  
+       if (id == state2ID) return("Element2");  
+       if (id == state3ID) return("Element3");  
+       if (id == state4ID) return("Element4");  
+       if (id == state5ID) return("Element5");  
+       if (id == state6ID) return("Element6");  
     }
     return("Unknown");
 }
-
