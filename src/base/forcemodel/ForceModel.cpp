@@ -345,7 +345,7 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
     if (!initialized)
         return false;
 
-    if (order = 1) 
+    if (order == 1) //loj: changed from =
     {
         deriv[0] = state[3];
         deriv[1] = state[4];
@@ -366,7 +366,7 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
         if (!current->GetDerivative()->GetDerivatives(state, dt, order))
             return false;
 
-        if (order = 1) 
+        if (order == 1) //loj: changed from =
         {
             deriv[3] += ddt[3];
             deriv[4] += ddt[4];
