@@ -23,17 +23,18 @@
 #include <wx/combobox.h>
 #include <wx/button.h>
 #include <wx/grid.h>
-#include <wx/docview.h>
+//#include <wx/docview.h>
 #include <wx/menu.h>
 #include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
-#include "ViewTextFrame.hpp"
-#include "DocViewFrame.hpp"
-#include "TextEditView.hpp"
-#include "TextDocument.hpp"
-#include "MdiTextEditView.hpp"
-#include "MdiDocViewFrame.hpp"
+//loj: 3/1/04 commented out for build2
+//#include "ViewTextFrame.hpp"
+//#include "DocViewFrame.hpp"
+//#include "TextEditView.hpp"
+//#include "TextDocument.hpp"
+//#include "MdiTextEditView.hpp"
+//#include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
 
 // base includes
@@ -53,6 +54,37 @@ public:
     PropagateCommandPanel( wxWindow *parent, const wxString &propName, GmatCommand *cmd);
     
 private:
+
+    static const int MAX_PROP_ROW = 10;
+    static const int MAX_STOPCOND_ROW = 20;
+    static const int PROP_NAME_COL = 0;
+    static const int PROP_SCS_COL = 1;
+    static const int STOPCOND_NAME_COL = 0;
+    static const int STOPCOND_DESC_COL = 1;
+
+    struct PropType
+    {
+        bool isChanged;
+        wxString propName;
+        wxString scNames;
+        PropSetup *propSetupPtr;
+    };
+    
+    struct StopCondType
+    {
+        bool           isChanged;
+        wxString       name;
+        wxString       desc;
+        wxString       typeStr;
+        wxString       varName;
+        wxString       typeName;
+        wxString       relOpStr;
+        Real           goal;
+        Real           tol;
+        Integer        repeat;
+        StopCondition *stopCondPtr;
+    };
+    
     wxStaticText *synchStaticText;
     wxStaticText *varStaticText;
     wxStaticText *repeatStaticText;
@@ -60,11 +92,11 @@ private:
     wxStaticText *nameStaticText;
     wxStaticText *condTypeStaticText;
         
-    wxTextCtrl *valueTextCtrl;
-    wxTextCtrl *repeatTextCtrl;
-    wxTextCtrl *toleranceTextCtrl;
     wxTextCtrl *nameTextCtrl;
     wxTextCtrl *variableTextCtrl;
+    wxTextCtrl *goalTextCtrl;
+    wxTextCtrl *toleranceTextCtrl;
+    wxTextCtrl *repeatTextCtrl;
 
     wxButton *scriptButton;
     wxButton *updateButton;
@@ -81,14 +113,16 @@ private:
 
     wxGrid *propGrid;
     wxGrid *stopCondGrid;
-    
-    wxDocManager *mDocManager;
-    wxDocTemplate *mDocTemplate;
-    ViewTextFrame *mTextFrame;
+
+    //loj: 3/1/04 commented out for build2
+//      wxDocManager *mDocManager;
+//      wxDocTemplate *mDocTemplate;
+//      ViewTextFrame *mTextFrame;
     
     Integer numOfModes;
-    Integer numOfPropRows;
-    Integer numOfCondRows;
+    //loj: 3/1/04 used const MAX_PROP_ROW, MAX_STOPCOND_ROW
+    //Integer numOfPropRows;
+    //Integer numOfCondRows;
     Integer numOfEqualities;
     Integer numOfProp;
     Integer numOfSC;
@@ -97,7 +131,10 @@ private:
     Integer numOfStopCond;
     Integer currentRowStopCond;
     Integer currentRowProp;
-    
+    Integer currentRow;
+    PropType tempProp[MAX_PROP_ROW];
+    StopCondType tempStopCond[MAX_STOPCOND_ROW];
+        
     std::string propSetupName;
     wxString propNameString;
     wxString scListString;
@@ -109,6 +146,8 @@ private:
     Propagate      *thePropagateCommand;
     GmatBase       *theStopCondBase;
     StopCondition  *theStopCond;
+    PropSetup      *thePropSetup;
+    
     //std::vector<StopCondition *> theStopCondVector;
 
     // Layout & data handling methods
@@ -119,6 +158,11 @@ private:
     void DisplayPropagator();
     void DisplayStopCondition();
     void UpdateStopCondition();
+    void ClearDetailedStopCond();
+    void ShowDetailedStopCond(int row);
+    wxString FormatStopCondDesc(const wxString &varName,
+                                const wxString &relOpStr,
+                                Real &goal);
     
     // Text control event method
     void OnTextUpdate(wxCommandEvent& event);
@@ -129,8 +173,9 @@ private:
 
     // Button event methods
     void OnButton(wxCommandEvent& event);
-    void CreateScript();
-    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
+    //loj: 3/1/04 commented out for build2
+    //void CreateScript();
+    //wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Popup menu event methods
     // waw: Future implementation
@@ -139,8 +184,8 @@ private:
     // Grid table event methods
     // waw: Future implementation
     //void OnCellValueChanged(wxGridEvent& event);
-    //void OnCellRightClick(wxGridEvent& ev, wxMouseEvent& event);
-    //void OnCellLeftClick(wxGridEvent& event);
+    void OnCellLeftClick(wxGridEvent& event);
+    void OnCellRightClick(wxGridEvent& event);
     //void OnCellLeftDoubleClick(wxGridEvent& event);
     //void InsertPropagatorRow();
     //void InsertStopCondRow();
