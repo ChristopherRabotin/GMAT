@@ -23,7 +23,7 @@
 //#include "MdiTextEditView.hpp"
 //#include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
-#include "GmatMainNotebook.hpp"
+//#include "GmatMainNotebook.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "ExponentialDragDialog.hpp"
 #include "MSISE90Dialog.hpp"
@@ -42,11 +42,11 @@
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(PropagationConfigPanel, wxPanel)
-    EVT_BUTTON(ID_BUTTON_SCRIPT, PropagationConfigPanel::OnScriptButton)
-    EVT_BUTTON(ID_BUTTON_OK, PropagationConfigPanel::OnOKButton)
-    EVT_BUTTON(ID_BUTTON_APPLY, PropagationConfigPanel::OnApplyButton)
-    EVT_BUTTON(ID_BUTTON_CANCEL, PropagationConfigPanel::OnCancelButton)
+BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
+//    EVT_BUTTON(ID_BUTTON_SCRIPT, PropagationConfigPanel::OnScriptButton)
+//    EVT_BUTTON(ID_BUTTON_OK, PropagationConfigPanel::OnOKButton)
+//    EVT_BUTTON(ID_BUTTON_APPLY, PropagationConfigPanel::OnApplyButton)
+//    EVT_BUTTON(ID_BUTTON_CANCEL, PropagationConfigPanel::OnCancelButton)
     EVT_BUTTON(ID_BUTTON_ADD_BODY, PropagationConfigPanel::OnAddButton)
     EVT_BUTTON(ID_BUTTON_GRAV_SEARCH, PropagationConfigPanel::OnGravSearchButton)
     EVT_BUTTON(ID_BUTTON_SETUP, PropagationConfigPanel::OnSetupButton)
@@ -73,14 +73,30 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString &propName)
-    : wxPanel(parent)
+    : GmatPanel(parent)
 {
     propSetupName = std::string(propName.c_str());
-    Initialize();
+//    Initialize();
+//    Setup(this);
+//    LoadData();
+//    
+//    applyButton->Enable(false);
+    Create();
+    Show();
+}
+
+
+PropagationConfigPanel::~PropagationConfigPanel()
+{
+}
+
+//-------------------------------
+// private methods
+//-------------------------------
+void PropagationConfigPanel::Create()
+{
+    Initialize(); 
     Setup(this);
-    LoadData();
-    
-    applyButton->Enable(false);
 }
 
 void PropagationConfigPanel::Initialize()
@@ -245,15 +261,15 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     magneticOrderTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_MAGN2, wxT(""), wxDefaultPosition, wxSize(50,-1), 0 );
 
     // wxButton
-    scriptButton = new wxButton( parent, ID_BUTTON_SCRIPT, wxT("Create Script"), wxDefaultPosition, wxDefaultSize, 0 );
+//    scriptButton = new wxButton( parent, ID_BUTTON_SCRIPT, wxT("Create Script"), wxDefaultPosition, wxDefaultSize, 0 );
     bodyButton = new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add Body"), wxDefaultPosition, wxDefaultSize, 0 );
     searchGravityButton = new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"), wxDefaultPosition, wxDefaultSize, 0 );
     setupButton = new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"), wxDefaultPosition, wxDefaultSize, 0 );
     editMassButton = new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
-    okButton = new wxButton( parent, ID_BUTTON_OK, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-    applyButton = new wxButton( parent, ID_BUTTON_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-    cancelButton = new wxButton( parent, ID_BUTTON_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    helpButton = new wxButton( parent, ID_BUTTON_HELP, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
+//    okButton = new wxButton( parent, ID_BUTTON_OK, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+//    applyButton = new wxButton( parent, ID_BUTTON_APPLY, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
+//    cancelButton = new wxButton( parent, ID_BUTTON_CANCEL, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+//    helpButton = new wxButton( parent, ID_BUTTON_HELP, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
     searchMagneticButton = new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"), wxDefaultPosition, wxDefaultSize, 0 );
     editPressureButton = new wxButton( parent, ID_BUTTON_SRP_EDIT, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
    
@@ -319,9 +335,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
     wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
     wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxHORIZONTAL );
+//    wxBoxSizer *boxSizer4 = new wxBoxSizer( wxHORIZONTAL );
     
-    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 5, 0, 0 );
+//    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 5, 0, 0 );
     wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 0 );
     wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 2 );
         
@@ -343,11 +359,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
     
     // Add to wx*Sizers    
-    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );    
+//    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    flexGridSizer1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );    
     
     flexGridSizer2->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
     flexGridSizer2->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
@@ -410,22 +426,24 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     boxSizer2->Add( staticBoxSizer1, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
     boxSizer2->Add( staticBoxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
            
-    boxSizer4->Add( okButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer4->Add( applyButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer4->Add( cancelButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer4->Add( helpButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer4->Add( okButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer4->Add( applyButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer4->Add( cancelButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer4->Add( helpButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     
-    boxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer1->Add( flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, 5 );
     boxSizer1->Add( boxSizer2, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer1->Add( boxSizer4, 0, wxALIGN_CENTRE|wxALL, 5 );
+//    boxSizer1->Add( boxSizer4, 0, wxALIGN_CENTRE|wxALL, 5 );
+
+    theMiddleSizer->Add(boxSizer1, 0, wxGROW, 5);
     
     // waw: future implementation
-    helpButton->Enable(false);
+//    helpButton->Enable(false);
     
-    parent->SetAutoLayout(true);
-    parent->SetSizer( boxSizer1 );
-    boxSizer1->Fit( parent );
-    boxSizer1->SetSizeHints( parent );
+//    parent->SetAutoLayout(true);
+//    parent->SetSizer( boxSizer1 );
+//    boxSizer1->Fit( parent );
+//    boxSizer1->SetSizeHints( parent );
 }
 
 void PropagationConfigPanel::LoadData()
@@ -725,7 +743,7 @@ void PropagationConfigPanel::OnIntegratorSelection()
         isIntegratorChanged = true;
         integratorString = integratorComboBox->GetStringSelection();
         DisplayIntegratorData(true);
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
 }
 
@@ -737,7 +755,7 @@ void PropagationConfigPanel::OnBodySelection()
         DisplayGravityFieldData();
         DisplayAtmosphereModelData();
         DisplayMagneticFieldData();
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
 }
 
@@ -765,7 +783,7 @@ void PropagationConfigPanel::OnGravitySelection()
                 gravityOrderTextCtrl->Enable(true);
             }
             isForceModelChanged = true;
-            applyButton->Enable(true);
+            theApplyButton->Enable(true);
         }
     }
 }
@@ -782,7 +800,7 @@ void PropagationConfigPanel::OnAtmosphereSelection()
     {
         useDragForce = false;
     }
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
     isForceModelChanged = true;
 }
 
@@ -901,38 +919,38 @@ void PropagationConfigPanel::OnAtmosphereSelection()
 //}
 
 // wxButton Events
-void PropagationConfigPanel::OnScriptButton()
-{
-//    CreateScript();
-//    applyButton->Enable(true);
-}
-
-void PropagationConfigPanel::OnOKButton()
-{
-    if (applyButton->IsEnabled())
-    {
-        SaveData();     
-    }
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
-}
-
-void PropagationConfigPanel::OnApplyButton()
-{
-    SaveData();
-    applyButton->Enable(false);
-}
-
-void PropagationConfigPanel::OnCancelButton()
-{
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
-}
-
-void OnHelpButton()
-{
-    // waw: Future build implementation
-}
+//void PropagationConfigPanel::OnScriptButton()
+//{
+////    CreateScript();
+////    theApplyButton->Enable(true);
+//}
+//
+//void PropagationConfigPanel::OnOKButton()
+//{
+//    if (theApplyButton->IsEnabled())
+//    {
+//        SaveData();     
+//    }
+//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+//    gmatMainNotebook->ClosePage();
+//}
+//
+//void PropagationConfigPanel::OntheApplyButton()
+//{
+//    SaveData();
+//    theApplyButton->Enable(false);
+//}
+//
+//void PropagationConfigPanel::OnCancelButton()
+//{
+//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+//    gmatMainNotebook->ClosePage();
+//}
+//
+//void OnHelpButton()
+//{
+//    // waw: Future build implementation
+//}
 
 void PropagationConfigPanel::OnAddButton()
 {   
@@ -952,7 +970,7 @@ void PropagationConfigPanel::OnAddButton()
             bodyTextCtrl->AppendText(names[i] + " ");
             bodyComboBox->Append(names[i]);
         }       
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
     
     bool pmChanged = false;
@@ -999,7 +1017,7 @@ void PropagationConfigPanel::OnGravSearchButton()
         gravityTypeComboBox->Append(filename); 
     }
         
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnSetupButton()
@@ -1010,7 +1028,7 @@ void PropagationConfigPanel::OnSetupButton()
         ExponentialDragDialog dragDlg(this, name);
         dragDlg.ShowModal();
     
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
     else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
     {        
@@ -1021,7 +1039,7 @@ void PropagationConfigPanel::OnSetupButton()
         dragDlg.ShowModal();
         theDragForce = dragDlg.GetForce();
         useDragForce = true;
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
 }
 
@@ -1038,7 +1056,7 @@ void PropagationConfigPanel::OnMagSearchButton()
         magneticTypeComboBox->Append(filename); 
     }
     
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnPMEditButton()
@@ -1056,13 +1074,13 @@ void PropagationConfigPanel::OnPMEditButton()
             pmEditTextCtrl->AppendText(names[i] + " ");
             pointmassBodiesArray.Add(names[i]);
         }
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
 }   
 
 void PropagationConfigPanel::OnSRPEditButton()
 {
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 // wxTextCtrl Events
@@ -1076,7 +1094,7 @@ void PropagationConfigPanel::OnIntegratorTextUpdate()
     wxString set4 = setting4TextCtrl->GetValue();
     wxString set5 = setting5TextCtrl->GetValue();
 
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnGravityTextUpdate()
@@ -1117,12 +1135,12 @@ void PropagationConfigPanel::OnGravityTextUpdate()
 
 void PropagationConfigPanel::OnMagneticTextUpdate()
 {
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 // wxCheckBox Events
 void PropagationConfigPanel::OnSRPCheckBoxChange()
 {
     useSRP = srpCheckBox->GetValue();
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }

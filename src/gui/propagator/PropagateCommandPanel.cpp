@@ -91,8 +91,6 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
         tempStopCond[i].repeat = 1;
     }
     
-    Setup(this);
-    
     if (theCommand != NULL)
     {
         Create();
@@ -109,7 +107,8 @@ PropagateCommandPanel::~PropagateCommandPanel()
 //-------------------------------
 void PropagateCommandPanel::Create()
 {
-    Initialize();    
+    Initialize(); 
+    Setup(this);   
 //    LoadData();
 }
 

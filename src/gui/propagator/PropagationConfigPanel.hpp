@@ -38,13 +38,15 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
+#include "GmatPanel.hpp"
 
-class PropagationConfigPanel : public wxPanel
+class PropagationConfigPanel : public GmatPanel
 {
 public:
     // constructor
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
-    
+    ~PropagationConfigPanel();  
+
 private:
 
     enum
@@ -95,11 +97,11 @@ private:
     wxButton *searchMagneticButton;
     wxButton *editMassButton;
     wxButton *editPressureButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
-    wxButton *scriptButton;
+//    wxButton *okButton;
+//    wxButton *applyButton;
+//    wxButton *cancelButton;
+//    wxButton *helpButton;
+//    wxButton *scriptButton;
     
     wxString integratorString;
     wxString primaryBodyString;
@@ -145,12 +147,20 @@ private:
     SolarSystem                    *theSolarSystem;
     std::vector<PointMassForce *>  thePMForces;
     std::vector<CelestialBody *>   theBodies;
+
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
       
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void LoadData();
-    void SaveData();
+//    void LoadData();
+//    void SaveData();
     void DisplayIntegratorData(bool integratorChanged);
     void DisplayPrimaryBodyData();
     void DisplayForceData();
@@ -176,11 +186,11 @@ private:
     void OnAtmosphereSelection();
     
     // Button event methods
-    void OnScriptButton();
-    void OnOKButton();
-    void OnApplyButton();
-    void OnCancelButton();
-    void OnHelpButton();
+//    void OnScriptButton();
+//    void OnOKButton();
+//    void OnApplyButton();
+//    void OnCancelButton();
+//    void OnHelpButton();
     void OnAddButton();
     void OnGravSearchButton();
     void OnSetupButton();
