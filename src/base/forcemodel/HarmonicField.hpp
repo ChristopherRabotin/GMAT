@@ -92,6 +92,9 @@ public:
     virtual Integer     GetIntegerParameter(const Integer id) const;
     virtual Integer     SetIntegerParameter(const Integer id,
                                             const Integer value);
+    virtual Integer     GetIntegerParameter(const std::string &label) const;
+    virtual Integer     SetIntegerParameter(const std::string &label,
+                                            const Integer value);
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id,
                                            const std::string &value);

@@ -457,7 +457,7 @@ std::string HarmonicField::GetParameterTypeString(const Integer id) const
 /**
  * Accessor method used to obtain a parameter value
  *
- * @param id    Integer ID for the requested parameter
+ * @param <id>    Integer ID for the requested parameter
  */
 //------------------------------------------------------------------------------
 Integer HarmonicField::GetIntegerParameter(const Integer id) const
@@ -476,8 +476,8 @@ Integer HarmonicField::GetIntegerParameter(const Integer id) const
 /**
  * Accessor method used to set a parameter value
  *
- * @param    id  Integer ID for the parameter
- * @param    val The new value for the parameter
+ * @param    <id>    Integer ID for the parameter
+ * @param    <value> The new value for the parameter
  */
 //------------------------------------------------------------------------------
 Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value)
@@ -491,12 +491,44 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 }
 
 //------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <label>  parameter label
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+Integer HarmonicField::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <label> Integer ID for the parameter
+ * @param    <value> The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+Integer HarmonicField::SetIntegerParameter(const std::string &label,
+                                           const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * Accessor method used to get a parameter value
  *
- * @param    id  Integer ID for the parameter
+ * @param    <id>  Integer ID for the parameter
  *
  * @return the value of the parameter
  */
@@ -514,8 +546,8 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 /**
  * Accessor method used to get a parameter value
  *
- * @param    id    Integer ID for the parameter
- * @param    value The new value for the parameter
+ * @param    <id>    Integer ID for the parameter
+ * @param    <value> The new value for the parameter
  */
 //------------------------------------------------------------------------------
 bool HarmonicField::SetStringParameter(const Integer id,
@@ -555,7 +587,7 @@ bool HarmonicField::SetStringParameter(const Integer id,
 /**
  * Accessor method used to get a parameter value
  *
- * @param    label  Integer ID for the parameter
+ * @param    <label>  Integer ID for the parameter
  *
  * @return the value of the parameter
  */
@@ -571,8 +603,8 @@ std::string HarmonicField::GetStringParameter(const std::string &label) const
 /**
  * Accessor method used to get a parameter value
  *
- * @param    label Integer ID for the parameter
- * @param    value The new value for the parameter
+ * @param    <label> Integer ID for the parameter
+ * @param    <value> The new value for the parameter
  */
 //------------------------------------------------------------------------------
 bool HarmonicField::SetStringParameter(const std::string &label,
