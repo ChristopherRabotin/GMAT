@@ -20,7 +20,7 @@
 
 #include "wx/colordlg.h"            // for wxColourDialog
 
-#define DEBUG_CELESBODY_DIALOG 1
+//#define DEBUG_CELESBODY_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -92,7 +92,7 @@ void CelesBodySelectDialog::Create()
                         wxDefaultPosition, wxDefaultSize, 0 );
     
    wxStaticText *bodyColorStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Trajectory Color"),
+      new wxStaticText( this, ID_TEXT, wxT("Orbit Color"),
                         wxDefaultPosition, wxDefaultSize, 0 );
     
    wxStaticText *emptyStaticText =
