@@ -146,9 +146,11 @@ void ReportFileSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Variables"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxArrayString empty;
-   
+
+   //loj: 10/1/04 call GetPlottableParameterListBox()
    mVarListBox = 
-       theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
+       theGuiManager->GetPlottableParameterListBox(this, -1, wxSize(150,200));
+      //theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
     
    mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
