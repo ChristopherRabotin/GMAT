@@ -43,8 +43,9 @@ std::string MessageInterface::continueMessage = "Continue";
 Gmat::MessageType MessageInterface::messageType = Gmat::INFO_;
 int MessageInterface::showIntervalInMilSec = 2000;
 short MessageInterface::messageExist = 0;
+std::string MessageInterface::logFileName = "GmatLog.txt";
+bool MessageInterface::logEnabled = true; //loj: 6/29/04 switch to true
 FILE* MessageInterface::logFile = NULL;
-bool MessageInterface::logFlag = false;
 
 //---------------------------------
 //  public functions
@@ -158,9 +159,8 @@ void MessageInterface::ShowMessage(const std::string &msgString)
       GmatAppData::theMessageWindow->Show(true);
       GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));        
    }
-#else
-   LogMessage(msgString);
 #endif
+   LogMessage(msgString);
 
 } // end ShowMessage()
 
@@ -206,10 +206,10 @@ void MessageInterface::ShowMessage(const char *msg, ...)
       GmatAppData::theMessageWindow->Show(true);
       GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));        
    }
-#else
-   LogMessage(std::string(msgBuffer));
+
 #endif
 
+   LogMessage(std::string(msgBuffer));
    free(msgBuffer);
    
 } // end ShowMessage()
@@ -260,9 +260,8 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
    default:
       break;
    };
-#else
-   LogMessage(msg);
 #endif
+   LogMessage(msg);
    
 } // end PopupMessage()
 
@@ -310,9 +309,8 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    default:
       break;
    };
-#else
-   LogMessage(msg);
 #endif
+   LogMessage(msg);
    
 } // end PopupMessage()
 
@@ -333,16 +331,30 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
 //  } // end PopupMessage()
 
 //------------------------------------------------------------------------------
-// void void LogMessage(const std::string &msg)
+// void LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 void MessageInterface::LogMessage(const std::string &msg)
 {
-   if (logFile == NULL)
+   std::cout << msg;
+
+   if (logEnabled)
    {
-      std::cout << msg; // loj: 4/28/04 removed extra line
+
+      if (logFile == NULL)
+         logFile = fopen(logFileName.c_str(), "w");
+
+      if (logFile)
+      {
+         fprintf(logFile, "%s", msg.c_str());
+         fflush(logFile);
+      }
    }
-   else
-   {
-      // work on this
-   }
+}
+
+//------------------------------------------------------------------------------
+// void CloseLogFile()
+//------------------------------------------------------------------------------
+void MessageInterface::CloseLogFile()
+{
+   fclose(logFile);
 }
