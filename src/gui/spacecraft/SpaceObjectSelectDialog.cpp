@@ -17,7 +17,7 @@
 #include "SpaceObjectSelectDialog.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_SO_DIALOG 1
+#define DEBUG_SO_DIALOG 0
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -180,6 +180,9 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       {
          spaceObjSelectedListBox->Append(s);
          spaceObjSelectedListBox->SetStringSelection(s);
+         // select next available item (loj: 8/18/04)
+         spaceObjAvailableListBox->
+            SetSelection(spaceObjAvailableListBox->GetSelection()+1);
       }
       
       theOkButton->Enable();
