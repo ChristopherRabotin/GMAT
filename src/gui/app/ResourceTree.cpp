@@ -889,12 +889,12 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 
     //kind of redundant because OpenPage returns false for some
     //of the default folders
-//    if ( (!mainNotebook->OpenPage(selItem)) ||
-//         (isDefaultFolder)                  ||
-//         (isDefaultItem))
-//    {
+    if ((GmatAppData::GetMainFrame()->IsChildOpen(selItem))  ||
+         (isDefaultFolder)                                   ||
+         (isDefaultItem))
+    {
         event.Veto();
-//    }
+    }
 }
 
 //------------------------------------------------------------------------------
