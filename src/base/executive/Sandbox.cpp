@@ -256,6 +256,16 @@ bool Sandbox::Initialize()
    // Set the solar system on each force model, spacecraft, parameter
    if (solarSys)
    {
+      std::string objName;
+
+      // set ref objct for internal coordinate system (loj: 3/8/05 Added)
+      internalCoordSys->SetSolarSystem(solarSys);
+      objName = internalCoordSys->GetStringParameter("OriginName");
+      internalCoordSys->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+      objName = internalCoordSys->GetStringParameter("J2000BodyName");
+      internalCoordSys->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+      internalCoordSys->Initialize();
+      
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
          #if DEBUG_SANDBOX_INIT
@@ -268,8 +278,12 @@ bool Sandbox::Initialize()
          {
             CoordinateSystem *cs = (CoordinateSystem*)(omi->second);
             cs->SetSolarSystem(solarSys);
-            cs->SetOrigin(solarSys->GetBody(cs->GetStringParameter("OriginName")));
-            cs->SetJ2000Body(solarSys->GetBody(cs->GetStringParameter("J2000BodyName")));
+            //cs->SetOrigin(solarSys->GetBody(cs->GetStringParameter("OriginName")));
+            //cs->SetJ2000Body(solarSys->GetBody(cs->GetStringParameter("J2000BodyName")));
+            objName = cs->GetStringParameter("OriginName");
+            cs->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
+            objName = cs->GetStringParameter("J2000BodyName");
+            cs->SetRefObject(solarSys->GetBody(objName), Gmat::SPACE_POINT, objName);
             cs->Initialize();
          }
          else if ((omi->second)->GetType() == Gmat::PROP_SETUP)
@@ -310,24 +324,7 @@ bool Sandbox::Initialize()
                   param->SetInternalCoordSystem(internalCoordSys);
                   std::string csName;
                   
-//                  try
-//                  {
-                     csName = param->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-//                  }
-//                  catch(BaseException &e)
-//                  {
-//                     //----------------------------------------------------
-//                     //loj: 1/26/05 temp. fix until ScriptInterpreter can
-//                     //     handle CoordinateSystem
-//                     //----------------------------------------------------
-//                     #if DEBUG_SANDBOX_INIT
-//                     MessageInterface::ShowMessage
-//                        ("Sandbox::Initialize() ===>temp. fix for B3 script. setting "
-//                         "EarthMJ2000Eq to %s \n", param->GetName().c_str());
-//                     #endif
-//                     csName = "EarthMJ2000Eq";
-//                     param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, csName);
-//                  }
+                  csName = param->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
 
                   #if DEBUG_SANDBOX_INIT > 1
                   MessageInterface::ShowMessage
