@@ -23,7 +23,8 @@
 
 #include "SpaceObject.hpp"
 
-class GMAT_API Formation : public SpaceObject{
+class GMAT_API Formation : public SpaceObject
+{
 public:
    Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
              const std::string &nomme);
