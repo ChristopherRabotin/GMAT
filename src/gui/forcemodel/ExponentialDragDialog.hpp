@@ -21,16 +21,20 @@
 #include "GmatAppData.hpp"
 #include "GmatDialog.hpp"
 
+#include "DragForce.hpp"
+
 class ExponentialDragDialog : public GmatDialog
 {
 public:
-    ExponentialDragDialog(wxWindow *parent, wxString name);
+    ExponentialDragDialog(wxWindow *parent, DragForce *dragForce);
     ~ExponentialDragDialog();
-    
+    DragForce* GetForce();
 private:   
     wxTextCtrl *expDrag1TextCtrl;
     wxTextCtrl *expDrag2TextCtrl;
     wxTextCtrl *expDrag3TextCtrl;
+    
+    DragForce *theForce;
 
     // Methods inherited from GmatDialog
     virtual void Create();

@@ -42,9 +42,12 @@ END_EVENT_TABLE()
  * @note Creates the exponential drag panel
  */
 //------------------------------------------------------------------------------
-ExponentialDragDialog::ExponentialDragDialog(wxWindow *parent, wxString name)
+ExponentialDragDialog::ExponentialDragDialog(wxWindow *parent, DragForce *dragForce)
     : GmatDialog(parent, -1, wxString(_T("ExponentialDragDialog")))
 {    
+    if (dragForce != NULL)    
+        theForce = dragForce;
+       
     Create();
     Show();
 }
@@ -54,6 +57,18 @@ ExponentialDragDialog::ExponentialDragDialog(wxWindow *parent, wxString name)
 //------------------------------------------------------------------------------
 ExponentialDragDialog::~ExponentialDragDialog()
 {
+}
+
+//-------------------------------
+// public methods
+//-------------------------------
+
+//------------------------------------------------------------------------------
+// void GetForce()
+//------------------------------------------------------------------------------
+DragForce* ExponentialDragDialog::GetForce()
+{
+   return theForce;
 }
 
 //-------------------------------
@@ -86,6 +101,11 @@ void ExponentialDragDialog::Create()
     pageFlexGridSizer->Add( expDrag3TextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     
     theMiddleSizer->Add(pageFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
+    
+    expDrag1TextCtrl->Enable(false);
+    expDrag2TextCtrl->Enable(false);
+    expDrag3TextCtrl->Enable(false);
+    
 }
 
 //------------------------------------------------------------------------------
