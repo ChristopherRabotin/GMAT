@@ -103,38 +103,38 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    mDescription = desc;
    mEccTol = 1.0e-6;  //loj: valid default?
    mRange = 100000;   //loj: valid default? 6/16/04 changed to 100000 from 10000
-    
+   
    mStopParamType = "";
    if (mStopParam != NULL)
       mStopParamType = mStopParam->GetTypeName();
-    
+   
    mNumValidPoints = 0;
    mBufferSize = 0;
    mStopEpoch = REAL_PARAMETER_UNDEFINED;
-    
+   
    mInitialized = false;
    mUseInternalEpoch = false;
    mNeedInterpolator = false;
    mNeedRefFrame = false;
-    
+   
    if (epochParam == NULL)
       mUseInternalEpoch = true;
-
+   
    // Create default Interpolator
    if (mInterpolator == NULL)
    {
       mInterpolator = new CubicSplineInterpolator("InternalInterpolator");
    }
-    
+   
    // Create default RefFrame
    if (mRefFrame == NULL)
    {
       mRefFrame = new MeanJ2000Equatorial("InternalRefFrame");
    }
-
+   
    mSolarSystem = NULL;
-   //Initialize();
 }
+
 
 //------------------------------------------------------------------------------
 // BaseStopCondition(const BaseStopCondition &copy)
@@ -160,9 +160,9 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEccParam = copy.mEccParam;
    mRmagParam = copy.mRmagParam;
    
-   //Initialize(); //loj: 9/13/04 Initialized() will be called during initialization
    CopyDynamicData(copy);
 }
+
 
 //------------------------------------------------------------------------------
 // BaseStopCondition& operator= (const BaseStopCondition &right)
@@ -189,12 +189,12 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
       mEccParam = right.mEccParam;
       mRmagParam = right.mRmagParam;
 
-      //Initialize();
       CopyDynamicData(right);
    }
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual ~BaseStopCondition()
@@ -212,6 +212,7 @@ BaseStopCondition::~BaseStopCondition()
       delete mRmagParam;
 }
 
+
 //------------------------------------------------------------------------------
 // bool IsInitialized()
 //------------------------------------------------------------------------------
@@ -219,6 +220,7 @@ bool BaseStopCondition::IsInitialized()
 {
    return mInitialized;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetBufferSize()
@@ -228,6 +230,7 @@ Integer BaseStopCondition::GetBufferSize()
    return mBufferSize;
 }
 
+
 //------------------------------------------------------------------------------
 // std::string& GetDescription()
 //------------------------------------------------------------------------------
@@ -235,7 +238,8 @@ std::string& BaseStopCondition::GetDescription()
 {
    return mDescription;
 }
-    
+
+
 //------------------------------------------------------------------------------
 // Parameter* GetEpochParameter()
 //------------------------------------------------------------------------------
@@ -243,6 +247,7 @@ Parameter* BaseStopCondition::GetEpochParameter()
 {
    return mEpochParam;
 }
+
 
 //------------------------------------------------------------------------------
 // Parameter* GetStopParameter()
@@ -252,6 +257,7 @@ Parameter* BaseStopCondition::GetStopParameter()
    return mStopParam;
 }
 
+
 //------------------------------------------------------------------------------
 // RefFrame* GetRefFrame()
 //------------------------------------------------------------------------------
@@ -260,6 +266,7 @@ RefFrame* BaseStopCondition::GetRefFrame()
    return mRefFrame;
 }
 
+
 //------------------------------------------------------------------------------
 // Interpolator* GetInterpolator()
 //------------------------------------------------------------------------------
@@ -267,7 +274,8 @@ Interpolator* BaseStopCondition::GetInterpolator()
 {
    return mInterpolator;
 }
-    
+
+
 //------------------------------------------------------------------------------
 // void SetDescription(const std::string &desc)
 //------------------------------------------------------------------------------
@@ -275,6 +283,7 @@ void BaseStopCondition::SetDescription(const std::string &desc)
 {
    mDescription = desc;
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetInterpolator(Interpolator *interp)
@@ -302,6 +311,7 @@ bool BaseStopCondition::SetInterpolator(Interpolator *interp)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetSolarSystem(SolarSystem *solarSystem)
 //------------------------------------------------------------------------------
@@ -323,6 +333,7 @@ bool BaseStopCondition::SetSolarSystem(SolarSystem *solarSystem)
       return false;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetInterpolator(const std::string &name)
@@ -356,6 +367,7 @@ bool BaseStopCondition::SetInterpolator(const std::string &name)
    return status;
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetRefFrame(RefFrame *refFrame)
 //------------------------------------------------------------------------------
@@ -380,6 +392,7 @@ bool BaseStopCondition::SetRefFrame(RefFrame *refFrame)
       return false;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetRefFrame(const std::string &name)
@@ -410,6 +423,7 @@ bool BaseStopCondition::SetRefFrame(const std::string &name)
    return status;
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetEpochParameter(Parameter *param)
 //------------------------------------------------------------------------------
@@ -433,6 +447,7 @@ bool BaseStopCondition::SetEpochParameter(Parameter *param)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetEpochParameter(const std::string &name)
 //------------------------------------------------------------------------------
@@ -446,10 +461,10 @@ bool BaseStopCondition::SetEpochParameter(const std::string &name)
 {
    bool status = false;
 
-#if DEBUG_BASE_STOPCOND
+   #if DEBUG_BASE_STOPCOND
    MessageInterface::ShowMessage("BaseStopCondition::SetEpochParameter() name = %s\n",
                                  name.c_str());
-#endif
+   #endif
    
 #if !defined __UNIT_TEST__
    Moderator *theModerator = Moderator::Instance();
@@ -469,6 +484,7 @@ bool BaseStopCondition::SetEpochParameter(const std::string &name)
    return status;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool SetStopParameter(Parameter *param)
 //------------------------------------------------------------------------------
@@ -487,8 +503,6 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
         
       if (param->IsTimeParameter())
          mInitialized = true;
-      else
-         ;//Initialize();
         
       return true;
    }
@@ -496,15 +510,16 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
    return false;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool SetStopParameter(const std::string &name)
 //------------------------------------------------------------------------------
 bool BaseStopCondition::SetStopParameter(const std::string &name)
 {
-#if DEBUG_BASE_STOPCOND
+   #if DEBUG_BASE_STOPCOND
    MessageInterface::ShowMessage("BaseStopCondition::SetStopParameter() name = %s\n",
                                  name.c_str());
-#endif
+   #endif
    
    bool status = false;
    
@@ -527,6 +542,7 @@ bool BaseStopCondition::SetStopParameter(const std::string &name)
    
    return status;
 }
+
 
 //------------------------------------------------------------------------------
 // void Initialize()
@@ -566,12 +582,13 @@ void BaseStopCondition::Initialize()
       //loj: How about mRefFrame? - need for crossing plane
    }
 
-#if DEBUG_BASE_STOPCOND
+   #if DEBUG_BASE_STOPCOND
    MessageInterface::ShowMessage
       ("BaseStopCondition::Initialize() mInitialized=%d\n",
        mInitialized);
-#endif
+   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetSpacecraft(Spacecraft *sc)
@@ -593,6 +610,7 @@ bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
    return true;
    //return false; // base class doesn't know which object is used
 }
+
 
 //------------------------------------------------------------------------------
 // virtual Real BaseStopCondition::GetStopEpoch()
@@ -650,10 +668,11 @@ bool BaseStopCondition::Validate()
          // check on Ecc parameter
          if (mEccParam  == NULL)
          {
-#if DEBUG_BASE_STOPCOND
+            #if DEBUG_BASE_STOPCOND
             MessageInterface::ShowMessage
                ("BaseStopCondition::Validate(): Creating KepEcc...\n");
-#endif
+            #endif
+            
             mEccParam = new KepEcc("");
          
             mEccParam->AddRefObject
@@ -673,10 +692,11 @@ bool BaseStopCondition::Validate()
          {
             if (mRmagParam == NULL)
             {
-#if DEBUG_BASE_STOPCOND
+               #if DEBUG_BASE_STOPCOND
                MessageInterface::ShowMessage
                   ("BaseStopCondition::Validate(): Creating SphRMag...\n");
-#endif
+               #endif
+               
                mRmagParam = new SphRMag("");
             
                mRmagParam->AddRefObject
@@ -694,7 +714,7 @@ bool BaseStopCondition::Validate()
       }
    }
 
-#if DEBUG_BASE_STOPCOND
+   #if DEBUG_BASE_STOPCOND
    if (!valid)
    {
       MessageInterface::ShowMessage
@@ -706,16 +726,16 @@ bool BaseStopCondition::Validate()
    MessageInterface::ShowMessage
       ("BaseStopCondition::Validate() Exiting valid=%d\n", valid);
    
-#endif
+   #endif
    
    return valid;
 }
+
 
 //---------------------------------
 // methods inherited from GmatBase
 //---------------------------------
 
-//loj: 11/16/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -738,12 +758,13 @@ bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
       if (pos != name.npos)
       {
          name.replace(pos, oldName.size(), newName);
-         SetName("StopOn" + name);
+         SetName(name);
       }
    }
    
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -756,6 +777,7 @@ std::string BaseStopCondition::GetParameterText(const Integer id) const
       return GmatBase::GetParameterText(id);
     
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
@@ -773,6 +795,7 @@ Integer BaseStopCondition::GetParameterID(const std::string &str) const
    return GmatBase::GetParameterID(str);
 }
 
+
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
@@ -783,6 +806,7 @@ Gmat::ParameterType BaseStopCondition::GetParameterType(const Integer id) const
    else
       return GmatBase::GetParameterType(id);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
@@ -795,6 +819,7 @@ std::string BaseStopCondition::GetParameterTypeString(const Integer id) const
       return GmatBase::GetParameterTypeString(id);
     
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const Integer id) const
@@ -810,6 +835,7 @@ Integer BaseStopCondition::GetIntegerParameter(const Integer id) const
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -817,6 +843,7 @@ Integer BaseStopCondition::GetIntegerParameter(const std::string &label) const
 {
    return GetIntegerParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const Integer id, const Integer value)
@@ -834,6 +861,7 @@ Integer BaseStopCondition::SetIntegerParameter(const Integer id,
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const std::string &label, const Integer value)
 //------------------------------------------------------------------------------
@@ -842,6 +870,7 @@ Integer BaseStopCondition::SetIntegerParameter(const std::string &label,
 {
    return SetIntegerParameter(GetParameterID(label), value);
 }
+
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
@@ -867,6 +896,7 @@ Real BaseStopCondition::GetRealParameter(const Integer id) const
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -874,6 +904,7 @@ Real BaseStopCondition::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const Integer id, const Real value)
@@ -905,6 +936,7 @@ Real BaseStopCondition::SetRealParameter(const Integer id, const Real value)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // Real SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
@@ -915,6 +947,7 @@ Real BaseStopCondition::SetRealParameter(const std::string &label, const Real va
     
    return SetRealParameter(GetParameterID(label), value);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -953,6 +986,7 @@ std::string BaseStopCondition::GetStringParameter(const Integer id) const
    }
 }
 
+
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -963,6 +997,7 @@ std::string BaseStopCondition::GetStringParameter(const std::string &label) cons
 
    return GetStringParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -987,6 +1022,7 @@ bool BaseStopCondition::SetStringParameter(const Integer id, const std::string &
    }
 }
 
+
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,
 //                         const std::string &value)
@@ -999,11 +1035,6 @@ bool BaseStopCondition::SetStringParameter(const std::string &label,
 
    return SetStringParameter(GetParameterID(label), value);
 }
-
-
-//---------------------------------
-// protected methods
-//---------------------------------
 
 
 //---------------------------------
