@@ -155,6 +155,12 @@ MessageInterface::ShowMessage("Entering if (force->GetTypeName() == 'SolarRadiat
                     useSRP = true;
                     theSRP = (SolarRadiationPressure*)force;
                 }
+                else if (force->GetTypeName() == "DragForce")
+                {
+                    theDragForce = (DragForce*)force;
+                    Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
+                    atmosModelString = theDragForce->GetStringParameter(atmosTypeID).c_str();
+                }
             }
 MessageInterface::ShowMessage("Exited for loop\n");
 
@@ -276,7 +282,7 @@ MessageInterface::ShowMessage("Entering Setup()\n");
     {
         wxT("None"),
         wxT("Exponential"),
-        wxT("MISISE-90")
+        wxT("MSISE90")
     };
     wxString strArray5[] = 
     {
@@ -497,6 +503,19 @@ void PropagationConfigPanel::SaveData()
             theForceModel->AddForce(pm);
         }    
     }
+    // the drag force data
+    Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
+    if ( atmosModelString.CmpNoCase("Exponential") == 0 )
+    {
+        // future implementation
+        //theDragForce->SetStringParameter(atmosTypeID, "Exponential");
+        //theForceModel->AddForce(theDragForce);
+    }
+    else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
+    {
+        theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
+        theForceModel->AddForce(theDragForce);
+    }
     // the srp data
     if (useSRP)
     {
@@ -626,34 +645,18 @@ MessageInterface::ShowMessage("if (orderArray.IsEmpty())\n");
 }
 
 void PropagationConfigPanel::DisplayAtmosphereModelData()
-{
-    // To display Earth specific combo choice
-    int x = atmosComboBox->FindString("None");
-    int y = atmosComboBox->FindString("Exponential");
-    int z = atmosComboBox->FindString("MISISE-90");
-    
-    // waw:  Venus & Mars for future implementation
-    
-    if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
+{ 
+    // Atmospheric model available for Earth, Venus & Mars    
+    if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 ) 
+       //( primaryBodyString.Cmp(SolarSystem::VENUS_NAME.c_str()) == 0 )
+       //( primaryBodyString.Cmp(SolarSystem::MARS_NAME.c_str()) == 0 )
     {                   
-        if (x == -1)
-            atmosComboBox->Append("None");
-            
-        if (y == -1)
-            atmosComboBox->Append("Exponential");
-
-        if (z == -1)
-            atmosComboBox->Append("MISISE-90");    
-        
-        atmosComboBox->SetSelection(0); // TBD
+        atmosComboBox->SetValue(atmosModelString.c_str());
         setupButton->Enable(true); 
     }
     else
     {
-        atmosComboBox->Clear();
-        atmosComboBox->Append("None");
-        atmosComboBox->SetSelection(0);
-        
+        atmosComboBox->SetValue("None");        
         setupButton->Enable(false);
     }
 }
@@ -722,6 +725,7 @@ void PropagationConfigPanel::OnGravitySelection()
 
 void PropagationConfigPanel::OnAtmosphereSelection()
 {
+    atmosModelString = atmosComboBox->GetStringSelection();
     applyButton->Enable(true);
     isForceModelChanged = true;
 }
@@ -943,10 +947,8 @@ void PropagationConfigPanel::OnGravSearchButton()
 }
 
 void PropagationConfigPanel::OnSetupButton()
-{
-    wxString atmosTypeString = atmosComboBox->GetStringSelection();
-    
-    if ( atmosTypeString.CmpNoCase("Exponential") == 0 )
+{   
+    if ( atmosModelString.CmpNoCase("Exponential") == 0 )
     {
         wxString name = wxT("Exponential");
         ExponentialDragDialog dragDlg(this, name);
@@ -954,12 +956,14 @@ void PropagationConfigPanel::OnSetupButton()
     
         applyButton->Enable(true);
     }
-    else if ( atmosTypeString.CmpNoCase("MISISE-90") == 0 )
-    {
-        wxString name = wxT("MISISE-90");
-        MSISE90Dialog dragDlg(this, name, theDragForce);
+    else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
+    {        
+        if (theDragForce == NULL)
+            theDragForce = (DragForce *)theGuiInterpreter->CreatePhysicalModel("DragForce", "MSISE90");
+            
+        MSISE90Dialog dragDlg(this, theDragForce);
         dragDlg.ShowModal();
-    
+        theDragForce = dragDlg.GetForce();
         applyButton->Enable(true);
     }
 }

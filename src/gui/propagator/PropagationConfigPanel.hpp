@@ -104,6 +104,7 @@ private:
     wxString integratorString;
     wxString primaryBodyString;
     wxString gravityFieldString;
+    wxString atmosModelString;
 
     std::string propSetupName;
     std::string newPropName;
