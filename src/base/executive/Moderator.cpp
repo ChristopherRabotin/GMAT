@@ -1411,6 +1411,13 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       id = cmd->GetParameterID("Spacecraft");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
    }
+   else if (type == "Target") //loj: 11/4/04 added
+   {
+      // set solver
+      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      id = cmd->GetParameterID("Targeter");
+      cmd->SetStringParameter(id, solver->GetName());
+   }
    else if (type == "Vary") //loj: 10/6/04 added
    {
       // set solver
@@ -2033,6 +2040,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
          // assign status
          status = -2;
+         //throw; //loj: 11/03/04 added to debug
       }
       catch (...)
       {
@@ -2398,7 +2406,7 @@ void Moderator::CreateDefaultMission()
             //loj: 9/13/04 param->SetStringParameter("Object", "DefaultSC");
          }
       }
-    
+      
       // StopCondition
       StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
