@@ -232,8 +232,13 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
 
 bool Propagate::Initialize(void)
 {
-
-    return false;
+    if (!prop)
+        return false;
+    Propagator *p = prop->GetPropagator();
+    if (!p)
+        return false;
+    p->Initialize();
+    return true;
 }
 
 /**
@@ -247,6 +252,9 @@ bool Propagate::Execute(void)
     if (initialized == false)
         return false;
 
+    Propagator *p = prop->GetPropagator();
+    p->Step();
+    
     return true;
 }
 
