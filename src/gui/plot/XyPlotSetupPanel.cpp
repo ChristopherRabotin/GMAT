@@ -73,10 +73,10 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    //MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
    //                              std::string(subscriberName.c_str()) + "\n");
     
-   mSubscriber =
+   Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-   mXyPlot = (XyPlot*)mSubscriber;
+   mXyPlot = (XyPlot*)subscriber;
    
    mXParamChanged = false;
    mYParamChanged = false;
@@ -264,8 +264,9 @@ void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
    
    if (paramDlg.IsParamCreated())
    {
-      mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
-                             theGuiManager->GetUserParameterList());
+      //loj: 9/30/04 changed **UserParameter()to **UserVariable()
+      mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                             theGuiManager->GetUserVariableList());
       mAddXButton->Disable();
       mAddYButton->Disable();
    }
@@ -418,11 +419,12 @@ void XyPlotSetupPanel::Create()
    // wxListBox
    wxArrayString emptyArray;
    mUserParamListBox =
-      theGuiManager->GetUserParameterListBox(this, USER_PARAM_LISTBOX, wxSize(150, 50), "");
-   
+      theGuiManager->GetUserVariableListBox(this, USER_PARAM_LISTBOX, wxSize(150, 50), "");
+
+   //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = 
-      theGuiManager->GetParameterListBox(this, PROPERTY_LISTBOX, wxSize(150, 100),
-                                         "Spacecraft");
+      theGuiManager->GetPropertyListBox(this, PROPERTY_LISTBOX, wxSize(150, 100),
+                                        "Spacecraft");
       
    // wx*Sizer
    wxStaticBoxSizer *userParamBoxSizer =
@@ -538,18 +540,17 @@ void XyPlotSetupPanel::LoadData()
 {
    // load data from the core engine
 
-   //loj: 3/18/04 added try block
    try
    {
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
     
-      showPlotCheckBox->SetValue(mSubscriber->IsActive());
-      showGridCheckBox->SetValue(mSubscriber->GetStringParameter("Grid") == "On");
-      targetStatusCheckBox->SetValue(mSubscriber->GetStringParameter("TargetStatus") == "On");
+      showPlotCheckBox->SetValue(mXyPlot->IsActive());
+      showGridCheckBox->SetValue(mXyPlot->GetStringParameter("Grid") == "On");
+      targetStatusCheckBox->SetValue(mXyPlot->GetStringParameter("TargetStatus") == "On");
       
       // get X parameter
       wxString *xParamNames = new wxString[1];
-      xParamNames[0] = mSubscriber->GetStringParameter("IndVar").c_str();
+      xParamNames[0] = mXyPlot->GetStringParameter("IndVar").c_str();
       
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
       //                              xParamNames[0].c_str());
@@ -561,7 +562,8 @@ void XyPlotSetupPanel::LoadData()
       }
       
       // get Y parameters
-      StringArray yParamList = mSubscriber->GetStringArrayParameter("DepVarList");
+      //StringArray yParamList = mXyPlot->GetStringArrayParameter("DepVarList");
+      StringArray yParamList = mXyPlot->GetStringArrayParameter("Add");
       mNumYParams = yParamList.size();
       //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
       //                              mNumYParams);
@@ -605,9 +607,10 @@ void XyPlotSetupPanel::LoadData()
          ShowParameterOption("", false);
       }
    }
-   catch (...)
+   catch (BaseException &e)
    {
-      MessageInterface::ShowMessage("XyPlotSetupPanel:LoadData() Unknown error occurred!\n");
+      MessageInterface::ShowMessage
+         ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
@@ -622,18 +625,18 @@ void XyPlotSetupPanel::SaveData()
 {
    // save data to core engine
     
-   mSubscriber->Activate(showPlotCheckBox->IsChecked());
+   mXyPlot->Activate(showPlotCheckBox->IsChecked());
 
    //loj: 8/6/04 changed "Grid" to string parameter
    if (showGridCheckBox->IsChecked())
-      mSubscriber->SetStringParameter("Grid", "On");
+      mXyPlot->SetStringParameter("Grid", "On");
    else
-      mSubscriber->SetStringParameter("Grid", "Off");
+      mXyPlot->SetStringParameter("Grid", "Off");
 
    if (targetStatusCheckBox->IsChecked())
-      mSubscriber->SetStringParameter("TargetStatus", "On");
+      mXyPlot->SetStringParameter("TargetStatus", "On");
    else
-      mSubscriber->SetStringParameter("TargetStatus", "Off");
+      mXyPlot->SetStringParameter("TargetStatus", "Off");
 
    // set X parameter
    if (mXParamChanged)
@@ -641,12 +644,12 @@ void XyPlotSetupPanel::SaveData()
       if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
-         mSubscriber->Activate(false);
+         mXyPlot->Activate(false);
       }
       else
       {
          std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
-         mSubscriber->SetStringParameter("IndVar", selXName);
+         mXyPlot->SetStringParameter("IndVar", selXName);
       }
 
       mXParamChanged = false;
@@ -664,7 +667,7 @@ void XyPlotSetupPanel::SaveData()
       if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
-         mSubscriber->Activate(false);
+         mXyPlot->Activate(false);
       }
       else if (numYParams > GmatPlot::MAX_XY_CURVE)
          //loj: 7/14/04 changed to use GmatPlot::MAX_XY_CURVE instead of 6
@@ -682,7 +685,8 @@ void XyPlotSetupPanel::SaveData()
 
       if (mNumYParams >= 0) // >=0 because the list needs to be cleared
       {
-         mSubscriber->SetBooleanParameter("ClearDepVarList", true);
+         //mXyPlot->SetBooleanParameter("ClearDepVarList", true);
+         mXyPlot->TakeAction("Clear"); //loj: 9/29/04 added
          for (int i=0; i<mNumYParams; i++)
          {
 #if DEBUG_XYPLOT_PANEL
@@ -690,7 +694,7 @@ void XyPlotSetupPanel::SaveData()
                                           mYSelectedListBox->GetString(i).c_str());
 #endif
             std::string selYName = std::string(mYSelectedListBox->GetString(i).c_str());
-            mSubscriber->SetStringParameter("Add", selYName);
+            mXyPlot->SetStringParameter("Add", selYName, i); //loj: 9/29/04 added index
          }
       }
    }

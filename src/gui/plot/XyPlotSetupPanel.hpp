@@ -31,7 +31,6 @@ public:
    XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-   Subscriber *mSubscriber;
    XyPlot *mXyPlot;
    
    int  mNumXParams;
