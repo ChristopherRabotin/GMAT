@@ -47,26 +47,28 @@ public:
     UniversePanel(wxWindow *parent);
    
 private:
-    wxBoxSizer *item0;
-    wxGridSizer *item1;
-    wxBoxSizer *item2;
+//      wxBoxSizer *item0;
+//      wxGridSizer *item1;
+//      wxBoxSizer *item2;
 //      wxBoxSizer *item5;
 //      wxBoxSizer *item9;
     
     wxStaticText *item3;
     wxStaticText *item10;
     
-    wxListBox *item4;
-    wxListBox *item11;
+    wxListBox *availableListBox;
+    wxListBox *selectedListBox;
     
-    wxButton *item6;
-    wxButton *item7;
-    wxButton *item8;
+    wxButton *addButton;
+    wxButton *prioritizeButton;
+    wxButton *removeButton;
     
   //    void CreateUniverse(wxWindow *parent);
     void OnAddButton(wxCommandEvent& event);
     void OnSortButton(wxCommandEvent& event);
     void OnRemoveButton(wxCommandEvent& event);
+
+    void OnAvailableSelectionChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -85,7 +87,11 @@ private:
         ID_BUTTON,
         ID_BUTTON_ADD,
         ID_BUTTON_SORT,
-        ID_BUTTON_REMOVE
+        ID_BUTTON_REMOVE,
+
+        ID_AVAILABLE_LIST,
+        ID_TEXT_CTRL,
+        ID_BUTTON_BROWSE,
     };
 };
 #endif
