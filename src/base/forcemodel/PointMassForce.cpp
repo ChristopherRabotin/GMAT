@@ -63,6 +63,7 @@
 #include "MessageInterface.hpp"
 #include "SolarSystem.hpp"
 #include "Rvector6.hpp"
+#include "ForceModelException.hpp"
 
 //---------------------------------
 // static data
@@ -91,7 +92,6 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
 // public
 //---------------------------------
 
-//loj: 3/12/04 added name
 //------------------------------------------------------------------------------
 // PointMassForce::PointMassForce(const std::string &name, Integer satcount)
 //------------------------------------------------------------------------------
@@ -108,13 +108,15 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
     parameterCount = PointMassParamCount;
     dimension = 6 * satcount;
     theBody = NULL;
-
+    
     // create default body
+    theBodyName = "Earth"; //loj: 5/7/04 added
+
     // temp fix, will be removed when default mission sets initial data
-    if (solarSystem != NULL)
-    {
-       SetBody("Earth");
-    }
+    //if (solarSystem != NULL)
+    //{
+    //   SetBodyName("Earth");
+    //}
 }
 
 //------------------------------------------------------------------------------
@@ -184,34 +186,61 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 //------------------------------------------------------------------------------
 bool PointMassForce::Initialize(void)
 {
-    PhysicalModel::Initialize();
+   //MessageInterface::ShowMessage("PointMassForce::Initialize() entered\n");
+   
+   PhysicalModel::Initialize();
     
-    if (solarSystem != NULL)
-    {
-       SetBody("Earth");
-       mu = theBody->GetGravitationalConstant();
-    }
+   if (solarSystem != NULL)
+   {
+      //MessageInterface::ShowMessage("PointMassForce::Initialize() theBodyName=%s\n",
+      //                              theBodyName.c_str());
+      
+      //SetBodyName("Earth"); //loj: 5/7/04 commented out
+      theBody = solarSystem->GetBody(theBodyName); //loj: 5/7/04 added
+       
+      if (theBody != NULL)
+      {
+         mu = theBody->GetGravitationalConstant();
+         //MessageInterface::ShowMessage
+         //   ("PointMassForce::Initialize() setting mu=%f for type=%s, "
+         //    "name=%s\n", mu, theBody->GetTypeName().c_str(), theBody->GetName().c_str());
+      }
+      else
+      {
+         MessageInterface::ShowMessage("PointMassForce::Initialize() theBody is NULL\n");
+         initialized = false;
+         throw ForceModelException("PointMassForce::Initialize() theBody is NULL\n");
+         //return false;
+      }
+   }
+   else
+   {
+      MessageInterface::ShowMessage("PointMassForce::Initialize() solarSystem is NULL\n");
+      initialized = false;
+      throw ForceModelException("PointMassForce::Initialize() solarSystem is NULL\n");
+      //return false;
+   }
     
-    Integer satCount = (Integer)(dimension / 6);
-    if (dimension != satCount * 6) 
-    {
-        initialized = false;
-        return false;
-    }
+   Integer satCount = (Integer)(dimension / 6);
+   if (dimension != satCount * 6) 
+   {
+      initialized = false;
+      return false;
+   }
 
-    Integer i6;
-    for (Integer i = 0; i < satCount; i++) 
-    {
-        i6 = i*6;
-        modelState[i6]   = 7000.0 + 200.0 * i;
-        modelState[i6+1] = 300.0 * i;
-        modelState[i6+2] = 1000.0 - 100.0 * i;
-        modelState[i6+3] = 0.0;
-        modelState[i6+4] = 8.0 + 0.1 * i;    // 7.61 km/s makes first one circular
-        modelState[i6+5] = 0.0;
-    }
+   Integer i6;
+   for (Integer i = 0; i < satCount; i++) 
+   {
+      i6 = i*6;
+      modelState[i6]   = 7000.0 + 200.0 * i;
+      modelState[i6+1] = 300.0 * i;
+      modelState[i6+2] = 1000.0 - 100.0 * i;
+      modelState[i6+3] = 0.0;
+      modelState[i6+4] = 8.0 + 0.1 * i;    // 7.61 km/s makes first one circular
+      modelState[i6+5] = 0.0;
+   }
 
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -323,7 +352,7 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 {
     Integer i6;
 
-    MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
+    //MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
     
     if (order != 1)
         return false;
@@ -414,6 +443,18 @@ CelestialBody* PointMassForce::GetBody()
 }
 
 //------------------------------------------------------------------------------
+// std::string GetBodyName()
+//------------------------------------------------------------------------------
+/**
+ * 
+ */
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetBodyName()
+{
+    return theBodyName;
+}
+
+//------------------------------------------------------------------------------
 // void SetBody(CelestialBody *body)
 //------------------------------------------------------------------------------
 /**
@@ -422,36 +463,50 @@ CelestialBody* PointMassForce::GetBody()
 //------------------------------------------------------------------------------
 void PointMassForce::SetBody(CelestialBody *body)
 {
-    if (body != NULL)
-    {
-        if (theBody != NULL)
-        {
-            //delete theBody;
-            theBody = NULL;
-        }
-    }
-  
-    theBody = body;
-    if (theBody)
-       mu = theBody->GetGravitationalConstant();
+   //loj: 5/7/04
+   //if (body != NULL)
+   //{
+   //    if (theBody != NULL)
+   //    {
+   //         //delete theBody;
+   //         theBody = NULL;
+   //    }
+   //}
+   
+   //MessageInterface::ShowMessage("PointMassForce::SetBody() body name=%s\n",
+   //                              body->GetName().c_str());
+   
+   theBody = body;
+   if (theBody != NULL)
+   {
+      theBodyName = theBody->GetName();
+      //MessageInterface::ShowMessage("PointMassForce::SetBody() set theBodyName=%s\n",
+      //                              theBodyName.c_str());
+      //mu = theBody->GetGravitationalConstant();
+      //MessageInterface::ShowMessage("PointMassForce::SetBody() set mu=%f\n", mu);
+   }
 }
 
 //------------------------------------------------------------------------------
-// bool SetBody(const std::string &name)
+// void SetBodyName(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  *
  */
 //------------------------------------------------------------------------------
-bool PointMassForce::SetBody(const std::string &name)
+void PointMassForce::SetBodyName(const std::string &name)
 {
-    CelestialBody *body = solarSystem->GetBody(name);
-    if (body != NULL)
-    {
-        SetBody(body);
-        return true;
-    }
-    return false;
+   theBodyName = name;
+   
+   //     if (solarSystem != NULL)
+   //     {
+   //        CelestialBody *body = solarSystem->GetBody(name);
+   //        if (body != NULL)
+   //        {
+   //           SetBody(body);
+   //           return true;
+   //        }
+   //     }
 }
 
 //---------------------------------
@@ -602,13 +657,14 @@ Real PointMassForce::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetStringParameter(const Integer id) const
 {
-    switch (id)
-    {
-    case BODY:
-        return theBody->GetTypeName(); //loj: What should we return?
-    default:
-        return PhysicalModel::GetStringParameter(id);
-    }
+   switch (id)
+   {
+   case BODY:
+      return theBodyName;
+      //return theBody->GetTypeName(); //loj: What should we return?
+   default:
+      return PhysicalModel::GetStringParameter(id);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -630,7 +686,8 @@ bool PointMassForce::SetStringParameter(const Integer id, const std::string &val
     switch (id)
     {
     case BODY:
-        return SetBody(value);
+        SetBodyName(value);
+        return true;
     default:
         return PhysicalModel::SetStringParameter(id, value);
     }
