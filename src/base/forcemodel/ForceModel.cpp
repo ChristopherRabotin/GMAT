@@ -596,6 +596,16 @@ bool ForceModel::Initialize(void)
 
     while (current) 
     {
+#if DEBUG_FORCEMODEL
+        std::string name, type;
+        name = current->GetName();
+        if (name == "")
+           name = "unnamed";
+        type = current->GetTypeName();
+        MessageInterface::ShowMessage
+           ("ForceModel::Initialize() initializing object %s of type %s\n",
+            name.c_str(), type.c_str());
+#endif
 //        currentPm = current->GetDerivative();  waw: 06/03/04
         currentPm = current;  // waw: added 06/04/04 
         currentPm->SetDimension(dimension);
@@ -856,7 +866,8 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
          return false;
 
 #if DEBUG_FORCEMODEL
-         MessageInterface::ShowMessage("  ddt(%s) = %le %le %le\n", 
+         MessageInterface::ShowMessage("  ddt(%s[%s]) = %le %le %le\n",
+            (current->GetTypeName().c_str()), 
             (current->GetStringParameter(current->GetParameterID("BodyName"))).c_str(), 
             ddt[3], ddt[4], ddt[5]);
 #endif
@@ -1111,7 +1122,12 @@ std::string ForceModel::GetStringParameter(const Integer id) const
        return am;
     }
     case  SRP:
+    {
+       const PhysicalModel *pm = GetForce("SolarRadiationPressure");
+       if (pm == NULL)
+          return "Off";
        return "On";
+    }
     default:
         return PhysicalModel::GetStringParameter(id);
     }
