@@ -234,6 +234,9 @@ void ReportFileSetupPanel::Create()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::LoadData()
 {
+    // Set the pointer for the "Show Script" button
+    mObject = reportFile;
+    
     // load data from the core engine
     writeCheckBox->SetValue(reportFile->IsActive());
 

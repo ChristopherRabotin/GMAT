@@ -73,6 +73,9 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
    mOpenGlPlot = (OpenGlPlot*)subscriber;
 
+   // Set the pointer for the "Show Script" button
+   mObject = mOpenGlPlot;
+
    mIsScChanged = false;
    mIsColorChanged = false;
    mIsCoordSysChanged = false;

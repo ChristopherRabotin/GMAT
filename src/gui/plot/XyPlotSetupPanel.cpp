@@ -504,6 +504,9 @@ void XyPlotSetupPanel::LoadData()
 
    try
    {   
+      // Set the pointer for the "Show Script" button
+      mObject = mXyPlot;
+      
       showPlotCheckBox->SetValue(mXyPlot->IsActive());
       showGridCheckBox->SetValue(mXyPlot->GetStringParameter("Grid") == "On");
       targetStatusCheckBox->SetValue(mXyPlot->GetStringParameter("TargetStatus") == "On");
