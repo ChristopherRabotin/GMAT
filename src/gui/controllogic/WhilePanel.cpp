@@ -15,6 +15,7 @@
 #include "ParameterSelectDialog.hpp"
 #include "gmatdefs.hpp"
 #include "GmatAppData.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -38,6 +39,7 @@ WhilePanel::WhilePanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
    
    mNumberOfConditions = 0;
    mNumberOfLogicalOps = 0;
+   
    mLhsList.clear();
    mOpStrings.clear();
    mRhsList.clear();
@@ -78,7 +80,7 @@ void WhilePanel::Setup( wxWindow *parent)
     conditionGrid->SetColSize(2, 60);
     conditionGrid->SetColLabelValue(3, _T("RHS"));
     conditionGrid->SetColSize(3, 165);
-    conditionGrid->SetCellValue(0, COMMAND_COL, "If");
+    conditionGrid->SetCellValue(0, COMMAND_COL, "While");
         
     item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
 
@@ -93,6 +95,8 @@ void WhilePanel::LoadData()
     if (theWhileCommand != NULL)
     {
        Integer paramId;
+       Integer index = 0;
+       
        paramId = theWhileCommand->GetParameterID("NumberOfConditions");
        mNumberOfConditions = theWhileCommand->GetIntegerParameter(paramId);
        paramId = theWhileCommand->GetParameterID("NumberOfLogicalOperators");
@@ -105,12 +109,19 @@ void WhilePanel::LoadData()
        paramId = theWhileCommand->GetParameterID("RightHandStrings");
        mRhsList = theWhileCommand->GetStringArrayParameter(paramId);
        paramId = theWhileCommand->GetParameterID("LogicalOperators");
-       mLogicalOpStrings = theWhileCommand->GetStringArrayParameter(paramId);
+       mLogicalOpStrings = theWhileCommand->GetStringArrayParameter(paramId); 
        
-       conditionGrid->SetCellValue(0, LHS_COL, mLhsList[0].c_str()); 
-       conditionGrid->SetCellValue(0, COND_COL, mOpStrings[0].c_str()); 
-       conditionGrid->SetCellValue(0, RHS_COL, mRhsList[0].c_str());   
-    }        
+       if (!mLhsList.empty() && !mOpStrings.empty() && !mRhsList.empty())
+       {
+          conditionGrid->SetCellValue(index, LHS_COL, mLhsList[index].c_str()); 
+          conditionGrid->SetCellValue(index, COND_COL, mOpStrings[index].c_str()); 
+          conditionGrid->SetCellValue(index, RHS_COL, mRhsList[index].c_str());   
+       }    
+    }     
+    else
+    {
+       theWhileCommand = (While*)theGuiInterpreter->CreateDefaultCommand("While", "While");
+    }      
 }
 
 //------------------------------------------------------------------------------
@@ -118,11 +129,30 @@ void WhilePanel::LoadData()
 //------------------------------------------------------------------------------
 void WhilePanel::SaveData()
 {
-       Integer paramId;
-       paramId = theWhileCommand->GetParameterID("NumberOfConditions");
-       theWhileCommand->SetIntegerParameter(paramId, mNumberOfConditions);
-       paramId = theWhileCommand->GetParameterID("NumberOfLogicalOperators");
-       theWhileCommand->SetIntegerParameter(paramId, mNumberOfLogicalOps);       
+MessageInterface::ShowMessage("Entering SaveData()\n");
+   Integer paramId;
+   Integer index = 0;
+   
+   wxString s1 = conditionGrid->GetCellValue(index,LHS_COL);
+   wxString s2 = conditionGrid->GetCellValue(index,COND_COL);
+   wxString s3 = conditionGrid->GetCellValue(index,RHS_COL);
+
+   mLhsList[index] = s1.c_str();
+   mOpStrings[index] = s2.c_str();
+   mRhsList[index] = s3.c_str();
+
+   theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
+
+   theWhileCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],
+                                 index);     
+   theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index], index);
+          
+// Build 4
+//   Integer paramId;
+//   paramId = theWhileCommand->GetParameterID("NumberOfConditions");
+//   theWhileCommand->SetIntegerParameter(paramId, mNumberOfConditions);
+//   paramId = theWhileCommand->GetParameterID("NumberOfLogicalOperators");
+//   theWhileCommand->SetIntegerParameter(paramId, mNumberOfLogicalOps);      
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +163,7 @@ void WhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
    int row = event.GetRow();
    int col = event.GetCol();
    
-   if (col == 1)
+   if ( (col == 1) && (row == 0) )
    {
       conditionGrid->EnableEditing(false);
       
@@ -148,7 +178,7 @@ void WhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
          theApplyButton->Enable(true);
       }
    }
-   else if (col == 2)
+   else if ( (col == 2) && (row == 0) )
    {
       conditionGrid->EnableEditing(false);
       
@@ -175,7 +205,7 @@ void WhilePanel::OnCellDoubleLeftClick(wxGridEvent& event)
          }
       }   
    }
-   else if (col == 3)
+   else if ( (col == 3) && (row == 0) )
    {
       conditionGrid->EnableEditing(true);
    }       

@@ -23,6 +23,7 @@
 #include "gmatdefs.hpp"
 #include "Command.hpp"
 #include "If.hpp"
+#include "Parameter.hpp"
 
 class IfPanel : public GmatPanel
 {
@@ -40,6 +41,7 @@ private:
     static const int RHS_COL = 3;
     
     If *theIfCommand;
+    Parameter *theParameter;
     
     // methods inherited from GmatPanel
     virtual void Create();
@@ -72,6 +74,7 @@ private:
     
    Integer mNumberOfConditions;
    Integer mNumberOfLogicalOps;
+   
    StringArray mLhsList;
    StringArray mOpStrings;
    StringArray mRhsList;

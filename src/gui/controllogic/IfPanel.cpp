@@ -15,6 +15,7 @@
 #include "ParameterSelectDialog.hpp"
 #include "gmatdefs.hpp"
 #include "GmatAppData.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -38,6 +39,7 @@ IfPanel::IfPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
    
    mNumberOfConditions = 0;
    mNumberOfLogicalOps = 0;
+   
    mLhsList.clear();
    mOpStrings.clear();
    mRhsList.clear();
@@ -93,24 +95,37 @@ void IfPanel::LoadData()
     if (theIfCommand != NULL)
     {
        Integer paramId;
+       Integer index = 0;
+       
        paramId = theIfCommand->GetParameterID("NumberOfConditions");
        mNumberOfConditions = theIfCommand->GetIntegerParameter(paramId);
+       
        paramId = theIfCommand->GetParameterID("NumberOfLogicalOperators");
-       mNumberOfLogicalOps = theIfCommand->GetIntegerParameter(paramId);       
+       mNumberOfLogicalOps = theIfCommand->GetIntegerParameter(paramId);  
+            
        paramId = theIfCommand->GetParameterID("LeftHandStrings");
        mLhsList = theIfCommand->GetStringArrayParameter(paramId);
 
        paramId = theIfCommand->GetParameterID("OperatorStrings");
        mOpStrings = theIfCommand->GetStringArrayParameter(paramId);
+       
        paramId = theIfCommand->GetParameterID("RightHandStrings");
        mRhsList = theIfCommand->GetStringArrayParameter(paramId);
+       
        paramId = theIfCommand->GetParameterID("LogicalOperators");
        mLogicalOpStrings = theIfCommand->GetStringArrayParameter(paramId);
        
-       conditionGrid->SetCellValue(0, LHS_COL, mLhsList[0].c_str()); 
-       conditionGrid->SetCellValue(0, COND_COL, mOpStrings[0].c_str()); 
-       conditionGrid->SetCellValue(0, RHS_COL, mRhsList[0].c_str());   
-    }        
+       if (!mLhsList.empty() && !mOpStrings.empty() && !mRhsList.empty())
+       {
+          conditionGrid->SetCellValue(index, LHS_COL, mLhsList[index].c_str()); 
+          conditionGrid->SetCellValue(index, COND_COL, mOpStrings[index].c_str()); 
+          conditionGrid->SetCellValue(index, RHS_COL, mRhsList[index].c_str());   
+       }    
+    }     
+    else
+    {
+       theIfCommand = (If*)theGuiInterpreter->CreateDefaultCommand("If", "If");
+    } 
 }
 
 //------------------------------------------------------------------------------
@@ -118,11 +133,30 @@ void IfPanel::LoadData()
 //------------------------------------------------------------------------------
 void IfPanel::SaveData()
 {
-       Integer paramId;
-       paramId = theIfCommand->GetParameterID("NumberOfConditions");
-       theIfCommand->SetIntegerParameter(paramId, mNumberOfConditions);
-       paramId = theIfCommand->GetParameterID("NumberOfLogicalOperators");
-       theIfCommand->SetIntegerParameter(paramId, mNumberOfLogicalOps);       
+MessageInterface::ShowMessage("Entering SaveData()\n");
+   Integer paramId;
+   Integer index = 0;
+   
+   wxString s1 = conditionGrid->GetCellValue(index,LHS_COL);
+   wxString s2 = conditionGrid->GetCellValue(index,COND_COL);
+   wxString s3 = conditionGrid->GetCellValue(index,RHS_COL);
+
+   mLhsList[index] = s1.c_str();
+   mOpStrings[index] = s2.c_str();
+   mRhsList[index] = s3.c_str();
+
+   theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
+
+   theIfCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],
+                              index);     
+   theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index], index);
+          
+// Build 4
+//   Integer paramId;
+//   paramId = theIfCommand->GetParameterID("NumberOfConditions");
+//   theIfCommand->SetIntegerParameter(paramId, mNumberOfConditions);
+//   paramId = theIfCommand->GetParameterID("NumberOfLogicalOperators");
+//   theIfCommand->SetIntegerParameter(paramId, mNumberOfLogicalOps); 
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +167,7 @@ void IfPanel::OnCellDoubleLeftClick(wxGridEvent& event)
    int row = event.GetRow();
    int col = event.GetCol();
    
-   if (col == 1)
+   if ( (col == 1) && (row == 0) )
    {
       conditionGrid->EnableEditing(false);
       
@@ -148,7 +182,7 @@ void IfPanel::OnCellDoubleLeftClick(wxGridEvent& event)
          theApplyButton->Enable(true);
       }
    }
-   else if (col == 2)
+   else if ( (col == 2) && (row == 0) )
    {
       conditionGrid->EnableEditing(false);
       
@@ -175,7 +209,7 @@ void IfPanel::OnCellDoubleLeftClick(wxGridEvent& event)
          }
       }   
    }
-   else if (col == 3)
+   else if ( (col == 3) && (row == 0) )
    {
       conditionGrid->EnableEditing(true);
    }       
