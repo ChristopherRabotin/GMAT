@@ -553,6 +553,13 @@ bool Parameter::Validate()
 // methods inherited from GmatBase
 //---------------------------------
 
+// required method for all subclasses that can be copied in a script
+void Parameter::Copy(const GmatBase* orig)
+{
+   operator=(*((Parameter *)(orig)));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
