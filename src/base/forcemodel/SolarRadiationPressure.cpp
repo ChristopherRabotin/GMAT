@@ -50,6 +50,7 @@
 // **************************************************************************
 
 #include "SolarRadiationPressure.hpp"
+#include <sstream>                      // For stringstream
 
 
 
@@ -119,9 +120,6 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    forceVector         (NULL),
    sunRadius           (6.96e5),
    hasMoons            (false),
-   cr                  (1.8),
-   area                (5.0),
-   mass                (500.0),
    flux                (1367.0),               // W/m^2, IERS 1996
    fluxPressure        (flux / 299792458.0),   // converted to N/m^2
    sunDistance         (149597870.691),
@@ -291,32 +289,47 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
 //------------------------------------------------------------------------------
 Real SolarRadiationPressure::GetRealParameter(const Integer id) const
 {
-    if (id == BODY_RADIUS)
-        return bodyRadius;
-    if (id == SUN_RADIUS)
-        return sunRadius;
-    if (id == CR)
-        return cr;
-    if (id == AREA)
-        return area;
-    if (id == MASS)
-        return mass;
-    if (id == FLUX)
-        return flux;
-    if (id == FLUX_PRESSURE)
-        return fluxPressure;
-    if (id == SUN_DISTANCE)
-        return sunDistance;
-    if (id == NOMINAL_SUN)
-        return nominalSun;
-    if (id == PSUNRAD)
-        return psunrad;
-    if (id == PCBRAD)
-        return pcbrad;
-    if (id == PERCENT_SUN)
-        return percentSun;
+   if (id == BODY_RADIUS)
+      return bodyRadius;
+   if (id == SUN_RADIUS)
+      return sunRadius;
+   if (id == CR)
+      if (cr.size() > 0)
+         return cr[0];
+      else
+         throw ForceModelException(
+            "Attempting to access C_r for SRP force before any spacecraft "
+            "parameters were set.");
+   if (id == AREA)
+      if (area.size() > 0)
+         return area[0];
+      else
+         throw ForceModelException(
+            "Attempting to access area for SRP force before any spacecraft "
+            "parameters were set.");
+   if (id == MASS)
+      if (mass.size() > 0)
+         return mass[0];
+      else
+         throw ForceModelException(
+            "Attempting to access mass for SRP force before any spacecraft "
+            "parameters were set.");
+   if (id == FLUX)
+      return flux;
+   if (id == FLUX_PRESSURE)
+      return fluxPressure;
+   if (id == SUN_DISTANCE)
+      return sunDistance;
+   if (id == NOMINAL_SUN)
+      return nominalSun;
+   if (id == PSUNRAD)
+      return psunrad;
+   if (id == PCBRAD)
+      return pcbrad;
+   if (id == PERCENT_SUN)
+      return percentSun;
 
-    return PhysicalModel::GetRealParameter(id);
+   return PhysicalModel::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -340,18 +353,19 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    }
    if (id == CR)
    {
-      cr = value;
-      return cr;
+      cr.push_back(value);
+      return cr[cr.size()-1];
    }
    if (id == AREA)
    {
-      area = value;
-      return area;
+      area.push_back(value);
+      return area[area.size()-1];
    }
+   /// @todo Revise this when mass is depleted
    if (id == MASS)
    {
-      mass = value;
-      return mass;
+      mass.push_back(value);
+      return mass[mass.size()-1];
    }
    if (id == FLUX)
    {
@@ -555,20 +569,47 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
 {
     if (!initialized)
         return false;
+        
+    Real satCount = dimension / 6;
 
     if (!theSun)
        throw ForceModelException("The Sun is not set in SRP::GetDerivatives");
 
       if (!body)
-       throw ForceModelException("The central body is not set in SRP::GetDerivatives");
+       throw ForceModelException(
+          "The central body is not set in SRP::GetDerivatives");
     
     if (!cbSunVector)
-       throw ForceModelException("The sun vector is not initialized in SRP::GetDerivatives");
+       throw ForceModelException(
+          "The sun vector is not initialized in SRP::GetDerivatives");
+
+    if (cr.size() != satCount)
+    {
+       std::stringstream msg;
+       msg << "Mismatch between satellite count (" << satCount 
+           << ") and radiation coefficient count (" << cr.size() << ")"; 
+       throw ForceModelException(msg.str());
+    }
+
+    if (cr.size() != satCount)
+    {
+       std::stringstream msg;
+       msg << "Mismatch between satellite count (" << satCount   
+           << ") and area count (" << area.size() << ")"; 
+       throw ForceModelException(msg.str());
+    }
+
+    if (cr.size() != satCount)
+    {
+       std::stringstream msg;
+       msg << "Mismatch between satellite count (" << satCount   
+           << ") and mass count (" << mass.size() << ")"; 
+       throw ForceModelException(msg.str());
+    }
 
     Real distancefactor = 1.0, mag = 0.0;
-
     bool inSunlight = true, inShadow = false;
-    
+
     Real ep = epoch + dt / 86400.0;
     Rvector6 sunrv = theSun->GetState(ep);
     Rvector6 cbrv = body->GetState(ep);
@@ -582,19 +623,33 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     // The following is an approximation -- the vector and sun distance both
     // are set to the central body rather than the satellite.
     Integer i6;
-    for (Integer i = 0; i < dimension/6; ++i) 
+    Real sunSat[3];
+    for (Integer i = 0; i < satCount; ++i) 
     {
-        distancefactor = nominalSun / sunDistance;
-        distancefactor *= distancefactor;
         i6 = i*6;
+
+        sunSat[0] = cbSunVector[0] - state[i6];
+        sunSat[1] = cbSunVector[1] - state[i6+1];
+        sunSat[2] = cbSunVector[2] - state[i6+2];
+        sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] + 
+                           sunSat[2]*sunSat[2]);
+        if (sunDistance == 0.0)
+           sunDistance = 1.0;
+        forceVector[0] = sunSat[0] / sunDistance;
+        forceVector[1] = sunSat[1] / sunDistance;
+        forceVector[2] = sunSat[2] / sunDistance;
+
+        distancefactor = nominalSun / sunDistance;
+        // Factor of 0.001 converts m/s^2 to km/s^2
+        distancefactor *= distancefactor * 0.001;
       
         // Test shadow condition for surrent spacecraft
         FindShadowState(inSunlight, inShadow, &state[i6]);
         
         if (!inShadow) 
         {
-            mag = percentSun * cr * fluxPressure * area / 
-                                 mass * distancefactor;
+            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
+                                 mass[i];
 
             if (order == 1) 
             {
@@ -616,9 +671,20 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 
             deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
         }
-    }
-
-    return true;
+   }
+   #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
+      MessageInterface::ShowMessage(
+         "SRP Parameters:\n   SunVec = [%16le %16le %16le]\n   posVec = "
+         "[%16le %16le %16le]\n", cbSunVector[0], cbSunVector[1], 
+         cbSunVector[2], state[0], state[1], state[2]);
+      MessageInterface::ShowMessage(
+         "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   percent "
+         "= %16le\n   cr = %16le\n   fluxP = %16le\n   area = %16le\n   mass"
+         " = %16le\n   distFac = %16le\n   forceVector = [%16le %16le %16le]",
+         ep, nominalSun, sunDistance, percentSun, cr, fluxPressure, area, mass, 
+         distancefactor, forceVector[0], forceVector[1], forceVector[2]);
+   #endif
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -793,5 +859,47 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
     Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
 
     return 1.0 - area / (M_PI * a2);
+}
+
+//------------------------------------------------------------------------------
+// void SetSatelliteParameter(const Integer i, const std::string parmName, 
+//                            const Real parm)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters to the SRP force.
+ * 
+ * @param i ID for the spacecraft
+ * @param parmName name of the Spacecraft parameter 
+ * @param parm Parameter value
+ */
+//------------------------------------------------------------------------------
+void SolarRadiationPressure::SetSatelliteParameter(const Integer i, 
+                                          const std::string parmName, 
+                                          const Real parm)
+{
+    unsigned parmNumber = (unsigned)(i);
+
+    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE
+         std::stringstream msg;
+         msg << "Setting satellite parameter " << parmName << " for Spacecraft " 
+             << i << " to " << parm << "\n";
+         MessageInterface::ShowMessage(msg.str());
+    #endif
+    
+    if (parmName == "DryMass")
+        if (parmNumber < mass.size())
+            mass[i] = parm;
+        else
+            mass.push_back(parm);
+    if (parmName == "Cr")
+        if (parmNumber < cr.size())
+            cr[i] = parm;
+        else
+            cr.push_back(parm);
+    if (parmName == "SRPArea")
+        if (parmNumber < area.size())
+            area[i] = parm;
+        else
+            area.push_back(parm);
 }
 

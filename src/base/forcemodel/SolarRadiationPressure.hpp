@@ -95,6 +95,11 @@ public:
    virtual bool                SetBooleanParameter(const Integer id, const bool value);
    virtual Integer             GetIntegerParameter(const Integer id) const;
    virtual Integer             SetIntegerParameter(const Integer id, const Integer value);
+   
+   virtual void SetSatelliteParameter(const Integer i, 
+                                      const std::string parmName, 
+                                      const Real parm);
+
 protected:
    // Parameter IDs
    enum
@@ -139,11 +144,11 @@ protected:
    bool hasMoons;
 
    /// Basically the reflectivity of the body experiancing the force
-   Real cr;
+   std::vector<Real> cr;
    /// Reflective surface area of the body, in square meters
-   Real area;
+   std::vector<Real> area;
    /// Mass of the body, in kg
-   Real mass;
+   std::vector<Real> mass;
    /// Solar flux, in W/m^2
    Real flux;
    /// Solar flux, in N/m^2
