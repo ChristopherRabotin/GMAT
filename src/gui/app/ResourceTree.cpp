@@ -928,12 +928,16 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    if ( !newName.IsEmpty())
    {
       Gmat::ObjectType objType;
-        
+      
       switch (dataType)
       {
       case GmatTree::DEFAULT_SPACECRAFT:
       case GmatTree::CREATED_SPACECRAFT:
          objType = Gmat::SPACECRAFT;
+         break;
+      case GmatTree::DEFAULT_FORMATION_FOLDER: //loj: 11/23/04 - added
+      case GmatTree::CREATED_FORMATION_FOLDER:
+         objType = Gmat::FORMATION;
          break;
       case GmatTree::DEFAULT_IMPULSIVE_BURN:
       case GmatTree::CREATED_IMPULSIVE_BURN:
