@@ -301,6 +301,11 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 {
     Spacecraft *sc =
         theFactoryManager->CreateSpacecraft(type, name);
+    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() sc = %d\n", sc);
+    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() name = " +
+    //                              sc->GetName() + "\n");
+    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Element1 = %f\n",
+    //                              sc->GetRealParameter("Element1"));
     theConfigManager->AddSpacecraft(sc);
     return sc;
 }
@@ -318,7 +323,14 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
-    return theConfigManager->GetSpacecraft(name);
+    Spacecraft *sc = theConfigManager->GetSpacecraft(name);
+    MessageInterface::ShowMessage("Moderator::GetSpacecraft() name = " +
+                                  sc->GetName() + "\n");
+    MessageInterface::ShowMessage("Moderator::GetSpacecraft() Element1 = %f\n",
+                                  sc->GetRealParameter("Element1"));
+
+    return sc;
+    //return theConfigManager->GetSpacecraft(name);
 }
 
 // Propagator
@@ -1068,7 +1080,16 @@ void Moderator::CreateDefaultMission()
     cartVx->AddObject(sc);
     cartVy->AddObject(sc);
     cartVz->AddObject(sc);
-    
+
+    currTime->SetDesc(currTime->GetName());
+    elapsedSecs->SetDesc(elapsedSecs->GetName());
+    cartX->SetDesc(cartX->GetName());
+    cartY->SetDesc(cartY->GetName());
+    cartZ->SetDesc(cartZ->GetName());
+    cartVx->SetDesc(cartVx->GetName());
+    cartVy->SetDesc(cartVy->GetName());
+    cartVz->SetDesc(cartVz->GetName());
+
 //      kepSma->AddObject(sc);
 //      kepEcc->AddObject(sc);
 //      kepInc->AddObject(sc);
@@ -1091,7 +1112,7 @@ void Moderator::CreateDefaultMission()
     sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
     sub->SetStringParameter("XParamName", "DefaultSC.CurrentTime");
     sub->SetStringParameter("YParamName", "DefaultSC.X");
-    sub->Activate(false);
+    sub->Activate(true);
     // OpenGlPlot
     sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
     
