@@ -23,55 +23,59 @@ class ParameterCreateDialog : public GmatDialog
 {
 public:
     
-    ParameterCreateDialog(wxWindow *parent);
+   ParameterCreateDialog(wxWindow *parent);
 
-    wxString GetParamName()
-        { return mParamName; }
-    bool IsParamCreated()
-        { return mIsParamCreated; }
+   wxString GetParamName()
+      { return mParamName; }
+   bool IsParamCreated()
+      { return mIsParamCreated; }
     
 private:
-    wxString mParamName;
-    bool mIsParamCreated;
+   wxString mParamName;
+   bool mIsParamCreated;
+   
+   wxColour mColor;
+   wxTextCtrl *nameTextCtrl;
+   wxTextCtrl *expTextCtrl;
+   wxTextCtrl *epochTextCtrl;
+   wxTextCtrl *indexTextCtrl;
+
+   wxButton *addPropertyButton;
+   wxButton *addParamButton;
+   wxButton *mColorButton;
+   
+   wxListBox *objectListBox;
+   wxListBox *propertyListBox;
+   wxListBox *parameterListBox;
     
-    wxTextCtrl *nameTextCtrl;
-    wxTextCtrl *expTextCtrl;
-    wxTextCtrl *epochTextCtrl;
-    wxTextCtrl *indexTextCtrl;
+   wxComboBox *cbodyComboBox;
+   wxComboBox *coordComboBox;
+   wxComboBox *rbodyComboBox;
 
-    wxButton *addPropertyButton;
-    wxButton *addParamButton;
-    
-    wxListBox *objectListBox;
-    wxListBox *propertyListBox;
-    wxListBox *parameterListBox;
-    
-    wxComboBox *cbodyComboBox;
-    wxComboBox *coordComboBox;
-    wxComboBox *rbodyComboBox;
+   // methods inherited from GmatDialog
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   virtual void ResetData();
 
-    // methods inherited from GmatDialog
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    virtual void ResetData();
+   // event handling
+   void OnTextUpdate(wxCommandEvent& event);
+   void OnComboSelection(wxCommandEvent& event);
+   void OnButton(wxCommandEvent& event);
+   void OnColorButtonClick(wxCommandEvent& event);
 
-    // event handling
-    void OnTextUpdate(wxCommandEvent& event);
-    void OnComboSelection(wxCommandEvent& event);
-    void OnButton(wxCommandEvent& event);
-
-    DECLARE_EVENT_TABLE()
-        
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 9200,
-        ID_LISTBOX,
-        ID_BUTTON,
-        ID_COMBO,
-        ID_TEXTCTRL
-    };
+   DECLARE_EVENT_TABLE();
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 9200,
+      ID_LISTBOX,
+      ID_BUTTON,
+      ID_COLOR_BUTTON,
+      ID_COMBO,
+      ID_TEXTCTRL
+   };
 };
 
 #endif
