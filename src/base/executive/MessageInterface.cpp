@@ -24,7 +24,11 @@
 #include <stdarg.h>                // for va_start(), va_end()
 #include <stdio.h>                 // for vsprintf()
 #include <string.h>                // for strlen()
-#include <malloc.h>                // for malloc()
+
+#ifdef __WXMSW__                   // for malloc.h if MS Windows only
+#include <malloc.h>                
+#endif
+
 #include <iostream>                // for cout, endl
 #include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
