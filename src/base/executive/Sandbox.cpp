@@ -255,6 +255,7 @@ bool Sandbox::Execute(void)
    bool rv = true;
 
    state = RUNNING;
+   Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
     
    current = sequence;
    if (!current)
@@ -264,6 +265,18 @@ bool Sandbox::Execute(void)
       // First check to see if the run should be interrupted
       if (Interrupt())
          break;
+        
+      if (current->GetTypeName() == "Target") {
+         if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
+            currentState = Gmat::RUNNING;
+         else
+            currentState = Gmat::TARGETING;
+      }
+      
+      if (currentState != runState) {
+         publisher->SetRunState(currentState);
+         runState = currentState;
+      }
         
       rv = current->Execute();
       if (!rv) {

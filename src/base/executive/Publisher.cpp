@@ -42,7 +42,8 @@ Publisher* Publisher::Instance(void)
 //------------------------------------------------------------------------------
 Publisher::Publisher(void) :
    providerCount     (0),
-   currentProvider   (-1)
+   currentProvider   (-1),
+   runState          (Gmat::IDLE)
 {
 }
 
@@ -276,6 +277,12 @@ const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
       return elementMap[currentProvider];
       
    throw PublisherException("Unknown StringArray type requested.");
+}
+
+
+void Publisher::SetRunState(const Gmat::RunState state)
+{
+   runState = state;
 }
 
 

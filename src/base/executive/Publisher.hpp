@@ -45,6 +45,10 @@ public:
    Integer              RegisterPublishedData(const StringArray& owners, 
                                               const StringArray& elements);
    const StringArray&   GetStringArrayParameter(const std::string& type);
+   
+   // Interfaces used to update the state of the running system
+   void                 SetRunState(const Gmat::RunState state);
+   inline Gmat::RunState GetRunState();
 
 protected:
    /// The singleton
@@ -59,6 +63,8 @@ protected:
    std::vector<StringArray> objectMap;
    /// Arrays used to track elements for published data
    std::vector<StringArray> elementMap;
+   /// State of the system (used to track data for display or suppression)
+   Gmat::RunState           runState;
 
    void                 UpdateProviderID(Integer newId);
    // default constructor
@@ -68,4 +74,12 @@ protected:
    // destructor
    virtual ~Publisher(void);
 };
+
+
+
+inline Gmat::RunState Publisher::GetRunState()
+{
+   return runState; 
+}
+
 #endif // Publisher_hpp

@@ -124,6 +124,17 @@ namespace Gmat
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };
+   
+   enum RunState {
+      IDLE = 10000,
+      RUNNING,
+      PAUSED,
+      TARGETING,
+      OPTIMIZING,
+      SOLVING,
+      WAITING
+   };
+
 }
 
 #endif //GMATDEFS_HPP
