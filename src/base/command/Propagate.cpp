@@ -824,8 +824,24 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
    ((Formation*)(so))->BuildState();
 }
 
+
+//------------------------------------------------------------------------------
+// GmatCommand* GetNext()
+//------------------------------------------------------------------------------
+/**
+ * Returns pointer to next command to be executed.
+ * 
+ * Propagate::GetNext overrides the base class's GetNext method so that it can
+ * poll the moderator for user interrupts periodically.  If the stopping 
+ * conditions have not yet been met, GetNext returns this object; otherwise, it 
+ * returns the next one in the command list.
+ *
+ * @return The next pointer, as described above.
+ */
+//------------------------------------------------------------------------------
 GmatCommand* Propagate::GetNext()
 {
+ 
    if (!inProgress)
       return next;
    return this;
@@ -968,43 +984,50 @@ bool Propagate::Execute(void)
             return true;
          }
       }
-      
+   }
+   catch (BaseException &ex) {
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() setting inProgress to false");
       inProgress = false;
+      throw;
+   }
+
+   inProgress = false;
    
+#if DEBUG_PROPAGATE_EXE
+   MessageInterface::ShowMessage
+      ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
+       currEpoch, stopEpoch, elapsedTime);
+#endif
+   
+   Real secsToStep = (stopEpoch - currEpoch) * 86400.0;
+   
+   if (secsToStep > 0.0)
+   {
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
-         ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
-          currEpoch, stopEpoch, elapsedTime);
+         ("Propagate::Execute() before Step(%f) epoch = %f\n",
+          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
 #endif
-   
-      Real secsToStep = (stopEpoch - currEpoch) * 86400.0;
-   
-      if (secsToStep > 0.0)
-      {
-#if DEBUG_PROPAGATE_EXE
-         MessageInterface::ShowMessage
-            ("Propagate::Execute() before Step(%f) epoch = %f\n",
-             secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
-#endif
-         if (!p->Step(secsToStep))
-            throw CommandException("Propagator Failed to Step fixed interval\n");
-         
-         fm->UpdateSpaceObject(baseEpoch + fm->GetTime() / 86400.0);
-   
-         // Publish the final data point here
-         pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
-         memcpy(&pubdata[1], state, dim*sizeof(Real));
-         publisher->Publish(streamID, pubdata, dim+1);
+      if (!p->Step(secsToStep))
+         throw CommandException("Propagator Failed to Step fixed interval\n");
+      
+      fm->UpdateSpaceObject(baseEpoch + fm->GetTime() / 86400.0);
+
+      // Publish the final data point here
+      pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
+      memcpy(&pubdata[1], state, dim*sizeof(Real));
+      publisher->Publish(streamID, pubdata, dim+1);
          
 #if DEBUG_PROPAGATE_EXE
-         MessageInterface::ShowMessage
-            ("Propagate::Execute() after Step(%f) epoch = %f\n",
-             secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() after Step(%f) epoch = %f\n",
+          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
 #endif
    
       publisher->FlushBuffers(); //loj: 6/22/04 added
       delete [] pubdata;
-       
+    
       for (unsigned int i=0; i<stopWhen.size(); i++)
       {
          if (stopWhen[i]->GetName() == "")
@@ -1017,16 +1040,9 @@ bool Propagate::Execute(void)
          ("Propagate::Execute() complete; epoch = %f\n",
           (baseEpoch + fm->GetTime() / 86400.0));
 #endif
-      
-      }
+   }
    
-      return true;
-   }
-   catch (BaseException *ex) {
-      inProgress = false;
-      throw;
-   }
-      
+   return true;
 }
 
 
