@@ -26,6 +26,10 @@
 #include "wx/wx.h"
 #endif
 
+#ifndef wxUSE_UNIX
+#define wxUSE_UNIX = 0
+#endif
+    
 #ifdef _MSC_VER
 #pragma warning( default : 4267 )  // Reset warning messages 4267
 #endif
