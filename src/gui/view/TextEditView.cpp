@@ -93,6 +93,9 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
     
     bool status = GmatAppData::GetGuiInterpreter()->
         InterpretScript(std::string(filename.c_str()));
+    
+    // Update ResourceTree
+    GmatAppData::GetResourceTree()->UpdateResources();
 }
 
 //------------------------------------------------------------------------------
