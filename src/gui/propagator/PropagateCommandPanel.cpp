@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                              PropagateCommandPanel
 //------------------------------------------------------------------------------
@@ -62,12 +63,18 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &propName )
+    : wxPanel(parent)
 {
-    propNameString = "Default"; //propName;
-    //theCommand = propCommand;
+    propNameString = propName;
+
+    //loj: moved from Initialize()
+    // For testing
+    GuiInterpreter *theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
+    Command *theCommand = theGuiInterpreter->GetCommand(propName.c_str());
+    //thePropagateCommand = theCommand->GetObject(Gmat::COMMAND, "Propagate");
     
     Initialize();
-    //Setup(this);
+    Setup(this);
 }
 
 void PropagateCommandPanel::Initialize()
@@ -77,10 +84,6 @@ void PropagateCommandPanel::Initialize()
     numOfConds = 10;
     numOfEqualities = 6;
     
-    // For testing
-    //theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //theCommand = theGuiInterpreter->CreateCommand("Propagate");
-    //thePropagateCommand = theCommand->GetObject(Gmat::COMMAND, "Propagate");
 }
 
 void PropagateCommandPanel::Setup( wxWindow *parent)
@@ -479,8 +482,8 @@ void PropagateCommandPanel::InsertStopCondRow()
 
 void PropagateCommandPanel::ClearPropagatorTable()
 {
-	propGrid->ClearGrid();
-	applyButton->Enable(TRUE);
+        propGrid->ClearGrid();
+        applyButton->Enable(TRUE);
 }
 
 void PropagateCommandPanel::ClearStopCondTable()
@@ -497,8 +500,8 @@ void PropagateCommandPanel::DeleteSelectedPropagatorRows()
         for ( int n = 0; n < propGrid->GetNumberRows(); )
             if (propGrid->IsInSelection( n , 0 ) )
                 propGrid->DeleteRows( n, 1 );
-			else
-				n++;
+                        else
+                                n++;
         propGrid->EndBatch();
     }
     applyButton->Enable(TRUE);
@@ -512,8 +515,8 @@ void PropagateCommandPanel::DeleteSelectedStopCondRows()
         for ( int n = 0; n < propGrid->GetNumberRows(); )
             if (stopCondGrid->IsInSelection( n , 0 ) )
                 stopCondGrid->DeleteRows( n, 1 );
-			else
-				n++;
+                        else
+                                n++;
         stopCondGrid->EndBatch();
     }
     applyButton->Enable(true);

@@ -44,7 +44,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 PropagatorSetupPanel::PropagatorSetupPanel( wxWindow *parent )
-    :wxPanel(parent)
+    : wxPanel(parent)
 {
     Setup(this);
 }
