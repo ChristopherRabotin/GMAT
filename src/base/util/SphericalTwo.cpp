@@ -21,15 +21,16 @@
 //------------------------------------------------------------------------------
 
 #include "SphericalTwo.hpp"
+#include "UtilityException.hpp"
 
-using namespace GmatRealUtil;
+using namespace GmatMathUtil;
 
 //---------------------------------
 //  static data
 //---------------------------------
 const std::string SphericalTwo::DATA_DESCRIPTIONS[NUM_DATA] =
 {
-   "Radical Magnitude",
+   "Radial Magnitude",
    "Right Ascension",
    "Declination",
    "Velocity Magnitude",
@@ -48,9 +49,9 @@ const std::string SphericalTwo::DATA_DESCRIPTIONS[NUM_DATA] =
  * Constructs base Spherical structures 
  */
 SphericalTwo::SphericalTwo() :
-    Spherical       (),
-    raVelocity      (0.0),
-    decVelocity     (0.0)
+   Spherical       (),
+   raVelocity      (0.0),
+   decVelocity     (0.0)
 {
 }
 
@@ -60,9 +61,9 @@ SphericalTwo::SphericalTwo() :
 //------------------------------------------------------------------------------
 SphericalTwo::SphericalTwo(Real rMag,  Real ra, Real dec, Real vMag,
                            Real vRA, Real vDec) :
-    Spherical        (rMag, ra, dec, vMag),
-    raVelocity       (vRA),
-    decVelocity      (vDec)
+   Spherical        (rMag, ra, dec, vMag),
+   raVelocity       (vRA),
+   decVelocity      (vDec)
 {
 }
 
@@ -70,10 +71,10 @@ SphericalTwo::SphericalTwo(Real rMag,  Real ra, Real dec, Real vMag,
 //   SphericalTwo::SphericalTwo(const SphericalTwo &spherical)
 //------------------------------------------------------------------------------
 SphericalTwo::SphericalTwo(const SphericalTwo &spherical) :
-    Spherical        (spherical.radicalMagnitude, spherical.rightAscension,
-                      spherical.declination, spherical.velocityMagnitude),
-    raVelocity       (spherical.raVelocity),
-    decVelocity      (spherical.decVelocity)
+   Spherical        (spherical.positionMagnitude, spherical.rightAscension,
+                     spherical.declination, spherical.velocityMagnitude),
+   raVelocity       (spherical.raVelocity),
+   decVelocity      (spherical.decVelocity)
 {
 }
 
@@ -84,7 +85,7 @@ SphericalTwo& SphericalTwo::operator=(const SphericalTwo &spherical)
 {
    if (this != &spherical)
    {
-      SetRadicalMagnitude( spherical.GetRadicalMagnitude() );
+      SetPositionMagnitude( spherical.GetPositionMagnitude() );
       SetRightAscension( spherical.GetRightAscension() );
       SetDeclination( spherical.GetDeclination() );
       SetVelocityMagnitude( spherical.GetVelocityMagnitude() );
@@ -102,37 +103,11 @@ SphericalTwo::~SphericalTwo()
 }
 
 //------------------------------------------------------------------------------
-//  std::ostream& operator<<(std::ostream& output, SphericalTwo &s)
-//------------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& output, SphericalTwo &s)
-{
-    Rvector v(6, s.radicalMagnitude, s.rightAscension, s.declination,
-              s.velocityMagnitude, s.raVelocity, s.decVelocity);
-
-    output << v << std::endl;
-
-    return output;
-}
-
-//------------------------------------------------------------------------------
-//  <friend>
-//  std::istream& operator>>(std::istream& input, SphericalTwo &s)
-//------------------------------------------------------------------------------
-std::istream& operator>>(std::istream& input, SphericalTwo &s )
-{
-    input >> s.radicalMagnitude >> s.rightAscension
-          >> s.declination >> s.velocityMagnitude
-          >> s.raVelocity >> s.decVelocity;
-
-    return input;
-}
-
-//------------------------------------------------------------------------------
 // Real SphericalTwo::GetVelocityRA() const
 //------------------------------------------------------------------------------
 Real SphericalTwo::GetVelocityRA() const
 {
-	return raVelocity;
+   return raVelocity;
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +115,7 @@ Real SphericalTwo::GetVelocityRA() const
 //------------------------------------------------------------------------------
 void SphericalTwo::SetVelocityRA(const Real vRA)
 {
-	raVelocity = vRA;
+   raVelocity = vRA;
 }
 
 //------------------------------------------------------------------------------
@@ -148,7 +123,7 @@ void SphericalTwo::SetVelocityRA(const Real vRA)
 //------------------------------------------------------------------------------
 Real SphericalTwo::GetVelocityDeclination() const
 {
-	return decVelocity;
+   return decVelocity;
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +131,7 @@ Real SphericalTwo::GetVelocityDeclination() const
 //------------------------------------------------------------------------------
 void SphericalTwo::SetVelocityDeclination(const Real vDec)
 {
-	decVelocity = vDec;
+   decVelocity = vDec;
 }
 
 //------------------------------------------------------------------------------
@@ -164,29 +139,30 @@ void SphericalTwo::SetVelocityDeclination(const Real vDec)
 //------------------------------------------------------------------------------
 bool SphericalTwo::ToSphericalTwo(const Cartesian &cartesian)
 {
-    if (!Spherical::ToSpherical(cartesian,false))
-    {
-        return false;
-    }
+   if (!Spherical::ToSpherical(cartesian,false))
+   {
+      return false;
+   }
 
-    // Get velocity vectors from Cartesian
-    Real  vX = cartesian.GetVelocity(0);
-    Real  vY = cartesian.GetVelocity(1);
-    Real  vZ = cartesian.GetVelocity(2);
+   // Get velocity vectors from Cartesian
+   Real  vX = cartesian.GetVelocity(0);
+   Real  vY = cartesian.GetVelocity(1);
+   Real  vZ = cartesian.GetVelocity(2);
 
-    // Calculate right ascension of velocity which is measured east of vernal
-    // equinox using atan2() which returns an angle between 0.0 and TWO_PI 
-    SetVelocityRA( 
-       Spherical::GetDegree(GmatMathUtil::ATan(vY,vX), 0.0, 
-                            GmatMathUtil::TWO_PI ));
+   // Calculate right ascension of velocity which is measured east of vernal
+   // equinox using atan2() which returns an angle between 0.0 and TWO_PI 
+   SetVelocityRA( 
+                 Spherical::GetDegree(GmatMathUtil::ATan(vY,vX), 0.0, 
+                                      GmatMathUtil::TWO_PI ));
   
-    // Calculate declination of Velocity which is measured north from the 
-    // equator using atan2() which will return an angle between -PI/2..PI/2 
-    // radians since the second argument will be greater than or equal to zero.
-    SetVelocityDeclination( GmatMathUtil::Deg( GmatMathUtil::ATan(vZ, 
-       GmatMathUtil::Sqrt(vX*vX + vY*vY))) );
-    
-    return true;
+   // Calculate declination of Velocity which is measured north from the 
+   // equator using atan2() which will return an angle between -PI/2..PI/2 
+   // radians since the second argument will be greater than or equal to zero.
+   SetVelocityDeclination(GmatMathUtil::Deg
+                          (GmatMathUtil::ATan(vZ, 
+                                              GmatMathUtil::Sqrt(vX*vX + vY*vY))) );
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -194,32 +170,32 @@ bool SphericalTwo::ToSphericalTwo(const Cartesian &cartesian)
 //------------------------------------------------------------------------------
 Cartesian SphericalTwo::GetCartesian()
 {
-    // Check if input of radical magnitude is not valid then return false
-    if (GmatMathUtil::Abs(GetRadicalMagnitude()) <= ORBIT_TOLERANCE)
-       return Cartesian(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   // Check if input of radial magnitude is not valid then return false
+   if (GmatMathUtil::Abs(GetPositionMagnitude()) <= ORBIT_TOLERANCE)
+      return Cartesian(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     // Get the position after converting to part of cartesian 
-    Rvector3 position = GetPosition();
+   Rvector3 position = GetPosition();
 
-    // Convert right ascension of velocity and declination of velocity from
-    // units of degrees to units of radians
-    Real raV  = GmatMathUtil::Rad( GetVelocityRA() );
-    Real decV = GmatMathUtil::Rad( GetVelocityDeclination() );
+   // Convert right ascension of velocity and declination of velocity from
+   // units of degrees to units of radians
+   Real raV  = GmatMathUtil::Rad( GetVelocityRA() );
+   Real decV = GmatMathUtil::Rad( GetVelocityDeclination() );
     
-    // start to calculate the conversion to cartesian's velocity
-    Real vX = GetVelocityMagnitude() * GmatMathUtil::Cos(decV) * 
-              GmatMathUtil::Cos(raV);
+   // start to calculate the conversion to cartesian's velocity
+   Real vX = GetVelocityMagnitude() * GmatMathUtil::Cos(decV) * 
+      GmatMathUtil::Cos(raV);
 
-    Real vY = vX * GmatMathUtil::Tan(raV);
+   Real vY = vX * GmatMathUtil::Tan(raV);
 
-    Real vZ = GetVelocityMagnitude() * GmatMathUtil::Sin(decV);
+   Real vZ = GetVelocityMagnitude() * GmatMathUtil::Sin(decV);
 
     // Set up the Cartesian's new velocity
-    Rvector3 velocity; 
-    velocity.Set(vX,vY,vZ);
+   Rvector3 velocity; 
+   velocity.Set(vX,vY,vZ);
 
     // Return the cartesian conversion
-    return Cartesian(position,velocity);
+   return Cartesian(position,velocity);
 }
 
 //------------------------------------------------------------------------------
@@ -245,7 +221,7 @@ std::string* SphericalTwo::ToValueStrings(void)
 {
    std::stringstream ss("");
 
-   ss << GetRadicalMagnitude();
+   ss << GetPositionMagnitude();
    stringValues[0] = ss.str();
    
    ss.str("");
@@ -270,3 +246,47 @@ std::string* SphericalTwo::ToValueStrings(void)
    
    return stringValues;
 }
+
+//---------------------------------
+// friend functions
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// friend SphericalTwo ToSphericalTwo(const Cartesian &c); //loj: 4/19/04 added
+//------------------------------------------------------------------------------
+SphericalTwo ToSphericalTwo(const Cartesian &c)
+{
+   SphericalTwo sph2;
+
+   if (sph2.ToSphericalTwo(c))
+      return sph2;
+   else
+      throw UtilityException("ToSphericalTwo(): R magnitude is less than orbit tolerance");
+   
+}
+
+//------------------------------------------------------------------------------
+//  friend std::ostream& operator<<(std::ostream& output, SphericalTwo &s)
+//------------------------------------------------------------------------------
+std::ostream& operator<<(std::ostream& output, SphericalTwo &s)
+{
+   Rvector v(6, s.positionMagnitude, s.rightAscension, s.declination,
+             s.velocityMagnitude, s.raVelocity, s.decVelocity);
+
+   output << v << std::endl;
+
+   return output;
+}
+
+//------------------------------------------------------------------------------
+//  friend std::istream& operator>>(std::istream& input, SphericalTwo &s)
+//------------------------------------------------------------------------------
+std::istream& operator>>(std::istream& input, SphericalTwo &s )
+{
+   input >> s.positionMagnitude >> s.rightAscension
+         >> s.declination >> s.velocityMagnitude
+         >> s.raVelocity >> s.decVelocity;
+
+   return input;
+}
+

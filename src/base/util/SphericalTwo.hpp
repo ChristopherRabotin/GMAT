@@ -36,35 +36,36 @@ class Keplerian;
 class SphericalTwo : public Spherical
 {
 public:
-    SphericalTwo();
-    SphericalTwo(Real rMag, Real ra, Real dec, Real vmag, Real vRA, Real vDec);
-    SphericalTwo(const SphericalTwo &spherical);
-    SphericalTwo& operator=(const SphericalTwo &spherical);
-    virtual ~SphericalTwo();
+   SphericalTwo();
+   SphericalTwo(Real rMag, Real ra, Real dec, Real vmag, Real vRA, Real vDec);
+   SphericalTwo(const SphericalTwo &spherical);
+   SphericalTwo& operator=(const SphericalTwo &spherical);
+   virtual ~SphericalTwo();
 
-    //  Friend functions
-    friend std::ostream& operator<<(std::ostream& output, SphericalTwo& s);
-    friend std::istream& operator>>(std::istream& input, SphericalTwo& s);
+   // public methods
+   Real GetVelocityRA() const;
+   void SetVelocityRA(const Real vRA);
 
-    // public methods
-    Real GetVelocityRA() const;
-    void SetVelocityRA(const Real vRA);
+   Real GetVelocityDeclination() const;
+   void SetVelocityDeclination(const Real vDeclincation);
 
-    Real GetVelocityDeclination() const;
-    void SetVelocityDeclination(const Real vDeclincation);
+   bool ToSphericalTwo(const Cartesian &c);
+   Cartesian GetCartesian();
 
-    bool ToSphericalTwo(const Cartesian &c);
-    Cartesian GetCartesian();
+   Integer GetNumData() const;
+   const std::string* GetDataDescriptions() const;
+   std::string* ToValueStrings();
 
-    Integer GetNumData() const;
-    const std::string* GetDataDescriptions() const;
-    std::string* ToValueStrings();
+   //  Friend functions
+   friend SphericalTwo ToSphericalTwo(const Cartesian &c); //loj: 4/19/04 added
+   friend std::ostream& operator<<(std::ostream& output, SphericalTwo& s);
+   friend std::istream& operator>>(std::istream& input, SphericalTwo& s);
 
 protected:
 
 private:
-    Real     raVelocity;            //  Right Ascension of Velocity 
-    Real     decVelocity;           //  Declination of Velocity 
+   Real     raVelocity;            //  Right Ascension of Velocity 
+   Real     decVelocity;           //  Declination of Velocity 
 
    static const Integer NUM_DATA = 6;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];
