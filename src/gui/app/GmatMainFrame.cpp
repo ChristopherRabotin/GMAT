@@ -186,6 +186,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // set the main frame, because there will no longer be right notebook
    GmatAppData::SetMainFrame(this);
 
+   // set the flag to say mdi is not open
+   scriptMdiShown = false;
 
 //   splitter = new GmatSplitterWindow(this);
  
@@ -261,7 +263,10 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
-    
+   
+   //close all windows
+   CloseAllChildren();
+       
    //close plot window on new project
    if (MdiGlPlot::mdiParentGlFrame != NULL)
       MdiGlPlot::mdiParentGlFrame->Close();
@@ -501,8 +506,8 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
 
-   scriptMenu->Append(MENU_SCRIPT_OPEN_EDITOR, wxT("Open Editor"), wxT(""), FALSE);
-   scriptMenu->Append(MENU_SCRIPT_BUILD, wxT("Build Script from Object"), wxT(""), FALSE);
+//   scriptMenu->Append(MENU_SCRIPT_OPEN_EDITOR, wxT("Open Editor"), wxT(""), FALSE);
+//   scriptMenu->Append(MENU_SCRIPT_BUILD, wxT("Build Script from Object"), wxT(""), FALSE);
     
    editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
@@ -566,7 +571,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
    
    menuBar->Append(fileMenu, wxT("File"));
-   menuBar->Append(scriptMenu, wxT("Script"));
+//   menuBar->Append(scriptMenu, wxT("Script"));
    menuBar->Append(editMenu, wxT("Edit"));
    menuBar->Append(parametersMenu, wxT("Parameters"));
    menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
@@ -600,7 +605,7 @@ wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
       fileMenu->Append(wxID_PRINT, _T("&Print..."));
       fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
       fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
-    
+ 
       editMenu = new wxMenu;
       editMenu->Append(wxID_UNDO, _T("&Undo"));
       editMenu->Append(wxID_REDO, _T("&Redo"));
@@ -674,7 +679,10 @@ void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
     
    mdiDocMainFrame->Centre(wxBOTH);
    mdiDocMainFrame->Show(TRUE);
-    
+   
+   // set flag to say that mdi is open
+   scriptMdiShown = true;
+  
    //loj:compile error:
    //SetTopWindow(mdiDocMainFrame);
    //----------------------------------------------------------------
@@ -835,7 +843,8 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
 {
-   OnScriptOpenEditor(event);
+   if (scriptMdiShown == false)
+      OnScriptOpenEditor(event);
 
    if (mDocManager != NULL)
       mDocManager->OnFileNew(event);
@@ -852,7 +861,8 @@ void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptOpenFileEditor(wxCommandEvent& event)
 {
-   OnScriptOpenEditor(event);
+   if (scriptMdiShown == false)
+     OnScriptOpenEditor(event);
 
    if (mDocManager != NULL)
       mDocManager->OnFileOpen(event);
@@ -1166,3 +1176,21 @@ void GmatMainFrame::CloseActiveChild()
    
    theChild->OnClose();
 }
+
+//------------------------------------------------------------------------------
+// void GmatMainFrame::CloseAllChildren()
+//------------------------------------------------------------------------------
+void GmatMainFrame::CloseAllChildren()
+{
+  wxNode *node = mdiChildren->GetFirst();
+  while (node)
+  {
+    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+    delete theChild;
+    delete node;
+    node = node->GetNext();
+  }
+   
+}
+
+

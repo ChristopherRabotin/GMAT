@@ -63,6 +63,8 @@ public:
     bool IsChildOpen(GmatTreeItemData *item);
     void RemoveChild(wxString item);
     void CloseActiveChild();
+    void CloseAllChildren();
+    bool scriptMdiShown;
     
 protected:
 private:
