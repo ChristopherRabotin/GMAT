@@ -47,6 +47,7 @@ DragForce::DragForce(const std::string &name) :
     useExternalAtmosphere  (true),
     atmosphereType         (""),  
     atmos                  (NULL),
+    internalAtmos          (NULL),
     density                (NULL),
     prefactor              (NULL),
     firedOnce              (false),
@@ -97,8 +98,10 @@ DragForce::DragForce(const std::string &name) :
 //------------------------------------------------------------------------------
 DragForce::~DragForce()
 {
-    if (!useExternalAtmosphere && atmos)
-        delete atmos;
+    //if (!useExternalAtmosphere && atmos)
+    //   delete atmos;
+   if (internalAtmos)
+      delete internalAtmos;
         
     if (density)
         delete [] density;
@@ -126,8 +129,9 @@ DragForce::DragForce(const DragForce& df) :
     sun                     (NULL),
     centralBody             (NULL),
     useExternalAtmosphere   (true),
-    atmosphereType          (df.atmosphereType),  
+    atmosphereType          (df.atmosphereType),
     atmos                   (NULL),
+    internalAtmos           (NULL),
     density                 (NULL),
     prefactor               (NULL),
     firedOnce               (false),
@@ -181,6 +185,8 @@ DragForce& DragForce::operator=(const DragForce& df)
         
     PhysicalModel::operator=(df); 
     firedOnce = false;
+
+    // more must be done here!!!!!!!!!!
           
     return *this;
 }
@@ -352,7 +358,8 @@ bool DragForce::Initialize(void)
                if (atmosphereType == "BodyDefault")
                   atmos = centralBody->GetAtmosphereModel();
                else
-                  atmos = centralBody->GetAtmosphereModel(atmosphereType);
+                  atmos = internalAtmos; // wcs - 2004.08.31
+                  //atmos = centralBody->GetAtmosphereModel(atmosphereType);
                if (!atmos)
                   throw ForceModelException("Atmosphere model not defined");
            }
@@ -807,6 +814,41 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    return PhysicalModel::SetStringParameter(id, value);
 }
 
+
+
+//------------------------------------------------------------------------------
+// bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
+//------------------------------------------------------------------------------
+/**
+ * Sets the internal atmosphere model for the DragForce.
+ *
+ * @param atm AtmosphereModel to use when useExternalAtmosphere is false.
+ *
+ * @return flag indicating success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
+{
+   if (internalAtmos)
+      delete internalAtmos;
+   internalAtmos = atm;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// AtmosphereModel* DragForce::GetInternalAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * Gets the internal atmosphere model for the DragForce.
+ *
+ * @return pointer to the internal atmosphere model used by the DragForce
+ *         object when useExternalAtmosphere is set to false.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* DragForce::GetInternalAtmosphereModel()
+{
+   return internalAtmos;
+}
 
 //------------------------------------------------------------------------------
 // void DragForce::GetDensity(Real *state)

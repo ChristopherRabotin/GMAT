@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef DRAGFORCE_HPP
-#define DRAGFORCE_HPP
+#ifndef DragForce_hpp
+#define DragForce_hpp
 
 #include "PhysicalModel.hpp"
 #include "AtmosphereModel.hpp"
@@ -45,7 +45,7 @@ public:
     void                SetSatelliteParameter(const Integer i, 
                                               const std::string parmName, 
                                               const std::string parm);
-    bool                Initialize(void);
+    bool                Initialize();
     virtual bool        GetDerivatives(Real * state, Real dt = 0.0, 
                                        Integer order = 1);
 
@@ -66,7 +66,8 @@ public:
                                            const std::string &value);
                                            
     // Special access methods used by drag forces
-    AtmosphereModel*    GetAtmosphereModel(void);
+    bool                SetInternalAtmosphereModel(AtmosphereModel* atm);
+    AtmosphereModel*    GetInternalAtmosphereModel();
 
 protected:
     /// Sun pointer for bulge calculations
@@ -85,6 +86,8 @@ protected:
     std::string         atmosphereType;
     /// Pointer to the atmosphere model used
     AtmosphereModel     *atmos;
+    /// Pointer to Internal atmosphere model
+    AtmosphereModel     *internalAtmos;
     /// Array of densities
     Real                *density;
     /// Array of products of spacecraft properties
@@ -136,4 +139,4 @@ protected:
     const Integer       magneticIndexID;
 };
 
-#endif // DRAGFORCE_HPP
+#endif // DragForce_hpp
