@@ -49,6 +49,8 @@ namespace GmatTree
         ICON_FILE,
         ICON_OPENFOLDER,
         ICON_SPACECRAFT,
+        ICON_TANK,
+        ICON_THRUSTER,
         
         ICON_SUN,
         ICON_MERCURY,
@@ -73,6 +75,8 @@ namespace GmatTree
         ICON_PROPAGATOR,
         ICON_VARIABLE,
         ICON_XY_PLOT,
+
+        ICON_DEFAULT,
     };
 
     enum MissionIconType
@@ -116,6 +120,7 @@ namespace GmatTree
         COORD_SYS_FOLDER,
         SPECIAL_POINTS_FOLDER,
         PREDEFINED_FUNCTIONS_FOLDER,
+        SCRIPTS_FOLDER,
 
         SPACECRAFT,
 
@@ -143,6 +148,7 @@ namespace GmatTree
         GMAT_FUNCTION,
         COORD_SYSTEM,
         GROUNDSTATION,
+        SCRIPT_FILE,
 
         //Mission Tree
         MISSIONS_FOLDER,

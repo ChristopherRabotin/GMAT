@@ -55,6 +55,7 @@ private:
    wxTreeItemId mCoordSysItem;
    wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId specialPointsItem;
+   wxTreeItemId mScriptItem;
 
    int mNumSpacecraft;
    int mNumFuelTank;
@@ -70,6 +71,7 @@ private:
    int mNumVariable;
    int mNumFunct;
    int mNumCoordSys;
+   int mNumScripts;
 
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
@@ -85,6 +87,7 @@ private:
    void AddDefaultVariables(wxTreeItemId itemId);
    void AddDefaultFunctions(wxTreeItemId itemId);
    void AddDefaultCoordSys(wxTreeItemId itemId);
+   void AddDefaultScripts(wxTreeItemId itemId);
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -119,6 +122,10 @@ private:
    void OnAddMatlabFunction(wxCommandEvent &event);
    void OnAddGmatFunction(wxCommandEvent &event);
    void OnAddCoordSys(wxCommandEvent &event);
+
+   void OnOpenScript(wxCommandEvent &event);
+   void OnNewScript(wxCommandEvent &event);
+   void OnRemoveAllScripts(wxCommandEvent &event);
 
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
@@ -158,6 +165,10 @@ private:
       POPUP_ADD_MATLAB_FUNCT,
       POPUP_ADD_COORD_SYS,
       POPUP_ADD_GMAT_FUNCT,
+
+      POPUP_OPEN_SCRIPT,
+      POPUP_NEW_SCRIPT,
+      POPUP_REMOVE_ALL_SCRIPTS,
    };
 };
 

@@ -42,6 +42,9 @@
 #include "bitmaps/propagator.xpm"
 #include "bitmaps/variable.xpm"
 #include "bitmaps/xyplot.xpm"
+#include "bitmaps/default.xpm"
+#include "bitmaps/tank.xpm"
+#include "bitmaps/thruster.xpm"
 #include <wx/string.h> // for wxArrayString
 
 #include "GuiInterpreter.hpp"
@@ -90,7 +93,10 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
    EVT_MENU(POPUP_DELETE, ResourceTree::OnDelete)
-   
+   EVT_MENU(POPUP_OPEN_SCRIPT, ResourceTree::OnOpenScript)
+   EVT_MENU(POPUP_NEW_SCRIPT, ResourceTree::OnNewScript)
+   EVT_MENU(POPUP_REMOVE_ALL_SCRIPTS, ResourceTree::OnRemoveAllScripts)
+
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -135,6 +141,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumVariable = 0;
    mNumFunct = 0;
    mNumCoordSys = 0;
+   mNumScripts=0;
 
    theGuiManager->UpdateAll();
 }
@@ -313,13 +320,22 @@ void ResourceTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
    
    //----- Subscripts
-   wxTreeItemId subscriptItem =
-      AppendItem(resource, wxT("Subscripts"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Subscripts"),
-                                      GmatTree::SUBSCRIPTS_FOLDER));
+   mScriptItem =
+      AppendItem(resource, wxT("Scripts"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Scripts"),
+                                      GmatTree::SCRIPTS_FOLDER));
 
-   SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
+   SetItemImage(mScriptItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
+
+// ag: commented out 3/25/05 to try adding scripts to main frame
+//   wxTreeItemId subscriptItem =
+//      AppendItem(resource, wxT("Subscripts"), GmatTree::ICON_FOLDER, -1,
+//                 new GmatTreeItemData(wxT("Subscripts"),
+//                                      GmatTree::SUBSCRIPTS_FOLDER));
+//
+//   SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
+//                wxTreeItemIcon_Expanded);
 
    //----- Vairables
    mVariableItem = 
@@ -462,10 +478,10 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
       objTypeName = wxString(hw->GetTypeName().c_str());
 
       if (objTypeName == "FuelTank")
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_TANK, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::FUELTANK));
       else if (objTypeName == "Thruster")
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_THRUSTER, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::THRUSTER));
    };
@@ -640,7 +656,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
         
       if (objTypeName == "DifferentialCorrector")
       {
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::DIFF_CORR));
       }
    };
@@ -702,7 +718,7 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
    AppendItem(itemId, wxT("TCP/IP"), GmatTree::ICON_NETWORK, -1,
               new GmatTreeItemData(wxT("TCP/IP"), GmatTree::INTERFACE));
-   AppendItem(itemId, wxT("Mex"), GmatTree::ICON_FILE, -1,
+   AppendItem(itemId, wxT("Mex"), GmatTree::ICON_DEFAULT, -1,
               new GmatTreeItemData(wxT("Mex"), GmatTree::INTERFACE));
     
 }
@@ -908,6 +924,13 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //#else
 //      menu.Enable(POPUP_ADD_MATLAB_FUNCT, FALSE);
 //#endif
+   }
+   else if (strcmp(title, wxT("Scripts")) == 0)
+   {
+      menu.Append(POPUP_OPEN_SCRIPT, wxT("Open"));
+      menu.Append(POPUP_NEW_SCRIPT, wxT("New"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
    }
    else if (dataType == GmatTree::COORD_SYS_FOLDER)
    {
@@ -1232,33 +1255,36 @@ void ResourceTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
   
    wxBusyCursor wait;
-   wxIcon icons[25];
+   wxIcon icons[28];
 
    icons[0] = wxIcon ( folder_xpm );
    icons[1] = wxIcon ( file_xpm );
    icons[2] = wxIcon ( openfolder_xpm );
-   icons[3] = wxIcon ( spacecrapt_xpm );
-   icons[4] = wxIcon ( sun_xpm );
-   icons[5] = wxIcon ( mercury_xpm );
-   icons[6] = wxIcon ( venus_xpm );
-   icons[7] = wxIcon ( earth_xpm );
-   icons[8] = wxIcon ( mars_xpm );
-   icons[9] = wxIcon ( jupiter_xpm );
-   icons[10] = wxIcon ( saturn_xpm );
-   icons[11] = wxIcon ( uranus_xpm );
-   icons[12] = wxIcon ( neptune_xpm );
-   icons[13] = wxIcon ( pluto_xpm );
-   icons[14] = wxIcon ( report_xpm );
-   icons[15] = wxIcon ( network_xpm );
-   icons[16] = wxIcon ( burn_xpm );
-   icons[17] = wxIcon ( moon_xpm );
-   icons[18] = wxIcon ( matlabfunction_xpm );
-   icons[19] = wxIcon ( array_xpm );
-   icons[20] = wxIcon ( coordinatesystem_xpm );
-   icons[21] = wxIcon ( openglplot_xpm );
-   icons[22] = wxIcon ( propagator_xpm );
-   icons[23] = wxIcon ( variable_xpm );
-   icons[24] = wxIcon ( xyplot_xpm );
+   icons[3] = wxIcon ( spacecraft_xpm );
+   icons[4] = wxIcon ( tank_xpm );
+   icons[5] = wxIcon ( thruster_xpm );
+   icons[6] = wxIcon ( sun_xpm );
+   icons[7] = wxIcon ( mercury_xpm );
+   icons[8] = wxIcon ( venus_xpm );
+   icons[9] = wxIcon ( earth_xpm );
+   icons[10] = wxIcon ( mars_xpm );
+   icons[11] = wxIcon ( jupiter_xpm );
+   icons[12] = wxIcon ( saturn_xpm );
+   icons[13] = wxIcon ( uranus_xpm );
+   icons[14] = wxIcon ( neptune_xpm );
+   icons[15] = wxIcon ( pluto_xpm );
+   icons[16] = wxIcon ( report_xpm );
+   icons[17] = wxIcon ( network_xpm );
+   icons[18] = wxIcon ( burn_xpm );
+   icons[19] = wxIcon ( moon_xpm );
+   icons[20] = wxIcon ( matlabfunction_xpm );
+   icons[21] = wxIcon ( array_xpm );
+   icons[22] = wxIcon ( coordinatesystem_xpm );
+   icons[23] = wxIcon ( openglplot_xpm );
+   icons[24] = wxIcon ( propagator_xpm );
+   icons[25] = wxIcon ( variable_xpm );
+   icons[26] = wxIcon ( xyplot_xpm );
+   icons[27] = wxIcon ( default_xpm );
 
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
@@ -1355,7 +1381,7 @@ void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
    {
       wxString newName = wxT(hw->GetName().c_str());
   
-      AppendItem(item, newName, GmatTree::ICON_FILE, -1,
+      AppendItem(item, newName, GmatTree::ICON_TANK, -1,
                  new GmatTreeItemData(newName, GmatTree::FUELTANK));
 
       //loj: 2/9/05 todo
@@ -1389,7 +1415,7 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
    {
       wxString newName = wxT(hw->GetName().c_str());
   
-      AppendItem(item, newName, GmatTree::ICON_FILE, -1,
+      AppendItem(item, newName, GmatTree::ICON_THRUSTER, -1,
                  new GmatTreeItemData(newName, GmatTree::THRUSTER));
 
       //loj: 2/9/05 todo
@@ -1569,7 +1595,7 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSolver
        ("DifferentialCorrector", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_FILE, -1,
+      AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
                  new GmatTreeItemData(name, GmatTree::DIFF_CORR));
 
       Expand(item);
@@ -1792,6 +1818,100 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 
       Expand(item);
    }
+}
+
+//------------------------------------------------------------------------------
+// void OnOpenScript(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a script to the folder and open it
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnOpenScript(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
+         _T("Script files (*.script, *.m)|*.script;*.m|"\
+            "Text files (*.txt, *.text)|*.txt;*.text|"\
+            "All files (*.*)|*.*"));
+
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString filename = dialog.GetFilename().c_str();
+      wxString path = dialog.GetPath().c_str();
+
+      // add item to tree
+      wxTreeItemId newItem = AppendItem(item, filename, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+
+      // open item
+      GmatAppData::GetMainFrame()->CreateChild(
+                  (GmatTreeItemData *)GetItemData(newItem));
+
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnNewScript(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a script to the folder and open it
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnNewScript(wxCommandEvent &event)
+{
+
+   wxTreeItemId item = GetSelection();
+
+   wxString name;
+   name.Printf("Script%d.script", ++mNumScripts);
+
+   // add item to tree
+   wxTreeItemId newItem = AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+                    new GmatTreeItemData(name, GmatTree::SCRIPT_FILE));
+
+   // open item
+   GmatAppData::GetMainFrame()->CreateChild(
+                  (GmatTreeItemData *)GetItemData(newItem));
+
+   Expand(item);
+}
+
+//------------------------------------------------------------------------------
+// void OnRemoveAllScripts(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a script to the folder and open it
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   Collapse(item);
+
+   while (GetChildrenCount(item) > 0)
+   {
+      wxTreeItemId lastChild = GetLastChild(item);
+      wxString name = ((GmatTreeItemData *)GetItemData(lastChild))->GetDesc();
+
+      // close window
+      GmatAppData::GetMainFrame()->RemoveChild(name);
+
+      // delete item
+      Delete(lastChild);
+   }
+
+   // arg: should script counter go back to 1?
+
 }
 
 //---------------------------------

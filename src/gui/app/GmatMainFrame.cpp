@@ -77,6 +77,7 @@
 #include "MatlabFunctionSetupPanel.hpp"
 #include "AssignmentPanel.hpp"
 #include "ScriptEventPanel.hpp"
+#include "ScriptPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -89,7 +90,7 @@
 #include "bitmaps/paste.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/help.xpm"
-#include "bitmaps/run.xpm"
+#include "bitmaps/play.xpm"
 #include "bitmaps/pause.xpm"
 #include "bitmaps/stop.xpm"
 #include "bitmaps/close.xpm"
@@ -140,6 +141,11 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_SIZE(GmatMainFrame::OnSize)
    EVT_SET_FOCUS(GmatMainFrame::OnFocus)
+
+   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
+   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
+   EVT_MENU(GmatScript::MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
+
 END_EVENT_TABLE()
 
 //------------------------------
@@ -572,6 +578,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new MatlabFunctionSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
+      else if (dataType == GmatTree::SCRIPT_FILE)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new ScriptPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
       else if (dataType == GmatTree::IF_CONTROL)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
@@ -647,6 +662,40 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       {
          // set the datatype, so the gmatnotebook minimize/cascade accordingly
          newChild->SetDataType(dataType);
+
+         if (dataType == GmatTree::SCRIPT_FILE)
+         {
+             // Make a menubar
+             wxMenu *file_menu = new wxMenu;
+
+             file_menu->Append(wxID_NEW, _T("&New..."));
+             file_menu->Append(wxID_OPEN, _T("&Open..."));
+             file_menu->Append(wxID_CLOSE, _T("&Close"));
+             file_menu->Append(wxID_SAVE, _T("&Save"));
+             file_menu->Append(wxID_SAVEAS, _T("Save &As..."));
+
+             wxMenu *scriptMenu = (wxMenu *) NULL;
+
+             scriptMenu = new wxMenu;
+             scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT,
+                   _T("&Build Object"));
+             scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN,
+                   _T("&Build and Run"));
+             scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
+
+             wxMenuBar *menu_bar = new wxMenuBar;
+
+             menu_bar->Append(file_menu, _T("&File"));
+             menu_bar->Append(scriptMenu, _T("&Script"));
+
+             // Associate the menu bar with the frame
+             newChild->SetMenuBar(menu_bar);
+
+         }
+         else
+         {
+            newChild->SetMenuBar(CreateMainMenu());
+         }
 
          panel->SetScrollRate(5, 5);
          panel->SetAutoLayout(TRUE);
@@ -1206,7 +1255,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[5] = new wxBitmap(paste_xpm);
    bitmaps[6] = new wxBitmap(print_xpm);
    bitmaps[7] = new wxBitmap(help_xpm);
-   bitmaps[8] = new wxBitmap(run_xpm);
+   bitmaps[8] = new wxBitmap(play_xpm);
    bitmaps[9] = new wxBitmap(pause_xpm);
    bitmaps[10] = new wxBitmap(stop_xpm);
    bitmaps[11] = new wxBitmap(close_xpm);
@@ -1860,6 +1909,94 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
    MessageInterface::ShowMessage("GmatMainFrame::OnFocus() entered\n");
 #endif
 
+
+//   wxObject *obj = event.GetEventObject();
+//   bool isGmatMdiChild = obj->IsKindOf(CLASSINFO(wxMDIChildFrame));
+//
+//   if (isGmatMdiChild)
+//   {
+//      // need to find out its type
+//      GmatMdiChildFrame *childFrame = (GmatMdiChildFrame *)obj;
+//
+//      if (childFrame->GetDataType() == GmatTree::SCRIPT_FILE)
+//         MessageInterface::ShowMessage("ScriptFile brought into focus\n");
+//      // set the menu
+//   }
    wxYield();
    event.Skip(true);
 }
+
+//------------------------------------------------------------------------------
+// bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+bool GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
+{
+   wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+
+   bool status = GmatAppData::GetGuiInterpreter()->
+      InterpretScript(std::string(filename.c_str()));
+
+   //close the open windows
+   GmatAppData::GetMainFrame()->CloseAllChildren();
+
+   // Update ResourceTree and MissionTree
+   GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
+   GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
+
+   return status;
+}
+
+//------------------------------------------------------------------------------
+// bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+bool GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
+{
+   bool status = false;
+
+   wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
+
+   status = GmatAppData::GetGuiInterpreter()->
+      InterpretScript(std::string(filename.c_str()));
+
+   if (status)
+   {
+      //close the open windows
+      GmatAppData::GetMainFrame()->CloseAllChildren();
+
+      // Update ResourceTree
+      GmatAppData::GetResourceTree()->UpdateResource(true);
+      GmatAppData::GetMissionTree()->UpdateMission(true);
+
+      //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+      GmatAppData::GetMainFrame()->RunCurrentMission();
+
+      //loj: 3/17/04 Should I close all plot window?
+      //status = GmatAppData::GetGuiInterpreter()->RunScript();
+   }
+
+   return status;
+}
+
+//------------------------------------------------------------------------------
+// bool OnScriptRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * @note We should have an option to clear message each run. If it runs for
+ *       a long time (days, months, etc), we will not see all the output written
+ *       to the message window.
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
+{
+   //MessageInterface::ClearMessage();
+
+   //loj: 3/17/04 Should I close all plot window?
+
+   //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+   GmatAppData::GetMainFrame()->RunCurrentMission();
+
+   //bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+
+   return true;
+}
+
