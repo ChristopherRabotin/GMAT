@@ -10,6 +10,7 @@ OBJECTS = AxisSystem.o \
           CoordinateSystem.o \
           CoordinateSystemException.o \
           DynamicAxes.o \
+          BodyFixedAxes.o \
           InertialAxes.o \
           MJ2000EcAxes.o \
           MJ2000EqAxes.o

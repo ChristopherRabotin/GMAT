@@ -31,7 +31,8 @@ OBJECTS = A1Date.o \
           Spherical.o \
           SphericalAZFPA.o \
           SphericalRADEC.o \
-          StringTokenizer.o
+          StringTokenizer.o \
+          TimeSystemConverter.o
 
 all: libUtilities 
 	mkdir -p ../lib
