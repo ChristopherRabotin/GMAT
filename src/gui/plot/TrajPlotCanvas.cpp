@@ -29,11 +29,11 @@
 #    include <glu.h>
 #  endif
 #else
-#  include <gl/gl.h>
-#  include <gl/glu.h>
-#  include <il/il.h>
-#  include <il/ilu.h>
-#  include <il/ilut.h>
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#  include <IL/il.h>
+#  include <IL/ilu.h>
+#  include <IL/ilut.h>
 #endif
 
 BEGIN_EVENT_TABLE(TrajPlotCanvas, wxGLCanvas)

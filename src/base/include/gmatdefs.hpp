@@ -76,6 +76,7 @@ namespace Gmat
       INTERPOLATOR,
       SOLAR_SYSTEM,
       CELESTIAL_BODY,
+      ATMOSPHERE,
       PARAMETER,
       STOP_CONDITION,
       SOLVER,

@@ -10,6 +10,7 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
           -I../refframe -I../burn -I../solver
           
 GUIHEADERS = -I../../gui/include \
+        -I../../gui/include/bitmaps \
         -I../../gui/app \
         -I../../gui/view \
         -I../../gui/foundation \

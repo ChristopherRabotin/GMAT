@@ -28,7 +28,6 @@
 
 
 #include "ManeuverFrame.hpp"
-#include <list>
 
 
 class ManeuverFrameManager
