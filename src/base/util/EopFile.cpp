@@ -48,7 +48,8 @@ eopFType        (eop),
 eopFileName     (fileName),
 tableSz         (0),
 polarMotion     (new Rmatrix(MAX_TABLE_SIZE,3)),
-ut1UtcOffsets   (new Rmatrix(MAX_TABLE_SIZE,2))
+ut1UtcOffsets   (new Rmatrix(MAX_TABLE_SIZE,2)),
+isInitialized   (false)
 {
 }
 
@@ -68,7 +69,8 @@ eopFType        (eopF.eopFType),
 eopFileName     (eopF.eopFileName),
 tableSz         (eopF.tableSz),
 polarMotion     (new Rmatrix(*(eopF.polarMotion))),
-ut1UtcOffsets   (new Rmatrix(*(eopF.ut1UtcOffsets)))
+ut1UtcOffsets   (new Rmatrix(*(eopF.ut1UtcOffsets))),
+isInitialized   (eopF.isInitialized)
 {
 }
 
@@ -94,6 +96,7 @@ const EopFile& EopFile::operator=(const EopFile &eopF)
    delete ut1UtcOffsets;
    polarMotion   = new Rmatrix(*(eopF.polarMotion));
    ut1UtcOffsets = new Rmatrix(*(eopF.ut1UtcOffsets));
+   isInitialized = eopF.isInitialized;
    return *this;
 }
 //---------------------------------------------------------------------------
@@ -121,6 +124,8 @@ EopFile::~EopFile()
 //------------------------------------------------------------------------------
 void EopFile::Initialize()
 {
+   if (isInitialized) return;
+   
    std::string   line;
    std::ifstream eopFile(eopFileName.c_str());
    if (!eopFile)
@@ -202,9 +207,20 @@ void EopFile::Initialize()
       throw UtilityException("Error In EopFile - file type unknown.");
    }
    if (eopFile.is_open())  eopFile.close();
+   isInitialized = true;
 }
 
-// method to return the UT1-UTC offset for the given UTCMjd - use UtcMjd???
+//---------------------------------------------------------------------------
+//  Real GetUt1UtcOffset(const Real utcMjd)
+//---------------------------------------------------------------------------
+ /**
+ * Returns the UT1-UTC offset for the given utc mjd.
+ *
+ * @param utcMjd  The utc mjd for which to return the offset.
+ *
+ * @return UT1-UTC offset for the given time.
+ */
+//---------------------------------------------------------------------------
 Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 {
    Integer i = 0;
@@ -216,7 +232,16 @@ Real EopFile::GetUt1UtcOffset(const Real utcMjd)
    return ut1UtcOffsets->GetElement(0,1);
 }
 
-// method to return JD, X, Y data (for use by coordinate systems)
+//---------------------------------------------------------------------------
+//  Rmatrix GetPolarMotionData()
+//---------------------------------------------------------------------------
+/**
+ * Returns the polar motion data.
+ * for each row:  mjd, x, y
+ *
+ * @return polar motion data.
+ */
+//---------------------------------------------------------------------------
 Rmatrix EopFile::GetPolarMotionData()
 {
    return Rmatrix(*polarMotion);

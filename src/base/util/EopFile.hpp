@@ -70,6 +70,7 @@ protected:
    /// vector of UT1-UTC offsets : MJD, offset
    Rmatrix*             ut1UtcOffsets;
    
+   bool isInitialized;
    
    bool IsBlank(const char* aLine);
 
