@@ -532,7 +532,7 @@ GmatBase* Periapsis::Clone(void) const
 */
 //------------------------------------------------------------------------------
 OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "Km/s", GmatParam::ORIGIN)
+   : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
@@ -1165,7 +1165,8 @@ Altitude::~Altitude()
 //------------------------------------------------------------------------------
 bool Altitude::Evaluate()
 {
-   mRealValue = OrbitData::GetSphReal("Altitude");    
+   //loj: 2/16/05 Changed from GetSphReal
+   mRealValue = OrbitData::GetSphRaDecReal("Altitude");
    
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
