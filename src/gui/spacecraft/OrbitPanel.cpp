@@ -350,22 +350,28 @@ void OrbitPanel::LoadData()
   
     wxString description;
     
-    description.Printf("%s", theSpacecraft->GetParameterText(1).c_str());
+    int stateId = theSpacecraft->GetParameterID("Element1");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description1->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(2).c_str());
+    stateId = theSpacecraft->GetParameterID("Element2");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description2->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(3).c_str());
+    stateId = theSpacecraft->GetParameterID("Element3");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description3->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(4).c_str());
+    stateId = theSpacecraft->GetParameterID("Element4");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description4->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(5).c_str());
+    stateId = theSpacecraft->GetParameterID("Element5");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description5->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(6).c_str());
+    stateId = theSpacecraft->GetParameterID("Element6");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description6->SetLabel(description);
     
 
@@ -481,22 +487,28 @@ void OrbitPanel::OnStateChange()
 
     wxString description;
     
-    description.Printf("%s", theSpacecraft->GetParameterText(1).c_str());
+    int stateId = theSpacecraft->GetParameterID("Element1");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description1->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(2).c_str());
+    stateId = theSpacecraft->GetParameterID("Element2");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description2->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(3).c_str());
+    stateId = theSpacecraft->GetParameterID("Element3");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description3->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(4).c_str());
+    stateId = theSpacecraft->GetParameterID("Element4");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description4->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(5).c_str());
+    stateId = theSpacecraft->GetParameterID("Element5");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description5->SetLabel(description);
 
-    description.Printf("%s", theSpacecraft->GetParameterText(6).c_str());
+    stateId = theSpacecraft->GetParameterID("Element6");
+    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
     description6->SetLabel(description);
 
      Real *returnState = theSpacecraft->GetDisplayState();
