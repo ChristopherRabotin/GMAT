@@ -1,12 +1,16 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              GmatMainApp
+//                              GmatApp
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: Linda Jun
 // Created: 2003/08/08
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains GMAT main application. Program starts here.
@@ -16,6 +20,8 @@
 
 #include "GmatMainFrame.hpp"
 #include "GmatApp.hpp"
+#include "GmatAppData.hpp"
+#include "Moderator.hpp"
 
 // Create a new application object: this macro will allow wxWindows to create
 // the application object during program execution (it's better than using a
@@ -34,17 +40,37 @@ IMPLEMENT_APP(GmatApp)
 //------------------------------------------------------------------------------
 bool GmatApp::OnInit()
 {
-   // create the main application window
-   GmatMainFrame *mainFrame = new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
-                        wxDefaultPosition, wxDefaultSize,
-                        wxDEFAULT_FRAME_STYLE);
+    bool status = false;
+    
+    // create the Moderator - GMAT executive
+    theModerator = Moderator::Instance();
 
-   // and show it (the frames, unlike simple controls, are not shown when
-   // created initially)
-   mainFrame->Show(true);
+    // initialize the moderator
+    if (theModerator->Initialize())
+    {
+        // get GuiInterpreter
+        GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
+   
+        // create the main application window
+        GmatMainFrame *mainFrame =
+            new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
+                              wxDefaultPosition, wxDefaultSize,
+                              wxDEFAULT_FRAME_STYLE);
 
-   // success: wxApp::OnRun() will be called which will enter the main message
-   // loop and the application will run. If we returned FALSE here, the
-   // application would exit immediately.
-   return true;
+        // and show it (the frames, unlike simple controls, are not shown when
+        // created initially)
+        mainFrame->Show(true);
+        status = true;
+    }
+    else
+    {
+        // show some message here
+        status = false;
+    }
+   
+    // success: wxApp::OnRun() will be called which will enter the main message
+    // loop and the application will run. If we returned FALSE here, the
+    // application would exit immediately.
+   
+    return status;
 }
