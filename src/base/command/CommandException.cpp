@@ -1,11 +1,11 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  ClassName
+//                              CommandException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
 // Author: Darrel J. Conway
-// Created: 2003/mm/dd
+// Created: 2003/10/27
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -27,7 +27,7 @@
  * @param details A message providing the details of the exception. 
  */
 //------------------------------------------------------------------------------
-CommandException::CommandException(std::string details) :
+CommandException::CommandException(const std::string &details) :
     BaseException           ("Command Exception Thrown: ", details)
 {
 }
@@ -50,6 +50,8 @@ CommandException::~CommandException()
 //------------------------------------------------------------------------------
 /**
  * Constructs CommandException instance (copy constructor). 
+ *
+ * @param ce Instance that gets copied.
  */
 //------------------------------------------------------------------------------
 CommandException::CommandException(const CommandException &ce) :

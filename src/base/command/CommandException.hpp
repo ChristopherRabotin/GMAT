@@ -16,8 +16,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef COMMANDEXCEPTION_HPP
-#define COMMANDEXCEPTION_HPP
+#ifndef CommandException_hpp
+#define CommandException_hpp
 
 #include "BaseException.hpp" // inheriting class's header file
 
@@ -28,12 +28,12 @@ class CommandException : public BaseException
 {
 	public:
 		// class constructor
-		CommandException(std::string details);
+		CommandException(const std::string &details);
 		// class destructor
 		~CommandException();
 		// Copy constructor
-		CommandException(const CommandException &);
+		CommandException(const CommandException &ce);
 };
 
-#endif // COMMANDEXCEPTION_HPP
+#endif // CommandException_hpp
 

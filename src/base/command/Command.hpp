@@ -44,12 +44,12 @@ class PhysicalModel;
 /**
  * GMAT GmatCommand Base Class, used for timeline elements in the script
  *
- * The GMAT GmatCommands all follow a "late-binding" philosophy, in that they do not
- * set object associations until the Sandbox has been populated with both the 
- * objects that are used in the model and with the complete GmatCommand sequence.
- * Once the Sandbox is populated, it initializes the GmatCommand sequence by calling
- * Initialize() on each GmatCommand, and then runs the sequence by calling Execute()
- * on the first GmatCommand in the sequence.
+ * The GMAT GmatCommands all follow a "late-binding" philosophy, in that they do
+ * not set object associations until the Sandbox has been populated with both
+ * the objects that are used in the model and with the complete GmatCommand 
+ * sequence.  Once the Sandbox is populated, it initializes the GmatCommand 
+ * sequence by calling Initialize() on each GmatCommand, and then runs the
+ * sequence by calling Execute() on the first GmatCommand in the sequence.
  */
 class GMAT_API GmatCommand : public GmatBase
 {
@@ -65,9 +65,10 @@ public:
    
    void                 SetGeneratingString(const std::string &gs);
    virtual const std::string&  
-                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                            const std::string &prefix = "",
-                                            const std::string &useName = "");
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
@@ -114,17 +115,21 @@ public:
    virtual bool         InterpretAction();
    
    Integer              DepthIncrement();
-   bool                 PropStateChanged();
+   bool                 HasPropStateChanged();
             
-   /** 
-   * The method that is fired to perform the GmatCommand.
-   *
-   * Derived classes implement this method to perform their actions on 
-   * GMAT objects.
-   *
-   * @return true if the GmatCommand runs to completion, false if an error 
-   *         occurs. 
-   */
+   //---------------------------------------------------------------------------
+   //  bool GmatCommand::InterpretAction()
+   //---------------------------------------------------------------------------
+   /**
+    * The method that is fired to perform the GmatCommand.
+    *
+    * Derived classes implement this method to perform their actions on
+    * GMAT objects.
+    *
+    * @return true if the GmatCommand runs to completion, false if an error
+    *         occurs.
+    */
+   //---------------------------------------------------------------------------
    virtual bool        Execute() = 0;
 
 protected:
@@ -156,11 +161,11 @@ protected:
    Integer              streamID;
    /// Change in branch depth caused by this command
    Integer              depthChange;
-   /// Flag indicating that the command changes the state vector for proagation
-   bool                 propStateChanged;
+   /// Flag indicating that the command changes the state vector for propagation
+   bool                 commandChangedState;
       
-   virtual bool          AssignObjects(); 
-   virtual bool          ClearObjects();    
+   virtual bool         AssignObjects();
+   virtual bool         ClearObjects();
 };
 
 #endif // Command_hpp
