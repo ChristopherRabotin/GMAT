@@ -53,7 +53,7 @@
 
 #include "Formation.hpp"      // for BuildState()
 
-#define DEBUG_FORCEMODEL 0
+//#define DEBUG_FORCEMODEL 1 //loj: 1/14/05 commented out
 #define normType -2
 
 //---------------------------------

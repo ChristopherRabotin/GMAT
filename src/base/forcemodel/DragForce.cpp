@@ -23,15 +23,16 @@
 #include "MessageInterface.hpp"
 
 // Uncomment to generate drag model data for debugging:
-#define     DEBUG      
+//loj: 1/14/05 Changed DEBUG to DEBUG_DRAGFORCE_DENSITY
+//#define DEBUG_DRAGFORCE_DENSITY
+//#define DEBUG_DRAGFORCE_PARAM
 
-#ifdef DEBUG
+#ifdef DEBUG_DRAGFORCE_DENSITY
    #include <fstream>
    
    std::ofstream dragdata;
 #endif
 
-//#defin DEBUG_DRAGFORCE_PARAM 1
 
 //------------------------------------------------------------------------------
 // DragForce(const std::string &name)
@@ -84,7 +85,7 @@ DragForce::DragForce(const std::string &name) :
     angVel[1]      = 0.0;
     angVel[2]      = 7.29211585530e-5;
 
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata.open("DragData.csv");
          dragdata << "Atmospheric drag parameters\n";
     #endif
@@ -111,7 +112,7 @@ DragForce::~DragForce()
     if (prefactor)
         delete [] prefactor;
 
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata.close();
     #endif
 }
@@ -269,7 +270,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
 {
     unsigned parmNumber = (unsigned)(i+1);
 
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Setting satellite parameter " << parmName 
                   << " for Spacecraft " << i << " to " << parm << "\n";
     #endif
@@ -329,7 +330,7 @@ void DragForce::SetSatelliteParameter(const Integer i,
 //------------------------------------------------------------------------------
 bool DragForce::Initialize()
 {
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Entered DragForce::Initialize()\n";
     #endif
 
@@ -391,7 +392,7 @@ bool DragForce::Initialize()
     
     firedOnce = false;
 
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Leaving DragForce::Initialize()\n";
     #endif
     
@@ -417,7 +418,7 @@ bool DragForce::Initialize()
 //------------------------------------------------------------------------------
 void DragForce::BuildPrefactors(void) 
 {
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Building prefactors for " << satCount <<" Spacecraft\n";
     #endif
 
@@ -434,7 +435,7 @@ void DragForce::BuildPrefactors(void)
         // Note: Prefactor is scaled to account for density in kg / m^3
         prefactor[i] = -500.0 * dragCoeff[i] * area[i] / mass[i];
 
-       #ifdef DEBUG
+       #ifdef DEBUG_DRAGFORCE_DENSITY
             dragdata << "Prefactor data\n   Spacecraft "
                      << i 
                      << "\n      Cd = " << dragCoeff[i] 
@@ -470,7 +471,7 @@ void DragForce::BuildPrefactors(void)
  */
 bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 {
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata << "Entered DragForce::GetDerivatives()\n";
     #endif
 
@@ -483,7 +484,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
        else
           if (mass.size() == 0) 
              for (Integer i = 0; i < satCount; ++i) {
-                #ifdef DEBUG
+                #ifdef DEBUG_DRAGFORCE_DENSITY
                     dragdata << "Using default prefactors for " << satCount <<" Spacecraft\n";
                 #endif
                 prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
@@ -492,18 +493,18 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
        firedOnce = true;
     }
     
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata << "Looking up density\n";
     #endif
     GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata << "density[0] = " << density[0] << "\n";
     #endif
     
     
     for (i = 0; i < satCount; ++i) {
         i6 = i * 6;
-        #ifdef DEBUG
+        #ifdef DEBUG_DRAGFORCE_DENSITY
            dragdata << "Spacecraft " << (i+1) << ": ";
         #endif
 
@@ -530,7 +531,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[1+i6] = state[4+i6];
             deriv[2+i6] = state[5+i6];
 
-            #ifdef DEBUG
+            #ifdef DEBUG_DRAGFORCE_DENSITY
                for (Integer m = 0; m < satCount; ++m)
                   dragdata << "   Drag Accel: " 
                            << deriv[3+i6] << "  "
@@ -548,7 +549,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[4+i6] = 0.0; 
             deriv[5+i6] = 0.0; 
 
-            #ifdef DEBUG
+            #ifdef DEBUG_DRAGFORCE_DENSITY
                for (Integer m = 0; m < satCount; ++m)
                   dragdata << "   Accel: " 
                            << deriv[i6] << "  "
@@ -786,7 +787,6 @@ std::string DragForce::GetStringParameter(const Integer id) const
    return PhysicalModel::GetStringParameter(id);
 }
 
-//loj: 10/25/04 added
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -809,7 +809,7 @@ std::string DragForce::GetStringParameter(const std::string &label) const
  */
 bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 {
-#if DEBUG_DRAGFORCE_PARAM
+#ifdef DEBUG_DRAGFORCE_PARAM
    MessageInterface::ShowMessage
       ("DragForce::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
 #endif
@@ -857,14 +857,13 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    return PhysicalModel::SetStringParameter(id, value);
 }
 
-//loj: 10/25/04 added
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 bool DragForce::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-#if DEBUG_DRAGFORCE_PARAM
+#ifdef DEBUG_DRAGFORCE_PARAM
    MessageInterface::ShowMessage("DragForce::SetStringParameter() label=%s, value=%s\n",
                                  label.c_str(), value.c_str());
 #endif
@@ -945,7 +944,7 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
  */
 void DragForce::GetDensity(Real *state, Real when)
 {
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata << "Entered DragForce::GetDensity()\n";
     #endif
 
@@ -970,15 +969,15 @@ void DragForce::GetDensity(Real *state, Real when)
             }
         }
 
-        #ifdef DEBUG
+        #ifdef DEBUG_DRAGFORCE_DENSITY
            dragdata << "Calling atmos->Density() on " << atmos->GetTypeName() << "\n";
         #endif
         atmos->Density(state, density, when, satCount);
-        #ifdef DEBUG
+        #ifdef DEBUG_DRAGFORCE_DENSITY
            dragdata << "Returned from atmos->Density()\n";
         #endif
         
-        #ifdef DEBUG
+        #ifdef DEBUG_DRAGFORCE_DENSITY
             for (Integer m = 0; m < satCount; ++m)
                dragdata << "   Epoch: " << when 
                         << "   State: " 
@@ -988,7 +987,7 @@ void DragForce::GetDensity(Real *state, Real when)
                         << density[m] << "\n";
         #endif
     }
-    #ifdef DEBUG
+    #ifdef DEBUG_DRAGFORCE_DENSITY
        dragdata << "Leaving DragForce::GetDensity()\n";
     #endif
 }
