@@ -24,7 +24,7 @@ const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
 const Real                  Star::MASS                = 1.989E30;    // kg
 const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
 const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
-const Real                  Star::MU                  = 1.32712438e20;      // m^3 / s^2
+const Real                  Star::MU                  = 1.32712438e20; //m^3/s^2
 const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const Integer               Star::BODY_NUMBER         = 3;  
@@ -32,10 +32,13 @@ const Integer               Star::REF_BODY_NUMBER     = 3;
 const Integer               Star::ORDER               = 4;      
 const Integer               Star::DEGREE              = 4;
 const Integer               Star::COEFFICIENT_SIZE    = 4;
-const Rmatrix               Star::SIJ                 = Rmatrix(4,4,
-            0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
-const Rmatrix               Star::CIJ                 = Rmatrix(4,4,
-           0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
+const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
+      1.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0); 
 
 
 const Real                  Star::RADIANT_POWER       = 1358.0;       // W / m^2
