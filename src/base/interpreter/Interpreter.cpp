@@ -465,7 +465,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
          if (cmd == NULL)
             throw InterpreterException("Cannot create \"" + topLevel[0] + 
                                        "\" command.");
-         cmd->SetGeneratingString(scriptline);
+//         cmd->SetGeneratingString(scriptline);
       }
       else 
          throw InterpreterException("\"" + topLevel[0] + 
@@ -473,6 +473,8 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    }
    if (!cmd)  
       return false;
+
+   cmd->SetGeneratingString(scriptline);
       
    // Perform Command specific tasks: Setting string data, and so forth
    std::string cmdCase = cmd->GetTypeName();

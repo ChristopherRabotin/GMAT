@@ -33,6 +33,8 @@
 #include "If.hpp"             // for IF command
 #include "Else.hpp"           // for Else command
 #include "EndIf.hpp"          // for EndIf command
+#include "While.hpp"            // for FOR command
+#include "EndWhile.hpp"         // for EndFor command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Save.hpp"           // for Save command  
 
@@ -74,6 +76,10 @@ GmatCommand* CommandFactory::CreateCommand(std::string ofType,
         return new For;
     else if (ofType == "EndFor")
         return new EndFor;
+    else if (ofType == "While")
+        return new While;
+    else if (ofType == "EndWhile")
+        return new EndWhile;
     else if (ofType == "If")
         return new If;
     else if (ofType == "Else")
@@ -119,6 +125,8 @@ CommandFactory::CommandFactory() :
       creatables.push_back("If");
       creatables.push_back("Else");
       creatables.push_back("EndIf");
+      creatables.push_back("While");
+      creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
       creatables.push_back("save");
    }
@@ -167,6 +175,8 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("If");
       creatables.push_back("Else");
       creatables.push_back("EndIf");
+      creatables.push_back("While");
+      creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
       creatables.push_back("save");
    }

@@ -27,6 +27,8 @@ OBJECTS = Command.o CommandException.o \
           If.o \
           Else.o \
           EndIf.o \
+          While.o \
+          EndWhile.o \
           Assignment.o \
           Save.o
 
