@@ -94,6 +94,7 @@ private:
 
     GuiInterpreter *theGuiInterpreter;
     Spacecraft *theSpacecraft;
+    Spacecraft *savedSpacecraft;
     
     wxStaticText *description1;
     wxStaticText *description2;
