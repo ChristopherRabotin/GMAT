@@ -64,7 +64,18 @@ bool GmatApp::OnInit()
     }
     else
     {
-        // show some message here
+        // show error messages
+        {
+            wxBusyCursor bc;
+            wxLogWarning(wxT("The Moderator failed to initialize."));
+            
+            // and if ~wxBusyCursor doesn't do it, then call it manually
+            wxYield();
+        }
+
+        //loj: How do I change the title?
+        wxLogError(wxT("The error occurred during the initialization. The GMAT will exit"));
+        wxLog::FlushActive();
         status = false;
     }
    
