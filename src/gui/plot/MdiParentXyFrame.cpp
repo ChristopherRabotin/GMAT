@@ -69,7 +69,7 @@ MdiParentXyFrame::MdiParentXyFrame(wxWindow *parent,
     CreateStatusBar();
     
     // tool bar
-    CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
+    CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
     InitToolBar(GetToolBar());
     
    // Accelerators

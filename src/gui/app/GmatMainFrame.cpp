@@ -190,7 +190,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
 #endif
    
-   CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
+   CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
    InitToolBar(GetToolBar());
    
    // used to store the list of open children
@@ -1072,8 +1072,8 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
    
-   wxColour toolBarBackground = *wxLIGHT_GREY;
-   toolBar->SetBackgroundColour(toolBarBackground);
+//   wxColour toolBarBackground = *wxLIGHT_GREY;
+//   toolBar->SetBackgroundColour(toolBarBackground);
 
    int i;
    for (i = 0; i < 13; i++)

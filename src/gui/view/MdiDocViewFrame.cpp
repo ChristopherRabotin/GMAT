@@ -68,7 +68,7 @@ MdiDocViewFrame::MdiDocViewFrame(wxDocManager *manager, wxFrame *frame,
     CreateStatusBar();
     
     // tool bar
-    wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
+    wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
     wxBitmap tbBitmaps[1];
 
     tbBitmaps[0] = wxBITMAP(open);
