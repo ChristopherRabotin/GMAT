@@ -97,8 +97,9 @@ private:
    Integer propID;
    Integer scID;
    Integer mStopCondCount;
-   Integer tempPropCount;
-   PropType tempProp[MAX_PROP_ROW];
+   Integer mTempPropCount;
+   Integer mCurrStopRow;
+   PropType mTempProp[MAX_PROP_ROW];
    StopCondType tempStopCond[MAX_STOPCOND_ROW];
    
    std::string propSetupName;
@@ -106,7 +107,7 @@ private:
    wxString scListString;
    wxString newParamName;
    StringArray scList;
-    
+   
    GmatCommand    *theCommand;
    Propagate      *thePropagateCommand;
    GmatBase       *theStopCondBase;
@@ -122,9 +123,10 @@ private:
 
    // Layout & data handling methods
    void DisplayPropagator();
-   void DisplayStopCondition();
+   void DisplayStopCondition(int selRow);
    void UpdateStopCondition();
-   void ClearDetailedStopCond();
+   void RemoveStopCondition();
+   void ClearStopCondition(int selRow);
    void ShowDetailedStopCond(int stopRow);
    void ActivateUpdateButton();
    wxString FormatStopCondDesc(const wxString &varName,
