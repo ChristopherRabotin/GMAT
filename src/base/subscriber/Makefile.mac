@@ -2,12 +2,13 @@
 # Module:     Makefile.mac for subscriber directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-
+# Modified:   2004/01/16 - Added OpenGlPlot.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = MessageWindow.cpp ReportFile.cpp Subscriber.cpp
+SRC = MessageWindow.cpp OpenGlPlot.cpp ReportFile.cpp Subscriber.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
