@@ -87,10 +87,10 @@ CurrentA1MjdParam::~CurrentA1MjdParam()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// Real EvaluateReal()
+// virtual Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
- * Evaluates and returns real value of the parameter.
+ * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
 Real CurrentA1MjdParam::EvaluateReal()
@@ -104,7 +104,19 @@ Real CurrentA1MjdParam::EvaluateReal()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// virtual Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer CurrentA1MjdParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference objects.
@@ -121,22 +133,12 @@ bool CurrentA1MjdParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer CurrentA1MjdParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
+// virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool CurrentA1MjdParam::Validate()
@@ -145,7 +147,7 @@ bool CurrentA1MjdParam::Validate()
 }
 
 //------------------------------------------------------------------------------
-// bool Evaluate()
+// virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
  * Evaluates value of the parameter.

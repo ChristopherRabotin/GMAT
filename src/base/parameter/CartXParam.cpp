@@ -91,10 +91,10 @@ CartXParam::~CartXParam()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// Real EvaluateReal()
+// virtual Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
- * Evaluates and returns real value of the parameter.
+ * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
 Real CartXParam::EvaluateReal()
@@ -109,7 +109,19 @@ Real CartXParam::EvaluateReal()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// virtual Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer CartXParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference objects.
@@ -126,22 +138,12 @@ bool CartXParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer CartXParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
+// virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool CartXParam::Validate()
@@ -150,12 +152,12 @@ bool CartXParam::Validate()
 }
 
 //------------------------------------------------------------------------------
-// bool Evaluate()
+// virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
  * Evaluates value of the parameter.
  *
- * @return true if parameter value successfully evaluated.
+ * @return true if parameter value successfully evaluated; false otherwise
  */
 //------------------------------------------------------------------------------
 bool CartXParam::Evaluate()

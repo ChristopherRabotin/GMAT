@@ -130,10 +130,24 @@ Real ElapsedSecsParam::EvaluateReal()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer ElapsedSecsParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference objects.
+ *
+ * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
 bool ElapsedSecsParam::AddObject(GmatBase *obj)
@@ -145,22 +159,12 @@ bool ElapsedSecsParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer ElapsedSecsParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
+// virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ElapsedSecsParam::Validate()
@@ -169,10 +173,12 @@ bool ElapsedSecsParam::Validate()
 }
 
 //------------------------------------------------------------------------------
-// bool Evaluate()
+// virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
  * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ElapsedSecsParam::Evaluate()

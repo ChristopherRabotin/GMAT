@@ -36,6 +36,7 @@ public:
     Real GetKepReal(const std::string &str);
     Real GetOtherKepReal(const std::string &str);
     Real GetSphReal(const std::string &str);
+    Real GetAngularReal(const std::string &str);
     
     // The inherited methods from RefData
     virtual bool ValidateRefObjects(GmatBase *param);
@@ -47,6 +48,7 @@ protected:
     virtual bool CheckRefObjectType(GmatBase *obj);
 
     const static Real ORBIT_REAL_UNDEFINED = -9876543210.1234;
+    const static Real ORBIT_TOL = 1.0e-10;
     
     enum
     {

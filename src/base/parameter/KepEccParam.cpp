@@ -91,7 +91,7 @@ KepEccParam::~KepEccParam()
 // Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
- * Evaluates and returns real value of the parameter.
+ * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
 Real KepEccParam::EvaluateReal()
@@ -103,6 +103,18 @@ Real KepEccParam::EvaluateReal()
 //-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
+
+//------------------------------------------------------------------------------
+// Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer KepEccParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
 
 //------------------------------------------------------------------------------
 // bool AddObject(GmatBase *obj)
@@ -122,22 +134,12 @@ bool KepEccParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer KepEccParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool KepEccParam::Validate()
@@ -156,7 +158,8 @@ bool KepEccParam::Validate()
 //------------------------------------------------------------------------------
 bool KepEccParam::Evaluate()
 {
-    mValue = GetKepReal("KepEcc");    
+    mValue = GetKepReal("KepEcc");
+    
     if (mValue == ORBIT_REAL_UNDEFINED)
         return false;
     else

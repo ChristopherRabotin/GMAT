@@ -19,8 +19,10 @@
 #include "gmatdefs.hpp"
 #include "OrbitData.hpp"
 #include "ParameterException.hpp"
+#include "Rvector3.hpp"
+#include "RealUtilities.hpp"
 
-#include <math.h>
+using namespace GmatMathUtil;
 
 //---------------------------------
 // static data
@@ -182,24 +184,24 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
         Real sma = obj->GetRealParameter(1); //("KepSma"); -- just to compile
         Real ecc = obj->GetRealParameter(2); //("KepEcc"); -- just to compile
         //Real grav = obj->GetRealParameter("RefBody");
-        Real grav = 3.986005e14; //loj: temp code
+        Real grav = 0.398600448073446198e+06; //loj: temp code
         Real E, R;
         
         if (str == "KepMm")
         {
-            return sqrt((grav / sma ) / (sma * sma));
+            return Sqrt((grav / sma ) / (sma * sma));
         }
         if (str == "VelApoapsis")
         {
             E = -grav / (2.0 * sma);
             R = sma * (1.0 - ecc);
-            return sqrt (2.0 * (E + grav/R));
+            return Sqrt (2.0 * (E + grav/R));
         }
         if (str == "VelPeriapsis")
         {
             E = -grav / (2.0 * sma);
             R = sma * (1.0 + ecc);
-            return sqrt (2.0 * (E + grav/R));
+            return Sqrt (2.0 * (E + grav/R));
         }
     }
     return ORBIT_REAL_UNDEFINED;
@@ -236,6 +238,47 @@ Real OrbitData::GetSphReal(const std::string &str)
             return obj->GetRealParameter(6); //("SphDecV");
     }
     return ORBIT_REAL_UNDEFINED;
+}
+
+//------------------------------------------------------------------------------
+// Real GetAngularReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives angular related element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetAngularReal(const std::string &str)
+{
+    Real result = ORBIT_REAL_UNDEFINED;
+    GmatBase *obj = FindObject(VALID_OBJECT_LIST[SPACECRAFT]);
+    
+    if (obj != NULL)
+    {
+        Rvector3 pos = Rvector3(obj->GetRealParameter(1),  //("CartX"),
+                                obj->GetRealParameter(2),  //("CartY"),
+                                obj->GetRealParameter(3)); //("CartZ");
+        Rvector3 vel = Rvector3(obj->GetRealParameter(4),  //("CartVx"),
+                                obj->GetRealParameter(5),  //("CartVy"),
+                                obj->GetRealParameter(6)); //("CartVz");
+        
+        Rvector3 hVec3 = Cross(pos, vel);
+        Real h = Sqrt(hVec3*hVec3);
+        
+        //grav = get_grav_constant(temp.coord.central_body); // Swingby
+        Real grav = 0.398600448073446198e+06; //loj: temp code - use mu for now
+
+        if (h < ORBIT_TOL)
+        {
+            result = 0.0;
+        }
+        else
+        {
+            if (str == "SemilatRectum")
+                result = (h / grav) * h;      // B M W; eq. 1.6-1
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------

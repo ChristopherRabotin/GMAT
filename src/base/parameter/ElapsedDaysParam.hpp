@@ -39,8 +39,8 @@ public:
     virtual Real EvaluateReal();
 
     // The inherited methods from Parameter
-    virtual bool AddObject(GmatBase *obj);
     virtual Integer GetNumObjects() const;
+    virtual bool AddObject(GmatBase *obj);
     virtual bool Validate();
     virtual bool Evaluate();
 

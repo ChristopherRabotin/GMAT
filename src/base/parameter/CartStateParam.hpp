@@ -40,8 +40,8 @@ public:
     virtual Rvector6 EvaluateRvector6();
     
     // The inherited methods from Parameter
-    virtual bool AddObject(GmatBase *obj);
     virtual Integer GetNumObjects() const;
+    virtual bool AddObject(GmatBase *obj);
     virtual bool Validate();
     virtual bool Evaluate();
 

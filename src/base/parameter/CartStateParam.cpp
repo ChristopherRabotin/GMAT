@@ -95,7 +95,7 @@ CartStateParam::~CartStateParam()
 // Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
- * Evaluates and returns real value of the parameter.
+ * @return newly evaluated value of parameter
  */
 //------------------------------------------------------------------------------
 Rvector6 CartStateParam::EvaluateRvector6()
@@ -110,7 +110,19 @@ Rvector6 CartStateParam::EvaluateRvector6()
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// virtual Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer CartStateParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference objects.
@@ -127,22 +139,12 @@ bool CartStateParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer CartStateParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
+// virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool CartStateParam::Validate()
@@ -151,7 +153,7 @@ bool CartStateParam::Validate()
 }
 
 //------------------------------------------------------------------------------
-// bool Evaluate()
+// virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
  * Evaluates value of the parameter.

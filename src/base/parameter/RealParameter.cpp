@@ -193,7 +193,7 @@ Gmat::ParameterType RealParameter::GetParameterType(const Integer id) const
     case PARAM_1:
         return RealParameter::PARAMETER_TYPE[id];
     default:
-        return GmatBase::GetParameterType(id);
+        return Parameter::GetParameterType(id);
     }
 }
 
@@ -205,9 +205,9 @@ std::string RealParameter::GetParameterTypeString(const Integer id) const
     switch (id)
     {
     case PARAM_1:
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+        return Parameter::PARAM_TYPE_STRING[GetParameterType(id)];
     default:
-        return GmatBase::GetParameterTypeString(id);
+        return Parameter::GetParameterTypeString(id);
     }
 }
 

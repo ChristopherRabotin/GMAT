@@ -41,7 +41,7 @@ ElapsedDaysParam::PARAMETER_TYPE[ElapsedDaysParamCount] =
 
 //------------------------------------------------------------------------------
 // ElapsedDaysParam(const std::string &name, GmatBase *obj,
-//                 const std::string &desc, const std::string &unit)
+//                  const std::string &desc, const std::string &unit)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -110,12 +110,12 @@ ElapsedDaysParam::~ElapsedDaysParam()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// Real EvaluateReal()
+// virtual Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
  * Computes elapsed time from epoch and current time.
  *
- * @return the elapsed seconds
+ * @return the elapsed days
  */
 //------------------------------------------------------------------------------
 Real ElapsedDaysParam::EvaluateReal()
@@ -130,10 +130,24 @@ Real ElapsedDaysParam::EvaluateReal()
 //-------------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
+// virtual Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+/**
+ * @return number of reference objects set.
+ */
+//------------------------------------------------------------------------------
+Integer ElapsedDaysParam::GetNumObjects() const
+{
+    return GetNumRefObjects();
+}
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Adds reference objects.
+ *
+ * @return true if the object has been added.
  */
 //------------------------------------------------------------------------------
 bool ElapsedDaysParam::AddObject(GmatBase *obj)
@@ -145,22 +159,12 @@ bool ElapsedDaysParam::AddObject(GmatBase *obj)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * Retrives number of reference objects.
- */
-//------------------------------------------------------------------------------
-Integer ElapsedDaysParam::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
+// virtual bool Validate()
 //------------------------------------------------------------------------------
 /**
  * Validates reference objects.
+ *
+ * @return true if all objects are set; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ElapsedDaysParam::Validate()
@@ -169,7 +173,7 @@ bool ElapsedDaysParam::Validate()
 }
 
 //------------------------------------------------------------------------------
-// bool Evaluate()
+// virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
  * Evaluates value of the parameter.
