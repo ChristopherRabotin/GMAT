@@ -22,7 +22,7 @@
 
 
 //------------------------------------------------------------------------------
-//  Solver(std::string type, std::string name)
+//  Solver(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Core constructor for Solver objects.
@@ -32,10 +32,10 @@
  * @param name The solver's name
  */
 //------------------------------------------------------------------------------
-Solver::Solver(std::string type, std::string name) :
-    GmatBase        (Gmat::SOLVER, type, name),
-    currentState    (INITIALIZING),
-    textFileMode    ("Normal")
+Solver::Solver(const std::string &type, const std::string &name) :
+   GmatBase        (Gmat::SOLVER, type, name),
+   currentState    (INITIALIZING),
+   textFileMode    ("Normal")
 {
 }
 
@@ -53,7 +53,7 @@ Solver::~Solver()
 
 
 //------------------------------------------------------------------------------
-//  Solver(const Solver& sol)
+//  Solver(const Solver &sol)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor for Solver objects.
@@ -61,7 +61,7 @@ Solver::~Solver()
  * @param sol The solver that is copied
  */
 //------------------------------------------------------------------------------
-Solver::Solver(const Solver& sol) :
+Solver::Solver(const Solver &sol) :
     GmatBase        (sol),
     currentState    (sol.currentState),
     textFileMode    (sol.textFileMode)
@@ -70,7 +70,7 @@ Solver::Solver(const Solver& sol) :
 
 
 //------------------------------------------------------------------------------
-//  Solver& operator=(const Solver& sol)
+//  Solver& operator=(const Solver &sol)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for solvers
@@ -78,15 +78,30 @@ Solver::Solver(const Solver& sol) :
  * @return this Solver, set to the same parameters as the input solver.
  */
 //------------------------------------------------------------------------------
-Solver& Solver::operator=(const Solver& sol)
+Solver& Solver::operator=(const Solver &sol)
 {
     if (&sol == this)
         return *this;
         
-    currentState = INITIALIZING;
+    currentState = sol.currentState;
     textFileMode = sol.textFileMode;
 
     return *this;
+}
+
+
+//------------------------------------------------------------------------------
+//  SolverState GetState()
+//------------------------------------------------------------------------------
+/**
+ * Determine the state-machine state of this instance of the Solver.
+ *
+ * @return this Solver, set to the same parameters as the input solver.
+ */
+//------------------------------------------------------------------------------
+Solver::SolverState Solver::GetState()
+{
+   return currentState;
 }
 
 
@@ -103,6 +118,7 @@ Solver& Solver::operator=(const Solver& sol)
  * 
  * @return The ID used for this variable.
  */
+//------------------------------------------------------------------------------
 bool Solver::UpdateSolverGoal(Integer id, Real newValue)
 {
    return false;
@@ -110,7 +126,7 @@ bool Solver::UpdateSolverGoal(Integer id, Real newValue)
 
 
 //------------------------------------------------------------------------------
-//  Solver::SolverState AdvanceState(void)
+//  Solver::SolverState AdvanceState()
 //------------------------------------------------------------------------------
 /**
  * The method used to iterate until a solution is found.  Derived classes 
@@ -163,7 +179,7 @@ Solver::SolverState Solver::AdvanceState()
 //------------------------------------------------------------------------------
 /**
  * Finalized the initialization process by setting the current state for the
- * state machine to the entry state for the solver.  The default methos provided
+ * state machine to the entry state for the solver.  The default method provided
  * here sets the state to the NOMINAL state.
  */
 //------------------------------------------------------------------------------

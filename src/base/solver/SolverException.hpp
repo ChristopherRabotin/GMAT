@@ -22,13 +22,39 @@
 #define SolverException_hpp
 
 #include "BaseException.hpp"
+#include "gmatdefs.hpp"          // For GMAT_API
 
-class SolverException : public BaseException{
+
+class GMAT_API SolverException : public BaseException
+{
 public:
-
-    SolverException(const std::string &details,
-                  const std::string &message = "Solver subsystem exception: ");
-	virtual ~SolverException();
+   //---------------------------------------------------------------------------
+   // SolverException(const std::string &details, const std::string &message)
+   //---------------------------------------------------------------------------
+   /**
+    * Default constructor.
+    *
+    * @param <details> Message explaining why the exception was thrown.
+    * @param <message> Initial part of the exception message.
+    */
+   //---------------------------------------------------------------------------
+   SolverException(const std::string &details,
+                   const std::string &message = "Solver subsystem exception: "):
+      BaseException       (message, details)
+   {
+   }
+   
+   //---------------------------------------------------------------------------
+   // ~SolverException()
+   //---------------------------------------------------------------------------
+   /**
+    * Destructor.
+    */
+   //---------------------------------------------------------------------------
+   virtual ~SolverException()
+   {
+   }
 };
+
 
 #endif // SolverException_hpp

@@ -39,101 +39,134 @@
 class GMAT_API Solver : public GmatBase
 {
 public:
-    /// Enumeration defining the states in the state machine
-    enum SolverState {
-        INITIALIZING = 10001,
-        NOMINAL,
-        PERTURBING,
-        ITERATING,
-        CALCULATING,
-        CHECKINGRUN,
-        FINISHED            // This one should stay at the end of the list.
-    };
+   /// Enumeration defining the states in the state machine
+   enum SolverState
+   {
+      INITIALIZING = 10001,
+      NOMINAL,
+      PERTURBING,
+      ITERATING,
+      CALCULATING,
+      CHECKINGRUN,
+      FINISHED            // This one should stay at the end of the list.
+   };
     
 public:
-    Solver(std::string type, std::string name);
-    virtual ~Solver();
-    Solver(const Solver& sol);
-    Solver&             operator=(const Solver& sol);
-    
-    SolverState         GetState()
-    {
-        return currentState;
-    }
-    
-    virtual SolverState AdvanceState();
-    virtual bool        UpdateSolverGoal(Integer id, Real newValue);    
-    
-    /**
-     * Derived classes implement this method to set object pointers and validate
-     * internal data structures.
-     * 
-     * @return true on success, false (or throws a SolverException) on failure
-     */
-    virtual bool        Initialize() = 0;
-    
-    /**
-     * Derived classes use this method to pass in parameter data specific to
-     * the algorithm implemented.
-     * 
-     * @param <data> An array of data appropriate to the variables used in the 
-     *               algorithm.
-     * @param <name> A label for the data parameter.  Defaults to the empty 
-     *               string.
-     * 
-     * @return The ID used for the variable.
-     */
-    virtual Integer     SetSolverVariables(Real *data, std::string name) = 0;
+   Solver(const std::string &type, const std::string &name);
+   virtual ~Solver();
+   Solver(const Solver& sol);
+   Solver&             operator=(const Solver& sol);
 
-    /**
-     * Derived classes use this method to pass in parameter data specific to
-     * the algorithm implemented.
-     * 
-     * @param <id> The ID used for the variable.
-     * 
-     * @return The value used for this variable
-     */
-    virtual Real        GetSolverVariable(Integer id) = 0;
+   virtual SolverState GetState();
+   virtual SolverState AdvanceState();
+   virtual bool        UpdateSolverGoal(Integer id, Real newValue);
     
-    /**
-     * Sets up the data fields used for the results of an iteration.
-     * 
-     * @param <data> An array of data appropriate to the results used in the 
-     *               algorithm (for instance, tolerances for targeter goals).
-     * @param <name> A label for the data parameter.  Defaults to the empty 
-     *               string.
-     * 
-     * @return The ID used for this variable.
-     */
-    virtual Integer     SetSolverResults(Real *data, std::string name) = 0;
+   //---------------------------------------------------------------------------
+   //  bool Initialize()
+   //---------------------------------------------------------------------------
+   /**
+    * Derived classes implement this method to set object pointers and validate
+    * internal data structures.
+    *
+    * @return true on success, false (or throws a SolverException) on failure
+    */
+   //---------------------------------------------------------------------------
+   virtual bool        Initialize() = 0;
     
-    /**
-     * Passes in the results obtained from a run in the solver loop.
-     * 
-     * @param <id> The ID used for this result.
-     * @param <value> The corresponding result.
-     */
-    virtual void        SetResultValue(Integer id, Real value) = 0;
+   //---------------------------------------------------------------------------
+   //  Integer SetSolverVariables(Real *data, std::string name)
+   //---------------------------------------------------------------------------
+   /**
+    * Derived classes use this method to pass in parameter data specific to
+    * the algorithm implemented.
+    *
+    * @param <data> An array of data appropriate to the variables used in the
+    *               algorithm.
+    * @param <name> A label for the data parameter.  Defaults to the empty
+    *               string.
+    *
+    * @return The ID used for the variable.
+    */
+   //---------------------------------------------------------------------------
+   virtual Integer     SetSolverVariables(Real *data,
+                                          const std::string &name) = 0;
+
+   //---------------------------------------------------------------------------
+   //  Real GetSolverVariable(Integer id)
+   //---------------------------------------------------------------------------
+   /**
+    * Derived classes use this method to retrieve parameter data specific to
+    * the algorithm implemented.
+    *
+    * @param <id> The ID used for the variable.
+    *
+    * @return The value used for this variable
+    */
+   //---------------------------------------------------------------------------
+   virtual Real        GetSolverVariable(Integer id) = 0;
+    
+   //---------------------------------------------------------------------------
+   //  Integer SetSolverResults(Real *data, std::string name)
+   //---------------------------------------------------------------------------
+   /**
+    * Sets up the data fields used for the results of an iteration.
+    *
+    * @param <data> An array of data appropriate to the results used in the
+    *               algorithm (for instance, tolerances for targeter goals).
+    * @param <name> A label for the data parameter.  Defaults to the empty
+    *               string.
+    *
+    * @return The ID used for this variable.
+    */
+   //---------------------------------------------------------------------------
+   virtual Integer     SetSolverResults(Real *data,
+                                        const std::string &name) = 0;
+    
+   //---------------------------------------------------------------------------
+   //  void SetResultValue(Integer id, Real value)
+   //---------------------------------------------------------------------------
+   /**
+    * Passes in the results obtained from a run in the solver loop.
+    *
+    * @param <id>    The ID used for this result.
+    * @param <value> The corresponding result.
+    */
+   //---------------------------------------------------------------------------
+   virtual void        SetResultValue(Integer id, Real value) = 0;
 
 protected:
-    /// Current state for the state machine
-    SolverState         currentState;
-    /// Output mode: Compact, Normal, and Verbose
-    std::string         textFileMode;
+   /// Current state for the state machine
+   SolverState         currentState;
+   /// Output mode: Compact, Normal, and Verbose
+   std::string         textFileMode;
+
+   /// Generic solver parameters (there are none defined at this time, so the
+   /// enumeration is basically empty).
+   enum
+   {
+      SolverParamCount = GmatBaseParamCount
+   };
+
+   // Methods that correspond to the solver states.  Derived classes should
+   // implement the methods that correspond to the Solver's state machine.  The
+   // default implementation just advances the state to the "next" state in the
+   // list.
+   virtual void        CompleteInitialization();
+   virtual void        RunNominal();
+   virtual void        RunPerturbation();
+   virtual void        RunIteration();
+   virtual void        CalculateParameters();
+   virtual void        CheckCompletion();
+   virtual void        RunComplete();
     
-    // Methods that correspond to the solver states.  Implement the methods
-    // that correspond to the Solver's state machine.  The default 
-    // implementation just advances the state to the "next" state in the list. 
-    virtual void        CompleteInitialization();
-    virtual void        RunNominal();
-    virtual void        RunPerturbation();
-    virtual void        RunIteration();
-    virtual void        CalculateParameters();
-    virtual void        CheckCompletion();
-    virtual void        RunComplete();
-    
-    /** Utility function used by the solvers to generate a progress file */
-    virtual void        WriteToTextFile() = 0;
+   //---------------------------------------------------------------------------
+   //  void WriteToTextFile()
+   //---------------------------------------------------------------------------
+   /**
+    * Utility function used by the solvers to generate a progress file.
+    */
+   //---------------------------------------------------------------------------
+   virtual void        WriteToTextFile() = 0;
 };
 
 
