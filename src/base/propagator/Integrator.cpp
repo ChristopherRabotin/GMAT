@@ -41,20 +41,24 @@
 //                              Changes:
 //                                - Updated style using GMAT cpp style guide
 //
-//                           : 10/10/2003 - W. Waktola, Mission Applications Branch
+//                           : 10/10/2003 - W. Waktola, 
+//                                          Mission Applications Branch
 //                              Changes:
 //                                - SetParameter() to SetRealParameter()
 //                                - GetParameter() to GetRealParameter()
-//                                - virtual char* GetParameterName(const int parm) const to
-//                                  virtual std::string GetParameterName(const int parm) const
-//                                - GetParameterName() from if statements to switch statements
+//                                - virtual char* 
+//                                  GetParameterName(const int parm) const to
+//                                  virtual std::string 
+//                                  GetParameterName(const int parm) const
 //
-//                           : 10/16/2003 - W. Waktola, Missions Applications Branch
+//                           : 10/16/2003 - W. Waktola, 
+//                                          Missions Applications Branch
 //                              Changes:
 //                                - All double types to Real types
 //                                - All primitive int types to Integer types
 //                              Removals:
-//                                - GetParameterName(), replaced by GetParameterText()
+//                                - GetParameterName(), replaced by 
+//                                  GetParameterText()
 //                              Additions:
 //                                - IntegratorParamCount
 //                                - PARAMTER_TEXT[]
@@ -69,9 +73,8 @@
 // **************************************************************************
 
 #include "Integrator.hpp"
-#include "gmatdefs.hpp"
-#include "Propagator.hpp"
 #include "MessageInterface.hpp"
+#include "PropagatorException.hpp"
 
 //---------------------------------
 // static data
@@ -267,7 +270,8 @@ Gmat::ParameterType Integrator::GetParameterType(const Integer id) const
 std::string Integrator::GetParameterTypeString(const Integer id) const
 {
     if (id >= PropagatorParamCount && id < IntegratorParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PropagatorParamCount)];
+        return GmatBase::PARAM_TYPE_STRING
+		                      [GetParameterType(id - PropagatorParamCount)];
     else
         return Propagator::GetParameterTypeString(id);
 }
@@ -289,26 +293,23 @@ std::string Integrator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real Integrator::GetRealParameter(const Integer id) const
 {
-    if (id == ACCURACY)
-        return tolerance;
-
-    else if (id == ERROR_THRESHOLD)
-    {
-        if (physicalModel)
+   switch (id)
+   {
+      case ACCURACY:
+	     return tolerance;
+	  case ERROR_THRESHOLD:
+	     if (physicalModel)
             return physicalModel->GetErrorThreshold();
-        return errorThreshold;
-    }
-
-    else if (id == SMALLEST_INTERVAL)
-        return smallestTime;
-
-    else if (id == MIN_STEP)
-        return minimumStep;
-
-    else if (id == MAX_STEP)
-        return maximumStep;
-    else 
-        return Propagator::GetRealParameter(id);
+		 return errorThreshold;
+	  case SMALLEST_INTERVAL:
+	     return smallestTime;
+	  case MIN_STEP:
+	     return minimumStep;
+	  case MAX_STEP:
+	     return maximumStep;
+	  default:
+	     return Propagator::GetRealParameter(id);   
+   }    
 }
 
 //------------------------------------------------------------------------------
@@ -339,28 +340,35 @@ Real Integrator::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real Integrator::SetRealParameter(const Integer id, const Real value)
 {
-   //loj: 8/6/04 added return statement
    switch (id)
    {
    case ACCURACY:
       if (value <= 0.0)
-         return false;
+         throw PropagatorException("Integrator::SetRealParameter -- 
+		                                       Accuracy value is set to <= 0.0");
       tolerance = value;
       return value;
    case MIN_STEP:
       if (value == 0.0)
-         return false;
+         throw PropagatorException("Minimum step is set to 0.0");
+	  else (fabs(value) > maximumStep)
+	     throw PropagatorException("Integrator::SetRealParameter -- 
+		                       Minimum step is set greater than maximum step.");
       minimumStep = fabs(value);
       return value;
    case MAX_STEP:
       if (fabs(value) < minimumStep)
-         return false;
+         throw PropagatorException("Integrator::SetRealParameter -- 
+								  Maximum step is set less than minimum step.");
       maximumStep = fabs(value);
       return value;
    case ERROR_THRESHOLD:
       errorThreshold = fabs(value);
       if (physicalModel)
          physicalModel->SetErrorThreshold(errorThreshold);
+	  else
+	     throw PropagatorException("Integrator::SetRealParameter -- 
+		                                              PhysicalModel is NULL.");
       return value;
    case SMALLEST_INTERVAL:
       smallestTime = fabs(value);
@@ -422,7 +430,7 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
     {
         if (value < 1)
             return GmatBase::INTEGER_PARAMETER_UNDEFINED;
-        maxStepAttempts = (Integer)value;
+        maxStepAttempts = value;
         return value;
     }
     
@@ -430,7 +438,8 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
 }
 
 //------------------------------------------------------------------------------
-// Integer Integrator::SetIntegerParameter(const std::string &label, const Integer value)
+// Integer Integrator::SetIntegerParameter(const std::string &label, 
+//                                                          const Integer value)
 //------------------------------------------------------------------------------
 /**
  * @see GmatBase
@@ -439,18 +448,6 @@ Integer Integrator::SetIntegerParameter(const Integer id, const Integer value)
 Integer Integrator::SetIntegerParameter(const std::string &label, const Integer value)
 {
     return SetIntegerParameter(GetParameterID(label), value);
-}
-
-//------------------------------------------------------------------------------
-// Integer Integrator::GetPropagatorOrder(void) const
-//------------------------------------------------------------------------------
-/**
- * Returns derivative order needed by the integrator; 1 by default
- */
-//------------------------------------------------------------------------------
-Integer Integrator::GetPropagatorOrder(void) const
-{
-    return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -468,8 +465,10 @@ Integer Integrator::GetPropagatorOrder(void) const
 void Integrator::SetPhysicalModel(PhysicalModel *pPhyscialModel)
 {
     Propagator::SetPhysicalModel(pPhyscialModel);
-    if (physicalModel) 
+    if (physicalModel != NULL) 
         physicalModel->SetErrorThreshold(errorThreshold);
+	else
+	   throw PropagatorException("Integrator::SetPhysicalModel -- PhyscialModel is NULL.");
 }
 
 
