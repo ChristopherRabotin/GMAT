@@ -467,6 +467,11 @@ bool Target::Execute(void)
     }
 
     targeter->AdvanceState();
+
+    if (targeter->GetState() == Solver::FINISHED) {
+       targeterConverged = true;
+    }
+
     return retval;
 }
 

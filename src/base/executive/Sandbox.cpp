@@ -279,6 +279,15 @@ bool Sandbox::Execute(void)
       }
         
       rv = current->Execute();
+
+      // Possible fix for displaying the last iteration...
+      if (current->GetTypeName() == "Target") {
+         if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
+            currentState = Gmat::RUNNING;
+         else
+            currentState = Gmat::TARGETING;
+      }
+      
       if (!rv) {
          std::string str = current->GetTypeName() +
             " Command failed to run to completion";
