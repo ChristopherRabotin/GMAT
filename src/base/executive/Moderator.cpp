@@ -348,8 +348,8 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
-    MessageInterface::ShowMessage("Moderator::CreatePropagator() name = %s\n",
-                                  name.c_str());
+    //MessageInterface::ShowMessage("Moderator::CreatePropagator() name = %s\n",
+    //                              name.c_str());
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
     if (prop ==  NULL)
@@ -367,9 +367,6 @@ Propagator* Moderator::CreatePropagator(const std::string &type, const std::stri
                                       e.GetMessage());
     }
         
-    //djc: commented out
-    //   theConfigManager->AddPropagator(prop);
-    
     return prop;
 }
 
@@ -422,8 +419,6 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                       e.GetMessage());
     }
         
-    //djc: do we need to add PhysicalModel to configuration?
-    //   theConfigManager->AddPhysicalModel(physicalModel);
     return physicalModel;
 }
 
@@ -601,9 +596,6 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
         MessageInterface::ShowMessage("Moderator::CreateStopCond()\n" +
                                       e.GetMessage());
     }
-    
-    //djc: do we need to add StopCondition to configuration?
-    //   theConfigManager->AddStopCondition(stopCond);
     
     return stopCond;
 }
@@ -965,9 +957,6 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
     //djc: if you plan on adding the gui commands to the sandbox next, using 
     // the same approach used when running a script.
     cmd = new NoOp; 
-
-    //@todo loj:Clear plot for build3
-    //PlotInterface::ClearGlPlotWindow();
     
     return true;
 }
@@ -1096,10 +1085,10 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
         InitializeSandbox(sandboxNum-1);
 
         SetupRun(sandboxNum, isFromGui);
-        MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
+        //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
 
         ExecuteSandbox(sandboxNum-1);
-        MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
+        //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
     }
     catch (BaseException &e)
     {
@@ -1208,21 +1197,21 @@ void Moderator::CreateDefaultMission()
     PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
 
     // Parameters
-    Parameter *currTime = CreateParameter("CurrentA1MjdParam", "DefaultSC.CurrentTime");
-    Parameter *elapsedSecs = CreateParameter("ElapsedSecsParam", "DefaultSC.ElapsedSecs");
-    Parameter *cartX = CreateParameter("CartXParam", "DefaultSC.X");
-    Parameter *cartY = CreateParameter("CartYParam", "DefaultSC.Y");
-    Parameter *cartZ = CreateParameter("CartZParam", "DefaultSC.Z");
-    Parameter *cartVx = CreateParameter("CartVxParam", "DefaultSC.Vx");
-    Parameter *cartVy = CreateParameter("CartVxParam", "DefaultSC.Vy");
-    Parameter *cartVz = CreateParameter("CartVxParam", "DefaultSC.Vz");
+    Parameter *currTime = CreateParameter("CurrA1Mjd", "DefaultSC.CurrentTime");
+    Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+    Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
+    Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
+    Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
+    Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
+    Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
+    Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
     
-//      Parameter *kepSma = CreateParameter("KepSmaParam", "DefaultSC.SMA");
-//      Parameter *kepEcc = CreateParameter("KepEccParam", "DefaultSC.ECC");
-//      Parameter *kepInc = CreateParameter("KepIncParam", "DefaultSC.INC");
-//      Parameter *kepRaan = CreateParameter("KepRaanParam", "DefaultSC.RAAN");
-//      Parameter *kepAop = CreateParameter("KepAopParam", "DefaultSC.AOP");
-//      Parameter *kepTa = CreateParameter("KepTaParam", "DefaultSC.TA");
+//      Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
+//      Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
+//      Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.INC");
+//      Parameter *kepRaan = CreateParameter("KepRaan", "DefaultSC.RAAN");
+//      Parameter *kepAop = CreateParameter("KepAop", "DefaultSC.AOP");
+//      Parameter *kepTa = CreateParameter("KepTa", "DefaultSC.TA");
     
     currTime->AddObject(sc);
     elapsedSecs->AddObject(sc);
@@ -1264,8 +1253,8 @@ void Moderator::CreateDefaultMission()
     
     // XyPlot
     sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
-    sub->SetStringParameter("XParamName", "DefaultSC.CurrentTime");
-    sub->SetStringParameter("YParamName", "DefaultSC.X");
+    sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
+    sub->SetStringParameter("DepVar", "DefaultSC.X");
     sub->Activate(true);
     
     // OpenGlPlot
@@ -1346,8 +1335,8 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
         sub = GetSubscriber(subs[i]);
         objTypeName = sub->GetTypeName();
         objName = sub->GetName();
-        MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-                                      objTypeName.c_str(), objName.c_str());
+        //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+        //                              objTypeName.c_str(), objName.c_str());
         sub->Initialize();
     }
 }
