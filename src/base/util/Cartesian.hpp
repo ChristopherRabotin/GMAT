@@ -35,7 +35,7 @@ class Cartesian
 /**
  *  The position and velocity will be stored in whatever units they are 
  *  initially entered into the second constructor.  The argument, mu, in the
- *  ToCartesian method has a default value in m^3 / s^2, AND assumes that the 
+ *  ToCartesian method has a default value in km^3 / s^2, AND assumes that the 
  *  central body is the Earth.  If these do not correspond to the units you 
  *  are using, or if the Earth is not the central body, you must enter mu in 
  *  the correct units when calling these methods.
