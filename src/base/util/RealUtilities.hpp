@@ -68,9 +68,12 @@ namespace GmatMathUtil
    Integer Abs(Integer theNumber);
    Real    Abs(Real theNumber);
    Real    NearestInt(Real theNumber);
-   Integer Round(Real theNumber);
-   Integer Floor(Real theNumber);
-   Integer Ceiling(Real theNumber);
+   Real    Round(Real theNumber);
+   Real    Floor(Real theNumber);
+   Real    Ceiling(Real theNumber);
+   //Integer Round(Real theNumber); //loj: 5/5/04 changed to Real
+   //Integer Floor(Real theNumber);
+   //Integer Ceiling(Real theNumber);
    Real    Mod(Real left, Real right);
    Real    Rem(Real left, Real right);
    void    Quotient(Real top, Real bottom, Integer &result);

@@ -63,27 +63,27 @@ Real GmatMathUtil::NearestInt(Real theNumber)
 }
 
 //------------------------------------------------------------------------------
-//  Integer Round(Real theNumber)
+//  Real Round(Real theNumber)
 //------------------------------------------------------------------------------
-Integer GmatMathUtil::Round(Real theNumber)
+Real GmatMathUtil::Round(Real theNumber)
 {
-   return (Integer) floor(theNumber + 0.5 );
+   return floor(theNumber + 0.5 );
 }
 
 //------------------------------------------------------------------------------
-//  Integer Floor(Real theNumber)
+//  Real Floor(Real theNumber)
 //------------------------------------------------------------------------------
-Integer GmatMathUtil::Floor(Real theNumber)
+Real GmatMathUtil::Floor(Real theNumber)
 {
-   return (Integer) floor(theNumber);
+   return floor(theNumber);
 }
 
 //------------------------------------------------------------------------------
-//  Integer Ceiling(Real theNumber)
+//  Real Ceiling(Real theNumber)
 //------------------------------------------------------------------------------
-Integer GmatMathUtil::Ceiling(Real theNumber)
+Real GmatMathUtil::Ceiling(Real theNumber)
 {
-   return (Integer) ceil(theNumber);
+   return ceil(theNumber);
 }
 
 //------------------------------------------------------------------------------
