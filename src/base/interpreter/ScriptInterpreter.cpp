@@ -19,6 +19,7 @@
 
 #include "ScriptInterpreter.hpp" // class's header file
 #include "Moderator.hpp" // class's header file
+#include "Command.hpp" //loj:added
 #include <fstream>
 
 
@@ -157,7 +158,7 @@ bool ScriptInterpreter::Parse(void)
                 name = **phrase;
 
             if (!InterpretObject(type, name))
-                throw InterpreterException("Unable to create object");
+                throw InterpreterException("Unable to create object: " + name); //loj: added name
         }
 
         if (**phrase == "GMAT") {
@@ -190,7 +191,7 @@ bool ScriptInterpreter::Parse(void)
                     /// @todo Fill in the parsing for multipart strings
                     std::string subparm = GetToken();
                     if (subparm == "")
-                        throw InterpreterException("Assignment string does not parse");
+                        throw InterpreterException("Assignment string does not parse: " + objParm); //loj: added objParm
                     // Find the owned object
                     // Set the parm on the owned object
                 }
