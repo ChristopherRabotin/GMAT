@@ -46,10 +46,16 @@ public:
    virtual ~ConditionalBranch();
          
    // Method to set up the condition(s) for the conditional branch commands
-   virtual bool         SetCondition(std::string lhs, std::string operation,
-                                       std::string rhs);
-   virtual bool         SetConditionOperator(std::string& op);
-
+   virtual bool         SetCondition(const std::string &lhs, 
+                                     const std::string &operation,
+                                     const std::string &rhs,
+                                     Integer atIndex = -999);
+   virtual bool         SetConditionOperator(const std::string &op,
+                                             Integer atIndex = -999);
+   virtual bool         RemoveCondition(Integer atIndex);
+   virtual bool         RemoveConditionOperator(Integer atIndex);
+   
+   
    virtual bool         Initialize();
    
    // inherited from GmatBase
@@ -59,11 +65,65 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index);
-    
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+//   virtual Integer      SetIntegerParameter(const Integer id,
+//                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+//   virtual Integer      SetIntegerParameter(const std::string &label,
+//                                            const Integer value);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   //virtual bool         SetStringParameter(const Integer id, 
+   //                                        const std::string &value,
+   //                                        const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   //virtual bool         SetStringParameter(const std::string &label, 
+   //                                        const std::string &value,
+   //                                        const Integer index);
+   virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id) const; 
+   //virtual const StringArray& 
+   //                     GetStringArrayParameter(const Integer id, 
+   //                           const Integer index) const; 
+   virtual const StringArray& 
+                        GetStringArrayParameter(const std::string &label) const;
+   //virtual const StringArray& 
+   //                     GetStringArrayParameter(const std::string &label, 
+   //                                             const Integer index) const; 
+   
+   
 protected:
 
    virtual bool         EvaluateCondition(Integer which);
    virtual bool         EvaluateAllConditions();
+   
+   virtual bool         SetStringArrayValue(Integer forArray, 
+                                            const std::string &toValue,
+                                            Integer forIndex);
+   
+   enum
+   {
+      NUMBER_OF_CONDITIONS = BranchCommandParamCount,
+      NUMBER_OF_LOGICAL_OPS,
+      LEFT_HAND_STRINGS,
+      OPERATOR_STRINGS,
+      RIGHT_HAND_STRINGS,
+      LOGICAL_OPERATORS,
+      NUMBER_OF_REF_PARAMS,
+      //REF_PARAMETER_NAMES,
+      ConditionalBranchParamCount
+   };
+
+   static const std::string PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandParamCount];
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[ConditionalBranchParamCount - BranchCommandParamCount];
 
    enum OpType
    {
@@ -92,11 +152,14 @@ protected:
    Integer                    numberOfLogicalOps;
    /// Arrays representing conditions
    StringArray                lhsList;
+   StringArray                opStrings;
    std::vector<OpType>        opList;
    StringArray                rhsList;
+   StringArray                logicalOpStrings;
    std::vector<LogicalOpType> logicalOpList;
    /// list of parameter objects used by the conditions
    std::vector<Parameter*>    params;
+   //StringArray                paramStrings;
    
 };
 #endif  // ConditionalBranch_hpp

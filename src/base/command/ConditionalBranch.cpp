@@ -22,6 +22,36 @@
 #include "ConditionalBranch.hpp"
 #include "Parameter.hpp"
 
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+ConditionalBranch::PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandParamCount] =
+{
+   "NumberOfConditions",
+   "NumberOfLogicalOperators",
+   "LeftHandStrings",
+   "OperatorStrings",
+   "RightHandStrings",
+   "LogicalOperators",
+   "NumberOfRefParams",
+   //"RefParameterNames",
+};
+
+const Gmat::ParameterType
+ConditionalBranch::PARAMETER_TYPE[ConditionalBranchParamCount - BranchCommandParamCount] =
+{
+   Gmat::INTEGER_TYPE,     
+   Gmat::INTEGER_TYPE, 
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::INTEGER_TYPE,
+   //Gmat::STRINGARRAY_TYPE,
+};
+
 const std::string
 ConditionalBranch::OPTYPE_TEXT[NumberOfOperators] =
 {
@@ -71,11 +101,13 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
+      opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
    }
    for (i=0; i < numberOfLogicalOps; i++)
    {
+      logicalOpStrings.push_back((cb.logicalOpStrings).at(i));
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
    
@@ -112,12 +144,14 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
+      opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
    }
    logicalOpList.clear();
    for (i=0; i < numberOfLogicalOps; i++)
    {
+      logicalOpStrings.push_back((cb.logicalOpStrings).at(i));
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
 
@@ -163,8 +197,8 @@ bool ConditionalBranch::Initialize()
 }
 
 //------------------------------------------------------------------------------
-//  bool SetCondition(std::string lhs, std::string operation,
-//                    std::string rhs)
+//  bool SetCondition(const std::string &lhs, const std::string &operation,
+//                    const std::string &rhs, Integer atIndex)
 //------------------------------------------------------------------------------
 /**
  * This method sets a condition for the ConditionalBranch Command.
@@ -173,53 +207,162 @@ bool ConditionalBranch::Initialize()
  *
  */
 //------------------------------------------------------------------------------
-bool ConditionalBranch::SetCondition(std::string lhs, std::string operation,
-                                     std::string rhs)
+bool ConditionalBranch::SetCondition(const std::string &lhs, 
+                                     const std::string &operation,
+                                     const std::string &rhs,
+                                     Integer atIndex)
 {
-   bool retVal = false;
+   bool   retVal = false;
+   OpType ot     = NumberOfOperators;
+   // determine the operator
    for (Integer i = 0; i < NumberOfOperators; i++)
    {
       if (operation == OPTYPE_TEXT[i])
       {
-         opList.push_back((OpType)i);
-         retVal = true;
+         ot = (OpType) i;
          break;
       }
    }
-   if (retVal)
+   if (ot == NumberOfOperators)
    {
+      throw CommandException(
+             "ConditionalCommand error: invalid operator");
+   }
+   // put it at the end, if requested (and by default)
+   if ((atIndex == -999) || (atIndex == numberOfConditions))
+   {
+      opStrings.push_back(operation);
+      opList.push_back(ot);
       lhsList.push_back(lhs);
       rhsList.push_back(rhs);
+      retVal = true;
       numberOfConditions++;
+   }
+   // assume that logical operators will be added in order
+   else if ((atIndex < 0) || (atIndex > numberOfConditions))
+   {
+      throw CommandException(
+            "ConditionalCommand error: condition index out of bounds");
+   }
+   // otherwise, replace an already-existing condition
+   else 
+   {
+      opStrings.at(atIndex) = operation;
+      opList.at(atIndex)    = ot;
+      lhsList.at(atIndex)   = lhs;
+      rhsList.at(atIndex)   = rhs;
+      retVal                = true;
    }
    return retVal;
 }
 
 //------------------------------------------------------------------------------
-//  bool SetConditionOperator(std::string& op)
+//  bool SetConditionOperator(const std::string &op, Integer atIndex)
 //------------------------------------------------------------------------------
 /**
  * This method sets a logical operator for the ConditionalBranch Command.
  *
  * @return true if successful; false otherwise.
  *
+ * @note This method assumes that condition operators are added in order
+ *
  */
 //------------------------------------------------------------------------------
-bool ConditionalBranch::SetConditionOperator(std::string& op)
+bool ConditionalBranch::SetConditionOperator(const std::string &op, 
+                                             Integer atIndex)
 {
-   bool retVal = false;
+   bool          retVal = false;
+   LogicalOpType ot     = NumberOfLogicalOperators;
+   // determine the logical operator
    for (Integer i = 0; i < NumberOfLogicalOperators; i++)
    {
       if (op == LOGICAL_OPTYPE_TEXT[i])
       {
-         logicalOpList.push_back((LogicalOpType)i);
-         retVal = true;
+         ot = (LogicalOpType) i;
          break;
       }
    }
-   if (retVal)
+   if (ot == NumberOfLogicalOperators)
+   {
+      throw CommandException(
+            "ConditionalCommand error: invalid logical operator");
+   }
+   if ((atIndex == -999) || (atIndex == numberOfLogicalOps))
+   {
+      logicalOpStrings.push_back(op);
+      logicalOpList.push_back(ot);
+      retVal = true;
       numberOfLogicalOps++;
+   }
+   // assume that logical operators will be added in order
+   else if ((atIndex < 0) || (atIndex > numberOfLogicalOps))
+   {
+      throw CommandException(
+            "ConditionalCommand error: logical operator index out of bounds");
+   }
+   // put it at the end, if requested (and by default)
+   // otherwise, replace an already-existing logical operator
+   else 
+   {
+      logicalOpStrings.at(atIndex) = op;
+      logicalOpList.at(atIndex)    = ot;
+      retVal                       = true;
+   }
    return retVal;
+}
+
+//------------------------------------------------------------------------------
+//  bool RemoveCondition(Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Removes the condition for the command, at index atIndex.
+ * 
+ * @param <atIndex>   where in the list to remove the condition from.
+ */
+//------------------------------------------------------------------------------
+bool ConditionalBranch::RemoveCondition(Integer atIndex)
+{
+   if ((atIndex < 0) || (atIndex >= numberOfConditions))
+      throw CommandException(
+            "RemoveCondition error - condition index out of bounds.");
+   std::vector<std::string>::iterator si = lhsList.begin();
+   si += atIndex;
+   lhsList.erase(si);
+   std::vector<std::string>::iterator opi = opStrings.begin();
+   opi += atIndex;
+   opStrings.erase(opi);
+   std::vector<OpType>::iterator opti = opList.begin();
+   opti += atIndex;
+   opList.erase(opti);
+   std::vector<std::string>::iterator ri = rhsList.begin();
+   ri += atIndex;
+   rhsList.erase(ri);
+   numberOfConditions--;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool RemoveConditionOperator(Integer atIndex)
+//------------------------------------------------------------------------------
+/**
+ * Removes the logical operator for the command, at index atIndex.
+ * 
+ * @param <atIndex>   where in the list to remove the logical operator from.
+ */
+//------------------------------------------------------------------------------
+bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
+{
+   if ((atIndex < 0) || (atIndex >= numberOfLogicalOps))
+      throw CommandException(
+            "RemoveConditionOperator error - condition index out of bounds.");
+   std::vector<std::string>::iterator   si = logicalOpStrings.begin();
+   std::vector<LogicalOpType>::iterator oi = logicalOpList.begin();
+   si += atIndex;
+   oi += atIndex;
+   logicalOpStrings.erase(si);
+   logicalOpList.erase(oi);
+   numberOfLogicalOps--;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -228,7 +371,7 @@ bool ConditionalBranch::SetConditionOperator(std::string& op)
 //                         const Integer index)
 //------------------------------------------------------------------------------
 /**
-* This method returns a reference object from the ConditionalBranch Command.
+ * This method returns a reference object from the ConditionalBranch Command.
  *
  * @param <type>  type of the reference object requested
  * @param <name>  name of the reference object requested
@@ -245,9 +388,9 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::PARAMETER:
-         if (index < (Integer)params.size())
+         if ((index >= 0) && (index < (Integer)params.size()))
          {
-            return params[index];
+            return params.at(index);
          }
          else
          {
@@ -300,7 +443,7 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          else if (index < size)
          {
-            params[index] = (Parameter *)obj;
+            params.at(index) = (Parameter *)obj;
             return true;
          }
          else
@@ -316,6 +459,348 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return BranchCommand::SetRefObject(obj, type, name, index);
 }
 
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ConditionalBranch::GetParameterText(const Integer id) const
+{
+   if (id >= BranchCommandParamCount && id < ConditionalBranchParamCount)
+      return PARAMETER_TEXT[id - BranchCommandParamCount];
+   return BranchCommand::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer ConditionalBranch::GetParameterID(const std::string &str) const
+{
+   for (Integer i = BranchCommandParamCount; i < ConditionalBranchParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - BranchCommandParamCount])
+         return i;
+   }
+   
+   return BranchCommand::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType ConditionalBranch::GetParameterType(const Integer id) const
+{
+   if (id >= BranchCommandParamCount && id < ConditionalBranchParamCount)
+      return PARAMETER_TYPE[id - BranchCommandParamCount];
+   
+   return BranchCommand::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ConditionalBranch::GetParameterTypeString(const Integer id) const
+{
+   return ConditionalBranch::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer ConditionalBranch::GetIntegerParameter(const Integer id) const
+{
+   if (id == NUMBER_OF_CONDITIONS)          return numberOfConditions;
+   if (id == NUMBER_OF_LOGICAL_OPS)         return numberOfLogicalOps;
+   if (id == NUMBER_OF_REF_PARAMS)          return (Integer) params.size();
+   
+   return BranchCommand::GetIntegerParameter(id); 
+}
+
+//Integer      ConditionalBranch::SetIntegerParameter(const Integer id, const Integer value);
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer ConditionalBranch::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+//Integer      ConditionalBranch::SetIntegerParameter(const std::string &label, const Integer value);
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets a string parameter value of a StringArray, for the input
+ * parameter ID, at the input index into the array.
+ *
+ * @param <id>    ID for the requested parameter.
+ * @param <index> index into the StringArray.
+ *
+ * @return  string value of the requested StringArray parameter, at the 
+ *          requested index.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ConditionalBranch::GetStringParameter(const Integer id,
+                                                  const Integer index) const
+{
+   std::string errorString = "ConditionalCommand error: Requested index ";
+   errorString += index;
+   errorString += " is out of bounds for ";
+   if (id == LEFT_HAND_STRINGS)
+   {
+      if (index < 0 || index >= (Integer) lhsList.size())
+      {
+         errorString += "left hand side string list.";
+         throw CommandException(errorString);
+      }
+      return (lhsList.at(index));
+   }
+   if (id == OPERATOR_STRINGS)   
+   {
+      if (index < 0 || index >= (Integer) opStrings.size())
+      {
+         errorString += "operator string list.";
+         throw CommandException(errorString);
+      }
+      return (opStrings.at(index));
+   }
+   if (id == RIGHT_HAND_STRINGS) 
+   {
+      if (index < 0 || index >= (Integer) rhsList.size())
+      {
+         errorString += "right hand side string list.";
+         throw CommandException(errorString);
+      }
+      return (rhsList.at(index));
+   }
+   if (id == LOGICAL_OPERATORS)  
+   {
+      if (index < 0 || index >= (Integer) logicalOpStrings.size())
+      {
+         errorString += "logical operator string list.";
+         throw CommandException(errorString);
+      }
+      return (logicalOpStrings.at(index));
+   }
+   //if (id == PARAMETER_NAMES)  return ??;
+   
+   return BranchCommand::GetStringParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value,
+//                          const Integer index) const
+//------------------------------------------------------------------------------
+ /**
+ * This method gets a string parameter value of a StringArray, for the input
+ * parameter ID, at the input index into the array.
+ *
+ * @param <id>    ID for the requested parameter.
+ * @param <value> value to set the parameter to
+ * @param <index> index into the StringArray.
+ *
+ * @return  success or failure of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+/*bool ConditionalBranch::SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index)
+{
+   std::string errorString = "ConditionalCommand error: Requested index ";
+   errorString += index;
+   errorString += " is out of bounds for ";
+   if (id == LEFT_HAND_STRINGS)
+   {
+      if (index < 0 || index >= (Integer) lhsList.size())
+      {
+         errorString += "left hand side string list.";
+         throw CommandException(errorString);
+      }
+      return SetStringArrayValue(id, value, index);
+   }
+   if (id == OPERATOR_STRINGS)   
+   {
+      if (index < 0 || index >= (Integer) opStrings.size())
+      {
+         errorString += "operator string list.";
+         throw CommandException(errorString);
+      }
+      return SetStringArrayValue(id, value, index);
+   }
+   if (id == RIGHT_HAND_STRINGS) 
+   {
+      if (index < 0 || index >= (Integer) rhsList.size())
+      {
+         errorString += "right hand side string list.";
+         throw CommandException(errorString);
+      }
+      return SetStringArrayValue(id, value, index);
+   }
+   if (id == LOGICAL_OPERATORS)  
+   {
+      if (index < 0 || index >= (Integer) logicalOpStrings.size())
+      {
+         errorString += "logical operator string list.";
+         throw CommandException(errorString);
+      }
+      return SetStringArrayValue(id, value, index);
+   }
+   //if (id == PARAMETER_NAMES)  return ??;
+   
+   return BranchCommand::SetStringParameter(id, value, index);
+}
+*/
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label, 
+//                                 const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets a string parameter value of a StringArray, for the input
+ * parameter label, at the input index into the array.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <index> index into the StringArray.
+ *
+ * @return  string value of the requested StringArray parameter, at the 
+ *          requested index.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ConditionalBranch::GetStringParameter(const std::string &label,
+                                        const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value,
+//                          const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets a string parameter value of a StringArray, for the input
+ * parameter label, at the input index into the array.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <value> value to set the parameter to
+ * @param <index> index into the StringArray.
+ *
+ * @return  success or failure of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+/*bool ConditionalBranch::SetStringParameter(const std::string &label, 
+                                        const std::string &value,
+                                        const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+*/
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the StringArray parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  StringArray value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& 
+ConditionalBranch::GetStringArrayParameter(const Integer id) const
+{
+   if (id == LEFT_HAND_STRINGS)  return lhsList;
+   if (id == OPERATOR_STRINGS)   return opStrings;
+   if (id == RIGHT_HAND_STRINGS) return rhsList;
+   if (id == LOGICAL_OPERATORS)  return logicalOpStrings;
+   //if (id == PARAMETER_NAMES)  return ??;
+   
+   return BranchCommand::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the StringArray parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  StringArray value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& 
+ConditionalBranch::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+//const StringArray& GetStringArrayParameter(const Integer id, 
+//                                           const Integer index) const; 
+//const StringArray& ConditionalBranch::GetStringArrayParameter(const std::string &label, 
+//                                                              const Integer index) const; 
 
 //------------------------------------------------------------------------------
 // protected methods
@@ -427,4 +912,12 @@ bool ConditionalBranch::EvaluateAllConditions()
    }
    return soFar;
 }
+
+bool ConditionalBranch::SetStringArrayValue(Integer forArray, 
+                                            const std::string &toValue,
+                                            Integer forIndex)
+{
+   return true;  // TEMPORARY
+}
+
 
