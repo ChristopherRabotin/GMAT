@@ -135,10 +135,10 @@ Moon::~Moon()
  *
  */
 //------------------------------------------------------------------------------
-RealArray  Moon::GetState(A1Mjd atTime)
-{
-   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-}
+//RealArray  Moon::GetState(A1Mjd atTime)
+//{
+//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
+//}
 
 //------------------------------------------------------------------------------
 //  Moon* Clone(void) const

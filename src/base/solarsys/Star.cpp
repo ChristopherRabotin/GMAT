@@ -116,10 +116,10 @@ Star::~Star()
  *
  */
 //------------------------------------------------------------------------------
-RealArray  Star::GetState(A1Mjd atTime)
-{
-   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-}
+//RealArray  Star::GetState(A1Mjd atTime)
+//{
+//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
+//}
 
 //------------------------------------------------------------------------------
 //  Star* Clone(void) const

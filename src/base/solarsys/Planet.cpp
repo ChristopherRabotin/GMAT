@@ -135,10 +135,10 @@ Planet::~Planet()
  *
  */
 //------------------------------------------------------------------------------
-RealArray  Planet::GetState(A1Mjd atTime)
-{
-   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-}
+//RealArray  Planet::GetState(A1Mjd atTime)
+//{
+//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
+//}
 
 //------------------------------------------------------------------------------
 //  Planet* Clone(void) const

@@ -49,7 +49,7 @@ public:
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
-   RealArray            GetState(A1Mjd atTime);
+   //RealArray            GetState(A1Mjd atTime);   // use the CelestialBody one!
    
    // Parameter access methods - overridden from GmatBase - do I need any?
    //std::string    GetParameterText(const Integer id) const;     
