@@ -43,7 +43,9 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // KepSMA(const KepSMA &copy)
@@ -59,6 +61,7 @@ KepSMA::KepSMA(const KepSMA &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepSMA& operator=(const KepSMA &right)
 //------------------------------------------------------------------------------
@@ -68,14 +71,14 @@ KepSMA::KepSMA(const KepSMA &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepSMA&
-KepSMA::operator=(const KepSMA &right)
+const KepSMA& KepSMA::operator=(const KepSMA &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepSMA()
@@ -87,6 +90,7 @@ KepSMA::operator=(const KepSMA &right)
 KepSMA::~KepSMA()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -111,6 +115,7 @@ bool KepSMA::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -126,6 +131,7 @@ GmatBase* KepSMA::Clone(void) const
 {
    return new KepSMA(*this);
 }
+
 
 //==============================================================================
 //                              KepEcc
@@ -149,7 +155,9 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // KepEcc(const KepEcc &copy)
@@ -165,6 +173,7 @@ KepEcc::KepEcc(const KepEcc &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepEcc& operator=(const KepEcc &right)
 //------------------------------------------------------------------------------
@@ -174,14 +183,14 @@ KepEcc::KepEcc(const KepEcc &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepEcc&
-KepEcc::operator=(const KepEcc &right)
+const KepEcc& KepEcc::operator=(const KepEcc &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepEcc()
@@ -193,6 +202,7 @@ KepEcc::operator=(const KepEcc &right)
 KepEcc::~KepEcc()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -216,6 +226,7 @@ bool KepEcc::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -259,6 +270,7 @@ KepInc::KepInc(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // KepInc(const KepInc &copy)
 //------------------------------------------------------------------------------
@@ -273,6 +285,7 @@ KepInc::KepInc(const KepInc &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepInc& operator=(const KepInc &right)
 //------------------------------------------------------------------------------
@@ -282,14 +295,14 @@ KepInc::KepInc(const KepInc &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepInc&
-KepInc::operator=(const KepInc &right)
+const KepInc& KepInc::operator=(const KepInc &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepInc()
@@ -301,6 +314,7 @@ KepInc::operator=(const KepInc &right)
 KepInc::~KepInc()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -325,6 +339,7 @@ bool KepInc::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -340,6 +355,7 @@ GmatBase* KepInc::Clone(void) const
 {
    return new KepInc(*this);
 }
+
 
 //==============================================================================
 //                              KepAOP
@@ -367,6 +383,7 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // KepAOP(const KepAOP &copy)
 //------------------------------------------------------------------------------
@@ -381,6 +398,7 @@ KepAOP::KepAOP(const KepAOP &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepAOP& operator=(const KepAOP &right)
 //------------------------------------------------------------------------------
@@ -390,14 +408,14 @@ KepAOP::KepAOP(const KepAOP &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepAOP&
-KepAOP::operator=(const KepAOP &right)
+const KepAOP& KepAOP::operator=(const KepAOP &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepAOP()
@@ -409,6 +427,7 @@ KepAOP::operator=(const KepAOP &right)
 KepAOP::~KepAOP()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -433,6 +452,7 @@ bool KepAOP::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -448,6 +468,7 @@ GmatBase* KepAOP::Clone(void) const
 {
    return new KepAOP(*this);
 }
+
 
 //==============================================================================
 //                              KepRAAN
@@ -474,6 +495,7 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // KepRAAN(const KepRAAN &copy)
 //------------------------------------------------------------------------------
@@ -488,6 +510,7 @@ KepRAAN::KepRAAN(const KepRAAN &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepRAAN& operator=(const KepRAAN &right)
 //------------------------------------------------------------------------------
@@ -497,14 +520,14 @@ KepRAAN::KepRAAN(const KepRAAN &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepRAAN&
-KepRAAN::operator=(const KepRAAN &right)
+const KepRAAN& KepRAAN::operator=(const KepRAAN &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
     
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepRAAN()
@@ -516,6 +539,7 @@ KepRAAN::operator=(const KepRAAN &right)
 KepRAAN::~KepRAAN()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -540,6 +564,7 @@ bool KepRAAN::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -555,6 +580,7 @@ GmatBase* KepRAAN::Clone(void) const
 {
    return new KepRAAN(*this);
 }
+
 
 //==============================================================================
 //                              KepRADN
@@ -581,6 +607,7 @@ KepRADN::KepRADN(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
+
 //------------------------------------------------------------------------------
 // KepRADN(const KepRADN &copy)
 //------------------------------------------------------------------------------
@@ -595,6 +622,7 @@ KepRADN::KepRADN(const KepRADN &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepRADN& operator=(const KepRADN &right)
 //------------------------------------------------------------------------------
@@ -604,14 +632,14 @@ KepRADN::KepRADN(const KepRADN &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepRADN&
-KepRADN::operator=(const KepRADN &right)
+const KepRADN& KepRADN::operator=(const KepRADN &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
     
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepRADN()
@@ -623,6 +651,7 @@ KepRADN::operator=(const KepRADN &right)
 KepRADN::~KepRADN()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -647,6 +676,7 @@ bool KepRADN::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -662,6 +692,7 @@ GmatBase* KepRADN::Clone(void) const
 {
    return new KepRADN(*this);
 }
+
 
 //==============================================================================
 //                              KepTA
@@ -685,7 +716,9 @@ KepTA::KepTA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // KepTA(const KepTA &copy)
@@ -701,6 +734,7 @@ KepTA::KepTA(const KepTA &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepTA& operator=(const KepTA &right)
 //------------------------------------------------------------------------------
@@ -710,14 +744,14 @@ KepTA::KepTA(const KepTA &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepTA&
-KepTA::operator=(const KepTA &right)
+const KepTA& KepTA::operator=(const KepTA &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepTA()
@@ -729,6 +763,7 @@ KepTA::operator=(const KepTA &right)
 KepTA::~KepTA()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -753,6 +788,7 @@ bool KepTA::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -768,6 +804,7 @@ GmatBase* KepTA::Clone(void) const
 {
    return new KepTA(*this);
 }
+
 
 //==============================================================================
 //                              KepMA
@@ -791,7 +828,9 @@ KepMA::KepMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // KepMA(const KepMA &copy)
@@ -807,6 +846,7 @@ KepMA::KepMA(const KepMA &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepMA& operator=(const KepMA &right)
 //------------------------------------------------------------------------------
@@ -816,14 +856,14 @@ KepMA::KepMA(const KepMA &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepMA&
-KepMA::operator=(const KepMA &right)
+const KepMA& KepMA::operator=(const KepMA &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepMA()
@@ -875,6 +915,7 @@ GmatBase* KepMA::Clone(void) const
    return new KepMA(*this);
 }
 
+
 //==============================================================================
 //                              KepMM
 //==============================================================================
@@ -897,7 +938,9 @@ KepMM::KepMM(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MM", obj, "Mean Motion", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // KepMM(const KepMM &copy)
@@ -913,6 +956,7 @@ KepMM::KepMM(const KepMM &copy)
 {
 }
 
+
 //------------------------------------------------------------------------------
 // const KepMM& operator=(const KepMM &right)
 //------------------------------------------------------------------------------
@@ -922,14 +966,14 @@ KepMM::KepMM(const KepMM &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepMM&
-KepMM::operator=(const KepMM &right)
+const KepMM& KepMM::operator=(const KepMM &right)
 {
    if (this != &right)
       OrbitReal::operator=(right);
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepMM()
@@ -964,6 +1008,7 @@ bool KepMM::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -1002,9 +1047,11 @@ GmatBase* KepMM::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepElem::KepElem(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "KepElem", obj, "Keplerian Elements", " ", GmatParam::NO_DEP)
+   : OrbitRvec6(name, "KepElem", obj, "Keplerian Elements", " ", GmatParam::COORD_SYS)
 {
    // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mIsPlottable = false;
 }
 
@@ -1031,8 +1078,7 @@ KepElem::KepElem(const KepElem &copy)
  * @param <right> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-const KepElem&
-KepElem::operator=(const KepElem &right)
+const KepElem& KepElem::operator=(const KepElem &right)
 {
    if (this != &right)
       OrbitRvec6::operator=(right);

@@ -43,6 +43,8 @@
 SphRMag::SphRMag(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
 //------------------------------------------------------------------------------
@@ -358,8 +360,10 @@ GmatBase* SphDec::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphVMag::SphVMag(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::ORIGIN)
+   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::COORD_SYS)
 {
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
 
 //------------------------------------------------------------------------------
@@ -676,9 +680,11 @@ GmatBase* SphDecV::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphElem::SphElem(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "SphElem", obj, "Spherical Elements", " ", GmatParam::NO_DEP)
+   : OrbitRvec6(name, "SphElem", obj, "Spherical Elements", " ", GmatParam::COORD_SYS)
 {
    // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mIsPlottable = false;
 }
 

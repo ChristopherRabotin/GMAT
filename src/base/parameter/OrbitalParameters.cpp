@@ -48,7 +48,9 @@ VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // VelApoapsis(const VelApoapsis &copy)
@@ -63,6 +65,7 @@ VelApoapsis::VelApoapsis(const VelApoapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const VelApoapsis& operator=(const VelApoapsis &right)
@@ -81,6 +84,7 @@ VelApoapsis::operator=(const VelApoapsis &right)
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~VelApoapsis()
@@ -116,6 +120,7 @@ bool VelApoapsis::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -131,6 +136,7 @@ GmatBase* VelApoapsis::Clone(void) const
 {
    return new VelApoapsis(*this);
 }
+
 
 //==============================================================================
 //                              VelPeriapsis
@@ -159,7 +165,9 @@ VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // VelPeriapsis(const VelPeriapsis &copy)
@@ -174,6 +182,7 @@ VelPeriapsis::VelPeriapsis(const VelPeriapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const VelPeriapsis& operator=(const VelPeriapsis &right)
@@ -193,6 +202,7 @@ VelPeriapsis::operator=(const VelPeriapsis &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~VelPeriapsis()
 //------------------------------------------------------------------------------
@@ -203,6 +213,7 @@ VelPeriapsis::operator=(const VelPeriapsis &right)
 VelPeriapsis::~VelPeriapsis()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -227,6 +238,7 @@ bool VelPeriapsis::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -242,6 +254,7 @@ GmatBase* VelPeriapsis::Clone(void) const
 {
    return new VelPeriapsis(*this);
 }
+
 
 //==============================================================================
 //                              Apoapsis
@@ -269,7 +282,9 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // Apoapsis(const Apoapsis &copy)
@@ -284,6 +299,7 @@ Apoapsis::Apoapsis(const Apoapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Apoapsis& operator=(const Apoapsis &right)
@@ -303,6 +319,7 @@ Apoapsis::operator=(const Apoapsis &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Apoapsis()
 //------------------------------------------------------------------------------
@@ -313,6 +330,7 @@ Apoapsis::operator=(const Apoapsis &right)
 Apoapsis::~Apoapsis()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -347,6 +365,7 @@ bool Apoapsis::Evaluate()
    //                              R[0], R[1], R[2], V[0], V[1], V[2], rdotv);
    return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -391,7 +410,9 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // Periapsis(const Periapsis &copy)
@@ -406,6 +427,7 @@ Periapsis::Periapsis(const Periapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Periapsis& operator=(const Periapsis &right)
@@ -424,6 +446,7 @@ Periapsis::operator=(const Periapsis &right)
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~Periapsis()
@@ -468,6 +491,7 @@ bool Periapsis::Evaluate()
    return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -511,7 +535,9 @@ OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "Km/s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // OrbitPeriod(const OrbitPeriod &copy)
@@ -526,6 +552,7 @@ OrbitPeriod::OrbitPeriod(const OrbitPeriod &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const OrbitPeriod& operator=(const OrbitPeriod &right)
@@ -545,6 +572,7 @@ OrbitPeriod::operator=(const OrbitPeriod &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~OrbitPeriod()
 //------------------------------------------------------------------------------
@@ -555,6 +583,7 @@ OrbitPeriod::operator=(const OrbitPeriod &right)
 OrbitPeriod::~OrbitPeriod()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -619,7 +648,9 @@ RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // RadApoapsis(const RadApoapsis &copy)
@@ -634,6 +665,7 @@ RadApoapsis::RadApoapsis(const RadApoapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const RadApoapsis& operator=(const RadApoapsis &right)
@@ -653,6 +685,7 @@ RadApoapsis::operator=(const RadApoapsis &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~RadApoapsis()
 //------------------------------------------------------------------------------
@@ -663,6 +696,7 @@ RadApoapsis::operator=(const RadApoapsis &right)
 RadApoapsis::~RadApoapsis()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -686,6 +720,7 @@ bool RadApoapsis::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -726,7 +761,9 @@ RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // RadPeriapsis(const RadPeriapsis &copy)
@@ -741,6 +778,7 @@ RadPeriapsis::RadPeriapsis(const RadPeriapsis &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const RadPeriapsis& operator=(const RadPeriapsis &right)
@@ -760,6 +798,7 @@ RadPeriapsis::operator=(const RadPeriapsis &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~RadPeriapsis()
 //------------------------------------------------------------------------------
@@ -770,6 +809,7 @@ RadPeriapsis::operator=(const RadPeriapsis &right)
 RadPeriapsis::~RadPeriapsis()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -793,6 +833,7 @@ bool RadPeriapsis::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -833,7 +874,9 @@ C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // C3Energy(const C3Energy &copy)
@@ -848,6 +891,7 @@ C3Energy::C3Energy(const C3Energy &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const C3Energy& operator=(const C3Energy &right)
@@ -867,6 +911,7 @@ C3Energy::operator=(const C3Energy &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~C3Energy()
 //------------------------------------------------------------------------------
@@ -877,6 +922,7 @@ C3Energy::operator=(const C3Energy &right)
 C3Energy::~C3Energy()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -900,6 +946,7 @@ bool C3Energy::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -940,7 +987,9 @@ Energy::Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // Energy(const Energy &copy)
@@ -955,6 +1004,7 @@ Energy::Energy(const Energy &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Energy& operator=(const Energy &right)
@@ -974,6 +1024,7 @@ Energy::operator=(const Energy &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Energy()
 //------------------------------------------------------------------------------
@@ -984,6 +1035,7 @@ Energy::operator=(const Energy &right)
 Energy::~Energy()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -1007,6 +1059,7 @@ bool Energy::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -1047,7 +1100,9 @@ Altitude::Altitude(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // Altitude(const Altitude &copy)
@@ -1062,6 +1117,7 @@ Altitude::Altitude(const Altitude &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const Altitude& operator=(const Altitude &right)
@@ -1081,6 +1137,7 @@ Altitude::operator=(const Altitude &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~Altitude()
 //------------------------------------------------------------------------------
@@ -1091,6 +1148,7 @@ Altitude::operator=(const Altitude &right)
 Altitude::~Altitude()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -1114,6 +1172,7 @@ bool Altitude::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase

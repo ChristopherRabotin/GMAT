@@ -43,7 +43,9 @@ SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // SemilatusRectum(const SemilatusRectum &copy)
@@ -58,6 +60,7 @@ SemilatusRectum::SemilatusRectum(const SemilatusRectum &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const SemilatusRectum& operator=(const SemilatusRectum &right)
@@ -77,6 +80,7 @@ SemilatusRectum::operator=(const SemilatusRectum &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~SemilatusRectum()
 //------------------------------------------------------------------------------
@@ -87,6 +91,7 @@ SemilatusRectum::operator=(const SemilatusRectum &right)
 SemilatusRectum::~SemilatusRectum()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -110,6 +115,7 @@ bool SemilatusRectum::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -150,7 +156,9 @@ AngularMomentumMag::AngularMomentumMag(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HMAG", obj, "Angular Momentum Mag", "Km^2/s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
+
 
 //------------------------------------------------------------------------------
 // AngularMomentumMag(const AngularMomentumMag &copy)
@@ -165,6 +173,7 @@ AngularMomentumMag::AngularMomentumMag(const AngularMomentumMag &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const AngularMomentumMag& operator=(const AngularMomentumMag &right)
@@ -183,6 +192,7 @@ AngularMomentumMag::operator=(const AngularMomentumMag &right)
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~AngularMomentumMag()
@@ -217,6 +227,7 @@ bool AngularMomentumMag::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -257,7 +268,9 @@ AngularMomentumX::AngularMomentumX(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HX", obj, "Angular Momentum X", "Km^2/s", GmatParam::COORD_SYS)
 {
    mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
+
 
 //------------------------------------------------------------------------------
 // AngularMomentumX(const AngularMomentumX &copy)
@@ -272,6 +285,7 @@ AngularMomentumX::AngularMomentumX(const AngularMomentumX &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const AngularMomentumX& operator=(const AngularMomentumX &right)
@@ -291,6 +305,7 @@ AngularMomentumX::operator=(const AngularMomentumX &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~AngularMomentumX()
 //------------------------------------------------------------------------------
@@ -301,6 +316,7 @@ AngularMomentumX::operator=(const AngularMomentumX &right)
 AngularMomentumX::~AngularMomentumX()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -324,6 +340,7 @@ bool AngularMomentumX::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -364,7 +381,9 @@ AngularMomentumY::AngularMomentumY(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HY", obj, "Angular Momentum Y", "Km^2/s", GmatParam::COORD_SYS)
 {
    mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
+
 
 //------------------------------------------------------------------------------
 // AngularMomentumY(const AngularMomentumY &copy)
@@ -379,6 +398,7 @@ AngularMomentumY::AngularMomentumY(const AngularMomentumY &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const AngularMomentumY& operator=(const AngularMomentumY &right)
@@ -398,6 +418,7 @@ AngularMomentumY::operator=(const AngularMomentumY &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~AngularMomentumY()
 //------------------------------------------------------------------------------
@@ -408,6 +429,7 @@ AngularMomentumY::operator=(const AngularMomentumY &right)
 AngularMomentumY::~AngularMomentumY()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -471,7 +493,9 @@ AngularMomentumZ::AngularMomentumZ(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HZ", obj, "Angular Momentum Z", "Km^2/s", GmatParam::COORD_SYS)
 {
    mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
 }
+
 
 //------------------------------------------------------------------------------
 // AngularMomentumZ(const AngularMomentumZ &copy)
@@ -486,6 +510,7 @@ AngularMomentumZ::AngularMomentumZ(const AngularMomentumZ &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const AngularMomentumZ& operator=(const AngularMomentumZ &right)
@@ -505,6 +530,7 @@ AngularMomentumZ::operator=(const AngularMomentumZ &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~AngularMomentumZ()
 //------------------------------------------------------------------------------
@@ -515,6 +541,7 @@ AngularMomentumZ::operator=(const AngularMomentumZ &right)
 AngularMomentumZ::~AngularMomentumZ()
 {
 }
+
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -538,6 +565,7 @@ bool AngularMomentumZ::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
