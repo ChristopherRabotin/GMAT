@@ -465,7 +465,6 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
          if (cmd == NULL)
             throw InterpreterException("Cannot create \"" + topLevel[0] + 
                                        "\" command.");
-//         cmd->SetGeneratingString(scriptline);
       }
       else 
          throw InterpreterException("\"" + topLevel[0] + 
@@ -540,6 +539,59 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
          ++index;
       }
 
+      return true;
+   }
+   
+   if (cmdCase == "For") {
+      Real start, step = 1.0, stop;
+      
+      // Find the start and end values, and the step if one is specified
+      StringArray::iterator w;
+      
+      #ifdef DEBUG_TOKEN_PARSING
+         std::cout << "Parsing " << scriptline << "\n   ";
+         for (w = topLevel.begin()+1; w != topLevel.end(); ++w)
+             std::cout << *w << "\n   ";
+         std::cout << std::endl;
+      #endif
+      
+      // First token is the loop index
+      w = topLevel.begin()+1;
+      // Parameter *parm = moderator->CreateParameter(*w);
+      // cmd->SetRefObject(Gmat::PARAMETER, parm);
+      ++w;
+      if (*w != "=")
+         throw InterpreterException("For loop missing \"=\" character");
+      ++w;
+      start = atof(w->c_str());
+      ++w;
+      if (*w != ":")
+         throw InterpreterException("For loop missing first \":\" character");
+      ++w;
+      stop = atof(w->c_str());
+      ++w;
+      
+      if (w != topLevel.end()) {
+         if (*w == ":") {
+            step = stop;   
+            ++w;
+            stop = atof(w->c_str());
+         }
+         // Commented out because of the possibility of trailing white space
+         // else
+         //    throw InterpreterException("For loop missing second \":\" character");
+      }
+      
+      #ifdef DEBUG_TOKEN_PARSING
+         std::cout << "Setting values:\n   start = " << start 
+                   << "\n   step  = " << step 
+                   << "\n   stop  = " << stop 
+                   << std::endl;
+      #endif
+      
+      cmd->SetRealParameter("StartValue", start);
+      cmd->SetRealParameter("Step", step);
+      cmd->SetRealParameter("EndValue", stop);
       return true;
    }
       
@@ -1202,10 +1254,15 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
          ++i;
          pos = i;
       }
-      else if ((str[i] == ' ') || (str[i] == ',')) {
+      else if ((str[i] == ' ') || (str[i] == ',') ||
+               (str[i] == '=') || (str[i] == ':') ) {
          token.assign(str, pos, i-pos);
          if ((token != " ") && (token.length() > 0))
             chunkArray.push_back(token);
+         if ((str[i] == '=') || (str[i] == ':')) {
+            token.assign(str, i, 1);
+            chunkArray.push_back(token);
+         }
          ++i;
          pos = i;
       }
