@@ -21,14 +21,18 @@
 #define Spacecraft_hpp
 
 #include "GmatBase.hpp"
+#include "Cartesian.hpp"
+#include "Keplerian.hpp"
+#include "SphericalOne.hpp"
+#include "SphericalTwo.hpp"
 
 class GMAT_API Spacecraft : public GmatBase
 {
 public:
     // Default constructor
     Spacecraft();
-    Spacecraft(const std::string &nomme);
-    Spacecraft(const std::string &typeStr, const std::string &nomme);
+    Spacecraft(const std::string &name);
+    Spacecraft(const std::string &typeStr, const std::string &name);
     // Copy constructor
     Spacecraft(const Spacecraft &a);
     // Assignment operator
@@ -40,7 +44,9 @@ public:
     // Parameter accessor methods -- overridden from GmatBase
     virtual Integer GetParameterID(const std::string &str) const;
     virtual Real GetRealParameter(const Integer id) const;
+    virtual Real GetRealParameter(const std::string &label) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
+    virtual Real SetRealParameter(const std::string &label, const Real value);
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool SetStringParameter(const Integer id, const std::string &value);
     
@@ -48,17 +54,20 @@ public:
     virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual Real* GetState(void)
-    { return state; }
+
+    virtual Real* GetState(void); // { return state; }
+    void SetState(Real s1, Real s2, Real s3, Real s4, Real s5, Real s6);
+
+    void  ConvertRepresentation(const std::string &elementType);
 
     // Default values for spacecraft 
     static const Real EPOCH; 
-    static const Real SEMI_MAJOR_AXIS; 
-    static const Real ECCENTRICITY;
-    static const Real INCLINATION; 
-    static const Real RIGHT_ASCENSION;
-    static const Real ARG_OF_PERIGEE; 
-    static const Real MEAN_ANOMALY;
+    static const Real ELEMENT1; 
+    static const Real ELEMENT2; 
+    static const Real ELEMENT3; 
+    static const Real ELEMENT4; 
+    static const Real ELEMENT5; 
+    static const Real ELEMENT6; 
     static const std::string REF_BODY; 
     static const std::string REF_FRAME; 
     static const std::string REF_PLANE; 
@@ -66,12 +75,8 @@ public:
 protected:
     // Declare protetced method data of spacecraft information
     Real         epoch;
-    Real         state[6];  // state[0]: semi-major axis (km)
-                            // state[1]: eccentricity
-                            // state[2]: inclination (rad) 
-                            // state[3]: right ascension of ascending node (rad)
-                            // state[4]: argument of perigee (rad)
-                            // state[5]: mean anomaly (rad)
+    Real         state[6];  
+    Real         mass;
     std::string  refBody; 
     std::string  refFrame;   
     std::string  refPlane; 
@@ -85,6 +90,7 @@ protected:
     Integer      refBodyID; 
     Integer      refFrameID; 
     Integer      refPlaneID; 
+    Integer      massID;
 
 private:
     void InitializeValues();
