@@ -104,9 +104,14 @@ public:
                                  const std::string &filename = "");
     Subscriber* GetSubscriber(const std::string &name);
 
+    //loj: 4/1/04 added
+    // StopCondition
+    StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
+    StopCondition* GetStopCondition(const std::string &name);
+    
     // Command
     GmatCommand* CreateCommand(const std::string &type, const std::string &name);
-    
+
     // Resource
     bool ClearResource();
     

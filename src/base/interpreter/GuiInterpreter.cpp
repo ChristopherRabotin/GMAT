@@ -544,6 +544,25 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
     return theModerator->GetSubscriber(name);
 }
 
+//loj: 4/1/04 added
+// StopCondition
+//------------------------------------------------------------------------------
+// StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
+                                                   const std::string &name)
+{
+    return theModerator->CreateStopCondition(type, name);
+}
+
+//------------------------------------------------------------------------------
+// StopCondition* GetStopCondition(const std::string &name)
+//------------------------------------------------------------------------------
+StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
+{
+    return theModerator->GetStopCondition(name);
+}
+
 // GmatCommand
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type, const std::string &name)
