@@ -97,7 +97,7 @@ public:
                                    const std::string &value);
 protected:
 
-
+   Real mBaseEpoch;
    Real mEpoch;
    Real mGoal;
    Real mTolerance;
@@ -131,7 +131,8 @@ protected:
     
    enum
    {
-      EPOCH = GmatBaseParamCount,
+      BASE_EPOCH = GmatBaseParamCount,
+      EPOCH,
       EPOCH_VAR,
       STOP_VAR,
       GOAL,
@@ -144,8 +145,10 @@ protected:
       BaseStopConditionParamCount,
    };
     
-   static const Gmat::ParameterType PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount];
-   static const std::string PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount];
+   static const std::string
+      PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount];
 
 private:
    void CopyDynamicData(const BaseStopCondition &stopCond);

@@ -38,6 +38,7 @@
 const std::string
 BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount] =
 {
+   "BaseEpoch",
    "Epoch",
    "EpochVar",
    "StopVar",
@@ -53,6 +54,7 @@ BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCou
 const Gmat::ParameterType
 BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount] =
 {
+   Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -86,6 +88,8 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
                                      Interpolator *interp)
    : GmatBase(Gmat::STOP_CONDITION, "StopCondition", name)
 {
+   mBaseEpoch = 0.0;
+   mEpoch = 0.0;
    mGoal = goal;
    mTolerance = tol;
    mRepeatCount = repeatCount;
@@ -141,6 +145,8 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
 BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    : GmatBase(copy)
 {
+   mBaseEpoch = copy.mBaseEpoch;
+   mEpoch = copy.mEpoch;
    mGoal = copy.mGoal;
    mTolerance = copy.mTolerance;
    mRepeatCount = copy.mRepeatCount;
@@ -169,6 +175,8 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
    if (this != &right)
    {
       GmatBase::operator=(right);        
+      mBaseEpoch = right.mBaseEpoch;
+      mEpoch = right.mEpoch;
       mGoal = right.mGoal;
       mTolerance = right.mTolerance;
       mRepeatCount = right.mRepeatCount;
@@ -328,7 +336,7 @@ bool BaseStopCondition::SetInterpolator(const std::string &name)
 {
    bool status = false;
 
-   //@todo Do not user Moderator
+   //@todo Do not use Moderator
     
 #if !defined __UNIT_TEST__
    Moderator *theModerator = Moderator::Instance();
@@ -783,6 +791,8 @@ Real BaseStopCondition::GetRealParameter(const Integer id) const
       return mEccTol;
    case RANGE:
       return mRange;
+   case BASE_EPOCH:
+      return mBaseEpoch;
    case EPOCH:
       return mEpoch;
    default:
@@ -817,6 +827,9 @@ Real BaseStopCondition::SetRealParameter(const Integer id, const Real value)
    case RANGE:
       mRange = value;
       return mRange;
+   case BASE_EPOCH:
+      mBaseEpoch = value;
+      return mBaseEpoch;
    case EPOCH:
       mEpoch = value;
       return mEpoch;
