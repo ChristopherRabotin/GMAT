@@ -38,7 +38,8 @@ const StringArray& AtmosphereManager::GetSupportedAtmospheres(
 }
 
 
-AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType)
+AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType, 
+                                                  bool isInternal)
 {
     if (atmType == "")
         return currentAtmosphere;
@@ -58,7 +59,7 @@ AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType)
     
         return currentAtmosphere;
     }
-        
+    
     return NULL;
 }
 

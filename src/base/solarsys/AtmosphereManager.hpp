@@ -12,7 +12,8 @@ public:
 	virtual ~AtmosphereManager();
  
     const StringArray&  GetSupportedAtmospheres(const std::string& body = "");
-    AtmosphereModel*    GetAtmosphere(const std::string& atmType = "");
+    AtmosphereModel*    GetAtmosphere(const std::string& atmType = "", 
+                                      bool isInternal = true);
     void                SetSunVector(Real *sv);
     
 protected:
