@@ -201,7 +201,7 @@ const Real con_den[5][7] =
  */
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere() :
-    AtmosphereModel     ("JacchiaRoberts")
+    AtmosphereModel     ("Jacchia-Roberts")
 {
    earth = NULL;
 }
@@ -215,6 +215,40 @@ JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere() :
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
 {
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the DragForce.
+ *
+ * @return clone of the DragForce.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* JacchiaRobertsAtmosphere::Clone(void) const
+{
+   return new JacchiaRobertsAtmosphere(*this);
+}
+
+//------------------------------------------------------------------------------
+//  bool Density(Real *pos, Real *density, Real epoch, Integer count)
+//------------------------------------------------------------------------------
+/**
+ *  Calculates the density at each of the states in the input vector, using the 
+ *  JacchiaRoberts atmosphere model.
+ * 
+ *  @param pos       The input vector of spacecraft states
+ *  @param density   The array of output densities
+ *  @param epoch     The current TAIJulian epoch
+ *  @param count     The number of spacecraft contained in pos 
+ */
+//------------------------------------------------------------------------------
+bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch, 
+                                Integer count)
+{
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -240,7 +274,7 @@ JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
  *  @param  <acceleration> Spacecraft acceleration due to atmospheric drag
  *                         (km/sec**2)
  *
- *  @return zero if drag calculated, reason for failure otherwise
+ *  @return true if drag calculated, false otherwise
  *
  *  Modifications:
  *     01/11/94  D. Gates - R94.02 delta SCR058: - Converted time to UTC and
@@ -256,7 +290,7 @@ JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
  *               CelestialBody, and utc_time gets time from A1MJD.
  */
 //------------------------------------------------------------------------------
-Integer JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time, 
+bool JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time, 
                                   Real sc_pos[3], Real sc_vel[3],
                                   Real sun_unit[3], Real area, Real mass,
                                   Real drag_coeff, FILE *tkptr, bool new_file,
@@ -289,8 +323,17 @@ Integer JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time,
    //  used for heights below 90 KM.
    if (height > 0.0)
    {
+      // waw: Added check if file opened successfully
+      if (fileReader->OpenSolarFluxFile(fileName))
+         tkptr = fileReader->GetSolarFluxFile();
+      else
+         return false;
+         
       rho = 1.0e12*JacchiaRoberts(height, sc_pos, sun_unit, utc_time, tkptr, 
                                   new_file, istat);
+      // waw: Added for checking                            
+      if (!fileReader->CloseSolarFluxFile())
+         return false;
    }
    else
    {
@@ -327,9 +370,8 @@ Integer JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time,
       acceleration[2] = 0.0;
    }
 
-   // Return status of drag computation
-   return istat;
-   
+   // Return status
+   return true;
 } // end GetJacchiaRobertsDrag()
 
 //---------------------------------
@@ -369,8 +411,8 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    Real density, temperature, t_500, sun_dec, geo_lat;
 
    // Read minimum temperature and geomagnetic indices
-   // waw: Modified to use fileReader->Load()
-    if((istat = fileReader->Load(a1_time, tkptr, new_file, &geo)) != 0)
+   // waw: Modified to use fileReader->LoadSolarFluxFile()
+    if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
     {
         return 0.0;
     }
@@ -1115,4 +1157,47 @@ CelestialBody* JacchiaRobertsAtmosphere::GetEarth()
 { 
    earth = solarSystem->GetBody(SolarSystem::EARTH_NAME);
    return earth;
+}
+
+//---------------------------------
+// protected
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr)
+//------------------------------------------------------------------------------
+/**
+ * Copy Constructor.
+ * 
+ * @param jr The JacchiaRoberts instance used to set parameters for this clone.
+ */
+//------------------------------------------------------------------------------
+JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr) :
+AtmosphereModel     (jr)
+{
+}
+
+//---------------------------------
+// private
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ * 
+ * @param jr JacchiaRobertsAtmosphere instance used as a template for this copy.
+ * 
+ * @return A reference to this class, with members set to match the template.
+ */
+//------------------------------------------------------------------------------
+JacchiaRobertsAtmosphere& JacchiaRobertsAtmosphere::operator=
+                                            (const JacchiaRobertsAtmosphere& jr)
+{
+//    if (this == &jr)
+//        return *this;
+//        
+//    AtmosphereModel::operator=(jr);        
+//    return *this;
 }
