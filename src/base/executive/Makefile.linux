@@ -40,6 +40,8 @@ clean:
 libExecutive : libExecutive.a
 	
 libExecutiveConsole : libExecutiveConsole.a
+	mkdir -p ../lib
+	cp libExecutiveConsole.a ../lib
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
