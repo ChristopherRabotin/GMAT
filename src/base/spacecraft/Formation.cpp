@@ -55,7 +55,8 @@ Formation::~Formation()
 
 Formation::Formation(const Formation& orig) :
    SpaceObject    (orig),
-   dimension      (orig.dimension)
+   dimension      (orig.dimension),
+   componentNames (orig.componentNames)
 {
 }
 
@@ -64,7 +65,12 @@ Formation& Formation::operator=(const Formation& orig)
 {
    if (&orig == this)
       return *this;
-      
+   
+   SpaceObject::operator=(orig);
+   dimension = orig.dimension;
+   componentNames = orig.componentNames;
+   components.clear();
+   
    return *this;
 }
 
