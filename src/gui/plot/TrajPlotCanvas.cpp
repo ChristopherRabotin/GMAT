@@ -1214,42 +1214,6 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
     
 } //end ReadTextTrajectory()
 
-
-//------------------------------------------------------------------------------
-// void UpdateSpacecraft(const Real &time, const Real &posX,
-//                       const Real &posY, const Real &posZ)
-//------------------------------------------------------------------------------
-/**
- * Updates spacecraft trajectory.
- *
- * @param <time> time
- * @param <posX> position x
- * @param <posY> position y
- * @param <posZ> position z
- */
-//------------------------------------------------------------------------------
-void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
-                                      const Real &posY, const Real &posZ,
-                                      const UnsignedInt orbitColor,
-                                      const UnsignedInt targetColor)
-{
-   int sc = 0;
-   if (mNumData < MAX_DATA)
-   {
-      mScTrajColor[sc][mNumData] = orbitColor;
-      mTime[mNumData] = time;
-      mTempScPos[sc][mNumData][0] = posX;
-      mTempScPos[sc][mNumData][1] = posY;
-      mTempScPos[sc][mNumData][2] = posZ;
-      mTempEarthPos[mNumData][0] = 0.0;
-      mTempEarthPos[mNumData][1] = 0.0;
-      mTempEarthPos[mNumData][2] = 0.0;
-      mNumData++;
-   }
-   
-   Refresh(false);
-}
-
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
