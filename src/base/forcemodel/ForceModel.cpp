@@ -172,9 +172,14 @@ ForceModel::~ForceModel(void)
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const ForceModel& fdf) :
-    PhysicalModel    (fdf)
+    PhysicalModel    (fdf),
+    previousState    (fdf.previousState),
+    estimationMethod (fdf.estimationMethod)
 {
-   /// @todo Implement the copy constructor
+    numForces = fdf.numForces;
+    dimension = fdf.dimension;
+    currentForce = fdf.currentForce;
+    parameterCount = ForceModelParamCount;
 }
 
 //------------------------------------------------------------------------------
