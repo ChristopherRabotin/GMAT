@@ -53,7 +53,8 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
    // a1mjd
    if (fromType == TIME_SYSTEM_TEXT[0])
    {
-      return (origValue - GmatTimeUtil::A1_TAI_OFFSET);
+      return (origValue -
+             (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
    // utc
    else if (fromType == TIME_SYSTEM_TEXT[1])
@@ -61,7 +62,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
       // look up leap secs from file
       Real numLeapSecs =
             theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue);
-      return (origValue + numLeapSecs);
+      return (origValue + (numLeapSecs/GmatTimeUtil::SECS_PER_DAY));
    }
    // ut1
    else if (fromType == TIME_SYSTEM_TEXT[2])
@@ -98,7 +99,8 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
    // tt
    else if (fromType == TIME_SYSTEM_TEXT[5])
    {
-      return (origValue - GmatTimeUtil::TT_TAI_OFFSET);
+      return (origValue -
+             (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
 
    return 0;
@@ -110,7 +112,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
 {
    if (toType == TIME_SYSTEM_TEXT[0])
    {
-      return (origValue + GmatTimeUtil::A1_TAI_OFFSET);
+      return (origValue +
+             (GmatTimeUtil::A1_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
    // utc
    else if (toType == TIME_SYSTEM_TEXT[1])
@@ -119,12 +122,13 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
             theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue);
 
       Real utcLeapSecs =
-            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue - taiLeapSecs);
+            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue -
+            (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
 
       if (utcLeapSecs == taiLeapSecs)
-         return (origValue - taiLeapSecs);
+         return (origValue - (taiLeapSecs/GmatTimeUtil::SECS_PER_DAY));
       else
-         return (origValue - utcLeapSecs);
+         return (origValue - (utcLeapSecs/GmatTimeUtil::SECS_PER_DAY));
    }
    // ut1
    else if (toType == TIME_SYSTEM_TEXT[2])
@@ -170,7 +174,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
    // tt
    else if (toType == TIME_SYSTEM_TEXT[5])
    {
-      return (origValue + GmatTimeUtil::TT_TAI_OFFSET);
+      return (origValue +
+             (GmatTimeUtil::TT_TAI_OFFSET/GmatTimeUtil::SECS_PER_DAY));
    }
 
    return 0;
