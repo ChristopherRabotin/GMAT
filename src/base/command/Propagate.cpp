@@ -171,7 +171,7 @@ std::string Propagate::GetParameterText(const Integer id) const
         return "InterruptFrequency";
 
     if (id == satNameID)
-        return "Satellite";
+        return "Spacecraft";
     
     if (id == propNameID)
         return "Propagator";
@@ -191,7 +191,7 @@ Integer Propagate::GetParameterID(const std::string &str) const
     if (str == "InterruptFrequency")
         return interruptCheckFrequencyID;
 
-    if (str == "Satellite")
+    if (str == "Spacecraft")
         return satNameID;
     
     if (str == "Propagator")
