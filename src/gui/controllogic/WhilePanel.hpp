@@ -35,6 +35,8 @@ public:
 private:
     wxGrid *conditionGrid;
 
+    static const int MAX_ROW = 10;
+    static const int MAX_COL = 4;
     static const int COMMAND_COL = 0;
     static const int LHS_COL = 1;
     static const int COND_COL = 2;
@@ -55,32 +57,28 @@ private:
     void Setup(wxWindow *parent);
 
     // Grid table event methods
-    void OnCellDoubleLeftClick(wxGridEvent& event);
+    void OnCellRightClick(wxGridEvent& event);
     void OnCellValueChange(wxGridEvent& event);
-                
+ 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 44000,
-        ID_BUTTON,
-        ID_GRID,
-        MENU_INSERT_P,
-        MENU_DELETE_P,
-        MENU_CLEAR_P
+        ID_GRID = 50000,
     };
-    
-   bool newCommand;
-    
+      
    Integer mNumberOfConditions;
    Integer mNumberOfLogicalOps;
    
-   StringArray mLhsList;
-   StringArray mOpStrings;
-   StringArray mRhsList;
+   std::vector<bool> mLhsIsParam;
+   std::vector<bool> mRhsIsParam;
+   
    StringArray mLogicalOpStrings;
+   StringArray mLhsList;
+   StringArray mEqualityOpStrings;
+   StringArray mRhsList;   
 };
 
 #endif // WhilePanel_hpp
