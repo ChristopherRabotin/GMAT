@@ -19,10 +19,11 @@
 #include "XyPlotSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-#include "PlotTypes.hpp"         // for MAX_XY_CURVE
+#include "PlotTypes.hpp"                // for MAX_XY_CURVE
+#include "ParameterCreateDialog.hpp"
 #include "MessageInterface.hpp"
 
-#include "wx/colordlg.h"   // for wxColourDialog
+#include "wx/colordlg.h"                // for wxColourDialog
 
 #define DEBUG_XYPLOT_PANEL 0
 
@@ -41,7 +42,9 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
    EVT_BUTTON(REMOVE_X, XyPlotSetupPanel::OnRemoveX)
    EVT_BUTTON(REMOVE_Y, XyPlotSetupPanel::OnRemoveY)
    EVT_BUTTON(CLEAR_Y, XyPlotSetupPanel::OnClearY)
+   EVT_BUTTON(CREATE_VARIABLE, XyPlotSetupPanel::OnCreateVariable)
    EVT_BUTTON(LINE_COLOR_BUTTON, XyPlotSetupPanel::OnLineColorClick)
+   EVT_LISTBOX(PARAM_LISTBOX, XyPlotSetupPanel::OnSelectParam)
    EVT_LISTBOX(Y_SEL_LISTBOX, XyPlotSetupPanel::OnSelectY)
    EVT_CHECKBOX(SHOW_PLOT_CHECKBOX, XyPlotSetupPanel::OnShowPlotCheckBoxChange)
    EVT_CHECKBOX(SHOW_GRID_CHECKBOX, XyPlotSetupPanel::OnShowGridCheckBoxChange)
@@ -104,14 +107,14 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 {
-   wxString oldParam = xSelectedListBox->GetStringSelection();
-   wxString newParam = paramListBox->GetStringSelection();
+   wxString oldParam = mXSelectedListBox->GetStringSelection();
+   wxString newParam = mParamListBox->GetStringSelection();
 
    if (!oldParam.IsSameAs(newParam))
    {
       // empty listbox first, only one parameter is allowed
-      xSelectedListBox->Clear();
-      xSelectedListBox->Append(newParam);
+      mXSelectedListBox->Clear();
+      mXSelectedListBox->Append(newParam);
 
       mXParamChanged = true;
       theApplyButton->Enable();
@@ -125,14 +128,14 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
 {
    // get string in first list and then search for it
    // in the second list
-   wxString s = paramListBox->GetStringSelection();
-   int found = ySelectedListBox->FindString(s);
+   wxString s = mParamListBox->GetStringSelection();
+   int found = mYSelectedListBox->FindString(s);
     
     // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      ySelectedListBox->Append(s);
-      ySelectedListBox->SetStringSelection(s);
+      mYSelectedListBox->Append(s);
+      mYSelectedListBox->SetStringSelection(s);
       ShowParameterOption(s, true);
       mYParamChanged = true;
       theApplyButton->Enable();
@@ -144,8 +147,8 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnRemoveX(wxCommandEvent& event)
 {
-   int sel = xSelectedListBox->GetSelection();
-   xSelectedListBox->Delete(sel);
+   int sel = mXSelectedListBox->GetSelection();
+   mXSelectedListBox->Delete(sel);
    mXParamChanged = true;
    theApplyButton->Enable();
 }
@@ -155,21 +158,21 @@ void XyPlotSetupPanel::OnRemoveX(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
 {
-   int sel = ySelectedListBox->GetSelection();
-   ySelectedListBox->Delete(sel);
+   int sel = mYSelectedListBox->GetSelection();
+   mYSelectedListBox->Delete(sel);
    
    if (sel-1 < 0)
    {
-      ySelectedListBox->SetSelection(0);
-      if (ySelectedListBox->GetCount() == 0)
+      mYSelectedListBox->SetSelection(0);
+      if (mYSelectedListBox->GetCount() == 0)
          ShowParameterOption("", false); // hide parameter color, etc
       else
-         ShowParameterOption(ySelectedListBox->GetStringSelection(), true);
+         ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
    }
    else
    {
-      ySelectedListBox->SetSelection(sel-1);
-      ShowParameterOption(ySelectedListBox->GetStringSelection(), true);
+      mYSelectedListBox->SetSelection(sel-1);
+      ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
    }
 
    mYParamChanged = true;
@@ -181,10 +184,19 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
 {
-   ySelectedListBox->Clear();
+   mYSelectedListBox->Clear();
    ShowParameterOption("", false);
    mYParamChanged = true;
    theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnSelectParam(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnSelectParam(wxCommandEvent& event)
+{
+   mAddXButton->Enable();
+   mAddYButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -192,7 +204,25 @@ void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnSelectY(wxCommandEvent& event)
 {
-   ShowParameterOption(ySelectedListBox->GetStringSelection(), true);
+   ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
+}
+
+//loj: 7/30/04 added
+//------------------------------------------------------------------------------
+// void OnCreateVariable(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnCreateVariable(wxCommandEvent& event)
+{
+   ParameterCreateDialog paramDlg(this);
+   paramDlg.ShowModal();
+   
+   if (paramDlg.IsParamCreated())
+   {
+      mParamListBox->Set(theGuiManager->GetNumConfigParameter(),
+                         theGuiManager->GetConfigParameterList());
+      mAddXButton->Disable();
+      mAddYButton->Disable();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -224,7 +254,7 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
    
    if (dialog.ShowModal() == wxID_OK)
    {
-      mSelYName = std::string(ySelectedListBox->GetStringSelection().c_str());
+      mSelYName = std::string(mYSelectedListBox->GetStringSelection().c_str());
       
       mLineColor = dialog.GetColourData().GetColour();
       mLineColorButton->SetBackgroundColour(mLineColor);
@@ -280,75 +310,82 @@ void XyPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Selected X"),
                        wxDefaultPosition, wxSize(80,-1), 0);
    
-   xSelectedListBox =
-      new wxListBox(this, LISTBOX, wxDefaultPosition,
+   mXSelectedListBox =
+      new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
     
    wxBoxSizer *xSelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
    xSelelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   xSelelectedBoxSizer->Add(xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xSelelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add, remove X buttons (2nd column)
    //------------------------------------------------------
-   addXButton = new wxButton(this, ADD_X, wxT("<--"),
-                             wxDefaultPosition, wxSize(20,20), 0);
+   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
+                              wxDefaultPosition, wxSize(20,20), 0);
 
-   removeXButton = new wxButton(this, REMOVE_X, wxT("-->"),
-                                wxDefaultPosition, wxSize(20,20), 0);
+   wxButton *removeXButton =
+      new wxButton(this, REMOVE_X, wxT("-->"),
+                   wxDefaultPosition, wxSize(20,20), 0);
 
    wxBoxSizer *xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    xButtonsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   xButtonsBoxSizer->Add(addXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   xButtonsBoxSizer->Add(mAddXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    xButtonsBoxSizer->Add(removeXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
       
    //------------------------------------------------------
    // parameters box (3rd column)
    //------------------------------------------------------
    wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
-    
+   
    wxStaticText *titleAvailbleText =
       new wxStaticText(this, -1, wxT("Variables"),
                        wxDefaultPosition, wxSize(80,-1), 0);
-    
+   
+   wxButton *createParamButton =
+      new wxButton( this, CREATE_VARIABLE, wxT("Create Variable"),
+                    wxDefaultPosition, wxSize(-1,-1), 0 );
+   
    theGuiManager->UpdateParameter();
-    
-   paramListBox =
-      theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
-   paramListBox->SetSelection(0);
+   
+   mParamListBox =
+      theGuiManager->GetConfigParameterListBox(this, PARAM_LISTBOX, wxSize(150,200));
+   mParamListBox->SetSelection(0);
    paramBoxSizer->Add(titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   paramBoxSizer->Add(paramListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   paramBoxSizer->Add(mParamListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    //------------------------------------------------------
    // add, remove, clear Y buttons (4th column)
    //------------------------------------------------------
-   addYButton = new wxButton(this, ADD_Y, wxT("-->"),
-                             wxDefaultPosition, wxSize(20,20), 0);
+   mAddYButton = new wxButton(this, ADD_Y, wxT("-->"),
+                              wxDefaultPosition, wxSize(20,20), 0);
 
-   removeYButton = new wxButton(this, REMOVE_Y, wxT("<--"),
-                                wxDefaultPosition, wxSize(20,20), 0);
-    
-   clearYButton = new wxButton(this, CLEAR_Y, wxT("<="),
-                               wxDefaultPosition, wxSize(20,20), 0);
-    
+   wxButton *removeYButton =
+      new wxButton(this, REMOVE_Y, wxT("<--"),
+                   wxDefaultPosition, wxSize(20,20), 0);
+   
+   wxButton *clearYButton =
+      new wxButton(this, CLEAR_Y, wxT("<="),
+                   wxDefaultPosition, wxSize(20,20), 0);
+   
    wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   yButtonsBoxSizer->Add(addYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   yButtonsBoxSizer->Add(mAddYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    yButtonsBoxSizer->Add(removeYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    yButtonsBoxSizer->Add(clearYButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
    //------------------------------------------------------
    // Y box label (5th column)
    //------------------------------------------------------
    wxStaticText *titleYText =
       new wxStaticText(this, -1, wxT("Selected Y"),
                        wxDefaultPosition, wxSize(80,-1), 0);
-
-   ySelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
-                                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
-        
+   
+   mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
+                                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+   
    wxBoxSizer *ySelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
    ySelelectedBoxSizer->Add(titleYText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   ySelelectedBoxSizer->Add(ySelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   ySelelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
     
    //------------------------------------------------------
    // line color (6th column)
@@ -379,12 +416,11 @@ void XyPlotSetupPanel::Create()
    
    mFlexGridSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
-   mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
+   mFlexGridSizer->Add(createParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(emptyText, 0, wxALIGN_LEFT|wxALL, bsize);
    mFlexGridSizer->Add(mParamOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
    pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   //pageBoxSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
         
    //------------------------------------------------------
    // add to parent sizer
@@ -418,7 +454,7 @@ void XyPlotSetupPanel::LoadData()
       if (!xParamNames[0].IsSameAs(""))
       {
          mNumXParams = 1;
-         xSelectedListBox->Set(1, xParamNames);
+         mXSelectedListBox->Set(1, xParamNames);
       }
     
       // get Y parameters
@@ -454,12 +490,12 @@ void XyPlotSetupPanel::LoadData()
             }
          }
     
-         ySelectedListBox->Set(mNumYParams, yParamNames);
-         ySelectedListBox->SetSelection(0);
+         mYSelectedListBox->Set(mNumYParams, yParamNames);
+         mYSelectedListBox->SetSelection(0);
          delete yParamNames;
 
          // show parameter option
-         ShowParameterOption(ySelectedListBox->GetStringSelection(), true);
+         ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
       }
       else
       {
@@ -485,7 +521,7 @@ void XyPlotSetupPanel::SaveData()
    // set X parameter
    if (mXParamChanged)
    {
-      if (xSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
+      if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
          mSubscriber->Activate(false);
@@ -494,7 +530,7 @@ void XyPlotSetupPanel::SaveData()
       {
          mSubscriber->
             SetStringParameter("IndVar",
-                               std::string(xSelectedListBox->GetString(0).c_str()));
+                               std::string(mXSelectedListBox->GetString(0).c_str()));
       }
 
       mXParamChanged = false;
@@ -506,7 +542,7 @@ void XyPlotSetupPanel::SaveData()
       mYParamChanged = false;
       mIsColorChanged = true;
       
-      int numYParams = ySelectedListBox->GetCount();
+      int numYParams = mYSelectedListBox->GetCount();
 
       mNumYParams = numYParams;
       if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
@@ -535,11 +571,11 @@ void XyPlotSetupPanel::SaveData()
          {
 #if DEBUG_XYPLOT_PANEL
             MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() DepVar = %s\n",
-                                          ySelectedListBox->GetString(i).c_str());
+                                          mYSelectedListBox->GetString(i).c_str());
 #endif
             mSubscriber->
                SetStringParameter("Add",
-                                  std::string(ySelectedListBox->GetString(i).c_str()));
+                                  std::string(mYSelectedListBox->GetString(i).c_str()));
          }
       }
    }
@@ -553,7 +589,7 @@ void XyPlotSetupPanel::SaveData()
       
       for (int i=0; i<mNumYParams; i++)
       {
-         mSelYName = std::string(ySelectedListBox->GetString(i).c_str());
+         mSelYName = std::string(mYSelectedListBox->GetString(i).c_str());
          param = theGuiInterpreter->GetParameter(mSelYName);
 
          if (param != NULL)

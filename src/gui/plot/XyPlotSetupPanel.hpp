@@ -45,17 +45,14 @@ protected:
 
    wxColour mLineColor;
    
-   wxListBox *paramListBox;
-   wxListBox *xSelectedListBox;
-   wxListBox *ySelectedListBox;
-    
-   wxButton *addXButton;
-   wxButton *addYButton;
-   wxButton *clearYButton;
-   wxButton *removeXButton;
-   wxButton *removeYButton;
+   wxListBox *mParamListBox;
+   wxListBox *mXSelectedListBox;
+   wxListBox *mYSelectedListBox;
+
+   wxButton *mAddXButton;
+   wxButton *mAddYButton;
    wxButton *mLineColorButton;
-   
+
    wxCheckBox *showPlotCheckBox;
    wxCheckBox *showGridCheckBox;
    wxComboBox *scComboBox;
@@ -68,7 +65,9 @@ protected:
    void OnRemoveX(wxCommandEvent& event);
    void OnRemoveY(wxCommandEvent& event);
    void OnClearY(wxCommandEvent& event);
+   void OnSelectParam(wxCommandEvent& event);
    void OnSelectY(wxCommandEvent& event);
+   void OnCreateVariable(wxCommandEvent& event);
    void OnShowPlotCheckBoxChange(wxCommandEvent& event);
    void OnShowGridCheckBoxChange(wxCommandEvent& event);
    void OnLineColorClick(wxCommandEvent& event);
@@ -84,13 +83,15 @@ protected:
    enum
    {     
       TEXTCTRL = 92000,
-      LISTBOX,
+      PARAM_LISTBOX,
+      X_SEL_LISTBOX,
       Y_SEL_LISTBOX,
       ADD_X,
       ADD_Y,
       REMOVE_X,
       REMOVE_Y,
       CLEAR_Y,
+      CREATE_VARIABLE,
       SHOW_PLOT_CHECKBOX,
       SHOW_GRID_CHECKBOX,
       LINE_COLOR_BUTTON,
