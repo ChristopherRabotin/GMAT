@@ -16,11 +16,14 @@
 #include "JacchiaRobertsAtmosphere.hpp"
 #include "AtmosphereException.hpp"
 
-// #define DEBUG_JR_DRAG 1
+#include "gmatwxdefs.hpp"
+#include "MessageInterface.hpp"
 
-#ifdef DEBUG_JR_DRAG
-   #include "MessageInterface.hpp"
-#endif
+//#define DEBUG_JR_DRAG 0     
+
+//#ifdef DEBUG_JR_DRAG
+//   #include "MessageInterface.hpp"
+//#endif
 
 const Real pi         = 3.141592653589793238;
 const Real ra         = 6356.766;              /// Average radius of the earth (km) 
@@ -279,8 +282,9 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
 #ifdef DEBUG_JR_DRAG
    MessageInterface::ShowMessage("   Getting Geo Height\n");
 #endif
+  
    height = get_geodetic_height(earthRadius, pos, flat);
-   
+
    // Obtain density of atmosphere at spacecraft height
 
    // Compute the correct time first  
@@ -295,7 +299,7 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
    MessageInterface::ShowMessage("   Getting rho\n");
 #endif
       rho = 1.0e12*JacchiaRoberts(height, pos, sunVector, utc_time, sfFileName, 
-                                  true, istat);
+                                  newFile, istat);
    }
    else
    {
@@ -307,10 +311,15 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
 
    // Output density in units of kg/m3
    *density = 1.0e-9*rho;
+  
+   wxString densityString;
+   densityString.Printf("%.15f", *density);
+   MessageInterface::ShowMessage("JR Density = %s\n", densityString.c_str());
    
-#ifdef DEBUG_JR_DRAG
+#ifdef DEBUG_JR_DRAG    
    MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density complete\n");
 #endif
+
    return true;
 }
 
@@ -350,20 +359,26 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    GEOPARMS geo;
    Real density, temperature, t_500, sun_dec, geo_lat;
 
-   // Read minimum temperature and geomagnetic indices
-#ifdef DEBUG_JR_DRAG
-   MessageInterface::ShowMessage("   Loading File\n");
-#endif
-
-   // Added 12/9 by DJC.  Waka -- Check this to see what we really want to do here!
-   if (tkptr == NULL)
-      throw AtmosphereException("Flux file pointer is NULL!\n");
-
-   if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
+   if (new_file)
    {
-      return 0.0;
+      if (fileReader->OpenSolarFluxFile(fileName))
+      {
+         // Read minimum temperature and geomagnetic indices
+         if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
+            return 0.0;
+      }
+      else
+         throw AtmosphereException("Error opening JacchiaRoberts data file.\n");   
    }
-
+   else
+   {
+      Real f107 = 160.0;
+      Real f107a = 185.0;
+      
+      geo.xtemp = 379.0 + 3.24 * f107a + 1.3 * (f107 - f107a);
+      geo.tkp = 4.0;    
+   }   
+      
    // Compute declination of the sun
    sun_dec = atan2(sun[2], sqrt(sun[0]*sun[0] + sun[1]*sun[1]));
 
@@ -393,8 +408,10 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    }
    else if (height <= (Real) 2500.0)
    {
-      t_500 = exotherm(space_craft, sun, &geo, 500.0, sun_dec,geo_lat);
-      temperature = exotherm(space_craft, sun, &geo, height,sun_dec, geo_lat);
+      t_500 = exotherm(space_craft, sun, &geo, 500.0, sun_dec,geo_lat);  
+      temperature = exotherm(space_craft, sun, &geo, 840.593731818565170,sun_dec, geo_lat);
+//      temperature = exotherm(space_craft, sun, &geo, height,sun_dec, geo_lat);
+ 
       density = rho_high(height, temperature, t_500, sun_dec, geo_lat);
    }
    else
