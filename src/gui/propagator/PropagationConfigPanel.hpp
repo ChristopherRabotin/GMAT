@@ -12,7 +12,6 @@
  * This class contains the Propagation Configuration window.
  */
 //------------------------------------------------------------------------------
-
 #ifndef PropagationConfigPanel_hpp
 #define PropagationConfigPanel_hpp
 
@@ -37,7 +36,7 @@
 class PropagationConfigPanel : public GmatPanel
 {
 public:
-   // constructor
+
    PropagationConfigPanel(wxWindow *parent, const wxString &propName);
    ~PropagationConfigPanel();  
 
@@ -95,7 +94,6 @@ private:
       DragForce *dragf;
       SolarRadiationPressure *srpf;
       bool useSrp;
-      bool isPrimaryBody;
       
       ForceType(const std::string &body, const std::string &grav,
                 const std::string &drag, const std::string &mag)
@@ -165,6 +163,7 @@ private:
    std::string gravTypeName;
    std::string dragTypeName;
    std::string potFilename;
+   
    StringArray gravModelArray;
    StringArray dragModelArray;
    StringArray magfModelArray;
