@@ -687,8 +687,8 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
             {
                if ((*s).compare(forType) == 0)
                {
-                  MessageInterface::ShowMessage
-                     ("FactoryManager::FindFactory() Found factory:%s\n", forType.c_str());
+                  //MessageInterface::ShowMessage
+                  //   ("FactoryManager::FindFactory() Found factory:%s\n", forType.c_str());
                   return (*f);
                }
                ++s;
