@@ -293,7 +293,7 @@ bool ScriptInterpreter::Parse(void)
                        (obj->GetType() == Gmat::SPACECRAFT)) {
                        if (sar.size() > 2) {
                          // obj->SetStringParameter("DateFormat", sar[2]);
-                         ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());                      
+                         ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());
                          unsigned int start, end;
                          start = line.find("=") + 1;
                          const char* linestr = line.c_str();
@@ -309,7 +309,7 @@ bool ScriptInterpreter::Parse(void)
                          epstr.assign(line, start, end-start);
                          
                          ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
-                         ((Spacecraft*)obj)->SaveDisplay();
+//                         ((Spacecraft*)obj)->SaveDisplay();
                          chunks.clear();
                          return true;
                       }
@@ -321,6 +321,7 @@ bool ScriptInterpreter::Parse(void)
                             ++start;
                          ((Spacecraft*)obj)->SetDisplayDateFormat("TAIModJulian");
                          ((Spacecraft*)obj)->SetDisplayEpoch(&(linestr[start]));
+ //                        ((Spacecraft*)obj)->SaveDisplay();
                          // obj->SetRealParameter(objParm, &(linestr[start]));
                       }
                    }
