@@ -27,6 +27,8 @@
 #include "SlpFile.hpp"
 #include "PlanetaryEphem.hpp"
 #include "PlanetaryEphemException.hpp"
+#include "TimeSystemConverter.hpp"
+#include "TimeTypes.hpp"
 
 
 // length of SLP header records
@@ -1029,7 +1031,8 @@ int SlpFile::slp_vel (double time, double elapst, int nbody, int ibody[],
 //
 //  Arguments:
 //     <refmjd>   i   the utc modified julian date for which time offsets
-//                    are calculated (mjd.fff)
+//                    are calculated (mjd.fff)  
+//                    ****************<< NOTE - refmjd is UTC, not A1!!!!!
 //     <a1utc>    o   the number of offset seconds to be added to a utc time to
 //                    derive the a.1 time (ss.sss)
 //     <ut1utc>   o   the number of offset seconds to be added to a utc time to
@@ -1071,7 +1074,7 @@ int SlpFile::a1_utc_offset(double refmjd, double *a1utc, double *ut1utc, double 
    // external variables
    //-------------------------
    //extern  DCB_TYPE  g_tcf_dcb;
-
+  /*   - ***************** replace all of this Swingby code with GMAT code ***********
    double time, a1ut1;
    long   julian, i;
    int    error;
@@ -1103,9 +1106,9 @@ int SlpFile::a1_utc_offset(double refmjd, double *a1utc, double *ut1utc, double 
 
    julian = (long)(refmjd - 0.5);
 
-   //*************************
+   // -- *************************
    //future_build: read_tcf()
-   //*************************
+   // -- *************************
    //     if (g_tcf_dcb.fptr == NULL)
    //     {
    //        // call tcf to open time coefficients file, imput request time
@@ -1165,9 +1168,25 @@ int SlpFile::a1_utc_offset(double refmjd, double *a1utc, double *ut1utc, double 
    }
 
    return error;
+   */
 
    // the tdt-tai and a.1-tai values used  are constant offsets
 
+ 
+   // interpolations
+   
+   Real mjdA1  = TimeConverterUtil::Convert(refmjd,
+                 "UtcMjd", "A1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+   *a1utc      = (mjdA1 - refmjd) * GmatTimeUtil::SECS_PER_DAY;
+   Real mjdUT1 = TimeConverterUtil::Convert(refmjd,
+                 "UtcMjd", "Ut1Mjd", GmatTimeUtil::JD_JAN_5_1941);
+   *ut1utc     = (mjdUT1 - refmjd) * GmatTimeUtil::SECS_PER_DAY;
+   Real mjdTT  = TimeConverterUtil::Convert(refmjd,
+                 "UtcMjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+   *tdtutc     = (mjdTT - refmjd) * GmatTimeUtil::SECS_PER_DAY;
+   return 0;
+
+   
 } // end a1_utc_offset()
 
 //------------------------------------------------------------------------------
