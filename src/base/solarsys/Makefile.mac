@@ -10,12 +10,13 @@
 #             2004/03/01 - Added AtmosphereException.cpp (WCS)
 #             2004/03/05 - Added msise90.cpp
 #             2004/09/01 - W. Shoan - removed AtmosphereManager
+#             2005/04/05 - W. Shoan - removed AtmosphereException
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AtmosphereException.cpp AtmosphereModel.cpp \
+SRC = 	AtmosphereModel.cpp \
 	CelestialBody.cpp DeFile.cpp ExponentialAtmosphere.cpp \
 	JacchiaRobertsAtmosphere.cpp Moon.cpp \
 	Msise90Atmosphere.cpp msise90.cpp Planet.cpp \
