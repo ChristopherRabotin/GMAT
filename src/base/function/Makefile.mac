@@ -2,12 +2,14 @@
 # Module:     Makefile.mac for function directory 
 # Created:    Wendy Shoan
 # Date:       2004/09/23
+# Modified:   2005/01/05 - J. Gurganus - added GmatFunction
+#          
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Function.cpp FunctionException.cpp MatlabFunction.cpp
+SRC = Function.cpp FunctionException.cpp MatlabFunction.cpp GmatFunction.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
