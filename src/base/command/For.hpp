@@ -82,6 +82,8 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
+   virtual bool         GetBooleanParameter(const Integer id) const; 
+   virtual bool         GetBooleanParameter(const std::string &label) const; 
    
     
 protected:
@@ -94,6 +96,10 @@ protected:
       START_NAME,
       END_NAME,
       INCREMENT_NAME,
+      INDEX_IS_PARAM,
+      START_IS_PARAM,
+      END_IS_PARAM,
+      INCR_IS_PARAM,
       ForParamCount
    };
 

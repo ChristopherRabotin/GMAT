@@ -35,7 +35,11 @@ For::PARAMETER_TEXT[ForParamCount - BranchCommandParamCount] =
    "IndexName",
    "StartName",
    "EndName",
-   "IncrementName"
+   "IncrementName",
+   "IndexIsParam",
+   "StartIsParam",
+   "EndIsParam",
+   "IncrIsparam"
 };
 
 const Gmat::ParameterType
@@ -48,6 +52,10 @@ For::PARAMETER_TYPE[ForParamCount - BranchCommandParamCount] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 const Real For::UNINITIALIZED_VALUE = -999.99;
@@ -614,6 +622,47 @@ bool For::SetStringParameter(const std::string &label,
                                         const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  bool  GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  bool value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool For::GetBooleanParameter(const Integer id) const
+{
+   if (id == INDEX_IS_PARAM)       return indexIsParam;
+   if (id == START_IS_PARAM)       return startIsParam;
+   if (id == END_IS_PARAM)         return endIsParam;
+   if (id == INCR_IS_PARAM)        return incrIsParam;
+
+   return BranchCommand::GetBooleanParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  bool  GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the bool parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  bool value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool For::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
 }
 
 
