@@ -132,31 +132,35 @@ void BallisticsMassPanel::Create()
 
 void BallisticsMassPanel::LoadData()
 {
-    int massID = theSpacecraft->GetParameterID("Mass");
+    int dryMassID = theSpacecraft->GetParameterID("DryMass");
     int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
-    int incidentAreaID = theSpacecraft->GetParameterID("IncidentArea");
+    int dragAreaID = theSpacecraft->GetParameterID("DragArea");
     int reflectCoeffID = theSpacecraft->GetParameterID("ReflectivityCoefficient");
+    int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
 
-    Real mass = theSpacecraft->GetRealParameter(massID);
+    Real mass = theSpacecraft->GetRealParameter(dryMassID);
     Real dragCoeff = theSpacecraft->GetRealParameter(coeffDragID);
-    Real incidentArea = theSpacecraft->GetRealParameter(incidentAreaID);
+    Real dragArea = theSpacecraft->GetRealParameter(dragAreaID);
     Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
+    Real srpArea = theSpacecraft->GetRealParameter(srpAreaID);
 
     wxString massStr;
     wxString dragCoeffStr;
-    wxString incidentAreaStr;
+    wxString dragAreaStr;
+    wxString srpAreaStr;
     wxString reflectCoeffStr;
     
     massStr.Printf("%f", mass);
     dragCoeffStr.Printf("%f", dragCoeff);
-    incidentAreaStr.Printf("%f", incidentArea);
+    dragAreaStr.Printf("%f", dragArea);
+    srpAreaStr.Printf("%f", srpArea);
     reflectCoeffStr.Printf("%f", reflectCoeff);
 
     dryMassTextCtrl->SetValue(massStr);
     dragCoeffTextCtrl->SetValue(dragCoeffStr);
     reflectCoeffTextCtrl->SetValue(reflectCoeffStr);
-    dragAreaTextCtrl->SetValue(incidentAreaStr);
-    srpAreaTextCtrl->SetValue(incidentAreaStr);
+    dragAreaTextCtrl->SetValue(dragAreaStr);
+    srpAreaTextCtrl->SetValue(srpAreaStr);
 
 //    epochValue->SetValue(epochStr);
 
@@ -164,19 +168,22 @@ void BallisticsMassPanel::LoadData()
 
 void BallisticsMassPanel::SaveData()
 {
-    int massID = theSpacecraft->GetParameterID("Mass");
+    int dryMassID = theSpacecraft->GetParameterID("DryMass");
     int coeffDragID = theSpacecraft->GetParameterID("CoefficientDrag");
-    int incidentAreaID = theSpacecraft->GetParameterID("IncidentArea");
+    int dragAreaID = theSpacecraft->GetParameterID("DragArea");
     int reflectCoeffID = theSpacecraft->GetParameterID("ReflectivityCoefficient");
+    int srpAreaID = theSpacecraft->GetParameterID("SRPArea");
 
     wxString massStr = dryMassTextCtrl->GetValue();
     wxString dragCoeffStr = dragCoeffTextCtrl->GetValue();
-    wxString incidentAreaStr = dragAreaTextCtrl->GetValue();
+    wxString dragAreaStr = dragAreaTextCtrl->GetValue();
+    wxString srpAreaStr = srpAreaTextCtrl->GetValue();
     wxString reflectCoeffStr = reflectCoeffTextCtrl->GetValue();
     
-    theSpacecraft->SetRealParameter(massID, atof(massStr));
+    theSpacecraft->SetRealParameter(dryMassID, atof(massStr));
     theSpacecraft->SetRealParameter(coeffDragID, atof(dragCoeffStr));
-    theSpacecraft->SetRealParameter(incidentAreaID, atof(incidentAreaStr));
+    theSpacecraft->SetRealParameter(dragAreaID, atof(dragAreaStr));
+    theSpacecraft->SetRealParameter(srpAreaID, atof(srpAreaStr));
     theSpacecraft->SetRealParameter(reflectCoeffID, atof(reflectCoeffStr));
 }
 
