@@ -133,7 +133,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumOpenGlPlot = 0;
    mNumDiffCorr = 0;
    mNumVariable = 0;
-   mNumMatlabFunct = 0;
+   mNumFunct = 0;
    mNumCoordSys = 0;
 
    theGuiManager->UpdateAll();
@@ -166,7 +166,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumOpenGlPlot = 0;
       mNumDiffCorr = 0;
       mNumVariable = 0;
-      mNumMatlabFunct = 0;
+      mNumFunct = 0;
       mNumCoordSys = 0;
    }
    
@@ -178,7 +178,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mSolverItem);
    Collapse(mSubscriberItem);
    Collapse(mVariableItem);
-   Collapse(mMatlabFunctItem);
+   Collapse(mFunctItem);
    Collapse(mCoordSysItem);
 
    DeleteChildren(mSpacecraftItem);
@@ -198,7 +198,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mSolverItem);
    DeleteChildren(mSubscriberItem);
    DeleteChildren(mVariableItem);
-   DeleteChildren(mMatlabFunctItem);
+   DeleteChildren(mFunctItem);
    DeleteChildren(mCoordSysItem);
 
    AddDefaultSpacecraft(mSpacecraftItem);
@@ -209,7 +209,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    AddDefaultSolvers(mSolverItem);
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultVariables(mVariableItem);
-   AddDefaultMatlabFunctions(mMatlabFunctItem);
+   AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
 
    theGuiManager->UpdateAll();
@@ -339,10 +339,10 @@ void ResourceTree::AddDefaultResources()
                 wxTreeItemIcon_Expanded);
 
    //----- Matlab functions
-   mMatlabFunctItem =
+   mFunctItem =
       AppendItem(resource, wxT("Functions"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCT_FOLDER));
-   SetItemImage(mMatlabFunctItem, GmatTree::ICON_OPENFOLDER,
+   SetItemImage(mFunctItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
                 
    //----- GroundStations
@@ -360,7 +360,7 @@ void ResourceTree::AddDefaultResources()
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultInterfaces(interfaceItem);
    AddDefaultVariables(mVariableItem);
-   AddDefaultMatlabFunctions(mMatlabFunctItem);
+   AddDefaultFunctions(mFunctItem);
    AddDefaultCoordSys(mCoordSysItem);
 }
 
@@ -745,7 +745,7 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 }
 
 //------------------------------------------------------------------------------
-// void AddDefaultMatlabFunctions(wxTreeItemId itemId)
+// void AddDefaultFunctions(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 /**
  * Add the default interfaces
@@ -753,18 +753,27 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
  * @param <itemId> tree item for the interfaces folder
  */
 //------------------------------------------------------------------------------
-void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
+void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
 {
    StringArray itemNames = GmatAppData::GetGuiInterpreter()
                      ->GetListOfConfiguredItems(Gmat::FUNCTION);
    int size = itemNames.size();
    wxString objName;
+   wxString objTypeName;
 
    for (int i = 0; i<size; i++)
    {
+      Function *funct = theGuiInterpreter->GetFunction(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
-      AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
+      objTypeName = wxString(funct->GetTypeName().c_str());
+
+      if (objTypeName == "MatlabFunction")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
+      else if (objTypeName == "GmatFunction")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
+                 new GmatTreeItemData(wxT(objName), GmatTree::GMAT_FUNCTION));
+
    };
  
    //----- Predefined functions
@@ -1699,7 +1708,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
 
    if (!withName.IsEmpty())
    {
-      ++mNumMatlabFunct;
+      ++mNumFunct;
       const std::string stdWithName = withName.c_str();
 
       if (GmatAppData::GetGuiInterpreter()->
@@ -1738,7 +1747,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
 
    if (!withName.IsEmpty())
    {
-      ++mNumMatlabFunct;
+      ++mNumFunct;
       const std::string stdWithName = withName.c_str();
 
       if (GmatAppData::GetGuiInterpreter()->

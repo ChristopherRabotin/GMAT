@@ -51,7 +51,7 @@ private:
    wxTreeItemId mSubscriberItem;
    wxTreeItemId mSolverItem;
    wxTreeItemId mVariableItem;
-   wxTreeItemId mMatlabFunctItem;
+   wxTreeItemId mFunctItem;
    wxTreeItemId mCoordSysItem;
    wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId specialPointsItem;
@@ -68,7 +68,7 @@ private:
    int mNumXyPlot;
    int mNumOpenGlPlot;
    int mNumVariable;
-   int mNumMatlabFunct;
+   int mNumFunct;
    int mNumCoordSys;
 
    void AddDefaultResources();
@@ -83,7 +83,7 @@ private:
    void AddDefaultSubscribers(wxTreeItemId itemId);
    void AddDefaultInterfaces(wxTreeItemId itemId);
    void AddDefaultVariables(wxTreeItemId itemId);
-   void AddDefaultMatlabFunctions(wxTreeItemId itemId);
+   void AddDefaultFunctions(wxTreeItemId itemId);
    void AddDefaultCoordSys(wxTreeItemId itemId);
 
    // event handlers
