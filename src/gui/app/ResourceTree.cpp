@@ -35,6 +35,7 @@
 #include "bitmaps/network.xpm"
 #include "bitmaps/burn.xpm"
 #include "bitmaps/moon.xpm"
+#include <wx/string.h> // for wxArrayString
 
 #include "GuiInterpreter.hpp"
 #include "ResourceTree.hpp"
@@ -1365,10 +1366,15 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
 
    if (paramDlg.IsParamCreated())
    {
-      wxString name = paramDlg.GetParamName();
-      AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_VARIABLE));
-        
+      //wxString name = paramDlg.GetParamName();
+      wxArrayString names = paramDlg.GetParamNames(); //loj: 9/27/04 more than 1 param
+
+      for (unsigned int i=0; i<names.GetCount(); i++)
+      {
+         AppendItem(item, names[i], GmatTree::ICON_FILE, -1,
+                    new GmatTreeItemData(names[i], GmatTree::CREATED_VARIABLE));
+      }
+      
       Expand(item);
    }
 }
