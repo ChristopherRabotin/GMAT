@@ -1,0 +1,249 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                   Function
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P.
+//
+// Author: Allison Greene
+// Created: 2004/09/22
+//
+/**
+ * Defines the Funtion base class used for Matlab and Gmat functions.
+ */
+//------------------------------------------------------------------------------
+
+
+#include "Function.hpp"
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+Function::PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount] =
+{
+   "FunctionName",
+};
+
+const Gmat::ParameterType
+Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
+{
+	Gmat::STRING_TYPE,
+};
+
+
+//------------------------------------------------------------------------------
+//  Function(std::string typeStr, std::string nomme)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Function object (default constructor).
+ * 
+ * @param <typeStr> String text identifying the object type
+ * @param <nomme>   Name for the object
+ */
+//------------------------------------------------------------------------------
+Function::Function(const std::string &typeStr, const std::string &nomme) :
+    GmatBase        (Gmat::FUNCTION, typeStr, nomme),
+    functionName      ("")
+{
+   parameterCount = FunctionParamCount;
+}
+
+
+//------------------------------------------------------------------------------
+//  ~Function(void)
+//------------------------------------------------------------------------------
+/**
+ * Destroys the Function object (destructor).
+ */
+//------------------------------------------------------------------------------
+Function::~Function()
+{
+}
+
+
+//------------------------------------------------------------------------------
+//  Function(const Function &f)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the Function object (copy constructor).
+ * 
+ * @param <f> Object that is copied
+ */
+//------------------------------------------------------------------------------
+Function::Function(const Function &f) :
+    GmatBase        (f),
+    functionName    (f.functionName)
+{
+    parameterCount = FunctionParamCount;
+}
+
+
+//------------------------------------------------------------------------------
+//  Function& operator=(const Function &f)
+//------------------------------------------------------------------------------
+/**
+ * Sets one Function object to match another (assignment operator).
+ * 
+ * @param <f> The object that is copied.
+ * 
+ * @return this object, with the parameters set as needed.
+ */
+//------------------------------------------------------------------------------
+Function& Function::operator=(const Function &f)
+{
+    if (this == &f)
+        return *this;
+        
+    GmatBase::operator=(f);
+
+    functionName  = f.functionName;
+
+    return *this;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Function.
+ *
+ * @return clone of the Function.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Function::Clone(void) const
+{
+   return (new Function(*this));
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the name of the parameter with the input id.
+ * 
+ * @param <id> Integer id for the parameter.
+ * 
+ * @return The string name of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Function::GetParameterText(const Integer id) const
+{
+    if (id >= FUNCTION_NAME && id < FunctionParamCount)
+        return PARAMETER_TEXT[id - GmatBaseParamCount];
+    else
+        return GmatBase::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the id corresponding to a named parameter.
+ * 
+ * @param <str> Name of the parameter.
+ * 
+ * @return The ID.
+ */
+//------------------------------------------------------------------------------
+Integer Function::GetParameterID(const std::string &str) const
+{
+    for (Integer i = FUNCTION_NAME; i < FunctionParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+            return i;
+    }
+
+    return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the type of a parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The type of the parameter.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType Function::GetParameterType(const Integer id) const
+{
+    if (id >= FUNCTION_NAME&& id < FunctionParamCount)
+        return PARAMETER_TYPE[id - GmatBaseParamCount];
+    else
+        return GmatBase::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the text description for the type of a parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The text description of the type of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Function::GetParameterTypeString(const Integer id) const
+{
+   if (id >= FUNCTION_NAME&& id < FunctionParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return GmatBase::GetParameterTypeString(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the value for a std::string parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * 
+ * @return The value of the parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Function::GetStringParameter(const Integer id) const
+{
+   if (id == FUNCTION_NAME)
+      return functionName;
+   return GmatBase::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * 
+ * @return If value of the parameter was set.
+ */
+//------------------------------------------------------------------------------
+bool Function::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == FUNCTION_NAME)
+   {
+      functionName = value;
+      return true;
+   }
+
+   return GmatBase::SetStringParameter(id, value);
+}
+
