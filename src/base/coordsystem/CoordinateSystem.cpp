@@ -201,9 +201,11 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 {
    Rvector internalState(inState.GetSize());
    if (axes)
+   {
       if (!axes->RotateToMJ2000Eq(epoch,inState,internalState))
          throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
                                          + instanceName);
+   }
    else // assume this is MJ2000Eq, so no rotation is necessary
       internalState = inState;
 
