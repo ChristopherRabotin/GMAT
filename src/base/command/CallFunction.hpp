@@ -25,6 +25,7 @@
 #include "Function.hpp"
 
 #include "Parameter.hpp"
+#include "Array.hpp"
 
 //#include <map>
 #include <iostream>
