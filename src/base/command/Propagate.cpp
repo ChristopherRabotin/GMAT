@@ -59,7 +59,9 @@ Propagate::Propagate(void) :
  */
 //------------------------------------------------------------------------------
 Propagate::~Propagate(void)
-{    
+{
+   for (unsigned int i=0; i<stopWhen.size(); i++)
+      delete stopWhen[i];
 }
 
 
@@ -494,15 +496,10 @@ void Propagate::InterpretAction(void)
     // This will be deleted when system shuts down
     Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
     stopParam->SetStringParameter("Object", paramObj);
-    //loj: 6/2/04 temp code to resolve repeated same stop conditions
-    static Integer stopCondCount = 0;
-    stopCondCount++;
-    std::stringstream ss("");
-    ss << "StopOn" << paramName << stopCondCount;
-    StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition", ss.str());
     
-    //StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName +
-    //                                                            stopCondCount);
+    StopCondition *stopCond =
+       theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
+    
     stopCond->SetStringParameter("StopVar", paramName);
     SetObject(stopCond, Gmat::STOP_CONDITION);
 
@@ -549,7 +546,7 @@ bool Propagate::Initialize(void)
     Propagator *p = prop->GetPropagator();
     if (!p)
         throw CommandException("Propagator not set in PropSetup");
-        
+
     // Toss the spacecraft into the force model
     ForceModel *fm = prop->GetForceModel();
     fm->ClearSpacecraft(); //loj: 4/1/04 added
@@ -561,7 +558,42 @@ bool Propagate::Initialize(void)
     
     p->Initialize();
     initialized = true;
-    return true;
+    
+    //loj: 6/16/04
+    // Set SolarSystem in StopCondition
+    if (solarSys != NULL)
+    {
+       for (unsigned int i=0; i<stopWhen.size(); i++)
+       {
+          stopWhen[i]->SetSolarSystem(solarSys);
+          //----------------------------------------------------------
+          //@note
+          //loj: 6/16/04 for multiple spacecraft, we need to know 
+          // which spacecraft belong to which stopping condition,
+          // so need Map. Set to first spacecraft for now.
+          //----------------------------------------------------------
+          stopWhen[i]->Initialize();
+          stopWhen[i]->SetSpacecraft(sats[0]); 
+          
+          if (!stopWhen[i]->IsInitialized())
+          {
+             initialized = false;
+             MessageInterface::ShowMessage
+                ("Propagate::Initialize() StopCondition %s is not initialized.\n",
+                 stopWhen[i]->GetName().c_str());
+             break;
+          }
+       }
+    }
+    else
+    {
+       initialized = false;
+       MessageInterface::ShowMessage
+          ("Propagate::Initialize() SolarSystem not set in StopCondition");
+    }
+
+    return initialized; //loj: 6/16/04
+    //return true;
 }
 
 
@@ -589,14 +621,38 @@ bool Propagate::Execute(void)
     Integer epochID = sat1->GetParameterID("Epoch");
     baseEpoch = sat1->GetRealParameter(epochID);
 
-//    MessageInterface::ShowMessage("Propagate start; epoch = %f",
-//                                 (baseEpoch + fm->GetTime() / 86400.0));
+#if DEBUG_PROPAGATE
+    MessageInterface::ShowMessage("Propagate start; epoch = %f\n",
+                                  (baseEpoch + fm->GetTime() / 86400.0));
+    int stopCondCount = stopWhen.size();
+    MessageInterface::ShowMessage("stopCondCount = %d\n", stopCondCount);
+    for (int i=0; i<stopCondCount; i++)
+    {
+       MessageInterface::ShowMessage("stopCondName[%d]=%s\n", i, stopWhen[i]->GetName().c_str());
+    }
+#endif
+    
     //---------------------------------------
     //loj: 3/22/04 new code
     //---------------------------------------
     bool stopCondMet = false;
     Real stopTime = 0.0;
-   
+    std::string stopVar;
+
+    //loj: 6/16/04 added setting new initial epoch for "Elapsed*" parameters
+    // for consecutive Propate commands
+    elapsedTime = fm->GetTime();
+    for (unsigned int i=0; i<stopWhen.size(); i++)
+    {
+       // ElapsedTime parameters need new initial epoch
+       stopVar = stopWhen[i]->GetStringParameter("StopVar");
+       if (stopVar.find("Elapsed") != stopVar.npos)
+       {
+          stopWhen[i]->GetStopParameter()->
+             SetRealParameter("InitialEpoch", baseEpoch + elapsedTime / 86400.0);
+       }
+    }
+
     while (!stopCondMet)
     {
         if (!p->Step())
@@ -604,12 +660,15 @@ bool Propagate::Execute(void)
 
         // orbit related parameters use spacecraft for data
         elapsedTime = fm->GetTime();
-        fm->UpdateSpacecraft();
+        //loj: 6/15/04 update spacecraft epoch, without argument the spacecraft epoch
+        // won't get updated for consecutive Propagate command
+        fm->UpdateSpacecraft(baseEpoch + elapsedTime / 86400.0);
         
         for (unsigned int i=0; i<stopWhen.size(); i++)
         {
             // StopCondition need epoch for the Interpolator
-            stopWhen[i]->SetRealParameter("Epoch", elapsedTime);
+            //stopWhen[i]->SetRealParameter("Epoch", elapsedTime);
+            stopWhen[i]->SetRealParameter("Epoch", baseEpoch + elapsedTime / 86400.0);
             
             if (stopWhen[i]->Evaluate())
             {
@@ -633,12 +692,14 @@ bool Propagate::Execute(void)
             //fm->UpdateFromSpacecraft();
             //fm->SetTime(elapsedTime);
         }
-//        MessageInterface::ShowMessage("Propagate intermediate; epoch = %f",
-//                                      (baseEpoch + fm->GetTime() / 86400.0));
+#if DEBUG_PROPAGATE
+        MessageInterface::ShowMessage("Propagate intermediate; epoch = %f\n",
+                                      (baseEpoch + fm->GetTime() / 86400.0));
+#endif
     }
 
 #if DEBUG_PROPAGATE
-    MessageInterface::ShowMessage("Stopping; epoch = %f, stopTime = %f, elapsedTime = %f",
+    MessageInterface::ShowMessage("Stopping; epoch = %f, stopTime = %f, elapsedTime = %f\n",
                                   (baseEpoch + fm->GetTime() / 86400.0), stopTime, elapsedTime);
 
     MessageInterface::ShowMessage("Propagate::Execute() stopTime=%f, elapsedTime=%f\n",
@@ -705,9 +766,12 @@ bool Propagate::Execute(void)
             delete stopWhen[i];
     }
     //---------------------------------------
+
+#if DEBUG_PROPAGATE
+    MessageInterface::ShowMessage("Propagate complete; epoch = %f\n",
+                                  (baseEpoch + fm->GetTime() / 86400.0));
+#endif
     
-//    MessageInterface::ShowMessage("Propagate complete; epoch = %f",
-//                                  (baseEpoch + fm->GetTime() / 86400.0));
     return true;
 }
 
