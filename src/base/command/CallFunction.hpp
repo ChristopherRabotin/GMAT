@@ -24,7 +24,7 @@
 #include "Command.hpp"
 #include "Function.hpp"
 
-#include "Variable.hpp"
+#include "Parameter.hpp"
 
 //#include <map>
 #include <iostream>
@@ -91,8 +91,8 @@ protected:
 
 private:
    ObjectArray objectArray;
-   std::vector<Variable*> mInputList;
-   std::vector<Variable*> mOutputList;
+   std::vector<Parameter*> mInputList;
+   std::vector<Parameter*> mOutputList;
 
    StringArray mInputListNames;
    StringArray mOutputListNames;
