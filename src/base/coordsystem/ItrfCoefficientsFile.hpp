@@ -60,7 +60,11 @@ public:
    
    // initializes the ItrfCoefficientsFile
    virtual void Initialize();
-   
+
+   // method to return the name of the coefficients file
+   virtual std::string GetNutationFileName() const;
+   virtual std::string GetPlanetaryFileName() const;
+      
    virtual Integer GetNumberOfNutationTerms();
    virtual Integer GetNumberOfPlanetaryTerms();
    virtual bool GetNutationTerms(std::vector<IntegerArray> &a5, Rvector &Aval, 

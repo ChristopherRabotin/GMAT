@@ -296,6 +296,17 @@ void ItrfCoefficientsFile::Initialize()
 }
 
 
+std::string ItrfCoefficientsFile::GetNutationFileName() const
+{
+   return nutationFileName;
+}
+
+std::string ItrfCoefficientsFile::GetPlanetaryFileName() const
+{
+   return planetaryFileName;
+}
+
+
 Integer ItrfCoefficientsFile::GetNumberOfNutationTerms()
 {
    return nut;
