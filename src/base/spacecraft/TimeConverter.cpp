@@ -20,6 +20,7 @@
 #include <iostream>
 #include <iomanip>
 #include "TimeConverter.hpp"
+#include <exception>
 
 //-------------------------------------
 // public methods
@@ -108,67 +109,82 @@ TimeConverter& TimeConverter::operator=(const TimeConverter &timeConverter)
  *
  * @return Converted time from the specific data format 
  */
-Real TimeConverter::Convert(const Real time,   
-                            const std::string &fromDateFormat,
-                            const std::string &toDateFormat)
+// Real TimeConverter::Convert(const Real time,   
+std::string TimeConverter::Convert(const std::string &time,   
+                                   const std::string &fromDateFormat,
+                                   const std::string &toDateFormat)
 {
-    Real newTime = time;
+    Real realTime = atof(time.c_str());
+    std::string newTime = time;
+
+    std::ostringstream timeBuffer;
+    timeBuffer.precision(9);
+    timeBuffer.setf(std::ios::fixed);
+    timeBuffer.str("");
 
     // Determine the input of date format 
     if (fromDateFormat == "TAIModJulian" && toDateFormat != "TAIModJulian") 
     {
-       A1Mjd *jd = new A1Mjd(time);
+       A1Mjd jd(realTime);
 
        if (toDateFormat == "UTCModJulian")
        {
-          newTime = jd->ToUtcMjd();
+          realTime = jd.ToUtcMjd();
+          timeBuffer << realTime;
+          newTime = timeBuffer.str();
        }
     
        else if (toDateFormat == "UTCGregorian")
        {
-          UtcDate utcDate = jd->ToUtcDate();
-          newTime = utcDate.ToPackedCalendarReal();
+          UtcDate utcDate = jd.ToUtcDate();
+          newTime = utcDate.ToPackedCalendarString();
        }
 
        else if (toDateFormat == "TAIGregorian")
        {
-          A1Date a1Date = jd->ToA1Date();
-          newTime = a1Date.ToPackedCalendarReal();
+          A1Date a1Date = jd.ToA1Date();
+          newTime = a1Date.ToPackedCalendarString();
        }
-
-       delete jd;
     }
 
     else if (fromDateFormat == "TAIGregorian" && toDateFormat != "TAIGregorian")
     {
-       std::ostringstream timeBuffer;
-       timeBuffer.precision(9);
-       timeBuffer.setf(std::ios::fixed);
-       timeBuffer << time; 
-      
-       A1Date *a1Date = new A1Date(timeBuffer.str());
+       Real mjd;  
+       try
+       {
+          A1Date a1Date(time);
 
-       Real mjd = ModifiedJulianDate(a1Date->GetYear(),
-                                     a1Date->GetMonth(),
-                                     a1Date->GetDay(),
-                                     a1Date->GetHour(),
-                                     a1Date->GetMinute(),
-                                     a1Date->GetSecond());
-       delete a1Date;
-
+          mjd = ModifiedJulianDate(a1Date.GetYear(),a1Date.GetMonth(),
+                                   a1Date.GetDay(),a1Date.GetHour(),
+                                   a1Date.GetMinute(),a1Date.GetSecond());
+                                   
+       }
+       catch (Date::TimeRangeError& e)
+       {
+          throw TimeConverterException();
+       }
+    
        if (toDateFormat == "TAIModJulian")
-          return(mjd);
-
+       {
+          timeBuffer << mjd;
+          return(timeBuffer.str());
+       }
        // Convert to A1 MJD and then UTC MJD 
        A1Mjd a1Mjd(mjd);
 
        if (toDateFormat == "UTCGregorian")
        {
           UtcDate utcDate = a1Mjd.ToUtcDate();
-          newTime = utcDate.ToPackedCalendarReal();
+          newTime = utcDate.ToPackedCalendarString();
        }
        else if (toDateFormat == "UTCModJulian")  
-          newTime = a1Mjd.ToUtcMjd();
+       {
+
+          realTime = a1Mjd.ToUtcMjd();
+
+          timeBuffer << realTime;
+          return(timeBuffer.str());
+       }
 
     }
 
@@ -178,51 +194,59 @@ Real TimeConverter::Convert(const Real time,
        {
           // Convert to A1 MJD and then A1 Date 
           A1Mjd a1Mjd;
-          Real mjd =  a1Mjd.UtcMjdToA1Mjd(time); 
+          Real mjd =  a1Mjd.UtcMjdToA1Mjd(realTime); 
           a1Mjd.Set(mjd);
           A1Date a1Date = a1Mjd.ToA1Date();
-          newTime = a1Date.ToPackedCalendarReal();
+          newTime = a1Date.ToPackedCalendarString();
        }
 
        else if (toDateFormat == "TAIModJulian")
        {
           A1Mjd a1Mjd;
-          newTime = a1Mjd.UtcMjdToA1Mjd(time);
+          realTime = a1Mjd.UtcMjdToA1Mjd(realTime);
+ 
+          timeBuffer << realTime;
+          return(timeBuffer.str());
        }
 
        else if (toDateFormat == "UTCGregorian")
        {
           A1Mjd a1Mjd;
-          Real a1mjd = a1Mjd.UtcMjdToA1Mjd(time);
+          Real a1mjd = a1Mjd.UtcMjdToA1Mjd(realTime);
           a1Mjd.Set(a1mjd);  
           UtcDate utcDate = a1Mjd.ToUtcDate();
-          newTime = utcDate.ToPackedCalendarReal();
+          newTime = utcDate.ToPackedCalendarString();
        }
     }
 
     else if (fromDateFormat == "UTCGregorian" && toDateFormat != "UTCGregorian")
     {
+#if 0
        std::ostringstream timeBuffer;
        timeBuffer.precision(9);
        timeBuffer.setf(std::ios::fixed);
-       timeBuffer << time; 
+       timeBuffer << realTime; 
+#endif
       
-       UtcDate *utcDate = new UtcDate(timeBuffer.str());
+       UtcDate utcDate(time);
 
        // Get UTC MJD 
-       Real mjd = ModifiedJulianDate(utcDate->GetYear(),
-                                     utcDate->GetMonth(),
-                                     utcDate->GetDay(),
-                                     utcDate->GetHour(),
-                                     utcDate->GetMinute(),
-                                     utcDate->GetSecond());
+       Real mjd = ModifiedJulianDate(utcDate.GetYear(),
+                                     utcDate.GetMonth(),
+                                     utcDate.GetDay(),
+                                     utcDate.GetHour(),
+                                     utcDate.GetMinute(),
+                                     utcDate.GetSecond());
 
-       if (toDateFormat == "TAIModJulian")
-          newTime = utcDate->ToA1Mjd();
-
-       else if (toDateFormat == "UTCModJulian")
-          newTime = mjd;
-
+       if (toDateFormat == "TAIModJulian" || toDateFormat == "UTCModJulian")
+       {
+          realTime = mjd;
+          if (toDateFormat == "TAIModJulian") 
+              realTime = utcDate.ToA1Mjd();
+  
+          timeBuffer << realTime;
+          newTime = timeBuffer.str();
+       }
        else if (toDateFormat == "TAIGregorian")
        {
           // Convert to A1 MJD and then A1 Date 
@@ -230,10 +254,9 @@ Real TimeConverter::Convert(const Real time,
           mjd =  a1Mjd.UtcMjdToA1Mjd(mjd); 
           a1Mjd.Set(mjd);
           A1Date a1Date = a1Mjd.ToA1Date();
-          newTime = a1Date.ToPackedCalendarReal();
+          newTime = a1Date.ToPackedCalendarString();
        }
-
-       delete utcDate;
+       
     }
 
     return newTime;

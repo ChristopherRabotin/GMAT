@@ -21,6 +21,7 @@
 #define TimeConverter_hpp
 
 #include <sstream>
+#include "BaseException.hpp"
 #include "Converter.hpp"
 #include "A1Date.hpp"
 #include "A1Mjd.hpp"
@@ -30,6 +31,15 @@
 class GMAT_API TimeConverter : public Converter
 {
 public:
+    // Implements exception
+    class TimeConverterException : public BaseException
+    {
+       public: 
+          TimeConverterException(const std::string &message = 
+           "TimeConverterException: Can't convert due to invalid date")
+           : BaseException(message) {};
+    };
+
     // Default constructor
     TimeConverter();
     TimeConverter(const std::string &name);
@@ -43,8 +53,9 @@ public:
     virtual ~TimeConverter();
 
     // public method 
-    Real Convert(const Real time, const std::string &fromDateFormat,
-                 const std::string &toDateFormat);
+    std::string Convert(const std::string &time, 
+                        const std::string &fromDateFormat,
+                        const std::string &toDateFormat);
 
 protected:
     // Declare protetced method data 
