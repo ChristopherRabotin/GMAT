@@ -20,203 +20,265 @@
 
 #include "Sandbox.hpp"
 #include "SandboxException.hpp"
+#include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_SANDBOX 0
+
+//------------------------------------------------------------------------------
+// Sandbox::Sandbox(void)
+//------------------------------------------------------------------------------
 Sandbox::Sandbox(void) :
-    solarSys        (NULL),
-    publisher       (NULL),
-    sequence        (NULL),
-    current         (NULL),
-    state           (IDLE)
+   solarSys        (NULL),
+   publisher       (NULL),
+   sequence        (NULL),
+   current         (NULL),
+   state           (IDLE)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// ~Sandbox(void)
+//------------------------------------------------------------------------------
 Sandbox::~Sandbox(void)
 {
-    if (solarSys)
-        delete solarSys;
-    if (sequence)
-        delete sequence;
+   if (solarSys)
+      delete solarSys;
+   if (sequence)
+      delete sequence;
     
-    // Delete the local objects
+   // Delete the local objects
 }
     
 // Setup methods
+//------------------------------------------------------------------------------
+// bool AddObject(GmatBase *obj)
+//------------------------------------------------------------------------------
 bool Sandbox::AddObject(GmatBase *obj)
 {
-    if (state == INITIALIZED)
-        state = IDLE;
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage
+      ("Sandbox::AddObject() objType=%s, objName=%s\n",
+       obj->GetTypeName().c_str(), obj->GetName().c_str());
+#endif
+   
+   if (state == INITIALIZED)
+      state = IDLE;
 
-    std::string name = obj->GetName();
-    if (name == "")
-        return false;           // No unnamed objects in the Sandbox tables
+   std::string name = obj->GetName();
+   if (name == "")
+      return false;           // No unnamed objects in the Sandbox tables
 
-    // Check to see if the object is already in the map
-    if (objectMap.find(name) == objectMap.end())
-        // If not, store the new object pointer
-        /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
-        if (obj->GetType() == Gmat::SPACECRAFT)
-            objectMap[name] = new Spacecraft(*((Spacecraft*)obj));
-        else
-            objectMap[name] = obj;
+   // Check to see if the object is already in the map
+   if (objectMap.find(name) == objectMap.end())
+      // If not, store the new object pointer
+      /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
+      if (obj->GetType() == Gmat::SPACECRAFT)
+         objectMap[name] = new Spacecraft(*((Spacecraft*)obj));
+      else
+         objectMap[name] = obj;
     
-    return true;
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool AddCommand(GmatCommand *cmd)
+//------------------------------------------------------------------------------
 bool Sandbox::AddCommand(GmatCommand *cmd)
 {
-    if (state == INITIALIZED)
-        state = IDLE;
+   if (state == INITIALIZED)
+      state = IDLE;
 
-    if (!cmd)
-        return false;
+   if (!cmd)
+      return false;
         
-    if (cmd == sequence)
-        return true;
-//        throw SandboxException("Adding command that is already in the Sandbox");
+   if (cmd == sequence)
+      return true;
+   // throw SandboxException("Adding command that is already in the Sandbox");
     
-    if (sequence)
-        return sequence->Append(cmd);
+   if (sequence)
+      return sequence->Append(cmd);
 
-    sequence = cmd;
-    return true;
+   sequence = cmd;
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool AddSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
 bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
-    if (state == INITIALIZED)
-        state = IDLE;
-    if (!ss)
-        return false;
-    solarSys = ss;
-    return true;
+   if (state == INITIALIZED)
+      state = IDLE;
+   if (!ss)
+      return false;
+   solarSys = ss;
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetPublisher(Publisher *pub)
+//------------------------------------------------------------------------------
 bool Sandbox::SetPublisher(Publisher *pub)
 {
-    if (state == INITIALIZED)
-        state = IDLE;
+   if (state == INITIALIZED)
+      state = IDLE;
 
-    if (pub) {
-        publisher = pub;
-        return true;
-    }
+   if (pub) {
+      publisher = pub;
+      return true;
+   }
 
-    // Initialize off of the singleton
-    //publisher = Publisher::Instance();
-    if (!publisher)
-        return false;
-    return true;
+   // Initialize off of the singleton
+   //publisher = Publisher::Instance();
+   if (!publisher)
+      return false;
+   return true;
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type)
+//------------------------------------------------------------------------------
 GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 {
-    GmatBase* obj = NULL;
+   GmatBase* obj = NULL;
     
-    if (objectMap.find(name) != objectMap.end()) {
-        obj = objectMap[name];
-        if (obj->GetType() != type) {
-            std::string errorStr = "GetInternalObject type mismatch for ";
-            errorStr += name;
-            throw SandboxException(errorStr);
-        }
-    }
-    else {
-        std::string errorStr = "Could not find ";
-        errorStr += name;
-        errorStr += " in the Sandbox.";
-        throw SandboxException(errorStr);
-    }
+   if (objectMap.find(name) != objectMap.end()) {
+      obj = objectMap[name];
+      if (obj->GetType() != type) {
+         std::string errorStr = "GetInternalObject type mismatch for ";
+         errorStr += name;
+         throw SandboxException(errorStr);
+      }
+   }
+   else {
+      std::string errorStr = "Could not find ";
+      errorStr += name;
+      errorStr += " in the Sandbox.";
+      throw SandboxException(errorStr);
+   }
     
-    return obj;
+   return obj;
 }
 
 
+//------------------------------------------------------------------------------
+// Spacecraft* GetSpacecraft(std::string name)
+//------------------------------------------------------------------------------
 Spacecraft* Sandbox::GetSpacecraft(std::string name)
 {
-    Spacecraft *sc = NULL;
-    GmatBase* obj = GetInternalObject(name, Gmat::SPACECRAFT);
+   Spacecraft *sc = NULL;
+   GmatBase* obj = GetInternalObject(name, Gmat::SPACECRAFT);
    
-    if (obj)
-        sc = (Spacecraft*)(obj);
+   if (obj)
+      sc = (Spacecraft*)(obj);
     
-    return sc;
+   return sc;
 }
 
 
 // Execution methods
+//------------------------------------------------------------------------------
+// bool Initialize(void)
+//------------------------------------------------------------------------------
 bool Sandbox::Initialize(void)
 {
-    bool rv = false;
+   bool rv = false;
 
-    // Already initialized
-    if (state == INITIALIZED)
-        return true;
+   // Already initialized
+   if (state == INITIALIZED)
+      return true;
 
-    current = sequence;
-    if (!current)
-        return false;
+   current = sequence;
+   if (!current)
+      return false;
         
-    // Set the solar system on each force model
-    if (solarSys) {
-        std::map<std::string, GmatBase *>::iterator omi;
-        for (omi = objectMap.begin(); omi != objectMap.end(); omi++) {
-            if ((omi->second)->GetType() == Gmat::PROP_SETUP) {
-                ((PropSetup*)(omi->second))->GetForceModel()
-                                           ->SetSolarSystem(solarSys);
-                ((PropSetup*)(omi->second))->Initialize();
-            }
-        }
-    }
-    else
-        throw SandboxException("No solar system defined in the Sandbox!");
+   // Set the solar system on each force model, spacecraft, parameter
+   if (solarSys)
+   {
+      std::map<std::string, GmatBase *>::iterator omi;
+      for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+      {
+         
+#if DEBUG_SANDBOX
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() objType=%s, objName=%s\n",
+             (omi->second)->GetTypeName().c_str(),
+             (omi->second)->GetName().c_str());
+#endif
+         if ((omi->second)->GetType() == Gmat::PROP_SETUP)
+         {
+            ((PropSetup*)(omi->second))->GetForceModel()
+               ->SetSolarSystem(solarSys);
+            ((PropSetup*)(omi->second))->Initialize();
+         }
+         else if((omi->second)->GetType() == Gmat::SPACECRAFT) //loj: 6/24/04 added
+         { 
+            ((Spacecraft*)(omi->second))->SetSolarSystem(solarSys);
+         }
+         else if((omi->second)->GetType() == Gmat::PARAMETER) //loj: 6/24/04 added
+         { 
+            ((Parameter*)(omi->second))->SetSolarSystem(solarSys);
+         }
+      }
+   }
+   else
+      throw SandboxException("No solar system defined in the Sandbox!");
 
-    while (current) {
-        current->SetObjectMap(&objectMap);
-        current->SetSolarSystem(solarSys); //loj: 6/16/04 added
-        rv = current->Initialize();
-        if (!rv)
-            return false;
-        current = current->GetNext();
-    }
+   while (current)
+   {
+      current->SetObjectMap(&objectMap);
+      current->SetSolarSystem(solarSys); //loj: 6/16/04 added
+      rv = current->Initialize();
+      if (!rv)
+         return false;
+      current = current->GetNext();
+   }
     
-    return rv;
+   return rv;
 }
 
 
+//------------------------------------------------------------------------------
+// bool Execute(void)
+//------------------------------------------------------------------------------
 bool Sandbox::Execute(void)
 {
-    bool rv = true;
+   
+   bool rv = true;
 
-    state = RUNNING;
+   state = RUNNING;
     
-    current = sequence;
-    if (!current)
-        return false;
+   current = sequence;
+   if (!current)
+      return false;
 
-    while (current) {
-        // First check to see if the run should be interrupted
-        if (Interrupt())
-            break;
+   while (current) {
+      // First check to see if the run should be interrupted
+      if (Interrupt())
+         break;
         
-        rv = current->Execute();
-        if (!rv) {
-            std::string str = current->GetTypeName() +
-                              " Command failed to run to completion";
-            throw SandboxException(str);
-        }
-        current = current->GetNext();
-    }
+      rv = current->Execute();
+      if (!rv) {
+         std::string str = current->GetTypeName() +
+            " Command failed to run to completion";
+         throw SandboxException(str);
+      }
+      current = current->GetNext();
+   }
 
-    return rv;
+   return rv;
 }
 
 
+//------------------------------------------------------------------------------
+// bool Interrupt(void)
+//------------------------------------------------------------------------------
 bool Sandbox::Interrupt(void)
 {
     // We'll want something like this in build 2, so the user can interrupt
@@ -243,62 +305,73 @@ bool Sandbox::Interrupt(void)
 }
 
 
+//------------------------------------------------------------------------------
+// void Clear(void)
+//------------------------------------------------------------------------------
 void Sandbox::Clear(void)
 {
-    solarSys  = NULL;
-    publisher = NULL;
-    sequence  = NULL;
-    current   = NULL;
-    state     = IDLE;
+   solarSys  = NULL;
+   publisher = NULL;
+   sequence  = NULL;
+   current   = NULL;
+   state     = IDLE;
     
-    /// @todo The current Sandbox::Clear() method has a small memory leak
-    ///       when spacecraft are removed from the onjectMap.  This needs to
-    ///       be fixed.
-    objectMap.clear();
+   /// @todo The current Sandbox::Clear() method has a small memory leak
+   ///       when spacecraft are removed from the onjectMap.  This needs to
+   ///       be fixed.
+   objectMap.clear();
 }
 
 
-bool Sandbox::AddSpacecraft(Spacecraft *obj)
-{
-    return AddObject(obj);
-}
+//loj: 6/24/04 Moderator calls AddObject() for adding the following objects
+
+//  bool Sandbox::AddSpacecraft(Spacecraft *obj)
+//  {
+//      return AddObject(obj);
+//  }
 
 
-bool Sandbox::AddPropSetup(PropSetup *propSetup)
-{
-    return AddObject(propSetup);
-}
+//  bool Sandbox::AddPropSetup(PropSetup *propSetup)
+//  {
+//      return AddObject(propSetup);
+//  }
 
 
-bool Sandbox::AddPropagator(Propagator *prop)
-{
-    return AddObject(prop);
-}
+//  bool Sandbox::AddPropagator(Propagator *prop)
+//  {
+//      return AddObject(prop);
+//  }
 
 
-bool Sandbox::AddForceModel(ForceModel *forces)
-{
-    return AddObject(forces);
-}
+//  bool Sandbox::AddForceModel(ForceModel *forces)
+//  {
+//      return AddObject(forces);
+//  }
 
 
-bool Sandbox::AddBurn(Burn *burn)
-{
-    return AddObject(burn);
-}
+//  bool Sandbox::AddBurn(Burn *burn)
+//  {
+//      return AddObject(burn);
+//  }
 
 
-bool Sandbox::AddSolver(Solver *solver)
-{
-    return AddObject(solver);
-}
+//  bool Sandbox::AddSolver(Solver *solver)
+//  {
+//      return AddObject(solver);
+//  }
 
 
+//------------------------------------------------------------------------------
+// bool AddSubscriber(Subscriber *sub)
+//------------------------------------------------------------------------------
 bool Sandbox::AddSubscriber(Subscriber *sub)
 {
-    //MessageInterface::ShowMessage("Sandbox::AddSubscriber() name = %s\n",
-    //                              sub->GetName().c_str());
-    publisher->Subscribe(sub); //loj: 3/9/04 added
-    return  AddObject(sub);
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage
+      ("Sandbox::AddSubscriber() name = %s\n",
+       sub->GetName().c_str());
+#endif
+   publisher->Subscribe(sub); //loj: 3/9/04 added
+   return  AddObject(sub);
 }
 

@@ -39,61 +39,63 @@
 class GMAT_API Sandbox
 {
 public:
-    Sandbox(void);
-    ~Sandbox(void);
+   Sandbox(void);
+   ~Sandbox(void);
 
-    // Setup methods
-    bool          AddObject(GmatBase *obj);
-    bool          AddSpacecraft(Spacecraft *obj);
-    bool          AddPropSetup(PropSetup *propSetup);
-    bool          AddPropagator(Propagator *prop);
-    bool          AddForceModel(ForceModel *forces);
-    bool          AddBurn(Burn *burn);
-    bool          AddSolver(Solver *s);
-    bool          AddCommand(GmatCommand *cmd);
-    bool          AddSolarSystem(SolarSystem *ss);
-    bool          AddSubscriber(Subscriber *sub);
-    bool	         SetPublisher(Publisher *pub = NULL);
+   // Setup methods
+   bool AddObject(GmatBase *obj);
+
+   //loj: 6/24/04 Moderator calls AddObject() for adding the following objects
+//     bool AddSpacecraft(Spacecraft *obj);
+//     bool AddPropSetup(PropSetup *propSetup);
+//     bool AddPropagator(Propagator *prop);
+//     bool AddForceModel(ForceModel *forces);
+//     bool AddBurn(Burn *burn);
+//     bool AddSolver(Solver *s);
+   
+   bool AddCommand(GmatCommand *cmd);
+   bool AddSolarSystem(SolarSystem *ss);
+   bool AddSubscriber(Subscriber *sub);
+   bool SetPublisher(Publisher *pub = NULL);
     
-    GmatBase*     GetInternalObject(std::string name, 
-                                          Gmat::ObjectType type);
-    Spacecraft*   GetSpacecraft(std::string name);
+   GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type);
+   Spacecraft* GetSpacecraft(std::string name);
     
-    // Execution methods
-    bool          Initialize(void);
-    bool          Execute(void);
-    bool          Interrupt(void);
-    void          Clear(void);
+   // Execution methods
+   bool Initialize(void);
+   bool Execute(void);
+   bool Interrupt(void);
+   void Clear(void);
 
 protected:
     
 private:
-    /// Enumerated values for the current Sandbox state
-    enum runMode        {
-                            IDLE = 7001,
-                            INITIALIZED,
-                            RUNNING,
-                            PAUSED,
-                            STOPPED,
-                            RESET
-                        };
+   /// Enumerated values for the current Sandbox state
+   enum runMode
+   {
+      IDLE = 7001,
+      INITIALIZED,
+      RUNNING,
+      PAUSED,
+      STOPPED,
+      RESET
+   };
     
-    /// Object store for this run
-    std::map<std::string, GmatBase *>
-                        objectMap;
-    /// Solar System model for this Sandbox
-    SolarSystem         *solarSys;
-    /// GMAT Publisher singleton
-    Publisher           *publisher;
-    /// Command sequence for the run
-    GmatCommand         *sequence;
-    /// The executing Command
-    GmatCommand         *current;
-    /// Execution mode for the sandbox
-    runMode				state;
+   /// Object store for this run
+   std::map<std::string, GmatBase *> objectMap;
+   /// Solar System model for this Sandbox
+   SolarSystem   *solarSys;
+   /// GMAT Publisher singleton
+   Publisher     *publisher;
+   /// Command sequence for the run
+   GmatCommand   *sequence;
+   /// The executing Command
+   GmatCommand   *current;
+   /// Execution mode for the sandbox
+   runMode       state;
 
-    Sandbox(const Sandbox&);
-    Sandbox&			operator=(const Sandbox&);
+   Sandbox(const Sandbox&);
+   Sandbox& operator=(const Sandbox&);
 };
 
 #endif
