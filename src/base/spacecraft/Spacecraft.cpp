@@ -22,9 +22,12 @@
 
 /// Set the default values for spacecraft 
 const Real        Spacecraft::EPOCH = 21545.0; 
-const Real        Spacecraft::SEMI_MAJOR_AXIS = 7000.0; 
-const Real        Spacecraft::INCLINATION = 1000.0; 
-const Real        Spacecraft::ARG_OF_PERIGEE = 7.9; 
+const Real        Spacecraft::SEMI_MAJOR_AXIS = 7100.0; 
+const Real        Spacecraft::ECCENTRICITY = 0.0;
+const Real        Spacecraft::INCLINATION = 1300.0; 
+const Real        Spacecraft::RIGHT_ASCENSION = 0.0;
+const Real        Spacecraft::ARG_OF_PERIGEE = 7.35; 
+const Real        Spacecraft::MEAN_ANOMALY = 1.0;
 const std::string Spacecraft::REF_BODY= "Earth"; 
 const std::string Spacecraft::REF_FRAME= "Cartesian"; 
 const std::string Spacecraft::REF_PLANE= "Equatorial"; 
@@ -54,6 +57,7 @@ Spacecraft::Spacecraft() :
     refPlaneID   (parameterCount + 9)
 {
     parameterCount += 10;
+    InitializeValues();
 }
 
 //---------------------------------------------------------------------------
@@ -81,6 +85,7 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &noname) :
     refPlaneID(parameterCount + 9)
 {
     parameterCount += 10;
+    InitializeValues();
 }
 
 
@@ -109,15 +114,7 @@ Spacecraft::Spacecraft(const std::string &nomme) :
     refPlaneID(parameterCount + 9)
 {
     parameterCount += 10;
-    
-    // A basic initial state
-    epoch = 21545.0;
-    state[0] = 7100.0;
-    state[1] =    0.0;
-    state[2] = 1300.0;
-    state[3] =    0.0;
-    state[4] =    7.35;
-    state[5] =    1.0;
+    InitializeValues();
 }
 
 //---------------------------------------------------------------------------
@@ -347,3 +344,29 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     return true;
 }
 
+//-------------------------------------
+// private methods
+//-------------------------------------
+
+//---------------------------------------------------------------------------
+//  void InitializeValues()
+//---------------------------------------------------------------------------
+/**
+ * Initialize the default values of spacecraft including epoch, semi-major axis,
+ * eccentricity, inclination, right ascension of ascending node, argument of
+ * perigee, and mean anomaly.
+ *
+ */
+void Spacecraft::InitializeValues()
+{
+    epoch = Spacecraft::EPOCH; 
+    state[0] = Spacecraft::SEMI_MAJOR_AXIS;
+    state[1] = Spacecraft::ECCENTRICITY;
+    state[2] = Spacecraft::INCLINATION;
+    state[3] = Spacecraft::RIGHT_ASCENSION;
+    state[4] = Spacecraft::ARG_OF_PERIGEE;
+    state[5] = Spacecraft::MEAN_ANOMALY;
+    refBody = Spacecraft::REF_BODY;
+    refFrame = Spacecraft::REF_FRAME;
+    refPlane = Spacecraft::REF_PLANE;
+}
