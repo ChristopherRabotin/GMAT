@@ -33,6 +33,10 @@
 #include "TimeTypes.hpp"
 #include "DeFile.hpp"
 
+#if defined (__UNIT_TEST__)
+#include <fstream> //for debug output
+#endif
+
 // DE file code from JPL/JSC (Hoffman) includes
 #include <stdio.h>
 #include <math.h>
@@ -401,7 +405,8 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
    
    if (worked == FAILURE)
    {
-      throw PlanetaryEphemException("DE file not able to be initialized!");
+      throw PlanetaryEphemException("DE file is not of specified format!!"
+                                    "DE file not able to be initialized!");
    }
    itsName                             = binaryFileName;
    strcpy(g_pef_dcb.full_path,binaryFileName.c_str());
@@ -537,7 +542,8 @@ int DeFile::Initialize_Ephemeris( char *fileName )
   /*  Open ephemeris file.                                                    */
   /*--------------------------------------------------------------------------*/
 
-  Ephemeris_File = fopen(fileName,"r");
+  //loj: Ephemeris_File = fopen(fileName,"r");
+  Ephemeris_File = fopen(fileName,"rb"); // loj: 4/14/04
 
 
   /*--------------------------------------------------------------------------*/
@@ -558,7 +564,9 @@ int DeFile::Initialize_Ephemeris( char *fileName )
        fread(&H1,sizeof(double),arraySize,Ephemeris_File);           // wcs
        fread(&H2,sizeof(double),arraySize,Ephemeris_File);           // wcs
        fread(&Coeff_Array,sizeof(double),arraySize,Ephemeris_File);  // wcs
-     
+
+
+            
        /*...............................Store header data in global variables */
        
        R1 = H1.data;
@@ -586,6 +594,31 @@ int DeFile::Initialize_Ephemeris( char *fileName )
        //     printf("\n      T_Span     = %7.3f\n\n",T_span);
        //   }
 
+#if defined (__UNIT_TEST__)
+       std::ofstream fout;
+       fout.open("TestDeFile.txt");
+                     
+       fout << " In: Initialize_Ephemeris" << std::endl;
+       fout << "     ARRAY_SIZE     " << arraySize << std::endl;
+       fout << "     R1.timeData[0] " << R1.timeData[0] << std::endl;
+       fout << "     R1.timeData[1] " << R1.timeData[1] << std::endl;
+       fout << "     R1.timeData[2] " << R1.timeData[2] << std::endl;
+       fout << "     R1.numConst    " << R1.numConst << std::endl;
+       fout << "     R1.AU          " << R1.AU << std::endl;
+       fout << "     R1.EMRAT       " <<  R1.EMRAT << std::endl;
+       fout << "     R1.coeffPtr[0][0] " << R1.coeffPtr[0][0] << std::endl;
+       fout << "     R1.coeffPtr[11][2]" << R1.coeffPtr[11][2] << std::endl;
+            
+       fout << "     R1.DENUM   " << R1.DENUM << std::endl;
+       fout << "     headerID   " << headerID << std::endl;
+       fout << "     EPHEMERIS  " << EPHEMERIS << std::endl;
+       fout << "     T_Beg      " << T_beg << std::endl;
+       fout << "     T_End      " << T_end << std::endl;
+       fout << "     T_Span     " << T_span << std::endl;
+
+       fout.close();
+#endif
+  
        /*..................................................Return status code */
 
        if ( headerID == EPHEMERIS ) 
@@ -596,9 +629,9 @@ int DeFile::Initialize_Ephemeris( char *fileName )
           {
             //printf("\n Opened wrong file: %s",fileName);
             //printf(" for ephemeris: %d.\n",EPHEMERIS);
-             throw PlanetaryEphemException(
-                           "DE file is not of specified format!!");  // wcs
-            //return FAILURE;
+              // throw PlanetaryEphemException(
+              //             "DE file is not of specified format!!");  // wcs
+            return FAILURE;
           }
      }
 }
