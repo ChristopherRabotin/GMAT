@@ -1039,6 +1039,11 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameterList()
 {    
+#if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateParameterList() entered.\n");
+#endif
+      
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
    int numParamCount = items.size();
@@ -1053,6 +1058,12 @@ void GuiItemManager::UpdateParameterList()
    
    for (int i=0; i<numParamCount; i++)
    {
+#if DEBUG_GUI_ITEM
+      //11/16/04 loj: added
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateParameterList() name=%s\n", items[i].c_str());
+#endif
+      
       param = theGuiInterpreter->GetParameter(items[i]);
 
       // add if parameter plottable (returning single value)
