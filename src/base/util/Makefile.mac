@@ -8,6 +8,7 @@
 #             2004/05/16 - Added StringTokenizer.cpp
 #             2004/07/14 - Added GregorianDate.cpp
 #             2004/07/21 - Added RgbColor.cpp 
+#             2005/02/01 - W. Shoan - Added EopFile, LeapSecsFileReader
 #
 #
 # Define the marco for the top-level directories
@@ -15,8 +16,9 @@ PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
 SRC = A1Date.cpp A1Mjd.cpp AngleUtil.cpp Cartesian.cpp CoordUtil.cpp Date.cpp \
-	DateUtil.cpp ElapsedTime.cpp EphemerisUtil.cpp GregorianDate.cpp \
-	Keplerian.cpp Linear.cpp RgbColor.cpp RealUtilities.cpp Rmatrix.cpp \
+	DateUtil.cpp ElapsedTime.cpp EopFile.cpp EphemerisUtil.cpp GregorianDate.cpp \
+	Keplerian.cpp LeapSecsFileReader.cpp Linear.cpp RgbColor.cpp \
+	RealUtilities.cpp Rmatrix.cpp \
 	Rmatrix33.cpp Rvector.cpp Rvector3.cpp Rvector6.cpp Spherical.cpp \
 	SphericalOne.cpp SphericalTwo.cpp StringTokenizer.cpp UtcDate.cpp
 #
