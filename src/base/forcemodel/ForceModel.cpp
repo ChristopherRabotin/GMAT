@@ -947,7 +947,9 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 
     // DJC: 06/16/04 Updated for scripting
     case CENTRAL_BODY:
-       return false;
+       centralBodyName = value;
+       bodyName = centralBodyName;
+       return true;
     case PRIMARY_BODIES:
        return false;
     case POINT_MASSES:

@@ -13,6 +13,8 @@ OBJECTS = AtmosphereException.o \
           Moon.o \
           msise90.o \
           Msise90Atmosphere.o \
+          JacchiaRobertsAtmosphere.o \
+          SolarFluxFileReader.o \
           Planet.o \
           PlanetaryEphem.o \
           PlanetaryEphemException.o \

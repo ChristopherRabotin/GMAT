@@ -338,7 +338,7 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
 //---------------------------------------------------------------------------
 /**
- * Obtains an array of GmatBase pointers.
+ * Obtains an array of GmatBase pointers by type.
  * 
  * @param type The type of objects requested
  *
@@ -350,6 +350,23 @@ ObjectArray& GmatBase::GetRefObjectArray(const Gmat::ObjectType type)
    oa.clear();
    return oa;
 }
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
+ * 
+ * @param typeString The string used to find the objects requested.
+ *
+ * @return Reference to the array.  This default method returns an empty vector.
+ */
+ObjectArray& GmatBase::GetRefObjectArray(const std::string& typeString)
+{
+   return GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
+}
+
 
 //---------------------------------------------------------------------------
 //  static Integer GetInstanceCount()

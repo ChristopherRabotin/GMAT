@@ -115,6 +115,7 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
       state = IDLE;
    if (!ss)
       return false;
+//   solarSys = (SolarSystem*)(ss->Clone());
    solarSys = ss;
    return true;
 }
@@ -310,6 +311,8 @@ bool Sandbox::Interrupt(void)
 //------------------------------------------------------------------------------
 void Sandbox::Clear(void)
 {
+//   if (solarSys)
+//      delete solarSys;
    solarSys  = NULL;
    publisher = NULL;
    sequence  = NULL;

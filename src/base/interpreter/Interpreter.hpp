@@ -138,18 +138,44 @@ protected:
     PropSetup*                      CreatePropSetup(std::string name);
     
     bool                            InterpretPropSetupParameter(GmatBase *obj, 
-                                     std::vector<std::string*>::iterator phrase);
+                                                  StringArray& items,
+                                                  std::vector<std::string*>::iterator& phrase, 
+                                                  Integer index = 1);
                                                 
     // Methods used to break apart lines of script
     void                            ChunkLine(void);
-    Integer                         SkipWhiteSpace(Integer start = 0);
+    bool                            IsGroup(const char *text);
+    Integer                         SkipWhiteSpace(Integer start = 0, 
+                                                   const std::string &text = "");
     void                            WriteParameterValue(GmatBase *obj, Integer id);
-    Integer                         FindDelimiter(std::string str,
-                                                  std::string specChar = "");
-    std::string                     GetToken(std::string tokstr = "");
+    Integer                         FindDelimiter(const std::string &str,
+                                                  const std::string &specChar = "");
+    std::string                     GetToken(const std::string &tokstr = "");
+
+// temporarily make public to test this piece
+public:
+    // Handlers for specific constructs
+    StringArray&                    Decompose(const std::string &chunk);
+
+protected:
+    StringArray&                    SeparateSpaces(const std::string &chunk);
+    StringArray&                    SeparateDots(const std::string &chunk, 
+                                            const std::string &delimiter = ".");
+    StringArray&                    SeparateBraces(const std::string &chunk);
+    StringArray&                    SeparateBrackets(const std::string &chunk);
+    StringArray&                    SeparateParens(const std::string &chunk);
+    
     GmatBase*                       FindObject(std::string objName);
+    GmatBase*                       FindOwnedObject(StringArray TokenList,
+                                                    GmatBase *owner, 
+                                                    Integer index);
     bool                            SetParameter(GmatBase *obj, Integer id,
                                                  std::string value);
+                                                 
+    void                            RegisterAliases(void);
+    bool                            ConfigureForce(ForceModel *obj, 
+                                                   std::string& objParm, 
+                                                   std::string& parm);
 };
 
 #endif // INTERPRETER_HPP

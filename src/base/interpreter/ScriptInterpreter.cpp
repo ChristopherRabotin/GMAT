@@ -250,11 +250,14 @@ bool ScriptInterpreter::Parse(void)
                 throw InterpreterException("Unable to create object: " + name); //loj: added name
         }
 
-//*
+
         if ((**phrase == "GMAT") && (!sequenceStarted)) {
             // Look up related object(s)
             ++phrase;
-            std::string objName = GetToken(**phrase);
+
+            StringArray sar = SeparateDots(**phrase);
+
+            std::string objName = sar[0];
             GmatBase *obj = FindObject(objName);
             if (obj == NULL) {
                 std::string errstr = objName;
@@ -265,37 +268,61 @@ bool ScriptInterpreter::Parse(void)
             // PropSetup has configuration info for the member objects, so it 
             // gets special treatment
             if (obj->GetType() == Gmat::PROP_SETUP) {
-                if (!InterpretPropSetupParameter(obj, phrase))
+                if (!InterpretPropSetupParameter(obj, sar, phrase))
                     throw InterpreterException("PropSetup Parameter was not recognized");
             }
             else 
             {
                 // Set object associations
-                std::string objParm = GetToken();
+                std::string objParm = sar[1];
                 Integer id = obj->GetParameterID(objParm);
-    
-                if (obj->GetParameterType(id) == Gmat::UNKNOWN_PARAMETER_TYPE)
-                {
-                    // Could be a member object -- check that first
-                    
-                    /// @todo Fill in the parsing for multipart strings
-                    std::string subparm = GetToken();
-                    if (subparm == "")
-                        throw InterpreterException("Assignment string does not parse: " + objParm); //loj: added objParm
-                    // Find the owned object
-                    // Set the parm on the owned object
+                
+                // Look for owned objects if the list is deeper than 2
+                if (sar.size() > 2)
+                   obj = FindOwnedObject(sar, obj, 1);
+                if (obj == NULL) {
+                   std::string errstr = objName;
+                   errstr += sar[1];
+                   errstr += ": Object was not found";
+                   throw InterpreterException(errstr);
                 }
-                else
-                {
+                
+    
+//                if (obj->GetParameterType(id) == Gmat::UNKNOWN_PARAMETER_TYPE)
+//                {
+//                    // Could be a member object -- check that first
+//                    
+//                    /// @todo Fill in the parsing for multipart strings
+//                    std::string subparm = GetToken();
+//                    if (subparm == "")
+//                        throw InterpreterException("Assignment string does not parse: " + objParm); //loj: added objParm
+//                    // Find the owned object
+//                    // Set the parm on the owned object
+//                }
+//                else
+//                {
                     // Set parameter data
                     ++phrase;
                     if (**phrase == "=")
                         ++phrase;
-                    SetParameter(obj, id, **phrase);
-                }
+std::cout << **phrase << "\n";
+                    StringArray sa;
+                    if (IsGroup((**phrase).c_str()))
+                        sa = Decompose(**phrase);
+                    else
+                        sa.push_back(**phrase);
+                        
+                    for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
+std::cout << "  Setting " << *i << "\n";
+                        if (!SetParameter(obj, id, *i)) {
+                           if (obj->GetType() == Gmat::FORCE_MODEL)
+                              ConfigureForce((ForceModel*)(obj), objParm, *i);
+                        }
+                    }
+//                }
             }
         }
-//*/
+
         // Check to see if it's a command
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");

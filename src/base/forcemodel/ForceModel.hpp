@@ -148,6 +148,8 @@ protected:
     /// Buffer that allows quick reversion to the previous state
     Real *previousState;
     Real estimationMethod;
+    
+    std::string centralBodyName;
     /// Mapping between script descriptions and force names.
     static std::map<std::string, std::string> scriptAliases;
     

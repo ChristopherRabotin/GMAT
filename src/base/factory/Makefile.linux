@@ -15,6 +15,9 @@ OBJECTS = Factory.o FactoryException.o FactoryManager.o CommandFactory.o \
 all: libFactory
 	mkdir -p ../lib
 	mv libFactory.a ../lib
+	
+clean:
+	rm -f *.o ../lib/libFactory.a
 
 libFactory : ../lib/libFactory.a
 

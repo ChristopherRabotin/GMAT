@@ -18,7 +18,10 @@ OBJECTS = PropSetup.o Propagator.o Integrator.o \
           RungeKuttaFehlberg56.o \
           RungeKuttaNystrom.o \
           DormandElMikkawyPrince68.o \
-          PrinceDormand78.o
+          PrinceDormand78.o \
+          PredictorCorrector.o \
+          AdamsBashfordMoulton.o \
+          BulirschStoer.o
 
 all: $(TARGET)
 	mkdir -p ../lib

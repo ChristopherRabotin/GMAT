@@ -23,6 +23,7 @@
 #include "PointMassForce.hpp"   // for PointMassForce class
 #include "SolarRadiationPressure.hpp" // for SolarRadiationPressure class
 #include "DragForce.hpp"  // for DragForce class
+#include "GravityField.hpp"  // for DragForce class
 
 
 //---------------------------------
@@ -51,6 +52,8 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(std::string ofType,
        return new SolarRadiationPressure(withName);
    else if (ofType == "DragForce")  // waw: 05/05/04 added to handle DragForce
        return new DragForce(withName);
+   else if (ofType == "GravityField") // djc: 06/25/04 Added for full field model
+       return new GravityField(withName, "Earth");
    return NULL;
 }
 
@@ -71,6 +74,7 @@ Factory(Gmat::PHYSICAL_MODEL)
    if (creatables.empty())
    {
       creatables.push_back("PointMassForce");
+      creatables.push_back("GravityField");
       creatables.push_back("SolarRadiationPressure");
       creatables.push_back("DragForce");
    }

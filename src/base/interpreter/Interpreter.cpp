@@ -49,7 +49,9 @@ Interpreter::Interpreter() :
         typemap["Subscriber"] = Gmat::SUBSCRIBER;
         typemap["Propagator"] = Gmat::PROP_SETUP;
         typemap["Burn"] = Gmat::BURN;
+        
     }
+    RegisterAliases();
 }
 
 
@@ -283,17 +285,28 @@ bool Interpreter::BuildObject(std::string &objectname)
         tname = "Propagator";
     *outstream << "Create " << tname << " " 
                << obj->GetName() << "\n";
-               
+
     Integer i;
     for (i = 0; i < obj->GetParameterCount(); ++i) 
     {
-        // Skip StringArray parameters, at least for now
+        // Handle StringArray parameters separately
         if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
-            // Fill in the l.h.s.
-            *outstream << "GMAT " << objectname << "." 
-                       << obj->GetParameterText(i) << " = ";
-            WriteParameterValue(obj, i);
-            *outstream << ";\n";
+           // Fill in the l.h.s.
+           *outstream << "GMAT " << objectname << "." 
+                      << obj->GetParameterText(i) << " = ";
+           WriteParameterValue(obj, i);
+           *outstream << ";\n";
+        }
+        else {
+           *outstream << "GMAT " << objectname << "." 
+                      << obj->GetParameterText(i) << " = {";
+           StringArray sar = obj->GetStringArrayParameter(i);
+           for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n) {
+              if (n != sar.begin())
+                 *outstream << ", ";
+              *outstream << (*n);
+           }
+           *outstream << "};\n";
         }
     }
     *outstream << "\n";
@@ -548,7 +561,7 @@ Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
 
 //------------------------------------------------------------------------------
 // bool InterpretPropSetupParameter(GmatBase *obj, 
-//                                  std::vector<std::string*>::iterator phrase)
+//                                 StringArray::iterator& phrase, Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets PropSetup parameters.
@@ -557,15 +570,20 @@ Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
  * @param phrase Phrase containing the configuration information.
  * 
  * @return true if the parameter is set, false otherwise.
+ * 
+ * @note This method is deprecated and remains in the code until it can be 
+ *       safely removed.
  */
 //------------------------------------------------------------------------------
 bool Interpreter::InterpretPropSetupParameter(GmatBase *obj, 
-                                     std::vector<std::string*>::iterator phrase)
+                                              StringArray& items,
+                                              std::vector<std::string*>::iterator& phrase,
+                                              Integer index)
 {
     bool retval = true;
     
     // Set object associations
-    std::string objParm = GetToken();
+    std::string objParm = items[index];
     Integer id = obj->GetParameterID(objParm);
     
     Gmat::ParameterType parmType = obj->GetParameterType(id);
@@ -643,13 +661,31 @@ void Interpreter::ChunkLine(void)
     std::string phrase;
 
     start = SkipWhiteSpace(start); // Find the beginning of the text
+    
     while (start != -1) {
         end = start;
-        while ((str[end] != ' ') && (str[end] != '\t') && (str[end] != '\r') &&
-               (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0')) {
-            ++end;
-            if ((str[end] == ';') && (semicolonLocation == 0))
-                semicolonLocation = end;
+        if (IsGroup(&(str[start]))) {
+           char endchar = ';';
+           if (str[start] == '[')
+              endchar = ']';
+           if (str[start] == '(')
+              endchar = ')';
+           if (str[start] == '{')
+              endchar = '}';
+           while (str[end] != endchar) {
+              ++end;  
+              if (str[end] == '\0')
+                 throw InterpreterException("Missing closing character");
+           }
+           ++end;
+        }
+        else {
+           while ((str[end] != ' ') && (str[end] != '\t') && (str[end] != '\r') &&
+                  (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0')) {
+               ++end;
+               if ((str[end] == ';') && (semicolonLocation == 0))
+                   semicolonLocation = end;
+           }
         }
         if (semicolonLocation == 0)
             semicolonLocation = end;
@@ -663,22 +699,37 @@ void Interpreter::ChunkLine(void)
 }
 
 
+bool Interpreter::IsGroup(const char *text)
+{
+   if ((text[0] == '[') || (text[0] == '(') || (text[0] == '{'))
+      return true;
+   return false;
+}
+
+
 //------------------------------------------------------------------------------
-// Integer SkipWhiteSpace(Integer start)
+// Integer SkipWhiteSpace(Integer start, const std::string &text)
 //------------------------------------------------------------------------------
 /**
  * Skips blank spaces and tabs.
  * 
  * @param start Starting point in the script line.
+ * @param text The string under analysis.
  * 
  * @return Location of the first useful character, or -1 for comments or line
  *         endings.
  */
 //------------------------------------------------------------------------------
-Integer Interpreter::SkipWhiteSpace(Integer start)
+Integer Interpreter::SkipWhiteSpace(Integer start, const std::string &text)
 {
     Integer finish = start;
-    const char *str = line.c_str();
+    const char *str;
+    
+    if (text == "")
+       str = line.c_str();
+    else
+       str = text.c_str();
+       
     if (str[0] == '%')  // Comment line
         return -1;
         
@@ -695,7 +746,7 @@ Integer Interpreter::SkipWhiteSpace(Integer start)
 
 
 //------------------------------------------------------------------------------
-// Integer FindDelimiter(std::string str, std::string specChar)
+// Integer FindDelimiter(std::string &str, std::string &specChar)
 //------------------------------------------------------------------------------
 /**
  * Method to find special characters: = , { } [ ] ( ) ; . %
@@ -709,14 +760,14 @@ Integer Interpreter::SkipWhiteSpace(Integer start)
  * @note This method is not implemented, and always returns -1.
  */
 //------------------------------------------------------------------------------
-Integer Interpreter::FindDelimiter(std::string str, std::string specChar)
+Integer Interpreter::FindDelimiter(const std::string &str, const std::string &specChar)
 {
     return -1;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetToken(std::string tokstr)
+// std::string GetToken(std::string &tokstr)
 //------------------------------------------------------------------------------
 /**
  * Find the next token in the input string.
@@ -727,7 +778,7 @@ Integer Interpreter::FindDelimiter(std::string str, std::string specChar)
  * @return The first (or next in subsequent calls) token in the string.
  */
 //------------------------------------------------------------------------------
-std::string Interpreter::GetToken(std::string tokstr)
+std::string Interpreter::GetToken(const std::string &tokstr)
 {
     static std::string str, token = "";
     static Integer start;
@@ -751,6 +802,214 @@ std::string Interpreter::GetToken(std::string tokstr)
 
 
 //------------------------------------------------------------------------------
+// StringArray& Decompose(const std::string &chunk)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a grouped string into component pieces.
+ * 
+ * @param chunk The string.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::Decompose(const std::string &chunk)
+{
+   static StringArray elements;
+   elements.clear();
+   
+   // Branch based on the first character in the string
+   char branchtype = (chunk.c_str())[0];
+   
+   if (branchtype == '(') {
+      // todo: Check to be sure we have closing paren
+      elements = SeparateParens(chunk);
+   }
+   else if (branchtype == '[') {
+      // todo: Check to be sure we have closing bracket
+      elements = SeparateBrackets(chunk);
+   }
+   else if (branchtype == '{') {
+      // todo: Check to be sure we have closing brace
+      elements = SeparateBraces(chunk);
+   }
+   else
+      elements = SeparateDots(chunk, ".");
+   
+   return elements;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& SeparateSpaces(const std::string &chunk)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a string containing white space into component pieces.
+ * 
+ * In this context, "white space" is the space character or the tab character.  
+ * 
+ * Note that this is not the most efficient code for this function -- other 
+ * techniques are likely to have better performance.  Instead, this method is 
+ * written to allow for other types of white space by changing the member 
+ * variables whitespace[] and wSpaceTypes.
+ * 
+ * @param chunk The string.
+ * 
+ * @return An array containing the pieces.
+ * 
+ * @note This method is not yet implemented.  It will be completed during 
+ *       build 3.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
+{
+   static StringArray chunkArray;
+   chunkArray.clear();
+   
+   // Add new white space characters by adjusting the following two members.  
+   // Don't forget to update the function comments as well!
+//   char whitespace[2] = {' ', '\t'};
+//   Integer pos = 0;
+//   Integer wSpaceTypes = 2;
+   
+   
+   
+   return chunkArray;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& SeparateDots(const std::string &chunk, 
+//                           const std::string &delimiter)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a period separated string into component pieces.
+ * 
+ * This method takes an input string containing heirarchical data separated by a
+ * specified delimiter (a period by default) and fills a StringArray with the
+ * data in the string.  For example, the input string "fm.GravityField.Earth"
+ * places three strings in the array: "fm", "GravityField", and "Earth".
+ * 
+ * @param chunk The string.
+ * @param delimiter The character that separates the pieces -- a "." by default.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::SeparateDots(const std::string &chunk, 
+                                       const std::string &delimiter)
+{
+   static StringArray chunkArray;
+   chunkArray.clear();
+   Integer loc, start = 0;
+   std::string token = "Starting", str = chunk;
+   bool parseComplete = false;
+   
+   while (!parseComplete) {
+      loc = chunk.find(delimiter, start);
+      if (loc == (Integer)std::string::npos) {
+         loc = strlen(str.c_str());
+         parseComplete = true;
+      }
+      token.assign(str, start, loc-start);
+      start = loc+strlen(delimiter.c_str());
+      if (token != "")
+         chunkArray.push_back(token);
+   }
+   
+   return chunkArray;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& SeparateParens(const std::string &chunk)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a string contained in parentheses into component pieces.
+ * 
+ * @param chunk The string.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::SeparateParens(const std::string &chunk)
+{
+   static StringArray chunkArray;
+   chunkArray.clear();
+   return chunkArray;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& SeparateBraces(const std::string &chunk)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a string contained in curly braces ("{...}") into component pieces.
+ * 
+ * @param chunk The string.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::SeparateBraces(const std::string &chunk)
+{
+   static StringArray chunkArray;
+   chunkArray.clear();
+
+   Integer loc, start = chunk.find("{", 0), stop = chunk.find("}", 0);
+   bool parseComplete = false;
+   
+   if (start == (Integer)std::string::npos) 
+         parseComplete = true;
+   else if (stop == (Integer)std::string::npos) 
+      throw InterpreterException("Missing closing brace \"}\"");
+
+   if (start > stop)
+      throw InterpreterException("Closing brace found before opening brace");
+      
+   loc = start;
+      
+   std::string token = "Starting", str = chunk;
+   
+   while (!parseComplete && (start < stop)) {
+      // skip over white spaces
+      start = loc + 1;
+      start = SkipWhiteSpace(start, str);
+      loc = chunk.find(",", start);
+      if (loc == (Integer)std::string::npos) {
+         loc = stop;
+         parseComplete = true;
+      }
+      token.assign(str, start, loc-start);
+      
+      // Prep for the next token
+      if (token != "")
+         chunkArray.push_back(token);
+   }
+      
+   return chunkArray;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& SeparateBrackets(const std::string &chunk)
+//------------------------------------------------------------------------------
+/**
+ * Breaks a string contained in square brackets ("[...]") into component pieces.
+ * 
+ * @param chunk The string.
+ * 
+ * @return An array containing the pieces.
+ */
+//------------------------------------------------------------------------------
+StringArray& Interpreter::SeparateBrackets(const std::string &chunk)
+{
+   static StringArray chunkArray;
+   chunkArray.clear();
+   return chunkArray;
+}
+
+
+//------------------------------------------------------------------------------
 // GmatBase* FindObject(std::string objName)
 //------------------------------------------------------------------------------
 /**
@@ -765,6 +1024,48 @@ GmatBase* Interpreter::FindObject(std::string objName)
 {
     GmatBase *obj = moderator->GetConfiguredItem(objName);
     return obj;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* FindOwnedObject(StringArray TokenList, Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Finds an object wrapped in another object.
+ * 
+ * @param objName The name of the object of interest.
+ * 
+ * @return Pointer to the object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
+                                       Integer index)
+{
+   GmatBase* obj = NULL;
+   Integer count = tokenList.size(), i = 0;
+   
+   if (owner->GetType() != Gmat::FORCE_MODEL)
+      throw InterpreterException("The ForceModel is the only allowed owner");
+   
+   ObjectArray objs = owner->GetRefObjectArray(tokenList[index]);
+   if (index == count - 2) {
+      if (objs.size() > 1) {
+         for (ObjectArray::iterator j = objs.begin(); j != objs.end(); ++j) {
+            Integer id = (*j)->GetParameterID("BodyName");
+            if (id != -1) {
+               std::string bodyName = (*j)->GetStringParameter(id);
+               if (bodyName == tokenList[index+1])
+                  obj = *j;
+            }
+         }
+      }
+      else
+         obj = objs[i];
+   }
+   else
+      obj = FindOwnedObject(tokenList, objs[i], index+1); 
+   
+   return obj;
 }
 
 
@@ -794,9 +1095,8 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
         obj->SetRealParameter(id, atof(value.c_str()));
         retval = true;
     }
-    if (type == Gmat::STRING_TYPE) {
-        obj->SetStringParameter(id, value);
-        retval = true;
+    if ((type == Gmat::STRING_TYPE) || (type == Gmat::STRINGARRAY_TYPE)) {
+        retval = obj->SetStringParameter(id, value);
     }
 
     return retval;
@@ -808,3 +1108,35 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
 //    return false;
 //}
 
+void Interpreter::RegisterAliases(void)
+{
+   ForceModel::SetScriptAlias("PrimaryBodies", "GravityField");
+   ForceModel::SetScriptAlias("PointMasses", "PointMassForce");
+   ForceModel::SetScriptAlias("Drag", "DragForce");
+   ForceModel::SetScriptAlias("SRP", "SolarRadiationPressure");
+}
+
+
+bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm, 
+                                 std::string& parm)
+{
+   bool retval = false;
+   
+   std::string forcetype = ForceModel::GetScriptAlias(objParm);
+   if (forcetype == "SolarRadiationPressure")
+      if (parm != "On")
+         return true;
+   PhysicalModel *pm = moderator->CreatePhysicalModel(forcetype, "");
+   if (pm) {
+      if (!pm->SetStringParameter("BodyName", parm))
+         if ((forcetype == "GravityField") || (forcetype == "PointMassForce"))
+            throw InterpreterException("Unable to set body for force " + objParm);
+      if (forcetype == "DragForce")
+         if (!pm->SetStringParameter("AtmosphereModel", parm))
+            throw InterpreterException("Unable to set AtmosphereModel for drag force.");
+      obj->AddForce(pm);
+      retval = true;
+   }
+   
+   return retval;
+}
