@@ -2,9 +2,13 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: Linda Jun
 // Created: 2003/08/08
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This header file contains wxWindows definitions.  Include this file if you
