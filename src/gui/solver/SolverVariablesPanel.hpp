@@ -89,7 +89,7 @@ private:
 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
-    
+  
     // IDs for the controls and the menu commands
     enum
     {     
@@ -105,3 +105,4 @@ private:
 };
 
 #endif // SolverGoalsPanel_hpp
+

@@ -28,23 +28,20 @@
 class SolverEventPanel : public wxPanel
 {
 public:
-    // constructors
+    // constructor
     SolverEventPanel(wxWindow *parent, const wxString &name);
        
 private:   
-    wxStaticText *item2;
     wxStaticText *item6;
     wxStaticText *item8;
     wxStaticText *item10;
     
-    wxTextCtrl *item3;
-    
-    wxButton *item4;
-    wxButton *item12;
-    wxButton *item14;
-    wxButton *item15;
-    wxButton *item16 ;
-    wxButton *item17;
+    wxButton *scriptButton;
+    wxButton *correctionsButton;
+    wxButton *okButton;
+    wxButton *applyButton;
+    wxButton *cancelButton ;
+    wxButton *helpButton;
     
     wxComboBox *item7;
     wxComboBox *item9;
@@ -81,3 +78,4 @@ private:
 };
 
 #endif // SolverEvent_hpp
+

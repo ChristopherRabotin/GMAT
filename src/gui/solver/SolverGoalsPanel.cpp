@@ -22,6 +22,8 @@
 #include <wx/grid.h>
 
 #include "gmatwxdefs.hpp"
+#include "GmatAppData.hpp"
+#include "GmatMainNotebook.hpp"
 #include "SolverGoalsPanel.hpp"
 
 // base includes
@@ -147,7 +149,7 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     item22->Add( applyButton, 0, wxALIGN_CENTER|wxALL, 5 );
     item22->Add( cancelButton, 0, wxALIGN_CENTER|wxALL, 5 );
     item22->Add( helpButton, 0, wxALIGN_CENTER|wxALL, 5 );
-    
+   
     item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
     item0->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
     item0->Add( item22, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -205,7 +207,8 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
     else if ( event.GetEventObject() == okButton )  
     {
         SetData(); 
-        Close(this);        
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();       
     }
     else if ( event.GetEventObject() == applyButton )
     {
@@ -214,7 +217,8 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
     } 
     else if ( event.GetEventObject() == cancelButton )
     {
-        Close(this);
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();
     }      
     else if ( event.GetEventObject() == helpButton )           
         ; 
@@ -226,5 +230,3 @@ void SolverGoalsPanel::OnCellValueChanged()
 { 
     applyButton->Enable(true);
 }
-
-

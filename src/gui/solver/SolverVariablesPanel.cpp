@@ -21,6 +21,8 @@
 #include <wx/grid.h>
 
 #include "gmatwxdefs.hpp"
+#include "GmatAppData.hpp"
+#include "GmatMainNotebook.hpp"
 #include "SolverVariablesPanel.hpp"
 
 // base includes
@@ -155,7 +157,7 @@ void SolverVariablesPanel::Setup( wxWindow *parent)
     item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
     item0->Add( item4, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     item0->Add( item26, 0, wxALIGN_CENTER|wxALL, 5 );
-    
+ 
     parent->SetAutoLayout( TRUE );
     parent->SetSizer( item0 );
     
@@ -235,7 +237,9 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
     else if ( event.GetEventObject() == okButton )  
     {
         SetData(); 
-        Close(this);        
+        
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();       
     }
     else if ( event.GetEventObject() == applyButton )
     {
@@ -244,7 +248,8 @@ void SolverVariablesPanel::OnButton(wxCommandEvent& event)
     } 
     else if ( event.GetEventObject() == cancelButton )
     {
-        Close(this);
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();
     }      
     else if ( event.GetEventObject() == helpButton )           
         ; 
