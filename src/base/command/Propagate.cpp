@@ -23,6 +23,8 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_PROPAGATE 0
+
 //------------------------------------------------------------------------------
 //  Propagate(void)
 //------------------------------------------------------------------------------
@@ -489,7 +491,15 @@ void Propagate::InterpretAction(void)
     // This will be deleted when system shuts down
     Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
     stopParam->SetStringParameter("Object", paramObj);
-    StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
+    //loj: 6/2/04 temp code to resolve repeated same stop conditions
+    static Integer stopCondCount = 0;
+    stopCondCount++;
+    std::stringstream ss("");
+    ss << "StopOn" << paramName << stopCondCount;
+    StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition", ss.str());
+    
+    //StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName +
+    //                                                            stopCondCount);
     stopCond->SetStringParameter("StopVar", paramName);
     SetObject(stopCond, Gmat::STOP_CONDITION);
 
@@ -624,11 +634,13 @@ bool Propagate::Execute(void)
 //                                      (baseEpoch + fm->GetTime() / 86400.0));
     }
 
-//   MessageInterface::ShowMessage("Stopping; epoch = %f, stopTime = %f, elapsedTime = %f",
-//                                 (baseEpoch + fm->GetTime() / 86400.0), stopTime, elapsedTime);
+#if DEBUG_PROPAGATE
+    MessageInterface::ShowMessage("Stopping; epoch = %f, stopTime = %f, elapsedTime = %f",
+                                  (baseEpoch + fm->GetTime() / 86400.0), stopTime, elapsedTime);
 
-    //MessageInterface::ShowMessage("Propagate::Execute() stopTime=%f, elapsedTime=%f\n",
-    //                              stopTime, elapsedTime);
+    MessageInterface::ShowMessage("Propagate::Execute() stopTime=%f, elapsedTime=%f\n",
+                                  stopTime, elapsedTime);
+#endif
     
     if (stopTime - elapsedTime > 0.0)
     {
