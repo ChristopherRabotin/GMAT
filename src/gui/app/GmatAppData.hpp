@@ -19,6 +19,10 @@
 #ifndef GmatAppData_hpp
 #define GmatAppData_hpp
 
+#if !defined __CONSOLE_APP__
+#include "ViewTextFrame.hpp"
+#endif
+
 #include "GuiInterpreter.hpp"
 
 class GmatAppData
@@ -28,7 +32,18 @@ public:
         { return theGuiInterpreter;};
     static void SetGuiInterpreter(GuiInterpreter *guiInterp)
         { theGuiInterpreter = guiInterp;};
+#if !defined __CONSOLE_APP__
+    static ViewTextFrame* GetMessageWindow()
+        { return theMessageWindow;};
+    static void SetMessageWindow(ViewTextFrame *msgFrame)
+        { theMessageWindow = msgFrame;};
+#endif
+    
 private:
     static GuiInterpreter *theGuiInterpreter;
+    
+#if !defined __CONSOLE_APP__
+    static ViewTextFrame *theMessageWindow;
+#endif
 };
 #endif // GmatAppData_hpp

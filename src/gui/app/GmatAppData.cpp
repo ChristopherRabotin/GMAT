@@ -13,10 +13,14 @@
 // Created: 2003/10/29
 //
 /**
- * Initializes GuiInterpreter pointer.
+ * defines application data.
  */
 //------------------------------------------------------------------------------
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 
-GuiInterpreter *GmatAppData::theGuiInterpreter = NULL;
+GuiInterpreter* GmatAppData::theGuiInterpreter = NULL;
+
+#if !defined __CONSOLE_APP__
+ViewTextFrame* GmatAppData::theMessageWindow = NULL;
+#endif

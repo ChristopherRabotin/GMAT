@@ -55,6 +55,7 @@ public:
     // constructors
     GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                   long style);
+    ~GmatMainFrame();
 
 protected:
 private:
@@ -73,7 +74,7 @@ private:
     //loj: addded
     void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
     void OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event));
-
+    
     // IDs for the controls and the menu commands
     enum
     {

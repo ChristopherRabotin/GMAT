@@ -29,6 +29,7 @@
 #include "DocViewFrame.hpp"
 #include "TextDocument.hpp"
 #include "TextEditView.hpp"
+#include "GmatAppData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -77,10 +78,9 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
 
 {
     mDocManager = (wxDocManager *) NULL;
-    //mTextFrame = (ViewTextFrame *)NULL;
     GmatSplitterWindow *splitter;
     GmatNotebook *leftTabs;
-     
+    
 #if wxUSE_MENUS
     // create a menu bar 
     SetMenuBar(CreateMainMenu());
@@ -107,6 +107,14 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
     // add the left and right side to splitter
     leftTabs->SetMainNotebook(rightTabs);
     splitter->SplitVertically( leftTabs, rightTabs, 175 );
+}
+
+//------------------------------------------------------------------------------
+// ~GmatMainFrame()
+//------------------------------------------------------------------------------
+GmatMainFrame::~GmatMainFrame()
+{
+    GmatAppData::GetMessageWindow()->Close();
 }
 
 //-------------------------------
@@ -389,8 +397,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
 {
-    mTextFrame = new ViewTextFrame(this, _T("Demo Batch Run"),
-                                   50, 50, 450, 340);
+    mTextFrame = new ViewTextFrame(this, _T("Demo Batch Run"), 50, 50, 450, 340);
     mTextFrame->Show(true);
 
     try

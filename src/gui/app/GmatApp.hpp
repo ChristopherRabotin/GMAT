@@ -46,6 +46,7 @@ protected:
 
 private:
     Moderator *theModerator;
+    ViewTextFrame *theMessageWindow;
 
 };
 
