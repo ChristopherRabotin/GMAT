@@ -26,7 +26,7 @@
 // base includes
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROP_PANEL 0 //loj: 8/5/04 turned off debug
+#define DEBUG_PROP_PANEL 0  //loj: 8/5/04 turned off debug
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -270,6 +270,8 @@ void PropagationConfigPanel::SaveData()
       {
          thePMF = new PointMassForce();
          thePMF->SetBodyName(pmForceList[i]->bodyName);
+         paramId = thePMF->GetParameterID("PrimaryBody");
+         thePMF->SetBooleanParameter(paramId, false);
          pmForceList[i]->pmf = thePMF;
          newFm->AddForce(thePMF);
       }
@@ -280,6 +282,8 @@ void PropagationConfigPanel::SaveData()
          {
             thePMF = new PointMassForce();
             thePMF->SetBodyName(forceList[i]->bodyName);
+            paramId = thePMF->GetParameterID("PrimaryBody");
+            thePMF->SetBooleanParameter(paramId, true);
             forceList[i]->pmf = thePMF;
             newFm->AddForce(thePMF);
          }
@@ -466,24 +470,38 @@ void PropagationConfigPanel::Initialize()
       numOfForces   = thePropSetup->GetNumForces();
          
       Integer paramId;
-      PhysicalModel *force;
-      //CelestialBody *body;
-//      std::string typeName;
+      PhysicalModel *force;      
+      
+      Integer paramID;
+      bool isPrimaryBody = false;
       std::string bodyName;
       wxString tempStr;
       
       for (Integer i = 0; i < numOfForces; i++)
       {
          force = theForceModel->GetForce(i);
-//         typeName = force->GetTypeName();
+         paramID = force->GetParameterID("PrimaryBody");
+         isPrimaryBody = force->GetBooleanParameter(paramID);
             
          if (force->GetTypeName() == "PointMassForce")
          {
             thePMF = (PointMassForce *)force;
             bodyName = thePMF->GetStringParameter("BodyName");
-            primaryBodiesArray.Add(bodyName.c_str());
+            
+            MessageInterface::ShowMessage("Body name=%s ", bodyName.c_str());
+            if (isPrimaryBody)
+            {
+               primaryBodiesArray.Add(bodyName.c_str());
+               MessageInterface::ShowMessage("isPrimaryBody is true.\n");
+            }
+            else if (!isPrimaryBody)
+            {
+               secondaryBodiesArray.Add(bodyName.c_str());
+               MessageInterface::ShowMessage("isPrimaryBody is false.\n");
+            }
+               
 //            primaryBodiesGravityArray.Add(typeName.c_str());                    
-
+            
             currentBodyId = FindBody(bodyName, gravModelArray[POINT_MASS]);
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->gravType = gravModelArray[POINT_MASS];
@@ -1148,6 +1166,7 @@ void PropagationConfigPanel::DisplayForceData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayPrimaryBodyData()
 {
+   // Primary bodies
    Integer bodyIndex = 0;
    for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
    {
@@ -1156,6 +1175,13 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
          bodyIndex = i;
    }
    bodyComboBox->SetSelection(bodyIndex);
+   
+   // Secondary bodies
+   if (!secondaryBodiesArray.IsEmpty())
+   {
+      for (Integer i = 0; i < (Integer)secondaryBodiesArray.GetCount(); i++)
+         pmEditTextCtrl->AppendText(secondaryBodiesArray.Item(i) + " ");
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1606,13 +1632,13 @@ void PropagationConfigPanel::OnPMEditButton()
    
    if (!primaryBodiesArray.IsEmpty())
    {
-      for (Integer i = 0; i < primaryBodiesArray.GetCount(); i++)
+      for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
          selectedBodies.Add(primaryBodiesArray.Item(i));
    }
    
    if (!secondaryBodiesArray.IsEmpty())
    {
-      for (Integer i = 0; i < secondaryBodiesArray.GetCount(); i++)
+      for (Integer i = 0; i < (Integer)secondaryBodiesArray.GetCount(); i++)
          selectedBodies.Add(secondaryBodiesArray.Item(i));
    }
    
