@@ -42,6 +42,7 @@ protected:
     wxBoxSizer *xSelelectedBoxSizer;
     wxBoxSizer *ySelelectedBoxSizer;
     wxBoxSizer *optionBoxSizer;
+    wxBoxSizer *bottomSizer;
     
     wxStaticText *titleAvailbleText;
     wxStaticText *titleXText;
@@ -58,7 +59,7 @@ protected:
     wxButton *clearYButton;
     wxButton *removeXButton;
     wxButton *removeYButton;
-
+    
     wxCheckBox *plotCheckBox;
     wxComboBox *scComboBox;
 
@@ -67,8 +68,7 @@ protected:
     void OnRemoveX(wxCommandEvent& event);
     void OnRemoveY(wxCommandEvent& event);
     void OnClearY(wxCommandEvent& event);
-    void OnEnablePlot(wxCommandEvent& event);
-    void OnSelectSc(wxCommandEvent& event);
+    void OnPlotCheckBoxChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create(wxWindow *parent);
@@ -76,7 +76,7 @@ protected:
     virtual void SaveData();
     virtual void OnHelp();
     virtual void OnScript();
-
+    
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
@@ -89,8 +89,7 @@ protected:
         XY_PLOT_REMOVE_X,
         XY_PLOT_REMOVE_Y,
         XY_PLOT_CLEAR_Y,
-        XY_PLOT_ENABLE,
-        XY_PLOT_SC_COMBOBOX
+        XY_PLOT_CHECKBOX,
     };
 };
 #endif
