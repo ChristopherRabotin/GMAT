@@ -157,13 +157,17 @@ public:
    
    wxBoxSizer*
    CreateParameterSizer(wxWindow *parent,
+                        wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                         wxButton **createVarButton, wxWindowID createVarButtonId,
                         wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
-                        wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                         wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
                         wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer);
+   wxBoxSizer*
+   CreateUserVarSizer(wxWindow *parent,
+                      wxListBox **userParamListBox, wxWindowID userParamListBoxId,
+                      wxButton **createVarButton, wxWindowID createVarButtonId);
    
 private:
    

@@ -263,7 +263,7 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
                                                  const wxSize &size,
                                                  wxArrayString &namesToExclude)
 {
-#if DEBUG_GUI_ITEM
+   #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage
       ("GuiItemManager::GetSpaceObjectListBox() theNumSpaceObject=%d\n",
        theNumSpaceObject);
@@ -272,17 +272,17 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
       MessageInterface::ShowMessage("namesToExclude[%d]=<%s>\n",
                                     i, namesToExclude[i].c_str());
    }
-#endif
-      
+   #endif
+   
    wxString emptyList[] = {};
 
    if (namesToExclude.IsEmpty())
    {
       
-#if DEBUG_GUI_ITEM
+      #if DEBUG_GUI_ITEM
       MessageInterface::ShowMessage
          ("GuiItemManager::GetSpaceObjectListBox() namesToExclude=0\n");
-#endif
+      #endif
       
       if (theNumSpaceObject > 0)
       {       
@@ -302,11 +302,11 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
       int exclCount = namesToExclude.GetCount();
       int newSpaceObjCount = theNumSpaceObject - exclCount;
       
-#if DEBUG_GUI_ITEM
+      #if DEBUG_GUI_ITEM
       MessageInterface::ShowMessage
          ("GuiItemManager::GetSpaceObjectListBox() newSpaceObjCount = %d\n",
           newSpaceObjCount);
-#endif
+      #endif
 
       if (newSpaceObjCount > 0)
       {
@@ -329,12 +329,13 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
             
             if (!excludeName)
             {
-#ifdef DEBUG_GUI_ITEM
+               #ifdef DEBUG_GUI_ITEM
                MessageInterface::ShowMessage
                   ("GuiItemManager::GetSpaceObjectListBox() so name to include:%s\n",
                    theSpaceObjectList[i].c_str());
                
-#endif
+               #endif
+               
                newSpaceObjList[numSpaceObj++] = theSpaceObjectList[i];
             }
          }
@@ -827,17 +828,17 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 //------------------------------------------------------------------------------
 wxBoxSizer* GuiItemManager::
 CreateParameterSizer(wxWindow *parent,
+                     wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                      wxButton **createVarButton, wxWindowID createVarButtonId,
                      wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
-                     wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                      wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                      wxComboBox **originComboBox, wxWindowID originComboBoxId,
                      wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer)
 {
-#if DEBUG_GUI_ITEM
+   #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
-#endif
+   #endif
    
    Integer borderSize = 1;
    
@@ -921,6 +922,60 @@ CreateParameterSizer(wxWindow *parent,
    return paramBoxSizer;
 }
 
+//------------------------------------------------------------------------------
+// wxBoxSizer* CreateUserVarSizer(...)
+//------------------------------------------------------------------------------
+/**
+ * Creates parameter sizer.
+ */
+//------------------------------------------------------------------------------
+wxBoxSizer* GuiItemManager::
+CreateUserVarSizer(wxWindow *parent,
+                   wxListBox **userParamListBox, wxWindowID userParamListBoxId,
+                   wxButton **createVarButton, wxWindowID createVarButtonId)
+{
+   #if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage("GuiItemManager::CreateUserVarSizer() entered\n");
+   #endif
+   
+   Integer borderSize = 1;
+   
+   //wxStaticBox
+   wxStaticBox *userParamStaticBox = new wxStaticBox(parent, -1, wxT(""));
+   
+   //wxStaticText
+   wxStaticText *userVarStaticText =
+      new wxStaticText(parent, -1, wxT("Variables"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   // wxButton
+   *createVarButton =
+      new wxButton(parent, createVarButtonId, wxT("Create"),
+                   wxDefaultPosition, wxSize(-1,-1), 0 );
+   
+   // wxListBox
+   wxArrayString emptyArray;
+   *userParamListBox =
+      GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+   
+   // wx*Sizer
+   wxStaticBoxSizer *userParamBoxSizer =
+      new wxStaticBoxSizer(userParamStaticBox, wxVERTICAL);
+   wxBoxSizer *paramBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
+   userParamBoxSizer->Add
+      (userVarStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*userParamListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   userParamBoxSizer->Add
+      (*createVarButton, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
+   
+   
+   paramBoxSizer->Add(userParamBoxSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   
+   return paramBoxSizer;
+}
+
 //-------------------------------
 // priavate methods
 //-------------------------------
@@ -942,7 +997,7 @@ void GuiItemManager::UpdateSpaceObjectList()
    int numObj = 0;
    int soCount = 0;
    
-#if DEBUG_GUI_ITEM
+   #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateSpaceObjectList() entered==========>\n");
    MessageInterface::ShowMessage("numSc=%d, scList=", numSc);
@@ -952,7 +1007,7 @@ void GuiItemManager::UpdateSpaceObjectList()
    for (int i=0; i<numFm; i++)
       MessageInterface::ShowMessage("%s ", fmList[i].c_str());
    MessageInterface::ShowMessage("\n");   
-#endif
+   #endif
 
    //--------------------------------------
    // if any space objects are configured
@@ -997,11 +1052,12 @@ void GuiItemManager::UpdateSpaceObjectList()
                {
                   theSpaceObjectList[soCount] = wxString(result[i].c_str());
                   soCount++;
-#if DEBUG_GUI_ITEM
+                  
+                  #if DEBUG_GUI_ITEM
                   MessageInterface::ShowMessage
                      ("theSpaceObjectList[%d]=%s\n", soCount-1,
                       theSpaceObjectList[soCount-1].c_str());
-#endif
+                  #endif
                }
             }
          }
