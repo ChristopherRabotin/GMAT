@@ -118,9 +118,9 @@ void GmatPanel::Show()
     thePanelSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
     thePanelSizer->SetSizeHints(this); //set size hints to honour minimum size
 
+    theApplyButton->Disable();
     LoadData();
 
-    theApplyButton->Disable();
     theScriptButton->Disable(); //loj: for build2
     theHelpButton->Disable();   //loj: for build2
 }
