@@ -56,8 +56,8 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
-              const wxPoint &pos, const wxSize &size, long style)
-              :wxTreeCtrl(parent, id, pos, size, style)
+                           const wxPoint &pos, const wxSize &size, long style)
+    : wxTreeCtrl(parent, id, pos, size, style)
 {
     this->parent = parent;
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
@@ -84,6 +84,9 @@ void ResourceTree::UpdateResources()
         this->AppendItem(mSpacecraftItem, wxT(objname), ICON_SPACECRAFT, -1,
                          new GmatTreeItemData(wxT(objname), DEFAULT_SPACECRAFT));
     };
+
+    if (size !=0)
+        Expand(mSpacecraftItem);
     
     // update propagator
     itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
@@ -98,6 +101,9 @@ void ResourceTree::UpdateResources()
                          new GmatTreeItemData(wxT(objname), DEFAULT_PROPAGATOR));
     };
 
+    if (size !=0)
+        Expand(mPropagatorItem);
+    
     // update reports
     itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
     size = itemNames.size();
@@ -111,7 +117,11 @@ void ResourceTree::UpdateResources()
                          new GmatTreeItemData(wxT(objname), DEFAULT_REPORT));
     };
 
+    if (size !=0)
+        Expand(mReportItem);
+    
     // update other tree items
+
 }
 
 //------------------------------------------------------------------------------
