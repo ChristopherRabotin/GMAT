@@ -224,9 +224,10 @@ public:
 
    // Script
    bool InterpretScript(const std::string &scriptFileName);
+   bool InterpretScript(std::istringstream *ss, bool clearObjs); //loj: 9/8/04 added
    bool SaveScript(const std::string &scriptFileName);
    Integer RunScript(Integer sandboxNum = 1);
-    
+   
 private:
 
    // initialization

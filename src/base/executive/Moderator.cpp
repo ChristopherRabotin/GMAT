@@ -21,11 +21,11 @@
 #include "NoOp.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_SETUP_RUN 0
-#define DEBUG_CREATE_RESOURCE 0
-#define DEBUG_PLANETARY_FILE 0
-#define DEBUG_MULTI_STOP 0
-#define DEBUG_USER_INTERRUPT 0
+//#define DEBUG_SETUP_RUN 1
+//#define DEBUG_CREATE_RESOURCE 1
+//#define DEBUG_PLANETARY_FILE 1
+//#define DEBUG_MULTI_STOP 1
+//#define DEBUG_USER_INTERRUPT 1
 
 //---------------------------------
 // static data
@@ -1972,7 +1972,7 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    //clear both resource and command sequence
    ClearResource();
    ClearCommandSeq();
-    
+   
    try
    {
       status = theScriptInterpreter->Interpret(scriptFileName);
@@ -1987,6 +1987,55 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
                                      "\n Check Type in the appropriate Factory or parameter text");
+      isRunReady = false;
+   }
+
+   return status;
+}
+
+//loj: 9/8/04 added
+//------------------------------------------------------------------------------
+// bool InterpretScript(std::istringstream *ss, bool clearObjs)
+//------------------------------------------------------------------------------
+/**
+ * Creates objects from stringstream
+ *
+ * @param <ss> input istringstream
+ * @param <clearObjs> clears objects and mission sequence if true
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
+{
+   bool status = false;
+   isRunReady = false;
+    
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
+
+   //clear both resource and command sequence
+   if (clearObjs)
+   {
+      ClearResource();
+      ClearCommandSeq();
+   }
+   
+   try
+   {
+      theScriptInterpreter->SetInStream(ss);
+      status = theScriptInterpreter->Interpret();
+      if (status)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::InterpretScript() successfully interpreted the script\n");
+         isRunReady = true;
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, e.GetMessage() +
+          "\n Check Type in the appropriate Factory or parameter text");
       isRunReady = false;
    }
 
@@ -2291,39 +2340,7 @@ void Moderator::SetupRun(Integer sandboxNum)
                                        e.GetMessage().c_str());
       }
    }
-        
-   //--------------------------------------------
-   // set SolarSystem on stopping condition
-   //--------------------------------------------
-
-   //loj: 6/15/04 now Propagate command sets SolarSystem on StopCondition and Initialize
-   // so don't need to configure StopCondition
    
-//     StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
-//     StopCondition *stopCond;
-    
-//     //MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
-//     for (unsigned int i=0; i<stopconds.size(); i++)
-//     {
-//        try
-//        {
-//           stopCond = GetStopCondition(stopconds[i]);
-//           stopCond->SetSolarSystem(theDefaultSolarSystem);
-//           stopCond->Initialize();
-//  #if DEBUG_SETUP_RUN
-//           objName = stopCond->GetName();
-//           MessageInterface::ShowMessage
-//              ("Moderator::SetupRun() %s:goal = %f\n",
-//               objName.c_str(), stopCond->GetRealParameter("Goal"));
-//  #endif
-//        }
-//        catch (BaseException &e)
-//        {
-//           MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-//                                         e.GetMessage().c_str());
-//        }
-//     }    
-
    //--------------------------------------------
    // create plot window
    //--------------------------------------------
