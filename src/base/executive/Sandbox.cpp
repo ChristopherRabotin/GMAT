@@ -196,6 +196,16 @@ bool Sandbox::Interrupt(void)
 
 void Sandbox::Clear(void)
 {
+    solarSys  = NULL;
+    publisher = NULL;
+    sequence  = NULL;
+    current   = NULL;
+    state     = IDLE;
+    
+    /// @todo The current Sandbox::Clear() method has a small memory leak
+    ///       when spacecraft are removed from the onjectMap.  This needs to
+    ///       be fixed.
+    objectMap.clear();
 }
 
 
