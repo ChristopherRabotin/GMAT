@@ -62,6 +62,7 @@ SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount] =
     "UseAnalytic",
     "ShadowModel",
     "VectorModel",
+    "Body", //loj: 5/28/04 added to match with enum/ this will be removed when PhysicalModel has body
     "BodyRadius",
     "SunRadius",
     "HasMoons",
@@ -83,6 +84,7 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount] =
    Gmat::BOOLEAN_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::STRING_TYPE, //loj: 5/28/04 added to match with enum
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::BOOLEAN_TYPE,
