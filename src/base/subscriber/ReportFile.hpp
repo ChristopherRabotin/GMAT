@@ -11,6 +11,8 @@
 //
 // Author: LaMont Ruley
 // Created: 2003/10/23
+// Modified:  2004/7/16 by Allison Greene to include copy constructor
+//                         and operator=
 //
 /**
  * Definition for the ReportFile class.
@@ -25,16 +27,23 @@
 #include "Subscriber.hpp"
 #include <fstream>
 
+#include "Parameter.hpp"
+#include <map>
 
 class ReportFile :
     public Subscriber
 {
 public:
 //    ReportFile(char * filename = NULL);
-   ReportFile(const std::string &name, const std::string &fileName = "");
-   ReportFile(const ReportFile &rf);
+//   ReportFile(const std::string &name, const std::string &fileName = "");
+   ReportFile(const std::string &name, const std::string &fileName = "", 
+               Parameter *firstVarParam = NULL);
+
    virtual ~ReportFile(void);
-   
+
+   ReportFile(const ReportFile &);
+   ReportFile& operator=(const ReportFile&);
+          
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
    
@@ -50,6 +59,18 @@ public:
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
+                                          
+   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+   
+   virtual bool GetBooleanParameter(const Integer id) const;
+   virtual bool GetBooleanParameter(const std::string &label) const;
+   virtual bool SetBooleanParameter(const Integer id, const bool value);
+   virtual bool SetBooleanParameter(const std::string &label,
+                                    const bool value);
+
+   Integer GetNumVarParameters();
+   bool AddVarParameter(const std::string &paramName);
 
 protected:
    /// Name of the report file
@@ -57,15 +78,39 @@ protected:
    /// Precision for output of real data
    Integer             precision;
    /// ID for the file name
-   Integer             filenameID;
+//   Integer             filenameID;
    /// ID for the precision information
-   Integer             precisionID;
-   
+//   Integer             precisionID;
    std::ofstream       dstream;  // output data stream
+
+   std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
+   std::map<std::string, Parameter*> mVarParamMap;
+
+   Integer mNumVarParams;
+
+   StringArray mVarParamNames;
    
    virtual bool        Distribute(Integer len);
    virtual bool        Distribute(const Real * dat, Integer len);
    virtual bool        OpenReportFile(void);
+   
+private:
+    
+    void ClearVarParameters();
+    
+    enum
+    {
+		FILENAME = SubscriberParamCount,
+      PRECISION,
+      VAR_LIST,
+      ADD,
+      CLEAR,
+      ReportFileParamCount  /// Count of the parameters for this class
+    };
+
+    static const std::string PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
+	 static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
+
 };
 
 

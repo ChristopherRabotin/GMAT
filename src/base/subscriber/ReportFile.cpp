@@ -11,6 +11,8 @@
 //
 // Author: LaMont Ruley
 // Created: 2003/10/23
+// Modified:  2004/7/16 by Allison Greene to include copy constructor
+//                         and operator=
 //
 /**
  * Writes the specified output to a file.
@@ -19,48 +21,82 @@
 
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
+#include "Moderator.hpp"         // for GetParameter()
 
 #define DEBUG_REPORTFILE 0
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
+{
+   "Filename",
+   "Precision",
+   "VarList",
+   "Add",
+   "Clear",
+};
+
+const Gmat::ParameterType
+ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
+{
+	Gmat::STRING_TYPE,
+	Gmat::INTEGER_TYPE,
+	Gmat::STRINGARRAY_TYPE,
+	Gmat::STRING_TYPE,
+	Gmat::BOOLEAN_TYPE,
+};
+
+////------------------------------------------------------------------------------
+//// ReportFile(const std::string &name, const std::string &fileName)
+////------------------------------------------------------------------------------
+//ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
+//   Subscriber      ("ReportFile", name),
+//   filename        (fileName),
+//   precision       (12)
+////   filenameID      (parameterCount),
+////   precisionID     (parameterCount + 1)
+//{
+//   if (fileName != "")
+//      dstream.open(fileName.c_str());
+//   else {
+//      filename = "ReportFile.txt";
+//   }
+//
+//   // Added 1 parameter
+////   parameterCount += 2;
+//   parameterCount = ReportFileParamCount;
+//}
 
 //------------------------------------------------------------------------------
 // ReportFile(const std::string &name, const std::string &fileName)
 //------------------------------------------------------------------------------
-ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
+ReportFile::ReportFile(const std::string &name, const std::string &fileName,
+                        Parameter *firstVarParam) :
    Subscriber      ("ReportFile", name),
    filename        (fileName),
-   precision       (12),
-   filenameID      (parameterCount),
-   precisionID     (parameterCount + 1)
+   precision       (12)
+//   filenameID      (parameterCount),
+//   precisionID     (parameterCount + 1)
 {
    if (fileName != "")
       dstream.open(fileName.c_str());
    else {
       filename = "ReportFile.txt";
    }
-
+   
+   mNumVarParams = 0;
+   
+   if (firstVarParam != NULL)
+      AddVarParameter(firstVarParam->GetName());
+   
    // Added 1 parameter
-   parameterCount += 2;
+//   parameterCount += 2;
+   parameterCount = ReportFileParamCount;
 }
 
-//------------------------------------------------------------------------------
-// ReportFile(const ReportFile &rf)
-//------------------------------------------------------------------------------
-ReportFile::ReportFile(const ReportFile &rf) :
-   Subscriber      (rf),
-   filename        (rf.filename),
-   precision       (rf.precision),
-   filenameID      (parameterCount),
-   precisionID     (parameterCount + 1)
-{
-   if (filename != "")
-      dstream.open(filename.c_str());
-   else {
-      filename = "ReportFile.txt";
-   }
 
-   // Added 1 parameter
-   parameterCount += 2;
-}
 
 
 //------------------------------------------------------------------------------
@@ -72,6 +108,60 @@ ReportFile::~ReportFile(void)
    dstream.close();
 }
 
+//------------------------------------------------------------------------------
+// ReportFile(const ReportFile &rf)
+//------------------------------------------------------------------------------
+ReportFile::ReportFile(const ReportFile &rf) :
+   Subscriber      (rf),
+   filename        (rf.filename),
+   precision       (rf.precision)
+//   filenameID      (parameterCount),
+//   precisionID     (parameterCount + 1)
+{
+   if (filename != "")
+      dstream.open(filename.c_str());
+   else {
+      filename = "ReportFile.txt";
+   }
+
+   mVarParams = rf.mVarParams; 
+   mVarParamMap = rf.mVarParamMap;
+   mNumVarParams = rf.mNumVarParams;
+   mVarParamNames = rf.mVarParamNames;
+
+   // Added 1 parameter
+//   parameterCount += 2;
+   parameterCount = ReportFileParamCount;
+}
+
+//------------------------------------------------------------------------------
+// ReportFile& ReportFile::operator=(const ReportFile& rf)
+//------------------------------------------------------------------------------
+/**
+ * The assignment operator
+ */
+//------------------------------------------------------------------------------
+ReportFile& ReportFile::operator=(const ReportFile& rf)
+{
+    if (this == &rf)
+        return *this;
+
+    Subscriber::operator=(rf);
+    
+    filename = rf.filename;
+    precision = rf.precision;
+//    filenameID = rf.filenameID;
+//    precisionID = rf.precisionID;
+
+   //ag: what to do with the stream?
+//    dstream = NULL;  // output data stream
+    mVarParams = rf.mVarParams; 
+    mVarParamMap = rf.mVarParamMap;
+    mNumVarParams = rf.mNumVarParams;
+    mVarParamNames = rf.mVarParamNames;
+
+    return *this;
+}
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -93,24 +183,34 @@ GmatBase* ReportFile::Clone(void) const
 //------------------------------------------------------------------------------
 std::string ReportFile::GetParameterText(const Integer id) const
 {
-   if (id == filenameID)
-      return "Filename";
-   if (id == precisionID)
-      return "Precision";
-   return Subscriber::GetParameterText(id);
+//   if (id == filenameID)
+//      return "Filename";
+//   if (id == precisionID)
+//      return "Precision";
+//   return Subscriber::GetParameterText(id);
+    if (id >= FILENAME && id < ReportFileParamCount)
+        return PARAMETER_TEXT[id - SubscriberParamCount];
+    else
+        return Subscriber::GetParameterText(id);
 }
-
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Integer ReportFile::GetParameterID(const std::string &str) const
 {
-   if (str == "Filename")
-      return filenameID;
-   if (str == "Precision")
-      return precisionID;
-   return Subscriber::GetParameterID(str);
+//   if (str == "Filename")
+//      return filenameID;
+//   if (str == "Precision")
+//      return precisionID;
+//   return Subscriber::GetParameterID(str);
+    for (Integer i = FILENAME; i < ReportFileParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - SubscriberParamCount])
+            return i;
+    }
+
+    return Subscriber::GetParameterID(str);
 }
 
 
@@ -119,11 +219,16 @@ Integer ReportFile::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 {
-   if (id == filenameID)
-      return Gmat::STRING_TYPE;
-   if (id == precisionID)
-      return Gmat::INTEGER_TYPE;
-   return Subscriber::GetParameterType(id);
+//   if (id == filenameID)
+//      return Gmat::STRING_TYPE;
+//   if (id == precisionID)
+//      return Gmat::INTEGER_TYPE;
+//   return Subscriber::GetParameterType(id);
+    if (id >= FILENAME && id < ReportFileParamCount)
+        return PARAMETER_TYPE[id - SubscriberParamCount];
+    else
+        return Subscriber::GetParameterType(id);
+
 }
 
 
@@ -132,11 +237,16 @@ Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ReportFile::GetParameterTypeString(const Integer id) const
 {
-   if (id == filenameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-   if (id == precisionID)
-      return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
-   return Subscriber::GetParameterTypeString(id);
+//   if (id == filenameID)
+//      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+//   if (id == precisionID)
+//      return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
+//   return Subscriber::GetParameterTypeString(id);
+   if (id >= FILENAME && id < ReportFileParamCount)
+      return Subscriber::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return Subscriber::GetParameterTypeString(id);
+
 }
 
 
@@ -145,7 +255,7 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ReportFile::GetIntegerParameter(const Integer id) const
 {
-   if (id == precisionID)
+   if (id == PRECISION)
       return precision;
    return Subscriber::GetIntegerParameter(id);
 }
@@ -156,7 +266,7 @@ Integer ReportFile::GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
 {
-   if (id == precisionID)
+   if (id == PRECISION)
    {
       if (value > 0)
          precision = value;
@@ -171,7 +281,7 @@ Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
 std::string ReportFile::GetStringParameter(const Integer id) const
 {
-   if (id == filenameID)
+   if (id == FILENAME)
       return filename;
    return Subscriber::GetStringParameter(id);
 }
@@ -181,7 +291,7 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == filenameID)
+   if (id == FILENAME)
    {
       // Close the stream if it is open
       if (dstream.is_open())
@@ -193,7 +303,110 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       filename = value;
       return true;
    }
+   else if (id == ADD)
+   {
+      return AddVarParameter(value);
+   }
+      
    return Subscriber::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& ReportFile::GetStringArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case VAR_LIST:
+      return mVarParamNames;
+   default:
+      return Subscriber::GetStringArrayParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& ReportFile::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+bool ReportFile::GetBooleanParameter(const Integer id) const
+{
+   return Subscriber::GetBooleanParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+bool ReportFile::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
+{
+   switch (id)
+   {
+   case CLEAR:
+      ClearVarParameters();
+      return true;
+   default:
+      return Subscriber::SetBooleanParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label,
+//                          const bool value)
+//------------------------------------------------------------------------------
+bool ReportFile::SetBooleanParameter(const std::string &label,
+                                 const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// Integer GetNumVarParameters()
+//------------------------------------------------------------------------------
+Integer ReportFile::GetNumVarParameters()
+{
+   return mNumVarParams;
+}
+
+//------------------------------------------------------------------------------
+// bool AddVarParameter(const std::string &paramName)
+//------------------------------------------------------------------------------
+bool ReportFile::AddVarParameter(const std::string &paramName)
+{
+   bool status = false;
+   Moderator *theModerator = Moderator::Instance();
+    
+   if (paramName != "")
+   {
+      mVarParamNames.push_back(paramName);
+      mVarParamMap[paramName] = NULL;
+      mNumVarParams = mVarParamNames.size();
+
+      // get parameter pointer
+      Parameter *param = theModerator->GetParameter(paramName);
+      if (param != NULL)
+      {
+         mVarParamMap[paramName] = param;
+         mVarParams.push_back(param);
+      }
+      status = true;
+   }
+
+   return status;
 }
 
 //--------------------------------------
@@ -212,6 +425,16 @@ bool ReportFile::OpenReportFile(void)
    dstream.open(filename.c_str());
    if (!dstream.is_open())
       return false;
+   
+   dstream.precision(precision);
+         
+   // write heading for each item
+   for (int i=0; i < mNumVarParams; i++)
+   {
+       dstream << mVarParamNames[i] << " ";
+   }   
+   dstream << std::endl;
+      
    return true;
 }
 
@@ -224,16 +447,29 @@ bool ReportFile::OpenReportFile(void)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(int len)
 {
+   // ag:  Not sure what len is for...
+   
    if (!dstream.is_open())
       if (!OpenReportFile())
          return false;
 
+   dstream.precision(precision);
+
+   // get var params
+   Rvector varvals = Rvector(mNumVarParams);
+
    if (len == 0)
       dstream << data;
    else
-      for (int i = 0; i < len; ++i)
-         dstream << data[i];
-
+   {
+      for (int i=0; i < len; i++)
+      {
+          varvals[i] = mVarParams[i]->EvaluateReal();
+          dstream << varvals[i] << " ";
+      }   
+      dstream << std::endl;
+   }   
+      
    return true;
 }
 
@@ -249,15 +485,38 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
         
    dstream.precision(precision);
 
+   // get var params
+   Rvector varvals = Rvector(mNumVarParams);
+
    if (len == 0)
       return false;
    else {
-      for (int i = 0; i < len-1; ++i)
-         dstream << dat[i] << "  ";
-      dstream << dat[len-1] << std::endl;
+//      for (int i = 0; i < len-1; ++i)
+//         dstream << dat[i] << "  ";
+//      dstream << dat[len-1] << std::endl;
+//      
+      for (int i=0; i < mNumVarParams; i++)
+      {
+          varvals[i] = mVarParams[i]->EvaluateReal();
+          dstream << varvals[i] << " ";
+      }   
+      dstream << std::endl;
    }
 
    return true;
 }
 
+//--------------------------------------
+// private methods
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// void ClearYParameters()
+//------------------------------------------------------------------------------
+void ReportFile::ClearVarParameters()
+{
+   mVarParams.clear();
+   mVarParamNames.clear();
+   mNumVarParams = 0;
+}
 
