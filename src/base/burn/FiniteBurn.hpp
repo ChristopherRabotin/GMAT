@@ -32,12 +32,40 @@ public:
    FiniteBurn(const FiniteBurn& fb);
    FiniteBurn&             operator=(const FiniteBurn& fb);
    
+   // Inherited (GmatBase) methods
+   virtual std::string     GetParameterText(const Integer id) const;
+   virtual Integer         GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                           GetParameterType(const Integer id) const;
+   virtual std::string     GetParameterTypeString(const Integer id) const;
+
+   virtual bool            SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual const StringArray&    
+                           GetStringArrayParameter(const Integer id) const;
+
    virtual bool            Fire(Real *burnData = NULL);
    
    GmatBase*               Clone() const;
    
 protected:
+   /// List of thrusters used in the maneuver
+   StringArray             thrusters;
+
+   /// Published parameters for thrusters
+   enum
+   {
+      THRUSTER = BurnParamCount,
+      FiniteBurnParamCount
+   };
    
+   /// Thruster parameter labels
+   static const std::string 
+                        PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount];
+   /// Thruster parameter types
+   static const Gmat::ParameterType 
+                        PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount];
+                        
 };
 
 #endif // FiniteBurn_hpp

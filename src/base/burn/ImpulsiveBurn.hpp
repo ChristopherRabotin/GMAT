@@ -32,11 +32,10 @@ public:
    ImpulsiveBurn(const ImpulsiveBurn &copy);
 	virtual ~ImpulsiveBurn(void);
  
-    virtual bool            Fire(Real *burnData = NULL);
+   virtual bool            Fire(Real *burnData = NULL);
 
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
-
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 };
 
 #endif // ImpulsiveBurn_hpp

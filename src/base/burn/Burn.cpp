@@ -21,14 +21,53 @@
 #include "Burn.hpp"
 
 
+//---------------------------------
+// static data
+//---------------------------------
+
+/// Labels used for the thruster element parameters.
+const std::string
+Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
+{
+   "CoordinateFrame",
+   "VectorFormat",
+   "Element1",
+   "Element2",
+   "Element3",
+   "Element1Label",
+   "Element2Label",
+   "Element3Label",
+   "SpacecraftName"
+};
+
+/// Types of the parameters used by thrusters.
+const Gmat::ParameterType
+Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
+{
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE, 
+   Gmat::REAL_TYPE, 
+   Gmat::REAL_TYPE, 
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+};
+
+
+//---------------------------------
+// public methods
+//---------------------------------
+
 //------------------------------------------------------------------------------
 //  Burn(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
 /**
  * Constructs the Burn object (default constructor).
  * 
- * @param <typeStr> String text identifying the object type
- * @param <nomme>   Name for the object
+ * @param typeStr String text identifying the object type
+ * @param nomme   Name for the object
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const std::string &typeStr, const std::string &nomme) :
@@ -36,17 +75,7 @@ Burn::Burn(const std::string &typeStr, const std::string &nomme) :
     coordFrame      ("Inertial"),
     coordSystem     ("Cartesian"),
     satName         (""),
-    sc              (NULL),
-    // Parameter IDs, for convenience
-    coordFrameID    (parameterCount),
-    coordSystemID   (parameterCount+1),
-    deltaV1ID       (parameterCount+2),
-    deltaV2ID       (parameterCount+3),
-    deltaV3ID       (parameterCount+4),
-    deltaV1LabelID  (parameterCount+5),
-    deltaV2LabelID  (parameterCount+6),
-    deltaV3LabelID  (parameterCount+7),
-    satNameID       (parameterCount+8)
+    sc              (NULL)
 {
     parameterCount += 9;
     
@@ -86,7 +115,7 @@ Burn::~Burn()
 /**
  * Constructs the Burn object (copy constructor).
  * 
- * @param <b> Object that is copied
+ * @param b Object that is copied
  */
 //------------------------------------------------------------------------------
 Burn::Burn(const Burn &b) :
@@ -94,17 +123,7 @@ Burn::Burn(const Burn &b) :
     coordFrame      (b.coordFrame),
     coordSystem     (b.coordSystem),
     satName         (b.satName),
-    sc              (NULL),
-    // Parameter IDs, for convenience
-    coordFrameID    (b.coordFrameID),
-    coordSystemID   (b.coordSystemID),
-    deltaV1ID       (b.deltaV1ID),
-    deltaV2ID       (b.deltaV2ID),
-    deltaV3ID       (b.deltaV3ID),
-    deltaV1LabelID  (b.deltaV1LabelID),
-    deltaV2LabelID  (b.deltaV2LabelID),
-    deltaV3LabelID  (b.deltaV3LabelID),
-    satNameID       (b.satNameID)
+    sc              (NULL)
 {
     deltaV[0] = b.deltaV[0];
     deltaV[1] = b.deltaV[1];
@@ -123,7 +142,7 @@ Burn::Burn(const Burn &b) :
 /**
  * Sets one burn object to match another (assignment operator).
  * 
- * @param <b> The object that is copied.
+ * @param b The object that is copied.
  * 
  * @return this object, with the parameters set as needed.
  */
@@ -156,41 +175,16 @@ Burn& Burn::operator=(const Burn &b)
 /**
  * Gets the name of the parameter with the input id.
  * 
- * @param <id> Integer id for the parameter.
+ * @param id Integer id for the parameter.
  * 
  * @return The string name of the parameter.
  */
 //------------------------------------------------------------------------------
 std::string Burn::GetParameterText(const Integer id) const
 {
-    if (id == coordFrameID) 
-        return "CoordinateFrame";
-        
-    if (id == coordSystemID) 
-        return "VectorFormat";
-        
-    if (id == deltaV1ID) 
-        return "Element1";
-        
-    if (id == deltaV2ID) 
-        return "Element2";
-        
-    if (id == deltaV3ID) 
-        return "Element3";
-        
-    if (id == deltaV1LabelID) 
-        return "Element1Label";
-        
-    if (id == deltaV2LabelID) 
-        return "Element2Label";
-        
-    if (id == deltaV3LabelID) 
-        return "Element3Label";
-        
-    if (id == satNameID) 
-        return "SpacecraftName";
-        
-    return GmatBase::GetParameterText(id);
+   if (id >= GmatBaseParamCount && id < BurnParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   return GmatBase::GetParameterText(id);
 }
 
 
@@ -200,41 +194,31 @@ std::string Burn::GetParameterText(const Integer id) const
 /**
  * Gets the id corresponding to a named parameter.
  * 
- * @param <str> Name of the parameter.
+ * @param str Name of the parameter.
  * 
  * @return The ID.
  */
 //------------------------------------------------------------------------------
 Integer Burn::GetParameterID(const std::string &str) const
 {
-    if (str == "CoordinateFrame") 
-        return coordFrameID;
+    // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates) 
+    // directly
+    if (str == dvLabels[0])
+        return DELTAV1;
         
-    if (str == "VectorFormat") 
-        return coordSystemID;
+    if (str == dvLabels[1]) 
+        return DELTAV2;
         
-    if ((str == "Element1") || (str == dvLabels[0]))
-        return deltaV1ID;
-        
-    if ((str == "Element2") || (str == dvLabels[1])) 
-        return deltaV2ID;
-        
-    if ((str == "Element3") || (str == dvLabels[2])) 
-        return deltaV3ID;
-        
-    if (str == "Element1Label") 
-        return deltaV1LabelID;
-        
-    if (str == "Element2Label") 
-        return deltaV2LabelID;
-        
-    if (str == "Element3Label") 
-        return deltaV3LabelID;
-        
-    if (str == "SpacecraftName") 
-        return satNameID;
-        
-    return GmatBase::GetParameterID(str);
+    if (str == dvLabels[2])
+        return DELTAV3;
+   
+   for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+
+   return GmatBase::GetParameterID(str);
 }
 
 
@@ -244,41 +228,17 @@ Integer Burn::GetParameterID(const std::string &str) const
 /**
  * Gets the type of a parameter.
  * 
- * @param <id> Integer ID of the parameter.
+ * @param id Integer ID of the parameter.
  * 
  * @return The type of the parameter.
  */
 //------------------------------------------------------------------------------
 Gmat::ParameterType Burn::GetParameterType(const Integer id) const
 {
-    if (id == coordFrameID) 
-        return Gmat::STRING_TYPE;
-        
-    if (id == coordSystemID) 
-        return Gmat::STRING_TYPE;
-        
-    if (id == deltaV1ID) 
-        return Gmat::REAL_TYPE;
-        
-    if (id == deltaV2ID) 
-        return Gmat::REAL_TYPE;
-        
-    if (id == deltaV3ID) 
-        return Gmat::REAL_TYPE;
-        
-    if (id == deltaV1LabelID) 
-        return Gmat::STRING_TYPE;
-        
-    if (id == deltaV2LabelID) 
-        return Gmat::STRING_TYPE;
-        
-    if (id == deltaV3LabelID) 
-        return Gmat::STRING_TYPE;
-        
-    if (id == satNameID) 
-        return Gmat::STRING_TYPE;
-        
-    return GmatBase::GetParameterType(id);
+   if (id >= GmatBaseParamCount && id < BurnParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+      
+   return GmatBase::GetParameterType(id);
 }
 
 
@@ -288,41 +248,14 @@ Gmat::ParameterType Burn::GetParameterType(const Integer id) const
 /**
  * Gets the text description for the type of a parameter.
  * 
- * @param <id> Integer ID of the parameter.
+ * @param id Integer ID of the parameter.
  * 
  * @return The text description of the type of the parameter.
  */
 //------------------------------------------------------------------------------
 std::string Burn::GetParameterTypeString(const Integer id) const
 {
-    if (id == coordFrameID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == coordSystemID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == deltaV1ID) 
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == deltaV2ID) 
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == deltaV3ID) 
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == deltaV1LabelID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == deltaV2LabelID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == deltaV3LabelID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == satNameID) 
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    return GmatBase::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -332,51 +265,51 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 /**
  * Gets the value for a Real parameter.
  * 
- * @param <id> Integer ID of the parameter.
+ * @param id Integer ID of the parameter.
  * 
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
 Real Burn::GetRealParameter(const Integer id) const
 {
-    if (id == deltaV1ID) 
+    if (id == DELTAV1) 
         return deltaV[0];
         
-    if (id == deltaV2ID) 
+    if (id == DELTAV2) 
         return deltaV[1];
         
-    if (id == deltaV3ID) 
+    if (id == DELTAV3) 
         return deltaV[2];
         
     return GmatBase::GetRealParameter(id);
 }
 
-
+      
 //------------------------------------------------------------------------------
 //  Real SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a Real parameter.
  * 
- * @param <id> Integer ID of the parameter.
- * @param <value> New value for the parameter.
+ * @param id Integer ID of the parameter.
+ * @param value New value for the parameter.
  * 
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
 Real Burn::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == deltaV1ID) {
+    if (id == DELTAV1) {
         deltaV[0] = value;
         return deltaV[0];
     }
         
-    if (id == deltaV2ID) {
+    if (id == DELTAV2) {
         deltaV[1] = value;
         return deltaV[1];
     }
         
-    if (id == deltaV3ID) {
+    if (id == DELTAV3) {
         deltaV[2] = value;
         return deltaV[2];
     } 
@@ -391,29 +324,29 @@ Real Burn::SetRealParameter(const Integer id, const Real value)
 /**
  * Gets the value for a std::string parameter.
  * 
- * @param <id> Integer ID of the parameter.
+ * @param id Integer ID of the parameter.
  * 
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
 std::string Burn::GetStringParameter(const Integer id) const
 {
-    if (id == coordFrameID) 
+    if (id == COORDFRAME) 
         return coordFrame;
         
-    if (id == coordSystemID) 
+    if (id == COORDSYSTEM) 
         return coordSystem;
         
-    if (id == deltaV1LabelID) 
+    if (id == DELTAV1LABEL) 
         return dvLabels[0];
         
-    if (id == deltaV2LabelID) 
+    if (id == DELTAV2LABEL) 
         return dvLabels[1];
         
-    if (id == deltaV3LabelID) 
+    if (id == DELTAV3LABEL) 
         return dvLabels[2];
         
-    if (id == satNameID) 
+    if (id == SATNAME) 
         return satName;
         
     return GmatBase::GetStringParameter(id);
@@ -426,15 +359,15 @@ std::string Burn::GetStringParameter(const Integer id) const
 /**
  * Sets the value for a std::string parameter.
  * 
- * @param <id> Integer ID of the parameter.
- * @param <value> New value for the parameter.
+ * @param id Integer ID of the parameter.
+ * @param value New value for the parameter.
  * 
  * @return The value of the parameter.
  */
 //------------------------------------------------------------------------------
 bool Burn::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == coordFrameID) {
+    if (id == COORDFRAME) {
         /// @todo validate the input value
         // if (!IsValidFrame(value))
         //    return false;    
@@ -447,7 +380,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
         return true;
     }
         
-    if (id == coordSystemID) {
+    if (id == COORDSYSTEM) {
         /// @todo validate the input value
         // if (!IsValidSystem(value))
         //     return false;
@@ -456,16 +389,16 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
     }
         
     // Cannot change the labels -- they are set internally
-    if (id == deltaV1LabelID) 
+    if (id == DELTAV1LABEL) 
         return false;
         
-    if (id == deltaV2LabelID) 
+    if (id == DELTAV2LABEL) 
         return false;
         
-    if (id == deltaV3LabelID) 
+    if (id == DELTAV3LABEL) 
         return false;
         
-    if (id == satNameID) {
+    if (id == SATNAME) {
         satName = value;
         return true;
     }
@@ -483,14 +416,15 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
  * For the Burn classes, calls to this method get passed to the maneuver frame
  * manager when the user requests the frames that are available for the system.
  *
- * @param <id> The integer ID for the parameter.
+ * @param id The integer ID for the parameter.
  *
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
+//---------------------------------------------------------------------------
 const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 {
-    if (id == coordFrameID)
+    if (id == COORDFRAME)
         return frameman->GetSupportedFrames();
 
     return GmatBase::GetStringArrayParameter(id);
@@ -503,7 +437,10 @@ const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
  * Accessor method used by Maneuver to pass in the spacecraft pointer
+ * 
+ * @param sat the Spacecraft
  */
+//---------------------------------------------------------------------------
 void Burn::SetSpacecraftToManeuver(Spacecraft *sat)
 {
     sc = sat;
