@@ -43,8 +43,11 @@ public:
    virtual std::string     GetParameterTypeString(const Integer id) const;
 
    virtual bool            SetStringParameter(const Integer id, 
-                                           const std::string &value);
-   virtual const StringArray&    
+                                              const std::string &value);
+   virtual bool            SetStringParameter(const Integer id,
+                                              const std::string &value,
+                                              const Integer index);
+   virtual const StringArray&
                            GetStringArrayParameter(const Integer id) const;
 
    virtual Real            GetRealParameter(const Integer id) const;

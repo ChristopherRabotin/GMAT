@@ -52,7 +52,10 @@ public:
    virtual std::string     GetStringParameter(const Integer id) const;
    virtual bool            SetStringParameter(const Integer id, 
                                            const std::string &value);
-   virtual const StringArray&    
+   virtual bool            SetStringParameter(const Integer id,
+                                              const std::string &value,
+                                              const Integer index);
+   virtual const StringArray&
                            GetStringArrayParameter(const Integer id) const;
     
    // Accessor method used by Maneuver to pass in the spacecraft pointer

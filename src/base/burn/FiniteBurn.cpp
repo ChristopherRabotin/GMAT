@@ -234,6 +234,69 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const Real value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a specific std::string element in an array.
+ *
+ * @param id Integer ID of the parameter.
+ * @param value New value for the parameter.
+ * @param index Index for the element
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value,
+                                    const Integer index)
+{
+   Integer count;
+   
+   if (id == THRUSTER) {
+      count = thrusters.size();
+      if (index > count)
+         throw BurnException("Attempting to write thruster " + value +
+                  " past the allowed range for FiniteBurn " + instanceName);
+      if (find(thrusters.begin(), thrusters.end(), value) != thrusters.end()) {
+         if (thrusters[index] == value)
+            return true;
+         throw BurnException("Thruster " + value +
+                  " already set for FiniteBurn " + instanceName);
+      }
+      if (index == count)
+         thrusters.push_back(value);
+      else
+         thrusters[index] = value;
+
+      initialized = false;
+      return true;
+   }
+
+   if (id == FUEL_TANK) {
+      count = tanks.size();
+      if (index > count)
+         throw BurnException("Attempting to write tank " + value +
+                  " past the allowed range for FiniteBurn " + instanceName);
+      if (find(tanks.begin(), tanks.end(), value) != tanks.end()) {
+         if (tanks[index] == value)
+            return true;
+         throw BurnException("Tank " + value +
+                  " already set for FiniteBurn " + instanceName);
+      }
+      if (index == count)
+         tanks.push_back(value);
+      else
+         tanks[index] = value;
+
+      initialized = false;
+      return true;
+   }
+
+   return Burn::SetStringParameter(id, value, index);
+}
+
+
 //---------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const Integer id) const
 //---------------------------------------------------------------------------
