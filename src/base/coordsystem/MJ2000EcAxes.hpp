@@ -44,9 +44,9 @@ public:
 
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState); //, SpacePoint *j2000Body);
+                                 Rvector &outState); 
    virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState); //, SpacePoint *j2000Body);
+                                   Rvector &outState);
 
    
    // all classes derived from GmatBase must supply this Clone method;

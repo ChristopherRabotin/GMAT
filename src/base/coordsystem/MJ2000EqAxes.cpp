@@ -126,7 +126,7 @@ void MJ2000EqAxes::Initialize()
 
 //---------------------------------------------------------------------------
 //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                        Rvector &outState//, SpacePoint *j2000Body)
+//                        Rvector &outState)
 //---------------------------------------------------------------------------
 /**
  * This method will rotate the input inState into the MJ2000Eq frame.
@@ -135,13 +135,12 @@ void MJ2000EqAxes::Initialize()
  * @param inState   the input state (in this AxisSystem) to be rotated.
  * @param iutState  the output state, in the MJ2000Eq AxisSystem, the result 
  *                  of rotating the input inState.
- * @param j2000Body the origin of the output MJ2000EqAxes frame. // set in object
  *
  * @return success or failure of the operation.
  */
 //---------------------------------------------------------------------------
 bool MJ2000EqAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                              Rvector &outState) //, SpacePoint *j2000Body)
+                              Rvector &outState)
 {
    outState = inState;
    return true;
@@ -149,7 +148,7 @@ bool MJ2000EqAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 
 //---------------------------------------------------------------------------
 //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                          Rvector &outState//, SpacePoint *j2000Body)
+//                          Rvector &outState)
 //---------------------------------------------------------------------------
 /**
  * This method will rotate the input inState from the MJ2000Eq frame into
@@ -159,14 +158,13 @@ bool MJ2000EqAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
  * @param inState   the input state (in MJ2000Eq AxisSystem) to be rotated.
  * @param iutState  the output state, in this AxisSystem, the result 
  *                  of rotating the input inState.
- * @param j2000Body the origin of the input MJ2000EqAxes frame.
  *
  * @return success or failure of the operation.
  */
 //---------------------------------------------------------------------------
 bool MJ2000EqAxes::RotateFromMJ2000Eq(const A1Mjd &epoch, 
                                       const Rvector &inState,
-                                      Rvector &outState) //, SpacePoint *j2000Body)
+                                      Rvector &outState)
 {
    outState = inState;
    return true;
@@ -277,13 +275,11 @@ GmatBase* MJ2000EqAxes::Clone() const
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  void CalculateRotationMatrix(SpacePoint *j2000Body)
+//  void CalculateRotationMatrix()
 //---------------------------------------------------------------------------
 /**
  * This method will compute the rotMatrix and rotDotMatrix used for rotations
  * from/to this AxisSystem to/from the MJ2000EqAxes system.
- *
- * @param j2000Body the origin of the MJ2000EqAxes frame.
  */
 //---------------------------------------------------------------------------
 void MJ2000EqAxes::CalculateRotationMatrix()
