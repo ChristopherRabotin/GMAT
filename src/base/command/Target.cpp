@@ -53,7 +53,10 @@ Target::Target() :
  */
 //------------------------------------------------------------------------------
 Target::~Target()
-{}
+{
+   if (targeter)
+      delete targeter;
+}
 
     
 //------------------------------------------------------------------------------
@@ -392,20 +395,45 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &na
 //------------------------------------------------------------------------------
 bool Target::Initialize(void)
 {
-    bool retval = BranchCommand::Initialize();
+   if (objectMap->find(targeterName) == objectMap->end()) {
+      std::string errorString = "Target command cannot find targeter \"";
+      errorString += targeterName;
+      errorString += "\"";
+      throw CommandException(errorString);
+   }
 
-    // Targeter specific initialization goes here:
-    if (objectMap->find(targeterName) == objectMap->end()) {
-        std::string errorString = "Target command cannot find targeter \"";
-        errorString += targeterName;
-        errorString += "\"";
-        throw CommandException(errorString);
-    }
+   // Clone the targeter for local use
+   targeter = (Solver *)((*objectMap)[targeterName])->Clone();
+    
+   // Set the local copy of the targeter on each node
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *current;
 
-    targeter = (Solver *)((*objectMap)[targeterName]);
-    targeter->Initialize();
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      current = *node;
+      while ((current != NULL) && (current != this))
+      {
+         if ((current->GetTypeName() == "Vary") || 
+             (current->GetTypeName() == "Achieve"))
+            current->SetRefObject(targeter, Gmat::SOLVER, targeterName);
+         current = current->GetNext();
+      }
+   }
+   bool retval = BranchCommand::Initialize();
+
+   // Targeter specific initialization goes here:
+   if (objectMap->find(targeterName) == objectMap->end()) {
+      std::string errorString = "Target command cannot find targeter \"";
+      errorString += targeterName;
+      errorString += "\"";
+      throw CommandException(errorString);
+   }
+
+    
+   targeter->Initialize();
         
-    return retval;
+   return retval;
 }
 
 

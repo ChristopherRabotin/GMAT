@@ -55,6 +55,10 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
+                                           
+    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+    
 
     // Inherited methods overridden from the base class
     virtual bool        InterpretAction(void);

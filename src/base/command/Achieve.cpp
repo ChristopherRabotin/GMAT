@@ -249,6 +249,35 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 // Multiple variables specified on the same line are not allowed in build 2
 // const StringArray& Achieve::GetStringArrayParameter(const Integer id) const; 
 
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                     const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced objects.
+ *
+ * @param obj reference object pointer.
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                           const std::string &name)
+{
+   if (type == Gmat::SOLVER) {
+      if (targeterName == obj->GetName()) {
+         targeter = (Solver*)obj;
+         return true;
+      }
+      return false;
+   }
+   return GmatCommand::SetRefObject(obj, type, name);
+}
+
+
 //------------------------------------------------------------------------------
 //  void InterpretAction(void)
 //------------------------------------------------------------------------------
@@ -347,16 +376,19 @@ bool Achieve::Initialize(void)
 {
     bool retval = GmatCommand::Initialize();
 
-    // Achieve specific initialization goes here:
-    
-    if (objectMap->find(targeterName) == objectMap->end()) {
-        std::string errorString = "Target command cannot find targeter \"";
-        errorString += targeterName;
-        errorString += "\"";
-        throw CommandException(errorString);
-    }
-
-    targeter = (Solver *)((*objectMap)[targeterName]);
+    if (targeter == NULL)
+       throw CommandException("Targeter not initialized for Achieve command\n  \""
+                              + generatingString + "\"\n");
+//    // Achieve specific initialization goes here:
+//    
+//    if (objectMap->find(targeterName) == objectMap->end()) {
+//        std::string errorString = "Target command cannot find targeter \"";
+//        errorString += targeterName;
+//        errorString += "\"";
+//        throw CommandException(errorString);
+//    }
+//
+//    targeter = (Solver *)((*objectMap)[targeterName]);
     Integer id = targeter->GetParameterID("Goals");
     targeter->SetStringParameter(id, goalName);
     

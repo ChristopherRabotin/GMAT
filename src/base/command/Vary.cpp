@@ -339,6 +339,34 @@ bool Vary::SetStringParameter(const Integer id, const std::string &value)
 //const StringArray& Vary::GetStringArrayParameter(const Integer id) const; 
 
 //------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                     const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets referenced objects.
+ *
+ * @param obj reference object pointer.
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                        const std::string &name)
+{
+   if (type == Gmat::SOLVER) {
+      if (targeterName == obj->GetName()) {
+         targeter = (Solver*)obj;
+         return true;
+      }
+      return false;
+   }
+   return GmatCommand::SetRefObject(obj, type, name);
+}
+
+
+//------------------------------------------------------------------------------
 //  void Vary::InterpretAction(void)
 //------------------------------------------------------------------------------
 /**
@@ -427,16 +455,21 @@ bool Vary::Initialize(void)
 {
     bool retval = GmatCommand::Initialize();
 
-    // Vary specific initialization (no pun intended) goes here:
-    // Find the targeter
-    if (objectMap->find(targeterName) == objectMap->end()) {
-        std::string errorString = "Target command cannot find targeter \"";
-        errorString += targeterName;
-        errorString += "\"";
-        throw CommandException(errorString);
-    }
+//    // Vary specific initialization (no pun intended) goes here:
+//    // Find the targeter
+//    if (objectMap->find(targeterName) == objectMap->end()) {
+//        std::string errorString = "Target command cannot find targeter \"";
+//        errorString += targeterName;
+//        errorString += "\"";
+//        throw CommandException(errorString);
+//    }
+//
+//    targeter = (Solver *)((*objectMap)[targeterName]);
 
-    targeter = (Solver *)((*objectMap)[targeterName]);
+    if (targeter == NULL)
+       throw CommandException("Targeter not initialized for Vary command\n  \""
+                              + generatingString + "\"\n");
+
     Integer id = targeter->GetParameterID("Variables");
     if (!variableName.empty())
         targeter->SetStringParameter(id, variableName[0]);
