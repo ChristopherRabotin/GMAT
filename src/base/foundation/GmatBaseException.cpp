@@ -19,8 +19,8 @@
 #include "GmatBaseException.hpp"
 
 
-GmatBaseException::GmatBaseException(std::string details) :
-    BaseException           ("GmatBase Exception Thrown: ", details)
+GmatBaseException::GmatBaseException(const std::string &details) :
+   BaseException       ("GmatBase Exception Thrown: ", details)
 {}
 
 
@@ -29,5 +29,5 @@ GmatBaseException::~GmatBaseException()
 
 
 GmatBaseException::GmatBaseException(const GmatBaseException &gbe) :
-    BaseException           (gbe)
+   BaseException       (gbe)
 {}

@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                               BurnException
+//                            GmatBaseException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -25,9 +25,9 @@ class GmatBaseException : public BaseException
 {
 public:
 
-	GmatBaseException(std::string details);
-	virtual ~GmatBaseException();
-    GmatBaseException(const GmatBaseException &gbe);
+   GmatBaseException(const std::string &details);
+   virtual ~GmatBaseException();
+   GmatBaseException(const GmatBaseException &gbe);
 };
 
 #endif // GmatBaseException_hpp
