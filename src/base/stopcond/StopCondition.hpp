@@ -13,7 +13,7 @@
 // Created: 2003/10/09
 //
 /**
- * Declares propagator stopping condition operations.
+ * Declares propagator stopping condition class.
  */
 //------------------------------------------------------------------------------
 #ifndef StopCondition_hpp
@@ -30,68 +30,72 @@ class GMAT_API StopCondition : public GmatBase
 {
 public:
 
-StopCondition(const std::string &name,
-              const std::string typeStr = "StopCondition",
-              const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
-              const Real &tol = GmatRealConst::REAL_TOL,
-              Parameter *parameter = NULL,
-              const Integer repeatCount = 1,
-              RefFrame *refFrame = NULL,
-              Interpolator *interp = NULL);
-   StopCondition(const StopCondition &sc);
-   StopCondition& operator= (const StopCondition &right); 
-   virtual ~StopCondition();
+    StopCondition(const std::string &name,
+                  const std::string typeStr = "StopCondition",
+                  Parameter *param = NULL,
+                  const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
+                  const Real &tol = GmatRealConst::REAL_TOL,
+                  const Integer repeatCount = 1,
+                  RefFrame *refFrame = NULL,
+                  Interpolator *interp = NULL);
+    StopCondition(const StopCondition &copy);
+    StopCondition& operator= (const StopCondition &right); 
+    virtual ~StopCondition();
 
-   bool IsInitialized();
-   Integer GetNumParameters();
-   Integer GetBufferSize();
+    bool IsInitialized();
+    Integer GetNumParameters();
+    Integer GetBufferSize();
 
-   Real GetGoal();
-   Real GetTolerance();
-   Parameter* GetFirstParameter();
-   RefFrame* GetRefFrame();
-   Interpolator* GetInterpolator();
+    Real GetGoal();
+    Real GetTolerance();
+    ParameterPtrArray GetParameters() const;
+    RefFrame* GetRefFrame();
+    Interpolator* GetInterpolator();
 
-   void SetGoal(const Real &goal);
-   void SetTolerance(const Real &tol);
-   void SetFirstParameter(Parameter *param);
-   void SetInterpolator(Interpolator *interp);
-   void SetRefFrame(RefFrame *refFrame);
+    void SetGoal(const Real &goal);
+    void SetTolerance(const Real &tol);
+    bool SetInterpolator(Interpolator *interp);
+    bool SetRefFrame(RefFrame *refFrame);
 
-   void AddParameter(Parameter *param);
-   Real GetStopEpoch();
+    bool AddParameter(Parameter *param);
+    Real GetStopEpoch();
 
-  /**
-   * Evaluates stopping condition.
-   * All derived classes must implement this method.
-   */
-   virtual bool Evaluate() = 0;
+    /**
+     * Evaluates stopping condition.
+     * All derived classes must implement this method.
+     */
+    virtual bool Evaluate() = 0;
+    /**
+     * Validates stopping condition.
+     * All derived classes must implement this method.
+     */
+    virtual bool Validate() = 0;
 
 protected:
 
-   void Initialize();
+    void Initialize();
 
-   Real mGoal;
-   Real mTolerance;
-   Integer mRepeatCount;
-   RefFrame *mRefFrame;
-   Interpolator *mInterpolator;
+    Real mGoal;
+    Real mTolerance;
+    Integer mRepeatCount;
+    RefFrame *mRefFrame;
+    Interpolator *mInterpolator;
 
-   ParameterPtrArray mParameters;
-   Integer mNumParams;
+    ParameterPtrArray mParameters;
+    Integer mNumParams;
 
-   /// ring buffer for epoches
-   RealArray mEpochBuffer;
-   /// ring buffer for associated values
-   RealArray mValueBuffer;
-   Integer mNumValidPoints;
-   Integer mBufferSize;
+    /// ring buffer for epoches
+    RealArray mEpochBuffer;
+    /// ring buffer for associated values
+    RealArray mValueBuffer;
+    Integer mNumValidPoints;
+    Integer mBufferSize;
 
-   bool mInitialized;
+    bool mInitialized;
 
 private:
-   StopCondition();
-   void CopyDynamicData(const StopCondition &sc);
+    StopCondition();
+    void CopyDynamicData(const StopCondition &stopCond);
 };
 
 #endif // StopCondition_hpp

@@ -25,7 +25,7 @@
 
 //------------------------------------------------------------------------------
 // StopCondition(const std::string &name, const std::string typeStr,
-//               const Real &goal, const Real &tol, Parameter *parameter,
+//               Parameter *param, const Real &goal, const Real &tol
 //               const Integer repeatCount, RefFrame *refFrame, Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
@@ -33,54 +33,50 @@
  */
 //------------------------------------------------------------------------------
 StopCondition::StopCondition(const std::string &name, const std::string typeStr,
-                             const Real &goal, const Real &tol,
-                             Parameter *parameter,
+                             Parameter *param, const Real &goal, const Real &tol,
                              const Integer repeatCount, RefFrame *refFrame,
                              Interpolator *interp)
-   : GmatBase(Gmat::STOP_CONDITION, typeStr, name)
+    : GmatBase(Gmat::STOP_CONDITION, typeStr, name)
 {
-   mGoal = goal;
-   mTolerance = tol;
-   mRepeatCount = repeatCount;
-   mRefFrame = refFrame;
-   mInterpolator = interp;
+    mGoal = goal;
+    mTolerance = tol;
+    mRepeatCount = repeatCount;
+    mRefFrame = refFrame;
+    mInterpolator = interp;
+    
+    mNumParams = 0;
+    mNumValidPoints = 0;
+    mBufferSize = 0;
    
-   mParameters.reserve(1);
-   mParameters[0] = parameter;
-   
-   mNumParams = 0;
-   mNumValidPoints = 0;
-   mBufferSize = 0;
-   
-   // need at least one Parameter object
-   if (mParameters[0] == NULL)
-      mInitialized = false;
-   else
-      mNumParams = 1;
-   
-   Initialize();
+    if (param != NULL)
+        AddParameter(param);
+       
+    Initialize();
 }
 
 //------------------------------------------------------------------------------
-// StopCondition(const StopCondition &sc)
+// StopCondition(const StopCondition &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  */
 //------------------------------------------------------------------------------
-StopCondition::StopCondition(const StopCondition &sc)
-   : GmatBase(sc)
+StopCondition::StopCondition(const StopCondition &copy)
+    : GmatBase(copy)
 {
-   mGoal = sc.mGoal;
-   mTolerance = sc.mTolerance;
-   mRepeatCount = sc.mRepeatCount;
-   mRefFrame = sc.mRefFrame;
-   mInterpolator = sc.mInterpolator;
-   
-   mParameters.reserve(1);
+    mGoal = copy.mGoal;
+    mTolerance = copy.mTolerance;
+    mRepeatCount = copy.mRepeatCount;
+    mRefFrame = copy.mRefFrame;
+    mInterpolator = copy.mInterpolator;
+    mNumParams = copy.mNumParams;
 
-   Initialize();
-   CopyDynamicData(sc);
+    mParameters.reserve(mNumParams);
+    for (int i=0; i<mNumParams; i++)
+        mParameters[i] = copy.mParameters[i];
+
+    Initialize();
+    CopyDynamicData(copy);
 }
 
 //------------------------------------------------------------------------------
@@ -92,21 +88,24 @@ StopCondition::StopCondition(const StopCondition &sc)
 //------------------------------------------------------------------------------
 StopCondition& StopCondition::operator= (const StopCondition &right)
 {
-   if (this != &right)
-   {
-      mGoal = right.mGoal;
-      mTolerance = right.mTolerance;
-      mRepeatCount = right.mRepeatCount;
-      mRefFrame = right.mRefFrame;
-      mInterpolator = right.mInterpolator;
-      
-      mParameters.reserve(1);
+    if (this != &right)
+    {
+        mGoal = right.mGoal;
+        mTolerance = right.mTolerance;
+        mRepeatCount = right.mRepeatCount;
+        mRefFrame = right.mRefFrame;
+        mInterpolator = right.mInterpolator;
+        mNumParams = right.mNumParams;
 
-      Initialize();
-      CopyDynamicData(right);
-   }
+        mParameters.reserve(mNumParams);
+        for (int i=0; i<mNumParams; i++)
+            mParameters[i] = right.mParameters[i];
 
-   return *this;
+        Initialize();
+        CopyDynamicData(right);
+    }
+
+    return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -129,7 +128,7 @@ StopCondition::~StopCondition()
 //------------------------------------------------------------------------------
 bool StopCondition::IsInitialized()
 {
-   return mInitialized;
+    return mInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -141,7 +140,7 @@ bool StopCondition::IsInitialized()
 //------------------------------------------------------------------------------
 Integer StopCondition::GetNumParameters()
 {
-   return mNumParams;
+    return mNumParams;
 }
 
 //------------------------------------------------------------------------------
@@ -153,7 +152,7 @@ Integer StopCondition::GetNumParameters()
 //------------------------------------------------------------------------------
 Integer StopCondition::GetBufferSize()
 {
-   return mBufferSize;
+    return mBufferSize;
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +160,7 @@ Integer StopCondition::GetBufferSize()
 //------------------------------------------------------------------------------
 Real StopCondition::GetGoal()
 {
-   return mGoal;
+    return mGoal;
 }
 
 //------------------------------------------------------------------------------
@@ -169,15 +168,15 @@ Real StopCondition::GetGoal()
 //------------------------------------------------------------------------------
 Real StopCondition::GetTolerance()
 {
-   return mTolerance;
+    return mTolerance;
 }
 
 //------------------------------------------------------------------------------
-// Parameter* GetFirstParameter()
+// ParameterPtrArray GetParameters() const
 //------------------------------------------------------------------------------
-Parameter* StopCondition::GetFirstParameter()
+ParameterPtrArray StopCondition::GetParameters() const
 {
-   return mParameters[0];
+    return mParameters;
 }
 
 //------------------------------------------------------------------------------
@@ -185,7 +184,7 @@ Parameter* StopCondition::GetFirstParameter()
 //------------------------------------------------------------------------------
 RefFrame* StopCondition::GetRefFrame()
 {
-   return mRefFrame;
+    return mRefFrame;
 }
 
 //------------------------------------------------------------------------------
@@ -193,7 +192,7 @@ RefFrame* StopCondition::GetRefFrame()
 //------------------------------------------------------------------------------
 Interpolator* StopCondition::GetInterpolator()
 {
-   return mInterpolator;
+    return mInterpolator;
 }
 
 //------------------------------------------------------------------------------
@@ -201,7 +200,7 @@ Interpolator* StopCondition::GetInterpolator()
 //------------------------------------------------------------------------------
 void StopCondition::SetGoal(const Real &goal)
 {
-   mGoal = goal;
+    mGoal = goal;
 }
 
 //------------------------------------------------------------------------------
@@ -209,53 +208,79 @@ void StopCondition::SetGoal(const Real &goal)
 //------------------------------------------------------------------------------
 void StopCondition::SetTolerance(const Real &tol)
 {
-   mTolerance = tol;
+    mTolerance = tol;
 }
 
 //------------------------------------------------------------------------------
-// void SetFirstParameter(Parameter *param)
-//------------------------------------------------------------------------------
-void StopCondition::SetFirstParameter(Parameter *param)
-{
-   //loj: Are we going to allow to set to different parameter pointer?
-   if (mParameters[0] == NULL)
-      mParameters[0] = param;
-}
-
-//------------------------------------------------------------------------------
-// void SetInterpolator(Interpolator *interp)
+// bool SetInterpolator(Interpolator *interp)
 //------------------------------------------------------------------------------
 /**
  * Sets Interpolator to interpolate stop condition epoch.
+ *
+ * @return true if Interplator is set; false if Interpolator has already been set.
  */
 //------------------------------------------------------------------------------
-void StopCondition::SetInterpolator(Interpolator *interp)
+bool StopCondition::SetInterpolator(Interpolator *interp)
 {
-   if (!mInitialized)
-   {
-      mInterpolator = interp;
-      Initialize();
-   }
-   else
-   {
-      throw StopConditionException("StopCondition:: The interpolator is already set.");
-   }
+    if (mInterpolator == NULL)
+    {
+        mInterpolator = interp;
+        Initialize();
+        return true;
+    }
+    else
+    {
+        //throw StopConditionException("StopCondition:: The interpolator is already set.");
+        return false;
+    }
 }
 
 //------------------------------------------------------------------------------
-// void AddParameter(Parameter *param)
+// bool SetRefFrame(RefFrame *refFrame)
 //------------------------------------------------------------------------------
 /**
- * Add parameter to stop condition if more than one Parameter object is needed
- * for evaluating stop condtion.
+ * Sets reference frame
  *
- * @note This method will be implemented in the future builds. This may not
- * need.
+ * @return true if RefFrame is set; false if RefFrame has already been set.
  */
 //------------------------------------------------------------------------------
-void StopCondition::AddParameter(Parameter *param)
+bool StopCondition::SetRefFrame(RefFrame *refFrame)
 {
-   // do nothing for now
+    if (mRefFrame == NULL)
+    {
+        mRefFrame = refFrame;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool AddParameter(Parameter *param)
+//------------------------------------------------------------------------------
+/**
+ * Add parameter to stop condition.
+ *
+ * @return true if parameter has added to array.
+ */
+//------------------------------------------------------------------------------
+bool StopCondition::AddParameter(Parameter *param)
+{
+    bool added = false;
+    
+    //loj: Do I really need to validate parameter before add?
+    if (param->Validate())
+    {
+        mParameters.push_back(param);
+        mNumParams = mParameters.size();
+        added = true;
+        if (param->IsTimeParameter())
+            mInitialized = true;
+    }
+
+    return added;
 }
 
 //------------------------------------------------------------------------------
@@ -267,8 +292,8 @@ void StopCondition::AddParameter(Parameter *param)
 //------------------------------------------------------------------------------
 Real StopCondition::GetStopEpoch()
 {
-   //loj: temporary code
-   return GmatBase::REAL_PARAMETER_UNDEFINED;
+    //loj: temporary code
+    return GmatBase::REAL_PARAMETER_UNDEFINED;
 }
 
 //---------------------------------
@@ -280,51 +305,58 @@ Real StopCondition::GetStopEpoch()
 //------------------------------------------------------------------------------
 void StopCondition::Initialize()
 {
-   //loj: How about mRefFrame?
-   //loj: Do I need RefFram* for all stopping condition?
+    //loj: How about mRefFrame?
+    //loj: Do I need RefFram* for all stopping condition?
    
-   mInitialized = false;
-   
-   if (mParameters[0] == NULL)
-      mInitialized = false;
-   
-   if (mInterpolator == NULL)
-   {
-      mInitialized = false;
-   }
-   else
-   {
-      mBufferSize = mInterpolator->GetBufferSize();
-      mEpochBuffer.reserve(mBufferSize);
-      mValueBuffer.reserve(mBufferSize);
+    mInitialized = false;
+
+    if (mNumParams >= 1)
+        mInitialized = true;
+
+    // if parameter is non-time parameter, need interpolator
+    bool needInterp = false;
+    for (int i=0; i<mNumParams; i++)
+    {
+        if (mParameters[i]->IsTimeParameter() == false)
+            needInterp = true;
+    }
+
+    if (needInterp)
+    {
+        if (mInterpolator == NULL)
+        {
+            mInitialized = false;
+        }
+        else
+        {
+            mBufferSize = mInterpolator->GetBufferSize();
+            mEpochBuffer.reserve(mBufferSize);
+            mValueBuffer.reserve(mBufferSize);
       
-      for (int i=0; i<mBufferSize; i++)
-      {
-         mEpochBuffer[i] = 0.0;
-         mValueBuffer[i] = 0.0;
-      }
+            for (int i=0; i<mBufferSize; i++)
+            {
+                mEpochBuffer[i] = 0.0;
+                mValueBuffer[i] = 0.0;
+            }
       
-      mNumValidPoints = 0;
-      mInitialized = true;
-   }
+            mNumValidPoints = 0;
+            mInitialized = true;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
 // void CopyDynamicData()
 //------------------------------------------------------------------------------
-void StopCondition::CopyDynamicData(const StopCondition &sc)
+void StopCondition::CopyDynamicData(const StopCondition &stopCond)
 {
-   mNumValidPoints = sc.mNumValidPoints;
-   mNumParams = sc.mNumParams;
-   
-   for (int i=0; i<mNumParams; i++)
-      mParameters[i] = sc.mParameters[i];
-   
-   mBufferSize = sc.mBufferSize;
-   for (int i=0; i<mBufferSize; i++)
-   {
-      mEpochBuffer[i] = sc.mEpochBuffer[i];
-      mValueBuffer[i] = sc.mValueBuffer[i];
-   }
+    mNumValidPoints = stopCond.mNumValidPoints;
+      
+    mBufferSize = stopCond.mBufferSize;
+    for (int i=0; i<mBufferSize; i++)
+    {
+        mEpochBuffer[i] = stopCond.mEpochBuffer[i];
+        mValueBuffer[i] = stopCond.mValueBuffer[i];
+    }
 }
 

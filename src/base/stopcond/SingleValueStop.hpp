@@ -28,26 +28,22 @@ class GMAT_API SingleValueStop : public StopCondition
 {
 public:
 
-   SingleValueStop(const std::string &name,
-                   const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
-                   const Real &tol = GmatRealConst::REAL_TOL,
-                   Parameter *param = NULL,
-                   const std::string &paramDataName = "",
-                   const Integer repeatCount = 1,
-                   RefFrame *refFrame = NULL,
-                   Interpolator *interp = NULL);
-   SingleValueStop(const SingleValueStop &svsc);
-   SingleValueStop& operator= (const SingleValueStop &right); 
-   virtual ~SingleValueStop();
+    SingleValueStop(const std::string &name = "",
+                    Parameter *param = NULL,
+                    const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
+                    const Real &tol = GmatRealConst::REAL_TOL,
+                    const Integer repeatCount = 1,
+                    RefFrame *refFrame = NULL,
+                    Interpolator *interp = NULL);
+    SingleValueStop(const SingleValueStop &svsc);
+    SingleValueStop& operator= (const SingleValueStop &right); 
+    virtual ~SingleValueStop();
 
-   void SetParameter(Parameter *param);
-   void SetParameterDataName(const std::string &paramDataName);
-
-   virtual bool Evaluate();
+    // The inherited methods from StopCondition
+    virtual bool Evaluate();
+    virtual bool Validate();
 
 protected:
-
-   std::string mParamDataName;
 
 private:
 
