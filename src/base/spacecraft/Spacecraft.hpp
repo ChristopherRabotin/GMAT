@@ -23,6 +23,7 @@
 #include "GmatBase.hpp"
 #include "Rvector6.hpp"
 #include "StateConverter.hpp"
+#include "TimeConverter.hpp"
 
 class GMAT_API Spacecraft : public GmatBase
 {
@@ -68,6 +69,12 @@ public:
 
     bool GetDisplay() const;
     void SetDisplay(const bool displayFlag);
+
+    std::string GetDisplayDateFormat() const;
+    void SetDisplayDateFormat(const std::string &dateType);
+    Real GetDisplayEpoch();
+    void SetDisplayEpoch(const Real value);
+
     std::string GetDisplayCoordType() const;
     void SetDisplayCoordType(const std::string &coordType);
 
@@ -121,6 +128,7 @@ protected:
 
     // for non-internal spacecraft information
     StateConverter stateConverter;
+    TimeConverter  timeConverter;
     Rvector6       cartesianState;
     Rvector6       keplerianState;
     Rvector6       modifiedKeplerainState;
@@ -129,11 +137,14 @@ protected:
     Real           cartesianEpoch;
     Real           keplerianEpoch;
     bool           isForDisplay;
+    Real           displayEpoch;
     Real           displayState[6];
+    std::string    displayDateFormat;
     std::string    displayCoordType; 
     std::string    displaySubType;
 private:
     void        InitializeValues();
+    void        SetEpoch();
     std::string GetElementName(const Integer id) const; 
     std::string GetLocalCoordType() const;
     void        SetInitialDisplay();
