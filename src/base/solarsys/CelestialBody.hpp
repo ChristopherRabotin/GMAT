@@ -33,6 +33,7 @@
 #include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "Rmatrix.hpp"
+#include "Rvector6.hpp"
 
 // Add needed things to Gmat namespace
 namespace Gmat  // do all of these things exist somewhere else already?
@@ -93,7 +94,8 @@ public:
 
    // method to return the state (position and velocity) of the body at
    // the specified time, using the specified method
-   virtual RealArray            GetState(A1Mjd atTime);  // should this be pure virtual?
+   virtual const Rvector6&      GetState(A1Mjd atTime); 
+   
    // methods to return the body type, central body, gravitational constant,
    // radius, mass, posvel source, and analytic method - ****need methods for other data as well
    virtual Gmat::BodyType       GetBodyType() const;
@@ -178,7 +180,7 @@ protected:
    /// analytic method to use
    Gmat::AnalyticMethod   analyticMethod;
    /// state of the body 0-2 position 3-5 velocity
-   RealArray              state;
+   Rvector6               state ;
    // time of the state
    A1Mjd                  stateTime;
    // order of the gravity model

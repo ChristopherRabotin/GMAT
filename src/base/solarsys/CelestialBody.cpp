@@ -20,6 +20,8 @@
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+#include "Rvector6.hpp"
+#include "AtmosphereManager.hpp"
 //#include "AtmosphereModel.hpp"
 
 const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
@@ -366,7 +368,7 @@ CelestialBody::~CelestialBody()
 }
 
 //------------------------------------------------------------------------------
-//  RealArray GetState(A1Mjd atTime)
+//  const Rvector6& GetState(A1Mjd atTime)
 //------------------------------------------------------------------------------
 /**
  * This method returns the state (position and velocity) of the body at the
@@ -378,14 +380,14 @@ CelestialBody::~CelestialBody()
  *
  */
 //------------------------------------------------------------------------------
-RealArray  CelestialBody::GetState(A1Mjd atTime)
+const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
-
    Real*     posVel;
-   RealArray rArray(6,0.0);
+  // RealArray rArray(6,0.0);
    switch (posVelSrc) {
       case Gmat::SLP :
       case Gmat::DE :
+
          // if SLP file not set , throw an exception here <<<<<<<<<
          posVel = theSourceFile->GetPosVel(bodyNumber,atTime);
          break;
@@ -394,15 +396,22 @@ RealArray  CelestialBody::GetState(A1Mjd atTime)
          break; // other cases later <<<<<<<<<<<<<<<<
    }
    stateTime  = atTime;
-   rArray[0]  = posVel[0];
-   rArray[1]  = posVel[1];
-   rArray[2]  = posVel[2];
-   rArray[3]  = posVel[3];
-   rArray[4]  = posVel[4];
-   rArray[5]  = posVel[5];
-   state      = rArray;
+   state.SetElement(0,posVel[0]);
+   state.SetElement(1,posVel[1]);
+   state.SetElement(2,posVel[2]);
+   state.SetElement(3,posVel[3]);
+   state.SetElement(4,posVel[4]);
+   state.SetElement(5,posVel[5]);
+   //rArray[0]  = posVel[0];
+   //rArray[1]  = posVel[1];
+   //rArray[2]  = posVel[2];
+   //rArray[3]  = posVel[3];
+   //rArray[4]  = posVel[4];
+   //rArray[5]  = posVel[5];
+   //state      = rArray;
 
-   return rArray;
+   //return rArray;
+   return state;
 }
 
 
@@ -1232,11 +1241,11 @@ void CelestialBody::Initialize(std::string withBodyType)
 {
    // assuming derived classes will fill in all the specific things with
    // appropriate default values
-   stateTime = 0.0;
-   state.reserve(6);
+   stateTime         = 0.0;
+   state             = Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
    potentialFileRead = false;
-   atmManager = NULL;
-   atmModel = NULL;
+   atmManager        = NULL;
+   atmModel          = NULL;
 }
 
 //------------------------------------------------------------------------------
