@@ -400,18 +400,11 @@ void OrbitPanel::LoadData()
     // get elements
 //    Real epoch = theSpacecraft->GetRealParameter(0);
     std::string epochStr = theSpacecraft->GetDisplayEpoch();
-    MessageInterface::ShowMessage("\nLoaded epoch as %s", epochStr.c_str());
+//    MessageInterface::ShowMessage("\nLoaded epoch as %s", epochStr.c_str());
 
-//    dateComboBox->SetSelection(2);
     std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
     dateComboBox->SetValue(wxT(dateFormat.c_str()));
 
-//    Real element1 = theSpacecraft->GetRealParameter(1);
-//    Real element2 = theSpacecraft->GetRealParameter(2);
-//    Real element3 = theSpacecraft->GetRealParameter(3);
-//    Real element4 = theSpacecraft->GetRealParameter(4);
-//    Real element5 = theSpacecraft->GetRealParameter(5);
-//    Real element6 = theSpacecraft->GetRealParameter(6);
     Real *displayState = theSpacecraft->GetDisplayState();
     Real element1 = displayState[0];
     Real element2 = displayState[1];
@@ -420,9 +413,6 @@ void OrbitPanel::LoadData()
     Real element5 = displayState[4];
     Real element6 = displayState[5];
 
-//    wxString epochStr;
-//    epochStr.Printf("%18.9f", epoch);
-//    epochValue->SetValue(epochStr);
     epochValue->SetValue(epochStr.c_str());
      
     wxString el1;
@@ -602,17 +592,17 @@ void OrbitPanel::SaveData()
     // refFrame id = 8
 //    theSpacecraft->SetStringParameter(8, std::string (stateStr.c_str()));
     wxString epochStr = epochValue->GetValue();
-    MessageInterface::ShowMessage("Going to save epoch as %s", epochStr.c_str());
+//    MessageInterface::ShowMessage("Going to save epoch as %s", epochStr.c_str());
 //    theSpacecraft->SetRealParameter(0, atof(epochStr));
- //   theSpacecraft->SetDisplayEpoch(epochStr.c_str());
+    theSpacecraft->SetDisplayEpoch(epochStr.c_str());
 
     
     wxString dateFormatStr = dateComboBox->GetStringSelection();
 //    theSpacecraft->SetStringParameter(11, std::string (dateFormatStr.c_str()));
     theSpacecraft->SetDisplayDateFormat(dateFormatStr.c_str());
 
-    MessageInterface::ShowMessage("theSpacecraft->GetDisplayEpoch: %s", 
-                                  theSpacecraft->GetDisplayEpoch().c_str());
+//    MessageInterface::ShowMessage("theSpacecraft->GetDisplayEpoch: %s", 
+//                                  theSpacecraft->GetDisplayEpoch().c_str());
 
     wxString el1 = textCtrl1->GetValue();
     wxString el2 = textCtrl2->GetValue();
@@ -630,11 +620,30 @@ void OrbitPanel::SaveData()
 //    theSpacecraft->SetRealParameter(6, atof(el6));
     Real displayState[6];
     displayState[0] = atof(el1);
-    displayState[1] = (Real) atof(el2);
+    displayState[1] = atof(el2);
     displayState[2] = atof(el3);
     displayState[3] = atof(el4);
     displayState[4] = atof(el5);
     displayState[5] = atof(el6);
+    
+   // Check to make sure that the Keplerian values 
+   // are acceptable for the spacecraft
+   if (stateStr.IsSameAs("Keplerian"))
+   {
+      if(displayState[1] < 0.0)
+      {
+         displayState[1] *= -1.0;
+      }
+      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
+      {
+         displayState[0] *= -1.0;
+      }
+      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
+      {
+         displayState[0] *= -1.0;
+      }          
+   }    
+    
     theSpacecraft->SetDisplayCoordType(std::string (stateStr.c_str()));
     theSpacecraft->SetDisplayState(displayState);
     theSpacecraft->SaveDisplay();
