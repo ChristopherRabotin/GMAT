@@ -25,6 +25,7 @@
 #include "PropSetup.hpp"
 #include "ForceModel.hpp"
 #include "DragForce.hpp"
+#include "GravityField.hpp"
 #include "PointMassForce.hpp"
 #include "SolarRadiationPressure.hpp"
 #include "SolarSystem.hpp"
@@ -55,7 +56,8 @@ private:
       POINT_MASS,
       JGM2,
       JGM3,
-      GravModelTypeCount,
+      OTHER,
+      GravModelCount,
    };
    
    enum DragModelType
@@ -64,7 +66,13 @@ private:
       EXPONENTIAL,
       MSISE90,
       JR,
-      DragModelTypeCount,
+      DragModelCount,
+   };
+   
+   enum MagfModelType
+   {
+      NONE_MM = 0,
+      MagfModelCount,
    };
    
    struct ForceType
@@ -72,10 +80,10 @@ private:
       std::string bodyName;
       std::string gravType;
       std::string dragType;
-      std::string magnType;
+      std::string magfType;
       ForceType(const std::string &body, const std::string grav, const std::string drag,
                 const std::string &mag)
-         {bodyName = body; gravType = grav; dragType = drag; magnType = mag;}
+         {bodyName = body; gravType = grav; dragType = drag; magfType = mag;}
          
    };
     
@@ -92,7 +100,8 @@ private:
    wxStaticText *degree2StaticText;
    wxStaticText *order2StaticText;
    wxStaticText *type3StaticText;
-                
+   wxStaticText *potFileStaticText;
+   
    wxTextCtrl *setting1TextCtrl;
    wxTextCtrl *setting2TextCtrl;
    wxTextCtrl *setting3TextCtrl;
@@ -101,6 +110,7 @@ private:
    wxTextCtrl *bodyTextCtrl;
    wxTextCtrl *gravityDegreeTextCtrl;
    wxTextCtrl *gravityOrderTextCtrl;
+   wxTextCtrl *potFileTextCtrl;
    wxTextCtrl *magneticDegreeTextCtrl;
    wxTextCtrl *magneticOrderTextCtrl;
    wxTextCtrl *pmEditTextCtrl;
@@ -108,8 +118,8 @@ private:
    wxComboBox *integratorComboBox;
    wxComboBox *bodyComboBox;
    wxComboBox *atmosComboBox;
-   wxComboBox *gravityTypeComboBox;
-   wxComboBox *magneticTypeComboBox;
+   wxComboBox *gravComboBox;
+   wxComboBox *magfComboBox;
 
    wxCheckBox *srpCheckBox;
 
@@ -130,9 +140,11 @@ private:
    std::string currentBodyName;
    std::string gravTypeName;
    std::string dragTypeName;
+   std::string potFilename;
    StringArray gravModelArray;
    StringArray dragModelArray;
-
+   StringArray magfModelArray;
+   
    wxArrayString primaryBodiesArray;
    wxArrayString savedBodiesArray;
    wxArrayString pointmassBodiesArray;    
@@ -140,15 +152,15 @@ private:
    wxArrayString integratorArray;
     
    Integer numOfBodies;
-   Integer numOfAtmosTypes;
    Integer numOfForces;
-   Integer numOfMagFields;
-   Integer numOfGraFields;
    Integer currentBodyId;
       
    bool useSRP;
    bool useDragForce;
    bool isForceModelChanged;
+   bool isGravTextChanged;
+   bool isPotFileChanged;
+   bool isMagfTextChanged;
    bool isBodiesChanged;
    bool isIntegratorChanged;
 
@@ -158,6 +170,7 @@ private:
    ForceModel                     *theForceModel;
    SolarRadiationPressure         *theSRP;
    DragForce                      *theDragForce;
+   GravityField                   *theGravForce;
    SolarSystem                    *theSolarSystem;
    std::vector<PointMassForce *>  thePMForces;
    std::vector<CelestialBody *>   theBodies;
@@ -175,7 +188,7 @@ private:
    Integer FindBody(const std::string &bodyName,
                     const std::string &gravType = "Point Mass",
                     const std::string &dragType = "None",
-                    const std::string &magnType = "None");
+                    const std::string &magfType = "None");
    void Initialize();
    void Setup(wxWindow *parent);
    void DisplayIntegratorData(bool integratorChanged);
@@ -209,8 +222,8 @@ private:
    void OnSRPEditButton();
 
    // for Debug
-   void ShowPropData();
-   void ShowForceList();
+   void ShowPropData(const std::string &header);
+   void ShowForceList(const std::string &header);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -222,18 +235,13 @@ private:
       ID_TEXTCTRL,
       ID_TEXTCTRL_PROP,
       ID_TEXTCTRL_GRAV,
-      ID_TEXTCTRL_MAGN,
+      ID_TEXTCTRL_MAGF,
       ID_CHECKBOX,
       ID_CB_INTGR,
       ID_CB_BODY,
       ID_CB_GRAV,
       ID_CB_ATMOS,
       ID_CB_MAG,
-//        ID_BUTTON_SCRIPT,
-//        ID_BUTTON_OK,
-//        ID_BUTTON_APPLY,
-//        ID_BUTTON_CANCEL,
-//        ID_BUTTON_HELP,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_SETUP,
