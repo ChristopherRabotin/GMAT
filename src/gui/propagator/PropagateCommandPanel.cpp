@@ -40,6 +40,7 @@
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -87,14 +88,15 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
         Initialize();    
         GetData();
     }
+    
+    applyButton->Enable(false); //loj: 2/11/04 added
 }
 
 void PropagateCommandPanel::Initialize()
 {  
     thePropagateCommand = (Propagate *)theCommand;
-    
     propID = thePropagateCommand->GetParameterID("Propagator");
-    propType = thePropagateCommand->GetStringParameter(propID);
+    propSetupName = thePropagateCommand->GetStringParameter(propID);
     numOfProp = 1;  // waw: TBD
 
     scID = thePropagateCommand->GetParameterID("Spacecraft");
@@ -263,9 +265,12 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
 void PropagateCommandPanel::GetData()
 {
     // Display Propagator
-    //if ( !propType.empty() ) // waw: Error - returns type 'String'??
-    //    propGrid->SetCellValue( 0, 0, wxT(propType.c_str()) );
-    propGrid->SetCellValue( 0, 0, propNameString );
+    //if ( !propSetupName.empty() ) // waw: Error - returns type 'String'??
+    propGrid->SetCellValue( 0, 0, wxT(propSetupName.c_str()) );
+    MessageInterface::ShowMessage("PropagateCommandPanel::GetData() propSetupName = " +
+                                  propSetupName + "\n");
+    
+    //loj: 2/11/04 propGrid->SetCellValue( 0, 0, propNameString );
 
     // Display Spacecraft column
     if ( !scList.empty() )
@@ -282,15 +287,26 @@ void PropagateCommandPanel::GetData()
     // Display Stopping condition
     if ( theStopCond != NULL )
     {
-        repeatTextCtrl->SetValue( wxVariant() );
+        stopCondGrid->SetCellValue( 0, 0, wxT(theStopCond->GetName().c_str())); //loj: 2/11/04
+        MessageInterface::ShowMessage("PropagateCommandPanel::GetData() stopCondName = " +
+                                      theStopCond->GetName() + "\n");
+
+        //fill in detailed stop condition
+        ParameterPtrArray params = theStopCond->GetParameters();
+        variableTextCtrl->AppendText(params[0]->GetName().c_str()); //loj: 2/11/04 first parameter for now
+        repeatTextCtrl->SetValue( wxVariant((long)(theStopCond->GetRepeatCount())) );
+        valueTextCtrl->AppendText(wxVariant(theStopCond->GetGoal()) );
         toleranceTextCtrl->SetValue( wxVariant(theStopCond->GetTolerance()) );
-        //stopCondGrid->SetCellValue();
     }
 }
 
 void PropagateCommandPanel::SetData()
 {
-
+    //loj: 2/12/04 added
+    double newGoal = atof(valueTextCtrl->GetValue());
+    theStopCond->SetGoal(newGoal);
+    Integer id = thePropagateCommand->GetParameterID("ElapsedSecs");
+    thePropagateCommand->SetRealParameter(id, newGoal);
 }
 
 void PropagateCommandPanel::OnTextUpdate(wxCommandEvent& event)
@@ -333,9 +349,13 @@ void PropagateCommandPanel::OnButton(wxCommandEvent& event)
         ;
     else if ( event.GetEventObject() == okButton )  
     {
-        SetData();     
-        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-        gmatMainNotebook->ClosePage();    
+        //loj: 2/11/04 added if block
+        if (applyButton->IsEnabled())
+        {
+            SetData();     
+            GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+            gmatMainNotebook->ClosePage();
+        }
     }
     else if ( event.GetEventObject() == applyButton )
     {
