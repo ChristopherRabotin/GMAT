@@ -63,16 +63,16 @@ ElapsedDaysParam::ElapsedDaysParam(const std::string &name, GmatBase *obj,
 }
 
 //------------------------------------------------------------------------------
-// ElapsedDaysParam(const ElapsedDaysParam &param)
+// ElapsedDaysParam(const ElapsedDaysParam &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <param> the parameter to make copy of
+ * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-ElapsedDaysParam::ElapsedDaysParam(const ElapsedDaysParam &param)
-    : RealParameter(param)
+ElapsedDaysParam::ElapsedDaysParam(const ElapsedDaysParam &copy)
+    : RealParameter(copy)
 {
 }
 
@@ -157,18 +157,6 @@ Integer ElapsedDaysParam::GetNumObjects() const
 }
 
 //------------------------------------------------------------------------------
-// void Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- */
-//------------------------------------------------------------------------------
-void ElapsedDaysParam::Evaluate()
-{
-    mValue = GetElapsedTimeReal("Days");
-}
-
-//------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
 /**
@@ -178,6 +166,25 @@ void ElapsedDaysParam::Evaluate()
 bool ElapsedDaysParam::Validate()
 {
     return ValidateRefObjects(this);
+}
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated.
+ */
+//------------------------------------------------------------------------------
+bool ElapsedDaysParam::Evaluate()
+{
+    mValue = GetElapsedTimeReal("Days");
+    
+    if (mValue == TIME_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
 }
 
 //--------------------------------------

@@ -44,16 +44,16 @@ CartXParam::CartXParam(const std::string &name, GmatBase *obj,
 }
 
 //------------------------------------------------------------------------------
-// CartXParam(const CartXParam &param)
+// CartXParam(const CartXParam &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <param> the parameter to make copy of
+ * @param <copy> the parameter to make copy of
  */
 //------------------------------------------------------------------------------
-CartXParam::CartXParam(const CartXParam &param)
-    : RealParameter(param)
+CartXParam::CartXParam(const CartXParam &copy)
+    : RealParameter(copy)
 {
 }
 
@@ -122,7 +122,7 @@ bool CartXParam::AddObject(GmatBase *obj)
     if (obj != NULL)
         return AddRefObject(obj);
     else
-        false;
+        return false;
 }
 
 //------------------------------------------------------------------------------
@@ -138,18 +138,6 @@ Integer CartXParam::GetNumObjects() const
 }
 
 //------------------------------------------------------------------------------
-// void Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- */
-//------------------------------------------------------------------------------
-void CartXParam::Evaluate()
-{
-    mValue = GetCartReal("CartX");    
-}
-
-//------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
 /**
@@ -160,3 +148,23 @@ bool CartXParam::Validate()
 {
     return ValidateRefObjects(this);
 }
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated.
+ */
+//------------------------------------------------------------------------------
+bool CartXParam::Evaluate()
+{
+    mValue = GetCartReal("CartX");
+    
+    if (mValue == ORBIT_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
+}
+

@@ -79,21 +79,21 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 }
 
 //------------------------------------------------------------------------------
-// Parameter(const Parameter &param)
+// Parameter(const Parameter &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <param> the object being copied.
+ * @param <copy> the object being copied.
  */
 //------------------------------------------------------------------------------
-Parameter::Parameter(const Parameter &param)
-    : GmatBase(param)
+Parameter::Parameter(const Parameter &copy)
+    : GmatBase(copy)
 {
-    mKey = param.mKey;
-    mDesc = param.mDesc;
-    mUnit = param.mUnit;
-    mIsTimeParam = param.mIsTimeParam;
+    mKey = copy.mKey;
+    mDesc = copy.mDesc;
+    mUnit = copy.mUnit;
+    mIsTimeParam = copy.mIsTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -271,6 +271,20 @@ bool Parameter::operator!=(const Parameter &right) const
 Real Parameter::EvaluateReal()
 {
     return REAL_PARAMETER_UNDEFINED;
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 EvaluateRvector6()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates parameter value.
+ *
+ * @return RVECTOR6_PARAMETER_UNDEFINED if derived class doesn't implement this
+ */
+//------------------------------------------------------------------------------
+Rvector6 Parameter::EvaluateRvector6()
+{
+    return Rvector6::RVECTOR6_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------

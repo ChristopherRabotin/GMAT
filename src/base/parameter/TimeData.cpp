@@ -187,8 +187,8 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 {
     std::string paramType = param->GetTypeName();
     
-    if (paramType == "ElapsedSecParam" ||
-        paramType == "CurrentTimeParam")
+    if (paramType == "ElapsedDaysParam" ||
+        paramType == "CurrentA1MjdParam")
     {
         if (HasObject(VALID_OBJECT_LIST[SPACECRAFT]))
             return true;

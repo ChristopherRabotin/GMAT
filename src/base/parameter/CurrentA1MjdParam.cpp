@@ -133,18 +133,6 @@ Integer CurrentA1MjdParam::GetNumObjects() const
 }
 
 //------------------------------------------------------------------------------
-// void Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- */
-//------------------------------------------------------------------------------
-void CurrentA1MjdParam::Evaluate()
-{
-    mValue = GetCurrentTimeReal("A1Mjd");
-}
-
-//------------------------------------------------------------------------------
 // bool Validate()
 //------------------------------------------------------------------------------
 /**
@@ -155,3 +143,23 @@ bool CurrentA1MjdParam::Validate()
 {
     return ValidateRefObjects(this);
 }
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated.
+ */
+//------------------------------------------------------------------------------
+bool CurrentA1MjdParam::Evaluate()
+{
+    mValue = GetCurrentTimeReal("A1Mjd");
+    
+    if (mValue == TIME_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
+}
+

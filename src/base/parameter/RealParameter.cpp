@@ -69,18 +69,18 @@ RealParameter::RealParameter(const std::string &name, const std::string &typeStr
 }
 
 //------------------------------------------------------------------------------
-// RealParameter(const RealParameter &param)
+// RealParameter(const RealParameter &copy)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * @param <param> the object being copied.
+ * @param <copy> the object being copied.
  */
 //------------------------------------------------------------------------------
-RealParameter::RealParameter(const RealParameter &param)
-    : Parameter(param)
+RealParameter::RealParameter(const RealParameter &copy)
+    : Parameter(copy)
 {
-    mValue = param.mValue;
+    mValue = copy.mValue;
 }
 
 //------------------------------------------------------------------------------

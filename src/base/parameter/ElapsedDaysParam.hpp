@@ -31,7 +31,7 @@ public:
                      GmatBase *obj = NULL,
                      const std::string &desc = "Spacecraft Elapsed Time in Days",
                      const std::string &unit = "Days");
-    ElapsedDaysParam(const ElapsedDaysParam &param);
+    ElapsedDaysParam(const ElapsedDaysParam &copy);
     const ElapsedDaysParam& operator= (const ElapsedDaysParam &right); 
     virtual ~ElapsedDaysParam();
 
@@ -41,8 +41,8 @@ public:
     // The inherited methods from Parameter
     virtual bool AddObject(GmatBase *obj);
     virtual Integer GetNumObjects() const;
-    virtual void Evaluate();
     virtual bool Validate();
+    virtual bool Evaluate();
 
     // The inherited methods from GmatBase
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -55,8 +55,6 @@ public:
     virtual Real SetRealParameter(const std::string &label, const Real value);
     
 protected:
-    
-    ElapsedDaysParam();
     
     enum
     {

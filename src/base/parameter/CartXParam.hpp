@@ -31,7 +31,7 @@ public:
                GmatBase *obj = NULL,
                const std::string &desc = "Spacecraft Cartesian Position X",
                const std::string &unit = "Km");
-    CartXParam(const CartXParam &param);
+    CartXParam(const CartXParam &copy);
     const CartXParam& operator=(const CartXParam &right);
     virtual ~CartXParam();
 
@@ -41,12 +41,11 @@ public:
     // The inherited methods from Parameter
     virtual bool AddObject(GmatBase *obj);
     virtual Integer GetNumObjects() const;
-    virtual void Evaluate();
     virtual bool Validate();
+    virtual bool Evaluate();
 
 protected:
 
-    CartXParam();
 };
 
 #endif // CartXParam_hpp

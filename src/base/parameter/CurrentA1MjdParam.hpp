@@ -31,7 +31,7 @@ public:
                       GmatBase *obj = NULL,
                       const std::string &desc = "Current A1Mjd",
                       const std::string &unit = "A1 Mod. Julian days");
-    CurrentA1MjdParam(const CurrentA1MjdParam &param);
+    CurrentA1MjdParam(const CurrentA1MjdParam &copy);
     CurrentA1MjdParam& operator= (const CurrentA1MjdParam &right); 
     virtual ~CurrentA1MjdParam();
 
@@ -41,13 +41,11 @@ public:
     // The inherited methods from Parameter
     virtual bool AddObject(GmatBase *obj);
     virtual Integer GetNumObjects() const;
-    virtual void Evaluate();
     virtual bool Validate();
+    virtual bool Evaluate();
 
 protected:
     
-    CurrentA1MjdParam();
-
 private:
 
 };

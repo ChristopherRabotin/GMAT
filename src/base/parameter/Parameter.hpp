@@ -21,6 +21,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Rvector6.hpp"
 
 class GMAT_API Parameter : public GmatBase
 {
@@ -35,7 +36,7 @@ public:
               ParameterKey key, GmatBase *obj,
               const std::string &desc, const std::string &unit,
               bool isTimeParam);
-    Parameter(const Parameter &param);
+    Parameter(const Parameter &copy);
     Parameter& operator= (const Parameter& right);
     virtual ~Parameter();
 
@@ -52,14 +53,13 @@ public:
     bool operator!=(const Parameter &right) const;
 
     virtual Real EvaluateReal();
-    //virtual Rvector6 EvaluateRvector6();
-    //virtual Integer EvaluateInteger();
+    virtual Rvector6 EvaluateRvector6();
     
     virtual const std::string* GetParameterList() const;
     
     virtual bool AddObject(GmatBase *object) = 0;
     virtual Integer GetNumObjects() const = 0;
-    virtual void Evaluate() = 0;
+    virtual bool Evaluate() = 0;
     virtual bool Validate() = 0;
     
 protected:

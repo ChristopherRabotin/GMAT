@@ -30,7 +30,7 @@ public:
                   ParameterKey key, GmatBase *obj,
                   const std::string &desc, const std::string &unit,
                   bool isTimeParam);
-    RealParameter(const RealParameter &param);
+    RealParameter(const RealParameter &copy);
     RealParameter& operator= (const RealParameter& right);
     virtual ~RealParameter();
 
