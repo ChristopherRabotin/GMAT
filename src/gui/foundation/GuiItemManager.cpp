@@ -189,7 +189,7 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
     
    theSpacecraftComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numSc, theSpacecraftList, wxCB_DROPDOWN);
+                     numSc, theSpacecraftList, wxCB_READONLY);
     
    // show first spacecraft
    theSpacecraftComboBox->SetSelection(0);
@@ -212,16 +212,41 @@ wxComboBox* GuiItemManager::GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
    int numCs = theNumCoordSys;
    
    if (theNumCoordSys == 0)
-      numCs = 1;
+      numCs = 3; //loj: ComboBox is too small if 1
    
    theCoordSysComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numCs, theCoordSysList, wxCB_DROPDOWN);
+                     numCs, theCoordSysList, wxCB_READONLY);
    
-   // show first spacecraft
+   // show first coordinate system
    theCoordSysComboBox->SetSelection(0);
    
    return theCoordSysComboBox;
+}
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetConfigBodyComboBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return celestial body combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetConfigBodyComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
+{
+   int numBody = theNumConfigBody;
+   
+   if (theNumConfigBody == 0)
+      numBody = 1;
+   
+   theConfigBodyComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     numBody, theConfigBodyList, wxCB_READONLY);
+   
+   // show Earth as a default body
+   theConfigBodyComboBox->SetStringSelection("Earth");
+   
+   return theConfigBodyComboBox;
 }
 
 //------------------------------------------------------------------------------
@@ -504,7 +529,7 @@ GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
     
    theUserParamComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numUserVar, theUserVarList, wxCB_DROPDOWN);
+                     numUserVar, theUserVarList, wxCB_READONLY);
    
    // show first spacecraft
    theUserParamComboBox->SetSelection(0);

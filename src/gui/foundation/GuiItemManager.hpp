@@ -85,8 +85,14 @@ public:
    wxString* GetUserVariableList()
       { return theUserVarList; }
    
-   wxString* GetUserParameterList() //loj: 11/8/04 added
+   wxString* GetUserParameterList()
       { return theUserParamList; }
+   
+   wxString* GetCoordSysList() //loj: 1/3/05 Added
+      { return theCoordSysList; }
+   
+   wxString* GetConfigBodyList() //loj: 1/3/05 Added
+      { return theConfigBodyList; }
    
    int GetNumProperty(const wxString &objName);
    wxString* GetPropertyList(const wxString &objName);
@@ -96,6 +102,9 @@ public:
    
    wxComboBox* GetCoordSysComboBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size);
+   
+   wxComboBox* GetConfigBodyComboBox(wxWindow *parent, wxWindowID id,
+                                     const wxSize &size);
    
    wxListBox* GetSpaceObjectListBox(wxWindow *parent, wxWindowID id,
                                     const wxSize &size,
@@ -196,6 +205,7 @@ private:
    wxComboBox *theSpacecraftComboBox;
    wxComboBox *theUserParamComboBox;
    wxComboBox *theCoordSysComboBox;
+   wxComboBox *theConfigBodyComboBox;
    wxListBox  *theSpaceObjectListBox;
    wxListBox  *theFormationListBox;
    wxListBox  *theSpacecraftListBox;
