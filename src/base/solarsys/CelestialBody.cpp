@@ -1137,7 +1137,7 @@ const Rvector3 CelestialBody::GetMJ2000Velocity(const A1Mjd &atTime)
 }
 
 //------------------------------------------------------------------------------
-//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 /**
  * This method returns the cartographic coordinates for the body.
@@ -1146,13 +1146,14 @@ const Rvector3 CelestialBody::GetMJ2000Velocity(const A1Mjd &atTime)
  *         alpha is the right ascension of the north pole of rotation
  *         delta is the declination of the north pole of rotation
  *         W specifies the ephemeris position of the prime meridian
+ *         Wdot specifies the time derivative of W
  *
  * @note currently only implemented for the Star, Planets, and Major Moons of
  *       our Solar System.
  *
  */
 //------------------------------------------------------------------------------
-Rvector3 CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+Rvector CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 {
    // should be implemented in derived classes
    throw SolarSystemException(

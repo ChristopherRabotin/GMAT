@@ -51,7 +51,7 @@ public:
 
    bool SetRadiantPower(Real radPower, Real refDistance);
 
-   virtual Rvector3       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   virtual Rvector       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
 
    // overridden access methods from CelestialBody
    virtual std::string    GetParameterText(const Integer id) const;     // const?

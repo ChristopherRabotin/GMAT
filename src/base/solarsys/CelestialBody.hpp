@@ -33,6 +33,7 @@
 #include "AtmosphereModel.hpp"
 #include "Rmatrix.hpp"
 #include "Rvector6.hpp"
+#include "TimeTypes.hpp"
 
 // Add needed things to Gmat namespace
 namespace Gmat
@@ -152,14 +153,15 @@ public:
    virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
    virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
 
-   // method to return the alpha, delta, and capital-W for the body (specifying
+   // method to return the alpha, delta, W, and Wdot for the body (specifying
    // the direction of the north pole of rotation (right ascension and
    // declination) and the prime meridian.  
-   // Units are degrees (alpha), degrees (delta), and deg/day (W)
+   // Units are degrees (alpha), degrees (delta), and deg/day (W); also,
+   // the time derivative of W (??)
    // For more information, see
    // "Report of the IAU/IAG Working Group on Cartographic Coordinates and
    // Rotational Elements of the Planets and Satellites: 2000"
-   virtual Rvector3       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   virtual Rvector       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
    
    
    // Parameter access methods - overridden from GmatBase
@@ -265,6 +267,8 @@ protected:
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
    static const Real JD_EPOCH_2000_TCB = 2451545.0;
+   static const Real dDot              = 1.0 / GmatTimeUtil::SECS_PER_DAY;
+   static const Real TDot              = dDot / 36525.0;
    
    // body type of the body
    Gmat::BodyType         bodyType;

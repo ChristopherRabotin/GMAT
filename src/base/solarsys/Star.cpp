@@ -194,12 +194,12 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
 }
 
 //------------------------------------------------------------------------------
-//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 /**
  * This method returns the cartographic coordinates for the star.
  *
- * @return vector containing alpha, delta, W.
+ * @return vector containing alpha, delta, W, Wdot.
  *
  * @note currently only implemented for our Star.
  *       See "Report of the IAU/IAG Working Group on
@@ -208,13 +208,14 @@ bool Star::SetRadiantPower(Real radPower, Real refDistance)
  *
  */
 //------------------------------------------------------------------------------
-Rvector3 Star::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+Rvector Star::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 {
    if (instanceName == SolarSystem::SUN_NAME)
    {
-      Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
-      Real W = Star::w1 + Star::w2 * d;
-      return Rvector3(Star::alpha, Star::delta, W);
+      Real d    = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
+      Real W    = Star::w1 + Star::w2 * d;
+      Real Wdot = Star::w2 * CelestialBody::dDot;
+      return Rvector(4, Star::alpha, Star::delta, W, Wdot);
    }
    return CelestialBody::GetBodyCartographicCoordinates(forTime);
 }
