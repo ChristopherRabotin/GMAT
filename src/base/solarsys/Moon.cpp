@@ -160,7 +160,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real alpha = 0;
    Real delta = 0;
    Real W     = 0;
-   Real Wdot  = 0.0; // *************** temporary ***************
+   Real Wdot  = 0.0;
    // intermediate angle computations, in radians (for trig functions)
    Real p1  = 0.0, p2  = 0.0, p3  = 0.0, p4  = 0.0;
    Real p5  = 0.0, p6  = 0.0, p7  = 0.0, p8  = 0.0;
@@ -200,6 +200,12 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
              -  0.0252 * Sin(p5)  -  0.0066 * Sin(p6)  -  0.0047 * Sin(p7)
              -  0.0046 * Sin(p8)  +  0.0028 * Sin(p9)  +  0.0052 * Sin(p10)
              +  0.0040 * Sin(p11) +  0.0019 * Sin(p12) -  0.0044 * Sin(p13);
+      Wdot  =  13.17635815
+             -  2.8e-12 *    d     -  0.18870 * Cos(p1)
+             -  0.01280 * Cos(p2)  -  0.835   * Cos(p3) +  0.211   * Cos(p4)
+             +  0.0248  * Cos(p5)  -  0.17    * Cos(p6) -  0.061   * Cos(p7)
+             -  0.0015  * Cos(p8)  +  0.0049  * Cos(p9) -  0.00083 * Cos(p10)
+             +  0.00001 * Cos(p11) +  0.00031 * Cos(p12) - 0.057 * Cos(p13);
    }
    // Compute for Mars' moons
    else if (centralBody == SolarSystem::MARS_NAME)
@@ -213,6 +219,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          delta =  52.90           -    0.061 * T     -  1.08 * Cos(p1);
          W     =  35.06           + 1128.8445850 * d +  8.864 * T * T  
                  - 1.42 * Sin(p1) -    0.78 * Sin(p2);
+         Wdot  = 0.0; // ******** TBD ***********
       }
       else  // Deimos
       {
@@ -220,6 +227,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
          delta =  53.52           -    0.061 * T     -  1.78 * Cos(p3);
          W     =  79.41           +  285.1618970 * d -  0.520 * T * T  
                  - 2.58 * Sin(p3) +    0.19 * Cos(p3);
+         Wdot  = 0.0; // ******** TBD ***********
       }
    }
    // add others when needed ...............
