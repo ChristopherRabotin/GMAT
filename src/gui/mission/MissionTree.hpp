@@ -40,6 +40,7 @@ protected:
 private:
    GuiInterpreter *theGuiInterpreter;
    // GmatMainNotebook *mainNotebook;
+   wxArrayString mCommandList;
    wxWindow *parent;
     
    wxTreeItemId mMissionSeqTopItem;
@@ -54,7 +55,7 @@ private:
    int mNumTarget;
    int mNumAchieve;
    int mNumVary;
-   int mNumSave; //loj: 10/20/04 added Save, Toggle
+   int mNumSave;
    int mNumToggle;
    int mNumIfStatement;
    int mNumWhileLoop;
@@ -73,7 +74,7 @@ private:
    wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                               wxTreeItemId prevId, GmatTree::MissionIconType icon,
                               GmatTree::ItemType type, GmatCommand *prevCmd,
-                              GmatCommand *cmd, int *cmdCount, int endCount = 0);
+                              GmatCommand *cmd, int *cmdCount);
    void AddDefaultMission();
    void AddDefaultMissionSeq(wxTreeItemId universe);
    void AddIcons();
@@ -91,11 +92,10 @@ private:
     
    void OnAddPropagate(wxCommandEvent &event);
    void OnAddManeuver(wxCommandEvent &event);
-   void OnAddTarget(wxCommandEvent &event);
    void OnAddAchieve(wxCommandEvent &event);
    void OnAddVary(wxCommandEvent &event);
-
    void OnAddFunction(wxCommandEvent &event);
+   void OnAddTarget(wxCommandEvent &event);
 
    void OnAddIfStatement(wxCommandEvent &event);
    void OnAddWhileLoop(wxCommandEvent &event);
@@ -107,9 +107,10 @@ private:
     
    void OnInsertPropagate(wxCommandEvent &event);
    void OnInsertManeuver(wxCommandEvent &event);
-   void OnInsertTarget(wxCommandEvent &event);
    void OnInsertAchieve(wxCommandEvent &event);
    void OnInsertVary(wxCommandEvent &event);
+   void OnInsertFunction(wxCommandEvent &event);
+   void OnInsertTarget(wxCommandEvent &event);
 
    void OnInsertIfStatement(wxCommandEvent &event);
    void OnInsertWhileLoop(wxCommandEvent &event);
@@ -130,17 +131,19 @@ private:
    wxMenu* CreateAddPopupMenu();
    wxMenu* CreateInsertPopupMenu();
    wxMenu* CreateTargetPopupMenu(bool insert);
+   wxMenu* AppendTargetPopupMenu(wxMenu *menu, bool insert);
    // wxMenu* CreateControlLogicPopupMenu();
    wxMenu* CreateAddControlLogicPopupMenu();
    wxMenu* CreateAddIfPopupMenu();
    wxMenu* CreateInsertControlLogicPopupMenu();
-
+   int GetMenuId(const wxString &cmd, bool insert); //loj: 11/15/04 added
+   
    // for Debug
    void ShowCommands(const wxString &msg = "");
    void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd);
    
    DECLARE_EVENT_TABLE();
-       
+   
    enum
    {
       POPUP_SWAP_BEFORE = 25000,
@@ -152,7 +155,7 @@ private:
       POPUP_RENAME,
       POPUP_OPEN,
       POPUP_CLOSE,
-
+      
       POPUP_ADD_MISSION_SEQ,
       POPUP_ADD_COMMAND,
       POPUP_ADD_PROPAGATE,
@@ -160,24 +163,26 @@ private:
       POPUP_ADD_TARGET,
       POPUP_ADD_VARY,
       POPUP_ADD_ACHIEVE,
-        
+      POPUP_ADD_FUNCTION,
+      
       POPUP_INSERT_COMMAND,
       POPUP_INSERT_PROPAGATE,
       POPUP_INSERT_MANEUVER,
       POPUP_INSERT_TARGET,
       POPUP_INSERT_VARY,
       POPUP_INSERT_ACHIEVE,
-
+      POPUP_INSERT_FUNCTION,
+      
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 
-
+      
       POPUP_RUN,
-
+      
       POPUP_CONTROL_LOGIC,
       POPUP_WHILE_CONTROL,
       POPUP_FOR_CONTROL,
       POPUP_DO_CONTROL,
-
+      
       POPUP_ADD_IF_STATEMENT,
       POPUP_ADD_WHILE_LOOP,
       POPUP_ADD_FOR_LOOP,
@@ -185,9 +190,7 @@ private:
       POPUP_ADD_SWITCH_CASE,
       POPUP_ADD_ELSE_IF_STATEMENT,
       POPUP_ADD_ELSE_STATEMENT,
-
-      POPUP_ADD_FUNCTION,
-        
+      
       POPUP_INSERT_IF_STATEMENT,
       POPUP_INSERT_WHILE_LOOP,
       POPUP_INSERT_FOR_LOOP,
