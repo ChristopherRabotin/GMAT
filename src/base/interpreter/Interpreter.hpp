@@ -97,8 +97,10 @@ protected:
     StringArray                     subscribermap;
     /// Available parameters
     StringArray                     parametermap;
-    /// Available stopping conditionss
+    /// Available stopping conditions
     StringArray                     stopcondmap;
+    /// Available solvers
+    StringArray                     solvermap;
 
     /// Current line from the script
     std::string                     line;

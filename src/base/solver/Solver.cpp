@@ -49,6 +49,12 @@ Solver& Solver::operator=(const Solver& sol)
 }
 
 
+/**
+ * The method used to iterate until a solution is found.  Derived classes 
+ * use this method to implement their solution technique.
+ * 
+ * @retval Returns true if the process is complete, false if not.
+ */
 bool Solver::AdvanceState(void)
 {
     bool retval = false;

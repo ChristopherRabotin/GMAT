@@ -78,6 +78,9 @@ void Interpreter::Initialize(void)
     StringArray sconds = moderator->GetListOfFactoryItems(Gmat::STOP_CONDITION);
     copy(sconds.begin(), sconds.end(), back_inserter(stopcondmap));
 
+    StringArray svers = moderator->GetListOfFactoryItems(Gmat::SOLVER);
+    copy(svers.begin(), svers.end(), back_inserter(solvermap));
+    
     #ifdef DEBUG_OBJECT_LISTS
         std::cout << "\nCommands:\n   ";
         for (std::vector<std::string>::iterator c = cmds.begin(); c != cmds.end(); ++c)
@@ -101,6 +104,10 @@ void Interpreter::Initialize(void)
 
         std::cout << "\nStopConds:\n   ";
         for (std::vector<std::string>::iterator sc = sconds.begin(); sc != sconds.end(); ++sc)
+           std::cout << *sc << "\n   ";
+
+        std::cout << "\nSolvers:\n   ";
+        for (std::vector<std::string>::iterator sc = svers.begin(); sc != svers.end(); ++sc)
            std::cout << *sc << "\n   ";
 
         std::cout << "\n";
@@ -177,6 +184,13 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
         return true;
     }
 
+    // Handle Solvers
+    if (find(solvermap.begin(), solvermap.end(), objecttype) != 
+                                                          solvermap.end()) {
+        moderator->CreateSolver(objecttype, objectname);
+        return true;
+    }
+
     return false;
 }
 
@@ -203,11 +217,14 @@ bool Interpreter::BuildObject(std::string &objectname)
     Integer i;
     for (i = 0; i < obj->GetParameterCount(); ++i) 
     {
-        // Fill in the l.h.s.
-        *outstream << "GMAT " << objectname << "." 
-                   << obj->GetParameterText(i) << " = ";
-        WriteParameterValue(obj, i);
-        *outstream << ";\n";
+        // Skip StringArray parameters, at least for now
+        if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
+            // Fill in the l.h.s.
+            *outstream << "GMAT " << objectname << "." 
+                       << obj->GetParameterText(i) << " = ";
+            WriteParameterValue(obj, i);
+            *outstream << ";\n";
+        }
     }
     *outstream << "\n";
     return true;

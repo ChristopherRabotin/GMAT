@@ -317,14 +317,14 @@ SolarSystem* FactoryManager::CreateSolarSystem(std::string withName)
  * @return pointer to the newly-created Solver object
  */
 //------------------------------------------------------------------------------
-//Solver* FactoryManager::CreateSolver(std::string ofType,
-//                                     std::string withName)
-//{
-//   Factory* f = FindFactory(Gmat::SOLVER, ofType);
-//   if (f != NULL)
-//      return f->CreateSolver(ofType, withName);
-//   return NULL;
-//}
+Solver* FactoryManager::CreateSolver(std::string ofType,
+                                     std::string withName)
+{
+   Factory* f = FindFactory(Gmat::SOLVER, ofType);
+   if (f != NULL)
+      return f->CreateSolver(ofType, withName);
+   return NULL;
+}
 
 //------------------------------------------------------------------------------
 //  Subscriber* CreateSubscriber(std::string ofType, std::string withname,
@@ -551,10 +551,10 @@ StringArray FactoryManager::GetListOfStopCondition(void)// const
  * @return list of creatable items of type Solver.
  */
 //------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfSolver(void) const
-//{
-//   return GetList(Gmat::SOLVER);
-//}
+StringArray FactoryManager::GetListOfSolver(void)// const
+{
+   return GetList(Gmat::SOLVER);
+}
 
 //------------------------------------------------------------------------------
 // StringArray GetListOfSubscriber(void) const;

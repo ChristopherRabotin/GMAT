@@ -33,7 +33,7 @@
 #include "StopCondition.hpp"
 //#include "CelestialBody.hpp"
 //#include "SolarSystem.hpp"
-//#include "Solver.hpp"
+#include "Solver.hpp"
 #include "Subscriber.hpp"
 #include "Command.hpp"
 
@@ -65,8 +65,8 @@ public:
 //                                                    std::string withName = "");
 //   virtual SolarSystem*         CreateSolarSystem(std::string ofType,
 //                                                  std::string withName = "");
-//   virtual Solver*            CreateSolver(std::string ofType,
-//                                           std::string withName = ""); 
+   virtual Solver*              CreateSolver(std::string ofType,
+                                           std::string withName = ""); 
    virtual Subscriber*          CreateSubscriber(std::string ofType,
                                                  std::string withname = "",
                                                  std::string fileName = "");

@@ -34,6 +34,7 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
+#include "Solver.hpp"
 #include "Burn.hpp"
 
 
@@ -48,6 +49,7 @@ public:
     bool				AddSpacecraft(Spacecraft *obj);
     bool                AddPropSetup(PropSetup *propSetup);
     bool                AddBurn(Burn *burn);
+    bool                AddSolver(Solver *s);
     bool				AddCommand(Command *cmd);
     bool				AddSolarSystem(SolarSystem *ss);
     bool                AddSubscriber(Subscriber *sub);

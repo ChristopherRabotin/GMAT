@@ -36,7 +36,7 @@
 #include "StopCondition.hpp"
 #include "CelestialBody.hpp"
 #include "SolarSystem.hpp"
-//#include "Solver.hpp"
+#include "Solver.hpp"
 #include "Subscriber.hpp"
 #include "Command.hpp"
 #include "Burn.hpp"
@@ -81,8 +81,8 @@ public:
     CelestialBody *       CreateCelestialBody(std::string ofType,
                                               std::string withName = "");
     SolarSystem *         CreateSolarSystem(std::string withName = "");
-//    Solver *              CreateSolver(std::string ofType,
-//                                       std::string withName = "");
+    Solver *              CreateSolver(std::string ofType,
+                                       std::string withName = "");
     Subscriber *          CreateSubscriber(std::string ofType,
                                            std::string withName = "",
                                            std::string fileName = "");
@@ -107,7 +107,7 @@ public:
     StringArray            GetListOfStopCondition(void);// const;
     StringArray            GetListOfCelestialBody(void);// const;
     StringArray            GetListOfSolarSystem(void);// const;
-//    StringArray            GetListofSolver(void) const;
+    StringArray            GetListOfSolver(void);// const;
     StringArray            GetListOfSubscriber(void);// const;
     StringArray            GetListOfCommand(void);// const;
     StringArray            GetListOfBurn(void);// const;

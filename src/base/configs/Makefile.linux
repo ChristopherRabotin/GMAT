@@ -4,7 +4,7 @@
 HEADERS = -I../include -I../foundation -I../forcemodel -I../subscriber \
           -I../solarsys -I../propagator -I../spacecraft -I../stopcond \
           -I../parameter -I../command -I../util -I../interpolator \
-          -I../refframe -I../burn
+          -I../refframe -I../burn -I../solver
 
 OBJECTS = ConfigManager.o ConfigManagerException.o
 

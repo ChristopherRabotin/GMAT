@@ -253,6 +253,12 @@ bool ScriptInterpreter::WriteScript(void)
         if (!BuildObject(*current))
             return false;
     
+    // Solver objects
+    objs = moderator->GetListOfConfiguredItems(Gmat::SOLVER);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+    
     // Subscriber setups
     objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
     for (current = objs.begin(); current != objs.end(); ++current)

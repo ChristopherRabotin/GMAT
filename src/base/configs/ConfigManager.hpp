@@ -37,6 +37,8 @@
 #include "Parameter.hpp"
 #include "Command.hpp"
 #include "Burn.hpp"
+#include "Solver.hpp"
+
 
 /**
  * Configuration Manager Stub -- a hack until the real code is ready
@@ -54,6 +56,7 @@ public:
     void                AddStopCondition(StopCondition* stopCond);
     void                AddParameter(Parameter* parameter);
     void                AddBurn(Burn* burn);
+    void                AddSolver(Solver *solver);
     
     bool                SetSolarSystemInUse(const std::string &name);
     StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
@@ -73,6 +76,7 @@ public:
     StopCondition*      GetStopCondition(const std::string &name);
     Parameter*          GetParameter(const std::string &name);
     Burn*               GetBurn(const std::string &name);
+    Solver*             GetSolver(const std::string &name);
         
     // Methods I'm not sure we need
     void                AddCelestialBody(CelestialBody* body);

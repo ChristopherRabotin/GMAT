@@ -13,10 +13,16 @@
 // Created: 2003/08/25
 //
 /**
- * Implements opeartions of the GMAT executive.
+ * Implements operations of the GMAT executive.
  */
 //------------------------------------------------------------------------------
 
+
+#include "Moderator.hpp"
+#include "NoOp.hpp"
+#include "MessageInterface.hpp"
+
+/* Already included in Moderator.hpp
 #include "gmatdefs.hpp"
 // executive
 #include "Sandbox.hpp"
@@ -51,9 +57,8 @@
 #include "ParameterFactory.hpp"
 
 #include "BaseException.hpp"
-#include "NoOp.hpp"
-#include "Moderator.hpp"
-#include "MessageInterface.hpp"
+*/
+
 
 //---------------------------------
 // static data
@@ -130,6 +135,7 @@ bool Moderator::Initialize()
         theSpacecraftFactory = new SpacecraftFactory();
         theStopConditionFactory = new StopConditionFactory();
         theSubscriberFactory = new SubscriberFactory();
+        theSolverFactory = new SolverFactory();
 
         // Register factories
         theFactoryManager->RegisterFactory(theBurnFactory);
@@ -142,6 +148,7 @@ bool Moderator::Initialize()
         theFactoryManager->RegisterFactory(theSpacecraftFactory);
         theFactoryManager->RegisterFactory(theStopConditionFactory);
         theFactoryManager->RegisterFactory(theSubscriberFactory);
+        theFactoryManager->RegisterFactory(theSolverFactory);
 
         // create default SolarSystem
      
@@ -483,8 +490,6 @@ Burn* Moderator::GetBurn(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
-    MessageInterface::ShowMessage("Moderator::CreateParameter() entered: type = " + type +
-                                  ", name = " + name + "\n");
     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
     // Manage it if it is a named parameter
 
@@ -570,6 +575,54 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
 StopCondition* Moderator::GetStopCondition(const std::string &name)
 {
     return theConfigManager->GetStopCondition(name);
+}
+
+// Solver
+//------------------------------------------------------------------------------
+// Solver* CreateSolver(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a solver object by given type and name and add to configuration.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a solver object pointer
+ */
+//------------------------------------------------------------------------------
+Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
+{
+    Solver *solver = theFactoryManager->CreateSolver(type, name);
+    // Manage it if it is a named solver
+
+    try
+    {
+        if (solver->GetName() != "")
+            theConfigManager->AddSolver(solver);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+                                      e.GetMessage());
+    }
+    
+    return solver;
+}
+
+//------------------------------------------------------------------------------
+// Solver* GetSolver(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a solver object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a solver object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Solver* Moderator::GetSolver(const std::string &name)
+{
+    return theConfigManager->GetSolver(name);
 }
 
 // PropSetup
@@ -719,8 +772,8 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
                                         const std::string &filename)
 {
-    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
-                                  ", name = " + name + "\n");
+//    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
+//                                  ", name = " + name + "\n");
     Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
     theConfigManager->AddSubscriber(subs);
     thePublisher->Subscribe(subs);
@@ -848,6 +901,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
         AddSpacecraftToSandbox(sandboxNum-1);
         AddPropSetupToSandbox(sandboxNum-1);
         AddBurnToSandbox(sandboxNum-1);        
+        AddSolverToSandbox(sandboxNum-1);        
         AddSubscriberToSandbox(sandboxNum-1);
         AddCommandToSandbox(sandboxNum-1);
         InitializeSandbox(sandboxNum-1);
@@ -989,6 +1043,21 @@ void Moderator::AddBurnToSandbox(Integer index)
     {
         burn = theConfigManager->GetBurn(burnNames[i]);
         sandboxes[index]->AddBurn(burn);
+    }
+}
+
+//------------------------------------------------------------------------------
+// void AddSolverToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddSolverToSandbox(Integer index)
+{
+    Solver *solver;
+    StringArray solverNames = theConfigManager->GetListOfItems(Gmat::SOLVER);
+    
+    for (Integer i=0; i<(Integer)solverNames.size(); i++)
+    {
+        solver = theConfigManager->GetSolver(solverNames[i]);
+        sandboxes[index]->AddSolver(solver);
     }
 }
 

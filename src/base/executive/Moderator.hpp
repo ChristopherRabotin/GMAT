@@ -36,6 +36,7 @@
 #include "Spacecraft.hpp"
 #include "Parameter.hpp"
 #include "StopCondition.hpp"
+#include "Solver.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
@@ -48,6 +49,7 @@
 #include "PhysicalModelFactory.hpp"
 #include "PropSetupFactory.hpp"
 #include "PropagatorFactory.hpp"
+#include "SolverFactory.hpp"
 #include "SpacecraftFactory.hpp"
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
@@ -116,6 +118,10 @@ public:
     StopCondition* GetStopCondition(const std::string &name);
     bool AddToStopCondition(const std::string &stopCondName, const std::string &paramName);
 
+    // Solver
+    Solver* CreateSolver(const std::string &type, const std::string &name);
+    Solver* GetSolver(const std::string &name);
+
     // PropSetup
     PropSetup* CreateDefaultPropSetup(const std::string &name);
     PropSetup* CreatePropSetup(const std::string &name,
@@ -167,6 +173,7 @@ private:
     void AddSpacecraftToSandbox(Integer index);
     void AddPropSetupToSandbox(Integer index);
     void AddBurnToSandbox(Integer index);
+    void AddSolverToSandbox(Integer index);
     void AddSubscriberToSandbox(Integer index);
     void AddCommandToSandbox(Integer index);
     void InitializeSandbox(Integer index);
@@ -199,6 +206,7 @@ private:
     SpacecraftFactory *theSpacecraftFactory;
     StopConditionFactory *theStopConditionFactory;
     SubscriberFactory *theSubscriberFactory;
+    SolverFactory *theSolverFactory;
 
     static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 

@@ -293,7 +293,16 @@ bool Target::Initialize(void)
     bool retval = BranchCommand::Initialize();
 
     // Targeter specific initialization goes here:
-    
+    if (objectMap->find(targeterName) == objectMap->end()) {
+        std::string errorString = "Target command cannot find targeter \"";
+        errorString += targeterName;
+        errorString += "\"";
+        throw CommandException(errorString);
+    }
+
+    targeter = (Solver *)((*objectMap)[targeterName]);
+    targeter -> Initialize();
+        
     return retval;
 }
 

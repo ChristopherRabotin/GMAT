@@ -46,13 +46,16 @@ public:
     Solver(const Solver& sol);
     Solver&             operator=(const Solver& sol);
     
-    /**
-     * The method used to iterate until a solution is found.  Derived classes 
-     * use this method to implement their solution technique.
-     * 
-     * @retval Returns true if the process is complete, false if not.
-     */
     virtual bool                AdvanceState(void);
+    
+    /**
+     * Derived classes implement this method to set object pointers and validate
+     * internal data structures.
+     * 
+     * @return true on success, false (or throws a SolverException) on failure
+     */
+    virtual bool                Initialize(void) = 0;
+
     
 protected:    
     /// Enumeration defining the states in the state machine

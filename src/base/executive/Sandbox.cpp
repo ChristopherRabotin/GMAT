@@ -55,7 +55,7 @@ bool Sandbox::AddObject(GmatBase *obj)
     // Check to see if the object is already in the map
     if (objectMap.find(name) == objectMap.end())
         // If not, store the new object pointer
-        /// @todo Replace copy c'tor call with Clone() -- Build 2 issue
+        /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
         if (obj->GetType() == Gmat::SPACECRAFT)
             objectMap[name] = new Spacecraft(*((Spacecraft*)obj));
         else
@@ -214,6 +214,12 @@ bool Sandbox::AddPropSetup(PropSetup *propSetup)
 bool Sandbox::AddBurn(Burn *burn)
 {
     return AddObject(burn);
+}
+
+
+bool Sandbox::AddSolver(Solver *solver)
+{
+    return AddObject(solver);
 }
 
 

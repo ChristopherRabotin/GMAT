@@ -9,7 +9,7 @@ HEADERS = -I../include -I../foundation -I../command -I../forcemodel \
 OBJECTS = Factory.o FactoryException.o FactoryManager.o CommandFactory.o \
           ForceModelFactory.o ParameterFactory.o PhysicalModelFactory.o \
           PropagatorFactory.o PropSetupFactory.o SpacecraftFactory.o \
-          StopConditionFactory.o SubscriberFactory.o BurnFactory.o
+          StopConditionFactory.o SubscriberFactory.o BurnFactory.o SolverFactory.o
 
 all: libFactory
 	mkdir -p ../lib

@@ -23,7 +23,7 @@
 
 
 #include "Solver.hpp"
-
+#include <fstream>          // for std::ofstream
 
 /**
  * This class implements the first targeter in GMAT.
@@ -41,7 +41,7 @@ public:
     DifferentialCorrector(const DifferentialCorrector &dc);
     DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
     
-    bool                        Initialize(void);
+    virtual bool                Initialize(void);
 
     // Access methods overriden from the base class
     virtual std::string GetParameterText(const Integer id) const;
@@ -102,6 +102,8 @@ protected:
     StringArray                 variableNames;
     /// List of goals
     StringArray                 goalNames;
+    /// The targeter text file
+    std::ofstream               textFile;
     
     virtual void                RunNominal(void); 
     virtual void                RunPerturbation(void);

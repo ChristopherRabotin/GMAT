@@ -200,6 +200,25 @@ void ConfigManager::AddBurn(Burn* burn)
 
 
 //------------------------------------------------------------------------------
+// void AddSolver(Solver* solver)
+//------------------------------------------------------------------------------
+void ConfigManager::AddSolver(Solver* solver)
+{
+    std::string name = solver->GetName();
+    if (name == "")
+        throw ConfigManagerException("Unnamed objects cannot be managed");
+    if (mapping.find(name) != mapping.end()) {
+        name += " is already in the configuration table";
+        throw ConfigManagerException(name);
+    }
+    else {
+        objects.push_back(solver);
+        mapping[name] = solver;
+    }
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
@@ -462,5 +481,19 @@ Burn* ConfigManager::GetBurn(const std::string &name)
         burn = (Burn *)mapping[name];
     }
     return burn;
+}
+
+Solver* ConfigManager::GetSolver(const std::string &name)
+{
+    Solver *solver = NULL;
+    if (mapping.find(name) != mapping.end()) {
+        if (mapping[name]->GetType() != Gmat::SOLVER) {
+            std::string str = mapping[name]->GetName() +
+                              " is not a solver";
+            throw ConfigManagerException(str);
+        }
+        solver = (Solver *)mapping[name];
+    }
+    return solver;
 }
 

@@ -76,7 +76,7 @@ Command* CommandFactory::CreateCommand(std::string ofType,
  */
 //------------------------------------------------------------------------------
 CommandFactory::CommandFactory() :
-Factory(Gmat::COMMAND)
+    Factory(Gmat::COMMAND)
 {
    if (creatables.empty())
    {
@@ -100,7 +100,7 @@ Factory(Gmat::COMMAND)
  */
 //------------------------------------------------------------------------------
 CommandFactory::CommandFactory(StringArray createList) :
-Factory(createList,Gmat::COMMAND)
+    Factory(createList,Gmat::COMMAND)
 {
 }
 
@@ -108,14 +108,14 @@ Factory(createList,Gmat::COMMAND)
 //  CommandFactory(const CommandFactory& fact)
 //------------------------------------------------------------------------------
 /**
-   * This method creates an object of the (base) class CommandFactory (called by
-   * copy constructors of derived classes).  (copy constructor)
-   *
-   * @param <fact> the factory object to copy to "this" factory.
-   */
+ * This method creates an object of the (base) class CommandFactory (called by
+ * copy constructors of derived classes).  (copy constructor)
+ *
+ * @param <fact> the factory object to copy to "this" factory.
+ */
 //------------------------------------------------------------------------------
 CommandFactory::CommandFactory(const CommandFactory& fact) :
-Factory(fact)
+    Factory(fact)
 {
    if (creatables.empty())
    {
@@ -132,12 +132,12 @@ Factory(fact)
 //  CommandFactory& operator= (const CommandFactory& fact)
 //------------------------------------------------------------------------------
 /**
-   * Assignment operator for the CommandFactory base class.
-   *
-   * @param <fact> the CommandFactory object whose data to assign to "this" factory.
-   *
-   * @return "this" CommandFactory with data of input factory fact.
-   */
+ * Assignment operator for the CommandFactory base class.
+ *
+ * @param <fact> the CommandFactory object whose data to assign to "this" factory.
+ *
+ * @return "this" CommandFactory with data of input factory fact.
+ */
 //------------------------------------------------------------------------------
 CommandFactory& CommandFactory::operator= (const CommandFactory& fact)
 {
@@ -149,9 +149,8 @@ CommandFactory& CommandFactory::operator= (const CommandFactory& fact)
 // ~CommandFactory()
 //------------------------------------------------------------------------------
 /**
-   * Destructor for the CommandFactory base class.
-   *
-   */
+ * Destructor for the CommandFactory base class.
+ */
 //------------------------------------------------------------------------------
 CommandFactory::~CommandFactory()
 {

@@ -45,6 +45,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     variableNamesID         (parameterCount+1),
     goalNamesID             (parameterCount+2)
 {
+    parameterCount += 3;
 }
 
 
@@ -185,7 +186,8 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
 }
 
 
-const StringArray& DifferentialCorrector::GetStringArrayParameter(const Integer id) const
+const StringArray& DifferentialCorrector::GetStringArrayParameter(
+                                                        const Integer id) const
 {
     if (id == variableNamesID)
         return variableNames;
@@ -242,12 +244,24 @@ bool DifferentialCorrector::Initialize(void)
         variableMaximumStep[i] =  9.999e300;
     }
     
-    return false;
+    // Prepare the text file for output
+    if (solverTextFile != "") {
+        textFile.open(solverTextFile.c_str());
+        WriteToTextFile();
+    }
+    
+    initialized = true;
+    return true;
 }
 
 
 void DifferentialCorrector::FreeArrays(void)
 {
+    if (textFile.is_open()) {
+        textFile.flush();
+        textFile.close();
+    }
+        
     if (variable) {
         delete [] variable;
         variable = NULL;
@@ -335,4 +349,22 @@ void DifferentialCorrector::CheckCompletion(void)
 
 void DifferentialCorrector::WriteToTextFile(void)
 {
+    if (!initialized) {
+        textFile << "********************************************************\n"
+                 << "*** Targeter Text File\n"
+                 << "*** \n"
+                 << "*** Using Differential Correction\n***\n";
+                 
+        // Write out the setup data
+        textFile << "*** " << variableCount << " variables\n*** "
+                 << goalCount << " goals\n***\n";
+                 
+        /// @todo Iterate through the variables and goals, writing them to the file
+        
+        textFile << "********************************************************\n"
+                 << std::endl;
+    }
+    else {
+
+    }
 }

@@ -337,11 +337,11 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  * objects of type  Solver.
  */
 //------------------------------------------------------------------------------
-//   Solver*�Factory::CreateSolver(std::string ofType,
-//                                         std::string withName)
-//{
-//   throw FactoryException("requested object must be of type Solver");
-//}
+Solver* Factory::CreateSolver(std::string ofType,
+                                         std::string withName)
+{
+   throw FactoryException("requested object must be of type Solver");
+}
 
 //------------------------------------------------------------------------------
 //  Subscriber* CreateSubscriber(std::string ofType,
@@ -560,9 +560,4 @@ Factory::~Factory()
 //   delete creatables;
    creatables.~vector<std::string>();
 }
-
-
-
-
-
 
