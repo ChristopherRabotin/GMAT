@@ -3,8 +3,14 @@
 
 TARGET = ../lib/libPropagator.a
 
-HEADERS = -I../include -I../foundation -I../forcemodel -I../spacecraft -I../util
-OBJECTS = PropSetup.o Propagator.o Integrator.o RungeKutta.o RungeKutta89.o
+HEADERS = -I../include -I../foundation -I../forcemodel -I../spacecraft \
+          -I../util -I../solarsys
+OBJECTS = PropSetup.o Propagator.o Integrator.o \
+          RungeKutta.o \
+          RungeKutta89.o \
+          RungeKuttaFehlberg56.o \
+          RungeKuttaNystrom.o \
+          DormandElMikkawyPrince68.o
 
 all: $(TARGET)
 	mkdir -p ../lib

@@ -29,7 +29,7 @@
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
 #include "PlanetaryEphem.hpp"
-#include "ForceModel.hpp"  // what about Drag?
+//#include "ForceModel.hpp"  // what about Drag?
 #include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "Rmatrix.hpp"
