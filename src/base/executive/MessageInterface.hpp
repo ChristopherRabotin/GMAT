@@ -31,6 +31,7 @@ namespace Gmat
         INFO_,
         DEBUG_
     };
+
 }
 
 class MessageInterface
@@ -42,6 +43,7 @@ public:
     static void ClearMessage();
     static int  GetNumberOfMessageLines();
     static void ShowMessage(const std::string &msg);
+    static void ShowMessage(const char *msg, ...);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
                              int interval);
@@ -55,6 +57,8 @@ public:
         { logFlag = flag; };
     
 private:
+    static const int MAX_MESSAGE_LENGTH = 1000;
+    
     static std::queue<std::string> messageQueue;
     static std::string popupMessage;
     static std::string abortMessage;

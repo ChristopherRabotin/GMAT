@@ -21,6 +21,10 @@
 #include "GmatAppData.hpp"
 #endif
 
+#include <stdarg.h>                // for va_start(), va_end()
+#include <stdio.h>                 // for vsprintf()
+#include <string.h>                // for strlen()
+#include <malloc.h>                // for malloc()
 #include <iostream>                // for cout, endl
 #include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
@@ -123,21 +127,21 @@ int MessageInterface::GetNumberOfMessageLines()
 }
 
 //------------------------------------------------------------------------------
-//  void ShowMessage(const std::string &msg)
+//  void ShowMessage(const std::string &msgString)
 //------------------------------------------------------------------------------
 //  Purpose:
 //     Pushes message into message queue and displays the message.
 //------------------------------------------------------------------------------
-void MessageInterface::ShowMessage(const std::string &msg)
+void MessageInterface::ShowMessage(const std::string &msgString)
 {
     //loj: I don't think we need this
-    //MessageInterface::messageQueue.push(msg);
+    //MessageInterface::messageQueue.push(msgString);
    
 #if !defined __CONSOLE_APP__
     if (GmatAppData::theMessageWindow != NULL)
     {
         GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));
+        GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));
     }
     else
     {
@@ -148,10 +152,61 @@ void MessageInterface::ShowMessage(const std::string &msg)
                               20, 20, 600, 350, "Permanent");
         GmatAppData::theMessageWindow->SetMaxLength(600000);
         GmatAppData::theMessageWindow->Show(true);
-        GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));        
+        GmatAppData::theMessageWindow->AppendText(wxString(msgString.c_str()));        
     }
 #else
-    LogMessage(msg);
+    LogMessage(msgString);
+#endif
+
+} // end ShowMessage()
+
+//------------------------------------------------------------------------------
+//  void ShowMessage(const char *msg, ...)
+//------------------------------------------------------------------------------
+//  Purpose:
+//     Pushes message into message queue and displays the message.
+//------------------------------------------------------------------------------
+void MessageInterface::ShowMessage(const char *msg, ...)
+{
+
+    short    ret;
+    short    size;
+    va_list  marker;
+    char     *msgBuffer;
+
+    size = strlen(msg) + MAX_MESSAGE_LENGTH;
+      
+    if( (msgBuffer = (char *)malloc(size)) != NULL )
+    {
+        va_start(marker, msg);      
+        ret = vsprintf(msgBuffer, msg, marker);      
+        va_end(marker);
+
+        //std::string message(msgBuffer);
+        
+    }
+    
+#if !defined __CONSOLE_APP__
+    if (GmatAppData::theMessageWindow != NULL)
+    {
+        GmatAppData::theMessageWindow->Show(true);
+        //GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));
+        GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));
+    }
+    else
+    {
+        wxLogWarning("MessageWindow was not created. Creating a new MessageWindow...");
+        wxLog::FlushActive();
+        GmatAppData::theMessageWindow =
+            new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                              20, 20, 600, 350, "Permanent");
+        GmatAppData::theMessageWindow->SetMaxLength(600000);
+        GmatAppData::theMessageWindow->Show(true);
+        //GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));        
+        GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));        
+    }
+#else
+    LogMessage(std::string(msgBuffer));
 #endif
 
 } // end ShowMessage()
