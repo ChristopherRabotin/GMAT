@@ -48,6 +48,7 @@ protected:
     bool HasObject(const std::string &objTypeName) const;
     GmatBase* FindObject(const std::string &objTypeName) const;
      
+    virtual void Initialize(); //loj: 3/31/04 added
     virtual bool IsValidObject(GmatBase *obj) = 0;
     std::map<std::string, GmatBase*> *mStringObjectMap;
     StringArray mObjectTypeNames;

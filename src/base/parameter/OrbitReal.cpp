@@ -140,14 +140,15 @@ GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
  * @return true if the object has been set.
  */
 //------------------------------------------------------------------------------
-bool OrbitReal::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
+bool OrbitReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
+                          GmatBase *obj)
 {
-    if (obj != NULL)
+    Initialize();
+    //loj: 3/31/04 do not check for NULL so it can reset object
+    //if (obj != NULL) 
         return SetRefObject(objType, objName, obj);
-    else
-        return false;
+    //else
+    //return false;
 }
 
 //------------------------------------------------------------------------------

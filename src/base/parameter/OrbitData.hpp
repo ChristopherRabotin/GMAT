@@ -62,6 +62,7 @@ protected:
     Real mSphEpoch;
     
     // The inherited methods from RefData
+    virtual void Initialize(); //loj: 3/31/04 added
     virtual bool IsValidObject(GmatBase *obj);
 
     enum {PX, PY, PZ, VX, VY, VZ};

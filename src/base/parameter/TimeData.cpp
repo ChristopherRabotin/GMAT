@@ -16,6 +16,7 @@
  * Implements Time related data class.
  */
 //------------------------------------------------------------------------------
+
 #include "gmatdefs.hpp"
 #include "TimeData.hpp"
 #include "MessageInterface.hpp"
@@ -43,8 +44,7 @@ TimeData::VALID_OBJECT_LIST[TimeDataObjectCount] =
 TimeData::TimeData()
     : RefData()
 {
-    mInitialEpoch = 0.0;
-    mIsInitialEpochSet = false;
+    Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -126,8 +126,8 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
 {
     mInitialEpoch = initialEpoch;
     mIsInitialEpochSet = true;
-    MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
-                                  mInitialEpoch);
+    //MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
+    //                              mInitialEpoch);
 }
 
 //------------------------------------------------------------------------------
@@ -232,6 +232,15 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
     return status;
 }
 
+//loj: 3/31/04 added
+//------------------------------------------------------------------------------
+// virtual void Initialize()
+//------------------------------------------------------------------------------
+void TimeData::Initialize()
+{
+    mInitialEpoch = 0.0;
+    mIsInitialEpochSet = false;
+}
 
 //------------------------------------------------------------------------------
 // bool IsValidObject(GmatBase *obj)

@@ -23,6 +23,7 @@
 #include "RealUtilities.hpp"
 #include "EphemerisUtil.hpp"
 #include "Spacecraft.hpp"
+#include "MessageInterface.hpp"
 
 #if !defined __UNIT_TEST__
 #include "SolarSystem.hpp"
@@ -54,12 +55,7 @@ OrbitData::VALID_OBJECT_LIST[OrbitDataObjectCount] =
 OrbitData::OrbitData()
     : RefData()
 {
-    mCartState = Rvector6::RVECTOR6_UNDEFINED;
-    mKepState = Rvector6::RVECTOR6_UNDEFINED;
-    mSphState = Rvector6::RVECTOR6_UNDEFINED;
-    mCartEpoch = 0.0;
-    mKepEpoch = 0.0;
-    mSphEpoch = 0.0;
+    Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -111,6 +107,10 @@ OrbitData::~OrbitData()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartState()
 {
+    //------------------------------------------------------
+    //loj: 4/1/04 until Spacecraft::GetCartState() is done
+    //------------------------------------------------------
+    
     Spacecraft *sc = (Spacecraft*)FindObject(VALID_OBJECT_LIST[SPACECRAFT]);
     
     if (sc != NULL)
@@ -122,13 +122,19 @@ Rvector6 OrbitData::GetCartState()
         {
             if (sc->GetRealParameter("Epoch") > mCartEpoch)
             {
-                Real *cartState = sc->GetState(); // should be cartesian state
+                Real *statePtr = sc->GetState(); // should be cartesian state
                 mCartEpoch = sc->GetRealParameter("Epoch");
 
                 for (int i=0; i<6; i++)
-                    mCartState[i] = cartState[i];
+                    mCartState[i] = statePtr[i];
                 
             }
+            
+            //MessageInterface::ShowMessage("OrbitData::GetCartState() scEpoch=%f, mCartEpoch=%f\n"
+            //                              "state = %f, %f, %f, %f, %f, %f\n",
+            //                              sc->GetRealParameter("Epoch"), mCartEpoch,
+            //                              mCartState[0], mCartState[1], mCartState[2],
+            //                              mCartState[3], mCartState[4], mCartState[5]);
         }
         else if (elemType == "Keplerian")
         {
@@ -137,7 +143,9 @@ Rvector6 OrbitData::GetCartState()
                 Rvector3 pos, vel;
                 Real grav = 0.398600448073446198e+06; //loj: temp code for B2
                 
-                Real *kepState = sc->GetState(); // should be keplerian state
+                Real *statePtr = sc->GetState(); // should be keplerian state
+                Real kepState[6];
+                memcpy(kepState, statePtr, 6*sizeof(Real));
                 mCartEpoch = sc->GetRealParameter("Epoch");
                 
                 Real ma = TrueToMeanAnomaly(kepState[TA], kepState[ECC]);
@@ -163,6 +171,10 @@ Rvector6 OrbitData::GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetKepState()
 {
+    //------------------------------------------------------
+    //loj: 4/1/04 until Spacecraft::GetKepState() is done
+    //------------------------------------------------------
+    
     Spacecraft *sc = (Spacecraft*)FindObject(VALID_OBJECT_LIST[SPACECRAFT]);
     
     if (sc != NULL)
@@ -174,11 +186,11 @@ Rvector6 OrbitData::GetKepState()
         {
             if (sc->GetRealParameter("Epoch") > mKepEpoch)
             {
-                Real *kepState = sc->GetState(); // should be keplerian state
+                Real *statePtr = sc->GetState(); // should be keplerian state
                 mKepEpoch = sc->GetRealParameter("Epoch");
 
                 for (int i=0; i<6; i++)
-                    mKepState[i] = kepState[i];
+                    mKepState[i] = statePtr[i];
                 
             }
         }
@@ -186,7 +198,9 @@ Rvector6 OrbitData::GetKepState()
         {
             if (sc->GetRealParameter("Epoch") > mCartEpoch)
             {
-                Real *cartState = sc->GetState();     // should be cartesian state
+                Real *statePtr = sc->GetState(); // should be cartesian state
+                Real cartState[6];
+                memcpy(cartState, statePtr, 6*sizeof(Real));
                 mCartEpoch = sc->GetRealParameter("Epoch");
                 
                 Real sma, ecc, inc, raan, aop, ma, ta;
@@ -428,7 +442,20 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 }
 
 //------------------------------------------------------------------------------
-// bool IsValidObject(GmatBase *obj)
+// virtual void Initialize()
+//------------------------------------------------------------------------------
+void OrbitData::Initialize()
+{
+    mCartState = Rvector6::RVECTOR6_UNDEFINED;
+    mKepState = Rvector6::RVECTOR6_UNDEFINED;
+    mSphState = Rvector6::RVECTOR6_UNDEFINED;
+    mCartEpoch = 0.0;
+    mKepEpoch = 0.0;
+    mSphEpoch = 0.0;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool IsValidObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.

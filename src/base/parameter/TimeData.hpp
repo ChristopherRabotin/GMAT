@@ -50,6 +50,7 @@ public:
 protected:
     
     // The inherited methods from RefData
+    virtual void Initialize(); //loj: 3/31/04 added
     virtual bool IsValidObject(GmatBase *obj);
 
     Real mInitialEpoch;
