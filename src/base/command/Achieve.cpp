@@ -22,7 +22,7 @@
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
 
-#define DEBUG_ACHIEVE 1
+//#define DEBUG_ACHIEVE 1
 
 //------------------------------------------------------------------------------
 //  Achieve(void)
