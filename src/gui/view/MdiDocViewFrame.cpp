@@ -32,7 +32,7 @@
 #include "wx/toolbar.h"
 
 // bitmap buttons for the toolbar
-//#include "bitmaps/open.xpm"
+#include "bitmaps/open.xpm"
 
 
 #ifndef __WXMSW__
