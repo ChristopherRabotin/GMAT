@@ -41,13 +41,6 @@ public:
    
    // method to initialize the data
    virtual void Initialize(); 
-
-   // methods to convert to/from the MJ2000 Equatorial axis system
-   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState);
-   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState); 
-
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

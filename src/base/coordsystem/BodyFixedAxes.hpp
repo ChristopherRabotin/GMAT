@@ -50,15 +50,11 @@ public:
    //    EOP file containing polar motion (x,y) and UT1-UTC offset
    //    coefficient file containing nutation and planetary coeffifients
    
-   // method to initialize the data
-   virtual void Initialize(); 
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
    
-   // methods to convert to/from the MJ2000 Equatorial axis system
-   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState); 
-   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState); 
-
+// method to initialize the data
+   virtual void Initialize(); 
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes

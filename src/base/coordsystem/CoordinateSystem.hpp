@@ -42,6 +42,37 @@ public:
    const bool operator==(const CoordinateSystem &coordSys);
    // destructor
    virtual ~CoordinateSystem();
+
+   // virtual methods to check to see how/if an AxisSystem uses 
+   // a particular parameter (calls through to its AxisSystem)
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
+   virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
+   virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
+   virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
+   virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
+   virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
+   // methods to set parameters for the AxisSystems
+   virtual void                  SetPrimaryObject(SpacePoint *prim);
+   virtual void                  SetSecondaryObject(SpacePoint *second);
+   virtual void                  SetEpoch(const A1Mjd &toEpoch);
+   virtual void                  SetXAxis(const std::string &toValue);
+   virtual void                  SetYAxis(const std::string &toValue);
+   virtual void                  SetZAxis(const std::string &toValue);
+   virtual void                  SetEopFile(EopFile *eopF);
+   virtual void                  SetCoefficientsFile(
+                                    ItrfCoefficientsFile *itrfF);
+
+   virtual SpacePoint*           GetPrimaryObject() const;
+   virtual SpacePoint*           GetSecondaryObject() const;
+   virtual A1Mjd                 GetEpoch() const;
+   virtual std::string           GetXAxis() const;
+   virtual std::string           GetYAxis() const;
+   virtual std::string           GetZAxis() const;
+   virtual EopFile*              GetEopFile() const;
+   virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
+   
    
    // initializes the CoordinateSystem
    virtual void Initialize();

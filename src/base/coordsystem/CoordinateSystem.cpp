@@ -150,6 +150,144 @@ CoordinateSystem::~CoordinateSystem()
    if (axes) delete axes; 
 }
 
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesEopFile() const
+{
+   if (axes) return axes->UsesEopFile();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesItrfFile() const
+{
+   if (axes) return axes->UsesItrfFile();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesEpoch() const
+{
+   if (axes) return axes->UsesEpoch();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesPrimary() const
+{
+   if (axes) return axes->UsesPrimary();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesSecondary() const
+{
+   if (axes) return axes->UsesSecondary();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesXAxis() const
+{
+   if (axes) return axes->UsesXAxis();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesYAxis() const
+{
+   if (axes) return axes->UsesYAxis();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage CoordinateSystem::UsesZAxis() const
+{
+   if (axes) return axes->UsesZAxis();
+   return GmatCoordinate::NOT_USED;
+}
+
+// methods to set parameters for the AxisSystems
+void CoordinateSystem::SetPrimaryObject(SpacePoint *prim)
+{
+   if (axes) axes->SetPrimaryObject(prim);
+}
+
+void CoordinateSystem::SetSecondaryObject(SpacePoint *second)
+{
+   if (axes) axes->SetSecondaryObject(second);
+}
+
+void CoordinateSystem::SetEpoch(const A1Mjd &toEpoch)
+{
+   if (axes) axes->SetEpoch(toEpoch);
+}
+
+void CoordinateSystem::SetXAxis(const std::string &toValue)
+{
+   if (axes) axes->SetXAxis(toValue);
+}
+
+void CoordinateSystem::SetYAxis(const std::string &toValue)
+{
+   if (axes) axes->SetYAxis(toValue);
+}
+
+void CoordinateSystem::SetZAxis(const std::string &toValue)
+{
+   if (axes) axes->SetZAxis(toValue);
+}
+
+void CoordinateSystem::SetEopFile(EopFile *eopF)
+{
+   if (axes) axes->SetEopFile(eopF);
+}
+
+void CoordinateSystem::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
+{
+   if (axes) axes->SetCoefficientsFile(itrfF);
+}
+
+SpacePoint* CoordinateSystem::GetPrimaryObject() const
+{
+   if (axes) return axes->GetPrimaryObject();
+   return NULL;
+}
+
+SpacePoint* CoordinateSystem::GetSecondaryObject() const
+{
+   if (axes) return axes->GetSecondaryObject();
+   return NULL;
+}
+
+A1Mjd CoordinateSystem::GetEpoch() const
+{
+   if (axes) return axes->GetEpoch();
+   return A1Mjd();  // does this make sense?
+}
+
+std::string CoordinateSystem::GetXAxis() const
+{
+   if (axes) return axes->GetXAxis();
+   return "";
+}
+
+std::string CoordinateSystem::GetYAxis() const
+{
+   if (axes) return axes->GetYAxis();
+   return "";
+}
+
+std::string CoordinateSystem::GetZAxis() const
+{
+   if (axes) return axes->GetZAxis();
+   return "";
+}
+
+EopFile* CoordinateSystem::GetEopFile() const
+{
+   if (axes) return axes->GetEopFile();
+   return NULL;
+}
+
+ItrfCoefficientsFile* CoordinateSystem::GetItrfCoefficientsFile()
+{
+   if (axes) return axes->GetItrfCoefficientsFile();
+   return NULL;
+}
+
+
 //---------------------------------------------------------------------------
 //  void CoordinateSystem::Initialize()
 //---------------------------------------------------------------------------

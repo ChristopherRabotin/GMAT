@@ -40,9 +40,11 @@ public:
    const DynamicAxes& operator=(const DynamicAxes &dyn);
    // destructor
    virtual ~DynamicAxes();
-   
-   virtual bool  SetEpoch(const A1Mjd &toEpoch);
-   virtual const A1Mjd& GetEpoch() const;
+
+   virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
+
+   virtual void         SetEpoch(const A1Mjd &toEpoch);
+   virtual A1Mjd        GetEpoch() const;
    
    
    // initializes the DynamicAxes

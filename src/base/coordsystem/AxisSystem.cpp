@@ -137,17 +137,76 @@ AxisSystem::~AxisSystem()
 {
 }
 
-//---------------------------------------------------------------------------
-//  void AxisSystem::Initialize()
-//---------------------------------------------------------------------------
-/**
- * Initialization method for this AxisSystem.
- *
- */
-//---------------------------------------------------------------------------
-void AxisSystem::Initialize()
+GmatCoordinate::ParameterUsage AxisSystem::UsesEopFile() const
 {
-   CoordinateBase::Initialize();
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesItrfFile() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesEpoch() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesSecondary() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesXAxis() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesYAxis() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+GmatCoordinate::ParameterUsage AxisSystem::UsesZAxis() const
+{
+   return GmatCoordinate::NOT_USED;
+}
+
+// methods to set parameters for the AxisSystems - AxisSystems that need these
+// will need to override these implementations
+void AxisSystem::SetPrimaryObject(SpacePoint *prim)
+{
+   // default behavior is to ignore this - should I throw an exception here??
+}
+
+void AxisSystem::SetSecondaryObject(SpacePoint *second)
+{
+   // default behavior is to ignore this
+}
+
+void AxisSystem::SetEpoch(const A1Mjd &toEpoch)
+{
+   // default behavior is to ignore this
+}
+
+void AxisSystem::SetXAxis(const std::string &toValue)
+{
+   // default behavior is to ignore this
+}
+
+void AxisSystem::SetYAxis(const std::string &toValue)
+{
+   // default behavior is to ignore this
+}
+
+void AxisSystem::SetZAxis(const std::string &toValue)
+{
+   // default behavior is to ignore this
 }
 
 //------------------------------------------------------------------------------
@@ -179,6 +238,132 @@ void AxisSystem::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
 {
    itrf = itrfF;
 }
+
+SpacePoint* AxisSystem::GetPrimaryObject() const
+{
+   return NULL;
+}
+
+SpacePoint* AxisSystem::GetSecondaryObject() const
+{
+   return NULL;
+}
+
+A1Mjd AxisSystem::GetEpoch() const
+{
+   return A1Mjd();  // does this make sense?
+}
+
+std::string AxisSystem::GetXAxis() const
+{
+   return "";
+}
+
+std::string AxisSystem::GetYAxis() const
+{
+   return "";
+}
+
+std::string AxisSystem::GetZAxis() const
+{
+   return "";
+}
+
+EopFile* AxisSystem::GetEopFile() const
+{
+   return eop;
+}
+
+ItrfCoefficientsFile* AxisSystem::GetItrfCoefficientsFile()
+{
+   return itrf;
+}
+
+
+//---------------------------------------------------------------------------
+//  void AxisSystem::Initialize()
+//---------------------------------------------------------------------------
+/**
+ * Initialization method for this AxisSystem.
+ *
+ */
+//---------------------------------------------------------------------------
+void AxisSystem::Initialize()
+{
+   CoordinateBase::Initialize();
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+//                        Rvector &outState)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState into the MJ2000Eq frame.
+ *
+ * @param epoch     the epoch at which to perform the rotation.
+ * @param inState   the input state (in this AxisSystem) to be rotated.
+ * @param iutState  the output state, in the MJ2000Eq AxisSystem, the result 
+ *                  of rotating the input inState.
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+                                   Rvector &outState)
+{
+   CalculateRotationMatrix(epoch);
+   // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
+   Rvector3 tmpPos(inState[0],inState[1], inState[2]);
+   Rvector3 tmpVel(inState[3],inState[4], inState[5]);
+   Rvector3 outPos = rotMatrix    * tmpPos;
+   Rvector3 outVel = (rotDotMatrix * tmpPos) + (rotMatrix * tmpVel);
+   outState[0] = outPos[0];
+   outState[1] = outPos[1];
+   outState[2] = outPos[2];
+   outState[3] = outVel[0];
+   outState[4] = outVel[1];
+   outState[5] = outVel[2];
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+//                          Rvector &outState)
+//------------------------------------------------------------------------------
+/**
+ * This method will rotate the input inState from the MJ2000Eq frame into
+ * this AxisSystem.
+ *
+ * @param epoch     the epoch at which to perform the rotation.
+ * @param inState   the input state (in MJ2000Eq AxisSystem) to be rotated.
+ * @param iutState  the output state, in this AxisSystem, the result 
+ *                  of rotating the input inState.
+ * @param j2000Body the origin of the input EquatorAxes frame.
+ *
+ * @return success or failure of the operation.
+ */
+//------------------------------------------------------------------------------
+bool AxisSystem::RotateFromMJ2000Eq(const A1Mjd &epoch, 
+                                     const Rvector &inState,
+                                     Rvector &outState)
+{
+   CalculateRotationMatrix(epoch);
+   // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
+   Rvector3 tmpPos(inState[0],inState[1], inState[2]);
+   Rvector3 tmpVel(inState[3],inState[4], inState[5]);
+   Rmatrix33 tmpRot    = rotMatrix.Transpose();
+   Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
+   Rvector3 outPos     = tmpRot    * tmpPos ;
+   Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
+   outState[0] = outPos[0];
+   outState[1] = outPos[1];
+   outState[2] = outPos[2];
+   outState[3] = outVel[0];
+   outState[4] = outVel[1];
+   outState[5] = outVel[2];
+   return true;
+}
+
 
 
 //------------------------------------------------------------------------------

@@ -26,6 +26,18 @@
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
 #include "SpacePoint.hpp"
+#include "EopFile.hpp"
+#include "ItrfCoefficientsFile.hpp"
+
+namespace GmatCoordinate
+{
+   enum ParameterUsage
+   {
+      NOT_USED = 0,
+      OPTIONAL,
+      REQUIRED
+   };
+};
 
 class GMAT_API CoordinateBase : public GmatBase
 {
@@ -50,7 +62,40 @@ public:
    virtual SpacePoint*         GetOrigin() const;
    virtual std::string         GetJ2000BodyName() const;
    virtual SpacePoint*         GetJ2000Body() const;
+
+   // pure virtual methods to check to see how/if an AxisSystem uses 
+   // a particular parameter
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const   = 0;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const  = 0;
+   virtual GmatCoordinate::ParameterUsage UsesEpoch() const     = 0;
+   virtual GmatCoordinate::ParameterUsage UsesPrimary() const   = 0;
+   virtual GmatCoordinate::ParameterUsage UsesSecondary() const = 0;
+   virtual GmatCoordinate::ParameterUsage UsesXAxis() const     = 0;
+   virtual GmatCoordinate::ParameterUsage UsesYAxis() const     = 0;
+   virtual GmatCoordinate::ParameterUsage UsesZAxis() const     = 0;
    
+   // pure virtual methods to set parameters for the AxisSystems
+   virtual void                  SetPrimaryObject(SpacePoint *prim)      = 0;
+   virtual void                  SetSecondaryObject(SpacePoint *second)  = 0;
+   virtual void                  SetEpoch(const A1Mjd &toEpoch)          = 0;
+   virtual void                  SetXAxis(const std::string &toValue)    = 0;
+   virtual void                  SetYAxis(const std::string &toValue)    = 0;
+   virtual void                  SetZAxis(const std::string &toValue)    = 0;
+   // methods to set the files to use - for those AxisSystems that 
+   // need all or part of the FK5 reduction
+   virtual void                  SetEopFile(EopFile *eopF)               = 0;
+   virtual void                  SetCoefficientsFile(
+                                    ItrfCoefficientsFile *itrfF)         = 0;
+   
+   virtual SpacePoint*           GetPrimaryObject() const                = 0;
+   virtual SpacePoint*           GetSecondaryObject() const              = 0;
+   virtual A1Mjd                 GetEpoch() const                        = 0;
+   virtual std::string           GetXAxis() const                        = 0;
+   virtual std::string           GetYAxis() const                        = 0;
+   virtual std::string           GetZAxis() const                        = 0;
+   virtual EopFile*              GetEopFile() const                      = 0;
+   virtual ItrfCoefficientsFile* GetItrfCoefficientsFile()               = 0;
+      
    // initializes the CoordinateBase
    virtual void Initialize();
    

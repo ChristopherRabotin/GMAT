@@ -109,8 +109,14 @@ DynamicAxes::~DynamicAxes()
 {
 }
 
+GmatCoordinate::ParameterUsage DynamicAxes::UsesEpoch() const
+{
+   return GmatCoordinate::REQUIRED;
+}
+
+
 //---------------------------------------------------------------------------
-//  bool SetEpoch(const A1Mjd &toEpoch)
+//  void SetEpoch(const A1Mjd &toEpoch)
 //---------------------------------------------------------------------------
 /**
  * Sets the epoch for the DynamicAxes class.
@@ -121,14 +127,13 @@ DynamicAxes::~DynamicAxes()
  *
  */
 //---------------------------------------------------------------------------
-bool DynamicAxes::SetEpoch(const A1Mjd &toEpoch)
+void DynamicAxes::SetEpoch(const A1Mjd &toEpoch)
 {
    epoch = toEpoch;
-   return true;
 }
 
 //---------------------------------------------------------------------------
-//  bool GetEpoch(const A1Mjd &toEpoch)
+//  A1Mjd GetEpoch() const
 //---------------------------------------------------------------------------
 /**
  * Returns the epoch of the DynamicAxes class.
@@ -137,7 +142,7 @@ bool DynamicAxes::SetEpoch(const A1Mjd &toEpoch)
  *
  */
 //---------------------------------------------------------------------------
-const A1Mjd& DynamicAxes::GetEpoch() const
+A1Mjd DynamicAxes::GetEpoch() const
 {
    return epoch;
 }

@@ -124,53 +124,6 @@ void MJ2000EqAxes::Initialize()
    // rotDotMatrix is still the default zero matrix
 }
 
-//---------------------------------------------------------------------------
-//  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                        Rvector &outState)
-//---------------------------------------------------------------------------
-/**
- * This method will rotate the input inState into the MJ2000Eq frame.
- *
- * @param epoch     the epoch at which to perform the rotation.
- * @param inState   the input state (in this AxisSystem) to be rotated.
- * @param iutState  the output state, in the MJ2000Eq AxisSystem, the result 
- *                  of rotating the input inState.
- *
- * @return success or failure of the operation.
- */
-//---------------------------------------------------------------------------
-bool MJ2000EqAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                              Rvector &outState)
-{
-   outState = inState;
-   return true;
-}
-
-//---------------------------------------------------------------------------
-//  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-//                          Rvector &outState)
-//---------------------------------------------------------------------------
-/**
- * This method will rotate the input inState from the MJ2000Eq frame into
- * this AxisSystem.
- *
- * @param epoch     the epoch at which to perform the rotation.
- * @param inState   the input state (in MJ2000Eq AxisSystem) to be rotated.
- * @param iutState  the output state, in this AxisSystem, the result 
- *                  of rotating the input inState.
- *
- * @return success or failure of the operation.
- */
-//---------------------------------------------------------------------------
-bool MJ2000EqAxes::RotateFromMJ2000Eq(const A1Mjd &epoch, 
-                                      const Rvector &inState,
-                                      Rvector &outState)
-{
-   outState = inState;
-   return true;
-}
-
-
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------

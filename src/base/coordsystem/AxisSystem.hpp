@@ -43,16 +43,43 @@ public:
    const AxisSystem& operator=(const AxisSystem &axisSys);
    // destructor
    virtual ~AxisSystem();
-   
+
+   virtual GmatCoordinate::ParameterUsage UsesEopFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesItrfFile() const;
+   virtual GmatCoordinate::ParameterUsage UsesEpoch() const;
+   virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
+   virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
+   virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
+   virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
+   virtual GmatCoordinate::ParameterUsage UsesZAxis() const;
+   // methods to set parameters for the AxisSystems
+   virtual void                  SetPrimaryObject(SpacePoint *prim);
+   virtual void                  SetSecondaryObject(SpacePoint *second);
+   virtual void                  SetEpoch(const A1Mjd &toEpoch);
+   virtual void                  SetXAxis(const std::string &toValue);
+   virtual void                  SetYAxis(const std::string &toValue);
+   virtual void                  SetZAxis(const std::string &toValue);
+   // methods to set the files to use - for those AxisSystems that 
+   // need all or part of the FK5 reduction
+   virtual void                  SetEopFile(EopFile *eopF);
+   virtual void                  SetCoefficientsFile(ItrfCoefficientsFile *itrfF);
+   virtual SpacePoint*           GetPrimaryObject() const;
+   virtual SpacePoint*           GetSecondaryObject() const;
+   virtual A1Mjd                 GetEpoch() const;
+   virtual std::string           GetXAxis() const;
+   virtual std::string           GetYAxis() const;
+   virtual std::string           GetZAxis() const;
+   virtual EopFile*              GetEopFile() const;
+   virtual ItrfCoefficientsFile* GetItrfCoefficientsFile();
    
    // initializes the AxisSystem
    virtual void Initialize();
 
-   // methods to set the files to use - for those AxisSystems that 
-   // need all or part of the FK5 reduction
-   virtual void SetEopFile(EopFile *eopF);
-   virtual void SetCoefficientsFile(ItrfCoefficientsFile *itrfF);
-   
+   // methods to convert to/from the MJ2000 Equatorial axis system
+   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+                                 Rvector &outState); 
+   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+                                   Rvector &outState); 
    
    //---------------------------------------------------------------------------
    //  bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
@@ -70,8 +97,8 @@ public:
     * @return success or failure of the operation.
     */
    //---------------------------------------------------------------------------
-   virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                 Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
+   //virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+   //                              Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
 
    //---------------------------------------------------------------------------
    //  bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
@@ -90,8 +117,8 @@ public:
     * @return success or failure of the operation.
     */
    //---------------------------------------------------------------------------
-   virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
-                                   Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
+   //virtual bool RotateFromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
+   //                                Rvector &outState) = 0; //, SpacePoint *j2000Body) = 0;
    
    
    // all classes derived from GmatBase must supply this Clone method;
