@@ -25,6 +25,7 @@
 #include "Rvec6Var.hpp"
 #include "Rvector6.hpp"
 #include "OrbitData.hpp"
+#include "OrbitReal.hpp"
 
 //==============================================================================
 //                              SphRA
@@ -33,7 +34,7 @@
  * Declares Spherical Right Ascension parameter class.
  */
 //------------------------------------------------------------------------------
-class GMAT_API SphRA : public RealVar, OrbitData
+class GMAT_API SphRA : public OrbitReal
 {
 public:
 
@@ -45,19 +46,7 @@ public:
     const SphRA& operator=(const SphRA &right);
     virtual ~SphRA();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:
@@ -72,7 +61,7 @@ protected:
  * Declares Spherical Declination parameter class.
  */
 //------------------------------------------------------------------------------
-class GMAT_API SphDec : public RealVar, OrbitData
+class GMAT_API SphDec : public OrbitReal
 {
 public:
 
@@ -84,19 +73,7 @@ public:
     const SphDec& operator=(const SphDec &right);
     virtual ~SphDec();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:

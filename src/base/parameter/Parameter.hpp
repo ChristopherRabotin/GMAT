@@ -53,6 +53,7 @@ public:
     bool operator==(const Parameter &right) const;
     bool operator!=(const Parameter &right) const;
 
+    virtual bool EvaluateBoolean(); //loj: 3/25/04 added
     virtual Real EvaluateReal();
     virtual Rvector6 EvaluateRvector6();
     
@@ -64,12 +65,13 @@ public:
     virtual bool SetObject(Gmat::ObjectType objType,
                            const std::string &objName,
                            GmatBase *obj);
-    
+
+    // methods all SYSTEM_PARAM should implement
     virtual bool AddObject(const std::string &name);
-    virtual bool AddObject(GmatBase *object) = 0;
-    virtual Integer GetNumObjects() const = 0;
-    virtual bool Evaluate() = 0;
-    virtual bool Validate() = 0;
+    virtual bool AddObject(GmatBase *object);
+    virtual Integer GetNumObjects() const;
+    virtual bool Evaluate();
+    virtual bool Validate();
     
     // methods inherited from GmatBase
     virtual std::string GetParameterText(const Integer id) const;

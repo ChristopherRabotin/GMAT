@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 SphRA::SphRA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : RealVar(name, "SphRA", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "SphRA", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -58,7 +58,7 @@ SphRA::SphRA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphRA::SphRA(const SphRA &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -75,7 +75,7 @@ const SphRA&
 SphRA::operator=(const SphRA &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -92,101 +92,8 @@ SphRA::~SphRA()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real SphRA::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer SphRA::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* SphRA::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool SphRA::SetObject(Gmat::ObjectType objType,
-                      const std::string &objName,
-                      GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool SphRA::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool SphRA::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // bool Evaluate()
@@ -199,9 +106,9 @@ bool SphRA::Validate()
 //------------------------------------------------------------------------------
 bool SphRA::Evaluate()
 {
-    mValue = GetSphReal("SphRA");    
+    mRealValue = OrbitData::GetSphReal("SphRA");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -231,7 +138,7 @@ bool SphRA::Evaluate()
 //------------------------------------------------------------------------------
 SphDec::SphDec(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : RealVar(name, "SphDec", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "SphDec", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -246,7 +153,7 @@ SphDec::SphDec(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphDec::SphDec(const SphDec &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -263,7 +170,7 @@ const SphDec&
 SphDec::operator=(const SphDec &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -280,101 +187,8 @@ SphDec::~SphDec()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real SphDec::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer SphDec::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* SphDec::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool SphDec::SetObject(Gmat::ObjectType objType,
-                       const std::string &objName,
-                       GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool SphDec::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool SphDec::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // bool Evaluate()
@@ -387,9 +201,9 @@ bool SphDec::Validate()
 //------------------------------------------------------------------------------
 bool SphDec::Evaluate()
 {
-    mValue = GetSphReal("SphDec");    
+    mRealValue = OrbitData::GetSphReal("SphDec");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -482,7 +296,7 @@ SphElem::~SphElem()
 Rvector6 SphElem::EvaluateRvector6()
 {
     Evaluate();
-    return mValue;
+    return mRvec6Value;
 }
 
 
@@ -577,13 +391,13 @@ bool SphElem::Validate()
 //------------------------------------------------------------------------------
 bool SphElem::Evaluate()
 {
-    mValue.Set(GetSphReal("SphRMag"),
-               GetSphReal("SphRA"),
-               GetSphReal("SphDec"),
-               GetSphReal("SphVMag"),
-               GetSphReal("SphVRA"),
-               GetSphReal("SphVDec"));
+    mRvec6Value.Set(GetSphReal("SphRMag"),
+                    GetSphReal("SphRA"),
+                    GetSphReal("SphDec"),
+                    GetSphReal("SphVMag"),
+                    GetSphReal("SphVRA"),
+                    GetSphReal("SphVDec"));
 
-    return mValue.IsValid(ORBIT_REAL_UNDEFINED);
+    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
 

@@ -16,8 +16,10 @@
  * Defines base class of Rvector6 parameters.
  */
 //------------------------------------------------------------------------------
+
 #include "gmatdefs.hpp"
 #include "Rvec6Var.hpp"
+#include "ParameterException.hpp"
 
 
 //---------------------------------
@@ -76,7 +78,7 @@ Rvec6Var::Rvec6Var(const std::string &name,
                    bool isTimeParam)
     : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
 {  
-    mValue = Rvector6::RVECTOR6_UNDEFINED;
+    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
     // GmatBase data
     parameterCount = Rvec6VarParamCount;
 }
@@ -93,7 +95,7 @@ Rvec6Var::Rvec6Var(const std::string &name,
 Rvec6Var::Rvec6Var(const Rvec6Var &copy)
     : Parameter(copy)
 {
-    mValue = copy.mValue;
+    mRvec6Value = copy.mRvec6Value;
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +114,7 @@ Rvec6Var& Rvec6Var::operator= (const Rvec6Var& right)
     if (this != &right)
     {
         Parameter::operator=(right);
-        mValue = right.mValue;
+        mRvec6Value = right.mRvec6Value;
     }
 
     return *this;
@@ -163,6 +165,18 @@ bool Rvec6Var::operator!=(const Rvec6Var &right) const
 //------------------------------------------------------------------------------
 Rvector6 Rvec6Var::EvaluateRvector6()
 {
+    if (mKey == SYSTEM_PARAM)
+    {
+        throw ParameterException("Parameter: EvaluateReal() should be implemented "
+                                 "for Parameter Type:" + GetTypeName());
+    }
+    else
+    {
+        //loj: Parse the expresstion, then evaluate
+        //loj: Should we use mDesc field instead of creating new exp. field?
+        return mRvec6Value; //loj: temp code
+    }
+
     return Rvector6(REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
                     REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED,
                     REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED);
@@ -178,7 +192,7 @@ Rvector6 Rvec6Var::EvaluateRvector6()
 //------------------------------------------------------------------------------
 Rvector6 Rvec6Var::GetRvector6() const
 {
-    return mValue;
+    return mRvec6Value;
 }
 
 //------------------------------------
@@ -221,9 +235,9 @@ std::string Rvec6Var::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id)
+// std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
-std::string Rvec6Var::GetParameterText(const Integer id)
+std::string Rvec6Var::GetParameterText(const Integer id) const
 {
     if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
         return PARAMETER_TEXT[id - ParameterParamCount];
@@ -232,9 +246,9 @@ std::string Rvec6Var::GetParameterText(const Integer id)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string str)
+// Integer GetParameterID(const std::string str) const
 //------------------------------------------------------------------------------
-Integer Rvec6Var::GetParameterID(const std::string str)
+Integer Rvec6Var::GetParameterID(const std::string str) const
 {
     for (int i=ParameterParamCount; i<Rvec6VarParamCount; i++)
     {
@@ -246,12 +260,12 @@ Integer Rvec6Var::GetParameterID(const std::string str)
 }
 
 //------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id)
+// Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
-Real Rvec6Var::GetRealParameter(const Integer id)
+Real Rvec6Var::GetRealParameter(const Integer id) const
 {
     if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
-        return mValue(id - ParameterParamCount);
+        return mRvec6Value(id - ParameterParamCount);
     else
         return Parameter::GetRealParameter(id);
 }
@@ -263,7 +277,7 @@ Real Rvec6Var::SetRealParameter(const Integer id, const Real value)
 {
     if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
     {
-        mValue(id - ParameterParamCount) = value;
+        mRvec6Value(id - ParameterParamCount) = value;
         return value;
     }
     else

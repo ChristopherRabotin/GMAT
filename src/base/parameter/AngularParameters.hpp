@@ -23,6 +23,7 @@
 #include "gmatdefs.hpp"
 #include "RealVar.hpp"
 #include "OrbitData.hpp"
+#include "OrbitReal.hpp"
 
 //==============================================================================
 //                              SemilatusRectum
@@ -32,7 +33,7 @@
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API SemilatusRectum : public RealVar, OrbitData
+class GMAT_API SemilatusRectum : public OrbitReal
 {
 public:
 
@@ -44,19 +45,7 @@ public:
     const SemilatusRectum& operator=(const SemilatusRectum &right);
     virtual ~SemilatusRectum();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:

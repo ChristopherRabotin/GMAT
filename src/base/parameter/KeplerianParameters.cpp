@@ -14,7 +14,7 @@
 //
 /**
  * Implements Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA
+ *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem
  */
 //------------------------------------------------------------------------------
 #include "KeplerianParameters.hpp"
@@ -42,7 +42,7 @@
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepSMA", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepSMA", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -57,7 +57,7 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepSMA::KepSMA(const KepSMA &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -74,7 +74,7 @@ const KepSMA&
 KepSMA::operator=(const KepSMA &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -91,101 +91,8 @@ KepSMA::~KepSMA()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepSMA::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepSMA::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepSMA::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepSMA::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepSMA::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepSMA::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -198,9 +105,9 @@ bool KepSMA::Validate()
 //------------------------------------------------------------------------------
 bool KepSMA::Evaluate()
 {
-    mValue = GetKepReal("KepSMA");    
+    mRealValue = OrbitData::GetKepReal("KepSMA");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -229,7 +136,7 @@ bool KepSMA::Evaluate()
 //------------------------------------------------------------------------------
 KepEcc::KepEcc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepEcc", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepEcc", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -244,7 +151,7 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepEcc::KepEcc(const KepEcc &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -261,7 +168,7 @@ const KepEcc&
 KepEcc::operator=(const KepEcc &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -278,101 +185,8 @@ KepEcc::~KepEcc()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepEcc::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepEcc::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepEcc::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepEcc::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepEcc::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepEcc::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // bool Evaluate()
@@ -385,9 +199,9 @@ bool KepEcc::Validate()
 //------------------------------------------------------------------------------
 bool KepEcc::Evaluate()
 {
-    mValue = GetKepReal("KepEcc");
+    mRealValue = OrbitData::GetKepReal("KepEcc");
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -417,7 +231,7 @@ bool KepEcc::Evaluate()
 //------------------------------------------------------------------------------
 KepInc::KepInc(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepInc", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepInc", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -432,7 +246,7 @@ KepInc::KepInc(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepInc::KepInc(const KepInc &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -449,7 +263,7 @@ const KepInc&
 KepInc::operator=(const KepInc &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -466,101 +280,8 @@ KepInc::~KepInc()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of real parameter
- */
-//------------------------------------------------------------------------------
-Real KepInc::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepInc::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepInc::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepInc::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepInc::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepInc::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -573,9 +294,9 @@ bool KepInc::Validate()
 //------------------------------------------------------------------------------
 bool KepInc::Evaluate()
 {
-    mValue = GetKepReal("KepInc");    
+    mRealValue = OrbitData::GetKepReal("KepInc");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -604,7 +325,7 @@ bool KepInc::Evaluate()
 //------------------------------------------------------------------------------
 KepAOP::KepAOP(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepAOP", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepAOP", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -619,7 +340,7 @@ KepAOP::KepAOP(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepAOP::KepAOP(const KepAOP &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -636,7 +357,7 @@ const KepAOP&
 KepAOP::operator=(const KepAOP &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -653,102 +374,8 @@ KepAOP::~KepAOP()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepAOP::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepAOP::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepAOP::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepAOP::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepAOP::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepAOP::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -761,9 +388,9 @@ bool KepAOP::Validate()
 //------------------------------------------------------------------------------
 bool KepAOP::Evaluate()
 {
-    mValue = GetKepReal("KepAOP");    
+    mRealValue = OrbitData::GetKepReal("KepAOP");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -792,7 +419,7 @@ bool KepAOP::Evaluate()
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
                            const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepRAAN", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepRAAN", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -807,7 +434,7 @@ KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const KepRAAN &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -824,7 +451,7 @@ const KepRAAN&
 KepRAAN::operator=(const KepRAAN &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
     
     return *this;
 }
@@ -841,102 +468,8 @@ KepRAAN::~KepRAAN()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepRAAN::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepRAAN::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepRAAN::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepRAAN::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepRAAN::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepRAAN::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -949,9 +482,9 @@ bool KepRAAN::Validate()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-    mValue = GetKepReal("KepRAAN");    
+    mRealValue = OrbitData::GetKepReal("KepRAAN");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -980,7 +513,7 @@ bool KepRAAN::Evaluate()
 //------------------------------------------------------------------------------
 KepTA::KepTA(const std::string &name, GmatBase *obj,
                        const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepTA", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepTA", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -995,7 +528,7 @@ KepTA::KepTA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepTA::KepTA(const KepTA &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -1012,7 +545,7 @@ const KepTA&
 KepTA::operator=(const KepTA &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -1029,101 +562,8 @@ KepTA::~KepTA()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepTA::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepTA::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepTA::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepTA::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepTA::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepTA::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -1136,9 +576,9 @@ bool KepTA::Validate()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-    mValue = GetKepReal("KepTA");    
+    mRealValue = OrbitData::GetKepReal("KepTA");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
@@ -1167,7 +607,7 @@ bool KepTA::Evaluate()
 //------------------------------------------------------------------------------
 KepMA::KepMA(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepMA", SYSTEM_PARAM, obj, desc, unit, false)
+    : OrbitReal(name, "KepMA", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }
@@ -1182,7 +622,7 @@ KepMA::KepMA(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepMA::KepMA(const KepMA &copy)
-    : RealVar(copy)
+    : OrbitReal(copy)
 {
 }
 
@@ -1199,7 +639,7 @@ const KepMA&
 KepMA::operator=(const KepMA &right)
 {
     if (this != &right)
-        RealVar::operator=(right);
+        OrbitReal::operator=(right);
 
     return *this;
 }
@@ -1216,101 +656,8 @@ KepMA::~KepMA()
 }
 
 //-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepMA::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepMA::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepMA::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepMA::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepMA::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepMA::Validate()
-{
-    return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -1323,13 +670,108 @@ bool KepMA::Validate()
 //------------------------------------------------------------------------------
 bool KepMA::Evaluate()
 {
-    mValue = GetKepReal("KepMA");    
+    mRealValue = OrbitData::GetKepReal("KepMA");    
     
-    if (mValue == ORBIT_REAL_UNDEFINED)
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
         return false;
     else
         return true;
 }
+
+//==============================================================================
+//                              KepMM
+//==============================================================================
+/**
+ * Implements Keplerian Mean Motion class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// KepMM(const std::string &name, GmatBase *obj,
+//       const std::string &desc, const std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ * @param <desc> description of the parameter
+ * @param <unit> unit of the parameter
+ */
+//------------------------------------------------------------------------------
+KepMM::KepMM(const std::string &name, GmatBase *obj,
+             const std::string &desc, const std::string &unit)
+    : OrbitReal(name, "KepMM", SYSTEM_PARAM, obj, desc, unit, false)
+{
+    AddObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// KepMM(const KepMM &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+KepMM::KepMM(const KepMM &copy)
+    : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const KepMM& operator=(const KepMM &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const KepMM&
+KepMM::operator=(const KepMM &right)
+{
+    if (this != &right)
+        OrbitReal::operator=(right);
+
+    return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~KepMM()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+KepMM::~KepMM()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool KepMM::Evaluate()
+{
+    mRealValue = OrbitData::GetOtherKepReal("KepMm");    
+    
+    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+        return false;
+    else
+        return true;
+}
+
 
 //==============================================================================
 //                              KepElem
@@ -1417,7 +859,7 @@ KepElem::~KepElem()
 Rvector6 KepElem::EvaluateRvector6()
 {
     Evaluate();
-    return mValue;
+    return mRvec6Value;
 }
 
 
@@ -1512,585 +954,12 @@ bool KepElem::Validate()
 //------------------------------------------------------------------------------
 bool KepElem::Evaluate()
 {
-    mValue.Set(GetKepReal("KepSMA"),
-               GetKepReal("KepEcc"),
-               GetKepReal("KepInc"),
-               GetKepReal("KepRAAN"),
-               GetKepReal("KepAOP"),
-               GetKepReal("KepTA"));
+    mRvec6Value.Set(OrbitData::GetKepReal("KepSMA"),
+                    GetKepReal("KepEcc"),
+                    GetKepReal("KepInc"),
+                    GetKepReal("KepRAAN"),
+                    GetKepReal("KepAOP"),
+                    GetKepReal("KepTA"));
 
-    return mValue.IsValid(ORBIT_REAL_UNDEFINED);
+    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
-
-
-//==============================================================================
-//                              KepMM
-//==============================================================================
-/**
- * Implements Keplerian Mean Motion class.
- */
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// KepMM(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-KepMM::KepMM(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-    : RealVar(name, "KepMM", SYSTEM_PARAM, obj, desc, unit, false)
-{
-    AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// KepMM(const KepMM &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-KepMM::KepMM(const KepMM &copy)
-    : RealVar(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// const KepMM& operator=(const KepMM &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const KepMM&
-KepMM::operator=(const KepMM &right)
-{
-    if (this != &right)
-        RealVar::operator=(right);
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~KepMM()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-KepMM::~KepMM()
-{
-}
-
-//-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real KepMM::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepMM::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepMM::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepMM::SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepMM::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepMM::Validate()
-{
-    return ValidateRefObjects(this);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepMM::Evaluate()
-{
-    mValue = GetOtherKepReal("KepMm");    
-    
-    if (mValue == ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
-}
-
-//==============================================================================
-//                              VelApoapsis
-//==============================================================================
-/**
- * Implements Velocity at Apoapsis class.
- */
-//------------------------------------------------------------------------------
-
-//---------------------------------
-// public methods
-//---------------------------------
-
-//------------------------------------------------------------------------------
-// VelApoapsis(const std::string &name, GmatBase *obj,
-//             const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-    : RealVar(name, "VelApoapsis", SYSTEM_PARAM, obj, desc, unit, false)
-{
-    AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// VelApoapsis(const VelApoapsis &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-VelApoapsis::VelApoapsis(const VelApoapsis &copy)
-    : RealVar(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// const VelApoapsis& operator=(const VelApoapsis &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const VelApoapsis&
-VelApoapsis::operator=(const VelApoapsis &right)
-{
-    if (this != &right)
-        RealVar::operator=(right);
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~VelApoapsis()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-VelApoapsis::~VelApoapsis()
-{
-}
-
-//-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real VelApoapsis::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer VelApoapsis::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* VelApoapsis::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool VelApoapsis::SetObject(Gmat::ObjectType objType,
-                                 const std::string &objName,
-                                 GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool VelApoapsis::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VelApoapsis::Validate()
-{
-    return ValidateRefObjects(this);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VelApoapsis::Evaluate()
-{
-    mValue = GetOtherKepReal("VelApoapsis");    
-    
-    if (mValue == ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
-}
-
-//==============================================================================
-//                              VelPeriapsis
-//==============================================================================
-/**
- * Implements Velocity at Periapsis class.
- */
-//------------------------------------------------------------------------------
-
-//---------------------------------
-// public methods
-//---------------------------------
-
-//------------------------------------------------------------------------------
-// VelPeriapsis(const std::string &name, GmatBase *obj,
-//              const std::string &desc, const std::string &unit)
-//------------------------------------------------------------------------------
-/**
- * Constructor.
- *
- * @param <name> name of the parameter
- * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
- */
-//------------------------------------------------------------------------------
-VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj,
-                           const std::string &desc, const std::string &unit)
-    : RealVar(name, "VelPeriapsis", SYSTEM_PARAM, obj, desc, unit, false)
-{
-    AddObject(obj);
-}
-
-//------------------------------------------------------------------------------
-// VelPeriapsis(const VelPeriapsis &copy)
-//------------------------------------------------------------------------------
-/**
- * Copy constructor.
- *
- * @param <copy> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-VelPeriapsis::VelPeriapsis(const VelPeriapsis &copy)
-    : RealVar(copy)
-{
-}
-
-//------------------------------------------------------------------------------
-// const VelPeriapsis& operator=(const VelPeriapsis &right)
-//------------------------------------------------------------------------------
-/**
- * Assignment operator.
- *
- * @param <right> the parameter to make copy of
- */
-//------------------------------------------------------------------------------
-const VelPeriapsis&
-VelPeriapsis::operator=(const VelPeriapsis &right)
-{
-    if (this != &right)
-        RealVar::operator=(right);
-
-    return *this;
-}
-
-//------------------------------------------------------------------------------
-// ~VelPeriapsis()
-//------------------------------------------------------------------------------
-/**
- * Destructor.
- */
-//------------------------------------------------------------------------------
-VelPeriapsis::~VelPeriapsis()
-{
-}
-
-//-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// Real EvaluateReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real VelPeriapsis::EvaluateReal()
-{
-    Evaluate();
-    return mValue;
-}
-
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer VelPeriapsis::GetNumObjects() const
-{
-    return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* VelPeriapsis::GetObject(const std::string &objTypeName)
-{
-    return GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool VelPeriapsis::SetObject(Gmat::ObjectType objType,
-                                  const std::string &objName,
-                                  GmatBase *obj)
-{
-    if (obj != NULL)
-        return SetRefObject(objType, objName, obj);
-    else
-        return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool VelPeriapsis::AddObject(GmatBase *obj)
-{
-    if (obj != NULL)
-    {
-        if (AddRefObject(obj))
-            ManageObject(obj);
-        
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VelPeriapsis::Validate()
-{
-    return ValidateRefObjects(this);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Evaluate()
-//------------------------------------------------------------------------------
-/**
- * Evaluates value of the parameter.
- *
- * @return true if parameter value successfully evaluated; false otherwise
- */
-//------------------------------------------------------------------------------
-bool VelPeriapsis::Evaluate()
-{
-    mValue = GetOtherKepReal("VelPeriapsis");    
-    
-    if (mValue == ORBIT_REAL_UNDEFINED)
-        return false;
-    else
-        return true;
-}
-

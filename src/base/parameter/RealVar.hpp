@@ -49,16 +49,16 @@ public:
     // The inherited methods from GmatBase
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual std::string GetParameterText(const Integer id);
-    virtual Integer GetParameterID(const std::string str);
-    virtual Real GetRealParameter(const Integer id); //loj:1/23 switch the line
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string str) const; //loj: 3/25 const was missing
+    virtual Real GetRealParameter(const std::string &label) const;
+    virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
-    virtual Real GetRealParameter(const std::string &label);
     virtual Real SetRealParameter(const std::string &label, const Real value);
     
 protected:
 
-    Real mValue;
+    Real mRealValue;
     
     enum
     {
@@ -66,8 +66,8 @@ protected:
         RealVarParamCount
     };
     
-    static const Gmat::ParameterType PARAMETER_TYPE[RealVarParamCount];
-    static const std::string PARAMETER_TEXT[RealVarParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
+    static const std::string PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
     
 private:
 

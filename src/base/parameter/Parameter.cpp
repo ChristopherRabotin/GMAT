@@ -21,7 +21,7 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
-#if !defined __TEST_PARAM__
+#if !defined __UNIT_TEST__
 #include "Moderator.hpp"
 #endif
 
@@ -279,6 +279,20 @@ bool Parameter::operator!=(const Parameter &right) const
 }
 
 //------------------------------------------------------------------------------
+// bool EvaluateBoolean()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates parameter value.
+ *
+ * @return false if derived class doesn't implement this
+ */
+//------------------------------------------------------------------------------
+bool Parameter::EvaluateBoolean()
+{
+    return false;
+}
+
+//------------------------------------------------------------------------------
 // Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
@@ -355,7 +369,7 @@ bool Parameter::AddObject(const std::string &name)
 {
     bool status = false;
 
-#if !defined __TEST_PARAM__
+#if !defined __UNIT_TEST__
     
     Moderator *theModerator = Moderator::Instance();
     
@@ -378,6 +392,58 @@ bool Parameter::AddObject(const std::string &name)
     }
 #endif
     return status;
+}
+
+//------------------------------------------
+// methods All SYSTEM_PARAM should implement
+//------------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool AddObject(GmatBase *object)
+//------------------------------------------------------------------------------
+bool Parameter::AddObject(GmatBase *object)
+{
+    if (mKey == SYSTEM_PARAM)
+        throw ParameterException("Parameter: AddObject() should be implemented "
+                                 "for Parameter Type:" + GetTypeName());
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual Integer GetNumObjects() const
+//------------------------------------------------------------------------------
+Integer Parameter::GetNumObjects() const
+{
+    if (mKey == SYSTEM_PARAM)
+        throw ParameterException("Parameter: GetNumObjects() should be implemented"
+                                 "for Parameter Type: " + GetTypeName());
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+bool Parameter::Evaluate()
+{
+    if (mKey == SYSTEM_PARAM)
+        throw ParameterException("Parameter: Evaluate() should be implemented "
+                                 "for Parameter Type: " + GetTypeName());
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual bool Validate()
+//------------------------------------------------------------------------------
+bool Parameter::Validate()
+{
+    if (mKey == SYSTEM_PARAM)
+        throw ParameterException("Parameter: Validate() should be implemented "
+                                 "for Parameter Type: " + GetTypeName());
+
+    return false;
 }
 
 //---------------------------------

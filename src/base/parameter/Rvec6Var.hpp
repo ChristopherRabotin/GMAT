@@ -50,9 +50,9 @@ public:
     // The inherited methods from GmatBase
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual std::string GetParameterText(const Integer id);
-    virtual Integer GetParameterID(const std::string str);
-    virtual Real GetRealParameter(const Integer id);
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string str) const; //loj: 3/25 const was missing
+    virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);
 
 protected:
@@ -68,7 +68,7 @@ protected:
         Rvec6VarParamCount
     };
 
-    Rvector6 mValue;
+    Rvector6 mRvec6Value;
         
     static const Gmat::ParameterType PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
     static const std::string PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];

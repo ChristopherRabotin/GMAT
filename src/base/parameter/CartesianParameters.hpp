@@ -14,7 +14,7 @@
 //
 /**
  * Declares Cartesian related parameter classes.
- *   CartX, CartY, CartZ, CartVx, CartVy, CartVz, CartState
+ *   CartX, CartY, CartZ, CartVx, CartVy, CartVz, RMag, VMag, CartState
  */
 //------------------------------------------------------------------------------
 #ifndef CartesianParameters_hpp
@@ -25,6 +25,7 @@
 #include "Rvec6Var.hpp"
 #include "Rvector6.hpp"
 #include "OrbitData.hpp"
+#include "OrbitReal.hpp"
 
 //==============================================================================
 //                               CartX
@@ -34,7 +35,7 @@
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartX : public RealVar, OrbitData
+class GMAT_API CartX : public OrbitReal
 {
 public:
 
@@ -46,19 +47,7 @@ public:
     const CartX& operator=(const CartX &right);
     virtual ~CartX();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:
@@ -73,7 +62,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartY : public RealVar, OrbitData
+class GMAT_API CartY : public OrbitReal
 {
 public:
 
@@ -85,19 +74,7 @@ public:
     const CartY& operator=(const CartY &right);
     virtual ~CartY();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
     
 protected:
@@ -112,7 +89,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartZ : public RealVar, OrbitData
+class GMAT_API CartZ : public OrbitReal
 {
 public:
 
@@ -124,19 +101,7 @@ public:
     const CartZ& operator=(const CartZ &right);
     virtual ~CartZ();
 
-    // The inherited methods from RealVar
-    virtual Real EvaluateReal();
-
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:
@@ -151,7 +116,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartVx : public RealVar, OrbitData
+class GMAT_API CartVx : public OrbitReal
 {
 public:
 
@@ -164,18 +129,6 @@ public:
     virtual ~CartVx();
 
     // The inherited methods from Parameter
-    virtual Real EvaluateReal();
-
-    // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
     
 protected:
@@ -190,7 +143,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartVy : public RealVar, OrbitData
+class GMAT_API CartVy : public OrbitReal
 {
 public:
 
@@ -203,18 +156,6 @@ public:
     virtual ~CartVy();
 
     // The inherited methods from Parameter
-    virtual Real EvaluateReal();
-
-    // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
-    
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
     virtual bool Evaluate();
 
 protected:
@@ -229,7 +170,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartVz : public RealVar, OrbitData
+class GMAT_API CartVz : public OrbitReal
 {
 public:
 
@@ -242,18 +183,60 @@ public:
     virtual ~CartVz();
 
     // The inherited methods from Parameter
-    virtual Real EvaluateReal();
+    virtual bool Evaluate();
+    
+protected:
+
+};
+
+//==============================================================================
+//                              RMag
+//==============================================================================
+/**
+ * Declares Magnitude of Position class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API RMag : public OrbitReal
+{
+public:
+
+    RMag(const std::string &name = "",
+         GmatBase *obj = NULL,
+         const std::string &desc = "",
+         const std::string &unit = "Km/Sec");
+    RMag(const RMag &copy);
+    const RMag& operator=(const RMag &right);
+    virtual ~RMag();
 
     // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
+    virtual bool Evaluate();
     
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
+protected:
+
+};
+
+//==============================================================================
+//                              VMag
+//==============================================================================
+/**
+ * Declares Magnitude of Velocity class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API VMag : public OrbitReal
+{
+public:
+
+    VMag(const std::string &name = "",
+         GmatBase *obj = NULL,
+         const std::string &desc = "",
+         const std::string &unit = "Km/Sec");
+    VMag(const VMag &copy);
+    const VMag& operator=(const VMag &right);
+    virtual ~VMag();
     
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
+    // The inherited methods from Parameter
     virtual bool Evaluate();
     
 protected:
