@@ -49,11 +49,14 @@ NoOp::~NoOp()
 //------------------------------------------------------------------------------
 /**
  * Makes a copy of the NoOp command (copy constructor).
+ *
+ * @param noop The original used to set parameters for this one.
  */
 //------------------------------------------------------------------------------
 NoOp::NoOp(const NoOp& noop) :
     GmatCommand (noop)
-{}
+{
+}
 
 
 //------------------------------------------------------------------------------
@@ -63,16 +66,18 @@ NoOp::NoOp(const NoOp& noop) :
  * Sets this NoOp to match another one (assignment operator).
  * 
  * @param noop The original used to set parameters for this one.
+ *
+ * @return this instance.
  */
 //------------------------------------------------------------------------------
 NoOp& NoOp::operator=(const NoOp& noop)
 {
-    return *this;
+   return *this;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Executes the NoOp command (copy constructor).
@@ -80,11 +85,13 @@ NoOp& NoOp::operator=(const NoOp& noop)
  * Like the name implies, NoOp is a null operation -- nothing is done in this 
  * command.  It functions as a place holder, and as the starting command in the 
  * command sequence managed by the Moderator.
+ *
+ * @return true always.
  */
 //------------------------------------------------------------------------------
-bool NoOp::Execute(void)
+bool NoOp::Execute()
 {
-    return true;
+   return true;
 }
 
 
@@ -95,11 +102,9 @@ bool NoOp::Execute(void)
  * This method returns a clone of the NoOp.
  *
  * @return clone of the NoOp.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* NoOp::Clone(void) const
+GmatBase* NoOp::Clone() const
 {
    return (new NoOp(*this));
 }
-

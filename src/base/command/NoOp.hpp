@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  ClassName
+//                                  NoOp
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -17,8 +17,8 @@
 
 
 
-#ifndef NOOP_HPP
-#define NOOP_HPP
+#ifndef NoOp_hpp
+#define NoOp_hpp
 
 #include "Command.hpp" // inheriting class's header file
 
@@ -26,21 +26,19 @@
  * Default command used to initialize the command sequence lists in the 
  * Moderator
  */
-class NoOp : public GmatCommand
+class GMAT_API NoOp : public GmatCommand
 {
-	public:
-		NoOp();
-		virtual ~NoOp();
-		NoOp(const NoOp& noop);
-      NoOp&                         operator=(const NoOp&);
+public:
+   NoOp();
+   virtual ~NoOp();
+   NoOp(const NoOp& noop);
+   NoOp&                   operator=(const NoOp &noop);
 
-		
-		bool                          Execute(void);
+   bool                    Execute(void);
 
-      // inherited from GmatBase
-      virtual GmatBase* Clone(void) const;
-
+   // inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
 };
 
 
-#endif // NOOP_HPP
+#endif // NoOp_hpp
