@@ -331,7 +331,7 @@ void Star::InitializeStar()
    mu                  = Star::MU;
    posVelSrc           = Star::POS_VEL_SOURCE;
    analyticMethod      = Star::ANALYTIC_METHOD;
-   centralBody         = NULL;
+   centralBody         = "";
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
    //order               = Star::ORDER;
