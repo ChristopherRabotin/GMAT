@@ -223,6 +223,18 @@ bool MdiChildTrajFrame::GetDrawEcLine()
    return false;
 }
 
+
+//------------------------------------------------------------------------------
+// bool GetDrawAxes()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::GetDrawAxes()
+{
+   if (mCanvas)
+      return mCanvas->GetDrawAxes();
+
+   return false;
+}
+
 //------------------------------------------------------------------------------
 // unsigned int GetEqPlaneColor()
 //------------------------------------------------------------------------------
@@ -367,6 +379,7 @@ void MdiChildTrajFrame::SetDrawEcPlane(bool flag)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void SetDrawEcLine(bool flag)
 //------------------------------------------------------------------------------
@@ -379,6 +392,21 @@ void MdiChildTrajFrame::SetDrawEcLine(bool flag)
       mCanvas->SetDrawEcLine(flag);
    }
 }
+
+
+//------------------------------------------------------------------------------
+// void SetDrawAxes(bool flag)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDrawAxes(bool flag)
+{
+   if (mCanvas)
+   {
+      //loj: the event ID is not in the GmatPlot yet
+      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_AXES, flag);
+      mCanvas->SetDrawAxes(flag);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void SetEqPlaneColor(UnsignedInt color)

@@ -82,6 +82,7 @@ protected:
    bool mHasDrawEqPlaneChanged;
    bool mHasDrawEcPlaneChanged;
    bool mHasDrawEcLineChanged;
+   bool mHasDrawAxesChanged;
    bool mHasDrawWireFrameChanged;
    bool mHasEqPlaneColorChanged;
    bool mHasEcPlaneColorChanged;
@@ -91,6 +92,7 @@ protected:
    bool mDrawEcPlane;
    bool mDrawEcLine;
    bool mDrawWireFrame;
+   bool mDrawAxes;
    
    float mDistance;
    wxString mGotoBodyName;
@@ -110,6 +112,7 @@ protected:
    wxCheckBox *mEqPlaneCheckBox;
    wxCheckBox *mEcPlaneCheckBox;
    wxCheckBox *mEcLineCheckBox;
+   wxCheckBox *mDrawAxesCheckBox;
 
    wxButton *mCreateCoordSysButton;
    wxButton *mEqPlaneColorButton;

@@ -226,6 +226,10 @@ void OpenGlOptionDialog::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Earth Sun Lines"),
                      wxDefaultPosition, wxSize(150, 20), 0);
 
+   mDrawAxesCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Axes"),
+                     wxDefaultPosition, wxSize(150, 20), 0);
+
    // equatorial plane color
    mEqPlaneColorButton =
       new wxButton(this, ID_EQPLANE_COLOR_BUTTON, "", wxDefaultPosition,
@@ -250,8 +254,11 @@ void OpenGlOptionDialog::Create()
    wxStaticBoxSizer *drawingOptionSizer
       = new wxStaticBoxSizer(drawingOptionStaticBox, wxVERTICAL);
 
+   borderSize = 1;
    wxFlexGridSizer *drawGridSizer = new wxFlexGridSizer(2, 0, 0);
    drawGridSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mDrawAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEqPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mEqPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
@@ -472,6 +479,12 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetDrawWireFrame(mDrawWireFrame);
    }
    
+   if (mHasDrawAxesChanged)
+   {
+      mHasDrawAxesChanged = false;
+      mTrajFrame->SetDrawAxes(mDrawAxes);
+   }
+   
    if (mHasEqPlaneColorChanged)
    {
       mHasEqPlaneColorChanged = false;
@@ -594,6 +607,11 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
    {
       mHasDrawWireFrameChanged = true;
       mDrawWireFrame = mWireFrameCheckBox->GetValue();
+   }
+   else if (event.GetEventObject() == mDrawAxesCheckBox)
+   {
+      mHasDrawAxesChanged = true;
+      mDrawAxes = mDrawAxesCheckBox->GetValue();
    }
    
    theApplyButton->Enable();

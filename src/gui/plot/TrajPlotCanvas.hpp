@@ -16,6 +16,7 @@
 #define TrajPlotCanvas_hpp
 
 #include "gmatwxdefs.hpp"
+#include "OpenGlShapes.hpp"
 #include "MdiGlPlotData.hpp"
 #include "GuiInterpreter.hpp"
 #include "TextTrajectoryFile.hpp"
@@ -43,6 +44,7 @@ public:
    bool  GetDrawEqPlane() {return mDrawEqPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
    bool  GetDrawEcLine() {return mDrawEcLine;}
+   bool  GetDrawAxes() {return mDrawAxes;}
    unsigned int GetEqPlaneColor() {return mEqPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
    unsigned int GetEcLineColor() {return mEcLineColor;}
@@ -56,6 +58,7 @@ public:
    void SetDrawEqPlane(bool flag) {mDrawEqPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
    void SetDrawEcLine(bool flag) {mDrawEcLine = flag;}
+   void SetDrawAxes(bool flag) {mDrawAxes = flag;}
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
@@ -71,16 +74,12 @@ public:
    void DrawWireFrame(bool flag);
    void DrawEqPlane(bool flag);
    void DrawEcPlane(bool flag);
-   void DrawEcLine(bool flag);
+   //void DrawEcLine(bool flag);
+   void OnDrawAxes(bool flag);
    void DrawInOtherCoordSystem(const wxString &csName);
    void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void GotoStdBody(int bodyId);
    void GotoOtherBody(const wxString &bodyName);
-   
-   // events
-   void OnPaint(wxPaintEvent &event);
-   void OnSize(wxSizeEvent &event);
-   void OnMouse(wxMouseEvent &event);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -92,7 +91,14 @@ public:
    void AddBody(const wxArrayString &bodyNames,
                 const UnsignedIntArray &bodyColors);
    
-
+protected:
+   
+   // events
+   void OnPaint(wxPaintEvent &event);
+   void OnSize(wxSizeEvent &event);
+   void OnMouse(wxMouseEvent &event);
+   
+   DECLARE_EVENT_TABLE();
 
 private:
    
@@ -111,16 +117,16 @@ private:
 
    // Data members used by the mouse
    GLfloat m_fStartX, m_fStartY;
-
+   
    // Actual params of the window
    GLfloat m_fLeftPos, m_fRightPos, m_fBottomPos, m_fTopPos;
-
+   
    // Camera rotations
    GLfloat m_fCamRotationX, m_fCamRotationY, m_fCamRotationZ;
-
+   
    // Camera translations
    GLfloat m_fCamTransX, m_fCamTransY, m_fCamTransZ;
-    
+   
    // draw option
    float mAxisLength;
    bool mDrawWireFrame;
@@ -129,7 +135,8 @@ private:
    bool mDrawEclipticPlane;
    bool mDrawEcLine;
    bool mDrawSpacecraft;
-
+   bool mDrawAxes;
+   
    // color
    unsigned int mEqPlaneColor;
    unsigned int mEcPlaneColor;
@@ -182,6 +189,7 @@ private:
    
    // coordinate sytem conversion
    bool mNeedSpacecraftConversion;
+   bool mNeedEarthConversion;
    bool mNeedConversion;
    CoordinateConverter mCoordConverter;
    
@@ -220,18 +228,21 @@ private:
    float mCurrViewY;
    float mCurrViewZ;
    float mCurrViewDist;
-    
+
+   // windows specific functions
+   bool SetPixelFormatDescriptor();
+   void SetDefaultGLFont();
+
    // initialization
    bool LoadGLTextures();
-
+   
    // view objects
-   void SetupWorld();
    void SetProjection();
+   void SetupWorld();
    void ComputeView(GLfloat fEndX, GLfloat fEndY);
    void ChangeView(float viewX, float viewY, float viewZ);
-   //float viewDistance);
    void ChangeProjection(int width, int height, float axisLength);
-    
+   
    // drawing objects
    void DrawPicture();
    void DrawEarth();
@@ -241,14 +252,16 @@ private:
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawSpacecraftOrbit();
    void DrawEquatorialPlane();
-   void DrawEclipticPlane(); //loj: 1/31/05 Added
-   void DrawEarthSunLine();  //loj: 1/31/05 Added
-   
+   void DrawEclipticPlane();
+   void DrawEarthSunLine();
+   void DrawAxes();  //loj: 3/8/05 Added
+   void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
+
    // for body
    int GetStdBodyId(const std::string &name);
 
    // for coordinate sytem
-   //CoordinateSystem* CreateCoordSystem();
+   bool TiltEarthZAxis();
    bool ConvertSpacecraftData();
    
    // for copy
@@ -257,7 +270,6 @@ private:
    void CopyVector3(double to[3], double from[3]);
    void CopyVector3(double to[3], float from[3]);
    
-   DECLARE_EVENT_TABLE();
 };
 
 #endif
