@@ -11,8 +11,10 @@
 //
 // Author: Rodger Abel, Wendy Shoan
 // Created: 1995/07/18 for GSS project (originally KeplerianElements)
-// Modified: 2003/09/16 Linda Jun - Added new methods and member data to return
-//           data descriptions and values.
+// Modified:
+//    2003/09/16 Linda Jun - Added new methods and member data to return
+//                           data descriptions and values.
+//    2003/12/22 Linda Jun - Added TrueAnomaly()
 //
 /**
  * Defines KeplerianElement class;  Performs conversions between mean, true and

@@ -11,7 +11,7 @@
 //
 // Author: Rodger Abel, Wendy Shoan
 // Created: 1995/07/18 for GSS project (originally KeplerianElements)
-// Modified: 2003/09/16 Linda Jun - See Keplerian.hpp
+// Modified: - See Keplerian.hpp
 //
 /**
  * Defines KeplerianElement class;  Performs conversions between mean, true and
