@@ -518,13 +518,13 @@ bool GuiInterpreter::SetPlanetaryFileName(const std::string &filetype,
 }
 
 //------------------------------------------------------------------------------
-// bool SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+// Integer SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 //------------------------------------------------------------------------------
 /*
  * @param <filetypes> list of file type in the priority order of use
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+Integer GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 {
    return moderator->SetPlanetaryFileTypesInUse(filetypes);
 }

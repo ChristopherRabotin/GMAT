@@ -110,7 +110,7 @@ public:
    std::string GetPlanetaryFileName(const std::string &filetype);
    bool SetPlanetaryFileName(const std::string &filetype,
                              const std::string &filename);
-   bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
+   Integer SetPlanetaryFileTypesInUse(const StringArray &filetypes);
 
    // Potential field files
    std::string GetPotentialFileName(const std::string &filetype); //loj: 5/21/04 added
