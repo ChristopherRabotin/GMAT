@@ -27,7 +27,7 @@ class GMAT_API RefFrame
 {
 public:
 
-   CelestialBody* GetCentralBody() const;
+   const CelestialBody* GetCentralBody() const;
    std::string GetCentralBodyName() const;
    A1Mjd GetRefDate() const;
    std::string GetFrameName() const;
@@ -43,7 +43,7 @@ protected:
 
 private:
 
-   CelestialBody* mCentralBody;
+   const CelestialBody* mCentralBody;
    A1Mjd mRefDate;
    std::string mFrameName;
 };
