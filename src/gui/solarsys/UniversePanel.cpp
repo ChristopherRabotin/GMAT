@@ -13,7 +13,6 @@
 //
 // Author: Monisha Butler
 // Created: 2003/09/10
-// Modified: 2003/09/29
 // Modified: 2004/01/13 by Allison Greene for action handling
 /**
  * This class allows user to specify where Universe information is 
@@ -21,6 +20,7 @@
  */
 //------------------------------------------------------------------------------
 #include "UniversePanel.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -54,8 +54,8 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
 {
-  Create();
-  Show();
+    Create();
+    Show();
 }
 
 //-------------------------------
@@ -79,13 +79,17 @@ void UniversePanel::Create()
    // SetParent(new wxFrame(0,-1,"title"));
    // parent = GetParent();
     
+    MessageInterface::ShowMessage("UniversePanel::Create() entering\n");
+    
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
     wxGridSizer *item1 = new wxGridSizer( 3, 0, 0 );
     wxBoxSizer *item2 = new wxBoxSizer( wxVERTICAL );
     
     item3 = new wxStaticText( this, ID_TEXT, wxT("Available"), wxDefaultPosition, wxSize(80,-1), 0 );
     item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
-      
+
+    //loj: 2/24/04 these should not be hardcoded for future build
+    //@todo theGuiInterpreter->GetListOfFactoryItems(Gmat::PLANETARY_SOURCE); need to talk to Wendy
     wxString availableStrs []= 
     {
         wxT("SLP"), 
@@ -132,7 +136,7 @@ void UniversePanel::Create()
     wxStaticText *filetypeStaticText = new wxStaticText( this, ID_TEXT, wxT("SLP File: "), 
                                        wxDefaultPosition, wxSize(80,-1), 0 );
     wxTextCtrl *fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), wxDefaultPosition, 
-					      wxSize(250, -1),  0);
+                                              wxSize(250, -1),  0);
     wxButton *browseButton = new wxButton( this, ID_BUTTON_BROWSE, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
 
     fileSizer->Add(filetypeStaticText, 0, wxALIGN_CENTER|wxALL, 5);
@@ -143,6 +147,7 @@ void UniversePanel::Create()
     item0->Add(fileSizer, 0, wxALIGN_CENTER|wxALL, 5);
 
     theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
+    MessageInterface::ShowMessage("UniversePanel::Create() exiting\n");
 
 //      parent->SetAutoLayout( TRUE );
 //      parent->SetSizer( item0);
@@ -165,29 +170,40 @@ void UniversePanel::LoadData()
 void UniversePanel::SaveData()
 {
     // save data to core engine
+
+    //loj: 2/26/04 temp code to test SetSlpFileToUse()
+    //if first item in the list is "SLP"
+    if (selectedListBox->GetString(0).IsSameAs("SLP"))
+    {
+        MessageInterface::ShowMessage("UniversePanel::SaveData() "
+                                      "calling theGuiInterpreter->SetSlpFileToUse()\n");
+        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat");
+    }
 }
 
-//------------------------------------------------------------------------------
-// virtual void OnHelp()
-//------------------------------------------------------------------------------
-void UniversePanel::OnHelp()
-{
-    // open the window
-    GmatPanel::OnHelp();
+    //loj: 2/27/04 commented out - becaulse it is calling GmatPanel, it will never
+    // get here
+//  //------------------------------------------------------------------------------
+//  // virtual void OnHelp()
+//  //------------------------------------------------------------------------------
+//  void UniversePanel::OnHelp()
+//  {
+//      // open the window
+//      GmatPanel::OnHelp();
 
-    // fill help text
-}
+//      // fill help text
+//  }
 
-//------------------------------------------------------------------------------
-// virtual void OnScript()
-//------------------------------------------------------------------------------
-void UniversePanel::OnScript()
-{
-    // open the window
-    GmatPanel::OnScript();
+//  //------------------------------------------------------------------------------
+//  // virtual void OnScript()
+//  //------------------------------------------------------------------------------
+//  void UniversePanel::OnScript()
+//  {
+//      // open the window
+//      GmatPanel::OnScript();
 
-    // fill scripts
-}
+//      // fill scripts
+//  }
 
 
 void UniversePanel::OnAddButton(wxCommandEvent& event)
@@ -203,6 +219,7 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
       selectedListBox->Insert(s, 0);
       addButton->Enable(false);
       removeButton->Enable(true);
+      theApplyButton->Enable(); //loj: 2/27/04 added
     }
 }
 
@@ -228,8 +245,14 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
     selectedListBox->Delete(sel);
 
     if (selectedListBox->GetCount() == 0)
+    {
       removeButton->Enable(false);
+      theApplyButton->Disable();
+    }
 
+    //loj: 2/26/04 added
+    if (availableListBox->GetStringSelection().IsSameAs("SLP"))
+      addButton->Enable(true);
 }
 
 void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)

@@ -74,8 +74,9 @@ private:
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    virtual void OnHelp();
-    virtual void OnScript();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
     
     DECLARE_EVENT_TABLE();
     
