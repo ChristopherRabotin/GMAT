@@ -109,14 +109,14 @@ bool StopCondition::Evaluate()
    bool goalMet = false;
    Real epoch;
    Real rval;
-   Real stopEpoch;
+   Real stopEpoch; //in A1Mjd
     
    if (!Validate())
    {
       throw StopConditionException
-         ("StopCondition::Evaluate()::StopCondition::Evaluate(): Validate() failed.");
+         ("StopCondition::Evaluate() Validate() failed.\n");
    }
-      
+   
    //loj: Do I really need to validate parameter before evaluate?
    //     Is validating parameter in AddParameter enough?
    if (mStopParam->Validate() == false)
@@ -124,7 +124,7 @@ bool StopCondition::Evaluate()
       throw StopConditionException
          ("StopCondition::Evaluate()::Cannot evaluate the stop condition: " + 
           mStopParam->GetTypeName() + ":" + mStopParam->GetName() +
-          " Validate() failed");
+          " Validate() failed\n");
    }
 
    // set current epoch
@@ -146,8 +146,20 @@ bool StopCondition::Evaluate()
       
       if (rval >= mGoal)
       {
-         //mStopEpoch = rval; //Should we return this?
-         mStopEpoch = mGoal;
+         std::string stopParamType = mStopParam->GetTypeName();
+         
+         if (stopParamType == "ElapsedSecs")
+            mStopEpoch = mBaseEpoch + mGoal/86400.0;
+         else if (stopParamType == "ElapsedDays")
+            mStopEpoch = mBaseEpoch + mGoal;
+         else if (stopParamType == "CurrA1MJD")
+            mStopEpoch = mGoal;
+         else
+            throw StopConditionException
+               ("StopCondition::Evaluate()::Unknown stop time param type:" +
+                stopParamType + "\n");
+         
+         //mStopEpoch = epoch; //loj: 6/30/04
          goalMet = true;
       }
    }
