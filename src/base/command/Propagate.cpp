@@ -36,10 +36,12 @@ Propagate::Propagate(void) :
     // Set the parameter IDs
     propCoupledID               (parameterCount),
     interruptCheckFrequencyID   (parameterCount+1),
+    satNameID                   (parameterCount+2),
+    propNameID                  (parameterCount+3),
     secondsToProp               (8640.0)
 {
     // Increase the number of parms by the 2 new ones
-    parameterCount += 2;
+    parameterCount += 4;
 }
 
 
@@ -74,6 +76,8 @@ Propagate::Propagate(const Propagate &p) :
     // Set the parameter IDs
     propCoupledID               (p.propCoupledID),
     interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
+    satNameID                   (p.satNameID),
+    propNameID                  (p.propNameID),
     secondsToProp               (p.secondsToProp)
 {
     // Increase the number of parms by the 2 new ones
@@ -144,6 +148,19 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 }
 
 
+GmatBase* Propagate::GetObject(const Gmat::ObjectType type, 
+                               const std::string objName)
+{
+    if (type == Gmat::STOP_CONDITION)
+        if (stopWhen.empty())
+            return NULL;
+        else
+            return stopWhen[0];
+            
+    return Command::GetObject(type, objName);
+}
+
+
 // Parameter accessor methods
 std::string Propagate::GetParameterText(const Integer id) const
 {
@@ -152,6 +169,15 @@ std::string Propagate::GetParameterText(const Integer id) const
 
     if (id == interruptCheckFrequencyID)
         return "InterruptFrequency";
+
+    if (id == satNameID)
+        return "Satellite";
+    
+    if (id == propNameID)
+        return "Propagator";
+    
+    if (id == stopWhenID)
+        return "StoppingConditions";
 
     return Command::GetParameterText(id);
 }
@@ -165,6 +191,12 @@ Integer Propagate::GetParameterID(const std::string &str) const
     if (str == "InterruptFrequency")
         return interruptCheckFrequencyID;
 
+    if (str == "Satellite")
+        return satNameID;
+    
+    if (str == "Propagator")
+        return propNameID;
+    
     return Command::GetParameterID(str);
 }
 
@@ -177,6 +209,12 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
     if (id == interruptCheckFrequencyID)
         return Gmat::INTEGER_TYPE;
 
+    if (id == satNameID)
+        return Gmat::STRINGARRAY_TYPE;
+    
+    if (id == propNameID)
+        return Gmat::STRING_TYPE;
+    
     return Command::GetParameterType(id);
 }
 
@@ -188,6 +226,12 @@ std::string Propagate::GetParameterTypeString(const Integer id) const
 
     if (id == interruptCheckFrequencyID)
         return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
+
+    if (id == satNameID)
+        return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
+
+    if (id == propNameID)
+        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
 
     return Command::GetParameterTypeString(id);
 }
@@ -231,6 +275,41 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
     }
 
     return Command::SetBooleanParameter(id, value);
+}
+
+
+std::string Propagate::GetStringParameter(const Integer id) const
+{
+    if (id == propNameID)
+        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+
+    return Command::GetStringParameter(id);
+}
+
+
+bool Propagate::SetStringParameter(const Integer id, const std::string &value)
+{
+    if (id == satNameID)
+        if (satName.empty())
+            satName.push_back(value);
+        else                            /// @todo: Generalize for multiple sats
+            satName[0] = value;
+//        if (value == "")
+//            satName.clear();
+
+    if (id == propNameID)
+        propName = value;
+ 
+    return Command::SetStringParameter(id, value);
+}
+
+
+const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
+{
+    if (id == satNameID)
+        return satName;
+ 
+    return Command::GetStringArrayParameter(id);
 }
 
 

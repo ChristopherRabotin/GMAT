@@ -37,17 +37,17 @@ public:
     Propagate(void);
     virtual ~Propagate(void);
     Propagate(const Propagate &p);
-    Propagate&              operator=(const Propagate &p);
+    Propagate&          operator=(const Propagate &p);
 
     // Methods used for configuration
-    virtual bool            SetObject(const std::string &name,
-                                      const Gmat::ObjectType type,
-                                      const std::string &associate = "",
-                                      const Gmat::ObjectType associateType =
-                                                          Gmat::UNKNOWN_OBJECT);
-
-    virtual bool            SetObject(GmatBase *obj,
-                                      const Gmat::ObjectType type);
+    virtual bool        SetObject(const std::string &name,
+                                  const Gmat::ObjectType type,
+                                  const std::string &associate = "",
+                                  const Gmat::ObjectType associateType =
+                                                      Gmat::UNKNOWN_OBJECT);
+    virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
+    virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
+                                      const std::string objName = "");
 
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
@@ -62,6 +62,11 @@ public:
     virtual bool        GetBooleanParameter(const Integer id) const;
     virtual bool        SetBooleanParameter(const Integer id,
                                             const bool value);
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+    virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id) const; 
 
     // Methods used to run the command
     virtual void            InterpretAction(void);
@@ -107,6 +112,12 @@ protected:
     const Integer           propCoupledID;
     /// ID for the number of iterations before calling to check for interrupts
     const Integer           interruptCheckFrequencyID;
+    /// ID for the satellite name array
+    const Integer           satNameID;
+    /// ID for the propagator name
+    const Integer           propNameID;
+    /// ID used to get the stopping conditions
+    const Integer           stopWhenID;
     
     /// Temporary parameter used to stop on time
     Real                    secondsToProp;

@@ -78,6 +78,7 @@ class Command : public GmatBase
                                       const Gmat::ObjectType type);
         virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
                                       const std::string objName = "");
+
         virtual void        SetSolarSystem(SolarSystem *ss);
         virtual void        SetObjectMap(std::map<std::string, GmatBase *> *map);
         virtual void        SetPublisher(Publisher *p);
