@@ -179,7 +179,7 @@ PredictorCorrector::PredictorCorrector(const PredictorCorrector& pc) :
     starter                         (NULL),
     invOrder                        (pc.invOrder)
 {
-    parameterCount = PredictorCorrectorParamCount;
+//    parameterCount = PredictorCorrectorParamCount;
     tolerance = pc.tolerance;
     initialized = false;
 }
@@ -207,6 +207,15 @@ PredictorCorrector& PredictorCorrector::operator=(const PredictorCorrector& pc)
     startupCount = 0;
     invOrder = pc.invOrder;
     initialized = false;
+    
+    // ag: Added - is this right?
+    ddt = NULL;
+    history = NULL;
+    pweights = NULL;
+    cweights = NULL;
+    predictorState = NULL;
+    correctorState = NULL;
+    starter = NULL;
 
     return *this;
 }
