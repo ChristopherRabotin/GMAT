@@ -196,26 +196,31 @@ void MSISE90Dialog::LoadData()
     avgSolarFluxID = theForce->GetParameterID("AverageSolarFlux");
     geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
     solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
+    inputSourceID = theForce->GetParameterID("InputSource");
 
     solarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
     avgSolarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
     geomagneticIndexTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
-
-    wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
-
-    if (!filename.IsNull())
+    
+    inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+    
+    if ( inputSourceString.CmpNoCase("Constant") == 0 )
     {
-       fileNameTextCtrl->SetValue(filename);
+       useFile = false;
+       userInputRadioButton->SetValue(true);
+       fileInputRadioButton->SetValue(false); 
+    }
+    else if ( inputSourceString.CmpNoCase("File") == 0 )
+    {
        useFile = true;
-       
        userInputRadioButton->SetValue(false);
        fileInputRadioButton->SetValue(true);
     }
-    else
-    {
-       userInputRadioButton->SetValue(true);
-       fileInputRadioButton->SetValue(false);    
-    }
+       
+    wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
+
+    if (!filename.IsNull())
+       fileNameTextCtrl->SetValue(filename);
     
     Update();
 }
@@ -228,9 +233,15 @@ void MSISE90Dialog::SaveData()
     if (theOkButton->IsEnabled())
     {
         if (useFile)
+        {
+           inputSourceString = wxT("File");
+           theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
            theForce->SetStringParameter(solarFluxFileID, fileNameTextCtrl->GetValue().c_str() );
+        }
         else
         {
+           inputSourceString = wxT("Constant");
+           theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
            theForce->SetRealParameter(solarFluxID, atof(solarFluxTextCtrl->GetValue()) );
            theForce->SetRealParameter(avgSolarFluxID, atof(avgSolarFluxTextCtrl->GetValue()) );
            theForce->SetRealParameter(geomagnecticIndexID, atof(geomagneticIndexTextCtrl->GetValue()) );         

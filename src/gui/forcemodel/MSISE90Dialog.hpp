@@ -51,6 +51,9 @@ private:
     Integer avgSolarFluxID;
     Integer geomagnecticIndexID;
     Integer solarFluxFileID;
+    Integer inputSourceID;
+    
+    wxString inputSourceString;
     
     bool useFile;
     
