@@ -472,12 +472,26 @@ void ConfigManager::AddCelestialBody(CelestialBody* body)
 {
 }
 
-
+//loj: 3/3/04 added implementation
+//------------------------------------------------------------------------------
+// void AddPhysicalModel(PhysicalModel *pm)
+//------------------------------------------------------------------------------
 void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
 {
+    std::string name = pm->GetName();
+    if (name == "")
+        throw ConfigManagerException("Unnamed objects cannot be managed");
+    if (mapping.find(name) != mapping.end()) {
+        name += " is already in the configuration table";
+        throw ConfigManagerException(name);
+    }
+    else {
+        objects.push_back(pm);
+        mapping[name] = pm;
+    }
 }
 
-//loj: 2/13/04 added
+//loj: 2/13/04 added implementation
 //------------------------------------------------------------------------------
 // void ConfigManager::AddPropagator(Propagator *prop)
 //------------------------------------------------------------------------------
@@ -503,15 +517,40 @@ CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
 }
 
 
+//loj: 3/3/04 added implementation
+//------------------------------------------------------------------------------
+// PhysicalModel* GetPhysicalModel(const std::string &name)
+//------------------------------------------------------------------------------
 PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
 {
-    return NULL;
+    PhysicalModel *physicalModel = NULL;
+    if (mapping.find(name) != mapping.end()) {
+        if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
+            std::string str = mapping[name]->GetName() +
+                              " is not a Propagator";
+            throw ConfigManagerException(str);
+        }
+        physicalModel = (PhysicalModel *)mapping[name];
+    }
+    return physicalModel;
 }
 
-
+//loj: 3/3/04 added implementation
+//------------------------------------------------------------------------------
+// Propagator* GetPropagator(const std::string &name)
+//------------------------------------------------------------------------------
 Propagator* ConfigManager::GetPropagator(const std::string &name)
 {
-    return NULL;
+    Propagator *prop = NULL;
+    if (mapping.find(name) != mapping.end()) {
+        if (mapping[name]->GetType() != Gmat::PROPAGATOR) {
+            std::string str = mapping[name]->GetName() +
+                              " is not a Propagator";
+            throw ConfigManagerException(str);
+        }
+        prop = (Propagator *)mapping[name];
+    }
+    return prop;
 }
 
 
