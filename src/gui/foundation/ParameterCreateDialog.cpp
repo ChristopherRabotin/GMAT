@@ -140,14 +140,14 @@ void ParameterCreateDialog::Create()
    // wxListBox
    wxArrayString emptyArray;
    mObjectListBox = 
-      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 120), emptyArray);
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), emptyArray);
    
    mPropertyListBox = 
       theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX,
-                                        wxSize(135, 120), "Spacecraft");
+                                        wxSize(135, 85), "Spacecraft");
    
    mUserVarListBox =
-      theGuiManager->GetUserVariableListBox(this, -1, wxSize(135, 120), "");
+      theGuiManager->GetUserVariableListBox(this, -1, wxSize(135, 85), "");
    
    mUserArrayListBox =
       theGuiManager->GetUserArrayListBox(this, -1, wxSize(135, 50), "");
@@ -178,7 +178,9 @@ void ParameterCreateDialog::Create()
 
    
    // Add to wx*Sizers
+   //-------------------------------------------------------
    // for Variable
+   //-------------------------------------------------------
    top1FlexGridSizer->Add(varNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    top1FlexGridSizer->Add(expStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -216,7 +218,52 @@ void ParameterCreateDialog::Create()
    variableStaticBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    variableStaticBoxSizer->Add(mDetailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
 
+   //-------------------------------------------------------
+   // for String Creation
+   //-------------------------------------------------------
+   wxStaticText *stringNameLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Name"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *stringValueLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Value"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *configStringLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Strings"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   
+   mStringNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                        wxDefaultPosition, wxSize(80,20), 0);
+   mStringValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(110,20), 0);
+   mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
+                                      wxDefaultPosition, wxDefaultSize, 0);
+   
+   mUserStringListBox =
+      theGuiManager->GetUserStringListBox(this, -1, wxSize(135, 50), "");
+   
+   wxStaticBox *stringStaticBox = new wxStaticBox(this, -1, wxT("String"));
+   wxStaticBoxSizer *stringStaticBoxSizer =
+      new wxStaticBoxSizer(stringStaticBox, wxHORIZONTAL);
+   
+   wxFlexGridSizer *stringFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+
+   stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(stringNameLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(stringValueLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(configStringLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   stringFlexGridSizer->Add(mCreateStringButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(mStringNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(varEqualSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   stringFlexGridSizer->Add(mStringValueTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(mUserStringListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+   stringStaticBoxSizer->Add(stringFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-------------------------------------------------------
    // for Array Creation
+   //-------------------------------------------------------
    // 1st row
    arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -238,11 +285,12 @@ void ParameterCreateDialog::Create()
    arrayStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    
    pageBoxSizer->Add(variableStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(stringStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    pageBoxSizer->Add(arrayStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   //------------------------------------------------------
+   //-------------------------------------------------------
    // add to parent sizer
-   //------------------------------------------------------
+   //-------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
 
 }
@@ -253,6 +301,7 @@ void ParameterCreateDialog::Create()
 void ParameterCreateDialog::LoadData()
 {
    mCreateVariableButton->Disable();
+   mCreateStringButton->Disable();
    mCreateArrayButton->Disable();
    mPropertyListBox->SetSelection(0);
 
@@ -262,180 +311,17 @@ void ParameterCreateDialog::LoadData()
 }
 
 //------------------------------------------------------------------------------
-// void CreateVariable()
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::CreateVariable()
-{
-   std::string varName = std::string(mVarNameTextCtrl->GetValue().c_str());
-   std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
-
-#if DEBUG_PARAM_DIALOG
-   MessageInterface::ShowMessage
-      ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
-       " varExpr = " + varExpr + "\n");
-#endif
-   
-   if (varName != "" && varExpr != "")
-   {
-      // if new user variable to create
-      if (theGuiInterpreter->GetParameter(varName) == NULL)
-      {
-         Parameter *param;
-         
-         param = theGuiInterpreter->CreateParameter("Variable", varName);
-         param->SetStringParameter("Expression", varExpr);
-
-         // Parse the Parameter
-         StringTokenizer st(varExpr, "()*/+-^ ");
-         StringArray tokens = st.GetAllTokens();
-
-         for (unsigned int i=0; i<tokens.size(); i++)
-         {
-#if DEBUG_PARAM_DIALOG
-            MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
-#endif
-            // if token does not start with number
-            if (!isdigit(*tokens[i].c_str()))
-            {
-               // create system parameter if it is NULL              
-               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
-               {
-                  //find objName.depObj.typeName
-                  std::string::size_type pos1 = tokens[i].find(".");
-                  std::string::size_type pos2 = tokens[i].find_last_of(".");
-                  if (pos1 != tokens[i].npos && pos2 != tokens[i].npos)
-                  {
-                     std::string objName = tokens[i].substr(0, pos1);
-                     std::string typeName = tokens[i].substr(pos2+1, tokens[i].npos-pos2);
-                     
-                     Parameter *sysParam =
-                        theGuiInterpreter->CreateParameter(typeName, tokens[i]);
-                     sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
-                     
-                     // set dependent object name
-                     if (pos2 > pos1)
-                     {
-                        std::string depObjName = tokens[i].substr(pos1+1, pos2);
-                        sysParam->SetStringParameter("DepObject", depObjName);
-                     }
-                  }
-               }
-               
-               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
-               
-            }
-         }
-         
-         RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-         param->SetUnsignedIntParameter("Color", color.GetIntColor());
-         
-#if DEBUG_PARAM_DIALOG
-         MessageInterface::ShowMessage
-            ("ParameterCreateDialog::CreateVariable() user var:%s added\n",
-             varName.c_str());
-#endif
-         
-         mParamNames.Add(varName.c_str());
-         mIsParamCreated = true;
-         theGuiManager->UpdateParameter();
-
-         mUserVarListBox->Append(varName.c_str());
-
-         for (int i=0; i<mUserVarListBox->GetCount(); i++)
-         {
-            if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
-            {
-               mUserVarListBox->SetSelection(i);
-               break;
-            }
-         }
-         
-         theOkButton->Enable();
-         //loj: once variable is created cannot revert (delete) for now
-         theCancelButton->Disable();
-      }
-      else
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ParameterCreateDialog::CreateVariable()\nThe variable: %s"
-             " cannot be created. It already exists.", varName.c_str());
-      }
-
-      mCreateVariable = false;
-      mCreateVariableButton->Disable();
-      mExprTextCtrl->SetValue("");
-      mVarNameTextCtrl->SetValue("");
-   }
-}
-
-//------------------------------------------------------------------------------
-// void CreateArray()
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::CreateArray()
-{
-   long row, col;
-
-   if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
-       !(mArrColTextCtrl->GetValue().ToLong(&col)))
-   {
-      wxLogError(wxT("Row or Column is not a number"));
-      wxLog::FlushActive();
-   }
-   else
-   {
-      std::string arrName = std::string(mArrNameTextCtrl->GetValue().c_str());
-      
-      // if new user array to create
-      if (theGuiInterpreter->GetParameter(arrName) == NULL)
-      {
-         Parameter *param;
-         
-         param = theGuiInterpreter->CreateParameter("Array", arrName);
-         param->SetIntegerParameter("NumRows", row);
-         param->SetIntegerParameter("NumCols", col);
-         
-         mParamNames.Add(arrName.c_str());
-         mIsParamCreated = true;
-         theGuiManager->UpdateParameter();
-
-         mUserArrayListBox->Append(arrName.c_str());
-
-         for (int i=0; i<mUserArrayListBox->GetCount(); i++)
-         {
-            if (mUserArrayListBox->GetString(i).IsSameAs(arrName.c_str()))
-            {
-               mUserArrayListBox->SetSelection(i);
-               break;
-            }
-         }
-         
-         theOkButton->Enable();
-         //loj: once array is created cannot revert (delete) for now
-         theCancelButton->Disable();
-      }
-      else
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ParameterCreateDialog::CreateArray()\nThe array: %s"
-             " cannot be created. It already exists.", arrName.c_str());
-      }
-      
-      mCreateArray = false;
-      mCreateArrayButton->Disable();
-      mArrNameTextCtrl->SetValue("");
-      mArrRowTextCtrl->SetValue("");
-      mArrColTextCtrl->SetValue("");
-   }
-}
-
-//------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::SaveData()
 {
    if (mCreateVariable)
       CreateVariable();
-   else if (mCreateArray)
+   
+   if (mCreateString)
+      CreateString();
+   
+   if (mCreateArray)
       CreateArray();
 }
 
@@ -464,7 +350,11 @@ void ParameterCreateDialog::OnOK()
    
    if (mCreateVariableButton->IsEnabled())
       mCreateVariable = true;
-   else if (mCreateArrayButton->IsEnabled())
+   
+   if (mCreateVariableButton->IsEnabled())
+      mCreateString = true;
+   
+   if (mCreateArrayButton->IsEnabled())
       mCreateArray = true;
    
    SaveData();
@@ -480,6 +370,11 @@ void ParameterCreateDialog::OnOK()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
 {
+   mCreateVariableButton->Disable();
+   mCreateStringButton->Disable();
+   mCreateArrayButton->Disable();
+   theOkButton->Disable();
+
    if (mVarNameTextCtrl->GetValue().Trim() != "" &&
        mVarNameTextCtrl->GetValue().Trim() != " " &&
        mExprTextCtrl->GetValue().Trim() != "")
@@ -487,13 +382,21 @@ void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
       mCreateVariableButton->Enable();
       theOkButton->Enable();
    }
-   else if (mArrNameTextCtrl->GetValue().Trim() != "" &&
-            mArrRowTextCtrl->GetValue().Trim() != "" &&
-            mArrColTextCtrl->GetValue().Trim() != "")
+   
+   if (mStringNameTextCtrl->GetValue().Trim() != "" )
+   {
+      mCreateStringButton->Enable();
+      theOkButton->Enable();
+   }
+   
+   if (mArrNameTextCtrl->GetValue().Trim() != "" &&
+       mArrRowTextCtrl->GetValue().Trim() != "" &&
+       mArrColTextCtrl->GetValue().Trim() != "")
    {
       mCreateArrayButton->Enable();
       theOkButton->Enable();
    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -519,12 +422,21 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
    if (event.GetEventObject() == mCreateVariableButton)  
    {
       mCreateVariable = true;
+      mCreateString = false;
+      mCreateArray = false;
+      SaveData();
+   }
+   else if (event.GetEventObject() == mCreateStringButton)  
+   {
+      mCreateVariable = false;
+      mCreateString = true;
       mCreateArray = false;
       SaveData();
    }
    else if (event.GetEventObject() == mCreateArrayButton)  
    {
       mCreateArray = true;
+      mCreateString = false;
       mCreateVariable = false;
       SaveData();
    }
@@ -670,3 +582,213 @@ wxString ParameterCreateDialog::GetParamName()
    
    return paramName;
 }
+
+//------------------------------------------------------------------------------
+// void CreateVariable()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::CreateVariable()
+{
+   std::string varName = std::string(mVarNameTextCtrl->GetValue().c_str());
+   std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
+
+#if DEBUG_PARAM_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
+       " varExpr = " + varExpr + "\n");
+#endif
+   
+   if (varName != "" && varExpr != "")
+   {
+      // if new user variable to create
+      if (theGuiInterpreter->GetParameter(varName) == NULL)
+      {
+         Parameter *param;
+         
+         param = theGuiInterpreter->CreateParameter("Variable", varName);
+         param->SetStringParameter("Expression", varExpr);
+
+         // Parse the Parameter
+         StringTokenizer st(varExpr, "()*/+-^ ");
+         StringArray tokens = st.GetAllTokens();
+
+         for (unsigned int i=0; i<tokens.size(); i++)
+         {
+#if DEBUG_PARAM_DIALOG
+            MessageInterface::ShowMessage("token:<%s> \n", tokens[i].c_str());
+#endif
+            // if token does not start with number
+            if (!isdigit(*tokens[i].c_str()))
+            {
+               // create system parameter if it is NULL              
+               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
+               {
+                  //find objName.depObj.typeName
+                  std::string::size_type pos1 = tokens[i].find(".");
+                  std::string::size_type pos2 = tokens[i].find_last_of(".");
+                  if (pos1 != tokens[i].npos && pos2 != tokens[i].npos)
+                  {
+                     std::string objName = tokens[i].substr(0, pos1);
+                     std::string typeName = tokens[i].substr(pos2+1, tokens[i].npos-pos2);
+                     
+                     Parameter *sysParam =
+                        theGuiInterpreter->CreateParameter(typeName, tokens[i]);
+                     sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
+                     
+                     // set dependent object name
+                     if (pos2 > pos1)
+                     {
+                        std::string depObjName = tokens[i].substr(pos1+1, pos2);
+                        sysParam->SetStringParameter("DepObject", depObjName);
+                     }
+                  }
+               }
+               
+               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
+               
+            }
+         }
+         
+         RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
+         param->SetUnsignedIntParameter("Color", color.GetIntColor());
+         
+#if DEBUG_PARAM_DIALOG
+         MessageInterface::ShowMessage
+            ("ParameterCreateDialog::CreateVariable() user var:%s added\n",
+             varName.c_str());
+#endif
+         
+         mParamNames.Add(varName.c_str());
+         mIsParamCreated = true;
+         theGuiManager->UpdateParameter();
+
+         mUserVarListBox->Append(varName.c_str());
+
+         for (int i=0; i<mUserVarListBox->GetCount(); i++)
+         {
+            if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
+            {
+               mUserVarListBox->SetSelection(i);
+               break;
+            }
+         }
+         
+         theOkButton->Enable();
+         //loj: once variable is created cannot revert (delete) for now
+         theCancelButton->Disable();
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ParameterCreateDialog::CreateVariable()\nThe variable: %s"
+             " cannot be created. It already exists.", varName.c_str());
+      }
+
+      mCreateVariable = false;
+      mCreateVariableButton->Disable();
+      mExprTextCtrl->SetValue("");
+      mVarNameTextCtrl->SetValue("");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void CreateString()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::CreateString()
+{
+   std::string strName = std::string(mStringNameTextCtrl->GetValue().c_str());
+   std::string strValue = std::string(mStringValueTextCtrl->GetValue().c_str());
+
+   // if new user string to create
+   if (theGuiInterpreter->GetParameter(strName) == NULL)
+   {
+      Parameter *param;
+      
+      param = theGuiInterpreter->CreateParameter("String", strName);
+      param->SetStringParameter("Expression", strValue);
+      
+      mParamNames.Add(strName.c_str());
+      mIsParamCreated = true;
+      theGuiManager->UpdateParameter();
+      
+      mUserStringListBox->Append(strName.c_str());
+      
+      for (int i=0; i<mUserStringListBox->GetCount(); i++)
+      {
+         if (mUserStringListBox->GetString(i).IsSameAs(strName.c_str()))
+         {
+            mUserStringListBox->SetSelection(i);
+            break;
+         }
+      }
+      
+      theOkButton->Enable();
+      //loj: once string is created cannot revert (delete) for now
+      theCancelButton->Disable();
+      
+      mCreateString = false;
+      mCreateStringButton->Disable();
+      mStringNameTextCtrl->SetValue("");
+      mStringValueTextCtrl->SetValue("");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void CreateArray()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::CreateArray()
+{
+   long row, col;
+
+   if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
+       !(mArrColTextCtrl->GetValue().ToLong(&col)))
+   {
+      wxLogError(wxT("Row or Column is not a number"));
+      wxLog::FlushActive();
+   }
+   else
+   {
+      std::string arrName = std::string(mArrNameTextCtrl->GetValue().c_str());
+      
+      // if new user array to create
+      if (theGuiInterpreter->GetParameter(arrName) == NULL)
+      {
+         Parameter *param;
+         
+         param = theGuiInterpreter->CreateParameter("Array", arrName);
+         param->SetIntegerParameter("NumRows", row);
+         param->SetIntegerParameter("NumCols", col);
+         
+         mParamNames.Add(arrName.c_str());
+         mIsParamCreated = true;
+         theGuiManager->UpdateParameter();
+
+         mUserArrayListBox->Append(arrName.c_str());
+
+         for (int i=0; i<mUserArrayListBox->GetCount(); i++)
+         {
+            if (mUserArrayListBox->GetString(i).IsSameAs(arrName.c_str()))
+            {
+               mUserArrayListBox->SetSelection(i);
+               break;
+            }
+         }
+         
+         theOkButton->Enable();
+         //loj: once array is created cannot revert (delete) for now
+         theCancelButton->Disable();
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ParameterCreateDialog::CreateArray()\nThe array: %s"
+             " cannot be created. It already exists.", arrName.c_str());
+      }
+      
+      mCreateArray = false;
+      mCreateArrayButton->Disable();
+      mArrNameTextCtrl->SetValue("");
+      mArrRowTextCtrl->SetValue("");
+      mArrColTextCtrl->SetValue("");
+   }
+}
+

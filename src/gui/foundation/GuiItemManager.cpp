@@ -265,6 +265,11 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    MessageInterface::ShowMessage
       ("GuiItemManager::GetSpaceObjectListBox() theNumSpaceObject=%d\n",
        theNumSpaceObject);
+   for (unsigned int i=0; i<namesToExclude.GetCount(); i++)
+   {
+      MessageInterface::ShowMessage("namesToExclude[%d]=<%s>\n",
+                                    i, namesToExclude[i].c_str());
+   }
 #endif
       
    wxString emptyList[] = {};
@@ -312,7 +317,8 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
             excludeName = false;
             for (int j=0; j<exclCount; j++)
             {
-               if (theSpaceObjectList[i] == namesToExclude[j])
+               //if (theSpaceObjectList[i] == namesToExclude[j])
+               if (theSpaceObjectList[i].IsSameAs(namesToExclude[j]))
                {
                   excludeName = true;
                   break;
@@ -320,12 +326,21 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
             }
             
             if (!excludeName)
+            {
+#ifdef DEBUG_GUI_ITEM
+               MessageInterface::ShowMessage
+                  ("GuiItemManager::GetSpaceObjectListBox() so name to include:%s\n",
+                   theSpaceObjectList[i].c_str());
+               
+#endif
                newSpaceObjList[numSpaceObj++] = theSpaceObjectList[i];
+            }
          }
 
          theSpaceObjectListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, newSpaceObjCount,
                           newSpaceObjList, wxLB_SINGLE|wxLB_SORT);
+         
          delete newSpaceObjList;
       }
       else
@@ -529,7 +544,7 @@ GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
     
    theUserParamComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numUserVar, theUserVarList, wxCB_READONLY);
+                     numUserVar, theUserVariableList, wxCB_READONLY);
    
    // show first spacecraft
    theUserParamComboBox->SetSelection(0);
@@ -551,42 +566,94 @@ wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID i
                                                   const wxString &nameToExclude)
 {       
    wxString emptyList[] = {};
-   wxString *newUserVarList;
+   wxString *newUserVariableList;
    int numParams = 0;
     
    if (nameToExclude != "" && theNumUserVariable >= 2)
    {
-      newUserVarList = new wxString[theNumUserVariable-1];
+      newUserVariableList = new wxString[theNumUserVariable-1];
         
       for (int i=0; i<theNumUserVariable; i++)
       {
-         if (theUserVarList[i] != nameToExclude)
-            newUserVarList[numParams++] = theUserVarList[i];
+         if (theUserVariableList[i] != nameToExclude)
+            newUserVariableList[numParams++] = theUserVariableList[i];
       }
       
-      theUserVarListBox =
+      theUserVariableListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, theNumUserVariable,
-                       newUserVarList, wxLB_SINGLE|wxLB_SORT);
+                       newUserVariableList, wxLB_SINGLE|wxLB_SORT);
       
-      delete newUserVarList;
+      delete newUserVariableList;
    }
    else
    {
       if (theNumUserVariable > 0)
       {       
-         theUserVarListBox =
+         theUserVariableListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, theNumUserVariable,
-                          theUserVarList, wxLB_SINGLE|wxLB_SORT);
+                          theUserVariableList, wxLB_SINGLE|wxLB_SORT);
       }
       else
       {       
-         theUserVarListBox =
+         theUserVariableListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
    
-   return theUserVarListBox;
+   return theUserVariableListBox;
+}
+
+//------------------------------------------------------------------------------
+// wxListBox* GetUserStringListBox(wxWindow *parent, wxWindowID id,
+//                                 const wxSize &size,
+//                                 const wxString &nameToExclude = "")
+//------------------------------------------------------------------------------
+/**
+ * @return Configured User Valiable ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetUserStringListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
+                                                const wxString &nameToExclude)
+{       
+   wxString emptyList[] = {};
+   wxString *newUserStringList;
+   int numParams = 0;
+    
+   if (nameToExclude != "" && theNumUserString >= 2)
+   {
+      newUserStringList = new wxString[theNumUserString-1];
+        
+      for (int i=0; i<theNumUserString; i++)
+      {
+         if (theUserStringList[i] != nameToExclude)
+            newUserStringList[numParams++] = theUserStringList[i];
+      }
+      
+      theUserStringListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserString,
+                       newUserStringList, wxLB_SINGLE|wxLB_SORT);
+      
+      delete newUserStringList;
+   }
+   else
+   {
+      if (theNumUserString > 0)
+      {       
+         theUserStringListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumUserString,
+                          theUserStringList, wxLB_SINGLE|wxLB_SORT);
+      }
+      else
+      {
+         theUserStringListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
+      }
+   }
+   
+   return theUserStringListBox;
 }
 
 //------------------------------------------------------------------------------
@@ -612,7 +679,7 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
         
       for (int i=0; i<theNumUserArray; i++)
       {
-         if (theUserVarList[i] != nameToExclude)
+         if (theUserArrayList[i] != nameToExclude)
             newUserArrayList[numParams++] = theUserArrayList[i];
       }
       
@@ -1131,7 +1198,7 @@ void GuiItemManager::UpdatePropertyList(const wxString &objName)
 //------------------------------------------------------------------------------
 /**
  * Updates confugured parameter list (thePlottableParamList, theSystemParamList,
- * theUserVarList, theUserArrayList).
+ * theUserVariableList, theUserStringList, theUserArrayList).
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameterList()
@@ -1149,6 +1216,7 @@ void GuiItemManager::UpdateParameterList()
 
    int plottableParamCount = 0;
    int userVarCount = 0;
+   int userStringCount = 0;
    int userArrayCount = 0;
    int systemParamCount = 0;
    int userParamCount = 0;
@@ -1189,7 +1257,7 @@ void GuiItemManager::UpdateParameterList()
                if (userArrayCount < MAX_USER_ARRAY_SIZE &&
                    userParamCount < MAX_USER_PARAM_SIZE)
                {
-                  theUserVarList[userVarCount] = items[i].c_str();
+                  theUserVariableList[userVarCount] = items[i].c_str();
                   userVarCount++;
                
                   theUserParamList[userParamCount] = items[i].c_str();
@@ -1204,10 +1272,29 @@ void GuiItemManager::UpdateParameterList()
             }
          }
       }
-      else
+      else // not plottable parameters
       {
+         // user String
+         if (param->GetTypeName() == "String")
+         {
+            if (userArrayCount < MAX_USER_STRING_SIZE &&
+                userParamCount < MAX_USER_PARAM_SIZE)
+            {
+               theUserStringList[userStringCount] = items[i].c_str();
+               userStringCount++;
+               
+               theUserParamList[userParamCount] = items[i].c_str();
+               userParamCount++;
+            }
+            else
+            {
+               MessageInterface::ShowMessage
+                  ("GuiItemManager::UpdateParameterList() % is ignored. GUI can "
+                   "handle up to %d user parameters.\n", MAX_USER_STRING_SIZE);
+            }
+         }
          // user Array
-         if (param->GetTypeName() == "Array")
+         else if (param->GetTypeName() == "Array")
          {
             if (userArrayCount < MAX_USER_ARRAY_SIZE &&
                 userParamCount < MAX_USER_PARAM_SIZE)
@@ -1233,6 +1320,7 @@ void GuiItemManager::UpdateParameterList()
    theNumPlottableParam = plottableParamCount;
    theNumSystemParam = systemParamCount;
    theNumUserVariable = userVarCount;
+   theNumUserString = userStringCount;
    theNumUserArray = userArrayCount;
    theNumUserParam = userParamCount;
 }
@@ -1310,13 +1398,18 @@ GuiItemManager::GuiItemManager()
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    UpdatePropertyList("Spacecraft");
    
+   theNumScProperty = 0;
    theNumSpaceObject = 0;
    theNumFormation = 0;
    theNumSpacecraft = 0;
-   theNumScProperty = 0;
-   theNumPlottableParam = 0;
-   theNumConfigBody = 0;
    theNumCoordSys = 0;
+   theNumPlottableParam = 0;
+   theNumSystemParam = 0;
+   theNumUserVariable = 0;
+   theNumUserString = 0;
+   theNumUserArray = 0;
+   theNumUserParam = 0;
+   theNumConfigBody = 0;
    
    theSpacecraftComboBox = NULL;
    theUserParamComboBox = NULL;
@@ -1328,7 +1421,8 @@ GuiItemManager::GuiItemManager()
    theScPropertyListBox = NULL;
    thePlottableParamListBox = NULL;
    theSystemParamListBox = NULL;
-   theUserVarListBox = NULL;
+   theUserVariableListBox = NULL;
+   theUserStringListBox = NULL;
    theUserArrayListBox = NULL;
    theUserParamListBox = NULL;
    theConfigBodyListBox = NULL;

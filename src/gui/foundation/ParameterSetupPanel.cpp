@@ -45,8 +45,13 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
    mVarName = name;
+   mIsStringVar = false;
    mIsColorChanged = false;
    mIsExpChanged = false;
+   
+   mParam = theGuiInterpreter->GetParameter(std::string(mVarName.c_str()));
+   if (mParam->GetTypeName() == "String")
+      mIsStringVar = true;
    
    Create();
    Show();
@@ -72,10 +77,10 @@ void ParameterSetupPanel::Create()
    wxStaticText *equalSignStaticText =
       new wxStaticText(this, ID_TEXT, wxT("="),
                         wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *expStaticText =
+   mExpStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Expression"),
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *colorStaticText =
+   mColorStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Color"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
@@ -84,7 +89,7 @@ void ParameterSetupPanel::Create()
                                  wxDefaultPosition, wxSize(150,20), 0);
    mVarExpTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                  wxDefaultPosition, wxSize(300,20), 0);
-    
+   
    // wxButton
    mColorButton =
       new wxButton(this, ID_COLOR_BUTTON, wxT(""),
@@ -94,8 +99,15 @@ void ParameterSetupPanel::Create()
    // wxSizers
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
-   wxBoxSizer *detailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);   
-   wxStaticBox *variableStaticBox = new wxStaticBox(this, -1, wxT(""));
+   wxBoxSizer *detailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   
+   wxStaticBox *variableStaticBox;
+   
+   if (mIsStringVar)
+      variableStaticBox = new wxStaticBox(this, -1, wxT("String"));
+   else
+      variableStaticBox = new wxStaticBox(this, -1, wxT("Variable"));
+      
    mVarStaticBoxSizer = new wxStaticBoxSizer(variableStaticBox, wxVERTICAL);
    
    // Add to wx*Sizers
@@ -103,7 +115,7 @@ void ParameterSetupPanel::Create()
    // 1st row
    top1FlexGridSizer->Add(nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   top1FlexGridSizer->Add(expStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mExpStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
     
    // 1st row
    top1FlexGridSizer->Add(mVarNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -111,7 +123,7 @@ void ParameterSetupPanel::Create()
    top1FlexGridSizer->Add(mVarExpTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
    // detail
-   detailsBoxSizer->Add(colorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(mColorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
 
    mVarStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
@@ -159,13 +171,23 @@ void ParameterSetupPanel::LoadData()
          wxLog::FlushActive();
       }
    }
-   
-   // if expression is just a number, enable editing
-   double realVal;
-   if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
-      mVarExpTextCtrl->Enable();
+
+   if (!mIsStringVar)
+   {
+      // if expression is just a number, enable editing
+      double realVal;
+      if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
+         mVarExpTextCtrl->Enable();
+      else
+         mVarExpTextCtrl->Disable();
+   }
    else
-      mVarExpTextCtrl->Disable();
+   {
+      mVarExpTextCtrl->SetValue(mParam->GetStringParameter("Expression").c_str());
+      mExpStaticText->SetLabel("Value");
+      mColorStaticText->Hide();
+      mColorButton->Hide();
+   }
    
    mVarNameTextCtrl->Disable();
 }
@@ -175,18 +197,18 @@ void ParameterSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::SaveData()
 {
-   if (mIsColorChanged)
-   {
-      mIsColorChanged = false;
-      RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-      mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
-   }
-
    if (mIsExpChanged)
    {
       mIsExpChanged = false;
       mParam->SetStringParameter("Expression",
                                  std::string(mVarExpTextCtrl->GetValue().c_str()));
+   }
+   
+   if (mIsColorChanged)
+   {
+      mIsColorChanged = false;
+      RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
+      mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
    }
 }
 

@@ -40,6 +40,7 @@ protected:
    wxArrayString mParamNames;
    bool mIsParamCreated;
    bool mCreateVariable;
+   bool mCreateString;
    bool mCreateArray;
    
    wxColour mColor;
@@ -48,6 +49,8 @@ protected:
    
    wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mExprTextCtrl;
+   wxTextCtrl *mStringNameTextCtrl;
+   wxTextCtrl *mStringValueTextCtrl;
    wxTextCtrl *mArrNameTextCtrl;
    wxTextCtrl *mArrRowTextCtrl;
    wxTextCtrl *mArrColTextCtrl;
@@ -57,6 +60,7 @@ protected:
    wxButton *mPastePropertyButton;
    wxButton *mPasteUserVarButton;
    wxButton *mColorButton;
+   wxButton *mCreateStringButton;
    wxButton *mCreateArrayButton;
    wxButton *mAssignArrayButton;
    wxButton *mInitArrayButton;
@@ -64,6 +68,7 @@ protected:
    wxListBox *mObjectListBox;
    wxListBox *mPropertyListBox;
    wxListBox *mUserVarListBox;
+   wxListBox *mUserStringListBox;
    wxListBox *mUserArrayListBox;
    
    wxComboBox *mCoordSysComboBox;
@@ -71,9 +76,6 @@ protected:
    
    wxBoxSizer *mDetailsBoxSizer;
 
-   void CreateVariable();
-   void CreateArray();
-   
    // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
@@ -108,6 +110,10 @@ private:
    void ShowCoordSystem();
    Parameter* CreateParameter(const wxString &name);
    wxString GetParamName();
+   void CreateVariable();
+   void CreateString();
+   void CreateArray();
+   
 };
 
 #endif

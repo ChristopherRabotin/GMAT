@@ -38,6 +38,7 @@ public:
    static const int MAX_SPACECRAFT_SIZE = 30;
    static const int MAX_PROPERTY_SIZE = 100;
    static const int MAX_USER_VAR_SIZE = 20;
+   static const int MAX_USER_STRING_SIZE = 20;
    static const int MAX_USER_ARRAY_SIZE = 20;
    static const int MAX_USER_PARAM_SIZE = 40;
    static const int MAX_PLOT_PARAM_SIZE = 140;
@@ -67,6 +68,9 @@ public:
    int GetNumUserVariable()
       { return theNumUserVariable; }
    
+   int GetNumUserString()
+      { return theNumUserString; }
+   
    int GetNumUserArray()
       { return theNumUserArray; }
    
@@ -83,7 +87,10 @@ public:
       { return theSystemParamList; }
    
    wxString* GetUserVariableList()
-      { return theUserVarList; }
+      { return theUserVariableList; }
+   
+   wxString* GetUserStringList()
+      { return theUserStringList; }
    
    wxString* GetUserParameterList()
       { return theUserParamList; }
@@ -132,6 +139,10 @@ public:
    wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size,
                                      const wxString &nameToExclude = "");
+   
+   wxListBox* GetUserStringListBox(wxWindow *parent, wxWindowID id,
+                                   const wxSize &size,
+                                   const wxString &nameToExclude = "");
    
    wxListBox* GetUserArrayListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
@@ -185,6 +196,7 @@ private:
    int theNumPlottableParam;
    int theNumSystemParam;
    int theNumUserVariable;
+   int theNumUserString;
    int theNumUserArray;
    int theNumUserParam;
    int theNumConfigBody;
@@ -198,7 +210,8 @@ private:
    wxString theScPropertyList[MAX_PROPERTY_SIZE];
    wxString thePlottableParamList[MAX_PLOT_PARAM_SIZE];
    wxString theSystemParamList[MAX_PROPERTY_SIZE];
-   wxString theUserVarList[MAX_USER_VAR_SIZE];
+   wxString theUserVariableList[MAX_USER_VAR_SIZE];
+   wxString theUserStringList[MAX_USER_STRING_SIZE];
    wxString theUserArrayList[MAX_USER_ARRAY_SIZE];
    wxString theUserParamList[MAX_USER_PARAM_SIZE];
    
@@ -212,7 +225,8 @@ private:
    wxListBox  *theScPropertyListBox;
    wxListBox  *thePlottableParamListBox;
    wxListBox  *theSystemParamListBox;
-   wxListBox  *theUserVarListBox;
+   wxListBox  *theUserVariableListBox;
+   wxListBox  *theUserStringListBox;
    wxListBox  *theUserArrayListBox;
    wxListBox  *theUserParamListBox;
    wxListBox  *theConfigBodyListBox;

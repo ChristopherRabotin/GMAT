@@ -17,7 +17,6 @@
 
 #include "GmatPanel.hpp"
 #include "Parameter.hpp"
-#include "Rmatrix.hpp"
 
 class ParameterSetupPanel: public GmatPanel
 {
@@ -28,11 +27,15 @@ public:
 private:
 
    Parameter *mParam;
+   bool mIsStringVar;
    bool mIsColorChanged;
    bool mIsExpChanged;
   
    wxColour mColor;
    wxString mVarName;
+
+   wxStaticText *mExpStaticText;
+   wxStaticText *mColorStaticText;
    
    wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mVarExpTextCtrl;

@@ -97,7 +97,7 @@ void ArraySetupPanel::Create()
    mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                     wxDefaultPosition, wxSize(35,20), 0);
    
-   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT(""));
+   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array")); //loj: 1/7/05 added Array
    mArrStaticBoxSizer = new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
