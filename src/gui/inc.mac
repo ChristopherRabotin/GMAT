@@ -4,13 +4,12 @@
 # Date:       2004/02/13
 # Modified:   2004/05/21 - Added controllogic directory
 #             2004/09/23 - W. Shoan - added function directory
+#             2004/09/24 - J. Gurgnaus - cleaned up
 #
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
 LIB = $(LIBDIR)/libgmatgui.a
 WXBASE = ${WX_HOME}
-#TESTFLAGS = -D__DEBUG__ -D__CONSOLE_APP__ -D__UNIT_TEST__ -Wall -dynamic
-TESTFLAGS = -Wall -dynamic
 
 # Define macros for the base directory
 B_BURN       = $(PROJECT_ROOT)/base/burn
@@ -44,8 +43,7 @@ FOUNDATION = $(PROJECT_ROOT)/gui/foundation
 INCLUDE    = $(PROJECT_ROOT)/gui/include
 XPM        = $(PROJECT_ROOT)/gui/include/bitmaps
 INC_IL     = $(PROJECT_ROOT)/gui/include/il
-#INC_PLOT   = $(PROJECT_ROOT)/gui/include/plot
-INC_PLOT   = $(WXBASE)/contrib/include
+PLOT_XPM   = $(WXBASE)/contrib/include/wx/plot
 MANEUVER   = $(PROJECT_ROOT)/gui/maneuver
 MISSION    = $(PROJECT_ROOT)/gui/mission
 PLOT       = $(PROJECT_ROOT)/gui/plot
@@ -64,14 +62,14 @@ BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
 
 GUI_INCS = -I$(APP) -I$(BURN) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
-	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(INC_PLOT) -I$(MANEUVER) \
+	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(PLOT_XPM) -I$(MANEUVER) \
 	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
-	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I$(WX_HOME)/../contrib/include/wx/plot -I.
+	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
 
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `$(WX_HOME)/wx-config --cxxflags` -Wall
+CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `$(WX_HOME)/wx-config --cxxflags` -dynamic -Wall
 CPP = g++ $(CXXFLAGS) $(TESTFLAGS)
 #
 # Default suffix rule
@@ -96,3 +94,5 @@ clean:
 
 bare: clean
 	rm -f $(LIB)
+
+testing: all
