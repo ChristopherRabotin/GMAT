@@ -81,6 +81,27 @@ std::string MessageInterface::GetMessage()
 }
 
 //------------------------------------------------------------------------------
+//  void ClearMessage()
+//------------------------------------------------------------------------------
+//  Purpose:
+//     Clear message window.
+//------------------------------------------------------------------------------
+void MessageInterface::ClearMessage()
+{
+#if !defined __CONSOLE_APP__
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+       GmatAppData::theMessageWindow->ClearText();
+   }
+   else
+   {
+       wxLogError("MessageInterface::ClearMessage(): MessageWindow was not created.");
+       wxLog::FlushActive();
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
 //  void ShowMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 //  Purpose:
@@ -92,15 +113,19 @@ void MessageInterface::ShowMessage(const std::string &msg)
    MessageInterface::messageQueue.push(msg);
    
 #if !defined __CONSOLE_APP__
-   if (GmatAppData::GetMessageWindow() != NULL)
+   if (GmatAppData::theMessageWindow != NULL)
    {
-       GmatAppData::GetMessageWindow()->Show(true);
-       GmatAppData::GetMessageWindow()->WriteText(wxString(msg.c_str()));
+       GmatAppData::theMessageWindow->Show(true);
+       GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));
    }
    else
    {
-       wxLogError("MessageWindow was not created");
+       wxLogError("MessageWindow was not created. Creating a new MessageWindow...");
        wxLog::FlushActive();
+       GmatAppData::theMessageWindow =
+           new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                             20, 20, 600, 350, "Permanent");
+       GmatAppData::theMessageWindow->Show(true);
    }
 #else
    LogMessage(msg);

@@ -39,6 +39,7 @@ class MessageInterface
 public:
 
     static std::string GetMessage();
+    static void ClearMessage();
     static void ShowMessage(const std::string &msg);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
