@@ -331,3 +331,8 @@ void DifferentialCorrector::CalculateParameters(void)
 void DifferentialCorrector::CheckCompletion(void)
 {
 }
+
+
+void DifferentialCorrector::WriteToTextFile(void)
+{
+}
