@@ -56,7 +56,7 @@ class Toggle : public GmatCommand
                                                const std::string &value);
 
         // Methods used to run the command
-        virtual void        InterpretAction(void);
+        virtual bool        InterpretAction(void);
         virtual bool        Execute(void);
         
     protected:

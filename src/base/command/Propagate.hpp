@@ -84,7 +84,7 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
 
    // Methods used to run the command
-   virtual void        InterpretAction(void);
+   virtual bool        InterpretAction(void);
     
    virtual bool        Initialize(void);
    virtual bool        Execute(void);

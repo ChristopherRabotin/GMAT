@@ -264,7 +264,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
  * point to the correct object during initialization.
  */
 //------------------------------------------------------------------------------
-void Achieve::InterpretAction(void)
+bool Achieve::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Achieve::InterpretAction method
     // Sample string:  "Achieve myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
@@ -322,6 +322,8 @@ void Achieve::InterpretAction(void)
     end = generatingString.find("=", loc);
     value = atof(&str[end+1]);
     SetRealParameter(toleranceID, value);
+    
+    return true;
 }
 
 

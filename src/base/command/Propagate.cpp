@@ -545,7 +545,7 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 // void InterpretAction(void)
 //------------------------------------------------------------------------------
-void Propagate::InterpretAction(void)
+bool Propagate::InterpretAction(void)
 {
    /// @todo: Clean up this hack for the Propagate::InterpretAction method
    // Sample string:  "Propagate RK89(Sat1, {Duration = 86400.0});"
@@ -687,7 +687,7 @@ void Propagate::InterpretAction(void)
    if (end == (Integer)std::string::npos)
       throw CommandException("Propagate does not identify stopping condition: looking for )\n");
     
-   //---------------------------------------
+   return true;
 }
 
 //------------------------------------------------------------------------------

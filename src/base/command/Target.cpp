@@ -132,44 +132,46 @@ bool Target::Append(GmatCommand *cmd)
 }
 
 
-//------------------------------------------------------------------------------
-//  void Target::InterpretAction(void)
-//------------------------------------------------------------------------------
-/**
- * Parses the command string and builds the corresponding command structures.
- *
- * The Target command has the following syntax:
- *
- *     Target myDC;
- *
- * where myDC is a Solver used to target a set of variables to achieve the
- * corresponding goals.  This method breaks the script line into the 
- * corresponding pieces, and stores the name of the Solver so it can be set to
- * point to the correct object during initialization.
- */
-//------------------------------------------------------------------------------
-void Target::InterpretAction(void)
-{
-    /// @todo: Clean up this hack for the Target::InterpretAction method
-    // Sample string:  "Target myDC;"
-    
-    // Set starting location to the space following the command string
-    Integer loc = generatingString.find("Target", 0) + 6, end;
-    const char *str = generatingString.c_str();
-    
-    // Skip white space
-    while (str[loc] == ' ')
-        ++loc;
-    
-    // Stop at the semicolon if it is there
-    end = generatingString.find(";", loc);
-    
-    
-    std::string component = generatingString.substr(loc, end-loc);
-    if (component == "")
-        throw CommandException("Target string does not identify the targeter");
-    SetStringParameter(targeterNameID, component);
-}
+////------------------------------------------------------------------------------
+////  void Target::InterpretAction(void)
+////------------------------------------------------------------------------------
+///**
+// * Parses the command string and builds the corresponding command structures.
+// *
+// * The Target command has the following syntax:
+// *
+// *     Target myDC;
+// *
+// * where myDC is a Solver used to target a set of variables to achieve the
+// * corresponding goals.  This method breaks the script line into the 
+// * corresponding pieces, and stores the name of the Solver so it can be set to
+// * point to the correct object during initialization.
+// */
+////------------------------------------------------------------------------------
+//bool Target::InterpretAction(void)
+//{
+//    /// @todo: Clean up this hack for the Target::InterpretAction method
+//    // Sample string:  "Target myDC;"
+//    
+//    // Set starting location to the space following the command string
+//    Integer loc = generatingString.find("Target", 0) + 6, end;
+//    const char *str = generatingString.c_str();
+//    
+//    // Skip white space
+//    while (str[loc] == ' ')
+//        ++loc;
+//    
+//    // Stop at the semicolon if it is there
+//    end = generatingString.find(";", loc);
+//    
+//    
+//    std::string component = generatingString.substr(loc, end-loc);
+//    if (component == "")
+//        throw CommandException("Target string does not identify the targeter");
+//    SetStringParameter(targeterNameID, component);
+//    
+//    return true;
+//}
 
 
 
@@ -311,6 +313,25 @@ bool Target::SetStringParameter(const Integer id, const std::string &value)
     
     return BranchCommand::SetStringParameter(id, value);
 }
+
+
+std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   if (type == Gmat::SOLVER)
+      return targeterName;
+   return "NO_SUCH_REFERENCE_OBJECT";
+}
+
+
+bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+{
+   if (type == Gmat::SOLVER) {
+      targeterName = name;
+      return true;
+   }
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 //  bool Initialize(void)

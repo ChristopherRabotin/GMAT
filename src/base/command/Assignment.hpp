@@ -39,7 +39,7 @@ public:
     Assignment&         operator=(const Assignment& a);
     
     virtual bool        Initialize(void);
-    virtual void        InterpretAction(void);
+    virtual bool        InterpretAction(void);
     virtual bool        Execute(void);
 
 

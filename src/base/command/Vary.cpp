@@ -354,7 +354,7 @@ bool Vary::SetStringParameter(const Integer id, const std::string &value)
  * point to the correct object during initialization.
  */
 //------------------------------------------------------------------------------
-void Vary::InterpretAction(void)
+bool Vary::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Vary::InterpretAction method
     // Sample string:  "Vary myDC(Burn1.V = 0.5, {Pert = 0.0001, MaxStep = 0.05, 
@@ -409,6 +409,8 @@ void Vary::InterpretAction(void)
     SetRealParameter(variableMinimumID, -value);
     SetRealParameter(variableMaximumID, value);
     SetRealParameter(variableMaximumStepID, value);
+    
+    return true;
 }
 
 

@@ -42,27 +42,46 @@ Save& Save::operator=(const Save& sv)
 }
      
 
-void Save::InterpretAction(void)
+//bool Save::InterpretAction(void)
+//{
+//    /// @todo: Clean up this hack for the Target::InterpretAction method
+//    // Sample string:  "Save Sat1;" or
+//    
+//    // Set starting location to the space following the command string
+//    Integer loc = generatingString.find("save", 0) + 4, end;
+//    const char *str = generatingString.c_str();
+//    
+//    // Skip white space
+//    while (str[loc] == ' ')
+//        ++loc;
+//    
+//    // Stop at the semicolon if it is there
+//    end = generatingString.find(";", loc);
+//    
+//    
+//    std::string component = generatingString.substr(loc, end-loc);
+//    if (component == "")
+//        throw CommandException("Save string does not identify the object");
+//    objName = component;
+//    
+//    return true;
+//}
+
+
+std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
 {
-    /// @todo: Clean up this hack for the Target::InterpretAction method
-    // Sample string:  "Save Sat1;" or
-    
-    // Set starting location to the space following the command string
-    Integer loc = generatingString.find("save", 0) + 4, end;
-    const char *str = generatingString.c_str();
-    
-    // Skip white space
-    while (str[loc] == ' ')
-        ++loc;
-    
-    // Stop at the semicolon if it is there
-    end = generatingString.find(";", loc);
-    
-    
-    std::string component = generatingString.substr(loc, end-loc);
-    if (component == "")
-        throw CommandException("Save string does not identify the object");
-    objName = component;
+   return objName;
+}
+
+
+bool Save::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+{
+   if (name == "")
+      return false;
+      
+   // Save works for all types, so we don't check the type parameter
+   objName = name;
+   return true;
 }
 
 

@@ -55,7 +55,7 @@ Toggle& Toggle::operator=(const Toggle& t)
 }
 
 
-void Toggle::InterpretAction(void)
+bool Toggle::InterpretAction(void)
 {
 /// @todo: Clean up this hack for the Toggle::InterpretAction method
     // Sample string:  "Toggle Report On"
@@ -89,6 +89,8 @@ void Toggle::InterpretAction(void)
     end = generatingString.find(" ", loc);
     std::string sName = generatingString.substr(loc, end-loc);
     subNames.push_back(sName);
+    
+    return true;
 }
 
 

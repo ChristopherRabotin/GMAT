@@ -75,7 +75,7 @@ public:
 //                        GetStringArrayParameter(const Integer id) const; 
 
     // Inherited methods overridden from the base class
-    virtual void        InterpretAction(void);
+    virtual bool        InterpretAction(void);
     virtual bool        Initialize(void);
     virtual bool        Execute(void);
     

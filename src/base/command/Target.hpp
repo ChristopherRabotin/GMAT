@@ -60,10 +60,12 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
-    
+    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                         const std::string &name);
     
     // Methods used to run the command
-    virtual void        InterpretAction(void);
+//    virtual bool        InterpretAction(void);
     virtual bool        Initialize(void);
     virtual bool        Execute(void);
 

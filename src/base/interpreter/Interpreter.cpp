@@ -373,6 +373,62 @@ Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 
 
 //------------------------------------------------------------------------------
+// bool AssembleCommand(const std::string& scriptline)
+//------------------------------------------------------------------------------
+/**
+ * Builds a command and sets the internal data based on the script test.
+ * 
+ * @param scriptline The line of script that generated the command.
+ * 
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cmd)
+{
+   StringArray topLevel = Decompose(scriptline);
+   StringArray sublevel[10];  // Allow up to 10 deep for now
+   Integer     cl = 0;        // Current level of decomposition
+   GmatBase    *object[10];   // Up to 10 reference objects
+   Integer     ol = 0;        // Current object level (depth when drilling into 
+                              // owned objects)
+   Gmat::ObjectType type;
+   
+   // First construct the Command if the input is NULL
+   if (cmd == NULL) {
+      if (find(cmdmap.begin(), cmdmap.end(), topLevel[0]) != cmdmap.end()) {
+         //cmd = CreateCommand(topLevel[0]);
+         GmatCommand *cmd = moderator->AppendCommand(topLevel[0], "");
+         if (cmd == NULL)
+            throw InterpreterException("Cannot create \"" + topLevel[0] + 
+                                       "\" command.");
+         cmd->SetGeneratingString(scriptline);
+      }
+      else 
+         throw InterpreterException("\"" + topLevel[0] + 
+                                    "\" command not recognized.");
+   }
+   if (!cmd)  
+      return false;
+   for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
+      // Walk through the rest of the command, setting it up
+      sublevel[cl] = Decompose(*i);
+      if (sublevel[cl].size() == 1) {
+         // Size 1 implies an object reference
+         object[ol] = moderator->GetConfiguredItem(*i);
+         type = object[ol]->GetType();
+         if (!cmd->SetRefObjectName(type, *i))
+            throw InterpreterException("Cannot set object " + (*i) + 
+                                       " for command " + (cmd->GetTypeName()));
+      }
+      else {
+         return false;
+      }
+   }
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(std::string commandtype)
 //------------------------------------------------------------------------------
 /**
@@ -832,8 +888,13 @@ StringArray& Interpreter::Decompose(const std::string &chunk)
       // todo: Check to be sure we have closing brace
       elements = SeparateBraces(chunk);
    }
-   else
+   else if ((chunk.find(" ", 0) == std::string::npos) && 
+            (chunk.find(",", 0) == std::string::npos)) {
       elements = SeparateDots(chunk, ".");
+   }
+   else {
+      elements = SeparateSpaces(chunk);
+   }
    
    return elements;
 }
@@ -864,15 +925,51 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
 {
    static StringArray chunkArray;
    chunkArray.clear();
+   char closebrace = '\0';
+   std::string token;
+   Integer pos = 0, end;
    
-   // Add new white space characters by adjusting the following two members.  
-   // Don't forget to update the function comments as well!
-//   char whitespace[2] = {' ', '\t'};
-//   Integer pos = 0;
-//   Integer wSpaceTypes = 2;
-   
-   
-   
+   // Examine the string character by character, skipping grouping elements
+   char str[4096];
+   strcpy(str, chunk.c_str());
+   for (unsigned i = 0; i < chunk.length(); ++i) {
+      if ((str[i] == '{') || (str[i] == '(') || (str[i] == '[')) {
+         token.assign(str, pos, i-pos);
+         chunkArray.push_back(token);
+         pos = i;
+         // Now find and push the bracketed chunk
+         if (str[i] == '{')
+            closebrace = '}';
+         if (str[i] == '(')
+            closebrace = ')';
+         if (str[i] == '[')
+            closebrace = ']';
+         while (str[i] != closebrace) {
+            ++i;
+            if (i > chunk.length())
+               throw InterpreterException("Missing closing brace in line " + chunk);
+         }
+         token.assign(str, pos, i-pos+1);
+         chunkArray.push_back(token);
+         ++i;
+         pos = i;
+      }
+      else if ((str[i] == ' ') || (str[i] == ',')) {
+         token.assign(str, pos, i-pos);
+         if ((token != " ") && (token.length() > 0))
+            chunkArray.push_back(token);
+         ++i;
+         pos = i;
+      }
+   }
+   // Push the last piece onto the array, unless it is a semicolon
+   token.assign(str, pos, chunk.length());
+   if (token.find(";", 0) != std::string::npos) {
+      end = token.find(";", 0);
+      token.assign(token, 0, end);
+   }
+   if ((token != ";") && (token != ""))
+         chunkArray.push_back(token);   
    return chunkArray;
 }
 

@@ -84,7 +84,7 @@ bool Assignment::Initialize(void)
 }
 
 
-void Assignment::InterpretAction(void)
+bool Assignment::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Maneuver::InterpretAction method
     // Assignment lines have the form GMAT Sat.Element1 = 7654.321;
@@ -123,6 +123,8 @@ void Assignment::InterpretAction(void)
     
     end = value.find(";");
     value = value.substr(0, end);
+    
+    return true;
 }
 
 

@@ -286,53 +286,41 @@ bool ScriptInterpreter::Parse(void)
                    errstr += ": Object was not found";
                    throw InterpreterException(errstr);
                 }
-                
     
-//                if (obj->GetParameterType(id) == Gmat::UNKNOWN_PARAMETER_TYPE)
-//                {
-//                    // Could be a member object -- check that first
-//                    
-//                    /// @todo Fill in the parsing for multipart strings
-//                    std::string subparm = GetToken();
-//                    if (subparm == "")
-//                        throw InterpreterException("Assignment string does not parse: " + objParm); //loj: added objParm
-//                    // Find the owned object
-//                    // Set the parm on the owned object
-//                }
-//                else
-//                {
-                    // Set parameter data
+                // Set parameter data
+                ++phrase;
+                if (**phrase == "=")
                     ++phrase;
-                    if (**phrase == "=")
-                        ++phrase;
-std::cout << **phrase << "\n";
-                    StringArray sa;
-                    if (IsGroup((**phrase).c_str()))
-                        sa = Decompose(**phrase);
-                    else
-                        sa.push_back(**phrase);
-                        
-                    for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
-std::cout << "  Setting " << *i << "\n";
-                        if (!SetParameter(obj, id, *i)) {
-                           if (obj->GetType() == Gmat::FORCE_MODEL)
-                              ConfigureForce((ForceModel*)(obj), objParm, *i);
-                        }
+
+                StringArray sa;
+                if (IsGroup((**phrase).c_str()))
+                    sa = Decompose(**phrase);
+                else
+                    sa.push_back(**phrase);
+                    
+                for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
+                    if (!SetParameter(obj, id, *i)) {
+                       if (obj->GetType() == Gmat::FORCE_MODEL)
+                          ConfigureForce((ForceModel*)(obj), objParm, *i);
                     }
-//                }
+                }
             }
         }
 
         // Check to see if it's a command
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
-            cmd->SetGeneratingString(line);
-            
-            //loj: 3/24/04 added try block
             try
             {
-                cmd->InterpretAction();
-                sequenceStarted = true;
+               cmd->SetGeneratingString(line);
+               // Temporarily continue to support InterpretAction until all 
+               // commands are moved to the new format
+               if (!cmd->InterpretAction()) {
+                  if (!AssembleCommand(line, cmd))
+                     throw InterpreterException("Could not construct command \"" +
+                                                line + "\"");
+               }
+               sequenceStarted = true;
             }
             catch (BaseException &e)
             {

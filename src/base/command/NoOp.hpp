@@ -32,7 +32,7 @@ class NoOp : public GmatCommand
 		NoOp();
 		virtual ~NoOp();
 		NoOp(const NoOp& noop);
-        NoOp&                         operator=(const NoOp&);
+      NoOp&                         operator=(const NoOp&);
 
 		
 		bool                          Execute(void);

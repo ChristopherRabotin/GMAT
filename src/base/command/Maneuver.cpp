@@ -177,7 +177,7 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
-void Maneuver::InterpretAction(void)
+bool Maneuver::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Maneuver::InterpretAction method
     // Sample string:  "Maneuver prop(Sat1);"
@@ -204,6 +204,8 @@ void Maneuver::InterpretAction(void)
     if (component == "")
         throw CommandException("Maneuver string does not identify spacecraft");
     SetStringParameter(satNameID, component);
+    
+    return true;
 }
 
 
