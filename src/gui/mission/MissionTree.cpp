@@ -48,6 +48,9 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
 
+   EVT_MENU(POPUP_OPEN, MissionTree::OnOpen)
+   EVT_MENU(POPUP_CLOSE, MissionTree::OnClose)
+
    EVT_MENU(POPUP_ADD_MISSION_SEQ, MissionTree::OnAddMissionSeq)
    EVT_MENU(POPUP_ADD_MANEUVER, MissionTree::OnAddManeuver)
    EVT_MENU(POPUP_ADD_PROPAGATE, MissionTree::OnAddPropagate)
@@ -71,6 +74,8 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_VIEW_GOALS, MissionTree::OnViewGoals)
 
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
+   
+   EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
 
 END_EVENT_TABLE()
 
@@ -348,8 +353,8 @@ void MissionTree::OnItemRightClick(wxTreeEvent& event)
 // void OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 /**
- * On a double click sends the TreeItemData to GmatMainNotebook to open a new
- * page.
+ * On a double click sends the TreeItemData to GmatMainFrame to open a new
+ * window.
  *
  * @param <event> input event.
  */
@@ -407,7 +412,10 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
         menu.Append(POPUP_ADD_MISSION_SEQ, wxT("Add Mission Sequence"));
     }
     else if (dataType == GmatTree::TARGET_COMMAND)
-    {
+    {   
+        menu.Append(POPUP_OPEN, wxT("Open"));
+        menu.Append(POPUP_CLOSE, wxT("Close"));
+        menu.AppendSeparator();
         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreatePopupMenu());
         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), 
                     CreateInsertPopupMenu());
@@ -422,6 +430,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
              (dataType == GmatTree::DO_CONTROL) ||
              (dataType == GmatTree::FOR_CONTROL))   
     {
+        menu.Append(POPUP_OPEN, wxT("Open"));
+        menu.Append(POPUP_CLOSE, wxT("Close"));
+        menu.AppendSeparator();
         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreatePopupMenu());
         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), 
                     CreateInsertPopupMenu());
@@ -431,13 +442,17 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
     else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
     {
         menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreatePopupMenu());
-        menu.Append(POPUP_DELETE, wxT("Delete"));
+        // ag: can't delete because sys. doesn't handle multiple sequences yet
+        // menu.Append(POPUP_DELETE, wxT("Delete"));
         menu.Append(POPUP_RENAME, wxT("Rename"));
         menu.AppendSeparator();
         menu.Append(POPUP_RUN, wxT("Run"));
     }
     else 
     {
+        menu.Append(POPUP_OPEN, wxT("Open"));
+        menu.Append(POPUP_CLOSE, wxT("Close"));
+        menu.AppendSeparator();
         menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), 
                     CreateInsertPopupMenu());
         menu.Append(POPUP_DELETE, wxT("Delete"));
@@ -1332,6 +1347,37 @@ void MissionTree::OnViewGoals()
     GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
+//------------------------------------------------------------------------------
+// void OnDelete()
+//------------------------------------------------------------------------------
+void MissionTree::OnDelete()
+{
+   // get selected item
+   wxTreeItemId itemId = GetSelection();
+   
+   // if panel is open close it
+   OnClose();
+   
+   // delete from gui interpreter
+   MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(itemId);
+   if (missionItem == NULL)
+     return;   // error
+     
+   GmatCommand *theCmd = missionItem->GetCommand();  
+   if (theCmd == NULL)
+      return;  //error 
+   
+   theGuiInterpreter->DeleteCommand(theCmd);
+   
+   // delete from tree - if parent only has 1 child collapse
+   wxTreeItemId parentId = GetItemParent(itemId);
+   if (GetChildrenCount(parentId) <= 1)
+      this->Collapse(parentId);
+      
+   this->Delete(itemId);  
+}
+
+
 //---------------------------------------------------------------------------
 // void MissionTree::OnRun()
 //--------------------------------------------------------------------------
@@ -1432,3 +1478,39 @@ bool MissionTree::CheckClickIn(wxPoint position)
 
     return false;
 }
+
+//------------------------------------------------------------------------------
+// void OnOpen(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Open chosen from popup menu
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnOpen()
+{
+    // Get info from selected item
+    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+//    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
+}
+
+//------------------------------------------------------------------------------
+// void OnClose()
+//------------------------------------------------------------------------------
+/**
+ * Close chosen from popup menu
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnClose()
+{
+   // Get info from selected item
+    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+   
+   // if its open, its activated
+   if (GmatAppData::GetMainFrame()->IsChildOpen(item))
+      // close the window
+      GmatAppData::GetMainFrame()->CloseActiveChild();
+   else
+      return;
+}
+
