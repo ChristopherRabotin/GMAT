@@ -2504,14 +2504,9 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    
          if (csNames.size() == 0)
          {
-            //----------------------------------------------------
-            //loj: 1/26/05 temp. fix until ScriptInterpreter can
-            //     handle CoordinateSystem
-            //----------------------------------------------------
             #if DEBUG_RUN
             MessageInterface::ShowMessage
-               ("Moderator::AddCoordSystemToSandbox() ===>temp. fix for B3 Script."
-                "creating EarthMJ2000Eq and EarthMJ2000Ec\n");
+               ("Moderator::InterpretScript() creating Default Coordinate System...\n");
             #endif
             
             CreateDefaultCoordSystems();
@@ -2565,6 +2560,18 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       status = theScriptInterpreter->Interpret();
       if (status)
       {
+         StringArray csNames = theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
+         
+         if (csNames.size() == 0)
+         {
+            #if DEBUG_RUN
+            MessageInterface::ShowMessage
+               ("Moderator::InterpretScript(ss) creating Default Coordinate System...\n");
+            #endif
+            
+            CreateDefaultCoordSystems();
+         }
+         
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          isRunReady = true;
@@ -2714,6 +2721,10 @@ void Moderator::CreateDefaultMission()
 
       //Create default coordinate systems
       CreateDefaultCoordSystems();
+      
+      // Hardware (loj: 2/8/05 Added)
+      CreateHardware("FuelTank", "DefaultFuelTank");
+      CreateHardware("Thruster", "DefaultThruster");
       
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
