@@ -2471,13 +2471,17 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
       for (StringArray::iterator i = sar.begin()+1; i != sar.end()-1; ++i) {
          // Grab the name for the command
          std::stringstream cmdLine;
-         cmdLine.clear();
+         cmdLine.str() = "";
+         if (*i == "")
+            continue;
          cmdLine << *i;
          cmdLine >> cmdType;
+         if (cmdType == "")
+            continue;
 
          #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
-               "   Constucting a command of type %s\n", cmdType.c_str());
+               "   Constructing a command of type %s\n", cmdType.c_str());
          #endif
 
          // Create the command
