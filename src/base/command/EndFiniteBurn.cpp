@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                            EndManeuver
+//                            EndFiniteBurn
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,11 +13,11 @@
 // Created: 2005/01/04
 //
 /**
- *  Implementation code for the EndManeuver command.
+ *  Implementation code for the EndFiniteBurn command.
  */
 //------------------------------------------------------------------------------
 
-#include "EndManeuver.hpp"
+#include "EndFiniteBurn.hpp"
 #include "ForceModel.hpp"
 
 
@@ -30,36 +30,36 @@
 
 
 //------------------------------------------------------------------------------
-// EndManeuver()
+// EndFiniteBurn()
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
  */
 //------------------------------------------------------------------------------
-EndManeuver::EndManeuver() :
-   GmatCommand    ("EndManeuver"),
+EndFiniteBurn::EndFiniteBurn() :
+   GmatCommand    ("EndFiniteBurn"),
    burnForce      (NULL),
    transientForces(NULL)
 {
    if (instanceName == "")
-      instanceName = "EndManeuver";
+      instanceName = "EndFiniteBurn";
 }
 
 
 //------------------------------------------------------------------------------
-// ~EndManeuver()
+// ~EndFiniteBurn()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-EndManeuver::~EndManeuver()
+EndFiniteBurn::~EndFiniteBurn()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// EndManeuver(const BeginManeuver& endman)
+// EndFiniteBurn(const BeginManeuver& endman)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -67,7 +67,7 @@ EndManeuver::~EndManeuver()
  * @param endman The command that gets copied.
  */
 //------------------------------------------------------------------------------
-EndManeuver::EndManeuver(const EndManeuver& endman) :
+EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
    GmatCommand       (endman),
    thrustName        (endman.thrustName),
    burnForce         (NULL),
@@ -79,7 +79,7 @@ EndManeuver::EndManeuver(const EndManeuver& endman) :
 
 
 //------------------------------------------------------------------------------
-// EndManeuver& operator=(const EndManeuver& endman)
+// EndFiniteBurn& operator=(const EndFiniteBurn& endman)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -90,7 +90,7 @@ EndManeuver::EndManeuver(const EndManeuver& endman) :
  *         instance.
  */
 //------------------------------------------------------------------------------
-EndManeuver& EndManeuver::operator=(const EndManeuver& endman)
+EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
 {
    if (&endman == this)
       return *this;
@@ -105,13 +105,13 @@ EndManeuver& EndManeuver::operator=(const EndManeuver& endman)
 }
 
 
-std::string EndManeuver::GetRefObjectName(const Gmat::ObjectType type) const
+std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type) {
       case Gmat::BURN:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
-               ("Getting EndManeuver reference burn names\n");
+               ("Getting EndFiniteBurn reference burn names\n");
          #endif
          return burnName;
          
@@ -123,13 +123,13 @@ std::string EndManeuver::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
-const StringArray& EndManeuver::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    switch (type) {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
-               ("Getting EndManeuver reference spacecraft list\n");
+               ("Getting EndFiniteBurn reference spacecraft list\n");
          #endif
          return satNames;
       
@@ -141,14 +141,14 @@ const StringArray& EndManeuver::GetRefObjectNameArray(const Gmat::ObjectType typ
 }
 
 
-bool EndManeuver::SetRefObjectName(const Gmat::ObjectType type, 
+bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
                                      const std::string &name)
 {
    switch (type) {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
-               ("Setting EndManeuver reference spacecraft \"%s\"\n", 
+               ("Setting EndFiniteBurn reference spacecraft \"%s\"\n", 
                 name.c_str());
          #endif
          satNames.push_back(name);
@@ -157,7 +157,7 @@ bool EndManeuver::SetRefObjectName(const Gmat::ObjectType type,
       case Gmat::BURN:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
-               ("Setting EndManeuver reference burn \"%s\"\n", name.c_str());
+               ("Setting EndFiniteBurn reference burn \"%s\"\n", name.c_str());
          #endif
          burnName = name;
          return true;
@@ -165,7 +165,7 @@ bool EndManeuver::SetRefObjectName(const Gmat::ObjectType type,
       default:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
-               ("EndManeuver reference object \"%s\" not set!\n", 
+               ("EndFiniteBurn reference object \"%s\" not set!\n", 
                 name.c_str());
          #endif
          ;
@@ -179,18 +179,18 @@ bool EndManeuver::SetRefObjectName(const Gmat::ObjectType type,
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the EndManeuver command.
+ * This method returns a clone of the EndFiniteBurn command.
  *
  * @return clone of the Propagate.
  */
 //------------------------------------------------------------------------------
-GmatBase* EndManeuver::Clone() const
+GmatBase* EndFiniteBurn::Clone() const
 {
-   return new EndManeuver(*this);
+   return new EndFiniteBurn(*this);
 }
 
 
-void EndManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
+void EndFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    transientForces = tf;
 }
@@ -204,7 +204,7 @@ void EndManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool EndManeuver::Initialize()
+bool EndFiniteBurn::Initialize()
 {
    bool retval = GmatCommand::Initialize();
    
@@ -265,7 +265,7 @@ bool EndManeuver::Initialize()
    thrustName = burnName + "_FiniteThrust";
    #ifdef DEBUG_END_MANEUVER
       MessageInterface::ShowMessage
-         ("EndManeuver initialized with thrust force named \"%s\"\n", 
+         ("EndFiniteBurn initialized with thrust force named \"%s\"\n", 
           thrustName.c_str());
    #endif
    
@@ -283,7 +283,7 @@ bool EndManeuver::Initialize()
  *         occurs. 
  */
 //------------------------------------------------------------------------------
-bool EndManeuver::Execute()
+bool EndFiniteBurn::Execute()
 {
    // Turn off all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 

@@ -39,8 +39,8 @@
 #include "Save.hpp"           // for Save command  
 #include "CallFunction.hpp"   // for CallFunction command
 #include "Assignment.hpp"     // for Assignment command
-#include "BeginManeuver.hpp"  // for BeginManeuver command
-#include "EndManeuver.hpp"    // for EndManeuver command
+#include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
+#include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
 
 
 //---------------------------------
@@ -98,10 +98,10 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new CallFunction;
     else if (ofType == "Assignment")
          return new Assignment;
-    else if (ofType == "BeginManeuver")
-        return new BeginManeuver;
-    else if (ofType == "EndManeuver")
-         return new EndManeuver;
+    else if (ofType == "BeginFiniteBurn")
+        return new BeginFiniteBurn;
+    else if (ofType == "EndFiniteBurn")
+         return new EndFiniteBurn;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -143,8 +143,8 @@ CommandFactory::CommandFactory() :
       creatables.push_back("save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
-      creatables.push_back("BeginManeuver");
-      creatables.push_back("EndManeuver");
+      creatables.push_back("BeginFiniteBurn");
+      creatables.push_back("EndFiniteBurn");
    }
 }
 
@@ -197,8 +197,8 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
-      creatables.push_back("BeginManeuver");
-      creatables.push_back("EndManeuver");
+      creatables.push_back("BeginFiniteBurn");
+      creatables.push_back("EndFiniteBurn");
    }
 }
 

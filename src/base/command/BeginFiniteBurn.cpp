@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                            BeginManeuver
+//                            BeginFiniteBurn
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,11 +13,11 @@
 // Created: 2005/01/04
 //
 /**
- *  Implementation code for the BeginManeuver command.
+ *  Implementation code for the BeginFiniteBurn command.
  */
 //------------------------------------------------------------------------------
 
-#include "BeginManeuver.hpp"
+#include "BeginFiniteBurn.hpp"
 
 
 //#define DEBUG_BEGIN_MANEUVER
@@ -28,32 +28,32 @@
 
 
 //------------------------------------------------------------------------------
-// BeginManeuver()
+// BeginFiniteBurn()
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
  */
 //------------------------------------------------------------------------------
-BeginManeuver::BeginManeuver() :
-   GmatCommand    ("BeginManeuver"),
+BeginFiniteBurn::BeginFiniteBurn() :
+   GmatCommand    ("BeginFiniteBurn"),
    burnName       (""),
    maneuver       (NULL),
    burnForce      (NULL),
    transientForces(NULL)
 {
    if (instanceName == "")
-      instanceName = "BeginManeuver";
+      instanceName = "BeginFiniteBurn";
 }
 
 
 //------------------------------------------------------------------------------
-// ~BeginManeuver()
+// ~BeginFiniteBurn()
 //------------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //------------------------------------------------------------------------------
-BeginManeuver::~BeginManeuver()
+BeginFiniteBurn::~BeginFiniteBurn()
 {
    if (burnForce)
       delete burnForce;
@@ -61,7 +61,7 @@ BeginManeuver::~BeginManeuver()
 
 
 //------------------------------------------------------------------------------
-// BeginManeuver(const BeginManeuver& begman)
+// BeginFiniteBurn(const BeginFiniteBurn& begman)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -69,7 +69,7 @@ BeginManeuver::~BeginManeuver()
  * @param begman The command that gets copied.
  */
 //------------------------------------------------------------------------------
-BeginManeuver::BeginManeuver(const BeginManeuver& begman) :
+BeginFiniteBurn::BeginFiniteBurn(const BeginFiniteBurn& begman) :
    GmatCommand       (begman),
    burnName          (begman.burnName),
    maneuver          (NULL),
@@ -81,7 +81,7 @@ BeginManeuver::BeginManeuver(const BeginManeuver& begman) :
 
 
 //------------------------------------------------------------------------------
-// BeginManeuver& operator=(const BeginManeuver& begman)
+// BeginFiniteBurn& operator=(const BeginFiniteBurn& begman)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
@@ -92,7 +92,7 @@ BeginManeuver::BeginManeuver(const BeginManeuver& begman) :
  *         instance.
  */
 //------------------------------------------------------------------------------
-BeginManeuver& BeginManeuver::operator=(const BeginManeuver& begman)
+BeginFiniteBurn& BeginFiniteBurn::operator=(const BeginFiniteBurn& begman)
 {
    if (&begman == this)
       return *this;
@@ -106,13 +106,13 @@ BeginManeuver& BeginManeuver::operator=(const BeginManeuver& begman)
 }
 
 
-std::string BeginManeuver::GetRefObjectName(const Gmat::ObjectType type) const
+std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type) {
       case Gmat::BURN:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
-               ("Getting BeginManeuver reference burn names\n");
+               ("Getting BeginFiniteBurn reference burn names\n");
          #endif
          return burnName;
          
@@ -124,13 +124,13 @@ std::string BeginManeuver::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
-const StringArray& BeginManeuver::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& BeginFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    switch (type) {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
-               ("Getting BeginManeuver reference spacecraft list\n");
+               ("Getting BeginFiniteBurn reference spacecraft list\n");
          #endif
          return satNames;
       
@@ -142,14 +142,14 @@ const StringArray& BeginManeuver::GetRefObjectNameArray(const Gmat::ObjectType t
 }
 
 
-bool BeginManeuver::SetRefObjectName(const Gmat::ObjectType type, 
+bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
                                      const std::string &name)
 {
    switch (type) {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
-               ("Setting BeginManeuver reference spacecraft \"%s\"\n", 
+               ("Setting BeginFiniteBurn reference spacecraft \"%s\"\n", 
                 name.c_str());
          #endif
          satNames.push_back(name);
@@ -158,7 +158,7 @@ bool BeginManeuver::SetRefObjectName(const Gmat::ObjectType type,
       case Gmat::BURN:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
-               ("Setting BeginManeuver reference burn \"%s\"\n", name.c_str());
+               ("Setting BeginFiniteBurn reference burn \"%s\"\n", name.c_str());
          #endif
          burnName = name;
          return true;
@@ -166,7 +166,7 @@ bool BeginManeuver::SetRefObjectName(const Gmat::ObjectType type,
       default:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
-               ("BeginManeuver reference object \"%s\" not set!\n", 
+               ("BeginFiniteBurn reference object \"%s\" not set!\n", 
                 name.c_str());
          #endif
          ;
@@ -176,7 +176,7 @@ bool BeginManeuver::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 
-GmatBase* BeginManeuver::GetObject(const Gmat::ObjectType type, 
+GmatBase* BeginFiniteBurn::GetObject(const Gmat::ObjectType type, 
                                    const std::string objName)
 {
    if (type == Gmat::TRANSIENT_FORCE)
@@ -188,18 +188,18 @@ GmatBase* BeginManeuver::GetObject(const Gmat::ObjectType type,
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the BeginManeuver command.
+ * This method returns a clone of the BeginFiniteBurn command.
  *
  * @return clone of the Propagate.
  */
 //------------------------------------------------------------------------------
-GmatBase* BeginManeuver::Clone() const
+GmatBase* BeginFiniteBurn::Clone() const
 {
-   return new BeginManeuver(*this);
+   return new BeginFiniteBurn(*this);
 }
 
 
-void BeginManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
+void BeginFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    transientForces = tf;
 }
@@ -209,17 +209,17 @@ void BeginManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
 //  bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Initializes the BeginManeuver structures at the start of a run.
+ * Initializes the BeginFiniteBurn structures at the start of a run.
  *
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool BeginManeuver::Initialize()
+bool BeginFiniteBurn::Initialize()
 {
    bool retval = GmatCommand::Initialize();
 
    #ifdef DEBUG_BEGIN_MANEUVER
-      MessageInterface::ShowMessage("BeginManeuver::Initialize() entered\n");
+      MessageInterface::ShowMessage("BeginFiniteBurn::Initialize() entered\n");
    #endif
    
    if (retval) {
@@ -230,7 +230,7 @@ bool BeginManeuver::Initialize()
          throw CommandException((burnName) + " is not a FiniteBurn");
 
       #ifdef DEBUG_BEGIN_MANEUVER
-         MessageInterface::ShowMessage("BeginManeuver::Initialize() found %s\n", 
+         MessageInterface::ShowMessage("BeginFiniteBurn::Initialize() found %s\n", 
             burnName.c_str());
       #endif      
 
@@ -245,7 +245,7 @@ bool BeginManeuver::Initialize()
 
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage(
-               "BeginManeuver::Initialize() found %s\n", scName->c_str());
+               "BeginFiniteBurn::Initialize() found %s\n", scName->c_str());
          #endif
          
          if ((*objectMap)[*scName]->GetType() != Gmat::SPACECRAFT)
@@ -297,7 +297,7 @@ bool BeginManeuver::Initialize()
       for (iter = satNames.begin(); iter != satNames.end(); ++iter) {
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage(
-               "BeginManeuver::Initialize() setting %s on %s\n", 
+               "BeginFiniteBurn::Initialize() setting %s on %s\n", 
                iter->c_str(), thrustName.c_str());
          #endif
          burnForce->SetRefObjectName(type, *iter);
@@ -320,7 +320,7 @@ bool BeginManeuver::Initialize()
  *         occurs. 
  */
 //------------------------------------------------------------------------------
-bool BeginManeuver::Execute()
+bool BeginFiniteBurn::Execute()
 {
    // Turn on all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 

@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                            EndManeuver
+//                            BeginFiniteBurn
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,54 +13,54 @@
 // Created: 2005/01/04
 //
 /**
- *  Definition code for the EndManeuver command.
+ *  Definition code for the BeginFiniteBurn command.
  */
 //------------------------------------------------------------------------------
 
-#ifndef EndManeuver_hpp
-#define EndManeuver_hpp
+#ifndef BeginFiniteBurn_hpp
+#define BeginFiniteBurn_hpp
 
 
 #include "Command.hpp"
 #include "FiniteBurn.hpp"
+#include "FiniteThrust.hpp"
 #include "Spacecraft.hpp"
 #include "Thruster.hpp"
-#include "FiniteThrust.hpp"
 
 
 /**
- * EndManeuver Class, used to turn off thrusters used in a finite burn.
+ * BeginFiniteBurn Class, used to turn on thrusters used in a finite burn.
  */
-class GMAT_API EndManeuver : public GmatCommand
+class GMAT_API BeginFiniteBurn : public GmatCommand
 {
 public:
-	EndManeuver();
-	virtual ~EndManeuver();
-   EndManeuver(const EndManeuver& endman);
-   EndManeuver&         operator=(const EndManeuver& endman);
-
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   BeginFiniteBurn();
+   virtual ~BeginFiniteBurn();
+   BeginFiniteBurn(const BeginFiniteBurn& begman);
+   BeginFiniteBurn&       operator=(const BeginFiniteBurn& begman);
+   
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
+   
+   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+                                  const std::string objName = "");
 
    virtual GmatBase*    Clone() const;
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    virtual bool         Initialize();
    virtual bool         Execute();
-
+   
 protected:
-   /// Name of the FiniteBurn object used to set the maneuver details
-   std::string          thrustName;
-   /// The FiniteThrust that is available for the force models
-   FiniteThrust         *burnForce;
-
    /// Name of the FiniteBurn object used to set the maneuver details
    std::string          burnName;
    /// The FiniteBurn object
    FiniteBurn           *maneuver;
+   /// The FiniteThrust that is available for the force models
+   FiniteThrust         *burnForce;
    /// The vector of forces managed by the Sandbox
    std::vector<PhysicalModel*> 
                         *transientForces;
@@ -69,9 +69,9 @@ protected:
    /// The spacecraft that get maneuvered
    std::vector<Spacecraft *>
                         sats;
-   /// The thrusters that get deactivated
+   /// The thrusters that get activated
    std::vector<Thruster *>
                         thrusters;
 };
 
-#endif // EndManeuver_hpp
+#endif // BeginFiniteBurn_hpp
