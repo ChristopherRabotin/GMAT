@@ -37,6 +37,7 @@ public:
 protected:
     // member functions
     virtual void Create(wxWindow *parent) = 0;
+    virtual void Show();
     virtual void LoadData() = 0;
     virtual void SaveData() = 0;
     
@@ -48,9 +49,11 @@ protected:
 
     // member data
     GuiInterpreter *theGuiInterpreter;
-
-    wxFlexGridSizer *thePanelSizer;
-    wxGridSizer *theTopSizer;
+    wxWindow *theParent;
+    
+    //wxFlexGridSizer *thePanelSizer;
+    wxBoxSizer *thePanelSizer;
+    wxBoxSizer *theTopSizer;
     wxBoxSizer *theMiddleSizer;
     wxBoxSizer *theBottomSizer;
 

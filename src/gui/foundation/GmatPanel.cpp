@@ -45,12 +45,14 @@ GmatPanel::GmatPanel(wxWindow *parent)
     : wxPanel(parent)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-
+    theParent = parent;
+    
     // create sizers
-    thePanelSizer = new wxFlexGridSizer(3, 1, 0, 0 );
-    theTopSizer = new wxGridSizer(1, 0, 0);
-    theMiddleSizer = new wxBoxSizer(wxHORIZONTAL);
-    theBottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    //thePanelSizer = new wxFlexGridSizer(3, 1, 0, 0 );
+    thePanelSizer = new wxBoxSizer(wxVERTICAL);
+    theTopSizer = new wxBoxSizer(wxVERTICAL);
+    theMiddleSizer = new wxBoxSizer(wxVERTICAL);
+    theBottomSizer = new wxBoxSizer(wxVERTICAL);
    
     // create script button
     theScriptButton = new wxButton(parent, ID_BUTTON_SCRIPT, "Show Script", 
@@ -76,22 +78,33 @@ GmatPanel::GmatPanel(wxWindow *parent)
     theBottomSizer->Add(theCancelButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
     theBottomSizer->Add(theHelpButton, 0, wxGROW | wxALIGN_CENTER | wxALL, 5);
    
-    // add items to panel sizer
-    thePanelSizer->Add(theTopSizer, 0, wxGROW | wxALL, 5);
-    thePanelSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 5);
-    thePanelSizer->Add(theBottomSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
-    
-    thePanelSizer->Fit(parent);
-    
-    // tells the enclosing window to adjust to the size of the sizer
-    thePanelSizer->SetSizeHints(parent);
-    parent->SetSizer(thePanelSizer);
-    parent->SetAutoLayout( TRUE );
 }
 
 //-------------------------------
 // protected methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void Show()
+//------------------------------------------------------------------------------
+/**
+ * Shows the panel.
+ */
+//------------------------------------------------------------------------------
+void GmatPanel::Show()
+{
+    // add items to panel sizer
+    thePanelSizer->Add(theTopSizer, 0, wxGROW | wxALL, 5);
+    thePanelSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 5);
+    thePanelSizer->Add(theBottomSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
+    
+    // tells the enclosing window to adjust to the size of the sizer
+    theParent->SetAutoLayout( TRUE );
+    theParent->SetSizer(thePanelSizer);
+    thePanelSizer->Fit(theParent);
+    thePanelSizer->SetSizeHints(theParent);
+    
+}
 
 //------------------------------------------------------------------------------
 // void OnOk()

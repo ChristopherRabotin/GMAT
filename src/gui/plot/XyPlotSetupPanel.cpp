@@ -18,6 +18,7 @@
 #include "XyPlotSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
+//#include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -69,7 +70,7 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
     xSelectedListBox->Clear();
     
     wxString s = paramListBox->GetStringSelection();
-    xSelectedListBox->Insert(s, 0);    
+    xSelectedListBox->Append(s);    
 }
 
 //------------------------------------------------------------------------------
@@ -84,7 +85,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
     
     // if the string wasn't found in the second list, insert it
     if ( found == wxNOT_FOUND )
-      ySelectedListBox->Insert(s, 0);
+        ySelectedListBox->Append(s);
     
 }
 
@@ -156,12 +157,16 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     wxString *paramList = new wxString[count];
     
     for (i=0; i<count; i++)
+    {
         paramList[i] = items[i].c_str();
+        //MessageInterface::ShowMessage("XyPlotSetupPanel::Create() " + items[i] + "\n");
+    }
+    
     titleAvailbleText = new wxStaticText( parent, XY_TEXT, wxT("Parameters"),
                                           wxDefaultPosition, wxSize(80,-1), 0 );
     paramBoxSizer->Add( titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5 );
     paramListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition,
-                                  wxSize(140,125), 3, paramList, wxLB_SINGLE );
+                                  wxSize(140,125), count, paramList, wxLB_SINGLE );
     paramBoxSizer->Add( paramListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
     
     //------------------------------------------------------
@@ -241,13 +246,16 @@ void XyPlotSetupPanel::Create(wxWindow *parent)
     
     pageBoxSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
     
-    //loj: test this later
-    //theMiddleSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    parent->SetAutoLayout( TRUE );
-    parent->SetSizer( pageBoxSizer);
-    pageBoxSizer->Fit( parent );
-    pageBoxSizer->SetSizeHints( parent );
+    //------------------------------------------------------
+    // add to parent sizer
+    //------------------------------------------------------
+    theMiddleSizer->Add( pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    Show();
+    
+//      parent->SetAutoLayout( TRUE );
+//      parent->SetSizer( pageBoxSizer);
+//      pageBoxSizer->Fit( parent );
+//      pageBoxSizer->SetSizeHints( parent );
 
     delete paramList;
 }
