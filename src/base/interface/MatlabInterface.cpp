@@ -123,7 +123,7 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
 
    if (mxArrayOutputPtrD == NULL)
    {
-      MessageInterface::ShowMessage("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
+//      MessageInterface::ShowMessage("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
       printf("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
       return 0;
    }
@@ -133,7 +133,7 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElemen
       //printf("MatlabInterface::GetArray():output value[0:2] = %g, %g, %g\n",
       //       outArray[0], outArray[1], outArray[2]);
       mxDestroyArray(mxArrayOutputPtrD);
-      MessageInterface::ShowMessage("Copied array over...\n");
+//      MessageInterface::ShowMessage("Copied array over...\n");
       return 1;
    }
 #endif
