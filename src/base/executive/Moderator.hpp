@@ -169,7 +169,7 @@ public:
 
     // Sandbox
     void ClearAllSandboxes();
-    Integer RunMission(Integer sandboxNum = 1);
+    Integer RunMission(Integer sandboxNum = 1, bool fromGui = false);
 
     // Script
     bool InterpretScript(const std::string &scriptFilename);
@@ -180,6 +180,7 @@ private:
 
     // initialization
     void CreateDefaultMission();
+    void SetupRun(Integer sandboxNum);
     
     // sandbox
     void AddSolarSysToSandbox(Integer index);

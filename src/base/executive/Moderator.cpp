@@ -324,13 +324,12 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
     Spacecraft *sc = theConfigManager->GetSpacecraft(name);
-    MessageInterface::ShowMessage("Moderator::GetSpacecraft() name = " +
-                                  sc->GetName() + "\n");
-    MessageInterface::ShowMessage("Moderator::GetSpacecraft() Element1 = %f\n",
-                                  sc->GetRealParameter("Element1"));
+    //MessageInterface::ShowMessage("Moderator::GetSpacecraft() name = " +
+    //                              sc->GetName() + "\n");
+    //MessageInterface::ShowMessage("Moderator::GetSpacecraft() Element1 = %f\n",
+    //                              sc->GetRealParameter("Element1"));
 
     return sc;
-    //return theConfigManager->GetSpacecraft(name);
 }
 
 // Propagator
@@ -349,8 +348,25 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
+    
+    if (prop ==  NULL)
+        return NULL;
+    
+    // Manage it if it is a named Propagator
+    try
+    {
+        if (prop->GetName() != "")
+            theConfigManager->AddPropagator(prop);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
+                                      e.GetMessage());
+    }
+        
     //djc: commented out
     //   theConfigManager->AddPropagator(prop);
+    
     return prop;
 }
 
@@ -387,6 +403,22 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
     PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
+    
+    if (physicalModel ==  NULL)
+        return NULL;
+    
+    // Manage it if it is a named PhysicalModel
+    try
+    {
+        if (physicalModel->GetName() != "")
+            theConfigManager->AddPhysicalModel(physicalModel);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
+                                      e.GetMessage());
+    }
+        
     //djc: do we need to add PhysicalModel to configuration?
     //   theConfigManager->AddPhysicalModel(physicalModel);
     return physicalModel;
@@ -552,8 +584,24 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
     StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+    if (stopCond ==  NULL)
+        return NULL;
+    
+    // Manage it if it is a named stopCondition
+    try
+    {
+        if (stopCond->GetName() != "")
+            theConfigManager->AddStopCondition(stopCond);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateStopCond()\n" +
+                                      e.GetMessage());
+    }
+    
     //djc: do we need to add StopCondition to configuration?
     //   theConfigManager->AddStopCondition(stopCond);
+    
     return stopCond;
 }
 
@@ -620,13 +668,13 @@ Solver* Moderator::GetSolver(const std::string &name)
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
     // assumes "RungeKutta89" is the default propagator
-    Propagator *prop = CreatePropagator("RungeKutta89", "DefaultRKV89");
+    Propagator *prop = CreatePropagator("RungeKutta89", name+"RKV89");
     
     // creates empty ForceModel
-    ForceModel *fm = CreateForceModel("DefaultForceModel");
+    ForceModel *fm = CreateForceModel(name+"ForceModel");
     
     // create PointMass force and add to Force
-    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "EarthGravity");
+    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", name+"EarthGravity");
     fm->AddForce(earthGrav);
     
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
@@ -837,7 +885,7 @@ GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string
 bool Moderator::LoadDefaultMission()
 {
     CreateDefaultMission();
-    return true;        // DJC added to fix warning message
+    return true;
 }
 
 // Resource
@@ -847,7 +895,7 @@ bool Moderator::LoadDefaultMission()
 bool Moderator::ClearResource()
 {
     theConfigManager->RemoveAllItems();
-    return true;        // DJC added to fix warning message
+    return true;
 }
 
 // Command Sequence
@@ -966,9 +1014,9 @@ void Moderator::ClearAllSandboxes()
 }
 
 //------------------------------------------------------------------------------
-// Integer RunMission(Integer sandboxNum)
+// Integer RunMission(Integer sandboxNum, bool fromGui = false)
 //------------------------------------------------------------------------------
-Integer Moderator::RunMission(Integer sandboxNum)
+Integer Moderator::RunMission(Integer sandboxNum, bool fromGui)
 {
     Integer status = 0;
 
@@ -994,6 +1042,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
         AddSubscriberToSandbox(sandboxNum-1);
         AddCommandToSandbox(sandboxNum-1);
         InitializeSandbox(sandboxNum-1);
+        
+        if (fromGui)
+            SetupRun(sandboxNum);
+    
         ExecuteSandbox(sandboxNum-1);
     }
     catch (BaseException &e)
@@ -1173,6 +1225,36 @@ void Moderator::CreateDefaultMission()
     // Add propagate command
     AppendCommand(propCommand);
     
+}
+
+//------------------------------------------------------------------------------
+// void SetupRun(Integer sandboxNum)
+//------------------------------------------------------------------------------
+void Moderator::SetupRun(Integer sandboxNum)
+{
+    MessageInterface::ShowMessage("Moderator setting up for run...\n");
+    std::string name;
+    Spacecraft *sc;
+    GmatBase *obj;
+    Parameter *param;
+    StringArray objList;
+    
+    // for configured parameters use internal copy of Spacecraft
+    StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
+    for (int i=0; i<params.size(); i++)
+    {
+        param = GetParameter(params[i]);
+        objList = param->GetObjectTypeNames();
+        for (int j=0; j<objList.size(); j++)
+        {
+            obj = param->GetObject(objList[j]);
+            name = obj->GetName(); 
+            sc = sandboxes[sandboxNum-1]->GetSpacecraft(name);
+            param->SetObject(Gmat::SPACECRAFT, name, sc);
+        }
+    }
+    
+    //loj:@todo: create plot window
 }
 
 // sandbox
