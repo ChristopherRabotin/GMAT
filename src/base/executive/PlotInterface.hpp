@@ -29,8 +29,7 @@ public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName);
    static bool DeleteGlPlot();
-   
-   //loj: 5/6/04 added drawWireFrame
+   static bool RefreshGlPlot(const std::string &plotName); //loj: 6/22/04 added
    static bool UpdateGlSpacecraft(const std::string &plotName,
                                   const Real &time, const Real &posX,
                                   const Real &posY, const Real &posZ,
@@ -53,6 +52,7 @@ public:
    static void ClearXyPlotData(const std::string &plotName);
    static void SetXyPlotTitle(const std::string &plotName,
                               const std::string &plotTitle);
+   static bool RefreshXyPlot(const std::string &plotName); //loj: 6/22/04 added
    static bool UpdateXyPlot(const std::string &plotName,
                             const Real &xval, const Rvector &yvals,
                             const std::string &plotTitle,

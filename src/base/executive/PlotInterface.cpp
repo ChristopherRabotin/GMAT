@@ -39,8 +39,9 @@
 #include "Rvector.hpp"
 #include "MessageInterface.hpp"    // for ShowMessage()
 
-#define DEBUG_PLOTIF_OPENGL 0
+#define DEBUG_PLOTIF_GL 0
 #define DEBUG_PLOTIF_XY 0
+#define DEBUG_PLOTIF_XY_UPDATE 0
 
 //---------------------------------
 //  static data
@@ -84,7 +85,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
    //-------------------------------------------------------
    if (MdiGlPlot::mdiParentGlFrame == NULL)
    {
-#if DEBUG_PLOTIF_OPENGL
+#if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
                                     "Creating MdiGlPlot::mdiParentGlFrame\n");
 #endif
@@ -159,7 +160,6 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName)
 //------------------------------------------------------------------------------
 /*
  * Deletes OpenGlPlot
- *
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::DeleteGlPlot()
@@ -170,9 +170,9 @@ bool PlotInterface::DeleteGlPlot()
 
    if (MdiGlPlot::mdiParentGlFrame != NULL)
    {
-#if DEBUG_PLITIF_OPENGL
+#if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage("PlotInterface::DeleteGlPlot() "
-                                    "Deleting MdiGlPlot::mdiParentGlFrame\n");
+                                    "Deleting MdiGlPlot::mdiChildren[]\n");
 #endif
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
@@ -186,8 +186,41 @@ bool PlotInterface::DeleteGlPlot()
 #endif
 }
 
-//loj: 5/6/04 added drawWireFrame
-//loj: 6/8/04 added orbitColor, targetColor
+//------------------------------------------------------------------------------
+//  delete RefreshGlPlot(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Refreshes OpenGlPlot.
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::RefreshGlPlot(const std::string &plotName)
+{    
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   if (MdiGlPlot::mdiParentGlFrame != NULL)
+   {
+#if DEBUG_PLOTIF_GL
+      MessageInterface::ShowMessage
+         ("PlotInterface::RefreshGlPlot() plotName=%s\n",plotName.c_str());
+#endif
+      wxString owner = wxString(plotName.c_str());
+      
+      for (int i=0; i<MdiGlPlot::numChildren; i++)
+      {
+         MdiChildTrajFrame *frame =
+            (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
+            
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+            frame->RefreshPlot();
+      }
+   }
+   
+   return true;
+#endif
+}
+
 //loj: 6/2104 added plotName
 //------------------------------------------------------------------------------
 //  bool UpdateGlSpacecraft(const std::string &plotName, const Real &time,
@@ -195,7 +228,7 @@ bool PlotInterface::DeleteGlPlot()
 //                          bool updateCanvas, bool drawWireFrame)
 //------------------------------------------------------------------------------
 /*
- * Updates OpenGL plow window
+ * Buffers data and updates OpenGL plow window if updateCanvas is true
  */
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
@@ -227,7 +260,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
          frame->UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
                                  updateCanvas, drawWireFrame);
          updated = true;
-     }
+      }
    }
 
    return updated;
@@ -540,6 +573,45 @@ void PlotInterface::SetXyPlotTitle(const std::string &plotName,
 }
 
 //------------------------------------------------------------------------------
+// bool RefreshXyPlot(const std::string &plotName)
+//------------------------------------------------------------------------------
+/*
+ * Refreshes XY plot curve.
+ *
+ * @param <plotName> name of xy plot
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::RefreshXyPlot(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+
+   if (MdiXyPlot::mdiParentXyFrame != NULL)
+   {        
+#if DEBUG_PLOTIF_XY_UPDATE
+      MessageInterface::ShowMessage
+         ("PlotInterface::RefreshXyPlot() plotName=%s, numChildren=%d\n",
+          plotName.c_str(), MdiXyPlot::numChildren);
+#endif
+      
+      wxString owner = wxString(plotName.c_str());
+      
+      for (int i=0; i<MdiXyPlot::numChildren; i++)
+      {
+         MdiChildXyFrame *frame =
+            (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+      
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+               frame->RedrawCurve();           
+      }
+   }
+   
+   return true;
+#endif
+}
+
+//------------------------------------------------------------------------------
 // bool UpdateXyPlot(const std::string &plotName,
 //                   const Real &xval, const Rvector &yvals,
 //                   const std::string &plotTitle,
@@ -574,14 +646,14 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
       //             "Creating a new MDI parent/child frame...");
       //wxLog::FlushActive();
       CreateXyPlotWindow(plotName, plotTitle, xAxisTitle, yAxisTitle);
-#if DEBUG_PLOTIF_XY
+#if DEBUG_PLOTIF_XY_UPDATE
       MessageInterface::ShowMessage
          ("PlotInterface::UpdateXyPlot()" + plotName + " " +
           plotTitle + " " + xAxisTitle + " " + yAxisTitle + "\n");
 #endif
    }
         
-#if DEBUG_PLOTIF_XY
+#if DEBUG_PLOTIF_XY_UPDATE
    MessageInterface::ShowMessage
       ("PlotInterface::UpdateXyPlot() numChildren = %d\n",
        MdiXyPlot::numChildren);
@@ -595,14 +667,14 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
       {
          int numCurves = frame->GetCurveCount();
             
-#if DEBUG_PLOTIF_XY
+#if DEBUG_PLOTIF_XY_UPDATE
          MessageInterface::ShowMessage
             ("PlotInterface::UpdateXyPlot() numCurves = %d\n",
              numCurves);
 #endif            
          for (int j=0; j<numCurves; j++)
          {
-#if DEBUG_PLOTIF_XY
+#if DEBUG_PLOTIF_XY_UPDATE
             MessageInterface::ShowMessage
                ("PlotInterface::UpdateXyPlot() yvals[%d] = %f\n",
                 j, yvals(j));
