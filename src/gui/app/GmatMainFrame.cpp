@@ -503,7 +503,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new IfPanel(panel), 0, wxGROW|wxALL, 0);
+         sizer->Add(new IfPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::WHILE_CONTROL)
       {
@@ -528,7 +528,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new ForLoopPanel(panel), 0, wxGROW|wxALL, 0);
+         sizer->Add(new ForLoopPanel(panel, item->GetCommand()), 0, wxGROW|wxALL, 0);
       }
      else if (dataType == GmatTree::CALL_FUNCTION_COMMAND)
      {
@@ -1581,4 +1581,3 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
    wxYield();
    event.Skip(true);
 }
-
