@@ -21,6 +21,7 @@
 #include "Factory.hpp"
 #include "ParameterFactory.hpp"
 #include "ElapsedDaysParam.hpp" 
+#include "ElapsedSecsParam.hpp" 
 #include "CurrentA1MjdParam.hpp"
 #include "CartXParam.hpp"
 //  #include "CartYParam.hpp"
@@ -29,7 +30,7 @@
 //  #include "CartVyParam.hpp"
 //  #include "CartVzParam.hpp"
 //  #include "KepSmaParam.hpp"
-//  #include "KepEccParam.hpp"
+#include "KepEccParam.hpp"
 //  #include "KepIncParam.hpp"
 //  #include "KepRaanParam.hpp"
 //  #include "KepAopParam.hpp"
@@ -56,6 +57,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
 {
    if (ofType == "ElapsedDaysParam")
       return new ElapsedDaysParam(withName);
+   if (ofType == "ElapsedSecsParam")
+      return new ElapsedDaysParam(withName);
    if (ofType == "CurrentA1MjdParam")
       return new CurrentA1MjdParam(withName);
    if (ofType == "CartXParam")
@@ -72,8 +75,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
 //        return new CartVzParam(withName);
 //      if (ofType == "KepSmaParam")
 //        return new KepSmaParam(withName);
-//      if (ofType == "KepEccParam")
-//        return new KepEccParam(withName);
+    if (ofType == "KepEccParam")
+      return new KepEccParam(withName);
 //      if (ofType == "KepIncParam")
 //        return new KepIncParam(withName);
 //      if (ofType == "KepRaanParam")
@@ -104,6 +107,7 @@ Factory(Gmat::PARAMETER)
    if (creatables.empty())
    {
       creatables.push_back("ElapsedDaysParam");
+      creatables.push_back("ElapsedSecsParam");
       creatables.push_back("CurrentA1MjdParam");
       creatables.push_back("CartXParam");
 //        creatables.push_back("CartYParam");
@@ -112,7 +116,7 @@ Factory(Gmat::PARAMETER)
 //        creatables.push_back("CartVyParam");
 //        creatables.push_back("CartVzParam");
 //        creatables.push_back("KepSmaParam");
-//        creatables.push_back("KepEccParam");
+      creatables.push_back("KepEccParam");
 //        creatables.push_back("KepIncParam");
 //        creatables.push_back("KepRaanParam");
 //        creatables.push_back("KepAopParam");
