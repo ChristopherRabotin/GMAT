@@ -450,3 +450,18 @@ std::string* Rvector6::ToValueStrings()
    return stringValues;
 }
 
+//------------------------------------------------------------------------------
+// bool IsValid(const Real val)
+//------------------------------------------------------------------------------
+/**
+ * @return true if all 6 elelmets are not equal to input value.
+ */
+//------------------------------------------------------------------------------
+bool Rvector6::IsValid(const Real val)
+{
+    if (elementD[0] == val || elementD[1] == val || elementD[2] == val ||
+        elementD[3] == val || elementD[4] == val || elementD[5] == val)
+        return false;
+    else
+        return true;
+}
