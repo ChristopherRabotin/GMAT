@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan/GSFC/MAB
 // Created: 2004/12/22
@@ -44,7 +44,7 @@ public:
    // destructor
    virtual ~CoordinateSystem();
    
-   // initilaizes the CoordinateSystem
+   // initializes the CoordinateSystem
    virtual void Initialize();
    
    // methods to convert between this CoordinateSystem and MJ2000Eq
@@ -56,7 +56,7 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   //virtual GmatBase*       Clone(void) const;
+   virtual GmatBase*       Clone() const;
 
    // Parameter access methods - overridden from GmatBase 
    virtual std::string     GetParameterText(const Integer id) const;     
@@ -75,7 +75,7 @@ protected:
    enum
    {
       AXES = CoordinateBaseParamCount,
-      INTERNAL_STATE,   // currently, no access allowed
+      //INTERNAL_STATE,   // currently, no access allowed
       CoordinateSystemParamCount
    };
    
@@ -94,7 +94,7 @@ protected:
    /// axis system
    AxisSystem    *axes;
    /// internal state
-   Rvector       internalState;
+   //Rvector       internalState; - moved to methods as local data
    
 };
 #endif // CoordinateSystem_hpp

@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan/GSFC/MAB
 // Created: 2004/12/27
@@ -41,7 +41,7 @@ public:
    // destructor
    virtual ~CoordinateConverter();
    
-   // initilaizes the CoordinateConverter
+   // initializes the CoordinateConverter
    virtual void Initialize(); 
    
    void        SetJ2000BodyName(const std::string &toName);
@@ -49,7 +49,6 @@ public:
    void        SetJ2000Body(SpacePoint *toBody);
    SpacePoint* GetJ2000Body();
    
-   bool AddCoordinateSystem(CoordinateSystem *coordSys);
    bool Convert(const A1Mjd &epoch, const Rvector &inState,
                 CoordinateSystem *inCoord, Rvector &outState,
                 CoordinateSystem *outCoord);
@@ -61,10 +60,8 @@ protected:
    SpacePoint                     *j2000Body;  
    /// Name for the J2000 body
    std::string                    j2000BodyName;
-   /// store pointers to all defined coordinate systems - is this necessary???
-   std::vector<CoordinateSystem*> coordSystems;
    
    /// internal (intermediate) state
-   Rvector                        internalState;
+  // Rvector                        internalState; - moved to methods as local data
 };
 #endif // CoordinateConverter_hpp

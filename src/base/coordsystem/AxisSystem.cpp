@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/12/20
@@ -29,19 +29,19 @@
 // static data
 //---------------------------------
 
-const std::string
+/*const std::string
 AxisSystem::PARAMETER_TEXT[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
    "RotationMatrix",
    "RotationDotMatrix",
-};
+};*/
 
-const Gmat::ParameterType
+/*const Gmat::ParameterType
 AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
 {
    Gmat::RMATRIX33_TYPE,
    Gmat::RMATRIX33_TYPE,
-};
+};*/
 
 
 //------------------------------------------------------------------------------
@@ -56,18 +56,18 @@ AxisSystem::PARAMETER_TYPE[AxisSystemParamCount - CoordinateBaseParamCount] =
  * Constructs base AxisSystem structures used in derived classes
  * (default constructor).
  *
- * @param <itsType> GMAT script string associated with this type of object.
- * @param <itsName> Optional name for the object.  Defaults to "".
+ * @param itsType GMAT script string associated with this type of object.
+ * @param itsName Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for AxisSystem.  Derived 
- *       classes must pass in the typeId and typeStr parameters.
+ *       classes must pass in the itsType and itsName parameters.
  */
 //---------------------------------------------------------------------------
 AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
-CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
-rotMatrix         (NULL),
-rotDotMatrix      (NULL)
+CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName)//,
+//rotMatrix         (NULL),
+//rotDotMatrix      (NULL)
 {
 }
 
@@ -78,7 +78,7 @@ rotDotMatrix      (NULL)
  * Constructs base AxisSystem structures used in derived classes, by copying 
  * the input instance (copy constructor).
  *
- * @param <sp>  AxisSystem instance to copy to create "this" instance.
+ * @param axisSys  AxisSystem instance to copy to create "this" instance.
  */
 //---------------------------------------------------------------------------
 AxisSystem::AxisSystem(const AxisSystem &axisSys) :
@@ -94,7 +94,7 @@ rotDotMatrix      (axisSys.rotDotMatrix)
 /**
  * Assignment operator for AxisSystem structures.
  *
- * @param <sp> The original that is being copied.
+ * @param axisSys The original that is being copied.
  *
  * @return Reference to this object
  */
@@ -143,18 +143,18 @@ void AxisSystem::Initialize()
 /**
  * This method returns the parameter text, given the input parameter ID.
  *
- * @param <id> Id for the requested parameter text.
+ * @param id Id for the requested parameter text.
  *
  * @return parameter text for the requested parameter.
  *
  */
 //------------------------------------------------------------------------------
-std::string AxisSystem::GetParameterText(const Integer id) const
+/*std::string AxisSystem::GetParameterText(const Integer id) const
 {
    if (id >= CoordinateBaseParamCount && id < AxisSystemParamCount)
       return PARAMETER_TEXT[id - CoordinateBaseParamCount];
    return CoordinateBase::GetParameterText(id);
-}
+}*/
 
 //------------------------------------------------------------------------------
 //  Integer  GetParameterID(const std::string &str) const
@@ -162,13 +162,13 @@ std::string AxisSystem::GetParameterText(const Integer id) const
 /**
  * This method returns the parameter ID, given the input parameter string.
  *
- * @param <str> string for the requested parameter.
+ * @param str string for the requested parameter.
  *
  * @return ID for the requested parameter.
  *
  */
 //------------------------------------------------------------------------------
-Integer AxisSystem::GetParameterID(const std::string &str) const
+/*Integer AxisSystem::GetParameterID(const std::string &str) const
 {
    for (Integer i = CoordinateBaseParamCount; i < AxisSystemParamCount; i++)
    {
@@ -177,7 +177,7 @@ Integer AxisSystem::GetParameterID(const std::string &str) const
    }
    
    return CoordinateBase::GetParameterID(str);
-}
+}*/
 
 //------------------------------------------------------------------------------
 //  Gmat::ParameterType  GetParameterType(const Integer id) const
@@ -185,19 +185,19 @@ Integer AxisSystem::GetParameterID(const std::string &str) const
 /**
  * This method returns the parameter type, given the input parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id ID for the requested parameter.
  *
  * @return parameter type of the requested parameter.
  *
  */
 //------------------------------------------------------------------------------
-Gmat::ParameterType AxisSystem::GetParameterType(const Integer id) const
+/*Gmat::ParameterType AxisSystem::GetParameterType(const Integer id) const
 {
    if (id >= CoordinateBaseParamCount && id < AxisSystemParamCount)
       return PARAMETER_TYPE[id - CoordinateBaseParamCount];
    
    return CoordinateBase::GetParameterType(id);
-}
+}*/
 
 //------------------------------------------------------------------------------
 //  std::string  GetParameterTypeString(const Integer id) const
@@ -205,13 +205,13 @@ Gmat::ParameterType AxisSystem::GetParameterType(const Integer id) const
 /**
  * This method returns the parameter type string, given the input parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id ID for the requested parameter.
  *
  * @return parameter type string of the requested parameter.
  *
  */
 //------------------------------------------------------------------------------
-std::string AxisSystem::GetParameterTypeString(const Integer id) const
+/*std::string AxisSystem::GetParameterTypeString(const Integer id) const
 {
    return CoordinateBase::PARAM_TYPE_STRING[GetParameterType(id)];
-}
+}*/

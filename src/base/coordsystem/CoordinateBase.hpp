@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan/GSFC/MAB
 // Created: 2004/12/20
@@ -43,7 +43,7 @@ public:
    
    virtual void            SetSolarSystem(SolarSystem *ss);
    
-   // initilaizes the CoordinateBase
+   // initializes the CoordinateBase
    virtual void Initialize();
    
    

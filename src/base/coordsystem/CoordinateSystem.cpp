@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/12/22
@@ -36,14 +36,14 @@ const std::string
 CoordinateSystem::PARAMETER_TEXT[CoordinateSystemParamCount - CoordinateBaseParamCount] =
 {
    "Axes",
-   "InternalState",
+   //"InternalState",
 };
 
 const Gmat::ParameterType
 CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBaseParamCount] =
 {
    Gmat::OBJECT_TYPE,
-   Gmat::RVECTOR_TYPE,
+   //Gmat::RVECTOR_TYPE,
 };
 
 
@@ -59,12 +59,12 @@ CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBasePara
  * Constructs CoordinateSystem structures
  * (default constructor).
  *
- * @param <ofType>  Gmat::ObjectTypes enumeration for the object.
- * @param <itsType> GMAT script string associated with this type of object.
- * @param <itsName> Optional name for the object.  Defaults to "".
+ * @param ofType   Gmat::ObjectTypes enumeration for the object.
+ * @param itsType  GMAT script string associated with this type of object.
+ * @param itsName  Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for CoordinateSystem.  Derived 
- *       classes must pass in the typeId and typeStr parameters.
+ *       classes must pass in the ofType and itsType parameters.
  */
 //---------------------------------------------------------------------------
 CoordinateSystem::CoordinateSystem(Gmat::ObjectType ofType, 
@@ -82,13 +82,12 @@ axes               (NULL)
  * Constructs base CoordinateSystem structures used in derived classes, 
  * by copying the input instance (copy constructor).
  *
- * @param <sp>  CoordinateSystem instance to copy to create "this" instance.
+ * @param sp  CoordinateSystem instance to copy to create "this" instance.
  */
 //---------------------------------------------------------------------------
 CoordinateSystem::CoordinateSystem(const CoordinateSystem &coordSys) :
 CoordinateBase(coordSys),
-axes          (coordSys.axes),
-internalState (coordSys.internalState)  // ???
+axes          (coordSys.axes)
 {
 }
 
@@ -98,7 +97,7 @@ internalState (coordSys.internalState)  // ???
 /**
 * Assignment operator for CoordinateSystem structures.
  *
- * @param <sp> The original that is being copied.
+ * @param coordSys The original that is being copied.
  *
  * @return Reference to this object
  */
@@ -110,7 +109,6 @@ const CoordinateSystem& CoordinateSystem::operator=(
       return *this;
    CoordinateBase::operator=(coordSys);
    axes           = coordSys.axes;
-   internalState  = coordSys.internalState;
    
    return *this;
 }
@@ -121,7 +119,8 @@ const CoordinateSystem& CoordinateSystem::operator=(
 /**
  * Equality operator for CoordinateSystem structures.
  *
- * @param <sp> The original that is being cjecked for equality with "this".
+ * @param coordSys  The original that is being cjecked for equality with 
+ *                   "this".
  *
  * @return true if "this" is the same as the input coordSys
  */
@@ -130,8 +129,10 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 {
    if (&coordSys == this)
       return true;
-   if (axes->GetType() == (coordSys.axes)->GetType()) return true;
-   // do I need to check internalState == coordSys.internalState?
+   if (axes->GetType() == (coordSys.axes)->GetType()) 
+   {
+      if (origin == coordSys.origin) return true;
+   }
    
    return false;
 }
@@ -145,7 +146,7 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 //---------------------------------------------------------------------------
 CoordinateSystem::~CoordinateSystem()
 {
-   delete axes;  // right? 
+   delete axes; 
 }
 
 //---------------------------------------------------------------------------
@@ -165,6 +166,7 @@ void CoordinateSystem::Initialize()
    //         "Axes are undefined for CoordinateSystem " + GetName());
 }
 
+
 //------------------------------------------------------------------------------
 //  Rvector  ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 //                      SpacePoint *j2000Body)
@@ -172,9 +174,9 @@ void CoordinateSystem::Initialize()
 /**
  * This method converts the input state, in 'this' axisSystem, to MJ2000Eq.
  *
- * @param <epoch>      epoch for which to do the conversion.
- * @param <inState>    input state to convert.
- * @param <j2000Body>  origin of the MJ2000Eq system.
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param j2000Body  origin of the MJ2000Eq system.
  *
  * @return input state converted to MJ2000Eq.
  *
@@ -183,6 +185,7 @@ void CoordinateSystem::Initialize()
 Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                      SpacePoint *j2000Body)
 {
+   Rvector internalState(inState.GetSize());
    if (axes)
       if (!axes->RotateToMJ2000Eq(epoch,inState,internalState,j2000Body))
          throw CoordinateSystemException("Error rotating state to MJ2000Eq for "
@@ -205,9 +208,9 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
  * This method converts the input state, in MJ2000Eq axisSystem, to "this"
  * axisSystem.
  *
- * @param <epoch>      epoch for which to do the conversion.
- * @param <inState>    input state to convert.
- * @param <j2000Body>  origin of the MJ2000Eq system.
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param j2000Body  origin of the MJ2000Eq system.
  *
  * @return input state converted from MJ2000Eq to 'this' axisSystem.
  *
@@ -216,6 +219,7 @@ Rvector CoordinateSystem::ToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
 Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inState, 
                                        SpacePoint *j2000Body)
 {
+   Rvector internalState(inState.GetSize());
    if (!TranslateFromMJ2000Eq(epoch,inState, internalState,j2000Body))
       throw CoordinateSystemException("Error translating from MJ2000Eq for "
                                       + instanceName);
@@ -224,8 +228,6 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
       if (!axes->RotateFromMJ2000Eq(epoch,internalState,internalState,j2000Body))
          throw CoordinateSystemException("Error rotating state from MJ2000Eq for "
                                          + instanceName);
-      else // assume this is MJ2000Eq, so no rotation is necessary
-         internalState = inState;
 
    return internalState; // implicit copy constructor
 }
@@ -235,12 +237,27 @@ Rvector CoordinateSystem::FromMJ2000Eq(const A1Mjd &epoch, const Rvector &inStat
 // public methods inherited from GmatBase
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+//  GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+* This method returns a clone of the Planet.
+ *
+ * @return clone of the Planet.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* CoordinateSystem::Clone() const
+{
+   return (new CoordinateSystem(*this));
+}
+
+//------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * This method returns the parameter text, given the input parameter ID.
  *
- * @param <id> Id for the requested parameter text.
+ * @param id Id for the requested parameter text.
  *
  * @return parameter text for the requested parameter.
  *
@@ -259,7 +276,7 @@ std::string CoordinateSystem::GetParameterText(const Integer id) const
 /**
  * This method returns the parameter ID, given the input parameter string.
  *
- * @param <str> string for the requested parameter.
+ * @param str string for the requested parameter.
  *
  * @return ID for the requested parameter.
  *
@@ -282,7 +299,7 @@ Integer CoordinateSystem::GetParameterID(const std::string &str) const
 /**
  * This method returns the parameter type, given the input parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id ID for the requested parameter.
  *
  * @return parameter type of the requested parameter.
  *
@@ -302,7 +319,7 @@ Gmat::ParameterType CoordinateSystem::GetParameterType(const Integer id) const
 /**
  * This method returns the parameter type string, given the input parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id  ID for the requested parameter.
  *
  * @return parameter type string of the requested parameter.
  *
@@ -320,8 +337,8 @@ std::string CoordinateSystem::GetParameterTypeString(const Integer id) const
 /**
  * This method returns a reference object from the CoordinateSystem class.
  *
- * @param <type>  type of the reference object requested
- * @param <name>  name of the reference object requested
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
  *
  * @return pointer to the reference object requested.
  *
@@ -349,9 +366,9 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
 /**
 * This method sets a reference object for the CoordinateSystem class.
  *
- * @param <obj>   pointer to the reference object
- * @param <type>  type of the reference object 
- * @param <name>  name of the reference object
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object 
+ * @param name  name of the reference object
  *
  * @return true if successful; otherwise, false.
  *
@@ -387,10 +404,10 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * This method translates the input state, in "this" axisSystem to the MJ2000Eq
  * axisSystem.
  *
- * @param <epoch>      epoch for which to do the conversion.
- * @param <inState>    input state to convert.
- * @param <outState>   output (converted) state.
- * @param <j2000Body>  origin of the MJ2000Eq system.
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ * @param j2000Body  origin of the MJ2000Eq system.
  *
  * @return true if successful; false if not.
  *
@@ -405,7 +422,7 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
       outState = inState;
    else
    {
-      // currently assuming an Rvector6 - update needed later?!?!
+      // currently assuming an Rvector6 - update needed later?!?!   - awaiting Darrel on this
       // compute vector from origin of MJ2000Eq to origin of this system
       Rvector6 rif =  origin->GetMJ2000State(epoch) - 
                       (j2000Body->GetMJ2000State(epoch));
@@ -422,10 +439,10 @@ bool CoordinateSystem::TranslateToMJ2000Eq(const A1Mjd &epoch,
  * This method translates the input state, in MJ2000Eq axisSystem to 'this'
  * axisSystem.
  *
- * @param <epoch>      epoch for which to do the conversion.
- * @param <inState>    input state to convert.
- * @param <outState>   output (converted) state.
- * @param <j2000Body>  origin of the MJ2000Eq system.
+ * @param epoch      epoch for which to do the conversion.
+ * @param inState    input state to convert.
+ * @param outState   output (converted) state.
+ * @param j2000Body  origin of the MJ2000Eq system.
  *
  * @return true if successful; false if not.
  *
@@ -440,7 +457,7 @@ bool CoordinateSystem::TranslateFromMJ2000Eq(const A1Mjd &epoch,
       outState = inState;
    else
    {
-      // currently assuming an Rvector6 - update needed later?!?!
+      // currently assuming an Rvector6 - update needed later?!?!    - awaiting Darrel on this
       // compute vector from origin of of this system to origin of MJ2000Eq
       Rvector6 rif =  j2000Body->GetMJ2000State(epoch) - 
                       (origin->GetMJ2000State(epoch));

@@ -6,8 +6,8 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/12/20
@@ -55,9 +55,9 @@ CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
  * Constructs base CoordinateBase structures used in derived classes
  * (default constructor).
  *
- * @param <ofType>  Gmat::ObjectTypes enumeration for the object.
- * @param <itsType> GMAT script string associated with this type of object.
- * @param <itsName> Optional name for the object.  Defaults to "".
+ * @param ofType   Gmat::ObjectTypes enumeration for the object.
+ * @param itsType  GMAT script string associated with this type of object.
+ * @param itsName  Optional name for the object.  Defaults to "".
  *
  * @note There is no parameter free constructor for CoordinateBase.  Derived 
  *       classes must pass in the typeId and typeStr parameters.
@@ -80,7 +80,8 @@ solar          (NULL)
  * Constructs base CoordinateBase structures used in derived classes, by copying 
  * the input instance (copy constructor).
  *
- * @param <sp>  CoordinateBase instance to copy to create "this" instance.
+ * @param coordBase   CoordinateBase instance to copy to create "this" 
+ *                    instance.
  */
 //---------------------------------------------------------------------------
 CoordinateBase::CoordinateBase(const CoordinateBase &coordBase) :
@@ -97,7 +98,7 @@ solar      (coordBase.solar)
 /**
  * Assignment operator for CoordinateBase structures.
  *
- * @param <sp> The original that is being copied.
+ * @param coordBase  The original that is being copied.
  *
  * @return Reference to this object
  */
@@ -106,6 +107,7 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
 {
    if (&coordBase == this)
       return *this;
+   GmatBase::operator=(coordBase);
    origin     = coordBase.origin;
    originName = coordBase.originName;
    solar      = coordBase.solar;
@@ -113,7 +115,7 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~CoordinateBase(void)
+//  ~CoordinateBase()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -150,6 +152,9 @@ void CoordinateBase::Initialize()
    if (!origin)
       throw CoordinateSystemException(
             "Origin has not been defined for CoordinateBase object");
+   if (!solar)
+      throw CoordinateSystemException(
+            "Solar System has not been defined for CoordinateBase object");
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +166,7 @@ void CoordinateBase::Initialize()
 /**
  * This method returns the parameter text, given the input parameter ID.
  *
- * @param <id> Id for the requested parameter text.
+ * @param id  Id for the requested parameter text.
  *
  * @return parameter text for the requested parameter.
  *
@@ -180,7 +185,7 @@ std::string CoordinateBase::GetParameterText(const Integer id) const
 /**
  * This method returns the parameter ID, given the input parameter string.
  *
- * @param <str> string for the requested parameter.
+ * @param str  string for the requested parameter.
  *
  * @return ID for the requested parameter.
  *
@@ -223,7 +228,7 @@ Gmat::ParameterType CoordinateBase::GetParameterType(const Integer id) const
 /**
  * This method returns the parameter type string, given the input parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id  ID for the requested parameter.
  *
  * @return parameter type string of the requested parameter.
  *
@@ -241,7 +246,7 @@ std::string CoordinateBase::GetParameterTypeString(const Integer id) const
  * This method returns the string parameter value, given the input
  * parameter ID.
  *
- * @param <id> ID for the requested parameter.
+ * @param id  ID for the requested parameter.
  *
  * @return  string value of the requested parameter.
  *
@@ -265,8 +270,8 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
  * This method sets the string parameter value, given the input
  * parameter ID.
  *
- * @param <id> ID for the requested parameter.
- * @param <value> string value for the requested parameter.
+ * @param id     ID for the requested parameter.
+ * @param value  string value for the requested parameter.
  *
  * @return  success flag.
  *
@@ -292,7 +297,7 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 /**
  * Accessor method used to get a parameter value
  *
- * @param    <label>  label ID for the parameter
+ * @param    label  label ID for the parameter
  *
  * @return the value of the parameter
  */
@@ -308,8 +313,8 @@ std::string CoordinateBase::GetStringParameter(const std::string &label) const
 /**
 * Accessor method used to get a parameter value
  *
- * @param    <label> Integer ID for the parameter
- * @param    <value> The new value for the parameter
+ * @param    label  Integer ID for the parameter
+ * @param    value  The new value for the parameter
  */
 //------------------------------------------------------------------------------
 
@@ -327,8 +332,8 @@ std::string CoordinateBase::GetStringParameter(const std::string &label) const
 /**
  * This method returns a reference object from the CoordinateBase class.
  *
- * @param <type>  type of the reference object requested
- * @param <name>  name of the reference object requested
+ * @param type  type of the reference object requested
+ * @param name  name of the reference object requested
  *
  * @return pointer to the reference object requested.
  *
@@ -356,9 +361,9 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
 /**
  * This method sets a reference object for the CoordinateBase class.
  *
- * @param <obj>   pointer to the reference object
- * @param <type>  type of the reference object 
- * @param <name>  name of the reference object
+ * @param obj   pointer to the reference object
+ * @param type  type of the reference object 
+ * @param name  name of the reference object
  *
  * @return true if successful; otherwise, false.
  *

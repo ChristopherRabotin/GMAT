@@ -6,15 +6,14 @@
 //
 // **Legal**
 //
-// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// number S-67573-G and MOMS Task order 124
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under 
+// MOMS Task order 124.
 //
 // Author: Wendy C. Shoan
 // Created: 2004/12/27
 //
 /**
- * Implementation of the CoordinateConverter class.  This is the base class for the 
- * CoordinateSystem and AxisSystem classes.
+ * Implementation of the CoordinateConverter class.
  *
  */
 //------------------------------------------------------------------------------
@@ -58,12 +57,12 @@ j2000BodyName     ("Earth")
  * Constructs CoordinateConverter classes, by copying 
  * the input instance (copy constructor).
  *
- * @param <sp>  CoordinateConverter instance to copy to create "this" 
- *              instance.
+ * @param coordCvt  CoordinateConverter instance to copy to create "this" 
+ *                  instance.
  */
 //---------------------------------------------------------------------------
 CoordinateConverter::CoordinateConverter(const CoordinateConverter &coordCvt) :
-j2000Body     (NULL),
+j2000Body     (coordCvt.j2000Body),
 j2000BodyName (coordCvt.j2000BodyName)
 {
 }
@@ -74,7 +73,7 @@ j2000BodyName (coordCvt.j2000BodyName)
 /**
  * Assignment operator for CoordinateConverter objects.
  *
- * @param <sp> The original that is being copied.
+ * @param coordCvt The original that is being copied.
  *
  * @return Reference to this object
  */
@@ -87,11 +86,10 @@ const CoordinateConverter& CoordinateConverter::operator=(
    j2000Body     = coordCvt.j2000Body;
    j2000BodyName = coordCvt.j2000BodyName;
    
-   // do I need to copy the whole list of CoordinateSystem* here?
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~CoordinateConverter(void)
+//  ~CoordinateConverter()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
@@ -123,7 +121,7 @@ void CoordinateConverter::Initialize()
 /**
  * This method sets the j2000 body name for the CoordinateConverter object.
  *
- * @param <toName> name to which to set the j2000 body name.
+ * @param toName name to which to set the j2000 body name.
  */
 //------------------------------------------------------------------------------
 void CoordinateConverter::SetJ2000BodyName(const std::string &toName)
@@ -152,7 +150,7 @@ std::string CoordinateConverter::GetJ2000BodyName() const
 /**
  * This method sets the j2000 body for the CoordinateConverter object.
  *
- * @param <toBody> body pointer to which to set the j2000 body parameter.
+ * @param toBody body pointer to which to set the j2000 body parameter.
  */
 //------------------------------------------------------------------------------
 void CoordinateConverter::SetJ2000Body(SpacePoint *toBody)
@@ -177,26 +175,6 @@ SpacePoint* CoordinateConverter::GetJ2000Body()
 
 
 //------------------------------------------------------------------------------
-//  bool  AddCoordinateSystem(CoordinateSystem *coordSys) 
-//------------------------------------------------------------------------------
-/**
- * This method adds the input CoordinateSyste pointer to the vector of
- * defined CoordinateSystem objects.
- *
- * @param <coordSys> coordinateSystem to add to the vector.
- *
- * @return true if successful; false otherwise.
- */
-//------------------------------------------------------------------------------
-bool CoordinateConverter::AddCoordinateSystem(CoordinateSystem *coordSys)
-{
-   if (coordSys == NULL) return false;
-   // check to see if it's already on the list first?
-   coordSystems.push_back(coordSys);
-   return true;
-}
-
-//------------------------------------------------------------------------------
 //  bool  Convert(const A1Mjd &epoch, const Rvector &inState,
 //                CoordinateSystem *inCoord, Rvector &outState,
 //                CoordinateSystem *outCoord) 
@@ -206,11 +184,11 @@ bool CoordinateConverter::AddCoordinateSystem(CoordinateSystem *coordSys)
  * to the coordOut CoordinateSystem, at the input epoch, and returns the
  * result in outState.
  *
- * @param <epoch>    time for which to do the conversion.
- * @param <inState>  input State (in inCoord system).
- * @param <inCoord>  pointer to the input CoordinateSystem.
- * @param <outState> resulting vector, in the outCoord system.
- * @param <outCoord> pointer to the output CoordinateSystem.
+ * @param epoch    time for which to do the conversion.
+ * @param inState  input State (in inCoord system).
+ * @param inCoord  pointer to the input CoordinateSystem.
+ * @param outState resulting vector, in the outCoord system.
+ * @param outCoord pointer to the output CoordinateSystem.
  *
  * @return true if successful; false otherwise.
  */
@@ -219,6 +197,7 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
                           CoordinateSystem *outCoord)
 {
+   Rvector internalState(inState.GetSize());
    if ((!inCoord) || (!outCoord))
       throw CoordinateSystemException(
             "Undefined coordinate system - conversion not performed.");
