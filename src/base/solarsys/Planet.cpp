@@ -20,6 +20,9 @@
 #include "Planet.hpp"
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
+#include "RealUtilities.hpp"
+
+using namespace GmatMathUtil;
 
 // initialize static default values
 // default values for Planet data
@@ -295,6 +298,90 @@ Planet& Planet::operator=(const Planet &pl)
 //------------------------------------------------------------------------------
 Planet::~Planet()
 {
+}
+
+//------------------------------------------------------------------------------
+//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the cartographic coordinates for the planet.
+ *
+ * @return vector containing alpha, delta, W.
+ *
+ * @note currently only implemented for the (currently known) planets of our
+ *       Solar System.  See "Report of the IAU/IAG Working Group on
+ *       Cartographic Coordinates and Rotational Elements of the Planets
+ *       and Satellites: 2000"
+ */
+//------------------------------------------------------------------------------
+Rvector3 Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+{
+   Real alpha = 0;
+   Real delta = 0;
+   Real W = 0;
+   Real d = forTime.JulianDaysFromTCBEpoch(); // interval in Julian days
+   Real T = d / 36525;                        // interval in Julian centuries
+   if (instanceName == SolarSystem::MERCURY_NAME)
+   {
+      alpha = 281.01  - 0.033 * T;
+      delta = 61.45   - 0.005 * T;
+      W     = 329.548 + 6.1385025 * d;
+   }
+   else if (instanceName == SolarSystem::VENUS_NAME)
+   {
+      alpha = 272.76;
+      delta = 67.16;
+      W     = 160.20 - 1.4813688 * d;
+   }
+   else if (instanceName == SolarSystem::EARTH_NAME)
+   {
+      alpha = 0.00    - 0.641 * T;
+      delta = 90.00   - 0.557 * T;
+      W     = 190.147 + 360.9856235 * d;
+   }
+   else if (instanceName == SolarSystem::MARS_NAME)
+   {
+      alpha = 317.68143 - 0.1061 * T;
+      delta = 52.88650  - 0.0609 * T;
+      W     = 176.630   + 350.89198226 * d;
+   }
+   else if (instanceName == SolarSystem::JUPITER_NAME)
+   {
+      alpha = 268.05 - 0.009 * T;
+      delta = 64.49  + 0.003 * T;
+      W     = 284.95 + 870.5366420 * d;
+   }
+   else if (instanceName == SolarSystem::SATURN_NAME)
+   {
+      alpha = 40.589 - 0.036 * T;
+      delta = 83.537 - 0.004 * T;
+      W     = 38.90  + 810.7939024 * d;
+   }
+   else if (instanceName == SolarSystem::URANUS_NAME)
+   {
+      alpha = 257.311;
+      delta = -15.175;
+      W     = 203.81 - 501.1600928 * d;
+   }
+   else if (instanceName == SolarSystem::NEPTUNE_NAME)
+   {
+      Real N = 357.85 + 52.316 * T;
+      alpha  = 299.36 + 0.70 * Sin(Rad(N));
+      delta  = 43.46  - 0.51 * Cos(Rad(N));
+      W      = 253.18 + 536.3128492 * d - 0.48 * Sin(Rad(N));
+   }
+   else if (instanceName == SolarSystem::PLUTO_NAME)
+   {
+      alpha = 313.02;
+      delta = 9.09;
+      W     = 236.77 - 56.3623195 * d;
+   }
+   else
+   {
+      return CelestialBody::GetBodyCartographicCoordinates(forTime);
+   }
+   
+   return Rvector3(alpha, delta, W);
 }
 
 
