@@ -3,8 +3,9 @@
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
 # Modified:   2004/01/14 - Added burn directory
+#             2004/09/23 - W. Shoan - added interface directory
 
-SUBS = burn command configs executive factory forcemodel foundation \
+SUBS = burn command configs executive factory forcemodel foundation interface \
 	interpolator interpreter parameter propagator refframe solarsys solver \
 	spacecraft stopcond subscriber util
 
