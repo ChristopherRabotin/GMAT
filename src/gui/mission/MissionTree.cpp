@@ -70,6 +70,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_ACHIEVE, MissionTree::OnAddAchieve)
    EVT_MENU(POPUP_ADD_VARY, MissionTree::OnAddVary)
    EVT_MENU(POPUP_ADD_FUNCTION, MissionTree::OnAddFunction)
+   EVT_MENU(POPUP_ADD_ASSIGNMENT, MissionTree::OnAddAssignment)
    EVT_MENU(POPUP_ADD_TARGET, MissionTree::OnAddTarget)
    EVT_MENU(POPUP_ADD_IF_STATEMENT, MissionTree::OnAddIfStatement)
    EVT_MENU(POPUP_ADD_WHILE_LOOP, MissionTree::OnAddWhileLoop)
@@ -84,6 +85,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_INSERT_ACHIEVE, MissionTree::OnInsertAchieve)
    EVT_MENU(POPUP_INSERT_VARY, MissionTree::OnInsertVary)
    EVT_MENU(POPUP_INSERT_FUNCTION, MissionTree::OnInsertFunction)
+   EVT_MENU(POPUP_INSERT_ASSIGNMENT, MissionTree::OnInsertAssignment)
    EVT_MENU(POPUP_INSERT_TARGET, MissionTree::OnInsertTarget)
    EVT_MENU(POPUP_INSERT_IF_STATEMENT, MissionTree::OnInsertIfStatement)
    EVT_MENU(POPUP_INSERT_WHILE_LOOP, MissionTree::OnInsertWhileLoop)
@@ -135,7 +137,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandList.Add("Propagate");
    mCommandList.Add("Maneuver");
    mCommandList.Add("Target");
-   mCommandList.Add("Function");
+   mCommandList.Add("CallFunction");
+   mCommandList.Add("Assignment");
    
    if (gridLines)
    {
@@ -165,6 +168,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mNumDoWhile = 0;
    mNumSwitchCase = 0;
    mNumFunct = 0;
+   mNumAssign = 0;
 
    AddIcons();
    AddDefaultMission();
@@ -215,6 +219,7 @@ void MissionTree::UpdateMission(bool resetCounter)
       mNumDoWhile = 0;
       mNumSwitchCase = 0;
       mNumFunct = 0;
+      mNumAssign = 0;
    }
    
    DeleteChildren(mMissionSeqSubItem);
@@ -404,6 +409,14 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
       mNewTreeId =
          AppendCommand(parent, GmatTree::MISSION_ICON_FUNCTION, GmatTree::CALL_FUNCTION_COMMAND,
                        cmd, &mNumFunct, mNumFunct);
+
+      Expand(parent);
+   }
+   else if (cmdTypeName == "Assignment")
+   {
+      mNewTreeId =
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::ASSIGNMENT_COMMAND,
+                       cmd, &mNumAssign, mNumAssign);
 
       Expand(parent);
    }
@@ -1137,6 +1150,47 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAddAssignment(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnAddAssignment(wxCommandEvent &event)
+{
+#if DEBUG_MISSION_TREE
+   ShowCommands("Before OnAddAssignment()");
+#endif
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId lastId = GetLastChild(itemId);
+   wxTreeItemId prevId = GetPrevVisible(lastId);
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+   GmatCommand *prevCmd = NULL;
+
+   //loj: 12/6/04 - handle case prevItem is NULL
+   if (prevItem != NULL)
+      prevCmd = prevItem->GetCommand();
+   else
+      prevCmd = currItem->GetCommand();
+
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("Adding assignment to gui interpreter");
+#endif
+   GmatCommand *cmd = theGuiInterpreter->CreateCommand("Assignment");
+
+   if (cmd != NULL)
+   {
+      InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+                    GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
+
+      Expand(itemId);
+   }
+
+#if DEBUG_MISSION_TREE
+   ShowCommands("After OnAddAssignment()");
+#endif
+
+
+}
+
+//------------------------------------------------------------------------------
 // void OnAddTarget(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnAddTarget(wxCommandEvent &event)
@@ -1621,7 +1675,7 @@ void MissionTree::OnInsertFunction(wxCommandEvent &event)
 
    if (prevCmd != NULL)
    {     
-      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Function");
+      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("CallFunction");
             
       if (cmd != NULL)
       {  
@@ -1633,6 +1687,37 @@ void MissionTree::OnInsertFunction(wxCommandEvent &event)
    ShowCommands("After OnInsertFunction()");
 #endif
 }
+
+//------------------------------------------------------------------------------
+// void OnInsertAssignment(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnInsertAssignment(wxCommandEvent &event)
+{
+#if DEBUG_MISSION_TREE
+   ShowCommands("Before OnInsertAssignment()");
+#endif
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId);
+   wxTreeItemId prevId = GetPrevVisible(itemId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
+
+   GmatCommand *prevCmd = prevItem->GetCommand();
+
+   if (prevCmd != NULL)
+   {     
+      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Assignment");
+            
+      if (cmd != NULL)
+      {  
+         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+                       GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
+      }
+   }
+#if DEBUG_MISSION_TREE
+   ShowCommands("After OnInsertAssignment()");
+#endif
+}
+
 
 //------------------------------------------------------------------------------
 // void OnInsertTarget(wxCommandEvent &event)
@@ -2312,8 +2397,10 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_INSERT_MANEUVER;
          else if (cmd == "Target")
             return POPUP_INSERT_TARGET;
-         else if (cmd == "Function")
+         else if (cmd == "CallFunction")
             return POPUP_INSERT_FUNCTION;
+         else if (cmd == "Assignment")
+            return POPUP_INSERT_ASSIGNMENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
@@ -2326,8 +2413,10 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_ADD_MANEUVER;
          else if (cmd == "Target")
             return POPUP_ADD_TARGET;
-         else if (cmd == "Function")
+         else if (cmd == "CallFunction")
             return POPUP_ADD_FUNCTION;
+         else if (cmd == "Assignment")
+            return POPUP_ADD_ASSIGNMENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
