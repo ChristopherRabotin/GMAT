@@ -35,6 +35,12 @@
 //#include "bitmaps/open.xpm"
 
 
+#ifndef __WXMSW__
+#include "bitmaps/open.xpm"
+#endif
+
+
+
 /*
 * This is the top-level window of the application.
 */
