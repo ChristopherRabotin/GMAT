@@ -99,6 +99,7 @@ public:
    // Methods used to run the command
    virtual bool        InterpretAction();
     
+   virtual void        SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual bool        Initialize();
    virtual void        FillFormation(SpaceObject *so, StringArray& owners,
                                      StringArray& elements);
@@ -178,6 +179,9 @@ protected:
    Integer                 dim;
    /// Identifies when the command is in single step mode
    bool                    singleStepMode;
+   /// List of forces that can be turned on or off by other commands
+   std::vector<PhysicalModel*> 
+                           *transientForces;
    
    /// Allowed modes of propagation
    enum PropModes {
@@ -197,6 +201,9 @@ protected:
    virtual void            AssemblePropagators(Integer &loc, 
                                                std::string& generatingString);
    virtual bool            TakeAStep(Real propStep = 0.0);
+   
+   void                    AddTransientForce(StringArray *sats, ForceModel *p);
+   void                    ClearTransientForces();
 
 public:    
    // Accessors (Temporary, to support internal prop duration)
