@@ -99,12 +99,8 @@ void UniversePanel::Create()
                               wxSize(80,-1), 0 );
     item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    //loj: 2/24/04 these should not be hardcoded for future build
     wxString availableStrs [] = 
     {
-        //wxT("SLP"), 
-        //wxT("DE200"), 
-        //wxT("DE405"), 
     };
 
 //        ag: not needed for build 2
@@ -198,12 +194,6 @@ void UniversePanel::Create()
     item0->Add(de200FileSizer, 0, wxALIGN_CENTER|wxALL, 5);
 
     theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
-    //MessageInterface::ShowMessage("UniversePanel::Create() exiting\n");
-
-//      parent->SetAutoLayout( TRUE );
-//      parent->SetSizer( item0);
-//      item0->Fit( parent );
-//      item0->SetSizeHints( parent );
 }
 
 //------------------------------------------------------------------------------
@@ -257,6 +247,9 @@ void UniversePanel::LoadData()
 
     if (fileTypesInUse.size() > 0)
         removeButton->Enable(true);
+
+    if (fileTypesInUse.size() > 1)
+        prioritizeButton->Enable(true); //loj: 4/14/04 added
 }
 
 
@@ -296,31 +289,6 @@ void UniversePanel::SaveData()
 //      }
 }
 
-//loj: 2/27/04 commented out - becaulse it is calling GmatPanel, it will never
-// get here
-//  //------------------------------------------------------------------------------
-//  // virtual void OnHelp()
-//  //------------------------------------------------------------------------------
-//  void UniversePanel::OnHelp()
-//  {
-//      // open the window
-//      GmatPanel::OnHelp();
-
-//      // fill help text
-//  }
-
-//  //------------------------------------------------------------------------------
-//  // virtual void OnScript()
-//  //------------------------------------------------------------------------------
-//  void UniversePanel::OnScript()
-//  {
-//      // open the window
-//      GmatPanel::OnScript();
-
-//      // fill scripts
-//  }
-
-
 void UniversePanel::OnAddButton(wxCommandEvent& event)
 {
     // get string in first list and then search for it
@@ -333,11 +301,18 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
     {
       selectedListBox->Insert(s, 0);
       selectedListBox->SetSelection(0);
-      addButton->Enable(false);
-      removeButton->Enable(true);
-      prioritizeButton->Enable(true);
       theApplyButton->Enable(); //loj: 2/27/04 added
     }
+
+    removeButton->Enable(false);
+    prioritizeButton->Enable(false);
+    
+    if (selectedListBox->GetCount() > 0)
+        removeButton->Enable(true);
+
+    if (selectedListBox->GetCount() > 1)
+        prioritizeButton->Enable(true);
+    
 }
 
 // moves selected item to the top of the lsit
@@ -363,15 +338,14 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
     int sel = selectedListBox->GetSelection();
     selectedListBox->Delete(sel);
 
-    if (selectedListBox->GetCount() == 0)
-    {
-      removeButton->Enable(false);
-      prioritizeButton->Enable(false);
-    }
+    removeButton->Enable(false);
+    prioritizeButton->Enable(false);
+    
+    if (selectedListBox->GetCount() > 0)
+        removeButton->Enable(true);
 
-    //loj: 2/26/04 added
-    if (availableListBox->GetStringSelection().IsSameAs("SLP"))
-      addButton->Enable(true);
+    if (selectedListBox->GetCount() > 1)
+        prioritizeButton->Enable(true);
     
     theApplyButton->Enable(true);
 }
