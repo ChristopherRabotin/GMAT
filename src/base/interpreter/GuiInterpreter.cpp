@@ -462,6 +462,18 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
     return theModerator->GetDefaultSolarSystem();
 }
 
+//------------------------------------------------------------------------------
+// bool SetSlpFileToUse(const std::string &filename)
+//------------------------------------------------------------------------------
+/**
+ * @return true if it is successful set to use SLP file
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::SetSlpFileToUse(const std::string &filename)
+{
+    return theModerator->SetSlpFileToUse(filename);
+}
+
 // Subscriber
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const const std::string &name,

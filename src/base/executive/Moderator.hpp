@@ -41,6 +41,7 @@
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
+#include "SlpFile.hpp"
 // factories
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
@@ -136,8 +137,9 @@ public:
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
     SolarSystem* CreateSolarSystem(const std::string &name);
-    bool SetSolarSystemInUse(const std::string &name);
     SolarSystem* GetSolarSystemInUse();
+    bool SetSolarSystemInUse(const std::string &name);
+    bool SetSlpFileToUse(const std::string &filename);
 
     // Subscriber
     Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
@@ -197,6 +199,8 @@ private:
 
     // member data
     bool isInitialized;
+    bool IsSlpAlreadyInUse;
+    
     std::vector<Sandbox*> sandboxes;
     std::vector<GmatCommand*> commands;
 
@@ -220,6 +224,7 @@ private:
     SolverFactory *theSolverFactory;
 
     SolarSystem *theDefaultSolarSystem;
+    SlpFile *theDefaultSlpFile;
     
     static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 

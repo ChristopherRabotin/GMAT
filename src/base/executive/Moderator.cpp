@@ -425,9 +425,22 @@ Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
     Burn *burn = theFactoryManager->CreateBurn(type, name);
-    // Manage it if it is a named parameter
-    if (burn->GetName() != "")
-        theConfigManager->AddBurn(burn);
+
+    if (burn ==  NULL)
+        return NULL;
+    
+    // Manage it if it is a named burn
+    try
+    {
+        if (burn->GetName() != "")
+            theConfigManager->AddBurn(burn);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
+                                      e.GetMessage());
+    }
+    
     return burn;
 }
 
@@ -445,7 +458,6 @@ Burn* Moderator::CreateBurn(const std::string &type,
 Burn* Moderator::GetBurn(const std::string &name)
 {
     return theConfigManager->GetBurn(name);
-    return NULL;
 }
 
 // Parameter
@@ -721,6 +733,14 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystemInUse()
+//------------------------------------------------------------------------------
+SolarSystem* Moderator::GetSolarSystemInUse()
+{
+    return theConfigManager->GetSolarSystemInUse();
+}
+
+//------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 bool Moderator::SetSolarSystemInUse(const std::string &name)
@@ -729,11 +749,32 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// SolarSystem* GetSolarSystemInUse()
+// bool SetSlpFileToUse(const std::string &filename)
 //------------------------------------------------------------------------------
-SolarSystem* Moderator::GetSolarSystemInUse()
+bool Moderator::SetSlpFileToUse(const std::string &filename)
 {
-    return theConfigManager->GetSolarSystemInUse();
+    bool status = false;
+    
+    if (IsSlpAlreadyInUse)
+    {
+        MessageInterface::ShowMessage("Moderator::SetSlpFileToUse() SlpFile already set\n");
+        status = true;
+    }
+    else
+    {
+        MessageInterface::ShowMessage("Moderator::SetSlpFileToUse() setting SlpFile\n");
+        theDefaultSlpFile = new SlpFile(filename);
+        if (theDefaultSolarSystem->SetSource(Gmat::SLP))
+        {
+            if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
+            {
+                IsSlpAlreadyInUse = true;
+                status = true;
+            }
+        }
+    }
+
+    return status;
 }
 
 // Subscriber
@@ -1259,7 +1300,9 @@ void Moderator::ExecuteSandbox(Integer index)
 Moderator::Moderator()
 {
     isInitialized = false;
+    IsSlpAlreadyInUse = false;
     theDefaultSolarSystem = NULL;
+    theDefaultSlpFile = NULL;
     theFactoryManager = FactoryManager::Instance();
     theConfigManager = ConfigManager::Instance();
     sandboxes.reserve(Gmat::MAX_SANDBOX);

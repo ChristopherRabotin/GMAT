@@ -94,7 +94,8 @@ public:
 
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
-
+    bool SetSlpFileToUse(const std::string &filename);
+    
     // Subscriber
     Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
                                  const std::string &filename = "");
