@@ -7,12 +7,13 @@
 #                          PlanetaryEphemException.cpp
 #             2004/02/25 - Added AtmosphereManager.cpp, AtmosphereModel.cpp,
 #                          ExponentialAtmosphere.cpp, and Msise90Atmosphere.cpp
+#             2004/03/01 - Added AtmosphereException.cpp (WCS)
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AtmosphereManager.cpp AtmosphereModel.cpp CelestialBody.cpp \
+SRC = AtmosphereException.cpp AtmosphereManager.cpp AtmosphereModel.cpp CelestialBody.cpp \
 	ExponentialAtmosphere.cpp Moon.cpp Msise90Atmosphere.cpp Planet.cpp \
 	PlanetaryEphemException.cpp PlanetaryEphem.cpp SlpFile.cpp \
 	SolarSystem.cpp Star.cpp
