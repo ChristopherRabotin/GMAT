@@ -21,27 +21,26 @@
 #define MatlabWs_hpp
 
 #include "Subscriber.hpp"
-
 #include "Parameter.hpp"
-#include <map>
-#include <iostream>
-#include <iomanip>
 
 class MatlabWs : public Subscriber
 {
 public:
-   MatlabWs(const std::string &name, Parameter *firstVarParam = NULL);
-
+   MatlabWs(const std::string &name, Parameter *firstParam = NULL);
+   
    virtual ~MatlabWs(void);
-
+   
    MatlabWs(const MatlabWs &copy);
    MatlabWs& operator=(const MatlabWs &right);
-    
+   
    // methods inherited from Subscriber
    virtual bool Initialize();
-                      
+   
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   
+   virtual bool TakeAction(const std::string &action,
+                           const std::string &actionData = "");
    
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -49,50 +48,48 @@ public:
                      GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    
-   virtual Integer     GetIntegerParameter(const Integer id) const;
-   virtual Integer     SetIntegerParameter(const Integer id,
-                                          const Integer value);
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool        SetStringParameter(const Integer id,
-                                          const std::string &value);
-                                          
+   virtual bool SetStringParameter(const Integer id,
+                                   const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value);
+   
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
+   
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
    
-   virtual bool GetBooleanParameter(const Integer id) const;
-   virtual bool GetBooleanParameter(const std::string &label) const;
-   virtual bool SetBooleanParameter(const Integer id, const bool value);
-   virtual bool SetBooleanParameter(const std::string &label,
-                                    const bool value);
-
-   Integer GetNumVarParameters();
-   bool AddVarParameter(const std::string &paramName);
+   //loj: 1/10/04 Added
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
+   
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   
+   Integer GetNumParameters();
+   bool AddParameter(const std::string &paramName, Integer index);
    
 protected:
    /// Precision for output of real data
-   Integer precision;
    Integer mEvaluateFrequency;
+   Integer mNumParams;
    
-   std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
-   std::map<std::string, Parameter*> mVarParamMap;
+   std::vector<Parameter*> mParams;
+   StringArray mParamNames;
    
-   Integer mNumVarParams;
-   
-   StringArray mVarParamNames;
-     
    virtual bool        Distribute(Integer len);
    virtual bool        Distribute(const Real * dat, Integer len);
    
 private:
-    void ClearVarParameters();
-    bool initial;
+    void ClearParameters();
     
     enum
     {
-       PRECISION = SubscriberParamCount,
-       VAR_LIST,
-       ADD,
-       CLEAR,
+       ADD = SubscriberParamCount,
        MatlabWsParamCount  /// Count of the parameters for this class
     };
 

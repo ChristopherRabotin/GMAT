@@ -20,10 +20,9 @@
 
 #include "MatlabWs.hpp"
 #include "MessageInterface.hpp"
-#include "Moderator.hpp"         // for GetParameter()
 #include "Publisher.hpp"         // for Instance()
 
-#define DEBUG_MATLABWS 1
+//#define DEBUG_MATLABWS 1
 
 //---------------------------------
 // static data
@@ -31,32 +30,25 @@
 const std::string
 MatlabWs::PARAMETER_TEXT[MatlabWsParamCount - SubscriberParamCount] =
 {
-   "Precision",
-   "VarList",
    "Add",
-   "Clear",
 };
 
 const Gmat::ParameterType
 MatlabWs::PARAMETER_TYPE[MatlabWsParamCount - SubscriberParamCount] =
 {
-   Gmat::INTEGER_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::BOOLEAN_TYPE,
 };
 
 //------------------------------------------------------------------------------
-// MatlabWs(const std::string &name, Parameter *firstVarParam)
+// MatlabWs(const std::string &name, Parameter *firstParam)
 //------------------------------------------------------------------------------
-MatlabWs::MatlabWs(const std::string &name, Parameter *firstVarParam) :
-   Subscriber("MatlabWS", name), //loj: 10/28/04 Changed from MatlabWs
-   precision(12)
+MatlabWs::MatlabWs(const std::string &name, Parameter *firstParam) :
+   Subscriber("MatlabWS", name)
 {
-   mNumVarParams = 0;
+   mNumParams = 0;
 
-   if (firstVarParam != NULL)
-      AddVarParameter(firstVarParam->GetName());
+   if (firstParam != NULL)
+      AddParameter(firstParam->GetName(), 0);
 
    mEvaluateFrequency = 1;
    parameterCount = MatlabWsParamCount;
@@ -73,13 +65,11 @@ MatlabWs::~MatlabWs(void)
 // MatlabWs(const MatlabWs &copy)
 //------------------------------------------------------------------------------
 MatlabWs::MatlabWs(const MatlabWs &copy) :
-   Subscriber(copy),
-   precision(copy.precision)
+   Subscriber(copy)
 {
-   mVarParams = copy.mVarParams; 
-   mVarParamMap = copy.mVarParamMap;
-   mNumVarParams = copy.mNumVarParams;
-   mVarParamNames = copy.mVarParamNames;
+   mParams = copy.mParams; 
+   mNumParams = copy.mNumParams;
+   mParamNames = copy.mParamNames;
    mEvaluateFrequency = copy.mEvaluateFrequency;
 }
 
@@ -96,13 +86,10 @@ MatlabWs& MatlabWs::operator=(const MatlabWs& right)
       return *this;
 
    Subscriber::operator=(right);
-   
-   precision = right.precision;
-   
-   mVarParams = right.mVarParams; 
-   mVarParamMap = right.mVarParamMap;
-   mNumVarParams = right.mNumVarParams;
-   mVarParamNames = right.mVarParamNames;
+     
+   mParams = right.mParams; 
+   mNumParams = right.mNumParams;
+   mParamNames = right.mParamNames;
    mEvaluateFrequency = right.mEvaluateFrequency;
 
    return *this;
@@ -150,6 +137,31 @@ bool MatlabWs::Initialize()
 GmatBase* MatlabWs::Clone(void) const
 {
    return (new MatlabWs(*this));
+}
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool MatlabWs::TakeAction(const std::string &action,
+                          const std::string &actionData)
+{
+   if (action == "Clear")
+   {
+      ClearParameters();
+      return true;
+   }
+
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -203,55 +215,56 @@ std::string MatlabWs::GetParameterTypeString(const Integer id) const
 
 }
 
-
 //------------------------------------------------------------------------------
-// Integer GetIntegerParameter(const Integer id) const
-//------------------------------------------------------------------------------
-Integer MatlabWs::GetIntegerParameter(const Integer id) const
-{
-   if (id == PRECISION)
-      return precision;
-   return Subscriber::GetIntegerParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// Integer SetIntegerParameter(const Integer id, const Integer value)
-//------------------------------------------------------------------------------
-Integer MatlabWs::SetIntegerParameter(const Integer id, const Integer value)
-{
-   if (id == PRECISION)
-   {
-      if (value > 0)
-         precision = value;
-      return precision;
-   }
-
-   return Subscriber::SetIntegerParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const Integer id) const
-//------------------------------------------------------------------------------
-std::string MatlabWs::GetStringParameter(const Integer id) const
-{
-   if (id == ADD)
-      return "";
-   return Subscriber::GetStringParameter(id);
-}
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const Integer id, const std::string &value)
+// virtual bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool MatlabWs::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == ADD)
+   switch (id)
    {
-      return AddVarParameter(value);
+   case ADD:
+      return AddParameter(value, mNumParams);
+   default:
+      return Subscriber::SetStringParameter(id, value);
    }
-   
-   return Subscriber::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value)
+//------------------------------------------------------------------------------
+bool MatlabWs::SetStringParameter(const std::string &label,
+                                  const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool MatlabWs::SetStringParameter(const Integer id, const std::string &value,
+                                  const Integer index)
+{
+   switch (id)
+   {
+   case ADD:
+      return AddParameter(value, index);
+   default:
+      return Subscriber::SetStringParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool MatlabWs::SetStringParameter(const std::string &label,
+                                  const std::string &value,
+                                  const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
 }
 
 //------------------------------------------------------------------------------
@@ -261,8 +274,8 @@ const StringArray& MatlabWs::GetStringArrayParameter(const Integer id) const
 {
    switch (id)
    {
-   case VAR_LIST:
-      return mVarParamNames;
+   case ADD:
+      return mParamNames;
    default:
       return Subscriber::GetStringArrayParameter(id);
    }
@@ -276,86 +289,85 @@ const StringArray& MatlabWs::GetStringArrayParameter(const std::string &label) c
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+//loj: 1/10/05 Added
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
 //------------------------------------------------------------------------------
-bool MatlabWs::GetBooleanParameter(const Integer id) const
+GmatBase* MatlabWs::GetRefObject(const Gmat::ObjectType type,
+                                 const std::string &name)
 {
-   switch (id)
+   for (int i=0; i<mNumParams; i++)
    {
-   case CLEAR:
-      return true;
-   default:
-         return Subscriber::GetBooleanParameter(id);
+      if (mParamNames[i] == name)
+         return mParams[i];
    }
+
+   throw GmatBaseException("MatlabWs::GetRefObject() the object name: " + name +
+                           " not found\n");
 }
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label) const
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool MatlabWs::GetBooleanParameter(const std::string &label) const
+bool MatlabWs::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                          const std::string &name)
 {
-   return GetBooleanParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
-//------------------------------------------------------------------------------
-bool MatlabWs::SetBooleanParameter(const Integer id, const bool value)
-{
-   switch (id)
+   for (int i=0; i<mNumParams; i++)
    {
-   case CLEAR:
-      ClearVarParameters();
-      return true;
-   default:
-      return Subscriber::SetBooleanParameter(id, value);
-   }
-}
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const std::string &label,
-//                          const bool value)
-//------------------------------------------------------------------------------
-bool MatlabWs::SetBooleanParameter(const std::string &label,
-                                 const bool value)
-{
-   return SetBooleanParameter(GetParameterID(label), value);
-}
-
-//------------------------------------------------------------------------------
-// Integer GetNumVarParameters()
-//------------------------------------------------------------------------------
-Integer MatlabWs::GetNumVarParameters()
-{
-   return mNumVarParams;
-}
-
-//------------------------------------------------------------------------------
-// bool AddVarParameter(const std::string &paramName)
-//------------------------------------------------------------------------------
-bool MatlabWs::AddVarParameter(const std::string &paramName)
-{
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (paramName != "")
-   {
-      mVarParamNames.push_back(paramName);
-      mVarParamMap[paramName] = NULL;
-      mNumVarParams = mVarParamNames.size();
-
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
+      if (mParamNames[i] == name)
       {
-         mVarParamMap[paramName] = param;
-         mVarParams.push_back(param);
+         mParams[i] = (Parameter*)obj;
+         return true;
       }
-      status = true;
    }
 
-   return status;
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+const StringArray& MatlabWs::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return mParamNames;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetNumParameters()
+//------------------------------------------------------------------------------
+Integer MatlabWs::GetNumParameters()
+{
+   return mNumParams;
+}
+
+//------------------------------------------------------------------------------
+// bool AddParameter(const std::string &paramName, Integer index)
+//------------------------------------------------------------------------------
+bool MatlabWs::AddParameter(const std::string &paramName, Integer index)
+{
+#if DEBUG_MATLABWS_PARAM
+   MessageInterface::ShowMessage("MatlabWs::AddParameter() name = %s, index = %d\n",
+                                 paramName.c_str(), index);
+#endif
+
+   if (paramName != "" && index == mNumParams)
+   {
+      StringArray::iterator paramPos = 
+         find(mParamNames.begin(), mParamNames.end(), paramName);
+
+      // if name is unique, add
+      if (paramPos == mParamNames.end())
+      {
+         mParamNames.push_back(paramName);
+         mNumParams = mParamNames.size();
+         mParams.push_back(NULL);
+         return true;
+      }
+   }
+
+   return false;
 }
 
 //--------------------------------------
@@ -384,7 +396,7 @@ bool MatlabWs::Distribute(const Real * dat, Integer len)
    MessageInterface::ShowMessage("\nMatlabWs::Distribute() entered\n");
 #endif
              
-   Rvector varvals = Rvector(mNumVarParams);
+   Rvector varvals = Rvector(mNumParams);
      
    if (len == 0)
    {
@@ -392,9 +404,9 @@ bool MatlabWs::Distribute(const Real * dat, Integer len)
    }
    else
    {
-      for (int i=0; i < mNumVarParams; i++)
+      for (int i=0; i < mNumParams; i++)
       {
-          mVarParams[i]->Evaluate();
+          mParams[i]->Evaluate();
       } 
    }
 
@@ -406,12 +418,12 @@ bool MatlabWs::Distribute(const Real * dat, Integer len)
 //--------------------------------------
 
 //------------------------------------------------------------------------------
-// void ClearYParameters()
+// void ClearParameters()
 //------------------------------------------------------------------------------
-void MatlabWs::ClearVarParameters()
+void MatlabWs::ClearParameters()
 {
-   mVarParams.clear();
-   mVarParamNames.clear();
-   mNumVarParams = 0;
+   mParams.clear();
+   mParamNames.clear();
+   mNumParams = 0;
 }
 
