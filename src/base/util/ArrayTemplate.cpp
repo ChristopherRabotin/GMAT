@@ -288,7 +288,9 @@ ArrayTemplate<T>::SetSize(int size)
 {
    if (isSizedD == true)
    {
-       throw ArrayTemplateExceptions::ArrayAlreadySized();
+       //throw ArrayTemplateExceptions::ArrayAlreadySized();
+      // wcs - 2005.02.01 - need to be able to resize
+      delete elementD;
    }
 
    if (size < 0)
