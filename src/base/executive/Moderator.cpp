@@ -1233,14 +1233,14 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          
          if (createDefault)
          {
-            if (type == "OpenGlPlot")
+            if (type == "OpenGLPlot") //loj: 10/28/04 Changed from OpenGlPlot
             {
-               // add default spacecraft to OpenGlPlot (loj: 9/28/04 added index)
+               // add default spacecraft to OpenGLPlot (loj: 9/28/04 added index)
                sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0); 
             }
-            else if (type == "XyPlot")
+            else if (type == "XYPlot") //loj: 10/28/04 Changed from XyPlot
             {
-               // add default x,y parameter to XyPlot (loj: 9/29/04 added index)
+               // add default x,y parameter to XYPlot (loj: 9/29/04 added index)
                sub->SetStringParameter("IndVar", GetDefaultX()->GetName());
                sub->SetStringParameter("Add", GetDefaultY()->GetName(), 0);
                sub->Activate(true);
@@ -2017,6 +2017,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          runState = Gmat::IDLE;
+         theGuiInterpreter->NotifyRunCompleted(); //loj: 10/28/04 added
          
 #if DEBUG_RUN
          MessageInterface::ShowMessage
@@ -2408,8 +2409,8 @@ void Moderator::CreateDefaultMission()
       sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
       sub->Activate(false);
     
-      // XyPlot
-      sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
+      // XYPlot
+      sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
       sub->SetStringParameter("Add", "DefaultSC.X", 0); //loj: 9/29/04 added index
 #if DEBUG_ACTION_REMOVE
@@ -2419,8 +2420,8 @@ void Moderator::CreateDefaultMission()
 #endif
       sub->Activate(true);
       
-      // OpenGlPlot
-      sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+      // OpenGLPlot
+      sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
       sub->SetStringParameter("Add", "DefaultSC", 0); //loj: 9/28/04 added index
 #if DEBUG_ACTION_REMOVE
       sub->SetStringParameter("Add", "Spacecraft1", 1);
