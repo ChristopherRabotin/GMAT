@@ -60,12 +60,12 @@ BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
 GUI_INCS = -I$(APP) -I$(BURN) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
 	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(INC_PLOT) -I$(MANEUVER) \
 	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
-	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
+	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I$(WX_HOME)/../contrib/include/wx/plot -I.
 
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `wx-config --cxxflags` -Wall
+CXXFLAGS = $(BASE_INCS) $(GUI_INCS) $(WXFLAGS) `$(WX_HOME)/wx-config --cxxflags` -Wall
 CPP = g++ $(CXXFLAGS)
 #
 # Default suffix rule
