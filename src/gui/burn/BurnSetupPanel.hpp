@@ -6,7 +6,6 @@
 //
 // Author: LaMont Ruley
 // Created: 2003/12/01
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Burn Setup window.
@@ -96,7 +95,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_BUTTON_OK,
+        ID_BUTTON_OK = 81000,
         ID_BUTTON_APPLY,
         ID_BUTTON_CANCEL,
         ID_BUTTON_HELP,

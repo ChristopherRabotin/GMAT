@@ -6,7 +6,6 @@
 //
 // Author: LaMont Ruley
 // Created: 2002/01/30
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Burn Setup window.
