@@ -32,16 +32,17 @@ BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// ParameterSelectDialog(wxWindow *parent)
+// ParameterSelectDialog(wxWindow *parent, bool showArray = false)
 //------------------------------------------------------------------------------
-ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent)
+ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, bool showArray)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mParamName = "";
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
-
+   mShowArray = showArray;
+   
    Create();
    Show();
 }
@@ -90,11 +91,21 @@ void ParameterSelectDialog::Create()
    mObjectComboBox =
       theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX, wxSize(150, 20));
    
+
    // wxListBox
-   mUserParamListBox =
-      theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
+   //loj: 11/8/04 added
+   // if add user array to the list
+   if (mShowArray)
+   {     
+      mUserParamListBox =
+         theGuiManager->GetUserParameterListBox(this, ID_LISTBOX, wxSize(150, 50));
+   }
+   else
+   {
+      mUserParamListBox =
+         theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
+   }
    
-   //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = theGuiManager->
       GetPropertyListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
    
@@ -186,7 +197,6 @@ void ParameterSelectDialog::SaveData()
       std::string objName(mObjectComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
 
-      //loj: 9/22/04 added
       // create parameter if it is new
       Parameter *param = theGuiInterpreter->GetParameter(paramName);
 
@@ -204,11 +214,18 @@ void ParameterSelectDialog::SaveData()
       }
       else
       {
-         wxLogMessage("Selected parameter:%s is not returning single value. "
-                      "Please select another parameter\n", paramName.c_str());
+         if (mShowArray)
+         {
+            mIsParamSelected = true;
+         }
+         else
+         {
+            wxLogMessage("Selected parameter:%s is not returning single value. "
+                         "Please select another parameter\n", paramName.c_str());
          
-         mIsParamSelected = false;
-         mCanClose = false;
+            mIsParamSelected = false;
+            mCanClose = false;
+         }
       }
    }
    else
@@ -250,16 +267,21 @@ void ParameterSelectDialog::OnButton(wxCommandEvent& event)
    }
    else if ( event.GetEventObject() == mCreateParamButton )  
    {
-      //loj: 7/28/04 added
-      // show dialog to create parameter
       ParameterCreateDialog paramDlg(this);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamCreated())
       {
-         //loj: 9/30/04 chagnged *UserParameter() to *UserVariable()
-         mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
-                                theGuiManager->GetUserVariableList());
+         if (mShowArray)
+         {
+            mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
+                                   theGuiManager->GetUserParameterList());
+         }
+         else
+         {
+            mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                                   theGuiManager->GetUserVariableList());
+         }
          mAddParamButton->Disable();
       }
    }

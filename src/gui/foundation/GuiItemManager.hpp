@@ -58,6 +58,12 @@ public:
    int GetNumUserVariable()
       { return theNumUserVariable; }
    
+   int GetNumUserArray()
+      { return theNumUserArray; }
+   
+   int GetNumUserParameter()
+      { return theNumUserParam; }
+   
    int GetNumConfigBody()
       { return theNumConfigBody; }
    
@@ -70,8 +76,8 @@ public:
    wxString* GetUserVariableList()
       { return theUserVarList; }
    
-   wxString* GetUserArrayList()
-      { return theUserArrayList; }
+   wxString* GetUserParameterList() //loj: 11/8/04 added
+      { return theUserParamList; }
    
    int GetNumProperty(const wxString &objName);
    wxString* GetPropertyList(const wxString &objName);
@@ -109,6 +115,9 @@ public:
    wxListBox* GetUserArrayListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
                                   const wxString &nameToExclude = "");
+   
+   wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size);
    
    wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
@@ -151,6 +160,7 @@ private:
    int theNumSystemParam;
    int theNumUserVariable;
    int theNumUserArray;
+   int theNumUserParam;
    int theNumConfigBody;
    
    wxString theSpaceObjectList[MAX_OBJECT_SIZE];
@@ -161,6 +171,7 @@ private:
    wxString theSystemParamList[MAX_PARAM_SIZE];
    wxString theUserVarList[MAX_PARAM_SIZE];
    wxString theUserArrayList[MAX_PARAM_SIZE];
+   wxString theUserParamList[MAX_PARAM_SIZE];   
    wxString theConfigBodyList[MAX_OBJECT_SIZE];
    
    wxComboBox *theSpacecraftComboBox;
@@ -173,6 +184,7 @@ private:
    wxListBox  *theSystemParamListBox;
    wxListBox  *theUserVarListBox;
    wxListBox  *theUserArrayListBox;
+   wxListBox  *theUserParamListBox;
    wxListBox  *theConfigBodyListBox;
 
    wxBoxSizer *theParamBoxSizer;

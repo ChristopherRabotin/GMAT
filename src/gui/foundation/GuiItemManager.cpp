@@ -578,6 +578,35 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
+// wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
+//                                    const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Configured User Array ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID id,
+                                                   const wxSize &size)
+{
+   wxString emptyList[] = {};
+   
+   if (theNumUserParam > 0)
+   {       
+      theUserParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserParam,
+                       theUserParamList, wxLB_SINGLE|wxLB_SORT);
+   }
+   else
+   {       
+      theUserParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                       emptyList, wxLB_SINGLE|wxLB_SORT);
+   }
+   
+   return theUserParamListBox;
+}
+
+//------------------------------------------------------------------------------
 // wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 //                                 const wxSize &size,
 //                                 wxArrayString &bodiesToExclude)
@@ -1020,11 +1049,12 @@ void GuiItemManager::UpdateParameterList()
    int userVarCount = 0;
    int userArrayCount = 0;
    int systemParamCount = 0;
+   int userParamCount = 0;
    
    for (int i=0; i<numParamCount; i++)
    {
       param = theGuiInterpreter->GetParameter(items[i]);
-      
+
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())
       {
@@ -1044,6 +1074,9 @@ void GuiItemManager::UpdateParameterList()
             {
                theUserVarList[userVarCount] = items[i].c_str();
                userVarCount++;
+               
+               theUserParamList[userParamCount] = items[i].c_str();
+               userParamCount++;
             }
          }
       }
@@ -1054,6 +1087,9 @@ void GuiItemManager::UpdateParameterList()
          {
             theUserArrayList[userArrayCount] = items[i].c_str();
             userArrayCount++;
+            
+            theUserParamList[userParamCount] = items[i].c_str();
+            userParamCount++;
          }
       }
       //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
@@ -1064,6 +1100,7 @@ void GuiItemManager::UpdateParameterList()
    theNumSystemParam = systemParamCount;
    theNumUserVariable = userVarCount;
    theNumUserArray = userArrayCount;
+   theNumUserParam = userParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -1115,6 +1152,7 @@ GuiItemManager::GuiItemManager()
    theSystemParamListBox = NULL;
    theUserVarListBox = NULL;
    theUserArrayListBox = NULL;
+   theUserParamListBox = NULL;
    theConfigBodyListBox = NULL;
 }
 
