@@ -46,6 +46,9 @@ public:
                                    const std::string &msg);
     static void ShowMessage(Gmat::MessageType msgType, int interval,
                             const std::string &msg);
+    static void LogMessage(const std::string &msg);
+    static void SetLogFile(FILE *file)
+        { logFile = file; };
     static void SetLog(bool flag)
         { logFlag = flag; };
     
@@ -57,6 +60,7 @@ private:
     static Gmat::MessageType messageType;
     static int showIntervalInMilSec;
     static short messageExist;
+    static FILE *logFile;
     static bool logFlag;
     
     MessageInterface();

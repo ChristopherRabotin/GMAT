@@ -16,8 +16,12 @@
  * Defines operations on messages.
  */
 //------------------------------------------------------------------------------
+#if !defined __CONSOLE_APP__
 #include "gmatwxdefs.hpp"
-#include <queue>                 // for queue
+#endif
+
+#include <iostream>                // for cout, endl
+#include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
 
 //---------------------------------
@@ -30,6 +34,8 @@ std::string MessageInterface::continueMessage = "Continue";
 Gmat::MessageType MessageInterface::messageType = Gmat::INFO_;
 int MessageInterface::showIntervalInMilSec = 2000;
 short MessageInterface::messageExist = 0;
+FILE* MessageInterface::logFile = NULL;
+bool MessageInterface::logFlag = false;
 
 //---------------------------------
 //  public functions
@@ -84,8 +90,10 @@ void MessageInterface::NoteMessage(const std::string &msg)
 
    MessageInterface::messageQueue.push(msg);
    
+#if !defined __CONSOLE_APP__
    wxLogError(wxT(wxString(msg.c_str())));
    wxLog::FlushActive();
+#endif
 
 } // end NoteMessage()
 
@@ -118,6 +126,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
    MessageInterface::popupMessage = msg;
    MessageInterface::messageType = msgType;
 
+#if !defined __CONSOLE_APP__
    switch (msgType)
    {
    case Gmat::ERROR_:
@@ -136,7 +145,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
    default:
        break;
    };
-
+#else
+   LogMessage(msg);
+#endif
+   
 } // end PopupMessage()
 
 
@@ -154,3 +166,18 @@ void MessageInterface::ShowMessage(Gmat::MessageType msgType, int interval,
    MessageInterface::showIntervalInMilSec = interval;
    
 } // end ShowMessage()
+
+//------------------------------------------------------------------------------
+// void void LogMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+void MessageInterface::LogMessage(const std::string &msg)
+{
+    if (logFile == NULL)
+    {
+        std::cout << msg << std::endl;
+    }
+    else
+    {
+        // work on this
+    }
+}
