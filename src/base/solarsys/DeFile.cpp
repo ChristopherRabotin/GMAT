@@ -32,6 +32,7 @@
 #include "PlanetaryEphemException.hpp"
 #include "TimeTypes.hpp"
 #include "DeFile.hpp"
+#include "TimeSystemConverter.hpp"
 
 #if defined (__UNIT_TEST__)
 #include <fstream> //for debug output
@@ -257,7 +258,12 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
    // add to the MJD to get the absolute Julian Date
    //double absJD = atTime.Get() + 2430000.5;
    //double absJD = atTime.Get() + 2430000.0;
-   double absJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
+   //double absJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
+   //double tmpJD = atTime.Get() + jdMjdOffset + TT_OFFSET / GmatTimeUtil::SECS_PER_DAY;
+   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+                   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+   double absJD  = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+
 
    // if we're asking for the moon state, just get it and return it, as
    // it is supposed to be a geocentric state from the DE file
