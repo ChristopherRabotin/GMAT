@@ -155,6 +155,10 @@ void SpacePoint::SetJ2000Body(SpacePoint* toBody)
    j2000Body = toBody;
 }
 
+const Rvector3 SpacePoint::GetMJ2000Acceleration(const A1Mjd &atTime)
+{
+   return Rvector3(0.0,0.0,0.0);
+}
 
 //------------------------------------------------------------------------------
 // public methods inherited from GmatBase
