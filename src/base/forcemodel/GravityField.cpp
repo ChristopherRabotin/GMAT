@@ -57,7 +57,12 @@
 #include "CelestialBody.hpp"
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
+#include "Rvector.hpp"
 //#include "SolarSystemException.hpp"
+
+//************
+#include <iostream>
+using namespace std;
 
 using namespace GmatMathUtil;
 
@@ -599,8 +604,8 @@ Real        GravityField::SetRealParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool GravityField::gravity_init(void)
 {
-   //Integer      fileDegree, fileOrder;
    Integer      cc, dd, size=0;
+   Integer      defDegree, defOrder;
    //Integer      n=0, m=0, iscomment, rtn;
 
    //if (body == NULL) throw ForceModelException("Body undefined for GravityField.");
@@ -685,7 +690,69 @@ bool GravityField::gravity_init(void)
       }
 
    }
-   if (!ReadFile()) return false;
+   if (!ReadFile())
+   {
+      cout << "Returned false from ReadFile() ........" << endl;
+      // try to get default coefficients from the body
+      MessageInterface::ShowMessage("Using default coefficients from the body.\n");
+      mu     = body->GetGravitationalConstant();
+      a      = body->GetEquatorialRadius();
+      Rmatrix sij = body->GetHarmonicCoefficientsSij();
+      Rmatrix cij = body->GetHarmonicCoefficientsCij();
+      Integer idx,jdx;
+      Integer srows, scolumns, crows, ccolumns;
+      sij.GetSize(srows, scolumns);
+      cij.GetSize(crows, ccolumns);
+      for (idx=0; idx<srows; idx++)
+         for (jdx=0; jdx<scolumns; jdx++)
+            Sbar[idx][jdx] = sij.GetElement(idx,jdx);
+      for (idx=0; idx<crows; idx++)
+         for (jdx=0; jdx<ccolumns; jdx++)
+            Cbar[idx][jdx] = cij.GetElement(idx,jdx);
+
+      // zero out the drift values, as there are no default values in the body - should there be?
+      for (idx=0; idx<GRAV_MAX_DRIFT_DEGREE+1;idx++)
+      {
+         for (jdx=0; jdx<GRAV_MAX_DRIFT_DEGREE+1;jdx++)
+         {
+            dSbar[idx][jdx] = 0.0;
+            dCbar[idx][jdx] = 0.0;
+         }
+      }
+
+      defDegree = body->GetDegree();
+      defOrder  = body->GetOrder();
+      // truncate the degree and/or order, if necessary
+      if (defDegree > degree)
+      {
+         MessageInterface::ShowMessage(
+                        "In GravityField, truncating to degree = %d\n",degree);
+      }
+      else if (defDegree < degree)
+      {
+         degree = defDegree;
+         MessageInterface::ShowMessage(
+                        "In GravityField, truncating to degree = %d\n", degree);
+      }
+      if (defOrder > order)
+      {
+         MessageInterface::ShowMessage(
+                        "In GravityField, truncating to order = %d\n",order);
+      }
+      else if (defOrder < order)
+      {
+         order = defOrder;
+         MessageInterface::ShowMessage(
+                        "In GravityField, truncating to order = %d\n", order);
+      }
+      if (order > degree)
+      {
+         order = degree;
+         MessageInterface::ShowMessage(
+                        "In GravityField, truncating to order = %d\n", order);
+      }
+      //return false;
+   }
    
    /* transform from tide free to zero tide system */ /* <<<<-- took out to match STK (SQ)*/
    /* G.Cbar[2][0] += (Real)3.11080e-8 * 0.3 / Sqrt((Real)5.0); */
@@ -706,33 +773,54 @@ bool GravityField::gravity_init(void)
 bool GravityField::ReadFile()
 {
    Integer      fileDegree, fileOrder;
+   std::string  errMsg;
+   bool         isOk = true;
 
    // Determine the type of file  --> add switch later!!!!!!!!!!
    if ((filename.find(".dat",0) != std::string::npos) ||
        (filename.find(".DAT",0) != std::string::npos) )
    {
       if (!ReadDatFile(fileDegree, fileOrder))
-         throw ForceModelException(
-                                   "Error reading mu and equatorial radius from " + filename);
+      {
+         errMsg = "Error reading coefficients, mu, and equatorial radius from "
+                  + filename;
+         //throw ForceModelException(errMsg);
+         isOk = false;
+      }
    }
    else if ((filename.find(".grv",0) != std::string::npos) ||
             (filename.find(".GRV",0) != std::string::npos) )
    {
       if (!ReadGrvFile(fileDegree, fileOrder))
-         throw ForceModelException(
-                                   "Error reading mu and equatorial radius from " + filename);
+      {
+         errMsg = "Error reading coefficients, mu, and equatorial radius from "
+                  + filename;
+         //throw ForceModelException(errMsg);
+         isOk = false;
+      }
    }
    else if ((filename.find(".cof",0) != std::string::npos) ||
             (filename.find(".COF",0) != std::string::npos) )
    {
       if (!ReadCofFile(fileDegree, fileOrder))
-         throw ForceModelException(
-                                   "Error reading mu and equatorial radius from " + filename);
+      {
+         errMsg = "Error reading coefficients, mu, and equatorial radius from "
+                  + filename;
+         //throw ForceModelException(errMsg);
+         isOk = false;
+      }
    }
    else
    {
-      throw ForceModelException("Gravity file " + filename +
-                                " is of unknown format.");
+      errMsg = "Gravity file " + filename + " is of unknown format.";
+      //throw ForceModelException(errMsg);
+      isOk = false;
+   }
+   if (!isOk)
+   {
+      MessageInterface::ShowMessage(errMsg);
+      fileRead = true;  // will be reset if/when new filename is set
+      return false;
    }
 
    // truncate the degree and/or order, if necessary
@@ -798,7 +886,12 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
    std::ifstream inFile;
    inFile.open(filename.c_str());
    if (!inFile)
-      throw ForceModelException("Cannot open file " + filename);
+   {
+      //throw ForceModelException("Cannot open file " + filename);
+      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
+      return false;
+   }
+
 
    std::string s;
    std::string firstStr;
@@ -863,7 +956,11 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
    std::ifstream inFile;
    inFile.open(filename.c_str());
    if (!inFile)
-      throw ForceModelException("Cannot open file " + filename);
+   {
+      //throw ForceModelException("Cannot open file " + filename);
+      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
+      return false;
+   }
 
    for ( n=0,m=0; n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER;n++,m++ )
    {
@@ -969,8 +1066,8 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
    
    /* read coefficients from file */
    fp = fopen( filename.c_str(), "r");
-   if (!fp)
-   {
+   if (!fp){
+      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
 //      gfInitialized = false;  // ???????????????????????????????????
       return false;
    }
