@@ -17,12 +17,14 @@
 #include "bitmaps/openfolder.xpm"
 #include "bitmaps/file.xpm"
 
-#include "GmatAppData.hpp"
 #include "MissionTree.hpp"
+#include "MissionTreeItemData.hpp"
+
+#include "GmatAppData.hpp"
+#include "Propagate.hpp"
+#include "Maneuver.hpp"
+#include "Target.hpp"
 #include "MessageInterface.hpp"
-#include "GmatTreeItemData.hpp"
-#include "GuiInterpreter.hpp"
-#include "Command.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -79,8 +81,8 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
-              const wxPoint &pos, const wxSize &size, long style)
-              :DecoratedTree(parent, id, pos, size, style)
+                         const wxPoint &pos, const wxSize &size, long style)
+    : DecoratedTree(parent, id, pos, size, style)
 {
     this->parent = parent;
     mainNotebook = GmatAppData::GetMainNotebook();
@@ -143,13 +145,13 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 void MissionTree::AddDefaultMission()
 {
     wxTreeItemId mission = this->AddRoot(wxT("Mission"), -1, -1,
-                                  new GmatTreeItemData(wxT("Mission"),
+                                  new MissionTreeItemData(wxT("Mission"),
                                   GmatTree::MISSIONS_FOLDER));
 
     //----- Mission Sequence
     mMissionSeqTopItem =
         this->AppendItem(mission, wxT("MissionSequence"), GmatTree::ICON_FOLDER,
-                         -1, new GmatTreeItemData(wxT("MissionSequence"),
+                         -1, new MissionTreeItemData(wxT("MissionSequence"),
                          GmatTree::MISSION_SEQ_TOP_FOLDER));
     
     SetItemImage(mMissionSeqTopItem, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
@@ -159,7 +161,7 @@ void MissionTree::AddDefaultMission()
     //loj: commented out
 //      // hard code mission in for now
 //      this->AppendItem(mission, wxT("Propagate"), -1, -1,
-//            new GmatTreeItemData(wxT("Propagate"), GmatTree::PROPAGATE_COMMAND));
+//            new MissionTreeItemData(wxT("Propagate"), GmatTree::PROPAGATE_COMMAND));
 }
 
 //------------------------------------------------------------------------------
@@ -175,7 +177,7 @@ void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
     //{
     //    wxString objName = wxString(itemNames[i].c_str());
     //    this->AppendItem(item, wxT(objName), GmatTree::ICON_FOLDER, -1,
-    //                     new GmatTreeItemData(wxT(objName), GmatTree::MISSION_SEQ_COMMAND));
+    //                     new MissionTreeItemData(wxT(objName), GmatTree::MISSION_SEQ_COMMAND));
     //};
 }
 
@@ -244,7 +246,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
     // get some info about this item
     wxTreeItemId itemId = event.GetItem();
-    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
+    MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
 
     mainNotebook->CreatePage(item);
 }
@@ -261,7 +263,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 {
-    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(id);
+    MissionTreeItemData *treeItem = (MissionTreeItemData *)GetItemData(id);
     wxString title = treeItem->GetDesc();
     int dataType = treeItem->GetDataType();
     
@@ -325,7 +327,7 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
     name.Printf("Sequence%d", ++mNumMissionSeq);
   
     this->AppendItem(item, name,GmatTree::ICON_FOLDER, -1,
-                     new GmatTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
+                     new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
     
     Expand(item);
 }
@@ -339,13 +341,22 @@ void MissionTree::OnAddPropagate(wxCommandEvent &event)
     name.Printf("Propagate%d", ++mNumPropagate);
 
     //loj: create Propagate command here
-    //loj: Why it doesn't compile?
-    //Command *cmd = theGuiInterpreter->AddCommand("Propagate", name);
+    //loj: Why Command *cmd doesn't compile?
+
+    Propagate *cmd = (Propagate*)
+        (theGuiInterpreter->CreateCommand("Propagate", std::string(name.c_str())));
+    if (theGuiInterpreter->AppendCommand(cmd))
+    {
     
-    this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                     new GmatTreeItemData(name, GmatTree::PROPAGATE_COMMAND));
-    
-    Expand(item);
+        if (cmd != NULL)
+        {
+            this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                             new MissionTreeItemData(name, GmatTree::PROPAGATE_COMMAND,
+                                                     name, cmd));
+            
+            Expand(item);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -356,10 +367,20 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
     wxString name;
     name.Printf("Maneuver%d", ++mNumManeuver);
   
-    this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                     new GmatTreeItemData(name, GmatTree::MANEUVER_COMMAND));
+    Maneuver *cmd = (Maneuver*)
+        (theGuiInterpreter->CreateCommand("Maneuver", std::string(name.c_str())));
+    if (theGuiInterpreter->AppendCommand(cmd))
+    {
     
-    Expand(item);
+        if (cmd != NULL)
+        {
+            this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                             new MissionTreeItemData(name, GmatTree::MANEUVER_COMMAND,
+                                                     name, cmd));
+            
+            Expand(item);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -370,10 +391,20 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
     wxString name;
     name.Printf("Target%d", ++mNumTarget);
   
-    this->AppendItem(item, name, GmatTree::ICON_FOLDER, -1,
-                     new GmatTreeItemData(name, GmatTree::TARGET_COMMAND));
+    Target *cmd = (Target*)
+        (theGuiInterpreter->CreateCommand("Target", std::string(name.c_str())));
+    if (theGuiInterpreter->AppendCommand(cmd))
+    {
     
-    Expand(item);
+        if (cmd != NULL)
+        {
+            this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                             new MissionTreeItemData(name, GmatTree::TARGET_COMMAND,
+                                                     name, cmd));
+            
+            Expand(item);
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -386,9 +417,59 @@ void MissionTree::OnInsertPropagate(wxCommandEvent &event)
   name.Printf("Propagate%d", ++mNumPropagate); 
  
   item = GetPrevSibling(item);
+  MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(item);
   
-  this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
-        new GmatTreeItemData(name, GmatTree::PROPAGATE_COMMAND));
+  std::string typeName = (prevItem->GetCommand())->GetTypeName();
+
+  //loj: because I cannot do:
+  //Command *prevCmd = prevItem->GetCommand();
+  //Propagate *cmd =
+  //    (Propagate*)(theGuiInterpreter->InsertCommand(cmd, prevCmd));
+  //if (cmd != NULL)
+  //{
+  //    this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
+  //          new MissionTreeItemData(name, GmatTree::PROPAGATE_COMMAND, name, cmd));
+  //}
+
+  //the followng is the workaround
+  
+  if (typeName == "Propagate")
+  {
+      Propagate *prevCmd = (Propagate*)(prevItem->GetCommand());
+      Propagate *cmd =
+          (Propagate*)(theGuiInterpreter->InsertCommand(cmd, prevCmd));
+      
+      if (cmd != NULL)
+      {
+          this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
+                           new MissionTreeItemData(name, GmatTree::PROPAGATE_COMMAND, name, cmd));
+      }
+  }
+  else if (typeName == "Maneuver")
+  {
+      Maneuver *prevCmd = (Maneuver*)(prevItem->GetCommand());
+      Propagate *cmd =
+          (Propagate*)(theGuiInterpreter->InsertCommand(cmd, prevCmd));
+
+      if (cmd != NULL)
+      {
+          this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
+                           new MissionTreeItemData(name, GmatTree::PROPAGATE_COMMAND, name, cmd));
+      }
+  }
+  else if (typeName == "Target")
+  {
+      Target *prevCmd = (Target*)(prevItem->GetCommand());
+      Propagate *cmd =
+          (Propagate*)(theGuiInterpreter->InsertCommand(cmd, prevCmd));
+
+      if (cmd != NULL)
+      {
+          this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
+                           new MissionTreeItemData(name, GmatTree::PROPAGATE_COMMAND, name, cmd));
+      }
+  }
+  
 }
 
 //------------------------------------------------------------------------------
@@ -403,7 +484,7 @@ void MissionTree::OnInsertManeuver(wxCommandEvent &event)
   item = GetPrevSibling(item);
   
   this->InsertItem(itemParent, item, name, GmatTree::ICON_FILE, -1,
-        new GmatTreeItemData(name, GmatTree::MANEUVER_COMMAND));
+        new MissionTreeItemData(name, GmatTree::MANEUVER_COMMAND));
 }
 
 //------------------------------------------------------------------------------
@@ -418,7 +499,7 @@ void MissionTree::OnInsertTarget(wxCommandEvent &event)
   item = GetPrevSibling(item);
   
   this->InsertItem(itemParent, item, name, GmatTree::ICON_FOLDER, -1,
-        new GmatTreeItemData(name, GmatTree::TARGET_COMMAND));
+        new MissionTreeItemData(name, GmatTree::TARGET_COMMAND));
 }
 
 
@@ -491,16 +572,23 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
     return menu;
 }
 
+//------------------------------------------------------------------------------
+// void OnViewVariables()
+//------------------------------------------------------------------------------
 void MissionTree::OnViewVariables()
 {
-    GmatTreeItemData *item = new GmatTreeItemData(wxT("Variables"), 
-                              GmatTree::VIEW_SOLVER_VARIABLES);
+    MissionTreeItemData *item = new MissionTreeItemData(wxT("Variables"), 
+                                                        GmatTree::VIEW_SOLVER_VARIABLES);
     mainNotebook->CreatePage(item);
 }
 
+//------------------------------------------------------------------------------
+// void OnViewGoals()
+//------------------------------------------------------------------------------
 void MissionTree::OnViewGoals()
 {
-    GmatTreeItemData *item = new GmatTreeItemData(wxT("Goals"),
-                              GmatTree::VIEW_SOLVER_GOALS);
+    MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
+                                                        GmatTree::VIEW_SOLVER_GOALS);
     mainNotebook->CreatePage(item);
 }
+

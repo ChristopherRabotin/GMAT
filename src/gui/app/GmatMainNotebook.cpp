@@ -23,7 +23,6 @@
 #include "DCSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
-#include "GmatTreeItemData.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
@@ -68,7 +67,7 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 GmatMainNotebook::GmatMainNotebook(wxWindow *parent, wxWindowID id,
                    const wxPoint &pos, const wxSize &size, long style)
-                   :wxNotebook(parent, id, pos, size, style)
+    : wxNotebook(parent, id, pos, size, style)
 {
   this->parent = parent;
   curPages = new wxList();
@@ -156,22 +155,22 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
         {
             //MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
-            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
+            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), item->GetCommand()),
                         0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::PROPAGATE_COMMAND)
         {
-          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
+          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), item->GetCommand()),
                       0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::MANEUVER_COMMAND)
         {
-            sizer->Add( new ManeuverSetupPanel(panel),
+            sizer->Add( new ManeuverSetupPanel(panel, item->GetCommand()),
                         0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::TARGET_COMMAND)
         {
-            sizer->Add ( new SolverEventPanel (panel, item->GetDesc()),
+            sizer->Add ( new SolverEventPanel (panel, item->GetDesc(), item->GetCommand()),
                         0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::VIEW_SOLVER_GOALS)

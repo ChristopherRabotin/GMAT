@@ -18,6 +18,8 @@
 #include "gmatwxdefs.hpp"
 #include "wx/treectrl.h"
 
+#include "Command.hpp"
+
 class GmatTreeItemData : public wxTreeItemData
 {
 public:
@@ -28,6 +30,9 @@ public:
     wxString GetDesc();
     int GetDataType();
     void SetDesc(wxString description);
+    
+    virtual Command* GetCommand();
+    virtual wxString GetCommandName();
     
 protected:
 private:

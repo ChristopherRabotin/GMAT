@@ -83,7 +83,7 @@ bool GmatApp::OnInit()
     theModerator = Moderator::Instance();
 
     // initialize the moderator
-    if (theModerator->Initialize())
+    if (theModerator->Initialize(true))
     {
         // get GuiInterpreter
         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());

@@ -79,7 +79,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 {
     this->parent = parent;
     this->mainNotebook = GmatAppData::GetMainNotebook();
+    
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+    theGuiManager = GuiItemManager::GetInstance();
+    
     AddIcons();
     AddDefaultResources();
     
@@ -152,8 +155,8 @@ void ResourceTree::UpdateResources()
         objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
         if (objType == "ImpulsiveBurn")
             this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
-			     -1, new GmatTreeItemData(wxT(objName),
-			     GmatTree::DEFAULT_IMPULSIVE_BURN));
+                             -1, new GmatTreeItemData(wxT(objName),
+                             GmatTree::DEFAULT_IMPULSIVE_BURN));
     };
 
     if (size !=0)
@@ -173,8 +176,8 @@ void ResourceTree::UpdateResources()
         objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
         if (objType == "DifferentialCorrector")
             this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
-			     -1, new GmatTreeItemData(wxT(objName),
-			     GmatTree::DEFAULT_DIFF_CORR));
+                             -1, new GmatTreeItemData(wxT(objName),
+                             GmatTree::DEFAULT_DIFF_CORR));
     };
 
     if (size !=0)
@@ -488,15 +491,15 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId subs)
         if (objName == "ReportFile")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
                              new GmatTreeItemData(wxT(objName),
-				 GmatTree::DEFAULT_REPORT_FILE));
+                                 GmatTree::DEFAULT_REPORT_FILE));
         else if (objName == "XyPlot")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
                              new GmatTreeItemData(wxT(objName),
-				 GmatTree::DEFAULT_XY_PLOT));
+                                 GmatTree::DEFAULT_XY_PLOT));
         else if (objName == "OpenGlPlot")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
                              new GmatTreeItemData(wxT(objName),
-			     GmatTree::DEFAULT_OPENGL_PLOT));
+                             GmatTree::DEFAULT_OPENGL_PLOT));
     };
 }
 
@@ -874,6 +877,8 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
   this->AppendItem(item, newName, GmatTree::ICON_SPACECRAFT, -1,
                    new GmatTreeItemData(newName, GmatTree::CREATED_SPACECRAFT));
 
+  theGuiManager->UpdateSpacecraft();
+  
   Expand(item);
 }
 

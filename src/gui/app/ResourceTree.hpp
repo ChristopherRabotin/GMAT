@@ -22,6 +22,7 @@
 
 #include "GmatMainNotebook.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 
 class ResourceTree : public wxTreeCtrl
 {
@@ -38,6 +39,8 @@ public:
     
 private:
     GuiInterpreter *theGuiInterpreter;
+    GuiItemManager *theGuiManager;
+
     GmatMainNotebook *mainNotebook;
     wxWindow *parent;
     wxTreeItemId mSpacecraftItem;
@@ -115,7 +118,7 @@ private:
         POPUP_ADD_REPORT_FILE,
         POPUP_ADD_XY_PLOT,
         POPUP_ADD_OPENGL_PLOT,
-	POPUP_ADD_VARIABLE,
+        POPUP_ADD_VARIABLE,
         
         POPUP_OPEN,
         POPUP_CLOSE,

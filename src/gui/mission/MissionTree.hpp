@@ -20,8 +20,9 @@
 #include "wx/imaglist.h"
 
 #include "GmatMainNotebook.hpp"
-#include "GuiInterpreter.hpp"
 #include "DecoratedTree.hpp"
+
+#include "GuiInterpreter.hpp"
 
 class MissionTree : public DecoratedTree
 {
@@ -49,7 +50,7 @@ private:
     int mNumPropagate;
     int mNumManeuver;
     int mNumTarget;
-    
+
     void AddDefaultMission();
     void AddDefaultMissionSeq(wxTreeItemId universe);
     
@@ -72,21 +73,14 @@ private:
     void OnInsertManeuver(wxCommandEvent &event);
     void OnInsertTarget(wxCommandEvent &event);
     
-//    void AddManeuver();
-
     void OnViewVariables();
     void OnViewGoals();
-
+    
     wxMenu* CreatePopupMenu();
     wxMenu* CreateInsertPopupMenu();
     
     DECLARE_EVENT_TABLE();
-    
-//    enum
-//    {
-//        ICON_FILE
-//    };
-   
+       
     enum
     {
         POPUP_SWAP_BEFORE = 25000,
