@@ -26,7 +26,7 @@
 // base includes
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROP_PANEL 1
+#define DEBUG_PROP_PANEL 0 //loj: 8/5/04 turned off debug
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
