@@ -384,6 +384,7 @@ private:
    wxBoxSizer *mTopPanelSizer;
    
    wxPanel *mLegendPanel;
+   wxFlexGridSizer *mLegendPanelSizer;
    wxBoxSizer *mBottomSizer;
    
    wxStaticText *mCurveColor[GmatPlot::MAX_XY_CURVE];

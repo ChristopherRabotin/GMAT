@@ -120,6 +120,7 @@ namespace GmatPlot
 {
    const int Y_AXIS_AREA_WIDTH = 70;
    const int X_AXIS_AREA_HEIGHT = 60;
+   const int LEFT_MARGIN = 30;
    const int RIGHT_MARGIN = 30;
 }
 
@@ -881,8 +882,7 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 
    //loj: 7/14/04 added initializing legend area
    // allow maximum of GmatPlot::MAX_XY_CURVE lines
-   wxFlexGridSizer *mLegendPanelSizer =
-      new wxFlexGridSizer(GmatPlot::MAX_XY_CURVE, 0, 0);
+   mLegendPanelSizer = new wxFlexGridSizer(GmatPlot::MAX_XY_CURVE, 0, 0);
 
    // The legend will be updated by ShowLegend()
    for (int i=0; i<GmatPlot::MAX_XY_CURVE; i++)
@@ -894,16 +894,12 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
                           wxSize(-1, -1), wxALIGN_RIGHT);
       
       mCurveDesc[i] =
-         new wxStaticText(mLegendPanel, -1, wxT("Desc..."), wxPoint(-1,-1),
-                          wxSize(120, -1), wxALIGN_LEFT);
-
+         new wxStaticText(mLegendPanel, -1, wxT("LineDesc..."), wxPoint(-1,-1),
+                          wxSize(-1, -1), wxALIGN_LEFT);
+     
       mLegendPanelSizer->Add(mCurveColor[i], 0, wxALIGN_CENTER | wxALL, 3);
       mLegendPanelSizer->Add(mCurveDesc[i], 0, wxALIGN_CENTER | wxALL, 3);
    }
-   
-   mLegendPanelSizer->AddGrowableCol(1);
-   mLegendPanelSizer->AddGrowableCol(3);
-   mLegendPanelSizer->AddGrowableCol(5);
    
    //-------------------------------------------------------
    // for plot area
@@ -982,27 +978,27 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
    middleSizer->Add( plotSizer, 1, wxEXPAND );
    middleSizer->Add(GmatPlot::RIGHT_MARGIN, 20); //loj: 7/15/04 added
    
-   mBottomSizer = new wxBoxSizer( wxVERTICAL );
-   mBottomSizer->Add(mLegendPanelSizer, 1, wxALIGN_CENTER | wxEXPAND | wxLEFT,
-                     GmatPlot::Y_AXIS_AREA_WIDTH);
+   mBottomSizer = new wxBoxSizer( wxHORIZONTAL );
+   mBottomSizer->Add(GmatPlot::LEFT_MARGIN, 20);
+   mBottomSizer->Add(mLegendPanelSizer, 0, wxALIGN_CENTER | wxEXPAND);
+   mBottomSizer->Add(GmatPlot::RIGHT_MARGIN, 20);
    
    mainSizer->Add( topPanel, 0, wxALIGN_CENTER | wxEXPAND );
    //loj: if 2nd arg is 0, plot is not showing
    mainSizer->Add( middleSizer, 1, wxEXPAND);
+   mLegendPanel->SetSizer(mBottomSizer);
    mainSizer->Add( mLegendPanel, 0, wxALIGN_CENTER | wxEXPAND ); //why LegendPanel doesn't center?
    
    SetAutoLayout( TRUE );
    SetSizer( mainSizer );
-   mLegendPanel->SetSizer(mBottomSizer);
-   mBottomSizer->Fit(mLegendPanel); // no effect
 
    //loj: 3/11/04 commented out because we want scroll on this frame,
    // otherwise, the plot will not be shown until mission run is done.
    //SetTargetWindow( m_area ); // scroll on m_area
    SetTargetWindow(this);
-    
+   
    SetBackgroundColour( *wxWHITE );
-    
+   
    m_current = (wxPlotCurve*) NULL;
 }
 
@@ -1412,6 +1408,8 @@ void wxPlotWindow::ShowLegend()
    {
       mCurveColor[i]->SetLabel("");
       mCurveDesc[i]->SetLabel("");
+      mLegendPanelSizer->Remove(mCurveColor[i]);
+      mLegendPanelSizer->Remove(mCurveDesc[i]);
    }
    
    while (node)
@@ -1425,11 +1423,18 @@ void wxPlotWindow::ShowLegend()
       mCurveColor[curveCount]->SetForegroundColour(curvePen.GetColour());
       mCurveDesc[curveCount]->SetLabel(curveTitle);
 
+      // need to add back to sizer resize the StaticText
+      mLegendPanelSizer->Add(mCurveColor[curveCount], 0, wxALIGN_RIGHT | wxALL, 3);
+      mLegendPanelSizer->Add(mCurveDesc[curveCount], 0, wxALIGN_LEFT | wxALL, 3);
+
+      //loj: doesn't expand column
+      //mLegendPanelSizer->AddGrowableCol(curveCount);
+   
       node = node->Next();
       curveCount++;
    }
-   
-   mBottomSizer->Fit(mLegendPanel); //no effect
+
+   mBottomSizer->Layout();
 }
 
 //------------------------------------------------------------------------------
