@@ -75,7 +75,8 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     AddIcons();
     AddDefaultResources();
     
-    numSc = 1;
+    numSc = 0;
+    mNumPropagator = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -509,7 +510,7 @@ void ResourceTree::OnAddSc(wxCommandEvent &event)
   wxTreeItemId item = GetSelection();
   
   wxString withName;
-  withName.Printf("Spacecraft%d", numSc++);
+  withName.Printf("Spacecraft%d", ++numSc);
   
   const std::string stdWithName = withName.c_str();
   
@@ -569,9 +570,17 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
 void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
-  this->AppendItem(item, wxT("New Propagator"), -1, -1,
-        new GmatTreeItemData(wxT("New Propagator"), CREATED_PROPAGATOR));
+  
+  wxString name;
+  name.Printf("Propagator%d", ++mNumPropagator);
 
+  PropSetup* propSetup =
+      theGuiInterpreter->CreateDefaultPropSetup(std::string(name.c_str()));
+  
+  this->AppendItem(item, name, ICON_FILE, -1,
+        new GmatTreeItemData(name, CREATED_PROPAGATOR));
+
+  Expand(item);
 }
 
 //------------------------------------------------------------------------------
@@ -589,16 +598,24 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
-//  static wxString sText;
-//  sText = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
-//                            sText, this);
-//  if ( !sText.IsEmpty())
-//  {
-//    SetItemText(item, sText);
-//    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
-//    selItem->SetDesc(sText);
-//  }
-  (void) this->EditLabel(GetSelection());
+  wxTreeItemId item = GetSelection();
+  GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
+  wxString oldName = selItem->GetDesc();
+
+  static wxString newName;
+  newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
+                              newName, this);
+  if ( !newName.IsEmpty())
+  {
+      SetItemText(item, newName);
+      GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
+      selItem->SetDesc(newName);
+  }
+
+  //loj: It looks better to change name using EditLabel, but How do I get new name?
+  //loj:(void) this->EditLabel(item);
+  
+  theGuiInterpreter->RenameConfiguredItem(Gmat::SPACECRAFT, oldName.c_str(), newName.c_str());
 }
 
 //------------------------------------------------------------------------------
