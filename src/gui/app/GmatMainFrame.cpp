@@ -55,6 +55,8 @@
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
 #include "SolverEventPanel.hpp"
+#include "AchievePanel.hpp"
+#include "VaryPanel.hpp"
 #include "ParameterSetupPanel.hpp"
 #include "IfPanel.hpp"
 #include "ForLoopPanel.hpp"
@@ -81,7 +83,7 @@
 #include "bitmaps/close.xpm"
 #include "bitmaps/script.xpm"
 
-#define DEBUG_MAINFRAME 0
+//#define DEBUG_MAINFRAME 1
 
 //------------------------------
 // event tables for wxWindows
@@ -221,7 +223,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 
    GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
                                 wxDefaultSize, wxCLIP_CHILDREN);          
-   new wxNotebookSizer( projectTree );  
+   new wxNotebookSizer(projectTree);  
   
 //   theChild->Maximize();
    
@@ -234,10 +236,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 //   splitter = new GmatSplitterWindow(this);
  
    // create the tabs for Resources, Mission, Output
-//   leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
+//   leftTabs = new GmatNotebook(splitter, -1, wxDefaultPosition,
 //                                wxDefaultSize, wxCLIP_CHILDREN);
 
-   //   splitter->SplitVertically( leftTabs, rightTabs, 200 );
+   //   splitter->SplitVertically(leftTabs, rightTabs, 200);
 
    mServer = NULL;
    
@@ -278,7 +280,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
    
    // GmatAppData::GetMainNotebook()->CreatePage(item);
    
-   wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
+   wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    panel = NULL;
    GmatMdiChildFrame *newChild = NULL;
 
@@ -286,16 +288,16 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
    {
       int dataType = item->GetDataType();
 
-      // curPages->Append( (wxObject *) item);
-      if ((dataType == GmatTree::DEFAULT_SPACECRAFT )  ||
-          (dataType == GmatTree::CREATED_SPACECRAFT ))
+      // curPages->Append((wxObject *) item);
+      if ((dataType == GmatTree::DEFAULT_SPACECRAFT)  ||
+          (dataType == GmatTree::CREATED_SPACECRAFT))
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new SpacecraftPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new SpacecraftPanel(panel, item->GetDesc()),
+                     0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER) ||
                (dataType == GmatTree::CREATED_FORMATION_FOLDER))
@@ -304,7 +306,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );         
+         sizer->Add(new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0);         
       }   
       else if (dataType == GmatTree::UNIVERSE_FOLDER)
       {
@@ -312,23 +314,23 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
+         sizer->Add(new UniversePanel(panel), 0, wxGROW|wxALL, 0);
       }
       // invisible for build 2
       // else if ((dataType == GmatTree::DEFAULT_BODY)   ||
       //           (dataType == GmatTree::CREATED_BODY))
       // {
-      //     sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
+      //     sizer->Add(new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0);      
       // }
-      else if ((dataType == GmatTree::DEFAULT_IMPULSIVE_BURN )  ||
-               (dataType == GmatTree::CREATED_IMPULSIVE_BURN ))
+      else if ((dataType == GmatTree::DEFAULT_IMPULSIVE_BURN)  ||
+               (dataType == GmatTree::CREATED_IMPULSIVE_BURN))
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
                (dataType == GmatTree::CREATED_PROPAGATOR))
@@ -337,8 +339,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new PropagationConfigPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_DIFF_CORR)   ||
                (dataType == GmatTree::CREATED_DIFF_CORR))
@@ -347,8 +349,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new DCSetupPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new DCSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
                (dataType == GmatTree::CREATED_REPORT_FILE))
@@ -357,8 +359,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new ReportFileSetupPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new ReportFileSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
                (dataType == GmatTree::CREATED_XY_PLOT))
@@ -367,8 +369,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new XyPlotSetupPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );          
+         sizer->Add(new XyPlotSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);          
       }
       else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
                (dataType == GmatTree::CREATED_OPENGL_PLOT))
@@ -377,8 +379,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new OpenGlPlotSetupPanel(panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new OpenGlPlotSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
       {
@@ -395,18 +397,19 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          MessageInterface::ShowMessage
             ("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
 #endif
-         sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), 
-                                               item->GetCommand()),
-                     0, wxGROW|wxALL, 0 );
+         //loj: 10/6/04 removed item->GetDesc() from the arg. list
+         sizer->Add(new PropagateCommandPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::PROPAGATE_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
-         panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), item->GetCommand()),
-                     0, wxGROW|wxALL, 0 );
+         panel = new wxScrolledWindow(newChild);
+         //loj: 10/6/04 removed item->GetDesc() from the arg. list
+         sizer->Add(new PropagateCommandPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::MANEUVER_COMMAND)
       {
@@ -414,17 +417,18 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add( new ManeuverSetupPanel(panel, item->GetCommand()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new ManeuverSetupPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::TARGET_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
-         panel = new wxScrolledWindow(newChild);  
-         sizer->Add ( new SolverEventPanel (panel, item->GetDesc(), item->GetCommand()),
-                      0, wxGROW|wxALL, 0 );
+         panel = new wxScrolledWindow(newChild);
+         //loj: 10/6/04 removed item->GetDesc() from the arg. list
+         sizer->Add(new SolverEventPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::ACHIEVE_COMMAND)
       {
@@ -432,17 +436,17 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);              
-         sizer->Add ( new SolverGoalsPanel (panel),
-                      0, wxGROW|wxALL, 0 );
+         sizer->Add(new AchievePanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::VARY_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
-         panel = new wxScrolledWindow(newChild);  
-         sizer->Add ( new SolverVariablesPanel (panel),
-                      0, wxGROW|wxALL, 0 );
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new VaryPanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
       {
@@ -450,8 +454,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);              
-         sizer->Add ( new SolverGoalsPanel (panel),
-                      0, wxGROW|wxALL, 0 );
+         sizer->Add(new SolverGoalsPanel(panel), 0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
       {
@@ -459,8 +462,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add ( new SolverVariablesPanel (panel),
-                      0, wxGROW|wxALL, 0 );
+         sizer->Add(new SolverVariablesPanel(panel), 0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
                (dataType == GmatTree::CREATED_VARIABLE))
@@ -469,8 +471,8 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add (new ParameterSetupPanel (panel, item->GetDesc()),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::IF_CONTROL)
       {
@@ -478,7 +480,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add (new IfPanel(panel), 0, wxGROW|wxALL, 0 );
+         sizer->Add(new IfPanel(panel), 0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::WHILE_CONTROL)
       {
@@ -487,7 +489,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
          
-         sizer->Add (new WhilePanel (panel), 0, wxGROW|wxALL, 0 );
+         sizer->Add(new WhilePanel(panel), 0, wxGROW|wxALL, 0);
       }
 //      else if (dataType == GmatTree::DO_CONTROL)
 //      {
@@ -495,7 +497,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
 //                                          wxPoint(-1,-1), wxSize(-1,-1),
 //                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
 //         panel = new wxScrolledWindow(newChild);  
-//         sizer->Add (new DoWhilePanel (panel), 0, wxGROW|wxALL, 0 );
+//         sizer->Add(new DoWhilePanel(panel), 0, wxGROW|wxALL, 0);
 //      }
       else if (dataType == GmatTree::FOR_CONTROL)
       {
@@ -503,8 +505,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
-         sizer->Add (new ForLoopPanel (panel),
-                     0, wxGROW|wxALL, 0 );
+         sizer->Add(new ForLoopPanel(panel), 0, wxGROW|wxALL, 0);
       }
       else
       {
@@ -516,11 +517,11 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
       // maximize window
       //newChild->Maximize();
 
-      panel->SetScrollRate( 5, 5 );
-      panel->SetAutoLayout( TRUE );
-      panel->SetSizer( sizer );
-      sizer->Fit( panel );
-      sizer->SetSizeHints( panel );
+      panel->SetScrollRate(5, 5);
+      panel->SetAutoLayout(TRUE);
+      panel->SetSizer(sizer);
+      sizer->Fit(panel);
+      sizer->SetSizeHints(panel);
 
       // list of open children
       mdiChildren->Append(newChild);
@@ -933,7 +934,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
-   msg.Printf( _T("Goddard Mission Analysis Tool.\n")
+   msg.Printf(_T("Goddard Mission Analysis Tool.\n")
                _T("Uses %s\n\nBuild Date: %s %s"), wxVERSION_STRING,
                __DATE__, __TIME__);      
 
@@ -970,26 +971,26 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 #endif
    wxBitmap* bitmaps[13];
 
-   bitmaps[0] = new wxBitmap( new_xpm );
-   bitmaps[1] = new wxBitmap( open_xpm );
-   bitmaps[2] = new wxBitmap( save_xpm );
-   bitmaps[3] = new wxBitmap( copy_xpm );
-   bitmaps[4] = new wxBitmap( cut_xpm );
-   bitmaps[5] = new wxBitmap( paste_xpm );
-   bitmaps[6] = new wxBitmap( print_xpm );
-   bitmaps[7] = new wxBitmap( help_xpm );
-   bitmaps[8] = new wxBitmap( run_xpm );
-   bitmaps[9] = new wxBitmap( pause_xpm );
-   bitmaps[10] = new wxBitmap( stop_xpm );
-   bitmaps[11] = new wxBitmap( close_xpm );
-   bitmaps[12] = new wxBitmap( script_xpm );
+   bitmaps[0] = new wxBitmap(new_xpm);
+   bitmaps[1] = new wxBitmap(open_xpm);
+   bitmaps[2] = new wxBitmap(save_xpm);
+   bitmaps[3] = new wxBitmap(copy_xpm);
+   bitmaps[4] = new wxBitmap(cut_xpm);
+   bitmaps[5] = new wxBitmap(paste_xpm);
+   bitmaps[6] = new wxBitmap(print_xpm);
+   bitmaps[7] = new wxBitmap(help_xpm);
+   bitmaps[8] = new wxBitmap(run_xpm);
+   bitmaps[9] = new wxBitmap(pause_xpm);
+   bitmaps[10] = new wxBitmap(stop_xpm);
+   bitmaps[11] = new wxBitmap(close_xpm);
+   bitmaps[12] = new wxBitmap(script_xpm);
 
    int width = 24;
    int currentX = 5;
    
-//   toolBar->AddTool( MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
+//   toolBar->AddTool(MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
 //                     (wxObject *) NULL, _T("New project"));
-   toolBar->AddTool( MENU_FILE_NEW_SCRIPT, *(bitmaps[0]), 
+   toolBar->AddTool(MENU_FILE_NEW_SCRIPT, *(bitmaps[0]), 
                      wxNullBitmap, FALSE, currentX, -1,
                      (wxObject *) NULL, _T("New Script"));
    currentX += width + 5;
@@ -1406,7 +1407,7 @@ void GmatMainFrame::OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 #ifdef __WXMSW__
    MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
 #else
-   MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+   MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(mondrian_xpm));
 #endif
     
    MdiGlPlot::mdiParentGlFrame->Show(TRUE);
@@ -1437,7 +1438,7 @@ void GmatMainFrame::OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 #ifdef __WXMSW__
    MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
 #else
-   MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
+   MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(mondrian_xpm));
 #endif
     
    MdiXyPlot::mdiParentXyFrame->Show(TRUE);
