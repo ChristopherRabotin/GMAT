@@ -116,6 +116,34 @@ Integer CartVxParam::GetNumObjects() const
 }
 
 //------------------------------------------------------------------------------
+// GmatBase* GetObject(const std::string &objTypeName)
+//------------------------------------------------------------------------------
+GmatBase* CartVxParam::GetObject(const std::string &objTypeName)
+{
+    return GetRefObject(objTypeName);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
+//                        GmatBase *obj
+//------------------------------------------------------------------------------
+/**
+ * Sets reference object.
+ *
+ * @return true if the object has been set.
+ */
+//------------------------------------------------------------------------------
+bool CartVxParam::SetObject(Gmat::ObjectType objType,
+                           const std::string &objName,
+                           GmatBase *obj)
+{
+    if (obj != NULL)
+        return SetRefObject(objType, objName, obj);
+    else
+        return false;
+}
+
+//------------------------------------------------------------------------------
 // virtual bool AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
@@ -127,9 +155,14 @@ Integer CartVxParam::GetNumObjects() const
 bool CartVxParam::AddObject(GmatBase *obj)
 {
     if (obj != NULL)
-        return AddRefObject(obj);
-    else
-        return false;
+    {
+        if (AddRefObject(obj))
+            ManageObject(obj);
+        
+        return true;
+    }
+
+    return false;
 }
 
 //------------------------------------------------------------------------------

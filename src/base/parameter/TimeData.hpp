@@ -49,7 +49,7 @@ public:
 protected:
     
     // The inherited methods from RefData
-    virtual bool CheckRefObjectType(GmatBase *obj);
+    virtual bool IsValidObject(GmatBase *obj);
 
     Real mInitialEpoch;
     

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "TimeData.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -131,8 +132,9 @@ Real TimeData::GetCurrentTimeReal(const std::string &str)
     }
     else
     {
-        Real a1mjd = obj->GetRealParameter(0); //("Epoch"); -- just to compile
-        
+        Real a1mjd = obj->GetRealParameter("Epoch");
+        //MessageInterface::ShowMessage("TimeData::GetCurrentTimeReal() time = %f\n",
+        //                              a1mjd);
         if (str == "A1Mjd")
             return a1mjd;
         if (str == "Jd")
@@ -203,13 +205,13 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 
 
 //------------------------------------------------------------------------------
-// bool CheckRefObjectType(GmatBase *obj)
+// bool IsValidObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
  */
 //------------------------------------------------------------------------------
-bool TimeData::CheckRefObjectType(GmatBase *obj)
+bool TimeData::IsValidObject(GmatBase *obj)
 {
     bool valid = false;
     

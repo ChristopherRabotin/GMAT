@@ -313,14 +313,14 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 }
 
 //------------------------------------------------------------------------------
-// bool CheckRefObjectType(GmatBase *obj)
+// bool IsValidObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Checks reference object type.
  *
  */
 //------------------------------------------------------------------------------
-bool OrbitData::CheckRefObjectType(GmatBase *obj)
+bool OrbitData::IsValidObject(GmatBase *obj)
 {
     bool valid = false;
     

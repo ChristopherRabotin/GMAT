@@ -20,8 +20,7 @@
 #include "Parameter.hpp"
 #include "ParameterException.hpp"
 #include "Moderator.hpp"
-//  #include "MessageInterface.hpp"
-//  #include <sstream>
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -245,33 +244,6 @@ void Parameter::SetUnit(const std::string &unit)
 }
 
 //------------------------------------------------------------------------------
-// bool AddObject(const std::string &name)
-//------------------------------------------------------------------------------
-bool Parameter::AddObject(const std::string &name)
-{
-    bool status = false;
-    Moderator *theModerator = Moderator::Instance();
-    
-//      MessageInterface::ShowMessage("Parameter::AddObject entered: "
-//                                    "name = " + name + "\n");
-    if (name != "")
-    {
-        //loj: should check name first to see if it's already added - do this later
-        
-        GmatBase *obj = theModerator->GetConfiguredItem(name);
-        if (obj != NULL)
-        {
-            mObjectNames.push_back(name);
-            mNumObjects = mObjectNames.size();
-            AddObject(obj);
-            status = true;
-        }
-    }
-
-    return status;
-}
-
-//------------------------------------------------------------------------------
 // bool operator==(const Parameter &right) const
 //------------------------------------------------------------------------------
 /**
@@ -335,6 +307,69 @@ Rvector6 Parameter::EvaluateRvector6()
 const std::string* Parameter::GetParameterList() const
 {
     return NULL;
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetObjectTypeNames()
+//------------------------------------------------------------------------------
+StringArray& Parameter::GetObjectTypeNames()
+{
+    return mObjectTypeNames;
+}
+
+//------------------------------------------------------------------------------
+// StringArray& GetObjectNames()
+//------------------------------------------------------------------------------
+StringArray& Parameter::GetObjectNames()
+{
+    return mObjectNames;
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* GetObject(const std::string &objTypeName)
+//------------------------------------------------------------------------------
+GmatBase* Parameter::GetObject(const std::string &objTypeName)
+{
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// bool SetObject(Gmat::ObjectType objType,
+//                const std::string &objName, GmatBase *obj)
+//------------------------------------------------------------------------------
+bool Parameter::SetObject(Gmat::ObjectType objType,
+                          const std::string &objName, GmatBase *obj)
+{
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// bool AddObject(const std::string &name)
+//------------------------------------------------------------------------------
+bool Parameter::AddObject(const std::string &name)
+{
+    bool status = false;
+    Moderator *theModerator = Moderator::Instance();
+    
+    //MessageInterface::ShowMessage("Parameter::AddObject entered: "
+    //                              "name = %s typename = %s\n", name.c_str());
+                                    
+    if (name != "")
+    {
+        //loj: should check name first to see if it's already added - do this later
+        
+        GmatBase *obj = theModerator->GetConfiguredItem(name);
+        if (obj != NULL)
+        {
+            //mObjectNames.push_back(name);
+            //mObjectTypeNames.push_back(obj->GetTypeName());
+            //mNumObjects = mObjectNames.size();
+            AddObject(obj);
+            status = true;
+        }
+    }
+
+    return status;
 }
 
 //---------------------------------
@@ -412,10 +447,6 @@ std::string Parameter::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
-//      std::stringstream ss("");
-//      ss << id;
-//      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
-//                                    "id = " + ss.str() + ", value = " + value + "\n");
     switch (id)
     {
     case OBJECT_NAME:
@@ -452,3 +483,20 @@ bool Parameter::SetStringParameter(const std::string &label,
 
     return GmatBase::SetStringParameter(label, value);
 }
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void Parameter::ManageObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+void Parameter::ManageObject(GmatBase *obj)
+{
+    mObjectNames.push_back(obj->GetName());
+    mObjectTypeNames.push_back(obj->GetTypeName());
+    mNumObjects = mObjectNames.size();
+    //MessageInterface::ShowMessage("Parameter::ManageObject() param name = %s mNumObjects = %d\n",
+    //                              obj->GetName().c_str(), mNumObjects);
+}
+

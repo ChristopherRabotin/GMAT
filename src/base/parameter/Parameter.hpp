@@ -56,6 +56,13 @@ public:
     virtual Rvector6 EvaluateRvector6();
     
     virtual const std::string* GetParameterList() const;
+
+    virtual StringArray& GetObjectTypeNames();
+    virtual StringArray& GetObjectNames();
+    virtual GmatBase* GetObject(const std::string &objTypeName);
+    virtual bool SetObject(Gmat::ObjectType objType,
+                           const std::string &objName,
+                           GmatBase *obj);
     
     virtual bool AddObject(const std::string &name);
     virtual bool AddObject(GmatBase *object) = 0;
@@ -75,6 +82,8 @@ public:
     virtual bool SetStringParameter(const std::string &label,
                                     const std::string &value);
 protected:
+
+    void ManageObject(GmatBase *obj);
     
     static const std::string PARAMETER_KEY_STRING[KeyCount];
 
@@ -83,6 +92,7 @@ protected:
     std::string   mUnit;
     bool mIsTimeParam;
 
+    StringArray mObjectTypeNames;
     StringArray mObjectNames;
     Integer mNumObjects;
     

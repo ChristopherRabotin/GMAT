@@ -45,7 +45,7 @@ public:
 protected:
     
     // The inherited methods from RefData
-    virtual bool CheckRefObjectType(GmatBase *obj);
+    virtual bool IsValidObject(GmatBase *obj);
 
     const static Real ORBIT_REAL_UNDEFINED = -9876543210.1234;
     const static Real ORBIT_TOL = 1.0e-10;

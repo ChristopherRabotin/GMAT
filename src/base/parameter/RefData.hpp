@@ -32,9 +32,15 @@ public:
     RefData& operator= (const RefData& right);
     virtual ~RefData();
 
-    bool AddRefObject(GmatBase *obj);
     Integer GetNumRefObjects() const;
+    virtual GmatBase* GetRefObject(const std::string &objTypeName);
     
+    virtual bool SetRefObject(Gmat::ObjectType objType,
+                              const std::string &objName,
+                              GmatBase *obj);
+    
+    bool AddRefObject(GmatBase *obj);
+
     virtual bool ValidateRefObjects(GmatBase *param) = 0;
     virtual const std::string* GetValidObjectList() const;
 
@@ -42,9 +48,9 @@ protected:
     bool HasObject(const std::string &objTypeName) const;
     GmatBase* FindObject(const std::string &objTypeName) const;
      
-    virtual bool CheckRefObjectType(GmatBase *obj) = 0;
+    virtual bool IsValidObject(GmatBase *obj) = 0;
     std::map<std::string, GmatBase*> *mStringObjectMap;
-
+    StringArray mObjectTypeNames;
     Integer mNumRefObjects;
 };
 #endif // RefData_hpp
