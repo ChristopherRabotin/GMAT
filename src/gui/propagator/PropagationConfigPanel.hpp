@@ -46,7 +46,16 @@ public:
     // constructor
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
-private:             
+private:
+
+    enum
+    {
+        RKV89_ID = 0,
+        RKN68_ID,
+        RKF56_ID,
+        IntegratorCount,
+    };
+    
     wxStaticText *integratorStaticText;
     wxStaticText *setting1StaticText;
     wxStaticText *setting2StaticText;
@@ -123,7 +132,7 @@ private:
 //    wxDocTemplate *mDocTemplate;
 //    ViewTextFrame *mTextFrame;
     
-    Integer numOfIntegrators;
+    //Integer numOfIntegrators;
     Integer numOfBodies;
     Integer numOfAtmosTypes;
     Integer numOfForces;
@@ -136,6 +145,7 @@ private:
     bool isForceModelChanged;
     bool isIntegratorChanged;
     
+    wxArrayString integratorArray;
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
     Propagator     *newProp;
@@ -156,7 +166,7 @@ private:
     void Setup(wxWindow *parent);
     void LoadData();
     void SaveData();
-    void DisplayIntegratorData();
+    void DisplayIntegratorData(bool integratorChanged);
     void DisplayPrimaryBodyData();
     void DisplayForceData(); //loj: 2/11/04 added
     void DisplayGravityFieldData();
