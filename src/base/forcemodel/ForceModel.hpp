@@ -69,7 +69,6 @@
 class GMAT_API ForceModel : public PhysicalModel
 {
 public:
-//    ForceModel(void);
     ForceModel(const std::string &nomme = "");
     virtual ~ForceModel(void);
     ForceModel(const ForceModel& fdf);
@@ -83,10 +82,10 @@ public:
     std::string GetForceTypeName(Integer index);
     void ClearSpacecraft(); //loj: 4/1/04 added
     PhysicalModel* GetForce(Integer index);
-    bool AddSpacecraft(Spacecraft *sc);
-    void UpdateSpacecraft(Real newEpoch = -1.0);
-    void UpdateFromSpacecraft(void);
-    void RevertSpacecraft(void);
+    bool AddSpaceObject(SpaceObject *so);
+    void UpdateSpaceObject(Real newEpoch = -1.0);
+    void UpdateFromSpaceObject(void);
+    void RevertSpaceObject(void);
     
     virtual bool Initialize(void);
     virtual void IncrementTime(Real dt);
@@ -131,15 +130,12 @@ public:
     virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
 protected:
-
-//    DerivativeList * derivatives;  waw: 06/03/04
-//    Integer          forceCount;  waw: 05/06/04
-
     Integer numForces;
     Integer currentForce;
+    Integer stateSize;
     
-    /// List of spacecraft that get propagated
-    std::vector<Spacecraft *> spacecraft;
+    /// List of spacecraft and formations that get propagated
+    std::vector<SpaceObject *> spacecraft;
     StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
@@ -155,16 +151,6 @@ protected:
     
     const StringArray&        BuildBodyList(std::string type) const;
 
-//    enum
-//    {
-//        POINT_MASS = PhysicalModelParamCount,
-//        FULL_FIELD,
-//        DRAG,
-//        MAG_FIELD,
-//        FORCE_LIST,
-//        ForceModelParamCount,
-//    };
-    // DJC: 06/16/04 Updated for scripting
     enum
     {
         CENTRAL_BODY = PhysicalModelParamCount,

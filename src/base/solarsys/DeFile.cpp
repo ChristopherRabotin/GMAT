@@ -661,7 +661,7 @@ int DeFile::Initialize_Ephemeris( char *fileName )
 
 void DeFile::Interpolate_Libration( double Time , int Target , double Libration[3] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg , T_sub , Tc;
+  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
 
@@ -808,7 +808,7 @@ void DeFile::Interpolate_Libration( double Time , int Target , double Libration[
 
 void DeFile::Interpolate_Nutation( double Time , int Target , double Nutation[2] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg , T_sub , Tc;
+  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
 
@@ -954,7 +954,7 @@ void DeFile::Interpolate_Nutation( double Time , int Target , double Nutation[2]
 
 void DeFile::Interpolate_Position( double Time , int Target , double Position[3] )
 {
-  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg , T_sub , Tc;
+  double    A[50] , Cp[50]  , sum[3] , T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
 
@@ -1100,7 +1100,7 @@ void DeFile::Interpolate_Position( double Time , int Target , double Position[3]
 void DeFile::Interpolate_State(double Time , int Target, stateType *p)
 {
   double    A[50]   , B[50] , Cp[50] , P_Sum[3] , V_Sum[3] , Up[50] ,
-            T_break , T_seg , T_sub  , Tc;
+            T_break , T_seg = 0.0 , T_sub  , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
   stateType X;

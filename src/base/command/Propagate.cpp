@@ -127,6 +127,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
 {
    switch (type) {
    case Gmat::SPACECRAFT:
+   case Gmat::FORMATION:
       satName.push_back(name);
       return true;
 
@@ -170,6 +171,7 @@ void Propagate::ClearObject(const Gmat::ObjectType type)
    switch (type)
    {
    case Gmat::SPACECRAFT: //loj: 6/9/04 added
+   case Gmat::FORMATION:
       satName.clear();
       break;
    case Gmat::STOP_CONDITION:
@@ -216,7 +218,22 @@ GmatBase* Propagate::Clone(void) const
 
 std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   return "NO_SUCH_REFERENCE_OBJECT";
+   switch (type) {
+      // Propagator setups
+      case Gmat::PROP_SETUP:
+         return propName;
+      
+      // Objects that get propagated
+      case Gmat::SPACECRAFT:
+      case Gmat::FORMATION:
+         if (satName.size() > 0)
+            return satName[0];
+      
+      default:
+         break;
+   }
+   
+   return GmatCommand::GetRefObjectName(type);
 }
 
 
@@ -231,7 +248,7 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
       
       // Objects that get propagated
       case Gmat::SPACECRAFT:
-//      case Gmat::FORMATION:
+      case Gmat::FORMATION:
          satName.push_back(name);
          return true;
       
@@ -746,11 +763,16 @@ bool Propagate::Initialize(void)
    ForceModel *fm = prop->GetForceModel();
    fm->ClearSpacecraft();
    StringArray::iterator scName;
+   SpaceObject *so;
    for (scName = satName.begin(); scName != satName.end(); ++scName) {
-      sats.push_back((Spacecraft*)(*objectMap)[*scName]);
-      fm->AddSpacecraft((Spacecraft*)(*objectMap)[*scName]);
+      so = (SpaceObject*)(*objectMap)[*scName];
+      sats.push_back(so);
+      fm->AddSpaceObject(so);
+      if (so->GetType() == Gmat::FORMATION)
+         FillFormation(so);
    }
-    
+   
+   p->SetPhysicalModel(fm); 
    p->Initialize();
    initialized = true;
     
@@ -786,6 +808,32 @@ bool Propagate::Initialize(void)
 }
 
 //------------------------------------------------------------------------------
+// void FillFormation(SpaceObject *so)
+//------------------------------------------------------------------------------
+/**
+ * Fill in the components of a formation (recursively).
+ *
+ * @param so The SpaceObject that needs to be filled.
+ */
+//------------------------------------------------------------------------------
+void Propagate::FillFormation(SpaceObject *so)
+{
+   if ((so == NULL) || (so->GetType() != Gmat::FORMATION))
+      throw CommandException("Invalid SpaceObject passed to FillFormation");
+      
+   StringArray comps = so->GetStringArrayParameter(so->GetParameterID("Add"));
+   SpaceObject *el;
+   for (StringArray::iterator i = comps.begin(); i != comps.end(); ++i) {
+      el = (SpaceObject*)(*objectMap)[*i];
+      so->SetRefObject(el, el->GetType(), el->GetName()); 
+      if (el->GetType() == Gmat::FORMATION)
+         FillFormation(el);
+   }
+   
+   ((Formation*)(so))->BuildState();
+}
+
+//------------------------------------------------------------------------------
 // bool Execute(void)
 //------------------------------------------------------------------------------
 /**
@@ -806,7 +854,6 @@ bool Propagate::Execute(void)
    Propagator *p = prop->GetPropagator();
    ForceModel *fm = prop->GetForceModel();
    fm->SetTime(0.0);
-    
    p->Initialize();
    Real *state = fm->GetState();
    Integer dim = fm->GetDimension();
@@ -841,7 +888,6 @@ bool Propagate::Execute(void)
    // for consecutive Propate commands
    elapsedTime = fm->GetTime();
    currEpoch = baseEpoch + elapsedTime / 86400.0;
-   
    for (unsigned int i=0; i<stopWhen.size(); i++)
    {
       // StopCondition need new base epoch -- loj: 6/30/04
@@ -855,7 +901,6 @@ bool Propagate::Execute(void)
             SetRealParameter("InitialEpoch", currEpoch);
       }
    }
-
    while (!stopCondMet)
    {
       if (!p->Step())
@@ -867,7 +912,7 @@ bool Propagate::Execute(void)
       
       //loj: 6/15/04 update spacecraft epoch, without argument the spacecraft epoch
       // won't get updated for consecutive Propagate command
-      fm->UpdateSpacecraft(currEpoch);
+      fm->UpdateSpaceObject(currEpoch);
 
       //------------------------------------------
       // loop through StopCondition list
@@ -898,7 +943,7 @@ bool Propagate::Execute(void)
       }
       else
       {
-         fm->RevertSpacecraft();
+         fm->RevertSpaceObject();
          elapsedTime = fm->GetTime();
          currEpoch = baseEpoch + elapsedTime / 86400.0;
          //fm->UpdateFromSpacecraft();
@@ -918,7 +963,7 @@ bool Propagate::Execute(void)
 #endif
 
    Real secsToStep = (stopEpoch - currEpoch) * 86400;
-   
+
    if (secsToStep > 0.0)
    {
 #if DEBUG_PROPAGATE_EXE
@@ -929,7 +974,7 @@ bool Propagate::Execute(void)
       if (!p->Step(secsToStep))
          throw CommandException("Propagator Failed to Step fixed interval\n");
       
-      fm->UpdateSpacecraft(baseEpoch + fm->GetTime() / 86400.0);
+      fm->UpdateSpaceObject(baseEpoch + fm->GetTime() / 86400.0);
 
       // Publish the final data point here
       pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
@@ -941,7 +986,6 @@ bool Propagate::Execute(void)
          ("Propagate::Execute() after Step(%f) epoch = %f\n",
           secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
 #endif
-   }
 
    publisher->FlushBuffers(); //loj: 6/22/04 added
     
@@ -999,6 +1043,8 @@ bool Propagate::Execute(void)
        (baseEpoch + fm->GetTime() / 86400.0));
 #endif
    
+   }
+
    return true;
 }
 

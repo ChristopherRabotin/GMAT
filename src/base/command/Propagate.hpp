@@ -27,6 +27,7 @@
 
 // Headers for the referenced classes
 #include "Spacecraft.hpp"
+#include "Formation.hpp"
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
 
@@ -90,6 +91,7 @@ public:
    virtual bool        InterpretAction(void);
     
    virtual bool        Initialize(void);
+   virtual void        FillFormation(SpaceObject *so);
    virtual bool        Execute(void);
 
 protected:
@@ -119,7 +121,7 @@ protected:
    // infrastructure is coded -- might
    // just be a Propagator *
    /// The spacecraft that are propagated
-   std::vector<Spacecraft*> sats;
+   std::vector<SpaceObject *> sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The object array used in GetRefObjectArray()

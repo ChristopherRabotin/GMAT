@@ -152,7 +152,7 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
     SpaceObject    (a),
-    epoch          (a.epoch),
+//    epoch          (a.epoch),
     dateFormat     (a.dateFormat),
     stateType      (a.stateType),
     refBody        (a.refBody),
@@ -218,12 +218,13 @@ Spacecraft::~Spacecraft(void)
  */
 Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 {
+    SpaceObject::operator=(a);
     // Don't do anything if copying self
     if (&a == this)
         return *this;
 
     // Duplicate the member data        
-    epoch = a.epoch;
+//    epoch = a.epoch;
     dateFormat = a.dateFormat;
     stateType = a.stateType;
     refBody = a.refBody;
@@ -422,7 +423,8 @@ std::string Spacecraft::GetParameterTypeString(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const Integer id) const
 {
-    if (id == epochID) return epoch;
+//    if (id == epochID) return epoch;
+    if (id == epochID) return state.GetEpoch();
     if (id == state1ID) return state[0];
     if (id == state2ID) return state[1];
     if (id == state3ID) return state[2];
@@ -437,7 +439,7 @@ Real Spacecraft::GetRealParameter(const Integer id) const
     if (id == srpAreaID) return srpArea;
     if (id == reflectCoeffID) return reflectCoeff;
 
-    return GmatBase::GetRealParameter(id);
+    return SpaceObject::GetRealParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -453,7 +455,8 @@ Real Spacecraft::GetRealParameter(const Integer id) const
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
     if (label == "Epoch") 
-       return epoch;
+//       return epoch;
+       return state.GetEpoch();
 
     if (label == "Element1") return state[0];
 
@@ -474,7 +477,7 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
     if (label == "SRPArea") return srpArea;
     if (label == "ReflectivityCoefficient") return reflectCoeff;
 
-    return GmatBase::GetRealParameter(label);
+    return SpaceObject::GetRealParameter(label);
 }
 //---------------------------------------------------------------------------
 //  Real SetRealParameter(const Integer id, const Real value)
@@ -556,7 +559,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
     if (id == reflectCoeffID) 
         return SetRealParameter("Cr",value);
 
-    return GmatBase::SetRealParameter(id, value);
+    return SpaceObject::SetRealParameter(id, value);
 }
 
 //---------------------------------------------------------------------------
@@ -574,7 +577,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
  */
 Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
-    if (label == "Epoch") return epoch = value;
+    if (label == "Epoch") 
+//       return epoch = value;
+       return state.SetEpoch(value);
 
     if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
        return state[0] = value;
@@ -601,7 +606,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "SRPArea") return srpArea = value;
     if (label == "Cr") return reflectCoeff = value;
 
-    return GmatBase::SetRealParameter(label, value);
+    return SpaceObject::SetRealParameter(label, value);
 }
 //---------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
@@ -711,7 +716,8 @@ void Spacecraft::SetEpoch()
          std::string newEpoch = timeConverter.Convert(displayEpoch,
                                 displayDateFormat,"TAIModJulian");
 
-         epoch = atof(newEpoch.c_str());
+//         epoch = atof(newEpoch.c_str());
+         state.SetEpoch(atof(newEpoch.c_str()));
       }
       catch (TimeConverter::TimeConverterException& e)
       {
@@ -720,24 +726,25 @@ void Spacecraft::SetEpoch()
    }
    else
    {
-      epoch = atof(displayEpoch.c_str());
+//      epoch = atof(displayEpoch.c_str());
+      state.SetEpoch(atof(displayEpoch.c_str()));
    }
 
 }
 
-//---------------------------------------------------------------------------
-//  Real* GetState()
-//---------------------------------------------------------------------------
-/**
- * Get the elements.
- * 
- * @return the state
- *
- */
-PropState& Spacecraft::GetState()
-{
-    return state;
-}
+////---------------------------------------------------------------------------
+////  Real* GetState()
+////---------------------------------------------------------------------------
+///**
+// * Get the elements.
+// * 
+// * @return the state
+// *
+// */
+//PropState& Spacecraft::GetState()
+//{
+//    return state;
+//}
 
 //---------------------------------------------------------------------------
 //  void SetState(const std::string elementType, Real *instate)
@@ -1131,7 +1138,8 @@ void Spacecraft::SetSolarSystem(SolarSystem *ss)
  */
 void Spacecraft::InitializeValues()
 {
-    epoch = Spacecraft::EPOCH; 
+//    epoch = Spacecraft::EPOCH; 
+    state.SetEpoch(Spacecraft::EPOCH); 
 
     state[0] = Spacecraft::ELEMENT1;
     state[1] = Spacecraft::ELEMENT2;
@@ -1162,7 +1170,8 @@ void Spacecraft::InitializeValues()
         displayState[i] = state[i];
  
 
-    displayEpoch = ToString(epoch); 
+//    displayEpoch = ToString(epoch); 
+    displayEpoch = ToString(state.GetEpoch()); 
     displayDateFormat = dateFormat; 
     displayCoordType = stateType;
 
@@ -1277,7 +1286,8 @@ void Spacecraft::SetInitialDisplay()
     for (int i=0; i < 6; i++)
          displayState[i] = state[i];
 
-    displayEpoch = ToString(epoch);
+//    displayEpoch = ToString(epoch);
+    displayEpoch = ToString(state.GetEpoch());
     displayDateFormat = dateFormat;
     displayCoordType = stateType;
     initialDisplay = false;

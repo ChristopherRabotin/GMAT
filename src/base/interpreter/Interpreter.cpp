@@ -434,7 +434,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
-std::cout << "Decomposing \"" << (*i) << "\"\n";
+//std::cout << "Decomposing \"" << (*i) << "\"\n";
       if (sublevel[cl].size() == 1) {
          // Size 1 implies an object reference
          object[ol] = moderator->GetConfiguredItem(*i);

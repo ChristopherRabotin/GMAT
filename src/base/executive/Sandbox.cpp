@@ -216,7 +216,7 @@ bool Sandbox::Initialize(void)
          {
             ((PropSetup*)(omi->second))->GetForceModel()
                ->SetSolarSystem(solarSys);
-            ((PropSetup*)(omi->second))->Initialize();
+//            ((PropSetup*)(omi->second))->Initialize();
          }
          else if((omi->second)->GetType() == Gmat::SPACECRAFT) //loj: 6/24/04 added
          { 

@@ -21,7 +21,7 @@
 #include <string>
 #include "MessageInterface.hpp"
 
-#define DEBUG_SUBSCRIBER 0
+#define DEBUG_SUBSCRIBER 1
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -95,8 +95,9 @@ bool Publisher::UnsubscribeAll()
 bool Publisher::Publish(Real *data, Integer count)
 {
    // No subscribers
-   if (subs.empty())
+   if (subs.empty()) {
       return false;
+   }
 
    // Convert the data into a string for distribution
    char stream[4096] = "";

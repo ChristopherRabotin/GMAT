@@ -571,7 +571,7 @@ void BaseStopCondition::Initialize()
  * @return true if spacecraft has been set.
  */
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetSpacecraft(Spacecraft *sc)
+bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
 {
    if (mEccParam != NULL)
       mEccParam->SetObject(Gmat::SPACECRAFT, sc->GetName(), sc);

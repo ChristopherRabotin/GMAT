@@ -1,3 +1,23 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                              Formation
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CI63P
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: 2004/7/24
+//
+/**
+ * Implements the class used for formations. 
+ */
+//------------------------------------------------------------------------------
+
+
 #include "Formation.hpp"
 #include <algorithm>          // for find()
 
@@ -22,7 +42,8 @@ Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 
 Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
                const std::string &nomme) :
-   SpaceObject    (typeId, typeStr, nomme)
+   SpaceObject    (typeId, typeStr, nomme),
+   dimension      (0)
 {
 }
 
@@ -33,7 +54,8 @@ Formation::~Formation()
 
 
 Formation::Formation(const Formation& orig) :
-   SpaceObject    (orig)
+   SpaceObject    (orig),
+   dimension      (orig.dimension)
 {
 }
 
@@ -136,7 +158,7 @@ std::string Formation::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
-#include <iostream>
+
 bool Formation::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == ADDED_SPACECRAFT) {
@@ -147,6 +169,32 @@ bool Formation::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
    return SpaceObject::SetStringParameter(id, value);
+}
+
+
+Real Formation::SetRealParameter(const Integer id, const Real value)
+{
+   Real retval = SpaceObject::SetRealParameter(id, value);
+      
+   if (id == EPOCH_PARAM) {
+      if (retval != value)
+         throw SpaceObjectException("Formation update returned incorrect epoch");
+      // Update the epoch on the constituent pieces
+      for (std::vector<SpaceObject*>::iterator i = components.begin();
+           i != components.end(); ++i) {
+          retval = (*i)->SetRealParameter(id, value);
+          if (retval != value)
+             throw SpaceObjectException("Formation constituent returned incorrect epoch");
+      }
+   }
+   
+   return retval;
+}
+
+
+Real Formation::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
 }
 
 
@@ -168,6 +216,8 @@ const StringArray& Formation::GetStringArrayParameter(const Integer id) const
 }
 
 
+
+
 //bool Formation::SetStringParameter(const std::string &label, 
 //                                   const std::string &value)
 //{
@@ -184,3 +234,116 @@ const StringArray& Formation::GetStringArrayParameter(const Integer id) const
 //const StringArray& Formation::GetStringArrayParameter(const std::string &label)const
 //{
 //}
+
+
+GmatBase* Formation::GetRefObject(const Gmat::ObjectType type, 
+                                  const std::string &name,
+                                  const Integer index)
+{
+   return SpaceObject::GetRefObject(type, name, index);
+}
+
+
+bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name)
+{
+   SpaceObject *so;
+   
+   if (type == Gmat::SPACECRAFT) {
+      so = ((SpaceObject*)(obj));
+      if (find(components.begin(), components.end(), so) == components.end()) {
+         PropState *ps = &(so->GetState());
+         Integer size = ps->GetDimension();
+         dimension += size;
+         Real newepoch = so->GetEpoch();
+         if (components.size() == 0)
+            state.SetEpoch(newepoch);
+         else
+            if (state.GetEpoch() != newepoch)
+               throw SpaceObjectException("Epochs are not synchronized in the formation " + instanceName);
+         components.push_back(so);
+      }
+   }
+   
+   return SpaceObject::SetRefObject(obj, type, name);
+}
+
+
+bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name,
+                                    const Integer index)
+{
+   return SpaceObject::SetRefObject(obj, type, name, index);
+}
+
+
+ObjectArray& Formation::GetRefObjectArray(const Gmat::ObjectType type)
+{
+   static ObjectArray oa;
+   oa.clear();
+   if ((type == Gmat::SPACECRAFT) || (type == Gmat::FORMATION)) {
+      for (std::vector<SpaceObject *>::iterator i = components.begin();
+           i != components.end(); ++i)
+         if ((*i)->GetType() == type)
+            oa.push_back(*i);
+      return oa;
+   }
+      
+   return SpaceObject::GetRefObjectArray(type);
+}
+
+
+ObjectArray& Formation::GetRefObjectArray(const std::string& typeString)
+{
+   Integer id = -1;
+   if (typeString == "Spacecraft") 
+      id = Gmat::SPACECRAFT;
+   if (typeString == "Formation") 
+      id = Gmat::FORMATION;
+      
+   if (id != -1)
+      return GetRefObjectArray(typeString);
+      
+   return SpaceObject::GetRefObjectArray(typeString);
+}
+
+
+void Formation::BuildState()
+{
+   // Setup the PropState
+   Real *data = new Real[dimension], *st;
+   Integer j = 0, k;
+   PropState *ps;
+   
+   if (state.GetDimension() < dimension)
+      state.Grow(dimension);
+   
+   for (std::vector<SpaceObject*>::iterator i = components.begin();
+        i != components.end(); ++i) {
+       ps = &((*i)->GetState());
+       st = ps->GetState();
+       for (k = 0; k < ps->GetDimension(); ++k) {
+          data[j + k] = st[k];
+       }
+       j += ps->GetDimension();
+   }
+   
+   if (!state.SetState(data, dimension))
+      throw SpaceObjectException("Error building Formation state");
+}
+
+
+void Formation::UpdateElements()
+{
+   Integer size, index = 0;
+   PropState *ps;
+   for (std::vector<SpaceObject*>::iterator i = components.begin();
+        i != components.end(); ++i) {
+       ps = &((*i)->GetState());
+       size = ps->GetDimension();
+       memcpy(ps->GetState(), &((state.GetState())[index]), size*sizeof(Real));
+       index += size;
+       if ((*i)->GetType() == Gmat::FORMATION)
+          ((Formation*)(*i))->UpdateElements();
+   }
+}

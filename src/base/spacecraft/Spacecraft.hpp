@@ -28,16 +28,16 @@
 #include "MessageInterface.hpp"
 #include "PropState.hpp"
 
-enum SC_Param_ID 
-{
-   EPOCH_ID, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
-   ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
-   DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
-   REFLECT_COEFF_ID, NO_NAME, SC_ParameterIDs
-};
-
 class GMAT_API Spacecraft : public SpaceObject
 {
+   enum SC_Param_ID 
+   {
+      EPOCH_ID = SpaceObjectParamCount, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
+      ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
+      DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
+      REFLECT_COEFF_ID, NO_NAME, SC_ParameterIDs
+   };
+   
 public:
     // Default constructor
     Spacecraft();
@@ -68,7 +68,7 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
 
-    virtual PropState& GetState(void); 
+//    virtual PropState& GetState(void); 
 
     void SetState(const std::string &elementType, Real *instate);
     void SetState(const Real s1, const Real s2, const Real s3, 
@@ -116,10 +116,10 @@ public:
 
 protected:
     // Declare protetced method data of internal spacecraft information
-    Real           epoch;
+//    Real           epoch;      // Moved to SpaceObject  
     // DJC:  7/21/04 Update for the state vector used in propagation
 //    Real           state[6];
-    PropState      state;
+//    PropState      state;      // Moved to SpaceObject
     Real           dryMass;
     Real           coeffDrag;
     Real           dragArea;

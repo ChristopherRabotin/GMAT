@@ -67,7 +67,7 @@ public:
    
    void Initialize();
     
-   virtual bool SetSpacecraft(Spacecraft *sc);
+   virtual bool SetSpacecraft(SpaceObject *sc);
 
    virtual bool Evaluate() = 0;
    virtual bool Validate();

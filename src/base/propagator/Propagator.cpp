@@ -327,7 +327,7 @@ Real Propagator::SetRealParameter(const std::string &label, const Real value)
  */
 //------------------------------------------------------------------------------
 void Propagator::Initialize(void)
-{    
+{
     if (physicalModel != NULL) 
     {
         //MessageInterface::ShowMessage("Propagator::Initialize() calling physicalModel->Initialize() \n");
@@ -341,7 +341,7 @@ void Propagator::Initialize(void)
         outState = physicalModel->GetState();
     }
     else
-       throw PropagatorException("Force model is not defined");
+       throw PropagatorException("Propagator::Initialize -- Force model is not defined");
     
     if (!initialized)
        throw PropagatorException("Propagator failed to initialize");

@@ -51,6 +51,8 @@
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
 
+#include "Formation.hpp"      // for BuildState()
+
 #define DEBUG_FORCEMODEL 0
 #define normType -2
 
@@ -137,6 +139,7 @@ previousState     (NULL),
 estimationMethod  (2.0)
 {
     numForces = 0;
+    stateSize = 6;
     dimension = 6;
     currentForce = 0;  // waw: added 06/04/04
     parameterCount = ForceModelParamCount;
@@ -177,6 +180,7 @@ ForceModel::ForceModel(const ForceModel& fdf) :
     estimationMethod (fdf.estimationMethod)
 {
     numForces = fdf.numForces;
+    stateSize = fdf.stateSize;
     dimension = fdf.dimension;
     currentForce = fdf.currentForce;
     parameterCount = ForceModelParamCount;
@@ -199,6 +203,7 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
    if (&fdf == this)
         return *this;
 
+   stateSize = fdf.stateSize;
    /// @todo Implement the assignment operator
    return *this;
 }
@@ -362,49 +367,51 @@ PhysicalModel* ForceModel::GetForce(Integer index)
 
 
 //------------------------------------------------------------------------------
-// bool ForceModel::AddSpacecraft(Spacecraft *sc)
+// bool ForceModel::AddSpaceObject(SpaceObject *so)
 //------------------------------------------------------------------------------
 /**
- * Sets spacecraft that use this force model.
+ * Sets spacecraft and formations that use this force model.
  *
- * @param sc The spacecraft
+ * @param so The spacecraft or formation
  *
- * @return true is the spacecraft is added to the list, false if it was already
+ * @return true is the object is added to the list, false if it was already
  *         in the list, or if it is NULL.
  */
 //------------------------------------------------------------------------------
-bool ForceModel::AddSpacecraft(Spacecraft *sc)
+bool ForceModel::AddSpaceObject(SpaceObject *so)
 {
-    if (sc == NULL)
+    if (so == NULL)
         return false;
-    if (find(spacecraft.begin(), spacecraft.end(), sc) != spacecraft.end())
+    if (find(spacecraft.begin(), spacecraft.end(), so) != spacecraft.end())
         return false;
-    spacecraft.push_back(sc);
+    spacecraft.push_back(so);
 
     // Quick fix for the epoch update
-    epoch = sc->GetRealParameter(sc->GetParameterID("Epoch"));
+    epoch = so->GetRealParameter(so->GetParameterID("Epoch"));
     return true;
 }
 
 
 //------------------------------------------------------------------------------
-// void ForceModel::UpdateSpacecraft(void)
+// void ForceModel::UpdateSpaceObject(void)
 //------------------------------------------------------------------------------
 /**
- * Updates the state data for the spacecraft that use this force model.
+ * Updates state data for the spacecraft or formation that use this force model.
  */
 //------------------------------------------------------------------------------
-void ForceModel::UpdateSpacecraft(Real newEpoch)
+void ForceModel::UpdateSpaceObject(Real newEpoch)
 {
    if (spacecraft.size() > 0) {
       Integer j = 0;
-      Integer stateSize = 6;
-      Integer vectorSize = stateSize * sizeof(Real);
-      std::vector<Spacecraft *>::iterator sat;
+      Integer stateSize;
+      Integer vectorSize;
+      std::vector<SpaceObject *>::iterator sat;
       PropState *state;
 
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
          state = &((*sat)->GetState());
+         stateSize = state->GetDimension();
+         vectorSize = stateSize * sizeof(Real);
          memcpy(&previousState[j*stateSize], state->GetState(), vectorSize);
          previousTime = 
             ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
@@ -428,6 +435,8 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
             ("ForceModel::UpdateSpacecraft() prevElapsedTime=%f elapsedTime=%f "
              "newepoch=%f\n", prevElapsedTime, elapsedTime, newepoch);
 #endif
+         if ((*sat)->GetType() == Gmat::FORMATION)
+            ((Formation*)(*sat))->UpdateElements();
       }
    }
 }
@@ -444,13 +453,13 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
  *       folded into the code
  */
 //------------------------------------------------------------------------------
-void ForceModel::UpdateFromSpacecraft(void)
+void ForceModel::UpdateFromSpaceObject(void)
 {
     if (spacecraft.size() > 0) 
     {
         Integer j = 0;
         Integer stateSize = 6;
-        std::vector<Spacecraft *>::iterator sat;
+        std::vector<SpaceObject *>::iterator sat;
         PropState *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
@@ -472,7 +481,7 @@ void ForceModel::UpdateFromSpacecraft(void)
  *       folded into the code
  */
 //------------------------------------------------------------------------------
-void ForceModel::RevertSpacecraft(void)
+void ForceModel::RevertSpaceObject(void)
 {
 #if DEBUG_FORCEMODEL
    MessageInterface::ShowMessage
@@ -496,15 +505,26 @@ bool ForceModel::Initialize(void)
 {
     Integer stateSize = 6;      // Will change if we integrate more variables
     Integer satCount = 1;
-    std::vector<Spacecraft *>::iterator sat;
+    std::vector<SpaceObject *>::iterator sat;
 
     if (spacecraft.size() > 0)
         satCount = spacecraft.size();
     
-    dimension = stateSize * satCount;
+    PropState *state;
+    
+    // Calculate the dimension of the state
+    dimension = 0;
+    for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+    {
+       state = &((*sat)->GetState());
+       if ((*sat)->GetType() == Gmat::FORMATION)
+          ((Formation*)(*sat))->BuildState();
+       stateSize = state->GetDimension();
+       dimension += stateSize;
+    }
+    
     if (!PhysicalModel::Initialize())
         return false;
-    previousState = new Real[dimension];
 
     if (spacecraft.size() == 0) 
     {
@@ -518,16 +538,17 @@ bool ForceModel::Initialize(void)
     else 
     {
         Integer j = 0;
-        PropState *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
         {
             state = &((*sat)->GetState());
-            memcpy(&modelState[j*stateSize], state->GetState(), stateSize * sizeof(Real));
-            ++j;
+            stateSize = state->GetDimension();
+            memcpy(&modelState[j], state->GetState(), stateSize * sizeof(Real));
+            j += stateSize;
         }
     }
     
     previousTime = 0.0;
+    previousState = new Real[dimension];
     memcpy(previousState, modelState, dimension*sizeof(Real));
 
 //    DerivativeList *current = derivatives;  waw: 06/03/04
@@ -554,11 +575,7 @@ bool ForceModel::Initialize(void)
            throw ForceModelException(msg.c_str());
         }
         currentPm->SetState(modelState);
-//std::cout << "Force " << currentPm->GetTypeName() << "\n";
-//if (currentPm->GetTypeName() == "DragForce") {
-//   Integer id = currentPm->GetParameterID("AtmosphereModel");
-//   std::cout << "   Drag type = " << currentPm->GetStringParameter(id) << "\n";
-//}
+
         // Set spacecraft parameters for forces that need them
         i = 0;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
@@ -654,58 +671,69 @@ void ForceModel::SetTime(Real t)
 //------------------------------------------------------------------------------
 bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
 {
-    if (order > 2)
-        return false;
-    if (!initialized)
-        return false;
+   if (order > 2)
+      return false;
+   if (!initialized)
+      return false;
+      
+   Integer satCount = dimension / stateSize, i, iOffset;
+    
+   // Initialize the derivative array
+   for (i = 0; i < satCount; ++i) {
+      iOffset = i*stateSize;
+      if (order == 1) //loj: changed from =
+      {
+          deriv[ iOffset ] = state[iOffset+3];
+          deriv[iOffset+1] = state[iOffset+4];
+          deriv[iOffset+2] = state[iOffset+5];
+          deriv[iOffset+3] = deriv[iOffset+4] = deriv[iOffset+5] = 0.0;
+      }
+      else 
+      {
+          deriv[iOffset] = deriv[iOffset+1] = deriv[iOffset+2] = 
+          deriv[iOffset+3] = deriv[iOffset+4] = deriv[iOffset+5] = 0.0;
+      }
+   }
+   
+   // waw: 06/03/04
+   //    DerivativeList *current = derivatives;
+   // waw: added 06/04/04
+   Integer cf = currentForce;
+   PhysicalModel *current = GetForce(cf);  
 
-    if (order == 1) //loj: changed from =
-    {
-        deriv[0] = state[3];
-        deriv[1] = state[4];
-        deriv[2] = state[5];
-        deriv[3] = deriv[4] = deriv[5] = 0.0;
-    }
-    else 
-    {
-        deriv[0] = deriv[1] = deriv[2] = 
-        deriv[3] = deriv[4] = deriv[5] = 0.0;
-    }
-// waw: 06/03/04
-//    DerivativeList *current = derivatives;
-    // waw: added 06/04/04
-    Integer cf = currentForce;
-    PhysicalModel *current = GetForce(cf);  
+   const Real * ddt;
+   while (current) 
+   {
+      // waw: 06/04/04
+      //ddt = current->GetDerivative()->GetDerivativeArray();
+//      ddt = GetForce(cf)->GetDerivativeArray();
+      ddt = current->GetDerivativeArray();
+      //if (!current->GetDerivative()->GetDerivatives(state, dt, order)) 
+      if (!current->GetDerivatives(state, dt, order))
+         return false;
 
-    const Real * ddt;
-    while (current) 
-    {
-        // waw: 06/04/04
-        //ddt = current->GetDerivative()->GetDerivativeArray();
-        ddt = GetForce(cf)->GetDerivativeArray();
-        //if (!current->GetDerivative()->GetDerivatives(state, dt, order)) 
-        if (!current->GetDerivatives(state, dt, order))
-            return false;
+      for (i = 0; i < satCount; ++i) {
+         iOffset = i*stateSize;
+         if (order == 1) //loj: changed from =
+         {
+            deriv[iOffset+3] += ddt[iOffset+3];
+            deriv[iOffset+4] += ddt[iOffset+4];
+            deriv[iOffset+5] += ddt[iOffset+5];
+         }
+         else 
+         {
+            deriv[ iOffset ] += ddt[ iOffset ];
+            deriv[iOffset+1] += ddt[iOffset+1];
+            deriv[iOffset+2] += ddt[iOffset+2];
+         }
+         //current = current->Next(); waw: 06/04/04
+         // waw: added 06/04/04
+      }
+      cf++;
+      current = GetForce(cf);
+   }
 
-        if (order == 1) //loj: changed from =
-        {
-            deriv[3] += ddt[3];
-            deriv[4] += ddt[4];
-            deriv[5] += ddt[5];
-        }
-        else 
-        {
-            deriv[0] += ddt[0];
-            deriv[1] += ddt[1];
-            deriv[2] += ddt[2];
-        }
-        //current = current->Next(); waw: 06/04/04
-        // waw: added 06/04/04
-        cf++;
-        current = GetForce(cf);
-    }
-
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
