@@ -43,8 +43,9 @@ public:
     ParameterKey GetKey() const;
     std::string GetDesc() const;
     std::string GetUnit() const;
+    std::string GetColor() const;
     bool IsTimeParameter() const;
-
+    
     void SetKey(const ParameterKey &key);
     void SetDesc(const std::string &desc);
     void SetUnit(const std::string &unit);
@@ -90,6 +91,7 @@ protected:
     ParameterKey  mKey;
     std::string   mDesc;
     std::string   mUnit;
+    std::string   mColorName;
     bool mIsTimeParam;
 
     StringArray mObjectTypeNames;
@@ -98,7 +100,8 @@ protected:
     
     enum
     {
-        OBJECT_NAME = 0,
+        OBJECT = 0,
+        COLOR,
         ParameterParamCount
     };
     

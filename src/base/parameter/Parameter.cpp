@@ -35,13 +35,15 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 const std::string
 Parameter::PARAMETER_TEXT[ParameterParamCount] =
 {
-    "ObjectName"
+    "Object",
+    "Color",
 };
 
 const Gmat::ParameterType
 Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
-    Gmat::STRING_TYPE
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -381,7 +383,7 @@ bool Parameter::AddObject(const std::string &name)
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterText(const Integer id) const
 {
-    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+    if (id >= OBJECT && id < ParameterParamCount)
         return PARAMETER_TEXT[id];
     else
         return GmatBase::GetParameterText(id);
@@ -407,7 +409,7 @@ Integer Parameter::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 {
-    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+    if (id >= OBJECT && id < ParameterParamCount)
         return PARAMETER_TYPE[id];
     else
         return GmatBase::GetParameterType(id);
@@ -418,7 +420,7 @@ Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterTypeString(const Integer id) const
 {
-    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+    if (id >= OBJECT && id < ParameterParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
        return GmatBase::GetParameterTypeString(id);
@@ -432,11 +434,13 @@ std::string Parameter::GetStringParameter(const Integer id) const
 {
     switch (id)
     {
-    case OBJECT_NAME: //loj: return first object name for now
+    case OBJECT: //loj: return first object name for now
         if (mNumObjects > 0)
             return mObjectNames[0];
         else
             return GmatBase::GetStringParameter(id);
+    case COLOR:
+        return mColorName;
     default:
         return GmatBase::GetStringParameter(id);
     }
@@ -449,8 +453,11 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
     switch (id)
     {
-    case OBJECT_NAME:
+    case OBJECT:
         return AddObject(value);
+    case COLOR:
+        mColorName = value;
+        return true;
     default:
         return GmatBase::SetStringParameter(id, value);
     }
