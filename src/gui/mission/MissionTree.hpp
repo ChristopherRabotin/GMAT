@@ -66,6 +66,7 @@ private:
    int mNumSwitchCase;
    int mNumFunct;
    int mNumAssign;
+   int mNumScriptEvent;
 
    void UpdateCommand();
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
@@ -101,6 +102,7 @@ private:
    void OnAddAssignment(wxCommandEvent &event);
    void OnAddToggle(wxCommandEvent &event);
    void OnAddTarget(wxCommandEvent &event);
+   void OnAddScriptEvent(wxCommandEvent &event);
 
    void OnAddIfStatement(wxCommandEvent &event);
    void OnAddIfElseStatement(wxCommandEvent &event);
@@ -119,6 +121,7 @@ private:
    void OnInsertAssignment(wxCommandEvent &event);
    void OnInsertToggle(wxCommandEvent &event);
    void OnInsertTarget(wxCommandEvent &event);
+   void OnInsertScriptEvent(wxCommandEvent &event);
 
    void OnInsertIfStatement(wxCommandEvent &event);
    void OnInsertWhileLoop(wxCommandEvent &event);
@@ -174,6 +177,7 @@ private:
       POPUP_ADD_FUNCTION,
       POPUP_ADD_ASSIGNMENT,
       POPUP_ADD_TOGGLE,
+      POPUP_ADD_SCRIPT_EVENT,
       
       POPUP_INSERT_COMMAND,
       POPUP_INSERT_PROPAGATE,
@@ -184,6 +188,7 @@ private:
       POPUP_INSERT_FUNCTION,
       POPUP_INSERT_ASSIGNMENT,
       POPUP_INSERT_TOGGLE,
+      POPUP_INSERT_SCRIPT_EVENT,
       
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 

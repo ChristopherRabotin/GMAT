@@ -23,6 +23,7 @@
 #include "bitmaps/achieveevent.xpm"
 #include "bitmaps/deltav.xpm"
 #include "bitmaps/function.xpm"
+#include "bitmaps/nestreturn.xpm"
 
 #include "MissionTree.hpp"
 #include "MissionTreeItemData.hpp"
@@ -70,9 +71,10 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_ACHIEVE, MissionTree::OnAddAchieve)
    EVT_MENU(POPUP_ADD_VARY, MissionTree::OnAddVary)
    EVT_MENU(POPUP_ADD_FUNCTION, MissionTree::OnAddFunction)
-   EVT_MENU(POPUP_ADD_ASSIGNMENT, MissionTree::OnAddAssignment)
-   EVT_MENU(POPUP_ADD_TOGGLE, MissionTree::OnAddToggle)
+//   EVT_MENU(POPUP_ADD_ASSIGNMENT, MissionTree::OnAddAssignment)
+//   EVT_MENU(POPUP_ADD_TOGGLE, MissionTree::OnAddToggle)
    EVT_MENU(POPUP_ADD_TARGET, MissionTree::OnAddTarget)
+   EVT_MENU(POPUP_ADD_SCRIPT_EVENT, MissionTree::OnAddScriptEvent)
    EVT_MENU(POPUP_ADD_IF_STATEMENT, MissionTree::OnAddIfStatement)
    EVT_MENU(POPUP_ADD_IF_ELSE_STATEMENT, MissionTree::OnAddIfElseStatement)
    EVT_MENU(POPUP_ADD_WHILE_LOOP, MissionTree::OnAddWhileLoop)
@@ -87,9 +89,10 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_INSERT_ACHIEVE, MissionTree::OnInsertAchieve)
    EVT_MENU(POPUP_INSERT_VARY, MissionTree::OnInsertVary)
    EVT_MENU(POPUP_INSERT_FUNCTION, MissionTree::OnInsertFunction)
-   EVT_MENU(POPUP_INSERT_ASSIGNMENT, MissionTree::OnInsertAssignment)
-   EVT_MENU(POPUP_INSERT_TOGGLE, MissionTree::OnInsertToggle)
+//   EVT_MENU(POPUP_INSERT_ASSIGNMENT, MissionTree::OnInsertAssignment)
+//   EVT_MENU(POPUP_INSERT_TOGGLE, MissionTree::OnInsertToggle)
    EVT_MENU(POPUP_INSERT_TARGET, MissionTree::OnInsertTarget)
+   EVT_MENU(POPUP_INSERT_SCRIPT_EVENT, MissionTree::OnInsertScriptEvent)
    EVT_MENU(POPUP_INSERT_IF_STATEMENT, MissionTree::OnInsertIfStatement)
    EVT_MENU(POPUP_INSERT_WHILE_LOOP, MissionTree::OnInsertWhileLoop)
    EVT_MENU(POPUP_INSERT_FOR_LOOP, MissionTree::OnInsertForLoop)
@@ -141,8 +144,9 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandList.Add("Maneuver");
    mCommandList.Add("Target");
    mCommandList.Add("CallFunction");
-   mCommandList.Add("Assignment");
-   mCommandList.Add("Toggle");
+//   mCommandList.Add("Assignment");
+//   mCommandList.Add("Toggle");
+   mCommandList.Add("ScriptEvent");
    
    if (gridLines)
    {
@@ -164,15 +168,16 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mNumTarget = 0;
    mNumAchieve = 0;
    mNumVary = 0;
-   mNumSave = 0; //loj: 10/20/04 added Save, Toggle
-   mNumToggle = 0;
+//   mNumSave = 0; //loj: 10/20/04 added Save, Toggle
+//   mNumToggle = 0;
    mNumIfStatement = 0;
    mNumWhileLoop = 0;
    mNumForLoop = 0;
    mNumDoWhile = 0;
    mNumSwitchCase = 0;
    mNumFunct = 0;
-   mNumAssign = 0;
+//   mNumAssign = 0;
+   mNumScriptEvent = 0;
 
    AddIcons();
    AddDefaultMission();
@@ -215,15 +220,16 @@ void MissionTree::UpdateMission(bool resetCounter)
       mNumTarget = 0;
       mNumAchieve = 0;
       mNumVary = 0;
-      mNumSave = 0;
-      mNumToggle = 0;
+//      mNumSave = 0;
+//      mNumToggle = 0;
       mNumIfStatement = 0;
       mNumWhileLoop = 0;
       mNumForLoop = 0;
       mNumDoWhile = 0;
       mNumSwitchCase = 0;
       mNumFunct = 0;
-      mNumAssign = 0;
+//      mNumAssign = 0;
+      mNumScriptEvent = 0;
    }
    
    DeleteChildren(mMissionSeqSubItem);
@@ -319,8 +325,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndTarget")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_TARGET_COMMAND,
-                       cmd, &mNumTarget, mNumTarget);
+         AppendCommand(parent, GmatTree::MISSION_ICON_NEST_RETURN,
+                       GmatTree::END_TARGET_COMMAND, cmd, &mNumTarget, mNumTarget);
 
       Expand(parent);
    }
@@ -338,22 +344,22 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
                        cmd, &mNumVary);
       Expand(parent);
    }
-   else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
-   {
-      mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
-                       cmd, &mNumSave, mNumSave);
-      
-      Expand(parent);
-   }
-   else if (cmdTypeName == "Toggle")
-   {
-      mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::TOGGLE_COMMAND,
-                       cmd, &mNumToggle, mNumToggle);
-      
-      Expand(parent);
-   }
+//   else if (cmdTypeName.CmpNoCase("Save") == 0) //loj: actual command is "save"
+//   {
+//      mNewTreeId =
+//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SAVE_COMMAND,
+//                       cmd, &mNumSave, mNumSave);
+//
+//      Expand(parent);
+//   }
+//   else if (cmdTypeName == "Toggle")
+//   {
+//      mNewTreeId =
+//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::TOGGLE_COMMAND,
+//                       cmd, &mNumToggle, mNumToggle);
+//
+//      Expand(parent);
+//   }
    else if (cmdTypeName == "For")
    {
       mNewTreeId =
@@ -368,8 +374,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndFor")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_FOR_CONTROL,
-                       cmd, &mNumForLoop, mNumForLoop);
+         AppendCommand(parent, GmatTree::MISSION_ICON_NEST_RETURN,
+                       GmatTree::END_FOR_CONTROL, cmd, &mNumForLoop, mNumForLoop);
       
       Expand(parent);
    }
@@ -387,8 +393,9 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndIf")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_IF_CONTROL,
-                       cmd, &mNumIfStatement, mNumIfStatement);
+         AppendCommand(parent, GmatTree::MISSION_ICON_NEST_RETURN,
+                       GmatTree::END_IF_CONTROL, cmd, &mNumIfStatement,
+                       mNumIfStatement);
         
       Expand(parent);
    }
@@ -403,7 +410,8 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndWhile")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_WHILE_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_ICON_NEST_RETURN,
+                       GmatTree::END_WHILE_CONTROL,
                        cmd, &mNumWhileLoop, mNumWhileLoop);
       
       Expand(parent);
@@ -416,14 +424,35 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
 
       Expand(parent);
    }
-   else if (cmdTypeName == "Assignment")
+//   else if (cmdTypeName == "Assignment")
+//   {
+//      mNewTreeId =
+//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::ASSIGNMENT_COMMAND,
+//                       cmd, &mNumAssign, mNumAssign);
+//
+//      Expand(parent);
+//   }
+   else if (cmdTypeName == "NoOp")
+   {
+
+   }
+   else
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::ASSIGNMENT_COMMAND,
-                       cmd, &mNumAssign, mNumAssign);
+         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::SCRIPT_COMMAND,
+                       cmd, &mNumScriptEvent, mNumScriptEvent);
 
       Expand(parent);
    }
+//   else if (cmdTypeName == "ScriptEvent")
+//   {
+//      mNewTreeId =
+//         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::FREE_FORM_SCRIPT_COMMAND,
+//                       cmd, &mNumScriptEvent, mNumScriptEvent);
+//
+//      Expand(parent);
+//   }
+
 
    return mNewTreeId;
 }
@@ -661,7 +690,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          //---------------------------------------------------
          wxString endName = "End" + typeName;
          endName.Printf("%s%d", endName.c_str(), *cmdCount);
-         InsertItem(node, 0, endName, GmatTree::MISSION_NO_ICON, -1,
+         InsertItem(node, 0, endName, GmatTree::MISSION_ICON_NEST_RETURN, -1,
                     new MissionTreeItemData(endName, endType, endName, endCmd));
       }
    }
@@ -746,7 +775,7 @@ void MissionTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
 
    wxBusyCursor wait;
-   wxIcon icons[11];
+   wxIcon icons[12];
 
    icons[0] = wxIcon ( propagateevent_xpm );
    icons[1] = wxIcon ( target_xpm );
@@ -759,6 +788,7 @@ void MissionTree::AddIcons()
    icons[8] = wxIcon ( achieveevent_xpm );
    icons[9] = wxIcon ( deltav_xpm );
    icons[10]= wxIcon ( function_xpm );
+   icons[11]= wxIcon ( nestreturn_xpm );
 
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
@@ -1171,39 +1201,39 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnAddAssignment(wxCommandEvent &event)
 {
-#if DEBUG_MISSION_TREE
-   ShowCommands("Before OnAddAssignment()");
-#endif
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId lastId = GetLastChild(itemId);
-   wxTreeItemId prevId = GetPrevVisible(lastId);
-   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
-   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
-   GmatCommand *prevCmd = NULL;
-
-   //loj: 12/6/04 - handle case prevItem is NULL
-   if (prevItem != NULL)
-      prevCmd = prevItem->GetCommand();
-   else
-      prevCmd = currItem->GetCommand();
-
-#if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("Adding assignment to gui interpreter");
-#endif
-   GmatCommand *cmd = theGuiInterpreter->CreateCommand("Assignment");
-
-   if (cmd != NULL)
-   {
-      InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
-                    GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
-
-      Expand(itemId);
-   }
-
-#if DEBUG_MISSION_TREE
-   ShowCommands("After OnAddAssignment()");
-#endif
-
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("Before OnAddAssignment()");
+//#endif
+//   wxTreeItemId itemId = GetSelection();
+//   wxTreeItemId lastId = GetLastChild(itemId);
+//   wxTreeItemId prevId = GetPrevVisible(lastId);
+//   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+//   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+//   GmatCommand *prevCmd = NULL;
+//
+//   //loj: 12/6/04 - handle case prevItem is NULL
+//   if (prevItem != NULL)
+//      prevCmd = prevItem->GetCommand();
+//   else
+//      prevCmd = currItem->GetCommand();
+//
+//#if DEBUG_MISSION_TREE
+//   MessageInterface::ShowMessage("Adding assignment to gui interpreter");
+//#endif
+//   GmatCommand *cmd = theGuiInterpreter->CreateCommand("Assignment");
+//
+//   if (cmd != NULL)
+//   {
+//      InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+//                    GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
+//
+//      Expand(itemId);
+//   }
+//
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("After OnAddAssignment()");
+//#endif
+//
 
 }
 
@@ -1212,40 +1242,40 @@ void MissionTree::OnAddAssignment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnAddToggle(wxCommandEvent &event)
 {
-#if DEBUG_MISSION_TREE
-   ShowCommands("Before OnAddToggle()");
-#endif
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId lastId = GetLastChild(itemId);
-   wxTreeItemId prevId = GetPrevVisible(lastId);
-   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
-   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
-   GmatCommand *prevCmd = NULL;
-
-   //loj: 12/6/04 - handle case prevItem is NULL
-   if (prevItem != NULL)
-      prevCmd = prevItem->GetCommand();
-   else
-      prevCmd = currItem->GetCommand();
-
-#if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("Adding toggle to gui interpreter");
-#endif
-   GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Toggle");
-
-   if (cmd != NULL)
-   {
-      InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
-                    GmatTree::TOGGLE_COMMAND, prevCmd, cmd, &mNumToggle);
-
-      Expand(itemId);
-   }
-
-#if DEBUG_MISSION_TREE
-   ShowCommands("After OnAddToggle()");
-#endif
-
-
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("Before OnAddToggle()");
+//#endif
+//   wxTreeItemId itemId = GetSelection();
+//   wxTreeItemId lastId = GetLastChild(itemId);
+//   wxTreeItemId prevId = GetPrevVisible(lastId);
+//   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+//   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+//   GmatCommand *prevCmd = NULL;
+//
+//   //loj: 12/6/04 - handle case prevItem is NULL
+//   if (prevItem != NULL)
+//      prevCmd = prevItem->GetCommand();
+//   else
+//      prevCmd = currItem->GetCommand();
+//
+//#if DEBUG_MISSION_TREE
+//   MessageInterface::ShowMessage("Adding toggle to gui interpreter");
+//#endif
+//   GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Toggle");
+//
+//   if (cmd != NULL)
+//   {
+//      InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+//                    GmatTree::TOGGLE_COMMAND, prevCmd, cmd, &mNumToggle);
+//
+//      Expand(itemId);
+//   }
+//
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("After OnAddToggle()");
+//#endif
+//
+//
 }
 
 
@@ -1291,6 +1321,54 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
 
 #if DEBUG_MISSION_TREE
    ShowCommands("After OnAddTarget()");
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void OnAddScriptEvent(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnAddScriptEvent(wxCommandEvent &event)
+{
+#if DEBUG_MISSION_TREE
+   ShowCommands("Before OnAddScriptEvent()");
+#endif
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId lastId = GetLastChild(itemId);
+   wxTreeItemId prevId = GetPrevVisible(lastId);
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
+   GmatCommand *prevCmd = NULL;
+
+   //loj: 12/6/04 - handle case prevItem is NULL
+   if (prevItem != NULL)
+      prevCmd = prevItem->GetCommand();
+   else
+      prevCmd = currItem->GetCommand();
+
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::OnAddScriptEvent() prevCmd=%s\n",
+                                 prevCmd->GetTypeName().c_str());
+#endif
+   
+   GmatCommand *cmd = theGuiInterpreter->CreateCommand("ScriptEvent");
+
+   if (cmd != NULL)
+   {
+      wxTreeItemId node =
+         InsertCommand(itemId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+                       GmatTree::SCRIPT_COMMAND, prevCmd, cmd,
+                       &mNumScriptEvent);
+
+      //SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+
+      Expand(itemId);
+      Expand(node);
+   }
+   else
+      MessageInterface::ShowMessage("cmd == null \n");
+
+#if DEBUG_MISSION_TREE
+   ShowCommands("After OnAddScriptEvent()");
 #endif
 }
 
@@ -1586,7 +1664,7 @@ void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
                                          name, NULL));
    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(item, endName, GmatTree::MISSION_NO_ICON, -1,
+   //            AppendItem(item, endName, GmatTree::MISSION_ICON_NEST_RETURN, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
@@ -1640,7 +1718,7 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
                                          name, NULL));
    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(itemId, endName, GmatTree::MISSION_NO_ICON, -1,
+   //            AppendItem(itemId, endName, GmatTree::MISSION_ICON_NEST_RETURN, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
@@ -1805,29 +1883,29 @@ void MissionTree::OnInsertFunction(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnInsertAssignment(wxCommandEvent &event)
 {
-#if DEBUG_MISSION_TREE
-   ShowCommands("Before OnInsertAssignment()");
-#endif
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId parentId = GetItemParent(itemId);
-   wxTreeItemId prevId = GetPrevVisible(itemId);
-   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
-
-   GmatCommand *prevCmd = prevItem->GetCommand();
-
-   if (prevCmd != NULL)
-   {     
-      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Assignment");
-            
-      if (cmd != NULL)
-      {  
-         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
-                       GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
-      }
-   }
-#if DEBUG_MISSION_TREE
-   ShowCommands("After OnInsertAssignment()");
-#endif
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("Before OnInsertAssignment()");
+//#endif
+//   wxTreeItemId itemId = GetSelection();
+//   wxTreeItemId parentId = GetItemParent(itemId);
+//   wxTreeItemId prevId = GetPrevVisible(itemId);
+//   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+//
+//   GmatCommand *prevCmd = prevItem->GetCommand();
+//
+//   if (prevCmd != NULL)
+//   {
+//      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Assignment");
+//
+//      if (cmd != NULL)
+//      {
+//         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+//                       GmatTree::ASSIGNMENT_COMMAND, prevCmd, cmd, &mNumAssign);
+//      }
+//   }
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("After OnInsertAssignment()");
+//#endif
 }
 
 //------------------------------------------------------------------------------
@@ -1835,29 +1913,29 @@ void MissionTree::OnInsertAssignment(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnInsertToggle(wxCommandEvent &event)
 {
-#if DEBUG_MISSION_TREE
-   ShowCommands("Before OnInsertToggle()");
-#endif
-   wxTreeItemId itemId = GetSelection();
-   wxTreeItemId parentId = GetItemParent(itemId);
-   wxTreeItemId prevId = GetPrevVisible(itemId);
-   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
-
-   GmatCommand *prevCmd = prevItem->GetCommand();
-
-   if (prevCmd != NULL)
-   {     
-      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Toggle");
-            
-      if (cmd != NULL)
-      {  
-         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
-                       GmatTree::TOGGLE_COMMAND, prevCmd, cmd, &mNumToggle);
-      }
-   }
-#if DEBUG_MISSION_TREE
-   ShowCommands("After OnInsertToggle()");
-#endif
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("Before OnInsertToggle()");
+//#endif
+//   wxTreeItemId itemId = GetSelection();
+//   wxTreeItemId parentId = GetItemParent(itemId);
+//   wxTreeItemId prevId = GetPrevVisible(itemId);
+//   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+//
+//   GmatCommand *prevCmd = prevItem->GetCommand();
+//
+//   if (prevCmd != NULL)
+//   {
+//      GmatCommand *cmd = theGuiInterpreter->CreateDefaultCommand("Toggle");
+//
+//      if (cmd != NULL)
+//      {
+//         InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+//                       GmatTree::TOGGLE_COMMAND, prevCmd, cmd, &mNumToggle);
+//      }
+//   }
+//#if DEBUG_MISSION_TREE
+//   ShowCommands("After OnInsertToggle()");
+//#endif
 }
 
 
@@ -1893,6 +1971,42 @@ void MissionTree::OnInsertTarget(wxCommandEvent &event)
    }
 #if DEBUG_MISSION_TREE
    ShowCommands("After OnInsertTarget()");
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void OnInsertScriptEvent(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnInsertScriptEvent(wxCommandEvent &event)
+{
+#if DEBUG_MISSION_TREE
+   ShowCommands("Before OnInsertScriptEvent()");
+#endif
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId); 
+   wxTreeItemId prevId = GetPrevVisible(itemId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);   
+  
+   GmatCommand *prevCmd = prevItem->GetCommand();
+
+   if (prevCmd != NULL)
+   {
+      GmatCommand *cmd = theGuiInterpreter->CreateCommand("ScriptEvent");
+
+      if (cmd != NULL)
+      {
+         wxTreeItemId node =
+            InsertCommand(parentId, itemId, prevId, GmatTree::MISSION_ICON_FILE,
+                          GmatTree::SCRIPT_COMMAND, prevCmd, cmd,
+                          &mNumScriptEvent);
+
+//         SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+
+         Expand(node);
+      }
+   }
+#if DEBUG_MISSION_TREE
+   ShowCommands("After OnInsertScriptEvent()");
 #endif
 }
 
@@ -2093,7 +2207,7 @@ wxMenu* MissionTree::CreateAddPopupMenu()
    for (i=0; i<mCommandList.GetCount(); i++)
       menu->Append(GetMenuId(mCommandList[i], false), mCommandList[i]);
 
-   menu->Enable(POPUP_ADD_TOGGLE, FALSE);
+//   menu->Enable(POPUP_ADD_TOGGLE, FALSE);
 
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", CreateAddControlLogicPopupMenu());
 
@@ -2112,7 +2226,7 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
    for (i=0; i<mCommandList.GetCount(); i++)
       menu->Append(GetMenuId(mCommandList[i], true), mCommandList[i]);
    
-   menu->Enable(POPUP_INSERT_TOGGLE, FALSE);
+//   menu->Enable(POPUP_INSERT_TOGGLE, FALSE);
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", CreateInsertControlLogicPopupMenu());
 
    return menu;
@@ -2548,10 +2662,12 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_INSERT_TARGET;
          else if (cmd == "CallFunction")
             return POPUP_INSERT_FUNCTION;
-         else if (cmd == "Assignment")
-            return POPUP_INSERT_ASSIGNMENT;
-         else if (cmd == "Toggle")
-            return POPUP_INSERT_TOGGLE;
+//         else if (cmd == "Assignment")
+//            return POPUP_INSERT_ASSIGNMENT;
+//         else if (cmd == "Toggle")
+//            return POPUP_INSERT_TOGGLE;
+         else if (cmd == "ScriptEvent")
+            return POPUP_INSERT_SCRIPT_EVENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
@@ -2566,10 +2682,12 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
             return POPUP_ADD_TARGET;
          else if (cmd == "CallFunction")
             return POPUP_ADD_FUNCTION;
-         else if (cmd == "Assignment")
-            return POPUP_ADD_ASSIGNMENT;
-         else if (cmd == "Toggle")
-            return POPUP_ADD_TOGGLE;
+//         else if (cmd == "Assignment")
+//            return POPUP_ADD_ASSIGNMENT;
+//         else if (cmd == "Toggle")
+//            return POPUP_ADD_TOGGLE;
+         else if (cmd == "ScriptEvent")
+            return POPUP_ADD_SCRIPT_EVENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
