@@ -22,13 +22,13 @@
 #include <ctype.h>         // for isalpha
 
 
+//#define DEBUG_INTERPRETER 1
 //#define DEBUG_TOKEN_PARSING 1
 //#define DEBUG_TOKEN_PARSING_DETAILS 1
 //#define DEBUG_RHS_PARSING 1
 
-#ifdef DEBUG_TOKEN_PARSING
-   #include "MessageInterface.hpp"
-#endif
+#include "MessageInterface.hpp"
+
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -1133,12 +1133,17 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
  * Breaks a line of script into pieces based on white space.
  */
 //------------------------------------------------------------------------------
-void Interpreter::ChunkLine(void)
+void Interpreter::ChunkLine()
 {
     // Break the line into pieces based on while space and special characters
     Integer start = 0, end, semicolonLocation = 0;
     const char *str = line.c_str();
     std::string phrase;
+
+    #ifdef DEBUG_TOKEN_PARSING
+       MessageInterface::ShowMessage(
+          "Interpreter::ChunkLine called for this line:\n   \"%s\"\n", str);
+    #endif
 
     start = SkipWhiteSpace(start); // Find the beginning of the text
     
@@ -1160,8 +1165,10 @@ void Interpreter::ChunkLine(void)
            ++end;
         }
         else {
-           while ((str[end] != ' ') && (str[end] != '\t') && (str[end] != '\r') &&
-                  (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0')) {
+           while ((str[end] != ' ') && (str[end] != '\t') && 
+                  (str[end] != '\r') && (str[end] != '\n') && 
+                  (str[end] != '%') && (str[end] != '\0') //) {
+                   && (str[end] != '=')) {
                ++end;
                if ((str[end] == ';') && (semicolonLocation == 0))
                    semicolonLocation = end;
@@ -1171,11 +1178,25 @@ void Interpreter::ChunkLine(void)
             semicolonLocation = end;
         
         phrase.assign(line, start, (semicolonLocation-start));
-        
-        chunks.push_back(new std::string(phrase));
+        if (phrase != "")
+           chunks.push_back(new std::string(phrase));
+
+        if (str[end] == '=') {
+           chunks.push_back(new std::string("="));
+           ++end;
+        } 
+
         start = SkipWhiteSpace(end);
         semicolonLocation = 0;
     }
+    
+    #ifdef DEBUG_TOKEN_PARSING
+       MessageInterface::ShowMessage(
+          "   Found these chunks:\n");
+       for (std::vector<std::string*>::iterator i = chunks.begin(); 
+            i != chunks.end(); ++i)
+          MessageInterface::ShowMessage("      \"%s\"\n", (*i)->c_str());
+    #endif
 }
 
 
