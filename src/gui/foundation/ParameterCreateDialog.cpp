@@ -137,17 +137,14 @@ void ParameterCreateDialog::Create()
    mCreateArrayButton = new wxButton(this, ID_BUTTON, wxT("Create"),
                                      wxDefaultPosition, wxDefaultSize, 0);
    
-   
    // wxListBox
    wxArrayString emptyArray;
    mObjectListBox = 
       theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 120), emptyArray);
    
-   //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = 
       theGuiManager->GetPropertyListBox(this, -1, wxSize(135, 120), "Spacecraft");
    
-   //loj: 9/24/04 use GetUserVariableListBox()
    mUserVarListBox =
       theGuiManager->GetUserVariableListBox(this, -1, wxSize(135, 120), "");
    
@@ -155,12 +152,10 @@ void ParameterCreateDialog::Create()
       theGuiManager->GetUserArrayListBox(this, -1, wxSize(135, 50), "");
    
 
-
    // wxComboBox
    mCoordComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
                                   wxSize(100,-1), 1, strCoordArray, wxCB_DROPDOWN);
-    
-   
+      
    // wxSizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -291,6 +286,22 @@ void ParameterCreateDialog::CreateVariable()
             // if token does not start with number
             if (!isdigit(*tokens[i].c_str()))
             {
+               //loj: 11/22/04 - added
+               // create system parameter if it is NULL
+               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
+               {
+                  std::string::size_type pos = tokens[i].find(".");
+                  if (pos != tokens[i].npos)
+                  {
+                     std::string objName = tokens[i].substr(0, pos);
+                     std::string typeName = tokens[i].substr(pos+1, tokens[i].npos-pos);
+                     
+                     Parameter *sysParam =
+                        theGuiInterpreter->CreateParameter(typeName, tokens[i]);
+                     sysParam->SetRefObjectName(Gmat::SPACECRAFT, objName);
+                  }
+               }
+               
                param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
             }
          }
@@ -496,7 +507,6 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
          mPropertyListBox->GetStringSelection();
 
       mExprTextCtrl->AppendText(s);
-      //mVarNameTextCtrl->SetValue(s); //loj: 9/23/04
 
       if (mVarNameTextCtrl->GetValue() != "" &&
           mVarNameTextCtrl->GetValue() != " ")
