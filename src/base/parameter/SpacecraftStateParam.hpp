@@ -29,7 +29,7 @@ class GMAT_API SpacecraftStateParam : public Parameter
 public:
 
    SpacecraftStateParam(const std::string &name, const std::string &desc,
-                        const Cartesian &cartesian);
+                        const Cartesian &cartesian = Cartesian::ZeroCartesian);
    SpacecraftStateParam(const SpacecraftStateParam &param);
    const SpacecraftStateParam& operator=(const SpacecraftStateParam &right);
    virtual ~SpacecraftStateParam();
