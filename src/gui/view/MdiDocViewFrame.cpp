@@ -32,13 +32,13 @@
 #include "wx/toolbar.h"
 
 // bitmap buttons for the toolbar
-#include "bitmaps/open.xpm"
+//#include "bitmaps/open.xpm"
 
 
 #ifndef __WXMSW__
-#ifndef __WXMAC__
+//#ifndef __WXMAC__
 #include "bitmaps/open.xpm"
-#endif
+//#endif
 #endif
 
 /*
