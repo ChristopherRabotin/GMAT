@@ -22,7 +22,7 @@
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 
-#define DEBUG_ACHIEVE_PANEL 1
+//#define DEBUG_ACHIEVE_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -34,6 +34,7 @@ BEGIN_EVENT_TABLE(AchievePanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBO, AchievePanel::OnSolverSelection)
 END_EVENT_TABLE()
 
+   
 //------------------------------------------------------------------------------
 // AchievePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
@@ -59,12 +60,14 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    theApplyButton->Disable();
 }
 
+
 //------------------------------------------------------------------------------
 // ~AchievePanel()
 //------------------------------------------------------------------------------
 AchievePanel::~AchievePanel()
 {
 }
+
 
 //-------------------------------
 // private methods
@@ -172,15 +175,16 @@ void AchievePanel::Create()
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
+
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void AchievePanel::LoadData()
 {
-#if DEBUG_ACHIEVE_PANEL
+   #if DEBUG_ACHIEVE_PANEL
    MessageInterface::ShowMessage("AchievePanel::LoadData() entered\n");
    MessageInterface::ShowMessage("Command=%s\n", mAchieveCommand->GetTypeName().c_str());
-#endif
+   #endif
 
    mGoalNameTextCtrl->Disable(); // we don't want user to edit this box
    
@@ -195,11 +199,11 @@ void AchievePanel::LoadData()
       std::string goalValue = mAchieveCommand->GetStringParameter
          (mAchieveCommand->GetParameterID("GoalValue"));
       
-#if DEBUG_ACHIEVE_PANEL
+      #if DEBUG_ACHIEVE_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
       MessageInterface::ShowMessage("goalName=%s\n", goalName.c_str());
       MessageInterface::ShowMessage("goalValue=%s\n", goalValue.c_str());
-#endif
+      #endif
       
       mSolverData.solverName = wxT(solverName.c_str());      
       mSolverData.goalName = wxT(goalName.c_str());
@@ -219,14 +223,16 @@ void AchievePanel::LoadData()
    ShowGoalSetup();
 }
 
+
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void AchievePanel::SaveData()
 {   
-#if DEBUG_ACHIEVE_PANEL
+   #if DEBUG_ACHIEVE_PANEL
    MessageInterface::ShowMessage("AchievePanel::SaveData() entered\n");
-#endif
+   #endif
+   
    canClose = true;
    
    //-------------------------------------------------------
@@ -285,6 +291,7 @@ void AchievePanel::ShowGoalSetup()
    
 }
 
+
 //---------------------------------
 // event handling
 //---------------------------------
@@ -296,26 +303,7 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
 {
    if (mGoalValueTextCtrl->IsModified())
    {
-//        // if some character entered bring up ParameterSelectDialog
-//        Real value;
-//        if (mGoalValueTextCtrl->GetValue() != "" &&
-//            !mGoalValueTextCtrl->GetValue().ToDouble(&value))
-//        {
-//           mGoalValueTextCtrl->SetValue(mSolverData.goalValue);
-//           ParameterSelectDialog paramDlg(this);
-//           paramDlg.ShowModal();
-
-//           if (paramDlg.IsParamSelected())
-//           {
-//              wxString newParamName = paramDlg.GetParamName();
-//              mGoalValueTextCtrl->SetValue(newParamName);
-//              mSolverData.goalValue = newParamName;
-//           }
-//        }
-//        else
-//        {
-         mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
-//        }
+      mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
    }
    
    if (mToleranceTextCtrl->IsModified())
@@ -323,6 +311,7 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
 
    theApplyButton->Enable();
 }
+
 
 //------------------------------------------------------------------------------
 // void AchievePanel::OnSolverSelection()
@@ -332,6 +321,7 @@ void AchievePanel::OnSolverSelection()
    mSolverData.solverName = mSolverComboBox->GetStringSelection();
 }
 
+
 //------------------------------------------------------------------------------
 // void AchievePanel::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -339,7 +329,7 @@ void AchievePanel::OnButtonClick(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewGoalButton ||
        event.GetEventObject() == mViewGoalValueButton)
-   {       
+   {      
       // show dialog to select parameter
       ParameterSelectDialog paramDlg(this);
       paramDlg.ShowModal();
