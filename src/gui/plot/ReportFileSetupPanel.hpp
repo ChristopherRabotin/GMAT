@@ -33,10 +33,11 @@ protected:
     Subscriber *theSubscriber;   
     int  mNumVarParams;
     
-    wxBoxSizer *pageBoxSizer;
     wxBoxSizer *optionBoxSizer;
+    wxTextCtrl *colWidthTextCtrl;
 
     wxCheckBox *writeCheckBox;
+    wxCheckBox *showHeaderCheckBox;
     
     wxStaticText *fileStaticText;
     wxTextCtrl *fileTextCtrl;
@@ -75,7 +76,9 @@ protected:
         ADD_VAR_BUTTON,
         REMOVE_VAR_BUTTON,
         CLEAR_VAR_BUTTON,
-        VAR_SEL_LISTBOX
+        VAR_SEL_LISTBOX,
+        
+        CHECKBOX,
     };
 };
 #endif

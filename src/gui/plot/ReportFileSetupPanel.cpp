@@ -104,8 +104,6 @@ void ReportFileSetupPanel::Create()
 {
     //MessageInterface::ShowMessage("ReportFileSetupPanel::Create() entering...\n");
 
-    pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-
     //------------------------------------------------------
     // plot option, (1st column)
     //------------------------------------------------------
@@ -115,11 +113,6 @@ void ReportFileSetupPanel::Create()
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
             
-    //------------------------------------------------------
-    // put in the order
-    //------------------------------------------------------
-    pageBoxSizer->Add(optionBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    
     //------------------------------------------------------
     // file option
     //------------------------------------------------------   
@@ -191,7 +184,28 @@ void ReportFileSetupPanel::Create()
    wxBoxSizer *mVarSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
    mVarSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
+   //------------------------------------------------------
+   // options
+   //------------------------------------------------------
+   showHeaderCheckBox =
+      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Show Headers"),
+                     wxDefaultPosition, wxSize(100, -1), 0);
+   
+   wxBoxSizer *colWidthBoxSizer = new wxBoxSizer(wxHORIZONTAL);         
+   wxStaticText *colWidthText =
+      new wxStaticText(this, -1, wxT("Column Width  "),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                              wxDefaultPosition, 
+                                              wxSize(35, -1),  0);
+
+   colWidthBoxSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, 0);
+   colWidthBoxSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, 0);           
+
+   optionBoxSizer->Add(showHeaderCheckBox, 0, wxALIGN_LEFT|wxALL, 5);                       
+   optionBoxSizer->Add(colWidthBoxSizer, 0, wxALIGN_LEFT|wxALL, 5);
+      
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
@@ -204,9 +218,11 @@ void ReportFileSetupPanel::Create()
     //------------------------------------------------------
     // add to parent sizer
     //------------------------------------------------------
-    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    theMiddleSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+    theMiddleSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+    theMiddleSizer->Add(optionBoxSizer, 0, wxGROW|wxALIGN_LEFT|wxALL, 5);
+
+//    theMiddleSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -221,6 +237,15 @@ void ReportFileSetupPanel::LoadData()
     int filenameId = theSubscriber->GetParameterID("Filename");
     std::string filename = theSubscriber->GetStringParameter(filenameId);
     fileTextCtrl->SetValue(wxT(filename.c_str()));
+    
+    int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
+    showHeaderCheckBox->SetValue(theSubscriber->
+                           GetBooleanParameter(writeHeadersId));
+                           
+    int spacesId = theSubscriber->GetParameterID("ColumnWidth");
+    wxString numSpacesValue;
+    numSpacesValue.Printf("%d", theSubscriber->GetIntegerParameter(spacesId));
+    colWidthTextCtrl->SetValue(numSpacesValue);
     
     StringArray varParamList = theSubscriber->GetStringArrayParameter("VarList");
     mNumVarParams = varParamList.size();
@@ -252,6 +277,14 @@ void ReportFileSetupPanel::SaveData()
     // save data to core engine
     theSubscriber->Activate(writeCheckBox->IsChecked());
     
+    int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
+    theSubscriber->SetBooleanParameter(writeHeadersId, 
+                  showHeaderCheckBox->IsChecked());
+                  
+    int spacesId = theSubscriber->GetParameterID("ColumnWidth");
+    theSubscriber->SetIntegerParameter(spacesId, 
+                  atoi(colWidthTextCtrl->GetValue()));
+                  
     // save file name data to core engine
     wxString filename = fileTextCtrl->GetValue();
     int filenameId = theSubscriber->GetParameterID("Filename");
