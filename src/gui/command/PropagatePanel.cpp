@@ -39,8 +39,9 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL, PropagatePanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, PropagatePanel::OnButtonClick)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
-   EVT_GRID_CELL_LEFT_CLICK(PropagatePanel::OnCellLeftClick)
+//   EVT_GRID_CELL_LEFT_CLICK(PropagatePanel::OnCellLeftClick)
    EVT_GRID_CELL_RIGHT_CLICK(PropagatePanel::OnCellRightClick)
+   EVT_GRID_CELL_CHANGE(PropagatePanel::OnCellValueChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -124,24 +125,31 @@ void PropagatePanel::Create()
    
    // wxGrid
    propGrid =
-      new wxGrid(this, -1, wxDefaultPosition, wxSize(700,100), wxWANTS_CHARS);
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,100), wxWANTS_CHARS);
    
-   propGrid->CreateGrid(MAX_PROP_ROW, 3, wxGrid::wxGridSelectRows);
+   propGrid->CreateGrid(MAX_PROP_ROW, 3, wxGrid::wxGridSelectCells);
    propGrid->SetColSize(0, 200);
    propGrid->SetColSize(1, 400);
    propGrid->SetColSize(2, 100);
-   propGrid->SetMargins(0, 0);
+   //propGrid->SetMargins(0, 0);
    propGrid->SetColLabelValue(0, _T("Propagator"));
    propGrid->SetColLabelValue(1, _T("Spacecraft List"));
-   propGrid->SetColLabelValue(2, _T("Direction"));
+   propGrid->SetColLabelValue(2, _T("Backward"));
    propGrid->SetRowLabelSize(0);
-   propGrid->SetScrollbars(5, 8, 15, 15);
-   propGrid->EnableEditing(false);
+   //propGrid->SetScrollbars(5, 8, 15, 15);
+   //propGrid->EnableEditing(false);
+   
+   // create and insert boolean choice editor
+   wxGridCellAttr *attrBool = new wxGridCellAttr;
+   attrBool->SetEditor(new wxGridCellBoolEditor);
+   attrBool->SetRenderer(new wxGridCellBoolRenderer);
+   propGrid->SetColAttr(2, attrBool);
+   propGrid->SetColFormatBool(2);
    
    stopCondGrid =
-      new wxGrid(this, -1, wxDefaultPosition, wxSize(700,120), wxWANTS_CHARS);
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,120), wxWANTS_CHARS);
    
-   stopCondGrid->CreateGrid(MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectRows);
+   stopCondGrid->CreateGrid(MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectCells);
    stopCondGrid->SetColSize(0, 200);
    stopCondGrid->SetColSize(1, 500);
    stopCondGrid->SetMargins(0, 0);
@@ -606,13 +614,28 @@ void PropagatePanel::DisplayPropagator()
       ("PropagatePanel::DisplayPropagator() entered\n");
 #endif
 
+   wxString name;
    for (int i=0; i<mTempPropCount; i++)
    {
       propGrid->SetCellValue(i, PROP_NAME_COL, mTempProp[i].propName);
       propGrid->SetCellValue(i, PROP_SOS_COL, mTempProp[i].soNames);
+      
+      name = mTempProp[i].propName;
+      int x = name.Find("-");
+      
+      if (x == -1)
+      {
+          propGrid->SetCellValue(i, PROP_BK_COL, "");
+          MessageInterface::ShowMessage("PropagatePanel::DisplayPropagator(1)\n");
+      }
+      else
+      {
+          propGrid->SetCellValue(i, PROP_BK_COL, "1");
+          MessageInterface::ShowMessage("PropagatePanel::DisplayPropagator(2)\n");
+      }            
    }
 
-   propGrid->SelectRow(0);    
+   //propGrid->SelectRow(0);    
 }
 
 //------------------------------------------------------------------------------
@@ -877,34 +900,33 @@ void PropagatePanel::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 // void OnCellLeftClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
-void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
-{
-   int row = event.GetRow();
-   int col = event.GetCol();
-    
-   if (event.GetEventObject() == propGrid)
-   {
-      if ( (col == 0) || (col == 1) )
-      {
-         propGrid->SelectRow(row);
-      }    
-      else if (col == 2)
-      {
-         propGrid->SelectBlock(row, col, row, col, false);
-      }    
-   }
-   else if (event.GetEventObject() == stopCondGrid)
-   {
-      stopCondGrid->SelectRow(row);
-      
-      //if (updateButton->IsEnabled())
-      //   UpdateStopCondition();
-
-      mCurrStopRow = row;
-      ShowDetailedStopCond(row);
-      updateButton->Disable();
-   }
-}
+//void PropagatePanel::OnCellLeftClick(wxGridEvent& event)
+//{
+//   int row = event.GetRow();
+//   int col = event.GetCol();
+//    
+//   if (event.GetEventObject() == propGrid)
+//   {
+//      //propGrid->SelectRow(row);
+//      
+//      if (col == 2)
+//      {
+//         //propGrid->SelectBlock(row, col, row, col, false);
+//      }    
+//   }
+//   else if (event.GetEventObject() == stopCondGrid)
+//
+//   {
+//      stopCondGrid->SelectRow(row);
+//      
+//      //if (updateButton->IsEnabled())
+//      //   UpdateStopCondition();
+//
+//      mCurrStopRow = row;
+//      ShowDetailedStopCond(row);
+//      updateButton->Disable();
+//   }
+//}
 
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)
@@ -918,7 +940,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
    {
       if (event.GetEventObject() == propGrid)
       {
-         propGrid->SelectRow(row);
+         //propGrid->SelectRow(row);
          if (col == 0)
          {
             //----------------------------------
@@ -1022,6 +1044,45 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnCellValueChange(wxGridEvent &event)
+//------------------------------------------------------------------------------
+void PropagatePanel::OnCellValueChange(wxGridEvent &event)
+{
+   int row = event.GetRow();
+   int col = event.GetCol();
+   
+   if (event.GetEventObject() == propGrid)
+   { 
+       if (col == 2)
+       {
+           wxString temp = propGrid->GetCellValue(row, col);
+           wxString name = mTempProp[row].propName;
+           
+           if (temp == "1")
+           {
+               MessageInterface::ShowMessage
+               ("PropagatePanel::OnCellValueChange(1) temp = %s\n", temp.c_str());
+               mTempProp[row].propName.Prepend("-");
+               
+           }
+           else
+           {
+              wxString name = mTempProp[row].propName;
+              MessageInterface::ShowMessage
+              ("PropagatePanel::OnCellValueChange(2) name = %s\n", name.c_str());
+              name.Replace("-", "", false);
+              MessageInterface::ShowMessage
+              ("PropagatePanel::OnCellValueChange(3) name = %s\n", name.c_str());
+              mTempProp[row].propName = name;
+              MessageInterface::ShowMessage
+              ("PropagatePanel::OnCellValueChange(4) propName = %s\n", mTempProp[row].propName.c_str());    
+           }   
+           theApplyButton->Enable(true);     
+       }    
+   }    
+}
+    
 //------------------------------------------------------------------------------
 // void ShowDetailedStopCond(int stopRow)
 //------------------------------------------------------------------------------

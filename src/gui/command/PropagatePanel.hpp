@@ -40,6 +40,7 @@ private:
    static const int MAX_STOPCOND_ROW = 10;
    static const int PROP_NAME_COL = 0;
    static const int PROP_SOS_COL = 1;
+   static const int PROP_BK_COL = 2;
    static const int STOPCOND_NAME_COL = 0;
    static const int STOPCOND_DESC_COL = 1;
    
@@ -125,8 +126,9 @@ private:
    void OnTextChange(wxCommandEvent &event);
    void OnComboBoxChange(wxCommandEvent &event);
    void OnButtonClick(wxCommandEvent &event);
-   void OnCellLeftClick(wxGridEvent &event);
+//   void OnCellLeftClick(wxGridEvent &event);
    void OnCellRightClick(wxGridEvent &event);
+   void OnCellValueChange(wxGridEvent &event);
 
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
