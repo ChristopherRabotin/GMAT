@@ -25,7 +25,7 @@
 #include "AngleUtil.hpp"               // for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 
-#define DEBUG_STOPCOND 0
+//#define DEBUG_STOPCOND 1
 
 //---------------------------------
 // public methods
@@ -280,14 +280,15 @@ GmatBase* StopCondition::Clone(void) const
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
 {
-   static int count = 0;
-   count++;
-
-   if (count > 100)
-   {
-      count = 0;
-      return true;
-   }
+   //loj: 11/4/04 commented out
+   //static int count = 0;
+   //count++;
+   //
+   //if (count > 100)
+   //{
+   //   count = 0;
+   //   return true;
+   //}
    
    bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
