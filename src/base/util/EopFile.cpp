@@ -227,6 +227,8 @@ void EopFile::Initialize()
 //---------------------------------------------------------------------------
 Real EopFile::GetUt1UtcOffset(const Real utcMjd)
 {
+   if (!isInitialized)  Initialize();
+   
    Integer i = 0;
    Real    utcJD = utcMjd + GmatTimeUtil::JD_NOV_17_1858;
    for (i = (tableSz - 1); i >= 0; i--)
@@ -283,6 +285,8 @@ Rmatrix EopFile::GetPolarMotionData()
 bool EopFile::GetPolarMotionAndLod(Real forUtcMjd, Real &xval, Real  &yval,
                                    Real &lodval)
 {
+   if (!isInitialized)  Initialize();
+   
    Integer i = 0;
    Real    utcJD = forUtcMjd + GmatTimeUtil::JD_NOV_17_1858;
    // if it's before the time on the file, return the first values
