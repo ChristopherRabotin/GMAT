@@ -221,6 +221,18 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
 }
 
 
+Integer DragForce::GetIntegerParameter(const Integer id) const
+{
+    return PhysicalModel::GetIntegerParameter(id);
+}
+
+
+Integer DragForce::SetIntegerParameter(const Integer id, const Real value)
+{
+    return PhysicalModel::SetIntegerParameter(id, value);
+}
+
+
 Real DragForce::GetRealParameter(const Integer id) const
 {
     return PhysicalModel::GetRealParameter(id);

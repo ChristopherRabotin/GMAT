@@ -45,6 +45,8 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
     
+    virtual Integer     GetIntegerParameter(const Integer id) const;
+    virtual Integer     SetIntegerParameter(const Integer id, const Real value);    
     virtual Real        GetRealParameter(const Integer id) const;
     virtual Real        SetRealParameter(const Integer id, const Real value);    
 
