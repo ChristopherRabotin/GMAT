@@ -16,9 +16,9 @@
 
 #include "Function.hpp"
 #include "Parameter.hpp"
-#include "ParameterMultiSelectDialog.hpp"
+#include "ParameterSelectDialog.hpp"
 
-#define DEBUG_PROPCMD_PANEL 0
+//#define DEBUG_PROPCMD_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -308,12 +308,15 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, inputStrings, true, true);
+      //loj: 2/7/05 Changed to use ParameterSelectDialog()
+      //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, true);
+      ParameterSelectDialog paramDlg(this, true, true, true);
+      paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
-
-      inputStrings = paramDlg.GetParamNames();
+      
+      inputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
-
+      
       if (inputStrings.Count() > 0)
       {
          cellValue = cellValue + inputStrings[0];
@@ -332,12 +335,15 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
+      //loj: 2/7/05 Changed to use ParameterSelectDialog()
+      //ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
+      ParameterSelectDialog paramDlg(this, true, false, true);
+      paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
-
-      outputStrings = paramDlg.GetParamNames();
+      
+      outputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
-
+      
       if (outputStrings.Count() > 0)
       {
          cellValue = cellValue + outputStrings[0];

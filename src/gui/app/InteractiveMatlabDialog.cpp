@@ -15,7 +15,7 @@
 //------------------------------------------------------------------------------
 
 #include "InteractiveMatlabDialog.hpp"
-#include "ParameterMultiSelectDialog.hpp"
+#include "ParameterSelectDialog.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
@@ -255,10 +255,13 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, inputStrings, true, false);
+      //loj: 2/7/05 Changed to use ParameterSelectDialog()
+      //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, false);
+      ParameterSelectDialog paramDlg(this, true, false, true);
+      paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
-
-      inputStrings = paramDlg.GetParamNames();
+      
+      inputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
 
       if (inputStrings.Count() > 0)
@@ -277,10 +280,13 @@ void InteractiveMatlabDialog::OnCellClick(wxGridEvent& event)
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
+      //loj: 2/7/05 Changed to use ParameterSelectDialog()
+      //ParameterMultiSelectDialog paramDlg(this, outputStrings, true, false);
+      ParameterSelectDialog paramDlg(this, true, false, true);
+      paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
 
-      outputStrings = paramDlg.GetParamNames();
+      outputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
 
       if (outputStrings.Count() > 0)
