@@ -134,6 +134,10 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 
    // register parameter names with info
    ParameterInfo::Instance()->Add(name, depObj);
+
+   // set parameter count
+   parameterCount = ParameterParamCount;
+
 }
 
 //------------------------------------------------------------------------------
@@ -153,10 +157,13 @@ Parameter::Parameter(const Parameter &copy)
    mDesc = copy.mDesc;
    mUnit = copy.mUnit;
    mDepObjectName = copy.mDepObjectName;
+   mOwnerType = copy.mOwnerType;
+   mColor = copy.mColor;
    mIsTimeParam = copy.mIsTimeParam;
+   mIsPlottable = copy.mIsPlottable;
    mIsCoordSysDependent = copy.mIsCoordSysDependent;
    mIsOriginDependent = copy.mIsOriginDependent;
-   mIsPlottable = copy.mIsPlottable;
+   mNeedCoordSystem = copy.mNeedCoordSystem;
 }
 
 //------------------------------------------------------------------------------
@@ -180,10 +187,13 @@ Parameter& Parameter::operator= (const Parameter& right)
       mDesc = right.mDesc;
       mUnit = right.mUnit;
       mDepObjectName = right.mDepObjectName;
+      mOwnerType = right.mOwnerType;
+      mColor = right.mColor;
       mIsTimeParam = right.mIsTimeParam;
+      mIsPlottable = right.mIsPlottable;
       mIsCoordSysDependent = right.mIsCoordSysDependent;
       mIsOriginDependent = right.mIsOriginDependent;
-      mIsPlottable = right.mIsPlottable;
+      mNeedCoordSystem = right.mNeedCoordSystem;
    }
 
    return *this;
@@ -598,10 +608,10 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 UnsignedInt Parameter::GetUnsignedIntParameter(const Integer id) const
 {
-#ifdef DEBUG_PARAMETER
+   #ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::GetUnsignedIntParameter() "
                                  "id=%d\n", id);
-#endif
+   #endif
    
    switch (id)
    {
@@ -626,10 +636,10 @@ UnsignedInt Parameter::GetUnsignedIntParameter(const std::string &label) const
 UnsignedInt Parameter::SetUnsignedIntParameter(const Integer id,
                                                const UnsignedInt value)
 {
-#ifdef DEBUG_PARAMETER
+   #ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetUnsignedIntParameter() "
                                  "id=%d value=%d\n", id, value);
-#endif
+   #endif
    switch (id)
    {
    case COLOR: 
@@ -693,10 +703,10 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
-#ifdef DEBUG_PARAMETER
+   #ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetStringParameter() id=%d, value=%s\n",
                                  id, value.c_str());
-#endif
+   #endif
    
    switch (id)
    {
@@ -730,10 +740,10 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 bool Parameter::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-#ifdef DEBUG_PARAMETER
+   #ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetStringParameter() label=%s value=%s\n",
                                  label.c_str(), value.c_str());
-#endif
+   #endif
    
    return SetStringParameter(GetParameterID(label), value);
 }
