@@ -269,7 +269,8 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
          relativePosition[2+i6]*relativePosition[2+i6];
        radius = sqrt(r3);
        r3 *= radius;
-       mu_r = - mu / r3;
+       //mu_r = - mu / r3;  waw: 05/06/04
+       mu_r = mu / r3;
 
        if (order == 1) 
        {
@@ -425,12 +426,14 @@ void PointMassForce::SetBody(CelestialBody *body)
     {
         if (theBody != NULL)
         {
-            delete theBody;
+            //delete theBody;
+            theBody = NULL;
         }
     }
   
     theBody = body;
-    mu = theBody->GetGravitationalConstant();
+    if (theBody)
+       mu = theBody->GetGravitationalConstant();
 }
 
 //------------------------------------------------------------------------------
