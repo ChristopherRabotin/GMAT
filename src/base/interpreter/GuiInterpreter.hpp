@@ -34,7 +34,7 @@
 #include "Subscriber.hpp"
 #include "Burn.hpp"
 #include "Solver.hpp"
-
+#include "AtmosphereModel.hpp"
 #include "Interpreter.hpp"
 
 //class Moderator;
@@ -46,8 +46,6 @@ public:
    static GuiInterpreter* Instance();
    ~GuiInterpreter();
 
-   //loj: 6/2/04 temp code until Interpreter is updated
-   // inherited from Interpreter
    virtual bool Interpret(void) {return false;};
    virtual bool Build(void) {return false;};
 
@@ -55,8 +53,6 @@ public:
    void Initialize();
 
    //----- factory
-   //loj:Do we need this?
-   //StringArray GetListOfContainer();
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    GmatBase* GetConfiguredItem(const std::string &name);
 
@@ -74,8 +70,6 @@ public:
                                            const std::string &name);
    Formation* GuiInterpreter::GetFormation(const std::string &name);
    
-   //future build:GroundStation* CreateGroundStation(const std::string &name);
-   //future build:GroundStation* GetGroundStation(const std::string &name);
 
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -91,6 +85,12 @@ public:
    PhysicalModel* CreatePhysicalModel(const std::string &type,
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
+
+   // AtmosphereModel (loj: 9/14/04 - added)
+   AtmosphereModel* CreateAtmosphereModel(const std::string &type,
+                                          const std::string &name,
+                                          const std::string &body = "Earth");
+   AtmosphereModel* GetAtmosphereModel(const std::string &name);
 
    // Burn
    Burn* CreateBurn(const std::string &type, const std::string &name);
@@ -122,14 +122,14 @@ public:
    Integer SetPlanetaryFileTypesInUse(const StringArray &filetypes);
 
    // Potential field files
-   std::string GetPotentialFileName(const std::string &filetype); //loj: 5/21/04 added
+   std::string GetPotentialFileName(const std::string &filetype);
 
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
                                 const std::string &filename = "",
-                                bool createDefault = true); //loj: 6/21/04 added
+                                bool createDefault = true);
    Subscriber* GetSubscriber(const std::string &name);
 
    // StopCondition

@@ -29,6 +29,7 @@
 #include "Publisher.hpp"
 #include "FileManager.hpp"
 // core
+#include "AtmosphereModel.hpp"
 #include "Burn.hpp"
 #include "Command.hpp"
 #include "PhysicalModel.hpp"
@@ -46,6 +47,7 @@
 #include "Interpolator.hpp"
 #include "RefFrame.hpp"
 // factories
+#include "AtmosphereFactory.hpp"
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
@@ -88,7 +90,6 @@ public:
 
    //----- configuration
    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
-   //future build:GmatBase* GetConfiguredItem(Gmat::ObjectType type, const std::string &name);
    GmatBase* GetConfiguredItem(const std::string &name);
    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                              const std::string &newName);
@@ -96,11 +97,8 @@ public:
     
    // Spacecraft
    SpaceObject* CreateSpacecraft(const std::string &type,
-                                const std::string &name);
+                                 const std::string &name);
    SpaceObject* GetSpacecraft(const std::string &name);
-   //future build:
-   //GroundStation* CreateGroundStation(const std::string &type, const std::string &name);
-   //GroundStation* GetGroundStation(const std::string &name);
 
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -112,6 +110,12 @@ public:
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
 
+   // AtmosphereModel (loj: 9/13/04 - added)
+   AtmosphereModel* CreateAtmosphereModel(const std::string &type,
+                                          const std::string &name,
+                                          const std::string &body = "Earth");
+   AtmosphereModel* GetAtmosphereModel(const std::string &name);
+   
    // Burn
    Burn* CreateBurn(const std::string &type,
                     const std::string &name);
@@ -175,7 +179,7 @@ public:
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "");
 
-    // SolarSystem
+   // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
    SolarSystem* CreateSolarSystem(const std::string &name);
    SolarSystem* GetSolarSystemInUse();
@@ -188,14 +192,14 @@ public:
    std::string GetPlanetaryFileName(const std::string &fileType);
    bool SetPlanetaryFileName(const std::string &fileType,
                              const std::string &fileName);
-   //loj: 6/14/04 changed bool to Integer
+
    Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); 
    Integer GetPlanetaryFileId(const std::string &fileType);
     
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
 
-  // Mission
+   // Mission
    bool LoadDefaultMission();
     
    // Resource
@@ -293,7 +297,8 @@ private:
    StopConditionFactory *theStopConditionFactory;
    SubscriberFactory *theSubscriberFactory;
    SolverFactory *theSolverFactory;
-    
+   AtmosphereFactory *theAtmosphereFactory; //loj: 9/14/04 - added
+   
    SolarSystem *theDefaultSolarSystem;
    SlpFile *theDefaultSlpFile;
    DeFile *theDefaultDeFile;

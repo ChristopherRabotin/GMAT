@@ -68,16 +68,6 @@ void GuiInterpreter::Initialize()
 
 //----- factory
 
-//loj:Do we need this?
-//------------------------------------------------------------------------------
-// StringArray GetListOfContainer()
-//------------------------------------------------------------------------------
-//  StringArray GuiInterpreter::GetListOfContainer()
-//  {
-//     //loj: such as: "PropSetup", "SolarSystem" Do we need this?
-//     return moderator->GetListOfContainer();
-//  }
-
 //------------------------------------------------------------------------------
 // StringArray GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -351,7 +341,46 @@ PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
    return moderator->GetPhysicalModel(name);
 }
 
-// burn
+// AtmosphereModel
+//------------------------------------------------------------------------------
+// AtmosphereModel* CreateAtmosphereModel(const std::string &type,
+//                                        const std::string &body,
+//                                        const std::string &name = "Earth")
+//------------------------------------------------------------------------------
+/**
+ * Creates an atmosphere model object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ * @param <body> the body for which the atmosphere model is requested
+ *
+ * @return an AtmosphereModel object pointer
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* GuiInterpreter::CreateAtmosphereModel(const std::string &type,
+                                                       const std::string &name,
+                                                       const std::string &body)
+{
+   return moderator->CreateAtmosphereModel(type, name, body);
+}
+
+//------------------------------------------------------------------------------
+// AtmosphereModel* GetAtmosphereModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an atmosphere model object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return an AtmosphereModel pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* GuiInterpreter::GetAtmosphereModel(const std::string &name)
+{
+   return moderator->GetAtmosphereModel(name);
+}
+
+// Burn
 //------------------------------------------------------------------------------
 // Burn* CreateBurn(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -361,7 +390,7 @@ PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
  * @param <type> object type
  * @param <name> object name
  *
- * @return a burn object pointer
+ * @return a Burn object pointer
  */
 //------------------------------------------------------------------------------
 Burn* GuiInterpreter::CreateBurn(const std::string &type,
@@ -378,7 +407,7 @@ Burn* GuiInterpreter::CreateBurn(const std::string &type,
  *
  * @param <name> object name
  *
- * @return a burn pointer, return null if name not found
+ * @return a Burn pointer, return null if name not found
  */
 //------------------------------------------------------------------------------
 Burn* GuiInterpreter::GetBurn(const std::string &name)
@@ -396,7 +425,7 @@ Burn* GuiInterpreter::GetBurn(const std::string &name)
  * @param <type> object type
  * @param <name> object name
  *
- * @return a solver object pointer
+ * @return a Solver object pointer
  */
 //------------------------------------------------------------------------------
 Solver* GuiInterpreter::CreateSolver(const std::string &type,
@@ -413,7 +442,7 @@ Solver* GuiInterpreter::CreateSolver(const std::string &type,
  *
  * @param <name> object name
  *
- * @return a solver pointer, return null if name not found
+ * @return a Solver pointer, return null if name not found
  */
 //------------------------------------------------------------------------------
 Solver* GuiInterpreter::GetSolver(const std::string &name)
@@ -492,7 +521,7 @@ CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
    return moderator->GetCelestialBody(name);
 }
 
-// solar system
+// SolarSystem
 //------------------------------------------------------------------------------
 // SolarSystem* GetDefaultSolarSystem()
 //------------------------------------------------------------------------------

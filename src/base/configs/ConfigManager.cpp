@@ -30,10 +30,10 @@ ConfigManager* ConfigManager::theConfigManager = NULL;
 //------------------------------------------------------------------------------
 ConfigManager* ConfigManager::Instance(void)
 {
-    if (!theConfigManager)
-        theConfigManager = new ConfigManager;
+   if (!theConfigManager)
+      theConfigManager = new ConfigManager;
         
-    return theConfigManager;
+   return theConfigManager;
 }
 
 
@@ -43,7 +43,7 @@ ConfigManager* ConfigManager::Instance(void)
 //------------------------------------------------------------------------------
 ConfigManager::ConfigManager()
 {
-    // insert your code here
+   // insert your code here
 }
 
 // class destructor
@@ -52,8 +52,7 @@ ConfigManager::ConfigManager()
 //------------------------------------------------------------------------------
 ConfigManager::~ConfigManager()
 {
-    //loj: 3/24/04 added
-    RemoveAllItems();
+   RemoveAllItems();
 }
 
 //------------------------------------------------------------------------------
@@ -61,18 +60,18 @@ ConfigManager::~ConfigManager()
 //------------------------------------------------------------------------------
 void ConfigManager::AddForceModel(ForceModel *fm)
 {
-    std::string name = fm->GetName();
+   std::string name = fm->GetName();
 
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(fm);
-        mapping[name] = fm;
-    }
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(fm);
+      mapping[name] = fm;
+   }
 }
 
 
@@ -81,18 +80,17 @@ void ConfigManager::AddForceModel(ForceModel *fm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSubscriber(Subscriber *subs)
 {
-//    throw ConfigManagerException("Subscribers cannot be managed yet");
-    std::string name = subs->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(subs);
-        mapping[name] = subs;
-    }
+   std::string name = subs->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(subs);
+      mapping[name] = subs;
+   }
 }
 
 
@@ -101,7 +99,7 @@ void ConfigManager::AddSubscriber(Subscriber *subs)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSolarSystem(SolarSystem *solarSys)
 {
-    throw ConfigManagerException("SolarSystem objects not managed in build 1");
+   throw ConfigManagerException("SolarSystem objects not managed in build 1");
 }
 
 
@@ -110,17 +108,17 @@ void ConfigManager::AddSolarSystem(SolarSystem *solarSys)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPropSetup(PropSetup* propSetup)
 {
-    std::string name = propSetup->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(propSetup);
-        mapping[name] = propSetup;
-    }
+   std::string name = propSetup->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(propSetup);
+      mapping[name] = propSetup;
+   }
 }
 
 
@@ -129,17 +127,17 @@ void ConfigManager::AddPropSetup(PropSetup* propSetup)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSpacecraft(SpaceObject *sc)
 {
-    std::string name = sc->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(sc);
-        mapping[name] = sc;
-    }
+   std::string name = sc->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(sc);
+      mapping[name] = sc;
+   }
 }
 
 
@@ -148,17 +146,17 @@ void ConfigManager::AddSpacecraft(SpaceObject *sc)
 //------------------------------------------------------------------------------
 void ConfigManager::AddStopCondition(StopCondition* stopCond)
 {
-    std::string name = stopCond->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(stopCond);
-        mapping[name] = stopCond;
-    }
+   std::string name = stopCond->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(stopCond);
+      mapping[name] = stopCond;
+   }
 }
 
 
@@ -167,17 +165,17 @@ void ConfigManager::AddStopCondition(StopCondition* stopCond)
 //------------------------------------------------------------------------------
 void ConfigManager::AddParameter(Parameter* parameter)
 {
-    std::string name = parameter->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(parameter);
-        mapping[name] = parameter;
-    }
+   std::string name = parameter->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(parameter);
+      mapping[name] = parameter;
+   }
 }
 
 
@@ -186,61 +184,83 @@ void ConfigManager::AddParameter(Parameter* parameter)
 //------------------------------------------------------------------------------
 void ConfigManager::AddBurn(Burn* burn)
 {
-    std::string name = burn->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(burn);
-        mapping[name] = burn;
-    }
+   std::string name = burn->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(burn);
+      mapping[name] = burn;
+   }
 }
-
 
 //------------------------------------------------------------------------------
 // void AddSolver(Solver* solver)
 //------------------------------------------------------------------------------
 void ConfigManager::AddSolver(Solver* solver)
 {
-    std::string name = solver->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(solver);
-        mapping[name] = solver;
-    }
+   std::string name = solver->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(solver);
+      mapping[name] = solver;
+   }
 }
 
+//loj: 9/14/04 - added
+//------------------------------------------------------------------------------
+// void AddAtmosphereModel(AtmosphereModel* atmosModel)
+//------------------------------------------------------------------------------
+void ConfigManager::AddAtmosphereModel(AtmosphereModel* atmosModel)
+{
+   std::string name = atmosModel->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   
+   if (mapping.find(name) != mapping.end())
+   {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else
+   {
+      objects.push_back(atmosModel);
+      mapping[name] = atmosModel;
+   }
+}
 
 //------------------------------------------------------------------------------
 // bool SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 {
-    return false;
+   return false;
 }
 
-//loj: 2/13/04 added
 //------------------------------------------------------------------------------
 // StringArray& GetListOfAllItems()
 //------------------------------------------------------------------------------
 StringArray& ConfigManager::GetListOfAllItems()
 {
-    listOfItems.erase(listOfItems.begin(), listOfItems.end());
+   listOfItems.erase(listOfItems.begin(), listOfItems.end());
     
-    std::vector<GmatBase*>::iterator current = (std::vector<GmatBase*>::iterator)(objects.begin());
-    while (current != (std::vector<GmatBase*>::iterator)(objects.end())) {
-        listOfItems.push_back((*current)->GetName());
-        ++current;
-    }
-    return listOfItems;
+   std::vector<GmatBase*>::iterator current =
+      (std::vector<GmatBase*>::iterator)(objects.begin());
+   
+   while (current != (std::vector<GmatBase*>::iterator)(objects.end()))
+   {
+      listOfItems.push_back((*current)->GetName());
+      ++current;
+   }
+   return listOfItems;
 }
 
 
@@ -249,15 +269,17 @@ StringArray& ConfigManager::GetListOfAllItems()
 //------------------------------------------------------------------------------
 StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 {
-    listOfItems.erase(listOfItems.begin(), listOfItems.end());
+   listOfItems.erase(listOfItems.begin(), listOfItems.end());
     
-    std::vector<GmatBase*>::iterator current = (std::vector<GmatBase*>::iterator)(objects.begin());
-    while (current != (std::vector<GmatBase*>::iterator)(objects.end())) {
-        if ((*current)->GetType() == itemType)
-            listOfItems.push_back((*current)->GetName());
-        ++current;
-    }
-    return listOfItems;
+   std::vector<GmatBase*>::iterator current =
+      (std::vector<GmatBase*>::iterator)(objects.begin());
+   while (current != (std::vector<GmatBase*>::iterator)(objects.end()))
+   {
+      if ((*current)->GetType() == itemType)
+         listOfItems.push_back((*current)->GetName());
+      ++current;
+   }
+   return listOfItems;
 }
 
 
@@ -266,17 +288,17 @@ StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 //------------------------------------------------------------------------------
 GmatBase* ConfigManager::GetItem(const std::string &name)
 {   
-    GmatBase *obj = NULL;
+   GmatBase *obj = NULL;
     
-    if (mapping.find(name) != mapping.end())
-    {
-        if (mapping[name]->GetName() == name)
-        {
-            obj = mapping[name];
-        }
-    }
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->GetName() == name)
+      {
+         obj = mapping[name];
+      }
+   }
     
-    return obj;
+   return obj;
 }
 
 //------------------------------------------------------------------------------
@@ -287,21 +309,21 @@ bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
                                const std::string &oldName,
                                const std::string &newName)
 {
-    bool status = false;
+   bool status = false;
     
-    if (mapping.find(oldName) != mapping.end())
-    {
-        GmatBase *obj = mapping[oldName];
-        if (obj->GetType() == itemType)
-        {
-            mapping.erase(oldName);
-            mapping[newName] = obj;
-            obj->SetName(newName);
-            status = true;
-        }
-    }
+   if (mapping.find(oldName) != mapping.end())
+   {
+      GmatBase *obj = mapping[oldName];
+      if (obj->GetType() == itemType)
+      {
+         mapping.erase(oldName);
+         mapping[newName] = obj;
+         obj->SetName(newName);
+         status = true;
+      }
+   }
     
-    return status;
+   return status;
 }
 
 
@@ -310,62 +332,59 @@ bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
 //------------------------------------------------------------------------------
 bool ConfigManager::RemoveAllItems()
 {
-    // delete objects
+   // delete objects
 
-    //loj: 3/10/04 added
-    for (unsigned int i=0; i<objects.size(); i++)
-    {
-        delete objects[i];
-        objects[i] = NULL;
-    }
+   for (unsigned int i=0; i<objects.size(); i++)
+   {
+      delete objects[i];
+      objects[i] = NULL;
+   }
     
-    objects.clear();
-    mapping.clear();
+   objects.clear();
+   mapping.clear();
 
-    return true;
+   return true;
 }
 
-//loj: 2/13/04 added
 //------------------------------------------------------------------------------
 // bool RemoveItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 {
-    bool status = false;
+   bool status = false;
 
-    // remove from objects
-    std::vector<GmatBase*>::iterator currentIter =
-        (std::vector<GmatBase*>::iterator)(objects.begin());
+   // remove from objects
+   std::vector<GmatBase*>::iterator currentIter =
+      (std::vector<GmatBase*>::iterator)(objects.begin());
     
-    while (currentIter != (std::vector<GmatBase*>::iterator)(objects.end()))
-    {
-        if ((*currentIter)->GetType() == type)
-        {
-            if ((*currentIter)->GetName() == name)
-            {
-                objects.erase(currentIter);
-                break;
-            }
-        }
-        ++currentIter;
-    }
+   while (currentIter != (std::vector<GmatBase*>::iterator)(objects.end()))
+   {
+      if ((*currentIter)->GetType() == type)
+      {
+         if ((*currentIter)->GetName() == name)
+         {
+            objects.erase(currentIter);
+            break;
+         }
+      }
+      ++currentIter;
+   }
     
-    // remove from mapping
-    if (mapping.find(name) != mapping.end())
-    {
-        GmatBase *obj = mapping[name];
-        if (obj->GetType() == type)
-        {
-            mapping.erase(name);
+   // remove from mapping
+   if (mapping.find(name) != mapping.end())
+   {
+      GmatBase *obj = mapping[name];
+      if (obj->GetType() == type)
+      {
+         mapping.erase(name);
             
-            // delete object loj:3/10/04 added
-            delete obj;
+         delete obj;
             
-            status = true;
-        }
-    }
+         status = true;
+      }
+   }
     
-    return status;
+   return status;
 }
 
 
@@ -374,17 +393,17 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* ConfigManager::GetForceModel(const std::string &name)
 {
-    ForceModel *fm = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::FORCE_MODEL) {
-            //std::string str = mapping[name]->GetName() +
-            //                  " is not a force model";
-            //throw ConfigManagerException(str);
-            return NULL;
-        }
-        fm = (ForceModel *)mapping[name];
-    }
-    return fm;
+   ForceModel *fm = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::FORCE_MODEL) {
+         //std::string str = mapping[name]->GetName() +
+         //                  " is not a force model";
+         //throw ConfigManagerException(str);
+         return NULL;
+      }
+      fm = (ForceModel *)mapping[name];
+   }
+   return fm;
 }
 
 
@@ -393,18 +412,18 @@ ForceModel* ConfigManager::GetForceModel(const std::string &name)
 //------------------------------------------------------------------------------
 SpaceObject* ConfigManager::GetSpacecraft(const std::string &name)
 {
-    SpaceObject *sc = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if ((mapping[name]->GetType() != Gmat::SPACECRAFT) &&
-            (mapping[name]->GetType() != Gmat::FORMATION)){
-            //std::string str = mapping[name]->GetName() +
-            //                  " is not a spacecraft";
-            //throw ConfigManagerException(str);
-            return NULL;
-        }
-        sc = (SpaceObject *)mapping[name];
-    }
-    return sc;
+   SpaceObject *sc = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if ((mapping[name]->GetType() != Gmat::SPACECRAFT) &&
+          (mapping[name]->GetType() != Gmat::FORMATION)){
+         //std::string str = mapping[name]->GetName() +
+         //                  " is not a spacecraft";
+         //throw ConfigManagerException(str);
+         return NULL;
+      }
+      sc = (SpaceObject *)mapping[name];
+   }
+   return sc;
 }
 
 
@@ -413,17 +432,17 @@ SpaceObject* ConfigManager::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* ConfigManager::GetPropSetup(const std::string &name)
 {
-    PropSetup *ps = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::PROP_SETUP) {
-            //std::string str = mapping[name]->GetName() +
-            //                  " is not a PropSetup";
-            //throw ConfigManagerException(str);
-            return NULL;
-        }
-        ps = (PropSetup *)mapping[name];
-    }
-    return ps;
+   PropSetup *ps = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PROP_SETUP) {
+         //std::string str = mapping[name]->GetName() +
+         //                  " is not a PropSetup";
+         //throw ConfigManagerException(str);
+         return NULL;
+      }
+      ps = (PropSetup *)mapping[name];
+   }
+   return ps;
 }
 
 
@@ -432,17 +451,17 @@ PropSetup* ConfigManager::GetPropSetup(const std::string &name)
 //------------------------------------------------------------------------------
 Subscriber* ConfigManager::GetSubscriber(const std::string &name)
 {
-    Subscriber *sub = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::SUBSCRIBER) {
-            //std::string str = mapping[name]->GetName() +
-            //                  " is not a PropSetup";
-            //throw ConfigManagerException(str);
-            return NULL;
-        }
-        sub = (Subscriber *)mapping[name];
-    }
-    return sub;
+   Subscriber *sub = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::SUBSCRIBER) {
+         //std::string str = mapping[name]->GetName() +
+         //                  " is not a PropSetup";
+         //throw ConfigManagerException(str);
+         return NULL;
+      }
+      sub = (Subscriber *)mapping[name];
+   }
+   return sub;
 }
 
 
@@ -451,7 +470,9 @@ Subscriber* ConfigManager::GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* ConfigManager::GetDefaultSolarSystem()
 {
-    return NULL;
+   throw ConfigManagerException
+      ("ConfigManager::GetDefaultSolarSystem() has not been implemented.\n");
+   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
 
 
@@ -460,7 +481,9 @@ SolarSystem* ConfigManager::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 SolarSystem* ConfigManager::GetSolarSystemInUse()
 {
-    return NULL;
+   throw ConfigManagerException
+      ("ConfigManager::GetSolarSystemInUse() has not been implemented.\n");
+   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
 
 
@@ -469,156 +492,202 @@ SolarSystem* ConfigManager::GetSolarSystemInUse()
 //------------------------------------------------------------------------------
 StopCondition* ConfigManager::GetStopCondition(const std::string &name)
 {
-    StopCondition *sc = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::STOP_CONDITION) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a spacecraft";
-            throw ConfigManagerException(str);
-        }
-        sc = (StopCondition *)mapping[name];
-    }
-    return sc;
+   StopCondition *sc = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::STOP_CONDITION) {
+         std::string str = mapping[name]->GetName() +
+            " is not a spacecraft";
+         throw ConfigManagerException(str);
+      }
+      sc = (StopCondition *)mapping[name];
+   }
+   return sc;
 }
 
 
-// Methods I'm not sure we need
-void ConfigManager::AddCelestialBody(CelestialBody* body)
-{
-}
-
-//loj: 3/3/04 added implementation
 //------------------------------------------------------------------------------
 // void AddPhysicalModel(PhysicalModel *pm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPhysicalModel(PhysicalModel *pm)
 {
-    std::string name = pm->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(pm);
-        mapping[name] = pm;
-    }
+   std::string name = pm->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(pm);
+      mapping[name] = pm;
+   }
 }
 
-//loj: 2/13/04 added implementation
 //------------------------------------------------------------------------------
 // void ConfigManager::AddPropagator(Propagator *prop)
 //------------------------------------------------------------------------------
 void ConfigManager::AddPropagator(Propagator *prop)
 {
-    std::string name = prop->GetName();
-    if (name == "")
-        throw ConfigManagerException("Unnamed objects cannot be managed");
-    if (mapping.find(name) != mapping.end()) {
-        name += " is already in the configuration table";
-        throw ConfigManagerException(name);
-    }
-    else {
-        objects.push_back(prop);
-        mapping[name] = prop;
-    }
+   std::string name = prop->GetName();
+   if (name == "")
+      throw ConfigManagerException("Unnamed objects cannot be managed");
+   if (mapping.find(name) != mapping.end()) {
+      name += " is already in the configuration table";
+      throw ConfigManagerException(name);
+   }
+   else {
+      objects.push_back(prop);
+      mapping[name] = prop;
+   }
 }
 
 
-CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
-{
-    return NULL;
-}
-
-
-//loj: 3/3/04 added implementation
 //------------------------------------------------------------------------------
 // PhysicalModel* GetPhysicalModel(const std::string &name)
 //------------------------------------------------------------------------------
 PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
 {
-    PhysicalModel *physicalModel = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a PhysicalModel";
-            throw ConfigManagerException(str);
-        }
-        physicalModel = (PhysicalModel *)mapping[name];
-    }
-    return physicalModel;
+   PhysicalModel *physicalModel = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
+         std::string str = mapping[name]->GetName() +
+            " is not a PhysicalModel";
+         throw ConfigManagerException(str);
+      }
+      physicalModel = (PhysicalModel *)mapping[name];
+   }
+   return physicalModel;
 }
 
-//loj: 3/3/04 added implementation
 //------------------------------------------------------------------------------
 // Propagator* GetPropagator(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* ConfigManager::GetPropagator(const std::string &name)
 {
-    Propagator *prop = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::PROPAGATOR) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a Propagator";
-            throw ConfigManagerException(str);
-        }
-        prop = (Propagator *)mapping[name];
-    }
-    return prop;
+   Propagator *prop = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PROPAGATOR) {
+         std::string str = mapping[name]->GetName() +
+            " is not a Propagator";
+         throw ConfigManagerException(str);
+      }
+      prop = (Propagator *)mapping[name];
+   }
+   return prop;
 }
 
 
-void ConfigManager::AddCommand(GmatCommand *cmd)
-{
-}
-
-
-GmatCommand* ConfigManager::GetCommand(const std::string name)
-{
-    return NULL;
-}
-
-
+//------------------------------------------------------------------------------
+// Parameter* GetParameter(const std::string &name)
+//------------------------------------------------------------------------------
 Parameter* ConfigManager::GetParameter(const std::string &name)
 {
-    Parameter *param = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::PARAMETER) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a spacecraft";
-            throw ConfigManagerException(str);
-        }
-        param = (Parameter *)mapping[name];
-    }
-    return param;
+   Parameter *param = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::PARAMETER) {
+         std::string str = mapping[name]->GetName() +
+            " is not a spacecraft";
+         throw ConfigManagerException(str);
+      }
+      param = (Parameter *)mapping[name];
+   }
+   return param;
 }
 
+//------------------------------------------------------------------------------
+// Burn* GetBurn(const std::string &name)
+//------------------------------------------------------------------------------
 Burn* ConfigManager::GetBurn(const std::string &name)
 {
-    Burn *burn = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::BURN) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a burn";
-            throw ConfigManagerException(str);
-        }
-        burn = (Burn *)mapping[name];
-    }
-    return burn;
+   Burn *burn = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::BURN) {
+         std::string str = mapping[name]->GetName() +
+            " is not a burn";
+         throw ConfigManagerException(str);
+      }
+      burn = (Burn *)mapping[name];
+   }
+   return burn;
 }
 
+//------------------------------------------------------------------------------
+// Solver* GetSolver(const std::string &name)
+//------------------------------------------------------------------------------
 Solver* ConfigManager::GetSolver(const std::string &name)
 {
-    Solver *solver = NULL;
-    if (mapping.find(name) != mapping.end()) {
-        if (mapping[name]->GetType() != Gmat::SOLVER) {
-            std::string str = mapping[name]->GetName() +
-                              " is not a solver";
-            throw ConfigManagerException(str);
-        }
-        solver = (Solver *)mapping[name];
-    }
-    return solver;
+   Solver *solver = NULL;
+   if (mapping.find(name) != mapping.end()) {
+      if (mapping[name]->GetType() != Gmat::SOLVER) {
+         std::string str = mapping[name]->GetName() +
+            " is not a solver";
+         throw ConfigManagerException(str);
+      }
+      solver = (Solver *)mapping[name];
+   }
+   return solver;
 }
 
+//loj: 9/14/04 - added
+//------------------------------------------------------------------------------
+// AtmosphereModel* GetAtmosphereModel(const std::string &name)
+//------------------------------------------------------------------------------
+AtmosphereModel* ConfigManager::GetAtmosphereModel(const std::string &name)
+{
+   AtmosphereModel *atmosModel = NULL;
+   if (mapping.find(name) != mapping.end())
+   {
+      if (mapping[name]->GetType() != Gmat::ATMOSPHERE)
+      {
+         std::string str = mapping[name]->GetName() +
+            " is not an atmosphere model";
+         throw ConfigManagerException(str);
+      }
+      atmosModel = (AtmosphereModel *)mapping[name];
+   }
+   return atmosModel;
+}
+
+//=================================
+// Methods I'm not sure we need
+//=================================
+
+//------------------------------------------------------------------------------
+// void AddCelestialBody(CelestialBody* body)
+//------------------------------------------------------------------------------
+void ConfigManager::AddCelestialBody(CelestialBody* body)
+{
+   //loj: 9/14/04 - throw an exception
+   throw ConfigManagerException
+      ("ConfigManager::AddCelestialBody() has not been implemented.\n");
+}
+
+//------------------------------------------------------------------------------
+// void AddCommand(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+void ConfigManager::AddCommand(GmatCommand *cmd)
+{
+   //loj: 9/14/04 - throw an exception
+   throw ConfigManagerException
+      ("ConfigManager::AddCommand() has not been implemented.\n");
+}
+
+//------------------------------------------------------------------------------
+// CelestialBody* GetCelestialBody(const std::string &name)
+//------------------------------------------------------------------------------
+CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
+{
+   throw ConfigManagerException
+      ("ConfigManager::GetCelestialBody() has not been implemented.\n");
+   //return NULL; //loj: 9/14/04 - throw an exception instead
+}
+
+//------------------------------------------------------------------------------
+// GmatCommand* GetCommand(const std::string name)
+//------------------------------------------------------------------------------
+GmatCommand* ConfigManager::GetCommand(const std::string name)
+{
+   throw ConfigManagerException
+      ("ConfigManager::GetCommand() has not been implemented.\n");
+   //return NULL; //loj: 9/14/04 - throw an exception instead
+}

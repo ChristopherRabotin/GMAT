@@ -94,6 +94,7 @@ bool Moderator::Initialize(bool fromGui)
          thePublisher = Publisher::Instance();
         
          // Create factories
+         theAtmosphereFactory = new AtmosphereFactory(); //loj: 9/14/04 - added
          theBurnFactory = new BurnFactory();
          theCommandFactory = new CommandFactory();
          theForceModelFactory = new ForceModelFactory();
@@ -107,6 +108,7 @@ bool Moderator::Initialize(bool fromGui)
          theSolverFactory = new SolverFactory();
 
          // Register factories
+         theFactoryManager->RegisterFactory(theAtmosphereFactory);
          theFactoryManager->RegisterFactory(theBurnFactory);
          theFactoryManager->RegisterFactory(theCommandFactory);
          theFactoryManager->RegisterFactory(theForceModelFactory);
@@ -321,7 +323,7 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
 
 // Spacecraft
 //------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name)
+// SpaceObject* CreateSpacecraft(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a spacecraft object by given name.
@@ -542,7 +544,90 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
       return theConfigManager->GetPhysicalModel(name);
 }
 
-// burn
+// AtmosphereModel
+//------------------------------------------------------------------------------
+// AtmosphereModel* CreateAtmosphereModel(const std::string &type,
+//                                        const std::string &name,
+//                                        const std::string &body = "Earth")
+//------------------------------------------------------------------------------
+/**
+ * Creates an atmosphere model object by given type and name and add to configuration.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ * @param <body> the body for which the atmosphere model is requested
+ *
+ * @return a atmosphereModel object pointer
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
+                                                  const std::string &name,
+                                                  const std::string &body)
+{
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+      ("Moderator::CreateAtmosphereModel() entered: type = " +
+       type + ", name = " + name + "\n");
+#endif
+
+   // if AtmosphereModel name doesn't exist, create AtmosphereModel
+   if (GetAtmosphereModel(name) == NULL)
+   {
+      AtmosphereModel *atmosphereModel =
+         theFactoryManager->CreateAtmosphereModel(type, body, name);
+
+      if (atmosphereModel ==  NULL)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::CreateAtmosphereModel() Error Creating "
+             "%s.  Check AtmosphereModelFactory. \n", type.c_str());
+
+         throw GmatBaseException("Error Creating AtmosphereModel");
+      }
+    
+      // Manage it if it is a named AtmosphereModel
+      try
+      {
+         if (atmosphereModel->GetName() != "")
+            theConfigManager->AddAtmosphereModel(atmosphereModel);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::ShowMessage
+            ("Moderator::CreateAtmosphereModel()\n" + e.GetMessage());
+      }
+    
+      return atmosphereModel;
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("Moderator::CreateAtmosphereModel() Unable to create AtmosphereModel "
+          "name: %s already exist\n", name.c_str());
+      return GetAtmosphereModel(name);
+   }
+}
+
+//------------------------------------------------------------------------------
+// AtmosphereModel* GetAtmosphereModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an atmosphere model object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a AtmosphereModel pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* Moderator::GetAtmosphereModel(const std::string &name)
+{
+   if (name == "")
+      return NULL;
+   else
+      return theConfigManager->GetAtmosphereModel(name);
+}
+
+// Burn
 //------------------------------------------------------------------------------
 // Burn* CreateBurn(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -776,24 +861,7 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
 
       throw GmatBaseException("Error Creating StopCondition");
    }
-
-   //-----------------------------------------------------------------
-   //Notes:
-   // Manage it if it is a named stopCondition.
-   // Need to manage because SetupRun() needs to set SolarSystem
-   // pointer for parameters used in stopping condition
-   //-----------------------------------------------------------------
-//     try
-//     {
-//        if (stopCond->GetName() != "")
-//           theConfigManager->AddStopCondition(stopCond);
-//     }
-//     catch (BaseException &e)
-//     {
-//        MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
-//                                      e.GetMessage());
-//     }
-    
+   
    return stopCond;
 }
 
@@ -1605,7 +1673,7 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
             if (thePlanetarySourcePriority[DE200] > 0)
                thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
          }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE405]) //loj: 7/1/04 fixed to DE405
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE405])
          {
             if (thePlanetarySourcePriority[DE405] > 0)
                thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
@@ -1834,18 +1902,22 @@ Integer Moderator::RunMission(Integer sandboxNum)
          AddSubscriberToSandbox(sandboxNum-1); 
          AddParameterToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
-         //MessageInterface::ShowMessage("Moderator::RunMission() after AddCommandToSandbox() \n");
+         //MessageInterface::ShowMessage
+         //   ("Moderator::RunMission() after AddCommandToSandbox() \n");
         
          InitializeSandbox(sandboxNum-1);
-         //MessageInterface::ShowMessage("Moderator::RunMission() after InitializeSanbox() \n");
+         //MessageInterface::ShowMessage
+         //   ("Moderator::RunMission() after InitializeSanbox() \n");
 
          SetupRun(sandboxNum);
-         //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
+         //MessageInterface::ShowMessage
+         //   ("Moderator::RunMission() after SetupRun() \n");
 
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          runState = Gmat::IDLE;
-         //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
+         //MessageInterface::ShowMessage
+         //   ("Moderator::RunMission() after ExecuteSandbox() \n");
       }
       catch (BaseException &e)
       {
@@ -1863,7 +1935,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
    }
    else
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
    }
 
    return status;
@@ -1973,8 +2046,9 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
-                                     "\n Check Type in the appropriate Factory or parameter text");
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, e.GetMessage() +
+          "\n Check Type in the appropriate Factory or parameter text");
       isRunReady = false;
    }
 
@@ -2472,8 +2546,6 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
-//     StringArray &configList =
-//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    StringArray &configList = GetListOfConfiguredItems(Gmat::SPACECRAFT);
    
    if (configList.size() > 0)
@@ -2497,8 +2569,6 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetDefaultPropSetup()
 {
-//     StringArray &configList =
-//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
    StringArray &configList = GetListOfConfiguredItems(Gmat::PROP_SETUP);
    
    if (configList.size() > 0)
@@ -2518,8 +2588,6 @@ PropSetup* Moderator::GetDefaultPropSetup()
 //------------------------------------------------------------------------------
 Burn* Moderator::GetDefaultBurn()
 {
-//     StringArray &configList =
-//        theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
    StringArray &configList = GetListOfConfiguredItems(Gmat::BURN);
    
    if (configList.size() > 0)
