@@ -29,7 +29,8 @@
 const std::string
 FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 {
-   "Thrusters"
+   "Thrusters",
+   "BurnScaleFactor"
 };
 
 /// Types of the parameters used by finite burns.
@@ -37,6 +38,7 @@ const Gmat::ParameterType
 FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
+   Gmat::REAL_TYPE,
 };
 
 
@@ -54,7 +56,8 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(std::string nomme) :
-   Burn        ("FiniteBurn", nomme)
+   Burn              ("FiniteBurn", nomme),
+   burnScaleFactor   (1.0)
 {
    parameterCount = FiniteBurnParamCount;
 }
@@ -82,8 +85,9 @@ FiniteBurn::~FiniteBurn()
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
-   Burn        (fb),
-   thrusters   (fb.thrusters)
+   Burn              (fb),
+   thrusters         (fb.thrusters),
+   burnScaleFactor   (fb.burnScaleFactor)
 {
    parameterCount = fb.parameterCount;
 }
@@ -107,6 +111,7 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
       
    Burn::operator=(fb);
    thrusters = fb.thrusters;
+   burnScaleFactor = fb.burnScaleFactor;
       
    return *this;
 }
@@ -239,6 +244,49 @@ const StringArray& FiniteBurn::GetStringArrayParameter(const Integer id) const
    return Burn::GetStringArrayParameter(id);
 }
 
+
+//---------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access the Real data associated with this burn.
+ * 
+ * @param id The integer ID for the parameter.
+ *
+ * @return The requested Real.
+ */
+//---------------------------------------------------------------------------
+Real FiniteBurn::GetRealParameter(const Integer id) const
+{
+   if (id == BURN_SCALE_FACTOR)
+      return burnScaleFactor;
+
+   return Burn::GetRealParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  Real setRealParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Change the Real data associated with this burn.
+ * 
+ * @param id Integer ID of the parameter.
+ * @param value New value for the parameter.
+ *
+ * @return The value of the parameter at the end of the call.
+ */
+//---------------------------------------------------------------------------
+Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == BURN_SCALE_FACTOR) {
+      if (value > 0.0)
+         burnScaleFactor = value;
+      return burnScaleFactor;
+   }
+
+   return Burn::SetRealParameter(id, value);
+}
 
 //------------------------------------------------------------------------------
 //  bool Fire(Real *burnData)

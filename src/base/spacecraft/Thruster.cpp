@@ -40,7 +40,8 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "K1",  "K2",  "K3",  "K4",  "K5",  "K6",  "K7", 
    "K8",  "K9", "K10", "K11", "K12", "K13", "K14", 
    "IsFiring",
-   "CoordinateSystem"
+   "CoordinateSystem",
+   "ThrustScaleFactor"
 };
 
 /// Types of the parameters used by thrusters.
@@ -58,6 +59,7 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::REAL_TYPE, Gmat::REAL_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
 };
 
 
@@ -75,6 +77,7 @@ Thruster::Thruster(std::string nomme) :
    coordinateName       ("MJ2000EarthEquator"),
    // theCoordinates       (NULL),
    thrusterFiring       (false),
+   thrustScaleFactor    (1.0),
    pressure             (1500.0),
    temperatureRatio     (1.0),
    thrust               (500.0),
@@ -132,6 +135,7 @@ Thruster::Thruster(const Thruster& th) :
    coordinateName       (th.coordinateName),
    // theCoordinates       (th.theCoordinates), // Assumes CS's are globally accessed
    thrusterFiring       (th.thrusterFiring),
+   thrustScaleFactor    (th.thrustScaleFactor),
    pressure             (th.pressure),
    temperatureRatio     (th.temperatureRatio),
    thrust               (th.thrust),
@@ -184,6 +188,7 @@ Thruster& Thruster::operator=(const Thruster& th)
 
    // theCoordinates = th.theCoordinates; // Assumes CS's are globally accessed
    thrusterFiring = th.thrusterFiring;
+   thrustScaleFactor = th.thrustScaleFactor;
    pressure = th.pressure;
    temperatureRatio = th.temperatureRatio;
    thrust = th.thrust;
@@ -391,6 +396,8 @@ Real Thruster::GetRealParameter(const Integer id) const
          return kCoefficients[12];
       case K14:
          return kCoefficients[13];
+      case THRUST_SCALE_FACTOR:
+         return thrustScaleFactor;
 
       default:
          break;   // Default just drops through
@@ -552,6 +559,10 @@ Real Thruster::SetRealParameter(const Integer id, const Real value)
          return kCoefficients[12] = value;
       case K14:
          return kCoefficients[13] = value;
+      case THRUST_SCALE_FACTOR:
+         if (value > 0.0)
+            thrustScaleFactor = value;
+         return thrustScaleFactor;
       default:
          break;   // Default just drops through
    }
@@ -805,7 +816,7 @@ bool Thruster::CalculateThrustAndIsp()
       }
    
       thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[12] + 
-                     pressure*cCoefficients[13]));
+                     pressure*cCoefficients[13])) * thrustScaleFactor;
       impulse *= pow(temperatureRatio, (1.0 + kCoefficients[12] + 
                      pressure*kCoefficients[13]));
    }
@@ -837,14 +848,14 @@ Real Thruster::CalculateMassFlow()
          if (impulse == 0.0)
             throw HardwareException("Thruster \"" + instanceName + 
                                     "\" has specific impulse == 0.0");
-         mDot = thrust / impulse;
+         mDot = (thrust/thrustScaleFactor) / impulse;
       }
    }
 
    #ifdef DEBUG_THRUSTER
       MessageInterface::ShowMessage(
-            "   Thrust = %15lf, Isp = %15lf, MassFlow = %15lf  %lf\n", thrust, 
-            impulse, mDot, thrust/impulse);
+            "   Thrust = %15lf, Isp = %15lf, MassFlow = %15lf T/Isp =  %lf\n", 
+            thrust, impulse, mDot, thrust/impulse);
    #endif
    
    return mDot;

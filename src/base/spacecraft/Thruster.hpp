@@ -84,8 +84,10 @@ protected:
    /// Array of specific impulse coefficients
    Real                       kCoefficients[14];
    
-   /// Flag used to turn thrusters on or off
+   /// Flag used to turn thruster on or off
    bool                       thrusterFiring;
+   /// Thrust scale factor for this thruster
+   Real                       thrustScaleFactor;
    /// Thrust direction projected into the specified coordinate system
    Real                       thrustDirection[3];
    /// Current tank pressure
@@ -113,6 +115,7 @@ protected:
       K8,    K9,   K10,   K11,   K12,   K13,   K14,
       THRUSTER_FIRING,
       COORDINATE_SYSTEM, 
+      THRUST_SCALE_FACTOR,
       ThrusterParamCount
    };
    

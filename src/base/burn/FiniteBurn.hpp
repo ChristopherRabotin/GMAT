@@ -44,6 +44,10 @@ public:
    virtual const StringArray&    
                            GetStringArrayParameter(const Integer id) const;
 
+   virtual Real            GetRealParameter(const Integer id) const;
+   virtual Real            SetRealParameter(const Integer id, const Real value);
+
+
    virtual bool            Fire(Real *burnData = NULL);
    
    GmatBase*               Clone() const;
@@ -51,11 +55,14 @@ public:
 protected:
    /// List of thrusters used in the maneuver
    StringArray             thrusters;
+   /// Overall thrust scale factor for this burn
+   Real                    burnScaleFactor;
 
    /// Published parameters for thrusters
    enum
    {
       THRUSTER = BurnParamCount,
+      BURN_SCALE_FACTOR,
       FiniteBurnParamCount
    };
    
