@@ -91,6 +91,8 @@ private:
     void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     
+//    void OnNewScript(wxCommandEvent& WXUNUSED(event));
+    
     void OnSashDrag(wxSashEvent& event);
     void OnSize(wxSizeEvent& event);
 
@@ -166,6 +168,11 @@ private:
         TOOL_SCRIPT,
         
         ID_SASH_WINDOW,
+        
+        FILE_OPEN_SCRIPT,
+        FILE_NEW_SCRIPT,
+        FILE_SAVE_SCRIPT,
+        FILE_SAVE_AS_SCRIPT,
     };
 };
 
