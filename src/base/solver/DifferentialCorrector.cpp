@@ -50,47 +50,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
 
 DifferentialCorrector::~DifferentialCorrector()
 {
-    if (variable)
-        delete [] variable;
-    
-    if (perturbation)
-        delete [] perturbation;
-            
-    if (variableMinimum)
-        delete [] variableMinimum;
-
-    if (variableMaximum)
-        delete [] variableMaximum;
-
-    if (variableMaximumStep)
-        delete [] variableMaximumStep;
-
-    if (goal)
-        delete [] goal;
-
-    if (tolerance)
-        delete [] tolerance;
-
-    if (nominal)
-        delete [] nominal;
-
-    if (achieved) {
-        for (Integer i = 0; i < goalCount; ++i)
-            delete [] achieved[i];
-        delete [] achieved;
-    }
-
-    if (jacobian) {
-        for (Integer i = 0; i < goalCount; ++i)
-            delete [] jacobian[i];
-        delete [] jacobian;
-    }
-
-    if (inverseJacobian) {
-        for (Integer i = 0; i < goalCount; ++i)
-            delete [] inverseJacobian[i];
-        delete [] inverseJacobian;
-    }
+    FreeArrays();
 }
 
 
@@ -211,6 +171,16 @@ bool DifferentialCorrector::SetStringParameter(const Integer id,
         return true;
     }
         
+    if (id == variableNamesID) {
+        variableNames.push_back(value);
+        return true;
+    }
+    
+    if (id == goalNamesID) {
+        goalNames.push_back(value);
+        return true;
+    }
+    
     return Solver::SetStringParameter(id, value);
 }
 
@@ -229,7 +199,115 @@ const StringArray& DifferentialCorrector::GetStringArrayParameter(const Integer 
 
 bool DifferentialCorrector::Initialize(void)
 {
+    // Setup the variable data structures
+    variableCount = variableNames.size();
+    goalCount = goalNames.size();
+    
+    if (goalCount > variableCount) {
+        std::string errorMessage = "Targeter cannot initialize: ";
+        errorMessage += "More goals than variables";
+        throw SolverException(errorMessage);
+    }
+    
+    FreeArrays();
+    
+    variable            = new Real[variableCount];
+    perturbation        = new Real[variableCount];
+    variableMinimum     = new Real[variableCount];
+    variableMaximum     = new Real[variableCount];
+    variableMaximumStep = new Real[variableCount];
+    
+    // Setup the goal data structures
+    goal      = new Real[goalCount];
+    tolerance = new Real[goalCount];
+    nominal   = new Real[goalCount];
+    
+    // And the sensitivity matrix
+    Integer i;
+    achieved        = new Real*[goalCount];
+    jacobian        = new Real*[variableCount];
+    inverseJacobian = new Real*[variableCount];
+    for (i = 0; i < variableCount; ++i) {
+        jacobian[i] = new Real[variableCount];
+        inverseJacobian[i] = new Real[variableCount];
+        achieved[i] = new Real[variableCount];
+        
+        // Initialize to the identity matrix
+        jacobian[i][i] = 1.0;
+        inverseJacobian[i][i] = 1.0;
+        
+        // Set default values for min and max parameters
+        variableMinimum[i]     = -9.999e300;
+        variableMaximum[i]     =  9.999e300;
+        variableMaximumStep[i] =  9.999e300;
+    }
+    
     return false;
+}
+
+
+void DifferentialCorrector::FreeArrays(void)
+{
+    if (variable) {
+        delete [] variable;
+        variable = NULL;
+    }
+    
+    if (perturbation) {
+        delete [] perturbation;
+        perturbation = NULL;
+    }
+            
+    if (variableMinimum) {
+        delete [] variableMinimum;
+        variableMinimum = NULL;
+    }
+
+    if (variableMaximum) {
+        delete [] variableMaximum;
+        variableMaximum = NULL;
+    }
+
+    if (variableMaximumStep) {
+        delete [] variableMaximumStep;
+        variableMaximumStep = NULL;
+    }
+
+    if (goal) {
+        delete [] goal;
+        goal = NULL;
+    }
+
+    if (tolerance) {
+        delete [] tolerance;
+        tolerance = NULL;
+    }
+
+    if (nominal) {
+        delete [] nominal;
+        nominal = NULL;
+    }
+    
+    if (achieved) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] achieved[i];
+        delete [] achieved;
+        achieved = NULL;
+    }
+
+    if (jacobian) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] jacobian[i];
+        delete [] jacobian;
+        jacobian = NULL;
+    }
+
+    if (inverseJacobian) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] inverseJacobian[i];
+        delete [] inverseJacobian;
+        inverseJacobian = NULL;
+    }
 }
 
 

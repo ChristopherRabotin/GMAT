@@ -109,6 +109,8 @@ protected:
     virtual void                CheckCompletion(void);
 //    virtual void                RunComplete(void);
 
+    void                        FreeArrays(void);
+
     virtual void                WriteToTextFile(void);
     
     // Parameter IDs
