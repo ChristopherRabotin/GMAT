@@ -21,6 +21,7 @@
 
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
+#include "SolarSystem.hpp"
 
 class PlotInterface
 {
@@ -30,7 +31,8 @@ public:
    static bool CreateGlPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
                                   bool drawWireFrame = false,
-                                  bool overlapPlot = false);
+                                  bool overlapPlot = false,
+                                  SolarSystem *ss = NULL); //loj: 12/14/04 Added
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    

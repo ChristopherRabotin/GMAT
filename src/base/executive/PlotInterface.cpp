@@ -68,7 +68,8 @@ PlotInterface::~PlotInterface()
 
 //------------------------------------------------------------------------------
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
-//                          bool drawWireFrame = flase, bool overlapPlot = false)
+//                          bool drawWireFrame = flase, bool overlapPlot = false,
+//                          SolarSystem *solarSystem)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -78,7 +79,8 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
-                                       bool drawWireFrame, bool overlapPlot)
+                                       bool drawWireFrame, bool overlapPlot,
+                                       SolarSystem *solarSystem)
 {    
 #if defined __CONSOLE_APP__
    return true;
@@ -143,7 +145,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
-                               wxDEFAULT_FRAME_STYLE);
+                               wxDEFAULT_FRAME_STYLE, solarSystem);
       
       ++MdiGlPlot::numChildren;
 

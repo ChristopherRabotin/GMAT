@@ -23,6 +23,8 @@
 #include <fstream>
 #include <sstream>
 
+//#define DEBUG_FILE_MANAGER 1
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -35,6 +37,7 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "DE_FILE_PATH",
    "EARTH_POT_FILE_PATH",
    "TEXTURE_FILE_PATH",
+   
    // file name
    "TIME_COEFF_FILE",
    "SLP_FILE",
@@ -43,7 +46,19 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "DE405_FILE",
    "EARTH_JGM2_FILE",
    "EARTH_JGM3_FILE",
+   
+   "SUN_TEXTURE_FILE",
+   "MERCURY_TEXTURE_FILE",
+   "VENUS_TEXTURE_FILE",
    "EARTH_TEXTURE_FILE",
+   "MARS_TEXTURE_FILE",
+   "JUPITER_TEXTURE_FILE",
+   "SATURN_TEXTURE_FILE",
+   "URANUS_TEXTURE_FILE",
+   "NEPTUNE_TEXTURE_FILE",
+   "PLUTO_TEXTURE_FILE",
+   "MOON_TEXTURE_FILE",
+
    // full file name
    "FULL_TIME_COEFF_FILE",
    "FULL_SLP_FILE",
@@ -52,7 +67,18 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "FULL_DE405_FILE",
    "FULL_EARTH_JGM2_FILE",
    "FULL_EARTH_JGM3_FILE",
+   
+   "FULL_SUN_TEXTURE_FILE",
+   "FULL_MERCURY_TEXTURE_FILE",
+   "FULL_VENUS_TEXTURE_FILE",
    "FULL_EARTH_TEXTURE_FILE",
+   "FULL_MARS_TEXTURE_FILE",
+   "FULL_JUPITER_TEXTURE_FILE",
+   "FULL_SATURN_TEXTURE_FILE",
+   "FULL_URANUS_TEXTURE_FILE",
+   "FULL_NEPTUNE_TEXTURE_FILE",
+   "FULL_PLUTO_TEXTURE_FILE",
+   "FULL_MOON_TEXTURE_FILE",
 };
 
 FileManager* FileManager::theInstance = NULL;
@@ -80,10 +106,12 @@ void FileManager::ReadStartupFile(const std::string &fileName)
     
    if (fileName != "")
       theStartupFileName = fileName;
-    
-   //MessageInterface::ShowMessage("FileManager::ReadStartupFile() reading:%s\n",
-   //                              theStartupFileName.c_str());
-    
+
+#ifdef DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage("FileManager::ReadStartupFile() reading:%s\n",
+                                 theStartupFileName.c_str());
+#endif
+   
    std::ifstream instream(theStartupFileName.c_str());
 
    if (!instream)
@@ -94,8 +122,11 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    {
       line[0] = '\0';
       instream.getline(line, 200);
-      //MessageInterface::ShowMessage("FileManager::ReadStartupFile() line=%s\n",
-      //                              line);
+      
+#ifdef DEBUG_FILE_MANAGER
+      MessageInterface::ShowMessage("FileManager::ReadStartupFile() line=%s\n",
+                                    line);
+#endif
 
       if (line[0] == '\0')
          break;
@@ -116,9 +147,11 @@ void FileManager::ReadStartupFile(const std::string &fileName)
         
       ss >> name;
             
-      //MessageInterface::ShowMessage("FileManager::ReadStartupFile() type=%s, "
-      //                              "name=%s\n", type.c_str(), name.c_str());
-        
+#ifdef DEBUG_FILE_MANAGER
+      MessageInterface::ShowMessage("FileManager::ReadStartupFile() type=%s, "
+                                    "name=%s\n", type.c_str(), name.c_str());
+#endif
+      
       // find string match
       // file path
       if (type == "OUTPUT_FILE_PATH")
@@ -153,8 +186,28 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          theFileList[EARTH_JGM3_FILE] = name;
 
       // texture file
+      else if (type == "SUN_TEXTURE_FILE")
+         theFileList[SUN_TEXTURE_FILE] = name;
+      else if (type == "MERCURY_TEXTURE_FILE")
+         theFileList[MERCURY_TEXTURE_FILE] = name;
+      else if (type == "VENUS_TEXTURE_FILE")
+         theFileList[VENUS_TEXTURE_FILE] = name;
       else if (type == "EARTH_TEXTURE_FILE")
          theFileList[EARTH_TEXTURE_FILE] = name;
+      else if (type == "MARS_TEXTURE_FILE")
+         theFileList[MARS_TEXTURE_FILE] = name;
+      else if (type == "JUPITER_TEXTURE_FILE")
+         theFileList[JUPITER_TEXTURE_FILE] = name;
+      else if (type == "SATURN_TEXTURE_FILE")
+         theFileList[SATURN_TEXTURE_FILE] = name;
+      else if (type == "URANUS_TEXTURE_FILE")
+         theFileList[URANUS_TEXTURE_FILE] = name;
+      else if (type == "NEPTUNE_TEXTURE_FILE")
+         theFileList[NEPTUNE_TEXTURE_FILE] = name;
+      else if (type == "PLUTO_TEXTURE_FILE")
+         theFileList[PLUTO_TEXTURE_FILE] = name;
+      else if (type == "MOON_TEXTURE_FILE")
+         theFileList[MOON_TEXTURE_FILE] = name;
       else
       {
          instream.close();
@@ -185,8 +238,38 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    theFileList[FULL_EARTH_JGM3_FILE]
       = theFileList[EARTH_POT_FILE_PATH] + theFileList[EARTH_JGM3_FILE];
     
+   theFileList[FULL_SUN_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[SUN_TEXTURE_FILE];
+   
+   theFileList[FULL_MERCURY_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[MERCURY_TEXTURE_FILE];
+   
+   theFileList[FULL_VENUS_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[VENUS_TEXTURE_FILE];
+    
    theFileList[FULL_EARTH_TEXTURE_FILE]
       = theFileList[TEXTURE_FILE_PATH] + theFileList[EARTH_TEXTURE_FILE];
+   
+   theFileList[FULL_MARS_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[MARS_TEXTURE_FILE];
+   
+   theFileList[FULL_JUPITER_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[JUPITER_TEXTURE_FILE];
+    
+   theFileList[FULL_SATURN_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[SATURN_TEXTURE_FILE];
+   
+   theFileList[FULL_URANUS_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[URANUS_TEXTURE_FILE];
+   
+   theFileList[FULL_NEPTUNE_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[NEPTUNE_TEXTURE_FILE];
+    
+   theFileList[FULL_PLUTO_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[PLUTO_TEXTURE_FILE];
+   
+   theFileList[FULL_MOON_TEXTURE_FILE]
+      = theFileList[TEXTURE_FILE_PATH] + theFileList[MOON_TEXTURE_FILE];
     
    instream.close();
 }
@@ -257,9 +340,10 @@ bool FileManager::SetStringParameter(const Integer id, const std::string &value)
 bool FileManager::SetStringParameter(const std::string &label,
                                      const std::string &value)
 {
-   //MessageInterface::ShowMessage("FileManager::SetStringParameter() entered: "
-   //                              "label = " + label + ", value = " + value + "\n");
-
+#ifdef DEBUG_FILE_MANAGER
+   MessageInterface::ShowMessage("FileManager::SetStringParameter() entered: "
+                                 "label = " + label + ", value = " + value + "\n");
+#endif
    return SetStringParameter(GetParameterID(label), value);
 }
 
@@ -279,6 +363,7 @@ bool FileManager::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 FileManager::FileManager()
 {    
+   
    // create default paths and files
    theFileList[OUTPUT_FILE_PATH] = ".\\output\\";
    theFileList[SLP_FILE_PATH] = ".\\planetary_ephem\\slp\\";
@@ -292,9 +377,21 @@ FileManager::FileManager()
    theFileList[DE405_FILE] = "winp1941.405";
    theFileList[EARTH_JGM2_FILE] = "JGM2.grv";
    theFileList[EARTH_JGM3_FILE] = "JGM3.grv";
+   
+   theFileList[SUN_TEXTURE_FILE] = "sun-0512.jpg";
+   theFileList[MERCURY_TEXTURE_FILE] = "mercury-0512.jpg";
+   theFileList[VENUS_TEXTURE_FILE] = "venus-0512.jpg";
    theFileList[EARTH_TEXTURE_FILE] = "earth-0512.jpg";
+   theFileList[MARS_TEXTURE_FILE] = "mars-0512.jpg";
+   theFileList[JUPITER_TEXTURE_FILE] = "jupiter-0512.jpg";
+   theFileList[SATURN_TEXTURE_FILE] = "saturn-0512.jpg";
+   theFileList[URANUS_TEXTURE_FILE] = "uranus-0512.jpg";
+   theFileList[NEPTUNE_TEXTURE_FILE] = "neptune-0512.jpg";
+   theFileList[PLUTO_TEXTURE_FILE] = "pluto-0512.jpg";
+   theFileList[MOON_TEXTURE_FILE] = "moon-0512.jpg";
 
    theStartupFileName = "gmat_startup_file.txt";
+   
 }
 
 //------------------------------------------------------------------------------

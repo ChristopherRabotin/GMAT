@@ -327,6 +327,11 @@ bool Sandbox::Initialize()
             }
          }
          
+         //loj: 12/14/04 Added
+         // OpenGLPlot need planet's info 
+         if (sub->GetTypeName() == "OpenGLPlot")
+            sub->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
+         
          sub->Initialize();
       }
    }
