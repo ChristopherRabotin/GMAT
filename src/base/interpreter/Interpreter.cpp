@@ -376,6 +376,10 @@ void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
             *outstream << obj->GetIntegerParameter(id);
             break;
             
+        case Gmat::UNSIGNED_INT_TYPE:
+            *outstream << obj->GetUnsignedIntParameter(id);
+            break;
+            
         case Gmat::REAL_TYPE:
             *outstream << obj->GetRealParameter(id);
             break;
