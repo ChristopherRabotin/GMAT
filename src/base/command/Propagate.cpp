@@ -766,7 +766,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    #endif
 
    bool scanning = true;
-   Integer currentLoc = loc, parmstart, end;
+   Integer currentLoc = loc, parmstart, end, endchar;
    
    parmstart = generatingString.find("(", currentLoc);   
    while (scanning) {
@@ -832,7 +832,16 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                                  i->c_str(), loc, end);
          #endif
           
-         component = i->substr(loc, end-loc);
+         // Strip off trailing spaces
+         #ifdef DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage("Last char ((*i)[end]) is '%c'\n",
+                                 (*i)[end]);
+         #endif
+         endchar = end-1;
+         while ((*i)[endchar] == ' ')
+            --endchar;
+         
+         component = i->substr(loc, endchar-loc+1);
          SetObject(component, Gmat::SPACECRAFT);
          #ifdef DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage("   \"%s\"\n", 
