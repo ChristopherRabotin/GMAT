@@ -44,7 +44,7 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(std::string ofType,
                                                          std::string withName)
 {
    if (ofType == "PointMassForce")
-      return new PointMassForce();
+       return new PointMassForce(withName); //loj: 3/12/04 pass the name
    return NULL;
 }
 
