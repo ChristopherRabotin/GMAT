@@ -24,7 +24,7 @@
 #endif
 
 //#define DEBUG_CALL_FUNCTION 1
-#define DEBUG_UPDATE_VAR 1
+//#define DEBUG_UPDATE_VAR 1
 //---------------------------------
 // static data
 //---------------------------------
@@ -559,12 +559,12 @@ bool CallFunction::ExecuteMatlabFunction()
    {
       Variable *param = (Variable *)mInputList[i];
       std::string varName =  param->GetName();
-      double arrayToSend[] = {param->EvaluateReal()};
+      double arrayToSend[] = {param->GetReal()};
 #if DEBUG_UPDATE_VAR
-      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
-      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
-      MessageInterface::ShowMessage("The type for this parameter is %f\n", param->GetTypeName().c_str());
-      MessageInterface::ShowMessage("The string parameter is %f\n", param->GetStringParameter("Expression").c_str());
+//      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
+//      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
+//      MessageInterface::ShowMessage("The type for this parameter is %f\n", param->GetTypeName().c_str());
+//      MessageInterface::ShowMessage("The string parameter is %f\n", param->GetStringParameter("Expression").c_str());
 #endif
       status = MatlabInterface::PutVariable(varName, 1, arrayToSend);
 #if DEBUG_UPDATE_VAR
@@ -572,10 +572,10 @@ bool CallFunction::ExecuteMatlabFunction()
                   arrayToSend[0]);
 
       // try updating variable to 5
-      param->SetRealParameter("Param1", 5);
-      MessageInterface::ShowMessage("The parameter should be updated to 5...\n");
-      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
-      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
+//      param->SetRealParameter("Param1", 5);
+//      MessageInterface::ShowMessage("The parameter should be updated to 5...\n");
+//      MessageInterface::ShowMessage("The EvaluateReal for %s is %f\n", varName.c_str(), param->EvaluateReal());
+//      MessageInterface::ShowMessage("The parameter value for %s is %f\n", varName.c_str(), param->GetRealParameter("Param1"));
 #endif
    }
 
@@ -602,8 +602,9 @@ bool CallFunction::ExecuteMatlabFunction()
 #endif
       param->SetRealParameter("Param1", outArray[0]);
 #if DEBUG_UPDATE_VAR
-      MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
-      MessageInterface::ShowMessage("The parameter value is %f\n", param->GetRealParameter("Param1"));
+      MessageInterface::ShowMessage("The GetReal is %f\n", param->GetReal());
+//      MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
+//      MessageInterface::ShowMessage("The parameter value is %f\n", param->GetRealParameter("Param1"));
 #endif
    }
 
