@@ -1735,7 +1735,8 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
    StringArray sar = Decompose(rhs);
    if ((sar.size() > 1) && isalpha(sar[1][0])) {
       if (!IsGroup(rhs.c_str())) {
-         try {
+         if (moderator->IsParameter(sar[1]))
+         {
             std::string name = rhs;
             #ifdef DEBUG_RHS_PARSING
                MessageInterface::ShowMessage("%s%s\"\n",
@@ -1761,13 +1762,7 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                lhsObject->SetStringParameter(label, name);
                return true;
             }
-         }
-         catch (BaseException &ex)
-         {
-            #ifdef DEBUG_RHS_PARSING
-               MessageInterface::ShowMessage("Parameter was not constructed.\n");
-            #endif
-         }
+         }         
       }
    }
    
