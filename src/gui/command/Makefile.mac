@@ -1,0 +1,17 @@
+# Project:    GMAT
+# Module:     Makefile.mac for gui/command directory 
+# Created:    Wendy Shoan
+# Date:       2004/10/21
+#
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = AchievePanel.cpp ManeuverPanel.cpp PropagatePanel.cpp \
+	SavePanel.cpp TogglePanel.cpp VaryPanel.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/gui/inc.mac
+include ${INCMK}
+#
