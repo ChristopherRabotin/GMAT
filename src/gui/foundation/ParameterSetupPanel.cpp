@@ -46,6 +46,9 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
    mVarName = name;
+   mIsColorChanged = false;
+   mIsExpChanged = false;
+   
    Create();
    Show();
 }
@@ -212,9 +215,9 @@ void ParameterSetupPanel::LoadData()
          {
             //std::string varDesc = mParam->GetStringParameter("Description");
             // Show expression (loj: 9/23/04)
-            std::string varDesc = mParam->GetStringParameter("Expression");
+            std::string varExp = mParam->GetStringParameter("Expression");
             mVarNameTextCtrl->SetValue(mVarName);
-            mVarExpTextCtrl->SetValue(varDesc.c_str());
+            mVarExpTextCtrl->SetValue(varExp.c_str());
 
             UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
             RgbColor color(intColor);
@@ -246,9 +249,15 @@ void ParameterSetupPanel::LoadData()
          wxLog::FlushActive();
       }
    }
+
+   // if expression is just a number, enable editing
+   double realVal;
+   if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
+      mVarExpTextCtrl->Enable();
+   else
+      mVarExpTextCtrl->Disable();
    
    mVarNameTextCtrl->Disable();
-   mVarExpTextCtrl->Disable();
    mArrNameTextCtrl->Disable();
    mArrRowTextCtrl->Disable();
    mArrColTextCtrl->Disable();
@@ -265,6 +274,13 @@ void ParameterSetupPanel::SaveData()
       RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
       mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
    }
+
+   if (mIsExpChanged)
+   {
+      mIsExpChanged = false;
+      mParam->SetStringParameter("Expression",
+                                 std::string(mVarExpTextCtrl->GetValue().c_str()));
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -272,8 +288,13 @@ void ParameterSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
+   if (mVarExpTextCtrl->IsModified())
+   {
+      mIsExpChanged = true;
+      theApplyButton->Enable();
+   }
 }
-    
+
 //------------------------------------------------------------------------------
 // void OnComboSelection(wxCommandEvent& event)
 //------------------------------------------------------------------------------

@@ -28,10 +28,11 @@ private:
 
    Parameter *mParam;
    bool mIsColorChanged;
+   bool mIsExpChanged;
    
    wxColour mColor;
    wxString mVarName;
-    
+   
    wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mVarExpTextCtrl;
    wxTextCtrl *mArrNameTextCtrl;
