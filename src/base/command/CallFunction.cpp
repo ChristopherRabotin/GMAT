@@ -641,7 +641,7 @@ bool CallFunction::ExecuteMatlabFunction()
       if (thePath != "")
       {
          std::string setPath = "path(path ,'" + thePath + "')";
-         EvalMatlabString(setPath);
+         MatlabInterface::EvalString(setPath);
       }
 
        // send the in parameters
@@ -675,7 +675,7 @@ void CallFunction::SendInParam(Parameter *param)
          return;
       }
 
-      MessageInterface::ShowMessage("Parameter type is: %d", param->GetType());
+//      MessageInterface::ShowMessage("Parameter type is: %d", param->GetType());
 
       if (param->GetTypeName() == "Array")
       {
