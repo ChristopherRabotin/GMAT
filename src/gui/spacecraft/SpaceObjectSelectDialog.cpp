@@ -96,15 +96,15 @@ void SpaceObjectSelectDialog::Create()
    wxStaticText *spaceObjStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Available SpaceObject"),
                         wxDefaultPosition, wxDefaultSize, 0 );
-    
+   
    wxStaticText *spaceObjSelectStaticText =
       new wxStaticText( this, ID_TEXT, wxT("SpaceObject Selected"),
                         wxDefaultPosition, wxDefaultSize, 0 );
-    
+   
    wxStaticText *emptyStaticText =
       new wxStaticText( this, ID_TEXT, wxT("  "),
                         wxDefaultPosition, wxDefaultSize, 0 );
-    
+   
    // wxButton
    addSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("->"),
                                        wxDefaultPosition, wxSize(20,20), 0 );
@@ -112,16 +112,18 @@ void SpaceObjectSelectDialog::Create()
                                           wxDefaultPosition, wxSize(20,20), 0 );
    clearSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("<="),
                                          wxDefaultPosition, wxSize(20,20), 0 );
-       
+
+   MessageInterface::ShowMessage("Calling GetSpaceObjectListBox\n");
+   
    // wxListBox
    spaceObjAvailableListBox =
       theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), mSoExcList);
-
-   if (spaceObjSelCount > 0)
+   
+   if (soSelCount > 0)
    {
       spaceObjSelectedListBox =
          new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                       wxSize(150, 100), spaceObjSelCount, tempList, wxLB_SINGLE);
+                       wxSize(150, 100), soSelCount, tempList, wxLB_SINGLE);
    }
    else
    {
