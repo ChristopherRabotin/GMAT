@@ -22,18 +22,89 @@
 
 
 DifferentialCorrector::DifferentialCorrector(std::string name) :
-    Solver          ("DifferentialCorrector", name)
+    Solver                  ("DifferentialCorrector", name), 
+    variableCount           (0),
+    goalCount               (0),
+    variable                (NULL),
+    perturbation            (NULL),
+    variableMinimum         (NULL),
+    variableMaximum         (NULL),
+    variableMaximumStep     (NULL),
+    goal                    (NULL),
+    tolerance               (NULL),
+    nominal                 (NULL),
+    achieved                (NULL),
+    jacobian                (NULL),
+    inverseJacobian         (NULL),
+    useCentralDifferences   (false),
+    initialized             (false)
 {
 }
 
 
 DifferentialCorrector::~DifferentialCorrector()
 {
+    if (variable)
+        delete [] variable;
+    
+    if (perturbation)
+        delete [] perturbation;
+            
+    if (variableMinimum)
+        delete [] variableMinimum;
+
+    if (variableMaximum)
+        delete [] variableMaximum;
+
+    if (variableMaximumStep)
+        delete [] variableMaximumStep;
+
+    if (goal)
+        delete [] goal;
+
+    if (tolerance)
+        delete [] tolerance;
+
+    if (nominal)
+        delete [] nominal;
+
+    if (achieved) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] achieved[i];
+        delete [] achieved;
+    }
+
+    if (jacobian) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] jacobian[i];
+        delete [] jacobian;
+    }
+
+    if (inverseJacobian) {
+        for (Integer i = 0; i < goalCount; ++i)
+            delete [] inverseJacobian[i];
+        delete [] inverseJacobian;
+    }
 }
 
 
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
-    Solver          (dc)
+    Solver                  (dc), 
+    variableCount           (0),
+    goalCount               (0),
+    variable                (NULL),
+    perturbation            (NULL),
+    variableMinimum         (NULL),
+    variableMaximum         (NULL),
+    variableMaximumStep     (NULL),
+    goal                    (NULL),
+    tolerance               (NULL),
+    nominal                 (NULL),
+    achieved                (NULL),
+    jacobian                (NULL),
+    inverseJacobian         (NULL),
+    useCentralDifferences   (false),
+    initialized             (false)
 {
 }
 
@@ -45,6 +116,12 @@ DifferentialCorrector&
         return *this;
         
     return *this;
+}
+
+
+bool                        Initialize(void)
+{
+    return false;
 }
 
 
