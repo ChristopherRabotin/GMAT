@@ -62,6 +62,9 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
    EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)    
    EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile)    
+   
+   EVT_SIZE(GmatMainFrame::OnSize)
+   EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
 END_EVENT_TABLE()
 
 //------------------------------
@@ -84,13 +87,21 @@ END_EVENT_TABLE()
  *       for the right hand side and the left hand side.
  */
 //------------------------------------------------------------------------------
-GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+//GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
+//                             long style)
+//              : wxFrame(NULL, -1, title, pos, size, style)
+GmatMainFrame::GmatMainFrame(wxWindow *parent,
+                             const wxWindowID id,
+                             const wxString& title, 
+                             const wxPoint& pos, 
+                             const wxSize& size,
                              long style)
-   : wxFrame(NULL, -1, title, pos, size, style)
+              : wxMDIParentFrame(parent, id, title, pos, size, 
+                                 style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mDocManager = (wxDocManager *) NULL;
-   GmatSplitterWindow *splitter;
-   GmatNotebook *leftTabs;
+//   GmatSplitterWindow *splitter;
+//   GmatNotebook *leftTabs;
 
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
   
@@ -107,25 +118,44 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
 
    CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
    InitToolBar(GetToolBar());
-  
-   splitter = new GmatSplitterWindow(this);
+   
+   wxMDIChildFrame *theChild = new wxMDIChildFrame(this, -1, _T(""),
+                        wxPoint(-1,-1), wxSize(-1,-1), wxDEFAULT_FRAME_STYLE);
 
    // need to do before leftTabs, because they use MainNotebook
-   rightTabs = new GmatMainNotebook( splitter, -1, wxDefaultPosition,
+   rightTabs = new GmatMainNotebook( theChild,
+                                     -1, 
+                                     wxDefaultPosition,
                                      wxDefaultSize, wxCLIP_CHILDREN);
-
+    
    // set to GmatAppData
    GmatAppData::SetMainNotebook(rightTabs);
-    
+   
+   int w, h;
+   GetClientSize(&w, &h);
+
+    // A window w/sash for gmat notebook
+   win = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
+                           wxDefaultPosition, wxSize(200, 30),
+                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+
+   win->SetDefaultSize(wxSize(200, h));
+   win->SetOrientation(wxLAYOUT_VERTICAL);
+   win->SetAlignment(wxLAYOUT_LEFT);
+   win->SetSashVisible(wxSASH_RIGHT, TRUE);
+
+   GmatNotebook *projectTree = new GmatNotebook(win, -1, wxDefaultPosition,
+                                wxDefaultSize, wxCLIP_CHILDREN);          
+   new wxNotebookSizer( projectTree );  
+  
+   theChild->Maximize();
+//   splitter = new GmatSplitterWindow(this);
+ 
    // create the tabs for Resources, Mission, Output
-   leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
-                                wxDefaultSize, wxCLIP_CHILDREN);
+//   leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
+//                                wxDefaultSize, wxCLIP_CHILDREN);
 
-   //ag : Removed to use GmatAppData::SetMainNotebook
-   //    // add the left and right side to splitter
-   //    leftTabs->SetMainNotebook(rightTabs);
-
-   splitter->SplitVertically( leftTabs, rightTabs, 200 );
+//   splitter->SplitVertically( leftTabs, rightTabs, 200 );
 }
 
 //------------------------------------------------------------------------------
@@ -183,6 +213,14 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 {
+   // ask user to continue because changes will be lost
+   if (wxMessageBox(_T("Changes will be lost.\nDo you still want to continue?"), 
+         _T("Please confirm"),
+         wxICON_QUESTION | wxYES_NO) != wxYES)
+   {
+      return;
+   }
+
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
     
@@ -272,7 +310,7 @@ void GmatMainFrame::OnCloseTabs(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 {
-   wxBitmap* bitmaps[12];
+   wxBitmap* bitmaps[13];
 
    bitmaps[0] = new wxBitmap( new_xpm );
    bitmaps[1] = new wxBitmap( open_xpm );
@@ -286,20 +324,34 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[9] = new wxBitmap( pause_xpm );
    bitmaps[10] = new wxBitmap( stop_xpm );
    bitmaps[11] = new wxBitmap( close_xpm );
+   bitmaps[12] = new wxBitmap( script_xpm );
 
    int width = 24;
    int currentX = 5;
-
-   toolBar->AddTool( MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
-                     (wxObject *) NULL, _T("New file"));
+   
+//   toolBar->AddTool( MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
+//                     (wxObject *) NULL, _T("New project"));
+   toolBar->AddTool( MENU_SCRIPT_OPEN_EDITOR, *(bitmaps[0]), 
+                     wxNullBitmap, FALSE, currentX, -1,
+                     (wxObject *) NULL, _T("New Script"));
    currentX += width + 5;
-   toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Open file"));
+   toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, 
+                     FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Open Script"));
    currentX += width + 5;
-   toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Save file"));
+   toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, 
+                     FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Save Script"));
    currentX += width + 5;
    toolBar->AddSeparator();
+
+   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, *bitmaps[12], 
+                    wxNullBitmap, FALSE,
+                    currentX, -1, (wxObject *) NULL, _T("Default Project"));
+   currentX += width + 5;
+   toolBar->AddSeparator();
+
+   
    toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Copy"));
    currentX += width + 5;
@@ -332,7 +384,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->Realize();
 
    int i;
-   for (i = 0; i < 12; i++)
+   for (i = 0; i < 13; i++)
    {
       delete bitmaps[i];
    }
@@ -354,35 +406,46 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    wxMenu *editMenu = new wxMenu;
    wxMenu *parametersMenu = new wxMenu;
    wxMenu *orbitFileMenu = new wxMenu;
-   wxMenu *variablesMenu = new wxMenu;
-   wxMenu *viewsMenu = new wxMenu;
+//   wxMenu *variablesMenu = new wxMenu;
+//   wxMenu *viewsMenu = new wxMenu;
    wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
    wxMenu *scriptMenu = new wxMenu;
+ 
+   wxMenu *propagatorMenu;
+//   wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
    
-   wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
+//   fileMenu->Append(MENU_PROJECT_NEW, wxT("New Project"), wxT(""), FALSE);
+//   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Load Default Mission"), wxT(""), FALSE);
+
+   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("New Script"), 
+                     wxT(""), FALSE);  
+   fileMenu->Append(MENU_PROJECT_OPEN, wxT("Open Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_PROJECT_SAVE, wxT("Save Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_PROJECT_SAVE_AS, wxT("Save Script As"), 
+                     wxT(""), FALSE);  
+
+//   openMenu = new wxMenu;
+//   openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);
+//   openMenu->Append(MENU_PROJECT_OPEN_ASCII, wxT("ASCII"), wxT(""), FALSE);
+//   fileMenu->Append(MENU_PROJECT_OPEN, wxT("Open Project"), openMenu, wxT(""));
+//   
+//   saveMenu = new wxMenu;
+//   saveMenu->Append(MENU_PROJECT_SAVE_BINARY, wxT("Binary"), wxT(""), FALSE);
+//   saveMenu->Append(MENU_PROJECT_SAVE_ASCII, wxT("ASCII"), wxT(""), FALSE);
+//   fileMenu->Append(MENU_PROJECT_SAVE, wxT("Save Project"), saveMenu, wxT(""));
+//   
+//   saveAsMenu = new wxMenu;
+//   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_BINARY, wxT("Binary"), wxT(""),
+//                      FALSE);
+//   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_ASCII, wxT("ASCII"), wxT(""),
+//                      FALSE);
+//   fileMenu->Append(MENU_PROJECT_SAVE_AS, wxT("Save Project As"), saveAsMenu,
+//                    wxT(""));
    
-   fileMenu->Append(MENU_PROJECT_NEW, wxT("New Project"), wxT(""), FALSE);
-   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Load Default Mission"), wxT(""), FALSE);
-   
-   openMenu = new wxMenu;
-   openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);
-   openMenu->Append(MENU_PROJECT_OPEN_ASCII, wxT("ASCII"), wxT(""), FALSE);
-   fileMenu->Append(MENU_PROJECT_OPEN, wxT("Open Project"), openMenu, wxT(""));
-   
-   saveMenu = new wxMenu;
-   saveMenu->Append(MENU_PROJECT_SAVE_BINARY, wxT("Binary"), wxT(""), FALSE);
-   saveMenu->Append(MENU_PROJECT_SAVE_ASCII, wxT("ASCII"), wxT(""), FALSE);
-   fileMenu->Append(MENU_PROJECT_SAVE, wxT("Save Project"), saveMenu, wxT(""));
-   
-   saveAsMenu = new wxMenu;
-   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_BINARY, wxT("Binary"), wxT(""),
-                      FALSE);
-   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_ASCII, wxT("ASCII"), wxT(""),
-                      FALSE);
-   fileMenu->Append(MENU_PROJECT_SAVE_AS, wxT("Save Project As"), saveAsMenu,
-                    wxT(""));
-   
+   fileMenu->AppendSeparator();
+   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
+                     wxT(""), FALSE);   
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_PREFERENCES, wxT("Preferences"), wxT(""),
                     FALSE);
@@ -435,23 +498,23 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    orbitFileMenu->Append(MENU_ORBIT_FILES_EPHEM_FILE,
                          wxT("Read/Plot Ephemeris File"), wxT(""), FALSE);
     
-   variablesMenu->Append(MENU_VARIABLES_CREATE, wxT("Create"), wxT(""), FALSE); 
-   variablesMenu->Append(MENU_VARIABLES_EVALUATE, wxT("Evaluate"), wxT(""),
-                         FALSE);
-
-   viewsMenu->Append(MENU_VIEWS_COORD_FRAME, wxT("Coordinate Frame"), wxT(""),
-                     FALSE);
-   viewsMenu->AppendSeparator();
-   viewsMenu->Append(MENU_VIEWS_TARG_OUTPUT, wxT("Targeter Output"), wxT(""),
-                     FALSE);
-   viewsMenu->AppendSeparator();
-   viewsMenu->Append(MENU_VIEWS_CASCADE, wxT("Cascade Plots"), wxT(""), FALSE); 
-   viewsMenu->Append(MENU_VIEWS_TILE, wxT("Tile Plots"), wxT(""), FALSE); 
-   viewsMenu->AppendSeparator();
-   viewsMenu->Append(MENU_VIEWS_CLEAR, wxT("Clear Plots"), wxT(""), FALSE); 
-   viewsMenu->Append(MENU_VIEWS_MIN, wxT("Minimize Plots"), wxT(""), FALSE); 
-   viewsMenu->Append(MENU_VIEWS_RESTORE, wxT("Restore Plots"), wxT(""), FALSE); 
-   viewsMenu->Append(MENU_VIEWS_CLOSE, wxT("Close Plots"), wxT(""), FALSE); 
+//   variablesMenu->Append(MENU_VARIABLES_CREATE, wxT("Create"), wxT(""), FALSE); 
+//   variablesMenu->Append(MENU_VARIABLES_EVALUATE, wxT("Evaluate"), wxT(""),
+//                         FALSE);
+//
+//   viewsMenu->Append(MENU_VIEWS_COORD_FRAME, wxT("Coordinate Frame"), wxT(""),
+//                     FALSE);
+//   viewsMenu->AppendSeparator();
+//   viewsMenu->Append(MENU_VIEWS_TARG_OUTPUT, wxT("Targeter Output"), wxT(""),
+//                     FALSE);
+//   viewsMenu->AppendSeparator();
+//   viewsMenu->Append(MENU_VIEWS_CASCADE, wxT("Cascade Plots"), wxT(""), FALSE); 
+//   viewsMenu->Append(MENU_VIEWS_TILE, wxT("Tile Plots"), wxT(""), FALSE); 
+//   viewsMenu->AppendSeparator();
+//   viewsMenu->Append(MENU_VIEWS_CLEAR, wxT("Clear Plots"), wxT(""), FALSE); 
+//   viewsMenu->Append(MENU_VIEWS_MIN, wxT("Minimize Plots"), wxT(""), FALSE); 
+//   viewsMenu->Append(MENU_VIEWS_RESTORE, wxT("Restore Plots"), wxT(""), FALSE); 
+//   viewsMenu->Append(MENU_VIEWS_CLOSE, wxT("Close Plots"), wxT(""), FALSE); 
 
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
     
@@ -464,8 +527,8 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    menuBar->Append(editMenu, wxT("Edit"));
    menuBar->Append(parametersMenu, wxT("Parameters"));
    menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
-   menuBar->Append(variablesMenu, wxT("Variables"));
-   menuBar->Append(viewsMenu, wxT("Views"));
+//   menuBar->Append(variablesMenu, wxT("Variables"));
+//   menuBar->Append(viewsMenu, wxT("Views"));
    menuBar->Append(toolsMenu, wxT("Tools"));
     
    menuBar->Append(helpMenu, wxT("Help"));
@@ -684,3 +747,38 @@ void GmatMainFrame::OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
    //SetTopWindow(MdiXyPlot::mdiParentXyFrame);
 
 }
+
+//------------------------------------------------------------------------------
+// void OnSize(wxSizeEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles resizing of the window
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnSize(wxSizeEvent& event)
+{
+    wxLayoutAlgorithm layout;
+    layout.LayoutMDIFrame(this);
+}
+
+
+void GmatMainFrame::OnSashDrag(wxSashEvent& event)
+{
+    int w, h;
+    GetClientSize(&w, &h);
+
+    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
+        return;
+        
+    win->SetDefaultSize(wxSize(event.GetDragRect().width, h));
+            
+
+    wxLayoutAlgorithm layout;
+    layout.LayoutMDIFrame(this);
+
+    // Leaves bits of itself behind sometimes
+    GetClientWindow()->Refresh();
+}
+

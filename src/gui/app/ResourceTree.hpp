@@ -28,7 +28,7 @@ class ResourceTree : public wxTreeCtrl
 {
 public:
 
-    // constructors
+    // constructor
     ResourceTree(wxWindow *parent, const wxWindowID id,
                  const wxPoint& pos, const wxSize& size,
                  long style);
@@ -39,7 +39,7 @@ private:
     GuiItemManager *theGuiManager;
 
     GmatMainNotebook *mainNotebook;
-    wxWindow *parent;
+//    wxWindow *parent;
     wxTreeItemId mSpacecraftItem;
     wxTreeItemId mPropagatorItem;
     wxTreeItemId mReportItem;
@@ -96,7 +96,6 @@ private:
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
     DECLARE_EVENT_TABLE();
-   
 
     // for popup menu
     enum
@@ -126,8 +125,6 @@ private:
         POPUP_RENAME,
         POPUP_DELETE
     };
-
-
 };
 
 #endif // ResourceTree_hpp

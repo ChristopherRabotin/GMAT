@@ -36,6 +36,7 @@
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
 #include "wx/docview.h"
+#include "wx/laywin.h"
 
 #include "bitmaps/new.xpm"
 #include "bitmaps/open.xpm"
@@ -49,18 +50,22 @@
 #include "bitmaps/pause.xpm"
 #include "bitmaps/stop.xpm"
 #include "bitmaps/close.xpm"
+#include "bitmaps/script.xpm"
 
-class GmatMainFrame : public wxFrame
+
+class GmatMainFrame : public wxMDIParentFrame
 {
 public:
     // constructors
-    GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
-                  long style);
+    GmatMainFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
+            const wxPoint& pos, const wxSize& size, const long style);
     ~GmatMainFrame();
 
 protected:
 private:
     GuiInterpreter *theGuiInterpreter;
+
+    wxSashLayoutWindow* win;
 
     wxDocManager *mDocManager;
     wxDocTemplate *mDocTemplate;
@@ -86,6 +91,9 @@ private:
     void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     
+    void OnSashDrag(wxSashEvent& event);
+    void OnSize(wxSizeEvent& event);
+
     // IDs for the controls and the menu commands
     enum
     {
@@ -155,6 +163,9 @@ private:
         // (where it is special and put into the "Apple" menu)    
         MENU_HELP_ABOUT = wxID_ABOUT,
         TOOL_CLOSE_TABS,
+        TOOL_SCRIPT,
+        
+        ID_SASH_WINDOW,
     };
 };
 

@@ -29,6 +29,8 @@
 #include "RealUtilities.hpp"
 #include "GmatMainNotebook.hpp"
 
+#include "MessageInterface.hpp"
+
 #include <stdlib.h>
 
 //------------------------------
@@ -84,7 +86,11 @@ void SpacecraftPanel::Create()
                          wxSize(350,300), wxGROW );
     sizer = new wxNotebookSizer( mainNotebook );
  
+    SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+    MessageInterface::ShowMessage
+         ("SpacecraftPanel:: got the solar sys\n");
     theOrbitPanel = new OrbitPanel(mainNotebook, currentSpacecraft, 
+                                   theSolarSystem,
                                    theApplyButton);
     mainNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
 

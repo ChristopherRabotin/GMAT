@@ -50,8 +50,6 @@
 BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, ResourceTree::OnItemRightClick)
 
-   // had to change back to double click because of a segmentation
-   // fault
    EVT_TREE_ITEM_ACTIVATED(-1, ResourceTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, ResourceTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, ResourceTree::OnEndLabelEdit)
@@ -91,9 +89,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
     : wxTreeCtrl(parent, id, pos, size, style)
 {
-    parent = parent;
+//    parent = parent;
     mainNotebook = GmatAppData::GetMainNotebook();
-    
+    MessageInterface::ShowMessage("got main notebook\n");
+  
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
     
@@ -164,7 +163,6 @@ void ResourceTree::UpdateResource()
 //------------------------------------------------------------------------------
 /**
  * Add default folders
- *
  */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultResources()
@@ -846,9 +844,6 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
 //    this->Delete(item);
 //    
 //
-    
-    // need to decrease counter
-    // Should an open tab close too?
 }
 
 //------------------------------------------------------------------------------

@@ -29,14 +29,16 @@ class OrbitPanel: public wxPanel
 {
 public:
     OrbitPanel(wxWindow *parent, 
-               Spacecraft *spacecraft, 
+               Spacecraft *spacecraft,
+               SolarSystem *solarsystem, 
                wxButton *theApplyButton);
     ~OrbitPanel();
     void SaveData();
     void LoadData();
    
 private:
-
+    wxString bodiesArray[100];
+    SolarSystem *theSolarSystem;
     void Create();
     void AddElements(wxWindow *parent);
     
@@ -44,6 +46,7 @@ private:
     DECLARE_EVENT_TABLE();
     void OnStateChange();
     void OnEpochChange();
+    void OnComboChange();
     void OnTextChange();
 
     Spacecraft *theSpacecraft;
@@ -71,12 +74,11 @@ private:
     wxStaticText *label6;
     
     wxPanel *elementsPanel;
+    wxComboBox *referenceBodyComboBox;
     wxComboBox *stateComboBox;
     wxComboBox *dateComboBox;
     wxTextCtrl *epochValue;
-
-
-
+    
     // IDs for the controls and the menu commands
     enum
     {     

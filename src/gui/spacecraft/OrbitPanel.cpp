@@ -28,6 +28,7 @@ BEGIN_EVENT_TABLE(OrbitPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, OrbitPanel::OnTextChange)
    EVT_COMBOBOX(ID_CB_STATE, OrbitPanel::OnStateChange)
    EVT_COMBOBOX(ID_CB_EPOCH, OrbitPanel::OnEpochChange)
+   EVT_COMBOBOX(ID_COMBO, OrbitPanel::OnComboChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -46,11 +47,18 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 OrbitPanel::OrbitPanel(wxWindow *parent,
                         Spacecraft *spacecraft,
+                        SolarSystem *solarsystem,
                         wxButton *theApplyButton)
                        :wxPanel(parent)
 {
+
+   MessageInterface::ShowMessage
+         ("In OrbitPanel\n");
+
     this->theSpacecraft = spacecraft;
+    this->theSolarSystem = solarsystem;
     this->theApplyButton = theApplyButton;
+
     Create();
 }
 
@@ -86,37 +94,41 @@ void OrbitPanel::Create()
     // gridsizer for inside the Coordinate System static box
     wxGridSizer *item3 = new wxGridSizer( 2, 0, 0 );
 
-    wxStaticText *item4 = new wxStaticText( this, ID_TEXT, 
+    wxStaticText *referenceBodyStaticText = new wxStaticText( this, ID_TEXT, 
                           wxT("Reference Body"), wxDefaultPosition, 
                           wxDefaultSize, 0 );
-    item4->Disable();
-    item3->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item5 = new wxStaticText( this, ID_TEXT, 
+    item3->Add( referenceBodyStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    wxStaticText *referenceFrameStaticText = new wxStaticText( this, ID_TEXT, 
                            wxT("Reference Frame"), wxDefaultPosition,
                            wxDefaultSize, 0 );
-    item5->Disable();
-    item3->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
+    item3->Add( referenceFrameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxString strs6[] =
+    StringArray items = theSolarSystem->GetBodiesInUse();
+    int theNumConfigBody = items.size();
+
+    for (int i=0; i<theNumConfigBody; i++)
     {
-        wxT("ComboItem")
-    };
-    wxComboBox *item6 = new wxComboBox( this, ID_COMBO, wxT(""), 
-                         wxDefaultPosition, wxSize(100,-1), 1, strs6, 
-                         wxCB_DROPDOWN );
-    item6->Disable();
-    item3->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
+      bodiesArray[i] = items[i].c_str();
+    }    
+      
+    referenceBodyComboBox = new wxComboBox( this, ID_COMBO, wxT(""), 
+                         wxDefaultPosition, wxDefaultSize, 
+                         theNumConfigBody, bodiesArray, 
+                         wxCB_DROPDOWN | wxCB_READONLY);        
+                         
+    item3->Add( referenceBodyComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
 
+    // hard coded for now
     wxString strs7[] =
     {
-        wxT("ComboItem")
+        wxT("Mean-of-J2000.0")
     };
-    wxComboBox *item7 = new wxComboBox( this, ID_COMBO, wxT(""),
-                         wxDefaultPosition, wxSize(100,-1), 1, strs7, 
-                         wxCB_DROPDOWN );
-    item7->Disable();
-    item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxComboBox *referenceFrameComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
+                         wxDefaultPosition, wxDefaultSize, 1, strs7, 
+                         wxCB_DROPDOWN | wxCB_READONLY );
+    referenceFrameComboBox->SetValue(wxT("Mean-of-J2000.0"));
+    item3->Add( referenceFrameComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
 
@@ -322,6 +334,11 @@ void OrbitPanel::LoadData()
     // change the element value
   //      stateComboBox->SetSelection(1);
   
+    // Get availible bodies for reference body
+    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
+    std::string refBody = theSpacecraft->GetStringParameter(refBodyId);
+    referenceBodyComboBox->SetValue(wxT(refBody.c_str()));
+
     // Reference Frame   
 //    std::string refFrame = theSpacecraft->GetStringParameter(8);
     std::string refFrame = theSpacecraft->GetDisplayCoordType();
@@ -426,6 +443,18 @@ void OrbitPanel::LoadData()
     wxString el6;
     el6.Printf("%.9f", element6);
     textCtrl6->SetValue(el6);    
+}
+
+//------------------------------------------------------------------------------
+// void OnComboChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when text is changed
+ */
+//------------------------------------------------------------------------------
+void OrbitPanel::OnComboChange()
+{
+    theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -551,6 +580,12 @@ void OrbitPanel::SaveData()
 {
     // save state type
     wxString stateStr = stateComboBox->GetStringSelection();
+    
+    int refBodyId = theSpacecraft->GetParameterID("ReferenceBody");
+    wxString refBodyStr = referenceBodyComboBox->GetStringSelection();
+    theSpacecraft->SetStringParameter(refBodyId,
+                   std::string(refBodyStr.c_str()));
+    
     // refFrame id = 8
 //    theSpacecraft->SetStringParameter(8, std::string (stateStr.c_str()));
     

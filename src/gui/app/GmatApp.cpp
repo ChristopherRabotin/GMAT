@@ -92,10 +92,15 @@ bool GmatApp::OnInit()
         wxSize size = ((wxUSE_UNIX != 1) ? wxDefaultSize : wxSize(800, 600));
         
         // create the main application window
+//        theMainFrame =
+//            new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
+//                              wxDefaultPosition, size,
+//                              wxDEFAULT_FRAME_STYLE);
         theMainFrame =
-            new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
+            new GmatMainFrame((wxFrame *)NULL, -1,
+                              _T("GMAT - Goddard Mission Analysis Tool"),
                               wxDefaultPosition, size,
-                              wxDEFAULT_FRAME_STYLE);
+                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
 
         // and show it (the frames, unlike simple controls, are not shown when
         // created initially)
