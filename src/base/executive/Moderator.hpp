@@ -297,6 +297,7 @@ private:
    void AddSolverToSandbox(Integer index);
    void AddSubscriberToSandbox(Integer index);
    void AddParameterToSandbox(Integer index);
+   void AddFunctionToSandbox(Integer index);
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);

@@ -2350,6 +2350,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          // Add Subscriber after Publisher. AddPublisherToSandbox() clears subscribers
          AddSubscriberToSandbox(sandboxNum-1); 
          AddParameterToSandbox(sandboxNum-1);
+         AddFunctionToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
          
          #if DEBUG_RUN
@@ -3465,6 +3466,25 @@ void Moderator::AddParameterToSandbox(Integer index)
    {
       param = theConfigManager->GetParameter(paramNames[i]);
       sandboxes[index]->AddObject(param);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void AddFunctionToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddFunctionToSandbox(Integer index)
+{
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddFunctionToSandbox() entered\n");
+   #endif
+   
+   Function *fn;
+   StringArray functionNames = theConfigManager->GetListOfItems(Gmat::FUNCTION);
+   for (Integer i=0; i<(Integer)functionNames.size(); i++)
+   {
+      fn = theConfigManager->GetFunction(functionNames[i]);
+      sandboxes[index]->AddObject(fn);
    }
 }
 
