@@ -22,7 +22,6 @@
 #include <wx/docview.h>
 #include <wx/menu.h>
 
-#include "VariableCreatePanel.hpp"
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
 #include "DocViewFrame.hpp"
@@ -30,6 +29,9 @@
 #include "TextDocument.hpp"
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
+#include "GmatAppData.hpp"
+#include "GmatMainNotebook.hpp"
+#include "VariableCreatePanel.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -333,7 +335,9 @@ void VariableCreatePanel::OnButton(wxCommandEvent& event)
     else if ( event.GetEventObject() == okButton )  
     {
         SetData(); 
-        Close(this);        
+        
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();       
     }
     else if ( event.GetEventObject() == applyButton )
     {
@@ -342,7 +346,8 @@ void VariableCreatePanel::OnButton(wxCommandEvent& event)
     } 
     else if ( event.GetEventObject() == cancelButton )
     {
-        Close(this);
+        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+        gmatMainNotebook->ClosePage();
     }      
     else if ( event.GetEventObject() == helpButton )           
         ; 
