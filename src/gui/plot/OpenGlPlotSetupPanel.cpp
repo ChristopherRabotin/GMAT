@@ -98,7 +98,7 @@ void OpenGlPlotSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
       mScSelectedListBox->Append(s);
       mScSelectedListBox->SetStringSelection(s);
       
-      // select next available item (loj: 8/18/04)
+      // select next available item
       mScAvailableListBox->
          SetSelection(mScAvailableListBox->GetSelection()+1);
 
@@ -240,10 +240,7 @@ void OpenGlPlotSetupPanel::Create()
    // empty StaticText
    wxStaticText *emptyStaticText =
       new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );
-
-   // default coordindate system
-   wxString strCoordArray[] = { wxT("") };
-   
+  
    wxString emptyList[] = {};
    Integer bsize = 3; // border size
    
@@ -272,13 +269,11 @@ void OpenGlPlotSetupPanel::Create()
    wxStaticText *titleCoordSys =
       new wxStaticText(this, -1, wxT("Coordinate System"),
                        wxDefaultPosition, wxSize(100,-1), 0);
-   
+
+   //loj: 1/19/05 Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(100,-1), 1, strCoordArray, wxCB_DROPDOWN);
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
    
-   //wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   //loj: 12/22/04 Added Coordinate System
    wxFlexGridSizer *plotOptionSizer = new wxFlexGridSizer(3, 0, 0);
 
    plotOptionSizer->Add(mPlotCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -493,8 +488,7 @@ void OpenGlPlotSetupPanel::SaveData()
 
       if (mScCount >= 0) // >=0 because the list needs to be cleared
       {
-         mOpenGlPlot->TakeAction("Clear"); //loj: 9/28/04 added
-         //mOpenGlPlot->SetBooleanParameter("ClearSpacecraftList", true);
+         mOpenGlPlot->TakeAction("Clear");
          
          for (int i=0; i<mScCount; i++)
          {
