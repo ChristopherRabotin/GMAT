@@ -22,6 +22,8 @@
 #include "ConfigManager.hpp"
 #include "ConfigManagerException.hpp"
 
+//#define DEBUG_RENAME 1
+
 ConfigManager* ConfigManager::theConfigManager = NULL;
 
 
@@ -380,28 +382,141 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// bool RenameItem(Gmat::ObjectType itemType, const std::string &oldName,
+// bool RenameItem(Gmat::ObjectType type, const std::string &oldName,
 //                 const std::string &newName)
 //------------------------------------------------------------------------------
-bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
+bool ConfigManager::RenameItem(Gmat::ObjectType type,
                                const std::string &oldName,
                                const std::string &newName)
 {
-   bool status = false;
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::RenameItem() type=%d, oldName=%s, newName=%s\n",
+       type, oldName.c_str(), newName.c_str());
+#endif
+   bool renamed = false;
     
    if (mapping.find(oldName) != mapping.end())
    {
       GmatBase *obj = mapping[oldName];
-      if (obj->GetType() == itemType)
+      if (obj->GetType() == type)
       {
          mapping.erase(oldName);
          mapping[newName] = obj;
          obj->SetName(newName);
-         status = true;
+         renamed = true;
       }
    }
-    
-   return status;
+   
+   if (!renamed)
+   {
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::RenameItem() Unable to rename: oldName not found.\n");
+#endif
+      return false;
+   }
+   
+   //loj: 11/17/04 - added
+   //--------------------------------------------------
+   // rename ref. object name used in parameters
+   //--------------------------------------------------
+   
+   if (type == Gmat::SPACECRAFT)
+   {
+      StringArray params = GetListOfItems(Gmat::PARAMETER);
+      StringArray subs = GetListOfItems(Gmat::SUBSCRIBER);
+      Subscriber *sub;
+      Parameter *param;
+      std::string oldParamName;
+      std::string newParamName;
+      
+      for (unsigned int i=0; i<params.size(); i++)
+      {
+#if DEBUG_RENAME
+         MessageInterface::ShowMessage("params[%d]=%s\n", i, params[i].c_str());
+#endif
+         
+         param = GetParameter(params[i]);
+         
+         // if system parameter
+         if (param->GetKey() == Parameter::SYSTEM_PARAM)
+         {
+            // rename ref. object name
+            param->RenameRefObject(type, oldName, newName);
+            
+            // rename actual parameter name
+            oldParamName = param->GetName();
+            newParamName = newName + "." + param->GetTypeName();
+            //param->SetName(newParamName);
+            // rename configured parameter name
+            renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
+
+#if DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("newParamName=%s\n", param->GetName().c_str());
+            MessageInterface::ShowMessage
+               ("===> Change Subscriber ref object names\n");
+#endif
+            //--------------------------------------------------
+            // rename ref. objects used in subscribers
+            //--------------------------------------------------
+            for (unsigned int i=0; i<subs.size(); i++)
+            {
+               sub = GetSubscriber(subs[i]);
+               if (sub->GetTypeName() == "OpenGLPlot")
+               {
+                  sub->RenameRefObject(type, oldName, newName);
+               }
+               else if (sub->GetTypeName() == "XYPlot" ||
+                        sub->GetTypeName() == "ReportFile")
+               {
+                  sub->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
+               }
+            }
+         }
+         else if (param->GetTypeName() == "Variable")
+         {
+            // if parameter name has oldName replace with newName
+            oldParamName = param->GetName();
+            newParamName = oldParamName;
+            std::string::size_type pos = newParamName.find(oldName);
+            if (pos != newParamName.npos)
+            {
+               newParamName.replace(pos, oldName.size(), newName);
+               //param->SetName(newParamName);
+            }
+            // rename configured parameter name
+            renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
+        
+            // if parameter expression has oldName replace with newName
+            std::string newExp = param->GetStringParameter("Expression");
+            pos = newExp.find(oldName);
+            if (pos != newExp.npos)
+            {
+               newExp.replace(pos, oldName.size(), newName);
+               param->SetStringParameter("Expression", newExp);
+               
+               // rename ref. parameter name
+               StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+               for (unsigned int i=0; i<refParamNames.size(); i++)
+               {
+                  oldParamName = refParamNames[i];
+                  newParamName = oldParamName;
+                  pos = oldParamName.find(oldName);
+                  if (pos != oldParamName.npos)
+                  {
+                     newParamName.replace(pos, oldName.size(), newName);
+                     param->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
+                  }
+               }
+            }
+         }//if (param->GetKey() == Parameter::SYSTEM_PARAM)
+      } //for (unsigned int i=0; i<params.size(); i++)
+   }
+   
+   
+   return renamed;
 }
 
 
