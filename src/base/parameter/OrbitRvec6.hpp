@@ -35,18 +35,17 @@ public:
    OrbitRvec6(const OrbitRvec6 &copy);
    OrbitRvec6& operator=(const OrbitRvec6 &right);
    virtual ~OrbitRvec6();
-
-   // methods inherited from Rvec6Var
-   virtual Rvector6 GetRvector6() const;
-   virtual Rvector6 EvaluateRvector6();
-
+   
    // methods inherited from Parameter
+   virtual Rvector6 EvaluateRvector6();
+   
    virtual Integer GetNumRefObjects() const;
    virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetInternalCoordSystem(CoordinateSystem *ss);
    virtual bool AddRefObject(GmatBase *obj);
    virtual bool Validate();
    virtual void Initialize();
-
+   
    // methods inherited from GmatBase
    virtual bool RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
@@ -59,7 +58,7 @@ public:
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-
+   
 protected:
 
 };

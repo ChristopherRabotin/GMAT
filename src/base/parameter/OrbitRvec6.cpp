@@ -48,6 +48,7 @@ OrbitRvec6::OrbitRvec6(const std::string &name, const std::string &typeStr,
    : Rvec6Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
               Gmat::SPACECRAFT)
 {
+   mNeedCoordSystem = true;
    AddRefObject(obj);
 }
 
@@ -94,20 +95,32 @@ OrbitRvec6::~OrbitRvec6()
 }
 
 //-------------------------------------
-// methods inherited from Rvec6Var
+// methods inherited from Parameter
 //-------------------------------------
 
-//------------------------------------------------------------------------------
-// virtual Rvector6 GetRvector6() const
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Rvector6 OrbitRvec6::GetRvector6() const
-{
-   return mRvec6Value;
-}
+//  //------------------------------------------------------------------------------
+//  // virtual Rvector6 GetRvector6() const
+//  //------------------------------------------------------------------------------
+//  /**
+//   * @return newly evaluated value of parameter.
+//   */
+//  //------------------------------------------------------------------------------
+//  Rvector6 OrbitRvec6::GetRvector6() const
+//  {
+//     return mRvec6Value;
+//  }
+
+//  //------------------------------------------------------------------------------
+//  // virtual void SetRvector6(const Rvector6 &val)
+//  //------------------------------------------------------------------------------
+//  /**
+//   * @Sets Rvector6 value of parameter.
+//   */
+//  //------------------------------------------------------------------------------
+//  void OrbitRvec6::SetRvector6(const Rvector6 &val)
+//  {
+//     mRvec6Value = val;
+//  }
 
 //------------------------------------------------------------------------------
 // virtual Rvector6 EvaluateRvector6()
@@ -121,10 +134,6 @@ Rvector6 OrbitRvec6::EvaluateRvector6()
    Evaluate();
    return mRvec6Value;
 }
-
-//-------------------------------------
-// methods nherited from Parameter
-//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const
@@ -156,6 +165,26 @@ void OrbitRvec6::SetSolarSystem(SolarSystem *ss)
       OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
    else
       OrbitData::SetRefObject(ss, Gmat::SOLAR_SYSTEM, ss->GetName());
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Sets internal CoordinateSystem pointer. Assumes parameter data is in
+ * this internal CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+void OrbitRvec6::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   //#if DEBUG_ORBITREAL
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetInternalCoordSystem() cs=%s to %s\n", cs->GetTypeName().c_str(),
+       this->GetName().c_str());
+   //#endif
+
+   OrbitData::SetInternalCoordSys(cs);
 }
 
 //------------------------------------------------------------------------------

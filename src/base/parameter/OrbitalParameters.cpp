@@ -48,7 +48,6 @@ VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +159,6 @@ VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
                GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -271,7 +269,6 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -394,7 +391,6 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -515,7 +511,6 @@ OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "Km/s", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -624,7 +619,6 @@ RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -732,7 +726,6 @@ RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -840,7 +833,6 @@ C3Energy::C3Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -948,7 +940,6 @@ Energy::Energy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -1056,7 +1047,6 @@ Altitude::Altitude(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

@@ -43,7 +43,6 @@ SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -148,9 +147,9 @@ GmatBase* SemilatusRectum::Clone(void) const
  */
 //------------------------------------------------------------------------------
 AngularMomentumMag::AngularMomentumMag(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "HMAG", obj, "Angular Momentum Mag", "Km^2/s", GmatParam::COORD_SYS)
+   : OrbitReal(name, "HMAG", obj, "Angular Momentum Mag", "Km^2/s", GmatParam::ORIGIN)
 {
-   AddRefObject(obj);
+   mDepObjectName = "Earth";
 }
 
 //------------------------------------------------------------------------------
@@ -257,7 +256,6 @@ GmatBase* AngularMomentumMag::Clone(void) const
 AngularMomentumX::AngularMomentumX(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HX", obj, "Angular Momentum X", "Km^2/s", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -364,7 +362,6 @@ GmatBase* AngularMomentumX::Clone(void) const
 AngularMomentumY::AngularMomentumY(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HY", obj, "Angular Momentum Y", "Km^2/s", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -471,7 +468,6 @@ GmatBase* AngularMomentumY::Clone(void) const
 AngularMomentumZ::AngularMomentumZ(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "HZ", obj, "Angular Momentum Z", "Km^2/s", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

@@ -43,7 +43,6 @@ AtmosDensity::AtmosDensity(const std::string &name, GmatBase *obj)
              Gmat::SPACECRAFT, GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------

@@ -46,7 +46,6 @@ GHA::GHA(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
    SetRefObjectName(Gmat::PARAMETER, "CurrA1MJD"); //if parameter, use type name
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +155,6 @@ Longitude::Longitude(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -266,7 +264,6 @@ Latitude::Latitude(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -376,7 +373,6 @@ LST::LST(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -487,7 +483,6 @@ BetaAngle::BetaAngle(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "Earth";
    PlanetData::mCentralBodyName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -548,7 +543,7 @@ BetaAngle::~BetaAngle()
 //------------------------------------------------------------------------------
 bool BetaAngle::Evaluate()
 {
-   mRealValue = PlanetData::GetReal("BetaAngle");    
+   mRealValue = PlanetData::GetReal("BetaAngle");
    
    if (mRealValue == PlanetData::PLANET_REAL_UNDEFINED)
       return false;

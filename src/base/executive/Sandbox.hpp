@@ -32,8 +32,9 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
-#include "Solver.hpp"
-#include "Burn.hpp"
+#include "CoordinateSystem.hpp"
+//  #include "Solver.hpp"
+//  #include "Burn.hpp"
 
 class Moderator;        // Forward reference for the moderator pointer
 
@@ -48,6 +49,7 @@ public:
    bool AddCommand(GmatCommand *cmd);
    bool AddSolarSystem(SolarSystem *ss);
    bool AddSubscriber(Subscriber *sub);
+   bool SetInternalCoordSystem(CoordinateSystem *ss);
    bool SetPublisher(Publisher *pub = NULL);
     
    GmatBase* GetInternalObject(std::string name, Gmat::ObjectType type);
@@ -77,6 +79,8 @@ private:
    std::map<std::string, GmatBase *> objectMap;
    /// Solar System model for this Sandbox
    SolarSystem    *solarSys;
+   /// CoordinateSystem used internally
+   CoordinateSystem    *internalCoordSys;
    /// GMAT Publisher singleton
    Publisher      *publisher;
    /// Command sequence for the run

@@ -23,6 +23,7 @@
 #include "GmatBase.hpp"
 #include "Rvector6.hpp"
 #include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
 
 namespace GmatParam
 {
@@ -56,6 +57,7 @@ public:
    bool IsPlottable() const;
    bool IsCoordSysDependent() const;
    bool IsOriginDependent() const;
+   bool NeedCoordSystem() const;
    
    void SetKey(const GmatParam::ParameterKey &key);
    
@@ -67,11 +69,18 @@ public:
    virtual Real GetReal();
    virtual Rvector6 GetRvector6();
    
+   virtual void SetReal(Real val);
+   virtual void SetRvector6(const Rvector6 &val);
+   
    virtual Real EvaluateReal();
    virtual Rvector6 EvaluateRvector6();
    
    virtual const std::string* GetParameterList() const;
-  
+   
+   //loj: 1/26/05 Added GetInternalCoordSystem(), SetInternalCoordSystem()
+   virtual CoordinateSystem* GetInternalCoordSystem();
+   
+   virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetSolarSystem(SolarSystem *ss);
    
    virtual void Initialize();
@@ -118,7 +127,8 @@ protected:
    bool mIsPlottable;
    bool mIsCoordSysDependent;
    bool mIsOriginDependent;
-
+   bool mNeedCoordSystem;
+   
    enum
    {
       OBJECT = GmatBaseParamCount,

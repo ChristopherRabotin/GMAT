@@ -280,8 +280,10 @@ private:
    Parameter* GetDefaultY();
    
    // sandbox
-   void AddSolarSysToSandbox(Integer index);
+   void AddSolarSystemToSandbox(Integer index);
+   void AddInternalCoordSystemToSandbox(Integer index);
    void AddPublisherToSandbox(Integer index);
+   void AddCoordSystemToSandbox(Integer index);
    void AddSpacecraftToSandbox(Integer index);
    void AddFormationToSandbox(Integer index);
    void AddPropSetupToSandbox(Integer index);
@@ -294,7 +296,7 @@ private:
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);
-
+   
    Moderator();
    virtual ~Moderator();
    Moderator(const Moderator&);
@@ -306,14 +308,14 @@ private:
    bool isRunReady;
    std::vector<Sandbox*> sandboxes;
    std::vector<GmatCommand*> commands;
-
+   
    static Moderator *instance;
    static GuiInterpreter *theGuiInterpreter;
    static ScriptInterpreter *theScriptInterpreter;
    ConfigManager *theConfigManager;
    FactoryManager *theFactoryManager;
    FileManager *theFileManager;
-
+   
    Publisher *thePublisher;
    BurnFactory *theBurnFactory;
    CommandFactory *theCommandFactory;
@@ -333,6 +335,7 @@ private:
    CoordinateSystemFactory *theCoordinateSystemFactory;
    
    SolarSystem *theDefaultSolarSystem;
+   CoordinateSystem *theInternalCoordSystem;
    SlpFile *theDefaultSlpFile;
    DeFile *theDefaultDeFile;
    StringArray thePlanetaryFileTypes;

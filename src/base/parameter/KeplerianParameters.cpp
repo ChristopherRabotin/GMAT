@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------------
 #include "KeplerianParameters.hpp"
 
+//1/24/05 loj: Removed AddRefObject(obj) because it is also added in OrbitReal
+
 //==============================================================================
 //                              KepSMA
 //==============================================================================
@@ -41,7 +43,6 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -148,7 +149,6 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -253,10 +253,8 @@ GmatBase* KepEcc::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepInc::KepInc(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::COORD_SYS)
 {
-   mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -363,7 +361,6 @@ GmatBase* KepInc::Clone(void) const
 KepAOP::KepAOP(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -467,10 +464,8 @@ GmatBase* KepAOP::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RAAN", obj, "RA of Asscending Node", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "RAAN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS)
 {
-   mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -574,10 +569,8 @@ GmatBase* KepRAAN::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepRADN::KepRADN(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::COORD_SYS)
 {
-   mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -684,7 +677,6 @@ KepTA::KepTA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -791,7 +783,6 @@ KepMA::KepMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -898,7 +889,6 @@ KepMM::KepMM(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MM", obj, "Mean Motion", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -1007,9 +997,7 @@ KepElem::KepElem(const std::string &name, GmatBase *obj)
    : OrbitRvec6(name, "KepElem", obj, "Keplerian Elements", " ", GmatParam::NO_DEP)
 {
    // Parameter member data
-   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
-   
-   AddRefObject(obj);
+   mIsPlottable = false;
 }
 
 //------------------------------------------------------------------------------

@@ -37,11 +37,9 @@ public:
    PlanetReal& operator=(const PlanetReal &right);
    virtual ~PlanetReal();
 
-   // methods inherited from RealVar
-   virtual Real GetReal();
+   // methods inherited from Parameter
    virtual Real EvaluateReal();
 
-   // methods inherited from Parameter
    virtual Integer GetNumRefObjects() const;
    virtual bool AddRefObject(GmatBase *obj);
    virtual void SetSolarSystem(SolarSystem *ss);

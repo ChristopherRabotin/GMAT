@@ -36,13 +36,13 @@ public:
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();
 
-   // methods inherited from RealVar
-   virtual Real GetReal();
-   virtual Real EvaluateReal();
-
    // methods inherited from Parameter
+   virtual Real EvaluateReal();
+   
    virtual Integer GetNumRefObjects() const;
+   virtual CoordinateSystem* GetInternalCoordSystem();
    virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetInternalCoordSystem(CoordinateSystem *ss);
    virtual bool AddRefObject(GmatBase*obj);
    virtual bool Validate();
    virtual void Initialize();

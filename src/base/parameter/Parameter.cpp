@@ -19,6 +19,7 @@
 #include "gmatdefs.hpp"
 #include "Parameter.hpp"
 #include "ParameterException.hpp"
+#include "ParameterInfo.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PARAMETER 1
@@ -120,6 +121,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mColor = 0; // black
    
    mIsTimeParam = isTimeParam;
+   mNeedCoordSystem = false;
    mIsCoordSysDependent = false;
    mIsOriginDependent = false;
    
@@ -129,6 +131,9 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
       mIsOriginDependent = true;
    
    mIsPlottable = true;
+
+   // register parameter names with info
+   ParameterInfo::Instance()->Add(name, depObj);
 }
 
 //------------------------------------------------------------------------------
@@ -247,7 +252,7 @@ bool Parameter::IsPlottable() const
 // bool IsCoordSysDependent() const
 //------------------------------------------------------------------------------
 /**
- * @return true if parameter is plottble.
+ * @return true if parameter is CoordinateSystem dependent.
  */
 //------------------------------------------------------------------------------
 bool Parameter::IsCoordSysDependent() const
@@ -259,12 +264,24 @@ bool Parameter::IsCoordSysDependent() const
 // bool IsOriginDependent() const
 //------------------------------------------------------------------------------
 /**
- * @return true if parameter is plottble.
+ * @return true if parameter is origin dependent.
  */
 //------------------------------------------------------------------------------
 bool Parameter::IsOriginDependent() const
 {
    return mIsOriginDependent;
+}
+
+//------------------------------------------------------------------------------
+// bool NeedCoordSystem() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is needs CoordinateSystem.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::NeedCoordSystem() const
+{
+   return mNeedCoordSystem;
 }
 
 //------------------------------------------------------------------------------
@@ -362,6 +379,40 @@ Rvector6 Parameter::GetRvector6()
 }
 
 //------------------------------------------------------------------------------
+// void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets Real value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetReal(Real val)
+{
+   throw ParameterException
+      ("Parameter: SetReal(): " + this->GetTypeName() + " has no "
+       "implementation of SetReal().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+//------------------------------------------------------------------------------
+// void SetRvector6(const Rvector6 &val)
+//------------------------------------------------------------------------------
+/**
+ * Sets Rvector6 value of parameter.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetRvector6(const Rvector6 &val)
+{
+   throw ParameterException
+      ("Parameter: SetRvector6(): " + this->GetTypeName() + " has no "
+       "implementation of SetRvector6().\nMay be an invalid call to this "
+       "function.\n");
+}
+
+//------------------------------------------------------------------------------
 // Real EvaluateReal()
 //------------------------------------------------------------------------------
 /**
@@ -404,9 +455,25 @@ const std::string* Parameter::GetParameterList() const
 }
 
 //------------------------------------------------------------------------------
+// virtual CoordinateSystem* GetInternalCoordSystem()
+//------------------------------------------------------------------------------
+CoordinateSystem* Parameter::GetInternalCoordSystem()
+{
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
 // void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void Parameter::SetSolarSystem(SolarSystem *ss)
+{
+   ; // do nothing here
+}
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void Parameter::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    ; // do nothing here
 }
@@ -648,6 +715,8 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case DEP_OBJECT: //loj: 12/8/04 added
       mDepObjectName = value;
+      //if (mIsCoordSysDependent)
+      //   return SetRefObjectName(Gmat::COORDINATE_SYSTEM, value);
       return true;
    default:
       return GmatBase::SetStringParameter(id, value);

@@ -38,7 +38,7 @@ public:
    bool SetRefObjectName(const Gmat::ObjectType type,
                          const std::string &name);
    GmatBase* GetRefObject(const Gmat::ObjectType type,
-                          const std::string &name);
+                          const std::string &name = "");
    bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                      const std::string &name = "");
 

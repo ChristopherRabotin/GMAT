@@ -53,6 +53,7 @@ EnvReal::EnvReal(const std::string &name, const std::string &typeStr,
    : RealVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false)
 {
+   mNeedCoordSystem = false;
    AddRefObject(obj);
 }
 
@@ -98,21 +99,10 @@ EnvReal::~EnvReal()
 {
 }
 
-//-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
 
-//------------------------------------------------------------------------------
-// virtual Real GetReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real EnvReal::GetReal()
-{
-   return mRealValue;
-}
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual Real EvaluateReal()
@@ -126,10 +116,6 @@ Real EnvReal::EvaluateReal()
    Evaluate();
    return mRealValue;
 }
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual void SetSolarSystem(SolarSystem *ss)

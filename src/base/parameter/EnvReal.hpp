@@ -37,11 +37,9 @@ public:
    EnvReal& operator=(const EnvReal &right);
    virtual ~EnvReal();
 
-   // methods inherited from RealVar
-   virtual Real GetReal();
-   virtual Real EvaluateReal();
-
    // methods inherited from Parameter
+   virtual Real EvaluateReal();
+   
    virtual Integer GetNumRefObjects() const;
    virtual bool AddRefObject(GmatBase *obj);
    virtual void SetSolarSystem(SolarSystem *ss);

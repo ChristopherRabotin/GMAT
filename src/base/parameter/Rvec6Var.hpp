@@ -44,40 +44,13 @@ public:
    virtual std::string ToString();
    
    virtual Rvector6 GetRvector6() const;
+   virtual void SetRvector6(const Rvector6 &val); //loj: 1/26/05 Added
    virtual Rvector6 EvaluateRvector6();
    
-   // methods inherited from Parameter
-   virtual const std::string* GetParameterList() const;
-   
-   // methods inherited from GmatBase
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string str) const;
-   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-   
-   virtual Real GetRealParameter(const Integer id) const;
-   virtual Real SetRealParameter(const Integer id, const Real value);
-
 protected:
-    
-   enum
-   {
-      VALUE1 = ParameterParamCount,
-      VALUE2,
-      VALUE3,
-      VALUE4,
-      VALUE5,
-      VALUE6,
-      Rvec6VarParamCount
-   };
-
+       
    Rvector6 mRvec6Value;
-        
-   static const Gmat::ParameterType
-   PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
-   static const std::string
-   PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
-    
+      
 private:
 
 };

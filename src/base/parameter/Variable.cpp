@@ -28,21 +28,6 @@
 //#define DEBUG_VARIABLE 1
 
 //---------------------------------
-// static data
-//---------------------------------
-const std::string
-Variable::PARAMETER_TEXT[VariableParamCount - RealVarParamCount] =
-{
-   "RefParams"
-}; 
-
-const Gmat::ParameterType
-Variable::PARAMETER_TYPE[VariableParamCount - RealVarParamCount] =
-{
-   Gmat::STRINGARRAY_TYPE
-};
-
-//---------------------------------
 // public methods
 //---------------------------------
 
@@ -165,17 +150,6 @@ Real Variable::EvaluateReal()
    return mRealValue;
 }
 
-//-------------------------------------
-// Methods inherited from Parameter
-//-------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual const std::string* GetParameterList() const
-//------------------------------------------------------------------------------
-const std::string* Variable::GetParameterList() const
-{
-   return PARAMETER_TEXT;
-}
 
 //-------------------------------------
 // Methods inherited from GmatBase
@@ -214,52 +188,6 @@ bool Variable::RenameRefObject(const Gmat::ObjectType type,
    return false;
 }
 
-//------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Variable::GetParameterText(const Integer id) const
-{
-   if (id >= RealVarParamCount && id < VariableParamCount)
-      return PARAMETER_TEXT[id - RealVarParamCount];
-   else
-      return RealVar::GetParameterText(id);
-}
-
-//------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string str) const
-//------------------------------------------------------------------------------
-Integer Variable::GetParameterID(const std::string &str) const
-{
-   for (int i=RealVarParamCount; i<VariableParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - RealVarParamCount])
-         return i;
-   }
-   
-   return RealVar::GetParameterID(str);
-}
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType Variable::GetParameterType(const Integer id) const
-{
-   if (id >= RealVarParamCount && id < VariableParamCount)
-      return PARAMETER_TYPE[id - RealVarParamCount];
-   else
-      return RealVar::GetParameterType(id);
-}
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Variable::GetParameterTypeString(const Integer id) const
-{
-   if (id >= RealVarParamCount && id < VariableParamCount)
-      return PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
-   else
-      return RealVar::GetParameterTypeString(id);
-}
 
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -367,45 +295,25 @@ bool Variable::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 //------------------------------------------------------------------------------
-// const StringArray& GetStringArrayParameter(const Integer id) const
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
-const StringArray& Variable::GetStringArrayParameter(const Integer id) const
+const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
 #if DEBUG_VARIABLE
    MessageInterface::ShowMessage
-      ("Variable::GetStringArrayParameter() id=%d\n", id);
+      ("Variable::GetStringArrayParameter() type=%d\n", type);
 #endif
    
-   switch (id)
-   {
-   case REF_PARAMS:
-      {
 #if DEBUG_VARIABLE
-         StringArray paramNames = mParamDb->GetNamesOfParameters();
-         MessageInterface::ShowMessage
-            ("Variable::GetStringArrayParameter() mParamDb->GetNamesOfParameters() "
-             "size=%d\n", paramNames.size());
-         for (unsigned int i=0; i<paramNames.size(); i++)
-            MessageInterface::ShowMessage
-               ("Variable::GetStringArrayParameter() "
-                "paramNames[%d]=%s\n", i, paramNames[i].c_str());
-#endif
-      
-         return mParamDb->GetNamesOfParameters();
-      }
-   default:
-      return RealVar::GetStringArrayParameter(id);
-   }
-}
-
-//------------------------------------------------------------------------------
-// const StringArray& GetStringArrayParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-const StringArray& Variable::GetStringArrayParameter(const std::string &label) const
-{
-#if DEBUG_VARIABLE
+   StringArray paramNames = mParamDb->GetNamesOfParameters();
    MessageInterface::ShowMessage
-      ("Variable::GetStringArrayParameter() label=%s\n", label.c_str());
+      ("Variable::GetStringArrayParameter() mParamDb->GetNamesOfParameters() "
+       "size=%d\n", paramNames.size());
+   for (unsigned int i=0; i<paramNames.size(); i++)
+      MessageInterface::ShowMessage
+         ("Variable::GetStringArrayParameter() "
+          "paramNames[%d]=%s\n", i, paramNames[i].c_str());
 #endif
-   return (GetStringArrayParameter(GetParameterID(label)));
+   
+   return mParamDb->GetNamesOfParameters();
 }

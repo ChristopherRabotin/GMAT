@@ -76,17 +76,18 @@ public:
    virtual Real SetRealParameter(const std::string &label, const Real value);
     
 protected:
-    
+
+   //loj: 1/26/05 use ParameterParamCount instead of RealVarParamCount
    enum
    {
-      INITIAL_EPOCH = RealVarParamCount,
+      INITIAL_EPOCH = ParameterParamCount, //RealVarParamCount,
       ElapsedDaysParamCount
    };
-
+   
    static const Gmat::ParameterType
-      PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount];
+      PARAMETER_TYPE[ElapsedDaysParamCount - ParameterParamCount];
    static const std::string
-      PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount];
+      PARAMETER_TEXT[ElapsedDaysParamCount - ParameterParamCount];
     
 private:
 };
@@ -123,14 +124,14 @@ protected:
     
    enum
    {
-      INITIAL_EPOCH = RealVarParamCount,
+      INITIAL_EPOCH = ParameterParamCount,
       ElapsedSecsParamCount
    };
 
    static const Gmat::ParameterType
-      PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount];
+      PARAMETER_TYPE[ElapsedSecsParamCount - ParameterParamCount];
    static const std::string
-      PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount];
+      PARAMETER_TEXT[ElapsedSecsParamCount - ParameterParamCount];
     
 private:
 };

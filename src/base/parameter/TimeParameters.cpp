@@ -19,6 +19,9 @@
 //------------------------------------------------------------------------------
 #include "TimeParameters.hpp"
 
+//1/26/05 loj: Removed AddRefObject(obj) because it is also added in TimeReal
+//             Changed RealVarParamCount to ParameterParamCount
+
 //==============================================================================
 //                              CurrA1MJD
 //==============================================================================
@@ -37,7 +40,6 @@ CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
    : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days",
               "day")
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -121,13 +123,13 @@ GmatBase* CurrA1MJD::Clone(void) const
 // static data
 //---------------------------------
 const std::string
-ElapsedDays::PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount] =
+ElapsedDays::PARAMETER_TEXT[ElapsedDaysParamCount - ParameterParamCount] =
 {
    "InitialEpoch"
 };
 
 const Gmat::ParameterType
-ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
+ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - ParameterParamCount] =
 {
    Gmat::REAL_TYPE
 };
@@ -151,8 +153,6 @@ ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj)
 {
    // GmatBase data
    parameterCount = ElapsedDaysParamCount;
-
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -246,8 +246,8 @@ GmatBase* ElapsedDays::Clone(void) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 {
-   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-      return PARAMETER_TYPE[id - RealVarParamCount];
+   if (id >= ParameterParamCount && id < ElapsedDaysParamCount)
+      return PARAMETER_TYPE[id - ParameterParamCount];
    else
       return TimeReal::GetParameterType(id);
 
@@ -262,8 +262,8 @@ Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 {
-   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+   if (id >= ParameterParamCount && id < ElapsedDaysParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
    else
       return TimeReal::GetParameterTypeString(id);
 
@@ -278,8 +278,8 @@ std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterText(const Integer id)
 {
-   if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
-      return PARAMETER_TEXT[id - RealVarParamCount];
+   if (id >= ParameterParamCount && id < ElapsedDaysParamCount)
+      return PARAMETER_TEXT[id - ParameterParamCount];
    else
       return TimeReal::GetParameterText(id);
 
@@ -294,9 +294,9 @@ std::string ElapsedDays::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedDays::GetParameterID(const std::string &str)
 {
-   for (int i = RealVarParamCount; i < ElapsedDaysParamCount; i++)
+   for (int i = ParameterParamCount; i < ElapsedDaysParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - RealVarParamCount])
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
          return i;
    }
    
@@ -383,13 +383,13 @@ Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
 // static data
 //---------------------------------
 const std::string
-ElapsedSecs::PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount] =
+ElapsedSecs::PARAMETER_TEXT[ElapsedSecsParamCount - ParameterParamCount] =
 {
    "InitialEpoch"
 };
 
 const Gmat::ParameterType
-ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
+ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - ParameterParamCount] =
 {
    Gmat::REAL_TYPE
 };
@@ -413,8 +413,6 @@ ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj)
 {
    // GmatBase data
    parameterCount = ElapsedSecsParamCount;
-
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -509,8 +507,8 @@ GmatBase* ElapsedSecs::Clone(void) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 {
-   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-      return PARAMETER_TYPE[id - RealVarParamCount];
+   if (id >= ParameterParamCount && id < ElapsedSecsParamCount)
+      return PARAMETER_TYPE[id - ParameterParamCount];
    else
       return TimeReal::GetParameterType(id);
 
@@ -525,8 +523,8 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 {
-   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+   if (id >= ParameterParamCount && id < ElapsedSecsParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
    else
       return TimeReal::GetParameterTypeString(id);
 
@@ -541,8 +539,8 @@ std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterText(const Integer id)
 {
-   if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
-      return PARAMETER_TEXT[id - RealVarParamCount];
+   if (id >= ParameterParamCount && id < ElapsedSecsParamCount)
+      return PARAMETER_TEXT[id - ParameterParamCount];
    else
       return TimeReal::GetParameterText(id);
 
@@ -557,9 +555,9 @@ std::string ElapsedSecs::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedSecs::GetParameterID(const std::string &str)
 {
-   for (int i = RealVarParamCount; i < ElapsedSecsParamCount; i++)
+   for (int i = ParameterParamCount; i < ElapsedSecsParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - RealVarParamCount])
+      if (str == PARAMETER_TEXT[i - ParameterParamCount])
          return i;
    }
    

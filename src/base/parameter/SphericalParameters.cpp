@@ -20,6 +20,7 @@
 
 #include "SphericalParameters.hpp"
 
+//1/24/05 loj: Removed AddRefObject(obj) because it is also added in OrbitReal
 
 //==============================================================================
 //                              SphRMag
@@ -42,7 +43,6 @@
 SphRMag::SphRMag(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km", GmatParam::ORIGIN)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -145,9 +145,8 @@ GmatBase* SphRMag::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphRA::SphRA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +252,6 @@ GmatBase* SphRA::Clone(void) const
 SphDec::SphDec(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "DEC", obj, "Sph. Declination", "Deg", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -356,9 +354,8 @@ GmatBase* SphDec::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphVMag::SphVMag(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::COORD_SYS)
+   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::ORIGIN)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -461,9 +458,8 @@ GmatBase* SphVMag::Clone(void) const
  */
 //------------------------------------------------------------------------------
 SphRAV::SphRAV(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -569,7 +565,6 @@ GmatBase* SphRAV::Clone(void) const
 SphDecV::SphDecV(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "DECV", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
 {
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -676,9 +671,7 @@ SphElem::SphElem(const std::string &name, GmatBase *obj)
    : OrbitRvec6(name, "SphElem", obj, "Spherical Elements", " ", GmatParam::NO_DEP)
 {
    // Parameter member data
-   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
-
-   AddRefObject(obj);
+   mIsPlottable = false;
 }
 
 //------------------------------------------------------------------------------

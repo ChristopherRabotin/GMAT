@@ -24,31 +24,6 @@
 
 
 //---------------------------------
-// static data
-//---------------------------------
-const std::string
-Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount] =
-{
-   "Value1",
-   "Value2",
-   "Value3",
-   "Value4",
-   "Value5",
-   "Value6"
-}; 
-
-const Gmat::ParameterType
-Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
-{
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
-};
-
-//---------------------------------
 // public methods
 //---------------------------------
 
@@ -77,8 +52,6 @@ Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, false)
 {
    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
-   // GmatBase data
-   parameterCount = Rvec6VarParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -168,6 +141,26 @@ std::string Rvec6Var::ToString()
 }
 
 //------------------------------------------------------------------------------
+// Rvector6 GetRvector6() const
+//------------------------------------------------------------------------------
+/**
+ * @return Rvector6 value of parameter without evaluating.
+ */
+//------------------------------------------------------------------------------
+Rvector6 Rvec6Var::GetRvector6() const
+{
+   return mRvec6Value;
+}
+
+//------------------------------------------------------------------------------
+// virtual void SetRvector6(const Rvector6 &val)
+//------------------------------------------------------------------------------
+void Rvec6Var::SetRvector6(const Rvector6 &val)
+{
+   mRvec6Value = val;
+}
+
+//------------------------------------------------------------------------------
 // Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
@@ -194,106 +187,3 @@ Rvector6 Rvec6Var::EvaluateRvector6()
                    REAL_PARAMETER_UNDEFINED, REAL_PARAMETER_UNDEFINED);
 }
 
-
-//------------------------------------------------------------------------------
-// Rvector6 GetRvector6() const
-//------------------------------------------------------------------------------
-/**
- * Retrieves Rvector6 value of parameter without evaluating.
- */
-//------------------------------------------------------------------------------
-Rvector6 Rvec6Var::GetRvector6() const
-{
-   return mRvec6Value;
-}
-
-//------------------------------------
-// Inherited methods from Parameter
-//------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual const std::string* GetParameterList() const
-//------------------------------------------------------------------------------
-const std::string* Rvec6Var::GetParameterList() const
-{
-   return PARAMETER_TEXT;
-}
-
-
-//------------------------------------
-// Inherited methods from GmatBase
-//------------------------------------
-
-//------------------------------------------------------------------------------
-// std::string GetParameterText(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Rvec6Var::GetParameterText(const Integer id) const
-{
-   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
-      return PARAMETER_TEXT[id - ParameterParamCount];
-   else
-      return Parameter::GetParameterText(id);
-}
-
-//------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string str) const
-//------------------------------------------------------------------------------
-Integer Rvec6Var::GetParameterID(const std::string str) const
-{
-   for (int i=ParameterParamCount; i<Rvec6VarParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - ParameterParamCount])
-         return i;
-   }
-   
-   return Parameter::GetParameterID(str);
-}
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-Gmat::ParameterType Rvec6Var::GetParameterType(const Integer id) const
-{
-   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
-      return PARAMETER_TYPE[id - ParameterParamCount];
-   else
-      return Parameter::GetParameterType(id);
-}
-
-//------------------------------------------------------------------------------
-// std::string GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-std::string Rvec6Var::GetParameterTypeString(const Integer id) const
-{
-   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
-      return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
-   else
-      return Parameter::GetParameterTypeString(id);
-}
-
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id) const
-//------------------------------------------------------------------------------
-Real Rvec6Var::GetRealParameter(const Integer id) const
-{
-   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
-      return mRvec6Value(id - ParameterParamCount);
-   else
-      return Parameter::GetRealParameter(id);
-}
-
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-Real Rvec6Var::SetRealParameter(const Integer id, const Real value)
-{
-   if (id >= ParameterParamCount && id < Rvec6VarParamCount)
-   {
-      mRvec6Value(id - ParameterParamCount) = value;
-      return value;
-   }
-   else
-   {
-      return Parameter::SetRealParameter(id, value);
-   }
-}

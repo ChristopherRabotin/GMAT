@@ -24,13 +24,16 @@
 #include "Parameter.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_SANDBOX 1
+//#define DEBUG_SANDBOX_OBJ 1
+//#define DEBUG_SANDBOX_INIT 2
+//#define DEBUG_SANDBOX_RUN 1
 
 //------------------------------------------------------------------------------
 // Sandbox::Sandbox(void)
 //------------------------------------------------------------------------------
 Sandbox::Sandbox() :
    solarSys        (NULL),
+   internalCoordSys(NULL),
    publisher       (NULL),
    sequence        (NULL),
    current         (NULL),
@@ -59,9 +62,9 @@ Sandbox::~Sandbox()
 //------------------------------------------------------------------------------
 bool Sandbox::AddObject(GmatBase *obj)
 {
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
-      ("Sandbox::AddObject() objType=%s, objName=%s\n",
+      ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str());
 #endif
    
@@ -137,6 +140,23 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
       return false;
 //   solarSys = (SolarSystem*)(ss->Clone());
    solarSys = ss;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   if (state == INITIALIZED)
+      state = IDLE;
+   
+   if (!cs)
+      return false;
+   
+   //internalCoordSys = (CoordinateSystem*)(cs->Clone());
+   internalCoordSys = cs;
    return true;
 }
 
@@ -228,17 +248,24 @@ bool Sandbox::Initialize()
    {
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage
-            ("Sandbox::Initialize() objType=%s, objName=%s\n",
+            ("Sandbox::Initialize() objTypeName=%s, objName=%s\n",
              (omi->second)->GetTypeName().c_str(),
              (omi->second)->GetName().c_str());
 #endif
-         if ((omi->second)->GetType() == Gmat::PROP_SETUP)
+         if ((omi->second)->GetType() == Gmat::COORDINATE_SYSTEM)
+         {
+            CoordinateSystem *cs = (CoordinateSystem*)(omi->second);
+            cs->SetSolarSystem(solarSys);
+            cs->SetOrigin(solarSys->GetBody(cs->GetStringParameter("OriginName")));
+            cs->SetJ2000Body(solarSys->GetBody(cs->GetStringParameter("J2000BodyName")));
+            cs->Initialize();
+         }
+         else if ((omi->second)->GetType() == Gmat::PROP_SETUP)
          {
             ((PropSetup*)(omi->second))->GetForceModel()
                ->SetSolarSystem(solarSys);
-            //((PropSetup*)(omi->second))->Initialize();
          }
          else if((omi->second)->GetType() == Gmat::SPACECRAFT)
          {
@@ -257,13 +284,50 @@ bool Sandbox::Initialize()
             // Set reference object for system parameters
             if (param->GetKey() == GmatParam::SYSTEM_PARAM)
             {
-               std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
-#if DEBUG_SANDBOX
+               // set Spacecraft
+               std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);         
+               #if DEBUG_SANDBOX_INIT > 1
                MessageInterface::ShowMessage
-                  ("Sandbox::Initialize() Set SC<%s> pointer on parameter: \"%s\"\n",
+                  ("Sandbox::Initialize() Set SC <%s> pointer on parameter: \"%s\"\n",
                    scName.c_str(), param->GetName().c_str());
-#endif
+               #endif
                param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
+
+                              
+               // set Internal and Output CoordinateSystem
+               if (param->NeedCoordSystem())
+               {                  
+                  param->SetInternalCoordSystem(internalCoordSys);
+                  std::string csName;
+                  
+                  try
+                  {
+                     csName = param->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+                  }
+                  catch(BaseException &e)
+                  {
+                     //----------------------------------------------------
+                     //loj: 1/26/05 temp. fix until ScriptInterpreter can
+                     //     handle CoordinateSystem
+                     //----------------------------------------------------
+                     #if DEBUG_SANDBOX_INIT
+                     MessageInterface::ShowMessage
+                        ("Sandbox::Initialize() ===>temp. fix for B3 script. setting "
+                         "EarthMJ2000Eq to %s \n", param->GetName().c_str());
+                     #endif
+                     csName = "EarthMJ2000Eq";
+                     param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, csName);
+                  }
+                  
+                  #if DEBUG_SANDBOX_INIT > 1
+                  MessageInterface::ShowMessage
+                     ("Sandbox::Initialize() Set CS <%s> pointer on parameter: \"%s\"\n",
+                      csName.c_str(), param->GetName().c_str());
+                  #endif
+                  param->SetRefObject(GetInternalObject(csName, Gmat::COORDINATE_SYSTEM),
+                                      Gmat::COORDINATE_SYSTEM, csName);
+               }
+               
                param->SetSolarSystem(solarSys);
                param->Initialize();
             }
@@ -273,8 +337,8 @@ bool Sandbox::Initialize()
    else
       throw SandboxException("No solar system defined in the Sandbox!");
 
-
-#if DEBUG_SANDBOX
+   
+#if DEBUG_SANDBOX_INIT
    MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Variables...\n");
 #endif
    // Note: All system parameters need to be initialized first
@@ -288,11 +352,12 @@ bool Sandbox::Initialize()
          
          if (param->GetTypeName() == "Variable")
          {
-#if DEBUG_SANDBOX
+            #if DEBUG_SANDBOX_INIT > 1
             MessageInterface::ShowMessage
                ("Sandbox::Initialize() userParamName=%s\n", param->GetName().c_str());
-#endif
-            StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+            #endif
+            //StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+            StringArray refParamNames = param->GetRefObjectNameArray(Gmat::PARAMETER);
             for (unsigned int i=0; i<refParamNames.size(); i++)
             {
                refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
@@ -304,7 +369,7 @@ bool Sandbox::Initialize()
       }
    }
 
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_INIT
    MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Subscribers...\n");
 #endif
 
@@ -316,7 +381,7 @@ bool Sandbox::Initialize()
          Subscriber *sub = (Subscriber*)(omi->second);
          GmatBase *refParam;
          
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_INIT > 1
          MessageInterface::ShowMessage
             ("Sandbox::Initialize() subType=%s, subName=%s\n",
              sub->GetTypeName().c_str(), sub->GetName().c_str());
@@ -336,7 +401,7 @@ bool Sandbox::Initialize()
       }
    }
    
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_INIT
    MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Commands...\n");
 #endif
    // Initialize commands
@@ -350,7 +415,7 @@ bool Sandbox::Initialize()
       current = current->GetNext();
    }
    
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_INIT
    MessageInterface::ShowMessage("Sandbox::Initialize() Successfully initialized\n");
 #endif
    
@@ -365,10 +430,10 @@ bool Sandbox::Execute()
 {
    
    bool rv = true;
-
+   
    state = RUNNING;
    Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
-    
+   
    current = sequence;
    if (!current)
       return false;
@@ -379,10 +444,12 @@ bool Sandbox::Execute()
          MessageInterface::ShowMessage("Sandbox::Execution interrupted by Moderator\n");
          return rv;
       }
-        
-      // MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
-      //                               current->GetTypeName().c_str());
 
+      #if DEBUG_SANDBOX_RUN
+      MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
+                                    current->GetTypeName().c_str());
+      #endif
+      
       if (current->GetTypeName() == "Target") {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
             currentState = Gmat::RUNNING;
@@ -394,7 +461,7 @@ bool Sandbox::Execute()
          publisher->SetRunState(currentState);
          runState = currentState;
       }
-        
+      
       rv = current->Execute();
 
       // Possible fix for displaying the last iteration...
@@ -413,7 +480,7 @@ bool Sandbox::Execute()
       }
       current = current->GetNext();
    }
-
+   
    return rv;
 }
 
@@ -481,7 +548,7 @@ void Sandbox::Clear()
 //------------------------------------------------------------------------------
 bool Sandbox::AddSubscriber(Subscriber *sub)
 {
-#if DEBUG_SANDBOX
+#if DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::AddSubscriber() name = %s\n",
        sub->GetName().c_str());

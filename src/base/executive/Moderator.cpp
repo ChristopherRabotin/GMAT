@@ -26,9 +26,8 @@
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
-//#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_PLANETARY_FILE 1
-//#define DEBUG_MULTI_STOP 1
+//#define DEBUG_MULTI_STOP 2
 //#define DEBUG_USER_INTERRUPT 1
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
@@ -85,7 +84,7 @@ bool Moderator::Initialize(bool fromGui)
         
          // Create publisher
          thePublisher = Publisher::Instance();
-        
+         
          // Create factories
          theAtmosphereFactory = new AtmosphereFactory();
          theAxisSystemFactory = new AxisSystemFactory(); //loj: 01/18/05 - added
@@ -103,7 +102,7 @@ bool Moderator::Initialize(bool fromGui)
          theSpacecraftFactory = new SpacecraftFactory();
          theStopConditionFactory = new StopConditionFactory();
          theSubscriberFactory = new SubscriberFactory();
-
+         
          // Register factories
          theFactoryManager->RegisterFactory(theAtmosphereFactory);
          theFactoryManager->RegisterFactory(theAxisSystemFactory);
@@ -121,13 +120,19 @@ bool Moderator::Initialize(bool fromGui)
          theFactoryManager->RegisterFactory(theSpacecraftFactory);
          theFactoryManager->RegisterFactory(theStopConditionFactory);
          theFactoryManager->RegisterFactory(theSubscriberFactory);
-
+         
          // Create default SolarSystem
          theDefaultSolarSystem = new SolarSystem("DefaultSolarSystem");
          //theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
          //SetSolarSystemInUse("DefaultSolarSystem");
          //MessageInterface::ShowMessage
          //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
+         
+         // Create internal CoordinateSystem with noname, so that it will not
+         // be configured
+         theInternalCoordSystem = CreateCoordinateSystem("", true);
+         //MessageInterface::ShowMessage
+         //   ("Moderator::Initialize() theInternalCoordSystem:%s created\n")
          
          // Read startup file
          theFileManager->ReadStartupFile();
@@ -1396,9 +1401,9 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
       {
          // create MJ2000Eq AxisSystem with Earth as origin
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
-         //cs->SetStringParameter("Origin", "Earth"); //loj: 1/18/05 Not available yet
-         if (axis)
-            cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+         cs->SetStringParameter("OriginName", "Earth");
+         cs->SetStringParameter("J2000BodyName", "Earth");
+         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
       }
    }
    catch (BaseException &e)
@@ -2313,11 +2318,14 @@ Integer Moderator::RunMission(Integer sandboxNum)
                                         "Invalid Sandbox number" + sandboxNum);
          return status;
       }
-      
+
       try
       {
-         AddSolarSysToSandbox(sandboxNum-1);
+         // add objects to sandbox and initialize
+         AddSolarSystemToSandbox(sandboxNum-1);
+         AddInternalCoordSystemToSandbox(sandboxNum-1);
          AddPublisherToSandbox(sandboxNum-1);        
+         AddCoordSystemToSandbox(sandboxNum-1);
          AddSpacecraftToSandbox(sandboxNum-1);
          AddFormationToSandbox(sandboxNum-1);
          AddForceModelToSandbox(sandboxNum-1);
@@ -2342,6 +2350,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
             ("Moderator::RunMission() after InitializeSanbox() \n");
 #endif
 
+         // execute sandbox
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          
@@ -2364,7 +2373,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
       }
       catch (...)
       {
-         // assign status
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() Unknown error occurred.\n");
          throw;
       }
    }
@@ -2643,11 +2653,12 @@ void Moderator::CreateDefaultMission()
 
       // CoordinateSystem
       CreateCoordinateSystem("EarthMJ2000Eq", true);
+      
       CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
       AxisSystem *axis = CreateAxisSystem("MJ2000Ec", "");
-      //cs->SetStringParameter("Origin", "Earth"); //loj: 1/18/05 Not available yet
-      if (axis)
-         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+      cs->SetStringParameter("OriginName", "Earth");
+      cs->SetStringParameter("J2000BodyName", "Earth");
+      cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
       
       // Spacecraft
       CreateSpacecraft("Spacecraft", "DefaultSC");
@@ -2694,6 +2705,12 @@ void Moderator::CreateDefaultMission()
       CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
       CreateParameter("Apoapsis", "DefaultSC.Earth.Apoapsis");
       CreateParameter("Periapsis", "DefaultSC.Earth.Periapsis");
+      CreateParameter("OrbitPeriod", "DefaultSC.Earth.OrbitPeriod");
+      CreateParameter("RadApo", "DefaultSC.Earth.RadApo");
+      CreateParameter("RadPer", "DefaultSC.Earth.RadPer");
+      CreateParameter("C3Energy", "DefaultSC.Earth.C3Energy");
+      CreateParameter("Energy", "DefaultSC.Earth.Energy");
+      CreateParameter("Altitude", "DefaultSC.Earth.Altitude");
 
       // Spherical parameters
       CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
@@ -2727,7 +2744,8 @@ void Moderator::CreateDefaultMission()
       
 #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default parameters created\n");
-#endif   
+#endif
+      
       // Set parameter description and object name
       StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
       Parameter *param;
@@ -2739,15 +2757,25 @@ void Moderator::CreateDefaultMission()
          // need spacecraft if system parameter
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
+            //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
             param->SetStringParameter("Expression", param->GetName());
             param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-            if (param->IsOriginDependent())
-               param->SetStringParameter("DepObject", "Earth");
-            else if (param->IsCoordSysDependent())
-               param->SetStringParameter("DepObject", "EarthMJ2000Eq");
+
+            if (param->NeedCoordSystem())
+            {
+               param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+               if (param->IsOriginDependent())
+                  param->SetStringParameter("DepObject", "Earth");
+               else if (param->IsCoordSysDependent())
+                  param->SetStringParameter("DepObject", "EarthMJ2000Eq");
+            }
          }
       }
       
+#if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
+#endif   
+
       // StopCondition
       StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
@@ -2808,6 +2836,14 @@ void Moderator::CreateDefaultMission()
       stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetRealParameter("Goal", 5000.0);
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
+#endif
+      
+#if DEBUG_MULTI_STOP > 1
+      StopCondition *stopOnPeriapsis =
+         CreateStopCondition("StopCondition", "StopOnDefaultSC.Earth.Periapsis");
+      stopOnPeriapsis->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
+      stopOnPeriapsis->SetStringParameter("StopVar", "DefaultSC.Earth.Periapsis");
+      propCommand->SetRefObject(stopOnPeriapsis, Gmat::STOP_CONDITION, "", 2);
       //----------------------------------------------------
 #endif
 
@@ -2986,8 +3022,8 @@ Burn* Moderator::GetDefaultBurn()
    }
    else
    {
-      // create ImpulsiveBurn
-      return CreateBurn("ImpulsiveBurn", "DefaultBurn");
+      // create ImpulsiveBurn (loj: 1/26/05 Changed the name to DefaultImpulsiveBurn)
+      return CreateBurn("ImpulsiveBurn", "DefaultImpulsiveBurn");
    }
 }
 
@@ -3053,7 +3089,7 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    std::string epochVar = scName + ".CurrA1MJD";
    std::string stopVar = scName + ".ElapsedSecs";
 
-#ifdef DEBUG_DEFAULT_COMMAND
+#ifdef DEBUG_DEFAULT_MISSION
    MessageInterface::ShowMessage
       ("Moderator::CreateDefaultStopCondition() scName=%s, epochVar=%s, stopVar=%s\n",
        scName.c_str(), epochVar.c_str(), stopVar.c_str());
@@ -3110,11 +3146,11 @@ Parameter* Moderator::GetDefaultX()
 Parameter* Moderator::GetDefaultY()
 {
    Spacecraft *sc = GetDefaultSpacecraft();
-   Parameter* param = GetParameter(sc->GetName() + "EarthMJ2000Eq.X");
+   Parameter* param = GetParameter(sc->GetName() + ".EarthMJ2000Eq.X");
    
    if (param == NULL)
    {
-      param = CreateParameter("X", sc->GetName() + "EarthMJ2000Eq.X");
+      param = CreateParameter("X", sc->GetName() + ".EarthMJ2000Eq.X");
       param->SetRefObjectName(Gmat::SPACECRAFT, sc->GetName());
    }
    
@@ -3123,13 +3159,32 @@ Parameter* Moderator::GetDefaultY()
 
 // sandbox
 //------------------------------------------------------------------------------
-// void AddSolarSysToSandbox(Integer index)
+// void AddSolarSystemToSandbox(Integer index)
 //------------------------------------------------------------------------------
-void Moderator::AddSolarSysToSandbox(Integer index)
+void Moderator::AddSolarSystemToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddSolarSystemToSandbox() entered\n");
+#endif
+   
    //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
    //sandboxes[index]->AddSolarSystem(solarSys);
    sandboxes[index]->AddSolarSystem(theDefaultSolarSystem);
+}
+
+//------------------------------------------------------------------------------
+// void AddInternalCoordSystemToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddInternalCoordSystemToSandbox(Integer index)
+{
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddInternalCoordSystemToSandbox() entered.\n");
+#endif
+   
+   sandboxes[index]->SetInternalCoordSystem(theInternalCoordSystem);
+   
 }
 
 //------------------------------------------------------------------------------
@@ -3137,8 +3192,47 @@ void Moderator::AddSolarSysToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPublisherToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddPublisherToSandbox() entered.\n");
+#endif
+   
    thePublisher->UnsubscribeAll();
    sandboxes[index]->SetPublisher(thePublisher);
+}
+
+//------------------------------------------------------------------------------
+// void AddCoordSystemToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddCoordSystemToSandbox(Integer index)
+{
+   CoordinateSystem *cs;
+   StringArray csNames = theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
+   
+   if (csNames.size() == 0)
+   {
+
+   //----------------------------------------------------
+   //loj: 1/26/05 temp. fix until ScriptInterpreter can
+   //     handle CoordinateSystem
+   //----------------------------------------------------
+#if DEBUG_RUN
+      MessageInterface::ShowMessage
+         ("Moderator::AddCoordSystemToSandbox() ===>temp. fix for B3 Script."
+          "creating EarthMJ2000Eq\n");
+#endif
+      
+      cs = CreateCoordinateSystem("EarthMJ2000Eq", true);
+      sandboxes[index]->AddObject(cs);
+   }
+   else
+   {
+      for (Integer i=0; i<(Integer)csNames.size(); i++)
+      {
+         cs = theConfigManager->GetCoordinateSystem(csNames[i]);
+         sandboxes[index]->AddObject(cs);
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -3174,6 +3268,11 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddFormationToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddFormationToSandbox() entered\n");
+#endif
+   
    Formation *form;
    StringArray formNames = theConfigManager->GetListOfItems(Gmat::FORMATION);
 
@@ -3189,6 +3288,11 @@ void Moderator::AddFormationToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropSetupToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddPropSetupToSandbox() entered\n");
+#endif
+   
    PropSetup *propSetup;
    StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
     
@@ -3204,6 +3308,11 @@ void Moderator::AddPropSetupToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropagatorToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddPropagatorToSandbox() entered\n");
+#endif
+   
    Propagator *prop;
    StringArray propNames = theConfigManager->GetListOfItems(Gmat::PROPAGATOR);
     
@@ -3219,6 +3328,11 @@ void Moderator::AddPropagatorToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddForceModelToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddPropagatorToSandbox() entered\n");
+#endif
+   
    ForceModel *fm;
    StringArray fmNames = theConfigManager->GetListOfItems(Gmat::FORCE_MODEL);
     
@@ -3234,6 +3348,11 @@ void Moderator::AddForceModelToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddBurnToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddBurnToSandbox() entered\n");
+#endif
+   
    Burn *burn;
    StringArray burnNames = theConfigManager->GetListOfItems(Gmat::BURN);
     
@@ -3249,6 +3368,11 @@ void Moderator::AddBurnToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSolverToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddSolverToSandbox() entered\n");
+#endif
+   
    Solver *solver;
    StringArray solverNames = theConfigManager->GetListOfItems(Gmat::SOLVER);
     
@@ -3264,6 +3388,11 @@ void Moderator::AddSolverToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddSubscriberToSandbox() entered\n");
+#endif
+   
    Subscriber *sub;
    StringArray subNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
    for (Integer i=0; i<(Integer)subNames.size(); i++)
@@ -3278,6 +3407,11 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddParameterToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddParameterToSandbox() entered\n");
+#endif
+   
    Parameter *param;
    StringArray paramNames = theConfigManager->GetListOfItems(Gmat::PARAMETER);
    for (Integer i=0; i<(Integer)paramNames.size(); i++)
@@ -3292,6 +3426,11 @@ void Moderator::AddParameterToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
+#if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddCommandToSandbox() entered\n");
+#endif
+   
    GmatCommand *cmd = commands[index]->GetNext();
 
    if (cmd != NULL)
@@ -3332,6 +3471,7 @@ Moderator::Moderator()
    isInitialized = false;
    isRunReady = false;
    theDefaultSolarSystem = NULL;
+   theInternalCoordSystem = NULL;
    theDefaultSlpFile = NULL;
    runState = Gmat::IDLE;
    

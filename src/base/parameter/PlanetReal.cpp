@@ -53,6 +53,7 @@ PlanetReal::PlanetReal(const std::string &name, const std::string &typeStr,
    : RealVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
              ownerType, false)
 {
+   mNeedCoordSystem = false;
    AddRefObject(obj);
 }
 
@@ -98,21 +99,11 @@ PlanetReal::~PlanetReal()
 {
 }
 
+
 //-------------------------------------
-// Inherited methods from RealVar
+// Inherited methods from Parameter
 //-------------------------------------
 
-//------------------------------------------------------------------------------
-// virtual Real GetReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real PlanetReal::GetReal()
-{
-   return mRealValue;
-}
 
 //------------------------------------------------------------------------------
 // virtual Real EvaluateReal()
@@ -126,10 +117,6 @@ Real PlanetReal::EvaluateReal()
    Evaluate();
    return mRealValue;
 }
-
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual void SetSolarSystem(SolarSystem *ss)

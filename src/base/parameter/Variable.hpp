@@ -41,9 +41,6 @@ public:
    virtual Real GetReal();
    virtual Real EvaluateReal();
    
-   // methods inherited from Parameter
-   virtual const std::string* GetParameterList() const;
-   
    // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
    
@@ -51,11 +48,6 @@ public:
                                 const std::string &oldName,
                                 const std::string &newName);
    
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name);
@@ -63,26 +55,15 @@ public:
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-   
-   virtual const StringArray& GetStringArrayParameter(const Integer id) const; 
-   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+
+   //loj: 1/26/05 Replaced GetStringArrayParameter with GetRefObjectNameArray
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
 
 protected:
 
    ParameterDatabase *mParamDb;
    ExpressionParser *mExpParser;
-   
-   enum
-   {
-      REF_PARAMS = RealVarParamCount,
-      VariableParamCount
-   };
-   
-   static const Gmat::ParameterType
-      PARAMETER_TYPE[VariableParamCount - RealVarParamCount];
-   static const std::string
-      PARAMETER_TEXT[VariableParamCount - RealVarParamCount];
-   
+      
 };
 
 #endif // Variable_hpp

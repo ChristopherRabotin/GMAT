@@ -29,6 +29,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITDATA 1
+//#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_DETAILS 1
 
 using namespace GmatMathUtil;
@@ -41,7 +42,8 @@ const std::string
 OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
 {
    "Spacecraft",
-   "SolarSystem"
+   "SolarSystem",
+   "CoordinateSystem",
 }; 
 
 //---------------------------------
@@ -64,6 +66,8 @@ OrbitData::OrbitData()
    mMA = ORBIT_REAL_UNDEFINED;
    mSpacecraft = NULL;
    mSolarSystem = NULL;
+   mInternalCoordSystem = NULL;
+   mOutCoordSystem = NULL;
    mCartEpoch = 0.0;
    mGravConst = 0.0;
 }
@@ -126,7 +130,9 @@ Rvector6 OrbitData::GetCartState()
    
 #if DEBUG_ORBITDATA
    MessageInterface::ShowMessage
-      ("OrbitData::GetCartState() stateType=%s\n", elemType.c_str());
+      ("OrbitData::GetCartState() stateType=%s, internalCoordName=%s, outCoordName=%s\n",
+       elemType.c_str(), mInternalCoordSystem->GetName().c_str(),
+       mOutCoordSystem->GetName().c_str());
 #endif
    
    if (elemType == "Cartesian")
@@ -135,13 +141,34 @@ Rvector6 OrbitData::GetCartState()
       for (int i=0; i<6; i++)
          mCartState[i] = statePtr[i];
 
-#if DEBUG_ORBITDATA
-      MessageInterface::ShowMessage("OrbitData::GetCartState() scEpoch=%f, mCartEpoch=%f\n"
-                                    "state = %f, %f, %f, %f, %f, %f\n",
-                                    mSpacecraft->GetRealParameter("Epoch"), mCartEpoch,
-                                    mCartState[0], mCartState[1], mCartState[2],
-                                    mCartState[3], mCartState[4], mCartState[5]);
+      if (mInternalCoordSystem == NULL || mOutCoordSystem == NULL)
+      {
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() Internal CoordSystem or Output CoordSystem is NULL.\n");
+         
+         throw ParameterException
+            ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
+      }
+      
+      // convert to output CoordinateSystem (loj: 1/21/05)
+      if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
+      {
+#if DEBUG_ORBITDATA_CONVERT
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\n"
+             "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
 #endif
+
+         mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
+                                 mCartState, mOutCoordSystem);
+         
+#if DEBUG_ORBITDATA_CONVERT
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() After convert: mCartEpoch=%f\n"
+             "state = %s\n", mCartEpoch, outState.ToString().c_str());
+#endif
+         
+      }
    }
    else if (elemType == "Keplerian")
    {
@@ -179,17 +206,12 @@ Rvector6 OrbitData::GetKepState()
 {
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
-   
-   //loj: 4/19/04 system crashes when I use the new method.
-   //Rvector6 mKepState = mSpacecraft->GetKeplerianState();
-
+      
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
-
-   PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
       
 #ifdef DEBUG_ORBITDATA_DETAILS
-   PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+   PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
    std::cout << "   elemType == " << elemType <<"\n";
    for (int i=0; i<6; i++)
@@ -212,14 +234,13 @@ Rvector6 OrbitData::GetKepState()
    }
    else if (elemType == "Cartesian")
    {
-      PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
-      Real cart[6];
-      memcpy(cart, statePtr.GetState(), 6*sizeof(Real));
-                
+      //loj: 1/26/05 Call GetCartState() since it provides the Coord Sys conversion
+      //Rvector6 cartState = mSpacecraft->GetCartesianState(); 
+      Rvector6 cartState = GetCartState();
+      
       Real grav = mGravConst;
-      Rvector6 cartState = Rvector6(cart);
       Rvector6 keplState;
-
+      
 #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s\n",
                                     cartState.ToString().c_str());
@@ -253,9 +274,11 @@ Rvector6 OrbitData::GetSphState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
 
    if (elemType == "Cartesian")
-   {      
-      Rvector6 cartState = mSpacecraft->GetCartesianState(); 
-
+   {
+      //loj: 1/26/05 Call GetCartState() since it provides the Coord Sys conversion
+      //Rvector6 cartState = mSpacecraft->GetCartesianState(); 
+      Rvector6 cartState = GetCartState();
+      
 #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
          ("OrbitData::GetSphState() cartState=%s\n",
@@ -476,10 +499,10 @@ Real OrbitData::GetAngularReal(const std::string &str)
    Rvector6 state = GetCartState();
    Rvector3 pos = Rvector3(state[0], state[1], state[2]);
    Rvector3 vel = Rvector3(state[3], state[4], state[5]);
-              
+   
    Rvector3 hVec3 = Cross(pos, vel);
    Real h = Sqrt(hVec3 * hVec3);
-        
+   
    Real grav = mGravConst;
    
    if (str == "SemilatusRectum")
@@ -547,10 +570,43 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
 }
 
 //------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystem()
+//------------------------------------------------------------------------------
+SolarSystem* OrbitData::GetSolarSystem()
+{
+   return mSolarSystem;
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetInternalCoordSys()
+//------------------------------------------------------------------------------
+CoordinateSystem* OrbitData::GetInternalCoordSys()
+{
+   return mInternalCoordSystem;
+}
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * @param <cs> internal coordinate system what parameter data is representing.
+ */
+//------------------------------------------------------------------------------ 
+void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
+{
+   mInternalCoordSystem = cs;
+}
+
+//------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
 void OrbitData::InitializeRefObjects()
 {
+#if DEBUG_ORBITDATA
+   MessageInterface::ShowMessage
+      ("OrbitData::InitializeRefObjects() entered.\n");
+#endif
+   
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
 
    if (mSpacecraft == NULL)
@@ -562,6 +618,15 @@ void OrbitData::InitializeRefObjects()
    if (mSolarSystem == NULL)
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find SolarSystem object\n");
+   
+   if (mInternalCoordSystem == NULL)
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() Cannot find internal CoordinateSystem object\n");
+   
+   mOutCoordSystem = (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+   if (mOutCoordSystem == NULL)
+      throw ParameterException
+         ("OrbitData::InitializeRefObjects() Cannot find output CoordinateSystem object\n");
    
    Integer id = mSpacecraft->GetParameterID("ReferenceBody");
    std::string bodyName = mSpacecraft->GetStringParameter(id);

@@ -23,6 +23,7 @@
 
 //#define DEBUG_CARTESIAN_PARAM 1
 
+//1/24/05 loj: Removed AddRefObject(obj) because it is also added in OrbitReal
 
 //==============================================================================
 //                              CartX
@@ -46,7 +47,6 @@ CartX::CartX(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::RED32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -153,7 +153,6 @@ CartY::CartY(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::GREEN32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -260,7 +259,6 @@ CartZ::CartZ(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::BLUE32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -367,7 +365,6 @@ CartVx::CartVx(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::RED32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -473,7 +470,6 @@ CartVy::CartVy(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::GREEN32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -580,7 +576,6 @@ CartVz::CartVz(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::BLUE32;
-   AddRefObject(obj);
 }
 
 //------------------------------------------------------------------------------
@@ -689,9 +684,7 @@ CartState::CartState(const std::string &name, GmatBase *obj)
                 "Km/s", GmatParam::COORD_SYS)
 {
    // Parameter member data
-   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
-   
-   AddRefObject(obj);
+   mIsPlottable = false;
 }
 
 //------------------------------------------------------------------------------
@@ -750,14 +743,7 @@ CartState::~CartState()
  */
 //------------------------------------------------------------------------------
 bool CartState::Evaluate()
-{    
-//     mRvec6Value.Set(GetCartReal("CartX"),
-//                     GetCartReal("CartY"),
-//                     GetCartReal("CartZ"),
-//                     GetCartReal("CartVx"),
-//                     GetCartReal("CartVy"),
-//                     GetCartReal("CartVz"));
-
+{
    mRvec6Value = GetCartState();
    
 #if DEBUG_CARTESIAN_PARAM
