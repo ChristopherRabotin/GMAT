@@ -64,14 +64,15 @@ protected:
     
    Real mMA;
    Real mCartEpoch;
-
+   Real mGravConst;
+   
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    
 
    enum {PX, PY, PZ, VX, VY, VZ};
    enum {SMA, ECC, INC, RAAN, AOP, TA};
-   enum {RMAG, RRA, RDEC, VMAG, VRA, VDEC};
+   enum {RMAG, RRA, RDEC, VMAG, RAV, DECV};
    
    enum
    {
