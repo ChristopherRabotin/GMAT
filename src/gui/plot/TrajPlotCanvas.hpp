@@ -17,6 +17,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "MdiGlPlotData.hpp"
+#include "GuiInterpreter.hpp"
 #include "TextTrajectoryFile.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
@@ -27,12 +28,14 @@ class TrajPlotCanvas: public wxGLCanvas
 public:
    TrajPlotCanvas(wxWindow *parent, const wxWindowID id = -1,
                   const wxPoint& pos = wxDefaultPosition,
-                  const wxSize& size = wxDefaultSize, SolarSystem *ss = NULL,
+                  const wxSize& size = wxDefaultSize, 
+                  const wxString &csName = "", SolarSystem *solarSys = NULL,
                   long style = 0, const wxString& name = wxT("TrajPlotCanvas"));
    ~TrajPlotCanvas();
-
+   
    // initialization
    bool InitGL();
+   bool IsInitialized();
 
    // getters
    float GetDistance() {return mAxisLength;}
@@ -44,6 +47,8 @@ public:
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
    unsigned int GetEcLineColor() {return mEcLineColor;}
    int GetGotoBodyId() {return mCenterViewBody;}
+   wxString GetDesiredCoordSysName() {return mDesiredCoordSysName;}
+   CoordinateSystem* GetDesiredCoordSystem() { return mDesiredCoordSystem;}
    
    // setters
    void SetDistance(float dist) {mAxisLength = dist;}
@@ -54,18 +59,12 @@ public:
    void SetEqPlaneColor(unsigned int color) {mEqPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
    void SetEcLineColor(unsigned int color) {mEcLineColor = color;}
+   void SetDesiredCoordSystem(CoordinateSystem* cs) {mDesiredCoordSystem = cs;}
+   void SetDesiredCoordSystem(const wxString &csName);
    
-   // events
-   void OnPaint(wxPaintEvent &event);
-   void OnSize(wxSizeEvent &event);
-   void OnMouse(wxMouseEvent &event);
-
-   // view
-   bool IsInitialized();
-
    // actions
-   void UpdatePlot();
    void ClearPlot();
+   void UpdatePlot();
    void ShowDefaultView();
    void ZoomIn();
    void ZoomOut();
@@ -73,9 +72,15 @@ public:
    void DrawEqPlane(bool flag);
    void DrawEcPlane(bool flag);
    void DrawEcLine(bool flag);
-   void DrawInNewCoordSystem(CoordinateSystem *cs);
+   void DrawInOtherCoordSystem(const wxString &csName);
+   void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void GotoStdBody(int bodyId);
    void GotoOtherBody(const wxString &bodyName);
+   
+   // events
+   void OnPaint(wxPaintEvent &event);
+   void OnSize(wxSizeEvent &event);
+   void OnMouse(wxMouseEvent &event);
    
    // data
    int  ReadTextTrajectory(const wxString &filename);
@@ -99,7 +104,8 @@ private:
    static const float MAX_ZOOM_IN = 3700.0;
    static const float RADIUS_ZOOM_RATIO = 2.2;
    static const float DEFAULT_DIST = 30000.0;
-   
+
+   GuiInterpreter *theGuiInterpreter;
    TextTrajectoryFile *mTextTrajFile;
    TrajectoryArray mTrajectoryData;
 
@@ -124,10 +130,6 @@ private:
    bool mDrawEcLine;
    bool mDrawSpacecraft;
 
-   // coordinate sytem conversion
-   bool mNeedSpacecraftConversion;
-   CoordinateConverter mCoordConverter;
-   
    // color
    unsigned int mEqPlaneColor;
    unsigned int mEcPlaneColor;
@@ -173,9 +175,15 @@ private:
    SolarSystem *mSolarSystem;
    
    // coordinate system
+   wxString mDesiredCoordSysName;
+   wxString mInternalCoordSysName;
    CoordinateSystem *mInternalCoordSystem;
-   CoordinateSystem *mCoordSystemList[MAX_COORD_SYS];
-   CoordinateSystem *mCurrCoordSystem;
+   CoordinateSystem *mDesiredCoordSystem;
+   
+   // coordinate sytem conversion
+   bool mNeedSpacecraftConversion;
+   bool mNeedConversion;
+   CoordinateConverter mCoordConverter;
    
    short mCurrViewFrame;
    short mCurrBody;

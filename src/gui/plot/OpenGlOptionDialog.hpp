@@ -72,10 +72,8 @@ protected:
    };
    
    // member data
-   GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    MdiChildTrajFrame *mTrajFrame;
-   CoordinateSystem *mCoordSystem;
    
    bool mHasChangeMade;
    bool mHasDistanceChanged;

@@ -22,7 +22,7 @@
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
-#include "CoordinateConverter.hpp"
+//#include "CoordinateConverter.hpp"
 #include <map>
 
 class OpenGlPlot : public Subscriber
@@ -105,7 +105,7 @@ protected:
 
    SolarSystem *mSolarSystem;
    CoordinateSystem *mOutCoordSystem;
-   CoordinateConverter mCoordConverter;
+//     CoordinateConverter mCoordConverter;
    
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;

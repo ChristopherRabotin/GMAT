@@ -87,7 +87,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    mDrawWireFrame = false;
    mDrawTarget = false;
    mOverlapPlot = false;
-   mNeedCoordSysConversion = false;
+   //mNeedCoordSysConversion = false;
    mOldName = instanceName;
    mCoordSysName = "EarthMJ2000Eq";
    mDataCollectFrequency = 1;
@@ -113,7 +113,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    mDrawWireFrame = ogl.mDrawWireFrame;
    mDrawTarget = ogl.mDrawTarget;
    mOverlapPlot = ogl.mOverlapPlot;
-   mNeedCoordSysConversion = ogl.mNeedCoordSysConversion;
+   //mNeedCoordSysConversion = ogl.mNeedCoordSysConversion;
    mOldName = ogl.mOldName;
    mCoordSysName = ogl.mCoordSysName;
    mDataCollectFrequency = ogl.mDataCollectFrequency;
@@ -150,35 +150,41 @@ bool OpenGlPlot::Initialize()
    Subscriber::Initialize();
    
    #if DEBUG_OPENGL_INIT
-      MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered mScCount = %d\n",
-                                    mScCount);
+   MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered mScCount = %d\n",
+                                 mScCount);
    #endif
+   
    if (mScCount > 0)
    {
       if (active)
       {
          #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+         MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
          #endif
 
-         if (internalCoordSystem == NULL || mOutCoordSystem == NULL)
-            throw GmatBaseException
-               ("OpenGlPlot::Initialize() Internal CoordSystem or Output CoordSystem "
-                " is not set. Make sure These pointers are set in the Sandbox.\n");
+         //loj: 2/3/05 Moved actual conversion to TrajPlotCanvas
+         //if (internalCoordSystem == NULL || mOutCoordSystem == NULL)
+         //{            
+         //   throw GmatBaseException
+         //   ("OpenGlPlot::Initialize() Internal CoordSystem or Output CoordSystem "
+         //   " is not set. Make sure These pointers are set in the Sandbox.\n");
+         //}
          
          // check if it needs coordinate system conversion
-         mNeedCoordSysConversion = (internalCoordSystem->GetName() !=
-                                    mOutCoordSystem->GetName());
+         //mNeedCoordSysConversion = (internalCoordSystem->GetName() !=
+         //                           mOutCoordSystem->GetName());
          
          return PlotInterface::CreateGlPlotWindow
-            (instanceName, mOldName, mDrawWireFrame, mOverlapPlot, mSolarSystem);
+            (instanceName, mOldName, mCoordSysName, mDrawWireFrame,
+             mOverlapPlot, mSolarSystem);
          
       }
       else
       {
          #if DEBUG_OPENGL_INIT
-            MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+         MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
          #endif
+         
          return PlotInterface::DeleteGlPlot();
       }
    }
@@ -220,9 +226,9 @@ bool OpenGlPlot::SetColor(const std::string &item, const std::string &scName,
                           const UnsignedInt value)
 {
    #if DEBUG_OPENGL_PARAM
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::SetColor() item=%s, scName=%s, value=%d\n",
-          item.c_str(), item.c_str(), value);
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetColor() item=%s, scName=%s, value=%d\n",
+       item.c_str(), item.c_str(), value);
    #endif
 
    if (item == "Orbit")
@@ -277,7 +283,7 @@ GmatBase* OpenGlPlot::Clone(void) const
 bool OpenGlPlot::SetName(const std::string &who)
 {
    #if DEBUG_RENAME
-      MessageInterface::ShowMessage("OpenGlPlot::SetName() newName=%s\n", who.c_str());
+   MessageInterface::ShowMessage("OpenGlPlot::SetName() newName=%s\n", who.c_str());
    #endif
    
    mOldName = instanceName;
@@ -301,8 +307,8 @@ bool OpenGlPlot::TakeAction(const std::string &action,
                             const std::string &actionData)
 {
    #if DEBUG_REMOVE_ACTION
-      MessageInterface::ShowMessage("OpenGlPlot::TakeAction() action=%s, actionData=%s\n",
-                                    action.c_str(), actionData.c_str());
+   MessageInterface::ShowMessage("OpenGlPlot::TakeAction() action=%s, actionData=%s\n",
+                                 action.c_str(), actionData.c_str());
    #endif
    if (action == "Clear")
    {
@@ -325,9 +331,9 @@ bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &newName)
 {
    #if DEBUG_RENAME
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-          GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
    if (type != Gmat::SPACECRAFT)
@@ -585,9 +591,10 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
 std::string OpenGlPlot::GetStringParameter(const std::string &label) const
 {
    #if DEBUG_OPENGL_PARAM
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::GetStringParameter() label = %s\n", label.c_str());
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetStringParameter() label = %s\n", label.c_str());
    #endif
+   
    return GetStringParameter(GetParameterID(label));
 }
 
@@ -597,8 +604,8 @@ std::string OpenGlPlot::GetStringParameter(const std::string &label) const
 bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 {
    #if DEBUG_OPENGL_PARAM
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::SetStringParameter() id = %d, value = %s \n", id, value.c_str());
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetStringParameter() id = %d, value = %s \n", id, value.c_str());
    #endif
    
    switch (id)
@@ -735,15 +742,24 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label)
 std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
 {
    #if DEBUG_OPENGL_INIT
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::GetRefObjectName() type:%d\n", type);
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetRefObjectName() type:%s\n",
+       GmatBase::GetObjectTypeString(type).c_str());
    #endif
+   
    if (type == Gmat::SOLAR_SYSTEM)
+   {
       return mSolarSystem->GetName();
+   }
    else if (type == Gmat::COORDINATE_SYSTEM)
+   {
       return mCoordSysName;
-
+   }
+   
    std::string msg = "type: " + GmatBase::GetObjectTypeString(type) + " not found";
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetRefObjectName() %s\n", msg.c_str());
+   
    return "OpenGlPlot::GetRefObjectName() " + msg;
 }
 
@@ -772,7 +788,9 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::SOLAR_SYSTEM)
       return mSolarSystem;
-      
+   else if (type == Gmat::COORDINATE_SYSTEM)
+      return mOutCoordSystem;
+   
    throw GmatBaseException("OpenGlPlot::GetRefObject() the object name: " + name +
                            "not found\n");
 }
@@ -785,10 +803,11 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
    #if DEBUG_OPENGL_INIT
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::SetRefObject() type:%d is set to addr=%d\n", type, obj);
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetRefObject() type:%s is set to addr=%d\n",
+       GmatBase::GetObjectTypeString(type).c_str(), obj);
    #endif
-      
+   
    // just check for the type
    if (type == Gmat::SOLAR_SYSTEM)
    {
@@ -1009,24 +1028,25 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
                idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
                
+               //loj: 2/3/05 Moved actual conversion to TrajPlotCanvas
                // convert to output coordinate system if needed
-               if (mNeedCoordSysConversion)
-               {
-                  Rvector6 inState(dat[idX], dat[idY], dat[idZ], 0.0, 0.0, 0.0);
-                  Rvector6 outState;
-                  mCoordConverter.Convert(A1Mjd(dat[0]), inState, internalCoordSystem,
-                                          outState, mOutCoordSystem);
-                  
-                  mScXArray[i] = outState[0];
-                  mScYArray[i] = outState[1];
-                  mScZArray[i] = outState[2];
-               }
-               else
-               {
+               //if (mNeedCoordSysConversion)
+               //{
+               //   Rvector6 inState(dat[idX], dat[idY], dat[idZ], 0.0, 0.0, 0.0);
+               //   Rvector6 outState;
+               //   mCoordConverter.Convert(A1Mjd(dat[0]), inState, internalCoordSystem,
+               //                           outState, mOutCoordSystem);
+               //   
+               //   mScXArray[i] = outState[0];
+               //   mScYArray[i] = outState[1];
+               //   mScZArray[i] = outState[2];
+               //}
+               //else
+               //{
                   mScXArray[i] = dat[idX];
                   mScYArray[i] = dat[idY];
                   mScZArray[i] = dat[idZ];
-               }
+                //}
                
                mOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
                mTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
@@ -1043,14 +1063,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             if (thePublisher->GetRunState() == Gmat::TARGETING)
             {
                PlotInterface::
-                  UpdateGlSpacecraft(instanceName, mOldName,
+                  UpdateGlSpacecraft(instanceName, mOldName, mCoordSysName,
                                      dat[0], mScXArray, mScYArray, mScZArray,
                                      mTargetColorArray, update, mDrawWireFrame);
             }
             else
             {
                PlotInterface::
-                  UpdateGlSpacecraft(instanceName, mOldName,
+                  UpdateGlSpacecraft(instanceName, mOldName, mCoordSysName,
                                      dat[0], mScXArray, mScYArray, mScZArray,
                                      mOrbitColorArray, update, mDrawWireFrame);
             }

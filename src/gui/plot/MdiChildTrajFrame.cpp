@@ -56,7 +56,8 @@ END_EVENT_TABLE()
 MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
-                                     const long style, SolarSystem *solarSystem)
+                                     const long style, const wxString &csName,
+                                     SolarSystem *solarSys)
    : wxMDIChildFrame(parent, -1, title, pos, size,
                      style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
@@ -159,7 +160,8 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    int width, height;
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
-      new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height), solarSystem);
+      new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
+                         csName, solarSys);
    
    mCanvas = canvas;
    
@@ -171,15 +173,10 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 // ~MdiChildTrajFrame()
 //------------------------------------------------------------------------------
 MdiChildTrajFrame::~MdiChildTrajFrame()
-{
-   if (mOptionDialog)
-   {
-      //MessageInterface::ShowMessage("Deleting mOptionDialog...\n");
-      delete mOptionDialog;
-   }
+{   
+   mOptionDialog = (OpenGlOptionDialog*)NULL;
    
    MdiGlPlot::mdiChildren.DeleteObject(this);
-   
 }
 
 //------------------------------------------------------------------------------
@@ -282,6 +279,27 @@ int MdiChildTrajFrame::GetGotoBodyId()
    return GmatPlot::UNKNOWN_BODY;
 }
 
+//------------------------------------------------------------------------------
+// wxString GetDesiredCoordSysName()
+//------------------------------------------------------------------------------
+wxString MdiChildTrajFrame::GetDesiredCoordSysName()
+{
+   if (mCanvas)
+      return mCanvas->GetDesiredCoordSysName();
+
+   return "Unknown";
+}
+
+//------------------------------------------------------------------------------
+// CoordinateSystem* GetDesiredCoordSystem()
+//------------------------------------------------------------------------------
+CoordinateSystem* MdiChildTrajFrame::GetDesiredCoordSystem()
+{
+   if (mCanvas)
+      return mCanvas->GetDesiredCoordSystem();
+
+   return NULL;
+}
 
 //------------------------------------------------------------------------------
 // void SetPlotName(const wxString &name)
@@ -416,13 +434,46 @@ void MdiChildTrajFrame::SetGotoBodyName(const wxString &bodyName)
 }
 
 //------------------------------------------------------------------------------
-// void SetCoordSystem(CoordinateSystem *cs)
+// void SetDesiredCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetCoordSystem(CoordinateSystem *cs)
+void MdiChildTrajFrame::SetDesiredCoordSystem(const wxString &csName)
 {
    if (mCanvas)
    {
-      mCanvas->DrawInNewCoordSystem(cs);
+      mCanvas->SetDesiredCoordSystem(csName);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetDesiredCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDesiredCoordSystem(CoordinateSystem *cs)
+{
+   if (mCanvas)
+   {
+      mCanvas->SetDesiredCoordSystem(cs);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void DrawInOtherCoordSystem(const wxString &csName)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
+{
+   if (mCanvas)
+   {
+      mCanvas->DrawInOtherCoordSystem(csName);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void DrawInOtherCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::DrawInOtherCoordSystem(CoordinateSystem *cs)
+{
+   if (mCanvas)
+   {
+      mCanvas->DrawInOtherCoordSystem(cs);
    }
 }
 
@@ -526,6 +577,7 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
    }
    else
    {
+      //mOptionDialog->Close();
       mOptionDialog->Hide();
    }
 }
@@ -729,13 +781,13 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 {    
    MdiGlPlot::numChildren--;
-    
+   
    if (mIsMainFrame)
       MdiGlPlot::mdiParentGlFrame->mainSubframe = NULL;
-    
+   
    if (MdiGlPlot::numChildren == 0)
       MdiGlPlot::mdiParentGlFrame->subframe = NULL;
-    
+   
    MdiGlPlot::mdiParentGlFrame->UpdateUI();
    event.Skip();
 }

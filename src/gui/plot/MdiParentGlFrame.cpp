@@ -23,7 +23,7 @@
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoomout.xpm"
 
-#define DEBUG_MDIGL_FRAME 0
+//#define DEBUG_MDIGL_FRAME 1
 
 BEGIN_EVENT_TABLE(MdiParentGlFrame, wxMDIParentFrame)
    EVT_MENU(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, MdiParentGlFrame::OnOpenTrajectoryFile)
@@ -144,7 +144,7 @@ void MdiParentGlFrame::OnClose(wxCloseEvent& event)
 {
    if ( event.CanVeto() && (MdiGlPlot::numChildren > 0) )
    {
-#if DEBUG_MDIGL_FRAME
+      #if DEBUG_MDIGL_FRAME
       wxString msg;
       msg.Printf(_T("%d windows still open, close anyhow?"), MdiGlPlot::numChildren);
       if ( wxMessageBox(msg, _T("Please confirm"),
@@ -153,7 +153,7 @@ void MdiParentGlFrame::OnClose(wxCloseEvent& event)
          event.Veto();
          return;
       }
-#endif
+      #endif
    }
    
    MdiGlPlot::mdiParentGlFrame = NULL;
@@ -183,7 +183,7 @@ void MdiParentGlFrame::OnOpenTrajectoryFile(wxCommandEvent& WXUNUSED(event) )
 
    if (fileDialog.ShowModal() == wxID_OK)
    {
-#if DEBUG_MDIGL_FRAME
+      #if DEBUG_MDIGL_FRAME
       wxString info;
       info.Printf(_T("Full file name: %s\n")
                   _T("Path: %s\n")
@@ -194,7 +194,7 @@ void MdiParentGlFrame::OnOpenTrajectoryFile(wxCommandEvent& WXUNUSED(event) )
       
       wxMessageDialog msgDialog(this, info, _T("Selected file"));
       msgDialog.ShowModal();
-#endif
+      #endif
         
       wxString trajectoryFileName = fileDialog.GetPath();
     

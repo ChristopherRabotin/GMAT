@@ -68,8 +68,8 @@ PlotInterface::~PlotInterface()
 
 //------------------------------------------------------------------------------
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
-//                          bool drawWireFrame = flase, bool overlapPlot = false,
-//                          SolarSystem *solarSystem)
+//                          const std::string &csName, bool drawWireFrame = flase,
+//                          bool overlapPlot = false, SolarSystem *solarSystem = NULL)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
@@ -79,6 +79,7 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
+                                       const std::string &csName,
                                        bool drawWireFrame, bool overlapPlot,
                                        SolarSystem *solarSystem)
 {    
@@ -91,24 +92,24 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    if (MdiGlPlot::mdiParentGlFrame == NULL)
    {
-#if DEBUG_PLOTIF_GL
+      #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
                                     "Creating MdiGlPlot::mdiParentGlFrame\n");
-#endif
+      #endif
+      
       int screenX = wxSystemSettings::GetMetric(wxSYS_SCREEN_X);
       int screenY = wxSystemSettings::GetMetric(wxSYS_SCREEN_Y);
       
       MdiGlPlot::mdiParentGlFrame =
          new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-                              //wxPoint(600, 515), wxSize(600, 500),
                               wxPoint(screenX-560, screenY-515), wxSize(550, 480),
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
       // Give it an icon
-#ifdef __WXMSW__
-      MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
-#else
-      MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
-#endif
+      #ifdef __WXMSW__
+         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
+      #else
+         MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+      #endif
    }
    
    //-------------------------------------------------------
@@ -140,12 +141,18 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    if (createNewFrame)
    {
+      #if DEBUG_PLOTIF_GL
+      MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
+                                    "Creating MdiChildTrajFrame\n");
+      #endif
+      
       MdiGlPlot::mdiParentGlFrame->mainSubframe =
          new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
-                               wxDEFAULT_FRAME_STYLE, solarSystem);
+                               wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
+                               solarSystem);
       
       ++MdiGlPlot::numChildren;
 
@@ -160,9 +167,12 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
          return false;
       }
    }
-
+   
    MdiGlPlot::mdiParentGlFrame->mainSubframe->SetDrawWireFrame(drawWireFrame);
    MdiGlPlot::mdiParentGlFrame->mainSubframe->SetOverlapPlot(overlapPlot);
+   MdiGlPlot::mdiParentGlFrame->mainSubframe->
+      SetDesiredCoordSystem(wxString(csName.c_str()));
+   
    MdiGlPlot::mdiParentGlFrame->Show(true);
    MdiGlPlot::mdiParentGlFrame->UpdateUI();
 
@@ -241,6 +251,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 //  bool UpdateGlSpacecraft(const std::string &plotName,
 //                          const std::string &oldName,
+//                          const std::string &csName,
 //                          const Real &time, const RealArray &posX,
 //                          const RealArray &posY, const RealArray &posZ,
 //                          const UnsignedIntArray &orbitColor,
@@ -253,6 +264,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
                                        const std::string &oldName,
+                                       const std::string &csName,
                                        const Real &time, const RealArray &posX,
                                        const RealArray &posY, const RealArray &posZ,
                                        const UnsignedIntArray &color,
@@ -267,7 +279,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
 
    if (MdiGlPlot::mdiParentGlFrame == NULL)
    {
-      if (!CreateGlPlotWindow(plotName, oldName, drawWireFrame))
+      if (!CreateGlPlotWindow(plotName, oldName, csName, drawWireFrame))
          return false;
    }
    

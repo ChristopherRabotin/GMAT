@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
 #include "SolarSystem.hpp"
+//#include "CoordinateSystem.hpp"
 
 class PlotInterface
 {
@@ -30,15 +31,18 @@ public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
+                                  const std::string &csName, //loj: 2/2/05 Added
                                   bool drawWireFrame = false,
                                   bool overlapPlot = false,
-                                  SolarSystem *ss = NULL); //loj: 12/14/04 Added
+                                  SolarSystem *ss = NULL);
+
    static bool DeleteGlPlot();
    static bool RefreshGlPlot(const std::string &plotName);
    
    //loj: 7/13/04 handles multiple spacecraft postion and color
    static bool UpdateGlSpacecraft(const std::string &plotName,
                                   const std::string &oldName,
+                                  const std::string &csName, //loj: 2/2/05 Added
                                   const Real &time, const RealArray &posX,
                                   const RealArray &posY, const RealArray &posZ,
                                   const UnsignedIntArray &color,

@@ -37,15 +37,16 @@ class MdiChildTrajFrame: public wxMDIChildFrame
 {
 public:
    TrajPlotCanvas *mCanvas;
-
+   
    bool mIsMainFrame;
    
    MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                      const wxString& plotName, const wxString& title,
                      const wxPoint& pos, const wxSize& size,
-                     const long style, SolarSystem *solarSystem = NULL);
+                     const long style, const wxString &csName = "",
+                     SolarSystem *solarSys = NULL);
    ~MdiChildTrajFrame();
-
+   
    // getters
    wxString GetPlotName() {return mPlotName;}
    bool GetOverlapPlot() {return mOverlapPlot;}
@@ -58,6 +59,8 @@ public:
    unsigned int GetEcLineColor();
    float GetDistance();
    int   GetGotoBodyId();
+   wxString GetDesiredCoordSysName();
+   CoordinateSystem* GetDesiredCoordSystem();
    
    // setters
    void SetPlotName(const wxString &name);
@@ -71,9 +74,12 @@ public:
    void SetEcLineColor(unsigned int color);
    void SetDistance(float dist);
    void SetGotoBodyName(const wxString &bodyName);
-   void SetCoordSystem(CoordinateSystem *cs); //loj: 1/28/05 Added
+   void SetDesiredCoordSystem(const wxString &csName);
+   void SetDesiredCoordSystem(CoordinateSystem *cs); //loj: 1/28/05 Added
 
    // actions
+   void DrawInOtherCoordSystem(const wxString &csName);
+   void DrawInOtherCoordSystem(CoordinateSystem *cs);
    void UpdatePlot();
    
    void OnClearPlot(wxCommandEvent& event);

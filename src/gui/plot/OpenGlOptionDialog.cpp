@@ -67,15 +67,21 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
                                        const UnsignedIntArray &bodyColors)
    : wxDialog(parent, -1, title)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mTrajFrame = (MdiChildTrajFrame*)parent;
-   mCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
    
    mHasChangeMade = false;
    mHasDistanceChanged = false;
    mHasGotoBodyChanged = false;
-
+   mHasCoordSysChanged = false;
+   mHasDrawEqPlaneChanged = false;
+   mHasDrawEcPlaneChanged = false;
+   mHasDrawEcLineChanged = false;
+   mHasDrawWireFrameChanged = false;
+   mHasEqPlaneColorChanged = false;
+   mHasEcPlaneColorChanged = false;
+   mHasEcLineColorChanged = false;
+   
    mDistance = 30000;
    mGotoBodyName = "";
    
@@ -350,16 +356,23 @@ void OpenGlOptionDialog::Create()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::LoadData()
 {
+   #if DEBUG_GL_OPTION_DIALOG
+   MessageInterface::ShowMessage("OpenGlOptionDialog::LoadData() entered.\n");
+   #endif
+   
    // distance
    wxString strVal;
    mDistance = mTrajFrame->GetDistance();
    strVal.Printf("%g", mDistance);
    mDistanceTextCtrl->SetValue(strVal);
-
+   
    // goto body
    mGotoBodyComboBox->
       SetStringSelection(BodyInfo::BODY_NAME[mTrajFrame->GetGotoBodyId()].c_str());
 
+   // coordinate system
+   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetDesiredCoordSysName());
+   
    // equatorial plane, eclitic plane, Earth-Sun line
    mEqPlaneCheckBox->SetValue(mTrajFrame->GetDrawEqPlane());
    RgbColor rgb(mTrajFrame->GetEqPlaneColor());
@@ -432,23 +445,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasCoordSysChanged)
    {
       mHasCoordSysChanged = false;
-      mCoordSystem = theGuiInterpreter->
-         GetCoordinateSystem(std::string(mCoordSysName.c_str()));
-
-      if (mCoordSystem)
-      {
-         #if DEBUG_GL_DIALOG
-         MessageInterface::ShowMessage
-            ("OpenGlOptionDialog::SaveData() selected CS:%s\n",
-             mCoordSystem->GetName.c_str());
-         #endif
-         mTrajFrame->SetCoordSystem(mCoordSystem);
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("OpenGlOptionDialog::SaveData() The selected CoordinateSystem is null\n");
-      }
+      mTrajFrame->DrawInOtherCoordSystem(mCoordSysName);
    }
    
    if (mHasDrawEqPlaneChanged)
@@ -773,13 +770,13 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnClose(wxCloseEvent& event)
 {
-    if ( event.CanVeto() )
-    {
-        wxMessageBox(_T("Use the menu item to close this dialog"),
-                     _T("Modeless dialog"),
-                     wxOK | wxICON_INFORMATION, this);
-
-        event.Veto();
-    }
+   if ( event.CanVeto() )
+   {
+      wxMessageBox(_T("Use the menu item to close this dialog"),
+                   _T("Modeless dialog"),
+                   wxOK | wxICON_INFORMATION, this);
+      
+      event.Veto();
+   }
 }
 

@@ -13,10 +13,10 @@
  */
 //------------------------------------------------------------------------------
 #include "TrajPlotCanvas.hpp"
+#include "GmatAppData.hpp"        // for GetGuiInterpreter()
 #include "FileManager.hpp"        // for Earth texture file
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "Rvector3.hpp"           // for Rvector3::GetMagnitude()
-#include "Moderator.hpp"          // for GetInternalCoordinateSystem()
 #include "MessageInterface.hpp"
 
 #include <math.h>
@@ -40,7 +40,7 @@
 //#define DEBUG_TRAJCANVAS_INIT 1
 //#define DEBUG_TRAJCANVAS_UPDATE 1
 //#define DEBUG_TRAJCANVAS_ACTION 1
-//#define DEBUG_TRAJCANVAS_CONVERT 1
+//#define DEBUG_TRAJCANVAS_CONVERT 2
 //#define DEBUG_TRAJCANVAS_DRAW 1
 //#define DEBUG_TRAJCANVAS_BODY 1
 
@@ -82,29 +82,32 @@ using namespace GmatPlot;
 
 //------------------------------------------------------------------------------
 // TrajPlotCanvas(wxWindow *parent, wxWindowID id,
-//                const wxPoint& pos, const wxSize& size, SolarSystem *ss,
-//                long style, const wxString& name)
+//                const wxPoint& pos, const wxSize& size, const wxString &csName,
+//                SolarSystem *solarSys, long style, const wxString& name)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
- * @param <parent> parent window pointer
- * @param <id>     window id
- * @param <pos>    position (top, left) where the window to be placed within the
- *                 parent window
- * @param <size>   size of the window
- * @param <ss>     solar system pointer to retrieve body information
- * @param <style>  style of window
- * @param <name>   title of window
+ * @param <parent>   parent window pointer
+ * @param <id>       window id
+ * @param <pos>      position (top, left) where the window to be placed within the
+ *                   parent window
+ * @param <size>     size of the window
+ * @param <csName>   coordinate system name for data to be plotted in
+ * @param <solarSys> solar system pointer to retrieve body information
+ * @param <style>    style of window
+ * @param <name>     title of window
  *
  */
 //------------------------------------------------------------------------------
 TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
-                               const wxPoint& pos, const wxSize& size, SolarSystem *ss,
+                               const wxPoint& pos, const wxSize& size,
+                               const wxString &csName, SolarSystem *solarSys,
                                long style, const wxString& name)
    : wxGLCanvas(parent, id, pos, size, style, name)
 {    
    // initalize data members
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    mTextTrajFile = NULL;
    mGlList = 0;
    mInitialized = false;
@@ -154,7 +157,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mEcLineColor = GmatColor::D_BROWN32;
    
    // solar system
-   mSolarSystem = ss;
+   mSolarSystem = solarSys;
    
    // bodies
    mOtherBodyCount = 0;
@@ -191,17 +194,18 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
             {
                mBodyRadius[body] = bodyPtr->GetEquatorialRadius();
                mBodyMaxZoomIn[body] = mBodyRadius[body] * RADIUS_ZOOM_RATIO;
-#if DEBUG_TRAJCANVAS_INIT
+               
+               #if DEBUG_TRAJCANVAS_INIT
                MessageInterface::ShowMessage
                   ("TrajPlotCanvas() %s Radius=%f maxZoomIn=%f\n",
                    BodyInfo::BODY_NAME[body].c_str(),
                    mBodyRadius[body], mBodyMaxZoomIn[body]);
-#endif
+               #endif
             }
          }
       }
    }
-
+   
    // Zoom
    mMaxZoomIn = mBodyMaxZoomIn[EARTH];
    
@@ -209,17 +213,26 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mScCount = 1; //loj: set to 1 for now
    for (int i=0; i<MAX_SCS; i++)
       mScTextureIndex[i] = UNINIT_TEXTURE;
-
-   // Coordinate System
-   //mInternalCoordSystem = CreateInternalCoordSystem();
-   mInternalCoordSystem = Moderator::Instance()->GetInternalCoordinateSystem();
    
-   for (int i=0; i<MAX_COORD_SYS; i++)
-      mCoordSystemList[i] = NULL;
+   // Coordinate System
+   mInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
+   mInternalCoordSysName = wxString(mInternalCoordSystem->GetName().c_str());
 
-   mCurrCoordSystem = mInternalCoordSystem;
+   mDesiredCoordSysName = csName;
+   mDesiredCoordSystem = theGuiInterpreter->
+      GetCoordinateSystem(std::string(csName.c_str()));
+   
+   if (!mDesiredCoordSysName.IsSameAs(mInternalCoordSysName))
+       mNeedConversion = true;
+   else
+       mNeedConversion = false;
+   
+   #if DEBUG_TRAJCANVAS_INIT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas() internalCS=%s, desiredCS=%s\n",
+       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+   #endif
 }
-
 
 //------------------------------------------------------------------------------
 // ~TrajPlotCanvas()
@@ -233,12 +246,43 @@ TrajPlotCanvas::~TrajPlotCanvas()
    if (mTextTrajFile)
       delete mTextTrajFile;
    
-   if (mInternalCoordSystem)
-      delete mInternalCoordSystem;
+}
 
-   for (int i=0; i<MAX_COORD_SYS; i++)
-      if (mCoordSystemList[i])
-         delete mCoordSystemList[i];
+//------------------------------------------------------------------------------
+// bool TrajPlotCanvas::InitGL()
+//------------------------------------------------------------------------------
+/**
+ * Initializes GL and IL.
+ */
+//------------------------------------------------------------------------------
+bool TrajPlotCanvas::InitGL()
+{
+   // remove back faces
+   glDisable(GL_CULL_FACE);
+   glEnable(GL_DEPTH_TEST);
+
+   glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+   glDepthFunc(GL_LESS);
+    
+   // speedups
+   glEnable(GL_DITHER);
+   glShadeModel(GL_SMOOTH);
+   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+   glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
+    
+#ifdef __WXMSW__
+   // initalize devIL library
+   ilInit();
+   ilutRenderer(ILUT_OPENGL);
+   
+   // try to load textures
+   if (!LoadGLTextures())
+      return false;
+   
+   mInitialized = true;
+#endif
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -251,6 +295,29 @@ TrajPlotCanvas::~TrajPlotCanvas()
 bool TrajPlotCanvas::IsInitialized()
 {
    return mInitialized;
+}
+
+//------------------------------------------------------------------------------
+// void SetDesiredCoordSystem(const wxString &csName)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetDesiredCoordSystem(const wxString &csName)
+{
+   #if DEBUG_TRAJCANVAS_INIT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas()::SetDesiredCoordSysName() internalCS=%s, desiredCS=%s\n",
+       mInternalCoordSystem->GetName().c_str(), csName.c_str());
+   #endif
+   
+   mDesiredCoordSysName = csName;
+
+   mDesiredCoordSystem =
+      theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+   
+   if (!mDesiredCoordSysName.IsSameAs(mInternalCoordSysName))
+      mNeedConversion = true;
+   else
+      mNeedConversion = false;
+   
 }
 
 //------------------------------------------------------------------------------
@@ -405,24 +472,56 @@ void TrajPlotCanvas::DrawEcPlane(bool flag)
 }
 
 //------------------------------------------------------------------------------
-// void DrawInNewCoordSystem(CoordinateSystem *cs)
+// void DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
 /**
- * Draws objects in the new coordinate system.
+ * Draws objects in other coordinate system.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawInNewCoordSystem(CoordinateSystem *cs)
+void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
 {
    #if DEBUG_TRAJCANVAS_ACTION
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawInNewCoordSystem() currCS=%s, newCS=%s\n",
-       mCurrCoordSystem->GetName().c_str(), cs->GetName().c_str());
+      ("TrajPlotCanvas::DrawInNewCoordSysName() desiredCS=%s, newCS=%s\n",
+       mDesiredCoordSysName.c_str(), csName.c_str());
    #endif
 
-   // if current CS name is different from the new CS name
-   if (mCurrCoordSystem->GetName() != cs->GetName())
+   // if current desired CS name is different from the new CS name
+   if (!mDesiredCoordSysName.IsSameAs(csName))
    {
-      mCurrCoordSystem = cs;
+      mDesiredCoordSysName = csName;
+      
+      mDesiredCoordSystem =
+         theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
+      
+      mNeedSpacecraftConversion = true;
+      Refresh(false);
+   }
+   else
+   {
+      mNeedSpacecraftConversion = false;
+   }
+}
+
+//------------------------------------------------------------------------------
+// void DrawInOtherCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/**
+ * Draws objects in other coordinate system.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawInOtherCoordSystem(CoordinateSystem *cs)
+{
+   #if DEBUG_TRAJCANVAS_ACTION
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::DrawInNewCoordSystem() desiredCS=%s, newCS=%s\n",
+       mDesiredCoordSystem->GetName().c_str(), cs->GetName().c_str());
+   #endif
+
+   // if current desired CS name is different from the new CS name
+   if (mDesiredCoordSystem->GetName() != cs->GetName())
+   {
+      mDesiredCoordSystem = cs;
       mNeedSpacecraftConversion = true;
       Refresh(false);
    }
@@ -622,46 +721,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    //            event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);
    event.Skip();
 }
-
-
-//------------------------------------------------------------------------------
-// bool TrajPlotCanvas::InitGL()
-//------------------------------------------------------------------------------
-/**
- * Initializes GL and IL.
- */
-//------------------------------------------------------------------------------
-bool TrajPlotCanvas::InitGL()
-{
-   // remove back faces
-   glDisable(GL_CULL_FACE);
-   glEnable(GL_DEPTH_TEST);
-
-   glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
-   glDepthFunc(GL_LESS);
-    
-   // speedups
-   glEnable(GL_DITHER);
-   glShadeModel(GL_SMOOTH);
-   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-   glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
-    
-#ifdef __WXMSW__
-   // initalize devIL library
-   ilInit();
-   ilutRenderer(ILUT_OPENGL);
-   
-   // try to load textures
-   if (!LoadGLTextures())
-      return false;
-   
-   mInitialized = true;
-#endif
-   
-   return true;
-}
-
-
 //------------------------------------------------------------------------------
 //  bool LoadGLTextures()
 //------------------------------------------------------------------------------
@@ -1630,31 +1689,49 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
    if (mScCount > MAX_SCS)
       mScCount = MAX_SCS;
 
-   //--------------------------------------------------
+   //-------------------------------------------------------
    // update spacecraft position
-   //--------------------------------------------------
+   //-------------------------------------------------------
    if (mNumData < MAX_DATA)
    {
       for (int i=0; i<mScCount; i++)
       {
          mTime[mNumData] = time;
+         mScTrajColor[i][mNumData]  = color[i];
          mScGciPos[i][mNumData][0] = posX[i];
          mScGciPos[i][mNumData][1] = posY[i];
          mScGciPos[i][mNumData][2] = posZ[i];
+
+         mEarthGciPos[mNumData][0] = 0.0;
+         mEarthGciPos[mNumData][1] = 0.0;
+         mEarthGciPos[mNumData][2] = 0.0;
          
-         mScTempPos[i][mNumData][0] = posX[i];
-         mScTempPos[i][mNumData][1] = posY[i];
-         mScTempPos[i][mNumData][2] = posZ[i];
-         mScTrajColor[i][mNumData]  = color[i];
-         
-         mEarthTempPos[mNumData][0] = 0.0;
-         mEarthTempPos[mNumData][1] = 0.0;
-         mEarthTempPos[mNumData][2] = 0.0;
+         if (mNeedConversion)
+         {
+            Rvector6 inState, outState;
+            inState.Set(posX[i], posY[i], posZ[i], 0.0, 0.0, 0.0);
+            mCoordConverter.Convert(time, inState, mInternalCoordSystem,
+                                    outState, mDesiredCoordSystem);
+            mScTempPos[i][mNumData][0] = outState[0];
+            mScTempPos[i][mNumData][1] = outState[1];
+            mScTempPos[i][mNumData][2] = outState[2];
+            
+            // convert Earth posistion, if desired CS has different origin
+            //mEarthTempPos[mNumData][0] = 0.0;
+            //mEarthTempPos[mNumData][1] = 0.0;
+            //mEarthTempPos[mNumData][2] = 0.0;
+         }
+         else
+         {
+            mScTempPos[i][mNumData][0] = posX[i];
+            mScTempPos[i][mNumData][1] = posY[i];
+            mScTempPos[i][mNumData][2] = posZ[i];
+         }
       }
       
-      //--------------------------------------------------
+      //----------------------------------------------------
       // update planet position
-      //--------------------------------------------------
+      //----------------------------------------------------
       if (mNumData < MAX_DATA)
       {
          for (int body=0; body<MAX_BODIES; body++)
@@ -1676,6 +1753,9 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const RealArray &posX,
                    BodyInfo::BODY_NAME[body].c_str(), mTempBodyPos[body][mNumData][0],
                    mTempBodyPos[body][mNumData][1], mTempBodyPos[body][mNumData][2]);
                #endif
+
+               //do conversion later
+               
             }
          }
       }
@@ -1809,17 +1889,23 @@ int TrajPlotCanvas::GetStdBodyId(const std::string &name)
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::ConvertSpacecraftData()
 {
-   if (mInternalCoordSystem == NULL || mCurrCoordSystem == NULL)
+   if (mInternalCoordSystem == NULL || mDesiredCoordSystem == NULL)
       return false;
    
    Rvector6 inState, outState;
    
-   // do not convert if current coord sys is internal
-   if (mCurrCoordSystem->GetName() == mInternalCoordSystem->GetName())
+   #if DEBUG_TRAJCANVAS_CONVERT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::ConvertSpacecraftData() internalCS=%s, desiredCS=%s\n",
+       mInternalCoordSystem->GetName().c_str(), mDesiredCoordSystem->GetName().c_str());
+   #endif
+   
+   // do not convert if desired CS is internal CS
+   if (mDesiredCoordSystem->GetName() == mInternalCoordSystem->GetName())
    {
       for (int sc=0; sc<mScCount; sc++)
       {
-         for (int i=1; i<mNumData; i++)
+         for (int i=0; i<mNumData; i++)
          {
             mScTempPos[sc][i][0] = mScGciPos[sc][i][0];
             mScTempPos[sc][i][1] = mScGciPos[sc][i][1];
@@ -1831,19 +1917,19 @@ bool TrajPlotCanvas::ConvertSpacecraftData()
    {
       for (int sc=0; sc<mScCount; sc++)
       {
-         for (int i=1; i<mNumData; i++)
+         for (int i=0; i<mNumData; i++)
          {
             inState.Set(mScGciPos[sc][i][0], mScGciPos[sc][i][1], mScGciPos[sc][i][2],
                         0.0, 0.0, 0.0);
-         
+            
             mCoordConverter.Convert(mTime[i], inState, mInternalCoordSystem,
-                                    outState, mCurrCoordSystem);
-         
+                                    outState, mDesiredCoordSystem);
+            
             mScTempPos[sc][i][0] = outState[0];
             mScTempPos[sc][i][1] = outState[1];
             mScTempPos[sc][i][2] = outState[2];
             
-            #if DEBUG_TRAJCANVAS_CONVERT
+            #if DEBUG_TRAJCANVAS_CONVERT > 1
             MessageInterface::ShowMessage
                ("TrajPlotCanvas::ConvertSpacecraftData() in=%g, %g, %g, out=%g, %g, %g\n",
                 inState[0], inState[1], inState[2], outState[0], outState[1], outState[2]);
