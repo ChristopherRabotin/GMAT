@@ -1,33 +1,85 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  Save
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// Author: Darrel J. Conway
+// Created: 2004/02/26
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+/**
+ * Class implementation for the save command
+ */
+//------------------------------------------------------------------------------
+
+
 #include "Save.hpp"
 
 
+//------------------------------------------------------------------------------
+// Save()
+//------------------------------------------------------------------------------
+/**
+ * Default constructor.
+ */
+//------------------------------------------------------------------------------
 Save::Save() :
     GmatCommand("save"),
     filename    (""),
     append      (false),
     written     (false),
     objName     (""),
-    obj         (NULL)
+    obj         (NULL),
+    verbose     (false)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// ~Save()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
 Save::~Save()
 {
 }
 
 
+//------------------------------------------------------------------------------
+// Save(const Save& sv)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ * 
+ * @param sv The instance that is copied.
+ */
+//------------------------------------------------------------------------------
 Save::Save(const Save& sv) :
     GmatCommand (sv),
     filename    (sv.filename),
     append      (sv.append),     // should be false...
     written     (sv.written),
     objName     (sv.objName),
-    obj         (NULL)
+    obj         (NULL),
+    verbose     (sv.verbose)
 {
 }
 
 
+//------------------------------------------------------------------------------
+// Save& operator=(const Save& sv)
+//------------------------------------------------------------------------------
+/**
+ * Assignmant operator.
+ * 
+ * @param sv The instance that is copied.
+ */
+//------------------------------------------------------------------------------
 Save& Save::operator=(const Save& sv)
 {
     if (this == &sv)
@@ -37,43 +89,41 @@ Save& Save::operator=(const Save& sv)
     append   = sv.append;
     written  = sv.written;
     objName  = sv.objName;
+    verbose  = sv.verbose;
     
     return *this;
 }
      
 
-//bool Save::InterpretAction(void)
-//{
-//    /// @todo: Clean up this hack for the Target::InterpretAction method
-//    // Sample string:  "Save Sat1;" or
-//    
-//    // Set starting location to the space following the command string
-//    Integer loc = generatingString.find("save", 0) + 4, end;
-//    const char *str = generatingString.c_str();
-//    
-//    // Skip white space
-//    while (str[loc] == ' ')
-//        ++loc;
-//    
-//    // Stop at the semicolon if it is there
-//    end = generatingString.find(";", loc);
-//    
-//    
-//    std::string component = generatingString.substr(loc, end-loc);
-//    if (component == "")
-//        throw CommandException("Save string does not identify the object");
-//    objName = component;
-//    
-//    return true;
-//}
-
-
+//------------------------------------------------------------------------------
+// bool GetRefObjectName(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the reference object names.
+ * 
+ * @param type The type of the reference object.
+ * 
+ * @return the name of the object.
+ */
+//------------------------------------------------------------------------------
 std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
 {
    return objName;
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets the reference objects that get saved.
+ * 
+ * @param type The type of the reference object.
+ * @param name THe name of the reference object.
+ * 
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool Save::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
 {
    if (name == "")
@@ -85,7 +135,16 @@ bool Save::SetRefObjectName(const Gmat::ObjectType type, const std::string &name
 }
 
 
-bool Save::Initialize(void)
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Connects up the object associations prior to saving them.
+ * 
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool Save::Initialize()
 {
     written = false;
     bool retval = GmatCommand::Initialize();
@@ -104,14 +163,31 @@ bool Save::Initialize(void)
 }
 
 
-bool Save::Execute(void)
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
+/**
+ * Write objects to a text file.
+ *
+ * @return true if the Command runs to completion, false if an error
+ *         occurs.
+ */
+//------------------------------------------------------------------------------
+bool Save::Execute()
 {
     WriteObject();
     return true;
 }
   
 
-void Save::WriteObject(void)
+//------------------------------------------------------------------------------
+// void Save::WriteObject()
+//------------------------------------------------------------------------------
+/**
+ * Writes out the script snippet that is needed to recreate an object.
+ */
+//------------------------------------------------------------------------------
+void Save::WriteObject()
 {
     if (!obj)
         throw CommandException("Object not set for Save command");
@@ -142,25 +218,39 @@ void Save::WriteObject(void)
         if (obj->GetParameterType(i) != Gmat::UNKNOWN_PARAMETER_TYPE) {
            if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
                // Fill in the l.h.s.
-               file << "GMAT " << objectname << "." 
-                    << obj->GetParameterText(i) << " = ";
-               WriteParameterValue(file, i);
-               file << ";\n";
+              if (obj->GetParameterType(i) == Gmat::STRING_TYPE) {
+                 std::string val = obj->GetStringParameter(i);
+                 // Only save string types if they are not empty or if verbose
+                 if (verbose || (val != "")) {
+                    file << "GMAT " << objectname << "." 
+                         << obj->GetParameterText(i) << " = "
+                         << val << ";\n";
+                 }
+              }
+              else {
+                  file << "GMAT " << objectname << "." 
+                       << obj->GetParameterText(i) << " = ";
+                  WriteParameterValue(file, i);
+                  file << ";\n";
+              }
            }
            else {
                // Fill in the l.h.s.
-               file << "GMAT " << objectname << "." 
-                    << obj->GetParameterText(i) << " = ";
-               std::string desc = "{";
                const StringArray dat = obj->GetStringArrayParameter(i);
-               for (StringArray::const_iterator i = dat.begin(); 
-                    i != dat.end(); ++i) {
-                  if (desc != "{")
-                     desc += ", ";
-                  desc += (*i);
+               // Only save string array types if they are not empty
+               if (verbose || (dat.size() > 0)) {
+                  file << "GMAT " << objectname << "." 
+                       << obj->GetParameterText(i) << " = ";
+                  std::string desc = "{";
+                  for (StringArray::const_iterator i = dat.begin(); 
+                       i != dat.end(); ++i) {
+                     if (desc != "{")
+                        desc += ", ";
+                     desc += (*i);
+                  }
+                  desc += "}";
+                  file << desc << "\n";
                }
-               desc += "}";
-               file << desc << "\n";   
            }
         }
     }
@@ -171,15 +261,21 @@ void Save::WriteObject(void)
 }
 
 
+//------------------------------------------------------------------------------
+// void WriteParameterValue(std::ofstream &file, Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Writes out the values of non-string parameters.
+ * 
+ * @param id The id for the parameter that is written.
+ */
+//------------------------------------------------------------------------------
 void Save::WriteParameterValue(std::ofstream &file, Integer id)
 {
     Gmat::ParameterType tid = obj->GetParameterType(id);
     
     switch (tid) {
         case Gmat::OBJECT_TYPE:
-        case Gmat::STRING_TYPE:     // Strings and objects write out a string
-            file << obj->GetStringParameter(id);
-            break;
             
         case Gmat::INTEGER_TYPE:
             file << obj->GetIntegerParameter(id);
@@ -193,6 +289,10 @@ void Save::WriteParameterValue(std::ofstream &file, Integer id)
             file << ((obj->GetBooleanParameter(id)) ? "true" : "false");
             break;
             
+        case Gmat::UNSIGNED_INT_TYPE:
+            file << obj->GetUnsignedIntParameter(id);
+            break;
+            
         default:
             break;
     }
@@ -200,26 +300,30 @@ void Save::WriteParameterValue(std::ofstream &file, Integer id)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Save.
  *
  * @return clone of the Save.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* Save::Clone(void) const
+GmatBase* Save::Clone() const
 {
    return (new Save(*this));
 }
 
 
-//loj: 11/22/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
+/**
+ * This method updates object names when the user changes them.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
 bool Save::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
