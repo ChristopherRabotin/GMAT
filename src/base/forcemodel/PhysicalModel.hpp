@@ -116,8 +116,7 @@ public:
 
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string str) const;
-    //DJC:  Should be a reference: ......^^^^^^^^^^^^^^^^^^^^^ const std::string &str
+    virtual Integer GetParameterID(const std::string &str) const;
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
     virtual Real GetRealParameter(const Integer id) const;

@@ -268,7 +268,7 @@ std::string PhysicalModel::GetParameterText(const Integer id) const
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer PhysicalModel::GetParameterID(const std::string str) const
+Integer PhysicalModel::GetParameterID(const std::string &str) const
 {
     for (int i = 0; i < PhysicalModelParamCount; i++)
     {
