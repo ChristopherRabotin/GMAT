@@ -25,6 +25,10 @@
 #include "XyPlotSetupPanel.hpp"
 #include "GmatTreeItemData.hpp"
 #include "MessageInterface.hpp"
+#include "SolverGoalsPanel.hpp"
+#include "SolverVariablesPanel.hpp"
+#include "SolverEventPanel.hpp"
+#include "VariableCreatePanel.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -157,14 +161,37 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::PROPAGATE_COMMAND)
         {
-            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
-                        0, wxGROW|wxALL, 0 );
+          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()),
+                      0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::MANEUVER_COMMAND)
         {
             sizer->Add( new ManeuverSetupPanel(panel),
                         0, wxGROW|wxALL, 0 );
         }
+        else if (dataType == GmatTree::TARGET_COMMAND)
+        {
+	  // doesn't show up but gets to this line
+            sizer->Add ( new SolverEventPanel (panel) );
+        }
+        else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
+        {
+	    MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
+	    
+	    // ag: keeps hanging when i add this in
+	    // sizer->Add ( new SolverGoalsPanel (panel) );
+        }
+        else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
+        {
+           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
+	   // ag: keeps hanging when i add this in
+	   // sizer->Add ( new SolverVariablesPanel (panel) );
+        }
+	else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
+		 (dataType == GmatTree::CREATED_VARIABLE))
+	{
+	    sizer->Add (new VariableCreatePanel (panel) );
+	}
 
         panel->SetScrollRate( 5, 5 );
         panel->SetAutoLayout( TRUE );
@@ -262,3 +289,4 @@ wxScrolledWindow *GmatMainNotebook::GetPanel()
 {
    return this->panel;
 }
+

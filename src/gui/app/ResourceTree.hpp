@@ -54,6 +54,7 @@ private:
     int mNumReportFile;
     int mNumXyPlot;
     int mNumOpenGlPlot;
+    int mNumVariable;
     
     // event handlers
     void AddDefaultResources();
@@ -86,7 +87,8 @@ private:
     void OnAddXyPlot(wxCommandEvent &event);
     void OnAddOpenGlPlot(wxCommandEvent &event);
     void OnAddDiffCorr(wxCommandEvent &event);
-    
+    void OnAddVariable(wxCommandEvent &event);
+  
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
     DECLARE_EVENT_TABLE();
@@ -113,6 +115,7 @@ private:
         POPUP_ADD_REPORT_FILE,
         POPUP_ADD_XY_PLOT,
         POPUP_ADD_OPENGL_PLOT,
+	POPUP_ADD_VARIABLE,
         
         POPUP_OPEN,
         POPUP_CLOSE,

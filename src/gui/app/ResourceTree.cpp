@@ -58,6 +58,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_REPORT_FILE, ResourceTree::OnAddReportFile)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
+   EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -89,6 +90,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     mNumXyPlot = 0;
     mNumOpenGlPlot = 0;
     mNumDiffCorr = 0;
+    mNumVariable = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -149,8 +151,9 @@ void ResourceTree::UpdateResources()
         objName = wxString(itemNames[i].c_str());
         objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
         if (objType == "ImpulsiveBurn")
-            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_IMPULSIVE_BURN));
+            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
+			     -1, new GmatTreeItemData(wxT(objName),
+			     GmatTree::DEFAULT_IMPULSIVE_BURN));
     };
 
     if (size !=0)
@@ -169,8 +172,9 @@ void ResourceTree::UpdateResources()
         objName = wxString(itemNames[i].c_str());
         objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
         if (objType == "DifferentialCorrector")
-            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_DIFF_CORR));
+            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
+			     -1, new GmatTreeItemData(wxT(objName),
+			     GmatTree::DEFAULT_DIFF_CORR));
     };
 
     if (size !=0)
@@ -218,94 +222,109 @@ void ResourceTree::AddDefaultResources()
 
     //----- Spacecraft
     mSpacecraftItem =
-        this->AppendItem(resource, wxT("Spacecraft"), -1, -1,
-                         new GmatTreeItemData(wxT("Spacecraft"),
-                                              GmatTree::SPACECRAFT_FOLDER));
+        this->AppendItem(resource, wxT("Spacecraft"), GmatTree::ICON_FOLDER, 
+                        -1, new GmatTreeItemData(wxT("Spacecraft"),
+                        GmatTree::SPACECRAFT_FOLDER));
     
-    SetItemImage(mSpacecraftItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mSpacecraftItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
     
     //----- Formations
     wxTreeItemId formationItem =
-        this->AppendItem(resource, wxT("Formations"), -1, -1,
+        this->AppendItem(resource, wxT("Formations"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Formations"),
-                                              GmatTree::FORMATIONS_FOLDER));
+                         GmatTree::FORMATIONS_FOLDER));
     
-    SetItemImage(formationItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Constellations
     wxTreeItemId constellationItem =
         this->AppendItem(resource,
-                         wxT("Constellations"), -1, -1,
+                         wxT("Constellations"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Constellations"),
                                               GmatTree::CONSTELLATIONS_FOLDER));
     
-    SetItemImage(constellationItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(constellationItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Burns
     mBurnItem =
-        this->AppendItem(resource, wxT("Burns"), -1, -1,
+        this->AppendItem(resource, wxT("Burns"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Burns"),
                                               GmatTree::BURNS_FOLDER));
     
-    SetItemImage(mBurnItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mBurnItem, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
     
     //----- Propagators
     mPropagatorItem =
         this->AppendItem(resource,
-                         wxT("Propagators"), -1, -1,
+                         wxT("Propagators"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Propagators"),
                                               GmatTree::PROPAGATORS_FOLDER));
     
-    SetItemImage(mPropagatorItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mPropagatorItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
     
     //----- Universe
     wxTreeItemId universeItem =
-        this->AppendItem(resource, wxT("Universe"), -1, -1,
+        this->AppendItem(resource, wxT("Universe"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Universe"),
                                               GmatTree::UNIVERSE_FOLDER));
     
-    SetItemImage(universeItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(universeItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Solver
     mSolverItem =
-        this->AppendItem(resource, wxT("Solvers"), -1, -1,
+        this->AppendItem(resource, wxT("Solvers"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Solvers"),
                                               GmatTree::SOLVERS_FOLDER));
     
-    SetItemImage(mSolverItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mSolverItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Subscribers
     mSubscriberItem =
-        this->AppendItem(resource, wxT("Plots/Reports"), -1, -1,
-                         new GmatTreeItemData(wxT("Plots/Reports"),
-                                              GmatTree::SUBSCRIBERS_FOLDER));
+        this->AppendItem(resource, wxT("Plots/Reports"), GmatTree::ICON_FOLDER,
+                        -1, new GmatTreeItemData(wxT("Plots/Reports"),
+                        GmatTree::SUBSCRIBERS_FOLDER));
     
-    SetItemImage(mSubscriberItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(mSubscriberItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Interfaces
     wxTreeItemId interfaceItem =
-        this->AppendItem(resource, wxT("Interfaces"), -1, -1,
+        this->AppendItem(resource, wxT("Interfaces"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Interfaces"),
                                               GmatTree::INTERFACES_FOLDER));
     
-    SetItemImage(interfaceItem, GmatTree::ICON_FOLDER, wxTreeItemIcon_Expanded);
+    SetItemImage(interfaceItem, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 
     //----- Subscripts
     wxTreeItemId subscriptItem =
-        this->AppendItem(resource, wxT("Subscripts"), -1, -1,
+        this->AppendItem(resource, wxT("Subscripts"), GmatTree::ICON_FOLDER, -1,
                          new GmatTreeItemData(wxT("Subscripts"),
                                               GmatTree::SUBSCRIPTS_FOLDER));
+
+    SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
+                 wxTreeItemIcon_Expanded);
     
     //----- Vairables
-    this->AppendItem(resource, wxT("Variables"), -1, -1,
+    wxTreeItemId variableItem = 
+         this->AppendItem(resource, wxT("Variables"), GmatTree::ICON_FOLDER, -1,
                      new GmatTreeItemData(wxT("Variables"),
                                           GmatTree::VARIABLES_FOLDER));
+
+    SetItemImage(variableItem, GmatTree::ICON_OPENFOLDER,
+                 wxTreeItemIcon_Expanded);
     
     //----- GroundStations
-    this->AppendItem(resource, wxT("Ground Stations"), -1, -1,
-                     new GmatTreeItemData(wxT("Ground Stations"),
-                                          GmatTree::GROUNDSTATIONS_FOLDER));
+    this->AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
+                     -1, new GmatTreeItemData(wxT("Ground Stations"),
+                     GmatTree::GROUNDSTATIONS_FOLDER));
 
     AddDefaultBodies(universeItem);
     AddDefaultSpacecraft(mSpacecraftItem);
@@ -468,13 +487,16 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId subs)
         //loj: added
         if (objName == "ReportFile")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_REPORT_FILE));
+                             new GmatTreeItemData(wxT(objName),
+				 GmatTree::DEFAULT_REPORT_FILE));
         else if (objName == "XyPlot")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_XY_PLOT));
+                             new GmatTreeItemData(wxT(objName),
+				 GmatTree::DEFAULT_XY_PLOT));
         else if (objName == "OpenGlPlot")
             this->AppendItem(subs, wxT(objName), GmatTree::ICON_REPORT, -1,
-                             new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_OPENGL_PLOT));
+                             new GmatTreeItemData(wxT(objName),
+			     GmatTree::DEFAULT_OPENGL_PLOT));
     };
 }
 
@@ -525,6 +547,8 @@ void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
         menu.Append(POPUP_ADD_BODY, wxT("Add Body..."));
     else if (strcmp(title, wxT("Plots/Reports")) == 0)
         menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
+    else if (strcmp(title, wxT("Variables")) == 0)
+      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
     else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
              (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
              (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
@@ -611,12 +635,14 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
-    MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
+    //MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
+
 
     wxTreeItemId item = GetSelection();
     GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
     wxString oldName = selItem->GetDesc();
     int dataType = selItem->GetDataType();
+
 
     wxString newName = oldName;
     newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
@@ -627,16 +653,24 @@ void ResourceTree::OnRename(wxCommandEvent &event)
         
         switch (dataType)
         {
-        case GmatTree::SPACECRAFT_FOLDER:
+        case GmatTree::DEFAULT_SPACECRAFT:
+        case GmatTree::CREATED_SPACECRAFT:
             objType = Gmat::SPACECRAFT;
             break;
-        case GmatTree::BURNS_FOLDER:
+        case GmatTree::DEFAULT_IMPULSIVE_BURN:
+        case GmatTree::CREATED_IMPULSIVE_BURN:
             objType = Gmat::BURN;
             break;
-        case GmatTree::SOLVERS_FOLDER:
+        case GmatTree::DEFAULT_DIFF_CORR:
+        case GmatTree::CREATED_DIFF_CORR:
             objType = Gmat::SOLVER;
             break;
-        case GmatTree::SUBSCRIBERS_FOLDER:
+        case GmatTree::DEFAULT_REPORT_FILE:
+        case GmatTree::CREATED_REPORT_FILE:
+        case GmatTree::DEFAULT_XY_PLOT:
+        case GmatTree::CREATED_XY_PLOT:
+        case GmatTree::DEFAULT_OPENGL_PLOT:
+        case GmatTree::CREATED_OPENGL_PLOT:
             objType = Gmat::SUBSCRIBER;
             break;
         default:
@@ -644,6 +678,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
             MessageInterface::ShowMessage("ResourceTree::OnRename() unknown object.\n");
             break;
         }
+
 
         // update item only if successful
         if (theGuiInterpreter->
@@ -653,15 +688,12 @@ void ResourceTree::OnRename(wxCommandEvent &event)
             GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
             selItem->SetDesc(newName);
         }
-        else
-        {
-            //loj: I need to fix on this
-            MessageInterface::ShowMessage("ResourceTree::OnRename() faild. Linda will fix this.\n");
-        }
     }
+
 
     //loj: It looks better to change name using EditLabel, but How do I get new name?
     //loj:(void) this->EditLabel(item);
+
 
 }
 
@@ -992,6 +1024,25 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
    
     this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
                      new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
+
+    Expand(item);
+}
+
+//------------------------------------------------------------------------------
+// void OnAddVariable(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddVariable(wxCommandEvent &event)
+{
+    wxTreeItemId item = GetSelection();
+  
+    wxString name;
+    name.Printf("Variable%d", ++mNumVariable);
+
+    //    Subscriber* subs =
+    //    theGuiInterpreter->CreateSubscriber("OpenGlPlot", std::string(name.c_str()));
+   
+    this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                     new GmatTreeItemData(name, GmatTree::CREATED_VARIABLE));
 
     Expand(item);
 }

@@ -133,6 +133,10 @@ namespace GmatTree
         PROPAGATE_COMMAND,
         TARGET_COMMAND,
 
+        // Temporary to show the panel
+        VIEW_SOLVER_VARIABLES,
+        VIEW_SOLVER_GOALS, 
+
     };
 }
 #endif // GmatTreeItemData_hpp

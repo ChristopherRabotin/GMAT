@@ -72,16 +72,20 @@ private:
     void OnInsertManeuver(wxCommandEvent &event);
     void OnInsertTarget(wxCommandEvent &event);
     
-    void AddManeuver();
+//    void AddManeuver();
+
+    void OnViewVariables();
+    void OnViewGoals();
 
     wxMenu* CreatePopupMenu();
+    wxMenu* CreateInsertPopupMenu();
     
     DECLARE_EVENT_TABLE();
     
-    enum
-    {
-        ICON_FILE
-    };
+//    enum
+//    {
+//        ICON_FILE
+//    };
    
     enum
     {
@@ -91,6 +95,7 @@ private:
         POPUP_COPY,
         POPUP_PASTE,
         POPUP_DELETE,
+        POPUP_RENAME,
 
         POPUP_ADD_MISSION_SEQ,
         POPUP_ADD_COMMAND,
@@ -102,7 +107,9 @@ private:
         POPUP_INSERT_PROPAGATE,
         POPUP_INSERT_MANEUVER,
         POPUP_INSERT_TARGET,
-        
+
+        POPUP_VIEW_VARIABLES,
+        POPUP_VIEW_GOALS, 
     };
 };
 
