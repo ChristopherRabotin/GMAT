@@ -321,8 +321,8 @@ bool Apoapsis::Evaluate()
     Real rdotv = R*V;
     mRealValue = rdotv;
     
-    MessageInterface::ShowMessage("Apoapsis::Evaluate() r=%f,%f,%f, v=%f,%f,%f, r.v=%f\n",
-                                  R[0], R[1], R[2], V[0], V[1], V[2], rdotv);
+    //MessageInterface::ShowMessage("Apoapsis::Evaluate() r=%f,%f,%f, v=%f,%f,%f, r.v=%f\n",
+    //                              R[0], R[1], R[2], V[0], V[1], V[2], rdotv);
     return true;
 }
 
