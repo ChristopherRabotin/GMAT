@@ -128,10 +128,12 @@ void PropagatePanel::Create()
    
    propGrid->CreateGrid(MAX_PROP_ROW, 2, wxGrid::wxGridSelectRows);
    propGrid->SetColSize(0, 200);
-   propGrid->SetColSize(1, 488);
+   propGrid->SetColSize(1, 500);
+   propGrid->SetMargins(0, 0);
    propGrid->SetColLabelValue(0, _T("Propagator"));
    propGrid->SetColLabelValue(1, _T("Spacecraft List"));
    propGrid->SetRowLabelSize(0);
+   propGrid->SetScrollbars(5, 8, 15, 15);
    propGrid->EnableEditing(false);
    
    stopCondGrid =
@@ -139,10 +141,12 @@ void PropagatePanel::Create()
    
    stopCondGrid->CreateGrid(MAX_STOPCOND_ROW, 2, wxGrid::wxGridSelectRows);
    stopCondGrid->SetColSize(0, 200);
-   stopCondGrid->SetColSize(1, 488);
+   stopCondGrid->SetColSize(1, 500);
+   stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetColLabelValue(0, _T("Name"));
    stopCondGrid->SetColLabelValue(1, _T("Condition"));
    stopCondGrid->SetRowLabelSize(0);
+   stopCondGrid->SetScrollbars(5, 14, 15, 15);
    stopCondGrid->EnableEditing(false);
 
    // wxString
@@ -253,7 +257,7 @@ void PropagatePanel::Create()
 
    propSizer->Add(synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    propSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   propSizer->Add(propGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
    
    stopNameSizer->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    stopNameSizer->Add(stopNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -279,7 +283,7 @@ void PropagatePanel::Create()
 
    detailSizer->Add(item9, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   mStopSizer->Add(stopCondGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   mStopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, bsize);
    mStopSizer->Add(detailSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    mMiddleBoxSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
