@@ -302,8 +302,10 @@ void XyPlotSetupPanel::LoadData()
         // get X parameter
         wxString *xParam = new wxString[1];
         xParam[0] = theSubscriber->GetStringParameter("IndVar").c_str();
-        MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParam = %s\n",
-                                      xParam[0].c_str());
+        
+        //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParam = %s\n",
+        //                              xParam[0].c_str());
+        
         if (!xParam[0].IsSameAs(""))
         {
             mNumXParams = 1;
@@ -390,7 +392,7 @@ void XyPlotSetupPanel::SaveData()
 
         if (numYParams >= 0)
         {
-            theSubscriber->SetBooleanParameter("ClearYParamList", true);
+            theSubscriber->SetBooleanParameter("ClearDepVarList", true);
             for (int i=0; i<numYParams; i++)
             {
                 //MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() DepVar = %s\n",
