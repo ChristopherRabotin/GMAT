@@ -21,10 +21,12 @@
 #ifndef AtmosphereModel_hpp
 #define AtmosphereModel_hpp
 
+#include <math.h>
+#include <stdio.h>
 
 #include "GmatBase.hpp"
+#include "SolarFluxFileReader.hpp"
 #include "AtmosphereException.hpp"
-
 
 /**
  * Base class for atmosphere models.
@@ -57,6 +59,8 @@ public:
     void                    SetCentralBodyVector(Real *cv);
     
 protected:
+    /// Solar flux binary file reader
+    SolarFluxFileReader *fileReader;
     /// Vector from the central body to the sun
     Real                    *sunVector;
     /// Name of the central body
@@ -69,7 +73,7 @@ protected:
     // copy constructor - needed by child classes (for Clone)
     AtmosphereModel(const AtmosphereModel& am);
 
-private:
+private:  
     AtmosphereModel&        operator=(const AtmosphereModel& am);
 };
 

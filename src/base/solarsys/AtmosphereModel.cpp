@@ -30,6 +30,7 @@
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
     GmatBase            (Gmat::ATMOSPHERE, typeStr),
+    fileReader          (NULL),
     sunVector           (NULL),
     centralBody         ("Earth"),
     centralBodyLocation (NULL),
@@ -88,6 +89,7 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
 GmatBase            (am),
+fileReader          (NULL),
 sunVector           (NULL),
 centralBody         (am.centralBody),
 centralBodyLocation (NULL),     // ************ NULL?
