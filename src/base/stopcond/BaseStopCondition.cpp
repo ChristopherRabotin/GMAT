@@ -150,7 +150,9 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEpochParam = copy.mEpochParam;
    mStopEpoch = copy.mStopEpoch;
    mStopParam = copy.mStopParam;
-    
+   mEccParam = copy.mEccParam;   //loj: 6/23/04 added
+   mRmagParam = copy.mRmagParam; //loj: 6/23/04 added
+   
    Initialize();
    CopyDynamicData(copy);
 }
@@ -175,6 +177,8 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
       mSolarSystem = right.mSolarSystem;
       mEpochParam = right.mEpochParam;
       mStopEpoch = right.mStopEpoch;
+      mEccParam = right.mEccParam;   //loj: 6/23/04 added
+      mRmagParam = right.mRmagParam; //loj: 6/23/04 added
 
       Initialize();
       CopyDynamicData(right);
@@ -196,7 +200,7 @@ BaseStopCondition::~BaseStopCondition()
       delete mEccParam;
 
    if (mRmagParam != NULL)
-      delete mEccParam;
+      delete mRmagParam; //loj: 6/24/04 changed from mEccParam
 }
 
 //------------------------------------------------------------------------------
