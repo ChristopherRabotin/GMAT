@@ -74,7 +74,6 @@ private:
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
     void OnCloseTabs(wxCommandEvent& WXUNUSED(event));
 
-    //void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
     void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event));
     void OnScriptBuild(wxCommandEvent& WXUNUSED(event));
     
@@ -134,9 +133,6 @@ private:
         MENU_TOOLS_SWINGBY,
 
         MENU_HELP_TOPICS,
-        MENU_HELP_DEMOS,
-
-        //MENU_DEMO_BATCH_RUN,
         
         // it is important for the id corresponding to the "About" command to have
         // this standard value as otherwise it won't be handled properly under Mac

@@ -27,8 +27,6 @@
 //------------------------------------------------------------------------------
 #include "GmatMainFrame.hpp"
 #include "ViewTextFrame.hpp"
-#include "BatchRunFromGui.hpp"
-#include "ConsoleAppException.hpp"
 #include "DocViewFrame.hpp"
 #include "TextEditView.hpp"
 #include "TextDocument.hpp"
@@ -53,7 +51,6 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
-    //EVT_MENU(MENU_DEMO_BATCH_RUN, GmatMainFrame::OnDemoBatchRun)    
     EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
     EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
 END_EVENT_TABLE()
@@ -271,8 +268,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
            *viewsMenu = new wxMenu,
            *toolsMenu = new wxMenu,
            *helpMenu = new wxMenu;
-    //loj: added
-    //wxMenu *demoMenu = new wxMenu;
     wxMenu *scriptMenu = new wxMenu;
     
     wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
@@ -368,13 +363,9 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
     
     helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
-    //helpMenu->Append(MENU_HELP_DEMOS, wxT("Demos"), wxT(""), FALSE);
     helpMenu->AppendSeparator();
     helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
-
-    //loj: added
-    //demoMenu->Append(MENU_DEMO_BATCH_RUN, wxT("Batch Run"), wxT(""), FALSE);
-    
+   
     menuBar->Append(fileMenu, wxT("File"));
     menuBar->Append(scriptMenu, wxT("Script"));
     menuBar->Append(editMenu, wxT("Edit"));
@@ -383,8 +374,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     menuBar->Append(variablesMenu, wxT("Variables"));
     menuBar->Append(viewsMenu, wxT("Views"));
     menuBar->Append(toolsMenu, wxT("Tools"));
-    //loj: added
-    //menuBar->Append(demoMenu, wxT("Demo"));
     
     menuBar->Append(helpMenu, wxT("Help"));
     
@@ -442,45 +431,6 @@ wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
 
     return menuBar;
 }
-
-//loj: added
-//  //------------------------------------------------------------------------------
-//  // void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
-//  //------------------------------------------------------------------------------
-//  /**
-//   * Handles demo output from the menu bar.
-//   *
-//   * @param <event> input event.
-//   */
-//  //------------------------------------------------------------------------------
-//  void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
-//  {
-//      mTextFrame = new ViewTextFrame(this, _T("Demo Batch Run"), 50, 50, 450, 340);
-//      mTextFrame->Show(true);
-
-//      GmatAppData::theMessageWindow->ClearText();
-    
-//      try
-//      {
-//          BatchRunFromGui batchMode;
-//          batchMode.Run();
-//          StringArray output = batchMode.GetTextBuffer();
-        
-//          int size = output.size();
-//          for(int i=0; i<size; i++)
-//              mTextFrame->AppendText(wxString(output[i].c_str()));
-
-//      }
-//      catch (BaseException &e)
-//      {
-//          mTextFrame->AppendText("*** Some Exception occurred in BatchRunFromGui! \n");
-//          mTextFrame->AppendText(wxString(e.GetMessage().c_str()));
-//      }
-//      catch (...)
-//      {
-//          mTextFrame->AppendText("*** Some other Error occurred in BatchRunFromGui! ");
-//      }
-//  }
 
 //------------------------------------------------------------------------------
 // void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
