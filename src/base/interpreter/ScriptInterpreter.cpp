@@ -309,7 +309,7 @@ bool ScriptInterpreter::Parse(void)
                          epstr.assign(line, start, end-start);
                          
                          ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
-//                         ((Spacecraft*)obj)->SaveDisplay();
+                         ((Spacecraft*)obj)->SaveDisplay();
                          chunks.clear();
                          return true;
                       }
