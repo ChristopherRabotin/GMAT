@@ -38,6 +38,8 @@ public:
 protected:
 
 private:
+   bool gridLines;
+
    GuiInterpreter *theGuiInterpreter;
    // GmatMainNotebook *mainNotebook;
    wxArrayString mCommandList;

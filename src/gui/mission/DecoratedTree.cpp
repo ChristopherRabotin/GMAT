@@ -53,9 +53,9 @@ DecoratedTree::DecoratedTree(wxWindow* parent, wxWindowID id, const wxPoint& pos
                    const wxValidator& validator, const wxString& name) :
     wxTreeCtrl              (parent, id, pos, size, style, validator, name),
     initialized             (false),
-    drawOutline             (true),
+    drawOutline             (false),
     drawBoxes               (true),
-    boxCount                (2),
+    boxCount                (0),
     boxWidth                (20),
     rowHeight               (14)
 {

@@ -120,6 +120,9 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    : DecoratedTree(parent, id, pos, size, style)
 {
    parent = parent;
+
+   gridLines = false;     // change to true to show gridlines for goals/vars
+
    // mainNotebook = GmatAppData::GetMainNotebook();
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
@@ -129,9 +132,18 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandList.Add("Target");
    mCommandList.Add("Function");
    
-   // SetNodes();
-   SetParameter(BOXCOUNT, 2);
-   SetParameter(BOXWIDTH, 20);
+   if (gridLines)
+   {
+      // SetNodes();
+      SetParameter(BOXCOUNT, 2);
+      SetParameter(BOXWIDTH, 20);
+      SetParameter(DRAWOUTLINE, 1);
+   }
+   else
+   {
+      SetParameter(BOXCOUNT, 0);
+      SetParameter(DRAWOUTLINE, 0);
+   }
 
    numManeuver = 0;
    mNumMissionSeq = 0;
@@ -156,8 +168,11 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    // does it right-to-left
    // should spaces be put in for those that don't have
    // any text?
-   SetString(-1, "V");                                   
-   SetString(-1, "G");  
+   if (gridLines)
+   {
+      SetString(-1, "V");
+      SetString(-1, "G");
+   }
 
    //    Initialize();
    //    SetNodes();
@@ -290,9 +305,9 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndTarget")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_TARGET_COMMAND,
+         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_TARGET_COMMAND,
                        cmd, &mNumTarget, mNumTarget);
-      
+
       Expand(parent);
    }
    else if (cmdTypeName == "Achieve")
@@ -339,7 +354,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndFor")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_FOR_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_FOR_CONTROL,
                        cmd, &mNumForLoop, mNumForLoop);
       
       Expand(parent);
@@ -358,7 +373,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndIf")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_IF_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_IF_CONTROL,
                        cmd, &mNumIfStatement, mNumIfStatement);
         
       Expand(parent);
@@ -377,7 +392,7 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
    else if (cmdTypeName == "EndWhile")
    {
       mNewTreeId =
-         AppendCommand(parent, GmatTree::MISSION_ICON_FILE, GmatTree::END_WHILE_CONTROL,
+         AppendCommand(parent, GmatTree::MISSION_NO_ICON, GmatTree::END_WHILE_CONTROL,
                        cmd, &mNumWhileLoop, mNumWhileLoop);
       
       Expand(parent);
@@ -468,10 +483,10 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
       ("MissionTree::AppendCommand() cmdTypeName=%s, nodeName=%s\n",
        cmdTypeName.c_str(), nodeName.c_str());
 #endif
-   
+
    node = AppendItem(parent, nodeName, icon, -1,
                      new MissionTreeItemData(nodeName, type, nodeName, cmd));
-   
+
    return node;
 }
 
@@ -614,7 +629,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          //---------------------------------------------------
          wxString endName = "End" + typeName;
          endName.Printf("%s%d", endName.c_str(), *cmdCount);
-         InsertItem(node, 0, endName, GmatTree::MISSION_ICON_FILE, -1,
+         InsertItem(node, 0, endName, GmatTree::MISSION_NO_ICON, -1,
                     new MissionTreeItemData(endName, endType, endName, endCmd));
       }
    }
@@ -1380,7 +1395,7 @@ void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
                                          name, NULL));
    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(item, endName, GmatTree::MISSION_ICON_FILE, -1,
+   //            AppendItem(item, endName, GmatTree::MISSION_NO_ICON, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
@@ -1434,7 +1449,7 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
                                          name, NULL));
    SetItemImage(targetId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);    
-   //            AppendItem(itemId, endName, GmatTree::MISSION_ICON_FILE, -1,
+   //            AppendItem(itemId, endName, GmatTree::MISSION_NO_ICON, -1,
    //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
    //                                               endName, NULL));
 
