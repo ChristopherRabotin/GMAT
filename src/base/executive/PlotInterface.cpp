@@ -214,7 +214,9 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
             (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren[i]);
             
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
             frame->RefreshPlot();
+         }
       }
    }
    
@@ -632,7 +634,10 @@ bool PlotInterface::RefreshXyPlot(const std::string &plotName)
             (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
       
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
-               frame->RedrawCurve();           
+         {
+            frame->RedrawCurve();
+            frame->SetFocus(); //loj: 7/26/04 added
+         }
       }
    }
    
