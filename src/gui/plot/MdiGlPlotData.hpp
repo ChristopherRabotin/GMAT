@@ -23,6 +23,9 @@ namespace GmatPlot
     {
         MDI_QUIT = 100,
         MDI_OPEN_TRAJECTORY_FILE,
+        MDI_CHILD_ZOOM_IN,
+        MDI_CHILD_ZOOM_OUT,
+        MDI_CLEAR_PLOT,
         MDI_CHANGE_TITLE,
         MDI_CHILD_QUIT,
         MDI_SHOW_DEFAULT_VIEW,
@@ -35,12 +38,11 @@ namespace GmatPlot
     };
 }
 
-struct MdiPlot
+struct MdiGlPlot
 {
     static MdiParentGlFrame *mdiParentGlFrame;
     static wxList mdiChildren;
-    
-    static int gs_nFrames;
+    static int numChildFrames;
 };
 
 #endif

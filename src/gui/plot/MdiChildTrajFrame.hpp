@@ -33,12 +33,14 @@ class MdiChildTrajFrame: public wxMDIChildFrame
 {
 public:
     TrajPlotCanvas *mCanvas;
-    int mViewMenuIndex;
-
-    MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& title,
-                      const wxPoint& pos, const wxSize& size, const long style);
+    bool mIsMainFrame;
+    
+    MdiChildTrajFrame(wxMDIParentFrame *parent, bool mainFrame,
+                      const wxString& title, const wxPoint& pos,
+                      const wxSize& size, const long style);
     ~MdiChildTrajFrame();
 
+    void OnClearPlot(wxCommandEvent& event);
     void OnChangeTitle(wxCommandEvent& event);
     void OnShowDefaultView(wxCommandEvent& event);
     void OnZoomIn(wxCommandEvent& event);
@@ -53,8 +55,10 @@ public:
     void OnMove(wxMoveEvent& event);
     void OnClose(wxCloseEvent& event);
 
+    void UpdateSpacecraft(const Real &time, const Real &posX,
+                          const Real &posY, const Real &posZ);
 protected:
-    
+
     DECLARE_EVENT_TABLE()
 };
 #endif

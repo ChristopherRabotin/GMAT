@@ -23,6 +23,7 @@
 const int MAX_DATA = 20000;
 const int MAX_EARTH_ZOOM_IN = 12756;
 const int MAX_BODIES = 20;
+const int MAX_SCS = 5;
 
 class TrajPlotCanvas: public wxGLCanvas
 {
@@ -34,16 +35,16 @@ public:
     ~TrajPlotCanvas();
 
     // initialization
-    bool InitGL(void);
+    bool InitGL();
     
     // events
     void OnPaint(wxPaintEvent &event);
     void OnSize(wxSizeEvent &event);
     void OnMouse(wxMouseEvent &event);
-    void OnEraseBackground(wxEraseEvent &event);
 
     // view
     bool IsInitialized() { return mInitialized; };
+    void ClearPlot();
     void ShowDefaultView();
     void ZoomIn();
     void ZoomOut();
@@ -80,7 +81,8 @@ private:
     int mEquatorialPlaneColor;
     
     // texture
-    GLuint mTextureIndex[MAX_BODIES];
+    GLuint mBodyTextureIndex[MAX_BODIES];
+    GLuint mScTextureIndex[MAX_SCS];
     bool mUseTexture;
     
     // rotating
@@ -107,7 +109,9 @@ private:
     // spacecraft
     float mTempScPos[MAX_DATA][3];
     int   mScTrajColor[MAX_DATA];
-    
+    float mScRadius;
+    GLuint mGlList;
+
     // bodies
     float mEarthRadius;
     float mEarthGciPos[MAX_DATA][3];
@@ -146,12 +150,13 @@ private:
     void ComputeView(GLfloat fEndX, GLfloat fEndY);
     void ChangeView(float viewX, float viewY, float viewZ);
     //float viewDistance);
-    void ChangeProjection(int width, int height, float distance);
+    void ChangeProjection(int width, int height, float axisLength);
     
     // drawing objects
     void DrawPicture();
     void DrawEarth();
     void DrawEarthTrajectory();
+    void DrawSpacecraft();
     void DrawSpacecraftTrajectory();
     void DrawEquatorialPlane();
 

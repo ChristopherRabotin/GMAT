@@ -29,6 +29,7 @@ class MdiParentGlFrame : public wxMDIParentFrame
 public:
     wxTextCtrl *textWindow;
     MdiChildTrajFrame *subframe;
+    MdiChildTrajFrame *mainSubframe;
 
     MdiParentGlFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
@@ -39,6 +40,8 @@ public:
     void OnClose(wxCloseEvent& event);
     void OnQuit(wxCommandEvent& event);
     void OnOpenTrajectoryFile(wxCommandEvent& event);
+    void OnZoomIn(wxCommandEvent& event);
+    void OnZoomOut(wxCommandEvent& event);
 
 protected:
     void InitToolBar(wxToolBar* toolBar);

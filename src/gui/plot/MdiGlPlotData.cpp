@@ -14,6 +14,6 @@
 //------------------------------------------------------------------------------
 #include "MdiGlPlotData.hpp"
 
-MdiParentGlFrame* MdiPlot::mdiParentGlFrame = (MdiParentGlFrame *) NULL;    
-wxList MdiPlot::mdiChildren = 0;
-int MdiPlot::gs_nFrames = 0;
+MdiParentGlFrame* MdiGlPlot::mdiParentGlFrame = (MdiParentGlFrame *) NULL;    
+wxList MdiGlPlot::mdiChildren = 0;
+int MdiGlPlot::numChildFrames = 0;

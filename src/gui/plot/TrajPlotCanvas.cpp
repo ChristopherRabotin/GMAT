@@ -38,7 +38,6 @@
 BEGIN_EVENT_TABLE(TrajPlotCanvas, wxGLCanvas)
     EVT_SIZE(TrajPlotCanvas::OnSize)
     EVT_PAINT(TrajPlotCanvas::OnPaint)
-    EVT_ERASE_BACKGROUND(TrajPlotCanvas::OnEraseBackground)
     EVT_MOUSE_EVENTS(TrajPlotCanvas::OnMouse)
 END_EVENT_TABLE()
 
@@ -75,11 +74,16 @@ struct GlColorType
    Byte not_used;
 };
 
-const int BLACK32 = 0x00000000;
-const int WHITE32 = 0x00ffffff;
-const int RED32   = 0x000000ff;
-const int GREEN32 = 0x00008000;
-const int GRAY32  = 0x00808080;
+const int BLACK32   = 0x00000000;
+const int WHITE32   = 0x00ffffff;
+const int RED32     = 0x000000ff;
+const int GREEN32   = 0x00008000;
+const int YELLOW32  = 0x0000ffff;
+const int GRAY32    = 0x00808080;
+const int BEIGE32   = 0x0065f2fd;
+const int SILVER32  = 0x00c0c0c0;
+const int ORANGE32  = 0x004080ff;
+const int L_BROWN32 = 0x001a98ce;
 
 //----------------------------
 //  static data
@@ -92,6 +96,19 @@ static GlColorType *sGlColor = (GlColorType*)sIntColor;
 //                const wxPoint& pos, const wxSize& size,
 //                long style, const wxString& name)
 //------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <parent> parent window pointer
+ * @param <id>  window id
+ * @param <pos> position (top, left) where the window to be placed within the
+ *              parent window
+ * @param <size>  size of the window
+ * @param <style>  style of window
+ * @param <name>  title of window
+ *
+ */
+//------------------------------------------------------------------------------
 TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
                                const wxPoint& pos, const wxSize& size,
                                long style, const wxString& name)
@@ -99,6 +116,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
 {    
     // initalize data members
     mTextTrajFile = NULL;
+    mGlList = 0;
     mInitialized = false;
     mNumData = 0;
 
@@ -134,20 +152,29 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
     ChangeProjection(size.x, size.y, mAxisLength);
         
     mEarthRadius = 6378.14; //km
+    mScRadius = 200; //km: make big enough to see
+
+    // view options
     mShowWireFrame = false;
     mShowEquatorialPlane = true;
     mUseTexture = true;
     mEquatorialPlaneColor = GRAY32;
     
     for (int i=0; i<MAX_BODIES; i++)
-    {
-        mTextureIndex[i] = 999;
-    }
+        mBodyTextureIndex[i] = 999;
+    
+    for (int i=0; i<MAX_SCS; i++)
+        mScTextureIndex[i] = 999;
 
 }
 
+
 //------------------------------------------------------------------------------
 // ~TrajPlotCanvas()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
 //------------------------------------------------------------------------------
 TrajPlotCanvas::~TrajPlotCanvas()
 {
@@ -156,7 +183,29 @@ TrajPlotCanvas::~TrajPlotCanvas()
 }
 
 //------------------------------------------------------------------------------
+// void ClearPlot()
+//------------------------------------------------------------------------------
+/**
+ * Clears plot.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::ClearPlot()
+{
+    //loj: black for now.. eventually it will use background color
+    glClearColor(0.0, 0.0, 0.0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glFlush();
+    SwapBuffers();
+    mNumData = 0;
+    //mShowEquatorialPlane = false;
+}
+
+//------------------------------------------------------------------------------
 // void ShowDefaultView()
+//------------------------------------------------------------------------------
+/**
+ * Shows default view.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ShowDefaultView()
 {
@@ -177,8 +226,13 @@ void TrajPlotCanvas::ShowDefaultView()
     Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void ZoomIn()
+//------------------------------------------------------------------------------
+/**
+ * Zoom in the picture.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ZoomIn()
 {
@@ -195,8 +249,13 @@ void TrajPlotCanvas::ZoomIn()
     Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void ZoomOut()
+//------------------------------------------------------------------------------
+/**
+ * Zoom out the picture.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ZoomOut()
 {
@@ -211,8 +270,13 @@ void TrajPlotCanvas::ZoomOut()
     Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void ShowWireFrame(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Shows objects in wire frame.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ShowWireFrame(bool flag)
 {
@@ -220,8 +284,13 @@ void TrajPlotCanvas::ShowWireFrame(bool flag)
     Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void ShowEquatorialPlane(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Shows equatorial plane.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::ShowEquatorialPlane(bool flag)
 {
@@ -229,8 +298,13 @@ void TrajPlotCanvas::ShowEquatorialPlane(bool flag)
     Refresh(false);
 }
 
+
 //------------------------------------------------------------------------------
 // void OnPaint(wxPaintEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Processes wxPaintEvent.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
 {
@@ -260,8 +334,13 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
     SwapBuffers();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnSize(wxSizeEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Processes wxSizeEvent.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnSize(wxSizeEvent& event)
 {
@@ -284,16 +363,13 @@ void TrajPlotCanvas::OnSize(wxSizeEvent& event)
     }
 }
 
-//------------------------------------------------------------------------------
-// void OnEraseBackground(wxEraseEvent& event)
-//------------------------------------------------------------------------------
-void TrajPlotCanvas::OnEraseBackground(wxEraseEvent& event)
-{
-    // Do nothing, to avoid flashing on MSW
-}
 
 //------------------------------------------------------------------------------
 // void OnMouse(wxMouseEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Processes wxMouseEvent.
+ */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
 {
@@ -307,18 +383,18 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
     mouseX = event.GetX();
     mouseY = event.GetY();
         
+    // First, flip the mouseY value so it is oriented right (bottom left is 0,0)
+    flippedY = clientHeight - mouseY;
+    
+    GLfloat fEndX = m_fLeftPos + ((GLfloat)mouseX /(GLfloat)clientWidth) *
+        (m_fRightPos - m_fLeftPos);
+    GLfloat fEndY = m_fBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
+        (m_fTopPos - m_fBottomPos);
+    
     //for rotating
     if (event.Dragging())
     {
-        // First, flip the mouseY value so it is oriented right (bottom left is 0,0)
-        flippedY = clientHeight - mouseY;
-    
-        GLfloat fEndX = m_fLeftPos + ((GLfloat)mouseX /(GLfloat)clientWidth) *
-            (m_fRightPos - m_fLeftPos);
-        GLfloat fEndY = m_fBottomPos + ((GLfloat)flippedY /(GLfloat)clientHeight)*
-            (m_fTopPos - m_fBottomPos);
-
-        
+  
         //------------------------------
         // translating
         //------------------------------
@@ -327,11 +403,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
             // Do a X/Y Translate of the camera
             m_fCamTransX += (fEndX - m_fStartX);
             m_fCamTransY += (fEndY - m_fStartY);
-
-            m_fStartX = fEndX;
-            m_fStartY = fEndY;
-            
-            mouseY = clientHeight - mouseY;
 
             // repaint
             Refresh(false);
@@ -343,8 +414,6 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
         {        
             ComputeView(fEndX, fEndY);
             ChangeView(mCurrViewX, mCurrViewY, mCurrViewZ);
-            
-            mouseY = clientHeight - mouseY;
             
             // repaint
             Refresh(false);
@@ -360,35 +429,43 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
             double length = sqrt(x2 + y2);
             mZoomAmount = length * 100;
 
-            if (mouseY > mLastMouseY || mouseX > mLastMouseX)
+            // if mouse moves toward the upper left, then zoom in
+            if (mouseX < mLastMouseX || mouseY < mLastMouseY)
                 ZoomIn();
             else
                 ZoomOut();
             
-            mLastMouseX = mouseX;
-            mLastMouseY = mouseY;
         }
-
-        // save last position
-        m_fStartX = m_fLeftPos + ((GLfloat)mouseX / (GLfloat)clientWidth) *
-            (m_fRightPos - m_fLeftPos);
-        m_fStartY = m_fBottomPos + ((GLfloat)mouseY / (GLfloat)clientHeight) *
-            (m_fTopPos - m_fBottomPos);
-        
+                
     } // end if (event.Dragging())
-    
+        
+    // save last position
     mLastMouseX = mouseX;
     mLastMouseY = mouseY;
     
-    wxLogStatus(MdiPlot::mdiParentGlFrame,
+    m_fStartX = m_fLeftPos + ((GLfloat)mouseX / (GLfloat)clientWidth) *
+        (m_fRightPos - m_fLeftPos);
+    m_fStartY = m_fBottomPos + ((GLfloat)flippedY / (GLfloat)clientHeight) *
+        (m_fTopPos - m_fBottomPos);
+    
+    m_fStartX = fEndX;
+    m_fStartY = fEndY;
+    
+    wxLogStatus(MdiGlPlot::mdiParentGlFrame,
                 wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
                 event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);
     event.Skip();
 }
 
+
 //------------------------------------------------------------------------------
+// bool TrajPlotCanvas::InitGL()
 //------------------------------------------------------------------------------
-bool TrajPlotCanvas::InitGL(void)
+/**
+ * Initializes GL and IL.
+ */
+//------------------------------------------------------------------------------
+bool TrajPlotCanvas::InitGL()
 {
     // remove back faces
     glDisable(GL_CULL_FACE);
@@ -416,9 +493,14 @@ bool TrajPlotCanvas::InitGL(void)
     return true;
 }
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  bool LoadGLTextures()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Loads textures.
+ */
+//------------------------------------------------------------------------------
 bool TrajPlotCanvas::LoadGLTextures()
 {     
     // always load Earth texture
@@ -427,29 +509,42 @@ bool TrajPlotCanvas::LoadGLTextures()
     if (status != 1)
         return false;
     
-    mTextureIndex[EARTH] = ilutGLBindTexImage();
+    mBodyTextureIndex[EARTH] = ilutGLBindTexImage();
     
     return true;
 }
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void SetProjection()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Sets view projection.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::SetProjection()
 {
    // Setup the world view
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glMatrixMode(GL_PROJECTION); // first go to projection mode
    glPushMatrix();
-   glLoadIdentity();            // init the matrix (need this to see SC traj)
+   glLoadIdentity();
    SetupWorld();                // set it up
    glMatrixMode(GL_MODELVIEW);
    glPopMatrix();
 }
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void SetupWorld()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Sets world view as orthographic projection. With an orthographic projection,
+ * the viewing volumn is a rectangular parallelepiped. Unlike perspective
+ * projection, the size of the viewing volumn doesn't change from one end to the
+ * other, so distance from the camera doesn't affect how large a object appears.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::SetupWorld()
 {
    // Setup how we view the world
@@ -498,14 +593,17 @@ void TrajPlotCanvas::SetupWorld()
    }
 } // end SetupWorld()
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void ComputeView(GLfloat fEndX, GLfloat fEndY)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Calculates a percentage of how much the mouse has moved. When moving the mouse
+ * left-right, we want to rotate about the Y axis, and vice versa
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
 {
-   // Calculate a percentage of how much the mouse has moved
-   // NOTE: When moving the mouse left-right, we want to rotate about the
-   // Y axis, and vice versa
    float fYAmnt = 360*(fEndX - m_fStartX)/(m_fRightPos - m_fLeftPos);
    float fXAmnt = 360*(fEndY - m_fStartY)/(m_fBottomPos - m_fTopPos);
 
@@ -524,14 +622,16 @@ void TrajPlotCanvas::ComputeView(GLfloat fEndX, GLfloat fEndY)
       // z axis
       mCurrViewZ = m_fCamRotationZ + fXAmnt;
    }
-
-   m_fStartX = fEndX;
-   m_fStartY = fEndY;
 }
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void DrawPicture()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Draws whole picture.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawPicture()
 {
     glClearColor(0.0, 0.0, 0.0, 1); // black
@@ -551,9 +651,14 @@ void TrajPlotCanvas::DrawPicture()
     
 } // end DrawPicture()
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void DrawEquatorialPlane()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Draws equatorial plane circles.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawEquatorialPlane()
 {
    int i;
@@ -612,9 +717,14 @@ void TrajPlotCanvas::DrawEquatorialPlane()
    
 } // end DrawEquatorialPlane()
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void DrawEarth()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Draws Earth shpere and maps texture image.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawEarth()
 {
    if (mPivotBody == EARTH)
@@ -623,9 +733,9 @@ void TrajPlotCanvas::DrawEarth()
 
        if (mUseTexture)
        {
-           if (mTextureIndex[EARTH] != 999)
+           if (mBodyTextureIndex[EARTH] != 999)
            {
-               glBindTexture(GL_TEXTURE_2D, mTextureIndex[EARTH]);
+               glBindTexture(GL_TEXTURE_2D, mBodyTextureIndex[EARTH]);
                glEnable(GL_TEXTURE_2D);
            }
        }
@@ -643,9 +753,13 @@ void TrajPlotCanvas::DrawEarth()
 } // end DrawEarth()
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  void DrawEarthTrajectory()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Draws Earth trajectory and draws Earth at the last point.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawEarthTrajectory()
 {
    // set color
@@ -688,14 +802,125 @@ void TrajPlotCanvas::DrawEarthTrajectory()
        DrawEarth();
        glPopMatrix();
    }
-
-   //glPopMatrix(); //loj: added
    
 } // end DrawEarthTrajectory()
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  void DrawSpacecraft()
+//------------------------------------------------------------------------------
+/**
+ * Draws spacecraft.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawSpacecraft()
+{
+    if( mGlList == 0 )
+    {
+        mGlList = glGenLists( 1 );
+        glNewList( mGlList, GL_COMPILE_AND_EXECUTE );
+        
+        // draw six faces of a long cube
+        glBegin(GL_QUADS);
+        *sIntColor = YELLOW32;
+        glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+        
+        glNormal3f( 0.0F, 0.0F, 1.0F);
+        glVertex3f( mScRadius, mScRadius, mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+        glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+
+        glNormal3f( 0.0F, 0.0F,-1.0F);
+        glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+        glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+
+        glNormal3f( 0.0F, 1.0F, 0.0F);
+        glVertex3f( mScRadius, mScRadius, mScRadius*2);
+        glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+
+        glNormal3f( 0.0F,-1.0F, 0.0F);
+        glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+        glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+
+        glNormal3f( 1.0F, 0.0F, 0.0F);
+        glVertex3f( mScRadius, mScRadius, mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius, mScRadius*2);
+        glVertex3f( mScRadius,-mScRadius,-mScRadius*2);
+        glVertex3f( mScRadius, mScRadius,-mScRadius*2);
+
+        glNormal3f(-1.0F, 0.0F, 0.0F);
+        glVertex3f(-mScRadius,-mScRadius,-mScRadius*2);
+        glVertex3f(-mScRadius,-mScRadius, mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius, mScRadius*2);
+        glVertex3f(-mScRadius, mScRadius,-mScRadius*2);
+        glEnd();
+        
+        // draw six faces of a thin wide cube
+        glBegin(GL_QUADS);
+        *sIntColor = YELLOW32;
+        glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+
+        glNormal3f( 0.0F, 0.0F, 1.0F);
+        glVertex3f( mScRadius/4, mScRadius*4, mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4, mScRadius*1.5);
+        glVertex3f(-mScRadius/4,-mScRadius*4, mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4, mScRadius*1.5);
+
+        glNormal3f( 0.0F, 0.0F,-1.0F);
+        glVertex3f(-mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4,-mScRadius*1.5);
+        glVertex3f( mScRadius/4, mScRadius*4,-mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+
+        glNormal3f( 0.0F, 1.0F, 0.0F);
+        glVertex3f( mScRadius/4, mScRadius*4, mScRadius*1.5);
+        glVertex3f( mScRadius/4, mScRadius*4,-mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4,-mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4, mScRadius*1.5);
+
+        glNormal3f( 0.0F,-1.0F, 0.0F);
+        glVertex3f(-mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4, mScRadius*1.5);
+        glVertex3f(-mScRadius/4,-mScRadius*4, mScRadius*1.5);
+
+        glNormal3f( 1.0F, 0.0F, 0.0F);
+        glVertex3f( mScRadius/4, mScRadius*4, mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4, mScRadius*1.5);
+        glVertex3f( mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+        glVertex3f( mScRadius/4, mScRadius*4,-mScRadius*1.5);
+
+        glNormal3f(-1.0F, 0.0F, 0.0F);
+        glVertex3f(-mScRadius/4,-mScRadius*4,-mScRadius*1.5);
+        glVertex3f(-mScRadius/4,-mScRadius*4, mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4, mScRadius*1.5);
+        glVertex3f(-mScRadius/4, mScRadius*4,-mScRadius*1.5);
+        glEnd();
+        glEndList();
+    }
+    else
+    {
+        glCallList( mGlList );
+    }
+
+    glMatrixMode(GL_MODELVIEW);
+} // end DrawSpacecraft()
+
+
+//------------------------------------------------------------------------------
 //  void DrawSpacecraftTrajectory()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Draws spacecraft trajectory and spacecraft at the last point.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawSpacecraftTrajectory()
 {
     glPushMatrix();
@@ -714,15 +939,41 @@ void TrajPlotCanvas::DrawSpacecraftTrajectory()
             glVertex3fv(mTempScPos[i]);
         }
     }
-    
     glEnd();
     glPopMatrix();
 
+
+   //-------------------------------------------------------
+   //draw spacecraft with texture
+   //-------------------------------------------------------
+   if (mNumData > 1)
+   {
+       glPushMatrix();
+       glLoadIdentity();
+       
+       // put spacecraft at final position
+       glTranslatef(mTempScPos[mNumData-1][0],
+                    mTempScPos[mNumData-1][1],
+                    mTempScPos[mNumData-1][2]);
+       
+       DrawSpacecraft();
+       glPopMatrix();
+   }
+
 } // end DrawSpacecraftTrajectory()
 
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  void ChangeView(float viewX, float viewY, float viewZ)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Changes view by rotating the camera.
+ *
+ * @param <viewX> rotation angle of X component.
+ * @param <viewY> rotation angle of Y component.
+ * @param <viewZ> rotation angle of Z component.
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::ChangeView(float viewX, float viewY, float viewZ)
 {
 
@@ -750,19 +1001,25 @@ void TrajPlotCanvas::ChangeView(float viewX, float viewY, float viewZ)
   
 } // end ChangeView()
 
-//---------------------------------------------------------------------------
-//  void SetProjection(int width, int height, float distance)
-//---------------------------------------------------------------------------
-void TrajPlotCanvas::ChangeProjection(int width, int height, float distance)
+
+//------------------------------------------------------------------------------
+//  void ChangeProjection(int width, int height, float axisLength)
+//------------------------------------------------------------------------------
+/**
+ * Changes view projection by viewing area in pixel and axis length in
+ * orghographic projection.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
 {    
     GLfloat fAspect = (GLfloat) height / (GLfloat) width;
         
-    m_fViewLeft   = -mAxisLength/2;
-    m_fViewRight  =  mAxisLength/2;
-    m_fViewTop    =  mAxisLength/2;
-    m_fViewBottom = -mAxisLength/2;
-    m_fViewNear   = -mAxisLength/2;
-    m_fViewFar    =  mAxisLength/2;
+    m_fViewLeft   = -axisLength/2;
+    m_fViewRight  =  axisLength/2;
+    m_fViewTop    =  axisLength/2;
+    m_fViewBottom = -axisLength/2;
+    m_fViewNear   = -axisLength/2;
+    m_fViewFar    =  axisLength/2;
         
     // save the size we are setting the projection for later use
     if (width <= height)
@@ -784,6 +1041,15 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float distance)
 
 //------------------------------------------------------------------------------
 // int ReadTextTrajectory(const wxString &filename)
+//------------------------------------------------------------------------------
+/**
+ * Reads text trajectory file and initializes OpenGL.
+ *
+ * @param <filename> file name
+ * @return number of data points.
+ *
+ * @note Assumes the trajectory file has time, x, y, z, vx, vy, vz.
+ */
 //------------------------------------------------------------------------------
 int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 {
@@ -810,7 +1076,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
         }
 
         mTextTrajFile->Close();
-        wxLogStatus(MdiPlot::mdiParentGlFrame, wxT("Number of data points: %d"), numDataPoints);
+        wxLogStatus(MdiGlPlot::mdiParentGlFrame, wxT("Number of data points: %d"), numDataPoints);
     }
     else
     {
@@ -847,6 +1113,15 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 // void UpdateSpacecraft(const Real &time, const Real &posX,
 //                       const Real &posY, const Real &posZ);
 //------------------------------------------------------------------------------
+/**
+ * Updates spacecraft trajectory.
+ *
+ * @param <time> time
+ * @param <posX> position x
+ * @param <posY> position y
+ * @param <posZ> position z
+ */
+//------------------------------------------------------------------------------
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
                                       const Real &posY, const Real &posZ)
 {
@@ -862,5 +1137,6 @@ void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
         mTempEarthPos[mNumData][2] = 0.0;
         mNumData++;
     }
+    
     Refresh(false);
 }

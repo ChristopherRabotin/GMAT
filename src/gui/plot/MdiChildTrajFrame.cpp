@@ -16,12 +16,10 @@
 #include "MdiGlPlotData.hpp"
 #include "TrajPlotCanvas.hpp"
 
-// Note that MDI_NEW_WINDOW and MDI_ABOUT commands get passed
-// to the parent window for processing, so no need to
-// duplicate event handlers here.
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
     EVT_MENU(GmatPlot::MDI_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
     EVT_MENU(GmatPlot::MDI_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
+    EVT_MENU(GmatPlot::MDI_CLEAR_PLOT, MdiChildTrajFrame::OnClearPlot)
     EVT_MENU(GmatPlot::MDI_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
     EVT_MENU(GmatPlot::MDI_ZOOM_IN, MdiChildTrajFrame::OnZoomIn)
     EVT_MENU(GmatPlot::MDI_ZOOM_OUT, MdiChildTrajFrame::OnZoomOut)
@@ -38,15 +36,16 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& title, ...)
 //------------------------------------------------------------------------------
-MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& title,
-                                     const wxPoint& pos, const wxSize& size,
-                                     const long style)
+MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
+                                     const wxString& title, const wxPoint& pos,
+                                     const wxSize& size, const long style)
     : wxMDIChildFrame(parent, -1, title, pos, size,
                       style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
     mCanvas = (TrajPlotCanvas *) NULL;
-    MdiPlot::mdiChildren.Append(this);
-
+    mIsMainFrame = isMainFrame;
+    MdiGlPlot::mdiChildren.Append(this);
+    
     // Give it an icon
 #ifdef __WXMSW__
     SetIcon(wxIcon(_T("chrt_icn")));
@@ -58,18 +57,20 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& t
     wxMenu *fileMenu = new wxMenu;
 
     fileMenu->Append(GmatPlot::MDI_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
-    fileMenu->Append(GmatPlot::MDI_CHILD_QUIT, _T("&Close child"), _T("Close this window"));
     fileMenu->Append(GmatPlot::MDI_QUIT, _T("&Exit"));
 
-    // Option menu
-    wxMenu *optionMenu = new wxMenu;
+    // Plot menu
+    wxMenu *plotMenu = new wxMenu;
 
-    optionMenu->Append(GmatPlot::MDI_CHANGE_TITLE, _T("Change &title...\tCtrl-T"));
-    optionMenu->AppendSeparator();
+    plotMenu->Append(GmatPlot::MDI_CLEAR_PLOT, _T("Clear Plot"));
+    plotMenu->Append(GmatPlot::MDI_CHILD_QUIT, _T("&Close"), _T("Close this window"));
+    plotMenu->AppendSeparator();
+    plotMenu->Append(GmatPlot::MDI_CHANGE_TITLE, _T("Change &title..."));
 
     // View menu
     wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(GmatPlot::MDI_SHOW_DEFAULT_VIEW, _T("Reset"));
+    viewMenu->Append(GmatPlot::MDI_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
+                     _("Reset to default view"));
     viewMenu->Append(GmatPlot::MDI_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
     viewMenu->Append(GmatPlot::MDI_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
     viewMenu->AppendSeparator();
@@ -98,11 +99,10 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& t
     wxMenuBar *menuBar = new wxMenuBar;
 
     menuBar->Append(fileMenu, _T("&File"));
-    menuBar->Append(optionMenu, _T("&Child"));
+    menuBar->Append(plotMenu, _T("&Plot"));
     menuBar->Append(viewMenu, _T("&View"));
     menuBar->Append(helpMenu, _T("&Help"));
-    mViewMenuIndex = 2;
-        
+
     // Associate the menu bar with the frame
     SetMenuBar(menuBar);
 
@@ -127,7 +127,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& t
 //------------------------------------------------------------------------------
 MdiChildTrajFrame::~MdiChildTrajFrame()
 {
-    MdiPlot::mdiChildren.DeleteObject(this);
+    MdiGlPlot::mdiChildren.DeleteObject(this);
 }
 
 //------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
     static wxString s_title = _T("Canvas Frame");
 
     wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
-                                       _T("MDI sample question"),
+                                       _T(""),
                                        s_title,
                                        GetParent()->GetParent());
     if ( !title )
@@ -156,6 +156,15 @@ void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
     s_title = title;
     SetTitle(s_title);
 //#endif
+}
+
+//------------------------------------------------------------------------------
+// void OnClearPlot(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
+{
+    if (mCanvas)
+        mCanvas->ClearPlot();
 }
 
 //------------------------------------------------------------------------------
@@ -236,7 +245,7 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
     //     to be the width of the MDI canvas border)
     wxPoint pos1 = event.GetPosition(),
             pos2 = GetPosition();
-    wxLogStatus(MdiPlot::mdiParentGlFrame,
+    wxLogStatus(MdiGlPlot::mdiParentGlFrame,
                 wxT("position from event: (%d, %d), from frame (%d, %d)"),
                 pos1.x, pos1.y, pos2.x, pos2.y);
 
@@ -254,13 +263,9 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
     wxSize size1 = event.GetSize(),
            size2 = GetSize(),
            size3 = GetClientSize();
-    wxLogStatus(MdiPlot::mdiParentGlFrame,
+    wxLogStatus(MdiGlPlot::mdiParentGlFrame,
                 wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
                 size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
-
-    //loj: added, but no difference
-//      if (mCanvas)
-//          mCanvas->OnSize(event);
     
     event.Skip();
 }
@@ -270,7 +275,30 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 {
-    MdiPlot::gs_nFrames--;
-    MdiPlot::mdiParentGlFrame->UpdateUI();
+    MdiGlPlot::numChildFrames--;
+    
+    if (mIsMainFrame)
+        MdiGlPlot::mdiParentGlFrame->mainSubframe = NULL;
+    
+    if (MdiGlPlot::numChildFrames == 0)
+        MdiGlPlot::mdiParentGlFrame->subframe = NULL;
+    
+    MdiGlPlot::mdiParentGlFrame->UpdateUI();
     event.Skip();
 }
+
+//------------------------------------------------------------------------------
+// void UpdateSpacecraft(const Real &time, const Real &posX,
+//                       const Real &posY, const Real &posZ)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
+                                         const Real &posY, const Real &posZ)
+{
+    if (mCanvas)
+    {
+        mCanvas->SetFocus();
+        mCanvas->UpdateSpacecraft(time, posX, posY, posZ);
+        Update();
+    }
+}
+
