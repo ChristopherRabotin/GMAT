@@ -475,17 +475,25 @@ void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MdiChildXyFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 {
 //#if wxUSE_TEXTDLG
-   static wxString s_title = _T("Plot Frame");
+   if (mXyPlot)
+   {
+      //static wxString s_title = _T("Plot Frame");
+      wxString oldTitle = mXyPlot->GetPlotTitle();
 
-   wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
-                                      _T(""),
-                                      s_title,
-                                      GetParent()->GetParent());
-   if ( !title )
-      return;
+      wxString newTitle = wxGetTextFromUser(_T("Enter the new title"),
+                                         _T(""),
+                                         oldTitle,
+                                         GetParent()->GetParent());
+      if ( !newTitle )
+         return;
 
-   s_title = title;
-   SetTitle(s_title);
+      //s_title = title;
+      //SetTitle(s_title);
+      SetTitle(newTitle);
+      
+      //loj: 5/13/04
+      mXyPlot->SetPlotTitle(newTitle);
+   }
 //#endif
 }
 
