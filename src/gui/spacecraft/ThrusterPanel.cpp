@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 #include "ThrusterPanel.hpp"
 #include "ThrusterCoefficientDialog.hpp"
+#include "TankSelectionDialog.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -27,6 +28,7 @@
 //------------------------------
 BEGIN_EVENT_TABLE(ThrusterPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, ThrusterPanel::OnTextChange)
+   EVT_LISTBOX(ID_LISTBOX, ThrusterPanel::OnSelect)
    EVT_BUTTON(ID_BUTTON, ThrusterPanel::OnButtonClick)
 END_EVENT_TABLE()
 
@@ -49,8 +51,8 @@ ThrusterPanel::ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
     coordsysCount = 0;
     
     this->theSpacecraft = spacecraft;
-    this->theThruster = NULL;
     this->theApplyButton = theApplyButton;
+    
     Create();
 }
 
@@ -82,6 +84,8 @@ void ThrusterPanel::Create()
     wxString emptyList[] = {};
     
     // wxButton
+    tankButton = new wxButton( this, ID_BUTTON, wxT("Select"),
+                              wxDefaultPosition, wxDefaultSize, 0 );
     addButton = new wxButton( this, ID_BUTTON, wxT("Add Thruster"),
                               wxDefaultPosition, wxDefaultSize, 0 );
     removeButton = new wxButton( this, ID_BUTTON, wxT("Remove Thruster"),
@@ -96,7 +100,7 @@ void ThrusterPanel::Create()
                       wxDefaultPosition, wxSize(80,-1), tankCount,
                       emptyList, wxCB_DROPDOWN|wxCB_READONLY );;
     coordsysComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                      wxDefaultPosition, wxSize(80,-1), coordsysCount,
+                      wxDefaultPosition, wxSize(125,-1), coordsysCount,
                       emptyList, wxCB_DROPDOWN|wxCB_READONLY );;
    
     // wxTextCtrl
@@ -135,24 +139,31 @@ void ThrusterPanel::Create()
     wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT("Thruster Parameters") );
     wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxVERTICAL );
 
-    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
+    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
     wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 2, 0, 0 );
     
     // Add to wx*Sizers 
     flexGridSizer1->Add(tankStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-    flexGridSizer1->Add(tankComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
+    flexGridSizer1->Add(tankComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add(tankButton, 0, wxALIGN_LEFT|wxALL, bsize );
     flexGridSizer1->Add(coordsysStaticText, 0, wxALIGN_CENTER|wxALL, bsize );
-    flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_CENTER|wxALL, bsize );
+    flexGridSizer1->Add(coordsysComboBox, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add(XStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(XTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add(YStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(YTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add(ZStaticText, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(ZTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     flexGridSizer1->Add(cCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
-    flexGridSizer1->Add(kCoefButton, 0, wxALIGN_CENTRE|wxALL, bsize );
+    flexGridSizer1->Add(kCoefButton, 0, wxALIGN_LEFT|wxALL, bsize );
+    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
     
     boxSizer2->Add(addButton, 0, wxALIGN_CENTER|wxALL, bsize );
     boxSizer2->Add(removeButton, 0, wxALIGN_CENTER|wxALL, bsize );
@@ -175,9 +186,10 @@ void ThrusterPanel::Create()
     boxSizer1->Fit( this );
     boxSizer1->SetSizeHints( this );
     
-    // Temp
-    addButton->Enable(false);
     removeButton->Enable(false);
+    cCoefButton->Enable(false);
+    kCoefButton->Enable(false);
+    tankButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -185,6 +197,43 @@ void ThrusterPanel::Create()
 //------------------------------------------------------------------------------
 void ThrusterPanel::LoadData()
 {  
+    if (theSpacecraft == NULL)
+       return;
+    
+    theThrusters = theSpacecraft->GetRefObjectArray(Gmat::THRUSTER);
+    thrusterNames = theSpacecraft->GetRefObjectNameArray(Gmat::THRUSTER);
+    
+    if (theThrusters.empty())
+       return;  
+       
+    thrusterCount = theThrusters.size();
+    
+    Integer paramID;
+      
+    for (Integer i = 0; i < thrusterCount; i++)
+    {    
+        Thruster *tr = (Thruster *)theThrusters[i];
+        
+        thrusters[i]->thruster = tr;
+        thrusters[i]->thrusterName = thrusterNames[i];
+        
+        paramID = tr->GetParameterID("Tank");
+        thrusters[i]->tanks = tr->GetStringArrayParameter(paramID);
+        
+        paramID = tr->GetParameterID("CoordinateSystem");
+        thrusters[i]->coordName = tr->GetStringParameter(paramID);
+  
+        paramID = tr->GetParameterID("X_Direction");
+        thrusters[i]->x_direction = tr->GetRealParameter(paramID);
+    
+        paramID = tr->GetParameterID("Y_Direction");
+        thrusters[i]->y_direction = tr->GetRealParameter(paramID);
+        
+        paramID = tr->GetParameterID("Z_Direction");
+        thrusters[i]->z_direction = tr->GetRealParameter(paramID);
+    }   
+    currentThruster = thrusterCount-1;
+    DisplayData();
 }
 
 //------------------------------------------------------------------------------
@@ -197,6 +246,63 @@ void ThrusterPanel::SaveData()
 }
 
 //------------------------------------------------------------------------------
+// void DisplayData()
+//------------------------------------------------------------------------------
+void ThrusterPanel::DisplayData()
+{ 
+   tankNames = thrusters[currentThruster]->tanks;
+   tankCount = tankNames.size();
+   
+   tankComboBox->Clear();
+   
+   if (tankCount == 0)
+      tankComboBox->Append("None");
+   else
+   {
+      for (Integer i = 0; i < tankCount; i++)
+      {
+         tankComboBox->Append(tankNames[i].c_str());
+      }    
+   }  
+   tankComboBox->SetSelection(0);
+   
+   coordsysCount = 1; // Temp value
+   coordsysComboBox->Clear();
+   for (Integer i = 0; i < coordsysCount; i++)
+   {
+       coordsysComboBox->Append(thrusters[currentThruster]->coordName.c_str());
+   }
+   coordsysComboBox->SetSelection(0);
+          
+   removeButton->Enable(true);
+   cCoefButton->Enable(true);
+   kCoefButton->Enable(true); 
+   tankButton->Enable(true);
+   
+   thrusterListBox->Clear();
+   for (Integer i = 0; i < thrusterCount; i++) 
+      thrusterListBox->Append(thrusters[i]->thrusterName.c_str());    
+        
+   thrusterListBox->SetSelection(currentThruster, true);
+   
+   wxString xString;
+   wxString yString;
+   wxString zString;
+   
+   xString.Printf("%f", thrusters[currentThruster]->x_direction);
+   yString.Printf("%f", thrusters[currentThruster]->y_direction);
+   zString.Printf("%f", thrusters[currentThruster]->z_direction);
+
+   XTextCtrl->Clear();
+   YTextCtrl->Clear();
+   ZTextCtrl->Clear();
+    
+   XTextCtrl->SetValue(xString);
+   YTextCtrl->SetValue(yString);
+   ZTextCtrl->SetValue(zString);    
+}
+
+//------------------------------------------------------------------------------
 // void OnTextChange()
 //------------------------------------------------------------------------------
 void ThrusterPanel::OnTextChange()
@@ -205,18 +311,103 @@ void ThrusterPanel::OnTextChange()
 }
 
 //------------------------------------------------------------------------------
+// void OnSelect()
+//------------------------------------------------------------------------------
+void ThrusterPanel::OnSelect()
+{
+    Integer id = thrusterListBox->GetSelection();
+    
+    if (id <= thrusterCount)
+    {
+        currentThruster = id;
+        DisplayData(); 
+    }    
+}  
+
+//------------------------------------------------------------------------------
 // void OnButtonClick()
 //------------------------------------------------------------------------------
 void ThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {
-   if (event.GetEventObject() == cCoefButton)
-   {
-      ThrusterCoefficientDialog tcDlg(this);
-      tcDlg.ShowModal();       
-   } 
-   else if (event.GetEventObject() == kCoefButton)
-   {
-      ThrusterCoefficientDialog tcDlg(this);
-      tcDlg.ShowModal();
-   }            
+    wxString tname;
+    Integer paramID;
+
+    if (event.GetEventObject() == addButton)
+    {  
+       tname.Printf("Engine%d", ++thrusterCount);
+       Thruster *tr = new Thruster(tname.c_str());
+       thrusters.push_back( new Thrusters(tr, tname.c_str()) );
+       
+       thrusterCount = thrusters.size();
+       currentThruster = thrusterCount-1;     
+       
+       thrusters[currentThruster]->thruster = tr;
+       thrusters[currentThruster]->thrusterName = tname.c_str();
+
+       paramID = tr->GetParameterID("Tank");
+       thrusters[currentThruster]->tanks = tr->GetStringArrayParameter(paramID);
+               
+       paramID = tr->GetParameterID("CoordinateSystem");
+       thrusters[currentThruster]->coordName = tr->GetStringParameter(paramID);
+
+       paramID = tr->GetParameterID("X_Direction");
+       thrusters[currentThruster]->x_direction = tr->GetRealParameter(paramID);
+    
+       paramID = tr->GetParameterID("Y_Direction");
+       thrusters[currentThruster]->y_direction = tr->GetRealParameter(paramID);
+        
+       paramID = tr->GetParameterID("Z_Direction");
+       thrusters[currentThruster]->z_direction = tr->GetRealParameter(paramID);
+        
+       DisplayData();
+    }
+    else if (event.GetEventObject() == removeButton)
+    {
+       if (thrusters.empty())
+          return;
+       
+       int count = 0;  
+       std::vector <Thrusters*>::iterator iter;
+       for (iter = thrusters.begin(); iter < thrusters.end(); iter++)
+       {
+          if (count == thrusterCount)
+          {
+             thrusters.erase(iter);  
+          }    
+          count++;     
+       }
+       
+       thrusterCount = thrusters.size();
+       currentThruster = thrusterCount-1;
+       
+       if (thrusters.empty())  
+       {
+          removeButton->Enable(false); 
+          cCoefButton->Enable(false);
+          kCoefButton->Enable(false);
+          tankButton->Enable(false);
+          thrusterListBox->Clear(); 
+       }    
+       else
+          DisplayData();
+    }     
+    else if (event.GetEventObject() == tankButton)
+    {
+       TankSelectionDialog tsDlg(this, theSpacecraft, tankNames);
+       tsDlg.ShowModal(); 
+    }    
+    else if (event.GetEventObject() == cCoefButton)
+    {
+       std::string type = "C";
+       
+       ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
+       tcDlg.ShowModal();       
+    } 
+    else if (event.GetEventObject() == kCoefButton)
+    {
+       std::string type = "K";
+       
+       ThrusterCoefficientDialog tcDlg(this, thrusters[currentThruster]->thruster, type);
+       tcDlg.ShowModal();
+    }            
 }    

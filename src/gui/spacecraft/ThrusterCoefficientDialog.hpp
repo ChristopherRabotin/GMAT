@@ -22,9 +22,17 @@
 class ThrusterCoefficientDialog : public GmatDialog
 {
 public:
-   ThrusterCoefficientDialog(wxWindow *parent);
+   ThrusterCoefficientDialog(wxWindow *parent, Thruster *thruster, std::string type);
    
-private:    
+private:  
+    
+   Thruster *theThruster;
+   
+   StringArray coefName;
+   RealArray coefValue;
+   
+   std::string coefType;
+     
    wxGrid *coefficientGrid;
 
    // methods inherited from GmatDialog
@@ -35,7 +43,7 @@ private:
    
    // event handling   
    DECLARE_EVENT_TABLE();
-   void OnCellValueChange();
+   void OnCellValueChange(wxGridEvent &event);
    
    // IDs for the controls and the menu commands
    enum

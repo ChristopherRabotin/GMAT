@@ -408,7 +408,6 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
           if (count == currentTank)
           {
              theTanks.erase(iter);  
-             tankListBox->Delete(count);
           }    
           count++;     
        }
@@ -417,7 +416,10 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        currentTank = tankCount-1;
        
        if (theTanks.empty())  
+       {
           removeButton->Enable(false);  
+          tankListBox->Clear();
+       }    
        else
           DisplayData();
     }     

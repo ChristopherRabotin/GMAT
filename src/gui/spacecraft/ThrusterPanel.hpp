@@ -38,22 +38,45 @@ public:
     void LoadData();
     
 private:
+    struct Thrusters
+    {
+        std::string thrusterName;
+        std::string coordName;
+        Thruster* thruster;
+        Real x_direction;
+        Real y_direction;
+        Real z_direction;
+        StringArray tanks;
+      
+        Thrusters(Thruster* tr, const std::string &name)
+        {
+            thruster = tr;
+            thrusterName = name;
+        }
+    }; 
     
     void Create();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
+    void DisplayData();
     void OnTextChange();
+    void OnSelect();
     void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
-    Thruster *theThruster;
+    ObjectArray theThrusters;
+    StringArray thrusterNames;
+    StringArray tankNames;
+    std::vector<Thrusters *> thrusters;
     
     Integer thrusterCount;
     Integer tankCount;
     Integer coordsysCount;
+    Integer currentThruster;
     
     wxButton *theApplyButton;
+    wxButton *tankButton;
     wxButton *addButton;
     wxButton *removeButton;
     wxButton *cCoefButton;
