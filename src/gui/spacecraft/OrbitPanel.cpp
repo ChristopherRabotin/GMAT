@@ -563,7 +563,7 @@ void OrbitPanel::OnEpochChange()
 //    MessageInterface::ShowMessage("Inside epochchange()\n");
     theApplyButton->Enable();
  
-    Real epoch1 = theSpacecraft->GetDisplayEpoch(); 
+//    Real epoch1 = theSpacecraft->GetDisplayEpoch(); 
 //    MessageInterface::ShowMessage("epoch value %f\n", epoch1);
 
     wxString dateFormat = dateComboBox->GetStringSelection();
@@ -608,6 +608,8 @@ void OrbitPanel::SaveData()
     wxString el6 = textCtrl6->GetValue(); 
     
     theSpacecraft->SetRealParameter(0, atof(epochStr));
+    theSpacecraft->SetDisplayEpoch(atof(epochStr));
+
 //    theSpacecraft->SetRealParameter(1, atof(el1));
 //    theSpacecraft->SetRealParameter(2, (double)atof(el2));
 //    theSpacecraft->SetRealParameter(3, atof(el3));
