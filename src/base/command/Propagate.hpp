@@ -113,10 +113,14 @@ protected:
 
    /// The propagator(s) used by this command
    std::vector<PropSetup*> prop;
-   /// The spacecraft that are propagated
+   /// The spacecraft and formations that are propagated
    std::vector<SpaceObject *> sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
+   /// Names of the spacecraft used in the stopping conditions
+   StringArray             stopSatNames;
+   /// The spacecraft used by the stopping conditions
+   std::vector<SpaceObject *> stopSats;
    /// The object array used in GetRefObjectArray()
    ObjectArray objectArray;
    

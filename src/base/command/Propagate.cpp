@@ -773,9 +773,6 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          }
       }
        
-      //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
-      //                              paramType.c_str());
-       
       Moderator *theModerator = Moderator::Instance();
        
        // create parameter
@@ -788,9 +785,11 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       
       StopCondition *stopCond =
          theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
-       
+      
       stopCond->SetStringParameter("StopVar", paramName);
       SetObject(stopCond, Gmat::STOP_CONDITION);
+      // Store the spacecraft name for use when setting the epoch data
+      stopSatNames.push_back(paramObj);
    
       if (paramType != "Apoapsis" && paramType != "Periapsis")
       {
@@ -875,7 +874,8 @@ bool Propagate::TakeAStep(Real propStep)
          default:
             #ifdef DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
-                  ("Propagate::TakeAStep() runnning in undefined mode\n");
+                  ("Propagate::TakeAStep() runnning in undefined mode (mode = %d)\n",
+                   currentMode);
             #endif
             retval = false;
       }
@@ -905,6 +905,7 @@ bool Propagate::Initialize(void)
    inProgress = false;
    Integer index = 0;
    prop.clear();
+   SpaceObject *so;
    
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i) {
       if (objectMap->find(*i) == objectMap->end())
@@ -926,7 +927,6 @@ bool Propagate::Initialize(void)
          throw CommandException("ForceModel not set in PropSetup\n");
       fm->ClearSpacecraft();
       StringArray::iterator scName;
-      SpaceObject *so;
       StringArray owners, elements;
    
       /// @todo Check to see if All and All.Epoch belong in place for all modes.
@@ -957,6 +957,19 @@ bool Propagate::Initialize(void)
       ++index;
    }
    initialized = true;
+   
+   // Setup spacecraft array used for stopping conditions
+   for (StringArray::iterator sc = stopSatNames.begin(); 
+        sc != stopSatNames.end(); ++sc) {
+      if (objectMap->find(*sc) == objectMap->end()) {
+         std::string errmsg = "Unknown SpaceObject \"";
+         errmsg += *sc;
+         errmsg += "\" used in stopping conditions";
+         throw CommandException(errmsg);
+      }
+      so = (SpaceObject*)(*objectMap)[*sc];
+      stopSats.push_back(so);
+   }
    
    if (solarSys != NULL)
    {
@@ -1080,14 +1093,18 @@ bool Propagate::Execute(void)
             GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
             Integer epochID = sat1->GetParameterID("Epoch");
             baseEpoch.push_back(sat1->GetRealParameter(epochID));
-   
-#if DEBUG_PROPAGATE_EXE
+            elapsedTime[n] = fm[n]->GetTime();
+            currEpoch[n] = baseEpoch[n] + elapsedTime[n] / 86400.0;
+         }
+         
+         // Now setup the stopping condition elements
+         #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage
                ("Propagate::Execute() Propagate start; epoch = %f\n",
-             (baseEpoch[n] + fm[n]->GetTime() / 86400.0));
+             (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
             MessageInterface::ShowMessage
                ("Propagate::Execute() Propagate start; fm epoch = %f\n",
-               (fm[n]->GetRealParameter(fm[n]->GetParameterID("Epoch"))));
+               (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
             int stopCondCount = stopWhen.size();
             MessageInterface::ShowMessage
                ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
@@ -1097,27 +1114,27 @@ bool Propagate::Execute(void)
                   ("Propagate::Execute() stopCondName[%d]=%s\n", i,
                       stopWhen[i]->GetName().c_str());
             }
-#endif
+         #endif
        
-            stopCondMet = false;
-            stopEpoch = 0.0;
-            std::string stopVar;
-      
-            elapsedTime[n] = fm[n]->GetTime();
-            currEpoch[n] = baseEpoch[n] + elapsedTime[n] / 86400.0;
-            for (unsigned int i=0; i<stopWhen.size(); i++)
-            {
-               // StopCondition need new base epoch
-               stopWhen[i]->SetRealParameter("BaseEpoch", currEpoch[n]);
+         stopCondMet = false;
+         stopEpoch = 0.0;
+         std::string stopVar;
+         Integer epochID;
+         Real stopEpochBase;
+         
+         for (unsigned int i = 0; i<stopWhen.size(); i++)
+         {
+            epochID = stopSats[i]->GetParameterID("Epoch");
+            stopEpochBase = stopSats[i]->GetRealParameter(epochID);
+            // StopCondition need new base epoch
+            stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
 
-/// @todo Set the right epoch here!!!!!!!            
-               // ElapsedTime parameters need new initial epoch
-               stopVar = stopWhen[i]->GetStringParameter("StopVar");
-               if (stopVar.find("Elapsed") != stopVar.npos)
-               {
-                  stopWhen[i]->GetStopParameter()->
-                     SetRealParameter("InitialEpoch", currEpoch[n]);
-               }
+            // ElapsedTime parameters need new initial epoch
+            stopVar = stopWhen[i]->GetStringParameter("StopVar");
+            if (stopVar.find("Elapsed") != stopVar.npos)
+            {
+               stopWhen[i]->GetStopParameter()->
+                  SetRealParameter("InitialEpoch", stopEpochBase);
             }
          }
          // Publish the initial data
@@ -1132,6 +1149,7 @@ bool Propagate::Execute(void)
       for (unsigned int i = 0; i < fm.size(); ++i)
          fm[i]->UpdateInitialData();
       
+      Integer epochID = stopSats[0]->GetParameterID("Epoch");;
       while (!stopCondMet)
       {
 //         if (!p->Step())
@@ -1153,18 +1171,19 @@ bool Propagate::Execute(void)
          //------------------------------------------
          for (unsigned int i=0; i<stopWhen.size(); i++)
          {
-// Not right yet!
             // StopCondition need epoch for the Interpolator
-            stopWhen[i]->SetRealParameter("Epoch", currEpoch[0]);
+            stopWhen[i]->SetRealParameter("Epoch", 
+                                        stopSats[i]->GetRealParameter(epochID));
             
             if (stopWhen[i]->Evaluate())
             {
                stopCondMet = true;
                stopEpoch = (stopWhen[i]->GetStopEpoch());
-#if DEBUG_PROPAGATE_EXE
-               MessageInterface::ShowMessage
-                  ("Propagate::Execute() %s met\n", stopWhen[i]->GetName().c_str());
-#endif
+               #if DEBUG_PROPAGATE_EXE
+                  MessageInterface::ShowMessage
+                     ("Propagate::Execute() %s met\n", 
+                     stopWhen[i]->GetName().c_str());
+               #endif
                break; // exit if any stop condition met
             }
          }
@@ -1185,10 +1204,10 @@ bool Propagate::Execute(void)
             }
          }
          
-#if DEBUG_PROPAGATE_EXE
-         MessageInterface::ShowMessage
-            ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch[0]);
-#endif
+         #if DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage
+               ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch[0]);
+         #endif
    
          // Periodically see if the user has stopped the run 
          ++checkCount;
@@ -1207,11 +1226,11 @@ bool Propagate::Execute(void)
 
    inProgress = false;
    
-#if DEBUG_PROPAGATE_EXE
-   MessageInterface::ShowMessage
-      ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
-       currEpoch[0], stopEpoch, elapsedTime[0]);
-#endif
+   #if DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage
+         ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
+          currEpoch[0], stopEpoch, elapsedTime[0]);
+   #endif
    
    
    Real secsToStep = (stopEpoch - currEpoch[trigger]) * 86400.0;
