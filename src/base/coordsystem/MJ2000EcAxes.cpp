@@ -152,7 +152,7 @@ bool MJ2000EcAxes::RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
    Rvector3 tmpPos(inState[0],inState[1], inState[2]);
    Rvector3 tmpVel(inState[3],inState[4], inState[5]);
    Rvector3 outPos = rotMatrix * tmpPos;
-   Rvector3 outVel = rotMatrix * tmpVel;
+   Rvector3 outVel = (rotDotMatrix * tmpPos) + (rotMatrix * tmpVel);
    outState[0] = outPos[0];
    outState[1] = outPos[1];
    outState[2] = outPos[2];
@@ -185,8 +185,10 @@ bool MJ2000EcAxes::RotateFromMJ2000Eq(const A1Mjd &epoch,
    // *********** assuming only one 6-vector for now - UPDATE LATER!!!!!!
    Rvector3 tmpPos(inState[0],inState[1], inState[2]);
    Rvector3 tmpVel(inState[3],inState[4], inState[5]);
-   Rvector3 outPos = tmpPos / rotMatrix;
-   Rvector3 outVel = tmpVel / rotMatrix;
+   Rmatrix33 tmpRot    = rotMatrix.Transpose();
+   Rmatrix33 tmpRotDot = rotDotMatrix.Transpose();
+   Rvector3 outPos     = tmpRot    * tmpPos ;
+   Rvector3 outVel     = (tmpRotDot * tmpPos) + (tmpRot * tmpVel);
    outState[0] = outPos[0];
    outState[1] = outPos[1];
    outState[2] = outPos[2];
