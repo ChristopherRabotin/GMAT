@@ -256,10 +256,12 @@ public:
 
    // Sandbox
    void ClearAllSandboxes();
+   //loj: 3/2/05 Added so that MATLAB can get the final object state
+   GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    Gmat::RunState GetUserInterrupt();
-
+   
    // Script
    bool InterpretScript(const std::string &scriptFileName);
    bool InterpretScript(std::istringstream *ss, bool clearObjs);

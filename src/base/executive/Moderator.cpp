@@ -1532,13 +1532,12 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             }
             else if (type == "ReportFile")
             {
+               //loj: 3/3/05 Correctly created ReportFile               
                // add default parameters to ReportFile
                sub->SetStringParameter(sub->GetParameterID("Filename"),
                                        name + ".txt");
-               sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X");
-               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y");
-               sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z");
+               sub->SetStringParameter("Add", GetDefaultX()->GetName());
+               sub->SetStringParameter("Add", GetDefaultY()->GetName());
                sub->Activate(true);
             }
          }
@@ -2169,24 +2168,10 @@ bool Moderator::LoadDefaultMission()
 bool Moderator::ClearResource()
 {
    MessageInterface::ShowMessage("Moderator::ClearResource() entered\n");
-
+   
    theConfigManager->RemoveAllItems();
-
-   StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-   Subscriber *sub;
-   std::string objTypeName;
-   std::string objName;
-
-   for (unsigned int i=0; i<subs.size(); i++)
-   {
-      sub = GetSubscriber(subs[i]);
-      objTypeName = sub->GetTypeName();
-      objName = sub->GetName();
-      MessageInterface::ShowMessage
-         ("Moderator::ClearResource() objTypeName = %s, objName = %s\n",
-          objTypeName.c_str(), objName.c_str());
-   }
-
+   ClearAllSandboxes(); //loj: 3/3/05 Added
+   
    return true;
 }
 
@@ -2216,7 +2201,7 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
       #endif
       delete oldcmd;
    }
-          
+   
    // djc: if you plan on adding the gui commands to the sandbox next, using 
    // the same approach used when running a script.
    cmd = new NoOp; 
@@ -2304,6 +2289,7 @@ GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
    return commands[sandboxNum-1];
 }
 
+
 // sandbox
 //------------------------------------------------------------------------------
 // void ClearAllSandboxes()
@@ -2311,8 +2297,19 @@ GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 void Moderator::ClearAllSandboxes()
 {
    for (int i=0; i<Gmat::MAX_SANDBOX; i++)
-      sandboxes[i]->Clear();
+      if (sandboxes[i])
+         sandboxes[i]->Clear();
 }
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+GmatBase* Moderator::GetInternalObject(const std::string &name, Integer sandboxNum)
+{
+   return sandboxes[sandboxNum-1]->GetInternalObject(name);
+}
+
 
 //------------------------------------------------------------------------------
 // Integer RunMission(Integer sandboxNum)
@@ -2379,9 +2376,13 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox() \n");
          #endif
-         
-         // clear sandbox
-         sandboxes[sandboxNum-1]->Clear();
+
+         //-----------------------------------------------------------
+         //loj: 3/2/05 comment the line so that MATLAB can get the
+         // internal object.
+         // Move this to ClearResource()
+         //sandboxes[sandboxNum-1]->Clear();
+         //-----------------------------------------------------------
       
       }
       catch (BaseException &e)
@@ -2677,8 +2678,10 @@ void Moderator::InitializePlanetarySource()
                                    GetStringParameter("FULL_DE405_FILE"));
 
    // initialize planetary file types/names in use
-   thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+   //thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
    //thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
+   //loj: 3/3/05 changed default to DE405
+   thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]); 
    SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
 }
 
@@ -2693,11 +2696,11 @@ void Moderator::InitializePlanetaryCoeffFile()
    
    std::string nutFileName =
       theFileManager->GetStringParameter("FULL_NUTATION_COEFF_FILE");
-   MessageInterface::ShowMessage("Moderator setting nutation file to %s...\n",
+   MessageInterface::ShowMessage("Moderator setting nutation file to %s\n",
                                  nutFileName.c_str());
    std::string planFileName =
       theFileManager->GetStringParameter("FULL_PLANETARY_COEFF_FILE");
-   MessageInterface::ShowMessage("Moderator setting planetary coeff. file to %s...\n",
+   MessageInterface::ShowMessage("Moderator setting planetary coeff. file to %s\n",
                                  planFileName.c_str());
    
    theItrfFile = new ItrfCoefficientsFile(nutFileName, planFileName);
@@ -2714,6 +2717,8 @@ void Moderator::InitializeTimeFile()
    MessageInterface::ShowMessage("Moderator initializing time file...\n");
    
    std::string filename = theFileManager->GetStringParameter("FULL_LEAP_SECS_FILE");
+   MessageInterface::ShowMessage("Moderator setting leap seconds file to %s\n",
+                                 filename.c_str());
    theLeapSecsFile = new LeapSecsFileReader(filename);
    theLeapSecsFile->Initialize();
 
@@ -3175,14 +3180,15 @@ Subscriber* Moderator::GetDefaultSubscriber()
    {
       // create default ReportFile
       Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+      std::string scName = GetDefaultSpacecraft()->GetName();
       sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-      sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Z");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VX");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VY");
-      sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.VZ");
+      sub->SetStringParameter("Add", scName + ".CurrA1MJD");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.X");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Y");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Z");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VX");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VY");
+      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VZ");
       sub->Activate(true);
       return sub;
    }
