@@ -8,7 +8,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AchievePanel.cpp ManeuverPanel.cpp PropagatePanel.cpp \
+SRC = AchievePanel.cpp CallFunctionPanel.cpp ManeuverPanel.cpp PropagatePanel.cpp \
 	SavePanel.cpp TogglePanel.cpp VaryPanel.cpp
 #
 # Define macro for using the included file 
