@@ -239,7 +239,7 @@ Integer  DeFile::GetBodyID(std::string bodyName)
 //------------------------------------------------------------------------------
 Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime)
 {
-   Real*     result = new Real[6];
+   static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're
    // currently assuming Earth-Centered Equatorial
    if (forBody == DeFile::EARTH_ID)
