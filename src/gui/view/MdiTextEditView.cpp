@@ -123,11 +123,14 @@ bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
       GmatAppData::GetMainFrame()->CloseAllChildren();
       
       // Update ResourceTree
-      GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-      GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
+      GmatAppData::GetResourceTree()->UpdateResource(true);
+      GmatAppData::GetMissionTree()->UpdateMission(true);
 
+      //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+      GmatAppData::GetMainFrame()->RunCurrentMission();
+      
       //loj: 3/17/04 Should I close all plot window?
-      status = GmatAppData::GetGuiInterpreter()->RunScript();
+      //status = GmatAppData::GetGuiInterpreter()->RunScript();
    }
     
    return status;
@@ -148,7 +151,10 @@ bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
     
    //loj: 3/17/04 Should I close all plot window?
     
-   bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+   //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+   GmatAppData::GetMainFrame()->RunCurrentMission();
+   
+   //bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 
-   return status;
+   return true;
 }

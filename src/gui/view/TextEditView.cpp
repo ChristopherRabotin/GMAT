@@ -117,9 +117,13 @@ bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
    if (status)
    {
       // Update ResourceTree
-      GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-      GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
-      status = GmatAppData::GetGuiInterpreter()->RunScript();
+      GmatAppData::GetResourceTree()->UpdateResource(true);
+      GmatAppData::GetMissionTree()->UpdateMission(true);
+      
+      //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+      GmatAppData::GetMainFrame()->RunCurrentMission();
+      
+      //status = GmatAppData::GetGuiInterpreter()->RunScript();
    }
     
    return status;
@@ -131,6 +135,11 @@ bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 bool TextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
    //MessageInterface::ClearMessage();
-   bool status = GmatAppData::GetGuiInterpreter()->RunScript();
-   return status; //loj: added 4/27/04
+   
+   //loj: 9/24/04 added so that it enables Red(stop) button on the main frame
+   GmatAppData::GetMainFrame()->RunCurrentMission();
+   
+   //bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+   
+   return true;
 }
