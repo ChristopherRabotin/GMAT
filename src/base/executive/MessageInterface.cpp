@@ -102,6 +102,27 @@ void MessageInterface::ClearMessage()
 }
 
 //------------------------------------------------------------------------------
+//  int GetNumberOfMessageLines()
+//------------------------------------------------------------------------------
+//  Purpose:
+//     Clear message window.
+//------------------------------------------------------------------------------
+int MessageInterface::GetNumberOfMessageLines()
+{
+#if !defined __CONSOLE_APP__
+   if (GmatAppData::theMessageWindow != NULL)
+   {
+       return GmatAppData::theMessageWindow->GetNumberOfLines();
+   }
+   else
+   {
+       wxLogError("MessageInterface::GetNumberOfMessageLines(): MessageWindow was not created.");
+       wxLog::FlushActive();
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
 //  void ShowMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 //  Purpose:
