@@ -420,13 +420,20 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
         theParamList[i] = items[i].c_str();
         len = theParamList[i].Length();
 
-        // remove "Param" from the parameter name
-        // Note: When a new Parameter is created "Param" should be appended
-        //       That's the constructor name
-        theParamList[i].Remove(len-5, 5);
-        
-        //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
-        //                              std::string(theParamList[i].c_str()) + "\n");
+        if (theParamList[i].Contains("Param"))
+        {
+            //if "Param" is suffix
+            if (theParamList[i].First("Param") == len-5)
+            {
+                // remove "Param" from the parameter name
+                // Note: When a new Parameter is created "Param" should be appended
+                //       That's the constructor name
+                theParamList[i].Remove(len-5, 5);
+                
+                //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+                //                              std::string(theParamList[i].c_str()) + "\n");
+            }
+        }
     }
 }
 

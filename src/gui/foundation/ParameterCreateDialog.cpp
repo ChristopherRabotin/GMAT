@@ -270,8 +270,15 @@ void ParameterCreateDialog::SaveData()
         // if new user variable to create
         if (theGuiInterpreter->GetParameter(varName) == NULL)
         {
+            Parameter *param;
+            
+            //loj: 3/1/04 temp fix, because not all the parameters has suffix "Param"
+            if (varType == "SMA" || varType == "Ecc" || varType =="Inc")
+                param = theGuiInterpreter->CreateParameter(varType, varName);
+            else
             //loj: because "Param" was removed from the name, add back
-            Parameter *param = theGuiInterpreter->CreateParameter(varType+"Param", varName);
+                param = theGuiInterpreter->CreateParameter(varType+"Param", varName);
+            
             param->AddObject(objName);
             param->SetDesc(varDesc);
             MessageInterface::ShowMessage("ParameterCreateDialog::SaveData() user var added\n");
