@@ -368,11 +368,7 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 bool XyPlot::GetBooleanParameter(const std::string &label) const
 {
-    for (int i=0; i<XyPlotParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return GetBooleanParameter(i);
-
-    return Subscriber::GetBooleanParameter(label);
+    return GetBooleanParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -382,11 +378,7 @@ bool XyPlot::GetBooleanParameter(const std::string &label) const
 bool XyPlot::SetBooleanParameter(const std::string &label,
                                  const bool value)
 {
-    for (int i=0; i<XyPlotParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return SetBooleanParameter(i, value);
-
-    return Subscriber::SetBooleanParameter(label, value);
+    return SetBooleanParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -412,6 +404,17 @@ std::string XyPlot::GetStringParameter(const Integer id) const
     default:
         return Subscriber::GetStringParameter(id);
     }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string XyPlot::GetStringParameter(const std::string &label) const
+{
+    //MessageInterface::ShowMessage("XyPlot::GetStringParameter() label = %s\n",
+    //                              label.c_str());
+
+    return GetStringParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -442,20 +445,6 @@ bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-std::string XyPlot::GetStringParameter(const std::string &label) const
-{
-    //MessageInterface::ShowMessage("XyPlot::GetStringParameter() label = %s\n",
-    //                              label.c_str());
-    for (int i=0; i<XyPlotParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return GetStringParameter(i);
-
-    return Subscriber::GetStringParameter(label);
-}
-
-//------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,
 //                         const std::string &value)
 //------------------------------------------------------------------------------
@@ -464,11 +453,8 @@ bool XyPlot::SetStringParameter(const std::string &label,
 {
     //MessageInterface::ShowMessage("XyPlot::SetStringParameter() label = %s, "
     //                              "value = %s \n", label.c_str(), value.c_str());
-    for (int i=0; i<XyPlotParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return SetStringParameter(i, value);
 
-    return Subscriber::SetStringParameter(label, value);
+    return SetStringParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -490,11 +476,7 @@ const StringArray& XyPlot::GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) const
 {
-    for (int i=0; i<XyPlotParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return GetStringArrayParameter(i);
-
-    return Subscriber::GetStringArrayParameter(label);
+    return GetStringArrayParameter(GetParameterID(label));
 }
 
 //---------------------------------
