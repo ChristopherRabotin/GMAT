@@ -22,9 +22,9 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
+//loj: 10/19/04 removed OnApply
 BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, ParameterSelectDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, ParameterSelectDialog::OnButton)
    EVT_COMBOBOX(ID_COMBOBOX, ParameterSelectDialog::OnComboBoxChange)

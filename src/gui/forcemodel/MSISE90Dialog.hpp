@@ -1,4 +1,4 @@
-//$Header$ /cygdrive/f/dev/cvs/gui/forcemodel/MSISE90Dialog.hpp,v 1.5 2004/05/11 14:45:37 uid500 Exp $
+//$Header$
 //------------------------------------------------------------------------------
 //                              MSISE90Dialog
 //------------------------------------------------------------------------------
@@ -26,62 +26,62 @@
 class MSISE90Dialog : public GmatDialog
 {
 public:
-    MSISE90Dialog(wxWindow *parent, DragForce *dragForce);
-    ~MSISE90Dialog();
-    DragForce* GetForce();
+   MSISE90Dialog(wxWindow *parent, DragForce *dragForce);
+   ~MSISE90Dialog();
+   DragForce* GetForce();
 private:   
-    wxStaticText *solarFluxStaticText;
-    wxStaticText *avgSolarFluxStaticText;
-    wxStaticText *geomagneticIndexStaticText;
-    wxStaticText *fileNameStaticText;
+   wxStaticText *solarFluxStaticText;
+   wxStaticText *avgSolarFluxStaticText;
+   wxStaticText *geomagneticIndexStaticText;
+   wxStaticText *fileNameStaticText;
     
-    wxTextCtrl *solarFluxTextCtrl;
-    wxTextCtrl *avgSolarFluxTextCtrl;
-    wxTextCtrl *geomagneticIndexTextCtrl;
-    wxTextCtrl *fileNameTextCtrl;
+   wxTextCtrl *solarFluxTextCtrl;
+   wxTextCtrl *avgSolarFluxTextCtrl;
+   wxTextCtrl *geomagneticIndexTextCtrl;
+   wxTextCtrl *fileNameTextCtrl;
     
-    wxButton *browseButton;
+   wxButton *browseButton;
     
-    wxRadioButton *userInputRadioButton;
-    wxRadioButton *fileInputRadioButton;
+   wxRadioButton *userInputRadioButton;
+   wxRadioButton *fileInputRadioButton;
     
-    DragForce *theForce;
+   DragForce *theForce;
     
-    Integer solarFluxID;
-    Integer avgSolarFluxID;
-    Integer geomagnecticIndexID;
-    Integer solarFluxFileID;
-    Integer inputSourceID;
+   Integer solarFluxID;
+   Integer avgSolarFluxID;
+   Integer geomagnecticIndexID;
+   Integer solarFluxFileID;
+   Integer inputSourceID;
     
-    wxString inputSourceString;
+   wxString inputSourceString;
     
-    bool useFile;
+   bool useFile;
     
-    // Private methods
-    void Initialize();
-    void Update();
+   // Private methods
+   void Initialize();
+   void Update();
     
-    // Methods inherited from GmatDialog
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    virtual void ResetData();
+   // Methods inherited from GmatDialog
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   virtual void ResetData();
     
-    // Event-handling Methods
-    void OnTextChange();
-    void OnRadioButtonChange(wxCommandEvent& event);
-    void OnBrowse();
+   // Event-handling Methods
+   void OnTextChange();
+   void OnRadioButtonChange(wxCommandEvent& event);
+   void OnBrowse();
 
-    DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE();
 
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 45000,
-        ID_TEXTCTRL,
-        ID_BUTTON,
-        ID_RADIOBUTTON
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 45000,
+      ID_TEXTCTRL,
+      ID_BUTTON,
+      ID_RADIOBUTTON
+   };
 };
 
 #endif

@@ -22,8 +22,8 @@
 
 BEGIN_EVENT_TABLE(GmatDialog, wxDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
+   EVT_BUTTON(ID_BUTTON_HELP, GmatDialog::OnHelp)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -43,42 +43,36 @@ END_EVENT_TABLE()
 GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
    : wxDialog(parent, id, title)
 {
-   int borderSize = 3;
+   int borderSize = 2;
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    theParent = parent;
     
-   wxStaticBox *middleStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBox *bottomStaticBox = new wxStaticBox( this, -1, wxT("") );
+   wxStaticBox *middleStaticBox = new wxStaticBox(this, -1, wxT(""));
+   wxStaticBox *bottomStaticBox = new wxStaticBox(this, -1, wxT(""));
     
     // create sizers
    theDialogSizer = new wxBoxSizer(wxVERTICAL);
-   theMiddleSizer = new wxStaticBoxSizer( middleStaticBox, wxVERTICAL );
-   theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
-   wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+   theMiddleSizer = new wxStaticBoxSizer(middleStaticBox, wxVERTICAL);
+   theBottomSizer = new wxStaticBoxSizer(bottomStaticBox, wxVERTICAL);
+   theButtonSizer = new wxBoxSizer(wxHORIZONTAL); //loj: 10/19/04 Made theButtonSizer member data
   
     // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
-
-   //---------------------------------------------
-   //loj: Do not create Apply button for dialog 
-   //theApplyButton =
-   //   new wxButton(this, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
-   //---------------------------------------------
    
    theCancelButton =
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
+   
    theHelpButton =
       new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
         
    // adds the buttons to button sizer    
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   //theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    
+   
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
 }
 
@@ -101,7 +95,7 @@ void GmatDialog::Show()
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
     
    // tells the enclosing window to adjust to the size of the sizer
-   SetAutoLayout( TRUE );
+   SetAutoLayout(TRUE);
    SetSizer(theDialogSizer); //use the sizer for layout
    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
@@ -111,7 +105,6 @@ void GmatDialog::Show()
    LoadData();
 
    theOkButton->Disable();
-   //theApplyButton->Disable();
    theHelpButton->Disable(); //loj: for future build
 }
 
@@ -126,18 +119,6 @@ void GmatDialog::OnOK()
 {
    SaveData();
    Close();
-}
-
-//------------------------------------------------------------------------------
-// void OnApply()
-//------------------------------------------------------------------------------
-/**
- * Saves the data and ramain unclosed.
- */
-//------------------------------------------------------------------------------
-void GmatDialog::OnApply()
-{
-   ;
 }
 
 //------------------------------------------------------------------------------

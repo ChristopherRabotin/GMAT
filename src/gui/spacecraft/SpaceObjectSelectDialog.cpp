@@ -17,15 +17,15 @@
 #include "SpaceObjectSelectDialog.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_SO_DIALOG 0
+//#define DEBUG_SO_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
+//loj: 10/19/04 removed OnApply
 BEGIN_EVENT_TABLE(SpaceObjectSelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, SpaceObjectSelectDialog::OnButton)
 END_EVENT_TABLE()

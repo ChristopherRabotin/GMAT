@@ -32,47 +32,45 @@
 class GmatDialog : public wxDialog
 {
 public:
-    // constructors
-    GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
+   // constructors
+   GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
     
 protected:
-    // member functions
-    virtual void Show();
-    virtual void Create() = 0;
-    virtual void LoadData() = 0;
-    virtual void SaveData() = 0;
-    virtual void ResetData() = 0;
+   // member functions
+   virtual void Show();
+   virtual void Create() = 0;
+   virtual void LoadData() = 0;
+   virtual void SaveData() = 0;
+   virtual void ResetData() = 0;
     
-    virtual void OnOK();
-    virtual void OnApply();
-    virtual void OnCancel();
-    virtual void OnHelp();
+   virtual void OnOK();
+   virtual void OnCancel();
+   virtual void OnHelp();
 
     // member data
-    GuiInterpreter *theGuiInterpreter;
-    GuiItemManager *theGuiManager;
-    wxWindow *theParent;
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
+   wxWindow *theParent;
     
-    wxBoxSizer *theDialogSizer;
-    wxStaticBoxSizer *theMiddleSizer;
-    wxStaticBoxSizer *theBottomSizer;
+   wxBoxSizer *theDialogSizer;
+   wxStaticBoxSizer *theMiddleSizer;
+   wxStaticBoxSizer *theBottomSizer;
+   wxBoxSizer *theButtonSizer; //loj: 10/19/04 added
+
+   wxButton *theOkButton;
+   wxButton *theCancelButton;
+   wxButton *theHelpButton;
     
-    wxButton *theOkButton;
-    wxButton *theApplyButton;
-    wxButton *theCancelButton;
-    wxButton *theHelpButton;
+   // any class wishing to process wxWindows events must use this macro
+   DECLARE_EVENT_TABLE();
     
-    // any class wishing to process wxWindows events must use this macro
-    DECLARE_EVENT_TABLE();
-    
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_BUTTON_OK = 8100,
-        ID_BUTTON_APPLY,
-        ID_BUTTON_CANCEL,
-        ID_BUTTON_HELP
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_BUTTON_OK = 8100,
+      ID_BUTTON_CANCEL,
+      ID_BUTTON_HELP
+   };
 
 };
 

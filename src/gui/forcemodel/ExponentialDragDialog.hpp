@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                              ExponentialDragDialog
 //------------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2004/04/01
-// Modified:
+//
 /**
  * This class allows user to edit Exponential drag parameters.
  */
@@ -26,33 +26,33 @@
 class ExponentialDragDialog : public GmatDialog
 {
 public:
-    ExponentialDragDialog(wxWindow *parent, DragForce *dragForce);
-    ~ExponentialDragDialog();
-    DragForce* GetForce();
+   ExponentialDragDialog(wxWindow *parent, DragForce *dragForce);
+   ~ExponentialDragDialog();
+   DragForce* GetForce();
 private:   
-    wxTextCtrl *expDrag1TextCtrl;
-    wxTextCtrl *expDrag2TextCtrl;
-    wxTextCtrl *expDrag3TextCtrl;
+   wxTextCtrl *expDrag1TextCtrl;
+   wxTextCtrl *expDrag2TextCtrl;
+   wxTextCtrl *expDrag3TextCtrl;
     
-    DragForce *theForce;
+   DragForce *theForce;
 
-    // Methods inherited from GmatDialog
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    virtual void ResetData();
+   // Methods inherited from GmatDialog
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   virtual void ResetData();
     
-    // Event-handling Methods
-    void OnTextChange();
+   // Event-handling Methods
+   void OnTextChange();
 
-    DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE();
 
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 10003,
-        ID_TEXTCTRL
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 10003,
+      ID_TEXTCTRL
+   };
 };
 
 #endif
