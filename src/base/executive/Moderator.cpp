@@ -607,9 +607,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
-    //loj:return theScriptInterpreter->Interpret(scriptFilename);
-    MessageInterface::PopupMessage(Gmat::INFO_, "BuildObject coming up soon.");
-    return true;
+    MessageInterface::ShowMessage("Moderator::InterpretScript entered\n"
+                                  "file: " + scriptFilename);
+    return theScriptInterpreter->Interpret(scriptFilename);
 }
 
 //------------------------------------------------------------------------------
@@ -618,7 +618,7 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 bool Moderator::SaveScript(const std::string &scriptFilename)
 {
     //loj:return theScriptInterpreter->Build(scriptFilename);
-    MessageInterface::PopupMessage(Gmat::INFO_, "SaveScript function coming up soon.");
+    MessageInterface::PopupMessage(Gmat::INFO_, "SaveScript function coming soon.");
     return true;
 }
 
@@ -627,7 +627,8 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer Moderator::RunScript(Integer sandboxNum)
 {
-    return RunMission(sandboxNum);
+    MessageInterface::PopupMessage(Gmat::INFO_, "RunScript function coming soon.");
+    //return RunMission(sandboxNum);
 }
 
 //---------------------------------
