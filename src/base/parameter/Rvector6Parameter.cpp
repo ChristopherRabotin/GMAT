@@ -262,7 +262,12 @@ Real Rvector6Parameter::GetRealParameter(const Integer id)
 Real Rvector6Parameter::SetRealParameter(const Integer id, const Real value)
 {
     if (id >= PARAM_1 && id <= PARAM_6)
+    {
         mValue(id) = value;
+        return value;
+    }
     else
+    {
         return Parameter::SetRealParameter(id, value);
+    }
 }
