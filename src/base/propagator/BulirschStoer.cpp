@@ -50,18 +50,8 @@
 const std::string
 BulirschStoer::PARAMETER_TEXT[BulirschStoerParamCount - IntegratorParamCount] =
 {
-	"Safety1",
-	"Safety2",
 	"MinimumReduction",
 	"MaximumReduction",
-	"Scale",
-	"Depth",
-	"DepthInitialized",
-	"Level",
-	"KOpt",
-	"KMax",
-	"KUsed",
-	"First",
 	"MinimumTolerance",
 };
 
@@ -70,16 +60,6 @@ BulirschStoer::PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount] =
 {
 	Gmat::REAL_TYPE,
 	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-	Gmat::REAL_TYPE,
-    Gmat::INTEGER_TYPE,
-	Gmat::BOOLEAN_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::INTEGER_TYPE,
-	Gmat::BOOLEAN_TYPE,
 	Gmat::REAL_TYPE,
 };
 
@@ -96,7 +76,7 @@ BulirschStoer::PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount] =
 //------------------------------------------------------------------------------
 BulirschStoer::BulirschStoer(const std::string &typeStr, 
                              const std::string &nomme) :
-    Integrator                      (typeStr, nomme),
+    Integrator                      ("BulirschStoer", nomme),
     depth                           (8),
     depthInitialized                (false), 
     level                           (0),
@@ -116,7 +96,7 @@ BulirschStoer::BulirschStoer(const std::string &typeStr,
     bs_safety2                      (0.70),
     minimumReduction                (0.7),
     maximumReduction                (1.0e-5),
-    SCALE_DT                        (0.1)
+    scale_dt                        (0.1)
 {
     parameterCount = BulirschStoerParamCount;
 }
@@ -195,7 +175,7 @@ BulirschStoer::BulirschStoer(const BulirschStoer& bs) :
     bs_safety2                      (0.70),
     minimumReduction                (0.7),
     maximumReduction                (1.0e-5),
-    SCALE_DT                        (0.1)
+    scale_dt                        (0.1)
 {
     parameterCount = BulirschStoerParamCount;
 }
@@ -220,7 +200,7 @@ BulirschStoer& BulirschStoer::operator=(const BulirschStoer& bs)
     bs_safety2 = bs.bs_safety2;
     minimumReduction = bs.minimumReduction;
     maximumReduction = bs.maximumReduction;
-    SCALE_DT = bs.SCALE_DT;
+    scale_dt = bs.scale_dt;
 
     return *this;
 }
@@ -732,10 +712,13 @@ bool BulirschStoer::Step(void)
 {
     if (!initialized)
         return false;
-
-    Real nextstep = stepSize;
-    bool reduct = false, converged = false;
-    Real tnew, eEstimate;
+        
+    //  waw: 06/28/04 Unused variable    
+    // Real nextstep = stepSize;
+    // bool reduct = false;
+    bool converged = false;
+    Real tnew = 0.0; // waw: 06/28/04 Initialized
+    Real eEstimate = 0.0; // waw: 06/28/04 Initialized
 
     do
 	{
@@ -1054,7 +1037,7 @@ bool BulirschStoer::AdaptStep(Real maxerror)
         for (Integer i = 0; i <= kused; i++)
 		{
             errorRatio = levelError[i] / tolerance;
-            factor = (errorRatio > SCALE_DT ? errorRatio : SCALE_DT);
+            factor = (errorRatio > scale_dt ? errorRatio : scale_dt);
             work = factor * ai[i+2];
             if (work < workingMin)
 			{
@@ -1070,7 +1053,7 @@ bool BulirschStoer::AdaptStep(Real maxerror)
         if ((kopt >= kused) && (kopt < kmax))
 		{
             work = scale / alpha[kopt-1][kopt];
-            factor = (scale < SCALE_DT ? scale : SCALE_DT);
+            factor = (scale < scale_dt ? scale : scale_dt);
             if (ai[kopt+1] * factor < workingMin)
 			{
                 ++kopt;
@@ -1110,7 +1093,7 @@ bool BulirschStoer::AdaptStep(Real maxerror)
 //------------------------------------------------------------------------------
 std::string BulirschStoer::GetParameterText(const Integer id) const
 {
-    if (id >= SAFETY1 && id < BulirschStoerParamCount)
+    if (id >= MINIMUM_REDUCTION && id < BulirschStoerParamCount)
         return PARAMETER_TEXT[id - IntegratorParamCount];
     else
         return Integrator::GetParameterText(id);
@@ -1125,7 +1108,7 @@ std::string BulirschStoer::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer BulirschStoer::GetParameterID(const std::string &str) const
 {
-    for (Integer i = SAFETY1; i < BulirschStoerParamCount; i++)
+    for (Integer i = MINIMUM_REDUCTION; i < BulirschStoerParamCount; i++)
     {
         if (str == PARAMETER_TEXT[i - IntegratorParamCount])
             return i;
@@ -1143,7 +1126,7 @@ Integer BulirschStoer::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType BulirschStoer::GetParameterType(const Integer id) const
 {
-    if (id >= SAFETY1 && id < BulirschStoerParamCount)
+    if (id >= MINIMUM_REDUCTION && id < BulirschStoerParamCount)
         return PARAMETER_TYPE[id - IntegratorParamCount];
     else
         return Integrator::GetParameterType(id);
@@ -1158,7 +1141,7 @@ Gmat::ParameterType BulirschStoer::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string BulirschStoer::GetParameterTypeString(const Integer id) const
 {
-   if (id >= SAFETY1 && id < BulirschStoerParamCount)
+   if (id >= MINIMUM_REDUCTION && id < BulirschStoerParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return Integrator::GetParameterTypeString(id);
@@ -1173,11 +1156,8 @@ std::string BulirschStoer::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real BulirschStoer::GetRealParameter(const Integer id) const
 {
-	if (id == SAFETY1)					return bs_safety1;
-	else if (id == SAFETY2)				return bs_safety2;
-	else if (id == MINIMUM_REDUCTION)	return minimumReduction;
+	if      (id == MINIMUM_REDUCTION)	return minimumReduction;
 	else if (id == MAXIMUM_REDUCTION)	return maximumReduction;
-	else if (id == SCALE)				return SCALE_DT;
 	else if (id == MIN_TOLERANCE)       return mintolerance;
 
     return Integrator::GetRealParameter(id);
@@ -1211,17 +1191,7 @@ Real BulirschStoer::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real BulirschStoer::SetRealParameter(const Integer id, const Real value)
 {
-	if (id == SAFETY1)
-	{
-		bs_safety1 = value;
-		return bs_safety1;
-	}
-	else if (id == SAFETY2)
-	{
-		bs_safety2 = value;
-		return bs_safety2;
-	}
-	else if (id == MINIMUM_REDUCTION)
+	if (id == MINIMUM_REDUCTION)
 	{
 		minimumReduction = value;
 		return minimumReduction;
@@ -1230,11 +1200,6 @@ Real BulirschStoer::SetRealParameter(const Integer id, const Real value)
 	{
 		maximumReduction = value;
 		return maximumReduction;
-	}
-	else if (id == SCALE)
-	{
-		SCALE_DT = value;
-		return SCALE_DT;
 	}
 	else if (id == MIN_TOLERANCE)
 	{
@@ -1268,125 +1233,4 @@ Real BulirschStoer::SetRealParameter(const Integer id, const Real value)
 Real BulirschStoer::SetRealParameter(const std::string &label, const Real value)
 {
     return SetRealParameter(GetParameterID(label), value);
-}
-
-//------------------------------------------------------------------------------
-//  Integer GetIntegerParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * This method returns the Integer parameter value, given the input
- * parameter ID.
- * @see GmatBase
- * @param <id> ID for the requested parameter.
- *
- * @return  Integer value of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-Integer BulirschStoer::GetIntegerParameter(const Integer id) const
-{
-    if (id == DEPTH)			     	return depth;
-	else if (id == LEVEL)				return level;
-	else if (id == K_OPT)				return kopt;
-	else if (id == K_MAX)				return kmax;
-	else if (id == K_USED)				return kused;
-
-	return Integrator::GetIntegerParameter(id);
-}
-
-//------------------------------------------------------------------------------
-//  Integer SetIntegerParameter(const Integer id, const Integer value)
-//------------------------------------------------------------------------------
-/**
- * This method sets the Integer parameter value, given the input
- * parameter ID.
- * @see GmatBase
- * @param <id> ID for the requested parameter.
- * @param <value> Integer value for the requested parameter.
- *
- * @return  Integer value of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-Integer BulirschStoer::SetIntegerParameter(const Integer id,
-											   const Integer value) // const?
-{
-	if (id == DEPTH)
-	{
-		depth = value;
-		return depth;
-	}
-	else if (id == LEVEL)
-	{
-		level = value;
-		return level;
-	}
-	else if (id == K_OPT)
-	{
-		kopt = value;
-		return kopt;
-	}
-	else if (id == K_MAX)
-	{
-		kmax = value;
-		return kmax;
-	}
-	else if (id == K_USED)
-	{
-		kused = value;
-		return kused;
-	}
-
-	return Integrator::SetIntegerParameter(id,value);
-}
-
-//------------------------------------------------------------------------------
-//  bool GetBooleanParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
-* This method returns the bool parameter value, given the input
- * parameter ID.
- *
- * @param <id> ID for the requested parameter.
- *
- * @return  bool value of the requested parameter.
- *
- */
-//------------------------------------------------------------------------------
-bool BulirschStoer::GetBooleanParameter(const Integer id) const
-{
-	if (id == DEPTH_INITIALIZED)	return depthInitialized;
-	else if (id == FIRST)			return first;
-
-	return Integrator::GetBooleanParameter(id);
-}
-
-//------------------------------------------------------------------------------
-//  bool SetBooleanParameter(const Integer id, const std::string value)
-//------------------------------------------------------------------------------
-/**
-* This method sets the bool parameter value, given the input
- * parameter ID.
- *
- * @param <id> ID for the requested parameter.
- * @param <value> bool value for the requested parameter.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-bool BulirschStoer::SetBooleanParameter(const Integer id, const bool value)
-{
-	if (id == DEPTH_INITIALIZED)
-	{
-		depthInitialized = value;
-		return depthInitialized;
-	}
-	else if (id == FIRST)
-	{
-		first = value;
-		return first;
-	}
-
-	return Integrator::SetBooleanParameter(id,value);
 }

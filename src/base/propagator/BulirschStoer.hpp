@@ -88,26 +88,12 @@ public:
     virtual Real    GetRealParameter(const std::string &label) const;
     virtual Real    SetRealParameter(const Integer id, const Real value);
     virtual Real    SetRealParameter(const std::string &label, const Real value);
-    virtual Integer GetIntegerParameter(const Integer id) const;
-    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
-	virtual bool    GetBooleanParameter(const Integer id) const; 
-	virtual bool    SetBooleanParameter(const Integer id, const bool value);
 	
 protected:
 	enum
     {
-		SAFETY1 = IntegratorParamCount,
-		SAFETY2,
-		MINIMUM_REDUCTION,
+		MINIMUM_REDUCTION = IntegratorParamCount,
 		MAXIMUM_REDUCTION,
-		SCALE,
-		DEPTH,
-		DEPTH_INITIALIZED,
-		LEVEL,
-		K_OPT,
-		K_MAX,
-		K_USED,
-		FIRST,
 		MIN_TOLERANCE,
         BulirschStoerParamCount  /// Count of the parameters for this class
     };
@@ -115,19 +101,6 @@ protected:
 	static const Gmat::ParameterType PARAMETER_TYPE[BulirschStoerParamCount - IntegratorParamCount];
 
 private:
-	/// Limit on the smallest tolerance for the BS integrator
-	//const Integer BULIRSCHSTOER_MINIMUMTOLERANCE;
-    /// Safety factor used when estimating error
-    Real bs_safety1;
-    /// Safety factor used to prevent thrashing on the stepsize
-    Real bs_safety2;
-    /// Smallest change in the stepsize when cutting it back
-    Real minimumReduction;
-    /// Largest change in the stepsize when cutting it back
-    Real maximumReduction;
-    /// The largest increase in stepsize is 1.0 / SCALE_DT
-    Real SCALE_DT;
-	
     /// The maximum depth to go in the extrapolation
     Integer depth;
     /// Flag  indicating status of the arrays sized by depth 
@@ -136,6 +109,10 @@ private:
     Integer level;
     /// Maximum error encountered at each level
     Real *levelError;
+    /// Work coefficients for the algorithm
+    Real *ai;
+    /// \f$\alpha(k,q)\f$ coefficients from the algorithm
+    Real **alpha;
     /// Intermediate states; corresponds to Numerical Recipes' d[][] array
     Real **intermediates;
     /// C array in the polynomial extrapolator
@@ -152,10 +129,18 @@ private:
     Real *estimatedState;
     /// Array containing number of subintervals at each level
     Integer *subinterval;
-    /// Work coefficients for the algorithm
-    Real *ai;
-    /// \f$\alpha(k,q)\f$ coefficients from the algorithm
-    Real **alpha;
+    /// Minimum tolerance permitted
+    Real mintolerance;
+     /// Safety factor used when estimating error
+    Real bs_safety1;
+    /// Safety factor used to prevent thrashing on the stepsize
+    Real bs_safety2;
+    /// Smallest change in the stepsize when cutting it back
+    Real minimumReduction;
+    /// Largest change in the stepsize when cutting it back
+    Real maximumReduction;
+    /// The largest increase in stepsize is 1.0 / SCALE_DT
+    Real scale_dt;
     /// Estimated optimal row for convergence
     Integer kopt;
     /// Maximum row allowed for convergence
@@ -164,11 +149,11 @@ private:
     Integer kused;
     /// Flag used to mark first call to the stepper
     bool first;
+/// Limit on the smallest tolerance for the BS integrator
+//const Integer BULIRSCHSTOER_MINIMUMTOLERANCE;
 //    /// Minimum allowed stepsize
 //    Real minstep;
 //    /// Maximum allowed stepsize (set to 0.0 for no limit)
 //    Real maxstep;
-    /// Minimum tolerance permitted
-    Real mintolerance;   
 };
 #endif
