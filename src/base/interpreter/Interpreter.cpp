@@ -1603,6 +1603,12 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
             throw InterpreterException("Unable to set AtmosphereModel for drag force.");
          /// @todo Add the body name for drag at other bodies
          if (parm != "BodyDefault") {
+            //---------------------------------------------------------------
+            //loj: 10/25/04 Set "Earth" as AtmosphereBody until it can handle
+            // Drag.Earth. Above pm->SetStringParameter("BodyName", parm) sets
+            // AtmosphereModel as Bodyname.
+            //---------------------------------------------------------------
+            pm->SetStringParameter("BodyName", "Earth");
             AtmosphereModel *m = moderator->CreateAtmosphereModel(parm, "");
             if (m)
                pm->SetRefObject(m, Gmat::ATMOSPHERE);
