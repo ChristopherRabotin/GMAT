@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 
 #define DEBUG_MODERATOR 0
+#define DEBUG_PLANETARY_FILE 0
 
 //---------------------------------
 // static data
@@ -1153,15 +1154,22 @@ std::string Moderator::GetPotentialFileName(const std::string &filetype)
 //------------------------------------------------------------------------------
 bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 {
-   //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
-   //                              filetypes.size());
+#if DEBUG_PLANETARY_FILE
+   MessageInterface::
+      ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
+                  filetypes.size());
+#endif
+   
    bool status = false;
    Integer fileTypeInUse = -1;
     
     // update planetary file types
    if (&thePlanetaryFileTypesInUse != &filetypes)
    {
-      //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
+#if DEBUG_PLANETARY_FILE
+      MessageInterface::
+         ShowMessage("Moderator::SetPlanetaryFileTypesInUse() updating planetary source\n");
+#endif
       thePlanetaryFileTypesInUse.clear();
     
       for (unsigned int i=0; i<filetypes.size(); i++)
@@ -1188,7 +1196,10 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
       }
       else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
       {
-         //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
+#if DEBUG_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
+#endif
          status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
          if (status)
          {
@@ -1212,7 +1223,10 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
       //          }
       else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
       {
-         //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
+#if DEBUG_PLANETARY_FILE
+         MessageInterface::
+            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
+#endif
          status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
          if (status)
          {
@@ -1234,9 +1248,11 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
    }
    else
    {
-      //MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
-      //                              "Set Planetary file to use:%d\n", fileTypeInUse);
-        
+#if DEBUG_PLANETARY_FILE
+      MessageInterface::
+         ShowMessage("Moderator::SetPlanetaryFileTypesInUse() "
+                     "Set Planetary file to use:%d\n", fileTypeInUse);
+#endif
       switch (fileTypeInUse)
       {
       case SLP:
@@ -1265,11 +1281,13 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
       }
    }
     
-   //      if (status)
-   //          MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
-   //                                        "set Planetary file to use: %s\n",
-   //                                        PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
-    
+#if DEBUG_PLANETARY_FILE
+   if (status)
+      MessageInterface::
+      ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
+                  "set Planetary file to use: %s\n",
+                  PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
+#endif
    return status;
 }
 
@@ -1334,34 +1352,29 @@ bool Moderator::CreateDeFile(Integer id, const std::string &filename,
              "Moderator::CreateDeFile() unsupported DE file type");
          return false;
       }
-
+      
+#if DEBUG_PLANETARY_FILE
       MessageInterface::ShowMessage
          ("Moderator::CreateDeFile() creating DeFile. type=%d, "
           "filename=%s, format=%d\n", deFileType, filename.c_str(),
           format);
-
-      //loj: 4/7/04 temp code until DeFile is resolved
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_,
-          "Moderator::CreateDeFile() Error creating %s.\n"
-          "The next filetype in the list will "
-          "be created.\n", filename.c_str());
-         
-      //          try
-      //          {
-      //              theDefaultDeFile = new DeFile(deFileType, filename, format);
+#endif
+               
+      try
+      {
+         theDefaultDeFile = new DeFile(deFileType, filename, format);
         
-      //              if (theDefaultDeFile != NULL)
-      //                  status = true;
-      //          }
-      //          catch (...)
-      //          {
-      //              MessageInterface::PopupMessage
-      //                  (Gmat::WARNING_,
-      //                   "Moderator::CreateDeFile() Error creating %s. "
-      //                   "The next filetype in the list will "
-      //                   "be created.\n", filename.c_str());
-      //          }
+         if (theDefaultDeFile != NULL)
+            status = true;
+      }
+      catch (...)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "Moderator::CreateDeFile() Error creating %s. "
+             "The next filetype in the list will "
+             "be created.\n", filename.c_str());
+      }
    }
 
    return status;
