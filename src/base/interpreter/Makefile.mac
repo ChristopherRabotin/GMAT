@@ -2,9 +2,10 @@
 # Module:     Makefile.mac for interpreter directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-#             2004/08/20 W. Shoan - added GUI includes to
+# Modified:  2004/08/20 W. Shoan - added GUI includes to
 #                        compile GuiInterpreter.cpp
-
+#            2004/09/27 J. Gurganus - Removed WX_HOME
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
@@ -18,14 +19,14 @@ G_PLOT    = $(PROJECT_ROOT)/gui/plot
 G_VIEW    = $(PROJECT_ROOT)/gui/view
 #
 GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
-	-I$(G_MISSION) -I$(G_VIEW) -I$(WX_HOME)/../contrib/include/wx/plot
+	-I$(G_MISSION) -I$(G_VIEW)
 
 # Source file for creating new library
 SRC = GuiInterpreter.cpp InterpreterException.cpp Interpreter.cpp \
 	ScriptInterpreter.cpp
 #
 #TESTFLAGS = -D__CONSOLE_APP__
-TESTFLAGS = $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
+TESTFLAGS = $(GUI_INCS) `wx-config --cxxflags`
 #
 #
 # Define macro for using the included file 

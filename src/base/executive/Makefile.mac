@@ -6,6 +6,7 @@
 #             2004/02/20 - Adjusted the flag for wxMac/wxWindows 
 #             2004/04/12 - Added FileManager.cpp
 #             2004/07/30 - W. Shoan - added PublisherException
+#             2004/09/27 - J. Gurganus - removed WX_HOME
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
@@ -20,7 +21,7 @@ G_PLOT    = $(PROJECT_ROOT)/gui/plot
 G_VIEW    = $(PROJECT_ROOT)/gui/view
 #
 GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
-	-I$(G_MISSION) -I$(G_VIEW) -I$(WX_HOME)/../contrib/include/wx/plot
+	-I$(G_MISSION) -I$(G_VIEW)
 #
 # Source file for creating new library
 SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
@@ -28,7 +29,7 @@ SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
 
 #
 #TESTFLAGS = -D__CONSOLE_APP__
-TESTFLAGS = $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
+TESTFLAGS = $(GUI_INCS) `wx-config --cxxflags`
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
