@@ -46,7 +46,7 @@ CartX::CartX(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "X", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   mColor = GmatColor::BLUE32;
+   mColor = GmatColor::RED32; //loj: 7/13/04 changed from BLUE32
    AddObject(obj);
 }
 
@@ -268,7 +268,7 @@ CartZ::CartZ(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
    : OrbitReal(name, "Z", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   mColor = GmatColor::YELLOW32;
+   mColor = GmatColor::BLUE32;
    AddObject(obj);
 }
 
@@ -379,7 +379,7 @@ CartVx::CartVx(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VX", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   mColor = GmatColor::BLUE32;
+   mColor = GmatColor::RED32;
    AddObject(obj);
 }
 
@@ -600,7 +600,7 @@ CartVz::CartVz(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
    : OrbitReal(name, "VZ", SYSTEM_PARAM, obj, desc, unit, false)
 {
-   mColor = GmatColor::YELLOW32;
+   mColor = GmatColor::BLUE32;
    AddObject(obj);
 }
 
