@@ -24,14 +24,14 @@ const Gmat::BodyType        Star::BODY_TYPE           = Gmat::STAR;
 const Real                  Star::MASS                = 1.989E30;    // kg
 const Real                  Star::EQUATORIAL_RADIUS   = 6.97E5;      // km
 const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
-const Real                  Star::MU                  = 2.74e4;      // cm/s**2  - need diff units????
+const Real                  Star::MU                  = 1.32712438e20;      // m^3 / s^2
 const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Star::CENTRAL_BODY        = NULL;
-const Integer               Star::BODY_NUMBER         = 1;           // don't know this!!!!!!
-const Integer               Star::REF_BODY_NUMBER     = 1;           // don't know this!!!!!!
-const Integer               Star::ORDER               = 4;           // don't know this!!!!!!
-const Integer               Star::DEGREE              = 4;           // don't know this!!!!!!
+const Integer               Star::BODY_NUMBER         = 3;  
+const Integer               Star::REF_BODY_NUMBER     = 3;    
+const Integer               Star::ORDER               = 4;      
+const Integer               Star::DEGREE              = 4;      
 // add other ones as needed
 
 

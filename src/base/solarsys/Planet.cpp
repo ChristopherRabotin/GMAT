@@ -22,16 +22,16 @@
 // default values for CelesitalBody data
 const Gmat::BodyType        Planet::BODY_TYPE           = Gmat::PLANET;
 const Real                  Planet::MASS                = 5.976e24;     // kg
-const Real                  Planet::EQUATORIAL_RADIUS   = 6378.164;     // km
-const Real                  Planet::POLAR_RADIUS        = 6356.8;       // km - need more precision
-const Real                  Planet::MU                  = 9.80;      // m/s^2???
+const Real                  Planet::EQUATORIAL_RADIUS   = 6378.140;     // km
+const Real                  Planet::POLAR_RADIUS        = 6356.755;       // km - need more precision
+const Real                  Planet::MU                  = 3.986005e14;      // m^3/s^2
 const Gmat::PosVelSource    Planet::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Planet::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Planet::CENTRAL_BODY        = NULL;        // doesn't make sense?
-const Integer               Planet::BODY_NUMBER         = 2;           // don't know this!!!!!!
-const Integer               Planet::REF_BODY_NUMBER     = 2;           // don't know this!!!!!!
-const Integer               Planet::ORDER               = 4;           // don't know this!!!!!!
-const Integer               Planet::DEGREE              = 4;           // don't know this!!!!!!
+const Integer               Planet::BODY_NUMBER         = 1;  
+const Integer               Planet::REF_BODY_NUMBER     = 3; 
+const Integer               Planet::ORDER               = 4;  
+const Integer               Planet::DEGREE              = 4;   
 // add other ones as needed
 
 
