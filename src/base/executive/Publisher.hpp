@@ -26,14 +26,15 @@ class GMAT_API Publisher
 {
 public:
     static Publisher*
-                Instance(void);
+    Instance(void);
 
-    bool        Subscribe(Subscriber * s);
-    bool        Unsubscribe(Subscriber * s);
+    bool Subscribe(Subscriber * s);
+    bool Unsubscribe(Subscriber * s);
+    bool UnsubscribeAll(); //loj: 3/9/04 added
 
-    bool        Publish(Real * data, Integer count);
-    bool        Publish(char * data, Integer count = 0);
-    bool        Publish(Integer * data, Integer count);
+    bool Publish(Real * data, Integer count);
+    bool Publish(char * data, Integer count = 0);
+    bool Publish(Integer * data, Integer count);
 
 protected:
     /// The singleton

@@ -19,7 +19,7 @@
 
 #include "Publisher.hpp"
 #include <string>
-
+#include "MessageInterface.hpp"
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -50,6 +50,7 @@ Publisher::~Publisher(void)
 
 bool Publisher::Subscribe(Subscriber * s)
 {
+    //MessageInterface::ShowMessage("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
     if (!s)
         return false;
 
@@ -64,6 +65,13 @@ bool Publisher::Unsubscribe(Subscriber * s)
         return false;
 
     subs.remove(s);
+    return true;
+}
+
+//loj: 3/9/04 added
+bool Publisher::UnsubscribeAll()
+{
+    subs.clear();
     return true;
 }
 
@@ -86,9 +94,13 @@ bool Publisher::Publish(Real * data, Integer count)
             strcat(stream, "\n");
     }
 
+    //MessageInterface::ShowMessage("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
+    //                              subs.size());
     std::list<Subscriber*>::iterator current = subs.begin();
     while (current != subs.end())
     {
+        //MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
+        //                              (*current)->GetName().c_str());
         if (!(*current)->ReceiveData(stream))
             return false;
         if (!(*current)->ReceiveData(data, count))
