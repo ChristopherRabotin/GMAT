@@ -100,6 +100,8 @@ protected:
 private:
     
     void ClearVarParameters();
+    void WriteHeaders();
+    bool initial;
     
     enum
     {

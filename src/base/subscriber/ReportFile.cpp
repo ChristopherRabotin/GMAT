@@ -96,6 +96,7 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    // Added 1 parameter
 //   parameterCount += 2;
    parameterCount = ReportFileParamCount;
+   initial = true;
 }
 
 
@@ -135,6 +136,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    // Added 1 parameter
 //   parameterCount += 2;
    parameterCount = ReportFileParamCount;
+   initial = true;
 }
 
 //------------------------------------------------------------------------------
@@ -164,6 +166,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
     mNumVarParams = rf.mNumVarParams;
     mVarParamNames = rf.mVarParamNames;
 
+    initial = true;
+    
     return *this;
 }
 
@@ -342,7 +346,13 @@ const StringArray& ReportFile::GetStringArrayParameter(const std::string &label)
 //------------------------------------------------------------------------------
 bool ReportFile::GetBooleanParameter(const Integer id) const
 {
-   return Subscriber::GetBooleanParameter(id);
+   switch (id)
+   {
+   case CLEAR:
+      return true;
+   default:
+         return Subscriber::GetBooleanParameter(id);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -431,13 +441,6 @@ bool ReportFile::OpenReportFile(void)
       return false;
    
    dstream.precision(precision);
-         
-   // write heading for each item
-   for (int i=0; i < mNumVarParams; i++)
-   {
-       dstream << mVarParamNames[i] << " ";
-   }   
-   dstream << std::endl;
       
    return true;
 }
@@ -461,6 +464,9 @@ bool ReportFile::Distribute(int len)
 
    // get var params
    Rvector varvals = Rvector(mNumVarParams);
+   
+   if (initial)
+     WriteHeaders();
 
    if (len == 0)
       dstream << data;
@@ -488,6 +494,9 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
          return false;
         
    dstream.precision(precision);
+   
+   if (initial)
+     WriteHeaders();
 
 // DJC 07/29/04 Commented out -- not sure how this works...
    // get var params
@@ -541,5 +550,22 @@ void ReportFile::ClearVarParameters()
    mVarParams.clear();
    mVarParamNames.clear();
    mNumVarParams = 0;
+   initial = true;   
 }
+
+//------------------------------------------------------------------------------
+// void WriteHeaders()
+//------------------------------------------------------------------------------
+void ReportFile::WriteHeaders()
+{
+   // write heading for each item
+   for (int i=0; i < mNumVarParams; i++)
+   {
+       dstream << mVarParamNames[i] << " ";
+   }   
+   dstream << std::endl;
+   
+   initial = false;
+}
+
 
