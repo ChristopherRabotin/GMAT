@@ -96,8 +96,8 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
       InterpretScript(std::string(filename.c_str()));
     
    // Update ResourceTree and MissionTree
-   GmatAppData::GetResourceTree()->UpdateResource();
-   GmatAppData::GetMissionTree()->UpdateMission();
+   GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
+   GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
 
    return status;
 }
@@ -117,8 +117,8 @@ bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
    if (status)
    {
       // Update ResourceTree
-      GmatAppData::GetResourceTree()->UpdateResource();
-      GmatAppData::GetMissionTree()->UpdateMission();
+      GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
+      GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
       status = GmatAppData::GetGuiInterpreter()->RunScript();
    }
     
