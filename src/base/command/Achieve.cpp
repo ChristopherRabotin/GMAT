@@ -412,8 +412,9 @@ bool Achieve::Execute(void)
     Real val;
     if (goalParm != NULL)
         val = goalParm->EvaluateReal();
-    else
+    else 
         val = goalObject->GetRealParameter(parmId);
+
     targeter->SetResultValue(goalId, val);
     return retval;
 }

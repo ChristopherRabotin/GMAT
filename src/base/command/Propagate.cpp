@@ -619,12 +619,12 @@ bool Propagate::Execute(void)
         if (!p->Step(stopTime - elapsedTime))
             throw CommandException("Propagator Failed to Step fixed interval");
         
+        fm->UpdateSpacecraft(baseEpoch + fm->GetTime() / 86400.0);
+
         // Publish the final data point here
         pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
-        
         memcpy(&pubdata[1], state, dim*sizeof(Real));
         publisher->Publish(pubdata, dim+1);
-        fm->UpdateSpacecraft(baseEpoch + fm->GetTime() / 86400.0);
     }
     
 //      //---------------------------------------
