@@ -37,6 +37,20 @@ ImpulsiveBurn::ImpulsiveBurn(std::string nomme) :
 
 
 //------------------------------------------------------------------------------
+//  ImpulsiveBurn(const ImpulsiveBurn &copy)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the impulsive burn from the input burn (copy constructor).
+ *
+ * @param <copy> ImpulsiveBurn object to copy
+ */
+//------------------------------------------------------------------------------
+ImpulsiveBurn::ImpulsiveBurn(const ImpulsiveBurn &copy) :
+Burn            (copy)
+{
+}
+
+//------------------------------------------------------------------------------
 //  Burn(void)
 //------------------------------------------------------------------------------
 /**
@@ -91,3 +105,19 @@ bool ImpulsiveBurn::Fire(Real *burnData)
                 deltaV[2]*frameBasis[2][2];
     return true;
 }
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ImpulsiveBurn.
+ *
+ * @return clone of the ImpulsiveBurn.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ImpulsiveBurn::Clone(void) const
+{
+   return (new ImpulsiveBurn(*this));
+}
+

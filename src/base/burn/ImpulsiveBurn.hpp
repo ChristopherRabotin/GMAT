@@ -28,10 +28,15 @@
 class ImpulsiveBurn : public Burn
 {
 public:
-	ImpulsiveBurn(std::string nomme = "");
+   ImpulsiveBurn(std::string nomme = "");
+   ImpulsiveBurn(const ImpulsiveBurn &copy);
 	virtual ~ImpulsiveBurn(void);
  
     virtual bool            Fire(Real *burnData = NULL);
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 };
 
 #endif // ImpulsiveBurn_hpp
