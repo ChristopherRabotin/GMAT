@@ -128,7 +128,7 @@ bool DynamicAxes::SetEpoch(const A1Mjd &toEpoch)
 }
 
 //---------------------------------------------------------------------------
-//  bool SetEpoch(const A1Mjd &toEpoch)
+//  bool GetEpoch(const A1Mjd &toEpoch)
 //---------------------------------------------------------------------------
 /**
  * Returns the epoch of the DynamicAxes class.
