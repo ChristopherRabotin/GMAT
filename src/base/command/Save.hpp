@@ -53,15 +53,23 @@ protected:
    bool                   append;
    /// Toggle to tell is file was written this run
    bool                   written;
-   /// Name of the object that is written
-   std::string            objName;
+//   /// Name of the object that is written
+//   std::string            objName;
+   /// Name of the objects that are written
+   StringArray            objName;
+//   /// Pointer to the object
+//   GmatBase               *obj;
    /// Pointer to the object
-   GmatBase               *obj;
+   std::vector<GmatBase*> obj;
    /// Toggle to show or hide emply fields
    bool                   verbose;
+   /// File stream used for the output
+   std::ofstream          file;
 
-   void                   WriteObject();
-   void                   WriteParameterValue(std::ofstream &file, Integer id);
+   void                   WriteObject(GmatBase *o);
+//   void                   WriteParameterValue(std::ofstream &file, Integer id);
+   void                   WriteParameterValue(GmatBase *o, std::ofstream &file, 
+                                              Integer id);
 };
 
 #endif // Save_hpp
