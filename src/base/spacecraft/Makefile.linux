@@ -2,7 +2,7 @@
 # Initial Version - D. Conway - 2003/11/19
 
 HEADERS = -I../include -I../foundation -I../util
-OBJECTS = Spacecraft.o
+OBJECTS = Spacecraft.o TextTrajectoryFile.o
 
 all: libSpacecraft 
 	mkdir -p ../lib
