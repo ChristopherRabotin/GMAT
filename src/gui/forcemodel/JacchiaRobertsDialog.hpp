@@ -31,17 +31,35 @@ public:
     DragForce* GetForce();
 private:   
     wxStaticText *solarFluxStaticText;
+    wxStaticText *avgSolarFluxStaticText;
+    wxStaticText *geomagneticIndexStaticText;
     wxStaticText *fileNameStaticText;
     
     wxTextCtrl *solarFluxTextCtrl;
+    wxTextCtrl *avgSolarFluxTextCtrl;
+    wxTextCtrl *geomagneticIndexTextCtrl;
     wxTextCtrl *fileNameTextCtrl;
     
     wxButton *browseButton;
     
+    wxRadioButton *userInputRadioButton;
+    wxRadioButton *fileInputRadioButton;
+    
     DragForce *theForce;
+    
+    Integer solarFluxID;
+    Integer avgSolarFluxID;
+    Integer geomagnecticIndexID;
+    Integer solarFluxFileID;
+    Integer inputSourceID;
+    
+    wxString inputSourceString;
+    
+    bool useFile;
     
     // Private methods
     void Initialize();
+    void Update();
     
     // Methods inherited from GmatDialog
     virtual void Create();
@@ -51,6 +69,7 @@ private:
     
     // Event-handling Methods
     void OnTextChange();
+    void OnRadioButtonChange(wxCommandEvent& event);
     void OnBrowse();
 
     DECLARE_EVENT_TABLE();
@@ -58,9 +77,10 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 45000,
+        ID_TEXT = 46000,
         ID_TEXTCTRL,
-        ID_BUTTON
+        ID_BUTTON,
+        ID_RADIOBUTTON
     };
 };
 
