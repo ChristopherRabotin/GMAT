@@ -19,7 +19,8 @@
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
-#include "Burn.hpp"
+#include "FiniteBurn.hpp"
+//#include "Burn.hpp"
 
 class FiniteBurnSetupPanel : public GmatPanel
 {
@@ -31,13 +32,18 @@ private:
     static const int MAX_PROP_ROW = 5;
 
     // member data
-    Burn *theBurn;
+//    Burn *theBurn;
+    FiniteBurn *theBurn;
 
     wxComboBox *frameCB;
-
+    wxComboBox *tankCB;
+    wxComboBox *thrusterCB;
+    wxGrid *engGrid;
+    wxTextCtrl *scaleTextCtrl;
+    
     // member functions
     void OnTextChange(wxCommandEvent& event);
-    void OnFrameComboBoxChange(wxCommandEvent& event);
+    void OnComboBoxChange(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -53,7 +59,7 @@ private:
         ID_TEXT = 81000,
         ID_TEXTCTRL,
 
-        ID_FRAME_COMBOBOX
+        ID_COMBOBOX
     };
 };
 
