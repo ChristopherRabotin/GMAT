@@ -147,7 +147,7 @@ const bool CoordinateSystem::operator==(const CoordinateSystem &coordSys)
 //---------------------------------------------------------------------------
 CoordinateSystem::~CoordinateSystem()
 {
-   delete axes; 
+   if (axes) delete axes; 
 }
 
 //---------------------------------------------------------------------------
