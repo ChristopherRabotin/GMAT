@@ -1,0 +1,6 @@
+//$Header$
+#include "wx/msw/wx.rc"
+
+open    BITMAP "bitmaps/open.bmp"
+zoomin  BITMAP "bitmaps/zoomin.bmp"
+zoomout BITMAP "bitmaps/zoomout.bmp"
