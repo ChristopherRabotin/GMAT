@@ -1164,7 +1164,7 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             n = (Integer) atoi(firstStr.c_str());
             if ((n > 0) && (n < HF_MAX_DEGREE)) {
                lineStr >> m;
-               if ((m > 0) && (m <= n)) {            
+               if ((m >= 0) && (m <= n)) {            
                   lineStr >> Cnm >> Snm;
 //                  if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
 //                  {
