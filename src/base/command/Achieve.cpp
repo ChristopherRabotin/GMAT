@@ -484,10 +484,7 @@ bool Achieve::ConstructGoal(const char* str)
          #endif
          goalTarget = mod->CreateParameter(parm, name);
          if (goalTarget != NULL) {
-            GmatBase *parmObj = mod->GetConfiguredItem(owner);
             std::string parmtype = "Object";
-            if (parmObj->GetType() == Gmat::SPACECRAFT)
-               parmtype = "Spacecraft";
             #ifdef DEBUG_ACHIEVE
 
                MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
