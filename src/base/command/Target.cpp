@@ -221,16 +221,13 @@ bool Target::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
 {
-   if (type != Gmat::SOLVER)
-      return true;
-
-   if (targeterName == oldName)
+   if (type == Gmat::SOLVER)
    {
-      targeterName = newName;
-      return true;
+      if (targeterName == oldName)
+         targeterName = newName;
    }
    
-   return false;
+   return true;
 }
 
 // Parameter access methods

@@ -127,11 +127,11 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
       if (burnName == oldName)
       {
          burnName = newName;
-         return true;
+         //return true;
       }
    }
    
-   return false;
+   return true; //false;
 }
 
 std::string Maneuver::GetParameterText(const Integer id) const

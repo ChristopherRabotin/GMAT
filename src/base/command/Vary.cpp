@@ -127,30 +127,21 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   if (type != Gmat::SOLVER && type != Gmat::PARAMETER)
-      return true;
-
    if (type == Gmat::SOLVER)
    {
       if (targeterName == oldName)
-      {
          targeterName = newName;
-         return true;
-      }
    }
    else if (type == Gmat::PARAMETER)
    {
       for (unsigned int i=0; i<variableName.size(); i++)
       {
          if (variableName[i] == oldName)
-         {
             variableName[i] = newName;
-            return true;
-         }
       }
    }
    
-   return false;
+   return true;
 }
 
 //---------------------------------------------------------------------------

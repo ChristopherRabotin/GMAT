@@ -228,10 +228,7 @@ bool Save::RenameRefObject(const Gmat::ObjectType type,
       return true;
    
    if (objName == oldName)
-   {
       objName = newName;
-      return true;
-   }
 
-   return false;
+   return true;
 }

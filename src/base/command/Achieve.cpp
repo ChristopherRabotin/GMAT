@@ -156,37 +156,25 @@ bool Achieve::RenameRefObject(const Gmat::ObjectType type,
                               const std::string &oldName,
                               const std::string &newName)
 {
-   if (type != Gmat::SOLVER && type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
-      return true;
-
    if (type == Gmat::SOLVER)
    {
       if (targeterName == oldName)
-      {
          targeterName = newName;
-         return true;
-      }
    }
    else if (type == Gmat::SPACECRAFT)
    {
       // set new goal name using object and property
       std::string::size_type pos = goalName.find(oldName);
       if (pos != goalName.npos)
-      {
          goalName.replace(pos, oldName.size(), newName);
-         return true;
-      }
    }
    else if (type == Gmat::PARAMETER)
    {
       if (goalName == oldName)
-      {
          goalName = newName;
-         return true;
-      }
    }
    
-   return false;
+   return true;
 }
 
 // Parameter accessors

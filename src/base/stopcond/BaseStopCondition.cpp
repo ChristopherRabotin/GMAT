@@ -716,11 +716,10 @@ bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
       {
          name.replace(pos, oldName.size(), newName);
          SetName("StopOn" + name);
-         return true;
       }
    }
    
-   return false;
+   return true;
 }
 
 //------------------------------------------------------------------------------

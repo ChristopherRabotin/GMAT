@@ -709,12 +709,12 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    bool satNameChanged = false;
    bool stopSatNameChanged = false;
 
-   // Propagate needs to know about spacecraft only
-   if (type != Gmat::SPACECRAFT)
+   // Propagate needs to know about spacecraft or formation only
+   if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION )
       return true;
 
    StringArray::iterator sat;
-      
+   
    for (unsigned int prop = 0; prop < propName.size(); ++prop)
    {
       for (sat = satName[prop]->begin(); sat != satName[prop]->end(); ++sat)
@@ -751,11 +751,9 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
       {
          stopWhen[i]->RenameRefObject(type, oldName, newName);
       }
-      
-      return true;
    }
    
-   return false;
+   return true;
 }
 
 //------------------------------------------------------------------------------

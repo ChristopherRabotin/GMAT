@@ -173,13 +173,10 @@ bool Toggle::RenameRefObject(const Gmat::ObjectType type,
    for (unsigned int i=0; i<subNames.size(); i++)
    {
       if (subNames[i] == oldName)
-      {
          subNames[i] = newName;
-         return true;
-      }
    }
 
-   return false;
+   return true;
 }
 
 
