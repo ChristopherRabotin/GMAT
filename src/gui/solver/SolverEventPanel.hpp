@@ -24,12 +24,13 @@
 
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "Command.hpp"
 
 class SolverEventPanel : public wxPanel
 {
 public:
     // constructor
-    SolverEventPanel(wxWindow *parent, const wxString &name);
+    SolverEventPanel(wxWindow *parent, const wxString &name, Command *cmd);
        
 private:   
     wxStaticText *item6;
@@ -48,7 +49,8 @@ private:
     wxComboBox *item11;
     
     GuiInterpreter *theGuiInterpreter;
-   
+    Command *theCommand;
+    
     // Layout & data handling methods
     void Setup(wxWindow *parent);
     void Initialize();

@@ -40,14 +40,14 @@
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
-#include "Propagate.hpp"
 
 class PropagateCommandPanel : public wxPanel
 {
 public:
     // constructors
     //PropagateCommandPanel( wxWindow *parent, Command *propCommand );
-    PropagateCommandPanel( wxWindow *parent, const wxString &propName );
+    //loj: 2/9/04 PropagateCommandPanel( wxWindow *parent, const wxString &propName );
+    PropagateCommandPanel( wxWindow *parent, const wxString &propName, Command *cmd);
     
 private:
     wxStaticText *eventStaticText;
@@ -90,9 +90,8 @@ private:
     Integer numOfConds;
     Integer numOfEqualities;
     
-    //GuiInterpreter *theGuiInterpreter;
-    //Command *theCommand;
-    //Propagate *thePropagateCommand;
+    GuiInterpreter *theGuiInterpreter;
+    Command *theCommand;
 
     // Layout & data handling methods
     void Initialize();

@@ -49,9 +49,11 @@ END_EVENT_TABLE()
  * @note Creates the maneuver dialog box
  */
 //------------------------------------------------------------------------------
-ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent)
+ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent, Command *cmd)
     :wxPanel(parent)
 {
+    theCommand = cmd;
+    
     CreateManeuver(this );
 }
 
@@ -60,7 +62,7 @@ ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent)
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void CreateImpulsive(wxWindow *parent)
+// void CreateImpulsive(wxWindow *parent, Command *cmd)
 //------------------------------------------------------------------------------
 /**
  * @param <parent> input parent.
@@ -69,15 +71,15 @@ ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent)
  * @note Use impulsivePanel as the parent of all the objects
  */
 //------------------------------------------------------------------------------
-void ManeuverSetupPanel::CreateManeuver(wxWindow *parent )
+void ManeuverSetupPanel::CreateManeuver(wxWindow *parent)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
-    theManeuver = theGuiInterpreter->CreateCommand("Maneuver", "Maneuver1");
- 
-//    theManeuver = theGuiInterpreter->GetCommand(std::string(maneuverName.c_str()));
+    //loj: 2/9/04 theCommand = theGuiInterpreter->CreateCommand("Maneuver", "Maneuver1");
+    
+//    theCommand = theGuiInterpreter->GetCommand(std::string(maneuverName.c_str()));
 
-//    if (theManeuver != NULL)
+//    if (theCommand != NULL)
 //    {
         wxFlexGridSizer *impulsiveSizer = new wxFlexGridSizer(3, 1, 0, 0 );
 //        impulsiveSizer->AddGrowableCol(0);
@@ -210,7 +212,7 @@ void ManeuverSetupPanel::CreateManeuver(wxWindow *parent )
         burnCB->SetSelection(0);
         satCB->SetSelection(0);
 
-//    }  // theManeuver->GetTypeName()
+//    }  // theCommand->GetTypeName()
 //    else
 //    {
        // show error message
@@ -253,12 +255,17 @@ void ManeuverSetupPanel::OnCancel()
 // void OnApply()
 //------------------------------------------------------------------------------
 /**
- * @note Saves the data to theManeuver
+ * @note Saves the data to theCommand
  */
 //------------------------------------------------------------------------------
 void ManeuverSetupPanel::OnApply()
 {
     // will implement later
+    //loj:
+    // LaMont,
+    // Use theCommand->GetParameterID("Spacecraft") and call SetStringParameter()
+    // to set spacecraft name.
+    // Do the same for the "Burn"
 }
 
 //------------------------------------------------------------------------------

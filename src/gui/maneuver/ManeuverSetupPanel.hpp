@@ -19,13 +19,14 @@
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
+#include "Command.hpp"
 #include "Burn.hpp"
 
 class ManeuverSetupPanel : public wxPanel
 {
 public:
     // constructors
-    ManeuverSetupPanel(wxWindow *parent);
+    ManeuverSetupPanel(wxWindow *parent, Command *cmd);
     
 private:
     // member functions
@@ -38,7 +39,7 @@ private:
 
     // member data
     GuiInterpreter *theGuiInterpreter;
-    Command *theManeuver;
+    Command *theCommand;
     Burn *theBurn;
 
     wxButton *okButton;
