@@ -109,8 +109,8 @@ protected:
         ElapsedDaysParamCount
     };
 
-    static const Gmat::ParameterType PARAMETER_TYPE[ElapsedDaysParamCount];
-    static const std::string PARAMETER_TEXT[ElapsedDaysParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount];
+    static const std::string PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount];
     
 private:
 };
@@ -164,8 +164,8 @@ protected:
         ElapsedSecsParamCount
     };
 
-    static const Gmat::ParameterType PARAMETER_TYPE[ElapsedSecsParamCount];
-    static const std::string PARAMETER_TEXT[ElapsedSecsParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount];
+    static const std::string PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount];
     
 private:
 };

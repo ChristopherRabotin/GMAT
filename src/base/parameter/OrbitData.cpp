@@ -21,6 +21,8 @@
 #include "ParameterException.hpp"
 #include "Rvector3.hpp"
 #include "RealUtilities.hpp"
+#include "EphemerisUtil.hpp"
+#include "Spacecraft.hpp"
 
 using namespace GmatMathUtil;
 
@@ -123,7 +125,7 @@ Real OrbitData::GetCartReal(const std::string &str)
         if (str == "CartVy")
             return obj->GetRealParameter("Vy");
         if (str == "CartVz")
-            return obj->GetRealParameter("VZ");
+            return obj->GetRealParameter("Vz");
     }
     return ORBIT_REAL_UNDEFINED;
 }
@@ -146,20 +148,58 @@ Real OrbitData::GetKepReal(const std::string &str)
     }
     else
     {
-        if (str == "KepSMA")
-            return obj->GetRealParameter("SMA");
-        if (str == "KepEcc")
-            return obj->GetRealParameter("ECC");
-        if (str == "KepInc")
-            return obj->GetRealParameter("INC");
-        if (str == "KepRAAN")
-            return obj->GetRealParameter("RAAN");
-        if (str == "KepAOP")
-            return obj->GetRealParameter("AOP");
-        if (str == "KepTA")
-            return obj->GetRealParameter("TA");
-        if (str == "KepMA")
-            return obj->GetRealParameter("MA");
+        //------------------------------------------------------------
+        //loj: 3/23/04 temp code until Spacecraft can compute Keplerian
+        // elements without converting internal CoordRep to Keplerian
+        //------------------------------------------------------------
+       
+        Integer id = obj->GetParameterID("CoordinateRepresentation");
+        std::string elemType = obj->GetStringParameter(id);
+
+        if (elemType == "Keplerian")
+        {
+            if (str == "KepSMA")
+                return obj->GetRealParameter("SMA");
+            if (str == "KepEcc")
+                return obj->GetRealParameter("ECC");
+            if (str == "KepInc")
+                return obj->GetRealParameter("INC");
+            if (str == "KepRAAN")
+                return obj->GetRealParameter("RAAN");
+            if (str == "KepAOP")
+                return obj->GetRealParameter("AOP");
+            if (str == "KepTA")
+                return obj->GetRealParameter("TA");
+            if (str == "KepMA")
+                return obj->GetRealParameter("MA");
+        }
+        else if (elemType == "Cartesian")
+        {
+            Real *state = ((Spacecraft*)obj)->GetState();
+            Real sma, ecc, inc, raan, aop, ma, ta;
+            Real grav = 0.398600448073446198e+06; //loj: temp code for B2
+            
+            ToKeplerian(Rvector3(state[0], state[1], state[2]),
+                        Rvector3(state[3], state[4], state[5]),
+                        grav, sma, ecc, inc, raan, aop, ma);
+            
+            ta = MeanToTrueAnomaly(ma, ecc);
+            
+            if (str == "KepSMA")
+                return sma;
+            if (str == "KepEcc")
+                return ecc;
+            if (str == "KepInc")
+                return inc;
+            if (str == "KepRAAN")
+                return raan;
+            if (str == "KepAOP")
+                return aop;
+            if (str == "KepTA")
+                return ta;
+            if (str == "KepMA")
+                return ma;
+        }
     }
     return ORBIT_REAL_UNDEFINED;
 }

@@ -19,8 +19,11 @@
 #include "gmatdefs.hpp"
 #include "Parameter.hpp"
 #include "ParameterException.hpp"
-#include "Moderator.hpp"
 #include "MessageInterface.hpp"
+
+#if !defined __TEST_PARAM__
+#include "Moderator.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -351,6 +354,9 @@ bool Parameter::SetObject(Gmat::ObjectType objType,
 bool Parameter::AddObject(const std::string &name)
 {
     bool status = false;
+
+#if !defined __TEST_PARAM__
+    
     Moderator *theModerator = Moderator::Instance();
     
     //MessageInterface::ShowMessage("Parameter::AddObject entered: "
@@ -370,7 +376,7 @@ bool Parameter::AddObject(const std::string &name)
             status = true;
         }
     }
-
+#endif
     return status;
 }
 

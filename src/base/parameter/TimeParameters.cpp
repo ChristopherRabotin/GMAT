@@ -205,13 +205,13 @@ bool CurrA1MJD::Evaluate()
 // static data
 //---------------------------------
 const std::string
-ElapsedDays::PARAMETER_TEXT[ElapsedDaysParamCount] =
+ElapsedDays::PARAMETER_TEXT[ElapsedDaysParamCount - RealVarParamCount] =
 {
     "InitialEpoch"
 };
 
 const Gmat::ParameterType
-ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount] =
+ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
 {
     Gmat::REAL_TYPE
 };
@@ -341,8 +341,8 @@ GmatBase* ElapsedDays::GetObject(const std::string &objTypeName)
  */
 //------------------------------------------------------------------------------
 bool ElapsedDays::SetObject(Gmat::ObjectType objType,
-                                 const std::string &objName,
-                                 GmatBase *obj)
+                            const std::string &objName,
+                            GmatBase *obj)
 {
     if (obj != NULL)
         return SetRefObject(objType, objName, obj);
@@ -418,13 +418,19 @@ bool ElapsedDays::Evaluate()
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return ElapsedDays::PARAMETER_TYPE[id - RealVarParamCount];
-   default:
-      return RealVar::GetParameterType(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+        return PARAMETER_TYPE[id - RealVarParamCount];
+    else
+        return RealVar::GetParameterType(id);
+
+    //loj: 3/23/04    
+//     switch (id)
+//     {
+//     case INITIAL_EPOCH:
+//        return ElapsedDays::PARAMETER_TYPE[id - RealVarParamCount];
+//     default:
+//        return RealVar::GetParameterType(id);
+//     }
 }
 
 //------------------------------------------------------------------------------
@@ -436,13 +442,19 @@ Gmat::ParameterType ElapsedDays::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return RealVar::PARAM_TYPE_STRING[GetParameterType(id)];
-   default:
-      return RealVar::GetParameterTypeString(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+    else
+        return RealVar::GetParameterTypeString(id);
+
+    //loj: 3/23/04
+//     switch (id)
+//     {
+//     case INITIAL_EPOCH:
+//        return RealVar::PARAM_TYPE_STRING[GetParameterType(id)];
+//     default:
+//        return RealVar::GetParameterTypeString(id);
+//     }
 }
 
 //------------------------------------------------------------------------------
@@ -454,13 +466,19 @@ std::string ElapsedDays::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedDays::GetParameterText(const Integer id)
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return ElapsedDays::PARAMETER_TEXT[id - RealVarParamCount];
-   default:
-      return RealVar::GetParameterText(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedDaysParamCount)
+        return PARAMETER_TEXT[id - RealVarParamCount];
+    else
+        return RealVar::GetParameterText(id);
+
+    //loj: 3/23/04
+//     switch (id)
+//     {
+//     case INITIAL_EPOCH:
+//        return ElapsedDays::PARAMETER_TEXT[id - RealVarParamCount];
+//     default:
+//        return RealVar::GetParameterText(id);
+//     }
 }
 
 //------------------------------------------------------------------------------
@@ -472,11 +490,18 @@ std::string ElapsedDays::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedDays::GetParameterID(const std::string &str)
 {
-   for (int i=0; i<ElapsedDaysParamCount; i++)
-   {
-      if (str == ElapsedDays::PARAMETER_TEXT[i])
-          return i + RealVarParamCount;
-   }
+    for (int i = RealVarParamCount; i < ElapsedDaysParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - RealVarParamCount])
+            return i;
+    }
+
+    //loj: 3/23/04
+//     for (int i=0; i<ElapsedDaysParamCount; i++)
+//     {
+//        if (str == ElapsedDays::PARAMETER_TEXT[i])
+//            return i + RealVarParamCount;
+//     }
    
    return RealVar::GetParameterID(str);
 }
@@ -561,13 +586,13 @@ Real ElapsedDays::SetRealParameter(const std::string &label, const Real value)
 // static data
 //---------------------------------
 const std::string
-ElapsedSecs::PARAMETER_TEXT[ElapsedSecsParamCount] =
+ElapsedSecs::PARAMETER_TEXT[ElapsedSecsParamCount - RealVarParamCount] =
 {
     "InitialEpoch"
 };
 
 const Gmat::ParameterType
-ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount] =
+ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
 {
     Gmat::REAL_TYPE
 };
@@ -775,13 +800,19 @@ bool ElapsedSecs::Evaluate()
 //------------------------------------------------------------------------------
 Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return ElapsedSecs::PARAMETER_TYPE[id - RealVarParamCount];
-   default:
-      return RealVar::GetParameterType(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+        return PARAMETER_TYPE[id - RealVarParamCount];
+    else
+        return RealVar::GetParameterType(id);
+
+    //loj: 3/23/04
+//      switch (id)
+//      {
+//      case INITIAL_EPOCH:
+//          return ElapsedSecs::PARAMETER_TYPE[id - RealVarParamCount];
+//      default:
+//          return RealVar::GetParameterType(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -793,13 +824,19 @@ Gmat::ParameterType ElapsedSecs::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return RealVar::PARAM_TYPE_STRING[GetParameterType(id)];
-   default:
-      return RealVar::GetParameterTypeString(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+    else
+        return RealVar::GetParameterTypeString(id);
+
+    //loj: 3/23/04
+//      switch (id)
+//      {
+//      case INITIAL_EPOCH:
+//          return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - RealVarParamCount)];
+//      default:
+//          return RealVar::GetParameterTypeString(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -811,13 +848,19 @@ std::string ElapsedSecs::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ElapsedSecs::GetParameterText(const Integer id)
 {
-   switch (id)
-   {
-   case INITIAL_EPOCH:
-      return ElapsedSecs::PARAMETER_TEXT[id - RealVarParamCount];
-   default:
-      return RealVar::GetParameterText(id);
-   }
+    if (id >= RealVarParamCount && id < ElapsedSecsParamCount)
+        return PARAMETER_TEXT[id - RealVarParamCount];
+    else
+        return RealVar::GetParameterText(id);
+
+    //loj: 3/23/04
+//      switch (id)
+//      {
+//      case INITIAL_EPOCH:
+//          return ElapsedSecs::PARAMETER_TEXT[id - RealVarParamCount];
+//      default:
+//          return RealVar::GetParameterText(id);
+//      }
 }
 
 //------------------------------------------------------------------------------
@@ -829,13 +872,20 @@ std::string ElapsedSecs::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer ElapsedSecs::GetParameterID(const std::string &str)
 {
-   for (int i=0; i<ElapsedSecsParamCount; i++)
-   {
-      if (str == ElapsedSecs::PARAMETER_TEXT[i])
-          return i + RealVarParamCount;
-   }
+    for (int i = RealVarParamCount; i < ElapsedSecsParamCount; i++)
+    {
+        if (str == PARAMETER_TEXT[i - RealVarParamCount])
+            return i;
+    }
+
+    //loj: 3/23/04
+//      for (int i=0; i<ElapsedSecsParamCount; i++)
+//      {
+//          if (str == ElapsedSecs::PARAMETER_TEXT[i])
+//              return i + RealVarParamCount;
+//      }
    
-   return RealVar::GetParameterID(str);
+    return RealVar::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------

@@ -24,7 +24,7 @@
 // static data
 //---------------------------------
 const std::string
-Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount] =
+Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount] =
 {
     "Param1",
     "Param2",
@@ -35,7 +35,7 @@ Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount] =
 }; 
 
 const Gmat::ParameterType
-Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount] =
+Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
 {
     Gmat::REAL_TYPE,
     Gmat::REAL_TYPE,
@@ -203,7 +203,7 @@ const std::string* Rvec6Var::GetParameterList() const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Rvec6Var::GetParameterType(const Integer id) const
 {
-    if (id >= PARAM_1 && id <= PARAM_6)
+    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
         return PARAMETER_TYPE[id - ParameterParamCount];
     else
         return Parameter::GetParameterType(id);
@@ -214,8 +214,8 @@ Gmat::ParameterType Rvec6Var::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Rvec6Var::GetParameterTypeString(const Integer id) const
 {
-    if (id >= PARAM_1 && id <= PARAM_6)
-        return PARAM_TYPE_STRING[GetParameterType(id)];
+    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
+        return PARAM_TYPE_STRING[GetParameterType(id - ParameterParamCount)];
     else
         return Parameter::GetParameterTypeString(id);
 }
@@ -225,7 +225,7 @@ std::string Rvec6Var::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Rvec6Var::GetParameterText(const Integer id)
 {
-    if (id >= PARAM_1 && id <= PARAM_6)
+    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
         return PARAMETER_TEXT[id - ParameterParamCount];
     else
         return Parameter::GetParameterText(id);
@@ -236,10 +236,10 @@ std::string Rvec6Var::GetParameterText(const Integer id)
 //------------------------------------------------------------------------------
 Integer Rvec6Var::GetParameterID(const std::string str)
 {
-    for (int i=0; i<Rvec6VarParamCount; i++)
+    for (int i=ParameterParamCount; i<Rvec6VarParamCount; i++)
     {
         if (str == PARAMETER_TEXT[i - ParameterParamCount])
-            return i + ParameterParamCount;
+            return i;
     }
    
     return Parameter::GetParameterID(str);
@@ -250,8 +250,8 @@ Integer Rvec6Var::GetParameterID(const std::string str)
 //------------------------------------------------------------------------------
 Real Rvec6Var::GetRealParameter(const Integer id)
 {
-    if (id >= PARAM_1 && id <= PARAM_6)
-        return mValue(id);
+    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
+        return mValue(id - ParameterParamCount);
     else
         return Parameter::GetRealParameter(id);
 }
@@ -261,9 +261,9 @@ Real Rvec6Var::GetRealParameter(const Integer id)
 //------------------------------------------------------------------------------
 Real Rvec6Var::SetRealParameter(const Integer id, const Real value)
 {
-    if (id >= PARAM_1 && id <= PARAM_6)
+    if (id >= ParameterParamCount && id <= Rvec6VarParamCount)
     {
-        mValue(id) = value;
+        mValue(id - ParameterParamCount) = value;
         return value;
     }
     else

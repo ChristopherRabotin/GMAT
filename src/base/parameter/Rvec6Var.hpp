@@ -70,8 +70,8 @@ protected:
 
     Rvector6 mValue;
         
-    static const Gmat::ParameterType PARAMETER_TYPE[Rvec6VarParamCount];
-    static const std::string PARAMETER_TEXT[Rvec6VarParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
+    static const std::string PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
     
 private:
 

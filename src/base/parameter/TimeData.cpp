@@ -44,6 +44,7 @@ TimeData::TimeData()
     : RefData()
 {
     mInitialEpoch = 0.0;
+    mIsInitialEpochSet = false;
 }
 
 //------------------------------------------------------------------------------
@@ -91,6 +92,18 @@ TimeData::~TimeData()
 }
 
 //------------------------------------------------------------------------------
+// bool IsInitialEpochSet()
+//------------------------------------------------------------------------------
+/**
+ * @return true if initial epoch is set
+ */
+//------------------------------------------------------------------------------
+bool TimeData::IsInitialEpochSet()
+{
+    return mIsInitialEpochSet;
+}
+
+//------------------------------------------------------------------------------
 // Real GetInitialEpoch()
 //------------------------------------------------------------------------------
 /**
@@ -112,6 +125,9 @@ Real TimeData::GetInitialEpoch()
 void TimeData::SetInitialEpoch(const Real &initialEpoch)
 {
     mInitialEpoch = initialEpoch;
+    mIsInitialEpochSet = true;
+    MessageInterface::ShowMessage("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
+                                  mInitialEpoch);
 }
 
 //------------------------------------------------------------------------------
@@ -189,18 +205,31 @@ const std::string* TimeData::GetValidObjectList() const
 //------------------------------------------------------------------------------
 bool TimeData::ValidateRefObjects(GmatBase *param)
 {
-    std::string paramType = param->GetTypeName();
+    //loj: 3/23/04 removed checking for type
+    bool status = false;
     
-    if (paramType == "ElapsedDays" ||
-        paramType == "CurrA1MJD")
+    if (HasObject(VALID_OBJECT_LIST[SPACECRAFT]))
     {
-        if (HasObject(VALID_OBJECT_LIST[SPACECRAFT]))
-            return true;
+        if (mIsInitialEpochSet)
+        {
+            status = true;
+        }
         else
-            return false;
+        {
+            Real rval = FindObject(VALID_OBJECT_LIST[SPACECRAFT])->
+                GetRealParameter("Epoch");
+
+            if (rval != GmatBase::REAL_PARAMETER_UNDEFINED)
+            {
+                mInitialEpoch =
+                    FindObject(VALID_OBJECT_LIST[SPACECRAFT])->GetRealParameter("Epoch");
+                mIsInitialEpochSet = true;
+                status = true;
+            }
+        }
     }
-    
-    return false;
+
+    return status;
 }
 
 

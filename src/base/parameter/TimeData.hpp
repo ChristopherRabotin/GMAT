@@ -32,6 +32,7 @@ public:
     TimeData& operator= (const TimeData& right);
     virtual ~TimeData();
 
+    bool IsInitialEpochSet();
     Real GetInitialEpoch();
     void SetInitialEpoch(const Real &initialEpoch);
     
@@ -52,6 +53,7 @@ protected:
     virtual bool IsValidObject(GmatBase *obj);
 
     Real mInitialEpoch;
+    bool mIsInitialEpochSet;
     
     const static Real MJD_OFFSET = 2430000.0; //loj: check the value
     const static Real TIME_REAL_UNDEFINED = -9876543210.1234;

@@ -949,7 +949,7 @@ bool KepRAAN::Validate()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-    mValue = GetKepReal("KepRaan");    
+    mValue = GetKepReal("KepRAAN");    
     
     if (mValue == ORBIT_REAL_UNDEFINED)
         return false;
@@ -1136,7 +1136,7 @@ bool KepTA::Validate()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-    mValue = GetKepReal("KepTa");    
+    mValue = GetKepReal("KepTA");    
     
     if (mValue == ORBIT_REAL_UNDEFINED)
         return false;
