@@ -146,14 +146,17 @@ void PropagateCommandPanel::Initialize()
     {
         tempProp[i].propName = wxT(propSetupName.c_str());
         tempProp[i].propSetupPtr = theGuiInterpreter->GetPropSetup(propSetupName);
-        
-        for (int j=0; j<numOfSC-1; j++)
+
+        if (numOfSC > 0)
         {
-            tempProp[i].scNames += scList[j].c_str();
-            tempProp[i].scNames += ",";
-        }
+            for (int j=0; j<numOfSC-1; j++)
+            {
+                tempProp[i].scNames += scList[j].c_str();
+                tempProp[i].scNames += ",";
+            }
     
-        tempProp[i].scNames += scList[numOfSC-1].c_str();
+            tempProp[i].scNames += scList[numOfSC-1].c_str();
+        }
     }
 
     //----------------------------------
@@ -185,7 +188,6 @@ void PropagateCommandPanel::Initialize()
             tempStopCond[i].desc = str;
         }
     }
-   
     /*  Waw:
         Display all the stop. cond. elements 
         Methods for this are currently not avaiable.
