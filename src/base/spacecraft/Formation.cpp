@@ -21,6 +21,12 @@
 #include "Formation.hpp"
 #include <algorithm>          // for find()
 
+// #define DEBUG_FORMATION_ACTIONS
+
+#ifdef DEBUG_FORMATION_ACTIONS
+   #include "MessageInterface.hpp"
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -32,17 +38,18 @@ Formation::PARAMETER_TEXT[FormationParamCount - SpaceObjectParamCount] =
    "Clear"
 };
 
+
 const Gmat::ParameterType
 Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
-   Gmat::UNKNOWN_PARAMETER_TYPE,     // Don't write the "remove" parms
+   Gmat::STRING_TYPE,     // todo: Don't write the "remove" parms
    Gmat::BOOLEAN_TYPE
 };
 
 
 Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr, 
-               const std::string &nomme) :
+                     const std::string &nomme) :
    SpaceObject    (typeId, typeStr, nomme),
    dimension      (0)
 {
@@ -176,11 +183,14 @@ bool Formation::GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Formation::SetBooleanParameter(const Integer id, const bool value)
 {
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("Formation::SetBooleanParameter called with id = %d\n", id);
+   #endif
+ 
    switch (id)
    {
    case CLEAR_NAMES:
-      componentNames.clear();
-      return true;
+      return ClearSpacecraftList();
    default:
       return SpaceObject::SetBooleanParameter(id, value);
    }
@@ -193,6 +203,10 @@ bool Formation::SetBooleanParameter(const Integer id, const bool value)
 bool Formation::SetBooleanParameter(const std::string &label,
                                  const bool value)
 {
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("Formation::SetBooleanParameter called with label = %s\n", label.c_str());
+   #endif
+
    return SetBooleanParameter(GetParameterID(label), value);
 }
 
@@ -220,7 +234,20 @@ bool Formation::SetStringParameter(const Integer id, const std::string &value)
               componentNames.end())
          return false;
       componentNames.push_back(value);
+
+      #ifdef DEBUG_FORMATION_ACTIONS
+         MessageInterface::ShowMessage("%s%s%s\n",
+            "Formation \"", instanceName.c_str(),
+            "\" now consists of these spacecraft names:");
+         for (StringArray::iterator i = componentNames.begin(); 
+              i != componentNames.end(); ++i)
+            MessageInterface::ShowMessage("    \"%s\"\n", i->c_str());
+      #endif
+
       return true;
+   }
+   if (id == REMOVED_SPACECRAFT) {
+      return RemoveSpacecraft(value);
    }
    return SpaceObject::SetStringParameter(id, value);
 }
@@ -258,8 +285,30 @@ bool Formation::SetStringParameter(const Integer id, const std::string &value,
    if (id == ADDED_SPACECRAFT) {
       return false;
    }
+   if (id == REMOVED_SPACECRAFT) {
+      return RemoveSpacecraft(value);
+   }
    return SpaceObject::SetStringParameter(id, value, index);
 }
+
+
+std::string  Formation::GetStringParameter(const Integer id) const
+{
+   if (id == REMOVED_SPACECRAFT) {
+      return "";
+   }
+   return SpaceObject::GetStringParameter(id);
+}
+
+std::string  Formation::GetStringParameter(const Integer id,
+                                           const Integer index) const
+{
+   if (id == REMOVED_SPACECRAFT) {
+      return "";
+   }
+   return SpaceObject::GetStringParameter(id, index);
+}
+
 
 
 const StringArray& Formation::GetStringArrayParameter(const Integer id) const
@@ -399,6 +448,23 @@ void Formation::BuildState()
        j += ps->GetDimension();
    }
    
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("%s%s%s\n",
+         "In BuildState, Formation \"", instanceName.c_str(),
+         "\" consists of these spacecraft names:");
+      for (StringArray::iterator i = componentNames.begin(); 
+           i != componentNames.end(); ++i)
+         MessageInterface::ShowMessage("    \"%s\"\n", i->c_str());
+  
+      MessageInterface::ShowMessage("%s%s%s\n",
+         "In BuildState, Formation \"", instanceName.c_str(),
+         "\" consists of these spacecraft:");
+      for (std::vector<SpaceObject *>::iterator j = components.begin(); 
+           j < components.end(); ++j) {
+         MessageInterface::ShowMessage("    \"%s\"\n", (*j)->GetName().c_str());
+      }
+   #endif
+   
    if (!state.SetState(data, dimension))
       throw SpaceObjectException("Error building Formation state");
 }
@@ -417,4 +483,108 @@ void Formation::UpdateElements()
        if ((*i)->GetType() == Gmat::FORMATION)
           ((Formation*)(*i))->UpdateElements();
    }
+}
+
+
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool Formation::TakeAction(const std::string &action,
+                           const std::string &actionData)
+{
+   if (action == "Clear")
+   {
+      return ClearSpacecraftList();
+   }
+   else if (action == "Remove")
+   {
+      return RemoveSpacecraft(actionData);
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ClearSpacecraftList()
+//------------------------------------------------------------------------------
+bool Formation::ClearSpacecraftList()
+{
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("Formation::ClearSpacecraftList() called\n");
+   #endif
+   componentNames.clear();
+   components.clear();
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool RemoveSpacecraft(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Removes spacecraft from the spacecraft list
+ *
+ * @param <name> spacecraft name to be removed from the list
+ *
+ * @return true if spacecraft was removed from the list, false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool Formation::RemoveSpacecraft(const std::string &name)
+{
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("%s%s\"\n",
+         "Formation::RemoveSpacecraft called to remove \"", name.c_str());
+   #endif
+
+   StringArray::iterator scPos = 
+      find(componentNames.begin(), componentNames.end(), name);
+   
+   if (scPos != componentNames.end())
+   {
+      componentNames.erase(scPos);
+
+      // Now remove the pointer from the component list
+      std::vector<SpaceObject *>::iterator j;
+      SpaceObject *current;
+      for (j = components.begin(); j < components.end(); ++j) {
+         current = *j;
+         if (current->GetName() == name) {
+            components.erase(j);
+            break;
+         }
+      }
+
+      #ifdef DEBUG_FORMATION_ACTIONS
+         MessageInterface::ShowMessage("%s%s%s\n",
+            "Formation \"", instanceName.c_str(),
+            "\" now consists of these spacecraft names:");
+         for (StringArray::iterator i = componentNames.begin(); 
+              i != componentNames.end(); ++i)
+            MessageInterface::ShowMessage("    \"%s\"\n", i->c_str());
+     
+         MessageInterface::ShowMessage("%s%s%s\n",
+            "Formation \"", instanceName.c_str(),
+            "\" now consists of these spacecraft:");
+         for (j = components.begin(); j < components.end(); ++j) {
+            MessageInterface::ShowMessage("    \"%s\"\n", (*j)->GetName().c_str());
+         }
+      #endif
+
+      return true;
+   }
+
+   #ifdef DEBUG_FORMATION_ACTIONS
+      MessageInterface::ShowMessage("%s%s\"\n",
+         "Formation::RemoveSpacecraft Did not find \"", name.c_str());
+   #endif
+
+   return false;
 }

@@ -47,9 +47,9 @@ public:
    virtual bool SetBooleanParameter(const std::string &label,
                                     const bool value);
    
-//   virtual std::string GetStringParameter(const Integer id) const;
-//   virtual std::string GetStringParameter(const Integer id,
-//                                          const Integer index) const;
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const Integer id,
+                                          const Integer index) const;
    virtual Real         SetRealParameter(const Integer id, const Real value);
    virtual Real         SetRealParameter(const std::string &label, 
                                          const Real value);
@@ -86,6 +86,8 @@ public:
 
    virtual void         BuildState();
    virtual void         UpdateElements();
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
 
 protected:
    /// List of the object names used in the formation
@@ -111,6 +113,9 @@ protected:
    /// Array of parameter types
    static const Gmat::ParameterType PARAMETER_TYPE[FormationParamCount - 
                                                    SpaceObjectParamCount];
+                                                   
+   bool                 ClearSpacecraftList();
+   bool                 RemoveSpacecraft(const std::string &name);
 };
 
 #endif // FORMATION_HPP

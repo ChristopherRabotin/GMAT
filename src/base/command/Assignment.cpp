@@ -165,6 +165,16 @@ bool Assignment::Execute(void)
             retval = true;
             break;
             
+        case Gmat::BOOLEAN_TYPE:
+            bool tf;
+            if (value == "true")
+               tf = true;
+            else
+               tf = false;
+            parmOwner->SetBooleanParameter(parmID, tf);
+            retval = true;
+            break;
+
         default:
             break;
     }
