@@ -48,6 +48,7 @@
 class GMAT_API RungeKutta89 : public RungeKutta
 {
 public:
+	RungeKutta89(void);
     RungeKutta89(Gmat::ObjectType typeId, const std::string &typeStr,
 				 const std::string &nomme = "");
     virtual ~RungeKutta89(void);
@@ -62,4 +63,5 @@ protected:
 };
 
 #endif // RungeKutta89_hpp
+
 

@@ -59,6 +59,7 @@
 class GMAT_API ForceModel : public PhysicalModel
 {
 public:
+    ForceModel(void);
     ForceModel(Gmat::ObjectType typeId, const std::string &typeStr,
 			   const std::string &nomme = "");
     virtual ~ForceModel(void);
@@ -92,3 +93,4 @@ protected:
 };
 
 #endif  // ForceModel_hpp
+

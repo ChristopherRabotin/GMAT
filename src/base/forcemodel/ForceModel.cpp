@@ -54,7 +54,23 @@
 // ForceModel::ForceModel(void)
 //------------------------------------------------------------------------------
 /**
- * The default constructor
+ * The constructor
+ */
+//------------------------------------------------------------------------------
+ForceModel::ForceModel(void) :
+PhysicalModel     (NULL, NULL, NULL),
+derivatives       (NULL),
+estimationMethod  (2.0)
+{
+    dimension = 6;
+}
+
+//------------------------------------------------------------------------------
+// ForceModel::ForceModel(Gmat::ObjectType id, const std::string &typeStr,
+//                        const std::string &nomme))
+//------------------------------------------------------------------------------
+/**
+ * The constructor
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(Gmat::ObjectType id, const std::string &typeStr,
@@ -382,3 +398,4 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
 
     return retval;
 }
+

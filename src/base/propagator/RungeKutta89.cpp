@@ -53,6 +53,19 @@
  * The default constructor
  */
 //------------------------------------------------------------------------------
+RungeKutta89::RungeKutta89(void) :
+RungeKutta (16, 9, NULL, NULL, NULL)
+{
+}
+
+//------------------------------------------------------------------------------
+// RungeKutta89::RungeKutta89(Gmat::ObjectType id, const std::string &typeStr,
+//                            const std::string &nomme)
+//------------------------------------------------------------------------------
+/**
+ * The constructor
+ */
+//------------------------------------------------------------------------------
 RungeKutta89::RungeKutta89(Gmat::ObjectType id, const std::string &typeStr,
 						   const std::string &nomme) :
     RungeKutta (16, 9, id, typeStr, nomme)
@@ -352,3 +365,4 @@ void RungeKutta89::SetCoefficients(void)
     ee[14] = 9.0 / 25.0;
     ee[15] = 233.0 / 4200.0;
 }
+
