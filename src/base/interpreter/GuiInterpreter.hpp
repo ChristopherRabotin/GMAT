@@ -51,7 +51,7 @@ public:
     StringArray GetListOfFactoryItems(Gmat::ObjectType type);
 
     //----- config
-    StringArray GetListOfConfiguredItems(Gmat::ObjectType type);
+    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
     bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
     // Spacecraft

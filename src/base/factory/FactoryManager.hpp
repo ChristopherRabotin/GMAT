@@ -39,6 +39,7 @@
 //#include "Solver.hpp"
 #include "Subscriber.hpp"
 #include "Command.hpp"
+#include "Burn.hpp"
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -87,7 +88,9 @@ public:
                                            std::string fileName = "");
     Command *             CreateCommand(std::string ofType,
                                         std::string withName = "");
-
+    Burn *                CreateBurn(std::string ofType,
+                                     std::string withName = "");
+    
     // method to return a list of strings representing the objects of the input
     // type that may be created in the system
     StringArray            GetListOfItems(Gmat::ObjectType byType);// const;
@@ -107,6 +110,7 @@ public:
 //    StringArray            GetListofSolver(void) const;
     StringArray            GetListOfSubscriber(void);// const;
     StringArray            GetListOfCommand(void);// const;
+    StringArray            GetListOfBurn(void);// const;
 
     // class destructor
     ~FactoryManager();

@@ -368,6 +368,25 @@ Command* FactoryManager::CreateCommand(std::string ofType, std::string withName)
 }
 
 //------------------------------------------------------------------------------
+//  Burn* CreateBurn(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type Burn, with the name withName.
+ *
+ * @param <withName> name of the new Burn object.
+ *
+ * @return pointer to the newly-created Burn object
+ */
+//------------------------------------------------------------------------------
+Burn* FactoryManager::CreateBurn(std::string ofType, std::string withName)
+{
+   Factory* f = FindFactory(Gmat::BURN, ofType);
+   if (f != NULL)
+      return f->CreateBurn(ofType, withName);
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
 // StringArray GetListOfItems(Gmat::ObjectType byType) const;
 //------------------------------------------------------------------------------
 /**
@@ -561,6 +580,20 @@ StringArray FactoryManager::GetListOfSubscriber(void)// const
  */
 //------------------------------------------------------------------------------
 StringArray FactoryManager::GetListOfCommand(void)// const
+{
+   return GetList(Gmat::COMMAND);
+}
+
+//------------------------------------------------------------------------------
+// StringArray GetListOfBurn(void) const;
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type Burn that can be created.
+ *
+ * @return list of creatable items of type Burn.
+ */
+//------------------------------------------------------------------------------
+StringArray FactoryManager::GetListOfBurn(void)// const
 {
    return GetList(Gmat::COMMAND);
 }

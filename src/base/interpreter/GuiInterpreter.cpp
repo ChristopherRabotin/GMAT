@@ -104,7 +104,7 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 
 //----- configuration
 //------------------------------------------------------------------------------
-// StringArray GetListOfConfiguredItems(Gmat::ObjectType type)
+// StringArray& GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -114,7 +114,7 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
  * @return array of configured item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
+StringArray& GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
     return theModerator->GetListOfConfiguredItems(type);
 }

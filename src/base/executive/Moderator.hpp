@@ -28,6 +28,8 @@
 #include "ConfigManager.hpp"
 #include "Publisher.hpp"
 // core
+#include "Burn.hpp"
+#include "Command.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
@@ -37,9 +39,9 @@
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
-#include "Command.hpp"
 #include "Subscriber.hpp"
 // factories
+#include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
 #include "ParameterFactory.hpp"
@@ -75,7 +77,7 @@ public:
     StringArray GetListOfFactoryItems(Gmat::ObjectType type);
 
     //----- configuration
-    StringArray GetListOfConfiguredItems(Gmat::ObjectType type);
+    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
     bool RemoveConfiguredItem(Gmat::ObjectType, const std::string &name);
 
     // Spacecraft
@@ -182,6 +184,7 @@ private:
     static ScriptInterpreter *theScriptInterpreter;
 
     Publisher *thePublisher;
+    BurnFactory *theBurnFactory;
     CommandFactory *theCommandFactory;
     ForceModelFactory *theForceModelFactory;
     ParameterFactory *theParameterFactory;

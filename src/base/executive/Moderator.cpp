@@ -46,6 +46,7 @@
 #include "SpacecraftFactory.hpp"
 #include "StopConditionFactory.hpp"
 #include "SubscriberFactory.hpp"
+#include "BurnFactory.hpp"
 
 #include "BaseException.hpp"
 #include "NoOp.hpp"
@@ -69,6 +70,7 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 {
     "Spacecraft",
     "GroundStation",
+    "Burn",
     "Command",
     "Propagator",
     "ForceModel",
@@ -116,6 +118,7 @@ bool Moderator::Initialize()
         thePublisher = Publisher::Instance();
 
         // Create factories
+        theBurnFactory = new BurnFactory();
         theCommandFactory = new CommandFactory();
         theForceModelFactory = new ForceModelFactory();
         theParameterFactory = new ParameterFactory();
@@ -127,6 +130,7 @@ bool Moderator::Initialize()
         theSubscriberFactory = new SubscriberFactory();
 
         // Register factories
+        theFactoryManager->RegisterFactory(theBurnFactory);
         theFactoryManager->RegisterFactory(theCommandFactory);
         theFactoryManager->RegisterFactory(theForceModelFactory);
         theFactoryManager->RegisterFactory(theParameterFactory);
@@ -248,7 +252,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 
 //----- configuration
 //------------------------------------------------------------------------------
-// StringArray GetListOfConfiguredItems(Gmat::ObjectType type)
+// StringArray& GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -258,7 +262,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
  * @return array of configured item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
+StringArray& Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
     return theConfigManager->GetListOfItems(type);
 }
@@ -408,10 +412,8 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
-    //loj: need to add CreateBurn to FactoryManager
-    //Burn *burn = theFactoryManager->CreateBurn(type, name);
-    //return burn;
-    return NULL;
+    Burn *burn = theFactoryManager->CreateBurn(type, name);
+    return burn;
 }
 
 //------------------------------------------------------------------------------
@@ -427,8 +429,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
 //------------------------------------------------------------------------------
 Burn* Moderator::GetBurn(const std::string &name)
 {
-    //loj: need to add GetBurn to FactoryManager
-    //return theConfigManager->GetBurn(name);
+    return theConfigManager->GetBurn(name);
     return NULL;
 }
 

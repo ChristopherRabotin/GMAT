@@ -39,60 +39,60 @@
 #include "Propagator.hpp"
 #include "Parameter.hpp"
 #include "Command.hpp"
-
+#include "Burn.hpp"
 
 /**
  * Configuration Manager Stub -- a hack until the real code is ready
  */
 class ConfigManager
 {
-	public:
-        static ConfigManager*   Instance(void);
+public:
+    static ConfigManager*   Instance(void);
         
-        void                AddForceModel(ForceModel *fm);
-        void                AddSubscriber(Subscriber *subs);
-        void                AddSolarSystem(SolarSystem *solarSys);
-        void                AddPropSetup(PropSetup *propSetup);
-        void                AddSpacecraft(Spacecraft *sc);
-        void                AddStopCondition(StopCondition* stopCond);
-        void                AddParameter(Parameter* parameter);
-
-        bool                SetSolarSystemInUse(const std::string &name);
-        StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
-        bool                RemoveItem(Gmat::ObjectType type,
-                                       const std::string &name);
+    void                AddForceModel(ForceModel *fm);
+    void                AddSubscriber(Subscriber *subs);
+    void                AddSolarSystem(SolarSystem *solarSys);
+    void                AddPropSetup(PropSetup *propSetup);
+    void                AddSpacecraft(Spacecraft *sc);
+    void                AddStopCondition(StopCondition* stopCond);
+    void                AddParameter(Parameter* parameter);
+    void                AddBurn(Burn* burn);
+    
+    bool                SetSolarSystemInUse(const std::string &name);
+    StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
+    bool                RemoveItem(Gmat::ObjectType type,
+                                   const std::string &name);
         
-        ForceModel*         GetForceModel(const std::string &name);
-        Spacecraft*         GetSpacecraft(const std::string &name);
-        PropSetup*          GetPropSetup(const std::string &name);
-        Subscriber*         GetSubscriber(const std::string &name);
-        SolarSystem*        GetDefaultSolarSystem();
-        SolarSystem*        GetSolarSystemInUse();
-        StopCondition*      GetStopCondition(const std::string &name);
-        Parameter*          GetParameter(const std::string &name);
+    ForceModel*         GetForceModel(const std::string &name);
+    Spacecraft*         GetSpacecraft(const std::string &name);
+    PropSetup*          GetPropSetup(const std::string &name);
+    Subscriber*         GetSubscriber(const std::string &name);
+    SolarSystem*        GetDefaultSolarSystem();
+    SolarSystem*        GetSolarSystemInUse();
+    StopCondition*      GetStopCondition(const std::string &name);
+    Parameter*          GetParameter(const std::string &name);
+    Burn*               GetBurn(const std::string &name);
         
-        // Methods I'm not sure we need
-        void                AddCelestialBody(CelestialBody* body);
-        void                AddPhysicalModel(PhysicalModel *pm);
-        void                AddPropagator(Propagator *prop);
+    // Methods I'm not sure we need
+    void                AddCelestialBody(CelestialBody* body);
+    void                AddPhysicalModel(PhysicalModel *pm);
+    void                AddPropagator(Propagator *prop);
                                              
-        CelestialBody*      GetCelestialBody(const std::string &name);
-        PhysicalModel*      GetPhysicalModel(const std::string &name);
-        Propagator*         GetPropagator(const std::string &name);
+    CelestialBody*      GetCelestialBody(const std::string &name);
+    PhysicalModel*      GetPhysicalModel(const std::string &name);
+    Propagator*         GetPropagator(const std::string &name);
         
-        void                AddCommand(Command *cmd);
-        Command*            GetCommand(const std::string name);
-    private:
-        /// The singleton instance
-        static ConfigManager*   theConfigManager;
-		ConfigManager();
-		~ConfigManager();
-		
-        std::vector<GmatBase*>
-                            objects;
-        StringArray         listOfItems;
-        std::map<std::string, GmatBase *>
-                            mapping;
+    void                AddCommand(Command *cmd);
+    Command*            GetCommand(const std::string name);
+private:
+    /// The singleton instance
+    static ConfigManager*   theConfigManager;
+    ConfigManager();
+    ~ConfigManager();
+                
+    std::vector<GmatBase*>  objects;
+    StringArray  listOfItems;
+    std::map<std::string, GmatBase *>  mapping;
 };
 
 
