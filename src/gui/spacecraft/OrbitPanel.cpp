@@ -390,7 +390,7 @@ void OrbitPanel::LoadData()
       }
 
 //    dateComboBox->SetSelection(2);
-    std::string dateFormat = theSpacecraft->GetStringParameter(11);
+    std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
     dateComboBox->SetValue(wxT(dateFormat.c_str()));
 
 
@@ -597,7 +597,8 @@ void OrbitPanel::SaveData()
 //    theSpacecraft->SetStringParameter(8, std::string (stateStr.c_str()));
     
     wxString dateFormatStr = dateComboBox->GetStringSelection();
-    theSpacecraft->SetStringParameter(11, std::string (dateFormatStr.c_str()));
+//    theSpacecraft->SetStringParameter(11, std::string (dateFormatStr.c_str()));
+    theSpacecraft->SetDisplayDateFormat(dateFormatStr.c_str());
 
     wxString epochStr = epochValue->GetValue();
     wxString el1 = textCtrl1->GetValue();
