@@ -21,6 +21,8 @@
 
 #include "Subscriber.hpp"
 #include "SolarSystem.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordinateConverter.hpp"
 #include <map>
 
 class OpenGlPlot : public Subscriber
@@ -29,7 +31,7 @@ public:
    OpenGlPlot(const std::string &name);
    OpenGlPlot(const OpenGlPlot &ogl);
    virtual ~OpenGlPlot(void);
-   
+
    // methods inherited from Subscriber
    virtual bool Initialize();
    
@@ -39,7 +41,7 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-   virtual bool SetName(const std::string &who); //loj: 11/19/04 - added
+   virtual bool SetName(const std::string &who);
    
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
@@ -85,13 +87,13 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
-   //loj: 12/14/04 added
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-
-   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
 
 protected:
    
@@ -102,12 +104,17 @@ protected:
                               const std::string &label);
 
    SolarSystem *mSolarSystem;
+   CoordinateSystem *mOutCoordSystem;
+   CoordinateConverter mCoordConverter;
    
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
    bool mDrawTarget;
    bool mOverlapPlot;
+   bool mNeedCoordSysConversion;
+   
    std::string mOldName;
+   std::string mCoordSysName; //loj: 1/27/05 Added
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -124,7 +131,7 @@ protected:
    RealArray mScZArray;
    UnsignedIntArray mOrbitColorArray;
    UnsignedIntArray mTargetColorArray;
-
+   
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
    
@@ -136,6 +143,7 @@ protected:
       EQUATORIAL_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
+      COORD_SYSTEM,
       OVERLAP_PLOT,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
@@ -146,7 +154,7 @@ protected:
       PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount];
    static const std::string
       PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount];
-
+   
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);
    
