@@ -21,7 +21,6 @@
 #define LeapSecsFileReader_hpp
 
 #include "gmatdefs.hpp"
-#include "A1Mjd.hpp"  
 #include "TimeTypes.hpp"
 
 class LeapSecsFileReader

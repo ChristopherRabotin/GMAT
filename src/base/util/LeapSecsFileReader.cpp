@@ -12,6 +12,10 @@
 /**
  * Reads time coefficent file, creates a table of coefficients and converts
  * to the utc.
+ *
+ * File found at : ftp://maia.usno.navy.mil/ser7/tai-utc.dat
+ *
+ * @note The MJD-JD offset used is 2400000.5
  */
 //------------------------------------------------------------------------------
 
@@ -162,5 +166,6 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
       return 0;
    }
    else
+
       return 0;
 }
