@@ -37,7 +37,8 @@ private:
    wxWindow *parent;
    wxList *curPages;
    wxScrolledWindow *panel;
-
+   wxSize theSize;
+    
    DECLARE_EVENT_TABLE();
 };
 

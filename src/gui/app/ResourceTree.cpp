@@ -36,6 +36,7 @@
 #include "ResourceTree.hpp"
 #include "MessageInterface.hpp"
 #include "GmatTreeItemData.hpp"
+#include "ParameterCreateDialog.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -60,7 +61,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_REPORT_FILE, ResourceTree::OnAddReportFile)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
-//   EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
+   EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
    EVT_MENU(POPUP_RENAME, ResourceTree::OnRename)
@@ -87,7 +88,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     
     AddIcons();
     AddDefaultResources();
-    
+
     mNumSpacecraft = 0;
     mNumPropagator = 0;
     mNumImpulsiveBurn = 0;
@@ -96,6 +97,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     mNumOpenGlPlot = 0;
     mNumDiffCorr = 0;
     mNumVariable = 0;
+
+    theGuiManager->UpdateObject();
+    theGuiManager->UpdateSpacecraft();
+    theGuiManager->UpdateParameter();
 }
 
 //------------------------------------------------------------------------------
@@ -223,14 +228,15 @@ void ResourceTree::AddDefaultResources()
                  wxTreeItemIcon_Expanded);
     
     //----- Vairables
-    wxTreeItemId variableItem = 
-         this->AppendItem(resource, wxT("Variables"), GmatTree::ICON_FILE, -1,
+    //loj: 2/20/04 changed back to folder
+    wxTreeItemId mVariableItem = 
+         this->AppendItem(resource, wxT("Variables"), GmatTree::ICON_FOLDER, -1,
                      new GmatTreeItemData(wxT("Variables"),
-                                          GmatTree::VARIABLES));
+                                          GmatTree::VARIABLES_FOLDER));
     // ag:  Should the GmatTree type of variableItem change?
 
-//      SetItemImage(variableItem, GmatTree::ICON_OPENFOLDER,
-//                   wxTreeItemIcon_Expanded);
+    SetItemImage(mVariableItem, GmatTree::ICON_OPENFOLDER,
+                 wxTreeItemIcon_Expanded);
     
     //----- GroundStations
     this->AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
@@ -245,6 +251,7 @@ void ResourceTree::AddDefaultResources()
     AddDefaultSolvers(mSolverItem);
     AddDefaultSubscribers(mSubscriberItem);
     AddDefaultInterfaces(interfaceItem);
+    AddDefaultVariables(mVariableItem);
 }
 
 //------------------------------------------------------------------------------
@@ -362,7 +369,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
 {
-    MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() entered\n");
+    //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() entered\n");
     StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
     int size = itemNames.size();
     wxString objName;
@@ -376,7 +383,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
 
         if (objTypeName == "ImpulsiveBurn")
         {
-            MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
+            //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
             this->AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
                              new GmatTreeItemData(wxT(objName),
                                  GmatTree::DEFAULT_IMPULSIVE_BURN));
@@ -461,6 +468,35 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 }
 
 //------------------------------------------------------------------------------
+// void AddDefaultVariables(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
+{
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
+    int size = itemNames.size();
+    wxString objName;
+    Parameter *param;
+    
+    for (int i = 0; i<size; i++)
+    {
+        objName = wxString(itemNames[i].c_str());
+        param = theGuiInterpreter->GetParameter(itemNames[i]);
+        
+        // add only user defined parameters
+        //if (param->GetKey() == Parameter::USER_PARAM)
+        //{
+            this->AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+                             new GmatTreeItemData(wxT(objName),
+                                                  GmatTree::DEFAULT_VARIABLE));
+        //}
+    };
+
+    theGuiManager->UpdateParameter();
+    
+    if (size > 0)
+        Expand(itemId);
+}
+//------------------------------------------------------------------------------
 // void OnItemRightClick(wxTreeEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnItemRightClick(wxTreeEvent& event)
@@ -496,8 +532,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
         menu.Append(POPUP_ADD_BODY, wxT("Add Body..."));
     else if (strcmp(title, wxT("Plots/Reports")) == 0)
         menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
-//      else if (strcmp(title, wxT("Variables")) == 0)
-//        menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
+    else if (strcmp(title, wxT("Variables")) == 0)
+        menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
     else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
              (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
              (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
@@ -525,7 +561,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
         menu.Append(POPUP_DELETE, wxT("Delete"));
     }
 
-    //loj: 2/13/04 I just thought about for later build
+    //loj: 2/13/04 I just thought about this for the future build
 //      switch (dataType)
 //      {
 //      case GmatTree::SPACECRAFT_FOLDER:
@@ -1008,24 +1044,45 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
     Expand(item);
 }
 
-//  //------------------------------------------------------------------------------
-//  // void OnAddVariable(wxCommandEvent &event)
-//  //------------------------------------------------------------------------------
-//  void ResourceTree::OnAddVariable(wxCommandEvent &event)
-//  {
+//------------------------------------------------------------------------------
+// void OnAddVariable(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddVariable(wxCommandEvent &event)
+{
+    wxTreeItemId item = GetSelection();
+    
+    // show dialog to create user parameter
+    ParameterCreateDialog paramDlg(this);
+    paramDlg.ShowModal();
+
+    if (paramDlg.IsParamCreated())
+    {
+        wxString name = paramDlg.GetParamName();
+        this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                         new GmatTreeItemData(name, GmatTree::CREATED_VARIABLE));
+        
+        Expand(item);
+    }
+
+    //loj: 2/25/04 commented out to use Dialog to create User Variable
 //      wxTreeItemId item = GetSelection();
   
-//      wxString name;
-//      name.Printf("Variable%d", ++mNumVariable);
+//      wxString oldName;
+//      oldName.Printf("Var%d", ++mNumVariable);
 
-//      //    Subscriber* subs =
-//      //    theGuiInterpreter->CreateSubscriber("OpenGlPlot", std::string(name.c_str()));
-   
-//      this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
-//                       new GmatTreeItemData(name, GmatTree::CREATED_VARIABLE));
-
+//      wxString name = oldName;
+//      name = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
+//                               name, this);
+    
+//      if ( !name.IsEmpty())
+//      {
+    
+//          this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+//                           new GmatTreeItemData(name, GmatTree::CREATED_VARIABLE));
+//      }
+  
 //      Expand(item);
-//  }
+}
 
 //---------------------------------
 // Crete popup menu

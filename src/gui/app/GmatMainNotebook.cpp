@@ -29,8 +29,7 @@
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
 #include "SolverEventPanel.hpp"
-//loj: 2/12/04 #include "VariableCreatePanel.hpp"
-#include "ParameterSetupPanel.hpp" //loj: use this instead
+#include "ParameterSetupPanel.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -69,10 +68,12 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 GmatMainNotebook::GmatMainNotebook(wxWindow *parent, wxWindowID id,
-                   const wxPoint &pos, const wxSize &size, long style)
+                                   const wxPoint &pos, const wxSize &size,
+                                   long style)
     : wxNotebook(parent, id, pos, size, style)
 {
   this->parent = parent;
+  theSize = size;
   curPages = new wxList();
 }
 
@@ -178,7 +179,6 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         {
             MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
             
-            // ag: keeps hanging when i add this in
             sizer->Add ( new SolverGoalsPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
@@ -188,11 +188,9 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
            sizer->Add ( new SolverVariablesPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
-        else if (dataType == GmatTree::VARIABLES)
+        else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
+                 (dataType == GmatTree::CREATED_VARIABLE))
         {
-            //loj: 2/10/04
-            //sizer->Add (new VariableCreatePanel (panel, item->GetDesc()),
-            //            0, wxGROW|wxALL, 0 );
             sizer->Add (new ParameterSetupPanel (panel, item->GetDesc()),
                         0, wxGROW|wxALL, 0 );
         }
@@ -258,6 +256,7 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
       (dataType == GmatTree::SUBSCRIBERS_FOLDER)          ||
       (dataType == GmatTree::SUBSCRIPTS_FOLDER)           ||
       (dataType == GmatTree::INTERFACES_FOLDER)           ||
+      (dataType == GmatTree::VARIABLES_FOLDER)            ||
       (dataType == GmatTree::DEFAULT_BODY)                ||
       (dataType == GmatTree::CREATED_BODY)                ||
       (dataType == GmatTree::DEFAULT_FORMATION_FOLDER)    ||

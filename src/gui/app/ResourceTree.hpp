@@ -49,6 +49,7 @@ private:
     wxTreeItemId mBurnItem;
     wxTreeItemId mSubscriberItem;
     wxTreeItemId mSolverItem;
+    wxTreeItemId mVariableItem;
 
     int mNumSpacecraft;
     int mNumPropagator;
@@ -69,6 +70,7 @@ private:
     void AddDefaultSolvers(wxTreeItemId itemId);
     void AddDefaultSubscribers(wxTreeItemId itemId);
     void AddDefaultInterfaces(wxTreeItemId itemId);
+    void AddDefaultVariables(wxTreeItemId itemId);
     void AddIcons();
     
     // event handlers
@@ -92,7 +94,7 @@ private:
     void OnAddXyPlot(wxCommandEvent &event);
     void OnAddOpenGlPlot(wxCommandEvent &event);
     void OnAddDiffCorr(wxCommandEvent &event);
-//    void OnAddVariable(wxCommandEvent &event);
+    void OnAddVariable(wxCommandEvent &event);
   
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     
