@@ -21,17 +21,17 @@
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-const Real                  Moon::MASS                = 7349e22;     // kg
+const Real                  Moon::MASS                = 7.3483e22;     // kg
 const Real                  Moon::EQUATORIAL_RADIUS   = 1738.1;     // km
 const Real                  Moon::POLAR_RADIUS        = 1736.0;       // km - need more precision
-const Real                  Moon::MU                  = 1.62;      // m/s^2??? HUH??????
+const Real                  Moon::MU                  = 4.902794e12;      // m^3 / s^2
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Moon::CENTRAL_BODY        = NULL;        // doesn't make sense?
-const Integer               Moon::BODY_NUMBER         = 3;           // don't know this!!!!!!
-const Integer               Moon::REF_BODY_NUMBER     = 3;           // don't know this!!!!!!
-const Integer               Moon::ORDER               = 4;           // don't know this!!!!!!
-const Integer               Moon::DEGREE              = 4;           // don't know this!!!!!!
+const Integer               Moon::BODY_NUMBER         = 2; 
+const Integer               Moon::REF_BODY_NUMBER     = 3; 
+const Integer               Moon::ORDER               = 4; 
+const Integer               Moon::DEGREE              = 4;  
 // add other ones as needed
 
 
