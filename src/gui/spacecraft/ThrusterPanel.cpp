@@ -274,7 +274,7 @@ void ThrusterPanel::DisplayData()
    }
    coordsysComboBox->SetSelection(0);
           
-   removeButton->Enable(true);
+   //removeButton->Enable(true);
    cCoefButton->Enable(true);
    kCoefButton->Enable(true); 
    tankButton->Enable(true);
