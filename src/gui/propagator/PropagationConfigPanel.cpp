@@ -95,7 +95,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
     propSetupName = std::string(propName.c_str());
     Initialize();
     Setup(this);
-    GetData();
+    LoadData();
     
     applyButton->Enable(false);
 }
@@ -105,7 +105,7 @@ void PropagationConfigPanel::Initialize()
     // Default values
     numOfIntegrators = 3;
     numOfAtmosTypes = 3;
-    numOfForces = 1;  // TBD thePropSetup->GetNumForces();
+    numOfForces = 1;  //waw: TBD thePropSetup->GetNumForces();
     numOfGraFields = 4;
     numOfMagFields = 1;  // TBD - Not for Build 2
     numOfPrimaryBodies = 1; //loj: 3/3/04 added
@@ -113,8 +113,6 @@ void PropagationConfigPanel::Initialize()
     newProp = NULL;
     newPropName = "";
     
-    //MessageInterface::ShowMessage("PropagationConfigPanel():Initialize() entered\n");
-
     // waw: TBD - future implementation gets the pri.body from the solar system
     primaryBodyString = SolarSystem::EARTH_NAME.c_str();
     primaryBodiesArray.Add(primaryBodyString); //loj: 3/3/04 added
@@ -430,11 +428,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     boxSizer1->SetSizeHints( parent );
 }
 
-void PropagationConfigPanel::GetData()
+void PropagationConfigPanel::LoadData()
 {           
     std::string propName = thePropagator->GetTypeName();
-    //MessageInterface::ShowMessage("PropagationConfigPanel():GetData() propName = %s\n",
-    //                              propName.c_str());
     
     if (propName == "RungeKutta89")
         integratorComboBox->SetSelection(0);
@@ -447,7 +443,7 @@ void PropagationConfigPanel::GetData()
     DisplayForceData();
 }
 
-void PropagationConfigPanel::SetData()
+void PropagationConfigPanel::SaveData()
 {
     MessageInterface::ShowMessage("PropagationConfigPanel():SetData() entered\n");
     
@@ -455,6 +451,7 @@ void PropagationConfigPanel::SetData()
         
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
+
         newProp->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
         newProp->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
         newProp->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
@@ -482,39 +479,48 @@ void PropagationConfigPanel::SetData()
     thePropSetup->SetPropagator(newProp);
     MessageInterface::ShowMessage("PropagationConfigPanel():SetData() newPropType = %s name = %s\n",
                                   newProp->GetTypeName().c_str(), newProp->GetName().c_str());
-    
-    // Saving the primary body data
-    if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
-    {   
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Earth primary body\n");
+       
+    /* Saving the primary body data
+    if (!primaryBodiesArray.IsEmpty())
+    {
+        for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
+        {
+            if (primaryBodiesArray[i].CmpNoCase(SolarSystem::EARTH_NAME.c_str()) == 0)
+            {
+                degreeID = theEarth->GetParameterID("Degree");
+                orderID = theEarth->GetParameterID("Order");
+                
+                theEarth->SetIntegerParameter(degreeID, atoi(earthParam.Item(0)));
+                theEarth->SetIntegerParameter(orderID, atoi(earthParam.Item(1)));
         
-        theEarth->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
-        theEarth->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+                thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "EarthGravity");
+                theForceModel->AddForce(thePhysicalModel);
+            }
+            if (primaryBodiesArray[i].CmpNoCase(SolarSystem::SUN_NAME.c_str()) == 0)
+            {
+                degreeID = theSun->GetParameterID("Degree");
+                orderID = theSun->GetParameterID("Order");
         
-        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "EarthGravity");
-        theForceModel->AddForce(thePhysicalModel);
+                theSun->SetIntegerParameter(degreeID, atoi(sunParam.Item(0)));
+                theSun->SetIntegerParameter(orderID, atoi(sunParam.Item(1)));
+        
+                thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "SunGravity");
+                theForceModel->AddForce(thePhysicalModel);
+            }
+            if (primaryBodiesArray[i].CmpNoCase(SolarSystem::MOON_NAME.c_str()) == 0)
+            {
+                degreeID = theMoon->GetParameterID("Degree");
+                orderID = theMoon->GetParameterID("Order");
+        
+                theMoon->SetIntegerParameter(degreeID, atoi(moonParam.Item(0)));
+                theMoon->SetIntegerParameter(orderID, atoi(moonParam.Item(1)));
+        
+                thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "MoonGravity");
+                theForceModel->AddForce(thePhysicalModel);
+            }        
+        }    
     }
-    else if ( primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0 )
-    {   
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Sun primary body\n");
-        
-        theSun->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
-        theSun->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
-        
-        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "SunGravity");
-        theForceModel->AddForce(thePhysicalModel);
-    }
-    else if ( primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0 )
-    {   
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving Moon primary body\n");
-        
-        theMoon->SetIntegerParameter(orderID, atoi(gravityOrderTextCtrl->GetValue()));
-        theMoon->SetIntegerParameter(degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
-        
-        thePhysicalModel = theGuiInterpreter->CreatePhysicalModel("PointMassForce", "MoonGravity");
-        theForceModel->AddForce(thePhysicalModel);
-    }
-    
+    */
     // Saving the secondary body data
     /*
     StringArray::iterator i;
@@ -626,15 +632,11 @@ void PropagationConfigPanel::SetData()
 
 void PropagationConfigPanel::DisplayIntegratorData()
 {    
-
     integratorString = integratorComboBox->GetStringSelection();
     
-    //if (integratorComboBox->GetSelection() == 0)
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
         newPropName = propSetupName + "RKV89";
-        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
-        //                              newPropName.c_str());
         
         newProp = theGuiInterpreter->GetPropagator(newPropName);
         if (newProp == NULL)
@@ -642,8 +644,6 @@ void PropagationConfigPanel::DisplayIntegratorData()
             MessageInterface::ShowMessage("Creating RungeKutta89\n");
             newProp = theGuiInterpreter->CreatePropagator("RungeKutta89", newPropName);
         }
-        //loj: changed theRK89 to newProp
-        //theRK89 = (RungeKutta89 *)thePropagator;
         
         setting1StaticText->SetLabel("Step Size: ");
         setting2StaticText->SetLabel("Max Int Error: ");
@@ -667,20 +667,16 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting8TextCtrl->Show(false); 
         setting9TextCtrl->Show(false); 
     }
-    //else if (integratorComboBox->GetSelection() == 1)
     else if (integratorString.Cmp("RKN 6(8)") == 0)
     {
         newPropName = propSetupName + "RKN68";
-        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
-        //                              newPropName.c_str());
         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
         if (newProp == NULL)
         {
             MessageInterface::ShowMessage("Creating DormandElMikkawyPrince68\n");
             newProp = theGuiInterpreter->CreatePropagator("DormandElMikkawyPrince68", newPropName);
         }
-        
-        //theRK68 = (RungeKutta89 *)thePropagator;
 
         // use newProp to retrive and set value
         setting1StaticText->SetLabel("Step Size: ");
@@ -705,13 +701,11 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting8TextCtrl->Show(false); 
         setting9TextCtrl->Show(false);  
     }
-    //else if (integratorComboBox->GetSelection() == 2)
     else if (integratorString.Cmp("RKF 5(6)") == 0)
     {   
         newPropName = propSetupName + "RKF56";
-        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
-        //                              newPropName.c_str());
         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
         if (newProp == NULL)
         {
             MessageInterface::ShowMessage("Creating RungeKuttaFehlberg56\n");
@@ -751,36 +745,8 @@ void PropagationConfigPanel::DisplayIntegratorData()
     }
 }
 
-//loj: 02/11/04 added
 void PropagationConfigPanel::DisplayForceData()
-{
-    /*
-    if (thePropSetup != NULL)
-    {
-        theForceModel = thePropSetup->GetForceModel();
-        numOfForces = thePropSetup->GetNumForces();
-        std::string forceName;
-    
-        for (int i = 0; i < numOfForces; i++)
-        {
-            PhysicalModel *thePhysicalModel = theForceModel->GetForce(i);
-            if (thePhysicalModel != NULL)
-            {
-                forceName = thePhysicalModel->GetTypeName();
-                MessageInterface::ShowMessage("forceName = " + forceName + "\n");
-
-                if (forceName == "PointMassForce")
-                {
-                    //loj: for B2, can we assume the Earth is the only body for PointMass?
-                    thePointMassBodies.Clear();
-                    thePointMassBodies.Add("Earth");
-                    DisplayPointMassData();
-                }
-            }
-        }
-    }
-    */
-    
+{   
     DisplayPrimaryBodyData();
     DisplayGravityFieldData();
     DisplayAtmosphereModelData();
@@ -818,27 +784,45 @@ void PropagationConfigPanel::DisplayGravityFieldData()
     
     if (primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0)
     {
-        orderID = theEarth->GetParameterID("Order");
         degreeID = theEarth->GetParameterID("Degree");
-            
+        orderID = theEarth->GetParameterID("Order");
+        
+        //earthParam.Add(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
+        //earthParam.Add(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
+        
+        //gravityDegreeTextCtrl->SetValue(earthParam.Item(0));
+        //gravityOrderTextCtrl->SetValue(earthParam.Item(1));
+        
         gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
         gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
     }
     else if (primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0)
     {
-        orderID = theSun->GetParameterID("Order");
         degreeID = theSun->GetParameterID("Degree");
+        orderID = theSun->GetParameterID("Order");
         
-        gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
-        gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
+        //sunParam.Add(wxVariant((long)theSun->GetIntegerParameter(degreeID)));
+        //sunParam.Add(wxVariant((long)theSun->GetIntegerParameter(orderID)));
+        
+        //gravityDegreeTextCtrl->SetValue(sunParam.Item(0));
+        //gravityOrderTextCtrl->SetValue(sunParam.Item(1));
+        
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theSun->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theSun->GetIntegerParameter(orderID)));
     }
     else if (primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0)
     {
-        orderID = theMoon->GetParameterID("Order");
         degreeID = theMoon->GetParameterID("Degree");
+        orderID = theMoon->GetParameterID("Order");
         
-        gravityDegreeTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(degreeID)));
-        gravityOrderTextCtrl->SetValue(wxVariant((long)theEarth->GetIntegerParameter(orderID)));
+        //moonParam.Add(wxVariant((long)theMoon->GetIntegerParameter(degreeID)));
+        //moonParam.Add(wxVariant((long)theMoon->GetIntegerParameter(orderID)));
+        
+        //gravityDegreeTextCtrl->SetValue(moonParam.Item(0));
+        //gravityOrderTextCtrl->SetValue(moonParam.Item(1));
+        
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theMoon->GetIntegerParameter(degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theMoon->GetIntegerParameter(orderID)));
     }
     
     // For Point Mass Edit
@@ -1068,15 +1052,15 @@ void PropagationConfigPanel::OnOKButton()
 {
     if (applyButton->IsEnabled())
     {
-        SetData();     
-        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-        gmatMainNotebook->ClosePage();
+        SaveData();     
     }
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
 }
 
 void PropagationConfigPanel::OnApplyButton()
 {
-    SetData();
+    SaveData();
     applyButton->Enable(false);
 }
 
@@ -1114,57 +1098,40 @@ void PropagationConfigPanel::OnAddButton()
             primaryBodiesArray.Add(names[i]);
             bodyTextCtrl->AppendText(", " + names[i]);
             bodyComboBox->Append(names[i]);
-        }
-
-        //loj: 3/3/04 commented out
-//          bodyTextCtrl->Clear();
-//          bodyComboBox->Clear();
-        
-//          int index = primaryBodiesArray.GetCount();
-        
-//          for (int i = 0; i < names.GetCount(); i++)
-//          {
-//             primaryBodiesArray.Insert(names.Item(i), index);
-//             index++;
-           
-//             bodyTextCtrl->AppendText(primaryBodiesArray.Item(i));
-//             bodyTextCtrl->AppendText(" ");
-           
-//             bodyComboBox->Append(primaryBodiesArray.Item(i));
-//          } 
-        
-//          int pos = bodyComboBox->FindString(primaryBodyString);
-//          if (pos == -1)
-//              bodyComboBox->SetSelection(0);
-//          else
-//              bodyComboBox->SetSelection(pos);       
+        }       
             
         applyButton->Enable(true);
     }
     
-    /*
-    wxString body = bodyComboBox->GetStringSelection();
-    
-    StringArray::iterator i;
-    
-    if ( !pointmassBodiesArray.empty() )
+    bool pmChanged = false;
+    for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
     {
-        Integer j = 0;
-        
-        for (i = pointmassBodiesArray.begin(); i != pointmassBodiesArray.end(); i++)
+        for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
         {
-            if ( body.IsSameAs(pointmassBodiesArray[j].c_str(), false) )
-                return;
-                
-            j++;
+            if (primaryBodiesArray[i].CmpNoCase(pointmassBodiesArray[j]) == 0)
+            {
+                wxString body = pointmassBodiesArray.Item(j);
+                pointmassBodiesArray.Remove(body);
+                pmChanged = true;
+            }
+        
         }
     }
     
-    secondaryBodiesStrArray.push_back(body.c_str());
-    bodyTextCtrl->AppendText(body + " ");
-    
-    applyButton->Enable(true);
-    */
+    if (pmChanged)
+    {
+        pmEditTextCtrl->Clear();
+        
+        if (!pointmassBodiesArray.IsEmpty())
+        {
+            for (int i = 0; i < pointmassBodiesArray.GetCount(); i++)
+            {
+                pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
+                pmEditTextCtrl->AppendText(" ");
+            }
+        }
+            
+    }
 }
 
 void PropagationConfigPanel::OnGravSearchButton()
@@ -1215,36 +1182,9 @@ void PropagationConfigPanel::OnPMEditButton()
         for (int i=0; i<names.GetCount(); i++)
         {
             pmEditTextCtrl->AppendText(names[i] + " ");
+            pointmassBodiesArray.Add(names[i]);
         }
         
-        //loj: 3/3/04 commented out
-//          int index = primaryBodiesArray.GetCount();
-        
-//          pmEditTextCtrl->Clear();
-        
-//          for (int i = 0; i < names.GetCount(); i++)
-//          {
-//             pointmassBodiesArray.Insert(names.Item(i), index);
-//             index++;
-//             pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
-//             pmEditTextCtrl->AppendText(" ");
-//          }
-//          // If any primary bodies exist, take them out (just a precaution)
-//          if (!pointmassBodiesArray.IsEmpty())
-//          {
-//              for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
-//              {
-//                  wxString pbStr = primaryBodiesArray.Item(i);
-//                  for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
-//                  {
-//                      wxString pmStr = pointmassBodiesArray.Item(j);
-//                      if (pmStr.CmpNoCase(pbStr))
-//                      {
-//                          pointmassBodiesArray.Remove(pmStr);
-//                      }
-//                  }
-//              } 
-//          }
         applyButton->Enable(true);
     }
 }   
@@ -1295,13 +1235,31 @@ void PropagationConfigPanel::OnGravityTextUpdate()
     wxString deg = gravityDegreeTextCtrl->GetValue();
     wxString ord = gravityOrderTextCtrl->GetValue();
     
-    if ( !deg.IsNumber() )
+    if ( (!deg.IsNumber()) || (!ord.IsNumber()) )
+    {
         gravityDegreeTextCtrl->Clear();
-    else if ( !ord.IsNumber() )
         gravityOrderTextCtrl->Clear();
-    else
-        applyButton->Enable(true);
-    
+            
+        return;
+    }
+    /*
+    if (primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0)
+    {      
+        earthParam.Insert(deg, 0, 1);
+        earthParam.Insert(ord, 1, 1);
+    }
+    else if (primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0)
+    {
+        sunParam.Insert(deg, 0, 1);
+        sunParam.Insert(ord, 1, 1);
+    }
+    else if (primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0)
+    {
+        moonParam.Insert(deg, 0, 1);
+        moonParam.Insert(ord, 1, 1);
+    }  
+    */
+    applyButton->Enable(true);      
 }
 
 void PropagationConfigPanel::OnMagneticTextUpdate()

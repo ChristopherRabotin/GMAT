@@ -133,15 +133,17 @@ private:
     bool useSRP;
     bool isForceModelChanged;
     
-    wxArrayString allBodiesArray;
     wxArrayString primaryBodiesArray;
     wxArrayString pointmassBodiesArray;
+    wxArrayString allBodiesArray;
+    //wxArrayString earthParam;
+    //wxArrayString sunParam;
+    //wxArrayString moonParam;
     
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
     Propagator     *newProp;
     Integrator     *theIntegrator;
-    RungeKutta89   *theRK89;
     PropSetup      *thePropSetup;
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
@@ -153,8 +155,8 @@ private:
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void GetData();
-    void SetData();
+    void LoadData();
+    void SaveData();
     void DisplayIntegratorData();
     void DisplayPrimaryBodyData();
     void DisplayForceData(); //loj: 2/11/04 added
