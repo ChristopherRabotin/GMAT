@@ -63,9 +63,11 @@ private:
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
     GmatMainNotebook *rightTabs;
-    wxMenuBar *CreateMainMenu();
+    
     void InitToolBar(wxToolBar* toolBar);
-
+    wxMenuBar* CreateMainMenu();
+    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
+    
     // event handling
     DECLARE_EVENT_TABLE();
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
@@ -73,7 +75,8 @@ private:
     void OnCloseTabs(wxCommandEvent& WXUNUSED(event));
     //loj: addded
     void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
-    void OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event));
+    void OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event));
+    void OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event));
     
     // IDs for the controls and the menu commands
     enum
@@ -94,7 +97,8 @@ private:
         MENU_SET_PATH_AND_LOG,
         MENU_INFORMATION,
 
-        MENU_SCRIPT_OPEN_FRAME,
+        MENU_SCRIPT_OPEN_SDI_FRAME,
+        MENU_SCRIPT_OPEN_MDI_FRAME,
       
         MENU_EDIT_CUT,
         MENU_EDIT_COPY,

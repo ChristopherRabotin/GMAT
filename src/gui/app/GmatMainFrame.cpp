@@ -27,8 +27,10 @@
 #include "BatchRunFromGui.hpp"
 #include "ConsoleAppException.hpp"
 #include "DocViewFrame.hpp"
-#include "TextDocument.hpp"
+#include "MdiDocViewFrame.hpp"
 #include "TextEditView.hpp"
+#include "MdiTextEditView.hpp"
+#include "TextDocument.hpp"
 #include "GmatAppData.hpp"
 
 //------------------------------
@@ -49,7 +51,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
     EVT_MENU(MENU_DEMO_BATCH_RUN, GmatMainFrame::OnDemoBatchRun)    
-    EVT_MENU(MENU_SCRIPT_OPEN_FRAME, GmatMainFrame::OnScriptOpenFrame)    
+    EVT_MENU(MENU_SCRIPT_OPEN_SDI_FRAME, GmatMainFrame::OnScriptOpenSdiFrame)    
+    EVT_MENU(MENU_SCRIPT_OPEN_MDI_FRAME, GmatMainFrame::OnScriptOpenMdiFrame)    
 END_EVENT_TABLE()
 
 //------------------------------
@@ -89,7 +92,7 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
 #if wxUSE_STATUSBAR
     // create a status bar
     CreateStatusBar(2);
-    SetStatusText(_T("Welcome to GMAT! This currently has no functionality "));
+    SetStatusText(_T("Welcome to GMAT!"));
 #endif // wxUSE_STATUSBAR
 
     CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
@@ -170,6 +173,81 @@ void GmatMainFrame::OnCloseTabs(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
+// void InitToolBar(wxToolBar* toolBar)
+//------------------------------------------------------------------------------
+/**
+ * Adds bitmaps to tool bar.
+ *
+ * @param <toolBar> input tool bar.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
+{
+    wxBitmap* bitmaps[12];
+
+    bitmaps[0] = new wxBitmap( new_xpm );
+    bitmaps[1] = new wxBitmap( open_xpm );
+    bitmaps[2] = new wxBitmap( save_xpm );
+    bitmaps[3] = new wxBitmap( copy_xpm );
+    bitmaps[4] = new wxBitmap( cut_xpm );
+    bitmaps[5] = new wxBitmap( paste_xpm );
+    bitmaps[6] = new wxBitmap( print_xpm );
+    bitmaps[7] = new wxBitmap( help_xpm );
+    bitmaps[8] = new wxBitmap( run_xpm );
+    bitmaps[9] = new wxBitmap( pause_xpm );
+    bitmaps[10] = new wxBitmap( stop_xpm );
+    bitmaps[11] = new wxBitmap( close_xpm );
+
+    int width = 24;
+    int currentX = 5;
+
+    toolBar->AddTool( 0, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("New file"));
+    currentX += width + 5;
+    toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Open file"));
+    currentX += width + 5;
+    toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Save file"));
+    currentX += width + 5;
+    toolBar->AddSeparator();
+    toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Copy"));
+    currentX += width + 5;
+    toolBar->AddTool(4, *bitmaps[4], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Cut"));
+    currentX += width + 5;
+    toolBar->AddTool(5, *bitmaps[5], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Paste"));
+    currentX += width + 5;
+    toolBar->AddSeparator();
+    toolBar->AddTool(6, *bitmaps[6], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Print"));
+    currentX += width + 5;
+    toolBar->AddSeparator();
+    toolBar->AddTool(7, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Run"));
+    toolBar->AddTool(8, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Pause"));
+    toolBar->AddTool(9, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
+                    (wxObject *) NULL, _T("Stop"));
+    toolBar->AddSeparator();
+    toolBar->AddTool(TOOL_CLOSE_TABS, *bitmaps[11], wxNullBitmap, FALSE,
+                    currentX, -1, (wxObject *) NULL, _T("Close Current Tab"));
+    toolBar->AddSeparator();
+    toolBar->AddTool(MENU_HELP_ABOUT, *bitmaps[7], wxNullBitmap, FALSE,
+                     currentX, -1, (wxObject *) NULL, _T("Help"));
+
+    toolBar->Realize();
+
+    int i;
+    for (i = 0; i < 12; i++)
+    {
+        delete bitmaps[i];
+    }
+}
+
+//------------------------------------------------------------------------------
 // wxMenuBar *CreateMainMenu()
 //------------------------------------------------------------------------------
 /**
@@ -228,7 +306,8 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""), FALSE);
 
     //loj: added
-    scriptMenu->Append(MENU_SCRIPT_OPEN_FRAME, wxT("Open Window"), wxT(""), FALSE);
+    scriptMenu->Append(MENU_SCRIPT_OPEN_SDI_FRAME, wxT("Open SDI Window"), wxT(""), FALSE);
+    scriptMenu->Append(MENU_SCRIPT_OPEN_MDI_FRAME, wxT("Open MDI Window"), wxT(""), FALSE);
     
     editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
     editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
@@ -310,79 +389,55 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 }
 
 //------------------------------------------------------------------------------
-// void InitToolBar(wxToolBar* toolBar)
+// wxMenuBar* CreateScriptWindowMenu(const std::string &docType)
 //------------------------------------------------------------------------------
-/**
- * Adds bitmaps to tool bar.
- *
- * @param <toolBar> input tool bar.
- */
-//------------------------------------------------------------------------------
-
-void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
+wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
 {
-    wxBitmap* bitmaps[12];
+    // Make a menubar
+    wxMenu *fileMenu = new wxMenu;
+    wxMenu *editMenu = (wxMenu *) NULL;
+    
+    fileMenu->Append(wxID_NEW, _T("&New..."));
+    fileMenu->Append(wxID_OPEN, _T("&Open..."));
 
-    bitmaps[0] = new wxBitmap( new_xpm );
-    bitmaps[1] = new wxBitmap( open_xpm );
-    bitmaps[2] = new wxBitmap( save_xpm );
-    bitmaps[3] = new wxBitmap( copy_xpm );
-    bitmaps[4] = new wxBitmap( cut_xpm );
-    bitmaps[5] = new wxBitmap( paste_xpm );
-    bitmaps[6] = new wxBitmap( print_xpm );
-    bitmaps[7] = new wxBitmap( help_xpm );
-    bitmaps[8] = new wxBitmap( run_xpm );
-    bitmaps[9] = new wxBitmap( pause_xpm );
-    bitmaps[10] = new wxBitmap( stop_xpm );
-    bitmaps[11] = new wxBitmap( close_xpm );
-
-    int width = 24;
-    int currentX = 5;
-
-    toolBar->AddTool( 0, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("New file"));
-    currentX += width + 5;
-    toolBar->AddTool(1, *bitmaps[1], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Open file"));
-    currentX += width + 5;
-    toolBar->AddTool(2, *bitmaps[2], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Save file"));
-    currentX += width + 5;
-    toolBar->AddSeparator();
-    toolBar->AddTool(3, *bitmaps[3], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Copy"));
-    currentX += width + 5;
-    toolBar->AddTool(4, *bitmaps[4], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Cut"));
-    currentX += width + 5;
-    toolBar->AddTool(5, *bitmaps[5], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Paste"));
-    currentX += width + 5;
-    toolBar->AddSeparator();
-    toolBar->AddTool(6, *bitmaps[6], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Print"));
-    currentX += width + 5;
-    toolBar->AddSeparator();
-    toolBar->AddTool(7, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Run"));
-    toolBar->AddTool(8, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Pause"));
-    toolBar->AddTool(9, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
-                    (wxObject *) NULL, _T("Stop"));
-    toolBar->AddSeparator();
-    toolBar->AddTool(TOOL_CLOSE_TABS, *bitmaps[11], wxNullBitmap, FALSE,
-                    currentX, -1, (wxObject *) NULL, _T("Close Current Tab"));
-    toolBar->AddSeparator();
-    toolBar->AddTool(MENU_HELP_ABOUT, *bitmaps[7], wxNullBitmap, FALSE,
-                     currentX, -1, (wxObject *) NULL, _T("Help"));
-
-    toolBar->Realize();
-
-    int i;
-    for (i = 0; i < 12; i++)
+    if (docType == "sdi")
     {
-        delete bitmaps[i];
+        fileMenu->Append(wxID_CLOSE, _T("&Close"));
+        fileMenu->Append(wxID_SAVE, _T("&Save"));
+        fileMenu->Append(wxID_SAVEAS, _T("Save &As..."));
+        fileMenu->AppendSeparator();
+        fileMenu->Append(wxID_PRINT, _T("&Print..."));
+        fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
+        fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
+    
+        editMenu = new wxMenu;
+        editMenu->Append(wxID_UNDO, _T("&Undo"));
+        editMenu->Append(wxID_REDO, _T("&Redo"));
+        editMenu->AppendSeparator();
+        //editMenu->Append(DOCVIEW_CUT, _T("&Cut last segment"));
+    
+        docMainFrame->editMenu = editMenu;
+        fileMenu->AppendSeparator();
     }
+    
+    fileMenu->Append(wxID_EXIT, _T("E&xit"));
+    
+    // A nice touch: a history of files visited. Use this menu.
+    mDocManager->FileHistoryUseMenu(fileMenu);
+    
+    //wxMenu *help_menu = new wxMenu;
+    //help_menu->Append(DOCVIEW_ABOUT, _T("&About"));
+    
+    wxMenuBar *menuBar = new wxMenuBar;
+    
+    menuBar->Append(fileMenu, _T("&File"));
+    
+    if (editMenu)
+        menuBar->Append(editMenu, _T("&Edit"));
+    
+    //menuBar->Append(help_menu, _T("&Help"));
+
+    return menuBar;
 }
 
 //loj: added
@@ -423,7 +478,7 @@ void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
-// void OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event))
+// void OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
  * Handles script file from the menu bar.
@@ -431,7 +486,7 @@ void GmatMainFrame::OnDemoBatchRun(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnScriptOpenSdiFrame(wxCommandEvent& WXUNUSED(event))
 {   
     // Create a document manager
     mDocManager = new wxDocManager;
@@ -459,53 +514,60 @@ void GmatMainFrame::OnScriptOpenFrame(wxCommandEvent& WXUNUSED(event))
 #endif
     
     // Make a menubar
-    wxMenu *file_menu = new wxMenu;
-    wxMenu *edit_menu = (wxMenu *) NULL;
-    
-    file_menu->Append(wxID_NEW, _T("&New..."));
-    file_menu->Append(wxID_OPEN, _T("&Open..."));
-    
-    file_menu->Append(wxID_CLOSE, _T("&Close"));
-    file_menu->Append(wxID_SAVE, _T("&Save"));
-    file_menu->Append(wxID_SAVEAS, _T("Save &As..."));
-    file_menu->AppendSeparator();
-    file_menu->Append(wxID_PRINT, _T("&Print..."));
-    file_menu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
-    file_menu->Append(wxID_PREVIEW, _T("Print Pre&view"));
-    
-    edit_menu = new wxMenu;
-    edit_menu->Append(wxID_UNDO, _T("&Undo"));
-    edit_menu->Append(wxID_REDO, _T("&Redo"));
-    edit_menu->AppendSeparator();
-    //edit_menu->Append(DOCVIEW_CUT, _T("&Cut last segment"));
-    
-    docMainFrame->editMenu = edit_menu;
-    
-    file_menu->AppendSeparator();
-    file_menu->Append(wxID_EXIT, _T("E&xit"));
-    
-    // A nice touch: a history of files visited. Use this menu.
-    mDocManager->FileHistoryUseMenu(file_menu);
-    
-    //wxMenu *help_menu = new wxMenu;
-    //help_menu->Append(DOCVIEW_ABOUT, _T("&About"));
-    
-    wxMenuBar *menu_bar = new wxMenuBar;
-    
-    menu_bar->Append(file_menu, _T("&File"));
-    
-    if (edit_menu)
-        menu_bar->Append(edit_menu, _T("&Edit"));
-    
-    //menu_bar->Append(help_menu, _T("&Help"));
-        
-    //// Associate the menu bar with the frame
-    docMainFrame->SetMenuBar(menu_bar);
+    wxMenuBar *menuBar = CreateScriptWindowMenu("sdi");
+       
+    // Associate the menu bar with the frame
+    docMainFrame->SetMenuBar(menuBar);
     
     docMainFrame->Centre(wxBOTH);
     docMainFrame->Show(TRUE);
     
     //loj:compile error:
     //SetTopWindow(docMainFrame);
+}
+
+//------------------------------------------------------------------------------
+// void OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenMdiFrame(wxCommandEvent& WXUNUSED(event))
+{   
+    // Create a document manager
+    mDocManager = new wxDocManager;
+
+    // Create a template relating text documents to their views
+    mDocTemplate = 
+        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+                          CLASSINFO(TextDocument), CLASSINFO(MdiTextEditView));
+    
+    // Create the main frame window    
+    //loj: pass "this" so that this frame closes when the main frame closes
+    mdiDocMainFrame =
+        new MdiDocViewFrame(mDocManager, this, _T("Script Window (MDI)"),
+                            wxPoint(0, 0), wxSize(600, 500),
+                            (wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE));
+    
+    // Give it an icon (this is ignored in MDI mode: uses resources)
+#ifdef __WXMSW__
+    mdiDocMainFrame->SetIcon(wxIcon(_T("doc")));
+#endif
+    
+    // Make a menubar
+    wxMenuBar *menuBar = CreateScriptWindowMenu("mdi");
+       
+    // Associate the menu bar with the frame
+    mdiDocMainFrame->SetMenuBar(menuBar);
+    
+    mdiDocMainFrame->Centre(wxBOTH);
+    mdiDocMainFrame->Show(TRUE);
+    
+    //loj:compile error:
+    //SetTopWindow(mdiDocMainFrame);
 }
 
