@@ -751,7 +751,7 @@ Integer PhysicalModel::GetParameterID(const std::string &str) const
 {
    for (int i = EPOCH; i < PhysicalModelParamCount; i++)
    {
-      if (str == PhysicalModel::PARAMETER_TEXT[i])
+      if (str == PhysicalModel::PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    return GmatBase::GetParameterID(str);
