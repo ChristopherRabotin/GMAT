@@ -147,9 +147,6 @@ bool Moderator::Initialize()
         theFactoryManager->RegisterFactory(theStopConditionFactory);
         theFactoryManager->RegisterFactory(theSubscriberFactory);
 
-        // create default Spacecraft
-        Spacecraft *defaultSc = CreateSpacecraft("Spacecraft", "DefaultSC");
-
         // create default SolarSystem
      
         //loj: reads in initial files, such as, system parameters, default mission script file.
@@ -610,9 +607,17 @@ Integer Moderator::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
-    MessageInterface::ShowMessage("Moderator::InterpretScript entered\n"
-                                  "file: " + scriptFilename);
-    return theScriptInterpreter->Interpret(scriptFilename);
+    MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
+                                  "file: " + scriptFilename + "\n");
+    try
+    {
+        return theScriptInterpreter->Interpret(scriptFilename);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage(e.GetMessage() +"\n");
+        return false;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -620,9 +625,9 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 bool Moderator::SaveScript(const std::string &scriptFilename)
 {
-    //loj:return theScriptInterpreter->Build(scriptFilename);
-    MessageInterface::PopupMessage(Gmat::INFO_, "SaveScript function coming soon.");
-    return true;
+    MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
+                                  "file: " + scriptFilename + "\n");
+    return theScriptInterpreter->Build(scriptFilename);
 }
 
 //------------------------------------------------------------------------------
@@ -630,8 +635,8 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer Moderator::RunScript(Integer sandboxNum)
 {
-    MessageInterface::PopupMessage(Gmat::INFO_, "RunScript function coming soon.");
-    //return RunMission(sandboxNum);
+    MessageInterface::ShowMessage("Moderator::RunScript() entered\n");
+    return RunMission(sandboxNum);
 }
 
 //---------------------------------
