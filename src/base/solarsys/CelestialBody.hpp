@@ -29,7 +29,10 @@
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
 #include "PlanetaryEphem.hpp"
-#include "ForceModel.hpp"  // what about Drag? 
+#include "ForceModel.hpp"  // what about Drag?
+#include "AtmosphereManager.hpp"
+#include "AtmosphereModel.hpp"
+#include "Rmatrix.hpp"
 
 // Add needed things to Gmat namespace
 namespace Gmat  // do all of these things exist somewhere else already?
@@ -95,11 +98,20 @@ public:
    // radius, mass, posvel source, and analytic method - ****need methods for other data as well
    virtual Gmat::BodyType       GetBodyType() const;
    virtual CelestialBody*       GetCentralBody() const;
-   virtual Real                 GetGravitationalConstant() const;
-   virtual Real                 GetEquatorialRadius() const;
+   virtual Real                 GetGravitationalConstant();
+   virtual Real                 GetEquatorialRadius();
+   virtual Real                 GetPolarRadius() const;
    virtual Real                 GetMass() const;
    virtual Gmat::PosVelSource   GetPosVelSource() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
+   virtual bool                 GetUsePotentialFile() const;
+   virtual Real*                GetAngularVelocity();
+   virtual Real                 GetHourAngle() const;            // const??  -> do I need a time here?
+   virtual Rmatrix              GetHarmonicCoefficientsSij(); // const??
+   virtual Rmatrix              GetHarmonicCoefficientsCij(); // const??
+   virtual const StringArray&   GetSupportedAtmospheres() const;
+   virtual std::string          GetCurrentAtmosphereModel();
+   
 
    // methods to return the body type, central body,
    // posvel source, and analytic method
@@ -108,6 +120,9 @@ public:
    virtual bool           SetSource(Gmat::PosVelSource pvSrc);
    virtual bool           SetSourceFile(PlanetaryEphem *src);
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
+   virtual bool           SetUsePotentialFile(bool useIt);
+   // need to set the filename here as well????
+   virtual bool           SetAtmosphereModel(std::string toAtmModel);
 
    
    // Parameter access methods - overridden from GmatBase
@@ -129,7 +144,9 @@ public:
    virtual bool           GetBooleanParameter(const Integer id) const; // const?
    virtual bool           SetBooleanParameter(const Integer id,
                                               const bool value); // const?
+   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
 
+   
    //------------------------------------------------------------------------------
    // virtual CelestialBody* Clone(void) const
    //------------------------------------------------------------------------------
@@ -160,32 +177,17 @@ protected:
    Gmat::PosVelSource     posVelSrc;
    /// analytic method to use
    Gmat::AnalyticMethod   analyticMethod;
-   /// flattening coefficient
-   Real                   flatCoeff;
-   /// rotation rate in rad/sec
-   Real                   rotationRate;
-   /// zonals
-   RealArray              zonals;
    /// state of the body 0-2 position 3-5 velocity
    RealArray              state;
    // time of the state
    A1Mjd                  stateTime;
-   /// maximum distance from the body at which oblateness effects matter
-   Real                   effectiveRange;
+   // order of the gravity model
+   Integer                order;     // are these the same as coefficientSize?
+   // degree of the gravity model
+   Integer                degree;     // are these the same as coefficientSize?
+
    /// central body around which this body revolves
    CelestialBody          *centralBody;
-   /// potential model
-   ForceModel             *potentialModel;   // - is this right??
-   /// drag model
-   //Drag                   *dragModel;
-   ForceModel                   *dragModel;  // should be drag
-   // order of the gravity model
-   Integer                order;
-   // degree of the gravity model
-   Integer                degree;
-   
-   /// flag indicting whether or not this body has been initialized
-   bool                   isInitialized;
    /// body number for the SLP file
    Integer                bodyNumber;
    /// body number of origin of coordinate system for file
@@ -193,11 +195,21 @@ protected:
    /// name of file that is the source of position and velocity for this body
    std::string            sourceFilename;
    /// date and time of start of source file
-   A1Mjd                  sourceStart;
+   A1Mjd                  sourceStart;       // do I need this?
    /// date and time of end of sourcce file
-   A1Mjd                  sourceEnd;
+   A1Mjd                  sourceEnd;         // do I need this?
    // the source file
    PlanetaryEphem*        theSourceFile;
+
+   bool                   usePotentialFile;
+   std::string            potentialFileName;   // do I need a pointer to a file type/class for the potential file?
+   Real                   angularVelocity[3];
+   Integer                coefficientSize;      // n   // same as degree, order above?
+   Rmatrix                sij;                  // n x n
+   Rmatrix                cij;                  // n x n
+   Real                   hourAngle;
+   AtmosphereManager*     atmManager;
+   AtmosphereModel*       atmModel;
 
    /// IDs for the parameters
    Integer                bodyTypeID;
@@ -207,13 +219,6 @@ protected:
    Integer                muID;
    Integer                posVelSourceID;
    Integer                analyticMethodID;
-   Integer                flatCoeffID;
-   Integer                rotationRateID;
-   Integer                zonals1ID;
-   Integer                zonals2ID;
-   Integer                zonals3ID;
-   Integer                zonals4ID;
-   Integer                zonals5ID;
    Integer                state1ID;
    Integer                state2ID;
    Integer                state3ID;
@@ -221,21 +226,41 @@ protected:
    Integer                state5ID;
    Integer                state6ID;
    Integer                stateTimeID;
-   Integer                effRangeID;
-   Integer                centralBodyID;    // ID for pointer? is this even needed?
-   Integer                potentialModelID; // ???
-   Integer                dragModelID;      // ???
    Integer                orderID;
    Integer                degreeID;
-   Integer                isInitializedID;
    Integer                bodyNumberID;
    Integer                refBodyNumberID;
    Integer                sourceFilenameID;
    Integer                sourceStartID; // ???????????????
    Integer                sourceEndID;   // ???????????????
-   
-   void Initialize(std::string withBodyType = "Planet");
+   Integer                usePotentialFileID;
+   Integer                potentialFileNameID;
+   Integer                angularVelocityID1;
+   Integer                angularVelocityID2;
+   Integer                angularVelocityID3;
+   Integer                coefficientSizeID;
+   Integer                sijID;        // ?????????????????
+   Integer                cijID;        // ?????????????????
+   Integer                hourAngleID;
+   Integer                atmModelID;
+   Integer                supportedAtmModelsID;
 
+   // initialze the body
+   void Initialize(std::string withBodyType = "Planet");
+   // read the potential file, if requested
+   bool ReadPotentialFile();
+
+   // has the potential file been read already?
+   bool                   potentialFileRead;
+
+   // defaults if potential file is not used
+   Real                   defaultMu;
+   Real                   defaultEqRadius;
+   Integer                defaultCoefSize;
+   Rmatrix                defaultSij;
+   Rmatrix                defaultCij;
+   
+   
 private:
 
 };

@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+//#include "AtmosphereModel.hpp"
 
 const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
 {
@@ -41,42 +42,41 @@ const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(std::string name) :
-GmatBase          (Gmat::CELESTIAL_BODY, "Planet", name),
-bodyTypeID        (parameterCount),
-massID            (parameterCount+1),
-eqRadiusID        (parameterCount +2),
-polarRadiusID     (parameterCount +3),
-muID              (parameterCount +4),
-posVelSourceID    (parameterCount +5),
-analyticMethodID  (parameterCount +6),
-flatCoeffID       (parameterCount +7),
-rotationRateID    (parameterCount +8),
-zonals1ID         (parameterCount +9),
-zonals2ID         (parameterCount +10),
-zonals3ID         (parameterCount +11),
-zonals4ID         (parameterCount +12),
-zonals5ID         (parameterCount +13),
-state1ID          (parameterCount +14),
-state2ID          (parameterCount +15),
-state3ID          (parameterCount +16),
-state4ID          (parameterCount +17),
-state5ID          (parameterCount +18),
-state6ID          (parameterCount +19),
-stateTimeID       (parameterCount +20),
-effRangeID        (parameterCount +21),
-centralBodyID     (parameterCount +22),
-potentialModelID  (parameterCount +23),
-dragModelID       (parameterCount +24),
-orderID           (parameterCount +25),
-degreeID          (parameterCount +26),
-isInitializedID   (parameterCount +27),
-bodyNumberID      (parameterCount +28),
-refBodyNumberID   (parameterCount +29),
-sourceFilenameID  (parameterCount +30),
-sourceStartID     (parameterCount +31),
-sourceEndID       (parameterCount +32)
+GmatBase            (Gmat::CELESTIAL_BODY, "Planet", name),
+bodyTypeID          (parameterCount),
+massID              (parameterCount +1),
+eqRadiusID          (parameterCount +2),
+polarRadiusID       (parameterCount +3),
+muID                (parameterCount +4),
+posVelSourceID      (parameterCount +5),
+analyticMethodID    (parameterCount +6),
+state1ID            (parameterCount +7),
+state2ID            (parameterCount +8),
+state3ID            (parameterCount +9),
+state4ID            (parameterCount +10),
+state5ID            (parameterCount +11),
+state6ID            (parameterCount +12),
+stateTimeID         (parameterCount +13),
+orderID             (parameterCount +14),
+degreeID            (parameterCount +15),
+bodyNumberID        (parameterCount +16),
+refBodyNumberID     (parameterCount +17),
+sourceFilenameID    (parameterCount +18),
+sourceStartID       (parameterCount +19),
+sourceEndID         (parameterCount +20),
+usePotentialFileID  (parameterCount +21),
+potentialFileNameID (parameterCount +22),
+angularVelocityID1  (parameterCount +23),
+angularVelocityID2  (parameterCount +24),
+angularVelocityID3  (parameterCount +25),
+coefficientSizeID   (parameterCount +26),
+sijID               (parameterCount +27),
+cijID               (parameterCount +28),
+hourAngleID         (parameterCount +29),
+atmModelID          (parameterCount +30),
+supportedAtmModelsID (parameterCount +31)
 {
-   parameterCount += 33;
+   parameterCount += 32;
    Initialize("Planet");  // should this be the default?
 }
 
@@ -92,42 +92,41 @@ sourceEndID       (parameterCount +32)
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
-GmatBase          (Gmat::CELESTIAL_BODY, itsBodyType, name),
-bodyTypeID        (parameterCount),
-massID            (parameterCount+1),
-eqRadiusID        (parameterCount +2),
-polarRadiusID     (parameterCount +3),
-muID              (parameterCount +4),
-posVelSourceID    (parameterCount +5),
-analyticMethodID  (parameterCount +6),
-flatCoeffID       (parameterCount +7),
-rotationRateID    (parameterCount +8),
-zonals1ID         (parameterCount +9),
-zonals2ID         (parameterCount +10),
-zonals3ID         (parameterCount +11),
-zonals4ID         (parameterCount +12),
-zonals5ID         (parameterCount +13),
-state1ID          (parameterCount +14),
-state2ID          (parameterCount +15),
-state3ID          (parameterCount +16),
-state4ID          (parameterCount +17),
-state5ID          (parameterCount +18),
-state6ID          (parameterCount +19),
-stateTimeID       (parameterCount +20),
-effRangeID        (parameterCount +21),
-centralBodyID     (parameterCount +22),
-potentialModelID  (parameterCount +23),
-dragModelID       (parameterCount +24),
-orderID           (parameterCount +25),
-degreeID          (parameterCount +26),
-isInitializedID   (parameterCount +27),
-bodyNumberID      (parameterCount +28),
-refBodyNumberID   (parameterCount +29),
-sourceFilenameID  (parameterCount +30),
-sourceStartID     (parameterCount +31),
-sourceEndID       (parameterCount +32)
+GmatBase            (Gmat::CELESTIAL_BODY, "Planet", name),
+bodyTypeID          (parameterCount),
+massID              (parameterCount +1),
+eqRadiusID          (parameterCount +2),
+polarRadiusID       (parameterCount +3),
+muID                (parameterCount +4),
+posVelSourceID      (parameterCount +5),
+analyticMethodID    (parameterCount +6),
+state1ID            (parameterCount +7),
+state2ID            (parameterCount +8),
+state3ID            (parameterCount +9),
+state4ID            (parameterCount +10),
+state5ID            (parameterCount +11),
+state6ID            (parameterCount +12),
+stateTimeID         (parameterCount +13),
+orderID             (parameterCount +14),
+degreeID            (parameterCount +15),
+bodyNumberID        (parameterCount +16),
+refBodyNumberID     (parameterCount +17),
+sourceFilenameID    (parameterCount +18),
+sourceStartID       (parameterCount +19),
+sourceEndID         (parameterCount +20),
+usePotentialFileID  (parameterCount +21),
+potentialFileNameID (parameterCount +22),
+angularVelocityID1  (parameterCount +23),
+angularVelocityID2  (parameterCount +24),
+angularVelocityID3  (parameterCount +25),
+coefficientSizeID   (parameterCount +26),
+sijID               (parameterCount +27),
+cijID               (parameterCount +28),
+hourAngleID         (parameterCount +29),
+atmModelID          (parameterCount +30),
+supportedAtmModelsID (parameterCount +31)
 {
-   parameterCount += 33;
+   parameterCount += 32;
    Initialize(itsBodyType);
 }
 
@@ -145,41 +144,40 @@ sourceEndID       (parameterCount +32)
 CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
 GmatBase          (Gmat::CELESTIAL_BODY,
                    CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name),
-bodyTypeID        (parameterCount),
-massID            (parameterCount+1),
-eqRadiusID        (parameterCount +2),
-polarRadiusID     (parameterCount +3),
-muID              (parameterCount +4),
-posVelSourceID    (parameterCount +5),
-analyticMethodID  (parameterCount +6),
-flatCoeffID       (parameterCount +7),
-rotationRateID    (parameterCount +8),
-zonals1ID         (parameterCount +9),
-zonals2ID         (parameterCount +10),
-zonals3ID         (parameterCount +11),
-zonals4ID         (parameterCount +12),
-zonals5ID         (parameterCount +13),
-state1ID          (parameterCount +14),
-state2ID          (parameterCount +15),
-state3ID          (parameterCount +16),
-state4ID          (parameterCount +17),
-state5ID          (parameterCount +18),
-state6ID          (parameterCount +19),
-stateTimeID       (parameterCount +20),
-effRangeID        (parameterCount +21),
-centralBodyID     (parameterCount +22),
-potentialModelID  (parameterCount +23),
-dragModelID       (parameterCount +24),
-orderID           (parameterCount +25),
-degreeID          (parameterCount +26),
-isInitializedID   (parameterCount +27),
-bodyNumberID      (parameterCount +28),
-refBodyNumberID   (parameterCount +29),
-sourceFilenameID  (parameterCount +30),
-sourceStartID     (parameterCount +31),
-sourceEndID       (parameterCount +32)
+bodyTypeID          (parameterCount),
+massID              (parameterCount +1),
+eqRadiusID          (parameterCount +2),
+polarRadiusID       (parameterCount +3),
+muID                (parameterCount +4),
+posVelSourceID      (parameterCount +5),
+analyticMethodID    (parameterCount +6),
+state1ID            (parameterCount +7),
+state2ID            (parameterCount +8),
+state3ID            (parameterCount +9),
+state4ID            (parameterCount +10),
+state5ID            (parameterCount +11),
+state6ID            (parameterCount +12),
+stateTimeID         (parameterCount +13),
+orderID             (parameterCount +14),
+degreeID            (parameterCount +15),
+bodyNumberID        (parameterCount +16),
+refBodyNumberID     (parameterCount +17),
+sourceFilenameID    (parameterCount +18),
+sourceStartID       (parameterCount +19),
+sourceEndID         (parameterCount +20),
+usePotentialFileID  (parameterCount +21),
+potentialFileNameID (parameterCount +22),
+angularVelocityID1  (parameterCount +23),
+angularVelocityID2  (parameterCount +24),
+angularVelocityID3  (parameterCount +25),
+coefficientSizeID   (parameterCount +26),
+sijID               (parameterCount +27),
+cijID               (parameterCount +28),
+hourAngleID         (parameterCount +29),
+atmModelID          (parameterCount +30),
+supportedAtmModelsID (parameterCount +31)
 {
-   parameterCount += 33;
+   parameterCount += 32;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
@@ -202,32 +200,65 @@ polarRadius         (cb.polarRadius),
 mu                  (cb.mu),
 posVelSrc           (cb.posVelSrc),
 analyticMethod      (cb.analyticMethod),
-flatCoeff           (cb.flatCoeff),
-rotationRate        (cb.rotationRate),
-effectiveRange      (cb.effectiveRange),
-centralBody         (cb.centralBody),
-potentialModel      (cb.potentialModel),
-dragModel           (cb.dragModel),
 order               (cb.order),
 degree              (cb.degree),
+centralBody         (cb.centralBody),
 bodyNumber          (cb.bodyNumber),
 referenceBodyNumber (cb.referenceBodyNumber),
 sourceFilename      (cb.sourceFilename),
 sourceStart         (cb.sourceStart),
-sourceEnd           (cb.sourceEnd)
+sourceEnd           (cb.sourceEnd),
+theSourceFile       (cb.theSourceFile),
+usePotentialFile    (cb.usePotentialFile),
+potentialFileName   (cb.potentialFileName),
+coefficientSize     (cb.coefficientSize),
+sij                 (cb.sij),
+cij                 (cb.cij),
+hourAngle           (cb.hourAngle),
+atmManager          (cb.atmManager),     // do I want to do this?
+atmModel            (cb.atmModel),
+bodyTypeID          (cb.bodyTypeID),
+massID              (cb.massID),
+eqRadiusID          (cb.eqRadiusID),
+polarRadiusID       (cb.polarRadiusID),
+muID                (cb.muID),
+posVelSourceID      (cb.posVelSourceID),
+analyticMethodID    (cb.analyticMethodID),
+state1ID            (cb.state1ID),
+state2ID            (cb.state2ID),
+state3ID            (cb.state3ID),
+state4ID            (cb.state4ID),
+state5ID            (cb.state5ID),
+state6ID            (cb.state6ID),
+stateTimeID         (cb.stateTimeID),
+orderID             (cb.orderID),
+degreeID            (cb.degreeID),
+bodyNumberID        (cb.bodyNumberID),
+refBodyNumberID     (cb.refBodyNumberID),
+sourceFilenameID    (cb.sourceFilenameID),
+sourceStartID       (cb.sourceStartID),    // ???????????????
+sourceEndID         (cb.sourceEndID),      // ???????????????
+usePotentialFileID  (cb.usePotentialFileID),
+potentialFileNameID (cb.potentialFileNameID),
+angularVelocityID1  (cb.angularVelocityID1),
+angularVelocityID2  (cb.angularVelocityID2),
+angularVelocityID3  (cb.angularVelocityID3),
+coefficientSizeID   (cb.coefficientSizeID),
+sijID               (cb.sijID),
+cijID               (cb.cijID), 
+hourAngleID         (cb.hourAngleID),
+atmModelID          (cb.atmModelID),
+supportedAtmModelsID (cb.supportedAtmModelsID),
+defaultMu           (cb.defaultMu),
+defaultEqRadius     (cb.defaultEqRadius),
+defaultCoefSize     (cb.defaultCoefSize),
+defaultSij          (cb.defaultSij),
+defaultCij          (cb.defaultCij)
 {
-   //int i = 0;
-   //for (i=0;i++;i<5)
-   //{
-   //   zonals[i] = cb.zonals[i];
-   //}
-   //for (i=0;i++;i<6)
-   //{
-   //   state[i] = cb.state[i];
-   //}
-      zonals    = cb.zonals;
       state     = cb.state;
       stateTime = cb.stateTime;
+      int i;
+      for (i=0;i<3;i++) angularVelocity[i] = cb.angularVelocity[i];
 }
 
 //------------------------------------------------------------------------------
@@ -255,34 +286,68 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    mu                  = cb.mu;
    posVelSrc           = cb.posVelSrc;
    analyticMethod      = cb.analyticMethod;
-   flatCoeff           = cb.flatCoeff;
-   rotationRate        = cb.rotationRate;
-   effectiveRange      = cb.effectiveRange;
-   centralBody         = cb.centralBody;
-   potentialModel      = cb.potentialModel;
-   dragModel           = cb.dragModel;
+   state               = cb.state;
+   stateTime           = cb.stateTime;
    order               = cb.order;
    degree              = cb.degree;
+   centralBody         = cb.centralBody;
    bodyNumber          = cb.bodyNumber;
    referenceBodyNumber = cb.referenceBodyNumber;
    sourceFilename      = cb.sourceFilename;
    sourceStart         = cb.sourceStart;
    sourceEnd           = cb.sourceEnd;
-
-   // how about the IDs?
-   //int i = 0;
-   //for (i=0;i++;i<5)
-   //{
-   //   zonals[i] = cb.zonals[i];
-   //}
-   //for (i=0;i++;i<6)
-   //{
-   //   state[i] = cb.state[i];
-   //}
-      zonals    = cb.zonals;
-      state     = cb.state;
-      stateTime = cb.stateTime;
+   usePotentialFile    = cb.usePotentialFile;
+   potentialFileName   = cb.potentialFileName;
+   coefficientSize     = cb.coefficientSize;
+   sij                 = cb.sij;
+   cij                 = cb.cij;
+   hourAngle           = cb.hourAngle;
+   atmManager          = cb.atmManager;     // do I want to do this?
+   atmModel            = cb.atmModel;
       
+   int i;
+   for (i=0;i<3;i++) angularVelocity[i] = cb.angularVelocity[i];
+   
+   // copy the IDs as well
+   bodyTypeID             = cb.bodyTypeID;
+   massID                 = cb.massID;
+   eqRadiusID             = cb.eqRadiusID;
+   polarRadiusID          = cb.polarRadiusID;
+   muID                   = cb.muID;
+   posVelSourceID         = cb.posVelSourceID;
+   analyticMethodID       = cb.analyticMethodID;
+   state1ID               = cb.state1ID;
+   state2ID               = cb.state2ID;
+   state3ID               = cb.state3ID;
+   state4ID               = cb.state4ID;
+   state5ID               = cb.state5ID;
+   state6ID               = cb.state6ID;
+   stateTimeID            = cb.stateTimeID;
+   orderID                = cb.orderID;
+   degreeID               = cb.degreeID;
+   bodyNumberID           = cb.bodyNumberID;
+   refBodyNumberID        = cb.refBodyNumberID;
+   sourceFilenameID       = cb.sourceFilenameID;
+   sourceStartID          = cb.sourceStartID;    // ???????????????
+   sourceEndID            = cb.sourceEndID;      // ???????????????
+   usePotentialFileID     = cb.usePotentialFileID;
+   potentialFileNameID    = cb.potentialFileNameID;
+   angularVelocityID1     = cb.angularVelocityID1;
+   angularVelocityID2     = cb.angularVelocityID2;
+   angularVelocityID3     = cb.angularVelocityID3;
+   coefficientSizeID      = cb.coefficientSizeID;
+   sijID                  = cb.sijID;           // ?????????????????
+   cijID                  = cb.cijID;           // ?????????????????
+   hourAngleID            = cb.hourAngleID;
+   atmModelID             = cb.atmModelID;
+   supportedAtmModelsID   = cb.supportedAtmModelsID;
+
+   defaultMu              = cb.defaultMu;
+   defaultEqRadius        = cb.defaultEqRadius;
+   defaultCoefSize        = cb.defaultCoefSize;
+   defaultSij             = cb.defaultSij;
+   defaultCij             = cb.defaultCij;
+
    return *this;
 }
 
@@ -295,9 +360,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
 //------------------------------------------------------------------------------
 CelestialBody::~CelestialBody()
 {
-   delete centralBody;
-   delete potentialModel;
-   delete dragModel;
+   delete atmManager;
+   delete atmModel;
 }
 
 //------------------------------------------------------------------------------
@@ -372,7 +436,7 @@ CelestialBody* CelestialBody::GetCentralBody() const
 }
 
 //------------------------------------------------------------------------------
-//  Real GetGravitationalConstant() const
+//  Real GetGravitationalConstant() 
 //------------------------------------------------------------------------------
 /**
  * This method returns the gravitational constant (km^3/s^2) of the body.
@@ -381,24 +445,49 @@ CelestialBody* CelestialBody::GetCentralBody() const
  *
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetGravitationalConstant() const
+Real CelestialBody::GetGravitationalConstant() 
 {
+   if ((usePotentialFile == true) & (!potentialFileRead))
+   {
+      bool err = ReadPotentialFile();
+      if (err) return 0.0;     // should throw an exception here
+   }
    return mu;
 }
 
 //------------------------------------------------------------------------------
-//  Real GetEquatorialRadius() const
+//  Real GetEquatorialRadius() 
 //------------------------------------------------------------------------------
 /**
- * This method returns the equatorial radius (km) of the body.
+* This method returns the equatorial radius (km) of the body.
  *
  * @return equatorial radius of the body.
  *
  */
 //------------------------------------------------------------------------------
-Real CelestialBody::GetEquatorialRadius() const
+Real CelestialBody::GetEquatorialRadius() 
 {
+   if ((usePotentialFile == true) & (!potentialFileRead))
+   {
+      bool err = ReadPotentialFile();
+      if (err) return 0.0;     // should throw an exception here
+   }
    return equatorialRadius;
+}
+
+//------------------------------------------------------------------------------
+//  Real GetPolarRadius() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the polar radius (km) of the body.
+ *
+ * @return polar radius of the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Real CelestialBody::GetPolarRadius() const
+{
+   return polarRadius;   //    if ((usePotentialFile == true) & (!potentialFileRead)) ReadPotentialFile();??
 }
 
 //------------------------------------------------------------------------------
@@ -420,7 +509,7 @@ Real CelestialBody::GetEquatorialRadius() const
 //  Gmat::PosVelSource GetPosVelSource() const
 //------------------------------------------------------------------------------
 /**
-* This method returns the source of position and velocity for the body.
+ * This method returns the source of position and velocity for the body.
  *
  * @return position/velocity source for the body.
  *
@@ -444,6 +533,126 @@ Gmat::PosVelSource  CelestialBody::GetPosVelSource() const
 Gmat::AnalyticMethod CelestialBody::GetAnalyticMethod() const
 {
    return analyticMethod;
+}
+
+//------------------------------------------------------------------------------
+//  bool CelestialBody::GetUsePotentialFile() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the flag indicating whether to use the potential file
+ * or not used for the body.
+ *
+ * @return flag indicating whether or not to use the potential file to determine
+ *         mu, radius, and spherical harmonic coefficients.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::GetUsePotentialFile() const
+{
+   return usePotentialFile;
+}
+
+//------------------------------------------------------------------------------
+//  Real* CelestialBody::GetAngularVelocity() 
+//------------------------------------------------------------------------------
+/**
+ * This method returns the angular velocity for the body.
+ *
+ * @return angular velocity (Real[3]) for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Real* CelestialBody::GetAngularVelocity() 
+{
+   return angularVelocity;  // but how do I compute it???????
+}
+
+//------------------------------------------------------------------------------
+//  Real CelestialBody::GetHourAngle() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the hour angle for the body.
+ *
+ * @return hour angle for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Real  CelestialBody:: GetHourAngle() const            // const??
+{
+   return hourAngle;       // but how do I compute it?????????
+}
+
+//------------------------------------------------------------------------------
+//  Rmatrix GetHarmonicCoefficientsSij() 
+//------------------------------------------------------------------------------
+/**
+ * This method returns the spherical harmonic coefficients sij for the body.  It
+ * will read the potential file if that is requested.
+ *
+ * @return sij spherical harmonic coefficients for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Rmatrix CelestialBody::GetHarmonicCoefficientsSij() 
+{
+   if ((usePotentialFile == true) & (!potentialFileRead))
+   {
+      bool err = ReadPotentialFile();
+      if (err) return Rmatrix();     // should throw an exception here
+   }
+   return sij;
+}
+
+//------------------------------------------------------------------------------
+//  Rmatrix GetHarmonicCoefficientsCij() 
+//------------------------------------------------------------------------------
+/**
+ * This method returns the spherical harmonic coefficients cij for the body.  It
+ * will read the potential file if that is requested.
+ *
+ * @return cij spherical harmonic coefficients for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+Rmatrix CelestialBody::GetHarmonicCoefficientsCij() 
+{
+   if ((usePotentialFile == true) & (!potentialFileRead))
+   {
+      bool err = ReadPotentialFile();
+      if (err) return Rmatrix();     // should throw an exception here
+   }
+   return cij;
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetSupportedAtmospheres() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a list of the supported atmosphere models for the body.
+ *
+ * @return a list of supported atmosphere models for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray&   CelestialBody::GetSupportedAtmospheres() const
+{
+   return atmManager->GetSupportedAtmospheres();
+}
+
+//------------------------------------------------------------------------------
+//  std::string GetCurrentAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * This method returns the name (type) of the current atmosphere model for
+ * the body.
+ *
+ * @return the name (type) of the current atmosphere model for the body.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string  CelestialBody::GetCurrentAtmosphereModel()
+{
+   return atmModel->GetTypeName();  // or should I go through the AtmManager?
 }
 
 //------------------------------------------------------------------------------
@@ -521,7 +730,7 @@ bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 //  bool SetAnalyticMethod(Gmat::AnalyticMethod aM)
 //------------------------------------------------------------------------------
 /**
- * This method sets the analytic method for the body.
+* This method sets the analytic method for the body.
  *
  * @param <aM> analytic method for the body.
  *
@@ -532,6 +741,67 @@ bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 bool CelestialBody::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 {
    return (analyticMethod = aM);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetUsePotentialFile(bool useIt)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the flag indicating whether or not to get the mu, radius,
+ * and harmonic coefficients from the potential file.
+ *
+ * @param <useIt> use the potential file?.
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetUsePotentialFile(bool useIt)
+{
+   if ((usePotentialFile == false) && (useIt == true))
+   {
+      potentialFileRead = false;
+   }
+   else if ((usePotentialFile == true) && (useIt == false))
+   {
+      mu               = defaultMu;
+      equatorialRadius = defaultEqRadius;
+      coefficientSize  = defaultCoefSize;
+      sij              = defaultSij;
+      cij              = defaultCij;
+   }
+   return (usePotentialFile = useIt);
+}
+
+//------------------------------------------------------------------------------
+//  bool SetAtmosphereModel(std::string toAtmModel)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the atmosphere model for the body.
+ *
+ * @param <toAtmModel> name (type) of the atmosphere model to use.
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetAtmosphereModel(std::string toAtmModel)
+{
+   if (atmModel != NULL)
+   {
+      std::string currentModel = atmModel->GetTypeName();
+      if (currentModel != toAtmModel)
+      {
+          delete atmModel;
+      }
+      else
+      {
+         return true;  // already the right kind of atmosphere model
+      }
+   }
+   atmModel = atmManager->GetAtmosphere(toAtmModel);
+   if (atmModel == NULL) return false;  // error creating a new atmosphere model
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -548,39 +818,38 @@ bool CelestialBody::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetParameterText(const Integer id) const
 {
-   if (id == bodyTypeID)        return "BodyType";
-   if (id == massID)            return "Mass";
-   if (id == eqRadiusID)        return "EquatorialRadius";
-   if (id == polarRadiusID)     return "PolarRadius";
-   if (id == muID)              return "mu";
-   if (id == posVelSourceID)    return "PositionVelocitySource";
-   if (id == analyticMethodID)  return "AnalyticMethod";
-   if (id == flatCoeffID)       return "Flattening Coefficient";
-   if (id == rotationRateID)    return "RotationRate";
-   if (id == zonals1ID)         return "Zonals1";
-   if (id == zonals2ID)         return "Zonals2";
-   if (id == zonals3ID)         return "Zonals3";
-   if (id == zonals4ID)         return "Zonals4";
-   if (id == zonals5ID)         return "Zonals5";
-   if (id == state1ID)          return "PositionX";
-   if (id == state2ID)          return "PositionY";
-   if (id == state3ID)          return "PositionZ";
-   if (id == state4ID)          return "VelocityX";
-   if (id == state5ID)          return "VelocityY";
-   if (id == state6ID)          return "VelocityZ";
-   if (id == stateTimeID)       return "StateTime";
-   if (id == effRangeID)        return "EffectiveRange";
-   if (id == centralBodyID)     return "CentralBody";
-   if (id == potentialModelID)  return "PotentialModel";
-   if (id == dragModelID)       return "DragModel";
-   if (id == orderID)           return "Order";
-   if (id == degreeID)          return "Degree";
-//   if (id == isInitializedID)   return "IsInitialized"; // does NOT make sense
-   if (id == bodyNumberID)      return "BodyNumber";
-   if (id == refBodyNumberID)   return "ReferenceBodyNumber";
-   if (id == sourceFilenameID)  return "SourceFilename";
-   if (id == sourceStartID)     return "SourceStartTime";
-   if (id == sourceEndID)       return "SourceEndTime";
+   if (id == bodyTypeID)          return "BodyType";
+   if (id == massID)              return "Mass";
+   if (id == eqRadiusID)          return "EquatorialRadius";
+   if (id == polarRadiusID)       return "PolarRadius";
+   if (id == muID)                return "mu";
+   if (id == posVelSourceID)      return "PositionVelocitySource";
+   if (id == analyticMethodID)    return "AnalyticMethod";
+   if (id == state1ID)            return "PositionX";
+   if (id == state2ID)            return "PositionY";
+   if (id == state3ID)            return "PositionZ";
+   if (id == state4ID)            return "VelocityX";
+   if (id == state5ID)            return "VelocityY";
+   if (id == state6ID)            return "VelocityZ";
+   if (id == stateTimeID)         return "StateTime";
+   if (id == orderID)             return "Order";
+   if (id == degreeID)            return "Degree";
+   if (id == bodyNumberID)        return "BodyNumber";
+   if (id == refBodyNumberID)     return "ReferenceBodyNumber";
+   if (id == sourceFilenameID)    return "SourceFilename";
+   if (id == sourceStartID)       return "SourceStartTime";
+   if (id == sourceEndID)         return "SourceEndTime";
+   if (id == usePotentialFileID)  return "UsePotentialFile";
+   if (id == potentialFileNameID) return "PotentialFileName";
+   if (id == angularVelocityID1)  return "AngularVelocityX";
+   if (id == angularVelocityID2)  return "AngularVelocityY";
+   if (id == angularVelocityID3)  return "AngularVelocityZ";
+   if (id == coefficientSizeID)  return "CoefficientSize";
+   if (id == sijID)               return "sij";
+   if (id == cijID)               return "cij";
+   if (id == hourAngleID)         return "HourAngle";
+   if (id == atmModelID)          return "AtmosphereModel";
+   if (id == supportedAtmModelsID) return "SupportedAtmosphereModels";
 
    return GmatBase::GetParameterText(id);
 }
@@ -606,13 +875,6 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
    if (str == "Mu")                     return muID;
    if (str == "PositionVelocitySource") return posVelSourceID;
    if (str == "AnalyticMethod")         return analyticMethodID;
-   if (str == "FlatteningCoefficient")  return flatCoeffID;
-   if (str == "RotationRate")           return rotationRateID;
-   if (str == "Zonals1")                return zonals1ID;
-   if (str == "Zonals2")                return zonals2ID;
-   if (str == "Zonals3")                return zonals3ID;
-   if (str == "Zonals4")                return zonals4ID;
-   if (str == "Zonals5")                return zonals5ID;
    if (str == "PositionX")              return state1ID;
    if (str == "PositionY")              return state2ID;
    if (str == "PositionZ")              return state3ID;
@@ -620,18 +882,24 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
    if (str == "VelocityY")              return state5ID;
    if (str == "VelocityZ")              return state6ID;
    if (str == "StateTime")              return stateTimeID;
-   if (str == "EffectiveRange")         return effRangeID;
-   if (str == "CentralBody")            return centralBodyID;
-   if (str == "PotentialModel")         return potentialModelID;
-   if (str == "DragModel")              return dragModelID;
    if (str == "Order")                  return orderID;
    if (str == "Degree")                 return degreeID;
-   //   if (id == "IsInitialized")        return isInitializedID; // does NOT make sense
    if (str == "BodyNumber")             return bodyNumberID;
    if (str == "ReferenceBodyNumber")    return refBodyNumberID;
    if (str == "SourceFilename")         return sourceFilenameID;
    if (str == "SourceStartTime")        return sourceStartID;
    if (str == "SourceEndTime")          return sourceEndID;
+   if (str == "UsePotentialFile")       return usePotentialFileID;
+   if (str == "PotentialFileName")      return potentialFileNameID;
+   if (str == "AngularVelocityX")       return angularVelocityID1;
+   if (str == "AngularVelocityY")       return angularVelocityID2;
+   if (str == "AngularVelocityZ")       return angularVelocityID3;
+   if (str == "CoefficientSize")        return coefficientSizeID;
+   if (str == "sij")                    return sijID;
+   if (str == "cij")                    return cijID;
+   if (str == "HourAngle")              return hourAngleID;
+   if (str == "AtmosphereModel")        return atmModelID;
+   if (str == "SupportedAtmosphereModels") return supportedAtmModelsID;
    
    return GmatBase::GetParameterID(str);
 }
@@ -650,39 +918,38 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
 {
-   if (id == bodyTypeID)        return Gmat::INTEGER_TYPE;
-   if (id == massID)            return Gmat::REAL_TYPE;
-   if (id == eqRadiusID)        return Gmat::REAL_TYPE;
-   if (id == polarRadiusID)     return Gmat::REAL_TYPE;
-   if (id == muID)              return Gmat::REAL_TYPE;
-   if (id == posVelSourceID)    return Gmat::INTEGER_TYPE;
-   if (id == analyticMethodID)  return Gmat::INTEGER_TYPE;
-   if (id == flatCoeffID)       return Gmat::REAL_TYPE;
-   if (id == rotationRateID)    return Gmat::REAL_TYPE;
-   if (id == zonals1ID)         return Gmat::REAL_TYPE;
-   if (id == zonals2ID)         return Gmat::REAL_TYPE;
-   if (id == zonals3ID)         return Gmat::REAL_TYPE;
-   if (id == zonals4ID)         return Gmat::REAL_TYPE;
-   if (id == zonals5ID)         return Gmat::REAL_TYPE;
-   if (id == state1ID)          return Gmat::REAL_TYPE; // should state be RVECTOR6?
-   if (id == state2ID)          return Gmat::REAL_TYPE;
-   if (id == state3ID)          return Gmat::REAL_TYPE;
-   if (id == state4ID)          return Gmat::REAL_TYPE;
-   if (id == state5ID)          return Gmat::REAL_TYPE;
-   if (id == state6ID)          return Gmat::REAL_TYPE;
-   if (id == stateTimeID)       return Gmat::A1MJD_TYPE;
-   if (id == effRangeID)        return Gmat::REAL_TYPE;
-   if (id == centralBodyID)     return Gmat::OBJECT_TYPE;  // what is right?
-   if (id == potentialModelID)  return Gmat::OBJECT_TYPE;  // ???
-   if (id == dragModelID)       return Gmat::OBJECT_TYPE;  // ???
-   if (id == orderID)           return Gmat::INTEGER_TYPE;
-   if (id == degreeID)          return Gmat::INTEGER_TYPE;
-//   if (id == isInitializedID)   return Gmat::INTEGER_TYPE; // does NOT make sense
-   if (id == bodyNumberID)      return Gmat::INTEGER_TYPE;
-   if (id == refBodyNumberID)   return Gmat::INTEGER_TYPE;
-   if (id == sourceFilenameID)  return Gmat::STRING_TYPE;
-   if (id == sourceStartID)     return Gmat::A1MJD_TYPE;
-   if (id == sourceEndID)       return Gmat::A1MJD_TYPE;
+   if (id == bodyTypeID)          return Gmat::INTEGER_TYPE;
+   if (id == massID)              return Gmat::REAL_TYPE;
+   if (id == eqRadiusID)          return Gmat::REAL_TYPE;
+   if (id == polarRadiusID)       return Gmat::REAL_TYPE;
+   if (id == muID)                return Gmat::REAL_TYPE;
+   if (id == posVelSourceID)      return Gmat::INTEGER_TYPE;
+   if (id == analyticMethodID)    return Gmat::INTEGER_TYPE;
+   if (id == state1ID)            return Gmat::REAL_TYPE; // should state be RVECTOR6?
+   if (id == state2ID)            return Gmat::REAL_TYPE;
+   if (id == state3ID)            return Gmat::REAL_TYPE;
+   if (id == state4ID)            return Gmat::REAL_TYPE;
+   if (id == state5ID)            return Gmat::REAL_TYPE;
+   if (id == state6ID)            return Gmat::REAL_TYPE;
+   if (id == stateTimeID)         return Gmat::A1MJD_TYPE;
+   if (id == orderID)             return Gmat::INTEGER_TYPE;
+   if (id == degreeID)            return Gmat::INTEGER_TYPE;
+   if (id == bodyNumberID)        return Gmat::INTEGER_TYPE;
+   if (id == refBodyNumberID)     return Gmat::INTEGER_TYPE;
+   if (id == sourceFilenameID)    return Gmat::STRING_TYPE;
+   if (id == sourceStartID)       return Gmat::A1MJD_TYPE;
+   if (id == sourceEndID)         return Gmat::A1MJD_TYPE;
+   if (id == usePotentialFileID)  return Gmat::BOOLEAN_TYPE;
+   if (id == potentialFileNameID) return Gmat::STRING_TYPE;
+   if (id == angularVelocityID1)  return Gmat::REAL_TYPE;
+   if (id == angularVelocityID2)  return Gmat::REAL_TYPE;
+   if (id == angularVelocityID3)  return Gmat::REAL_TYPE;
+   if (id == coefficientSizeID)   return Gmat::INTEGER_TYPE;
+   if (id == sijID)               return Gmat::UNKNOWN_PARAMETER_TYPE;  // ?????? n x n matrix
+   if (id == cijID)               return Gmat::UNKNOWN_PARAMETER_TYPE;  // ?????? n x n matrix
+   if (id == hourAngleID)         return Gmat::REAL_TYPE;
+   if (id == atmModelID)          return Gmat::OBJECT_TYPE;             // correct?  // string type????
+   if (id == supportedAtmModelsID) return Gmat::STRINGARRAY_TYPE;
       
    return GmatBase::GetParameterType(id);
 }
@@ -718,24 +985,21 @@ std::string CelestialBody::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real        CelestialBody::GetRealParameter(const Integer id) const
 {
-   if (id == massID)            return mass;
-   if (id == eqRadiusID)        return equatorialRadius;
-   if (id == polarRadiusID)     return polarRadius;
-   if (id == muID)              return mu;
-   if (id == flatCoeffID)       return flatCoeff;
-   if (id == rotationRateID)    return rotationRate;
-   if (id == zonals1ID)         return zonals[0];
-   if (id == zonals2ID)         return zonals[1];
-   if (id == zonals3ID)         return zonals[2];
-   if (id == zonals4ID)         return zonals[3];
-   if (id == zonals5ID)         return zonals[4];
-   if (id == state1ID)          return state[0];
-   if (id == state2ID)          return state[1];
-   if (id == state3ID)          return state[2];
-   if (id == state4ID)          return state[3];
-   if (id == state5ID)          return state[4];
-   if (id == state6ID)          return state[5];
-   if (id == effRangeID)        return effectiveRange;
+   if (id == massID)             return mass;
+   if (id == eqRadiusID)         return equatorialRadius;
+   if (id == polarRadiusID)      return polarRadius;
+   if (id == muID)               return mu;
+   if (id == state1ID)           return state[0];
+   if (id == state2ID)           return state[1];
+   if (id == state3ID)           return state[2];
+   if (id == state4ID)           return state[3];
+   if (id == state5ID)           return state[4];
+   if (id == state6ID)           return state[5];
+   if (id == angularVelocityID1) return angularVelocity[0];
+   if (id == angularVelocityID2) return angularVelocity[1];
+   if (id == angularVelocityID3) return angularVelocity[2];
+   if (id == hourAngleID)        return hourAngle;
+   // what to do about sij, cij????????????????
 
    return GmatBase::GetRealParameter(id);
 }
@@ -755,25 +1019,22 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == massID)            return mass             = value;
-   if (id == eqRadiusID)        return equatorialRadius = value;
-   if (id == polarRadiusID)     return polarRadius      = value;
-   if (id == muID)              return mu               = value;
-   if (id == flatCoeffID)       return flatCoeff        = value;
-   if (id == rotationRateID)    return rotationRate     = value;
-   if (id == zonals1ID)         return zonals[0]        = value;
-   if (id == zonals2ID)         return zonals[1]        = value;
-   if (id == zonals3ID)         return zonals[2]        = value;
-   if (id == zonals4ID)         return zonals[3]        = value;
-   if (id == zonals5ID)         return zonals[4]        = value;
-   if (id == state1ID)          return state[0]         = value;
-   if (id == state2ID)          return state[1]         = value;
-   if (id == state3ID)          return state[2]         = value;
-   if (id == state4ID)          return state[3]         = value;
-   if (id == state5ID)          return state[4]         = value;
-   if (id == state6ID)          return state[5]         = value;
-   if (id == effRangeID)        return effectiveRange   = value;
-
+   if (id == massID)             return (mass               = value);
+   if (id == eqRadiusID)         return (equatorialRadius   = value);
+   if (id == polarRadiusID)      return (polarRadius        = value);
+   if (id == muID)               return (mu                 = value);
+   if (id == state1ID)           return (state[0]           = value);
+   if (id == state2ID)           return (state[1]           = value);
+   if (id == state3ID)           return (state[2]           = value);
+   if (id == state4ID)           return (state[3]           = value);
+   if (id == state5ID)           return (state[4]           = value);
+   if (id == state6ID)           return (state[5]           = value);
+   if (id == angularVelocityID1) return (angularVelocity[0] = value);
+   if (id == angularVelocityID2) return (angularVelocity[1] = value);
+   if (id == angularVelocityID3) return (angularVelocity[2] = value);
+   if (id == hourAngleID)        return (hourAngle          = value);
+   // what to do about sij, cij????????????????
+   
    return GmatBase::SetRealParameter(id, value);
 }
 
@@ -796,6 +1057,7 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
    if (id == refBodyNumberID)       return referenceBodyNumber;
    if (id == orderID)               return order;
    if (id == degreeID)              return degree;
+   if (id == coefficientSizeID)     return coefficientSize;
    
    return GmatBase::GetIntegerParameter(id); // add others in later?
 }
@@ -817,10 +1079,11 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
 Integer     CelestialBody::SetIntegerParameter(const Integer id,
                                         const Integer value) // const?
 {
-   if (id == bodyNumberID)          return bodyNumber          = value;
-   if (id == refBodyNumberID)       return referenceBodyNumber = value;
-   if (id == orderID)               return order               = value;
-   if (id == degreeID)              return degree              = value;
+   if (id == bodyNumberID)          return (bodyNumber          = value);
+   if (id == refBodyNumberID)       return (referenceBodyNumber = value);
+   if (id == orderID)               return (order               = value);
+   if (id == degreeID)              return (degree              = value);
+   if (id == coefficientSizeID)     return (coefficientSize     = value);
    
    return GmatBase::SetIntegerParameter(id,value);  // add others in later
 }
@@ -841,6 +1104,12 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
 std::string CelestialBody::GetStringParameter(const Integer id) const
 {
    if (id == sourceFilenameID)      return sourceFilename;
+   if (id == potentialFileNameID)   return potentialFileName;
+   if (id == atmModelID)
+   {
+      if (atmModel == NULL) return "";
+      return atmModel->GetTypeName();
+   }
 
    return GmatBase::GetStringParameter(id);
 }
@@ -855,7 +1124,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
  * @param <id> ID for the requested parameter.
  * @param <value> string value for the requested parameter.
  *
- * @return  string value of the requested parameter.
+ * @return  success flag.
  *
  */
 //------------------------------------------------------------------------------
@@ -867,7 +1136,16 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       sourceFilename = value;
       return true;
    }
-
+   if (id == potentialFileNameID)
+   {
+      potentialFileName = value;
+      return true;
+   }
+   if (id == atmModelID)
+   {
+      return SetAtmosphereModel(value);
+   }
+   
    return GmatBase::SetStringParameter(id, value);
 }
 
@@ -886,7 +1164,7 @@ bool        CelestialBody::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 bool        CelestialBody::GetBooleanParameter(const Integer id) const
 {
-//   if (id == isInitializedID)       return isInitialized;  // does NOT make sense
+   if (id == usePotentialFileID)       return usePotentialFile;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -901,18 +1179,42 @@ bool        CelestialBody::GetBooleanParameter(const Integer id) const
  * @param <id> ID for the requested parameter.
  * @param <value> bool value for the requested parameter.
  *
- * @return  string bool of the requested parameter.
+ * @return  success flag.
  *
  */
 //------------------------------------------------------------------------------
 bool        CelestialBody::SetBooleanParameter(const Integer id,
                                         const bool value) // const?
 {
-//   if (id == isInitializedID)       return isInitialized = value; // this does NOT make sense
+   if (id == usePotentialFileID)       return (usePotentialFile = value); 
 
    return GmatBase::SetBooleanParameter(id,value);
 }
-                                                           //------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter((const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the StringArray parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  StringArray value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& CelestialBody::GetStringArrayParameter(const Integer id) const
+{
+   if (id == supportedAtmModelsID)
+   {
+      return GetSupportedAtmospheres();
+   }
+
+   return GmatBase::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -927,10 +1229,33 @@ bool        CelestialBody::SetBooleanParameter(const Integer id,
 //------------------------------------------------------------------------------
 void CelestialBody::Initialize(std::string withBodyType)
 {
-   // fill in with default values, based on the body type?  Or let derived classes
-   // do that?
+   // assuming derived classes will fill in all the specific things with
+   // appropriate default values
    stateTime = 0.0;
    state.reserve(6);
+   potentialFileRead = false;
+   atmManager = NULL;
+   atmModel = NULL;
+}
+
+//------------------------------------------------------------------------------
+//  bool  ReadPotentialFile()
+//------------------------------------------------------------------------------
+/**
+ * This method reads the potential file, if requested, and gets the mu, radius,
+ * and spherical harmonic coefficients, sij and cij, from the file.
+ *
+ * @return flag indicating success of the file-reading.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::ReadPotentialFile()
+{
+   if (potentialFileRead) return true;
+   // I will need to call the method of the full field force to read the file
+   // set mu, radius, sij, cij, coefficientSize
+   potentialFileRead = true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
