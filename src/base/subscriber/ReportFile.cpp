@@ -19,6 +19,7 @@
 
 
 #include "ReportFile.hpp"
+#include "MessageInterface.hpp"
 /*
 ReportFile::ReportFile(char * filename)
 {
@@ -108,6 +109,8 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 
 bool ReportFile::OpenReportFile(void)
 {
+     MessageInterface::ShowMessage("ReportFile() filename = %s\n", filename.c_str());
+
     dstream.open(filename.c_str());
     if (!dstream.is_open())
         return false;
@@ -201,7 +204,12 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id == filenameID) {
         // Close the stream if it is open
-    
+        if (dstream.is_open())
+        {
+           dstream.close();
+           dstream.open(value.c_str());
+        }
+           
         filename = value;
         return true;
     }
