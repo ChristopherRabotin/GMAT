@@ -258,12 +258,19 @@ bool ScriptInterpreter::Parse(void)
             ++phrase;
             type = **phrase;
             ++phrase;
-            if (phrase != chunks.end())
+            
+            while (phrase != chunks.end()) {
+//            if (phrase != chunks.end())
                 name = **phrase;
+                
+                if ((name == ";") || (name[0] == '%'))
+                   break;
 
-            if (!InterpretObject(type, name))
-                throw InterpreterException("Unable to create object " + name +
-                                           " of type " + type);
+                if (!InterpretObject(type, name))
+                    throw InterpreterException("Unable to create object " +
+                                               name + " of type " + type);
+                ++phrase;
+            }
         }
         // Next try for object parameter setup or assignment
         else if ((**phrase == "GMAT") && (!sequenceStarted)) {
