@@ -746,10 +746,15 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnClose(wxCommandEvent &event)
 {
-    // make item most current, then close it
-//    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-//    mainNotebook->CreatePage(item);
-//    mainNotebook->ClosePage(); //need to add for frame
+   // Get info from selected item
+    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+   
+   // if its open, its activated
+   if (GmatAppData::GetMainFrame()->IsChildOpen(item))
+      // close the window
+      GmatAppData::GetMainFrame()->CloseActiveChild();
+   else
+      return;
 }
 
 //------------------------------------------------------------------------------

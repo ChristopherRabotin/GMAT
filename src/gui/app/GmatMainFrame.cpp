@@ -60,6 +60,8 @@
 #include "ForLoopPanel.hpp"
 #include "GmatMdiChildFrame.hpp"
 
+#include <wx/gdicmn.h>
+
 #define DEBUG_MAINFRAME 0
 
 //------------------------------
@@ -418,6 +420,9 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                     currentX, -1, (wxObject *) NULL, _T("Help"));
 
    toolBar->Realize();
+   
+   wxColour toolBarBackground = *wxLIGHT_GREY;
+   toolBar->SetBackgroundColour(toolBarBackground);
 
    int i;
    for (i = 0; i < 13; i++)
@@ -954,8 +959,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
         {
-            MessageInterface::ShowMessage
-                ("GmatMainNotebook::CreatePage() creating MISSION_SEQ_COMMAND\n");
             return;
         }
         else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
@@ -994,8 +997,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
         {
-            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
-
             newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                      wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
             panel = new wxScrolledWindow(newChild);              
@@ -1004,7 +1005,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
         {
-           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
            newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                      wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
            panel = new wxScrolledWindow(newChild);  
