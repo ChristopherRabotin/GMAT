@@ -219,6 +219,7 @@ private:
    void DisplayForceData();
    void DisplayGravityFieldData();
    void DisplayAtmosphereModelData();
+   void DisplayPointMassData();
    void DisplayMagneticFieldData();
    void DisplaySRPData();
     
