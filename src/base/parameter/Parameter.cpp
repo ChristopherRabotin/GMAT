@@ -519,6 +519,14 @@ std::string Parameter::GetStringParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetStringParameter(const std::string &label) const
+{
+    return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
@@ -536,18 +544,6 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-std::string Parameter::GetStringParameter(const std::string &label) const
-{
-    for (int i=0; i<ParameterParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return GetStringParameter(i);
-
-    return GmatBase::GetStringParameter(label);
-}
-
-//------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label,
 //                         const std::string &value)
 //------------------------------------------------------------------------------
@@ -556,11 +552,7 @@ bool Parameter::SetStringParameter(const std::string &label,
 {
 //      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
 //                                    "label = " + label + ", value = " + value + "\n");
-    for (int i=0; i<ParameterParamCount; i++)
-        if (label == PARAMETER_TEXT[i])
-            return SetStringParameter(i, value);
-
-    return GmatBase::SetStringParameter(label, value);
+    return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------
