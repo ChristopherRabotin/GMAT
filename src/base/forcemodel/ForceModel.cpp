@@ -1040,9 +1040,16 @@ std::string ForceModel::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ForceModel::GetParameterID(const std::string &str) const
 {
+    std::string alias = str;
+    
+    // Script document required two different names for the primary body
+    // force descriptor
+    if (alias == "Gravity")
+       alias = "PrimaryBodies";
+    
     for (int i = PhysicalModelParamCount; i < ForceModelParamCount; i++)
     {
-        if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
+        if (alias == PARAMETER_TEXT[i - PhysicalModelParamCount])
             return i;
     }
 
@@ -1379,7 +1386,7 @@ ObjectArray& ForceModel::GetRefObjectArray(const std::string& typeString)
    // Run through list of forces, adding body names for GravityField instances
    std::vector<PhysicalModel*>::const_iterator i;
    std::string actualType = GetScriptAlias(typeString);
-   
+
    if (typeString == "PhysicalModel") {
       for (i = forceList.begin(); i != forceList.end(); ++i) {
          objects.push_back(*i);       // Ignore names for forces.

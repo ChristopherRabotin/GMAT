@@ -399,59 +399,70 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
 {
    if ((dvorder > 2) || (dvorder < 1))
       return false;
+      
+/// @todo Optimize this code -- May be possible to make GravityField calcs more efficient
 
-   int satcount = dimension / 6;
-   if (6*satcount != dimension)
-      return false;
+   Integer stateSize = 6;
+   Integer satcount = dimension / stateSize; 
+   
+   if (stateSize * satcount != dimension)
+      throw ForceModelException("GravityField state dimension and state size do not match!");
 
    // Currently hardcoded for one spacecraft.  - remove this!!!!!!!!!!!!!!
-   if (satcount != 1)
-      return false;
-
+   if (satcount < 1)
+      throw ForceModelException("GravityField requires at least one spacecraft.");
+      
+   Real* satState;
    Real f[3], rbb3, mu_rbb, aIndirect[3], now;
+   Integer nOffset;
    
-   if (!legendreP_rtq(state))
-      return false;
-   if (!gravity_rtq(epoch + 2430000.0 + dt/86400.0, f))
-      return false;
-
-   now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
-   const Rvector6 *rv = &(body->GetState(now));
-
-   // Precalculations for the indirect effect term
-   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-   if (rbb3 != 0.0) {
-      rbb3 = rbb3 * sqrt(rbb3);
-      mu_rbb = mu / rbb3;
-      aIndirect[0] = mu_rbb * (*rv)[0];
-      aIndirect[1] = mu_rbb * (*rv)[1];
-      aIndirect[2] = mu_rbb * (*rv)[2];
-   }
-   else
-      aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
-
-   switch (dvorder)
-   {
-      case 1:
-         deriv[0] = state[3];
-         deriv[1] = state[4];
-         deriv[2] = state[5];
-         deriv[3] = f[0] - aIndirect[0];
-         deriv[4] = f[1] - aIndirect[1];
-         deriv[5] = f[2] - aIndirect[2];
-         break;
-
-      case 2:
-         deriv[0] = f[0] - aIndirect[0];
-         deriv[1] = f[1] - aIndirect[1];
-         deriv[2] = f[2] - aIndirect[2];
-         deriv[3] =
-            deriv[4] =
-            deriv[5] = 0.0;
-         break;
-
-      default:
-         return false;
+   for (Integer n = 0; n < satcount; ++n) {
+      nOffset = n * stateSize;
+      satState = state + nOffset;
+    
+      if (!legendreP_rtq(satState))
+         throw ForceModelException("GravityField::legendreP_rtq failed");
+      if (!gravity_rtq(epoch + 2430000.0 + dt/86400.0, f))
+         throw ForceModelException("GravityField::gravity_rtq failed");
+   
+      now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
+      const Rvector6 *rv = &(body->GetState(now));
+   
+      // Precalculations for the indirect effect term
+      rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+      if (rbb3 != 0.0) {
+         rbb3 = rbb3 * sqrt(rbb3);
+         mu_rbb = mu / rbb3;
+         aIndirect[0] = mu_rbb * (*rv)[0];
+         aIndirect[1] = mu_rbb * (*rv)[1];
+         aIndirect[2] = mu_rbb * (*rv)[2];
+      }
+      else
+         aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
+   
+      switch (dvorder)
+      {
+         case 1:
+            deriv[0+nOffset] = satState[3];
+            deriv[1+nOffset] = satState[4];
+            deriv[2+nOffset] = satState[5];
+            deriv[3+nOffset] = f[0] - aIndirect[0];
+            deriv[4+nOffset] = f[1] - aIndirect[1];
+            deriv[5+nOffset] = f[2] - aIndirect[2];
+            break;
+   
+         case 2:
+            deriv[0+nOffset] = f[0] - aIndirect[0];
+            deriv[1+nOffset] = f[1] - aIndirect[1];
+            deriv[2+nOffset] = f[2] - aIndirect[2];
+            deriv[3+nOffset] =
+               deriv[4+nOffset] =
+               deriv[5+nOffset] = 0.0;
+            break;
+   
+         default:
+            throw ForceModelException("GravityField::GetDerivatives requires order = 1 or 2");
+      }
    }
 
    return true;
