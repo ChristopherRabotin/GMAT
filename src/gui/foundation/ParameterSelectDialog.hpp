@@ -29,14 +29,22 @@ public:
       { return mParamName; }
    bool IsParamSelected()
       { return mIsParamSelected; }
-    
+
+protected:
+   // override methods from GmatDialog
+   virtual void OnOK();
+
 private:
    wxString mParamName;
    bool mIsParamSelected;
-
+   bool mCanClose;
+   bool mUseUserParam;
+   
    wxButton *mAddParamButton;
    wxButton *mCreateParamButton;
-   wxListBox *mParamListBox;
+   wxComboBox *mObjectComboBox;
+   wxListBox *mUserParamListBox;
+   wxListBox *mPropertyListBox;
    wxListBox *mParamSelectedListBox;
       
    // abstract methods from GmatDialog
@@ -48,6 +56,7 @@ private:
    // event handling
    void OnButton(wxCommandEvent& event);
    void OnListSelect(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
         
@@ -55,6 +64,7 @@ private:
    enum
    {     
       ID_TEXT = 9300,
+      ID_COMBOBOX,
       ID_LISTBOX,
       ID_BUTTON,
    };

@@ -39,13 +39,17 @@ protected:
    bool mXParamChanged;
    bool mYParamChanged;
    bool mIsColorChanged;
+   bool mUseUserParam;
    
    std::string mSelYName;
    std::map<std::string, RgbColor> mColorMap;
 
    wxColour mLineColor;
    
-   wxListBox *mParamListBox;
+   wxComboBox *mObjectComboBox;
+   
+   wxListBox *mUserParamListBox;
+   wxListBox *mPropertyListBox;
    wxListBox *mXSelectedListBox;
    wxListBox *mYSelectedListBox;
 
@@ -56,8 +60,6 @@ protected:
    wxCheckBox *showPlotCheckBox;
    wxCheckBox *showGridCheckBox;
    wxCheckBox *targetStatusCheckBox;
-
-   wxComboBox *scComboBox;
    
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mParamOptionBoxSizer;
@@ -67,7 +69,9 @@ protected:
    void OnRemoveX(wxCommandEvent& event);
    void OnRemoveY(wxCommandEvent& event);
    void OnClearY(wxCommandEvent& event);
-   void OnSelectParam(wxCommandEvent& event);
+   void OnSelectUserParam(wxCommandEvent& event);
+   void OnSelectProperty(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
    void OnSelectY(wxCommandEvent& event);
    void OnCreateVariable(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
@@ -84,7 +88,9 @@ protected:
    enum
    {     
       TEXTCTRL = 92000,
-      PARAM_LISTBOX,
+      USER_PARAM_LISTBOX,
+      ID_COMBOBOX,
+      PROPERTY_LISTBOX,
       X_SEL_LISTBOX,
       Y_SEL_LISTBOX,
       ADD_X,
@@ -99,6 +105,7 @@ protected:
    
 private:
    void ShowParameterOption(const wxString &scName, bool show = true);
-   
+   wxString GetNewParam();
+   Parameter* CreateParameter(const wxString &name);
 };
 #endif
