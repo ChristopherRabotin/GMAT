@@ -13,7 +13,7 @@
 // Created: 2004/01/29
 //
 /**
- * This is the base class for stars.
+ * This is the class for stars.
  *
  */
 //------------------------------------------------------------------------------
@@ -24,11 +24,12 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Rmatrix.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 
 /**
-* Star base class, for all stars in the solar system : ).
+ * Star class, for all stars in the solar system : ).
  *
  * The Star class will contain all data and methods for any star that exists in
  * the solar system.
@@ -45,28 +46,10 @@ public:
    // destructor
    virtual ~Star();
 
-   // method to return the state (position and velocity) of the body at
-   // the specified time, using the specified method
-   //RealArray            GetState(A1Mjd atTime);
-   
-   // Parameter access methods - overridden from GmatBase - do I need any?
-   //std::string    GetParameterText(const Integer id) const;     
-   //Integer        GetParameterID(const std::string &str) const; 
-   //Gmat::ParameterType GetParameterType(const Integer id) const;
-   //std::string    GetParameterTypeString(const Integer id) const;
+   Real GetRadiantPower() const;       // W / m^2
+   Real GetReferenceDistance() const;  // km
 
-   //Real           GetRealParameter(const Integer id) const;
-   //Real           SetRealParameter(const Integer id,
-   //                                        const Real value);
-   //Integer        GetIntegerParameter(const Integer id) const; 
-   //Integer        SetIntegerParameter(const Integer id,
-   //                                           const Integer value); 
-   //std::string    GetStringParameter(const Integer id) const; 
-   //bool           SetStringParameter(const Integer id, 
-   //                                          const std::string &value); 
-   //bool           GetBooleanParameter(const Integer id) const; 
-   //bool           SetBooleanParameter(const Integer id,
-   //                                           const bool value); 
+   bool SetRadiantPower(Real radPower, Real refDistance);
 
    //------------------------------------------------------------------------------
    // virtual Star* Clone(void) const
@@ -85,16 +68,23 @@ public:
    static const Real                  MU;
    static const Gmat::PosVelSource    POS_VEL_SOURCE;
    static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
-   static const CelestialBody*        CENTRAL_BODY;
    static const Integer               BODY_NUMBER;
    static const Integer               REF_BODY_NUMBER;
    static const Integer               ORDER;
    static const Integer               DEGREE;
+   static const Integer               COEFFICIENT_SIZE;
+   static const Rmatrix               SIJ;
+   static const Rmatrix               CIJ;
+
+   static const Real                  RADIANT_POWER;       // W / m^2
+   static const Real                  REFERENCE_DISTANCE;  // km
    // add other ones as needed
 
 protected:
 
-   // what other star-specifi parameters do I need?
+   // radiant power and reference distance
+   Real radiantPower;
+   Real referenceDistance;
 
    void InitializeStar();
 

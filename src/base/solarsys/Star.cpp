@@ -27,11 +27,19 @@ const Real                  Star::POLAR_RADIUS        = 6.97E5;      // km
 const Real                  Star::MU                  = 1.32712438e20;      // m^3 / s^2
 const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
-const CelestialBody*        Star::CENTRAL_BODY        = NULL;
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
 const Integer               Star::ORDER               = 4;      
-const Integer               Star::DEGREE              = 4;      
+const Integer               Star::DEGREE              = 4;
+const Integer               Star::COEFFICIENT_SIZE    = 4;
+const Rmatrix               Star::SIJ                 = Rmatrix(4,4,
+            0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+const Rmatrix               Star::CIJ                 = Rmatrix(4,4,
+           0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+
+
+const Real                  Star::RADIANT_POWER       = 1358.0;       // W / m^2
+const Real                  Star::REFERENCE_DISTANCE  = 1.49597870e8; // km (1 AU)
 // add other ones as needed
 
 
@@ -52,7 +60,6 @@ const Integer               Star::DEGREE              = 4;
 Star::Star(std::string name) :
 CelestialBody     (name)
 {
-   //parameterCount += 30; -- ???
    InitializeStar();  // should this be the default?
 }
 
@@ -67,7 +74,9 @@ CelestialBody     (name)
  */
 //------------------------------------------------------------------------------
 Star::Star(const Star &st) :
-CelestialBody (st)
+CelestialBody     (st),
+radiantPower      (st.radiantPower),
+referenceDistance (st.referenceDistance)
 {
 }
 
@@ -89,6 +98,8 @@ Star& Star::operator=(const Star &st)
       return *this;
 
    GmatBase::operator=(st);
+   radiantPower      = st.radiantPower;
+   referenceDistance = st.referenceDistance;
    return *this;
 }
 
@@ -104,22 +115,53 @@ Star::~Star()
 }
 
 //------------------------------------------------------------------------------
-//  RealArray GetState(A1Mjd atTime)
+//  Real GetRadiantPower() const
 //------------------------------------------------------------------------------
 /**
- * This method returns the state (position and velocity) of the body at the
- * requested time.
+ * This method returns the radiant power of the star.
  *
- * @param <atTime>  time for which state of the body is requested.
- *
- * @return state of the body at the requested time.
+ * @return radiant power of the star.
  *
  */
 //------------------------------------------------------------------------------
-//RealArray  Star::GetState(A1Mjd atTime)
-//{
-//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-//}
+Real Star::GetRadiantPower() const
+{
+   return radiantPower;
+}
+
+//------------------------------------------------------------------------------
+//  Real GetReferenceDifference() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the reference distance associated with the radiant power
+ * of the star.
+ *
+ * @return reference distance of the star.
+ *
+ */
+//------------------------------------------------------------------------------
+Real Star::GetReferenceDistance() const
+{
+   return referenceDistance;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetRadiantPower(Real radPower, Real refDistance)
+//------------------------------------------------------------------------------
+ /**
+ * This method sets the radiant power and reference distance for the star.
+ *
+ * @return flag indicating success of the operation.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Star::SetRadiantPower(Real radPower, Real refDistance)
+{
+   radiantPower      = radPower;
+   referenceDistance = refDistance;
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  Star* Clone(void) const
@@ -133,8 +175,8 @@ Star::~Star()
 //------------------------------------------------------------------------------
 Star* Star::Clone(void) const
 {
-   // TBD
-    return NULL;
+   Star* theClone = new Star(*this);
+   return theClone;   // huh??????????????????????????????
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +193,7 @@ Star* Star::Clone(void) const
 void Star::InitializeStar()
 {
    CelestialBody::Initialize();
-   // fill in with default values, for the Sun
+   // fill in with default values, for the Sun (all from CelestialBody)
    bodyType            = Star::BODY_TYPE;
    mass                = Star::MASS;
    equatorialRadius    = Star::EQUATORIAL_RADIUS;
@@ -159,12 +201,26 @@ void Star::InitializeStar()
    mu                  = Star::MU;
    posVelSrc           = Star::POS_VEL_SOURCE;
    analyticMethod      = Star::ANALYTIC_METHOD;
-   //centralBody         = Star::CENTRAL_BODY;
    centralBody         = NULL;
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
    order               = Star::ORDER;
    degree              = Star::DEGREE;
+
+   atmManager          = NULL;
+   
+   // fill in default values for Star-specific stuff
+   radiantPower        = Star::RADIANT_POWER;
+   referenceDistance   = Star::REFERENCE_DISTANCE;
+
+   coefficientSize     = Star::COEFFICIENT_SIZE;
+   sij                 = Star::SIJ;
+   cij                 = Star::CIJ;  
+   defaultSij          = Star::SIJ;
+   defaultCij          = Star::CIJ;
+   defaultMu           = Star::MU;
+   defaultEqRadius     = Star::EQUATORIAL_RADIUS;
+   defaultCoefSize     = Star::COEFFICIENT_SIZE;
 }
 
 //------------------------------------------------------------------------------
