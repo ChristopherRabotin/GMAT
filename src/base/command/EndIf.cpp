@@ -51,7 +51,8 @@ bool EndIf::Initialize(void)
     if (!next)
         throw CommandException("EndIf Command not properly reconnected");
     
-    if (next->GetTypeName() != "If" && next->GetTypeName() != "Else")
+    if (next->GetTypeName() != "If" && next->GetTypeName() != "Else" &&
+        next->GetTypeName() != "ElseIf")
         throw CommandException("EndIf Command not connected to IF Command");
                              
     return true;    
