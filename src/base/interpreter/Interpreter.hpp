@@ -154,6 +154,9 @@ protected:
    bool                          IsGroup(const char *text);
    Integer                       SkipWhiteSpace(Integer start = 0, 
                                                 const std::string &text = "");
+                                                
+   void                          WriteParameters(std::string &prefix, 
+                                                 GmatBase *obj);
    void                          WriteParameterValue(GmatBase *obj, Integer id);
    Integer                       FindDelimiter(const std::string &str,
                                                const std::string &specChar = "");

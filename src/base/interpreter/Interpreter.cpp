@@ -213,16 +213,11 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     }
     
     if (objecttype == "Propagator") {
-        // PropSetup *prop =
         CreatePropSetup(objectname);
-        // // Add the force model container
-        // ForceModel *fm = moderator->CreateForceModel("");
-        // prop->SetForceModel(fm);
         return true;
     }
 
     if (objecttype == "ForceModel") {
-        // ForceModel *prop =
         CreateForceModel(objectname);
         return true;
     }
@@ -232,7 +227,6 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
         return true;
     }
 
-    //loj: added
     // Handle Parameters
     if (find(parametermap.begin(), parametermap.end(), objecttype) != 
         parametermap.end())
@@ -290,6 +284,32 @@ bool Interpreter::BuildObject(std::string &objectname)
         tname = "Propagator";
     *outstream << "Create " << tname << " " 
                << obj->GetName() << "\n";
+               
+    std::string prefix = "GMAT ";
+    prefix += objectname;
+    prefix += ".";
+
+    WriteParameters(prefix, obj);
+    
+    *outstream << "\n";
+    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteParameters(std::string &prefix, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Code that writes the parameter details for an object.
+ * 
+ * @param prefix Starting portion of the script string used for the parameter.
+ * @param obj The object that is written.
+ */
+//------------------------------------------------------------------------------
+void Interpreter::WriteParameters(std::string &prefix, GmatBase *obj)
+{
+    if (obj == NULL)
+       return;
 
     Integer i;
     for (i = 0; i < obj->GetParameterCount(); ++i) 
@@ -297,14 +317,12 @@ bool Interpreter::BuildObject(std::string &objectname)
         // Handle StringArray parameters separately
         if (obj->GetParameterType(i) != Gmat::STRINGARRAY_TYPE) {
            // Fill in the l.h.s.
-           *outstream << "GMAT " << objectname << "." 
-                      << obj->GetParameterText(i) << " = ";
+           *outstream << prefix << obj->GetParameterText(i) << " = ";
            WriteParameterValue(obj, i);
            *outstream << ";\n";
         }
         else {
-           *outstream << "GMAT " << objectname << "." 
-                      << obj->GetParameterText(i) << " = {";
+           *outstream << prefix << obj->GetParameterText(i) << " = {";
            StringArray sar = obj->GetStringArrayParameter(i);
            for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n) {
               if (n != sar.begin())
@@ -314,9 +332,21 @@ bool Interpreter::BuildObject(std::string &objectname)
            *outstream << "};\n";
         }
     }
-    *outstream << "\n";
-    return true;
+
+    GmatBase *ownedObject;
+    std::string nomme, newprefix;
+    for (i = 0; i < obj->GetOwnedObjectCount(); ++i) {
+       newprefix = prefix;
+       ownedObject = obj->GetOwnedObject(i);
+       nomme = ownedObject->GetName();
+       if (nomme != "") {
+          newprefix += ".";
+          newprefix += nomme;
+       }
+       WriteParameters(newprefix, ownedObject);
+    }
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -677,69 +707,89 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                                               std::vector<std::string*>::iterator& phrase,
                                               Integer index)
 {
-    bool retval = true;
-    
-    // Set object associations
-    std::string objParm = items[index];
-    Integer id = obj->GetParameterID(objParm);
-    
-    Gmat::ParameterType parmType = obj->GetParameterType(id);
+   bool retval = true;
+   // Set object associations
+   std::string objParm = items[index];
 
-    if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
-        (parmType != Gmat::OBJECT_TYPE))
-    {
-        // Set parameter data
-        ++phrase;
-
-        if (**phrase == "=")
-            ++phrase;
-        SetParameter(obj, id, **phrase);
-    }
-    else
-    {
-        if (objParm == "Type") {
-            ++phrase;
+   try {
+       Integer id = obj->GetParameterID(objParm);
+       
+       Gmat::ParameterType parmType = obj->GetParameterType(id);
+       if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
+           (parmType != Gmat::OBJECT_TYPE))
+       {
+           // Set parameter data
+           ++phrase;
+   
+           if (**phrase == "=")
+               ++phrase;
+           SetParameter(obj, id, **phrase);
+       }
+       else
+       {
+           if (objParm == "Type") {
+               ++phrase;
+       
+               if (**phrase == "=")
+                   ++phrase;
+               else
+                   throw InterpreterException("Syntax error creating Propagator");
+               Propagator *prop = moderator->CreatePropagator(**phrase, "");
+               if (prop)
+                   ((PropSetup*)obj)->SetPropagator(prop);
+               else
+                   throw InterpreterException("Propagator could not be created");
+           }
+           else if (objParm == "ForceModelName") {
+               ++phrase;
+       
+               if (**phrase == "=")
+                   ++phrase;
+               else
+                   throw InterpreterException("Syntax error accessing Force Model");
+               ForceModel *fm = moderator->GetForceModel(**phrase);
+               if (fm)
+                   ((PropSetup*)obj)->SetForceModel(fm);
+               else
+                   throw InterpreterException("Force model does not exist");
+           }    
+           else {
+               // Could be a subitem -- Drag.Earth = Exponential, for example
+               std::string subparm = GetToken();
+               if (subparm == "")
+                   throw InterpreterException("Assignment string does not parse");
+               // Find the owned object
+               if (objParm == "Drag") {
+                   if (subparm != "Earth")
+                       throw InterpreterException("Only Earth drag is supported in build 2");
+               }
+                   
+               // Set the parm on the owned object
+               throw InterpreterException("Assignment string does not parse");
+           }
+       }
+   }
+   catch (BaseException &ex) {
+      /// Check to see if it is a propagator parameter; otherwise throw
+      Propagator *prop = ((PropSetup*)obj)->GetPropagator();
+      if (prop == NULL)
+         throw;
+      ++phrase;
+       
+      if (**phrase == "=")
+         ++phrase;
+      else
+         throw InterpreterException("Syntax error creating Propagator");
+         
+      Integer id = prop->GetParameterID(objParm);
+#ifdef DEBUG_INTERPRETER
+      std::cout << "Setting " << objParm << " on " << prop->GetTypeName() << " to " << **phrase << "\n";
+#endif
+      if (!SetParameter(prop, id, **phrase))
+         throw;
+   }
     
-            if (**phrase == "=")
-                ++phrase;
-            else
-                throw InterpreterException("Syntax error creating Propagator");
-            Propagator *prop = moderator->CreatePropagator(**phrase, "");
-            if (prop)
-                ((PropSetup*)obj)->SetPropagator(prop);
-            else
-                throw InterpreterException("Propagator could not be created");
-        }
-        else if (objParm == "ForceModelName") {
-            ++phrase;
-    
-            if (**phrase == "=")
-                ++phrase;
-            else
-                throw InterpreterException("Syntax error accessing Force Model");
-            ForceModel *fm = moderator->GetForceModel(**phrase);
-            if (fm)
-                ((PropSetup*)obj)->SetForceModel(fm);
-            else
-                throw InterpreterException("Force model does not exist");
-        }    
-        else {
-            // Could be a subitem -- Drag.Earth = Exponential, for example
-            std::string subparm = GetToken();
-            if (subparm == "")
-                throw InterpreterException("Assignment string does not parse");
-            // Find the owned object
-            if (objParm == "Drag") {
-                if (subparm != "Earth")
-                    throw InterpreterException("Only Earth drag is supported in build 2");
-            }
-                
-            // Set the parm on the owned object
-            throw InterpreterException("Assignment string does not parse");
-        }
-    }
-    
-    return retval;
+   return retval;
 }
 
 

@@ -276,36 +276,41 @@ bool ScriptInterpreter::Parse(void)
             }
             else 
             {
-                // Set object associations
-                std::string objParm = sar[1];
-                Integer id = obj->GetParameterID(objParm);
-                
-                // Look for owned objects if the list is deeper than 2
-                if (sar.size() > 2)
-                   obj = FindOwnedObject(sar, obj, 1);
-                if (obj == NULL) {
-                   std::string errstr = objName;
-                   errstr += sar[1];
-                   errstr += ": Object was not found";
-                   throw InterpreterException(errstr);
+               try {
+                   // Set object associations
+                   std::string objParm = sar[1];
+                   Integer id = obj->GetParameterID(objParm);
+                   
+                   // Look for owned objects if the list is deeper than 2
+                   if (sar.size() > 2)
+                      obj = FindOwnedObject(sar, obj, 1);
+                   if (obj == NULL) {
+                      std::string errstr = objName;
+                      errstr += sar[1];
+                      errstr += ": Object was not found";
+                      throw InterpreterException(errstr);
+                   }
+       
+                   // Set parameter data
+                   ++phrase;
+                   if (**phrase == "=")
+                       ++phrase;
+   
+                   StringArray sa;
+                   if (IsGroup((**phrase).c_str()))
+                       sa = Decompose(**phrase);
+                   else
+                       sa.push_back(**phrase);
+                       
+                   for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
+                       if (!SetParameter(obj, id, *i)) {
+                          if (obj->GetType() == Gmat::FORCE_MODEL)
+                             ConfigureForce((ForceModel*)(obj), objParm, *i);
+                       }
+                   }
                 }
-    
-                // Set parameter data
-                ++phrase;
-                if (**phrase == "=")
-                    ++phrase;
-
-                StringArray sa;
-                if (IsGroup((**phrase).c_str()))
-                    sa = Decompose(**phrase);
-                else
-                    sa.push_back(**phrase);
-                    
-                for (StringArray::iterator i = sa.begin(); i != sa.end(); ++i) {
-                    if (!SetParameter(obj, id, *i)) {
-                       if (obj->GetType() == Gmat::FORCE_MODEL)
-                          ConfigureForce((ForceModel*)(obj), objParm, *i);
-                    }
+                catch (BaseException &ex) {
+                   throw;
                 }
             }
         }
