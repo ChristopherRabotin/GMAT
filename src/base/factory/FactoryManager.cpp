@@ -120,7 +120,7 @@ Spacecraft* FactoryManager::CreateSpacecraft(std::string ofType,
 
 
 //------------------------------------------------------------------------------
-//  Propagator* CreatePropagator(std::string ofType, std::string withName)
+//  Parameter* CreateParameter(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------
 /**
  * Create an object of type Parameter, with the name withName, and of the
