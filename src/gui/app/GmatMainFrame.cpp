@@ -122,8 +122,8 @@ GmatMainFrame::~GmatMainFrame()
     if (GmatAppData::GetMessageWindow() != NULL)
         GmatAppData::GetMessageWindow()->Close();
 
-    if (MdiPlot::mdiParentGlFrame != NULL)
-        MdiPlot::mdiParentGlFrame->Close();
+    if (MdiGlPlot::mdiParentGlFrame != NULL)
+        MdiGlPlot::mdiParentGlFrame->Close();
 }
 
 //-------------------------------
@@ -540,9 +540,9 @@ void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 {
-    if (MdiPlot::mdiParentGlFrame == NULL)
+    if (MdiGlPlot::mdiParentGlFrame == NULL)
     {
-        MdiPlot::mdiParentGlFrame = 
+        MdiGlPlot::mdiParentGlFrame = 
             new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
                                  wxPoint(300, 200), wxSize(600, 500),
                                  wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
@@ -550,12 +550,12 @@ void GmatMainFrame::OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
     
     // Give it an icon
 #ifdef __WXMSW__
-    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
+    MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
 #else
-    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+    MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
 #endif
     
-    MdiPlot::mdiParentGlFrame->Show(TRUE);
-    //SetTopWindow(MdiPlot::mdiParentGlFrame);
+    MdiGlPlot::mdiParentGlFrame->Show(TRUE);
+    //SetTopWindow(MdiGlPlot::mdiParentGlFrame);
 
 }
