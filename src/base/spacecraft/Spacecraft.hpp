@@ -86,7 +86,7 @@ public:
     std::string GetDisplayDateFormat() const;
     void SetDisplayDateFormat(const std::string &dateType);
     std::string GetDisplayEpoch();
-    void SetDisplayEpoch(const std::string &value);
+    bool SetDisplayEpoch(const std::string &value);
 
     std::string GetDisplayCoordType() const;
     void SetDisplayCoordType(const std::string &coordType);

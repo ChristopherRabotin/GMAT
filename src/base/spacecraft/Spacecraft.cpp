@@ -718,6 +718,11 @@ void Spacecraft::SetEpoch()
          // do  nothing - retain with epoch
       }
    }
+   else
+   {
+      epoch = atof(displayEpoch.c_str());
+   }
+
 }
 
 //---------------------------------------------------------------------------
@@ -876,7 +881,7 @@ void Spacecraft::SetDisplay(const bool displayFlag)
 }
 
 //---------------------------------------------------------------------------
-//  std::string SetDisplayDateFormat() const 
+//  std::string GetDisplayDateFormat() const 
 //---------------------------------------------------------------------------
 /**
  * Get the display's dateformat of epoch.
@@ -890,7 +895,7 @@ std::string Spacecraft::GetDisplayDateFormat() const
 }
 
 //---------------------------------------------------------------------------
-//  void SetDisplayDateFormat(const std::string &dateType) 
+// void SetDisplayDateFormat(const std::string &dateType) 
 //---------------------------------------------------------------------------
 /**
  * Set the display's dateformat of epoch.
@@ -900,7 +905,8 @@ std::string Spacecraft::GetDisplayDateFormat() const
  */
 void Spacecraft::SetDisplayDateFormat(const std::string &dateType) 
 {
-   std::string tempType = dateType;
+   std::string tempType  = dateType;
+   std::string tempEpoch = displayEpoch;
 
    if (initialDisplay)
       SetInitialDisplay();
@@ -913,7 +919,9 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
          std::string newEpoch = timeConverter.Convert(displayEpoch,
                                 displayDateFormat,dateType);
 
+         displayDateFormat = tempType;
          SetDisplayEpoch(newEpoch);
+         return;
       }
       catch (TimeConverter::TimeConverterException e)
       {
@@ -923,6 +931,7 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
    }
 
    displayDateFormat = tempType;
+
 }
 
 //---------------------------------------------------------------------------
@@ -943,17 +952,33 @@ std::string Spacecraft::GetDisplayEpoch()
 }
 
 //---------------------------------------------------------------------------
-//  void SetDisplayEpoch(const std::string &value) 
+//  bool SetDisplayEpoch(const std::string &value) 
 //---------------------------------------------------------------------------
 /**
  * Set the display's epoch.
  * 
  * @param <value> Epoch input from GUI. 
+ * 
+ * @return flag indicator (true - successful; otherwise false) 
  *
  */
-void Spacecraft::SetDisplayEpoch(const std::string &value) 
+bool Spacecraft::SetDisplayEpoch(const std::string &value) 
 {
-    displayEpoch = value;
+    if (displayDateFormat == "TAIGregorian" || 
+        displayDateFormat == "UTCGregorian")
+    {
+       GregorianDate gregorianDate(value);
+       if (gregorianDate.IsValid())
+          displayEpoch = gregorianDate.GetDate(); 
+       else
+          return false;
+    }
+    else
+    { 
+       displayEpoch = value;
+    }
+
+    return true;
 }
 
 //---------------------------------------------------------------------------
