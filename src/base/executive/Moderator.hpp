@@ -188,6 +188,8 @@ public:
    // GmatCommand
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
+   GmatCommand* CreateDefaultCommand(const std::string &type,
+                                     const std::string &name = "");
 
    // Mission
    bool LoadDefaultMission();
@@ -228,7 +230,13 @@ private:
    bool CreateSlpFile(const std::string &fileName);
    bool CreateDeFile(const Integer id, const std::string &fileName,
                      Gmat::DeFileFormat format = Gmat::DE_BINARY);
-    
+
+   // default objects
+   Spacecraft* GetDefaultSpacecraft();
+   PropSetup* GetDefaultPropSetup();
+   Burn* GetDefaultBurn();
+   StopCondition* CreateDefaultStopCondition();
+   
    // sandbox
    void AddSolarSysToSandbox(Integer index);
    void AddSubscriberToSandbox(Integer index);

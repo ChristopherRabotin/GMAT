@@ -603,16 +603,36 @@ StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
 /**
  * Creates a command object by given type and name.
  *
- * @param <type> object type
- * @param <name> object name
+ * @param <type> command type
+ * @param <name> command name
  *
  * @return a command object pointer
  */
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
-                                       const std::string &name)
+                                           const std::string &name)
 {
    return moderator->CreateCommand(type, name);
+}
+
+// GmatCommand
+//------------------------------------------------------------------------------
+// GmatCommand* CreateDefaultCommand(const std::string &type,
+//                                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a default command object by given type and name.
+ *
+ * @param <type> command type
+ * @param <name> command name
+ *
+ * @return a command object pointer
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
+                                                  const std::string &name)
+{
+   return moderator->CreateDefaultCommand(type, name);
 }
 
 // Mission

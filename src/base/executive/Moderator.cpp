@@ -696,8 +696,13 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
       throw GmatBaseException("Error Creating StopCondition");
       return NULL;
    }
-    
-   // Manage it if it is a named stopCondition
+
+   //-----------------------------------------------------------------
+   //Notes:
+   // Manage it if it is a named stopCondition.
+   // Need to manage because SetupRun() needs to set SolarSystem
+   // pointer for parameters used in stopping condition
+   //-----------------------------------------------------------------
    try
    {
       if (stopCond->GetName() != "")
@@ -1341,108 +1346,6 @@ Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 }
 
 //------------------------------------------------------------------------------
-// bool CreateSlpFile(const std::string &fileName)
-//------------------------------------------------------------------------------
-bool Moderator::CreateSlpFile(const std::string &fileName)
-{
-   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() fileName=%s\n",
-   //                              fileName.c_str());
-    
-   bool status = false;
-    
-   if (isPlanetaryFileInUse[SLP])
-   {
-      MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile already created\n");
-      status = true;
-   }
-   else
-   {
-      theDefaultSlpFile = new SlpFile(fileName);
-      //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
-        
-      if (theDefaultSlpFile != NULL)
-         status = true;
-   }
-
-   return status;
-}
-
-//------------------------------------------------------------------------------
-// bool CreateDeFile(const Integer id, const std::string &fileName,
-//                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
-//------------------------------------------------------------------------------
-bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
-                             Gmat::DeFileFormat format)
-{
-   bool status = false;
-   Gmat::DeFileType deFileType;
-    
-   if (isPlanetaryFileInUse[id])
-   {
-      MessageInterface::ShowMessage("Moderator::CreateDeFile() DeFile already created\n");
-      status = true;
-   }
-   else
-   {
-      switch (id)
-      {
-      case DE200:
-         deFileType = Gmat::DE200;
-         break;
-         //          case DE202:
-         //              deFileType = Gmat::DE202;
-         //              break;
-      case DE405:
-         deFileType = Gmat::DE405;
-         break;
-      default:
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "Moderator::CreateDeFile() unsupported DE file type");
-         return false;
-      }
-      
-#if DEBUG_PLANETARY_FILE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateDeFile() creating DeFile. type=%d, "
-          "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
-          format);
-#endif
-
-      FILE *defile = fopen(fileName.c_str(), "rb");
-      if (defile == NULL)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "Error opening DE file:%s. \n"
-             "Please check file path. "
-             "The next filetype in the list will be used.\n", fileName.c_str());
-      }
-      else
-      {
-         fclose(defile);
-         
-         try
-         {
-            theDefaultDeFile = new DeFile(deFileType, fileName, format);
-        
-            if (theDefaultDeFile != NULL)
-               status = true;
-         }
-         catch (...)
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "Moderator::CreateDeFile() Error creating %s. "
-                "The next filetype in the list will "
-                "be created.\n", fileName.c_str());
-         }
-      }
-   }
-   return status;
-}
-
-//------------------------------------------------------------------------------
 // Integer GetPlanetaryFileId(const std::string &fileType)
 //------------------------------------------------------------------------------
 Integer Moderator::GetPlanetaryFileId(const std::string &fileType)
@@ -1502,11 +1405,42 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 
 // GmatCommand
 //------------------------------------------------------------------------------
-// GmatCommand* CreateCommand(const std::string &type,const std::string &name )
+// GmatCommand* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
+   return cmd;
+}
+
+//------------------------------------------------------------------------------
+// GmatCommand* CreateDefaultCommand(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
+                                             const std::string &name)
+{
+   GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
+
+   if (type == "Propagate")
+   {
+      cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
+      cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
+      cmd->SetObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION);
+      cmd->SetSolarSystem(theDefaultSolarSystem);
+   }
+   else if (type == "Maneuver")
+   {
+      Integer id;
+      
+      // save burn
+      id = cmd->GetParameterID("Burn");
+      cmd->SetStringParameter(id, GetDefaultBurn()->GetName());
+
+      // save spacecraft
+      id = cmd->GetParameterID("Spacecraft");
+      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
+   }
+   
    return cmd;
 }
 
@@ -2048,8 +1982,27 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    }
         
    //--------------------------------------------
-   // initialize stopping condition
+   // set SolarSystem on stopping condition
    //--------------------------------------------
+
+   //loj: 6/15/04 the future code to set SolarSystem to StopCondition
+   // In this way, StopCondition need not be configured.
+   
+   //GmatCommand *cmd = commands[sandboxNum]->GetNext();
+   //while (current)
+   //{
+   //   if (current->GetName() == "Propagate")
+   //   {
+   //      std::vector<StopCondition*> &stopArray = current->GetStopConditions();
+   //      int stopCount = stopArray.size();
+   //      for (int i=0; i<stopCount; i++)
+   //      {
+   //         stopArray[0]->SetSolarSystem(theDefaultSolarSystem);
+   //      }
+   //   }
+   //   current = current->GetNext();
+   //}
+   
    StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
    StopCondition *stopCond;
     
@@ -2097,6 +2050,208 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    }
    
    MessageInterface::ShowMessage("Moderator successfully set up for a run...\n");
+}
+
+//------------------------------------------------------------------------------
+// bool CreateSlpFile(const std::string &fileName)
+//------------------------------------------------------------------------------
+bool Moderator::CreateSlpFile(const std::string &fileName)
+{
+   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() fileName=%s\n",
+   //                              fileName.c_str());
+    
+   bool status = false;
+    
+   if (isPlanetaryFileInUse[SLP])
+   {
+      MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile already created\n");
+      status = true;
+   }
+   else
+   {
+      theDefaultSlpFile = new SlpFile(fileName);
+      //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
+        
+      if (theDefaultSlpFile != NULL)
+         status = true;
+   }
+
+   return status;
+}
+
+//------------------------------------------------------------------------------
+// bool CreateDeFile(const Integer id, const std::string &fileName,
+//                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
+//------------------------------------------------------------------------------
+bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
+                             Gmat::DeFileFormat format)
+{
+   bool status = false;
+   Gmat::DeFileType deFileType;
+    
+   if (isPlanetaryFileInUse[id])
+   {
+      MessageInterface::ShowMessage("Moderator::CreateDeFile() DeFile already created\n");
+      status = true;
+   }
+   else
+   {
+      switch (id)
+      {
+      case DE200:
+         deFileType = Gmat::DE200;
+         break;
+         //          case DE202:
+         //              deFileType = Gmat::DE202;
+         //              break;
+      case DE405:
+         deFileType = Gmat::DE405;
+         break;
+      default:
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "Moderator::CreateDeFile() unsupported DE file type");
+         return false;
+      }
+      
+#if DEBUG_PLANETARY_FILE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDeFile() creating DeFile. type=%d, "
+          "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
+          format);
+#endif
+
+      FILE *defile = fopen(fileName.c_str(), "rb");
+      if (defile == NULL)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "Error opening DE file:%s. \n"
+             "Please check file path. "
+             "The next filetype in the list will be used.\n", fileName.c_str());
+      }
+      else
+      {
+         fclose(defile);
+         
+         try
+         {
+            theDefaultDeFile = new DeFile(deFileType, fileName, format);
+        
+            if (theDefaultDeFile != NULL)
+               status = true;
+         }
+         catch (...)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_,
+                "Moderator::CreateDeFile() Error creating %s. "
+                "The next filetype in the list will "
+                "be created.\n", fileName.c_str());
+         }
+      }
+   }
+   return status;
+}
+
+// default objects
+//------------------------------------------------------------------------------
+// Spacecraft* GetDefaultSpacecraft()
+//------------------------------------------------------------------------------
+Spacecraft* Moderator::GetDefaultSpacecraft()
+{
+   StringArray &configList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+   
+   if (configList.size() > 0)
+   {
+      // return 1st Spacecraft from the list
+      return GetSpacecraft(configList[0]);
+   }
+   else
+   {
+      // create Spacecraft
+      return CreateSpacecraft("Spacecraft", "DefaultSC");
+   }
+}
+
+//------------------------------------------------------------------------------
+// PropSetup* GetDefaultPropSetup()
+//------------------------------------------------------------------------------
+PropSetup* Moderator::GetDefaultPropSetup()
+{
+   StringArray &configList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+   
+   if (configList.size() > 0)
+   {
+      // return 1st PropSetup from the list
+      return GetPropSetup(configList[0]);
+   }
+   else
+   {
+      // create PropSetup
+      return CreateDefaultPropSetup("DefaultProp");
+   }
+}
+
+//------------------------------------------------------------------------------
+// Burn* GetDefaultBurn()
+//------------------------------------------------------------------------------
+Burn* Moderator::GetDefaultBurn()
+{
+   StringArray &configList =
+      theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+   
+   if (configList.size() > 0)
+   {
+      // return 1st Burn from the list
+      return GetBurn(configList[0]);
+   }
+   else
+   {
+      // create ImpulsiveBurn
+      return CreateBurn("ImpulsiveBurn", "DefaultBurn");
+   }
+}
+
+//------------------------------------------------------------------------------
+// StopCondition* CreateDefaultStopCondition()
+//------------------------------------------------------------------------------
+StopCondition* Moderator::CreateDefaultStopCondition()
+{
+   // Propagate command starts with 0
+   static Integer stopCondCount = 100;
+   StopCondition *stopCond = NULL;
+   
+   Spacecraft *sc = GetDefaultSpacecraft();
+   std::string epochVar = sc->GetName() + ".CurrentTime";
+   std::string stopVar = sc->GetName() + ".ElapsedSecs";
+
+   if (GetParameter(epochVar) == NULL)
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+
+   if (GetParameter(stopVar) == NULL)
+      CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+
+   std::string stopCondName = "StopOn" + stopVar;
+   
+   if (GetStopCondition(stopCondName) == NULL)
+   {
+      stopCond = CreateStopCondition("StopCondition", "StopOn" + stopVar);
+   }
+   else
+   {
+      stopCondCount++;
+      std::stringstream ss("");
+      ss << stopCondName << stopCondCount;
+      stopCond = CreateStopCondition("StopCondition", ss.str());
+   }
+   
+   stopCond->SetStringParameter("EpochVar", epochVar);
+   stopCond->SetStringParameter("StopVar", stopVar);
+   stopCond->SetRealParameter("Goal", 8640.0);
+   return stopCond;
 }
 
 // sandbox

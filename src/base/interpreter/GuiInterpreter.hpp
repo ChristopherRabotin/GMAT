@@ -127,6 +127,8 @@ public:
     
    // Command
    GmatCommand* CreateCommand(const std::string &type, const std::string &name);
+   GmatCommand* CreateDefaultCommand(const std::string &type,
+                                     const std::string &name);
 
    // Resource
    bool ClearResource();
