@@ -2585,29 +2585,27 @@ StringArray Interpreter::SeparateLines(const std::string block)
 }
 
 
+//------------------------------------------------------------------------------
+//  bool ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
+//------------------------------------------------------------------------------
+/**
+ * Checks a block of GmatCommands and ensures that the nesting level at the end
+ * matches the level at the start.
+ *
+ * @param cmdStart The first command in the block.
+ * @param cmdEnd The last command in the block.
+ *
+ * @return true if the nesting is matched, false if not, and throws if the
+ *              nesting ever attempts to go out of the current nesting level.
+ */
+//------------------------------------------------------------------------------
 bool Interpreter::ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
 {
-//   // First check to be sure the command nesting is consistent
-//   GmatCommand *current = cmd, *child;
-//
-////      while ((current != NULL) && (current->GetTypeName() != "EndScript")) {
-////         depth += current->DepthIncrement();
-////
-////         if (depth < 0)
-////            throw InterpreterException(
-////               "Cannot move outside current nesting level in a ScriptEvent.");
-////         current = current->GetNext();
-////      }
-////
-////      if (depth != 0)
-////         throw InterpreterException(
-////            "ScriptEvents must start and end at the same nesting depth.");
-////
-//
-//
-//   while ((current != NULL) && (current != cmd)) {
-//   }
-//
+   // First check to be sure the command nesting is consistent
+//   GmatCommand *current = cmdStart, *child;
+
+
+
    return false;
 }
 
@@ -2657,6 +2655,10 @@ bool Interpreter::ValidateBlock(StringArray &sar)
       sstr >> cmdName;
       if (cmdName[0] == '%')
          continue;
+         
+      // Throw away trailing semicolon if there is one
+      if (cmdName.find(";") != std::string::npos)
+         cmdName = cmdName.substr(0, cmdName.find(";"));
 
       #ifdef DEBUG_TOKEN_PARSING
          MessageInterface::ShowMessage("Looking up '%s'\n", cmdName.c_str());
