@@ -423,8 +423,8 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
         || str == "RAV")
        return ELEMENT5_ID;
 
-    if (str == "Element6" || str == "VZ" || str == "TA" || str == "FPA" 
-        || str == "DECV") 
+    if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
+        str == "EA" || str == "FPA" || str == "DECV") 
        return ELEMENT6_ID;
 
     if (str == "StateType") return STATE_TYPE_ID;
@@ -581,33 +581,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
-//    if (label == "Epoch") 
-//       return epoch;
-//       return state.GetEpoch();
-
-    if (label == "Element1") return state[0];
-
-    if (label == "Element2") return state[1];
-
-    if (label == "Element3") return state[2];
-
-    if (label == "Element4") return state[3];
- 
-    if (label == "Element5") return state[4];
-
-    if (label == "Element6") return state[5];
-
-    if (label == "Mass") return dryMass;
- 
-    if (label == "Cd") return coeffDrag;
-    if (label == "DragArea") return dragArea;
-    if (label == "SRPArea") return srpArea;
-    if (label == "Cr") return reflectCoeff;
-
-    if (label == "TotalMass") return UpdateTotalMass();
-
-    return SpaceObject::GetRealParameter(label);
+    return GetRealParameter(GetParameterID(label));
 }
+
 //---------------------------------------------------------------------------
 //  Real SetRealParameter(const Integer id, const Real value)
 //---------------------------------------------------------------------------
@@ -1628,6 +1604,7 @@ void Spacecraft::InitializeValues()
 
     dateFormat = "TAIModJulian";
     stateType = "Cartesian";
+    anomalyType = "TA";
     refBody = "Earth";
     refFrame = "MJ2000";
     refPlane = "Equatorial";
@@ -1688,23 +1665,23 @@ std::string Spacecraft::GetElementName(const Integer id) const
        if (id == ELEMENT5_ID) return("VY");  
        if (id == ELEMENT6_ID) return("VZ");  
     }
-    else if (localCoordType == "Keplerian")
+    else if (localCoordType == "Keplerian" || 
+             localCoordType == "ModifiedKeplerian")
     {
-       if (id == ELEMENT1_ID) return("SMA");  
-       if (id == ELEMENT2_ID) return("ECC");  
-       if (id == ELEMENT3_ID) return("INC");  
-       if (id == ELEMENT4_ID) return("RAAN");  
-       if (id == ELEMENT5_ID) return("AOP");  
-       if (id == ELEMENT6_ID) 
+       if (id == ELEMENT1_ID) 
        {
-           // @todo will add subType to check with MA, TA, EA
-           return("TA");  
+          if (localCoordType == "Keplerian")
+             return("SMA");  
+          else
+             return("RadPer");
        }
-    }
-    else if (localCoordType == "ModifiedKeplerian")
-    {
-       if (id == ELEMENT1_ID) return("RadPer");  
-       if (id == ELEMENT2_ID) return("RadApo");  
+       if (id == ELEMENT2_ID) 
+       {
+          if (localCoordType == "Keplerian")
+             return("ECC");  
+          else
+             return("RadApo");
+       }
        if (id == ELEMENT3_ID) return("INC");  
        if (id == ELEMENT4_ID) return("RAAN");  
        if (id == ELEMENT5_ID) return("AOP");  
