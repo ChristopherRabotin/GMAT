@@ -59,8 +59,10 @@ typedef double          Real;              // 8 byte float
 typedef int             Integer;           // 4 byte signed integer
 typedef unsigned char   Byte;              // 1 byte
 typedef unsigned int    UnsignedInt;       // 4 byte unsigned integer
-typedef std::vector<Real> RealArray;
-typedef std::vector<Integer> IntegerArray;
+
+typedef std::vector<Real>        RealArray;
+typedef std::vector<Integer>     IntegerArray;
+typedef std::vector<UnsignedInt> UnsignedIntArray; //loj: 7/12/04 added
 typedef std::vector<std::string> StringArray;
 
 class GmatBase;                            // Forward reference for ObjectArray
@@ -94,7 +96,7 @@ namespace Gmat
       SOLVER,
       SUBSCRIBER,
       PROP_SETUP,
-      REF_FRAME,        //loj: 3/22/04 added
+      REF_FRAME,
       UNKNOWN_OBJECT
    };
 
