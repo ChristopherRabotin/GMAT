@@ -43,8 +43,10 @@ private:
     wxTreeItemId mSpacecraftItem;
     wxTreeItemId mPropagatorItem;
     wxTreeItemId mReportItem;
+    wxTreeItemId mBurnItem;
     int numSc;
     int mNumPropagator;
+    int mNumBurn;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
@@ -69,6 +71,7 @@ private:
     void OnDelete(wxCommandEvent &event);
     void OnRename(wxCommandEvent &event);
     void OnAddBody(wxCommandEvent &event);
+    void OnAddBurn(wxCommandEvent &event);
     void OnAddPropagator(wxCommandEvent &event);
     void OnAddConstellation(wxCommandEvent &event);
     void OnAddFormation(wxCommandEvent &event);
@@ -104,6 +107,7 @@ private:
         POPUP_ADD_SC,
         POPUP_ADD_FORMATION,
         POPUP_ADD_CONSTELLATION,
+        POPUP_ADD_BURN,
         POPUP_ADD_PROPAGATOR,
         POPUP_ADD_BODY,
         POPUP_OPEN,

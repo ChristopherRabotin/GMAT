@@ -30,11 +30,13 @@ public:
    void CreatePage(GmatTreeItemData *item);
    void ClosePage();
    bool OpenPage(GmatTreeItemData *item);
+   wxScrolledWindow *GetPanel();
    
 protected:
 private:
    wxWindow *parent;
    wxList *curPages;
+   wxScrolledWindow *panel;
 
    DECLARE_EVENT_TABLE();
 };

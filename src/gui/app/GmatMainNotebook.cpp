@@ -77,7 +77,7 @@ GmatMainNotebook::GmatMainNotebook(wxWindow *parent, wxWindowID id,
 void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
 {
     wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
-    wxScrolledWindow *panel = new wxScrolledWindow(this);
+    panel = new wxScrolledWindow(this);
 
     int dataType = item->GetDataType();
 
@@ -85,19 +85,16 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
     {
       curPages->Append( (wxObject *) item);
       
-      if ((dataType == UNIVERSE_FOLDER)             ||
-          (dataType == DEFAULT_FORMATION_FOLDER)    ||
-          (dataType == CREATED_FORMATION_FOLDER)    ||
-          (dataType == DEFAULT_CONSTELLATION_FOLDER)||
-          (dataType == CREATED_CONSTELLATION_FOLDER))
+      if (dataType == UNIVERSE_FOLDER)
       {
         sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
       }
-      else if ((dataType == DEFAULT_BODY)   ||
-               (dataType == CREATED_BODY))
-      {
-        sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );
-      }
+      // invisible for build 2
+//      else if ((dataType == DEFAULT_BODY)   ||
+//               (dataType == CREATED_BODY))
+//      {
+//         sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
+//      }
       else if ((dataType == DEFAULT_SPACECRAFT )  ||
                (dataType == CREATED_SPACECRAFT ))
       {
@@ -106,8 +103,7 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if ((dataType == DEFAULT_PROPAGATOR)   ||
                (dataType == CREATED_PROPAGATOR))
       {
-        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()), 0,
-                    wxGROW|wxALL, 0 );
+        sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
       }
       else if ((dataType == DEFAULT_REPORT)   ||
                (dataType == CREATED_REPORT))
@@ -181,16 +177,23 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
   bool result = TRUE;
   int dataType = item->GetDataType();
 
-  if ((dataType == RESOURCES_FOLDER)     ||
-      (dataType == SPACECRAFT_FOLDER)    ||
-      (dataType == FORMATIONS_FOLDER)    ||
-      (dataType == CONSTELLATIONS_FOLDER)||
-      (dataType == PROPAGATORS_FOLDER)   ||
-      (dataType == SOLVERS_FOLDER)       ||
-      (dataType == PLOTS_FOLDER)         ||
-      (dataType == REPORTS_FOLDER)       ||
-      (dataType == SUBSCRIPTS_FOLDER)    ||
-      (dataType == INTERFACES_FOLDER))
+  if ((dataType == RESOURCES_FOLDER)            ||
+      (dataType == SPACECRAFT_FOLDER)           ||
+      (dataType == FORMATIONS_FOLDER)           ||
+      (dataType == CONSTELLATIONS_FOLDER)       ||
+      (dataType == BURNS_FOLDER)          ||
+      (dataType == PROPAGATORS_FOLDER)          ||
+      (dataType == SOLVERS_FOLDER)              ||
+      (dataType == PLOTS_FOLDER)                ||
+      (dataType == REPORTS_FOLDER)              ||
+      (dataType == SUBSCRIPTS_FOLDER)           ||
+      (dataType == INTERFACES_FOLDER)           ||
+      (dataType == DEFAULT_BODY)                ||
+      (dataType == CREATED_BODY)                ||
+      (dataType == DEFAULT_FORMATION_FOLDER)    ||
+      (dataType == CREATED_FORMATION_FOLDER)    ||
+      (dataType == DEFAULT_CONSTELLATION_FOLDER)||
+      (dataType == CREATED_CONSTELLATION_FOLDER))
   {
     result = FALSE;
   }
@@ -210,5 +213,10 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
   }
   
   return result;
+}
+
+wxScrolledWindow *GmatMainNotebook::GetPanel()
+{
+   return this->panel;
 }
 

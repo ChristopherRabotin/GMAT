@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSc)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
+   EVT_MENU(POPUP_ADD_BURN, ResourceTree::OnAddBurn)
    EVT_MENU(POPUP_ADD_PROPAGATOR, ResourceTree::OnAddPropagator)
    EVT_MENU(POPUP_ADD_BODY, ResourceTree::OnAddBody)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
@@ -77,6 +78,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     
     numSc = 0;
     mNumPropagator = 0;
+    mNumBurn = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -170,6 +172,13 @@ void ResourceTree::AddDefaultResources()
                                      new GmatTreeItemData(wxT("Constellations"),
                                      CONSTELLATIONS_FOLDER));
     SetItemImage(constellationItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+
+    mBurnItem = this->AppendItem(resource,
+                     wxT("Burns"), -1, -1,
+                     new GmatTreeItemData(wxT("Burns"),
+                     GROUNDSTATIONS_FOLDER));
+    SetItemImage(mBurnItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+
 
     //loj: commented out
 //      wxTreeItemId propagatorItem = this->AppendItem(resource,
@@ -418,6 +427,8 @@ void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation..."));
     else if (strcmp(title, wxT("Constellations")) == 0)
       menu.Append(POPUP_ADD_CONSTELLATION, wxT("Add Constellation..."));
+    else if (strcmp(title, wxT("Burns")) == 0)
+      menu.Append(POPUP_ADD_BURN, wxT("Add Burn..."));
     else if (strcmp(title, wxT("Propagators")) == 0)
       menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator..."));
     else if (strcmp(title, wxT("Universe")) == 0)
@@ -517,8 +528,6 @@ void ResourceTree::OnAddSc(wxCommandEvent &event)
   Spacecraft *theSpacecraft = theGuiInterpreter->CreateSpacecraft("Spacecraft", 
                                       stdWithName);
 
-//  theSpacecraft->SetName("Big Daddy");
-  
   wxString newName = wxT(theSpacecraft->GetName().c_str());
   
   this->AppendItem(item, newName, ICON_SPACECRAFT, -1,
@@ -562,6 +571,25 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
                      new GmatTreeItemData(wxT("GPS1"), CREATED_CONSTELLATION_SATELLITE));
   this->AppendItem(constellation, wxT("GPS2"), ICON_SPACECRAFT, -1,
                      new GmatTreeItemData(wxT("GPS2"), CREATED_CONSTELLATION_SATELLITE));
+}
+
+//------------------------------------------------------------------------------
+// void OnAddBurn(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddBurn(wxCommandEvent &event)
+{
+  wxTreeItemId item = GetSelection();
+  
+  wxString name;
+  name.Printf("Burn%d", ++mNumBurn);
+
+//  PropSetup* propSetup =
+//      theGuiInterpreter->CreateDefaultPropSetup(std::string(name.c_str()));
+  
+  this->AppendItem(item, name, ICON_FILE, -1,
+        new GmatTreeItemData(name, CREATED_GROUNDSTATION));
+
+  Expand(item);
 }
 
 //------------------------------------------------------------------------------
@@ -640,6 +668,7 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
                          (dataType == SPACECRAFT_FOLDER)     ||
                          (dataType == FORMATIONS_FOLDER)     ||
                          (dataType == CONSTELLATIONS_FOLDER) ||
+                         (dataType == BURNS_FOLDER)    ||
                          (dataType == PROPAGATORS_FOLDER)    ||
                          (dataType == UNIVERSE_FOLDER)       ||
                          (dataType == SOLVERS_FOLDER)        ||
