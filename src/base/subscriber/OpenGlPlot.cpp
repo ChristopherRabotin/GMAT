@@ -16,10 +16,10 @@
  * Implements OpenGlPlot class.
  */
 //------------------------------------------------------------------------------
-//#include <iomanip>
+
 #include "OpenGlPlot.hpp"
 #include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
-//#include "MessageInterface.hpp"  // for ShowMessage()
+#include "MessageInterface.hpp"  // for ShowMessage()
 
 //---------------------------------
 // static data
@@ -27,9 +27,9 @@
 const std::string
 OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount] =
 {
-   "DrawAxis",
+   "Axis",
    "DrawEquatorialPlane",
-   "DrawWireFrame",
+   "WireFrame",
    "DataCollectFrequency",
    "UpdatePlotFrequency"
 }; 
@@ -39,7 +39,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount] =
 {
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE
 };
@@ -114,7 +114,7 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
 
          //loj: assumes data in time, x, y, z order
          return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
-                                                  update);
+                                                  update, mDrawWireFrame);
       }
    }
     
@@ -183,8 +183,6 @@ bool OpenGlPlot::GetBooleanParameter(const Integer id) const
       return mDrawAxis;
    case DRAW_EQUATORIAL_PLANE:
       return mDrawEquatorialPlane;
-   case DRAW_WIRE_FRAME:
-      return mDrawWireFrame;
    default:
       return Subscriber::GetBooleanParameter(id);
    }
@@ -203,10 +201,76 @@ bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
    case DRAW_EQUATORIAL_PLANE:
       mDrawEquatorialPlane = value;
       return mDrawEquatorialPlane;
-   case DRAW_WIRE_FRAME:
-      mDrawWireFrame = value;
-      return mDrawWireFrame;
    default:
       return Subscriber::SetBooleanParameter(id, value);
    }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string OpenGlPlot::GetStringParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case WIRE_FRAME:
+      if (mDrawWireFrame)
+         return "On";
+      else
+         return "Off";
+   default:
+      return Subscriber::GetStringParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string OpenGlPlot::GetStringParameter(const std::string &label) const
+{
+   //MessageInterface::ShowMessage("OpenGlPlot::GetStringParameter() label = %s\n",
+   //                              label.c_str());
+
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
+{
+   //MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() id = %d, "
+   //                              "value = %s \n", id, value.c_str());
+   
+   switch (id)
+   {
+   case WIRE_FRAME:
+      if (value == "On" || value == "Off")
+      {
+         mDrawWireFrame = (value == "On");
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::SetStringParameter() mDrawWireFrame=%d\n", mDrawWireFrame);
+             
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   default:
+      return Subscriber::SetStringParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetStringParameter(const std::string &label,
+                                const std::string &value)
+{
+   //MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
+   //                              "value = %s \n", label.c_str(), value.c_str());
+
+   return SetStringParameter(GetParameterID(label), value);
 }
