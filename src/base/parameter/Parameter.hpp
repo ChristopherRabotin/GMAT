@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "Rvector6.hpp"
+#include "SolarSystem.hpp"
 
 class GMAT_API Parameter : public GmatBase
 {
@@ -63,7 +64,9 @@ public:
    virtual bool SetObject(Gmat::ObjectType objType,
                           const std::string &objName,
                           GmatBase *obj);
-
+   
+   virtual void SetSolarSystem(SolarSystem *ss); //loj: 6/24/04 added
+   
    // methods all SYSTEM_PARAM should implement
    virtual bool AddObject(const std::string &name); //loj: 5/26/04 will be removed
    virtual bool AddObject(GmatBase *object);
@@ -119,7 +122,7 @@ protected:
    StringArray mObjectTypeNames;
    StringArray mObjectNames;
    Integer mNumObjects;
-    
+
    enum
    {
       OBJECT = GmatBaseParamCount,

@@ -21,6 +21,8 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_REFDATA_OBJECT 0
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -83,7 +85,6 @@ RefData::~RefData()
    delete mObjTypeObjMap;
 }
 
-
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const
 //------------------------------------------------------------------------------
@@ -115,7 +116,10 @@ bool RefData::SetRefObject(Gmat::ObjectType objType,
 {
    bool status = false;
 
-   //MessageInterface::ShowMessage("RefData::SetRefObject() objName=%s\n", objName.c_str());
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage("RefData::SetRefObject() objName=%s\n", objName.c_str());
+#endif
+   
    if (obj->GetType() == objType)
    {
 
@@ -127,8 +131,11 @@ bool RefData::SetRefObject(Gmat::ObjectType objType,
       {
          pos->second = obj;
          status = true;
-         //MessageInterface::ShowMessage("RefData::SetRefObject() obj set to %s\n",
-         //                              obj->GetName().c_str());
+
+#if DEBUG_REFDATA_OBJECT
+         MessageInterface::ShowMessage("RefData::SetRefObject() obj set to %s\n",
+                                       obj->GetName().c_str());
+#endif
       }
    }
     
@@ -148,9 +155,12 @@ bool RefData::SetRefObject(Gmat::ObjectType objType,
 bool RefData::AddRefObject(GmatBase*obj)
 {
    bool added;
-   //MessageInterface::ShowMessage("RefData::AddRefObject() objType=%s, objName=%s\n",
-   //                              obj->GetTypeName().c_str(), obj->GetName().c_str());
-
+   
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage("RefData::AddRefObject() objType=%s, objName=%s\n",
+                                 obj->GetTypeName().c_str(), obj->GetName().c_str());
+#endif
+   
    if (IsValidObject(obj))
    {
       std::string objTypeName = obj->GetTypeName();
@@ -163,8 +173,9 @@ bool RefData::AddRefObject(GmatBase*obj)
          mObjTypeObjMap->insert(std::pair<std::string, GmatBase*>(objTypeName, obj));
          mNumRefObjects = mObjTypeObjMap->size();
          added = true;
-         //MessageInterface::ShowMessage("RefData::AddRefObject() object added\n");
-
+#if DEBUG_REFDATA_OBJECT
+         MessageInterface::ShowMessage("RefData::AddRefObject() object added\n");
+#endif
       }
    }
    else
@@ -229,9 +240,12 @@ GmatBase* RefData::FindFirstObject(const std::string &objType) const
    
    if (pos != mObjTypeObjMap->end())
    {
-      //MessageInterface::ShowMessage("RefData::FindFirstObject(): objType=%s "
-      //                              "objName=%s\n", (pos->second->GetTypeName()).c_str(),
-      //                              (pos->second->GetName()).c_str());
+#if DEBUG_REFDATA_OBJECT
+      MessageInterface::ShowMessage
+         ("RefData::FindFirstObject(): objType=%s "
+          "objName=%s\n", (pos->second->GetTypeName()).c_str(),
+          (pos->second->GetName()).c_str());
+#endif
       return pos->second;
    }
    

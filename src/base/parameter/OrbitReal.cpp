@@ -19,6 +19,9 @@
 //------------------------------------------------------------------------------
 
 #include "OrbitReal.hpp"
+#include "MessageInterface.hpp"
+
+#define DEBUG_ORBITREAL 0
 
 //---------------------------------
 // public methods
@@ -124,6 +127,27 @@ Real OrbitReal::EvaluateReal()
 // Inherited methods from Parameter
 //-------------------------------------
 
+//loj: 6/24/04 added
+//------------------------------------------------------------------------------
+// virtual void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets SolarSystem pointer.
+ */
+//------------------------------------------------------------------------------
+void OrbitReal::SetSolarSystem(SolarSystem *ss)
+{
+#if DEBUG_ORBITREAL
+   MessageInterface::ShowMessage
+      ("OrbitReal::SetSolarSystem() ss=%s", ss->GetTypeName().c_str());
+#endif
+   
+   if (OrbitData::GetRefObject("SolarSystem") == NULL)
+      OrbitData::AddRefObject(ss);
+   else
+      OrbitData::SetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName(), ss);
+}
+
 //------------------------------------------------------------------------------
 // virtual Integer GetNumObjects() const
 //------------------------------------------------------------------------------
@@ -157,6 +181,7 @@ GmatBase* OrbitReal::GetObject(const std::string &objTypeName)
  *
  * @param <objType> object type
  * @param <objName> object name
+ * @param <obj> object pointer
  *
  * @return true if the object has been set.
  */

@@ -328,6 +328,15 @@ bool Parameter::SetObject(Gmat::ObjectType objType,
    return false;
 }
 
+//loj: 6/24/04 added
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void Parameter::SetSolarSystem(SolarSystem *ss)
+{
+   ; // do nothing here
+}
+
 //------------------------------------------------------------------------------
 // bool AddObject(const std::string &name)
 //------------------------------------------------------------------------------

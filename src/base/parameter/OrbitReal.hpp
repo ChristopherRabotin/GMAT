@@ -41,6 +41,7 @@ public:
    virtual Real EvaluateReal();
 
    // The inherited methods from Parameter
+   virtual void SetSolarSystem(SolarSystem *ss); //loj: 6/24/04 added
    virtual Integer GetNumObjects() const;
    virtual GmatBase* GetObject(const std::string &objTypeName);
    virtual bool SetObject(Gmat::ObjectType objType,
