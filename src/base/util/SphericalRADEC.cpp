@@ -136,30 +136,6 @@ void SphericalRADEC::SetState(const Rvector6& state)
 }
 
 //------------------------------------------------------------------------------
-// void SphericalRADEC::SetState(const Rvector6& state,
-//                               const std::string& fromElementType)
-//------------------------------------------------------------------------------
-void SphericalRADEC::SetState(const Rvector6& state,
-                              const std::string& fromElementType)
-{
-   if (fromElementType == "Cartesian")
-      SetState(CartesianToSphericalRADEC(state));
-
-   else if (fromElementType == "Keplerian")
-   {
-      Real mu = 0.3986004415e+06;  // km^3/s^2
-      SetState(KeplerianToSphericalRADEC(state,mu));  // @todo will fix it later
-   }
-   else if (fromElementType == "SphericalAZFPA")
-      SetState(AZFPA_To_RADECV(state));
-
-   else if (fromElementType == "SphericalRADEC")
-      SetState(state);      // no change
-
-   // @todo - will add else for throw or return false
-}
-
-//------------------------------------------------------------------------------
 // Real SphericalRADEC::GetVelocityRA() const
 //------------------------------------------------------------------------------
 Real SphericalRADEC::GetVelocityRA() const
@@ -350,25 +326,26 @@ Rvector6 SphericalRADECToCartesian(const Rvector6& spherical)
 
 //------------------------------------------------------------------------------
 //  friend Rvector6 KeplerianToSphericalRADEC(const Rvector6& keplerian,
-//                                            const Real mu)
+//                                            const Real mu, Anomaly anomaly)
 //------------------------------------------------------------------------------
-Rvector6 KeplerianToSphericalRADEC(const Rvector6& keplerian, const Real mu)
+Rvector6 KeplerianToSphericalRADEC(const Rvector6& keplerian, 
+                                   const Real mu, Anomaly anomaly)
 {
-   Rvector6 cartesian = KeplerianToCartesian(keplerian,mu,CoordUtil::TA);
+   Rvector6 cartesian = KeplerianToCartesian(keplerian,mu,anomaly);
 
    return CartesianToSphericalRADEC(cartesian);
 }
 
 //------------------------------------------------------------------------------
 //  friend Rvector6 SphericalRADECToKeplerian(const Rvector6& spherical,
-//                                            const Real mu)
+//                                            const Real mu, Anomaly &anomaly)
 //------------------------------------------------------------------------------
-Rvector6 SphericalRADECToKeplerian(const Rvector6& spherical, const Real mu)
+Rvector6 SphericalRADECToKeplerian(const Rvector6& spherical,
+                                   const Real mu, Anomaly &anomaly)
 {
-   Real     meanAnomaly;
    Rvector6 cartesian = SphericalRADECToCartesian(spherical);
 
-   return (CartesianToKeplerian(cartesian,mu,&meanAnomaly));
+   return (CartesianToKeplerian(cartesian,mu,anomaly));
 }
 
 //------------------------------------------------------------------------------

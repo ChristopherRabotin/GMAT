@@ -40,8 +40,6 @@ public:
    // public methods
    Rvector6 GetState();
    void SetState(const Rvector6& state);
-   void SetState(const Rvector6& state, 
-                 const std::string &fromElementType);
 
    Real GetVelocityRA() const;
    void SetVelocityRA(const Real vRA);
@@ -61,9 +59,9 @@ public:
     friend Rvector6 SphericalRADECToCartesian(const Rvector6& spherical);
 
     friend Rvector6 KeplerianToSphericalRADEC(const Rvector6& keplerian,
-                                              const Real mu);
+                                              const Real mu, Anomaly anomaly);
     friend Rvector6 SphericalRADECToKeplerian(const Rvector6& spherical,
-                                              const Real mu);
+                                              const Real mu, Anomaly &anomaly);
 
     friend Rvector6 AZFPA_To_RADECV(const Rvector6& spherical);
     friend Rvector6 RADECV_To_AZFPA(const Rvector6& spherical);

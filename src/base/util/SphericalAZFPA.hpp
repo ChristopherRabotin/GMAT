@@ -23,6 +23,7 @@
 #define SphericalAZFPA_hpp
 
 #include "Spherical.hpp"
+#include "Anomaly.hpp"
 #include "CoordUtil.hpp"
 
 class SphericalAZFPA : public Spherical
@@ -43,15 +44,13 @@ public:
     friend Rvector6 SphericalAZFPAToCartesian(const Rvector6& sphVector);
 
     friend Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, 
-                                              const Real mu);
+                                              const Real mu, Anomaly anomaly);
     friend Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, 
-                                              const Real mu);
+                                              const Real mu, Anomaly &anomaly);
 
     // public methods
     Rvector6 GetState();
     void SetState(const Rvector6& state);
-    void SetState(const Rvector6& state, 
-                      const std::string &fromElementType);
 
     Real GetAzimuth() const;
     void SetAzimuth(const Real az);

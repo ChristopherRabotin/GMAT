@@ -199,27 +199,28 @@ Rvector6 SphericalAZFPAToCartesian(const Rvector6& sphVector)
 
 //------------------------------------------------------------------------------
 //  friend Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, 
-//                                            const Real mu)
+//                                            const Real mu, Anomaly anomaly)
 //------------------------------------------------------------------------------
-Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, const Real mu)
+Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, const Real mu, 
+                                   Anomaly anomaly)
 {
    Rvector6 cartesian;
 
-   cartesian = KeplerianToCartesian(keplerian,mu,CoordUtil::TA);
+   cartesian = KeplerianToCartesian(keplerian,mu,anomaly);
    return (CartesianToSphericalAZFPA(cartesian)); 
 }
 
 //------------------------------------------------------------------------------
 //  friend Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, 
-//                                            const Real mu)
+//                                            const Real mu, Anomaly &anomaly)
 //------------------------------------------------------------------------------
-Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, const Real mu)
+Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, const Real mu,
+                                   Anomaly &anomaly)
 {
    Rvector6 cartesian;
-   Real     meanAnomaly;
 
    cartesian = SphericalAZFPAToCartesian(spherical);
-   return (CartesianToKeplerian(cartesian,mu,&meanAnomaly));
+   return (CartesianToKeplerian(cartesian,mu,anomaly));
 }
 
 
@@ -247,28 +248,6 @@ void SphericalAZFPA::SetState(const Rvector6& state)
    SetVelocityMagnitude(state[3]);
    SetAzimuth(state[4]);
    SetFlightPathAngle(state[5]);
-}
-
-//------------------------------------------------------------------------------
-// void SphericalAZFPA::SetState(const Rvector6& state, 
-//                               const std::string& fromElementType) 
-//------------------------------------------------------------------------------
-void SphericalAZFPA::SetState(const Rvector6& state, 
-                              const std::string& fromElementType) 
-{
-   if (fromElementType == "Cartesian")
-      SetState(CartesianToSphericalAZFPA(state));
-
-   else if (fromElementType == "Keplerian")
-   {
-      Real mu = 0.3986004415e+06;  // km^3/s^2 
-      SetState(KeplerianToSphericalAZFPA(state,mu));  // @todo will fix it later
-   }
-   else if (fromElementType == "SphericalAZFPA")
-      SetState(state);   // no change
-   else if (fromElementType == "SphericalRADEC")
-      SetState(state);    // @todo - will add RADECV_To_AZFPA 
-   // @todo - will add else for throw or return false
 }
 
 //------------------------------------------------------------------------------
