@@ -194,69 +194,116 @@ void CallFunctionPanel::Create()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::LoadData()
 {
-//   MessageInterface::ShowMessage("Loading data...\n"); 
-     
+//   MessageInterface::ShowMessage("Loading data...\n");
+
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
 
-   std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
-   functionComboBox->SetValue(objectName.c_str());
+//   std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
+//   functionComboBox->SetValue(objectName.c_str());
+    int id = theCommand->GetParameterID("FunctionName");
+    std::string filename = theCommand->GetStringParameter(id);
+    functionComboBox->SetValue(wxT(filename.c_str()));
 
-   int numInput = theCommand->GetNumInputParams();
-   int numOutput = theCommand->GetNumOutputParams();
-   
-//   MessageInterface::ShowMessage("Number of input: %d, Number of output: %d\n", 
+//   MessageInterface::ShowMessage("Number of input: %d, Number of output: %d\n",
 //      numInput, numOutput);
 
-   wxString cellValue = "";
-   inputStrings.Clear();
-   outputStrings.Clear();
+    // get input parameters
+    StringArray inputList = theCommand->GetStringArrayParameter("AddInput");
+    mNumInput = inputList.size();
+    inputStrings.Clear();
+
+    if (mNumInput > 0)
+    {
+
+       wxString *inputNames = new wxString[mNumInput];
+       Parameter *param;
+       wxString cellValue = "";
+
+       for (int i=0; i<mNumInput; i++)
+       {
+          inputNames[i] = inputList[i].c_str();
+          param = theGuiInterpreter->GetParameter(inputList[i]);
+          cellValue = cellValue + param->GetName().c_str() + "  ";
+          inputStrings.Add(param->GetName().c_str());
+       }
+
+       inputGrid->SetCellValue(0, 0, cellValue);
+       delete inputNames;
+    }
+
+    // get output parameters
+    StringArray outputList = theCommand->GetStringArrayParameter("AddOutput");
+    mNumOutput = outputList.size();
+    outputStrings.Clear();
+
+    if (mNumOutput > 0)
+    {
+
+       wxString *outputNames = new wxString[mNumOutput];
+       Parameter *param;
+       wxString cellValue = "";
+
+       for (int i=0; i<mNumOutput; i++)
+       {
+          outputNames[i] = outputList[i].c_str();
+          param = theGuiInterpreter->GetParameter(outputList[i]);
+          cellValue = cellValue + param->GetName().c_str() + "  ";
+          outputStrings.Add(param->GetName().c_str());
+       }
+
+       outputGrid->SetCellValue(0, 0, cellValue);
+       delete outputNames;
+    }
+
+//   int numInput = theCommand->GetNumInputParams();
+//   int numOutput = theCommand->GetNumOutputParams();
 
    // get input params
-   if (numInput > 0)
-   {
-      // for now - needs to be done in the sandbox
-      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
-                           "Input", 0);
-      inputStrings.Add(param->GetName().c_str());
-      cellValue = cellValue + param->GetName().c_str();
-
-      for (int i=1; i<numInput; i++)
-      {
-         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
-                           "Input", i);
-         cellValue = cellValue + ", " + param->GetName().c_str();
-         inputStrings.Add(param->GetName().c_str());
-      }
-
-      inputGrid->SetCellValue(0, 0, cellValue);
-   }
-   else
-      inputGrid->SetCellValue(0, 0, "");
-
-   // reset the cell value
-   cellValue = "";
-
-   // get output params
-   if (numOutput > 0)
-   {
-      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
-                           "Output", 0);
-      outputStrings.Add(param->GetName().c_str());
-      cellValue = cellValue + param->GetName().c_str();
-
-      for (int i=1; i<numOutput; i++)
-      {
-         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
-                           "Output", i);
-         cellValue = cellValue + ", " + param->GetName().c_str();
-         outputStrings.Add(param->GetName().c_str());
-      }
-
-      outputGrid->SetCellValue(0, 0, cellValue);
-   }
-   else
-      outputGrid->SetCellValue(0, 0, "");
+//   if (numInput > 0)
+//   {
+//      // for now - needs to be done in the sandbox
+//      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+//                           "Input", 0);
+//      inputStrings.Add(param->GetName().c_str());
+//      cellValue = cellValue + param->GetName().c_str();
+//
+//      for (int i=1; i<numInput; i++)
+//      {
+//         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+//                           "Input", i);
+//         cellValue = cellValue + ", " + param->GetName().c_str();
+//         inputStrings.Add(param->GetName().c_str());
+//      }
+//
+//      inputGrid->SetCellValue(0, 0, cellValue);
+//   }
+//   else
+//      inputGrid->SetCellValue(0, 0, "");
+//
+//   // reset the cell value
+//   cellValue = "";
+//
+//   // get output params
+//   if (numOutput > 0)
+//   {
+//      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+//                           "Output", 0);
+//      outputStrings.Add(param->GetName().c_str());
+//      cellValue = cellValue + param->GetName().c_str();
+//
+//      for (int i=1; i<numOutput; i++)
+//      {
+//         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+//                           "Output", i);
+//         cellValue = cellValue + ", " + param->GetName().c_str();
+//         outputStrings.Add(param->GetName().c_str());
+//      }
+//
+//      outputGrid->SetCellValue(0, 0, cellValue);
+//   }
+//   else
+//      outputGrid->SetCellValue(0, 0, "");
 
 }
 
@@ -271,34 +318,54 @@ void CallFunctionPanel::SaveData()
    // arg: for now to avoid a crash
    if (functionName != "")
    {
-      Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
-               std::string(functionName));
-
-      if (function != NULL)
-      {
-         theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
-      }
+      theCommand->SetStringParameter("FunctionName",
+                     std::string(functionName.c_str()));
    }
+
+
+    mNumInput = inputStrings.Count();
+
+    if (mNumInput >= 0) // >=0 because the list needs to be cleared
+    {
+         theCommand->TakeAction("ClearInput");
+         for (int i=0; i<mNumInput; i++)
+         {
+            std::string selInName = std::string(inputStrings[i]);
+            theCommand->SetStringParameter("AddInput", selInName, i);
+         }
+    }
+
+    mNumOutput = outputStrings.Count();
+
+    if (mNumOutput >= 0) // >=0 because the list needs to be cleared
+    {
+         theCommand->TakeAction("ClearOutput");
+         for (int i=0; i<mNumOutput; i++)
+         {
+            std::string selOutName = std::string(outputStrings[i]);
+            theCommand->SetStringParameter("AddOutput", selOutName, i);
+         }
+      }
 
    // clear out previous parameters
-   theCommand->ClearObject(Gmat::PARAMETER);
-
-   // set input parameters
-   for (unsigned int i=0; i<inputStrings.Count(); i++)
-   {
-      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-            std::string(inputStrings[i]));
-      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
-   }
-
-   // set output parameters
-   for (unsigned int i=0; i<outputStrings.Count(); i++)
-   {
-      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-            std::string(outputStrings[i]));
-      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
-   }
-
+//   theCommand->ClearObject(Gmat::PARAMETER);
+//
+//   // set input parameters
+//   for (unsigned int i=0; i<inputStrings.Count(); i++)
+//   {
+//      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+//            std::string(inputStrings[i]));
+//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
+//   }
+//
+//   // set output parameters
+//   for (unsigned int i=0; i<outputStrings.Count(); i++)
+//   {
+//      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+//            std::string(outputStrings[i]));
+//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
+//   }
+//
 }
 
 //------------------------------------------------------------------------------
@@ -313,7 +380,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    {
       //loj: 2/7/05 Changed to use ParameterSelectDialog()
       //ParameterMultiSelectDialog paramDlg(this, inputStrings, true, true);
-      ParameterSelectDialog paramDlg(this, true, true, true);
+      ParameterSelectDialog paramDlg(this, true, true, true, true);
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -326,7 +393,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
          for (unsigned int i=1; i<inputStrings.Count(); i++)
          {
-            cellValue = cellValue + ", " + inputStrings[i];
+            cellValue = cellValue + "  " + inputStrings[i];
          }
 
          inputGrid->SetCellValue(row, col, cellValue);
@@ -353,7 +420,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
          for (unsigned int i=1; i<outputStrings.Count(); i++)
          {
-            cellValue = cellValue + ", " + outputStrings[i];
+            cellValue = cellValue + "  " + outputStrings[i];
          }
 
          outputGrid->SetCellValue(row, col, cellValue);

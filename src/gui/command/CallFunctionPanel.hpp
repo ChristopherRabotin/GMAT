@@ -40,6 +40,9 @@ private:
    wxTextCtrl *inputTextCtrl;
    wxTextCtrl *outputTextCtrl;
 
+   int  mNumInput;
+   int  mNumOutput;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
