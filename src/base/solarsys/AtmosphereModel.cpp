@@ -144,3 +144,8 @@ void AtmosphereModel::SetFileFlag(bool flag)
 {
    newFile = flag;
 }
+
+
+void AtmosphereModel::SetSolarSystem(SolarSystem *solsys)
+{
+}

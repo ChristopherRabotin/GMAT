@@ -27,6 +27,9 @@
 #include "SolarFluxFileReader.hpp"
 #include "AtmosphereException.hpp"
 
+
+class SolarSystem;          // Forward reference
+
 /**
  * Base class for atmosphere models.
  * 
@@ -63,6 +66,7 @@ public:
     // waw: Added 06/29/04
     void                    SetSolarFluxFile(std::string file);
     void                    SetFileFlag(bool flag);
+    virtual void            SetSolarSystem(SolarSystem *solsys);
 protected:
     /// Solar flux binary file reader
     SolarFluxFileReader *fileReader;
