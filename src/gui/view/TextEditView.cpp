@@ -20,7 +20,8 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
-#include "GmatAppData.hpp" // for GuiInterpreter pointer
+#include "GmatAppData.hpp"      // for GuiInterpreter pointer
+#include "MessageInterface.hpp" // for ClearMessage()
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in setup.h!
@@ -99,6 +100,6 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-    GmatAppData::theMessageWindow->ClearText();
+    //MessageInterface::ClearMessage();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }
