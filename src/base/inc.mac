@@ -15,6 +15,7 @@ LIB = $(LIBDIR)/libgmatbase.a
 BURN       = $(PROJECT_ROOT)/base/burn
 COMMAND    = $(PROJECT_ROOT)/base/command
 CONFIGS    = $(PROJECT_ROOT)/base/configs
+COORDSYS   = $(PROJECT_ROOT)/base/coordsystem
 INCLUDE    = $(PROJECT_ROOT)/base/include
 EXECUTIVE  = $(PROJECT_ROOT)/base/executive
 FACTORY    = $(PROJECT_ROOT)/base/factory
@@ -34,7 +35,7 @@ STOPCOND   = $(PROJECT_ROOT)/base/stopcond
 SUBSCRIBER = $(PROJECT_ROOT)/base/subscriber
 UTIL       = $(PROJECT_ROOT)/base/util
 
-INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(EXECUTIVE) -I$(FACTORY) \
+INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(COORDSYS) -I$(EXECUTIVE) -I$(FACTORY) \
 	-I$(FORCEMODEL) -I$(FOUNDATION) -I$(FUNCTION) -I$(INCLUDE) \
 	-I$(INTERFACE) -I$(INTERPOL) -I$(INTERPRET) \
 	-I$(PARAM) -I$(PROPAG) -I$(REFFRAME) -I$(SOLARSYS) -I$(SOLVER) \
