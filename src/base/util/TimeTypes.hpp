@@ -26,7 +26,8 @@
 typedef Real     UtcMjd;
 //loj: implemented ElapsedTime as a class
 //loj: typedef Real     ElapsedTime;
-typedef Integer  ElapsedDays;
+//loj: 3/12/04 conflicts with ElapsedDays parameter class, use Integer
+//typedef Integer  ElapsedDays;
 typedef Integer  YearNumber;
 
 typedef Integer  DayOfYear;

@@ -23,11 +23,12 @@
 
 #include "TimeTypes.hpp" // for ElapsedDays, YearNumber, MonthOfYear, DayOfMonth
 
+//loj: 3/12/04 changed ElapsedDays to Integer due to conflict with parameter ElapsedDays
 class DateUtil
 {
 public:
-    static ElapsedDays JulianDay(YearNumber year, MonthOfYear month,
-                                 DayOfMonth day);
+    static Integer JulianDay(YearNumber year, MonthOfYear month,
+                             DayOfMonth day);
     friend void UnpackDate(Real packedDate, Integer& year, Integer& month, 
                            Integer& day);        // input in YYYYMMDD. 
     friend void UnpackDateWithDOY(Real packedDate, Integer& year, Integer& day);

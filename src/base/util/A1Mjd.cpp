@@ -664,8 +664,9 @@ CalDate A1Mjd::UtcMjdToCalDate(const UtcMjd &utcmjd)
 //                                    DayOfMonth day, HourOfDay hour,
 //                                    MinuteOfHour minute, Real second)
 //  {
-//     ElapsedDays julianDay;
-//     ElapsedDays daysSinceRef;
+//loj: 3/12/04 Changed ElapsedDays to Integer
+//     Integer julianDay;
+//     Integer daysSinceRef;
 //     Real leapSecondsBtw;
 //     Real seconds;
 

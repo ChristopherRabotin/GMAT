@@ -30,12 +30,13 @@ using namespace GmatMathUtil; // for Floor(), Mod()
 // static
 //---------------------------------
 
+//loj: 3/12/04 changed ElapsedDays to Integer due to conflict with parameter ElapsedDays
 //------------------------------------------------------------------------------
 // ElapsedDays DateUtil::JulianDay(YearNumber year, MonthOfYear month,
 //                                 DayOfMonth day) 
 //------------------------------------------------------------------------------
-ElapsedDays DateUtil::JulianDay(YearNumber year, MonthOfYear month,
-                                DayOfMonth day) 
+Integer DateUtil::JulianDay(YearNumber year, MonthOfYear month,
+                            DayOfMonth day) 
 {
    //Calculate julian date using Fliegel and Van Flandern algorithm
    const Integer L = (month - 14) / 12;
