@@ -45,15 +45,13 @@ TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
                      wxButton *theApplyButton):wxPanel(parent)
 {
     this->theSpacecraft = spacecraft;
-//    this->theFuelTanks = NULL
     this->theApplyButton = theApplyButton;
     
-    theTanks.clear();
-    theFuelTanks.clear();
-    fuelTankNames.clear();
+//    theTanks.clear();
+//    theFuelTanks.clear();
+//    fuelTankNames.clear();
     
     tankCount = 0;
-
     currentTank = 0;
     
     Create();
@@ -64,10 +62,6 @@ TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
 //------------------------------------------------------------------------------
 TankPanel::~TankPanel()
 {
-//    for (unsigned int i = 0; i < theTanks.size(); i++)
-//      delete theTanks[i];
-//    for (unsigned int i = 0; i < theFuelTanks.size(); i++)
-//      delete theFuelTanks[i];
 }
 
 //-------------------------------
@@ -207,26 +201,26 @@ void TankPanel::LoadData()
     theFuelTanks = theSpacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
     fuelTankNames = theSpacecraft->GetRefObjectNameArray(Gmat::FUEL_TANK);
     
-    MessageInterface::ShowMessage("TankPanel::LoadData(1)\n"); 
-    
     if (theFuelTanks.empty())
        return;     
       
-    tankCount = theFuelTanks.size();
+    tankCount = fuelTankNames.size();
     
     Integer paramID;
       
     for (Integer i = 0; i < tankCount; i++)
     {    
-        MessageInterface::ShowMessage("TankPanel::LoadData(2)\n"); 
         FuelTank * ft = (FuelTank *)theFuelTanks[i];
+        
+        //FuelTank *ft = (FuelTank *)theSpacecraft->GetRefObject(Gmat::FUEL_TANK, fuelTankNames[i]);
+        //theTanks.push_back(new Tank(ft, fuelTankNames[i]));
         
         theTanks[i]->fuelTank = ft;
         theTanks[i]->tankName = fuelTankNames[i];
-        
+           
         paramID = ft->GetParameterID("Temperature");
         theTanks[i]->temperature = ft->GetRealParameter(paramID);
-  
+         
         paramID = ft->GetParameterID("RefTemperature");
         theTanks[i]->refTemperature = ft->GetRealParameter(paramID);
     
@@ -278,10 +272,12 @@ void TankPanel::SaveData()
         
         paramID = ft->GetParameterID("Volume");
         ft->SetRealParameter(paramID, theTanks[i]->volume);
+        
+        paramID = theSpacecraft->GetParameterID("Tanks");
+        theSpacecraft->SetStringParameter(paramID, theTanks[i]->tankName);
 
-        //theTanks[i]->fuelTank = ft;
         theSpacecraft->SetRefObject(theTanks[i]->fuelTank, Gmat::HARDWARE, 
-                       theTanks[i]->tankName);
+                                    theTanks[i]->tankName); 
     }
 }
 

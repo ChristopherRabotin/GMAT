@@ -131,7 +131,7 @@ void SpacecraftPanel::LoadData()
     theOrbitPanel->LoadData();
     theBallisticMassPanel->LoadData();
     theTankPanel->LoadData();
-
+    theThrusterPanel->LoadData();
     
     // explicitly disable apply button
     // it is turned on in each of the panels
@@ -145,14 +145,25 @@ void SpacecraftPanel::SaveData()
 {
     theOrbitPanel->SaveData();
     theBallisticMassPanel->SaveData();   
-    theTankPanel->SaveData();  
-     
+    theTankPanel->SaveData(); 
+    theThrusterPanel->SaveData();
+      
     // what's wrong with this?
     // copy the current info into theSpacecraft
-    delete(theSpacecraft);
+    delete(theSpacecraft); 
     theSpacecraft = new Spacecraft(*currentSpacecraft);
+    //theSpacecraft = currentSpacecraft;
     
     // explicitly disable apply button
     // it is turned on in each of the panels
     theApplyButton->Disable();
 }
+
+//------------------------------------------------------------------------------
+// void OnPageChange()
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
+{
+    theTankPanel->LoadData();
+    theThrusterPanel->LoadData();
+}    
