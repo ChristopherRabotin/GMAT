@@ -22,6 +22,8 @@
 #include "AxisSystemFactory.hpp"
 #include "AxisSystem.hpp"
 #include "MessageInterface.hpp"
+#include "MJ2000EqAxes.hpp"
+#include "MJ2000EcAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -46,15 +48,11 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    AxisSystem *withAxes = NULL;
    if (ofType == "MJ2000Eq")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "MJ2000EqAxes not yet imnplemented.\n");
-      //withAxes = new MJ2000EqAxes(withName);
+      withAxes = new MJ2000EqAxes(withName);
    }
    else if (ofType == "MJ2000Ec")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "MJ2000EcAxes not yet imnplemented.\n");
-      //withAxes = new MJ2000EcAxes(withName);
+      withAxes = new MJ2000EcAxes(withName);
    }
    else if (ofType == "TOEEq")
    {
