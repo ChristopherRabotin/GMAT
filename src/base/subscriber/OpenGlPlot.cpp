@@ -22,7 +22,9 @@
 #include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "MessageInterface.hpp"  // for ShowMessage()
 
-#define DEBUG_OPENGL 0
+#define DEBUG_OPENGL_INIT 1
+#define DEBUG_OPENGL_PARAM 0
+#define DEBUG_OPENGL_DATA 0
 
 //---------------------------------
 // static data
@@ -60,8 +62,8 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 //------------------------------------------------------------------------------
 // OpenGlPlot(const std::string &name)
 //------------------------------------------------------------------------------
-OpenGlPlot::OpenGlPlot(const std::string &name)
-: Subscriber      ("OpenGlPlot", name)
+OpenGlPlot::OpenGlPlot(const std::string &name) :
+   Subscriber("OpenGlPlot", name)
 {
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
@@ -83,9 +85,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
 OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    Subscriber(ogl)
 {
-   // GmatBase data
-   //parameterCount = OpenGlPlotParamCount;
-
    mDrawAxis = ogl.mDrawAxis;
    mDrawEquatorialPlane = ogl.mDrawEquatorialPlane;
    mDrawWireFrame = ogl.mDrawWireFrame;
@@ -115,7 +114,7 @@ OpenGlPlot::~OpenGlPlot(void)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Initialize()
 {
-#if DEBUG_OPENGL
+#if DEBUG_OPENGL_INIT
    MessageInterface::ShowMessage("OpenGlPlot::Initialize() entered mScCount = %d\n",
                                  mScCount);
 #endif
@@ -123,12 +122,16 @@ bool OpenGlPlot::Initialize()
    {
       if (active)
       {
-         //MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
-         return PlotInterface::CreateGlPlotWindow();
+#if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+#endif
+         return PlotInterface::CreateGlPlotWindow(instanceName);
       }
       else
       {
-         //MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+#if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+#endif
          return PlotInterface::DeleteGlPlot();
       }
    }
@@ -171,14 +174,15 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
             //loj: assumes data in time, x, y, z order
             //loj: 6/8/04 try color
 
-#if DEBUG_OPENGL
+#if DEBUG_OPENGL_DATA
             MessageInterface::
                ShowMessage("OpenGlPlot::Distribute() time=%f pos = %f %f %f\n",
                            dat[0], dat[1], dat[2], dat[3]);
 #endif
             
             return PlotInterface::
-               UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
+               UpdateGlSpacecraft(instanceName,
+                                  dat[0], dat[1], dat[2], dat[3],
                                   mOrbitColorMap[mScList[0]],
                                   mTargetColorMap[mScList[0]],
                                   update, mDrawWireFrame);
@@ -337,7 +341,7 @@ UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
                                                 const std::string &item,
                                                 const UnsignedInt value)
 {
-#if DEBUG_OPENGL
+#if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
       ("OpenGlPlot::SetUnsignedIntParameter()"
        "id=%d, item=%s, value=%d\n", id, item.c_str(), value);
@@ -420,7 +424,7 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       if (value == "On" || value == "Off")
       {
          mDrawWireFrame = (value == "On");
-#if DEBUG_OPENGL
+#if DEBUG_OPENGL_PARAM
          MessageInterface::ShowMessage
             ("OpenGlPlot::SetStringParameter() mDrawWireFrame=%d\n", mDrawWireFrame);
 #endif
@@ -442,7 +446,7 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 bool OpenGlPlot::SetStringParameter(const std::string &label,
                                     const std::string &value)
 {
-#if DEBUG_OPENGL
+#if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
                                  "value = %s \n", label.c_str(), value.c_str());
 #endif
