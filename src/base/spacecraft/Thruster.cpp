@@ -164,10 +164,8 @@ Thruster::Thruster(const Thruster& th) :
  * @return this object, with parameters set to the input object's parameters.
  */
 //------------------------------------------------------------------------------
-#include <iostream>
 Thruster& Thruster::operator=(const Thruster& th)
 {
-   std::cout << "Calling Thruster::operator= for " << instanceName << "\n";
    if (&th == this)
       return *this;
 

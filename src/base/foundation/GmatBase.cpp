@@ -187,10 +187,8 @@ GmatBase::GmatBase(const GmatBase &a) :
  *
  * @return Reference to this object
  */
-#include <iostream>
 GmatBase& GmatBase::operator=(const GmatBase &a)
 {
-std::cout << "Calling GmatBase::operator= for " << instanceName << "\n";
    // Don't do anything if copying self
    if (&a == this)
       return *this;
