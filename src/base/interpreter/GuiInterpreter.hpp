@@ -49,9 +49,12 @@ public:
     //loj:Do we need this?
     //StringArray GetListOfContainer();
     StringArray GetListOfFactoryItems(Gmat::ObjectType type);
+    GmatBase* GetConfiguredItem(const std::string &name);
 
     //----- config
     StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
+    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
+                              const std::string &newName);
     bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
     // Spacecraft

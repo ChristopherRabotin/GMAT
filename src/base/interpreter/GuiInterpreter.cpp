@@ -120,6 +120,35 @@ StringArray& GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
 }
 
 //------------------------------------------------------------------------------
+// GmatBase* GetConfiguredItem(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::GetConfiguredItem(const std::string &name)
+{
+    return theModerator->GetConfiguredItem(name);
+}
+
+//------------------------------------------------------------------------------
+// bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName
+//                           const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * Renames item from the configured list.
+ *
+ * @param <type> object type
+ * @param <oldName>  old object name
+ * @param <newName>  new object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
+                                          const std::string &oldName,
+                                          const std::string &newName)
+{
+    return theModerator->RenameConfiguredItem(type, oldName, newName);
+}
+
+//------------------------------------------------------------------------------
 // bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
@@ -135,7 +164,6 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
                                           const std::string &name)
 {
     return theModerator->RemoveConfiguredItem(type, name);
-    return true; //for now
 }
 
 // spacecraft
