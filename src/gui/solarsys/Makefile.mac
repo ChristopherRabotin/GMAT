@@ -8,7 +8,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = SolarSystemWindow.cpp UniversePanel.cpp
+SRC = CelesBodySelectDialog.cpp SolarSystemWindow.cpp UniversePanel.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
