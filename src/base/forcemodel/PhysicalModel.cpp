@@ -90,6 +90,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CelestialBody.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -97,15 +98,15 @@
 const std::string
 PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount] =
 {
-    "Epoch",
-    "ElapsedSeconds"            // DJC changed to make script parsing work
+   "Epoch",
+   "ElapsedSeconds",
 };
 
 const Gmat::ParameterType
 PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount] =
 {
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
 };
 
 //---------------------------------
@@ -127,19 +128,18 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount] =
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
                              const std::string &nomme) :
-    GmatBase                    (id, typeStr, nomme),   // DJC added
-    dimension                   (1),
-    initialized                 (false),
-    stateChanged                (false),
-    modelState                  (NULL),
-    epoch                       (21545.0),
-    elapsedTime                 (0.0),
-    deriv                       (NULL),
-    relativeErrorThreshold      (0.10),
-    solarSystem                 (NULL)
+   GmatBase                    (id, typeStr, nomme),
+   dimension                   (1),
+   initialized                 (false),
+   stateChanged                (false),
+   modelState                  (NULL),
+   epoch                       (21545.0),
+   elapsedTime                 (0.0),
+   deriv                       (NULL),
+   relativeErrorThreshold      (0.10),
+   solarSystem                 (NULL)
 {
-    //loj: 3/19/04 parameterCount = 1;
-    parameterCount = PhysicalModelParamCount;
+   parameterCount = PhysicalModelParamCount;
 }
              
 //------------------------------------------------------------------------------
@@ -152,11 +152,11 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
 //------------------------------------------------------------------------------
 PhysicalModel::~PhysicalModel(void)
 {
-    if (modelState)
-        delete [] modelState;
+   if (modelState)
+      delete [] modelState;
 
-    if (deriv)
-        delete [] deriv;
+   if (deriv)
+      delete [] deriv;
 }
 
 //------------------------------------------------------------------------------
@@ -167,39 +167,38 @@ PhysicalModel::~PhysicalModel(void)
  */
 //------------------------------------------------------------------------------
 PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
-    GmatBase                    (pm),
-    dimension                   (pm.dimension),
-    initialized                 (pm.initialized),
-    stateChanged                (pm.stateChanged),
-    epoch                       (pm.epoch),
-    elapsedTime                 (pm.elapsedTime),
-    relativeErrorThreshold      (pm.relativeErrorThreshold),
-    solarSystem                 (pm.solarSystem)
+   GmatBase                    (pm),
+   dimension                   (pm.dimension),
+   initialized                 (pm.initialized),
+   stateChanged                (pm.stateChanged),
+   epoch                       (pm.epoch),
+   elapsedTime                 (pm.elapsedTime),
+   relativeErrorThreshold      (pm.relativeErrorThreshold),
+   solarSystem                 (pm.solarSystem)
 {
-    if (pm.modelState != NULL) 
-    {
-        modelState = new Real[dimension];
-        if (modelState != NULL) 
-            memcpy(modelState, pm.modelState, dimension * sizeof(Real));
-        else
-            initialized = false;
-    }
-    else
-        modelState = NULL;
+   if (pm.modelState != NULL) 
+   {
+      modelState = new Real[dimension];
+      if (modelState != NULL) 
+         memcpy(modelState, pm.modelState, dimension * sizeof(Real));
+      else
+         initialized = false;
+   }
+   else
+      modelState = NULL;
 
-    if (pm.deriv != NULL) 
-    {
-        deriv = new Real[dimension];
-        if (deriv != NULL) 
-            memcpy(deriv, pm.deriv, dimension * sizeof(Real));
-        else
-            initialized = false;
-    }
-    else
-        deriv = NULL;
+   if (pm.deriv != NULL) 
+   {
+      deriv = new Real[dimension];
+      if (deriv != NULL) 
+         memcpy(deriv, pm.deriv, dimension * sizeof(Real));
+      else
+         initialized = false;
+   }
+   else
+      deriv = NULL;
 
-    //loj: 3/19/04 parameterCount = 1;
-    parameterCount = PhysicalModelParamCount;
+   parameterCount = PhysicalModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -253,188 +252,56 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    return *this;
 }
 
-//------------------------------------------------------------------------------
-// CelestialBody* GetBody()
-//------------------------------------------------------------------------------
-/**
- * 
- */
-//------------------------------------------------------------------------------
-CelestialBody* PhysicalModel::GetBody()
-{
-    return theBody;
-}
+//  //------------------------------------------------------------------------------
+//  // CelestialBody* GetBody()
+//  //------------------------------------------------------------------------------
+//  /**
+//   * 
+//   */
+//  //------------------------------------------------------------------------------
+//  CelestialBody* PhysicalModel::GetBody()
+//  {
+//     return theBody;
+//  }
 
-//------------------------------------------------------------------------------
-// void SetBody(CelestialBody *body)
-//------------------------------------------------------------------------------
-/**
- *
- */
-//------------------------------------------------------------------------------
-void PhysicalModel::SetBody(CelestialBody *body)
-{
-    if (body != NULL)
-    {
-        if (theBody != NULL)
-        {
-            delete theBody;
-        }
-    }
+//  //------------------------------------------------------------------------------
+//  // void SetBody(CelestialBody *body)
+//  //------------------------------------------------------------------------------
+//  /**
+//   *
+//   */
+//  //------------------------------------------------------------------------------
+//  void PhysicalModel::SetBody(CelestialBody *body)
+//  {  
+//      if (body != NULL)
+//      {
+//          if (theBody != NULL)
+//          {
+//              delete theBody;
+//          }
+//      }
   
-    theBody = body;
-//    mu = theBody->GetGravitationalConstant();
-}
+//      theBody = body;
+//  //    mu = theBody->GetGravitationalConstant();
+//  }
 
-//------------------------------------------------------------------------------
-// bool SetBody(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- *
- */
-//------------------------------------------------------------------------------
-bool PhysicalModel::SetBody(const std::string &name)
-{
-    CelestialBody *body = solarSystem->GetBody(name);
-    if (body != NULL)
-    {
-        SetBody(body);
-        return true;
-    }
-    return false;
-}
-
-//------------------------------------------------------------------------------
-// std::string PhysicalModel::GetParameterText(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-std::string PhysicalModel::GetParameterText(const Integer id) const
-{
-    if (id >= EPOCH && id < PhysicalModelParamCount)
-        return PARAMETER_TEXT[id];
-    else
-        return GmatBase::GetParameterText(id);
-
-    //loj: 3/18/04
-//      switch (id)
+//  //------------------------------------------------------------------------------
+//  // bool SetBody(const std::string &name)
+//  //------------------------------------------------------------------------------
+//  /**
+//   *
+//   */
+//  //------------------------------------------------------------------------------
+//  bool PhysicalModel::SetBody(const std::string &name)
+//  {
+//      CelestialBody *body = solarSystem->GetBody(name);
+//      if (body != NULL)
 //      {
-//          case EPOCH:        // Intentional fall-through
-//          case ELAPSED_SECS:
-//              return PhysicalModel::PARAMETER_TEXT[id];
-//          default:
-//              return GmatBase::GetParameterText(id);
+//          SetBody(body);
+//          return true;
 //      }
-}
-
-//------------------------------------------------------------------------------
-// Integer PhysicalModel::GetParameterID(const std::string str)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Integer PhysicalModel::GetParameterID(const std::string &str) const
-{
-    for (int i = EPOCH; i < PhysicalModelParamCount; i++)
-    {
-        if (str == PhysicalModel::PARAMETER_TEXT[i])
-            return i;
-    }
-    return GmatBase::GetParameterID(str);
-}
-
-//------------------------------------------------------------------------------
-// Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
-{
-    if (id >= EPOCH && id < PhysicalModelParamCount)
-        return PARAMETER_TYPE[id];
-    else
-        return GmatBase::GetParameterType(id);
-
-    //loj: 3/18/04
-//      switch (id)
-//      {
-//          case EPOCH:
-//          case ELAPSED_SECS:
-//              return PhysicalModel::PARAMETER_TYPE[id];
-//          default:
-//              return GmatBase::GetParameterType(id);
-//      }
-}
-
-//------------------------------------------------------------------------------
-// std::string PhysicalModel::GetParameterTypeString(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-std::string PhysicalModel::GetParameterTypeString(const Integer id) const
-{
-    if (id >= EPOCH && id < PhysicalModelParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-    else
-        return GmatBase::GetParameterTypeString(id);
-
-    //loj: 3/18/04
-//      switch (id)
-//      {
-//          case EPOCH:
-//          case ELAPSED_SECS:
-//              return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-//          default:
-//              return GmatBase::GetParameterTypeString(id);
-//      }
-}
-
-//------------------------------------------------------------------------------
-// Real PhysicalModel::GetRealParameter(const Integer id)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real PhysicalModel::GetRealParameter(const Integer id) const
-{
-    if (id == EPOCH)
-        return epoch + elapsedTime / 86400.0;
-    if (id == ELAPSED_SECS)
-        return elapsedTime;
-
-    return GmatBase::GetRealParameter(id);
-}
-
-//------------------------------------------------------------------------------
-// Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-/**
- * @see GmatBase
- */
-//------------------------------------------------------------------------------
-Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
-{
-    if (id == ELAPSED_SECS) 
-    {
-        elapsedTime = value;
-        return elapsedTime;
-    }
-    if (id == EPOCH) 
-    {
-        epoch = value;
-        elapsedTime = 0.0;
-        return epoch;
-    }
-    return GmatBase::SetRealParameter(id, value);
-}
+//      return false;
+//  }
 
 //------------------------------------------------------------------------------
 // bool PhysicalModel::Initialize(void)
@@ -451,28 +318,30 @@ Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 bool PhysicalModel::Initialize(void)
 { 
-    if (modelState) {
-        delete [] modelState;
-        modelState = NULL;
+   //MessageInterface::ShowMessage("PhysicalModel::Initialize() entered\n");
+   
+   if (modelState) {
+      delete [] modelState;
+      modelState = NULL;
 
-        initialized = false;
-    }
+      initialized = false;
+   }
 
-    if (deriv) {
-        delete [] deriv;
-        deriv = NULL;
-    }
+   if (deriv) {
+      delete [] deriv;
+      deriv = NULL;
+   }
 
-    modelState = new Real[dimension];
-    if (modelState != NULL) {
-        deriv = new Real[dimension];
-        if (deriv)
-            initialized = true;
-        else
-            initialized = false;
-    }
-
-    return initialized;
+   modelState = new Real[dimension];
+   if (modelState != NULL) {
+      deriv = new Real[dimension];
+      if (deriv)
+         initialized = true;
+      else
+         initialized = false;
+   }
+  
+   return initialized;
 }
 
 //------------------------------------------------------------------------------
@@ -484,8 +353,8 @@ bool PhysicalModel::Initialize(void)
 //------------------------------------------------------------------------------
 Real PhysicalModel::GetErrorThreshold(void) const
 {
-    return relativeErrorThreshold;
-        // DJC: Should relativeErrorThreshold be added to the list of parameters? :
+   return relativeErrorThreshold;
+   // DJC: Should relativeErrorThreshold be added to the list of parameters? :
 }
 
 //------------------------------------------------------------------------------
@@ -499,8 +368,8 @@ Real PhysicalModel::GetErrorThreshold(void) const
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetErrorThreshold(const Real thold)
 {
-    relativeErrorThreshold = (thold >= 0.0 ? thold : -thold);
-    return true;
+   relativeErrorThreshold = (thold >= 0.0 ? thold : -thold);
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -517,7 +386,7 @@ bool PhysicalModel::SetErrorThreshold(const Real thold)
 //------------------------------------------------------------------------------
 Integer PhysicalModel::GetDimension(void)
 {
-    return dimension;
+   return dimension;
 }
 
 //------------------------------------------------------------------------------
@@ -531,8 +400,8 @@ Integer PhysicalModel::GetDimension(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::SetDimension(Integer n)
 {
-    dimension = n;
-    initialized = false;
+   dimension = n;
+   initialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -548,7 +417,7 @@ void PhysicalModel::SetDimension(Integer n)
 //------------------------------------------------------------------------------
 Real * PhysicalModel::GetState(void)
 {
-    return modelState;
+   return modelState;
 }
 
 //------------------------------------------------------------------------------
@@ -562,9 +431,9 @@ Real * PhysicalModel::GetState(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::SetState(const Real * st)
 {
-    for (Integer i = 0; i < dimension; i++)
-        modelState[i] = st[i];
-    stateChanged = true;
+   for (Integer i = 0; i < dimension; i++)
+      modelState[i] = st[i];
+   stateChanged = true;
 }
 
 //------------------------------------------------------------------------------
@@ -578,7 +447,7 @@ void PhysicalModel::SetState(const Real * st)
 //------------------------------------------------------------------------------
 const Real* PhysicalModel::GetDerivativeArray(void)
 {
-    return deriv;
+   return deriv;
 }
 
 //------------------------------------------------------------------------------
@@ -592,8 +461,8 @@ const Real* PhysicalModel::GetDerivativeArray(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::IncrementTime(Real dt)
 {
-    elapsedTime += dt;
-    stateChanged = true;
+   elapsedTime += dt;
+   stateChanged = true;
 }
 
 //------------------------------------------------------------------------------
@@ -609,7 +478,7 @@ void PhysicalModel::IncrementTime(Real dt)
 //------------------------------------------------------------------------------
 Real PhysicalModel::GetTime(void)
 {
-    return elapsedTime;
+   return elapsedTime;
 }
 
 //------------------------------------------------------------------------------
@@ -622,7 +491,7 @@ Real PhysicalModel::GetTime(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::SetTime(Real t)
 {
-    elapsedTime = t;
+   elapsedTime = t;
 }
 
 //------------------------------------------------------------------------------
@@ -651,7 +520,7 @@ void PhysicalModel::SetTime(Real t)
 //------------------------------------------------------------------------------
 bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
 {
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -705,20 +574,20 @@ bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
 //------------------------------------------------------------------------------
 Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
 {
-    Real retval = 0.0, err, delta;
+   Real retval = 0.0, err, delta;
 
-    for (Integer i = 0; i < dimension; ++i)
-    {
-        delta = answer[i] - modelState[i];
-        if (delta > relativeErrorThreshold)
-            err = fabs(diffs[i] / delta);
-        else
-            err = fabs(diffs[i]);
-        if (err > retval)
-            retval = err;
-    }
+   for (Integer i = 0; i < dimension; ++i)
+   {
+      delta = answer[i] - modelState[i];
+      if (delta > relativeErrorThreshold)
+         err = fabs(diffs[i] / delta);
+      else
+         err = fabs(diffs[i]);
+      if (err > retval)
+         retval = err;
+   }
 
-    return retval;
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -760,25 +629,25 @@ Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
 //------------------------------------------------------------------------------
 bool PhysicalModel::GetComponentMap(Integer * map, Integer order) const
 {
-//    return false;
-    int i6;
+   //    return false;
+   int i6;
 
-    if (order == 1) {
-        // Calculate how many spacecraft are in the model
-        int satCount = (int)(dimension / 6);
-        for (int i = 0; i < satCount; i++) {
-            i6 = i * 6;
+   if (order == 1) {
+      // Calculate how many spacecraft are in the model
+      int satCount = (int)(dimension / 6);
+      for (int i = 0; i < satCount; i++) {
+         i6 = i * 6;
     
-            map[ i6 ] = i6 + 3;
-            map[i6+1] = i6 + 4;
-            map[i6+2] = i6 + 5;
-            map[i6+3] = -1;
-            map[i6+4] = -1;
-            map[i6+5] = -1;
-        }
-    }
+         map[ i6 ] = i6 + 3;
+         map[i6+1] = i6 + 4;
+         map[i6+2] = i6 + 5;
+         map[i6+3] = -1;
+         map[i6+4] = -1;
+         map[i6+5] = -1;
+      }
+   }
     
-    return true;
+   return true;
 
 }
 
@@ -793,7 +662,7 @@ bool PhysicalModel::GetComponentMap(Integer * map, Integer order) const
 //------------------------------------------------------------------------------
 void PhysicalModel::SetSolarSystem(SolarSystem *ss)
 {
-    solarSystem = ss;
+   solarSystem = ss;
 }
 
 //------------------------------------------------------------------------------
@@ -844,9 +713,115 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 // DJC: Probably should document this a bit better -- want me to do it? :
 bool PhysicalModel::StateChanged(bool reset)
 {
-    bool retval = stateChanged;
-    if (reset)
-        stateChanged = false;
-    return retval;
+   bool retval = stateChanged;
+   if (reset)
+      stateChanged = false;
+   return retval;
 }
 
+
+//---------------------------------
+// inherited methods from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// std::string PhysicalModel::GetParameterText(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PhysicalModel::GetParameterText(const Integer id) const
+{
+   if (id >= EPOCH && id < PhysicalModelParamCount)
+      return PARAMETER_TEXT[id];
+   else
+      return GmatBase::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+// Integer PhysicalModel::GetParameterID(const std::string str)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer PhysicalModel::GetParameterID(const std::string &str) const
+{
+   for (int i = EPOCH; i < PhysicalModelParamCount; i++)
+   {
+      if (str == PhysicalModel::PARAMETER_TEXT[i])
+         return i;
+   }
+   return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
+{
+   if (id >= EPOCH && id < PhysicalModelParamCount)
+      return PARAMETER_TYPE[id];
+   else
+      return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string PhysicalModel::GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PhysicalModel::GetParameterTypeString(const Integer id) const
+{
+   if (id >= EPOCH && id < PhysicalModelParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return GmatBase::GetParameterTypeString(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PhysicalModel::GetRealParameter(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real PhysicalModel::GetRealParameter(const Integer id) const
+{
+   if (id == EPOCH)
+      return epoch + elapsedTime / 86400.0;
+   if (id == ELAPSED_SECS)
+      return elapsedTime;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == ELAPSED_SECS) 
+   {
+      elapsedTime = value;
+      return elapsedTime;
+   }
+   if (id == EPOCH) 
+   {
+      epoch = value;
+      elapsedTime = 0.0;
+      return epoch;
+   }
+   return GmatBase::SetRealParameter(id, value);
+}

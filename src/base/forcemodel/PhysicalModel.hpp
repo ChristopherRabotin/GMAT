@@ -110,88 +110,88 @@
 class GMAT_API PhysicalModel : public GmatBase
 {
 public:
-    PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
-                  const std::string &nomme = "");
-    virtual ~PhysicalModel(void);
+   PhysicalModel(Gmat::ObjectType typeId, const std::string &typeStr,
+                 const std::string &nomme = "");
+   virtual ~PhysicalModel(void);
 
-    PhysicalModel(const PhysicalModel&);
-    PhysicalModel& operator=(const PhysicalModel&);
+   PhysicalModel(const PhysicalModel&);
+   PhysicalModel& operator=(const PhysicalModel&);
     
-    //waw: added o3/16/04
-    CelestialBody* GetBody();
-    void SetBody(CelestialBody *body);
-    bool SetBody(const std::string &name);
+   //loj: 5/11/04 removed Get/SetBody()   
+   //CelestialBody* GetBody();
+   //void SetBody(CelestialBody *body);
+   //bool SetBody(const std::string &name);
 
-    // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual Real GetRealParameter(const Integer id) const;
-    virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual bool Initialize(void);
 
-    virtual bool Initialize(void);
+   virtual Integer GetDimension(void);
+   virtual Real *  GetState(void);
+   const Real *    GetDerivativeArray(void);
 
-    virtual Integer GetDimension(void);
-    virtual Real *  GetState(void);
-    const Real *    GetDerivativeArray(void);
+   virtual void SetDimension(Integer);
+   virtual void SetState(const Real * st);
 
-    virtual void SetDimension(Integer);
-    virtual void SetState(const Real * st);
+   Real GetErrorThreshold(void) const;
+   bool SetErrorThreshold(const Real thold = 0.10);
 
-    Real GetErrorThreshold(void) const;
-    bool SetErrorThreshold(const Real thold = 0.10);
+   virtual void IncrementTime(Real dt);
+   virtual Real GetTime(void);
+   virtual void SetTime(Real t);
 
-    virtual void IncrementTime(Real dt);
-    virtual Real GetTime(void);
-    virtual void SetTime(Real t);
-
-    virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
-    virtual Real EstimateError(Real * diffs, Real * answer) const;
-    virtual bool GetComponentMap(Integer * map, Integer order = 1) const;
+   virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
+   virtual Real EstimateError(Real * diffs, Real * answer) const;
+   virtual bool GetComponentMap(Integer * map, Integer order = 1) const;
     
-    virtual void SetSolarSystem(SolarSystem *ss);
-    virtual void SetSatelliteParameter(const Integer i, 
-                                       const std::string parmName, 
-                                       const Real parm);
-    virtual void SetSatelliteParameter(const Integer i, 
-                                       const std::string parmName, 
-                                       const std::string parm);
-    virtual bool StateChanged(bool reset = true);
+   virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetSatelliteParameter(const Integer i, 
+                                      const std::string parmName, 
+                                      const Real parm);
+   virtual void SetSatelliteParameter(const Integer i, 
+                                      const std::string parmName, 
+                                      const std::string parm);
+   virtual bool StateChanged(bool reset = true);
 
+   // Parameter accessor methods -- inherited from GmatBase
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real SetRealParameter(const Integer id, const Real value);
+   
 protected:
-    /// Number of parameters being modeled
-    Integer dimension;
-    /// Flag used to tell the readiness of the model for use
-    bool initialized;
-    /// Flag that is set when SetState() or SetTime() is called
-    bool stateChanged;
+   /// Number of parameters being modeled
+   Integer dimension;
+   /// Flag used to tell the readiness of the model for use
+   bool initialized;
+   /// Flag that is set when SetState() or SetTime() is called
+   bool stateChanged;
 
-    /// Array of data parameters containing the model data
-    Real *modelState;
-    /// The base epoch
-    Real epoch;
-    /// Number of seconds elapsed from the base epoch
-    Real elapsedTime;
-    /// Array containing the most recent derivative calculation, when needed
-    Real * deriv;
-    /// Threshold for switching between relative and absolute error control
-    Real relativeErrorThreshold;
-    /// Pointer to the solar system model used as a data provider for the forces
-    SolarSystem *solarSystem;
-    /// Pointer to the body associated with the force model
-    CelestialBody *theBody;
-    
-    /// Parameter IDs
-    enum
-    {
-        EPOCH = 0,
-        ELAPSED_SECS,
-        PhysicalModelParamCount  // Count of the parameters for this class (including all of its ancestors)
-    };
+   /// Array of data parameters containing the model data
+   Real *modelState;
+   /// The base epoch
+   Real epoch;
+   /// Number of seconds elapsed from the base epoch
+   Real elapsedTime;
+   /// Array containing the most recent derivative calculation, when needed
+   Real * deriv;
+   /// Threshold for switching between relative and absolute error control
+   Real relativeErrorThreshold;
+   /// Pointer to the solar system model used as a data provider for the forces
+   SolarSystem *solarSystem;
+   /// Pointer to the origin associated with the force model
+   //CelestialBody *theBody; //loj: 5/11/04
+   
+   /// Parameter IDs
+   enum
+   {
+      EPOCH = 0, // assume GmatBase has no parameters
+      ELAPSED_SECS,
+      PhysicalModelParamCount
+   };
 
-    static const std::string PARAMETER_TEXT[PhysicalModelParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[PhysicalModelParamCount];
+   static const std::string PARAMETER_TEXT[PhysicalModelParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[PhysicalModelParamCount];
 };
 
 #endif // PhysicalModel_hpp
