@@ -28,22 +28,37 @@
 
 #include "MdiTextDocument.hpp"
 #include "MdiTextEditView.hpp"
+#include "MessageInterface.hpp"
 
 IMPLEMENT_DYNAMIC_CLASS(MdiTextDocument, wxDocument)
 
 // Since text windows have their own method for saving to/loading from files,
 // we override OnSave/OpenDocument instead of Save/LoadObject
+   
+//loj: 4/16/04 added
+//------------------------------------------------------------------------------
+// bool Save()
+//------------------------------------------------------------------------------
+bool MdiTextDocument::Save()
+{
+   wxString filename = GetFilename();
+   
+   MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
+   if (!view->textsw->SaveFile(filename))
+      return FALSE;
+
+   Modify(FALSE);
+   return TRUE;
+
+}
+
 //------------------------------------------------------------------------------
 // bool OnSaveDocument(const wxString& filename)
 //------------------------------------------------------------------------------
 bool MdiTextDocument::OnSaveDocument(const wxString& filename)
 {
-    MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
-    
-    if (!view->textsw->SaveFile(filename))
-        return FALSE;
-    Modify(FALSE);
-    return TRUE;
+   Modify(FALSE);
+   return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -51,14 +66,14 @@ bool MdiTextDocument::OnSaveDocument(const wxString& filename)
 //------------------------------------------------------------------------------
 bool MdiTextDocument::OnOpenDocument(const wxString& filename)
 {
-    MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
-    if (!view->textsw->LoadFile(filename))
-        return FALSE;
+   MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
+   if (!view->textsw->LoadFile(filename))
+      return FALSE;
     
-    SetFilename(filename, TRUE);
-    Modify(FALSE);
-    UpdateAllViews();
-    return TRUE;
+   SetFilename(filename, TRUE);
+   Modify(FALSE);
+   UpdateAllViews();
+   return TRUE;
 }
 
 //------------------------------------------------------------------------------
@@ -66,13 +81,13 @@ bool MdiTextDocument::OnOpenDocument(const wxString& filename)
 //------------------------------------------------------------------------------
 bool MdiTextDocument::IsModified(void) const
 {
-    MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
-    if (view)
-    {
-        return (wxDocument::IsModified() || view->textsw->IsModified());
-    }
-    else
-        return wxDocument::IsModified();
+   MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
+   if (view)
+   {
+      return (wxDocument::IsModified() || view->textsw->IsModified());
+   }
+   else
+      return wxDocument::IsModified();
 }
 
 //------------------------------------------------------------------------------
@@ -80,10 +95,10 @@ bool MdiTextDocument::IsModified(void) const
 //------------------------------------------------------------------------------
 void MdiTextDocument::Modify(bool mod)
 {
-    MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
+   MdiTextEditView *view = (MdiTextEditView *)GetFirstView();
     
-    wxDocument::Modify(mod);
+   wxDocument::Modify(mod);
     
-    if (!mod && view && view->textsw)
-        view->textsw->DiscardEdits();
+   if (!mod && view && view->textsw)
+      view->textsw->DiscardEdits();
 }

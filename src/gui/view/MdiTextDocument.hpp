@@ -32,6 +32,9 @@ class MdiTextDocument: public wxDocument
 {
     DECLARE_DYNAMIC_CLASS(MdiTextDocument)
 public:
+
+    // inherited methods from wxDocument
+    virtual bool Save(); //loj: 4/16/04 added
     virtual bool OnSaveDocument(const wxString& filename);
     virtual bool OnOpenDocument(const wxString& filename);
     virtual bool IsModified(void) const;
