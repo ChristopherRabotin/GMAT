@@ -61,6 +61,7 @@ private:
    int mNumForLoop;
    int mNumDoWhile;
    int mNumSwitchCase;
+   int mNumFunct;
 
    void UpdateCommand();
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
@@ -93,6 +94,8 @@ private:
    void OnAddTarget(wxCommandEvent &event);
    void OnAddAchieve(wxCommandEvent &event);
    void OnAddVary(wxCommandEvent &event);
+
+   void OnAddFunction(wxCommandEvent &event);
 
    void OnAddIfStatement(wxCommandEvent &event);
    void OnAddWhileLoop(wxCommandEvent &event);
@@ -182,6 +185,8 @@ private:
       POPUP_ADD_SWITCH_CASE,
       POPUP_ADD_ELSE_IF_STATEMENT,
       POPUP_ADD_ELSE_STATEMENT,
+
+      POPUP_ADD_FUNCTION,
         
       POPUP_INSERT_IF_STATEMENT,
       POPUP_INSERT_WHILE_LOOP,

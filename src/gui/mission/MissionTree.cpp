@@ -42,7 +42,9 @@
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
    EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
-   EVT_LEFT_DCLICK(MissionTree::OnDoubleClick) 
+//    ag: 10/20/2004 Commented out so that the position of the click is not
+//        checked to open up a panel from the variables/goals boxes
+//   EVT_LEFT_DCLICK(MissionTree::OnDoubleClick)
 
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
@@ -66,7 +68,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_SWITCH_CASE, MissionTree::OnAddSwitchCase)
    EVT_MENU(POPUP_ADD_ELSE_IF_STATEMENT, MissionTree::OnAddElseIfStatement)
    EVT_MENU(POPUP_ADD_ELSE_STATEMENT, MissionTree::OnAddElseStatement)
-
+   EVT_MENU(POPUP_ADD_FUNCTION, MissionTree::OnAddFunction)
 
    EVT_MENU(POPUP_INSERT_MANEUVER, MissionTree::OnInsertManeuver)
    EVT_MENU(POPUP_INSERT_PROPAGATE, MissionTree::OnInsertPropagate)
@@ -134,6 +136,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mNumForLoop = 0;
    mNumDoWhile = 0;
    mNumSwitchCase = 0;
+   mNumFunct = 0;
 
    AddIcons();
    AddDefaultMission();
@@ -180,6 +183,7 @@ void MissionTree::UpdateMission(bool resetCounter)
       mNumForLoop = 0;
       mNumDoWhile = 0;
       mNumSwitchCase = 0;
+      mNumFunct = 0;
    }
    
    DeleteChildren(mMissionSeqSubItem);
@@ -1333,6 +1337,31 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAddFunction(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnAddFunction(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   wxString name;
+   name.Printf("CallFunction%d", ++mNumFunct);
+
+//   GmatCommand *cmd =
+//      theGuiInterpreter->CreateCommand("CallFunction", std::string(name.c_str()));
+//
+//   if (cmd != NULL)
+//   {
+//      if (theGuiInterpreter->AppendCommand(cmd))
+//      {
+//         wxTreeItemId targetId =
+            AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                       new MissionTreeItemData(name, GmatTree::CALL_FUNCTION_COMMAND,
+                                               name, NULL));
+
+//      }
+//   }
+}
+
+//------------------------------------------------------------------------------
 // void OnInsertPropagate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnInsertPropagate(wxCommandEvent &event)
@@ -1737,6 +1766,7 @@ wxMenu* MissionTree::CreateAddPopupMenu()
    }
 
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", CreateAddControlLogicPopupMenu());
+   menu->Append(POPUP_ADD_FUNCTION, wxT("Function"));
 
    return menu;
 }
@@ -2135,7 +2165,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
                //MessageInterface::ShowMessage("\nInside variables");
                MissionTreeItemData *item =
                   new MissionTreeItemData(
-                                          wxT("Variables"), 
+                                          wxT("Variables"),
                                           GmatTree::VIEW_SOLVER_VARIABLES);
                GmatAppData::GetMainFrame()->CreateChild(item);
             }
