@@ -702,9 +702,9 @@ void XyPlotSetupPanel::SaveData()
       }
       else
       {
-         numYParams = numYParams;
+         mNumYParams = numYParams; //loj: 11/17/04 - changed from numYParams = numYParams;
       }
-
+      
       if (mNumYParams >= 0) // >=0 because the list needs to be cleared
       {
          //mXyPlot->SetBooleanParameter("ClearDepVarList", true);
