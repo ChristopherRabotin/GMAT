@@ -812,6 +812,9 @@ bool Propagate::Execute(void)
    
    for (unsigned int i=0; i<stopWhen.size(); i++)
    {
+      // StopCondition need new base epoch -- loj: 6/30/04
+      stopWhen[i]->SetRealParameter("BaseEpoch", currEpoch);
+      
       // ElapsedTime parameters need new initial epoch
       stopVar = stopWhen[i]->GetStringParameter("StopVar");
       if (stopVar.find("Elapsed") != stopVar.npos)
@@ -871,8 +874,8 @@ bool Propagate::Execute(void)
       }
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
-         ("Propagate::Execute() intermediate; epoch = %f\n",
-          (baseEpoch + fm->GetTime() / 86400.0));
+         ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch);
+      //(baseEpoch + fm->GetTime() / 86400.0));
 #endif
    }
 
