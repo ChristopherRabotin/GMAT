@@ -31,9 +31,9 @@ GuiInterpreter* GuiInterpreter::instance = NULL;
 //------------------------------------------------------------------------------
 GuiInterpreter* GuiInterpreter::Instance()
 {
-    if (instance == NULL)
-        instance = new GuiInterpreter();
-    return instance;
+   if (instance == NULL)
+      instance = new GuiInterpreter();
+   return instance;
 }
 
 //------------------------------------------------------------------------------
@@ -41,8 +41,8 @@ GuiInterpreter* GuiInterpreter::Instance()
 //------------------------------------------------------------------------------
 GuiInterpreter::~GuiInterpreter()
 {
-    if (instance != NULL)
-        delete instance;
+   if (instance != NULL)
+      delete instance;
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ GuiInterpreter::~GuiInterpreter()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::IsInitialized()
 {
-    return isInitialized;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -58,8 +58,8 @@ bool GuiInterpreter::IsInitialized()
 //------------------------------------------------------------------------------
 void GuiInterpreter::Initialize()
 {
-    //loj: Is there anything to initialize?
-    isInitialized = true;
+   //loj: Is there anything to initialize?
+   isInitialized = true;
 }
 
 //----- factory
@@ -87,7 +87,7 @@ void GuiInterpreter::Initialize()
 //------------------------------------------------------------------------------
 StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 {
-    return theModerator->GetListOfFactoryItems(type);
+   return theModerator->GetListOfFactoryItems(type);
 }
 
 //----- configuration
@@ -104,7 +104,7 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
-    return theModerator->GetListOfConfiguredItems(type);
+   return theModerator->GetListOfConfiguredItems(type);
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ StringArray& GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 GmatBase* GuiInterpreter::GetConfiguredItem(const std::string &name)
 {
-    return theModerator->GetConfiguredItem(name);
+   return theModerator->GetConfiguredItem(name);
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
                                           const std::string &oldName,
                                           const std::string &newName)
 {
-    return theModerator->RenameConfiguredItem(type, oldName, newName);
+   return theModerator->RenameConfiguredItem(type, oldName, newName);
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ bool GuiInterpreter::RenameConfiguredItem(Gmat::ObjectType type,
 bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
                                           const std::string &name)
 {
-    return theModerator->RemoveConfiguredItem(type, name);
+   return theModerator->RemoveConfiguredItem(type, name);
 }
 
 // spacecraft
@@ -170,8 +170,8 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
 Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
                                              const std::string &name)
 {
-    Spacecraft *sc = theModerator->CreateSpacecraft(type, name);
-    return sc;
+   Spacecraft *sc = theModerator->CreateSpacecraft(type, name);
+   return sc;
 }
 
 //------------------------------------------------------------------------------
@@ -187,8 +187,8 @@ Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
 //------------------------------------------------------------------------------
 Spacecraft* GuiInterpreter::GetSpacecraft(const std::string &name)
 {
-    Spacecraft *sc = theModerator->GetSpacecraft(name);
-    return sc;
+   Spacecraft *sc = theModerator->GetSpacecraft(name);
+   return sc;
 }
 
 // Propagator
@@ -207,7 +207,7 @@ Spacecraft* GuiInterpreter::GetSpacecraft(const std::string &name)
 Propagator* GuiInterpreter::CreatePropagator(const std::string &type,
                                              const std::string &name)
 {
-    return theModerator->CreatePropagator(type, name);
+   return theModerator->CreatePropagator(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -223,7 +223,7 @@ Propagator* GuiInterpreter::CreatePropagator(const std::string &type,
 //------------------------------------------------------------------------------
 Propagator* GuiInterpreter::GetPropagator(const std::string &name)
 {
-    return theModerator->GetPropagator(name);
+   return theModerator->GetPropagator(name);
 }
 
 // PropSetup
@@ -240,7 +240,7 @@ Propagator* GuiInterpreter::GetPropagator(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
 {
-    return theModerator->CreateDefaultPropSetup(name);
+   return theModerator->CreateDefaultPropSetup(name);
 }
 
 //------------------------------------------------------------------------------
@@ -256,7 +256,7 @@ PropSetup* GuiInterpreter::CreateDefaultPropSetup(const std::string &name)
 //------------------------------------------------------------------------------
 PropSetup* GuiInterpreter::GetPropSetup(const std::string &name)
 {
-    return theModerator->GetPropSetup(name);
+   return theModerator->GetPropSetup(name);
 }
 
 // ForceModel/PhysicalModel
@@ -273,7 +273,7 @@ PropSetup* GuiInterpreter::GetPropSetup(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* GuiInterpreter::CreateForceModel(const std::string &name)
 {
-    return theModerator->CreateForceModel(name);
+   return theModerator->CreateForceModel(name);
 }
 
 //------------------------------------------------------------------------------
@@ -291,7 +291,7 @@ ForceModel* GuiInterpreter::CreateForceModel(const std::string &name)
 PhysicalModel* GuiInterpreter::CreatePhysicalModel(const std::string &type,
                                                    const std::string &name)
 {
-    return theModerator->CreatePhysicalModel(type, name);
+   return theModerator->CreatePhysicalModel(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -307,7 +307,7 @@ PhysicalModel* GuiInterpreter::CreatePhysicalModel(const std::string &type,
 //------------------------------------------------------------------------------
 PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
 {
-    return theModerator->GetPhysicalModel(name);
+   return theModerator->GetPhysicalModel(name);
 }
 
 // burn
@@ -326,7 +326,7 @@ PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
 Burn* GuiInterpreter::CreateBurn(const std::string &type,
                                  const std::string &name)
 {
-    return theModerator->CreateBurn(type, name);
+   return theModerator->CreateBurn(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -342,7 +342,7 @@ Burn* GuiInterpreter::CreateBurn(const std::string &type,
 //------------------------------------------------------------------------------
 Burn* GuiInterpreter::GetBurn(const std::string &name)
 {
-    return theModerator->GetBurn(name);
+   return theModerator->GetBurn(name);
 }
 
 // Solver
@@ -361,7 +361,7 @@ Burn* GuiInterpreter::GetBurn(const std::string &name)
 Solver* GuiInterpreter::CreateSolver(const std::string &type,
                                      const std::string &name)
 {
-    return theModerator->CreateSolver(type, name);
+   return theModerator->CreateSolver(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -377,7 +377,7 @@ Solver* GuiInterpreter::CreateSolver(const std::string &type,
 //------------------------------------------------------------------------------
 Solver* GuiInterpreter::GetSolver(const std::string &name)
 {
-    return theModerator->GetSolver(name);
+   return theModerator->GetSolver(name);
 }
 
 // Parameter
@@ -396,7 +396,7 @@ Solver* GuiInterpreter::GetSolver(const std::string &name)
 Parameter* GuiInterpreter::CreateParameter(const std::string &type,
                                            const std::string &name)
 {
-    return theModerator->CreateParameter(type, name);
+   return theModerator->CreateParameter(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -431,7 +431,7 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
                                                    const std::string &name)
 {
-    return theModerator->CreateCelestialBody(type, name);
+   return theModerator->CreateCelestialBody(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -447,8 +447,8 @@ CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
 {
-    //loj: assumes body type from SolarSystem container
-    return theModerator->GetCelestialBody(name);
+   //loj: assumes body type from SolarSystem container
+   return theModerator->GetCelestialBody(name);
 }
 
 // solar system
@@ -463,7 +463,7 @@ CelestialBody* GuiInterpreter::GetCelestialBody(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 {
-    return theModerator->GetDefaultSolarSystem();
+   return theModerator->GetDefaultSolarSystem();
 }
 
 // Planetary files
@@ -476,7 +476,7 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetaryFileTypes()
 {
-    return theModerator->GetPlanetaryFileTypes();
+   return theModerator->GetPlanetaryFileTypes();
 }
 
 //------------------------------------------------------------------------------
@@ -488,7 +488,7 @@ StringArray& GuiInterpreter::GetPlanetaryFileTypes()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetaryFileNames()
 {
-    return theModerator->GetPlanetaryFileNames();
+   return theModerator->GetPlanetaryFileNames();
 }
 
 //------------------------------------------------------------------------------
@@ -496,7 +496,7 @@ StringArray& GuiInterpreter::GetPlanetaryFileNames()
 //------------------------------------------------------------------------------
 StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
 {
-    return theModerator->GetPlanetaryFileTypesInUse();
+   return theModerator->GetPlanetaryFileTypesInUse();
 }
 
 //------------------------------------------------------------------------------
@@ -504,7 +504,7 @@ StringArray& GuiInterpreter::GetPlanetaryFileTypesInUse()
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetPlanetaryFileName(const std::string &filetype)
 {
-    return theModerator->GetPlanetaryFileName(filetype);
+   return theModerator->GetPlanetaryFileName(filetype);
 }
 
 //------------------------------------------------------------------------------
@@ -514,7 +514,7 @@ std::string GuiInterpreter::GetPlanetaryFileName(const std::string &filetype)
 bool GuiInterpreter::SetPlanetaryFileName(const std::string &filetype,
                                           const std::string &filename)
 {
-    return theModerator->SetPlanetaryFileName(filetype, filename);
+   return theModerator->SetPlanetaryFileName(filetype, filename);
 }
 
 //------------------------------------------------------------------------------
@@ -526,8 +526,19 @@ bool GuiInterpreter::SetPlanetaryFileName(const std::string &filetype,
 //------------------------------------------------------------------------------
 bool GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 {
-    return theModerator->SetPlanetaryFileTypesInUse(filetypes);
+   return theModerator->SetPlanetaryFileTypesInUse(filetypes);
 }
+
+//loj: 5/21/04 added
+// Potential field files
+//------------------------------------------------------------------------------
+// std::string GetPotentialFileName(const std::string &filetype)
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetPotentialFileName(const std::string &filetype)
+{
+   return theModerator->GetPotentialFileName(filetype);
+}
+
 
 // Subscriber
 //------------------------------------------------------------------------------
@@ -548,7 +559,7 @@ Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
                                              const std::string &name,
                                              const std::string &filename)
 {
-    return theModerator->CreateSubscriber(type, name, filename);
+   return theModerator->CreateSubscriber(type, name, filename);
 }
 
 //------------------------------------------------------------------------------
@@ -564,10 +575,9 @@ Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
 //------------------------------------------------------------------------------
 Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 {
-    return theModerator->GetSubscriber(name);
+   return theModerator->GetSubscriber(name);
 }
 
-//loj: 4/1/04 added
 // StopCondition
 //------------------------------------------------------------------------------
 // StopCondition* CreateStopCondition(const std::string &type, const std::string &name)
@@ -575,7 +585,7 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
                                                    const std::string &name)
 {
-    return theModerator->CreateStopCondition(type, name);
+   return theModerator->CreateStopCondition(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -583,7 +593,7 @@ StopCondition* GuiInterpreter::CreateStopCondition(const std::string &type,
 //------------------------------------------------------------------------------
 StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
 {
-    return theModerator->GetStopCondition(name);
+   return theModerator->GetStopCondition(name);
 }
 
 // GmatCommand
@@ -602,7 +612,7 @@ StopCondition* GuiInterpreter::GetStopCondition(const std::string &name)
 GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
                                        const std::string &name)
 {
-    return theModerator->CreateCommand(type, name);
+   return theModerator->CreateCommand(type, name);
 }
 
 // Mission
@@ -611,7 +621,7 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
 //------------------------------------------------------------------------------
 bool GuiInterpreter::LoadDefaultMission()
 {
-    return theModerator->LoadDefaultMission();
+   return theModerator->LoadDefaultMission();
 }
 
 // Resource
@@ -620,7 +630,7 @@ bool GuiInterpreter::LoadDefaultMission()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::ClearResource()
 {
-    return theModerator->ClearResource();
+   return theModerator->ClearResource();
 }
 
 // Command Sequence
@@ -629,7 +639,7 @@ bool GuiInterpreter::ClearResource()
 //------------------------------------------------------------------------------
 bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
 {
-    return theModerator->ClearCommandSeq(sandboxNum);
+   return theModerator->ClearCommandSeq(sandboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -645,7 +655,7 @@ bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
-    return theModerator->AppendCommand(cmd, sandboxNum);
+   return theModerator->AppendCommand(cmd, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -655,7 +665,7 @@ bool GuiInterpreter::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 GmatCommand* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
                                   Integer sandboxNum)
 {
-    return theModerator->AppendCommand(type, name, sandboxNum);
+   return theModerator->AppendCommand(type, name, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -664,7 +674,7 @@ GmatCommand* GuiInterpreter::AppendCommand(const std::string &type, const std::s
 bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                                    Integer sandboxNum)
 {
-    return theModerator->InsertCommand(cmd, prevCmd, sandboxNum);
+   return theModerator->InsertCommand(cmd, prevCmd, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -674,7 +684,7 @@ bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 GmatCommand* GuiInterpreter::InsertCommand(const std::string &type, const std::string &currName,
                                   const std::string &prevName, Integer sandboxNum)
 {
-    return theModerator->InsertCommand(type, currName, prevName, sandboxNum);
+   return theModerator->InsertCommand(type, currName, prevName, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -682,7 +692,7 @@ GmatCommand* GuiInterpreter::InsertCommand(const std::string &type, const std::s
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 {
-    return theModerator->DeleteCommand(cmd, snadboxNum);
+   return theModerator->DeleteCommand(cmd, snadboxNum);
 }
 
 //------------------------------------------------------------------------------
@@ -698,7 +708,7 @@ GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 //------------------------------------------------------------------------------
 GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 {
-    return theModerator->GetNextCommand(sandboxNum);
+   return theModerator->GetNextCommand(sandboxNum);
 }
 
 // sandbox
@@ -716,7 +726,7 @@ GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunMission(Integer sandboxNum)
 {
-    return theModerator->RunMission(sandboxNum, true);
+   return theModerator->RunMission(sandboxNum, true);
 }
 
 // Script
@@ -733,7 +743,7 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
 {
-    return theModerator->InterpretScript(scriptFilename);
+   return theModerator->InterpretScript(scriptFilename);
 }
 
 //------------------------------------------------------------------------------
@@ -749,7 +759,7 @@ bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
 {
-    return theModerator->SaveScript(scriptFilename);
+   return theModerator->SaveScript(scriptFilename);
 }
 
 //------------------------------------------------------------------------------
@@ -766,7 +776,7 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunScript(Integer sandboxNum)
 {
-    return theModerator->RunScript(sandboxNum, true); //loj: 3/11/04 added true
+   return theModerator->RunScript(sandboxNum, true);
 }
 
 
@@ -779,8 +789,8 @@ Integer GuiInterpreter::RunScript(Integer sandboxNum)
 //------------------------------------------------------------------------------
 GuiInterpreter::GuiInterpreter()
 {
-    isInitialized = false;
-    theModerator = Moderator::Instance();
+   isInitialized = false;
+   theModerator = Moderator::Instance();
 }
 
 //------------------------------------------------------------------------------
@@ -795,5 +805,5 @@ GuiInterpreter::GuiInterpreter(const GuiInterpreter&)
 //------------------------------------------------------------------------------
 GuiInterpreter& GuiInterpreter::operator=(const GuiInterpreter &guiInterpreter)
 {
-    return *this;
+   return *this;
 }

@@ -40,120 +40,123 @@ class GMAT_API GuiInterpreter
 {
 public:
 
-    static GuiInterpreter* Instance();
-    ~GuiInterpreter();
+   static GuiInterpreter* Instance();
+   ~GuiInterpreter();
 
-    bool IsInitialized();
-    void Initialize();
+   bool IsInitialized();
+   void Initialize();
 
-    //----- factory
-    //loj:Do we need this?
-    //StringArray GetListOfContainer();
-    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
-    GmatBase* GetConfiguredItem(const std::string &name);
+   //----- factory
+   //loj:Do we need this?
+   //StringArray GetListOfContainer();
+   StringArray GetListOfFactoryItems(Gmat::ObjectType type);
+   GmatBase* GetConfiguredItem(const std::string &name);
 
-    //----- config
-    StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
-    bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
-                              const std::string &newName);
-    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
+   //----- config
+   StringArray& GetListOfConfiguredItems(Gmat::ObjectType type);
+   bool RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
+                             const std::string &newName);
+   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
-    // Spacecraft
-    Spacecraft* CreateSpacecraft(const std::string&type, const std::string &name);
-    Spacecraft* GetSpacecraft(const std::string &name);
-    //future build:GroundStation* CreateGroundStation(const std::string &name);
-    //future build:GroundStation* GetGroundStation(const std::string &name);
+   // Spacecraft
+   Spacecraft* CreateSpacecraft(const std::string&type, const std::string &name);
+   Spacecraft* GetSpacecraft(const std::string &name);
+   //future build:GroundStation* CreateGroundStation(const std::string &name);
+   //future build:GroundStation* GetGroundStation(const std::string &name);
 
-    // Propagator
-    Propagator* CreatePropagator(const std::string &type, const std::string &name);
-    Propagator* GetPropagator(const std::string &name);
+   // Propagator
+   Propagator* CreatePropagator(const std::string &type, const std::string &name);
+   Propagator* GetPropagator(const std::string &name);
 
-    // PropSetup
-    PropSetup* CreateDefaultPropSetup(const std::string &name);
-    PropSetup* GetPropSetup(const std::string &name);
+   // PropSetup
+   PropSetup* CreateDefaultPropSetup(const std::string &name);
+   PropSetup* GetPropSetup(const std::string &name);
 
-    // ForceModel/PhysicalModel
-    ForceModel* CreateForceModel(const std::string &name);
-    PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
-    PhysicalModel* GetPhysicalModel(const std::string &name);
+   // ForceModel/PhysicalModel
+   ForceModel* CreateForceModel(const std::string &name);
+   PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
+   PhysicalModel* GetPhysicalModel(const std::string &name);
 
-    // Burn
-    Burn* CreateBurn(const std::string &type, const std::string &name);
-    Burn* GetBurn(const std::string &name);
+   // Burn
+   Burn* CreateBurn(const std::string &type, const std::string &name);
+   Burn* GetBurn(const std::string &name);
 
-    // Solver
-    Solver* CreateSolver(const std::string &type, const std::string &name);
-    Solver* GetSolver(const std::string &name);
+   // Solver
+   Solver* CreateSolver(const std::string &type, const std::string &name);
+   Solver* GetSolver(const std::string &name);
 
-    // Parameter
-    Parameter* CreateParameter(const std::string &type, const std::string &name);
-    Parameter* GetParameter(const std::string &name);
+   // Parameter
+   Parameter* CreateParameter(const std::string &type, const std::string &name);
+   Parameter* GetParameter(const std::string &name);
 
-    // Celestial body
-    CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
-    CelestialBody* GetCelestialBody(const std::string &name);
+   // Celestial body
+   CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
+   CelestialBody* GetCelestialBody(const std::string &name);
 
-    // SolarSystem
-    SolarSystem* GetDefaultSolarSystem();
+   // SolarSystem
+   SolarSystem* GetDefaultSolarSystem();
 
-    // Planetary files
-    StringArray& GetPlanetaryFileTypes();
-    StringArray& GetPlanetaryFileNames();
-    StringArray& GetPlanetaryFileTypesInUse();
-    std::string GetPlanetaryFileName(const std::string &filetype);
-    bool SetPlanetaryFileName(const std::string &filetype,
-                              const std::string &filename);
-    bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
+   // Planetary files
+   StringArray& GetPlanetaryFileTypes();
+   StringArray& GetPlanetaryFileNames();
+   StringArray& GetPlanetaryFileTypesInUse();
+   std::string GetPlanetaryFileName(const std::string &filetype);
+   bool SetPlanetaryFileName(const std::string &filetype,
+                             const std::string &filename);
+   bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
+
+   // Potential field files
+   std::string GetPotentialFileName(const std::string &filetype); //loj: 5/21/04 added
+
+   
+   // Subscriber
+   Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
+                                const std::string &filename = "");
+   Subscriber* GetSubscriber(const std::string &name);
+
+   // StopCondition
+   StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
+   StopCondition* GetStopCondition(const std::string &name);
     
-    // Subscriber
-    Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
-                                 const std::string &filename = "");
-    Subscriber* GetSubscriber(const std::string &name);
+   // Command
+   GmatCommand* CreateCommand(const std::string &type, const std::string &name);
 
-    //loj: 4/1/04 added
-    // StopCondition
-    StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
-    StopCondition* GetStopCondition(const std::string &name);
+   // Resource
+   bool ClearResource();
     
-    // Command
-    GmatCommand* CreateCommand(const std::string &type, const std::string &name);
+   // Command sequence
+   bool LoadDefaultMission();
+   bool ClearCommandSeq(Integer sandboxNum = 1);
+   bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   GmatCommand* AppendCommand(const std::string &type, const std::string &name,
+                              Integer sandboxNum = 1);
+   bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
+                      Integer sandboxNum = 1);
+   GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
+                              const std::string &prevName, Integer sandboxNum = 1);
+   GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   GmatCommand* GetNextCommand(Integer sandboxNum = 1);
 
-    // Resource
-    bool ClearResource();
-    
-    // Command sequence
-    bool LoadDefaultMission();
-    bool ClearCommandSeq(Integer sandboxNum = 1);
-    bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-    GmatCommand* AppendCommand(const std::string &type, const std::string &name,
-                           Integer sandboxNum = 1);
-    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
-                       Integer sandboxNum = 1);
-    GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
-                           const std::string &prevName, Integer sandboxNum = 1);
-    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-    GmatCommand* GetNextCommand(Integer sandboxNum = 1);
+   // Sandbox
+   void ClearAllSandboxes();
+   Integer RunMission(Integer sandboxNum = 1);
 
-    // Sandbox
-    void ClearAllSandboxes();
-    Integer RunMission(Integer sandboxNum = 1);
-
-    // Script
-    bool InterpretScript(const std::string &scriptFilename);
-    bool SaveScript(const std::string &scriptFilename);
-    Integer RunScript(Integer sandboxNum = 1);
+   // Script
+   bool InterpretScript(const std::string &scriptFilename);
+   bool SaveScript(const std::string &scriptFilename);
+   Integer RunScript(Integer sandboxNum = 1);
     
 private:
 
-    GuiInterpreter();
-    GuiInterpreter(const GuiInterpreter&);
-    GuiInterpreter& operator=(const GuiInterpreter &guiInterpreter);
+   GuiInterpreter();
+   GuiInterpreter(const GuiInterpreter&);
+   GuiInterpreter& operator=(const GuiInterpreter &guiInterpreter);
 
-    // member data
-    bool isInitialized;
-    Moderator *theModerator;
+   // member data
+   bool isInitialized;
+   Moderator *theModerator;
 
-    static GuiInterpreter *instance;
+   static GuiInterpreter *instance;
 };
 
 

@@ -1125,6 +1125,21 @@ bool Moderator::SetPlanetaryFileName(const std::string &filetype,
    return status;
 }
 
+//loj: 5/21/04 added
+// Potential field files
+//------------------------------------------------------------------------------
+// std::string GetPotentialFileName(const std::string &filetype)
+//------------------------------------------------------------------------------
+std::string Moderator::GetPotentialFileName(const std::string &filetype)
+{
+   if (filetype == "JGM2")
+      return theFileManager->GetStringParameter("FULL_EARTH_JGM2_FILE");
+   else if (filetype == "JGM3")
+      return theFileManager->GetStringParameter("FULL_EARTH_JGM3_FILE");
+   else
+      return "Unknown Potential File Type:" + filetype;
+}
+
 //------------------------------------------------------------------------------
 // bool SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 //------------------------------------------------------------------------------

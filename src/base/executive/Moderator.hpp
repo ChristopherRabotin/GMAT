@@ -176,6 +176,9 @@ public:
    bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
    Integer GetPlanetaryFileId(const std::string &filetype);
     
+   // Potential field files
+   std::string GetPotentialFileName(const std::string &filetype); //loj: 5/21/04 added
+
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
