@@ -2,7 +2,13 @@
 # Initial Version - D. Conway - 2003/12/17
 
 HEADERS = -I../include -I../foundation -I../spacecraft -I../solarsys
-OBJECTS = Burn.o ImpulsiveBurn.o ManeuverFrame.o
+OBJECTS = Burn.o \
+          BurnException.o \
+          ImpulsiveBurn.o \
+          ManeuverFrame.o \
+          ManeuverFrameManager.o \
+          InertialManeuverFrame.o \
+          VnbManeuverFrame.o
 
 all: libBurn
 	mkdir -p ../lib

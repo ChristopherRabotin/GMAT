@@ -4,7 +4,7 @@
 WXTARGET = lib/libGMATBase.a
 CONSOLETARGET = lib/libGMATBaseConsole.a
 
-TARGETS = $(WXTARGET) $(CONSOLETARGET)
+TARGETS = $(CONSOLETARGET) $(WXTARGET)
 
 all: $(TARGETS)
 
@@ -23,16 +23,17 @@ LIBRARIES = lib/libFoundation.a \
             lib/libSpacecraft.a \
             lib/libForceModel.a \
             lib/libPropagator.a \
-            lib/libBurn.a \
             lib/libParameter.a \
+            lib/libBurn.a	\
             lib/libInterpolator.a \
             lib/libRefFrame.a \
             lib/libStopCondition.a \
             lib/libSubscriber.a \
+            lib/libSolver.a \
             lib/libCommand.a \
             lib/libFactory.a \
             lib/libConfiguration.a \
-            lib/libInterpreter.a
+            lib/libInterpreter.a 
 
 GUILIBRARIES = lib/libExecutive.a
 CONSOLELIBRARIES = lib/libExecutiveConsole.a
@@ -90,6 +91,9 @@ lib/libStopCondition.a :
 
 lib/libSubscriber.a :
 	cd subscriber ; $(MAKE) -f Makefile.linux all
+
+lib/libSolver.a :
+	cd solver ; $(MAKE) -f Makefile.linux all
 
 lib/libCommand.a :
 	cd command ; $(MAKE) -f Makefile.linux all

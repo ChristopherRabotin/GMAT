@@ -6,7 +6,10 @@
 # the factory for MessageWindow gets built before executive.
 
 HEADERS = -I../include -I../foundation -I../executive
-OBJECTS = Subscriber.o ReportFile.o MessageWindow.o
+OBJECTS = Subscriber.o \
+        ReportFile.o \
+        MessageWindow.o \
+        OpenGlPlot.o
 
 all: libSubscriber
 	mkdir -p ../lib

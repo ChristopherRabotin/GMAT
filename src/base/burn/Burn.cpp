@@ -23,8 +23,10 @@
 
 Burn::Burn(std::string typeStr, std::string nomme) :
     GmatBase        (Gmat::BURN, typeStr, nomme),
-    coordFrame      ("VNB"),
+    coordFrame      ("Inertial"),
     coordSystem     ("Cartesian"),
+    satName         (""),
+    sc              (NULL),
     // Parameter IDs, for convenience
     coordFrameID    (parameterCount),
     coordSystemID   (parameterCount+1),
@@ -33,14 +35,25 @@ Burn::Burn(std::string typeStr, std::string nomme) :
     deltaV3ID       (parameterCount+4),
     deltaV1LabelID  (parameterCount+5),
     deltaV2LabelID  (parameterCount+6),
-    deltaV3LabelID  (parameterCount+7)
+    deltaV3LabelID  (parameterCount+7),
+    satNameID       (parameterCount+8)
 {
-    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
-    dvLabels[0] = "V";
-    dvLabels[1] = "N";
-    dvLabels[2] = "B";
+    parameterCount += 9;
     
-    parameterCount += 8;
+    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+    frameman = new ManeuverFrameManager;
+
+    /// Load the default maneuver frame
+    frame = frameman->GetFrameInstance(coordFrame);
+
+    dvLabels[0] = frame->GetFrameLabel(1);
+    dvLabels[1] = frame->GetFrameLabel(2);
+    dvLabels[2] = frame->GetFrameLabel(3);
+    
+    frameBasis[0][0] = frameBasis[1][1] = frameBasis[2][2] = 1.0;
+    frameBasis[0][1] = frameBasis[1][0] = frameBasis[2][0] = 
+    frameBasis[0][2] = frameBasis[1][2] = frameBasis[2][1] = 0.0;
+     
 }
 
 
@@ -53,6 +66,7 @@ Burn::Burn(const Burn &b) :
     GmatBase        (b),
     coordFrame      (b.coordFrame),
     coordSystem     (b.coordSystem),
+    satName         (b.satName),
     // Parameter IDs, for convenience
     coordFrameID    (b.coordFrameID),
     coordSystemID   (b.coordSystemID),
@@ -61,7 +75,8 @@ Burn::Burn(const Burn &b) :
     deltaV3ID       (b.deltaV3ID),
     deltaV1LabelID  (b.deltaV1LabelID),
     deltaV2LabelID  (b.deltaV2LabelID),
-    deltaV3LabelID  (b.deltaV3LabelID)
+    deltaV3LabelID  (b.deltaV3LabelID),
+    satNameID       (b.satNameID)
 {
     deltaV[0] = b.deltaV[0];
     deltaV[1] = b.deltaV[1];
@@ -74,8 +89,13 @@ Burn::Burn(const Burn &b) :
 }
 
 
-Burn Burn::operator=(const Burn &b)
-{}
+Burn& Burn::operator=(const Burn &b)
+{
+    if (this == &b)
+        return *this;
+        
+    return *this;
+}
 
 
 std::string Burn::GetParameterText(const Integer id) const
@@ -103,6 +123,9 @@ std::string Burn::GetParameterText(const Integer id) const
         
     if (id == deltaV3LabelID) 
         return "Element3Label";
+        
+    if (id == satNameID) 
+        return "SpacecraftName";
         
     return GmatBase::GetParameterText(id);
 }
@@ -134,6 +157,9 @@ Integer Burn::GetParameterID(const std::string &str) const
     if (str == "Element3Label") 
         return deltaV3LabelID;
         
+    if (str == "SpacecraftName") 
+        return satNameID;
+        
     return GmatBase::GetParameterID(str);
 }
 
@@ -164,6 +190,9 @@ Gmat::ParameterType Burn::GetParameterType(const Integer id) const
     if (id == deltaV3LabelID) 
         return Gmat::STRING_TYPE;
         
+    if (id == satNameID) 
+        return Gmat::STRING_TYPE;
+        
     return GmatBase::GetParameterType(id);
 }
 
@@ -192,6 +221,9 @@ std::string Burn::GetParameterTypeString(const Integer id) const
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
     if (id == deltaV3LabelID) 
+        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+        
+    if (id == satNameID) 
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
         
     return GmatBase::GetParameterTypeString(id);
@@ -251,6 +283,9 @@ std::string Burn::GetStringParameter(const Integer id) const
     if (id == deltaV3LabelID) 
         return dvLabels[2];
         
+    if (id == satNameID) 
+        return satName;
+        
     return GmatBase::GetStringParameter(id);
 }
 
@@ -262,6 +297,11 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
         // if (!IsValidFrame(value))
         //    return false;    
         coordFrame = value;
+        frame = frameman->GetFrameInstance(coordFrame);
+
+        dvLabels[0] = frame->GetFrameLabel(1);
+        dvLabels[1] = frame->GetFrameLabel(2);
+        dvLabels[2] = frame->GetFrameLabel(3);
         return true;
     }
         
@@ -282,6 +322,11 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
         
     if (id == deltaV3LabelID) 
         return false;
+        
+    if (id == satNameID) {
+        satName = value;
+        return true;
+    }
         
     return GmatBase::SetStringParameter(id, value);
 }

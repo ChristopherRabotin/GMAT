@@ -25,10 +25,13 @@
 #include "Burn.hpp"
 
 
-class ImpulsiveBurn : public Burn{
+class ImpulsiveBurn : public Burn
+{
 public:
 	ImpulsiveBurn(std::string nomme = "");
 	virtual ~ImpulsiveBurn(void);
+ 
+    virtual bool            Fire(Real *burnData = NULL);
 };
 
 #endif // ImpulsiveBurn_hpp
