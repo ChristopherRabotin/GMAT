@@ -624,12 +624,11 @@ Real GmatBase::GetRealParameter(const Integer id) const
 /**
  * Set the value for a Real parameter.
  *
- * @param <id> The integer ID for the parameter.
- * @param <value> The new parameter value.
+ * @param id The integer ID for the parameter.
+ * @param value The new parameter value.
  *
- * @return the parameter value at the end of this call, or 
- *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
- *         parameter type is not Real.
+ * @return the parameter value at the end of this call, or throw an exception
+ *         if the parameter id is invalid or the parameter type is not Real.
  */
 Real GmatBase::SetRealParameter(const Integer id, const Real value)
 {
@@ -972,8 +971,8 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
  *
  * @param <id> The integer ID for the parameter.
  *
- * @return The string stored for this parameter, or the empty string if there
- *         is no string association.
+ * @return The string stored for this parameter, or throw ab=n exception if 
+ *         there is no string association.
  */
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
@@ -993,7 +992,7 @@ std::string GmatBase::GetStringParameter(const Integer id) const
  * @param <id> The integer ID for the parameter.
  * @param <value> The new string for this parameter.
  *
- * @return true if the string is stored, false if not.
+ * @return true if the string is stored, throw if the parameter is not stored.
  */
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
 {
@@ -1105,11 +1104,8 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
  *
  * @param <id> The integer ID for the parameter.
  *
- * @return the boolean value for this parameter, or false if the parameter is
- *         not boolean.
- *
- * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
- *       parameter accesses.
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter access in invalid.
  */
 bool GmatBase::GetBooleanParameter(const Integer id) const
 {
@@ -1129,8 +1125,8 @@ bool GmatBase::GetBooleanParameter(const Integer id) const
  * @param id The integer ID for the parameter.
  * @param value The new value.
  * 
- * @return the boolean value for this parameter, or false if the parameter is
- *         not boolean.
+ * @return the boolean value for this parameter, or throw an exception if the 
+ *         parameter is invalid or not boolean.
  */
 bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
 {
