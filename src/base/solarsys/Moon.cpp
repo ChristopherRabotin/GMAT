@@ -19,32 +19,33 @@
 #include "Moon.hpp"
 #include "PhysicalConstants.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
+
+using namespace GmatMathUtil;
 
 
 // initialize static default values
 // default values for CelesitalBody data
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
-//const Real                  Moon::MASS                = 7.3483e22;     // kg
-const Real                  Moon::EQUATORIAL_RADIUS   = 1738.1;     // km
-const Real                  Moon::FLATTENING          = 0.0;
-//const Real                  Moon::POLAR_RADIUS        = 1736.0;       // km - need more precision
-const Real                  Moon::MU                  = 4902.799;      // km^3 / s^2 
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
-const Integer               Moon::BODY_NUMBER         = 2; 
-const Integer               Moon::REF_BODY_NUMBER     = 3; 
 const Integer               Moon::ORDER               = 4; 
 const Integer               Moon::DEGREE              = 4;  
+const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1;     // km
+const Real                  Moon::LUNA_FLATTENING          = 0.0;
+const Real                  Moon::LUNA_MU                  = 4902.799;      // km^3 / s^2 
+const Integer               Moon::LUNA_BODY_NUMBER         = 2; 
+const Integer               Moon::LUNA_REF_BODY_NUMBER     = 3; 
 
 //const Integer               Moon::COEFFICIENT_SIZE    = 4;
 
-const Rmatrix               Moon::SIJ                 = Rmatrix(5,5,
+const Rmatrix               Moon::LUNA_SIJ                 = Rmatrix(5,5,
    0.0,                  0.0,                  0.0,                  0.0,                 0.0,
    0.0,                  0.0,                  0.0,                  0.0,                 0.0,
    0.0, 4.78976286742000E-09, 1.19043314469000E-08,                  0.0,                 0.0,
    0.0, 5.46564929895000E-06, 4.88875341590000E-06,-1.76416063010000E-06,                 0.0,
    0.0, 1.63304293851000E-06,-6.76012176494000E-06,-1.34287028168000E-05, 3.94334642990000E-06);
-const Rmatrix               Moon::CIJ                 = Rmatrix(5,5,
+const Rmatrix               Moon::LUNA_CIJ                 = Rmatrix(5,5,
                      1.0,                 0.0,                  0.0,                  0.0,                   0.0,
                      0.0,                 0.0,                  0.0,                  0.0,                   0.0,
    -9.09314486280000E-05, 9.88441569067000E-09, 3.47139237760000E-05,                  0.0,                  0.0,
@@ -141,6 +142,95 @@ Moon::~Moon()
 }
 
 //------------------------------------------------------------------------------
+//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the cartographic coordinates for the planet.
+ *
+ * @return vector containing alpha, delta, W.
+ *
+ * @note currently only implemented for the moons (listed in IAU doc) of our
+ *       Solar System.  See "Report of the IAU/IAG Working Group on
+ *       Cartographic Coordinates and Rotational Elements of the Planets
+ *       and Satellites: 2000"
+ */
+//------------------------------------------------------------------------------
+Rvector3 Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+{
+   Real alpha = 0;
+   Real delta = 0;
+   Real W = 0;
+   // intermediate angle computations, in radians (for trig functions)
+   Real p1  = 0.0, p2  = 0.0, p3  = 0.0, p4  = 0.0;
+   Real p5  = 0.0, p6  = 0.0, p7  = 0.0, p8  = 0.0;
+   Real p9  = 0.0, p10 = 0.0, p11 = 0.0, p12 = 0.0;
+   Real p13 = 0.0;
+   // Real p14 = 0.0, p15 = 0.0, p16 = 0.0;
+   Real d = forTime.JulianDaysFromTCBEpoch(); // interval in Julian days
+   Real T = d / 36525;                        // interval in Julian centuries
+   // Compute for Eath's Moon
+   if (centralBody == SolarSystem::EARTH_NAME) 
+   {
+      p1  = Rad(125.045 -  0.0529921 * d);
+      p2  = Rad(250.089 -  0.1059842 * d);
+      p3  = Rad(260.008 + 13.0120009 * d);
+      p4  = Rad(176.625 + 13.3407154 * d);
+      p5  = Rad(357.529 +  0.9856003 * d);
+      p6  = Rad(311.589 + 26.4057084 * d);
+      p7  = Rad(134.963 + 13.0649930 * d);
+      p8  = Rad(276.617 +  0.3287146 * d);
+      p9  = Rad( 34.226 +  1.7484877 * d);
+      p10 = Rad( 15.134 -  0.1589763 * d);
+      p11 = Rad(119.743 +  0.0036096 * d);
+      p12 = Rad(239.961 +  0.1643573 * d);
+      p13 = Rad( 25.053 + 12.9590088 * d);
+      
+      alpha = 269.9949  
+             +  0.0031 * T        -  3.8787 * Sin(p1)  -  0.1204 * Sin(p2)
+             +  0.0700 * Sin(p3)  -  0.0172 * Sin(p4)  +  0.0072 * Sin(p6)
+             -  0.0052 * Sin(p10) +  0.0043 * Sin(p13);
+      delta =  66.5392   
+             +  0.0130 * T        +  1.5419 * Cos(p1)  +  0.0239 * Cos(p2)
+             -  0.0278 * Cos(p3)  +  0.0068 * Cos(p4)  -  0.0029 * Cos(p6)
+             +  0.0009 * Cos(p7)  +  0.0008 * Cos(p10) -  0.0009 * Cos(p13);
+      W     =  38.3213 
+             + 13.17635815 * d    -  1.4E-12 * d * d   +  3.5610 * Sin(p1)
+             +  0.1208 * Sin(p2)  -  0.0642 * Sin(p3)  +  0.0158 * Sin(p4)
+             -  0.0252 * Sin(p5)  -  0.0066 * Sin(p6)  -  0.0047 * Sin(p7)
+             -  0.0046 * Sin(p8)  +  0.0028 * Sin(p9)  +  0.0052 * Sin(p10)
+             +  0.0040 * Sin(p11) +  0.0019 * Sin(p12) -  0.0044 * Sin(p13);
+   }
+   // Compute for Mars' moons
+   else if (centralBody == SolarSystem::MARS_NAME)
+   {
+      p1  = Rad(169.51  -    0.4357640 * d);
+      p2  = Rad(192.93  + 1128.4096700 * d +  8.864 * T * T);
+      p3  = Rad( 53.47  -    0.0181510 * d);
+      if (instanceName == SolarSystem::PHOBOS_NAME)
+      {
+         alpha = 317.68           -    0.108 * T     +  1.79 * Sin(p1);
+         delta =  52.90           -    0.061 * T     -  1.08 * Cos(p1);
+         W     =  35.06           + 1128.8445850 * d +  8.864 * T * T  
+                 - 1.42 * Sin(p1) -    0.78 * Sin(p2);
+      }
+      else  // Deimos
+      {
+         alpha = 316.65           -    0.108 * T     +  2.98 * Sin(p3);
+         delta =  53.52           -    0.061 * T     -  1.78 * Cos(p3);
+         W     =  79.41           +  285.1618970 * d -  0.520 * T * T  
+                 - 2.58 * Sin(p3) +    0.19 * Cos(p3);
+      }
+   }
+   // add others when needed ...............
+   else
+   {
+      return CelestialBody::GetBodyCartographicCoordinates(forTime);
+   }
+   
+   return Rvector3(alpha, delta, W);
+}
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
@@ -173,32 +263,35 @@ void Moon::InitializeMoon(const std::string &cBody)
    CelestialBody::Initialize();
    // fill in with default values, for the Sun
    bodyType            = Moon::BODY_TYPE;
-   mu                  = Moon::MU;
-   mass                = mu /
-                         GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
-  // mass                = Moon::MASS;
-   equatorialRadius    = Moon::EQUATORIAL_RADIUS;
-   flattening          = Moon::FLATTENING;
-   //polarRadius         = Moon::POLAR_RADIUS;
-   polarRadius         = (1.0 - flattening) * equatorialRadius;
    posVelSrc           = Moon::POS_VEL_SOURCE;
    analyticMethod      = Moon::ANALYTIC_METHOD;
    centralBody         = cBody;
-   bodyNumber          = Moon::BODY_NUMBER;
-   referenceBodyNumber = Moon::REF_BODY_NUMBER;
 
    //coefficientSize     = Moon::COEFFICIENT_SIZE;
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
-   sij                 = Moon::SIJ;
-   cij                 = Moon::CIJ;
 
-   //defaultSij          = sij;
-   //defaultCij          = cij;
-   defaultMu           = Moon::MU;
-   defaultEqRadius     = Moon::EQUATORIAL_RADIUS;
-   //defaultCoefSize     = Moon::COEFFICIENT_SIZE;
+   if (instanceName == SolarSystem::MOON_NAME)
+   {
+      mu                  = Moon::LUNA_MU;
+      mass                = mu /
+         GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
+      // mass                = Moon::MASS;
+      equatorialRadius    = Moon::LUNA_EQUATORIAL_RADIUS;
+      flattening          = Moon::LUNA_FLATTENING;
+      polarRadius         = (1.0 - flattening) * equatorialRadius;
+      bodyNumber          = Moon::LUNA_BODY_NUMBER;
+      referenceBodyNumber = Moon::LUNA_REF_BODY_NUMBER;
+      sij                 = Moon::LUNA_SIJ;
+      cij                 = Moon::LUNA_CIJ;
+      
+      defaultMu           = Moon::LUNA_MU;
+      defaultEqRadius     = Moon::LUNA_EQUATORIAL_RADIUS;
+   }
+   // NEED values for other moons in here!!!!
+   // And how do I get position and velocity for the other moons?
    
+   // write message for now
    if (instanceName != SolarSystem::MOON_NAME)
    MessageInterface::ShowMessage(
     "Unknown moon created - please supply physical parameter values");

@@ -48,27 +48,27 @@ public:
    // destructor
    virtual ~Moon();
 
-
+   virtual Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
 
    // default values for CelesitalBody data
    static const Gmat::BodyType        BODY_TYPE;
-   //static const Real                  MASS;
-   static const Real                  EQUATORIAL_RADIUS;
-   static const Real                  FLATTENING;
-   //static const Real                  POLAR_RADIUS;
-   static const Real                  MU;
    static const Gmat::PosVelSource    POS_VEL_SOURCE;
    static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
-   static const CelestialBody*        CENTRAL_BODY;
-   static const Integer               BODY_NUMBER;
-   static const Integer               REF_BODY_NUMBER;
+   //static const CelestialBody*        CENTRAL_BODY;
    static const Integer               ORDER;
    static const Integer               DEGREE;
-   static const Rmatrix               SIJ;
-   static const Rmatrix               CIJ;
-   //static const Integer               COEFFICIENT_SIZE;
+
+   static const Integer               LUNA_BODY_NUMBER;
+   static const Integer               LUNA_REF_BODY_NUMBER;
+
+   static const Real                  LUNA_EQUATORIAL_RADIUS;
+   static const Real                  LUNA_FLATTENING;
+   static const Real                  LUNA_MU;
+   static const Rmatrix               LUNA_SIJ;
+   static const Rmatrix               LUNA_CIJ;
 
 protected:
 
