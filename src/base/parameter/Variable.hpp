@@ -52,7 +52,7 @@ public:
                                 const std::string &newName);
    
    virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string str) const;
+   virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 

@@ -219,7 +219,7 @@ std::string RealVar::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string str) const
 //------------------------------------------------------------------------------
-Integer RealVar::GetParameterID(const std::string str) const
+Integer RealVar::GetParameterID(const std::string &str) const
 {
    for (int i=ParameterParamCount; i<RealVarParamCount; i++)
    {

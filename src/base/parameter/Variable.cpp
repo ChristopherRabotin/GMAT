@@ -228,7 +228,7 @@ std::string Variable::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string str) const
 //------------------------------------------------------------------------------
-Integer Variable::GetParameterID(const std::string str) const
+Integer Variable::GetParameterID(const std::string &str) const
 {
    for (int i=RealVarParamCount; i<VariableParamCount; i++)
    {
