@@ -136,6 +136,7 @@ SlpFile::~SlpFile()
 Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime)
 {
    double    forTime            = (double) atTime.Get();
+
    int       iBody[1]           = {forBody};
    double    pos[MAX_BODIES][3];
    double    vel[MAX_BODIES][3];
@@ -238,8 +239,9 @@ Real* SlpFile::GetPosVel(Integer forBody, A1Mjd atTime)
  *
  * @return start day-of-year and year of the SLP file.
  *
- * @exception <PlanetaryEphemException> thrown if there is an error opening or reading
- *            the SLP File, or if it is not J2000
+ * @exception <PlanetaryEphemException> thrown if there is an error opening or
+ *                                      reading the SLP File, or if it is not
+ *                                      J2000
  */
 //------------------------------------------------------------------------------
 Integer* SlpFile::GetStartDayAndYear()
