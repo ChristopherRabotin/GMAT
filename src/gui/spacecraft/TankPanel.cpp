@@ -221,16 +221,13 @@ void TankPanel::SaveData()
        return;
        
     Integer paramID = 0;
-       
+    
+    theSpacecraft->TakeAction("RemoveTank", ""); 
     for (Integer i = 0; i < selectedTankCount; i++) 
-    {
-        //FuelTank* ft = new FuelTank(selectedTanksArray[i].c_str());
-        //theSpacecraft->SetRefObject(ft, Gmat::HARDWARE, selectedTanksArray[i].c_str()); 
-        
+    {        
         paramID = theSpacecraft->GetParameterID("Tanks");
         theSpacecraft->SetStringParameter(paramID, selectedTanksArray[i].c_str());       
-    }   
-    theApplyButton->Disable();
+    }  
 }
 
 //------------------------------------------------------------------------------
@@ -286,12 +283,9 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
     else if (event.GetEventObject() == selectAllButton)
     {
         for (Integer i = 0; i < availableTankCount; i++) 
-        {
-           wxString tank = availableTanksArray.Item(i);
-           selectedTanksArray.Add(tank);
-           availableTanksArray.Remove(tank.c_str());
-        }  
-        
+           selectedTanksArray.Add(availableTanksArray.Item(i));
+
+        availableTanksArray.Clear();
         availableTankCount = availableTanksArray.GetCount();
         currentAvailTank = 0;
         
@@ -304,17 +298,14 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
     else if (event.GetEventObject() == removeAllButton)
     {
         for (Integer i = 0; i < selectedTankCount; i++) 
-        {
-           wxString tank = selectedTanksArray.Item(i);
-           availableTanksArray.Add(tank);
-           selectedTanksArray.Remove(tank.c_str());
-        }  
+           availableTanksArray.Add(selectedTanksArray.Item(i));
+ 
+        selectedTanksArray.Clear();
+        selectedTankCount = selectedTanksArray.GetCount();
+        currentSelectedTank = 0;
         
         availableTankCount = availableTanksArray.GetCount();
         currentAvailTank = 0;
-        
-        selectedTankCount = selectedTanksArray.GetCount();
-        currentSelectedTank = 0;
         
         DisplayData();
         theApplyButton->Enable();
