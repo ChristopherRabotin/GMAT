@@ -58,6 +58,7 @@
 #include "RealUtilities.hpp"
 #include "MessageInterface.hpp"
 #include "Rvector.hpp"
+#include "TimeTypes.hpp"
 //#include "SolarSystemException.hpp"
 
 
@@ -407,11 +408,27 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    if (satcount != 1)
       return false;
 
-   Real f[3];
+   Real f[3], rbb3, mu_rbb, aIndirect[3], now;
+   
    if (!legendreP_rtq(state))
       return false;
    if (!gravity_rtq(epoch + 2430000.0 + dt/86400.0, f))
       return false;
+
+   now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
+   const Rvector6 *rv = &(body->GetState(now));
+
+   // Precalculations for the indirect effect term
+   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+   if (rbb3 != 0.0) {
+      rbb3 = rbb3 * sqrt(rbb3);
+      mu_rbb = mu / rbb3;
+      aIndirect[0] = mu_rbb * (*rv)[0];
+      aIndirect[1] = mu_rbb * (*rv)[1];
+      aIndirect[2] = mu_rbb * (*rv)[2];
+   }
+   else
+      aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
 
    switch (dvorder)
    {
@@ -419,15 +436,15 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
          deriv[0] = state[3];
          deriv[1] = state[4];
          deriv[2] = state[5];
-         deriv[3] = f[0];
-         deriv[4] = f[1];
-         deriv[5] = f[2];
+         deriv[3] = f[0] - aIndirect[0];
+         deriv[4] = f[1] - aIndirect[1];
+         deriv[5] = f[2] - aIndirect[2];
          break;
 
       case 2:
-         deriv[0] = f[0];
-         deriv[1] = f[1];
-         deriv[2] = f[2];
+         deriv[0] = f[0] - aIndirect[0];
+         deriv[1] = f[1] - aIndirect[1];
+         deriv[2] = f[2] - aIndirect[2];
          deriv[3] =
             deriv[4] =
             deriv[5] = 0.0;
