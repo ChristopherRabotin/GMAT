@@ -21,13 +21,13 @@
 #include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
 #include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "Publisher.hpp"         // for Instance()
+#include "GmatBaseException.hpp" // for GmatBaseException()
 #include "MessageInterface.hpp"  // for ShowMessage()
 #include <algorithm>             // for find(), distance()
 
-#define DEBUG_OPENGL_INIT 0
-#define DEBUG_OPENGL_PARAM 0
-#define DEBUG_OPENGL_UPDATE 0
-#define TEST_MULTI_SC 0
+//#define DEBUG_OPENGL_INIT 1
+//#define DEBUG_OPENGL_PARAM 1
+//#define DEBUG_OPENGL_UPDATE 1
 
 //---------------------------------
 // static data
@@ -36,11 +36,8 @@ const std::string
 OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 {
    "Add",
-   "SpacecraftList",
-   "ClearSpacecraftList",
    "OrbitColor",
    "TargetColor",
-   "Axis",
    "EquatorialPlane",
    "WireFrame",
    "TargetStatus",
@@ -51,20 +48,16 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
-   Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::UNSIGNED_INT_TYPE,
-   Gmat::UNSIGNED_INT_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE,
+   Gmat::UNSIGNED_INTARRAY_TYPE,
+   Gmat::UNSIGNED_INTARRAY_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE
 };
 
-//loj: 7/30/04 added
 const UnsignedInt
 OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SC_COLOR] =
 {
@@ -84,7 +77,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
 
-   mDrawAxis = false;
    mDrawEquatorialPlane = true;
    mDrawWireFrame = false;
    mDrawTarget = false;
@@ -107,7 +99,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
 OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    Subscriber(ogl)
 {
-   mDrawAxis = ogl.mDrawAxis;
    mDrawEquatorialPlane = ogl.mDrawEquatorialPlane;
    mDrawWireFrame = ogl.mDrawWireFrame;
    mDrawTarget = ogl.mDrawTarget;
@@ -176,6 +167,63 @@ bool OpenGlPlot::Initialize()
 }
 
 //------------------------------------------------------------------------------
+// UnsignedInt GetColor(const std::string &item, const std::string &scName)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::GetColor(const std::string &item,
+                                 const std::string &scName)
+{
+   if (item == "Orbit")
+   {
+      if (mOrbitColorMap.find(scName) != mOrbitColorMap.end())
+         return mOrbitColorMap[scName];
+   }
+   else if (item == "Target")
+   {
+      if (mTargetColorMap.find(scName) != mTargetColorMap.end())
+         return mTargetColorMap[scName];
+   }
+   
+   return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+}
+
+//------------------------------------------------------------------------------
+// bool SetColor(const std::string &item, const std::string &scName,
+//               const UnsignedInt value)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetColor(const std::string &item, const std::string &scName,
+                          const UnsignedInt value)
+{
+#if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetColor() item=%s, scName=%s, value=%d\n",
+       item.c_str(), item.c_str(), value);
+#endif
+
+   if (item == "Orbit")
+   {
+      if (mOrbitColorMap.find(scName) != mOrbitColorMap.end())
+      {
+         mOrbitColorMap[scName] = value;
+         return true;
+      }
+   }
+   else if (item == "Target")
+   {
+      if (mTargetColorMap.find(scName) != mTargetColorMap.end())
+      {
+         mTargetColorMap[scName] = value;
+         return true;
+      }
+   }
+   
+   return false;
+}
+
+//---------------------------------
+// inherited methods from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
 /**
@@ -188,6 +236,34 @@ bool OpenGlPlot::Initialize()
 GmatBase* OpenGlPlot::Clone(void) const
 {
    return (new OpenGlPlot(*this));
+}
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,  
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool OpenGlPlot::TakeAction(const std::string &action,
+                            const std::string &actionData)
+{
+   if (action == "Clear")
+   {
+      return ClearSpacecraftList();
+   }
+   else if (action == "Remove")
+   {
+      return RemoveSpacecraft(actionData);
+   }
+   
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -239,122 +315,128 @@ std::string OpenGlPlot::GetParameterTypeString(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
+// virtual Integer GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
-bool OpenGlPlot::GetBooleanParameter(const Integer id) const
+Integer OpenGlPlot::GetIntegerParameter(const Integer id) const
 {
    switch (id)
    {
-   case DRAW_AXIS:
-      return mDrawAxis;
-   case DRAW_EQUATORIAL_PLANE:
-      return mDrawEquatorialPlane;
+   case DATA_COLLECT_FREQUENCY:
+      return mDataCollectFrequency;
+   case UPDATE_PLOT_FREQUENCY:
+      return mUpdatePlotFrequency;
    default:
-      return Subscriber::GetBooleanParameter(id);
+      return Subscriber::GetIntegerParameter(id);
    }
 }
 
 //------------------------------------------------------------------------------
-// bool SetBooleanParameter(const bool id, const bool value)
+// virtual Integer GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
-bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
+Integer OpenGlPlot::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
 {
    switch (id)
    {
-   case DRAW_AXIS:
-      mDrawAxis = value;
-      return mDrawAxis;
-   case DRAW_EQUATORIAL_PLANE:
-      mDrawEquatorialPlane = value;
-      return mDrawEquatorialPlane;
-   case CLEAR_SPACECRAFT_LIST:
-      ClearSpacecraftList();
-      return true;
+   case DATA_COLLECT_FREQUENCY:
+      mDataCollectFrequency = value;
+      return value;
+   case UPDATE_PLOT_FREQUENCY:
+      mUpdatePlotFrequency = value;
+      return value;
    default:
-      return Subscriber::SetBooleanParameter(id, value);
+      return Subscriber::SetIntegerParameter(id, value);
    }
 }
 
 //------------------------------------------------------------------------------
-// UnsignedInt GetUnsignedIntParameter(const Integer id,
-//                                     const std::string &item)
+// virtual Integer SetIntegerParameter(const std::string &label,
+//                                     const Integer value)
 //------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::GetUnsignedIntParameter(const Integer id,
-                                                const std::string &item)
-{   
-   switch (id)
-   {
-   case ORBIT_COLOR:
-      if (mOrbitColorMap.find(item) != mOrbitColorMap.end())
-         return mOrbitColorMap[item];
-      else
-         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-   case TARGET_COLOR:
-      if (mTargetColorMap.find(item) != mTargetColorMap.end())
-         return mTargetColorMap[item];
-      else
-         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
-   default:
-      return Subscriber::GetUnsignedIntParameter(id);
-   }
-}
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetUnsignedIntParameter(const std::string &label,
-//                                     const std::string &item)
-//------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::GetUnsignedIntParameter(const std::string &label,
-                                                const std::string &item)
+Integer OpenGlPlot::SetIntegerParameter(const std::string &label,
+                                        const Integer value)
 {
-   return GetUnsignedIntParameter(GetParameterID(label), item);
+   return SetIntegerParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
-// UnsignedInt SetUnsignedIntParameter(const Integer id,
-//                                     const std::string &item,
-//                                     const UnsignedInt value)
+// virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                             const UnsignedInt value,
+//                                             const Integer index)
 //------------------------------------------------------------------------------
 UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
-                                                const std::string &item,
-                                                const UnsignedInt value)
+                                                const UnsignedInt value,
+                                                const Integer index)
 {
-#if DEBUG_OPENGL_PARAM
-   MessageInterface::ShowMessage
-      ("OpenGlPlot::SetUnsignedIntParameter()"
-       "id=%d, item=%s, value=%d\n", id, item.c_str(), value);
-#endif
-   
    switch (id)
    {
    case ORBIT_COLOR:
-      if (mOrbitColorMap.find(item) != mOrbitColorMap.end())
+      if (index < mScCount)
       {
-         mOrbitColorMap[item] = value;
+         mOrbitColorArray[index] = value;
          return value;
       }
-      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+      break;
    case TARGET_COLOR:
-      if (mTargetColorMap.find(item) != mTargetColorMap.end())
+      if (index < mScCount)
       {
-         mTargetColorMap[item] = value;
+         mTargetColorArray[index] = value;
          return value;
       }
-      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+      break;
    default:
-      return Subscriber::SetUnsignedIntParameter(id, value);
+      return Subscriber::SetUnsignedIntParameter(id, value, index);
+   }
+
+   throw GmatBaseException("OpenGlPlot::SetUnsignedIntParameter() index out of bounds "
+                           "for " + GetParameterText(id));
+}
+
+//------------------------------------------------------------------------------
+// virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                             const UnsignedInt value,
+//                                             const Integer index)
+//------------------------------------------------------------------------------
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
+                                                const UnsignedInt value,
+                                                const Integer index)
+{
+   return SetUnsignedIntParameter(GetParameterID(label), value, index);
+}
+
+//------------------------------------------------------------------------------
+// virtual const UnsignedIntArray&
+// GetUnsignedIntArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const UnsignedIntArray&
+OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      return mOrbitColorArray;
+   case TARGET_COLOR:
+      return mTargetColorArray;
+   default:
+      return Subscriber::GetUnsignedIntArrayParameter(id);
    }
 }
 
 //------------------------------------------------------------------------------
-// UnsignedInt SetUnsignedIntParameter(const std::string &label,
-//                                     const std::string &item,
-//                                     const UnsignedInt value)
+// virtual const UnsignedIntArray& 
+// GetUnsignedIntArrayParameter(const std::string &label) const
 //------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
-                                                const std::string &item,
-                                                const UnsignedInt value)
+const UnsignedIntArray& 
+OpenGlPlot::GetUnsignedIntArrayParameter(const std::string &label) const
 {
-   return SetUnsignedIntParameter(GetParameterID(label), item, value);
+   return GetUnsignedIntArrayParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -364,6 +446,11 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
+   case EQUATORIAL_PLANE:
+      if (mDrawEquatorialPlane)
+         return "On";
+      else
+         return "Off";
    case WIRE_FRAME:
       if (mDrawWireFrame)
          return "On";
@@ -405,8 +492,18 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
-   case ADD:
-      return AddSpacecraft(value);
+   case ADD: //loj: 9/28/04 still needs here to work with current interpreter
+      return AddSpacecraft(value, mScCount);
+   case EQUATORIAL_PLANE:
+      if (value == "On" || value == "Off")
+      {
+         mDrawEquatorialPlane = (value == "On");
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    case WIRE_FRAME:
       if (value == "On" || value == "Off")
       {
@@ -441,8 +538,7 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label,
-//                         const std::string &value)
+// bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetStringParameter(const std::string &label,
                                     const std::string &value)
@@ -456,13 +552,41 @@ bool OpenGlPlot::SetStringParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value,
+                                    const Integer index)
+{
+   switch (id)
+   {
+   case ADD:
+      return AddSpacecraft(value, index);
+   default:
+      return Subscriber::SetStringParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool OpenGlPlot::SetStringParameter(const std::string &label,
+                                    const std::string &value,
+                                    const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+//------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
 {
    switch (id)
    {
-   case SPACECRAFT_LIST:
+   case ADD:
       return mScNameArray;
    default:
       return Subscriber::GetStringArrayParameter(id);
@@ -482,13 +606,13 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// bool AddSpacecraft(const std::string &name)
+// bool AddSpacecraft(const std::string &name, Integer index)
 //------------------------------------------------------------------------------
-bool OpenGlPlot::AddSpacecraft(const std::string &name)
+bool OpenGlPlot::AddSpacecraft(const std::string &name, Integer index)
 {
    bool status = false;
-    
-   if (name != "")
+   
+   if (name != "" && index == mScCount)
    {
       mScNameArray.push_back(name);
       mScXArray.push_back(0.0);
@@ -501,7 +625,7 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
       if (mScCount < MAX_SC_COLOR)
       {
          mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mScCount-1];
-         mTargetColorMap[name] = GmatColor::TEAL32; //loj: 8/6/04 changed to teal
+         mTargetColorMap[name] = GmatColor::TEAL32;
       }
       else
       {
@@ -522,9 +646,9 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
-// void ClearSpacecraftList()
+// bool ClearSpacecraftList()
 //------------------------------------------------------------------------------
-void OpenGlPlot::ClearSpacecraftList()
+bool OpenGlPlot::ClearSpacecraftList()
 {
    mScNameArray.clear();
    mScXArray.clear();
@@ -533,6 +657,59 @@ void OpenGlPlot::ClearSpacecraftList()
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mScCount = 0;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool RemoveSpacecraft(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Removes spacecraft from the spacecraft list
+ *
+ * @param <name> spacecraft name to be removed from the list
+ *
+ * @return true if spacecraft was removed from the list, false otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+bool OpenGlPlot::RemoveSpacecraft(const std::string &name)
+{
+   StringArray::iterator scPos;
+   scPos = find(mScNameArray.begin(), mScNameArray.end(), name);
+   if (scPos != mScNameArray.end())
+   {
+      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
+      orbColorPos = mOrbitColorMap.find(name);
+      targColorPos = mTargetColorMap.find(name);
+      
+      if (orbColorPos != mOrbitColorMap.end() &&
+          targColorPos != mTargetColorMap.end())
+      {
+         mScNameArray.erase(scPos);
+         mOrbitColorMap.erase(orbColorPos);
+         mTargetColorMap.erase(targColorPos);
+
+         mOrbitColorArray.erase(mOrbitColorArray.end()--);
+         mTargetColorArray.erase(mTargetColorArray.end()--);
+
+         mScXArray.erase(mScXArray.end()--);
+         mScYArray.erase(mScYArray.end()--);
+         mScZArray.erase(mScZArray.end()--);
+         
+         mScCount = mScNameArray.size();
+
+         // update color array
+         for (int i=0; i<mScCount; i++)
+         {
+            mOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
+            mTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
+         }
+         
+         return true;
+      }
+   }
+
+   return false;
 }
 
 //------------------------------------------------------------------------------

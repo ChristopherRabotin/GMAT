@@ -32,57 +32,61 @@ public:
    // methods inherited from Subscriber
    virtual bool Initialize(); //loj: 3/8/04 added
    
-   // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   UnsignedInt GetColor(const std::string &item, const std::string &scName);
+   bool SetColor(const std::string &item, const std::string &scName,
+                 const UnsignedInt value);
    
    // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+   virtual bool TakeAction(const std::string &action,  
+                           const std::string &actionData = "");
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    
-   virtual bool GetBooleanParameter(const Integer id) const;
-   virtual bool SetBooleanParameter(const Integer id, const bool value);
+   virtual Integer GetIntegerParameter(const Integer id) const;
+   virtual Integer GetIntegerParameter(const std::string &label) const;
+   virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer SetIntegerParameter(const std::string &label,
+                                       const Integer value);
    
-   //virtual UnsignedInt GetUnsignedIntParameter(const Integer id) const;
-   UnsignedInt GetUnsignedIntParameter(const Integer id, const std::string &item);
-   //virtual UnsignedInt GetUnsignedIntParameter(const std::string &label) const;
-   UnsignedInt GetUnsignedIntParameter(const std::string &label,
-                                       const std::string &item);
-   UnsignedInt SetUnsignedIntParameter(const Integer id, const std::string &item,
-                                       const UnsignedInt value);
-   //virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-   //                                     const UnsignedInt value);
-   //virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-   //                                     const UnsignedInt value);
-   //loj: 6/2/04 need to add to GmatBase?
-   UnsignedInt  SetUnsignedIntParameter(const std::string &label,
-                                        const std::string &item,
-                                        const UnsignedInt value);
+   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+                                               const UnsignedInt value,
+                                               const Integer index);
+   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
+                                               const UnsignedInt value,
+                                               const Integer index);
+   virtual const UnsignedIntArray&
+           GetUnsignedIntArrayParameter(const Integer id) const; 
+   virtual const UnsignedIntArray& 
+           GetUnsignedIntArrayParameter(const std::string &label) const;
    
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
-//     virtual std::string GetStringParameter(const std::string &label,
-//                                            const std::string &item) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
-//     //loj: 6/2/04 need to add to GmatBase
-//     bool SetStringParameter(const std::string &label,
-//                             const std::string &item,
-//                             const std::string &value);
+   
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
    
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
    
-   bool AddSpacecraft(const std::string &name);
-   void ClearSpacecraftList();
+   bool AddSpacecraft(const std::string &name, Integer index);
+   bool ClearSpacecraftList();
+   bool RemoveSpacecraft(const std::string &name);
    Integer FindIndexOfElement(StringArray &labelArray,
                               const std::string &label);
    
-   bool mDrawAxis;
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
    bool mDrawTarget;
@@ -100,19 +104,16 @@ protected:
    RealArray mScZArray;
    UnsignedIntArray mOrbitColorArray;
    UnsignedIntArray mTargetColorArray;
-   
+
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
    
    enum
    {
       ADD = SubscriberParamCount,
-      SPACECRAFT_LIST,
-      CLEAR_SPACECRAFT_LIST,
       ORBIT_COLOR,
       TARGET_COLOR,
-      DRAW_AXIS,
-      DRAW_EQUATORIAL_PLANE,
+      EQUATORIAL_PLANE,
       WIRE_FRAME,
       TARGET_STATUS,
       DATA_COLLECT_FREQUENCY,
