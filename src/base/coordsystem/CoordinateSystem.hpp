@@ -31,10 +31,9 @@
 class GMAT_API CoordinateSystem : public CoordinateBase
 {
 public:
-
    // default constructor
-   CoordinateSystem(Gmat::ObjectType ofType, const std::string &itsType,
-                   const std::string &itsName = "");
+   CoordinateSystem(const std::string &itsType,
+                    const std::string &itsName = "");
    // copy constructor
    CoordinateSystem(const CoordinateSystem &coordSys);
    // operator = for assignment

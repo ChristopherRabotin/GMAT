@@ -67,10 +67,9 @@ CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBasePara
  *       classes must pass in the ofType and itsType parameters.
  */
 //---------------------------------------------------------------------------
-CoordinateSystem::CoordinateSystem(Gmat::ObjectType ofType, 
-                                   const std::string &itsType,
+CoordinateSystem::CoordinateSystem(const std::string &itsType,
                                    const std::string &itsName) :
-CoordinateBase(ofType,itsType,itsName),
+CoordinateBase(Gmat::COORDINATE_SYSTEM,itsType,itsName),
 axes               (NULL)
 {
 }

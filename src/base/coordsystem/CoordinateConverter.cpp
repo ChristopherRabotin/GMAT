@@ -197,6 +197,9 @@ bool CoordinateConverter::Convert(const A1Mjd &epoch, const Rvector &inState,
                           CoordinateSystem *inCoord, Rvector &outState,
                           CoordinateSystem *outCoord)
 {
+   if (inState.GetSize() != outState.GetSize())
+      throw CoordinateSystemException(
+             "input and output states have different sizes - no conversion done");
    Rvector internalState(inState.GetSize());
    if ((!inCoord) || (!outCoord))
       throw CoordinateSystemException(
