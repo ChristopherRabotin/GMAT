@@ -29,6 +29,8 @@
 #include "Moderator.hpp"
 #endif
 
+#define DEBUG_BASE_STOPCOND 0
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -94,8 +96,8 @@ BaseStopCondition::BaseStopCondition(const std::string &name, const std::string 
    mEccParam = NULL;
    mRmagParam = NULL;
    mDescription = desc;
-   mEccTol = 1.0e-6; //loj: valid default?
-   mRange = 10000;   //loj: valid default?
+   mEccTol = 1.0e-6;  //loj: valid default?
+   mRange = 100000;   //loj: valid default? 6/16/04 changed to 100000 from 10000
     
    mStopParamType = "";
    if (mStopParam != NULL)
@@ -190,6 +192,11 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
 //------------------------------------------------------------------------------
 BaseStopCondition::~BaseStopCondition()
 {
+   if (mEccParam != NULL)
+      delete mEccParam;
+
+   if (mRmagParam != NULL)
+      delete mEccParam;
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +214,7 @@ Integer BaseStopCondition::GetBufferSize()
 {
    return mBufferSize;
 }
-    
+
 //------------------------------------------------------------------------------
 // std::string& GetDescription()
 //------------------------------------------------------------------------------
@@ -528,23 +535,40 @@ void BaseStopCondition::Initialize()
          mNumValidPoints = 0;
          mInitialized = true;
       }
-        
+      else
+      {
+         mInitialized = true;
+      }
+      
       //loj: How about mRefFrame? - need for crossing plane
    }
+
+#if DEBUG_BASE_STOPCOND
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::Initialize() mInitialized=%d\n",
+       mInitialized);
+#endif
 }
 
 //------------------------------------------------------------------------------
-// virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+// virtual bool SetSpacecraft(Spacecraft *sc)
 //------------------------------------------------------------------------------
 /**
- * Sets object to parameter used in stop condition.
+ * Sets spacecraft pointer to internal parameter used in stop condition.
  *
- * @return true if object has been set.
+ * @return true if spacecraft has been set.
  */
 //------------------------------------------------------------------------------
-bool BaseStopCondition::SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj)
+bool BaseStopCondition::SetSpacecraft(Spacecraft *sc)
 {
-   return false; // base class doesn't know which object is used
+   if (mEccParam != NULL)
+      mEccParam->SetObject(Gmat::SPACECRAFT, sc->GetName(), sc);
+
+   if (mRmagParam != NULL)
+      mRmagParam->SetObject(Gmat::SPACECRAFT, sc->GetName(), sc);
+
+   return true;
+   //return false; // base class doesn't know which object is used
 }
 
 //------------------------------------------------------------------------------
@@ -621,15 +645,20 @@ bool BaseStopCondition::Validate()
       }
    }
 
-   //loj: 3/30/04 comment out
-   //      if (!valid)
-   //      {
-   //          MessageInterface::ShowMessage
-   //              ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, mEpochParam=%d, "
-   //               "mStopParam=%d, mInterpolator=%d\n",
-   //               mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator);
-   //      }
-    
+#if DEBUG_BASE_STOPCOND
+   if (!valid)
+   {
+      MessageInterface::ShowMessage
+         ("BaseStopCondition::Validate() failed mUseInternalEpoch=%d, "
+          "mEpochParam=%d, mStopParam=%d, mInterpolator=%d\n",
+          mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator);
+   }
+
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::Validate() valid=%d\n", valid);
+   
+#endif
+   
    return valid;
 }
 

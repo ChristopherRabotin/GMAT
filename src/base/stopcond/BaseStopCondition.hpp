@@ -26,6 +26,7 @@
 #include "Interpolator.hpp"
 #include "RefFrame.hpp"
 #include "SolarSystem.hpp"
+#include "Spacecraft.hpp"
 
 class GMAT_API BaseStopCondition : public GmatBase
 {
@@ -66,7 +67,7 @@ public:
    
    void Initialize();
     
-   virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj);
+   virtual bool SetSpacecraft(Spacecraft *sc);
 
    virtual bool Evaluate() = 0;
    virtual bool Validate();
