@@ -26,7 +26,7 @@
 // base includes
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROP_PANEL 1
+#define DEBUG_PROP_PANEL 0
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -305,12 +305,14 @@ void PropagationConfigPanel::SaveData()
       ShowForceList("SaveData() BEFORE  saving DragForce");
 #endif 
             theDragForce = new DragForce(forceList[i]->dragType);
-            theCelestialBody = theDragForce->GetBody();
 
-            if (theCelestialBody == NULL)
-               theCelestialBody = theSolarSystem->GetBody(forceList[i]->bodyName); 
-               
+            //theCelestialBody = theDragForce->GetBody();
+            
+            //if (theCelestialBody == NULL)
+            theCelestialBody = theSolarSystem->GetBody(forceList[i]->bodyName); 
+                             
             theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
+            
 #if DEBUG_PROP_PANEL
       ShowForceList("Entering if (theAtmosphereModel == NULL)");
 #endif
@@ -1296,19 +1298,18 @@ void PropagationConfigPanel::OnAtmosphereSelection()
    dragTypeName = std::string(atmosComboBox->GetStringSelection().c_str());
 
    if (forceList[currentBodyId]->dragType != dragTypeName)
-   {
+   {    
+      forceList[currentBodyId]->dragType = dragTypeName;
+      DisplayAtmosphereModelData();
+         
+      isForceModelChanged = true;
+      theApplyButton->Enable(true);
 #if DEBUG_PROP_PANEL
       MessageInterface::ShowMessage
          ("OnAtmosphereSelection() grav changed from=%s to=%s for body=%s\n",
           forceList[currentBodyId]->dragType.c_str(), dragTypeName.c_str(),
           forceList[currentBodyId]->bodyName.c_str());
 #endif
-      
-      forceList[currentBodyId]->dragType = dragTypeName;
-      DisplayAtmosphereModelData();
-         
-      isForceModelChanged = true;
-      theApplyButton->Enable(true);
    }
 }
 
