@@ -63,6 +63,7 @@
 
 #include <fstream>
 #include <vector>
+#include <map>
 #include <string.h>
 
 class GMAT_API ForceModel : public PhysicalModel
@@ -116,6 +117,18 @@ public:
     
     virtual const StringArray& GetStringArrayParameter(const Integer id) const;
     virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+    
+    static void         SetScriptAlias(const std::string& alias, 
+                                       const std::string& typeName);
+    static std::string& GetScriptAlias(const std::string& alias);
+    
+    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name,
+                                    const Integer index);
+//    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+ 
 
 protected:
 
@@ -130,21 +143,36 @@ protected:
     StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
-    /// Buffer that allows quick reversion to the previous state
-    Real *previousState;
     /// Epoch for the previous state
     Real previousTime;
+    /// Buffer that allows quick reversion to the previous state
+    Real *previousState;
     Real estimationMethod;
+    /// Mapping between script descriptions and force names.
+    static std::map<std::string, std::string> scriptAliases;
+    
+    const StringArray&        BuildBodyList(std::string type) const;
 
+//    enum
+//    {
+//        POINT_MASS = PhysicalModelParamCount,
+//        FULL_FIELD,
+//        DRAG,
+//        MAG_FIELD,
+//        FORCE_LIST,
+//        ForceModelParamCount,
+//    };
+    // DJC: 06/16/04 Updated for scripting
     enum
     {
-        POINT_MASS = PhysicalModelParamCount,
-        FULL_FIELD,
+        CENTRAL_BODY = PhysicalModelParamCount,
+        PRIMARY_BODIES,
+        POINT_MASSES,
         DRAG,
-        MAG_FIELD,
-        FORCE_LIST,
-        ForceModelParamCount,
+        SRP,
+        ForceModelParamCount
     };
+
     
     static const std::string PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];

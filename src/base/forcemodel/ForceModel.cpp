@@ -58,25 +58,49 @@
 // static data
 //---------------------------------
 
+// DJC: 06/16/04 Updated for scripting
+//const std::string
+//ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
+//{
+//    "PointMass",
+//    "FullField",
+//    "Drag",        //loj: 3/19/04 This is also in PropSetup. Where do we want to handle?
+//    "MagField",
+//    "ForceList",
+//};
 const std::string
 ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
 {
-    "PointMass",
-    "FullField",
-    "Drag",        //loj: 3/19/04 This is also in PropSetup. Where do we want to handle?
-    "MagField",
-    "ForceList",
+    "CentralBody",
+    "PrimaryBodies",
+    "PointMasses",
+    "Drag",
+    "SRP"
 };
 
+
+// DJC: 06/16/04 Updated for scripting
+//const Gmat::ParameterType
+//ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
+//{
+//    Gmat::STRING_TYPE,
+//    Gmat::STRING_TYPE,
+//    Gmat::STRING_TYPE,
+//    Gmat::STRING_TYPE,
+//    Gmat::STRINGARRAY_TYPE,
+//};
 const Gmat::ParameterType
 ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 {
     Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
     Gmat::STRINGARRAY_TYPE,
+    Gmat::STRINGARRAY_TYPE,
+    Gmat::STRING_TYPE,
+    Gmat::STRING_TYPE
 };
+
+
+std::map<std::string, std::string> ForceModel::scriptAliases;
 
 //---------------------------------
 // public
@@ -150,6 +174,7 @@ ForceModel::~ForceModel(void)
 ForceModel::ForceModel(const ForceModel& fdf) :
     PhysicalModel    (fdf)
 {
+   /// @todo Implement the copy constructor
 }
 
 //------------------------------------------------------------------------------
@@ -166,10 +191,11 @@ ForceModel::ForceModel(const ForceModel& fdf) :
 //------------------------------------------------------------------------------
 ForceModel& ForceModel::operator=(const ForceModel& fdf)
 {
-    if (&fdf == this)
+   if (&fdf == this)
         return *this;
 
-    return *this;
+   /// @todo Implement the assignment operator
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -853,15 +879,22 @@ std::string ForceModel::GetStringParameter(const Integer id) const
 {
     switch (id)
     {
-    case POINT_MASS:
-        //loj: what should we return here?
-        return "PointMassForce";
-    case FULL_FIELD:
-        return "TBD-FullFieldForce";
-    case DRAG:
-        return "TBD-DragForce";
-    case MAG_FIELD:
-        return "TBD-MagFieldForce";
+//    case POINT_MASS:
+//        //loj: what should we return here?
+//        return "PointMassForce";
+//    case FULL_FIELD:
+//        return "TBD-FullFieldForce";
+//    case DRAG:
+//        return "TBD-DragForce";
+//    case MAG_FIELD:
+//        return "TBD-MagFieldForce";
+    // DJC: 06/16/04 Updated for scripting
+    case CENTRAL_BODY:
+       return "Earth";
+    case  DRAG:
+       return "Exponential";
+    case  SRP:
+       return "On";
     default:
         return PhysicalModel::GetStringParameter(id);
     }
@@ -882,28 +915,40 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
     switch (id)
     {
-    case POINT_MASS:
-        {
-            PhysicalModel *pmf = new PointMassForce();
-            if (pmf != NULL)
-            {
-                if (pmf->SetStringParameter("Body", value))
-                {
-                    AddForce(pmf);
-                    return true;
-                }
-            }
-            return false;
-        }
-    case FULL_FIELD:
-        // build 3
-        return false;
-    case DRAG:
-        // build 3
-        return false;
-    case MAG_FIELD:
-        // build 3
-        return false;
+//    case POINT_MASS:
+//        {
+//            PhysicalModel *pmf = new PointMassForce();
+//            if (pmf != NULL)
+//            {
+//                if (pmf->SetStringParameter("Body", value))
+//                {
+//                    AddForce(pmf);
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
+//    case FULL_FIELD:
+//        // build 3
+//        return false;
+//    case DRAG:
+//        // build 3
+//        return false;
+//    case MAG_FIELD:
+//        // build 3
+//        return false;
+
+    // DJC: 06/16/04 Updated for scripting
+    case CENTRAL_BODY:
+       return false;
+    case PRIMARY_BODIES:
+       return false;
+    case POINT_MASSES:
+       return false;
+    case  DRAG:
+       return false;
+    case  SRP:
+       return false;
     default:
         return PhysicalModel::SetStringParameter(id, value);
     }
@@ -925,8 +970,16 @@ const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
 {
     switch (id)
     {
-    case FORCE_LIST:
-        return forceTypeNames;
+//    case FORCE_LIST:
+//        return forceTypeNames;
+    case PRIMARY_BODIES:
+       return BuildBodyList("GravityField");
+    case POINT_MASSES:
+//       sar.clear();
+//       sar.push_back("Sun");
+//       sar.push_back("Moon");
+//       return sar;
+       return BuildBodyList("PointMassForce");
     default:
         return PhysicalModel::GetStringArrayParameter(id);
     }
@@ -939,3 +992,139 @@ const StringArray& ForceModel::GetStringArrayParameter(const std::string &label)
 {
     return GetStringArrayParameter(GetParameterID(label));
 }
+
+
+//------------------------------------------------------------------------------
+// const StringArray& BuildBodyList(std::string type) const
+//------------------------------------------------------------------------------
+const StringArray& ForceModel::BuildBodyList(std::string type) const
+{
+   static StringArray bodylist;
+   bodylist.clear();
+   
+   // Run through list of forces, adding body names for GravityField instances
+   std::vector<PhysicalModel*>::const_iterator i;
+   
+   std::string actualType = GetScriptAlias(type);
+   
+   for (i = forceList.begin(); i != forceList.end(); ++i) {
+       if ((*i)->GetTypeName() == actualType) {
+          bodylist.push_back((*i)->GetStringParameter("Body"));
+       }
+   }
+   return bodylist;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetScriptAlias(const std::string& alias, const std::string& typeName)
+//------------------------------------------------------------------------------
+/**
+ * Sets mapping between script descriptions of forces and their class names.
+ * 
+ * The GMAT script document specifies descriptors for some forces that is 
+ * different from the actual class names, and in some cases actually uses more
+ * than one name for the same force.  This method is used to build the map
+ * between the script strings and the actual class names.  The constructor for
+ * the Interpreter base class fills in this data (at least for now -- we might
+ * move it to the Moderator's initialization once it is working and tested).
+ * 
+ * @param alias script string used for the force.
+ * @param typeName actual class name as used by the factory that creates it.
+ * 
+ * @todo Put the initialization for force aliases in a convenient location.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::SetScriptAlias(const std::string& alias, 
+                                const std::string& typeName)
+{
+   if (scriptAliases.find(alias) == scriptAliases.end()) {
+      scriptAliases[alias] = typeName;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string& GetScriptAlias(const std::string& alias)
+//------------------------------------------------------------------------------
+/**
+ * Accesses mapping between script descriptions of forces and their class names.
+ * 
+ * This method provides access to class names given an alias in the script.
+ * 
+ * @param alias script string used for the force.
+ * @return The class name.
+ */
+//------------------------------------------------------------------------------
+std::string& ForceModel::GetScriptAlias(const std::string& alias)
+{
+   static std::string type = alias;
+   if (scriptAliases.find(alias) != scriptAliases.end()) {
+      type = scriptAliases[alias];
+   }
+   return type;
+}
+
+
+GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
+                                   const std::string &name)
+{
+   if (type != Gmat::PHYSICAL_MODEL)
+       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
+   
+   // Run through list of forces, adding body names for GravityField instances
+   std::vector<PhysicalModel*>::const_iterator i;
+   
+   std::string actualType = GetScriptAlias(name);
+   
+   for (i = forceList.begin(); i != forceList.end(); ++i) {
+       if ((*i)->GetTypeName() == actualType) {
+          return *i;
+       }
+   }
+   return NULL;
+}
+
+                                    
+GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type, 
+                                   const std::string &name, const Integer index)
+{
+   if (type != Gmat::PHYSICAL_MODEL)
+       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
+   
+   // Run through list of forces, adding body names for GravityField instances
+   std::vector<PhysicalModel*>::const_iterator i;
+   std::string actualType = GetScriptAlias(name);
+   Integer j = 0;
+   
+   for (i = forceList.begin(); i != forceList.end(); ++i) {
+       if ((*i)->GetTypeName() == actualType) {
+          ++j;
+          if (j == index)
+             return *i;       // Ignore names for forces.
+       }
+   }
+   return NULL;
+}
+
+
+//ObjectArray& ForceModel::GetRefObjectArray(const Gmat::ObjectType type)
+//{
+//   if (type != Gmat::PHYSICAL_MODEL)
+//       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
+//   
+//   static ObjectArray objects;
+//   objects.clear();
+//   
+//   // Run through list of forces, adding body names for GravityField instances
+//   std::vector<PhysicalModel*>::const_iterator i;
+//   
+//   std::string actualType = GetScriptAlias(name);
+//   
+//   for (i = forceList.begin(); i != forceList.end(); ++i) {
+//       if ((*i)->GetTypeName() == actualType) {
+//          objects.push_back(*i);       // Ignore names for forces.
+//       }
+//   }
+//   return objects;
+//}

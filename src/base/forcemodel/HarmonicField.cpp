@@ -521,6 +521,34 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 bool HarmonicField::SetStringParameter(const Integer id,
                                        const std::string &value)
 {
+//<<<<<<< HarmonicField.cpp
+//   if (id == BODY)
+//   {
+//// DJC: Channges that allow setting without a solar system instance
+////      if (!solarSystem) throw ForceModelException(
+////          "In HarmonicField, cannot set body, as no solar system has been set");
+//      if (value != bodyName)
+//      {
+////         body = solarSystem->GetBody(value);
+////         if (body)
+////         {
+////            bodyName = body->GetName();
+////            return true;
+////         }
+////         else      return false;
+//         bodyName = value;
+//         if (filename == "")
+//         {
+//            fileRead = false;
+//            filename = value;
+//            filename += ".grv";
+//         }
+//      }
+////      else return true;
+//      return true;
+//   }
+//=======
+//>>>>>>> 1.6
    if (id == FILENAME)
    {
       if (filename != value)
