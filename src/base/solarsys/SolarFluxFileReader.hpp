@@ -29,15 +29,13 @@ public:
    SolarFluxFileReader& operator=(const SolarFluxFileReader& sf);
         
    Integer LoadSolarFluxFile(Real a1_time, FILE *tkptr, 
-                             bool new_file, GEOPARMS *tkparms);
-   bool    OpenSolarFluxFile(std::string filename);
-   FILE*   GetSolarFluxFile();
-   bool    CloseSolarFluxFile();
+                             bool new_file, GEOPARMS *geoParms);
+   FILE*   OpenSolarFluxFile(std::string filename);
+   bool    CloseSolarFluxFile(FILE* tkptr);
    
 protected:
 
 private:    
-   FILE *solarFluxFile;
 };
 
 #endif // SolarFluxFileReader_hpp

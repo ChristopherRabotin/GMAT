@@ -16,6 +16,7 @@
 //------------------------------------------------------------------------------
 
 #include "SolarFluxFileReader.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 //  SolarFluxFileReader()
@@ -24,8 +25,7 @@
  *  Constructor.
  */
 //------------------------------------------------------------------------------
-SolarFluxFileReader::SolarFluxFileReader() :
-   solarFluxFile   (NULL)
+SolarFluxFileReader::SolarFluxFileReader()
 {
 }
 
@@ -54,7 +54,8 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
 
 //------------------------------------------------------------------------------
 //  Integer LoadSolarFluxFile
-//                 (Real a1_time, FILE *tkptr, bool new_file, GEOPARMS *tkparms)
+//                 (Real a1_time, FILE *tkptr, bool new_file, 
+//                  GEOPARMS *geoParams)
 //------------------------------------------------------------------------------
 /**
  *  To access the Jacchia-Roberts binary data file using a time index value.  
@@ -67,7 +68,7 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
  *  @param <*tkptr>   File pointer to the Jacchia-Roberts file.
  *  @param <new_file> If true, flush static data for file
  * 
- *  @param <*tkparms> Pointer to a data structure containing values for a
+ *  @param <*geoParams> Pointer to a data structure containing values for a
  *                    minimum global exospheric temperature and an unpacked
  *                    3-hour geomagnetic index value retrieved from the Jacchia
  *                    -Roberts file.
@@ -88,7 +89,7 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
  */ 
 //------------------------------------------------------------------------------
 Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr, 
-                                               bool new_file, GEOPARMS *tkparms)
+                                               bool new_file, GEOPARMS *geoParams)
 {
    Integer it;          // Time of first day of TC data
    Integer kp[21][8];   // Magnetic activity, 3-hour indices
@@ -101,25 +102,23 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
    Real hour, tp1;
 
    status = 0;          // Initialize status flag to zero
-
    day = (Integer)a1_time;       // Assign time as an Integer value
    diff = day - it;     // Compare input time to stored time
-
+   
    // If input time out of range of stored time
    if (new_file || diff < 0 || diff > 19)
    {                          
       //   retrieve the requested time record
       new_file = false;
-
+      
       // Go to 1st position on Record.
-
       if (fseek(tkptr, 0, SEEK_SET) != 0) // If error reading
       {
          status = -1;  // 1st record
       }
       else
-      {   // Read the 1st record
-
+      {   
+          // Read the 1st record
          if(fread( (void *) inbuf, sizeof(Integer), (size_t)4, tkptr) == 4)
          {
             idrec1 = inbuf[0]; // Obtain 1st time point in file
@@ -131,7 +130,7 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
 
             // Assign time as an Integer for record computation.
             ita = (Integer)a1_time;
-
+            
             if (ita < idrec1 || ita > lgd) // If input time out of bounds for
             {
                status = -5;                // record times, set error status
@@ -142,7 +141,7 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
 
                if (rec_num > nrec)  // If input record # > maximum number of      
                {                    // records in file, set error status and exit
-                  status = -6;       
+                  status = -6;      
                }
                else
                {
@@ -161,7 +160,6 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
                         for(j = 0; j < 4; ++j)      // Read words in column-major
                            for (i = 0; i < 21; ++i)
                               fread((void *)&kp1[i][j], sizeof(Integer), (size_t)1, tkptr);
-
                         if(fread((void *)tc, sizeof(Real), (size_t)20, tkptr) == 20)
                         {
                            for (i = 0; i < 21; ++i)     // Copy into 21 by 8 buffer to
@@ -206,20 +204,20 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
    if(status == 0)
    {
       i = day - it;
-      tkparms->xtemp = tc[i];
+      geoParams->xtemp = tc[i];
       day = (Integer)(a1_time - 0.28);
       hour = (Integer)((a1_time - 0.28 - day) * 24.0);
       i3_hour = (Integer)(hour / 3.0);
       i = day - it;
       i3_day  = i + 1;
       tp1 = (kp[i3_day][i3_hour] * 3 + 5) / 10;
-      tkparms->tkp = tp1 / 3.0;
+      geoParams->tkp = tp1 / 3.0;
    }
    return status;
 }
 
 //------------------------------------------------------------------------------
-//  OpenSolarFluxFile(std::string file)
+//  OpenSolarFluxFile(std::string filename)
 //------------------------------------------------------------------------------
 /**
  *  Open solar flux file.
@@ -227,28 +225,16 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
  *  @return true if successful, false otherwise
  */
 //------------------------------------------------------------------------------
-bool SolarFluxFileReader::OpenSolarFluxFile(std::string filename)
+FILE* SolarFluxFileReader::OpenSolarFluxFile(std::string filename)
 {
-   solarFluxFile = fopen(filename.c_str(), "rb");
+   FILE *file;
    
-   if (solarFluxFile != NULL)
-      return true;
+   file = fopen(filename.c_str(), "rb");
+   
+   if (file != NULL)
+      return file;
    else
-      return false;
-}
-
-//------------------------------------------------------------------------------
-//  FILE* GetSolarFluxFile()
-//------------------------------------------------------------------------------
-/**
- *  Get solar flux file.
- *
- *  @return solar flux file pointer
- */
-//------------------------------------------------------------------------------
-FILE* SolarFluxFileReader::GetSolarFluxFile()
-{
-   return solarFluxFile;
+      return NULL;    
 }
 
 //------------------------------------------------------------------------------
@@ -260,9 +246,9 @@ FILE* SolarFluxFileReader::GetSolarFluxFile()
  *  @return true if successful, false otherwise
  */
 //------------------------------------------------------------------------------
-bool SolarFluxFileReader::CloseSolarFluxFile()
+bool SolarFluxFileReader::CloseSolarFluxFile(FILE* tkptr)
 {
-   Integer status = fclose(solarFluxFile);
+   Integer status = fclose(tkptr);
    
    if (status == 0)
       return true;
