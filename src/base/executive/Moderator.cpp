@@ -1091,19 +1091,19 @@ StringArray& Moderator::GetPlanetaryFileNames()
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetPlanetaryFileTypesInUse()
 {
-   theList.clear();
+   theTempFileList.clear();
    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
-      theList.push_back(thePlanetaryFileTypesInUse[i]);
+      theTempFileList.push_back(thePlanetaryFileTypesInUse[i]);
 
-   return theList;
+   return theTempFileList;
 }
 
 //------------------------------------------------------------------------------
-// std::string GetPlanetaryFileName(const std::string &filetype)
+// std::string GetPlanetaryFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
-std::string Moderator::GetPlanetaryFileName(const std::string &filetype)
+std::string Moderator::GetPlanetaryFileName(const std::string &fileType)
 {
-   Integer id = GetPlanetaryFileId(filetype);
+   Integer id = GetPlanetaryFileId(fileType);
 
    if (id >= 0)
       return thePlanetaryFileNames[id];
@@ -1112,59 +1112,65 @@ std::string Moderator::GetPlanetaryFileName(const std::string &filetype)
 }
 
 //------------------------------------------------------------------------------
-// bool SetPlanetaryFileName(const std::string &filetype,
-//                           const std::string &filename)
+// bool SetPlanetaryFileName(const std::string &fileType,
+//                           const std::string &fileName)
 //------------------------------------------------------------------------------
-bool Moderator::SetPlanetaryFileName(const std::string &filetype,
-                                     const std::string &filename)
+bool Moderator::SetPlanetaryFileName(const std::string &fileType,
+                                     const std::string &fileName)
 {
    bool status = false;
-   Integer id = GetPlanetaryFileId(filetype);
+   Integer id = GetPlanetaryFileId(fileType);
 
    if (id >= 0)
    {
-      thePlanetaryFileNames[id] = filename;
+      thePlanetaryFileNames[id] = fileName;
       status = true;
    }
     
    return status;
 }
 
-//loj: 5/21/04 added
 // Potential field files
 //------------------------------------------------------------------------------
-// std::string GetPotentialFileName(const std::string &filetype)
+// std::string GetPotentialFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
-std::string Moderator::GetPotentialFileName(const std::string &filetype)
+std::string Moderator::GetPotentialFileName(const std::string &fileType)
 {
-   if (filetype == "JGM2")
+   if (fileType == "JGM2")
       return theFileManager->GetStringParameter("FULL_EARTH_JGM2_FILE");
-   else if (filetype == "JGM3")
+   else if (fileType == "JGM3")
       return theFileManager->GetStringParameter("FULL_EARTH_JGM3_FILE");
    else
-      return "Unknown Potential File Type:" + filetype;
+      return "Unknown Potential File Type:" + fileType;
 }
 
+//loj: 6/14/04 changed bool to Integer
 //------------------------------------------------------------------------------
-// bool SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+// Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 //------------------------------------------------------------------------------
 /*
- * @param <filetypes> list of file type in the priority order of use
+ * @param <fileTypes> list of file type in the priority order of use
+ *
+ * @return 0, if error setting any of planetary file in the list.
+ *         1, if error setting first planetary file in the list, but set to
+ *            next available file.
+ *         2, if successfuly set to first planetary file in the list
  */
 //------------------------------------------------------------------------------
-bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
+Integer Moderator::SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
 {
 #if DEBUG_PLANETARY_FILE
    MessageInterface::
       ShowMessage("Moderator::SetPlanetaryFileTypesInUse() num filetypes=%d\n",
-                  filetypes.size());
+                  fileTypes.size());
 #endif
    
    bool status = false;
    Integer fileTypeInUse = -1;
-    
-    // update planetary file types
-   if (&thePlanetaryFileTypesInUse != &filetypes)
+   Integer retCode = 0;
+   
+   // update planetary file types
+   if (&thePlanetaryFileTypesInUse != &fileTypes)
    {
 #if DEBUG_PLANETARY_FILE
       MessageInterface::
@@ -1172,19 +1178,22 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
 #endif
       thePlanetaryFileTypesInUse.clear();
     
-      for (unsigned int i=0; i<filetypes.size(); i++)
+      for (unsigned int i=0; i<fileTypes.size(); i++)
       {
-         thePlanetaryFileTypesInUse.push_back(filetypes[i]);
+         thePlanetaryFileTypesInUse.push_back(fileTypes[i]);
       }
    }
 
+   theTempFileList.clear();
+   for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+      theTempFileList.push_back(thePlanetaryFileTypesInUse[i]);
+   
    // create planetary ephem file
    for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
    {
-      thePlanetarySourcePriority[i] = 0;
-       
       if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
       {
+         thePlanetarySourcePriority[SLP] = 0;
          status = CreateSlpFile(thePlanetaryFileNames[SLP]);
          if (status)
          {
@@ -1200,6 +1209,7 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
          MessageInterface::
             ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE200\n");
 #endif
+         thePlanetarySourcePriority[DE200] = 0;
          status = CreateDeFile(DE200, thePlanetaryFileNames[DE200]);
          if (status)
          {
@@ -1209,24 +1219,26 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
             break;
          }
       }
-      //          else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE202])
-      //          {
-      //              MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE202\n");
-      //              status = CreateDeFile(DE202, thePlanetaryFileNames[DE202]);
-      //              if (status)
-      //              {
-      //                  thePlanetarySourcePriority[DE202] = HIGHEST_PRIORITY - i;
-      //                  isPlanetaryFileInUse[DE202] = true;
-      //                  fileTypeInUse = DE202;
-      //                  break;
-      //              }
-      //          }
+      //else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE202])
+      //{
+      //   MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE202\n");
+      //   thePlanetarySourcePriority[DE202] = 0;
+      //   status = CreateDeFile(DE202, thePlanetaryFileNames[DE202]);
+      //   if (status)
+      //   {
+      //      thePlanetarySourcePriority[DE202] = HIGHEST_PRIORITY - i;
+      //      isPlanetaryFileInUse[DE202] = true;
+      //      fileTypeInUse = DE202;
+      //      break;
+      //   }
+      //}
       else if (thePlanetaryFileTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
       {
 #if DEBUG_PLANETARY_FILE
          MessageInterface::
-            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create de405\n");
+            ShowMessage("Moderator::SetPlanetaryFileTypesInUse() create DE405\n");
 #endif
+         thePlanetarySourcePriority[DE405] = 0;
          status = CreateDeFile(DE405, thePlanetaryFileNames[DE405]);
          if (status)
          {
@@ -1238,13 +1250,12 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
       }
    }
 
-   status = false;
-
-    // set SolarSystem to use the file
+   // set SolarSystem to use the file
    if (fileTypeInUse == -1)
    {
       MessageInterface::ShowMessage("Moderator::SetPlanetaryFileTypesInUse() NO "
                                     "Planetary file is set to use \n");
+      retCode = 0;
    }
    else
    {
@@ -1258,46 +1269,84 @@ bool Moderator::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
       case SLP:
          if (theDefaultSolarSystem->SetSource(Gmat::SLP))
             if (theDefaultSolarSystem->SetSourceFile(theDefaultSlpFile))
-               status = true;
-            
+               retCode = 1;
          break;
       case DE200:
          if (theDefaultSolarSystem->SetSource(Gmat::DE_200))
             if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-               status = true;
+               retCode = 1;
          break;
          //          case DE202:
          //              if (theDefaultSolarSystem->SetSource(Gmat::DE_202))
          //                  if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-         //                      status = true;
+         //                      retCode = 1;
          //              break;
       case DE405:
          if (theDefaultSolarSystem->SetSource(Gmat::DE_405))
             if (theDefaultSolarSystem->SetSourceFile(theDefaultDeFile))
-               status = true;
+               retCode = 1;
          break;
       default:
          break;
       }
    }
-    
+
+   // if planetary file is set to first type in the list
+   if (retCode == 1 && PLANETARY_SOURCE_STRING[fileTypeInUse] == fileTypes[0])
+      retCode = 2;
+
+
+   // if error setting given planetary file, re-arrany planetary file list
+   if (retCode == 1)
+   {      
+      thePlanetaryFileTypesInUse.clear();
+
+      for (unsigned int i=0; i<theTempFileList.size(); i++)
+      {            
+         if (theTempFileList[i] == PLANETARY_SOURCE_STRING[SLP])
+         {
+            if (thePlanetarySourcePriority[SLP] > 0)
+               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
+         }
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE200])
+         {
+            if (thePlanetarySourcePriority[DE200] > 0)
+               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
+         }
+         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE200])
+         {
+            if (thePlanetarySourcePriority[DE405] > 0)
+               thePlanetaryFileTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
+         }
+      }
+      
 #if DEBUG_PLANETARY_FILE
-   if (status)
+      for (unsigned int i=0; i<thePlanetaryFileTypesInUse.size(); i++)
+      {
+         MessageInterface::ShowMessage
+            ("thePlanetaryFileTypesInUse[%d]=%s\n", i,
+             thePlanetaryFileTypesInUse[i].c_str());
+      }
+#endif
+   }
+   
+#if DEBUG_PLANETARY_FILE
+   if (retCode > 0)
       MessageInterface::
       ShowMessage("Moderator::SetPlanetaryFileTypesInUse() Successfully "
                   "set Planetary file to use: %s\n",
                   PLANETARY_SOURCE_STRING[fileTypeInUse].c_str());
 #endif
-   return status;
+   return retCode;
 }
 
 //------------------------------------------------------------------------------
-// bool CreateSlpFile(const std::string &filename)
+// bool CreateSlpFile(const std::string &fileName)
 //------------------------------------------------------------------------------
-bool Moderator::CreateSlpFile(const std::string &filename)
+bool Moderator::CreateSlpFile(const std::string &fileName)
 {
-   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() filename=%s\n",
-   //                              filename.c_str());
+   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() fileName=%s\n",
+   //                              fileName.c_str());
     
    bool status = false;
     
@@ -1308,7 +1357,7 @@ bool Moderator::CreateSlpFile(const std::string &filename)
    }
    else
    {
-      theDefaultSlpFile = new SlpFile(filename);
+      theDefaultSlpFile = new SlpFile(fileName);
       //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
         
       if (theDefaultSlpFile != NULL)
@@ -1319,10 +1368,10 @@ bool Moderator::CreateSlpFile(const std::string &filename)
 }
 
 //------------------------------------------------------------------------------
-// bool CreateDeFile(const Integer id, const std::string &filename,
+// bool CreateDeFile(const Integer id, const std::string &fileName,
 //                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
 //------------------------------------------------------------------------------
-bool Moderator::CreateDeFile(Integer id, const std::string &filename,
+bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
                              Gmat::DeFileFormat format)
 {
    bool status = false;
@@ -1356,38 +1405,51 @@ bool Moderator::CreateDeFile(Integer id, const std::string &filename,
 #if DEBUG_PLANETARY_FILE
       MessageInterface::ShowMessage
          ("Moderator::CreateDeFile() creating DeFile. type=%d, "
-          "filename=%s, format=%d\n", deFileType, filename.c_str(),
+          "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
           format);
 #endif
-               
-      try
-      {
-         theDefaultDeFile = new DeFile(deFileType, filename, format);
-        
-         if (theDefaultDeFile != NULL)
-            status = true;
-      }
-      catch (...)
+
+      FILE *defile = fopen(fileName.c_str(), "rb");
+      if (defile == NULL)
       {
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "Moderator::CreateDeFile() Error creating %s. "
-             "The next filetype in the list will "
-             "be created.\n", filename.c_str());
+             "Error opening DE file:%s. \n"
+             "Please check file path. "
+             "The next filetype in the list will be used.\n", fileName.c_str());
+      }
+      else
+      {
+         fclose(defile);
+         
+         try
+         {
+            theDefaultDeFile = new DeFile(deFileType, fileName, format);
+        
+            if (theDefaultDeFile != NULL)
+               status = true;
+         }
+         catch (...)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_,
+                "Moderator::CreateDeFile() Error creating %s. "
+                "The next filetype in the list will "
+                "be created.\n", fileName.c_str());
+         }
       }
    }
-
    return status;
 }
 
 //------------------------------------------------------------------------------
-// Integer GetPlanetaryFileId(const std::string &filetype)
+// Integer GetPlanetaryFileId(const std::string &fileType)
 //------------------------------------------------------------------------------
-Integer Moderator::GetPlanetaryFileId(const std::string &filetype)
+Integer Moderator::GetPlanetaryFileId(const std::string &fileType)
 {
    for (int i=0; i<PlanetaryFileCount; i++)
    {
-      if (filetype == PLANETARY_SOURCE_STRING[i])
+      if (fileType == PLANETARY_SOURCE_STRING[i])
          return i;
    }
     
@@ -1397,25 +1459,25 @@ Integer Moderator::GetPlanetaryFileId(const std::string &filetype)
 // Subscriber
 //------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
-//                              const std::string &filename)
+//                              const std::string &fileName)
 //------------------------------------------------------------------------------
 /**
  * Creates a subscriber object by given type and name.
  *
  * @param <type> object type
  * @param <name> object name
- * @param <filename> file name if used
+ * @param <fileName> file name if used
  *
  * @return a subscriber object pointer
  */
 //------------------------------------------------------------------------------
 Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &name,
-                                        const std::string &filename)
+                                        const std::string &fileName)
 {
    //    MessageInterface::ShowMessage("Moderator::CreateSubscriber() entered: type = " + type +
    //                                  ", name = " + name + "\n");
-   Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
+   Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, fileName);
    theConfigManager->AddSubscriber(subs);
    //loj: 3/9/04 commented out. The subscribers are added in AddSubscriberToSandbox()
    //thePublisher->Subscribe(subs);
@@ -1668,24 +1730,24 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 
 // Script
 //------------------------------------------------------------------------------
-// bool InterpretScript(const std::string &scriptFilename)
+// bool InterpretScript(const std::string &scriptFileName)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
- * @param <scriptFilename> input script file name
+ * @param <scriptFileName> input script file name
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::InterpretScript(const std::string &scriptFilename)
+bool Moderator::InterpretScript(const std::string &scriptFileName)
 {
    bool status = false;
    isRunReady = false;
     
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
-                                 "file: " + scriptFilename + "\n");
+                                 "file: " + scriptFileName + "\n");
 
    //loj: clear both resource and command sequence for B2
    ClearResource();
@@ -1693,7 +1755,7 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
     
    try
    {
-      status = theScriptInterpreter->Interpret(scriptFilename);
+      status = theScriptInterpreter->Interpret(scriptFileName);
       if (status)
       {
          MessageInterface::ShowMessage
@@ -1712,25 +1774,25 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
 }
 
 //------------------------------------------------------------------------------
-// bool SaveScript(const std::string &scriptFilename)
+// bool SaveScript(const std::string &scriptFileName)
 //------------------------------------------------------------------------------
 /**
  * Builds scripts from objects and write to a file.
  *
- * @param <scriptFilename> output script file name
+ * @param <scriptFileName> output script file name
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::SaveScript(const std::string &scriptFilename)
+bool Moderator::SaveScript(const std::string &scriptFileName)
 {
    MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
-                                 "file: " + scriptFilename + "\n");
-   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFilename);
+                                 "file: " + scriptFileName + "\n");
+   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFileName);
 
    try
    {
-      return theScriptInterpreter->Build(scriptFilename);
+      return theScriptInterpreter->Build(scriptFileName);
    }
    catch (BaseException &e)
    {
@@ -2053,7 +2115,7 @@ void Moderator::AddSolarSysToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPublisherToSandbox(Integer index)
 {
-   thePublisher->UnsubscribeAll(); //loj: 3/9/04 added
+   thePublisher->UnsubscribeAll();
    sandboxes[index]->SetPublisher(thePublisher);
 }
 

@@ -150,12 +150,12 @@ public:
                                       const std::string &name);
    CelestialBody* GetCelestialBody(const std::string &name);
 
-   // Interpolator //loj: 3/23/04 added
+   // Interpolator
    Interpolator* CreateInterpolator(const std::string &type,
                                     const std::string &name);
    Interpolator* GetInterpolator(const std::string &name);
 
-   // RefFrame //loj: 3/23/04 added
+   // RefFrame
    RefFrame* CreateRefFrame(const std::string &type,
                             const std::string &name);
    RefFrame* GetRefFrame(const std::string &name);
@@ -170,19 +170,19 @@ public:
    StringArray& GetPlanetaryFileTypes();
    StringArray& GetPlanetaryFileNames();
    StringArray& GetPlanetaryFileTypesInUse();
-   std::string GetPlanetaryFileName(const std::string &filetype);
-   bool SetPlanetaryFileName(const std::string &filetype,
-                             const std::string &filename);
-   bool SetPlanetaryFileTypesInUse(const StringArray &filetypes);
-   Integer GetPlanetaryFileId(const std::string &filetype);
+   std::string GetPlanetaryFileName(const std::string &fileType);
+   bool SetPlanetaryFileName(const std::string &fileType,
+                             const std::string &fileName);
+   Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); //loj: 6/14/04 changed bool to Integer
+   Integer GetPlanetaryFileId(const std::string &fileType);
     
    // Potential field files
-   std::string GetPotentialFileName(const std::string &filetype); //loj: 5/21/04 added
+   std::string GetPotentialFileName(const std::string &fileType);
 
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
                                 const std::string &name,
-                                const std::string &filename = "");
+                                const std::string &fileName = "");
    Subscriber* GetSubscriber(const std::string &name);
 
    // GmatCommand
@@ -215,8 +215,8 @@ public:
    Integer RunMission(Integer sandboxNum = 1, bool isFromGui = false);
 
    // Script
-   bool InterpretScript(const std::string &scriptFilename);
-   bool SaveScript(const std::string &scriptFilename);
+   bool InterpretScript(const std::string &scriptFileName);
+   bool SaveScript(const std::string &scriptFileName);
    Integer RunScript(Integer sandboxNum = 1, bool isFromGui = false);
     
 private:
@@ -225,8 +225,8 @@ private:
    void InitializePlanetarySource();
    void CreateDefaultMission();
    void SetupRun(Integer sandboxNum, bool isFromGui = false);
-   bool CreateSlpFile(const std::string &filename);
-   bool CreateDeFile(const Integer id, const std::string &filename,
+   bool CreateSlpFile(const std::string &fileName);
+   bool CreateDeFile(const Integer id, const std::string &fileName,
                      Gmat::DeFileFormat format = Gmat::DE_BINARY);
     
    // sandbox
@@ -281,7 +281,7 @@ private:
    StringArray thePlanetaryFileTypes;
    StringArray thePlanetaryFileNames;
    StringArray thePlanetaryFileTypesInUse;
-   StringArray theList;
+   StringArray theTempFileList;
     
    static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
