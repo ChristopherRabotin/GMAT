@@ -236,7 +236,7 @@ bool ScriptInterpreter::Parse(void)
 {
     // Determine what kind of line we have
     ChunkLine();
-
+    
     // Process accordingly
     if (!chunks.empty())
     {
@@ -261,7 +261,6 @@ bool ScriptInterpreter::Parse(void)
             ++phrase;
 
             StringArray sar = SeparateDots(**phrase);
-
             std::string objName = sar[0];
             GmatBase *obj = FindObject(objName);
             if (obj == NULL) {
@@ -281,6 +280,7 @@ bool ScriptInterpreter::Parse(void)
                try {
                    // Set object associations
                    std::string objParm = sar[1];
+                   
                    Integer id = obj->GetParameterID(objParm);
                    
                    /// @todo Correct this kludge in the Spacecraft code!!!
@@ -290,29 +290,39 @@ bool ScriptInterpreter::Parse(void)
                    //
                    // Code to handle "Sat.Epoch.TAIGregorian", etc.
                    if ((objParm == "Epoch") && 
-                       (obj->GetType() == Gmat::SPACECRAFT) &&
-                       (sar.size() > 2)) {
+                       (obj->GetType() == Gmat::SPACECRAFT)) {
+                       if (sar.size() > 2) {
+                         // obj->SetStringParameter("DateFormat", sar[2]);
+                         ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());                      
+                         unsigned int start, end;
+                         start = line.find("=") + 1;
+                         const char* linestr = line.c_str();
+                         while (linestr[start] == ' ')
+                            ++start;
+                         end = line.find(";");
+                         if (end == std::string::npos)
+                            end = line.length()-1;
+                         while (linestr[end] == ' ')
+                            --end;
    
-                      // obj->SetStringParameter("DateFormat", sar[2]);
-                      ((Spacecraft*)obj)->SetDisplayDateFormat(sar[2].c_str());                      
-                      unsigned int start, end;
-                      start = line.find("=") + 1;
-                      const char* linestr = line.c_str();
-                      while (linestr[start] == ' ')
-                         ++start;
-                      end = line.find(";");
-                      if (end == std::string::npos)
-                         end = line.length()-1;
-                      while (linestr[end] == ' ')
-                         --end;
-
-                      std::string epstr;
-                      epstr.assign(line, start, end-start);
-                      
-                      ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
-                      ((Spacecraft*)obj)->SaveDisplay();
-                      chunks.clear();
-                      return true;
+                         std::string epstr;
+                         epstr.assign(line, start, end-start);
+                         
+                         ((Spacecraft*)obj)->SetDisplayEpoch(epstr);
+                         ((Spacecraft*)obj)->SaveDisplay();
+                         chunks.clear();
+                         return true;
+                      }
+                      else {
+                         // Treat it as a ModJulian format epoch
+                         unsigned int start = line.find("=") + 1;
+                         const char* linestr = line.c_str();
+                         while (linestr[start] == ' ')
+                            ++start;
+                         ((Spacecraft*)obj)->SetDisplayDateFormat("TAIModJulian");
+                         ((Spacecraft*)obj)->SetDisplayEpoch(&(linestr[start]));
+                         // obj->SetRealParameter(objParm, &(linestr[start]));
+                      }
                    }
                    
                    // Look for owned objects if the list is deeper than 2

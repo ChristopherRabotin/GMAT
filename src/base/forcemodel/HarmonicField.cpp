@@ -386,9 +386,13 @@ std::string HarmonicField::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer HarmonicField::GetParameterID(const std::string &str) const
 {
+   std::string useStr = str;
+   if (useStr == "Model")
+      useStr = "Filename";
+ 
    for (Integer i = PhysicalModelParamCount; i < HarmonicFieldParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
+      if (useStr == PARAMETER_TEXT[i - PhysicalModelParamCount])
          return i;
    }
    return PhysicalModel::GetParameterID(str);

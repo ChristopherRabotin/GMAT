@@ -181,7 +181,8 @@ protected:
                                                  Integer index);
    bool                          SetParameter(GmatBase *obj, Integer id,
                                               std::string value);
-                                                 
+   void                          CheckForSpecialCase(GmatBase *obj, Integer id, 
+                                                     std::string& value);
    void                          RegisterAliases(void);
    bool                          ConfigureForce(ForceModel *obj, 
                                                 std::string& objParm, 
