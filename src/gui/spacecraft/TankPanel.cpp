@@ -99,7 +99,7 @@ void TankPanel::Create()
                             wxDefaultPosition,wxDefaultSize, 0);
    refTemperatureStaticText = new wxStaticText( this, ID_TEXT, wxT("Reference Temperature"),
                             wxDefaultPosition,wxDefaultSize, 0);
-   fuelMassStaticText = new wxStaticText( this, ID_TEXT, wxT("Furel Mass"),
+   fuelMassStaticText = new wxStaticText( this, ID_TEXT, wxT("Fuel Mass"),
                             wxDefaultPosition,wxDefaultSize, 0);
    fuelDensityStaticText = new wxStaticText( this, ID_TEXT, wxT("Fuel Density"),
                             wxDefaultPosition,wxDefaultSize, 0);
@@ -122,7 +122,7 @@ void TankPanel::Create()
                             
    // wxListBox
    tankListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(150,250), tankCount, emptyList, wxLB_SINGLE);
+                    wxSize(150,200), tankCount, emptyList, wxLB_SINGLE);
                             
    Integer bsize = 3; // border size
    
@@ -130,6 +130,7 @@ void TankPanel::Create()
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
    
    wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT("Tank List") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxVERTICAL );
@@ -163,9 +164,11 @@ void TankPanel::Create()
    boxSizer2->Add(removeButton, 0, wxALIGN_CENTER|wxALL, bsize );
     
    boxSizer3->Add(flexGridSizer1, 0, wxALIGN_CENTER|wxALL, bsize );
-   boxSizer3->Add(boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize );
+   
+   boxSizer4->Add(tankListBox, 0, wxALIGN_CENTER|wxALL, bsize );
+   boxSizer4->Add(boxSizer2, 0, wxALIGN_CENTER|wxALL, bsize );
       
-   staticBoxSizer1->Add( tankListBox, 0, wxALIGN_CENTER|wxALL, bsize ); 
+   staticBoxSizer1->Add( boxSizer4, 0, wxALIGN_CENTER|wxALL, bsize ); 
    staticBoxSizer2->Add( boxSizer3, 0, wxALIGN_CENTER|wxALL, bsize );
    
    flexGridSizer2->Add( staticBoxSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -188,6 +191,49 @@ void TankPanel::Create()
 //------------------------------------------------------------------------------
 void TankPanel::LoadData()
 {  
+    if (theFuelTank == NULL)
+       return;
+       
+    Integer paramID;
+    
+    paramID = theFuelTank->GetParameterID("Temperature");
+    Real temperature = theFuelTank->GetRealParameter(paramID);
+  
+    paramID = theFuelTank->GetParameterID("RefTemperature");
+    Real refTemperature = theFuelTank->GetRealParameter(paramID);
+    
+    paramID = theFuelTank->GetParameterID("FuelMass");
+    Real fuelMass = theFuelTank->GetRealParameter(paramID);
+
+    paramID = theFuelTank->GetParameterID("FuelDensity");
+    Real fuelDensity = theFuelTank->GetRealParameter(paramID);
+   
+    paramID = theFuelTank->GetParameterID("Pressure");
+    Real pressure = theFuelTank->GetRealParameter(paramID);
+   
+    paramID = theFuelTank->GetParameterID("Volume");
+    Real volume = theFuelTank->GetRealParameter(paramID);
+ 
+    wxString temperatureString;
+    wxString refTemperatureString;
+    wxString fuelMassString;
+    wxString fuelDensityString;
+    wxString pressureString;
+    wxString volumeString;
+   
+    temperatureString.Printf("%f", temperature);
+    refTemperatureString.Printf("%f", refTemperature);
+    fuelMassString.Printf("%f", fuelMass);
+    fuelDensityString.Printf("%f", fuelDensity);
+    pressureString.Printf("%f", pressure);
+    volumeString.Printf("%f", volume);
+
+    temperatureTextCtrl->SetValue(temperatureString);
+    refTemperatureTextCtrl->SetValue(refTemperatureString);
+    fuelMassTextCtrl->SetValue(fuelMassString);
+    fuelDensityTextCtrl->SetValue(fuelDensityString);
+    pressureTextCtrl->SetValue(pressureString);
+    volumeTextCtrl->SetValue(volumeString);
 }
 
 //------------------------------------------------------------------------------
@@ -197,6 +243,28 @@ void TankPanel::SaveData()
 {
     if (!theApplyButton->IsEnabled())
        return;
+       
+    wxString temperatureString = temperatureTextCtrl->GetValue();
+    wxString refTemperatureString = refTemperatureTextCtrl->GetValue();
+    wxString fuelMassString = fuelMassTextCtrl->GetValue();
+    wxString fuelDensityString = fuelDensityTextCtrl->GetValue();
+    wxString pressureString = pressureTextCtrl->GetValue();
+    wxString volumeString = volumeTextCtrl->GetValue();
+    
+    Integer paramID;
+    
+    paramID = theFuelTank->GetParameterID("Temperature");
+    theFuelTank->SetRealParameter(paramID, atof(temperatureString));  
+    paramID = theFuelTank->GetParameterID("RefTemperature");
+    theFuelTank->SetRealParameter(paramID, atof(refTemperatureString)); 
+    paramID = theFuelTank->GetParameterID("FuelMass");
+    theFuelTank->SetRealParameter(paramID, atof(fuelMassString)); 
+    paramID = theFuelTank->GetParameterID("FuelDensity");
+    theFuelTank->SetRealParameter(paramID, atof(fuelDensityString)); 
+    paramID = theFuelTank->GetParameterID("Pressure");
+    theFuelTank->SetRealParameter(paramID, atof(pressureString)); 
+    paramID = theFuelTank->GetParameterID("Volume");
+    theFuelTank->SetRealParameter(paramID, atof(volumeString)); 
 }
 
 //------------------------------------------------------------------------------

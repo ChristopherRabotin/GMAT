@@ -55,24 +55,18 @@ private:
     wxButton *theApplyButton;
     wxButton *addButton;
     wxButton *removeButton;
+    wxButton *cCoefButton;
+    wxButton *kCoefButton;
     
     wxComboBox *tankComboBox;
     wxComboBox *coordsysComboBox;
     
-    wxTextCtrl *C1TextCtrl;
-    wxTextCtrl *C2TextCtrl;
-    wxTextCtrl *K1TextCtrl;
-    wxTextCtrl *K3TextCtrl;
     wxTextCtrl *XTextCtrl;
     wxTextCtrl *YTextCtrl;
     wxTextCtrl *ZTextCtrl;
     
     wxStaticText *tankStaticText;
     wxStaticText *coordsysStaticText;
-    wxStaticText *C1StaticText;
-    wxStaticText *C2StaticText;
-    wxStaticText *K1StaticText;
-    wxStaticText *K3StaticText;
     wxStaticText *XStaticText;
     wxStaticText *YStaticText;
     wxStaticText *ZStaticText;
