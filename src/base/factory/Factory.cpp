@@ -287,11 +287,11 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  * objects of type  CelestialBody.
  */
 //------------------------------------------------------------------------------
-//CelestialBody* Factory::CreateCelestialBody(std::string ofType,
-//                                                    std::string withName)
-//{
-//   throw FactoryException("requested object must be of type CelestialBody");
-//}
+CelestialBody* Factory::CreateCelestialBody(std::string ofType,
+                                                    std::string withName)
+{
+   throw FactoryException("requested object must be of type CelestialBody");
+}
 
 //------------------------------------------------------------------------------
 //  SolarSystem* CreateSolarSystem(std::string ofType,
@@ -312,11 +312,11 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  * objects of type  SolarSystem.
  */
 //------------------------------------------------------------------------------
-//SolarSystem* Factory::CreateSolarSystem(std::string ofType,
-//                                                std::string withName)
-//{
-//   throw FactoryException("requested object must be of type SolarSystem");
-//}
+SolarSystem* Factory::CreateSolarSystem(std::string ofType,
+                                                std::string withName)
+{
+   throw FactoryException("requested object must be of type SolarSystem");
+}
 
 //------------------------------------------------------------------------------
 //  Solver* CreateSolver(std::string ofType,
