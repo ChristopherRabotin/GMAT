@@ -4,6 +4,13 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P.
+//
+//
 // Author: Monisha Butler
 // Created: 2003/09/10
 // Modified: 2003/09/29
@@ -78,6 +85,8 @@ private:
     void OnCartElements();
     void OnKepElements();
     void OnStateChange();
+    void OnEpochChange();
+    void OnTextChange();
     void UpdateValues();
     void OnApply();
     void OnOk();

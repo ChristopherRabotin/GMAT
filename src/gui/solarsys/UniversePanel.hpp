@@ -42,9 +42,6 @@ class UniversePanel: public wxPanel
 {
 public:
     UniversePanel(wxWindow *parent);
-    //wxSizer *CreateSolarSystem(wxWindow *parent, bool call_fit=TRUE, bool set_sizer=TRUE);
-
- 
    
 private:
     wxBoxSizer *item0;

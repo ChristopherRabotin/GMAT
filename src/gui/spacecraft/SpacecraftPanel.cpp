@@ -4,6 +4,13 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P.
+//
+//
 // Author: Monisha Butler
 // Created: 2003/09/10
 // Modified: 2003/09/29
@@ -27,7 +34,9 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(SpacecraftPanel, wxPanel)
+   EVT_TEXT(ID_TEXTCTRL, SpacecraftPanel::OnTextChange)
    EVT_COMBOBOX(ID_CB_STATE, SpacecraftPanel::OnStateChange)
+   EVT_COMBOBOX(ID_CB_EPOCH, SpacecraftPanel::OnEpochChange)
    EVT_BUTTON(ID_BUTTON_OK, SpacecraftPanel::OnOk) 
    EVT_BUTTON(ID_BUTTON_APPLY, SpacecraftPanel::OnApply) 
    EVT_BUTTON(ID_BUTTON_CANCEL, SpacecraftPanel::OnCancel) 
@@ -51,7 +60,7 @@ END_EVENT_TABLE()
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
     :wxPanel(parent)
 {
-   CreateNotebook(this, scName);
+    CreateNotebook(this, scName);
 }
 
 //-------------------------------
@@ -149,9 +158,11 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     wxStaticText *item4 = new wxStaticText( orbitPanel, ID_TEXT, 
                           wxT("Reference Body"), wxDefaultPosition, 
                           wxDefaultSize, 0 );
+    item4->Disable();
     item3->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *item5 = new wxStaticText( orbitPanel, ID_TEXT, wxT("Reference Frame"), wxDefaultPosition, wxDefaultSize, 0 );
+    item5->Disable();
     item3->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxString strs6[] =
@@ -159,6 +170,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
         wxT("ComboItem")
     };
     wxComboBox *item6 = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs6, wxCB_DROPDOWN );
+    item6->Disable();
     item3->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxString strs7[] =
@@ -166,6 +178,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
         wxT("ComboItem")
     };
     wxComboBox *item7 = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs7, wxCB_DROPDOWN );
+    item7->Disable();
     item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item1->Add( item3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
@@ -192,7 +205,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     };
     
     // combo box for the date type
-    dateCB = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), 
+    dateCB = new wxComboBox( orbitPanel, ID_CB_EPOCH, wxT(""), 
              wxDefaultPosition, wxSize(100,-1), 4, strs12, 
              wxCB_DROPDOWN );
     item10->Add( dateCB, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -244,7 +257,7 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     applyButton = new wxButton(orbitPanel, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
     cancelButton = new wxButton(orbitPanel, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
     helpButton = new wxButton(orbitPanel, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-    
+
     buttonSizer->Add(okButton, 0, wxALL|wxALIGN_CENTER, 5);
     buttonSizer->Add(applyButton, 0, wxALL|wxALIGN_CENTER, 5);
     buttonSizer->Add(cancelButton, 0, wxALL|wxALIGN_CENTER, 5);
@@ -261,6 +274,9 @@ void SpacecraftPanel::CreateOrbit(wxWindow *parent)
     
     // gets the values from theSpacecraft
     UpdateValues();
+    //disable apply button until a field is changed
+    applyButton->Disable();
+    helpButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -579,6 +595,12 @@ void SpacecraftPanel::OnCancel()
     // need to figure out the best way to close
     // the notebook page
     this->Destroy();
+//    this->Close();
+    
+    /* // make item most current, then close it
+ GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
+ mainNotebook->CreatePage(item);
+ mainNotebook->ClosePage();*/
 }
 
 //------------------------------------------------------------------------------
@@ -607,6 +629,20 @@ void SpacecraftPanel::OnApply()
     theSpacecraft->SetRealParameter(4, atof(el4));
     theSpacecraft->SetRealParameter(5, atof(el5));
     theSpacecraft->SetRealParameter(6, atof(el6));
+    
+    applyButton->Disable();
+}
+
+//------------------------------------------------------------------------------
+// void OnTextChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when text is changed
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnTextChange()
+{
+    applyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -618,6 +654,7 @@ void SpacecraftPanel::OnApply()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::OnStateChange()
 {
+    applyButton->Enable();
     if (stateCB->GetSelection() == 0)
     {
        OnCartElements();
@@ -630,5 +667,17 @@ void SpacecraftPanel::OnStateChange()
     {
         ;
     }
+}
+
+//------------------------------------------------------------------------------
+// void OnEpochChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when epoch combobox is changed
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnEpochChange()
+{
+    applyButton->Enable();
 }
 
