@@ -173,8 +173,8 @@ wxFrame* GmatApp::CreateSdiChildFrame(wxDocument *doc, wxView *view, bool isCanv
     if (isScript)
     {
         scriptMenu = new wxMenu;
-        scriptMenu->Append(MENU_SCRIPT_BUILD_OBJECT, _T("&Build Object"));
-        scriptMenu->Append(MENU_SCRIPT_RUN, _T("&Run"));
+        scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT, _T("&Build Object"));
+        scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
     }
     
     wxMenu *edit_menu = (wxMenu *) NULL;
@@ -259,9 +259,9 @@ wxMDIChildFrame* GmatApp::CreateMdiChildFrame(wxDocument *doc, wxView *view, boo
     if (isScript)
     {
         scriptMenu = new wxMenu;
-        scriptMenu->Append(MENU_SCRIPT_BUILD_OBJECT, _T("&Build Object"));
-        scriptMenu->Append(MENU_SCRIPT_BUILD_AND_RUN, _T("&Build and Run"));
-        scriptMenu->Append(MENU_SCRIPT_RUN, _T("&Run"));
+        scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_OBJECT, _T("&Build Object"));
+        scriptMenu->Append(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, _T("&Build and Run"));
+        scriptMenu->Append(GmatScript::MENU_SCRIPT_RUN, _T("&Run"));
     }
     
     wxMenu *edit_menu = (wxMenu *) NULL;

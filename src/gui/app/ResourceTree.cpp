@@ -128,15 +128,15 @@ void ResourceTree::AddDefaultResources()
 {
     wxTreeItemId resource = this->AddRoot(wxT("Resources"), -1, -1,
                                   new GmatTreeItemData(wxT("Resources"),
-                                  GmatTree::RESOURCES_FOLDER));
+                                                       GmatTree::RESOURCES_FOLDER));
 
     //----- Spacecraft
     mSpacecraftItem =
-        this->AppendItem(resource, wxT("Spacecraft"), GmatTree::ICON_FOLDER, 
-                        -1, new GmatTreeItemData(wxT("Spacecraft"),
-                        GmatTree::SPACECRAFT_FOLDER));
+        this->AppendItem(resource, wxT("Spacecraft"), GmatTree::ICON_FOLDER, -1,
+                         new GmatTreeItemData(wxT("Spacecraft"),
+                                              GmatTree::SPACECRAFT_FOLDER));
     
-    SetItemImage(mSpacecraftItem, GmatTree::ICON_OPENFOLDER, 
+    SetItemImage(mSpacecraftItem, GmatTree::ICON_OPENFOLDER,
                  wxTreeItemIcon_Expanded);
     
     //----- Formations
@@ -294,7 +294,8 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
                          new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_SPACECRAFT));
     };
 
-    Expand(itemId);
+    if (size > 0)
+        Expand(itemId);
 }
 
 
@@ -352,7 +353,8 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
                          new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_PROPAGATOR));
     };
 
-    Expand(itemId);
+    if (size > 0)
+        Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
@@ -381,7 +383,8 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
         }
     };
 
-    Expand(itemId);
+    if (size > 0)
+        Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
@@ -407,7 +410,8 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
         }
     };
 
-    Expand(itemId);
+    if (size > 0)
+        Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
@@ -440,7 +444,8 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
                              GmatTree::DEFAULT_OPENGL_PLOT));
     };
 
-    Expand(itemId);
+    if (size > 0)
+        Expand(itemId);
 }
 
 //------------------------------------------------------------------------------
@@ -452,6 +457,7 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
           new GmatTreeItemData(wxT("TCP/IP"), GmatTree::DEFAULT_INTERFACE));
     this->AppendItem(itemId, wxT("Mex"), GmatTree::ICON_FILE, -1,
           new GmatTreeItemData(wxT("Mex"), GmatTree::DEFAULT_INTERFACE));
+    
 }
 
 //------------------------------------------------------------------------------

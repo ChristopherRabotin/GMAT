@@ -196,31 +196,27 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
     StringArray &listSc = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
     int numSc = listSc.size();
 
-    if (firstTime)
+    if (theSpacecraftList != NULL)
+        delete theSpacecraftList;
+        
+    if (numSc > 0)  // check to see if any spacecrafts exist
     {
-        // combo box for avaliable spacecrafts
-        theSpacecraftList = new wxString[1];
-        theSpacecraftList[0] = wxString("No Spacecrafts Available");
+        theSpacecraftList = new wxString[numSc];
+        
+        for (int i=0; i<numSc; i++)
+        {
+            theSpacecraftList[i] = wxString(listSc[i].c_str());
+            //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacecraftList() " +
+            //                              std::string(theSpacecraftList[i].c_str()) + "\n");
+        }
     }
     else
     {
-        if (theSpacecraftList != NULL)
-            delete theSpacecraftList;
-        
-        if (numSc > 0)  // check to see if any spacecrafts exist
-        {
-            theSpacecraftList = new wxString[numSc];
-        
-            for (int i=0; i<numSc; i++)
-            {
-                theSpacecraftList[i] = wxString(listSc[i].c_str());
-                //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacecraftList() " +
-                //                              std::string(theSpacecraftList[i].c_str()) + "\n");
-             }
-        }
-
-        theNumSpacecraft = numSc;
+        theSpacecraftList = new wxString[1];
+        theSpacecraftList[0] = wxString("-- None --");
     }
+        
+    theNumSpacecraft = numSc;
 }
 
 //------------------------------------------------------------------------------

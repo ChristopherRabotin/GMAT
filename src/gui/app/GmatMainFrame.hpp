@@ -74,6 +74,7 @@ private:
     // event handling
     DECLARE_EVENT_TABLE();
     void OnProjectNew(wxCommandEvent& WXUNUSED(event));
+    void OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event));
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
     void OnRun(wxCommandEvent& WXUNUSED(event));
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
@@ -89,6 +90,7 @@ private:
     enum
     {
         MENU_PROJECT_NEW = 10000,
+        MENU_PROJECT_LOAD_DEFAULT_MISSION,
         MENU_PROJECT_OPEN,
         MENU_PROJECT_OPEN_BINARY,
         MENU_PROJECT_OPEN_ASCII,

@@ -51,6 +51,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
+    EVT_MENU(MENU_PROJECT_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
     EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
     EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
@@ -158,6 +159,25 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 {
     theGuiInterpreter->ClearResource();
     theGuiInterpreter->ClearCommandSeq();
+
+    GmatAppData::GetResourceTree()->UpdateResource();
+    GmatAppData::GetMissionTree()->UpdateMission();    
+}
+
+//------------------------------------------------------------------------------
+// void OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles loading the default mission from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
+{
+    theGuiInterpreter->ClearResource();
+    theGuiInterpreter->ClearCommandSeq();
+    
     theGuiInterpreter->LoadDefaultMission();
 
     GmatAppData::GetResourceTree()->UpdateResource();
@@ -340,6 +360,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
     wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
     
     fileMenu->Append(MENU_PROJECT_NEW, wxT("New Project"), wxT(""), FALSE);
+    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Load Default Mission"), wxT(""), FALSE);
     
     openMenu = new wxMenu;
     openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);
