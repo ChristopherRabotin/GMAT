@@ -225,10 +225,14 @@ JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere() :
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
 {
-    if (fileReader->CloseSolarFluxFile(solarFluxFile))
-       fileRead = false;
-    else
-       throw AtmosphereException("Error closing JacchiaRoberts data file.\n");
+   //loj: 2/23/05 Added if (fileReader)
+   if (fileReader)
+   {
+      if (fileReader->CloseSolarFluxFile(solarFluxFile))
+         fileRead = false;
+      else
+         throw AtmosphereException("Error closing JacchiaRoberts data file.\n");
+   }
 }
 
 //------------------------------------------------------------------------------
