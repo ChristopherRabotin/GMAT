@@ -15,7 +15,6 @@
 #include "MdiParentGlFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "MdiChildTrajFrame.hpp"
-#include "TrajPlotCanvas.hpp"
 
 #include "wx/toolbar.h"
 

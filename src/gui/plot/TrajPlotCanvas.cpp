@@ -796,7 +796,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
         
         numDataPoints = mTrajectoryData.size();
 
-        for(int i=0; i<numDataPoints; i++)
+        for(int i=0; i<numDataPoints && i < MAX_DATA; i++)
         {
             mScTrajColor[mNumData] = RED32;
             mTime[mNumData] = mTrajectoryData[i].time;
@@ -850,15 +850,17 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
 void TrajPlotCanvas::UpdateSpacecraft(const Real &time, const Real &posX,
                                       const Real &posY, const Real &posZ)
 {
-    mScTrajColor[mNumData] = RED32;
-    mTime[mNumData] = time;
-    mTempScPos[mNumData][0] = posX;
-    mTempScPos[mNumData][1] = posY;
-    mTempScPos[mNumData][2] = posZ;
-    mTempEarthPos[mNumData][0] = 0.0;
-    mTempEarthPos[mNumData][1] = 0.0;
-    mTempEarthPos[mNumData][2] = 0.0;
-    mNumData++;
-
+    if (mNumData < MAX_DATA)
+    {
+        mScTrajColor[mNumData] = RED32;
+        mTime[mNumData] = time;
+        mTempScPos[mNumData][0] = posX;
+        mTempScPos[mNumData][1] = posY;
+        mTempScPos[mNumData][2] = posZ;
+        mTempEarthPos[mNumData][0] = 0.0;
+        mTempEarthPos[mNumData][1] = 0.0;
+        mTempEarthPos[mNumData][2] = 0.0;
+        mNumData++;
+    }
     Refresh(false);
 }

@@ -20,7 +20,7 @@
 #include "TextTrajectoryFile.hpp"
 #include "wx/glcanvas.h"
 
-const int MAX_DATA = 2000;
+const int MAX_DATA = 20000;
 const int MAX_EARTH_ZOOM_IN = 12756;
 const int MAX_BODIES = 20;
 
@@ -33,6 +33,9 @@ public:
                    const wxString& name = wxT("TrajPlotCanvas"));
     ~TrajPlotCanvas();
 
+    // initialization
+    bool InitGL(void);
+    
     // events
     void OnPaint(wxPaintEvent &event);
     void OnSize(wxSizeEvent &event);
@@ -135,7 +138,6 @@ private:
     float mCurrViewDist;
     
     // initialization
-    bool InitGL(void);
     bool LoadGLTextures();
 
     // view objects

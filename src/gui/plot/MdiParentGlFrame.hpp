@@ -28,6 +28,7 @@ class MdiParentGlFrame : public wxMDIParentFrame
 {
 public:
     wxTextCtrl *textWindow;
+    MdiChildTrajFrame *subframe;
 
     MdiParentGlFrame(wxWindow *parent, const wxWindowID id,
                      const wxString& title, const wxPoint& pos,
@@ -41,8 +42,6 @@ public:
 
 protected:
     void InitToolBar(wxToolBar* toolBar);
-    
-    MdiChildTrajFrame *subframe;
     
     DECLARE_EVENT_TABLE()
 };
