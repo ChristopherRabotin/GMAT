@@ -8,23 +8,26 @@ HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
           -I../solarsys -I../factory -I../stopcond -I../interpreter \
           -I../util -I../interpolator -I../parameter -I../configs \
           -I../refframe -I../burn -I../solver
+          
+GUIHEADERS = -I../../gui/include \
+        -I../../gui/app \
+        -I../../gui/view \
+        -I../../gui/foundation \
+        -I../../gui/plot
 
 OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
 
 CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o PlotInterfaceConsole.o
 GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o PlotInterfaceGUI.o
 
-# all: ../lib/libExecutiveConsole ../lib/libExecutive
-
-all: libExecutiveConsole.a
+all: libExecutiveConsole libExecutive
 	mkdir -p ../lib
 	cp libExecutiveConsole.a ../lib
+	cp libExecutive.a ../lib
 
-#	mv libExecutive.a ../lib
-
-libExecutive : ../lib/libExecutive.a
+libExecutive : libExecutive.a
 	
-libExecutiveConsole : ../lib/libExecutiveConsole.a
+libExecutiveConsole : libExecutiveConsole.a
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
@@ -34,8 +37,7 @@ MessageInterfaceConsole.o : MessageInterface.cpp MessageInterface.hpp
         -o MessageInterfaceConsole.o MessageInterface.cpp
 
 MessageInterfaceGUI.o : MessageInterface.cpp MessageInterface.hpp
-	$(CPP) $(CPPFLAGS) $(HEADERS) -I../../gui/include \
-        -I../../gui/app -I../../gui/view \
+	$(CPP) $(CPPFLAGS) $(HEADERS) $(GUIHEADERS) \
         -c `wx-config --cppflags`\
         -o MessageInterfaceGUI.o MessageInterface.cpp
 
@@ -44,8 +46,7 @@ PlotInterfaceConsole.o : PlotInterface.cpp PlotInterface.hpp
         -o PlotInterfaceConsole.o PlotInterface.cpp
 
 PlotInterfaceGUI.o : PlotInterface.cpp PlotInterface.hpp
-	$(CPP) $(CPPFLAGS) $(HEADERS) -I../../gui/include \
-        -I../../gui/app -I../../gui/view -I../../gui/plot \
+	$(CPP) $(CPPFLAGS) $(HEADERS) $(GUIHEADERS) \
         -c `wx-config --cppflags`\
         -o PlotInterfaceGUI.o PlotInterface.cpp
 
