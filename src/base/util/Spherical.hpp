@@ -26,12 +26,10 @@
 #include <iostream>
 #include <sstream>
 #include "gmatdefs.hpp"
-#include "Cartesian.hpp"
 #include "Linear.hpp"
-#include "PhysicalConstants.hpp"    // for mu
 #include "RealUtilities.hpp"
-#include "Rvector.hpp"
 #include "Rvector3.hpp"
+#include "Rvector6.hpp"
 
 class Spherical 
 {
@@ -63,20 +61,23 @@ public:
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
  
+
+protected:
     // Constant value for orbit tolerance
     static const Real ORBIT_TOLERANCE = 1.0E-10;
 
-protected:
     Real     positionMagnitude;    //  Position vector magnitude
     Real     rightAscension;       //  RA measured of vernal equinox 
     Real     declination;          //  Declination measured north from equator
     Real     velocityMagnitude;    //  Velocity vector magnitude
 
     // protected method
-    bool ToSpherical(const Cartesian &cartesian, const bool isPartOne);
+    bool CartesianToSpherical(const Rvector6& cartVector, 
+                              const bool isAZFPA);
+                     
     Rvector3 GetPosition();
     Real GetDegree(const Real angle, const Real minAngle, const Real maxAngle);
-
+ 
 private:
    static const Integer NUM_DATA = 4;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];

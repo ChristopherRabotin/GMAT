@@ -185,12 +185,14 @@ void Spherical::SetVelocityMagnitude(const Real vMag)
 }
 
 //------------------------------------------------------------------------------
-// bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
+// bool Spherical::CartesianToSpherical(const Rvector6& cartesian, 
+//                                      const bool isAZFPA)
 //------------------------------------------------------------------------------
-bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
+bool Spherical::CartesianToSpherical(const Rvector6& cartesian, 
+                                     const bool isAZFPA)
 {
-    Rvector3 position = cartesian.GetPosition();
-    Rvector3 velocity = cartesian.GetVelocity();
+    Rvector3 position = cartesian.GetR();
+    Rvector3 velocity = cartesian.GetV();
 
     // Get position and velocity vector magnitudes
     Real r_mag = position.GetMagnitude();
@@ -218,7 +220,7 @@ bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
     mState = GmatMathUtil::ATan(posZ, 
                                 GmatMathUtil::Sqrt(posX*posX + posY*posY));
 
-    if (isPartOne)
+    if (isAZFPA)
        mState = GetDegree(mState,0.-GmatMathUtil::PI,GmatMathUtil::PI);
     else
        mState = GmatMathUtil::Deg(mState);
@@ -226,7 +228,7 @@ bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
     SetDeclination(mState); 
 
     // Get and set velocity vector magnitude
-    SetVelocityMagnitude(cartesian.GetVelocity().GetMagnitude()); 
+    SetVelocityMagnitude(velocity.GetMagnitude()); 
 
     return true;
 }
