@@ -32,14 +32,9 @@
 #include "CommandException.hpp"
 
 
-// Forward references for classes that we'll have eventually
-class SolarSystem;
-class Publisher;
-
 // Headers for the referenced classes
-//#include "Asset.hpp"        // for Spacecraft and GroundStations
-//#include "SolarSystem.hpp"  // for SolarSystem
-#include "Subscriber.hpp"    // For the Publisher
+#include "SolarSystem.hpp"   // for SolarSystem
+#include "Subscriber.hpp"    // For the Publisher and base Subscribers
 
 
 /**
