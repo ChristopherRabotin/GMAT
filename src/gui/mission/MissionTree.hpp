@@ -54,12 +54,12 @@ private:
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
    void OnBefore();
    void OnAfter();
-   void OnAddManeuverBefore(wxCommandEvent &event);
-   void OnAddPropagateBefore(wxCommandEvent &event);
-   void OnAddTargetBefore(wxCommandEvent &event);
-   void OnAddManeuverAfter(wxCommandEvent &event);
-   void OnAddPropagateAfter(wxCommandEvent &event);
-   void OnAddTargetAfter(wxCommandEvent &event);
+   void OnAddBeforeManeuver(wxCommandEvent &event);
+   void OnAddBeforePropagate(wxCommandEvent &event);
+   void OnAddBeforeTarget(wxCommandEvent &event);
+   void OnAddAfterManeuver(wxCommandEvent &event);
+   void OnAddAfterPropagate(wxCommandEvent &event);
+   void OnAddAfterTarget(wxCommandEvent &event);
    void AddManeuver();
 
    enum
