@@ -22,6 +22,8 @@
 #include "OrbitPanel.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_ORBIT_PANEL 1
+
 //------------------------------
 // event tables for wxWindows
 //------------------------------
@@ -29,7 +31,8 @@ BEGIN_EVENT_TABLE(OrbitPanel, wxPanel)
    EVT_TEXT(ID_TEXTCTRL, OrbitPanel::OnTextChange)
    EVT_COMBOBOX(ID_CB_STATE, OrbitPanel::OnStateChange)
    EVT_COMBOBOX(ID_CB_EPOCH, OrbitPanel::OnEpochChange)
-   EVT_COMBOBOX(ID_COMBO, OrbitPanel::OnComboChange)
+   EVT_COMBOBOX(ID_COMBOBOX, OrbitPanel::OnComboBoxChange)
+   EVT_COMBOBOX(ID_CB_ANOMALY, OrbitPanel::OnAnomalyChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -56,11 +59,13 @@ OrbitPanel::OrbitPanel(wxWindow *parent,
 //   MessageInterface::ShowMessage
 //         ("In OrbitPanel\n");
 
-    this->theSpacecraft = spacecraft;
-    this->theSolarSystem = solarsystem;
-    this->theApplyButton = theApplyButton;
+   theGuiManager = GuiItemManager::GetInstance();
+   this->theSpacecraft = spacecraft;
+   this->theSolarSystem = solarsystem;
+   this->theApplyButton = theApplyButton;
 
-    Create();
+   mIsCoordSysChanged = false;
+   Create();
 }
 
 OrbitPanel::~OrbitPanel()
@@ -85,104 +90,130 @@ OrbitPanel::~OrbitPanel()
 //------------------------------------------------------------------------------
 void OrbitPanel::Create()
 {
-    wxBoxSizer *orbitSizer = new wxBoxSizer(wxVERTICAL);
+   Integer bsize = 3; // border size
 
-    //static box for the orbit state
-    wxStaticBox *item9 = new wxStaticBox( this, ID_STATIC_ORBIT,
-                         wxT("Orbit State") );
-    wxStaticBoxSizer *item8 = new wxStaticBoxSizer( item9, wxVERTICAL );
+   //------------- create sizers -------------
+   // sizer for orbit tab
+   wxBoxSizer *orbitSizer = new wxBoxSizer(wxVERTICAL);
+   //static box for the state
+   wxStaticBox *item9 = new wxStaticBox( this, ID_STATIC_ORBIT,
+      wxT("Orbit State") );
+   wxStaticBoxSizer *item8 = new wxStaticBoxSizer( item9, wxVERTICAL );
+   // gridsizer for inside the orbit state static box
+   wxGridSizer *item10 = new wxGridSizer( 2, 0, 0 );
+   // static box for the elements
+   wxStaticBox *elementBox =
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Elements"));
+   wxStaticBoxSizer *elementSizer =
+      new wxStaticBoxSizer(elementBox, wxVERTICAL);
+   // sizer for anomaly
+   wxBoxSizer *anomalySizer = new wxBoxSizer(wxHORIZONTAL);
+   
+   // label for epoch
+   wxStaticText *item11 = new wxStaticText( this, ID_TEXT,
+      wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
+   
+   // add epcoh label and blank to ?? sizer                         
+   item10->Add( item11, 0, wxALIGN_CENTER, bsize );
+   item10->Add( 20, 20, 0, wxALIGN_CENTER, bsize );
 
-    // gridsizer for inside the orbit state static box
-    wxGridSizer *item10 = new wxGridSizer( 2, 0, 0 );
+   wxString strs12[] =
+   {
+      wxT("TAIModJulian"),
+      wxT("UTCModJulian"),
+      wxT("TAIGregorian"),
+      wxT("UTCGregorian")
+   };
 
-    wxStaticText *item11 = new wxStaticText( this, ID_TEXT,
-                            wxT("Epoch"), wxDefaultPosition,
-                            wxDefaultSize, 0 );
-    item10->Add( item11, 0, wxALIGN_CENTER, 5 );
-
-    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
-
-    wxString strs12[] =
-    {
-        wxT("TAIModJulian"),
-        wxT("UTCModJulian"),
-        wxT("TAIGregorian"),
-        wxT("UTCGregorian")
-    };
-
-    // combo box for the date type
+   // combo box for the date type
    dateComboBox = new wxComboBox( this, ID_CB_EPOCH, wxT(""),
-             wxDefaultPosition, wxSize(150,-1), 4, strs12,
-             wxCB_DROPDOWN | wxCB_READONLY );
-   item10->Add( dateComboBox, 0, wxALIGN_CENTER, 5 );
+      wxDefaultPosition, wxSize(150,-1), 4, strs12, wxCB_DROPDOWN | wxCB_READONLY );
+   item10->Add( dateComboBox, 0, wxALIGN_CENTER, bsize );
 
    // textfield for the epochvalue
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-                 wxDefaultPosition, wxSize(150,-1), 0 );
+      wxDefaultPosition, wxSize(150,-1), 0 );
 
-   item10->Add( epochValue, 0, wxALIGN_CENTER, 5 );
+   item10->Add( epochValue, 0, wxALIGN_CENTER, bsize );
 
    wxStaticText *coordSysStaticText = new wxStaticText( this, ID_TEXT,
-                            wxT("Coordinate System"), wxDefaultPosition,
-                            wxDefaultSize, 0 );
-   item10->Add( coordSysStaticText, 0, wxALIGN_CENTER, 5 );
+      wxT("Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
+   item10->Add( coordSysStaticText, 0, wxALIGN_CENTER, bsize );
 
    wxStaticText *item14 = new wxStaticText( this, ID_TEXT,
-                            wxT("State Type"), wxDefaultPosition,
-                            wxDefaultSize, 0 );
-   item10->Add( item14, 0, wxALIGN_CENTER, 5 );
+      wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
+   item10->Add( item14, 0, wxALIGN_CENTER, bsize );
 
-   wxString coordSysStrs[] =
-   {
-       wxT(""),
-       wxT("")
-   };
+//   wxString coordSysStrs[] =
+//   {
+//       wxT(""),
+//       wxT("")
+//   };
 
-    // combo box for the state
-   wxComboBox *coordSysComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-              wxDefaultPosition, wxSize(150,-1), 2, coordSysStrs,
-              wxCB_DROPDOWN | wxCB_READONLY);
+   //loj: 1/19/05 Get CordinateSystem ComboBox from the GuiItemManager.
+   mCoordSysComboBox =
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
 
-   item10->Add( coordSysComboBox, 0, wxALIGN_CENTER, 5 );
+   item10->Add(mCoordSysComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   // combo box for coordinate system
+//   coordSysComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
+//              wxDefaultPosition, wxSize(150,-1), 2, coordSysStrs,
+//              wxCB_DROPDOWN | wxCB_READONLY);
+
+//   item10->Add( coordSysComboBox, 0, wxALIGN_CENTER, 5 );
 
    wxString strs15[] =
    {
-       wxT("Cartesian"),
-       wxT("Keplerian"),
-//         wxT("Modified Keplerian"),
-//         wxT("Spherical"),
+      wxT("Cartesian"),
+      wxT("Keplerian"),
+      wxT("ModifiedKeplerian"),
+      wxT("SphericalAZFPA"),
+      wxT("SphericalRADEC")
 //         wxT("Equinotical")
    };
 
-    // combo box for the state
-    stateComboBox = new wxComboBox( this, ID_CB_STATE, wxT(""),
-              wxDefaultPosition, wxSize(150,-1), 2, strs15,
-              wxCB_DROPDOWN | wxCB_READONLY);
+   // combo box for the state
+   stateComboBox = new wxComboBox( this, ID_CB_STATE, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 5, strs15, wxCB_DROPDOWN | wxCB_READONLY);
 
-//      stateComboBox = new wxComboBox( orbitPanel, ID_CB_STATE, wxT(""),
-//                wxDefaultPosition, wxSize(100,-1), 5, strs15, wxCB_DROPDOWN );
-    item10->Add( stateComboBox, 0, wxALIGN_CENTER, 5 );
+   item10->Add( stateComboBox, 0, wxALIGN_CENTER, bsize );
+   item8->Add( item10, 0, wxALIGN_CENTER, bsize );
 
-    item8->Add( item10, 0, wxALIGN_CENTER, 5 );
+   // panel that has the labels and text fields for the elements
+   // adds default descriptors/labels
+   AddElements(this);
+   elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER, bsize);
 
-    // static box for the elements
-    wxStaticBox *elementBox =
-                new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Elements"));
-    wxStaticBoxSizer *elementSizer =
-                new wxStaticBoxSizer(elementBox, wxVERTICAL);
+   item8->Add( elementSizer, 0, wxALIGN_CENTER, bsize );
 
-    // panel that has the labels and text fields for the elements
-    // adds default descriptors/labels
-    AddElements(this);
-    elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER, 5);
+   // label for anomaly type
+   anomalyLabel = new wxStaticText( this, ID_TEXT,
+      wxT("Anomaly Type "), wxDefaultPosition, wxDefaultSize, 0 );
 
-    item8->Add( elementSizer, 0, wxALIGN_CENTER, 5 );
+   // combo box for the anomaly type
+   wxString typeList[] =
+   {
+      wxT("Mean Anomaly"),
+      wxT("True Anomaly"),
+      wxT("Eccentric Anomaly")
+   };
 
-    orbitSizer->Add( item8, 1, wxGROW|wxALIGN_CENTER, 5 );
+   anomalyCB = new wxComboBox( this, ID_CB_ANOMALY, wxT(""),
+      wxDefaultPosition, wxSize(125,-1), 3, typeList, wxCB_DROPDOWN | wxCB_READONLY );
 
-    theSpacecraft->SetDisplay(true);
+   anomalyLabel->Show(false);
+   anomalyCB->Show(false);
+   
+   anomalySizer->Add(anomalyLabel, 0, wxALIGN_CENTER, bsize );
+   anomalySizer->Add(anomalyCB, 0, wxALIGN_CENTER, bsize );
 
-    this->SetSizer( orbitSizer );
+   item8->Add(anomalySizer, 0, wxALIGN_CENTER, bsize );
+
+   orbitSizer->Add( item8, 1, wxGROW|wxALIGN_CENTER, bsize );
+
+   theSpacecraft->SetDisplay(true);
+
+   this->SetSizer( orbitSizer );
 }
 
 //------------------------------------------------------------------------------
@@ -303,60 +334,97 @@ void OrbitPanel::LoadData()
 //    std::string refBody = theSpacecraft->GetStringParameter(refBodyId);
 //    referenceBodyComboBox->SetValue(wxT(refBody.c_str()));
 
+      // load data from the core engine
+//      mCoordSysComboBox->SetStringSelection
+//         (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
+      mCoordSysComboBox->SetSelection(0);
+
     // Reference Frame   
 //    std::string refFrame = theSpacecraft->GetStringParameter(8);
-    std::string refFrame = theSpacecraft->GetDisplayCoordType();
-    stateComboBox->SetValue(wxT(refFrame.c_str()));
+   std::string refFrame = theSpacecraft->GetDisplayCoordType();
+   stateComboBox->SetValue(wxT(refFrame.c_str()));
     // for the labels
     //OnStateChange();  
   
-    wxString description;
+   wxString description;
     
-    int stateId = theSpacecraft->GetParameterID("Element1");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description1->SetLabel(description);
+   int stateId = theSpacecraft->GetParameterID("Element1");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description1->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element2");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description2->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element2");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description2->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element3");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description3->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element3");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description3->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element4");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description4->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element4");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description4->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element5");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description5->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element5");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description5->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element6");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description6->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element6");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description6->SetLabel(description);
     
+   #if DEBUG_ORBIT_PANEL
+   MessageInterface::ShowMessage("OrbitPanel:LoadData() description =%s\n",
+      description.c_str());
+   #endif
 
      // hard code label change for now, should actually
      // come from the spacecraft object
-     if (refFrame == "Cartesian")
-     {
-       label1->SetLabel("Km");
-       label2->SetLabel("Km");
-       label3->SetLabel("Km");
-       label4->SetLabel("Km/s");
-       label5->SetLabel("Km/s");
-       label6->SetLabel("Km/s");
-     }
-     else if (refFrame == "Keplerian")
-     {
-       label1->SetLabel("Km");
-       label2->SetLabel("");
-       label3->SetLabel("deg");
-       label4->SetLabel("deg");
-       label5->SetLabel("deg");
-       label6->SetLabel("deg");
-      }
+   if (refFrame == "Cartesian")
+   {
+      label1->SetLabel("Km");
+      label2->SetLabel("Km");
+      label3->SetLabel("Km");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("Km/s");
+      label6->SetLabel("Km/s");
+      
+      anomalyLabel->Show(false);
+      anomalyCB->Show(false);
+   }
+   else if ((refFrame == "Keplerian") || (refFrame == "ModifiedKeplerian"))
+   {
+      label1->SetLabel("Km");
+      if (refFrame == "Keplerian")
+         label2->SetLabel("");
+      else
+         label2->SetLabel("Km");
+      label3->SetLabel("deg");
+      label4->SetLabel("deg");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+      
+      anomalyLabel->Show(true);
+      anomalyCB->Show(true);
+      
+      if (strcmp(description.c_str(), "MA") == 0) 
+         anomalyCB->SetSelection(0);
+      else if (strcmp(description.c_str(), "TA") == 0) 
+         anomalyCB->SetSelection(1);
+      else if (strcmp(description.c_str(), "EA") == 0)
+         anomalyCB->SetSelection(2);
+   }
+   else if ((refFrame == "SphericalAZFPA") || (refFrame == "SphericalRADEC"))
+   {
+      label1->SetLabel("Km");
+      label2->SetLabel("deg");
+      label3->SetLabel("deg");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+      
+      anomalyLabel->Show(false);
+      anomalyCB->Show(false);
+   }
 
     //loj: get element type first
     //loj: if element type is Cartesian, the combobox should show Cartesian
@@ -367,45 +435,45 @@ void OrbitPanel::LoadData()
     
     // get elements
 //    Real epoch = theSpacecraft->GetRealParameter(0);
-    std::string epochStr = theSpacecraft->GetDisplayEpoch();
+   std::string epochStr = theSpacecraft->GetDisplayEpoch();
 //    MessageInterface::ShowMessage("\nLoaded epoch as %s", epochStr.c_str());
 
-    std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
-    dateComboBox->SetValue(wxT(dateFormat.c_str()));
+   std::string dateFormat = theSpacecraft->GetDisplayDateFormat();
+   dateComboBox->SetValue(wxT(dateFormat.c_str()));
 
-    Real *displayState = theSpacecraft->GetDisplayState();
-    Real element1 = displayState[0];
-    Real element2 = displayState[1];
-    Real element3 = displayState[2];
-    Real element4 = displayState[3];
-    Real element5 = displayState[4];
-    Real element6 = displayState[5];
+   Real *displayState = theSpacecraft->GetDisplayState();
+   Real element1 = displayState[0];
+   Real element2 = displayState[1];
+   Real element3 = displayState[2];
+   Real element4 = displayState[3];
+   Real element5 = displayState[4];
+   Real element6 = displayState[5];
 
-    epochValue->SetValue(epochStr.c_str());
+   epochValue->SetValue(epochStr.c_str());
      
-    wxString el1;
-    el1.Printf("%.9f", element1);
-    textCtrl1->SetValue(el1);
+   wxString el1;
+   el1.Printf("%.9f", element1);
+   textCtrl1->SetValue(el1);
     
-    wxString el2;
-    el2.Printf("%.9f", element2);
-    textCtrl2->SetValue(el2);
+   wxString el2;
+   el2.Printf("%.9f", element2);
+   textCtrl2->SetValue(el2);
 
-    wxString el3;
-    el3.Printf("%.9f", element3);
-    textCtrl3->SetValue(el3);
+   wxString el3;
+   el3.Printf("%.9f", element3);
+   textCtrl3->SetValue(el3);
 
-    wxString el4;
-    el4.Printf("%.9f", element4);
-    textCtrl4->SetValue(el4);
+   wxString el4;
+   el4.Printf("%.9f", element4);
+   textCtrl4->SetValue(el4);
 
-    wxString el5;
-    el5.Printf("%.9f", element5);
-    textCtrl5->SetValue(el5);
+   wxString el5;
+   el5.Printf("%.9f", element5);
+   textCtrl5->SetValue(el5);
 
-    wxString el6;
-    el6.Printf("%.9f", element6);
-    textCtrl6->SetValue(el6);    
+   wxString el6;
+   el6.Printf("%.9f", element6);
+   textCtrl6->SetValue(el6);    
 }
 
 //------------------------------------------------------------------------------
@@ -415,9 +483,13 @@ void OrbitPanel::LoadData()
  * @note Activates the Apply button when text is changed
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::OnComboChange()
+void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-    theApplyButton->Enable();
+   if (event.GetEventObject() == mCoordSysComboBox)
+   {
+      mIsCoordSysChanged = true;
+      theApplyButton->Enable();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -441,99 +513,132 @@ void OrbitPanel::OnTextChange()
 //------------------------------------------------------------------------------
 void OrbitPanel::OnStateChange()
 {
-    wxString el1 = textCtrl1->GetValue();
-    wxString el2 = textCtrl2->GetValue();
-    wxString el3 = textCtrl3->GetValue();
-    wxString el4 = textCtrl4->GetValue();
-    wxString el5 = textCtrl5->GetValue();
-    wxString el6 = textCtrl6->GetValue(); 
+   wxString el1 = textCtrl1->GetValue();
+   wxString el2 = textCtrl2->GetValue();
+   wxString el3 = textCtrl3->GetValue();
+   wxString el4 = textCtrl4->GetValue();
+   wxString el5 = textCtrl5->GetValue();
+   wxString el6 = textCtrl6->GetValue(); 
 
-    Real displayState[6];
-    displayState[0] = atof(el1);
-    displayState[1] = atof(el2);
-    displayState[2] = atof(el3);
-    displayState[3] = atof(el4);
-    displayState[4] = atof(el5);
-    displayState[5] = atof(el6);
+   Real displayState[6];
+   displayState[0] = atof(el1);
+   displayState[1] = atof(el2);
+   displayState[2] = atof(el3);
+   displayState[3] = atof(el4);
+   displayState[4] = atof(el5);
+   displayState[5] = atof(el6);
     
-    theSpacecraft->SetDisplayState(displayState);
+   theSpacecraft->SetDisplayState(displayState);
     
-    wxString refFrame = stateComboBox->GetStringSelection();
+   wxString refFrame = stateComboBox->GetStringSelection();
 //    theSpacecraft->ConvertRepresentation(refFrame.c_str());
-    theSpacecraft->SetDisplayCoordType(refFrame.c_str());
+   theSpacecraft->SetDisplayCoordType(refFrame.c_str());
 
-    wxString description;
+   wxString description;
     
-    int stateId = theSpacecraft->GetParameterID("Element1");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description1->SetLabel(description);
+   int stateId = theSpacecraft->GetParameterID("Element1");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description1->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element2");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description2->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element2");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description2->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element3");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description3->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element3");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description3->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element4");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description4->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element4");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description4->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element5");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description5->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element5");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description5->SetLabel(description);
 
-    stateId = theSpacecraft->GetParameterID("Element6");
-    description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
-    description6->SetLabel(description);
+   stateId = theSpacecraft->GetParameterID("Element6");
+   description.Printf("%s", theSpacecraft->GetParameterText(stateId).c_str());
+   description6->SetLabel(description);
+   
+   #if DEBUG_ORBIT_PANEL
+   MessageInterface::ShowMessage("OrbitPanel:OnStateChange() description =%s\n",
+      description.c_str());
+   #endif
 
-     Real *returnState = theSpacecraft->GetDisplayState();
+   Real *returnState = theSpacecraft->GetDisplayState();
 
-     wxString stateValue;
+   wxString stateValue;
 
-     stateValue.Printf("%.9f", returnState[0]);
+   stateValue.Printf("%.9f", returnState[0]);
 
-     textCtrl1->SetValue(stateValue);
+   textCtrl1->SetValue(stateValue);
 
-     stateValue.Printf("%.9f", returnState[1]);
-     textCtrl2->SetValue(stateValue);
+   stateValue.Printf("%.9f", returnState[1]);
+   textCtrl2->SetValue(stateValue);
 
-     stateValue.Printf("%.9f", returnState[2]);
-     textCtrl3->SetValue(stateValue);
+   stateValue.Printf("%.9f", returnState[2]);
+   textCtrl3->SetValue(stateValue);
 
-     stateValue.Printf("%.9f", returnState[3]);
-     textCtrl4->SetValue(stateValue);
+   stateValue.Printf("%.9f", returnState[3]);
+   textCtrl4->SetValue(stateValue);
 
-     stateValue.Printf("%.9f", returnState[4]);
-     textCtrl5->SetValue(stateValue);
+   stateValue.Printf("%.9f", returnState[4]);
+   textCtrl5->SetValue(stateValue);
 
-     stateValue.Printf("%.9f", returnState[5]);
-     textCtrl6->SetValue(stateValue);
+   stateValue.Printf("%.9f", returnState[5]);
+   textCtrl6->SetValue(stateValue);
 
 
-     // hard code label change for now, should actually
-     // come from the spacecraft object
-     if (refFrame == "Cartesian")
-     {
-       label1->SetLabel("Km");
-       label2->SetLabel("Km");
-       label3->SetLabel("Km");
-       label4->SetLabel("Km/s");
-       label5->SetLabel("Km/s");
-       label6->SetLabel("Km/s");
-     }
-     else if (refFrame == "Keplerian")
-     {
-       label1->SetLabel("Km");
-       label2->SetLabel("");
-       label3->SetLabel("deg");
-       label4->SetLabel("deg");
-       label5->SetLabel("deg");
-       label6->SetLabel("deg");
-     }
+   // hard code label change for now, should actually
+   // come from the spacecraft object
+   if (refFrame == "Cartesian")
+   {
+      label1->SetLabel("Km");
+      label2->SetLabel("Km");
+      label3->SetLabel("Km");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("Km/s");
+      label6->SetLabel("Km/s");
+      
+      anomalyLabel->Show(false);
+      anomalyCB->Show(false);
+   }
+   else if ((refFrame == "Keplerian") || (refFrame == "ModifiedKeplerian"))
+   {
+      label1->SetLabel("Km");
+      if (refFrame == "Keplerian")
+         label2->SetLabel("");
+      else
+         label2->SetLabel("Km");
+      label3->SetLabel("deg");
+      label4->SetLabel("deg");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+      
+      anomalyLabel->Show(true);
+      anomalyCB->Show(true);
+      
+      if (strcmp(description.c_str(), "MA") == 0) 
+         anomalyCB->SetSelection(0);
+      else if (strcmp(description.c_str(), "TA") == 0) 
+         anomalyCB->SetSelection(1);
+      else if (strcmp(description.c_str(), "EA") == 0)
+         anomalyCB->SetSelection(2);
+   }
+   else if ((refFrame == "SphericalAZFPA") || (refFrame == "SphericalRADEC"))
+   {
+      label1->SetLabel("Km");
+      label2->SetLabel("deg");
+      label3->SetLabel("deg");
+      label4->SetLabel("Km/s");
+      label5->SetLabel("deg");
+      label6->SetLabel("deg");
+      
+      anomalyLabel->Show(false);
+      anomalyCB->Show(false);
+   }
 
-    theApplyButton->Enable();
+   theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -570,6 +675,48 @@ void OrbitPanel::OnEpochChange()
    epochValue->SetValue(epochStr.c_str());
    theSpacecraft->SetDisplayEpoch(epochStr.c_str());
 }
+
+//------------------------------------------------------------------------------
+// void OnAnomalyChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when anomaly combobox is changed
+ */
+//------------------------------------------------------------------------------
+void OrbitPanel::OnAnomalyChange()
+{
+   std::string anomalyType;
+
+   wxString description;
+   
+   int anomalySelected = anomalyCB->GetSelection();
+
+   if (anomalySelected == 0) 
+      anomalyType = "MA";
+   else if (anomalySelected == 1) 
+      anomalyType = "TA";
+   else if (anomalySelected == 2)
+      anomalyType = "EA";
+         
+   int anomalyID = theSpacecraft->GetParameterID("AnomalyType");
+
+   #if DEBUG_ORBIT_PANEL
+   MessageInterface::ShowMessage("OrbitPanel:OnAnomalyChange() anomaly selected = %d\n",
+      anomalySelected);
+   MessageInterface::ShowMessage("OrbitPanel:OnAnomalyChange() anomaly ID =%d\n",
+      anomalyID);
+   MessageInterface::ShowMessage("OrbitPanel:OnAnomalyChange() anomaly type = %s\n",
+      anomalyType.c_str());
+   #endif
+
+   description.Printf("%s", anomalyType.c_str());
+   description6->SetLabel(description);
+   
+   theSpacecraft->SetStringParameter(anomalyID, anomalyType);
+
+   theApplyButton->Enable();
+}
+
 
 void OrbitPanel::SaveData()
 {
