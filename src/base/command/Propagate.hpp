@@ -47,8 +47,9 @@ public:
                                                       Gmat::UNKNOWN_OBJECT);
     virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
     virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
-                                      const std::string objName = "");
-
+                                  const std::string objName = "");
+    virtual void        ClearObject(const Gmat::ObjectType type); //loj: 3/31/04 added
+    
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
@@ -121,7 +122,7 @@ protected:
     
     /// Temporary parameter used to stop on time
     Real                    secondsToProp;
-	/// ID for the temporary parameter
+    /// ID for the temporary parameter
     const Integer           secondsToPropID;
 
 public:    

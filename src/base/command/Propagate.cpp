@@ -152,6 +152,23 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
     return GmatCommand::SetObject(obj, type);
 }
 
+//loj: 3/31/04 added
+void Propagate::ClearObject(const Gmat::ObjectType type)
+{
+    switch (type) {
+        case Gmat::STOP_CONDITION:
+            stopWhen.clear();
+            break;
+            
+        // Keep the compiler from whining
+        default:
+            break;
+    }
+
+    // Not handled here -- invoke the next higher SetObject call
+    //GmatCommand::ClearObject(type); loj: 3/31/04 Do we need this?
+}
+
 
 GmatBase* Propagate::GetObject(const Gmat::ObjectType type, 
                                const std::string objName)
@@ -407,18 +424,19 @@ void Propagate::InterpretAction(void)
     //--------------------------------------
     loc = end + 1;
     end = generatingString.find(".", loc);
+
     if (end == (Integer)std::string::npos)
         throw CommandException("Propagate does not identify stopping condition: looking for .");
     
     std::string paramObj = generatingString.substr(loc, end-loc);
-    MessageInterface::ShowMessage("Propagate::InterpretAction() component=%s, loc=%d, end=%d\n",
-                                  paramObj.c_str(), loc, end);
+    //MessageInterface::ShowMessage("Propagate::InterpretAction() component=%s, loc=%d, end=%d\n",
+    //                              paramObj.c_str(), loc, end);
     
     loc = end + 1;
     end = generatingString.find("=", loc);
     if (end == (Integer)std::string::npos)
     {
-        MessageInterface::ShowMessage("Propagate::InterpretAction() ParamType is Apoapsis or Periapsis\n");
+        //MessageInterface::ShowMessage("Propagate::InterpretAction() ParamType is Apoapsis or Periapsis\n");
         
         end = generatingString.find(",", loc);
         if (end != (Integer)std::string::npos)
@@ -430,8 +448,8 @@ void Propagate::InterpretAction(void)
     }
     
     std::string paramType = generatingString.substr(loc, end-loc);
-    MessageInterface::ShowMessage("Propagate::InterpretAction() paramType=%s, loc=%d, end=%d\n",
-                                  paramType.c_str(), loc, end);
+    //MessageInterface::ShowMessage("Propagate::InterpretAction() paramType=%s, loc=%d, end=%d\n",
+    //                              paramType.c_str(), loc, end);
     
     // remove blank spaces
     unsigned int start = 0;
@@ -444,8 +462,8 @@ void Propagate::InterpretAction(void)
         }
     }
     
-    MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
-                                  paramType.c_str());
+    //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
+    //                              paramType.c_str());
     
     Moderator *theModerator = Moderator::Instance();
     
@@ -481,8 +499,8 @@ void Propagate::InterpretAction(void)
     
     loc = end + 1;
     end = generatingString.find(")", loc);
-    MessageInterface::ShowMessage("Propagate::InterpretAction() looking for ) loc=%d, end=%d\n",
-                                  loc, end);
+    //MessageInterface::ShowMessage("Propagate::InterpretAction() looking for ) loc=%d, end=%d\n",
+    //                              loc, end);
     
     if (end == (Integer)std::string::npos)
         throw CommandException("Propagate does not identify stopping condition: looking for )");
@@ -505,6 +523,7 @@ bool Propagate::Initialize(void)
         
     // Toss the spacecraft into the force model
     ForceModel *fm = prop->GetForceModel();
+    fm->ClearSpacecraft(); //loj: 4/1/04 added
     StringArray::iterator scName;
     for (scName = satName.begin(); scName != satName.end(); ++scName) {
         sats.push_back((Spacecraft*)(*objectMap)[*scName]);
@@ -578,7 +597,8 @@ bool Propagate::Execute(void)
         }
         else
         {
-            // Can we step backward if elapsedTime > stopTime?
+            fm->UpdateFromSpacecraft();
+            fm->SetTime(elapsedTime);
         }
     }
 
@@ -620,11 +640,8 @@ bool Propagate::Execute(void)
 //          pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
 //          memcpy(&pubdata[1], state, dim*sizeof(Real));
 //          publisher->Publish(pubdata, dim+1);
-//      }
-    
-//      MessageInterface::ShowMessage("Propagate::Execute() secondsToProp=%f, elapsedTime=%f\n",
-//                                    secondsToProp, elapsedTime);
-    
+//      }    
+//    
 //      if (secondsToProp - elapsedTime > 0.0) {
 //          if (!p->Step(secondsToProp - elapsedTime))
 //              throw CommandException("Propagator Failed to Step fixed interval");
