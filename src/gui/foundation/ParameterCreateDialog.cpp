@@ -351,7 +351,7 @@ void ParameterCreateDialog::OnOK()
    if (mCreateVariableButton->IsEnabled())
       mCreateVariable = true;
    
-   if (mCreateVariableButton->IsEnabled())
+   if (mCreateStringButton->IsEnabled())
       mCreateString = true;
    
    if (mCreateArrayButton->IsEnabled())
@@ -373,7 +373,6 @@ void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
    mCreateVariableButton->Disable();
    mCreateStringButton->Disable();
    mCreateArrayButton->Disable();
-   theOkButton->Disable();
 
    if (mVarNameTextCtrl->GetValue().Trim() != "" &&
        mVarNameTextCtrl->GetValue().Trim() != " " &&
@@ -588,9 +587,10 @@ wxString ParameterCreateDialog::GetParamName()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::CreateVariable()
 {
-   std::string varName = std::string(mVarNameTextCtrl->GetValue().c_str());
+   wxString wxvarName = mVarNameTextCtrl->GetValue().Trim();
+   std::string varName = std::string(wxvarName.c_str());
    std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
-
+   
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage
       ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
@@ -671,9 +671,10 @@ void ParameterCreateDialog::CreateVariable()
                break;
             }
          }
-         
+
+         //isVarCreated = true;
+         // once variable is created cannot revert (delete) for now
          theOkButton->Enable();
-         //loj: once variable is created cannot revert (delete) for now
          theCancelButton->Disable();
       }
       else
@@ -695,9 +696,10 @@ void ParameterCreateDialog::CreateVariable()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::CreateString()
 {
-   std::string strName = std::string(mStringNameTextCtrl->GetValue().c_str());
+   wxString wxstrName = mStringNameTextCtrl->GetValue().Trim();
+   std::string strName = std::string(wxstrName);
    std::string strValue = std::string(mStringValueTextCtrl->GetValue().c_str());
-
+   
    // if new user string to create
    if (theGuiInterpreter->GetParameter(strName) == NULL)
    {
@@ -720,16 +722,23 @@ void ParameterCreateDialog::CreateString()
             break;
          }
       }
-      
+
+      // once string is created cannot revert.
       theOkButton->Enable();
-      //loj: once string is created cannot revert (delete) for now
       theCancelButton->Disable();
       
-      mCreateString = false;
-      mCreateStringButton->Disable();
-      mStringNameTextCtrl->SetValue("");
-      mStringValueTextCtrl->SetValue("");
    }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "ParameterCreateDialog::CreateVariable()\nThe string: %s"
+          " cannot be created. It already exists.", strName.c_str());
+   }
+
+   mCreateString = false;
+   mCreateStringButton->Disable();
+   mStringNameTextCtrl->SetValue("");
+   mStringValueTextCtrl->SetValue("");
 }
 
 //------------------------------------------------------------------------------
@@ -738,7 +747,7 @@ void ParameterCreateDialog::CreateString()
 void ParameterCreateDialog::CreateArray()
 {
    long row, col;
-
+   
    if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
        !(mArrColTextCtrl->GetValue().ToLong(&col)))
    {
@@ -747,7 +756,8 @@ void ParameterCreateDialog::CreateArray()
    }
    else
    {
-      std::string arrName = std::string(mArrNameTextCtrl->GetValue().c_str());
+      wxString wxarrName = mArrNameTextCtrl->GetValue().Trim();
+      std::string arrName = std::string(wxarrName.c_str());
       
       // if new user array to create
       if (theGuiInterpreter->GetParameter(arrName) == NULL)
@@ -772,9 +782,9 @@ void ParameterCreateDialog::CreateArray()
                break;
             }
          }
-         
+
+         // once array is created cannot revert (delete) for now
          theOkButton->Enable();
-         //loj: once array is created cannot revert (delete) for now
          theCancelButton->Disable();
       }
       else
