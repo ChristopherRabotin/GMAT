@@ -13,7 +13,7 @@
 // Created: 2003/09/18
 //
 /**
- * Declares operations for parameter database.
+ * Declares parameter database class.
  */
 //------------------------------------------------------------------------------
 #ifndef ParameterDatabase_hpp
@@ -22,11 +22,11 @@
 #include "gmatdefs.hpp"
 #include "paramdefs.hpp"
 #include "Parameter.hpp"
-#include "Rvector3.hpp"
-#include "Rmatrix33.hpp"
-#include "Cartesian.hpp"
-#include "Keplerian.hpp"
-#include "A1Mjd.hpp"
+//  #include "Rvector3.hpp"
+//  #include "Rmatrix33.hpp"
+//  #include "Cartesian.hpp"
+//  #include "Keplerian.hpp"
+//  #include "A1Mjd.hpp"
 #include "Parameter.hpp"
 //loj:#include "UtcDate.hpp"
 

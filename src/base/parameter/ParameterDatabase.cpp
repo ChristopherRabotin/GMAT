@@ -13,7 +13,7 @@
 // Created: 2003/09/18
 //
 /**
- * Defines operations for parameter database.
+ * Implements parameter database class.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -21,13 +21,13 @@
 #include "Parameter.hpp"
 #include "ParameterDatabase.hpp"
 #include "ParameterDatabaseException.hpp"
-#include "Rvector3.hpp"
-#include "Rmatrix33.hpp"
-#include "Cartesian.hpp"
-#include "Keplerian.hpp"
-#include "A1Mjd.hpp"
-#include "ElapsedTimeParam.hpp"
-//loj:#include "UtcDate.hpp"
+//  #include "Rvector3.hpp"
+//  #include "Rmatrix33.hpp"
+//  #include "Cartesian.hpp"
+//  #include "Keplerian.hpp"
+//  #include "A1Mjd.hpp"
+//  #include "ElapsedTimeParam.hpp"
+//  //loj:#include "UtcDate.hpp"
 
 //---------------------------------
 // public
@@ -121,7 +121,7 @@ StringArray ParameterDatabase::GetDescsOfParameters() const
 
    for (pos = mStringParamPtrMap->begin(); pos != mStringParamPtrMap->end(); ++pos)
    {
-      paramDescs.push_back(pos->second->GetParameterDesc());
+      paramDescs.push_back(pos->second->GetDesc());
    }
    
    return paramDescs;
@@ -183,7 +183,7 @@ std::string ParameterDatabase::GetDesc(const std::string &name) const
       throw ParameterDatabaseException("Parameter name " + name +
                                        " not found in the database");
    else
-      return pos->second->GetParameterDesc();
+      return pos->second->GetDesc();
    
 }
 

@@ -10,10 +10,10 @@
 // number S-67573-G
 //
 // Author: Linda Jun
-// Created: 2003/09/16 Linda Jun
+// Created: 2003/09/16
 //
 /**
- * Defines base class of parameters.
+ * Implements base class of parameters.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -36,36 +36,44 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 
 //------------------------------------------------------------------------------
 // Parameter(const std::string &name, const std::string &typeStr,
-//           ParameterKey key, const std::string &desc)
+//           ParameterKey key, GmatBase *refObj, const std::string &desc)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> parameter name
+ * @param <typeStr>  parameter type string
  * @param <key>  parameter key (SYSTEM_PARAM, USER_PARAM, etc)
+ * @param <refObj>  reference object pointer
  * @param <desc> parameter description
+ * @param <unit> parameter unit
  *
- * @exception <ParameterException> thrown if parameter name is blank or has
- *    blank spaces
+ * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
-                     ParameterKey key,const std::string &desc)
-   : GmatBase(Gmat::PARAMETER, typeStr, name)
+                     ParameterKey key, GmatBase *refObj,
+                     const std::string &desc, const std::string &unit)
+    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
-   mKey = key;
+    mKey = key;
 
-   //if name is blank or has blank spaces
-   if ((name == "") || (name.find(' ') < name.npos))
-      throw ParameterException
-         ("Parameter: parameter name is blank or has blank space:" + name);
-   else
-      instanceName = name;
+    //loj: should "" or " " be allowed?
+    if ((name != "" && name != " "))
+    {
+        //if name has blank spaces
+        if (name.find(' ') < name.npos)
+            throw ParameterException
+                ("Parameter: parameter name cannot have blank space: " + name);
+    }
+   
+    if (desc == "")
+        mDesc = std::string(name);
+    else
+        mDesc = desc;
 
-   if (desc == "")
-      mDesc = std::string(name);
-   else
-      mDesc = desc;
+    mUnit = unit;
+    mObject = refObj;
 }
 
 //------------------------------------------------------------------------------
@@ -78,10 +86,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const Parameter &param)
-   : GmatBase(param)
+    : GmatBase(param)
 {
-   mKey = param.mKey;
-   mDesc = param.mDesc;
+    mKey = param.mKey;
+    mDesc = param.mDesc;
+    mUnit = param.mUnit;
+    mObject = param.mObject;
 }
 
 //------------------------------------------------------------------------------
@@ -97,14 +107,16 @@ Parameter::Parameter(const Parameter &param)
 //------------------------------------------------------------------------------
 Parameter& Parameter::operator= (const Parameter& right)
 {
-   if (this != &right)
-   {
-      GmatBase::operator=(right);
-      mKey = right.mKey;
-      mDesc = right.mDesc;
-   }
+    if (this != &right)
+    {
+        GmatBase::operator=(right);
+        mKey = right.mKey;
+        mDesc = right.mDesc;
+        mUnit = right.mUnit;
+        mObject = right.mObject;
+    }
 
-   return *this;
+    return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -119,7 +131,7 @@ Parameter::~Parameter()
 }
 
 //------------------------------------------------------------------------------
-// ParameterKey GetParameterKey() const
+// ParameterKey GetKey() const
 //------------------------------------------------------------------------------
 /**
  * Retrieves parameter key.
@@ -127,13 +139,13 @@ Parameter::~Parameter()
  * @return enumeration value of parameter key.
  */
 //------------------------------------------------------------------------------
-Parameter::ParameterKey Parameter::GetParameterKey() const
+Parameter::ParameterKey Parameter::GetKey() const
 {
-   return mKey;
+    return mKey;
 }
 
 //------------------------------------------------------------------------------
-// std::string GetParameterDesc() const
+// std::string GetDesc() const
 //------------------------------------------------------------------------------
 /**
  * Retrieves parameter description.
@@ -141,9 +153,37 @@ Parameter::ParameterKey Parameter::GetParameterKey() const
  * @return parameter description.
  */
 //------------------------------------------------------------------------------
-std::string Parameter::GetParameterDesc() const
+std::string Parameter::GetDesc() const
 {
-   return mDesc;
+    return mDesc;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetUnit() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves parameter unit.
+ *
+ * @return parameter description.
+ */
+//------------------------------------------------------------------------------
+std::string Parameter::GetUnit() const
+{
+    return mUnit;
+}
+
+//------------------------------------------------------------------------------
+// void SetKey(const ParameterKey &key)
+//------------------------------------------------------------------------------
+/**
+ * Sets parameter key.
+ *
+ * @param <key> key of parameter.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetKey(const ParameterKey &key)
+{
+    mKey = key;
 }
 
 //------------------------------------------------------------------------------
@@ -157,7 +197,21 @@ std::string Parameter::GetParameterDesc() const
 //------------------------------------------------------------------------------
 void Parameter::SetDesc(const std::string &desc)
 {
-   mDesc = desc;
+    mDesc = desc;
+}
+
+//------------------------------------------------------------------------------
+// void SetUnit(cosnt std::string &unit)
+//------------------------------------------------------------------------------
+/**
+ * Sets parameter unit.
+ *
+ * @param <unit> unit of parameter.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetUnit(const std::string &unit)
+{
+    mUnit = unit;
 }
 
 //------------------------------------------------------------------------------
@@ -169,13 +223,13 @@ void Parameter::SetDesc(const std::string &desc)
 //------------------------------------------------------------------------------
 bool Parameter::operator==(const Parameter &right) const
 {
-   if (typeName != right.typeName)
-      return false;
+    if (typeName != right.typeName)
+        return false;
 
-   if (instanceName.compare(right.instanceName) != 0)
-      return false;
+    if (instanceName.compare(right.instanceName) != 0)
+        return false;
 
-   return true;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -187,15 +241,58 @@ bool Parameter::operator==(const Parameter &right) const
 //------------------------------------------------------------------------------
 bool Parameter::operator!=(const Parameter &right) const
 {
-   return !(*this == right);
+    return !(*this == right);
 }
 
-//loj: added since review ready
+//------------------------------------------------------------------------------
+// void SetObject(GmatBase *refObj)
+//------------------------------------------------------------------------------
+/**
+ * Sets object which is used in evaluation.
+ */
+//------------------------------------------------------------------------------
+void Parameter::SetObject(GmatBase *refObj)
+{
+    if (mObject == NULL)
+    {
+        mObject = refObj;
+        CheckObjectType();
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetObject()
+//------------------------------------------------------------------------------
+/**
+ * Gets object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Parameter::GetObject()
+{
+    return mObject;
+}
+
 
 //------------------------------------------------------------------------------
 // virtual const std::string* GetParameterList() const
 //------------------------------------------------------------------------------
 const std::string* Parameter::GetParameterList() const
 {
-   return NULL;
+    return NULL;
+}
+
+//---------------------------------
+// protected methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void CheckObjectType()
+//------------------------------------------------------------------------------
+/**
+ * Checks reference object type.
+ */
+//------------------------------------------------------------------------------
+void Parameter::CheckObjectType()
+{
 }
