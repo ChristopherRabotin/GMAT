@@ -27,6 +27,8 @@
 #include "SphericalParameters.hpp"
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
+#include "Variable.hpp"
+#include "Array.hpp"
 
 //---------------------------------
 //  public methods
@@ -45,6 +47,12 @@
 Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
                                              const std::string &withName)
 {
+   // User defined parameters (loj: 9/22/04 added)
+   if (ofType == "Variable")
+      return new Variable(withName);
+   if (ofType == "Array")
+      return new Array(withName);
+   
    // Time parameters
    if (ofType == "ElapsedDays")
       return new ElapsedDays(withName);
@@ -142,6 +150,10 @@ ParameterFactory::ParameterFactory()
 {
    if (creatables.empty())
    {
+      // User defined parameters (loj: 9/22/04 added)
+      creatables.push_back("Variable");
+      creatables.push_back("Array");
+      
       // Time parameters
       creatables.push_back("ElapsedDays");
       creatables.push_back("ElapsedSecs");
