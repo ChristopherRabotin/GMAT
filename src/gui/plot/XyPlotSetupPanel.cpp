@@ -160,7 +160,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
       }
       else
       {
-         wxLogMessage("Selected X parameter:%s is not plottable. Please select "
+         wxLogMessage("Selected Y parameter:%s is not plottable. Please select "
                       "another parameter\n", newParam.c_str());
       }
    }
