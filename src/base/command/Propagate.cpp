@@ -24,7 +24,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PROPAGATE_OBJ 0
-//#define DEBUG_PROPAGATE_EXE 0
+//#define DEBUG_PROPAGATE_EXE 1
 
 
 std::string Propagate::PropModeList[PROP_MODE_COUNT] =
@@ -633,116 +633,13 @@ bool Propagate::InterpretAction(void)
    // Now fill in the list of propagators
    AssemblePropagators(loc, generatingString);
    
-//   end = generatingString.find("(", loc);
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Propagate string does not identify propagator\n");
-//
-//   std::string component = generatingString.substr(loc, end-loc);
-//   SetObject(component, Gmat::PROP_SETUP);
-//
-//   loc = end + 1;
-//   end = generatingString.find(",", loc);
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Propagate string does not identify spacecraft\n");
-//    
-//   component = generatingString.substr(loc, end-loc);
-//   SetObject(component, Gmat::SPACECRAFT);
-//
-//   loc = end + 1;
-//   end = generatingString.find(",", loc);
-//   if (end != (Integer)std::string::npos)
-//      throw CommandException("Propagate does not yet support multiple spacecraft\n");
-//
-//    //loj: 3/24/04 for b3 "," also valid for multiple spacecraft
-//   end = generatingString.find("{", loc);
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Propagate does not identify stopping condition: looking for {\n");
-//
-//   loc = end + 1;
-//   end = generatingString.find(".", loc);
-//
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Propagate does not identify stopping condition: looking for .\n");
-//    
-//   std::string paramObj = generatingString.substr(loc, end-loc);
-//    
-//   loc = end + 1;
-//   end = generatingString.find("=", loc);
-//   if (end == (Integer)std::string::npos)
-//   {
-//      end = generatingString.find(",", loc);
-//      if (end != (Integer)std::string::npos)
-//         throw CommandException("Propagate does not yet support multiple stopping condition\n");
-//        
-//      end = generatingString.find("}", loc);
-//      if (end == (Integer)std::string::npos)
-//         throw CommandException("Propagate does not identify stopping condition: looking for }\n");
-//   }
-//    
-//   std::string paramType = generatingString.substr(loc, end-loc);
-//
-//   unsigned int start = 0;
-//   for (unsigned int i=start; i<paramType.size(); i++)
-//   {
-//      if (paramType[i] == ' ')
-//      {
-//         paramType.erase(i, 1);
-//         start = i;
-//      }
-//   }
-//    
-//   //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
-//   //                              paramType.c_str());
-//    
-//   Moderator *theModerator = Moderator::Instance();
-//    
-//    // create parameter
-//   std::string paramName = paramObj + "." + paramType;
-//   //loj: if we want to see parameter via the GUI, use named parameter
-//   // This will be deleted when system shuts down
-//   Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
-//   //stopParam->SetStringParameter("Object", paramObj);
-//   stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
-//   
-//   StopCondition *stopCond =
-//      theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
-//    
-//   stopCond->SetStringParameter("StopVar", paramName);
-//   SetObject(stopCond, Gmat::STOP_CONDITION);
-//
-//   if (paramType != "Apoapsis" && paramType != "Periapsis")
-//   {
-//      loc = end + 1;
-//      Real propStopVal = atof(&str[loc]);
-//      stopCond->SetRealParameter("Goal", propStopVal);
-//      //MessageInterface::ShowMessage("Propagate::InterpretAction() propStopVal = %f\n",
-//      //                              propStopVal);
-//
-//      loc = end + 1;
-//      end = generatingString.find(",", loc);
-//      if (end != (Integer)std::string::npos)
-//         throw CommandException("Propagate does not yet support multiple stopping condition\n");
-//    
-//      loc = end + 1;
-//      end = generatingString.find("}", loc);
-//        
-//      if (end == (Integer)std::string::npos)
-//         throw CommandException("Propagate does not identify stopping condition: looking for }\n");
-//   }
-//    
-//   loc = end + 1;
-//   end = generatingString.find(")", loc);
-//   //MessageInterface::ShowMessage("Propagate::InterpretAction() looking for ) loc=%d, end=%d\n",
-//   //                              loc, end);
-//    
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Propagate does not identify stopping condition: looking for )\n");
-//    
-
    return true;
 }
 
 
+//------------------------------------------------------------------------------
+// void CheckForOptions(Integer &loc, std::string& generatingString)
+//------------------------------------------------------------------------------
 void Propagate::CheckForOptions(Integer &loc, std::string& generatingString)
 {
    std::string modeStr;
@@ -772,111 +669,158 @@ void Propagate::CheckForOptions(Integer &loc, std::string& generatingString)
 }
 
 
+//------------------------------------------------------------------------------
+// void AssemblePropagators(Integer &loc, std::string& generatingString)
+//------------------------------------------------------------------------------
 void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 {
-   const char *str = generatingString.c_str(); 
-   Integer end = generatingString.find("(", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Propagate string does not identify propagator\n");
-
-   std::string component = generatingString.substr(loc, end-loc);
-   SetObject(component, Gmat::PROP_SETUP);
-
-   loc = end + 1;
-   end = generatingString.find(",", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Propagate string does not identify spacecraft\n");
-    
-   component = generatingString.substr(loc, end-loc);
-   SetObject(component, Gmat::SPACECRAFT);
-
-   loc = end + 1;
-   end = generatingString.find(",", loc);
-   if (end != (Integer)std::string::npos)
-      throw CommandException("Propagate does not yet support multiple spacecraft\n");
-
-    //loj: 3/24/04 for b3 "," also valid for multiple spacecraft
-   end = generatingString.find("{", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Propagate does not identify stopping condition: looking for {\n");
-
-   loc = end + 1;
-   end = generatingString.find(".", loc);
-
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Propagate does not identify stopping condition: looking for .\n");
-    
-   std::string paramObj = generatingString.substr(loc, end-loc);
-    
-   loc = end + 1;
-   end = generatingString.find("=", loc);
-   if (end == (Integer)std::string::npos)
-   {
-      end = generatingString.find(",", loc);
-      if (end != (Integer)std::string::npos)
-         throw CommandException("Propagate does not yet support multiple stopping condition\n");
-        
-      end = generatingString.find("}", loc);
-      if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not identify stopping condition: looking for }\n");
-   }
-    
-   std::string paramType = generatingString.substr(loc, end-loc);
-
-   unsigned int start = 0;
-   for (unsigned int i=start; i<paramType.size(); i++)
-   {
-      if (paramType[i] == ' ')
-      {
-         paramType.erase(i, 1);
-         start = i;
-      }
-   }
-    
-   //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
-   //                              paramType.c_str());
-    
-   Moderator *theModerator = Moderator::Instance();
-    
-    // create parameter
-   std::string paramName = paramObj + "." + paramType;
-   //loj: if we want to see parameter via the GUI, use named parameter
-   // This will be deleted when system shuts down
-   Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
-   //stopParam->SetStringParameter("Object", paramObj);
-   stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
+   // At this point we are set with loc pointing to the start of the list of
+   // PropSetups.  First we break that list into the individual pieces
+   StringArray pieces;
+   const char *str = generatingString.c_str();
    
-   StopCondition *stopCond =
-      theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
-    
-   stopCond->SetStringParameter("StopVar", paramName);
-   SetObject(stopCond, Gmat::STOP_CONDITION);
+   #ifdef DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage("Propagate::AssemblePropagators: "
+                                    "Breaking \"%s\" into pieces\n", 
+                                    generatingString.c_str()+loc);
+   #endif
 
-   if (paramType != "Apoapsis" && paramType != "Periapsis")
-   {
-      loc = end + 1;
-      Real propStopVal = atof(&str[loc]);
-      stopCond->SetRealParameter("Goal", propStopVal);
-      //MessageInterface::ShowMessage("Propagate::InterpretAction() propStopVal = %f\n",
-      //                              propStopVal);
+   bool scanning = true;
+   Integer currentLoc = loc, parmstart, end;
+   
+   parmstart = generatingString.find("(", currentLoc);   
+   while (scanning) {
+      end = generatingString.find(")", parmstart)+1;
 
-      loc = end + 1;
-      end = generatingString.find(",", loc);
-      if (end != (Integer)std::string::npos)
-         throw CommandException("Propagate does not yet support multiple stopping condition\n");
-    
-      loc = end + 1;
-      end = generatingString.find("}", loc);
-        
       if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+         throw CommandException("Propagate::AssemblePropagators: Propagate"
+                                " string does not identify propagator\n");
+      
+      pieces.push_back(generatingString.substr(currentLoc, end-currentLoc));
+      currentLoc = end+1;
+      // Skip trailing comma or white space
+      while ((str[currentLoc] == ',') || (str[currentLoc] == ' '))
+         ++currentLoc;
+      parmstart = generatingString.find("(", currentLoc);
+      if (parmstart == (Integer)std::string::npos)
+         scanning = false;
    }
-    
-   loc = end + 1;
-   end = generatingString.find(")", loc);
-    
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Propagate does not identify stopping condition: looking for )\n");
+      
+   #ifdef DEBUG_PROPAGATE_EXE
+      MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
+                                    " Propagators Identified:\n");
+      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) 
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+   #endif
+
+   for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i) {
+      loc = 0;
+      end = i->find("(", loc);
+      if (end == (Integer)std::string::npos)
+         throw CommandException("Propagate string does not identify propagator\n");
+   
+      std::string component = i->substr(loc, end-loc);
+      SetObject(component, Gmat::PROP_SETUP);
+   
+      loc = end + 1;
+      end = i->find(",", loc);
+      if (end == (Integer)std::string::npos)
+         throw CommandException("Propagate string does not identify spacecraft\n");
+       
+      component = i->substr(loc, end-loc);
+      SetObject(component, Gmat::SPACECRAFT);
+   
+      loc = end + 1;
+      end = i->find(",", loc);
+      if (end != (Integer)std::string::npos)
+         throw CommandException("Propagate does not yet support multiple spacecraft\n");
+   
+       //loj: 3/24/04 for b3 "," also valid for multiple spacecraft
+      end = i->find("{", loc);
+      if (end == (Integer)std::string::npos)
+         throw CommandException("Propagate does not identify stopping condition: looking for {\n");
+   
+      loc = end + 1;
+      end = i->find(".", loc);
+   
+      if (end == (Integer)std::string::npos)
+         throw CommandException("Propagate does not identify stopping condition: looking for .\n");
+       
+      std::string paramObj = i->substr(loc, end-loc);
+       
+      loc = end + 1;
+      end = i->find("=", loc);
+      if (end == (Integer)std::string::npos)
+      {
+         end = i->find(",", loc);
+         if (end != (Integer)std::string::npos)
+            throw CommandException("Propagate does not yet support multiple stopping condition\n");
+           
+         end = i->find("}", loc);
+         if (end == (Integer)std::string::npos)
+            throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+      }
+       
+      std::string paramType = i->substr(loc, end-loc);
+   
+      unsigned int start = 0;
+      for (unsigned int idx=start; idx<paramType.size(); ++idx)
+      {
+         if (paramType[idx] == ' ')
+         {
+            paramType.erase(idx, 1);
+            start = idx;
+         }
+      }
+       
+      //MessageInterface::ShowMessage("Propagate::InterpretAction() after remove blanks paramType=%s\n",
+      //                              paramType.c_str());
+       
+      Moderator *theModerator = Moderator::Instance();
+       
+       // create parameter
+      std::string paramName = paramObj + "." + paramType;
+      //loj: if we want to see parameter via the GUI, use named parameter
+      // This will be deleted when system shuts down
+      Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
+      //stopParam->SetStringParameter("Object", paramObj);
+      stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
+      
+      StopCondition *stopCond =
+         theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
+       
+      stopCond->SetStringParameter("StopVar", paramName);
+      SetObject(stopCond, Gmat::STOP_CONDITION);
+   
+      if (paramType != "Apoapsis" && paramType != "Periapsis")
+      {
+         loc = end + 1;
+         Real propStopVal = atof(&(i->c_str())[loc]);
+         stopCond->SetRealParameter("Goal", propStopVal);
+         
+         #ifdef DEBUG_PROPAGATE_EXE
+            MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
+                                          " propStopVal = %f\n", propStopVal);
+         #endif
+   
+         loc = end + 1;
+         end = i->find(",", loc);
+         if (end != (Integer)std::string::npos)
+            throw CommandException("Propagate does not yet support multiple stopping condition\n");
+       
+         loc = end + 1;
+         end = i->find("}", loc);
+           
+         if (end == (Integer)std::string::npos)
+            throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+      }
+       
+      loc = end + 1;
+      end = i->find(")", loc);
+       
+      if (end == (Integer)std::string::npos)
+         throw CommandException("Propagate does not identify stopping condition: looking for )\n");
+   }
 }
 
 
@@ -1243,7 +1187,7 @@ bool Propagate::Execute(void)
          
 #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch);
+            ("Propagate::Execute() intermediate; epoch = %f\n", currEpoch[0]);
 #endif
    
          // Periodically see if the user has stopped the run 
@@ -1266,7 +1210,7 @@ bool Propagate::Execute(void)
 #if DEBUG_PROPAGATE_EXE
    MessageInterface::ShowMessage
       ("Propagate::Execute() currEpoch = %f, stopEpoch = %f, elapsedTime = %f\n",
-       currEpoch, stopEpoch, elapsedTime);
+       currEpoch[0], stopEpoch, elapsedTime[0]);
 #endif
    
    
@@ -1277,7 +1221,7 @@ bool Propagate::Execute(void)
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
          ("Propagate::Execute() before Step(%f) epoch = %f\n",
-          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
+          secsToStep, (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
 #endif
 //      if (!p->Step(secsToStep))
       if (!TakeAStep(secsToStep))
@@ -1294,7 +1238,7 @@ bool Propagate::Execute(void)
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
          ("Propagate::Execute() after Step(%f) epoch = %f\n",
-          secsToStep, (baseEpoch + fm->GetTime() / 86400.0));
+          secsToStep, (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
 #endif
    
       publisher->FlushBuffers(); //loj: 6/22/04 added
@@ -1310,7 +1254,7 @@ bool Propagate::Execute(void)
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
          ("Propagate::Execute() complete; epoch = %f\n",
-          (baseEpoch + fm->GetTime() / 86400.0));
+          (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
 #endif
    }
    
