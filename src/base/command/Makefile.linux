@@ -16,6 +16,8 @@ OBJECTS = Command.o CommandException.o \
           Maneuver.o \
           BranchCommand.o \
           Target.o \
+          Vary.o \
+          Achieve.o \
           EndTarget.o 
           
           #\

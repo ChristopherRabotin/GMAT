@@ -26,6 +26,8 @@
 #include "Toggle.hpp"      // for Toggle command
 #include "Maneuver.hpp"    // for Maneuver command
 #include "Target.hpp"      // for Target command
+#include "Vary.hpp"        // for Vary command
+#include "Achieve.hpp"     // for Achieve command
 #include "EndTarget.hpp"   // for EndTarget command
 
 
@@ -56,6 +58,10 @@ Command* CommandFactory::CreateCommand(std::string ofType,
         return new Maneuver;
     else if (ofType == "Target")
         return new Target;
+    else if (ofType == "Vary")
+        return new Target;
+    else if (ofType == "Achieve")
+        return new Target;
     else if (ofType == "EndTarget")
         return new EndTarget;
    // add more here .......
@@ -85,6 +91,8 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Maneuver");
       // Commands related to the targeter
       creatables.push_back("Target");
+      creatables.push_back("Vary");
+      creatables.push_back("Achieve");
       creatables.push_back("EndTarget");
    }
 }
@@ -124,6 +132,8 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Maneuver");
       // Commands related to the targeter
       creatables.push_back("Target");
+      creatables.push_back("Vary");
+      creatables.push_back("Achieve");
       creatables.push_back("EndTarget");
    }
 }
