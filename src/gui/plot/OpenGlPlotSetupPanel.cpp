@@ -269,9 +269,9 @@ void OpenGlPlotSetupPanel::Create()
    wxStaticText *titleAvailable =
       new wxStaticText(this, -1, wxT("Available Spacecraft"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-    
+   wxArrayString empty;
    mScAvailableListBox =
-      theGuiManager->GetSpacecraftListBox(this, wxSize(150,200));
+      theGuiManager->GetSpacecraftListBox(this, wxSize(150,200), empty);
     
    mScAvailableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    mScAvailableBoxSizer->Add(mScAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
