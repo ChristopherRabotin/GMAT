@@ -22,7 +22,7 @@
 
 
 //------------------------------------------------------------------------------
-//  ManeuverFrame(void)
+//  ManeuverFrame()
 //------------------------------------------------------------------------------
 /**
  * Constructs the maneuver frame object (default constructor).
@@ -39,7 +39,7 @@ ManeuverFrame::ManeuverFrame() :
 
 
 //------------------------------------------------------------------------------
-//  ~ManeuverFrame(void)
+//  ~ManeuverFrame()
 //------------------------------------------------------------------------------
 /**
  * Destroys the maneuver frame object (destructor).
@@ -143,7 +143,8 @@ void ManeuverFrame::CalculateBasis(Real basis[3][3])
 //------------------------------------------------------------------------------
 std::string ManeuverFrame::GetFrameLabel(Integer id)
 {
-    switch (id) {
+    switch (id)
+    {
         case 1:
             return "X";
         case 2:

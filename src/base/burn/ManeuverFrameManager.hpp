@@ -30,26 +30,26 @@
 #include "ManeuverFrame.hpp"
 
 
-class ManeuverFrameManager
+class GMAT_API ManeuverFrameManager
 {
 public:
 	ManeuverFrameManager();
 	virtual ~ManeuverFrameManager();
 
-    StringArray&                GetSupportedFrames(void);
-    ManeuverFrame*              GetFrameInstance(std::string frameType);
+   StringArray&                GetSupportedFrames();
+   ManeuverFrame*              GetFrameInstance(std::string frameType);
 
 protected:
-    /// Table of available frames
-    StringArray                 frames;
-    /// Current frame used for the maneuver
-    ManeuverFrame               *currentFrame;
+   /// Table of available frames
+   StringArray                 frames;
+   /// Current frame used for the maneuver
+   ManeuverFrame               *currentFrame;
     
 private:
-    /// Private to prevent accidental use of copy constructor
-    ManeuverFrameManager(const ManeuverFrameManager&);
-    /// Private to prevent accidental use of assignment operator
-    ManeuverFrameManager&       operator=(const ManeuverFrameManager&);
+   /// Private to prevent accidental use of copy constructor
+   ManeuverFrameManager(const ManeuverFrameManager&);
+   /// Private to prevent accidental use of assignment operator
+   ManeuverFrameManager&       operator=(const ManeuverFrameManager&);
 };
 
-#endif // MANEUVERFRAMEMANAGER_H
+#endif // ManeuverFrameManager_hpp

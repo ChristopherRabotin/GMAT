@@ -32,7 +32,7 @@
 
 
 //------------------------------------------------------------------------------
-//  ManeuverFrameManager(void)
+//  ManeuverFrameManager()
 //------------------------------------------------------------------------------
 /**
  * Constructs the maneuver frame manager object (default constructor).
@@ -48,7 +48,7 @@ ManeuverFrameManager::ManeuverFrameManager() :
 
 
 //------------------------------------------------------------------------------
-//  ~ManeuverFrameManager(void)
+//  ~ManeuverFrameManager()
 //------------------------------------------------------------------------------
 /**
  * Destroys the maneuver frame manager object (destructor).
@@ -62,7 +62,7 @@ ManeuverFrameManager::~ManeuverFrameManager()
 
 
 //------------------------------------------------------------------------------
-//  StringArray& GetSupportedFrames(void)
+//  StringArray& GetSupportedFrames()
 //------------------------------------------------------------------------------
 /**
  * Obtains a list of the maneuver frames available for use.
@@ -70,7 +70,7 @@ ManeuverFrameManager::~ManeuverFrameManager()
  * @return A StringArray containing the list of frames that can be used.
  */
 //------------------------------------------------------------------------------
-StringArray& ManeuverFrameManager::GetSupportedFrames(void)
+StringArray& ManeuverFrameManager::GetSupportedFrames()
 {
     return frames;
 }
@@ -93,7 +93,8 @@ StringArray& ManeuverFrameManager::GetSupportedFrames(void)
 //------------------------------------------------------------------------------
 ManeuverFrame* ManeuverFrameManager::GetFrameInstance(std::string frameType)
 {
-    if (currentFrame) {
+    if (currentFrame)
+    {
         delete currentFrame;
         currentFrame = NULL;
     }

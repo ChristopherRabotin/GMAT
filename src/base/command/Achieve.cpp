@@ -423,7 +423,7 @@ bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-//  void InterpretAction(void)
+//  bool InterpretAction()
 //------------------------------------------------------------------------------
 /**
  * Parses the command string and builds the corresponding command structures.
@@ -438,7 +438,7 @@ bool Achieve::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
  * point to the correct object during initialization.
  */
 //------------------------------------------------------------------------------
-bool Achieve::InterpretAction(void)
+bool Achieve::InterpretAction()
 {
    /// @todo: Clean up this hack for the Achieve::InterpretAction method
    // Sample string:  "Achieve myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
@@ -678,10 +678,10 @@ bool Achieve::InterpretParameter(const std::string text,
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Performs the initialization needed to run the Achieveer.
+ * Performs the initialization needed to run the Achieve command.
  *
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
@@ -747,10 +747,10 @@ bool Achieve::Initialize()
 //  bool Execute(void)
 //------------------------------------------------------------------------------
 /**
- * Achieve the variables defined for this Achieveing loop.
+ * Achieve the variables defined for this targeting loop.
  *
- * This method (will eventually) runs the Achieveer state machine in order to
- * determine the variable values needed to achieve the user specified 
+ * This method (will eventually) feeds data to the targeter state machine in 
+ * order to determine the variable values needed to achieve the user specified
  * goals.
  *
  * @return true if the GmatCommand runs to completion, false if an error

@@ -37,9 +37,12 @@
  */
 //------------------------------------------------------------------------------
 EndFiniteBurn::EndFiniteBurn() :
-   GmatCommand    ("EndFiniteBurn"),
-   burnForce      (NULL),
-   transientForces(NULL)
+   GmatCommand       ("EndFiniteBurn"),
+   thrustName        (""),
+   burnForce         (NULL),
+   burnName          (""),
+   maneuver          (NULL),
+   transientForces   (NULL)
 {
    if (instanceName == "")
       instanceName = "EndFiniteBurn";
@@ -64,7 +67,7 @@ EndFiniteBurn::~EndFiniteBurn()
 /**
  * Copy constructor.
  * 
- * @param endman The command that gets copied.
+ * @param <endman> The command that gets copied.
  */
 //------------------------------------------------------------------------------
 EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
@@ -72,6 +75,7 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
    thrustName        (endman.thrustName),
    burnForce         (NULL),
    burnName          (endman.burnName),
+   maneuver          (NULL),
    transientForces   (NULL),
    satNames          (endman.satNames)
 {
@@ -84,7 +88,7 @@ EndFiniteBurn::EndFiniteBurn(const EndFiniteBurn& endman) :
 /**
  * Assignment operator.
  * 
- * @param endman The command that gets copied.
+ * @param <endman> The command that gets copied.
  * 
  * @return this instance, with internal data structures set to match the input
  *         instance.
@@ -99,8 +103,10 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
    thrustName = endman.thrustName;
    burnForce = NULL;
    burnName = endman.burnName;
+   maneuver = NULL;
    transientForces = NULL;
    satNames = endman.satNames;
+   
    return *this;
 }
 
@@ -111,14 +117,15 @@ EndFiniteBurn& EndFiniteBurn::operator=(const EndFiniteBurn& endman)
 /**
  * Accesses names for referenced objects.
  * 
- * @param type Type of object requested.
+ * @param <type> Type of object requested.
  * 
  * @return the referenced object's name.
  */
 //------------------------------------------------------------------------------
 std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::BURN:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
@@ -140,14 +147,16 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 /**
  * Accesses arrays of names for referenced objects.
  * 
- * @param type Type of object requested.
+ * @param <type> Type of object requested.
  * 
  * @return the StringArray containing the referenced object names.
  */
 //------------------------------------------------------------------------------
-const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
+const StringArray& EndFiniteBurn::GetRefObjectNameArray(
+                             const Gmat::ObjectType type)
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
@@ -169,8 +178,8 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType t
 /**
  * Sets names for referenced objects.
  * 
- * @param type Type of the object.
- * @param name Name of the object.
+ * @param <type> Type of the object.
+ * @param <name> Name of the object.
  * 
  * @return true if the name was set, false if not.
  */
@@ -178,7 +187,8 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType t
 bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
                                      const std::string &name)
 {
-   switch (type) {
+   switch (type)
+   {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
@@ -225,12 +235,12 @@ GmatBase* EndFiniteBurn::Clone() const
 
 
 //------------------------------------------------------------------------------
-//  void BeginFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 /**
  * Sets the array of transient forces for the command.
  *
- * @param tf The transient force vector.
+ * @param <tf> The transient force vector.
  */
 //------------------------------------------------------------------------------
 void EndFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
@@ -252,7 +262,8 @@ bool EndFiniteBurn::Initialize()
 {
    bool retval = GmatCommand::Initialize();
    
-   if (retval) {
+   if (retval)
+   {
       // Look up the maneuver object
       if (objectMap->find(burnName) == objectMap->end()) 
          throw CommandException("Unknown finite burn \"" + burnName + "\"");
@@ -263,7 +274,8 @@ bool EndFiniteBurn::Initialize()
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
-      for (scName = satNames.begin(); scName != satNames.end(); ++scName) {
+      for (scName = satNames.begin(); scName != satNames.end(); ++scName)
+      {
          if (objectMap->find(*scName) == objectMap->end()) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
          
@@ -276,7 +288,8 @@ bool EndFiniteBurn::Initialize()
       // Validate that the spacecraft have the thrusters they need
       thrusters.clear();
       for (std::vector<Spacecraft*>::iterator current = sats.begin(); 
-           current != sats.end(); ++current) {
+           current != sats.end(); ++current)
+      {
          StringArray thrusterNames = (*current)->GetStringArrayParameter(
                                      (*current)->GetParameterID("Thrusters"));
          StringArray engines = (maneuver)->GetStringArrayParameter(
@@ -284,7 +297,8 @@ bool EndFiniteBurn::Initialize()
          for (StringArray::iterator i = engines.begin(); 
               i != engines.end(); ++i) {
             if (find(thrusterNames.begin(), thrusterNames.end(), *i) == 
-                     thrusterNames.end()) {
+                     thrusterNames.end())
+            {
                thrusters.clear();
                throw CommandException("Spacecraft " + (*current)->GetName() +
                                       " does not have a thruster named \"" +
@@ -295,7 +309,8 @@ bool EndFiniteBurn::Initialize()
                (Thruster*)((*current)->GetRefObject(Gmat::THRUSTER, *i));
             if (th)
                thrusters.push_back(th);
-            else {
+            else
+            {
                thrusters.clear();
                throw CommandException("Thruster object \"" + (*i) +
                                       "\" was not set on Spacecraft \"" 
@@ -331,7 +346,8 @@ bool EndFiniteBurn::Execute()
 {
    // Turn off all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 
-        i != thrusters.end(); ++i) {
+        i != thrusters.end(); ++i)
+   {
       #ifdef DEBUG_END_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Deactivating engine %s\n", 
@@ -350,28 +366,32 @@ bool EndFiniteBurn::Execute()
    // Remove the thrust force from all force models
    ForceModel* fm;
    for (std::map<std::string, GmatBase *>::iterator n = objectMap->begin(); 
-        n != objectMap->end(); ++n) {
-      if (n->second->GetType() == Gmat::FORCE_MODEL) {
+        n != objectMap->end(); ++n)
+   {
+      if (n->second->GetType() == Gmat::FORCE_MODEL)
+      {
          fm = (ForceModel*)(n->second);
          #ifdef DEBUG_END_MANEUVER_EXE
             MessageInterface::ShowMessage
                ("Attempting to remove %s from %s\n", thrustName.c_str(), 
                 fm->GetName().c_str());
          #endif
-//         fm->DeleteForce(thrustName);
       }
    }
    
    // Tell active spacecraft that they are no longer firing
-   for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s) {
+   for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
+   {
       /// todo: Be sure that no other maneuver has the spacecraft maneuvering
       (*s)->IsManeuvering(false);
    }
    
    // Remove the force from the list of transient forces
    for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
-        j != transientForces->end(); ++j) {
-      if (((*j)->GetName()) == thrustName) {
+        j != transientForces->end(); ++j)
+   {
+      if (((*j)->GetName()) == thrustName)
+      {
          transientForces->erase(j);
          break;
       }

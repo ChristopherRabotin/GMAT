@@ -25,18 +25,18 @@
 #include "ManeuverFrame.hpp"
 
 
-class VnbManeuverFrame : public ManeuverFrame
+class GMAT_API VnbManeuverFrame : public ManeuverFrame
 {
 public:
-	VnbManeuverFrame();
-	virtual ~VnbManeuverFrame();
-    VnbManeuverFrame(const VnbManeuverFrame& imf);
-    VnbManeuverFrame&   operator=(const VnbManeuverFrame& imf);
+   VnbManeuverFrame();
+   virtual ~VnbManeuverFrame();
+   VnbManeuverFrame(const VnbManeuverFrame& imf);
+   VnbManeuverFrame&   operator=(const VnbManeuverFrame& imf);
 
-    virtual std::string GetFrameLabel(Integer id);
+   virtual std::string GetFrameLabel(Integer id);
 
 protected:
-    void                CalculateBasis(void);
+   void                CalculateBasis();
 };
 
 #endif // VnbManeuverFrame_hpp
