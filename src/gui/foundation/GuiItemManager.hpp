@@ -36,21 +36,36 @@ public:
 
     static int GetNumSpacecraft()
         { return theNumSpacecraft; }
+
+    static int GetNumParameter()
+        { return theNumParameter; }
     
-    static wxComboBox* GetSpacecraftComboBox(wxWindow *parent, int eventId);
+    static wxString* GetParameterList()
+        { return theParameterList; }
+    
+    static wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
+                                             const wxSize &size);
+    static wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
+                                          const wxString &objName, int numObj);
     
     static void UpdateSpacecraft();
+    static void UpdateParameter(const wxString &objName);
     
 private:
 
     static void UpdateSpacecraftList(bool firstTime = false);
+    static void UpdateParameterList(const wxString &objName, bool firstTime = false);
     
     static GuiItemManager *theInstance;
     static GuiInterpreter *theGuiInterpreter;
     
     static wxComboBox *theSpacecraftComboBox;
+    static wxListBox *theParameterListBox;
 
     static int theNumSpacecraft;
+    static int theNumParameter;
+    
+    static wxString *theParameterList;
     static wxString *theSpacecraftList;
     
 };

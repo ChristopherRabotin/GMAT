@@ -15,16 +15,19 @@
 #include "GuiItemManager.hpp"
 #include "GmatAppData.hpp"
 #include "gmatdefs.hpp" //put this one after GUI includes
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------
 // static data
 //------------------------------
 int GuiItemManager::theNumSpacecraft = 0;
+int GuiItemManager::theNumParameter = 0;
 GuiItemManager* GuiItemManager::theInstance = NULL;
 GuiInterpreter* GuiItemManager::theGuiInterpreter = NULL;
-wxComboBox* GuiItemManager::theSpacecraftComboBox = NULL;
+wxString* GuiItemManager::theParameterList = NULL;
 wxString* GuiItemManager::theSpacecraftList = NULL;
+wxComboBox* GuiItemManager::theSpacecraftComboBox = NULL;
+wxListBox* GuiItemManager::theParameterListBox = NULL;
 
 //------------------------------
 // public methods
@@ -57,17 +60,30 @@ GuiItemManager* GuiItemManager::GetInstance()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateSpacecraft()
 {
-        UpdateSpacecraftList();
+    UpdateSpacecraftList();
 }
 
 //------------------------------------------------------------------------------
-//  wxComboBox* GetSpacecraftComboBox(wxWindow *parent)
+//  void UpdateParameter(const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Updates spacecraft related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateParameter(const wxString &objName)
+{
+    UpdateParameterList(objName);
+}
+
+//------------------------------------------------------------------------------
+//  wxComboBox* GetSpacecraftComboBox(wxWindow *parent, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return spacecraft combo box pointer
  */
 //------------------------------------------------------------------------------
-wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, int eventId)
+wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size)
 {
     // combo box for avaliable spacecrafts
 
@@ -79,13 +95,39 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, int eventId)
         delete theSpacecraftComboBox;
     
     theSpacecraftComboBox =
-        new wxComboBox(parent, eventId, wxT(""), wxDefaultPosition, 
-                       wxSize(100, -1), numSc, theSpacecraftList, wxCB_DROPDOWN);
+        new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                       numSc, theSpacecraftList, wxCB_DROPDOWN);
     
     // show first spacecraft
     theSpacecraftComboBox->SetSelection(0);
     
     return theSpacecraftComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
+//                                const wxString &objName, int numObj)
+//------------------------------------------------------------------------------
+/**
+ * @return Parameter ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, const wxSize &size,
+                                               const wxString &objName, int numObj)
+{
+    
+    if (theParameterListBox != NULL)
+        delete theParameterListBox;
+    
+    if (numObj > 0)
+    {       
+        theParameterListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, theNumParameter,
+                          theParameterList, wxLB_SINGLE);
+    }
+   
+    return theParameterListBox;
 }
 
 
@@ -104,8 +146,14 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
 {
     StringArray &listSc = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
     int numSc = listSc.size();
-    
-    if ((theNumSpacecraft != numSc) || firstTime)
+
+    if (firstTime)
+    {
+        // combo box for avaliable spacecrafts
+        theSpacecraftList = new wxString[1];
+        theSpacecraftList[0] = wxString("No Spacecrafts Available");
+    }
+    else
     {
         if (theSpacecraftList != NULL)
             delete theSpacecraftList;
@@ -115,17 +163,45 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
             theSpacecraftList = new wxString[numSc];
         
             for (int i=0; i<numSc; i++)
+            {
                 theSpacecraftList[i] = wxString(listSc[i].c_str());
-        }
-        else
-        {
-            // combo box for avaliable spacecrafts
-            theSpacecraftList = new wxString[1];
-            theSpacecraftList[0] = wxString("No Spacecrafts Available");
+                //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacecraftList() " +
+                //                              std::string(theSpacecraftList[i].c_str()) + "\n");
+             }
         }
 
         theNumSpacecraft = numSc;
-        //MessageInterface::ShowMessage("GuiItemManager::UpdateSpacecraftList() " +
-        //                              std::string(theSpacecraftList[0].c_str()) + "\n");
+    }
+}
+
+//------------------------------------------------------------------------------
+//  void UpdateParameterList(const wxString &objName, bool firstTime = false)
+//------------------------------------------------------------------------------
+/**
+ * updates spacecraft list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime)
+{
+    MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+                                  std::string(objName.c_str()) + "\n");
+    
+    if (theParameterList != NULL)
+    {
+        delete theParameterList;
+        theParameterList = NULL;
+    }
+
+    StringArray items =
+        theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
+    theNumParameter = items.size();
+
+    theParameterList = new wxString[theNumParameter];
+    
+    for (int i=0; i<theNumParameter; i++)
+    {
+        theParameterList[i] = objName + "." + items[i].c_str();
+        MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+                                      std::string(theParameterList[i].c_str()) + "\n");
     }
 }
