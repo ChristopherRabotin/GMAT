@@ -170,8 +170,6 @@ private:
    
    wxArrayString primaryBodiesArray;
    wxArrayString secondaryBodiesArray;
-//   wxArrayString savedBodiesArray;   
-//   wxArrayString primaryBodiesGravityArray;
    wxArrayString integratorArray;
     
    Integer numOfBodies;
