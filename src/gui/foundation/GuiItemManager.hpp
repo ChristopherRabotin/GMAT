@@ -24,71 +24,92 @@
 #include <wx/textctrl.h>
 #include <wx/combobox.h>
 #include <wx/checkbox.h>
-#include "wx/notebook.h"
+#include <wx/notebook.h>
 #include <wx/button.h>
 #include <wx/grid.h>
-#include "wx/radiobut.h"
+#include <wx/radiobut.h>
+#include <wx/string.h>
 
 class GuiItemManager
 {
 public:
+    static const int MAX_LIST_SIZE = 30;
     static GuiItemManager* GetInstance();
 
-    static int GetNumSpacecraft()
+    void UpdateAll();
+    void UpdateObject();
+    void UpdateSpacecraft();
+    void UpdateParameter(const wxString &objName = "");
+    void UpdateSolarSystem();
+
+    int GetNumSpacecraft()
         { return theNumSpacecraft; }
 
-    static int GetNumParameter()
+    int GetNumParameter()
         { return theNumParam; }
     
-    static int GetNumConfigParameter()
+    int GetNumConfigParameter()
         { return theNumConfigParam; }
     
-    static wxString* GetParameterList()
+    int GetNumConfigBody()
+        { return theNumConfigBody; }
+    
+    wxString* GetParameterList()
         { return theParamList; }
     
-    static wxString* GetConfigParameterList()
+    wxString* GetConfigParameterList()
         { return theConfigParamList; }
         
-    static wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
-                                             const wxSize &size);
+    wxComboBox* GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size);
     
-    static wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size);
+    wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size);
     
-    static wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
-                                          const wxString &objName, int numObj);
+    wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
+                                   const wxString &objName, int numObj);
     
-    static wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size,
-                                                const wxString &nameToExclude = "");
+    wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size,
+                                         const wxString &nameToExclude = "");
     
-    static void UpdateObject();
-    static void UpdateSpacecraft();
-    static void UpdateParameter(const wxString &objName = "");
+    wxListBox* GetConfigBodyListBox(wxWindow *parent, const wxSize &size,
+                                    wxArrayString &bodiesToExclude);
+
     
 private:
 
-    static void UpdateObjectList(bool firstTime = false);
-    static void UpdateSpacecraftList(bool firstTime = false);
-    static void UpdateParameterList(const wxString &objName, bool firstTime = false);
-    static void UpdateConfigParameterList(const wxString &objName, bool firstTime = false);
-    static void UpdateConfigUserVarList(const wxString &objName, bool firstTime = false);
+    GuiItemManager();
+    virtual ~GuiItemManager();
+    GuiItemManager(const GuiItemManager&);
+    GuiItemManager& operator=(const GuiItemManager&);
+
+    void UpdateObjectList(bool firstTime = false);
+    void UpdateSpacecraftList(bool firstTime = false);
+    void UpdateParameterList(const wxString &objName, bool firstTime = false);
+    void UpdateConfigParameterList(const wxString &objName, bool firstTime = false);
+    void UpdateConfigUserVarList(const wxString &objName, bool firstTime = false);
+    void UpdateConfigBodyList(bool firstTime = false);
     
     static GuiItemManager *theInstance;
-    static GuiInterpreter *theGuiInterpreter;
+    GuiInterpreter *theGuiInterpreter;
+    SolarSystem *theSolarSystem;
     
-    static int theNumObject;
-    static int theNumSpacecraft;
-    static int theNumParam;
-    static int theNumConfigParam;
+    int theNumObject;
+    int theNumSpacecraft;
+    int theNumParam;
+    int theNumConfigParam;
+    int theNumConfigBody;
     
-    static wxString *theObjectList;
-    static wxString *theSpacecraftList;
-    static wxString *theParamList;
-    static wxString *theConfigParamList;
+    wxString theObjectList[MAX_LIST_SIZE];
+    wxString theSpacecraftList[MAX_LIST_SIZE];
+    wxString theParamList[MAX_LIST_SIZE];
+    wxString theConfigParamList[MAX_LIST_SIZE];
+    wxString theConfigBodyList[MAX_LIST_SIZE];
     
-    static wxComboBox *theSpacecraftComboBox;
-    static wxListBox *theObjectListBox;
-    static wxListBox *theParamListBox;
-    static wxListBox *theConfigParamListBox;
+    wxComboBox *theSpacecraftComboBox;
+    wxListBox *theObjectListBox;
+    wxListBox *theParamListBox;
+    wxListBox *theConfigParamListBox;
+    wxListBox *theConfigBodyListBox;
     
 };
 

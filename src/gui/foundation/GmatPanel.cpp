@@ -84,7 +84,7 @@ GmatPanel::GmatPanel(wxWindow *parent)
     theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     
-//      // adds the buttons to button sizer    
+//      // adds the buttons to bottom sizer    
 //      theBottomSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
 //      theBottomSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
 //      theBottomSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
@@ -121,6 +121,8 @@ void GmatPanel::Show()
     LoadData();
 
     theApplyButton->Disable();
+    theScriptButton->Disable(); //loj: for build2
+    theHelpButton->Disable();   //loj: for build2
 }
 
 //------------------------------------------------------------------------------
@@ -175,7 +177,7 @@ void GmatPanel::OnApply()
 //------------------------------------------------------------------------------
 void GmatPanel::OnHelp()
 {
-    // open separate window to show help
+    // open separate window to show help?
 }
 
 //------------------------------------------------------------------------------
@@ -187,6 +189,6 @@ void GmatPanel::OnHelp()
 //------------------------------------------------------------------------------
 void GmatPanel::OnScript()
 {
-    // open separate window to show scripts
+    // open separate window to show scripts?
 }
 

@@ -42,7 +42,7 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
 {
     theVarName = name;
     Create();
-    LoadData();
+    Show();
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +149,6 @@ void ParameterSetupPanel::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
 }
 

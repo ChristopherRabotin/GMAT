@@ -31,6 +31,7 @@ BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
+// ParameterCreateDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
     : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
@@ -39,10 +40,11 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
     mIsParamCreated = false;
     
     Create();
-    LoadData();
+    Show();
 }
 
 //------------------------------------------------------------------------------
+// virtual void Create()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::Create()
 {
@@ -197,11 +199,11 @@ void ParameterCreateDialog::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
 }
 
 //------------------------------------------------------------------------------
+// void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
 {
@@ -213,6 +215,7 @@ void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
 }
     
 //------------------------------------------------------------------------------
+// void OnComboSelection(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnComboSelection(wxCommandEvent& event)
 {
@@ -220,6 +223,7 @@ void ParameterCreateDialog::OnComboSelection(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
+// void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnButton(wxCommandEvent& event)
 {    
@@ -227,7 +231,10 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
     {
         wxString s = objectListBox->GetStringSelection() + "." +
             propertyListBox->GetStringSelection();
-        expTextCtrl->AppendText(s);
+
+        //loj: for build2 donot append
+        //expTextCtrl->AppendText(s);
+        expTextCtrl->SetValue(s);
     }
     else if ( event.GetEventObject() == addParamButton )  
     {
@@ -236,12 +243,17 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
+// virtual void LoadData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::LoadData()
 {
+    //loj: for build2, disable the button, disable textctrl
+    addParamButton->Disable();
+    expTextCtrl->Disable();
 }
 
 //------------------------------------------------------------------------------
+// virtual void SaveData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::SaveData()
 {
@@ -274,6 +286,7 @@ void ParameterCreateDialog::SaveData()
 }
 
 //------------------------------------------------------------------------------
+// virtual void ResetData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::ResetData()
 {

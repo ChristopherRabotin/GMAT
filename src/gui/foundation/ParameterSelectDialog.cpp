@@ -29,6 +29,7 @@ BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
+// ParameterSelectDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent)
     : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
@@ -37,10 +38,11 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent)
     mIsParamSelected = false;
     
     Create();
-    LoadData();
+    Show();
 }
 
 //------------------------------------------------------------------------------
+// virtual void Create()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::Create()
 {
@@ -52,7 +54,7 @@ void ParameterSelectDialog::Create()
         new wxStaticText( this, ID_TEXT, wxT("Available Variables"),
                           wxDefaultPosition, wxDefaultSize, 0 );
     
-    wxStaticText *paramSelectStaticText =
+    wxStaticText *paramSelectedStaticText =
         new wxStaticText( this, ID_TEXT, wxT("Variables Selected"),
                           wxDefaultPosition, wxDefaultSize, 0 );
     
@@ -62,13 +64,13 @@ void ParameterSelectDialog::Create()
     
     // wxButton
    addParamButton = new wxButton( this, ID_BUTTON, wxT("->"),
-                                  wxDefaultPosition, wxDefaultSize, 0 );
+                                  wxDefaultPosition, wxSize(20,20), 0 );
     
     // wxListBox
     paramListBox =
         theGuiManager->GetConfigParameterListBox(this, wxSize(150, 200), "");
     
-    paramSelectListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+    paramSelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                                        wxSize(150, 200), 0, emptyList, wxLB_SINGLE);
     
     
@@ -79,12 +81,12 @@ void ParameterSelectDialog::Create()
     // 2nd row
     paramGridSizer->Add(paramStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
     paramGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-    paramGridSizer->Add(paramSelectStaticText, 0, wxALIGN_CENTER|wxALL, borderSize);
+    paramGridSizer->Add(paramSelectedStaticText, 0, wxALIGN_CENTER|wxALL, borderSize);
 
     // 3rd row
     paramGridSizer->Add(paramListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
     paramGridSizer->Add(addParamButton, 0, wxALIGN_CENTER|wxALL, borderSize);
-    paramGridSizer->Add(paramSelectListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
+    paramGridSizer->Add(paramSelectedListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
         
     pageBoxSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
 
@@ -92,12 +94,11 @@ void ParameterSelectDialog::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
 }
 
-
 //------------------------------------------------------------------------------
+// void OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnButton(wxCommandEvent& event)
 {    
@@ -105,32 +106,45 @@ void ParameterSelectDialog::OnButton(wxCommandEvent& event)
     {
         // empty listbox first, only one parameter is allowed
         // loj: Do we need multiple selection?
-        paramSelectListBox->Clear();
+        paramSelectedListBox->Clear();
         
         wxString s = paramListBox->GetStringSelection();
-        paramSelectListBox->Append(s);
+        paramSelectedListBox->Append(s);
 
         theOkButton->Enable();
     }
 }
 
 //------------------------------------------------------------------------------
+// virtual void LoadData()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::LoadData()
 {
 }
 
 //------------------------------------------------------------------------------
+// virtual void SaveData()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::SaveData()
 {
-    mParamName = paramListBox->GetStringSelection();
-    mIsParamSelected = true;
+    //loj: Can we select multiple parameters? If so we need to use wxArrayString
+    // for build2, just assume one parameter selection
+    if (paramSelectedListBox->GetCount() > 0)
+    {
+        mParamName = paramSelectedListBox->GetString(0); // first selection
+        mIsParamSelected = true;
+    }
+    else
+    {
+        mIsParamSelected = false;
+    }
 }
 
 //------------------------------------------------------------------------------
+// virtual void ResetData()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::ResetData()
 {
+    mIsParamSelected = false;
 }
 

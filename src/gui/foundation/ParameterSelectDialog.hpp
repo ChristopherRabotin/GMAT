@@ -36,7 +36,7 @@ private:
 
     wxButton *addParamButton;
     wxListBox *paramListBox;
-    wxListBox *paramSelectListBox;
+    wxListBox *paramSelectedListBox;
     
     // methods inherited from GmatDialog
     virtual void Create();

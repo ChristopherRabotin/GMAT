@@ -105,6 +105,7 @@ void GmatDialog::Show()
     LoadData();
 
     theOkButton->Disable();
+    theHelpButton->Disable(); //loj: for build2
 }
 
 //------------------------------------------------------------------------------
