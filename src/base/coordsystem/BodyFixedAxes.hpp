@@ -16,7 +16,6 @@
  * Definition of the BodyFixedAxes class.
  *
  * @note There are three data files currently needed:
- *    leap second file (NOTE - this should be done in the utiltities!!)
  *    EOP file containing polar motion (x,y) and UT1-UTC offset
  *    coefficient file containing nutation and planetary coeffifients
  */
@@ -54,10 +53,6 @@ public:
    // method to initialize the data
    virtual void Initialize(); 
    
-   // methods to set the files to use
-   virtual void SetEopFile(EopFile *eopF);
-   virtual void SetCoefficientsFile(ItrfCoefficientsFile *itrfF);
-
    // methods to convert to/from the MJ2000 Equatorial axis system
    virtual bool RotateToMJ2000Eq(const A1Mjd &epoch, const Rvector &inState,
                                  Rvector &outState); 
@@ -98,18 +93,7 @@ protected:
    //static const Gmat::ParameterType PARAMETER_TYPE[BodyFixedAxesParamCount - 
    //                                                DynamicAxesParamCount];
    
-   static const Real  JD_OF_JANUARY_1_1997  = 2450449.5;  // correct????
-   static const Real  DETERMINANT_TOLERANCE = 1.0e-15;
-   
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch);
-
-         
-   EopFile                   *eop;
-   ItrfCoefficientsFile      *itrf;
-   
-   std::vector<IntegerArray> a, ap;
-   Rvector                   A, B, C, D, E, F, Ap, Bp, Cp, Dp;
-   
    
 };
 #endif // BodyFixedAxes_hpp

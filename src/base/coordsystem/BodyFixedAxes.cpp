@@ -36,7 +36,6 @@
 using namespace GmatMathUtil;      // for trig functions, etc.
 using namespace GmatTimeUtil;      // for JD offsets, etc.
 
-
 //---------------------------------
 // static data
 //---------------------------------
@@ -66,9 +65,7 @@ using namespace GmatTimeUtil;      // for JD offsets, etc.
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const std::string &itsName) :
-DynamicAxes("BodyFixed",itsName),
-eop                    (NULL),
-itrf                   (NULL)
+DynamicAxes("BodyFixed",itsName)
 {
 }
 
@@ -84,9 +81,7 @@ itrf                   (NULL)
  */
 //------------------------------------------------------------------------------
 BodyFixedAxes::BodyFixedAxes(const BodyFixedAxes &bfAxes) :
-DynamicAxes(bfAxes),
-eop                    (bfAxes.eop),
-itrf                   (bfAxes.itrf)
+DynamicAxes(bfAxes)
 {
 }
 
@@ -106,9 +101,6 @@ const BodyFixedAxes& BodyFixedAxes::operator=(const BodyFixedAxes &bfAxes)
    if (&bfAxes == this)
       return *this;
    DynamicAxes::operator=(bfAxes);  
-   eop   = bfAxes.eop;
-   itrf  = bfAxes.itrf;
-   Initialize();
    return *this;
 }
 //------------------------------------------------------------------------------
@@ -123,36 +115,6 @@ BodyFixedAxes::~BodyFixedAxes()
 }
 
 //------------------------------------------------------------------------------
-//  void SetEopFile(EopFile *eopF)
-//------------------------------------------------------------------------------
-/**
- * Method to set EopFile for this system.
- *
- * @param eopF  the eopFile.
- *
- */
-//------------------------------------------------------------------------------
-void BodyFixedAxes::SetEopFile(EopFile *eopF)
-{
-   eop = eopF;
-}
-
-//------------------------------------------------------------------------------
-//  void SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
-//------------------------------------------------------------------------------
-/**
- * Method to set ITRF coefficients for this system.
- *
- * @param itrfF  the ITRF coefficients file.
- *
- */
-//------------------------------------------------------------------------------
-void BodyFixedAxes::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
-{
-   itrf = itrfF;
-}
-
-//------------------------------------------------------------------------------
 //  void Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -163,32 +125,7 @@ void BodyFixedAxes::SetCoefficientsFile(ItrfCoefficientsFile *itrfF)
 void BodyFixedAxes::Initialize()
 {
    DynamicAxes::Initialize();
-   if (eop == NULL)
-      throw CoordinateSystemException(
-            "EOP file has not been set for " + instanceName);
-   if (itrf == NULL)
-      throw CoordinateSystemException(
-            "Coefficient file has not been set for " + instanceName);
-   Integer numNut = itrf->GetNumberOfNutationTerms();
-   A.SetSize(numNut);
-   B.SetSize(numNut);
-   C.SetSize(numNut);
-   D.SetSize(numNut);
-   E.SetSize(numNut);
-   F.SetSize(numNut);
-   
-   Integer numPlan = itrf->GetNumberOfPlanetaryTerms();
-   Ap.SetSize(numPlan);
-   Bp.SetSize(numPlan);
-   Cp.SetSize(numPlan);
-   Dp.SetSize(numPlan);
-   
-   bool OK = itrf->GetNutationTerms(a, A, B, C, D, E, F);
-   if (!OK) throw CoordinateSystemException("Error getting nutation data.");
-   OK      = itrf->GetPlanetaryTerms(ap, Ap, Bp, Cp, Dp);
-   if (!OK) throw CoordinateSystemException("Error getting planetary data.");
-   
-   // how to check whether or not epoch has been set?
+   InitializeFK5();
 }
 
 //------------------------------------------------------------------------------
@@ -454,6 +391,13 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    // compute rotMatrix and rotDotMatrix
    if (originName == SolarSystem::EARTH_NAME)
    {
+      Real dPsi             = 0.0;
+      Real longAscNodeLunar = 0.0;
+      Real cosEpsbar        = 0.0;
+      Real cosAst           = 0.0;
+      Real sinAst           = 0.0;
+      Real x                = 0.0;
+      Real y                = 0.0;
       // Convert to MJD UTC to use for polar motion  and LOD 
       // interpolations
       Real mjdUTC = TimeConverterUtil::Convert(atEpoch.Get(),
@@ -468,237 +412,25 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
       Real jdUT1    = mjdUT1 + JD_JAN_5_1941; // right?
       // Compute elapsed Julian centuries (UT1)
       Real tUT1     = (jdUT1 - 2451545.0) / 36525.0;
-      Real tUT12    = tUT1  * tUT1;
-      Real tUT13    = tUT12 * tUT1;
-
       
       // convert input A1 MJD to TT MJD (for most calculations)
       Real mjdTT = TimeConverterUtil::Convert(atEpoch.Get(),
                    "A1Mjd", "TtMjd", JD_JAN_5_1941);      
       Real jdTT    = mjdTT + JD_JAN_5_1941; // right? 
       // Compute Julian centuries of TDB from the base epoch (J2000) 
-      // NOTE - this is rally TT, an approximation of TDB ****************
+      // NOTE - this is really TT, an approximation of TDB *********
       Real tTDB    = (jdTT - 2451545.0) / 36525.0;
-      Real tTDB2   = tTDB  * tTDB;
-      Real tTDB3   = tTDB2 * tTDB;
-      Real tTDB4   = tTDB3 * tTDB;
-
-      // Compute precession (Vallado, Eq. 3-56)
-      Real zeta  = ( 2306.2181*tTDB + 0.30188*tTDB2 + 0.017998*tTDB3 )
-                   *RAD_PER_ARCSEC;
-      Real Theta = ( 2004.3109*tTDB - 0.42665*tTDB2 - 0.041833*tTDB3 )
-                   *RAD_PER_ARCSEC;
-      Real     z = ( 2306.2181*tTDB + 1.09468*tTDB2 + 0.018203*tTDB3 )
-                   *RAD_PER_ARCSEC;
-      
-      // Compute trigonometric quantities
-      Real cosTheta = Cos(Theta);
-      Real cosz     = Cos(z);
-      Real coszeta  = Cos(zeta);
-      Real sinTheta = Sin(Theta);
-      Real sinz     = Sin(z);
-      Real sinzeta  = Sin(zeta);
-      
-      // Compute Rotation matrix for transformations from FK5 to MOD
-      // (Vallado Eq. 3-57)
-      Rmatrix33  PREC;
-      PREC(0,0) =  cosTheta*cosz*coszeta - sinz*sinzeta;
-      PREC(0,1) = -sinzeta*cosTheta*cosz - sinz*coszeta;
-      PREC(0,2) = -sinTheta*cosz;
-      PREC(1,0) =  sinz*cosTheta*coszeta + sinzeta*cosz;
-      PREC(1,1) = -sinz*sinzeta*cosTheta + cosz*coszeta;
-      PREC(1,2) = -sinTheta*sinz;
-      PREC(2,0) =  sinTheta*coszeta;
-      PREC(2,1) = -sinTheta*sinzeta;
-      PREC(2,2) =  cosTheta;
-      
-      
-      // Compute nutation - NOTE: this algorithm is bsased on the IERS 1996
-      // Theory of Precession and Nutation. 
-      Real dPsi = 0.0;
-      Real dEps = 0.0;
-      // First, compute useful angles (Vallado Eq. 3-54)
-      // NOTE - taken from Steve Queen's code - he has apparently converted
-      // the values in degrees (from Vallado Eq. 3-54) to arcsec before
-      // performing these computations
-      Real meanAnomalyMoon   = 134.96340251*RAD_PER_DEG + (1717915923.2178*tTDB 
-           + 31.8792*tTDB2 + 0.051635*tTDB3 - 0.00024470*tTDB4)*RAD_PER_ARCSEC;
-      Real meanAnomalySun    = 357.52910918*RAD_PER_DEG + ( 129596581.0481*tTDB 
-           +  0.5532*tTDB2 + 0.000136*tTDB3 - 0.00001149*tTDB4)*RAD_PER_ARCSEC;
-      Real argLatitudeMoon   =  93.27209062*RAD_PER_DEG + (1739527262.8478*tTDB 
-           - 12.7512*tTDB2 - 0.001037*tTDB3 + 0.00000417*tTDB4)*RAD_PER_ARCSEC;
-      Real meanElongationSun = 297.85019547*RAD_PER_DEG + (1602961601.2090*tTDB 
-           -  6.3706*tTDB2 + 0.006593*tTDB3 - 0.00003169*tTDB4)*RAD_PER_ARCSEC;
-      Real longAscNodeLunar  = 125.04455501*RAD_PER_DEG + (  -6962890.2665*tTDB 
-           +  7.4722*tTDB2 + 0.007702*tTDB3 - 0.00005939*tTDB4)*RAD_PER_ARCSEC;
-
-      // Now, sum using nutation coefficients  (Vallado Eq. 3-60)
-      Integer i  = 0;
-      Real apNut = 0.0;
-      Real cosAp = 0.0;
-      Real sinAp = 0.0;
-      Integer nut = itrf->GetNumberOfNutationTerms();
-      for (i = nut-1; i >= 0; i--)
-      {
-         apNut = (a.at(0)).at(i)*meanAnomalyMoon + (a.at(1)).at(i)*meanAnomalySun 
-         + (a.at(2)).at(i)*argLatitudeMoon + (a.at(3)).at(i)*meanElongationSun 
-         + (a.at(4)).at(i)*longAscNodeLunar;
-         cosAp = Cos(apNut);
-         sinAp = Sin(apNut);
-         dPsi += (A[i] + B[i]*tTDB )*sinAp + E[i]*cosAp;
-         dEps += (C[i] + D[i]*tTDB )*cosAp + F[i]*sinAp;
-      }
-      dPsi *= RAD_PER_ARCSEC;
-      dEps *= RAD_PER_ARCSEC;
-      
-      // Compute the corrections for planetary effects on the nutation and
-      // the obliquity of the ecliptic 
-      // NOTE - this part is commented out for now, per Steve Hughes
-      // First, compute the mean Heliocentric longitudes of the planets, and the
-      // general precession in longitude
-      /*
-      Real longVenus   = (181.979800853  + 58517.8156748  * tTDB)* RAD_PER_DEG;
-      Real longEarth   = (100.466448494  + 35999.3728521  * tTDB)* RAD_PER_DEG;
-      Real longMars    = (355.433274605  + 19140.299314   * tTDB)* RAD_PER_DEG;
-      Real longJupiter = ( 34.351483900  +  3034.90567464 * tTDB)* RAD_PER_DEG;
-      Real longSaturn  = ( 50.0774713998 +  1222.11379404 * tTDB)* RAD_PER_DEG;
-      Real genPrec     = (1.39697137214 * tTDB + 0.0003086 * tTDB2)
-                         * RAD_PER_DEG;
-      Real apPlan = 0.0;
-      Real cosApP = 0.0;
-      Real sinApP = 0.0;
-      Integer nutpl = itrf->GetNumberOfPlanetaryTerms();
-      for (i = nutpl-1; i >= 0; i--)
-      {
-          apPlan = (ap.at(0)).at(i)*longVenus + (ap.at(1)).at(i)*longEarth 
-          + (ap.at(2)).at(i)*longMars   + (ap.at(3)).at(i)*longJupiter 
-          + (ap.at(4)).at(i)*longSaturn + (ap.at(5)).at(i)*genPrec
-          + (ap.at(6)).at(i)*meanElongationSun*
-          + (ap.at(7)).at(i)*argLatitudeMoon
-          + (ap.at(8)).at(i)*meanAnomalyMoon
-          + (ap.at(9)).at(i)*longAscNodeLunar;
-          cosApP = Cos(apPlan);
-          sinApP = Sin(apPlan);
-          dPsi += (( Ap[i] + Bp[i]*tTDB )*sinApP) * RAD_PER_ARCSEC;
-          dEps += (( Cp[i] + Dp[i]*tTDB )*cosApP) * RAD_PER_ARCSEC;
-      }
-       */
-      // FOR NOW, SQ's code to approximate GSRF frame
-      // NOTE - do we delete this when we put in the planetary stuff above?
-      // offset and rate correction to approximate GCRF, Ref.[1], Eq (3-63)  - SQ
-      dPsi += (-0.0431 - 0.2957*tTDB )*RAD_PER_ARCSEC;
-      dEps += (-0.0051 - 0.0277*tTDB )*RAD_PER_ARCSEC;
-      
-      // Compute obliquity of the ecliptic (Vallado Eq. 3-52)
-      Real Epsbar  = (84381.448 - 46.8150*tTDB - 0.00059*tTDB2 + 0.001813*tTDB3)
-                     *RAD_PER_ARCSEC;
-      Real TrueOoE = Epsbar + dEps;
-      
-      // Compute useful trigonometric quantities
-      Real cosdPsi   = Cos(dPsi);
-      Real cosEpsbar = Cos(Epsbar);
-      Real cosTEoE   = Cos(TrueOoE);
-      Real sindPsi   = Sin(dPsi);
-      Real sinEpsbar = Sin(Epsbar);
-      Real sinTEoE   = Sin(TrueOoE);   
-      
-      // Compute Rotation matrix for transformations from MOD to TOD
-      // (Vallado Eq. 3-64)
-      Rmatrix33  NUT;
-      NUT(0,0) =  cosdPsi;
-      NUT(0,1) = -sindPsi*cosEpsbar;
-      NUT(0,2) = -sindPsi*sinEpsbar;
-      NUT(1,0) =  sindPsi*cosTEoE;
-      NUT(1,1) =  cosTEoE*cosdPsi*cosEpsbar + sinTEoE*sinEpsbar;
-      NUT(1,2) =  sinEpsbar*cosTEoE*cosdPsi - sinTEoE*cosEpsbar;
-      NUT(2,0) =  sinTEoE*sindPsi;
-      NUT(2,1) =  sinTEoE*cosdPsi*cosEpsbar - sinEpsbar*cosTEoE;
-      NUT(2,2) =  sinTEoE*sinEpsbar*cosdPsi + cosTEoE*cosEpsbar;
-      
-      // Compute Sidereal Time
-      
-      // First, compute the equation of the equinoxes
-      // If the time is before January 1, 1997, don't use the last two terms
-      Real term2 = 0.0;
-      Real term3 = 0.0;
-      if (jdTT > JD_OF_JANUARY_1_1997)
-      {
-         term2 = (0.00264 * Sin(longAscNodeLunar))        * RAD_PER_ARCSEC;
-         term3 = (0.000063 * Sin(2.0 * longAscNodeLunar)) * RAD_PER_ARCSEC;
-      }
-      //Real EQequinox = (dPsi * cosTEoE) + term2 + term3; 
-      Real EQequinox = (dPsi * cosEpsbar) + term2 + term3;
-      
-      // Compute Greenwich Apparent Sidereal Time from the Greenwich Mean 
-      // Sidereal Time and the Equation of the equinoxes
-      // (Vallado Eq. 3-45)
-      // NOTE: 1 sec = 15"; 1 hour (= 15 deg) = 54000"
-      Real sec2deg = 15.0 / 3600;
-      Real hour2deg = 15.0;
-      //Real ThetaGmst = (1.00965822615e6 + 4.746600277219299e10*tUT1 
-      //                  + 1.396560*tUT12 + 9.3e-5*tUT13 )*RAD_PER_ARCSEC;
-      Real ThetaGmst = ((67310.54841 * sec2deg) + 
-                       ((876600 * hour2deg) + (8640184.812866 * sec2deg))*tUT1 +
-                       (0.093104 * sec2deg)*tUT12 - (6.2e-06 * sec2deg)*tUT13 )
-                       *RAD_PER_DEG;
-      
-      Real ThetaAst = ThetaGmst + EQequinox;
-      
-      //Compute useful trignonometric quantities
-      Real cosAst = Cos(ThetaAst);
-      Real sinAst = Sin(ThetaAst);
-      
-      // Compute Rotation matrix for Sidereal Time
-      // (Vallado Eq. 3-64)
-      Rmatrix33  ST;
-      ST(0,0) =  cosAst;
-      ST(0,1) =  sinAst;
-      ST(0,2) =  0.0;
-      ST(1,0) = -sinAst;
-      ST(1,1) =  cosAst;
-      ST(1,2) =  0.0;
-      ST(2,0) =  0.0;
-      ST(2,1) =  0.0;
-      ST(2,2) =  1.0;
-
-      // Get the polar motion and lod data
-      Real x   = 0.0;
-      Real y   = 0.0;
-      Real lod = 0.0;
-      eop->GetPolarMotionAndLod(mjdUTC,x,y,lod);
-      
-      // Compute the portion that has a significant time derivative
-      Real omegaE = 7.29211514670698e-05 * (1.0 - (lod / SECS_PER_DAY));
-      Rmatrix33 STderiv;
-      STderiv(0,0) = -omegaE * sinAst;
-      STderiv(0,1) =  omegaE * cosAst;
-      STderiv(0,2) =  0.0;
-      STderiv(1,0) = -omegaE * cosAst;
-      STderiv(1,1) = -omegaE * sinAst;
-      STderiv(1,2) =  0.0;
-      STderiv(2,0) =  0.0;
-      STderiv(2,1) =  0.0;
-      STderiv(2,2) =  0.0;
-      
-      // Compute useful trigonometric quantities
-      Real cosX = Cos(-x * RAD_PER_ARCSEC);
-      Real sinX = Sin(-x * RAD_PER_ARCSEC);
-      Real cosY = Cos(-y * RAD_PER_ARCSEC);
-      Real sinY = Sin(-y * RAD_PER_ARCSEC);
-
-      // Compute the polar motion rotation matrix
-      Rmatrix33 PM;
-      PM(0,0) =  cosX;
-      PM(0,1) =  sinX*sinY;
-      PM(0,2) = -sinX*cosY;
-      PM(1,0) =  0.0;
-      PM(1,1) =  cosY;
-      PM(1,2) =  sinY;
-      PM(2,0) =  sinX;
-      PM(2,1) = -cosX*sinY;
-      PM(2,2) =  cosX*cosY;
-
-      
+ 
+      Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB);
+      Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, dPsi,
+                             longAscNodeLunar, cosEpsbar);
+      Rmatrix33  ST        = ComputeSiderealTimeRotation(jdTT, tUT1,
+                             dPsi, longAscNodeLunar, cosEpsbar,
+                             cosAst, sinAst);
+      Rmatrix33  STderiv   = ComputeSiderealTimeDotRotation(mjdUTC, 
+                             cosAst, sinAst, x, y);
+      Rmatrix33  PM        = ComputePolarMotionRotation(x, y);
+     
       rotMatrix    = PREC.Transpose() * (NUT.Transpose() * 
                      (ST.Transpose() * PM.Transpose()));
       Real determinant = rotMatrix.Determinant();
