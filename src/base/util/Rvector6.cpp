@@ -457,7 +457,8 @@ const std::string* Rvector6::GetDataDescriptions() const
 std::string* Rvector6::ToValueStrings()
 {
    std::stringstream ss("");
-
+   ss.precision(10); //loj: 6/24/04 added
+   
    ss << elementD[0];
    stringValues[0] = ss.str();
 
