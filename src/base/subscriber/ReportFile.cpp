@@ -172,12 +172,15 @@ bool ReportFile::Initialize()
 {
    //loj: 11/2/04 added
    // Check if there are parameters selected for report
-   if (mNumVarParams == 0)
+   if (active)
    {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
-          "No parameters selected for ReportFile.\n");
-      return false;
+      if (mNumVarParams == 0)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ReportFile::Initialize() Report will not be written."
+             "No parameters selected for ReportFile.\n");
+         return false;
+      }
    }
    
    Subscriber::Initialize();

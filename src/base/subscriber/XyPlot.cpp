@@ -225,12 +225,16 @@ bool XyPlot::Initialize()
 {
    //loj: 11/2/04 added
    // Check if there are parameters selected for XYPlot
-   if (mNumXParams == 0 || mNumYParams == 0)
+   if (active)
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-                                     "XyPlot::Initialize() XYPlot will not be shown."
-                                     "No parameters selected for X Axis or Y Axis\n");
-      return false;
+      if (mNumXParams == 0 || mNumYParams == 0)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "XyPlot::Initialize() XYPlot will not be shown."
+             "No parameters selected for X Axis or Y Axis\n");
+         return false;
+      }
    }
    
    Subscriber::Initialize();
