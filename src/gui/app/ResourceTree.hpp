@@ -43,6 +43,7 @@ private:
     wxTreeItemId mSpacecraftItem;
     wxTreeItemId mPropagatorItem;
     wxTreeItemId mReportItem;
+    int numSc;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);

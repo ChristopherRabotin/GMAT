@@ -74,6 +74,8 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     AddIcons();
     AddDefaultResources();
+    
+    numSc = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -505,8 +507,23 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 void ResourceTree::OnAddSc(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
-  this->AppendItem(item, wxT("New Spacecraft"), ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("New Spacecraft"), CREATED_SPACECRAFT));
+  
+  wxString withName;
+  withName.Printf("Spacecraft%d", numSc++);
+  
+  const std::string stdWithName = withName.c_str();
+  
+  Spacecraft *theSpacecraft = theGuiInterpreter->CreateSpacecraft("Spacecraft", 
+                                      stdWithName);
+
+//  theSpacecraft->SetName("Big Daddy");
+  
+  wxString newName = wxT(theSpacecraft->GetName().c_str());
+  
+  this->AppendItem(item, newName, ICON_SPACECRAFT, -1,
+              new GmatTreeItemData(newName, CREATED_SPACECRAFT));
+
+  Expand(item);
 }
 
 
@@ -638,14 +655,39 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
 {
-  wxString label = event.GetLabel();
+  wxString newLabel = event.GetLabel();
   
   // check to see if label is a single word
-  if (label.IsWord())
+  if (newLabel.IsWord())
   {
      GmatTreeItemData *selItem = (GmatTreeItemData *)
                                  GetItemData(GetSelection());
-     selItem->SetDesc(label);
+
+     wxString oldLabel = selItem->GetDesc();
+     int itemType = selItem->GetDataType();
+
+     selItem->SetDesc(newLabel);
+                  
+     // if label refers to an object reset the object name
+     if ((itemType == DEFAULT_SPACECRAFT)  ||
+         (itemType == CREATED_SPACECRAFT))
+     {
+          const std::string stdOldLabel = oldLabel.c_str();
+          const std::string stdNewLabel = newLabel.c_str();
+     
+          Spacecraft *theSpacecraft = theGuiInterpreter->GetSpacecraft(
+                                        stdOldLabel);
+
+          theSpacecraft->SetName(stdNewLabel);
+
+         // if (resetName)
+        //     selItem->SetDesc(label);
+        //  else
+        //     selItem->SetDesc(oldLabel);
+      
+     }
+     
+ 
   }
   else
   {
