@@ -38,7 +38,7 @@ OBJECTS = PropSetup.o \
           RungeKuttaNystrom.o \
           DormandElMikkawyPrince68.o \
           PredictorCorrector.o \
-          AdamsBashfordMoulton.o \
+          AdamsBashforthMoulton.o \
           BulirschStoer.o
 
 all: $(TARGET)
