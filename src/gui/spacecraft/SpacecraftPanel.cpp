@@ -27,7 +27,6 @@
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 #include "RealUtilities.hpp"
-#include "GmatMainNotebook.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -82,37 +81,37 @@ void SpacecraftPanel::Create()
 {
     currentSpacecraft = new Spacecraft(*theSpacecraft);
     
-    mainNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
+    spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
                          wxSize(350,300), wxGROW );
-    sizer = new wxNotebookSizer( mainNotebook );
+    sizer = new wxNotebookSizer( spacecraftNotebook );
  
     SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     MessageInterface::ShowMessage
          ("SpacecraftPanel:: got the solar sys\n");
-    theOrbitPanel = new OrbitPanel(mainNotebook, currentSpacecraft, 
+    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft, 
                                    theSolarSystem,
                                    theApplyButton);
-    mainNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
+    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
 
-    attitude = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( attitude, wxT("Attitude") );
+    attitude = new wxPanel( spacecraftNotebook, -1 );
+    spacecraftNotebook->AddPage( attitude, wxT("Attitude") );
 
     theBallisticMassPanel = 
-                    new BallisticsMassPanel(mainNotebook, currentSpacecraft,
+                    new BallisticsMassPanel(spacecraftNotebook, currentSpacecraft,
                                     theApplyButton);
-    mainNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
+    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
 
-    actuators = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( actuators, wxT("Actuators") );
+    actuators = new wxPanel( spacecraftNotebook, -1 );
+    spacecraftNotebook->AddPage( actuators, wxT("Actuators") );
 
-    sensors = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( sensors, wxT("Sensors") );
+    sensors = new wxPanel( spacecraftNotebook, -1 );
+    spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
 
-    tanks = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( tanks, wxT("Tanks") );
+    tanks = new wxPanel( spacecraftNotebook, -1 );
+    spacecraftNotebook->AddPage( tanks, wxT("Tanks") );
 
 //    visuals = new wxPanel( mainNotebook, -1 );
-    mainNotebook->AddPage( tanks, wxT("Visualization") );
+    spacecraftNotebook->AddPage( tanks, wxT("Visualization") );
 
     theMiddleSizer->Add(sizer, 0, wxGROW, 5);
 }

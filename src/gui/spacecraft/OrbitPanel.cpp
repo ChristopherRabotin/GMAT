@@ -149,9 +149,10 @@ void OrbitPanel::Create()
 
     wxString strs12[] =
     {
-        wxT("Julian"),
-        wxT("UTC"),
-        wxT("Gregorian")
+        wxT("TAIModJulian"),
+        wxT("UTCModJulian"),
+        wxT("TAIGregorian"),
+        wxT("UTCGregorian ")
     };
     
     // combo box for the date type
@@ -561,14 +562,20 @@ void OrbitPanel::OnEpochChange()
 {
 //    MessageInterface::ShowMessage("Inside epochchange()\n");
     theApplyButton->Enable();
-    
+ 
+    Real epoch1 = theSpacecraft->GetDisplayEpoch(); 
+    MessageInterface::ShowMessage("epoch value %f\n", epoch1);
+
     wxString dateFormat = dateComboBox->GetStringSelection();
-//    theSpacecraft->ConvertDateFormat(dateFormat.c_str());
+    
+    MessageInterface::ShowMessage("date format is %s\n", dateFormat.c_str());
+//    theSpacecraft->SetDisplayDateFormat("UTC");
+    
+    theSpacecraft->SetDisplayDateFormat(dateFormat.c_str());
 
     // get elements
-    Real epoch = theSpacecraft->GetRealParameter(0);
-    
-//    MessageInterface::ShowMessage("new value %f\n", epoch);
+    Real epoch = theSpacecraft->GetDisplayEpoch();  
+    MessageInterface::ShowMessage("new value %f\n", epoch);
 
     wxString epochStr;
     epochStr.Printf("%f", epoch);
