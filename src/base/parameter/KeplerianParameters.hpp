@@ -14,7 +14,8 @@
 //
 /**
  * Declares Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem
+ *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem,
+ *   ModKepElem
  */
 //------------------------------------------------------------------------------
 #ifndef KeplerianParameters_hpp
@@ -216,6 +217,7 @@ protected:
 
 };
 
+
 //==============================================================================
 //                              KepMA
 //==============================================================================
@@ -242,6 +244,7 @@ public:
 protected:
 
 };
+
 
 //==============================================================================
 //                              KepMM
@@ -270,6 +273,7 @@ protected:
 
 };
 
+
 //==============================================================================
 //                              KepElem
 //==============================================================================
@@ -287,6 +291,36 @@ public:
    KepElem(const KepElem &copy);
    const KepElem& operator=(const KepElem &right);
    virtual ~KepElem();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+    
+};
+
+
+//loj: 2/16/05 Added
+//==============================================================================
+//                              ModKepElem
+//==============================================================================
+/**
+ * Declares Keplerian Elements class.
+ *   6 elements: RadPeriapais, RadApoapsis, KepInc, KepRAAN, KepAOP, KepTA
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API ModKepElem : public OrbitRvec6
+{
+public:
+
+   ModKepElem(const std::string &name = "", GmatBase *obj = NULL);
+   ModKepElem(const ModKepElem &copy);
+   const ModKepElem& operator=(const ModKepElem &right);
+   virtual ~ModKepElem();
 
    // methods inherited from Parameter
    virtual bool Evaluate();

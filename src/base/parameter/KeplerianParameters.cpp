@@ -14,12 +14,12 @@
 //
 /**
  * Implements Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem
+ *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem,
+ *   ModKepElem
  */
 //------------------------------------------------------------------------------
 #include "KeplerianParameters.hpp"
 
-//1/24/05 loj: Removed AddRefObject(obj) because it is also added in OrbitReal
 
 //==============================================================================
 //                              KepSMA
@@ -876,6 +876,7 @@ KepMA::~KepMA()
 {
 }
 
+
 //-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
@@ -898,6 +899,7 @@ bool KepMA::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -1047,13 +1049,14 @@ GmatBase* KepMM::Clone(void) const
  */
 //------------------------------------------------------------------------------
 KepElem::KepElem(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "KepElem", obj, "Keplerian Elements", " ", GmatParam::COORD_SYS)
+   : OrbitRvec6(name, "Keplerian", obj, "Keplerian Elements", " ", GmatParam::COORD_SYS)
 {
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mIsPlottable = false;
 }
+
 
 //------------------------------------------------------------------------------
 // KepElem(const KepElem &copy)
@@ -1068,6 +1071,7 @@ KepElem::KepElem(const KepElem &copy)
    : OrbitRvec6(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // const KepElem& operator=(const KepElem &right)
@@ -1085,6 +1089,7 @@ const KepElem& KepElem::operator=(const KepElem &right)
 
    return *this;
 }
+
 
 //------------------------------------------------------------------------------
 // ~KepElem()
@@ -1113,15 +1118,11 @@ KepElem::~KepElem()
 //------------------------------------------------------------------------------
 bool KepElem::Evaluate()
 {
-   mRvec6Value.Set(OrbitData::GetKepReal("KepSMA"),
-                   GetKepReal("KepEcc"),
-                   GetKepReal("KepInc"),
-                   GetKepReal("KepRAAN"),
-                   GetKepReal("KepAOP"),
-                   GetKepReal("KepTA"));
+   mRvec6Value = OrbitData::GetKepState();
 
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -1137,4 +1138,116 @@ bool KepElem::Evaluate()
 GmatBase* KepElem::Clone(void) const
 {
    return new KepElem(*this);
+}
+
+
+//==============================================================================
+//                              ModKepElem
+//==============================================================================
+/**
+ * Implements Keplerian Elements class.
+ *   6 elements: RadPeriapais, RadApoapsis, KepInc, KepRAAN, KepAOP, KepTA
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ModKepElem(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+ModKepElem::ModKepElem(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "ModKeplerian", obj, "Keplerian Elements", " ", GmatParam::COORD_SYS)
+{
+   // Parameter member data
+   mDepObjectName = "EarthMJ2000Eq";
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   mIsPlottable = false;
+}
+
+
+//------------------------------------------------------------------------------
+// ModKepElem(const ModKepElem &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+ModKepElem::ModKepElem(const ModKepElem &copy)
+   : OrbitRvec6(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const ModKepElem& operator=(const ModKepElem &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const ModKepElem& ModKepElem::operator=(const ModKepElem &right)
+{
+   if (this != &right)
+      OrbitRvec6::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~ModKepElem()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+ModKepElem::~ModKepElem()
+{
+}
+
+
+//--------------------------------------
+// Inherited methods from Parameter
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated.
+ */
+//------------------------------------------------------------------------------
+bool ModKepElem::Evaluate()
+{
+   mRvec6Value = OrbitData::GetModKepState();
+
+   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* ModKepElem::Clone(void) const
+{
+   return new ModKepElem(*this);
 }
