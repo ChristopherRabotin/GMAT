@@ -42,6 +42,7 @@
 // factories
 #include "CommandFactory.hpp"
 #include "ForceModelFactory.hpp"
+#include "ParameterFactory.hpp"
 #include "PhysicalModelFactory.hpp"
 #include "PropSetupFactory.hpp"
 #include "PropagatorFactory.hpp"
@@ -172,6 +173,7 @@ private:
    Publisher *thePublisher;
    CommandFactory *theCommandFactory;
    ForceModelFactory *theForceModelFactory;
+   ParameterFactory *theParameterFactory;
    PhysicalModelFactory *thePhysicalModelFactory;
    PropSetupFactory *thePropSetupFactory;
    PropagatorFactory *thePropagatorFactory;

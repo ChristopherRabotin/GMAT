@@ -95,6 +95,7 @@ bool Moderator::Initialize()
    // Create factories
    theCommandFactory = new CommandFactory();
    theForceModelFactory = new ForceModelFactory();
+   theParameterFactory = new ParameterFactory();
    thePhysicalModelFactory = new PhysicalModelFactory();
    thePropSetupFactory = new PropSetupFactory();
    thePropagatorFactory = new PropagatorFactory();
@@ -105,6 +106,7 @@ bool Moderator::Initialize()
    // Register factories
    theFactoryManager->RegisterFactory(theCommandFactory);
    theFactoryManager->RegisterFactory(theForceModelFactory);
+   theFactoryManager->RegisterFactory(theParameterFactory);
    theFactoryManager->RegisterFactory(thePhysicalModelFactory);
    theFactoryManager->RegisterFactory(thePropSetupFactory);
    theFactoryManager->RegisterFactory(thePropagatorFactory);
@@ -258,10 +260,11 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string type, const std::string &name)
 {
-   //loj: not implemented in build 1
-//     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
-//     theConfigManager->AddParameter(parameter);
-//     return parameter;
+   Parameter *parameter = theFactoryManager->CreateParameter(type, name);
+   // Manage it if it is a named parameter
+   if (parameter->GetName() != "")
+      theConfigManager->AddParameter(parameter);
+   return parameter;
    return NULL;
 }
 
@@ -270,9 +273,7 @@ Parameter* Moderator::CreateParameter(const std::string type, const std::string 
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetParameter(const std::string &name)
 {
-   //loj: not implemented in build 1
-//     return theConfigManager->GetParameter(name);
-   return NULL;
+   return theConfigManager->GetParameter(name);
 }
 
 // ForceModel

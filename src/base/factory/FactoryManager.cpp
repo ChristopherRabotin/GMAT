@@ -118,6 +118,28 @@ Spacecraft* FactoryManager::CreateSpacecraft(std::string ofType,
 //   return NULL;
 //}
 
+
+//------------------------------------------------------------------------------
+//  Propagator* CreatePropagator(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an object of type Parameter, with the name withName, and of the
+ * specific propagator type ofType.
+ *
+ * @param <withName> name of the new Parameter object.
+ *
+ * @return pointer to the newly-created Parameter object
+ */
+//------------------------------------------------------------------------------
+Parameter* FactoryManager::CreateParameter(std::string ofType,
+                                           std::string withName)
+{
+   Factory* f = FindFactory(Gmat::PARAMETER, ofType);
+   if (f != NULL)
+      return f->CreateParameter(ofType, withName);
+   return NULL;
+}
+
 //------------------------------------------------------------------------------
 //  Propagator* CreatePropagator(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------

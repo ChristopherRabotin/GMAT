@@ -217,6 +217,33 @@ void ForceModel::UpdateSpacecraft(void)
 
 
 //------------------------------------------------------------------------------
+// void ForceModel::UpdateSpacecraft(void)
+//------------------------------------------------------------------------------
+/**
+ * Updates the model state data from the spacecraft state -- useful to revert
+ * to a previous step.
+ *
+ * @note This method will need to be updated when the multi-step integrators are
+ *       folded into the code
+ */
+//------------------------------------------------------------------------------
+void ForceModel::UpdateFromSpacecraft(void)
+{
+    if (spacecraft.size() > 0) {
+        Integer j = 0;
+        Integer stateSize = 6;
+        std::vector<Spacecraft *>::iterator sat;
+        Real *state;
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+            state = (*sat)->GetState();
+            memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
+            ++j;
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------
 // bool ForceModel::Initialize(void)
 //------------------------------------------------------------------------------
 /**

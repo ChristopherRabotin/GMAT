@@ -137,6 +137,22 @@ void ConfigManager::AddStopCondition(StopCondition* stopCond)
 }
 
 
+void ConfigManager::AddParameter(Parameter* parameter)
+{
+    std::string name = parameter->GetName();
+    if (name == "")
+        throw ConfigManagerException("Unnamed objects cannot be managed");
+    if (mapping.find(name) != mapping.end()) {
+        name += " is already in the configuration table";
+        throw ConfigManagerException(name);
+    }
+    else {
+        objects.push_back(parameter);
+        mapping[name] = parameter;
+    }
+}
+
+
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 {
     return false;
@@ -289,9 +305,17 @@ Command* ConfigManager::GetCommand(const std::string name)
 }
 
 
-// Methods we'll need after build 1
-// void ConfigManager::AddParameter(Parameter* parameter,
-//                                  std::string &name);
-// Parameter* ConfigManager::GetParameter(const std::string &name);
-
+Parameter* ConfigManager::GetParameter(const std::string &name)
+{
+    Parameter *param = NULL;
+    if (mapping.find(name) != mapping.end()) {
+        if (mapping[name]->GetType() != Gmat::PARAMETER) {
+            std::string str = mapping[name]->GetName() +
+                              " is not a spacecraft";
+            throw ConfigManagerException(str);
+        }
+        param = (Parameter *)mapping[name];
+    }
+    return param;
+}
 

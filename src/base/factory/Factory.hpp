@@ -23,6 +23,7 @@
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
 //#include "GroundStation.hpp"
+#include "Parameter.hpp"
 #include "Propagator.hpp"
 #include "ForceModel.hpp"
 #include "PhysicalModel.hpp"
@@ -50,6 +51,8 @@ public:
    virtual PhysicalModel*       CreatePhysicalModel(std::string ofType,
                                                     std::string withName = "");
    virtual PropSetup*           CreatePropSetup(std::string ofType,
+                                                std::string withName = "");
+   virtual Parameter*           CreateParameter(std::string ofType,
                                                 std::string withName = "");
 //   virtual CalculatedParameter* CreateCalculatedParameter(std::string ofType,
 //                                                  std::string withName = "");

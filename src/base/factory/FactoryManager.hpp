@@ -27,6 +27,7 @@
 #include "Factory.hpp"
 #include "Spacecraft.hpp"
 //#include "GroundStation.hpp"
+#include "Parameter.hpp"
 #include "Propagator.hpp"
 #include "ForceModel.hpp"
 #include "PhysicalModel.hpp"
@@ -63,6 +64,8 @@ public:
     Spacecraft *          CreateSpacecraft(std::string ofType = "Spacecraft",
                                            std::string withName = "");
 //    GroundStation *       CreateGroundStation(std::string withName);
+    Parameter *           CreateParameter(std::string ofType,
+                                          std::string withName = "");
     Propagator *          CreatePropagator(std::string ofType,
                                            std::string withName = "");
     ForceModel *          CreateForceModel(std::string withName = "");

@@ -254,6 +254,7 @@ bool Propagate::Initialize(void)
     return true;
 }
 
+
 /**
  * Propagate the assigned members to the desired stopping condition
  *
@@ -262,17 +263,35 @@ bool Propagate::Initialize(void)
  */
 bool Propagate::Execute(void)
 {
+    Real elapsedTime = 0.0, desiredTime = 86400.0;
     if (initialized == false)
         throw CommandException("Propagate Command was not Initialized");
 
     Propagator *p = prop->GetPropagator();
     ForceModel *fm = prop->GetForceModel();
     p->Initialize();
-    for (Integer i = 0; i < 1; ++i) {
+    while (elapsedTime < desiredTime) {
         if (!p->Step())
             throw CommandException("Propagator Failed to Step");
-        fm->UpdateSpacecraft();
+        // Not at stop condition yet
+        if (fm->GetTime() < desiredTime) {
+            elapsedTime = fm->GetTime();
+            fm->UpdateSpacecraft();
+            /// @todo Update epoch on spacecraft
+        }
+        else // Passed stop epoch
+        {
+            fm->UpdateFromSpacecraft();
+            break;
+        }
+        // Publish the data here
     }
+    
+    if (desiredTime - elapsedTime > 0.0)
+        if (!p->Step(desiredTime - elapsedTime))
+            throw CommandException("Propagator Failed to Step fixed interval");
+    // Publish the final data point here
+
     return true;
 }
 

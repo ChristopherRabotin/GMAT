@@ -72,6 +72,7 @@ public:
     void AddForce(PhysicalModel *pPhyscialModel);
     bool AddSpacecraft(Spacecraft *sc);
     void UpdateSpacecraft(void);
+    void UpdateFromSpacecraft(void);
     
     virtual bool Initialize(void);
     virtual void IncrementTime(Real dt);

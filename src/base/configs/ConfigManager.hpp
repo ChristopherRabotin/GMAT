@@ -37,6 +37,7 @@
 #include "StopCondition.hpp"
 #include "PhysicalModel.hpp"
 #include "Propagator.hpp"
+#include "Parameter.hpp"
 #include "Command.hpp"
 
 
@@ -54,7 +55,8 @@ class ConfigManager
         void                AddPropSetup(PropSetup *propSetup);
         void                AddSpacecraft(Spacecraft *sc);
         void                AddStopCondition(StopCondition* stopCond);
-                                           
+        void                AddParameter(Parameter* parameter);
+
         bool                SetSolarSystemInUse(const std::string &name);
         StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
         bool                RemoveItem(Gmat::ObjectType type,
@@ -67,11 +69,7 @@ class ConfigManager
         SolarSystem*        GetDefaultSolarSystem();
         SolarSystem*        GetSolarSystemInUse();
         StopCondition*      GetStopCondition(const std::string &name);
-        
-        // Methods we'll need after build 1
-        // void                AddParameter(Parameter* parameter,
-        //                                  std::string &name);
-        // Parameter*          GetParameter(const std::string &name);
+        Parameter*          GetParameter(const std::string &name);
         
         // Methods I'm not sure we need
         void                AddCelestialBody(CelestialBody* body);

@@ -96,6 +96,30 @@ Propagator* Factory::CreatePropagator(std::string ofType,
    throw FactoryException("requested object must be of type Propagator");
 }
 
+
+//------------------------------------------------------------------------------
+//  Propagator* CreateParameter(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create Parameter objects -
+ * in that case, it returns a new Parameter object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Parameter.
+ *
+ * @param <ofType>   specific type of Parameter object to create.
+ * @param <withName> name to give to the newly created Parameter object.
+ *
+ * @return pointer to a new Parameter object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type Parameter.
+ */
+//------------------------------------------------------------------------------
+Parameter* Factory::CreateParameter(std::string ofType, std::string withName)
+{
+   throw FactoryException("requested object must be of type Parameter");
+}
+
 //------------------------------------------------------------------------------
 //  ForceModel* CreateForceModel(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------

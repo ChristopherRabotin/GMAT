@@ -327,3 +327,4 @@ void StopCondition::CopyDynamicData(const StopCondition &sc)
       mValueBuffer[i] = sc.mValueBuffer[i];
    }
 }
+
