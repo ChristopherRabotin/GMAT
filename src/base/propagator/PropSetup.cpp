@@ -146,6 +146,10 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
 //------------------------------------------------------------------------------
 PropSetup::~PropSetup()
 {
+   if (mPropagator->GetName() == "InternalRKV89")
+      delete mPropagator;
+   if (mForceModel->GetName() == "InternalForceModel")
+      delete mForceModel;
 }
 
 //------------------------------------------------------------------------------
@@ -170,6 +174,8 @@ bool PropSetup::IsInitialized()
 //------------------------------------------------------------------------------
 Propagator* PropSetup::GetPropagator()
 {
+   //MessageInterface::ShowMessage("PropSetup::GetPropagator() mPropagator=%d "
+   //                              "name=%s\n", mPropagator, mPropagator->GetName().c_str());
    return mPropagator;
 }
 
@@ -200,9 +206,9 @@ void PropSetup::SetPropagator(Propagator *propagator)
    if (propagator == NULL)
       throw PropSetupException("PropSetup::SetPropagator failed: propagator is NULL");
        
-   if (mPropagator->GetName() == "InternalRKV89") //loj: 3/12/04 added
-      delete mPropagator;
-    
+   //if (mPropagator->GetName() == "InternalRKV89")
+   //   delete mPropagator; //loj: 5/18/04 problem deleting? cannot set from GUI
+   
    mPropagator = propagator;
    //    Initialize();
 }
@@ -218,12 +224,14 @@ void PropSetup::SetPropagator(Propagator *propagator)
 //------------------------------------------------------------------------------
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
-   //MessageInterface::ShowMessage("PropSetup::SetForceModel() entered \n");
+   //MessageInterface::ShowMessage("PropSetup::SetForceModel() mForceModel=%s "
+   //                              "forceModel=%s\n", mForceModel->GetName().c_str(),
+   //                              forceModel->GetName().c_str());
    if (forceModel == NULL)
       throw PropSetupException("PropSetup::SetForceModel failed: ForceModel is NULL");
        
-   if (mForceModel->GetName() == "InternalForceModel")
-      delete mForceModel;
+   //if (mForceModel->GetName() == "InternalForceModel")
+   //   delete mForceModel; //loj: 5/18/04 problem deleting? cannot set from GUI
    
    mForceModel = forceModel;
    //    Initialize();
