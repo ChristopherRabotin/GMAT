@@ -136,9 +136,3 @@ PropagatorFactory::~PropagatorFactory()
 //---------------------------------
 //  private methods
 //---------------------------------
-
-
-
-
-
-   
