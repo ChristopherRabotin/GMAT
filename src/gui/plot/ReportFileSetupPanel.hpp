@@ -30,8 +30,10 @@ public:
     ReportFileSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    Subscriber *theSubscriber;   
+    ReportFile *reportFile;
+
     int  mNumVarParams;
+    bool mUseUserParam;
     
     wxBoxSizer *optionBoxSizer;
     wxTextCtrl *colWidthTextCtrl;
@@ -43,6 +45,11 @@ protected:
     wxTextCtrl *fileTextCtrl;
     wxButton *browseButton; 
     
+    wxComboBox *mObjectComboBox;
+
+    wxListBox *mUserParamListBox;
+    wxListBox *mPropertyListBox;
+
     wxBoxSizer *mVarBoxSizer;
     wxListBox *mVarListBox;
     wxListBox *mVarSelectedListBox;
@@ -55,6 +62,10 @@ protected:
     void OnRemoveVariable(wxCommandEvent& event);
     void OnClearVariable(wxCommandEvent& event);
 
+    void OnSelectUserParam(wxCommandEvent& event);
+    void OnSelectProperty(wxCommandEvent& event);
+    void OnComboBoxChange(wxCommandEvent& event);
+    void OnCreateVariable(wxCommandEvent& event);
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -77,8 +88,16 @@ protected:
         REMOVE_VAR_BUTTON,
         CLEAR_VAR_BUTTON,
         VAR_SEL_LISTBOX,
-        
+        CREATE_VARIABLE,
+        ID_COMBOBOX,
+        USER_PARAM_LISTBOX,
+        PROPERTY_LISTBOX,
+
         CHECKBOX,
     };
+
+private:
+   wxString GetNewParam();
+   Parameter* CreateParameter(const wxString &name);
 };
 #endif

@@ -18,7 +18,7 @@
 #include "ReportFileSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-
+#include "ParameterCreateDialog.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -41,6 +41,11 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
    EVT_BUTTON(ADD_VAR_BUTTON, ReportFileSetupPanel::OnAddVariable)
    EVT_BUTTON(REMOVE_VAR_BUTTON, ReportFileSetupPanel::OnRemoveVariable)
    EVT_BUTTON(CLEAR_VAR_BUTTON, ReportFileSetupPanel::OnClearVariable)
+
+   EVT_LISTBOX(USER_PARAM_LISTBOX, ReportFileSetupPanel::OnSelectUserParam)
+   EVT_LISTBOX(PROPERTY_LISTBOX, ReportFileSetupPanel::OnSelectProperty)
+   EVT_COMBOBOX(ID_COMBOBOX, ReportFileSetupPanel::OnComboBoxChange)
+   EVT_BUTTON(CREATE_VARIABLE, ReportFileSetupPanel::OnCreateVariable)
 
 END_EVENT_TABLE()
 
@@ -67,11 +72,14 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
     //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
     //                              std::string(subscriberName.c_str()) + "\n");
     
-    theSubscriber =
+    Subscriber *subscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+
+    reportFile = (ReportFile*)subscriber;
 
     Create();
     Show();
+    mUseUserParam = false;
     theApplyButton->Disable();
 }
 
@@ -142,19 +150,26 @@ void ReportFileSetupPanel::Create()
    //------------------------------------------------------
    mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
     
-   wxStaticText *titleAvailable =
-      new wxStaticText(this, -1, wxT("Variables"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxArrayString empty;
+//   wxStaticText *titleAvailable =
+//      new wxStaticText(this, -1, wxT("Variables"),
+//                       wxDefaultPosition, wxSize(-1,-1), 0);
+//   wxArrayString empty;
 
-   //loj: 10/1/04 call GetPlottableParameterListBox()
-   mVarListBox = 
-       theGuiManager->GetPlottableParameterListBox(this, -1, wxSize(150,200));
-      //theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
-    
-   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+//   //loj: 10/1/04 call GetPlottableParameterListBox()
+//   mVarListBox =
+//       theGuiManager->GetPlottableParameterListBox(this, -1, wxSize(150,200));
+//      //theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
+   wxButton *createVarButton;
+
+   wxBoxSizer *paramBoxSizer =
+      theGuiManager->CreateParameterSizer(this, &createVarButton, CREATE_VARIABLE,
+                                          &mObjectComboBox, ID_COMBOBOX,
+                                          &mUserParamListBox, USER_PARAM_LISTBOX,
+                                          &mPropertyListBox, PROPERTY_LISTBOX);
+
+//   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+
    //------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
@@ -175,16 +190,22 @@ void ReportFileSetupPanel::Create()
    //------------------------------------------------------
    // selected spacecraft list (4th column)
    //------------------------------------------------------
-   wxStaticText *titleSelected =
-      new wxStaticText(this, -1, wxT("Selected Variables"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+   //wxStaticBox
+   wxStaticBox *selectedStaticBox = new wxStaticBox( this, -1, wxT("") );
+
+   //wxStaticText
+   wxStaticText *titleSelectedText =
+      new wxStaticText(this, -1, wxT("Selected"),
+                       wxDefaultPosition, wxSize(80,-1), 0);
 
    mVarSelectedListBox =
       new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+                    wxSize(150,250), 0, emptyList, wxLB_SINGLE);
         
-   wxBoxSizer *mVarSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mVarSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
+   wxStaticBoxSizer *mVarSelectedBoxSizer =
+      new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
+
+   mVarSelectedBoxSizer->Add(titleSelectedText, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
@@ -211,7 +232,7 @@ void ReportFileSetupPanel::Create()
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
-   mFlexGridSizer->Add(mVarBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(paramBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -233,25 +254,25 @@ void ReportFileSetupPanel::Create()
 void ReportFileSetupPanel::LoadData()
 {
     // load data from the core engine
-    writeCheckBox->SetValue(theSubscriber->IsActive());
+    writeCheckBox->SetValue(reportFile->IsActive());
 
     // load file name data from core engine
-    int filenameId = theSubscriber->GetParameterID("Filename");
-    std::string filename = theSubscriber->GetStringParameter(filenameId);
+    int filenameId = reportFile->GetParameterID("Filename");
+    std::string filename = reportFile->GetStringParameter(filenameId);
     fileTextCtrl->SetValue(wxT(filename.c_str()));
     
-    int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
-    if (strcmp(theSubscriber->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
+    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
+    if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
       showHeaderCheckBox->SetValue(true);
     else
       showHeaderCheckBox->SetValue(false);                     
       
-    int spacesId = theSubscriber->GetParameterID("ColumnWidth");
+    int spacesId = reportFile->GetParameterID("ColumnWidth");
     wxString numSpacesValue;
-    numSpacesValue.Printf("%d", theSubscriber->GetIntegerParameter(spacesId));
+    numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
     colWidthTextCtrl->SetValue(numSpacesValue);
     
-    StringArray varParamList = theSubscriber->GetStringArrayParameter("VarList");
+    StringArray varParamList = reportFile->GetStringArrayParameter("Add");
     mNumVarParams = varParamList.size();
 
     if (mNumVarParams > 0)
@@ -279,26 +300,26 @@ void ReportFileSetupPanel::LoadData()
 void ReportFileSetupPanel::SaveData()
 {
     // save data to core engine
-    theSubscriber->Activate(writeCheckBox->IsChecked());
+    reportFile->Activate(writeCheckBox->IsChecked());
 //    if (theSubscriber->IsActive())
 //      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was activiated\n");
 //    else
 //      MessageInterface::ShowMessage("\nReportFileSetupPanel:: The subscriber was NOT activiated\n");
     
-    int writeHeadersId = theSubscriber->GetParameterID("WriteHeaders");
+    int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
     if (showHeaderCheckBox->IsChecked())
-      theSubscriber->SetStringParameter(writeHeadersId, "On");
+      reportFile->SetStringParameter(writeHeadersId, "On");
     else
-      theSubscriber->SetStringParameter(writeHeadersId, "Off");
+      reportFile->SetStringParameter(writeHeadersId, "Off");
                   
-    int spacesId = theSubscriber->GetParameterID("ColumnWidth");
-    theSubscriber->SetIntegerParameter(spacesId, 
+    int spacesId = reportFile->GetParameterID("ColumnWidth");
+    reportFile->SetIntegerParameter(spacesId,
                   atoi(colWidthTextCtrl->GetValue()));
                   
     // save file name data to core engine
     wxString filename = fileTextCtrl->GetValue();
-    int filenameId = theSubscriber->GetParameterID("Filename");
-    theSubscriber->SetStringParameter(filenameId, 
+    int filenameId = reportFile->GetParameterID("Filename");
+    reportFile->SetStringParameter(filenameId,
                   std::string (filename.c_str()));
                  
             
@@ -306,12 +327,11 @@ void ReportFileSetupPanel::SaveData()
     
     if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
     {
-         theSubscriber->SetBooleanParameter("Clear", true);
+         reportFile->TakeAction("Clear");
          for (int i=0; i<mNumVarParams; i++)
          {
-            theSubscriber->
-               SetStringParameter("Add",
-                                  std::string(mVarSelectedListBox->GetString(i).c_str()));
+            std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
+            reportFile->SetStringParameter("Add", selYName, i); //arg: 11/17/04 added index
          }
       }
 
@@ -350,28 +370,26 @@ void ReportFileSetupPanel::OnTextChange()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
 {
-   // get string in first list and then search for it
-   // in the second list
-   wxString s = mVarListBox->GetStringSelection();
-   int found = mVarSelectedListBox->FindString(s);
+   // get string in first list and then search for it in the second list
+   wxString newParam = GetNewParam();
+   int found = mVarSelectedListBox->FindString(newParam);
     
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      // check if parameter is plottable
-      Parameter *param;
-      param = theGuiInterpreter->GetParameter(std::string(s.c_str()));
+      // Create a paramete if it does not exist
+      Parameter *param = CreateParameter(newParam);
 
       if (param->IsPlottable())
       {
-         mVarSelectedListBox->Append(s);
-         mVarSelectedListBox->SetStringSelection(s);
+         mVarSelectedListBox->Append(newParam);
+         mVarSelectedListBox->SetStringSelection(newParam);
          theApplyButton->Enable();
       }
       else
       {
          wxLogMessage("Selected  parameter:%s is not reportable. Please select "
-                      "another parameter\n", s.c_str());
+                      "another parameter\n", newParam.c_str());
       }
    }
 }
@@ -405,4 +423,94 @@ void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
    theApplyButton->Enable();
 }
 
+//------------------------------------------------------------------------------
+// void OnCreateVariable(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnCreateVariable(wxCommandEvent& event)
+{
+   ParameterCreateDialog paramDlg(this);
+   paramDlg.ShowModal();
 
+   if (paramDlg.IsParamCreated())
+   {
+      mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                             theGuiManager->GetUserVariableList());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnSelectUserParam(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnSelectUserParam(wxCommandEvent& event)
+{
+   // deselect property
+   mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+
+   mUseUserParam = true;
+}
+
+//------------------------------------------------------------------------------
+// void OnSelectProperty(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnSelectProperty(wxCommandEvent& event)
+{
+   // deselect user param
+   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+
+   mUseUserParam = false;
+}
+
+//------------------------------------------------------------------------------
+// void OnComboBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
+{
+   if (event.GetEventObject() == mObjectComboBox)
+   {
+      mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
+      mUseUserParam = false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// wxString GetNewParam()
+//------------------------------------------------------------------------------
+wxString ReportFileSetupPanel::GetNewParam()
+{
+   if (mUseUserParam)
+   {
+      return mUserParamListBox->GetStringSelection();
+   }
+   else
+   {
+      return mObjectComboBox->GetStringSelection() + "." +
+         mPropertyListBox->GetStringSelection();
+   }
+}
+
+//------------------------------------------------------------------------------
+// Parameter* CreateParameter(const wxString &paramName)
+//------------------------------------------------------------------------------
+/*
+ * @return newly created parameter pointer if it does not exist,
+ *         return existing parameter pointer otherwise
+ */
+//------------------------------------------------------------------------------
+Parameter* ReportFileSetupPanel::CreateParameter(const wxString &name)
+{
+   std::string paramName(name.c_str());
+   std::string objName(mObjectComboBox->GetStringSelection().c_str());
+   std::string propName(mPropertyListBox->GetStringSelection().c_str());
+
+   Parameter *param = theGuiInterpreter->GetParameter(paramName);
+
+   // create a parameter if it does not exist
+   if (param == NULL)
+   {
+      param = theGuiInterpreter->CreateParameter(propName, paramName);
+      param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+   }
+
+   return param;
+}
