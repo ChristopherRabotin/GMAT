@@ -8,8 +8,8 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library 
-SRC = GmatApp.cpp GmatAppData.cpp GmatMainFrame.cpp \
-	GmatNotebook.cpp GmatTreeItemData.cpp \
+SRC = GmatApp.cpp GmatAppData.cpp GmatConnection.cpp GmatMainFrame.cpp \
+	GmatNotebook.cpp GmatServer.cpp GmatTreeItemData.cpp \
 	MissionTreeItemData.cpp ResourceTree.cpp
 #
 # Define macro for using the included file 
