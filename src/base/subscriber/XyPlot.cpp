@@ -241,15 +241,17 @@ bool XyPlot::Initialize()
 
       for (int i=0; i<mNumYParams; i++)
       {
-         std::string curveTitle = mYParams[i]->GetName();
-         UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
+         if (((Integer)mYParams.size() > i) && mYParams[i]) {
+            std::string curveTitle = mYParams[i]->GetName();
+            UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
          
 #if DEBUG_XYPLOT_INIT
-         MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-                                       curveTitle.c_str());
+            MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+                                          curveTitle.c_str());
 #endif
-         PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                       curveTitle, penColor);
+            PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
+                                          curveTitle, penColor);
+         }
       }
 
       PlotInterface::ShowXyPlotLegend(instanceName); //loj: 7/14/04 added
@@ -599,8 +601,15 @@ void XyPlot::BuildPlotTitle()
 {
    //set X and Y axis title
    if (mXAxisTitle == "")
-      mXAxisTitle = mXParam->GetName();
-
+      if (mXParam)
+         mXAxisTitle = mXParam->GetName();
+      else {
+         mXAxisTitle = "No X parameters";
+         mYAxisTitle = "empty";
+         mPlotTitle  = "Plot not fully initialized";
+         return;
+      }
+      
 #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
                                  mXAxisTitle.c_str());
