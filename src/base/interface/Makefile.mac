@@ -3,6 +3,7 @@
 # Created:    Wendy Shoan
 # Date:       2004/09/10	
 # Modified:   2004/09/27 - J. Gurganus - removed WX_HOME
+#             2004/10/27 - W. Shoan - added MatlabInterface
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
@@ -20,7 +21,7 @@ GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
 	-I$(G_MISSION) -I$(G_VIEW)
 #
 # Source file for creating new library
-SRC = GmatInterface.cpp
+SRC = GmatInterface.cpp MatlabInterface.cpp
 
 #
 #TESTFLAGS = -D__CONSOLE_APP__
