@@ -314,7 +314,7 @@ void XyPlotSetupPanel::Create()
    theGuiManager->UpdateParameter();
     
    paramListBox =
-      theGuiManager->GetConfigParameterListBox(this, wxSize(150,200));
+      theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
    paramListBox->SetSelection(0);
    paramBoxSizer->Add(titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, bsize);
    paramBoxSizer->Add(paramListBox, 0, wxALIGN_CENTRE|wxALL, bsize);

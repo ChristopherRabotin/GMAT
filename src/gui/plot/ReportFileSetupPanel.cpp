@@ -155,7 +155,7 @@ void ReportFileSetupPanel::Create()
    wxArrayString empty;
    
    mVarListBox = 
-       theGuiManager->GetConfigParameterListBox(this, wxSize(150,200));
+       theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150,200));
     
    mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);

@@ -76,7 +76,7 @@ void CelesBodySelectDialog::Create()
     //                              mBodiesToExclude.GetCount());
     // wxListBox
     bodyListBox =
-        theGuiManager->GetConfigBodyListBox(this, wxSize(150, 200), mBodiesToExclude);
+        theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200), mBodiesToExclude);
         
     bodySelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                                        wxSize(150, 200), 0, emptyList, wxLB_SINGLE);

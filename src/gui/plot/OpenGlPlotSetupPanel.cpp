@@ -272,7 +272,7 @@ void OpenGlPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    wxArrayString empty;
    mScAvailableListBox =
-      theGuiManager->GetSpacecraftListBox(this, wxSize(150,200), empty);
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150,200), empty);
     
    mScAvailableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    mScAvailableBoxSizer->Add(mScAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);

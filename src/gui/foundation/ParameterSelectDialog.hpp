@@ -23,39 +23,41 @@ class ParameterSelectDialog : public GmatDialog
 {
 public:
     
-    ParameterSelectDialog(wxWindow *parent);
+   ParameterSelectDialog(wxWindow *parent);
 
-    wxString GetParamName()
-        { return mParamName; }
-    bool IsParamSelected()
-        { return mIsParamSelected; }
+   wxString GetParamName()
+      { return mParamName; }
+   bool IsParamSelected()
+      { return mIsParamSelected; }
     
 private:
-    wxString mParamName;
-     bool mIsParamSelected;
+   wxString mParamName;
+   bool mIsParamSelected;
 
-    wxButton *addParamButton;
-    wxListBox *paramListBox;
-    wxListBox *paramSelectedListBox;
-    
-    // methods inherited from GmatDialog
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    virtual void ResetData();
+   wxButton *mAddParamButton;
+   wxButton *mCreateParamButton;
+   wxListBox *mParamListBox;
+   wxListBox *mParamSelectedListBox;
+      
+   // abstract methods from GmatDialog
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   virtual void ResetData();
 
-    // event handling
-    void OnButton(wxCommandEvent& event);
-    
-    DECLARE_EVENT_TABLE()
+   // event handling
+   void OnButton(wxCommandEvent& event);
+   void OnListSelect(wxCommandEvent& event);
+   
+   DECLARE_EVENT_TABLE();
         
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXT = 9300,
-        ID_LISTBOX,
-        ID_BUTTON,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_TEXT = 9300,
+      ID_LISTBOX,
+      ID_BUTTON,
+   };
 };
 
 #endif

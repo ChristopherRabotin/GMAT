@@ -114,7 +114,7 @@ void SpacecraftSelectDialog::Create()
        
    // wxListBox
    scAvailableListBox =
-      theGuiManager->GetSpacecraftListBox(this, wxSize(150, 100), mScExcList);
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150, 100), mScExcList);
 
    if (scSelCount > 0)
    {

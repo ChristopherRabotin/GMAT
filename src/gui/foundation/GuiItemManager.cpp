@@ -136,14 +136,15 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 
 
 //------------------------------------------------------------------------------
-// wxListBox* GetSpacecraftListBox(wxWindow *parent, const wxSize &size,
-//                                 wxArrayString &scsToExclude)
+// wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
+//                                 const wxSize &size, wxArrayString &scsToExclude)
 //------------------------------------------------------------------------------
 /**
  * @return Available Spacecraft ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, const wxSize &size,
+wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
                                                 wxArrayString &scsToExclude)
 {
    wxString emptyList[] = {};
@@ -154,14 +155,14 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, const wxSize &
       if (theNumSpacecraft > 0)
       {       
          theSpacecraftListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, theNumSpacecraft,
-                          theSpacecraftList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumSpacecraft,
+                          theSpacecraftList, wxLB_SINGLE|wxLB_SORT);
       }
       else
       {       
          theSpacecraftListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                          emptyList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
    else
@@ -194,56 +195,33 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, const wxSize &
          }
 
          theSpacecraftListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, newScCount,
-                          newScList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, newScCount,
+                          newScList, wxLB_SINGLE|wxLB_SORT);
          delete newScList;
       }
       else
       {
          //MessageInterface::ShowMessage("GuiItemManager::GetSpacecraftListBox() emptyList\n");
          theSpacecraftListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                          emptyList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
 
    return theSpacecraftListBox;
-
-//     int numObj = theNumSpacecraft;
-    
-//     if (theNumSpacecraft == 0)
-//        numObj = 1;
-    
-//     wxString emptyList[] = {};
-        
-//     if (numObj > 0)
-//     {       
-//        theSpacecraftListBox =
-//           new wxListBox(parent, -1, wxDefaultPosition, size, numObj,
-//                         theSpacecraftList, wxLB_SINGLE);
-//     }
-//     else
-//     {       
-//        theSpacecraftListBox =
-//           new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-//                         emptyList, wxLB_SINGLE);
-//     }
-   
-//     return theSpacecraftListBox;
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetObjectListBox(wxWindow *parent, const wxSize &size,
+// wxListBox* GetObjectListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //                             const wxString &objName, int numObj)
 //------------------------------------------------------------------------------
 /**
  * @return Available Object ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetObjectListBox(wxWindow *parent, const wxSize &size)
-   //const wxString &objName, int numObj)
+wxListBox* GuiItemManager::GetObjectListBox(wxWindow *parent, wxWindowID id,
+                                            const wxSize &size)
 {
-
    // Spacecraft
    //loj: 2/23/04 add other objects in the future build
     
@@ -257,58 +235,60 @@ wxListBox* GuiItemManager::GetObjectListBox(wxWindow *parent, const wxSize &size
    if (numObj > 0)
    {       
       theObjectListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, numObj,
-                       theObjectList, wxLB_SINGLE);
+         new wxListBox(parent, id, wxDefaultPosition, size, numObj,
+                       theObjectList, wxLB_SINGLE|wxLB_SORT);
    }
    else
    {       
       theObjectListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                       emptyList, wxLB_SINGLE);
+         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                       emptyList, wxLB_SINGLE|wxLB_SORT);
    }
    
    return theObjectListBox;
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetParameterListBox(wxWindow *parent, const wxSize &size,
+// wxListBox* GetParameterListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //                                const wxString &objName, int numObj)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, const wxSize &size,
+wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, wxWindowID id,
+                                               const wxSize &size,
                                                const wxString &objName, int numObj)
 {
-        
    wxString emptyList[] = {};
         
    if (numObj > 0)
    {       
       theParamListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, theNumParam,
-                       theParamList, wxLB_SINGLE);
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumParam,
+                       theParamList, wxLB_SINGLE|wxLB_SORT);
    }
    else
    {       
       theParamListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                       emptyList, wxLB_SINGLE);
+         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                       emptyList, wxLB_SINGLE|wxLB_SORT);
    }
    
    return theParamListBox;
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size,
-//                                      const wxString &nameToExclude)
+// wxListBox* GetConfigParameterListBox(wxWindow *parent, wxWindowID id,
+//                                      const wxSize &size,
+//                                      const wxString &nameToExclude = "")
 //------------------------------------------------------------------------------
 /**
  * @return Configured ConfigParameterListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
+                                                     wxWindowID id,
                                                      const wxSize &size,
                                                      const wxString &nameToExclude)
 {       
@@ -325,11 +305,11 @@ wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
          if (theConfigParamList[i] != nameToExclude)
             newConfigParamList[numParams++] = theConfigParamList[i];
       }
-        
+      
       theConfigParamListBox =
-         new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam-1,
-                       newConfigParamList, wxLB_SINGLE);
-
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigParam,
+                       newConfigParamList, wxLB_SINGLE|wxLB_SORT);
+      
       delete newConfigParamList;
    }
    else
@@ -337,29 +317,31 @@ wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
       if (theNumConfigParam > 0)
       {       
          theConfigParamListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam,
-                          theConfigParamList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigParam,
+                          theConfigParamList, wxLB_SINGLE|wxLB_SORT);
       }
       else
       {       
          theConfigParamListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
-                          emptyList, wxLB_SINGLE);
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
-    
+   
    return theConfigParamListBox;
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetConfigBodyListBox(wxWindow *parent, const wxSize &size,
+// wxListBox* GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
+//                                 const wxSize &size,
 //                                 wxArrayString &bodiesToExclude)
 //------------------------------------------------------------------------------
 /**
  * @return Configured ConfigBodyListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, const wxSize &size,
+wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
                                                 wxArrayString &bodiesToExclude)
 {
    //MessageInterface::ShowMessage("GuiItemManager::GetConfigBodyListBox() entered\n");
@@ -372,13 +354,13 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, const wxSize &
       if (theNumConfigBody > 0)
       {       
          theConfigBodyListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigBody,
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigBody,
                           theConfigBodyList, wxLB_SINGLE);
       }
       else
       {       
          theConfigBodyListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE);
       }
    }
@@ -412,7 +394,7 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, const wxSize &
          }
 
          theConfigBodyListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, newBodyCount,
+            new wxListBox(parent, id, wxDefaultPosition, size, newBodyCount,
                           newBodyList, wxLB_SINGLE);
          delete newBodyList;
       }
@@ -420,7 +402,7 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, const wxSize &
       {
          //MessageInterface::ShowMessage("GuiItemManager::GetConfigBodyListBox() emptyList\n");
          theConfigBodyListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE);
       }
    }
@@ -516,22 +498,6 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
    {
       theParamList[i] = items[i].c_str();
       len = theParamList[i].Length();
-
-      //loj: 3/12/04 Parameters does not have "Param" suffix anymore
-      //          if (theParamList[i].Contains("Param"))
-      //          {
-      //              //if "Param" is suffix
-      //              if (theParamList[i].First("Param") == len-5)
-      //              {
-      //                  // remove "Param" from the parameter name
-      //                  // Note: When a new Parameter is created "Param" should be appended
-      //                  //       That's the constructor name
-      //                  theParamList[i].Remove(len-5, 5);
-                
-      //                  //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
-      //                  //                              std::string(theParamList[i].c_str()) + "\n");
-      //              }
-      //          }
    }
 }
 
