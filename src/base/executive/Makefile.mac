@@ -19,7 +19,7 @@ G_PLOT    = $(PROJECT_ROOT)/gui/plot
 G_VIEW    = $(PROJECT_ROOT)/gui/view
 #
 GUI_INCS = -I$(G_APP) -I$(G_BITMAPS) -I$(G_FOUND) -I$(G_INC) -I$(G_PLOT) \
-	-I$(G_MISSION) -I$(G_VIEW)
+	-I$(G_MISSION) -I$(G_VIEW) -I$(WX_HOME)/../contrib/include/wx/plot
 #
 # Source file for creating new library
 SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
@@ -27,7 +27,7 @@ SRC = FileManager.cpp MessageInterface.cpp Moderator.cpp PlotInterface.cpp \
 
 #
 #TESTFLAGS = -D__CONSOLE_APP__
-TESTFLAGS = $(GUI_INCS) `wx-config --cxxflags`
+TESTFLAGS = $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
