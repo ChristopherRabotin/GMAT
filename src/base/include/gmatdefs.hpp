@@ -93,6 +93,7 @@ namespace Gmat
       SOLAR_SYSTEM,
       SPACE_POINT,
       CELESTIAL_BODY,
+      CALCULATED_POINT,
       LIBRATION_POINT,
       BARYCENTER,
       ATMOSPHERE,
@@ -106,6 +107,8 @@ namespace Gmat
       FUEL_TANK,
       THRUSTER,
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
+      COORDINATE_SYSTEM,
+      AXIS_SYSTEM,
       UNKNOWN_OBJECT
    };
 
