@@ -952,13 +952,18 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       case GmatTree::CREATED_OPENGL_PLOT:
          objType = Gmat::SUBSCRIBER;
          break;
+      case GmatTree::DEFAULT_VARIABLE:
+      case GmatTree::CREATED_VARIABLE:
+         objType = Gmat::PARAMETER;
+         break;
       case GmatTree::DEFAULT_MATLAB_FUNCT:
       case GmatTree::CREATED_MATLAB_FUNCT:
          objType = Gmat::FUNCTION;
          break;
       default:
          objType = Gmat::UNKNOWN_OBJECT;
-         //            MessageInterface::ShowMessage("ResourceTree::OnRename() unknown object.\n");
+         MessageInterface::ShowMessage
+            ("ResourceTree::OnRename() unknown object type.\n");
          break;
       }
 
@@ -971,15 +976,25 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          GmatAppData::GetMainFrame()->RenameChild(selItem, newName);
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
-         //theGuiManager->UpdateSpacecraft();
-         theGuiManager->UpdateAll(); //loj: 8/5/04 Let's try UpdateAll
+         theGuiManager->UpdateAll();
+
+         //loj: 11/17/04 added
+         // update variables which may use new object name
+         Collapse(mVariableItem);
+         DeleteChildren(mVariableItem);
+         AddDefaultVariables(mVariableItem);
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("ResourceTree::OnRename() Unable to rename %s to %s.\n",
+             oldName.c_str(), newName.c_str());
       }
    }
 
 
    //loj: It looks better to change name using EditLabel, but How do I get new name?
    //loj:(void) EditLabel(item);
-
 
 }
 
