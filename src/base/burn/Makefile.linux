@@ -1,7 +1,7 @@
 # Makefile for GMAT Burn library
 # Initial Version - D. Conway - 2003/12/17
 
-HEADERS = -I../include -I../foundation -I../spacecraft -I../solarsys
+HEADERS = -I../include -I../foundation -I../spacecraft -I../solarsys -I../util
 OBJECTS = Burn.o \
           BurnException.o \
           ImpulsiveBurn.o \

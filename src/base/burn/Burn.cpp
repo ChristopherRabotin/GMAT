@@ -474,7 +474,7 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
-StringArray& Burn::GetStringArrayParameter(const Integer id) const
+const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 {
     if (id == coordFrameID)
         return frameman->GetSupportedFrames();

@@ -90,6 +90,7 @@ namespace Gmat
       INTEGER_TYPE,
       REAL_TYPE,
       STRING_TYPE,
+      STRINGARRAY_TYPE,
       BOOLEAN_TYPE,
       RVECTOR3_TYPE,
       RVECTOR6_TYPE,

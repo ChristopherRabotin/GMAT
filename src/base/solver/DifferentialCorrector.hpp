@@ -25,7 +25,16 @@
 #include "Solver.hpp"
 
 
-class DifferentialCorrector : public Solver {
+/**
+ * This class implements the first targeter in GMAT.
+ * 
+ * @todo refactor this class with the Solver class so that elements common to
+ *       targeting, scanning, and optimizing are all in the base class.  This 
+ *       task should be done when the first instance of one of the other 
+ *       approaches is implemented.
+ */
+class DifferentialCorrector : public Solver 
+{
 public:
     DifferentialCorrector(std::string name);
     virtual ~DifferentialCorrector();
@@ -33,12 +42,30 @@ public:
     DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
     
     bool                        Initialize(void);
-    
+
+    // Access methods overriden from the base class
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+    virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id) const; 
+
 protected:
+    // Core elements used for the targeter numerics
     /// The number of variables in the targeting problem
     Integer                     variableCount;
     /// The number of goals in the targeting problem
     Integer                     goalCount;
+    /// The number of iterations taken (increments hen the matrix is inverted)
+    Integer                     iterationsTaken;
+    /// Maximum number of iterations allowed
+    Integer                     maxIterations;
     /// Array used to track the variables in the targeting run
     Real                        *variable;
     /// Array used to track the perturbations on each variable
@@ -62,16 +89,35 @@ protected:
     /// The inverted sensitivity matrix
     Real                        **inverseJacobian;
    
+    // Control parameters
     /// Used to turn on central differencing.  Currently not implemented. 
     bool                        useCentralDifferences;
     /// Flag used to ensure the targeter is ready to go
     bool                        initialized;
     
-    virtual void                RunNominal(void);
+    // Reporting parameters
+    /// Name of the targeter text file.  An empty string turns the file off.
+    std::string                 solverTextFile;
+    /// List of variables
+    StringArray                 variableNames;
+    /// List of goals
+    StringArray                 goalNames;
+    
+    virtual void                RunNominal(void); 
     virtual void                RunPerturbation(void);
     virtual void                CalculateParameters(void);
     virtual void                CheckCompletion(void);
 //    virtual void                RunComplete(void);
+
+    virtual void                WriteToTextFile(void);
+    
+    // Parameter IDs
+    /// ID for the targeter text file name
+    const Integer               solverTextFileID;
+    /// ID for variable names
+    const Integer               variableNamesID;
+    /// ID for goal names
+    const Integer               goalNamesID;
 };
 
 #endif // DifferentialCorrector_hpp

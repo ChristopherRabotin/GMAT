@@ -14,11 +14,12 @@ OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
 CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o PlotInterfaceConsole.o
 GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o PlotInterfaceGUI.o
 
-# all: libExecutiveConsole libExecutive
+# all: ../lib/libExecutiveConsole ../lib/libExecutive
 
-all: libExecutiveConsole
+all: libExecutiveConsole.a
 	mkdir -p ../lib
-	mv libExecutiveConsole.a ../lib
+	cp libExecutiveConsole.a ../lib
+
 #	mv libExecutive.a ../lib
 
 libExecutive : ../lib/libExecutive.a
@@ -48,11 +49,11 @@ PlotInterfaceGUI.o : PlotInterface.cpp PlotInterface.hpp
         -c `wx-config --cppflags`\
         -o PlotInterfaceGUI.o PlotInterface.cpp
 
-../lib/libExecutive.a : $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
+libExecutive.a : $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
 	ar rs libExecutive.a $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
 	ranlib libExecutive.a
 
-../lib/libExecutiveConsole.a : $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
+libExecutiveConsole.a : $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
 	ar rs libExecutiveConsole.a $(OBJECTS) $(CONSOLE_INTERFACE_OBJECTS)
 	ranlib libExecutiveConsole.a
 

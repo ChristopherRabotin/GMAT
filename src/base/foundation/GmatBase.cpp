@@ -44,7 +44,7 @@ const Integer     GmatBase::INTEGER_PARAMETER_UNDEFINED = -987654321;
 /// Build the list of type names
 const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
       {
-        "Integer", "Real", "String", "Boolean",
+        "Integer", "Real", "String", "StringArray", "Boolean",
         "Rvector3", "Rvector6", "Rmatrix33", "Cartesian", "Keplerian",
         "A1Mjd", "UtcDate", "Object"
       }; 
@@ -391,7 +391,7 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
-StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
+const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
 {
     std::string errorText = "No StringArrays defined for the ID ";
     errorText += id;
@@ -560,7 +560,7 @@ bool GmatBase::SetStringParameter(const std::string &label,
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
-StringArray& GmatBase::GetStringArrayParameter(const std::string &label) const
+const StringArray& GmatBase::GetStringArrayParameter(const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetStringArrayParameter(id);

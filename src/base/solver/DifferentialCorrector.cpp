@@ -25,6 +25,8 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     Solver                  ("DifferentialCorrector", name), 
     variableCount           (0),
     goalCount               (0),
+    iterationsTaken         (0),
+    maxIterations           (25),
     variable                (NULL),
     perturbation            (NULL),
     variableMinimum         (NULL),
@@ -37,7 +39,11 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     jacobian                (NULL),
     inverseJacobian         (NULL),
     useCentralDifferences   (false),
-    initialized             (false)
+    initialized             (false),
+    solverTextFile          ("targeter.data"),
+    solverTextFileID        (parameterCount),
+    variableNamesID         (parameterCount+1),
+    goalNamesID             (parameterCount+2)
 {
 }
 
@@ -90,8 +96,10 @@ DifferentialCorrector::~DifferentialCorrector()
 
 DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
     Solver                  (dc), 
-    variableCount           (0),
-    goalCount               (0),
+    variableCount           (dc.variableCount),
+    goalCount               (dc.goalCount),
+    iterationsTaken         (0),
+    maxIterations           (dc.maxIterations),
     variable                (NULL),
     perturbation            (NULL),
     variableMinimum         (NULL),
@@ -103,9 +111,14 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
     achieved                (NULL),
     jacobian                (NULL),
     inverseJacobian         (NULL),
-    useCentralDifferences   (false),
-    initialized             (false)
+    useCentralDifferences   (dc.useCentralDifferences),
+    initialized             (false),
+    solverTextFile          (dc.solverTextFile),
+    solverTextFileID        (dc.solverTextFileID),
+    variableNamesID         (dc.variableNamesID),
+    goalNamesID             (dc.goalNamesID)
 {
+    parameterCount = dc.parameterCount;
 }
 
 
@@ -119,7 +132,102 @@ DifferentialCorrector&
 }
 
 
-bool                        Initialize(void)
+// Access methods overriden from the base class
+
+std::string DifferentialCorrector::GetParameterText(const Integer id) const
+{
+    if (id == solverTextFileID)
+        return "TargeterTextFile";
+        
+    if (id == variableNamesID)
+        return "Variables";
+        
+    if (id == goalNamesID)
+        return "Goals";
+        
+    return Solver::GetParameterText(id);
+}
+
+
+Integer DifferentialCorrector::GetParameterID(const std::string &str) const
+{
+    if (str == "TargeterTextFile")
+        return solverTextFileID;
+        
+    if (str == "Variables")
+        return variableNamesID;
+        
+    if (str == "Goals")
+        return goalNamesID;
+        
+    return Solver::GetParameterID(str);
+}
+
+
+Gmat::ParameterType DifferentialCorrector::GetParameterType(const Integer id) const
+{
+    if (id == solverTextFileID)
+        return Gmat::STRING_TYPE;
+        
+    if (id == variableNamesID)
+        return Gmat::STRINGARRAY_TYPE;
+        
+    if (id == goalNamesID)
+        return Gmat::STRINGARRAY_TYPE;
+        
+    return Solver::GetParameterType(id);
+}
+
+
+std::string DifferentialCorrector::GetParameterTypeString(const Integer id) const
+{
+    if (id == solverTextFileID)
+        return GmatBase::PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+        
+    if (id == variableNamesID)
+        return GmatBase::PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
+        
+    if (id == goalNamesID)
+        return GmatBase::PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
+        
+    return Solver::GetParameterTypeString(id);
+}
+
+
+std::string DifferentialCorrector::GetStringParameter(const Integer id) const
+{
+    if (id == solverTextFileID)
+        return solverTextFile;
+        
+    return Solver::GetStringParameter(id);
+}
+
+
+bool DifferentialCorrector::SetStringParameter(const Integer id, 
+                                               const std::string &value)
+{
+    if (id == solverTextFileID) {
+        solverTextFile = value;
+        return true;
+    }
+        
+    return Solver::SetStringParameter(id, value);
+}
+
+
+const StringArray& DifferentialCorrector::GetStringArrayParameter(const Integer id) const
+{
+    if (id == variableNamesID)
+        return variableNames;
+        
+    if (id == goalNamesID)
+        return goalNames;
+        
+    return Solver::GetStringArrayParameter(id);
+}
+
+
+bool DifferentialCorrector::Initialize(void)
 {
     return false;
 }

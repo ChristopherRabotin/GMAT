@@ -26,7 +26,7 @@
 #include "Toggle.hpp"      // for Toggle command
 #include "Maneuver.hpp"    // for Maneuver command
 #include "Target.hpp"      // for Target command
-#include "Endtarget.hpp"   // for EndTarget command
+#include "EndTarget.hpp"   // for EndTarget command
 
 
 //---------------------------------

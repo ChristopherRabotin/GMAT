@@ -1,7 +1,12 @@
 # Makefile for GMAT Parameter library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../foundation -I../util
+HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
+          -I../forcemodel -I../propagator -I../subscriber -I../command \
+          -I../solarsys -I../factory -I../stopcond -I../interpreter \
+          -I../util -I../interpolator -I../parameter -I../configs \
+          -I../refframe -I../burn
+
 OBJECTS = Parameter.o \
           ParameterDatabase.o \
           CartStateParam.o \

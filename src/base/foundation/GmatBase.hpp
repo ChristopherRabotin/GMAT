@@ -80,7 +80,7 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
-    virtual StringArray& 
+    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const; 
     virtual bool        GetBooleanParameter(const Integer id) const;
     virtual bool        SetBooleanParameter(const Integer id,
@@ -95,7 +95,7 @@ public:
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const std::string &label, 
                                            const std::string &value);
-    virtual StringArray& 
+    virtual const StringArray& 
                         GetStringArrayParameter(const std::string &label)const;
     virtual bool        GetBooleanParameter(const std::string &label) const;
     virtual bool        SetBooleanParameter(const std::string &label,

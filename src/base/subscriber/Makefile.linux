@@ -5,11 +5,17 @@
 # MessageWindow uses MessageInterface, part of the executive library.  But
 # the factory for MessageWindow gets built before executive.
 
-HEADERS = -I../include -I../foundation -I../executive
+HEADERS =  -I../include -I../foundation -I../executive -I../spacecraft \
+          -I../forcemodel -I../propagator -I../subscriber -I../command \
+          -I../solarsys -I../factory -I../stopcond -I../interpreter \
+          -I../util -I../interpolator -I../parameter -I../configs \
+          -I../refframe -I../burn
+
 OBJECTS = Subscriber.o \
         ReportFile.o \
         MessageWindow.o \
-        OpenGlPlot.o
+        OpenGlPlot.o \
+        XyPlot.o
 
 all: libSubscriber
 	mkdir -p ../lib

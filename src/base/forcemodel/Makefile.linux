@@ -1,7 +1,7 @@
 # Makefile for GMAT Force Model library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../foundation -I../spacecraft
+HEADERS = -I../include -I../foundation -I../spacecraft -I../util
 OBJECTS = DerivativeList.o ForceModel.o PhysicalModel.o PointMassForce.o
 
 all: libForceModel

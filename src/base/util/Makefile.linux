@@ -5,7 +5,7 @@ HEADERS = -I../include -I../foundation
 OBJECTS = A1Date.o A1Mjd.o Cartesian.o Date.o DateUtil.o ElapsedTime.o \
           EphemerisUtil.o Keplerian.o Linear.o RealUtilities.o \
           Rmatrix33.o Rmatrix.o Rvector3.o Rvector6.o Rvector.o \
-          UtcDate.o
+          UtcDate.o Spherical.o SphericalOne.o SphericalTwo.o
 
 all: libUtilities 
 	mkdir -p ../lib
