@@ -200,9 +200,13 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       // convert time to tdb
       Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue,
          refJd);
-      Real offset = L_B * ((origValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
+      //Real jdValue = origValue;  // but this is TAI
+      Real jdValue = tdbMjd;
+      //Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
+      Real offset = L_B * ((jdValue + refJd) - TCB_JD_MJD_OFFSET);
       // units of offset are in seconds, so convert to fraction of days
-      return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
+      //return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
+      return (offset + tdbMjd);
    }
    // tt
    else if (toType == TIME_SYSTEM_TEXT[5])
