@@ -45,11 +45,12 @@ public:
                                         const std::string &name);
 
    virtual GmatBase*    Clone() const;
+   virtual bool         Initialize();
    virtual bool         Execute();
 
 protected:
    /// Name of the FiniteBurn object used to set the maneuver details
-   std::string          maneuverName;
+   std::string          burnName;
    /// The FiniteBurn object
    FiniteBurn           *maneuver;
    /// The names of the spacecraft that get maneuvered
@@ -57,6 +58,9 @@ protected:
    /// The spacecraft that get maneuvered
    std::vector<Spacecraft *>
                         sats;
+   /// The thrusters that get deactivated
+   std::vector<Thruster *>
+                        thrusters;
 };
 
 #endif // EndManeuver_hpp

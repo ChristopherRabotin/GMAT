@@ -20,6 +20,7 @@
 #ifndef BeginManeuver_hpp
 #define BeginManeuver_hpp
 
+
 #include "Command.hpp"
 #include "FiniteBurn.hpp"
 #include "Spacecraft.hpp"
@@ -32,7 +33,6 @@
 class GMAT_API BeginManeuver : public GmatCommand
 {
 public:
-
    BeginManeuver();
    virtual ~BeginManeuver();
    BeginManeuver(const BeginManeuver& begman);
@@ -45,11 +45,12 @@ public:
                                         const std::string &name);
    
    virtual GmatBase*    Clone() const;
+   virtual bool         Initialize();
    virtual bool         Execute();
    
 protected:
    /// Name of the FiniteBurn object used to set the maneuver details
-   std::string          maneuverName;
+   std::string          burnName;
    /// The FiniteBurn object
    FiniteBurn           *maneuver;
    /// The names of the spacecraft that get maneuvered
@@ -57,6 +58,9 @@ protected:
    /// The spacecraft that get maneuvered
    std::vector<Spacecraft *>
                         sats;
+   /// The thrusters that get activated
+   std::vector<Thruster *>
+                        thrusters;
 };
 
 #endif // BeginManeuver_hpp

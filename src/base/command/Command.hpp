@@ -48,7 +48,7 @@
  * Initialize() on each GmatCommand, and then runs the sequence by calling Execute()
  * on the first GmatCommand in the sequence.
  */
-class GmatCommand : public GmatBase
+class GMAT_API GmatCommand : public GmatBase
 {
 public:
    // class constructor
