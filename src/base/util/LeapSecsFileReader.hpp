@@ -23,23 +23,20 @@
 #include "gmatdefs.hpp"
 #include "TimeTypes.hpp"
 
-class LeapSecsFileReader
+class GMAT_API LeapSecsFileReader
 {
 public:
-   LeapSecsFileReader(std::string withFileName = "tai-utc.dat");
+   LeapSecsFileReader(const std::string &fileName = "tai-utc.dat");
    virtual ~LeapSecsFileReader();
    LeapSecsFileReader(const LeapSecsFileReader& lsfr);
    LeapSecsFileReader& operator=(const LeapSecsFileReader& lsfr);
-        
-   bool    LoadTimeCoeffFile(std::string withFileName);
+
+   bool Initialize();
    Real    NumberOfLeapSecondsFrom(UtcMjd utcMjd);
 
-protected:
-
-
 private:
+
    bool Parse(std::string line);
-   bool initialized;
 
    struct LeapSecondInformation
    {
@@ -48,8 +45,11 @@ private:
       Real offset2;
       Real offset3;
    };    
-   
+
+   // member data
+   bool isInitialized;
    std::vector<LeapSecondInformation> lookUpTable;
+   std::string withFileName;
 };
 
 #endif // LeapSecsFileReader_hpp

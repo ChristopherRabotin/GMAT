@@ -20,224 +20,133 @@
 #include "TimeSystemConverter.hpp"
 
 using namespace GmatMathUtil;
-using namespace std;
-
-//---------------------------------
-// static data
-//---------------------------------
-const std::string
-TimeSystemConverter::TIME_SYSTEM_TEXT[6] =
-{
-   "A1Mjd",
-   "UtcMjd",
-   "Ut1Mjd",
-   "TdbMjd",
-   "TcbMjd",
-   "TtMjd",
-};
-
-// Specified in Math Spec section 2.3
-const Real TimeSystemConverter::TDB_COEFF1               = 0.001658;
-const Real TimeSystemConverter::TDB_COEFF2               = 0.00001385;
-const Real TimeSystemConverter::M_E_OFFSET               = 357.5277233;
-const Real TimeSystemConverter::M_E_COEFF1               = 35999.05034;
-const Real TimeSystemConverter::T_TT_OFFSET              = 2451545.0;
-const Real TimeSystemConverter::T_TT_COEFF1              = 36525;
-// from email from Wendy 1/26/05
-const Real TimeSystemConverter::L_B                      = 1.550505e-8;
-const Real TimeSystemConverter::TCB_JD_MJD_OFFSET        = 2443144.5;
-const Real TimeSystemConverter::NUM_SECS                 = 86400;
-
-//-------------------------------------
-// public methods
-//-------------------------------------
 
 //---------------------------------------------------------------------------
-//  TimeSystemConverter()
-//---------------------------------------------------------------------------
-/**
- * Creates default constructor.
- *
- */
-TimeSystemConverter::TimeSystemConverter()
-{
-   jdOffset = 2400000.5;
-}
-
-//---------------------------------------------------------------------------
-//  TimeSystemConverter(const std::string &type)
-//---------------------------------------------------------------------------
-/**
- * Creates constructors with parameters.
- *
- * @param <typeStr> GMAT script string associated with this type of object.
- *
- */
-TimeSystemConverter::TimeSystemConverter(const std::string &type)
-{
-}
-
-//---------------------------------------------------------------------------
-//  TimeSystemConverter(const TimeSystemConverter &TimeSystemConverter)
-//---------------------------------------------------------------------------
-/**
- * Copy Constructor for base TimeSystemConverter structures.
- *
- * @param <stateConverter> The original that is being copied.
- */
-TimeSystemConverter::TimeSystemConverter(const TimeSystemConverter &TimeSystemConverter)
-{
-}
-
-//---------------------------------------------------------------------------
-//  ~TimeSystemConverter()
-//---------------------------------------------------------------------------
-/**
- * Destructor.
- */
-TimeSystemConverter::~TimeSystemConverter()
-{
-}
-
-//---------------------------------------------------------------------------
-//  TimeSystemConverter& operator=(const TimeSystemConverter &TimeSystemConverter)
+//  Real TimeConverterUtil::Convert(const Real origValue,
+//                              const std::string &fromType,
+//                              const std::string &toType)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for TimeSystemConverter structures.
  *
- * @param <converter> The original that is being copied.
- *
- * @return Reference to this object
- */
-TimeSystemConverter& TimeSystemConverter::operator=(const TimeSystemConverter &TimeSystemConverter)
-{
-    // Don't do anything if copying self
-    if (&TimeSystemConverter == this)
-        return *this;
-
-    // Will fix it later
-    return *this;
-}
-
-//---------------------------------------------------------------------------
-//  Real TimeSystemConverter::Convert(const Real time,
-//                              const std::string &fromDateFormat,
-//                              const std::string &toDateFormat)
-//---------------------------------------------------------------------------
-/**
- * Assignment operator for TimeSystemConverter structures.
- *
- * @param <time>            Given Time 
- * @param <fromDateFormat>  Time which is converted from date format
- * @param <toDateFormat>    Tiem which is converted to date format 
+ * @param <origValue>            Given Time
+ * @param <fromType>  Time which is converted from date format
+ * @param <toType>    Tiem which is converted to date format
  *
  * @return Converted time from the specific data format 
  */
-Real TimeSystemConverter::Convert(const Real time,
-                        const std::string &fromTimeFormat,
-                        const std::string &toTimeFormat)
+Real TimeConverterUtil::Convert(const Real origValue,
+                        const std::string &fromType,
+                        const std::string &toType)
 {
-    return 0;
+   Real newTime =
+      TimeConverterUtil::ConvertToTaiMjd(fromType, origValue);
+   Real returnTime =
+      TimeConverterUtil::ConvertFromTaiMjd(toType, origValue);
+   return returnTime;
 }
 
-Real TimeSystemConverter::ConvertToTaiMjd(std::string fromTimeFormat, Real time)
+Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
+      Real refJd)
 {
    // a1mjd
-   if (fromTimeFormat == TIME_SYSTEM_TEXT[0])
+   if (fromType == TIME_SYSTEM_TEXT[0])
    {
-      return (time - GmatTimeUtil::A1_TAI_OFFSET);
+      return (origValue - GmatTimeUtil::A1_TAI_OFFSET);
    }
    // utc
-   else if (fromTimeFormat == TIME_SYSTEM_TEXT[1])
+   else if (fromType == TIME_SYSTEM_TEXT[1])
    {
       // look up leap secs from file
       Real numLeapSecs =
-            theLeapSecsFileReader->NumberOfLeapSecondsFrom(time);
-      return (time + numLeapSecs);
+            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue);
+      return (origValue + numLeapSecs);
    }
    // ut1
-   else if (fromTimeFormat == TIME_SYSTEM_TEXT[2])
+   else if (fromType == TIME_SYSTEM_TEXT[2])
    {
-      Real ut1Offset = theEopFile->GetUt1UtcOffset(time);
-      Real utcOffset = theEopFile->GetUt1UtcOffset(time - ut1Offset);
+      if (theEopFile == NULL)
+         throw TimeSystemConverterExceptions::FileException(
+               "EopFile is unknown");
 
-      return (ConvertToTaiMjd("UtcMjd", (time - utcOffset)));
+      Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue);
+      Real utcOffset = theEopFile->GetUt1UtcOffset(origValue - ut1Offset);
+
+      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue - utcOffset)));
 
    }
    // tdb
-   else if (fromTimeFormat == TIME_SYSTEM_TEXT[3])
+   else if (fromType == TIME_SYSTEM_TEXT[3])
    {
-      throw TimeSystemConverter::ImplementationException("Not Implement - TDB to TAI");
-//      Real tdbJd = time + jdOffset;
+      throw TimeSystemConverterExceptions::ImplementationException(
+               "Not Implement - TDB to TAI");
+//      Real tdbJd = origValue + jdOffset;
 //      Real taiJd = ((tdbJd - ((TDB_COEFF1 *sin(m_E)) +
 //                    (TDB_COEFF2 * sin(2 * m_E)))) * T_TT_COEFF1) - T_TT_OFFSET;
 //      return (taiJd - jdOffset);
    }
    // tcb
-   else if (fromTimeFormat == TIME_SYSTEM_TEXT[4])
+   else if (fromType == TIME_SYSTEM_TEXT[4])
    {
-      throw TimeSystemConverter::ImplementationException("Not Implement - TCB to TAI");
+      throw TimeSystemConverterExceptions::ImplementationException(
+               "Not Implement - TCB to TAI");
 //      Real tdbMjd;
 //      return ConvertToTaiMjd("TdbMjd", tdbMjd);
    }
    // tt
-   else if (fromTimeFormat == TIME_SYSTEM_TEXT[5])
+   else if (fromType == TIME_SYSTEM_TEXT[5])
    {
-      return (time - GmatTimeUtil::TT_TAI_OFFSET);
+      return (origValue - GmatTimeUtil::TT_TAI_OFFSET);
    }
 
    return 0;
 }
 
 
-Real TimeSystemConverter::ConvertFromTaiMjd(std::string toTimeFormat, Real time)
+Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
+      Real refJd)
 {
-   if (toTimeFormat == TIME_SYSTEM_TEXT[0])
+   if (toType == TIME_SYSTEM_TEXT[0])
    {
-      return (time + GmatTimeUtil::A1_TAI_OFFSET);
+      return (origValue + GmatTimeUtil::A1_TAI_OFFSET);
    }
    // utc
-   else if (toTimeFormat == TIME_SYSTEM_TEXT[1])
+   else if (toType == TIME_SYSTEM_TEXT[1])
    {
-       Real taiLeapSecs =
-            theLeapSecsFileReader->NumberOfLeapSecondsFrom(time);
+      Real taiLeapSecs =
+            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue);
 
-      // no leap second
-      if (taiLeapSecs == 0)
-         return time;
-      // leap second
+      Real utcLeapSecs =
+            theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue - taiLeapSecs);
+
+      if (utcLeapSecs == taiLeapSecs)
+         return (origValue - taiLeapSecs);
       else
-      {
-         // leap second falls in the middle
-         Real utcLeapSecs =
-               theLeapSecsFileReader->NumberOfLeapSecondsFrom(time - taiLeapSecs);
-
-         if (utcLeapSecs == taiLeapSecs)
-            return (time - taiLeapSecs);
-         else
-            return (time - utcLeapSecs);
-      }
+         return (origValue - utcLeapSecs);
    }
    // ut1
-   else if (toTimeFormat == TIME_SYSTEM_TEXT[2])
+   else if (toType == TIME_SYSTEM_TEXT[2])
    {
-      // convert time to utc
-      Real utcMjd = ConvertFromTaiMjd("UtcMjd", time);
+      if (theEopFile == NULL)
+         throw TimeSystemConverterExceptions::FileException(
+               "EopFile is unknown");
+
+      // convert origValue to utc
+      Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd("UtcMjd", origValue);
       Real numOffset = 0;
 
-      if (theEopFile != NULL)
-         numOffset = theEopFile->GetUt1UtcOffset(utcMjd);
+      numOffset = theEopFile->GetUt1UtcOffset(utcMjd);
 
       // add delta ut1 read from eop file
       return (utcMjd + numOffset);
    }
    // tdb
-   else if (toTimeFormat == TIME_SYSTEM_TEXT[3])
+   else if (toType == TIME_SYSTEM_TEXT[3])
    {
       // convert time to tt
-      Real ttJd = ConvertFromTaiMjd("TtMjd", time);
+      Real ttJd = TimeConverterUtil::ConvertFromTaiMjd("TtMjd", origValue);
       // convert to ttJD
-      ttJd += jdOffset;
+      ttJd += refJd;
 
       // compute T_TT
       Real t_TT = (ttJd - T_TT_OFFSET) / T_TT_COEFF1;
@@ -245,33 +154,34 @@ Real TimeSystemConverter::ConvertFromTaiMjd(std::string toTimeFormat, Real time)
       Real m_E = M_E_OFFSET + (M_E_COEFF1 * t_TT);
 
       Real tdbJd = ttJd + (TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E));
-      return tdbJd - jdOffset;
+      return tdbJd - refJd;
    }
    // tcb
-   else if (toTimeFormat == TIME_SYSTEM_TEXT[4])
+   else if (toType == TIME_SYSTEM_TEXT[4])
    {
       // convert time to tdb
-      Real tdbMjd = ConvertFromTaiMjd("TdbMjd", time);
-      return ((L_B * (time - TCB_JD_MJD_OFFSET) * NUM_SECS) + tdbMjd);
+      Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue);
+      return ((L_B * (origValue - TCB_JD_MJD_OFFSET) * NUM_SECS) + tdbMjd);
    }
    // tt
-   else if (toTimeFormat == TIME_SYSTEM_TEXT[5])
+   else if (toType == TIME_SYSTEM_TEXT[5])
    {
-      return (time + GmatTimeUtil::TT_TAI_OFFSET);
+      return (origValue + GmatTimeUtil::TT_TAI_OFFSET);
    }
 
    return 0;
 }
 
-bool TimeSystemConverter::SetEopFile(EopFile *eopFile)
+bool TimeConverterUtil::SetEopFile(EopFile *eopFile)
 {
    theEopFile = eopFile;
    return true;
 }
 
-bool TimeSystemConverter::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
+bool TimeConverterUtil::SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader)
 {
    theLeapSecsFileReader = leapSecsFileReader;
    return true;
 }
+
 

@@ -27,6 +27,18 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+
+using namespace std;
+
+//---------------------------------
+// static data
+//---------------------------------
+// hard coded for now - need to allow user to set later
+//std::string LeapSecsFileReader::withFileName = "tai-utc.dat";
+
+//---------------------------------
+// public
+//---------------------------------
 //------------------------------------------------------------------------------
 //  LeapSecsFileReader()
 //------------------------------------------------------------------------------
@@ -34,10 +46,10 @@
  *  Constructor.
  */
 //------------------------------------------------------------------------------
-LeapSecsFileReader::LeapSecsFileReader(std::string withFileName)
+LeapSecsFileReader::LeapSecsFileReader(const std::string &fileName) :
+withFileName     (fileName)
 {
-   initialized = false;
-   LoadTimeCoeffFile(withFileName);
+   isInitialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -52,54 +64,39 @@ LeapSecsFileReader::~LeapSecsFileReader()
 }
 
 //------------------------------------------------------------------------------
-//  LeapSecsFileReader(const LeapSecsFileReader& tcfr)
+// bool Initialize()
 //------------------------------------------------------------------------------
-/**
- *  Copy constructor.
- */
-//------------------------------------------------------------------------------
-LeapSecsFileReader::LeapSecsFileReader(const LeapSecsFileReader& lsfr)
+bool LeapSecsFileReader::Initialize()
 {
-}
-
-//------------------------------------------------------------------------------
-//  bool LoadTimeCoeffFile(std::string withFileName)
-//------------------------------------------------------------------------------
-/**
- */ 
-bool LeapSecsFileReader::LoadTimeCoeffFile(std::string withFileName)
-{
-//   MessageInterface::ShowMessage("LeapSecsFileReader::LoadTimeCoeffFile()\n");
-
-   std::ifstream instream;
-   
-   instream.open(withFileName.c_str());
-
-   if (instream == NULL)
-      return false;
-
-   while (!instream.eof())
+   try
    {
-      std::string line;
-      getline(instream,line);
-//      MessageInterface::ShowMessage("LeapSecsFileReader::LoadTimeCoeffFile %s\n",
-//                         line.c_str());
-      Parse(line);
+      if (!isInitialized)
+      {
+         std::ifstream instream;
+
+         instream.open(withFileName.c_str());
+
+         if (instream == NULL)
+            return false;
+
+         while (!instream.eof())
+         {
+            std::string line;
+            getline(instream,line);
+            Parse(line);
+         }
+
+         instream.close();
+      }
+   }
+   catch (...)
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+                                     "Unknown Error");
    }
 
-   initialized = true;
-   instream.close();
-
-//   print out of the table
-//   for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end()-1;
-//              i >= lookUpTable.begin(); i--)
-//   {
-//      MessageInterface::ShowMessage("%f\t%f\t%f\t%f\t\n", (*i).julianDate,
-//            (*i).offset1, (*i).offset2, (*i).offset3);
-//   }
-
-
-   return true;
+   isInitialized = true;
+   return isInitialized;
 }
 
 //------------------------------------------------------------------------------
@@ -150,10 +147,12 @@ bool LeapSecsFileReader::Parse(std::string line)
 //------------------------------------------------------------------------------
 Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
 {
-   if (initialized)
+   if (isInitialized)
    {
       Real jd = utcMjd + GmatTimeUtil::JD_MJD_OFFSET;
 
+      // look up each entry in the table to see if value is greater then the
+      // julian date
       for (std::vector<LeapSecondInformation>::iterator i = lookUpTable.end()-1;
                  i >= lookUpTable.begin(); i--)
       {
@@ -166,6 +165,5 @@ Real LeapSecsFileReader::NumberOfLeapSecondsFrom(UtcMjd utcMjd)
       return 0;
    }
    else
-
       return 0;
 }

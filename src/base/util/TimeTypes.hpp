@@ -82,6 +82,8 @@ namespace GmatTimeUtil
    const Real JD_MJD_OFFSET = 2400000.5;        // Vallado page 187
    const Real TT_TAI_OFFSET = 32.184;           // GMAT Math Spec section 2.3
    const Real A1_TAI_OFFSET = 0.0343817;        // GMAT Math Spec section 2.1
+   const Real JD_JAN_5_1941 = 24300000.0;       // old name JULIAN_DATE_OF_010541
+   const Real JD_NOV_17_1858 = 2400000.5;       // old name JD_MJD_OFFSET
 
    const Integer DAYS_BEFORE_MONTH[12] =
    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
