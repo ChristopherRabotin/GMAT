@@ -153,6 +153,7 @@ namespace GmatTree
         FOR_CONTROL,
         DO_CONTROL,
         SWITCH_CONTROL,
+        END_CONTROL,
     };
 }
 #endif // GmatTreeItemData_hpp
