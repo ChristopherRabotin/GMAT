@@ -76,20 +76,22 @@ private:
    /// Object store for this run
    std::map<std::string, GmatBase *> objectMap;
    /// Solar System model for this Sandbox
-   SolarSystem   *solarSys;
+   SolarSystem    *solarSys;
    /// GMAT Publisher singleton
-   Publisher     *publisher;
+   Publisher      *publisher;
    /// Command sequence for the run
-   GmatCommand   *sequence;
+   GmatCommand    *sequence;
    /// The executing Command
-   GmatCommand   *current;
+   GmatCommand    *current;
    /// Pointer to the moderator, used to check Pause/Stop status
-   Moderator     *moderator;
+   Moderator      *moderator;
    /// Execution mode for the sandbox
-   runMode       state;
+   runMode        state;
 
    Sandbox(const Sandbox&);
    Sandbox& operator=(const Sandbox&);
+   
+   void           BuildAssociations(GmatBase * obj);
 };
 
 #endif

@@ -238,6 +238,9 @@ bool Sandbox::Initialize()
             // Finalize the state data -- this call moves the display state data
             // into the internal state.
             ((Spacecraft*)(omi->second))->SaveDisplay();
+            
+            // Build the spacecraft hardware and couple it together
+            BuildAssociations(omi->second);
          }
          else if((omi->second)->GetType() == Gmat::PARAMETER)
          {
@@ -454,9 +457,16 @@ void Sandbox::Clear()
    current   = NULL;
    state     = IDLE;
     
-   /// @todo The current Sandbox::Clear() method has a small memory leak
-   ///       when spacecraft are removed from the onjectMap.  This needs to
-   ///       be fixed.
+   // Delete the clones (currently only Spacecraft and Formations get cloned)
+   std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+//      if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
+//          ((omi->second)->GetType() == Gmat::FORMATION))
+      if ((omi->second)->GetType() == Gmat::SPACECRAFT)
+         delete omi->second;
+   }
+   
    objectMap.clear();
 }
 
@@ -475,3 +485,23 @@ bool Sandbox::AddSubscriber(Subscriber *sub)
    return  AddObject(sub);
 }
 
+
+//------------------------------------------------------------------------------
+// void BuildAssociations()
+//------------------------------------------------------------------------------
+void Sandbox::BuildAssociations(GmatBase * obj)
+{
+   // Spacecraft receive clones of the associated hardware objects
+   if (obj->GetType() == Gmat::SPACECRAFT) {
+      StringArray hw = obj->GetRefObjectNameArray(Gmat::HARDWARE);
+      for (StringArray::iterator i = hw.begin(); i < hw.end(); ++i) {
+         if (objectMap.find(*i) == objectMap.end())
+            throw SandboxException("Sandbox::BuildAssociations: Cannot find "
+                                   "hardware element \"" + (*i) + "\"\n");
+         GmatBase *el = objectMap[*i];
+         obj->SetRefObject(el->Clone(), el->GetType(), el->GetName());
+      }
+      
+      obj->TakeAction("SetupHardware");
+   }
+}
