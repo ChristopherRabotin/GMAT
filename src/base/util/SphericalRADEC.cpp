@@ -215,7 +215,9 @@ Rvector6 SphericalRADEC::GetCartesian()
    Real vX = GetVelocityMagnitude() * GmatMathUtil::Cos(decV) * 
       GmatMathUtil::Cos(raV);
 
-   Real vY = vX * GmatMathUtil::Tan(raV);
+   Real vY = vX * tan(raV);
+//   @todo:  below looks like the problem... should use Tan() or tan()? 
+//   Real vY = vX * GmatMathUtil::Tan(raV);
 
    Real vZ = GetVelocityMagnitude() * GmatMathUtil::Sin(decV);
 
