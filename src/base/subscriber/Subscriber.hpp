@@ -36,7 +36,7 @@
 #define Subscriber_hpp
 
 #include "GmatBase.hpp"
-
+#include "CoordinateSystem.hpp"
 
 class GMAT_API Subscriber : public GmatBase
 {
@@ -60,7 +60,8 @@ public:
    bool IsActive();
    
    virtual void SetProviderId(Integer id);
-    
+   virtual void SetInternalCoordSystem(CoordinateSystem *cs); //loj: 1/27/05 Added
+   
 protected:
    enum
    {
@@ -69,6 +70,8 @@ protected:
    
    const char *data;
    Subscriber *next;
+   CoordinateSystem *internalCoordSystem;
+   
    bool        active;
    bool        isEndOfReceive;
    Integer     currentProvider;

@@ -230,6 +230,14 @@ void Subscriber::SetProviderId(Integer id)
    currentProvider = id;
 }
 
+//------------------------------------------------------------------------------
+// virtual void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   internalCoordSystem = cs;
+}
+
 //---------------------------------
 //  protected methods
 //---------------------------------
