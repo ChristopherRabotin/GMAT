@@ -876,11 +876,11 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
          ++p;
       }
       if (leftIsParm && !lhFound) 
-         throw CommandException("Parameter not found for LHS string in condition " +
-                                which);
+         throw CommandException("Parameter " + theLHSParmName +
+              " not found for LHS string in condition ");// + which);
       if (rightIsParm && !rhFound)
-         throw CommandException("Parameter not found for RHS string in condition " +
-                                which);
+         throw CommandException("Parameter " + theRHSParmName +
+              " not found for RHS string in condition ");// + which);
    }
    switch (opList.at(which))
    {
