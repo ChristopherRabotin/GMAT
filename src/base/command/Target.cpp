@@ -404,6 +404,8 @@ bool Target::Initialize(void)
 
    // Clone the targeter for local use
    targeter = (Solver *)((*objectMap)[targeterName])->Clone();
+   targeter->TakeAction("IncrementInstanceCount");
+   ((*objectMap)[targeterName])->TakeAction("IncrementInstanceCount");
     
    // Set the local copy of the targeter on each node
    std::vector<GmatCommand*>::iterator node;

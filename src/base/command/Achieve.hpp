@@ -59,7 +59,8 @@ public:
     virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
     
-
+    bool                ConstructGoal(const char* str);
+    
     // Inherited methods overridden from the base class
     virtual bool        InterpretAction(void);
     virtual bool        Initialize(void);
@@ -72,6 +73,8 @@ protected:
     std::string         goalName;
     /// Target value for the goal
     Real                goal;
+    /// Parameter used for floating end point goals
+    Parameter           *goalTarget;
     /// Accuracy needed for the goal
     Real                tolerance;
     /// Pointer to the object that owns the goal
