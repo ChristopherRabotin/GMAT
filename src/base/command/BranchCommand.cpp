@@ -207,7 +207,9 @@ bool BranchCommand::Initialize()
       }
    }
    
+   commandComplete  = false;
    commandExecuting = false;
+   
    return retval;
 }
 
