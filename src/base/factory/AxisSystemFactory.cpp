@@ -26,6 +26,7 @@
 #include "MJ2000EcAxes.hpp"
 #include "BodyFixedAxes.hpp"
 #include "EquatorAxes.hpp"
+#include "ObjectReferencedAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -106,9 +107,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "ObjectReferenced")  // need to do more here????
    {
-      MessageInterface::ShowMessage(                // *** temporary
-          "ObjectReferencedAxes not yet imnplemented.\n");
-      //withAxes = new ObjectReferencedAxes(withName);
+      withAxes = new ObjectReferencedAxes(withName);
    }
    else if (ofType == "Equator")
    {
