@@ -497,12 +497,6 @@ Ut1Mjd A1Mjd::ToUt1Mjd()
    return (Ut1Mjd) (((Real) ToUtcMjd()) + Ut1MinusUtc);
 }
 
-// additions to compute offsets for planetary orientation data (see IAU doc)
-Real A1Mjd::JulianDaysFromTCBEpoch() const
-{
-   return mMjd / SECS_PER_DAY; // ?????????????????? temporary ****************
-}
-
 
 //---------------------------------
 // private
