@@ -23,6 +23,10 @@
 #include "ConditionalBranch.hpp"
 #include "Parameter.hpp"
 
+#include "MessageInterface.hpp"
+
+//#define DEBUG_CONDITIONS
+
 
 //---------------------------------
 // static data
@@ -415,6 +419,14 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index)
 {
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "ConditionalBranch::SetRefObject entered; Parameters are\n   "
+         "obj with type \"%s\"\n   Gmat::ObjectType = %d\n   name = \"%s\""
+         "\n   index = %d\n", obj->GetTypeName().c_str(), type, name.c_str(), 
+         index);
+   #endif
+
    
    switch (type)
    {
@@ -834,6 +846,24 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    std::string theLHSParmName = "";
    //std::string theLHSParmName = lhsList.at(which);
    std::string theRHSParmName = "";
+
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "ConditionalBranch::EvaluateCondition entered; which = %d\n   "
+         "LHS conditions known:\n", which);
+      for (StringArray::iterator l = lhsList.begin(); l != lhsList.end(); ++l)
+         MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());
+      MessageInterface::ShowMessage(
+         "\n   RHS conditions known:\n");
+      for (StringArray::iterator r = lhsList.begin(); r != lhsList.end(); ++r)
+         MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());
+
+      MessageInterface::ShowMessage("\n   Actual parms known:\n");
+      for (std::vector<Parameter*>::iterator p = params.begin(); 
+           p != params.end(); ++p)
+         MessageInterface::ShowMessage("      \"%s\"\n", 
+            (*p)->GetName().c_str());
+   #endif
    
    char firstChar = (rhsList.at(which)).at(0);
    if (isalpha(firstChar))  // if not a real, assume a Parameter  
