@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 
 // Uncomment to generate drag model data for debugging:
-// #define     DEBUG      
+#define     DEBUG      
 
 #ifdef DEBUG
    #include <fstream>
@@ -327,8 +327,12 @@ void DragForce::SetSatelliteParameter(const Integer i,
  * Allocates memory and performs other drag force initialization.
  */
 //------------------------------------------------------------------------------
-bool DragForce::Initialize(void)
+bool DragForce::Initialize()
 {
+    #ifdef DEBUG
+         dragdata << "Entered DragForce::Initialize()\n";
+    #endif
+
     bool retval = PhysicalModel::Initialize();
     
     if (retval) {
@@ -372,6 +376,7 @@ bool DragForce::Initialize(void)
            if (atmos)  {
                atmos->SetSunVector(sunLoc);
                atmos->SetCentralBodyVector(cbLoc);
+               atmos->SetSolarSystem(solarSystem);
            }
            else {
               if (atmosphereType != "BodyDefault") {
@@ -385,6 +390,10 @@ bool DragForce::Initialize(void)
     }
     
     firedOnce = false;
+
+    #ifdef DEBUG
+         dragdata << "Leaving DragForce::Initialize()\n";
+    #endif
     
     return retval;
 }
@@ -398,7 +407,7 @@ bool DragForce::Initialize(void)
  * 
  * The drag prefactor is given by
  * 
- *     \f[F_d = -{1 \over 2} {{C_d A} \over {m}} \f]
+ *     \f[F_d = -\frac{1}{2} \frac{C_d A}{m} \f]
  * 
  * The atmospheric model classes provide densities in kg/m^3.  Since we need
  * accelerations in km/s^2, there is an extra factor of 1000 in the prefactor
@@ -461,6 +470,10 @@ void DragForce::BuildPrefactors(void)
  */
 bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 {
+    #ifdef DEBUG
+       dragdata << "Entered DragForce::GetDerivatives()\n";
+    #endif
+
     Integer i, i6;
     Real vRelative[3], vRelMag, factor;
 
@@ -479,10 +492,20 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
        firedOnce = true;
     }
     
+    #ifdef DEBUG
+       dragdata << "Looking up density\n";
+    #endif
     GetDensity(state, epoch + (elapsedTime + dt) / 86400.0);
+    #ifdef DEBUG
+       dragdata << "density[0] = " << density[0] << "\n";
+    #endif
+    
     
     for (i = 0; i < satCount; ++i) {
         i6 = i * 6;
+        #ifdef DEBUG
+           dragdata << "Spacecraft " << (i+1) << ": ";
+        #endif
 
         // v_rel = v - w x R
         vRelative[0] = state[i6+3] - 
@@ -509,7 +532,7 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 
             #ifdef DEBUG
                for (Integer m = 0; m < satCount; ++m)
-                  dragdata << "   Accel: " 
+                  dragdata << "   Drag Accel: " 
                            << deriv[3+i6] << "  "
                            << deriv[4+i6] << "  "
                            << deriv[5+i6] << "\n";
@@ -921,6 +944,10 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
  */
 void DragForce::GetDensity(Real *state, Real when)
 {
+    #ifdef DEBUG
+       dragdata << "Entered DragForce::GetDensity()\n";
+    #endif
+
     // Give it a default value if the atmosphere model is not set
     if (!atmos) {
         for (Integer i = 0; i < satCount; ++i)
@@ -941,7 +968,14 @@ void DragForce::GetDensity(Real *state, Real when)
                 cbLoc[2]  = cbV[2];
             }
         }
+
+        #ifdef DEBUG
+           dragdata << "Calling atmos->Density() on " << atmos->GetTypeName() << "\n";
+        #endif
         atmos->Density(state, density, when, satCount);
+        #ifdef DEBUG
+           dragdata << "Returned from atmos->Density()\n";
+        #endif
         
         #ifdef DEBUG
             for (Integer m = 0; m < satCount; ++m)
@@ -950,7 +984,10 @@ void DragForce::GetDensity(Real *state, Real when)
                         << state[m*6] << "  "
                         << state[m*6+1] << "  "
                         << state[m*6+2] << "    Density: "
-                        << density[m];
+                        << density[m] << "\n";
         #endif
     }
+    #ifdef DEBUG
+       dragdata << "Leaving DragForce::GetDensity()\n";
+    #endif
 }
