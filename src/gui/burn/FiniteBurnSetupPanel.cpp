@@ -16,7 +16,7 @@
 
 #include "MessageInterface.hpp"
 
-// #define DEBUG_FINITEBURN_PANEL 1
+//#define DEBUG_FINITEBURN_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -178,15 +178,12 @@ void FiniteBurnSetupPanel::LoadData()
       int tankCount = 0;       // counter for configured tanks
       int thrusterCount = 0;   // counter for configured thrusters
    
-      // coordinate frame   
+      // Set object pointer for "Show Script"
+      mObject = theBurn;
 
       // list of thrusters and tanks
       StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
       int size = itemNames.size();
-      
-      // Set object pointer for "Show Script"
-      mObject = theBurn;
-
       
       wxString *tankList = new wxString[size];
       wxString *thrusterList = new wxString[size];
@@ -209,11 +206,15 @@ void FiniteBurnSetupPanel::LoadData()
          }   
       };
 
+      #if DEBUG_FINITEBURN_PANEL
+      MessageInterface::ShowMessage("FiniteBurnSetupPanel::LoadData() thruster count = %d\n",
+         thrusterCount);
+      #endif
       // append list of thrusters and tanks to combobox
-      for (int i = 0; i<=thrusterCount; i++)
+      for (int i = 0; i<thrusterCount; i++)
          thrusterCB->Append(thrusterList[i]);
 
-      for (int i = 0; i<=tankCount; i++)
+      for (int i = 0; i<tankCount; i++)
          tankCB->Append(tankList[i]);
      
       // load thruster
