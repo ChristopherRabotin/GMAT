@@ -63,6 +63,10 @@ typedef std::vector<Real> RealArray;
 typedef std::vector<Integer> IntegerArray;
 typedef std::vector<std::string> StringArray;
 
+class GmatBase;                            // Forward reference for ObjectArray
+typedef std::vector<GmatBase*> ObjectArray;
+
+
 namespace Gmat
 {
    enum ObjectType
