@@ -18,12 +18,15 @@
 #if defined(__GNUG__) && !defined(__APPLE__)
 #pragma interface "plot.h"
 #endif
+#include "gmatwxdefs.hpp"
 
 #include "wx/defs.h"
 
 #include "wx/scrolwin.h"
 #include "wx/event.h"
 #include "wx/dynarray.h"
+#include "wx/stattext.h" //loj: 3/11/04 added
+#include "wx/sizer.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -143,7 +146,8 @@ public:
         { return m_curveTitle; }
     void SetCurveTitle(const wxString &title)
         { m_curveTitle = title; }
-    
+    virtual void ClearData() //loj: 3/10/04 added
+        { ; }
 private:
     int     m_offsetY;
     double  m_startY;
@@ -283,7 +287,8 @@ class WXDLLEXPORT wxPlotWindow: public wxScrolledWindow
 public:
     wxPlotWindow() {}
     wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
-                  const wxSize &size, int flags = wxPLOT_DEFAULT );
+                  const wxSize &size, int flags = wxPLOT_DEFAULT,
+                  const wxString &plotTitle = "");
     ~wxPlotWindow();
 
     // curve accessors
@@ -291,7 +296,8 @@ public:
 
     void Add( wxPlotCurve *curve );
     void Delete( wxPlotCurve* curve );
-
+    void ClearAllCurveData(); //loj: 3/10/04 added
+    
     size_t GetCount();
     wxPlotCurve *GetAt( size_t n );
 
@@ -355,16 +361,20 @@ public:
     // ---------
 
     void RedrawEverything();
+    void RedrawPlotArea(); //loj: 3/10/04 added
     void RedrawXAxis();
     void RedrawYAxis();
-
+    void SetPlotTitle(const wxString &title); //loj: 3/11/04 added
     void ResetScrollbar();
 
 private:
     friend class wxPlotArea;
     friend class wxPlotXAxisArea;
     friend class wxPlotYAxisArea;
-
+    
+    wxStaticText *mTitleText; //loj: 3/11/04 added
+    wxBoxSizer *mTopPanelSizer; //loj: 3/11/04 added
+    
     double             m_xUnitsPerValue;
     double             m_xZoom;
 

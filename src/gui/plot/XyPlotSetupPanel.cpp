@@ -69,9 +69,19 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
     theParamList = NULL;
     mXParamChanged = false;
     mYParamChanged = false;
+    mNumXParams = 0;
+    mNumYParams = 0;
     
     Create();
     Show();
+
+    // force saving data
+    if (mNumXParams == 0 || mNumYParams <= 0)
+    {
+        theApplyButton->Enable();
+        mXParamChanged = true;
+        mYParamChanged = true;
+    }
 }
 
 //-------------------------------
@@ -123,6 +133,7 @@ void XyPlotSetupPanel::OnRemoveX(wxCommandEvent& event)
 {
     int sel = xSelectedListBox->GetSelection();
     xSelectedListBox->Delete(sel);
+    mXParamChanged = true;
     theApplyButton->Enable();
 }
 
@@ -133,6 +144,7 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
 {
     int sel = ySelectedListBox->GetSelection();
     ySelectedListBox->Delete(sel);
+    mYParamChanged = true;
     theApplyButton->Enable();
 }
 
@@ -142,6 +154,7 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
 void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
 {
     ySelectedListBox->Clear();
+    mYParamChanged = true;
 }
 
 //------------------------------------------------------------------------------
@@ -188,13 +201,6 @@ void XyPlotSetupPanel::Create()
     
     xSelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(150,200), 0, emptyList, wxLB_SINGLE);
-
-    
-    // get X parameter
-    //wxString *xParam = new wxString[1];
-    //xParam[0] = theSubscriber->GetStringParameter("XParamName").c_str();
-    //if (xParam[0] != "STRING_PARAMETER_UNDEFINED")
-    //    xSelectedListBox->Set(1, xParam);
     
     xSelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
     xSelelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, 5);
@@ -255,13 +261,7 @@ void XyPlotSetupPanel::Create()
 
     ySelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
                                      wxSize(150,200), 0, emptyList, wxLB_SINGLE);
-    
-    //loj: for B2, 1 Y axis parameter
-    //wxString *yParam = new wxString[1];
-    //yParam[0] = theSubscriber->GetStringParameter("YParamName").c_str();
-    //if (yParam[0] != "STRING_PARAMETER_UNDEFINED")
-    //    ySelectedListBox->Set(1, yParam);
-    
+        
     ySelelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
     ySelelectedBoxSizer->Add(titleYText, 0, wxALIGN_CENTRE|wxALL, 5);
     ySelelectedBoxSizer->Add(ySelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5);
@@ -283,8 +283,6 @@ void XyPlotSetupPanel::Create()
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
 
-    //delete xParam;
-    //delete yParam;
 }
 
 //------------------------------------------------------------------------------
@@ -294,32 +292,40 @@ void XyPlotSetupPanel::LoadData()
 {
     // load data from the core engine
     
+    //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() entered\n");
+    
     plotCheckBox->SetValue(theSubscriber->IsActive());
     
     // get X parameter
     wxString *xParam = new wxString[1];
     xParam[0] = theSubscriber->GetStringParameter("XParamName").c_str();
-    if (xParam[0] != "STRING_PARAMETER_UNDEFINED")
-        xSelectedListBox->Set(1, xParam);
-
-    // get Y parameters
-    StringArray yParamList = theSubscriber->GetStringArrayParameter("YParamNameList");
-    int numYParams = yParamList.size();
-    MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() numYParams = %d\n",
-                                  numYParams);
-    
-    wxString *yParam = new wxString[numYParams];
-    for (int i=0; i<numYParams; i++)
+    if (!xParam[0].IsSameAs(""))
     {
-        MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() y param = %s\n",
-                                      yParamList[i].c_str());
-        yParam[i] = yParamList[i].c_str();
+        mNumXParams = 1;
+        xSelectedListBox->Set(1, xParam);
     }
     
-    ySelectedListBox->Set(numYParams, yParam);
-    
+    // get Y parameters
+    StringArray yParamList = theSubscriber->GetStringArrayParameter("YParamNameList");
+    mNumYParams = yParamList.size();
+    //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() mNumYParams = %d\n",
+    //                              mNumYParams);
+
     delete xParam;
-    delete yParam;
+    
+    if (mNumYParams > 0)
+    {
+        wxString *yParam = new wxString[mNumYParams];
+        for (int i=0; i<mNumYParams; i++)
+        {
+            //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() y param = %s\n",
+            //                              yParamList[i].c_str());
+            yParam[i] = yParamList[i].c_str();
+        }
+    
+        ySelectedListBox->Set(mNumYParams, yParam);
+        delete yParam;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -336,42 +342,55 @@ void XyPlotSetupPanel::SaveData()
     {
         if (xSelectedListBox->GetCount() == 0)
         {
-            //wxBusyCursor bc;
-            //wxLogWarning(wxT("Plese select X parameter to plot"));           
-            //wxYield();
-            wxLogMessage(wxT("Plese select X parameter to plot"));           
+            wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
+            theSubscriber->Activate(false);
         }
         else
         {
             theSubscriber->
                 SetStringParameter("XParamName",
-                                   std::string(xSelectedListBox->GetStringSelection().c_str()));
+                                   std::string(xSelectedListBox->GetString(0).c_str()));
         }
+
+        mXParamChanged = false;
     }
 
     // set Y parameters
     if (mYParamChanged)
     {
-        int yParamCount = ySelectedListBox->GetCount();
-        if (yParamCount == 0)
+        mNumYParams = ySelectedListBox->GetCount();
+        int numYParams = 0;
+        
+        if (mNumYParams == 0)
         {
-            wxLogMessage(wxT("Plese select Y parameters to plot"));
+            wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
+            theSubscriber->Activate(false);
         }
-        else if (yParamCount > 6)
+        else if (mNumYParams > 6)
         {
-            wxLogMessage(wxT("Number of Y parameters cannot be greater than 6"));
+            wxLogMessage(wxT("Selected Y parameter count is greater than 6.\n"
+                             "First 6 parameters will be plotted"));
+
+            numYParams = 6;
         }
         else
         {
+            numYParams = mNumYParams;
+        }
+
+        if (numYParams >= 0)
+        {
             theSubscriber->SetBooleanParameter("ClearYParamList", true);
-            for (int i=0; i<yParamCount; i++)
+            for (int i=0; i<numYParams; i++)
             {
-                MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() YParamName = %s\n",
-                                              ySelectedListBox->GetString(i).c_str());
+                //MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() YParamName = %s\n",
+                //                              ySelectedListBox->GetString(i).c_str());
                 theSubscriber->
                     SetStringParameter("YParamName",
                                        std::string(ySelectedListBox->GetString(i).c_str()));
             }
         }
+        
+        mYParamChanged = false;
     }
 }

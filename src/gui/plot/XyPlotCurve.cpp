@@ -14,6 +14,7 @@
 //------------------------------------------------------------------------------
 #include "XyPlotCurve.hpp"
 #include "LinearInterpolator.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // XyPlotCurve(int offsetY, double startY, double endY, double defaultY)
@@ -30,6 +31,8 @@ XyPlotCurve::XyPlotCurve(int offsetY, double startY, double endY, //double defau
     
     //mInterp = NULL;
     mInterp = new LinearInterpolator(); //loj: should I allow user to use his own?
+    mXdata.clear();
+    mYdata.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -39,31 +42,6 @@ XyPlotCurve::~XyPlotCurve()
 {
     delete mInterp;
 }
-
-//------------------------------------------------------------------------------
-// wxString GetXAxisTitle()
-//------------------------------------------------------------------------------
-//  wxString XyPlotCurve::GetXAxisTitle()
-//  {
-//      return mXAxisTitle;
-//  }
-
-//------------------------------------------------------------------------------
-// wxString GetYAxisTitle()
-//------------------------------------------------------------------------------
-//  wxString XyPlotCurve::GetYAxisTitle()
-//  {
-//      return mYAxisTitle;
-//  }
-
-//loj: 2/20/04 moved to wxPlotCurve
-//  //------------------------------------------------------------------------------
-//  // wxString GetCurveTitle()
-//  //------------------------------------------------------------------------------
-//  wxString XyPlotCurve::GetCurveTitle()
-//  {
-//      return mCurveTitle;
-//  }
 
 //------------------------------------------------------------------------------
 // double GetFirstX()
@@ -92,6 +70,9 @@ void XyPlotCurve::AddData(double x, double y)
     
     mXdata.push_back(intTime);
     mYdata.push_back(y);
+
+    //MessageInterface::ShowMessage("XyPlotCurve::AddData() size = %d, x = %d, y = %f\n",
+    //                              mXdata.size(), mXdata.back(), mYdata.back());
 }
 
 //------------------------------------------------------------------------------
@@ -155,5 +136,19 @@ double XyPlotCurve::GetY(wxInt32 x)
         }
     }
     
+    //MessageInterface::ShowMessage("XyPlotCurve::GetY() size = %d, x = %d, y = %f\n",
+    //                              mXdata.size(), x, yVal);
+    
     return yVal;
 }
+
+//loj: 3/10/04 added
+//------------------------------------------------------------------------------
+// virtual void ClearData()
+//------------------------------------------------------------------------------
+void XyPlotCurve::ClearData()
+{
+    mXdata.clear();
+    mYdata.clear();
+}
+

@@ -35,11 +35,13 @@ public:
     TrajPlotCanvas *mCanvas;
     bool mIsMainFrame;
     
-    MdiChildTrajFrame(wxMDIParentFrame *parent, bool mainFrame,
+    MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                       const wxString& title, const wxPoint& pos,
                       const wxSize& size, const long style);
     ~MdiChildTrajFrame();
 
+    bool DeletePlot(); //loj: 3/8/04 added
+    
     void OnClearPlot(wxCommandEvent& event);
     void OnChangeTitle(wxCommandEvent& event);
     void OnShowDefaultView(wxCommandEvent& event);

@@ -27,29 +27,21 @@ public:
     XyPlotCurve(int offsetY, double startY, double endY,
                 const wxString &curveTitle);
     ~XyPlotCurve();
-
-    //wxString GetXAxisTitle();
-    //wxString GetYAxisTitle();
-    //loj: 2/20/04 moved to wxPlotCurve wxString GetCurveTitle();
     
     double GetFirstX();
     void SetFirstX(double x);
     void SetEndX(double x);
     void AddData(double x, double y);
-
+    
     void SetInterpolator(Interpolator *interp);
     
     // methods inherited from wxPlotCurve
     virtual wxInt32 GetStartX();
     virtual wxInt32 GetEndX();
     virtual double GetY(wxInt32 x);
+    virtual void ClearData(); //loj: 3/10/04 added
 
     double mFirstX;
-    //double mDefaultY;
-
-    //wxString mXAxisTitle;
-    //wxString mYAxisTitle;
-    //loj: 2/20/04 moved to wxPlotCurve wxString mCurveTitle;
     
     Interpolator *mInterp;
     

@@ -16,6 +16,7 @@
 #include "MdiChildTrajFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "TrajPlotCanvas.hpp"
+#include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
     EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
@@ -129,6 +130,19 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 MdiChildTrajFrame::~MdiChildTrajFrame()
 {
     MdiGlPlot::mdiChildren.DeleteObject(this);
+}
+
+//loj: 3/8/04 added
+//------------------------------------------------------------------------------
+// bool DeletePlot()
+//------------------------------------------------------------------------------
+bool MdiChildTrajFrame::DeletePlot()
+{
+    // This will call OnClose()
+    if (mIsMainFrame)
+        MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -275,7 +289,7 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
 // void OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
-{
+{    
     MdiGlPlot::numChildren--;
     
     if (mIsMainFrame)

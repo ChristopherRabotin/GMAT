@@ -31,6 +31,8 @@ public:
 protected:
     Subscriber *theSubscriber;
     wxString *theParamList;
+    int  mNumXParams;
+    int  mNumYParams;
     bool mXParamChanged;
     bool mYParamChanged;
     

@@ -38,13 +38,26 @@ class MdiChildXyFrame: public wxMDIChildFrame
 public:
     wxPlotWindow   *mXyPlot;
     wxTextCtrl     *mLogTextCtrl;
+    bool mIsMainFrame;
         
-    MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotName,
-                    const wxString& title, const wxString& xAxisTitle,
-                    const wxString& yAxisTitle, const wxPoint& pos,
-                    const wxSize& size, const long style);
+    MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
+                    const wxString &plotName, const wxString& plotTitle,
+                    const wxString& xAxisTitle, const wxString& yAxisTitle,
+                    const wxPoint& pos, const wxSize& size, const long style);
     ~MdiChildXyFrame();
 
+    int  ReadXyPlotFile(const wxString &filename);
+    bool DeletePlot(); //loj: 3/8/04 added
+    void SetPlotTitle(const wxString &title); //loj: 3/8/04 added
+    void AddPlotCurve(int curveIndex, int yOffset, double yMin, double yMax,
+                      const wxString &curveTitle,
+                      const wxString &penColorName);
+    void DeleteAllPlotCurves(); //loj: 3/8/04 added
+    void DeletePlotCurve(int curveIndex); //loj: 3/8/04 added
+    void AddDataPoints(int curveIndex, double xData, double yData);
+    void ClearPlotData();
+    void RedrawCurve();
+    
     // getter
     wxString GetPlotName() {return mPlotName;}
     wxString GetPlotTitle() {return mPlotTitle;}
@@ -54,7 +67,6 @@ public:
     
     // setter
     void SetPlotName(const wxString &str) {mPlotName = str;}
-    void SetPlotTitle(const wxString &str) {mPlotTitle = str;}
     void SetXAxisTitle(const wxString &str) {mXAxisTitle = str;}
     void SetYAxisTitle(const wxString &str) {mYAxisTitle = str;}
    
@@ -74,13 +86,6 @@ public:
     void OnMove(wxMoveEvent& event);
     void OnClose(wxCloseEvent& event);
 
-    int ReadXyPlotFile(const wxString &filename);
-
-    void AddPlotCurve(int curveNum, int yOffset, double yMin, double yMax,
-                      const wxString &curveTitle,
-                      const wxString &penColorName);
-    void AddDataPoints(int curveNum, double xData, double yData);
-    void RedrawCurve();
     
 protected:
 

@@ -157,7 +157,7 @@ void MdiParentXyFrame::OnOpenXyPlotFile(wxCommandEvent& WXUNUSED(event) )
     
         // Make a frame, containing a wxPlotWindow
         subframe = 
-            new MdiChildXyFrame(MdiXyPlot::mdiParentXyFrame,
+            new MdiChildXyFrame(MdiXyPlot::mdiParentXyFrame, false, //loj: 3/10/04 added false
                                 _T("XYPlotFile"),                                
                                 _T("XY Plot File"),
                                 _T("Time"),
