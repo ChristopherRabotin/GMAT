@@ -472,10 +472,12 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
 
     if (label == "Mass") return dryMass;
  
-    if (label == "CoefficientDrag") return coeffDrag;
+//    if (label == "CoefficientDrag") return coeffDrag;
+    if (label == "Cd") return coeffDrag;
     if (label == "DragArea") return dragArea;
     if (label == "SRPArea") return srpArea;
-    if (label == "ReflectivityCoefficient") return reflectCoeff;
+//    if (label == "ReflectivityCoefficient") return reflectCoeff;
+    if (label == "Cr") return reflectCoeff;
 
     return SpaceObject::GetRealParameter(label);
 }
