@@ -1073,7 +1073,7 @@ void GuiItemManager::UpdateParameterList()
          plottableParamCount++;
          
          // system Parameter (object property)
-         if (param->GetKey() == Parameter::SYSTEM_PARAM)
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
          {
             theSystemParamList[systemParamCount] = items[i].c_str();
             systemParamCount++;
