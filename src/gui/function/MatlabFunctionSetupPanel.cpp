@@ -96,6 +96,9 @@ void MatlabFunctionSetupPanel::Create()
 //------------------------------------------------------------------------------
 void MatlabFunctionSetupPanel::LoadData()
 {
+   // Set the pointer for the "Show Script" button
+   mObject = theMatlabFunction;
+
    int pathId = theMatlabFunction->GetParameterID("FunctionPath");
    std::string path = theMatlabFunction->GetStringParameter(pathId);
    mPathTextCtrl->SetValue(path.c_str());

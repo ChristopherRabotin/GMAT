@@ -145,6 +145,9 @@ void ParameterSetupPanel::LoadData()
 {
    mParam = theGuiInterpreter->GetParameter(std::string(mVarName.c_str()));
 
+   // Set the pointer for the "Show Script" button
+   mObject = mParam;
+
    if (mParam != NULL)
    {
       
