@@ -39,13 +39,13 @@ class MessageInterface
 public:
 
     static std::string GetMessage();
-    static void NoteMessage(const std::string &msg);
+    static void ShowMessage(const std::string &msg);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg);
+    static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+                             int interval);
     static void PopupAbortContinue(const std::string &abortMsg,
                                    const std::string &continueMsg,
                                    const std::string &msg);
-    static void ShowMessage(Gmat::MessageType msgType, int interval,
-                            const std::string &msg);
     static void LogMessage(const std::string &msg);
     static void SetLogFile(FILE *file)
         { logFile = file; };

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #if !defined __CONSOLE_APP__
 #include "gmatwxdefs.hpp"
+#include "GmatAppData.hpp"
 #endif
 
 #include <iostream>                // for cout, endl
@@ -80,22 +81,32 @@ std::string MessageInterface::GetMessage()
 }
 
 //------------------------------------------------------------------------------
-//  void NoteMessage(const std::string &msg)
+//  void ShowMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 //  Purpose:
-//     Pushes message into message queue and set the output message event.
+//     Pushes message into message queue and displays the message.
 //------------------------------------------------------------------------------
-void MessageInterface::NoteMessage(const std::string &msg)
+void MessageInterface::ShowMessage(const std::string &msg)
 {
 
    MessageInterface::messageQueue.push(msg);
    
 #if !defined __CONSOLE_APP__
-   wxLogError(wxT(wxString(msg.c_str())));
-   wxLog::FlushActive();
+   if (GmatAppData::GetMessageWindow() != NULL)
+   {
+       GmatAppData::GetMessageWindow()->Show(true);
+       GmatAppData::GetMessageWindow()->WriteText(wxString(msg.c_str()));
+   }
+   else
+   {
+       wxLogError("MessageWindow was not created");
+       wxLog::FlushActive();
+   }
+#else
+   LogMessage(msg);
 #endif
 
-} // end NoteMessage()
+} // end ShowMessage()
 
 
 //------------------------------------------------------------------------------
@@ -153,19 +164,20 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
 
 
 //------------------------------------------------------------------------------
-//  static void ShowMessage(Gmat::MessageType msgType, int interval, ...)
+//  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+//                           int interval)
 //------------------------------------------------------------------------------
 //  Purpose:
 //     Shows popup message and closes itself.
 //------------------------------------------------------------------------------
-void MessageInterface::ShowMessage(Gmat::MessageType msgType, int interval,
-                                   const std::string &msg)
+void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+                                    int interval)
 {
    MessageInterface::popupMessage = msg;
    MessageInterface::messageType = msgType;
    MessageInterface::showIntervalInMilSec = interval;
    
-} // end ShowMessage()
+} // end PopupMessage()
 
 //------------------------------------------------------------------------------
 // void void LogMessage(const std::string &msg)
