@@ -132,13 +132,17 @@ protected:
    /// default equatorial radius
    Real               defaultA;
    /// normalized harmonic coefficients
-   Real               **Cbar;
+   Real               Cbar[361][361];
+//   Real               **Cbar;
    /// normalized harmonic coefficients
-   Real               **Sbar;
+   Real               Sbar[361][361];
+//   Real               **Sbar;
    /// coefficient drifts per year
-   Real               **dCbar;
+   Real               dCbar[17][17];
+//   Real               **dCbar;
    /// coefficient drifts per year
-   Real               **dSbar;
+   Real               dSbar[17][17];
+//   Real               **dSbar;
    ///
    bool               gfInitialized;
    
@@ -148,6 +152,8 @@ protected:
    bool          ReadCofFile(Integer& fileDeg, Integer& fileOrd);
    bool          ReadGrvFile(Integer& fileDeg, Integer& fileOrd);
    bool          ReadDatFile(Integer& fileDeg, Integer& fileOrd);
+   
+   void          PrepareArrays();
 
    bool          IsBlank(char* aLine);
 

@@ -830,6 +830,11 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
       return false;
       
    Integer satCount = dimension / stateSize, i, iOffset;
+
+#if DEBUG_FORCEMODEL
+         MessageInterface::ShowMessage("  Input state = %le %le %le %le %le %le\n",
+            state[0], state[1], state[2], state[3], state[4], state[5]);
+#endif
     
    // Initialize the derivative array
    for (i = 0; i < satCount; ++i) {

@@ -58,6 +58,7 @@
 
 using namespace GmatMathUtil;
 
+// #define DEBUG_HARMONIC_FIELD
 
 //---------------------------------
 // static data
@@ -282,6 +283,13 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
 //------------------------------------------------------------------------------
 bool HarmonicField::SetFilename(const std::string &fn)
 {
+   #ifdef DEBUG_HARMONIC_FIELD
+       char str[1024];
+       strcpy(str, fn.c_str());
+       MessageInterface::ShowMessage("HarmonicField::SetFilename called with \"%s\"\n",
+          str);
+   #endif
+ 
    if (filename != fn)
    {
       fileRead = false;
@@ -557,6 +565,13 @@ bool HarmonicField::SetStringParameter(const Integer id,
    {
       if (filename != value)
       {
+         #ifdef DEBUG_HARMONIC_FIELD
+            char str[1024];
+            strcpy(str, value.c_str());
+            
+            MessageInterface::ShowMessage("Setting file name to \"%s\"\n", str);
+         #endif
+       
          fileRead = false;
          filename = value;
       }

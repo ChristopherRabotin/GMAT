@@ -15,6 +15,9 @@
 //           Updated for GMAT style, standards; changed Real to Real, int
 //           to Integer, etc.
 //
+//           2004/11/02 D. Conway Thinking Systems, Inc.
+//           Changed internal arrays to static arrays to fix memory error.
+//
 /**
  * This is the GravityField class.
  *
@@ -62,6 +65,10 @@
 //#include "SolarSystemException.hpp"
 
 
+//#define DEBUG_GRAVITY_FIELD
+//#define DEBUG_GRAVITY_FIELD_DETAILS
+
+
 using namespace GmatMathUtil;
 
 //---------------------------------
@@ -106,10 +113,10 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
     a               (6378.1363),
     defaultMu       (398600.4415),
     defaultA        (6378.1363),
-    Cbar            (NULL),
-    Sbar            (NULL),
-    dCbar           (NULL),
-    dSbar           (NULL),
+//    Cbar            (NULL),
+//    Sbar            (NULL),
+//    dCbar           (NULL),
+//    dSbar           (NULL),
     gfInitialized   (false)
 {
    bodyName = forBodyName;
@@ -128,31 +135,31 @@ GravityField::GravityField(const std::string &name, const std::string &forBodyNa
 //------------------------------------------------------------------------------
 GravityField::~GravityField(void)
 {
-   int cc;
-
-   if (Cbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Cbar[cc];
-      delete Cbar;
-   }
-
-   if (Sbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Sbar[cc];
-      delete Sbar;
-   }
-
-   if (dCbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dCbar[cc];
-      delete dCbar;
-   }
-
-   if (dSbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dSbar[cc];
-      delete dSbar;
-   }
+//   int cc;
+//
+//   if (Cbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc)
+//         delete [] Cbar[cc];
+//      delete Cbar;
+//   }
+//
+//   if (Sbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc)
+//         delete [] Sbar[cc];
+//      delete Sbar;
+//   }
+//
+//   if (dCbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dCbar[cc];
+//      delete dCbar;
+//   }
+//
+//   if (dSbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dSbar[cc];
+//      delete dSbar;
+//   }
 }
 
 
@@ -173,10 +180,10 @@ GravityField::GravityField(const GravityField &gf) :
     a               (gf.a),
     defaultMu       (gf.defaultMu),
     defaultA        (gf.defaultA),
-    Cbar            (NULL),  // or (gf.Cbar),  
-    Sbar            (NULL),  // or (gf.Sbar),
-    dCbar           (NULL),  // or (gf.dCbar),
-    dSbar           (NULL),  // or (gf.dSbar)
+//    Cbar            (NULL),  // or (gf.Cbar),  
+//    Sbar            (NULL),  // or (gf.Sbar),
+//    dCbar           (NULL),  // or (gf.dCbar),
+//    dSbar           (NULL),  // or (gf.dSbar)
     gfInitialized   (false)
 {
 }
@@ -197,39 +204,39 @@ GravityField& GravityField::operator=(const GravityField &gf)
    if (&gf == this)
       return *this;
    
-   int cc;
+//   int cc;
    HarmonicField::operator=(gf);
    mu               = gf.mu;
    a                = gf.a;
    defaultMu        = gf.defaultMu;
    defaultA         = gf.defaultA;
-   if (Cbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Cbar[cc];
-      delete Cbar;
-   }
-   Cbar  = NULL;
-
-   if (Sbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Sbar[cc];
-      delete Sbar;
-   }
-   Sbar  = NULL;
-
-   if (dCbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dCbar[cc];
-      delete dCbar;
-   }
-   dCbar = NULL;
-
-   if (dSbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dSbar[cc];
-      delete dSbar;
-   }
-   dSbar = NULL;
+//   if (Cbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc)
+//         delete [] Cbar[cc];
+//      delete [] Cbar;
+//      Cbar  = NULL;
+//   }
+//
+//   if (Sbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc)
+//         delete [] Sbar[cc];
+//      delete [] Sbar;
+//      Sbar  = NULL;
+//   }
+//
+//   if (dCbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dCbar[cc];
+//      delete [] dCbar;
+//      dCbar = NULL;
+//   }
+//
+//   if (dSbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dSbar[cc];
+//      delete [] dSbar;
+//      dSbar = NULL;
+//   }
    gfInitialized = false;  // is that what I want to do?
    
    return *this;
@@ -302,7 +309,10 @@ bool GravityField::Initialize(void)
 //------------------------------------------------------------------------------
 bool GravityField::gravity_rtq(Real jday, Real F[] )
 {
-   
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("Entered gravity_rtq with Julian epoch %le\n", jday);
+   #endif
+
    if (!gfInitialized)
       if (!Initialize())
          return false;
@@ -327,6 +337,12 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
    arr[3] = -mu/r/r;
    p *= a/r;
 
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("  Calculated p = %le\n", p);
+      MessageInterface::ShowMessage("  Iterating over degree = %d, order = %d\n",
+         degree, order);
+   #endif
+
 //   for (n=2;n<=min(G->degree,LP->degree);n++) {
    for (n = 2; n <= degree; ++n)
    {
@@ -336,6 +352,16 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
 //      for (m = 0;( m <= n && m <= min(G->order,LP->order) );m++) {
       for (m = 0;(m <= n && m <= order); ++m)
       {
+         #ifdef DEBUG_GRAVITY_FIELD_DETAILS
+            dT = (jday - (Real)2.4464305e+06)/(Real)365.25; /* years since Jan 1, 1986 */
+            MessageInterface::ShowMessage("  m = %d  n = %d\n   Cbar[n][m] = %le   Sbar[n][m] = %le\n",
+               m, n, Cbar[n][m], Sbar[n][m]);
+            if ( n <= GRAV_MAX_DRIFT_DEGREE )
+            {
+               MessageInterface::ShowMessage("  dCbar[n][m] = %le  dSbar[n][m] = %le  dt = %le\n",
+                  dCbar[n][m], dSbar[n][m], dT);
+            }
+         #endif
 
          /* time rate of change of coefficients (drift/year)*/
          if ( n <= GRAV_MAX_DRIFT_DEGREE )
@@ -368,8 +394,12 @@ bool GravityField::gravity_rtq(Real jday, Real F[] )
             summ[3] += Sqrt( (Real)( (2*n+1)*(n+m+2)*(n+m+1) )/
                              (Real)( 2*n+3 ) )*Abar[n+1][m+1]*D;
          }
-
       } /* end m summation */
+      
+      #ifdef DEBUG_GRAVITY_FIELD
+         MessageInterface::ShowMessage("  Calculated summ = %le  %le  %le  %le\n",
+            summ[0], summ[1], summ[2], summ[3]);
+      #endif
 
       arr[0] += p/a*summ[0];
       arr[1] += p/a*summ[1];
@@ -400,6 +430,13 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    if ((dvorder > 2) || (dvorder < 1))
       return false;
       
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("%s %d %s %le %s  %le %le %le %le %le %le\n",
+          "Entered GravityField::GetDerivatives with order", dvorder, "dt = ",
+          dt, "and state\n",
+          state[0], state[1], state[2], state[3], state[4], state[5]);
+   #endif
+      
 /// @todo Optimize this code -- May be possible to make GravityField calcs more efficient
 
    Integer stateSize = 6;
@@ -416,29 +453,45 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    Real f[3], rbb3, mu_rbb, aIndirect[3], now;
    Integer nOffset;
    
+   now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
+   const Rvector6 *rv = &(body->GetState(now));
+
+   // Precalculations for the indirect effect term
+   rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+   if (rbb3 != 0.0) {
+      rbb3 = rbb3 * sqrt(rbb3);
+      mu_rbb = mu / rbb3;
+      aIndirect[0] = mu_rbb * (*rv)[0];
+      aIndirect[1] = mu_rbb * (*rv)[1];
+      aIndirect[2] = mu_rbb * (*rv)[2];
+   }
+   else
+      aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
+
    for (Integer n = 0; n < satcount; ++n) {
       nOffset = n * stateSize;
       satState = state + nOffset;
     
       if (!legendreP_rtq(satState))
          throw ForceModelException("GravityField::legendreP_rtq failed");
+
+      #ifdef DEBUG_GRAVITY_FIELD
+         MessageInterface::ShowMessage("%s%le  s = %le  t = %le  u = %le\n", 
+            "legendreP_rtq r = ", r, s, t, u);
+         MessageInterface::ShowMessage("%s%le\n", 
+            "Calling gravity_rtq for Julian epoch = ", epoch + 2430000.0 + dt/86400.0);
+      #endif
+
       if (!gravity_rtq(epoch + 2430000.0 + dt/86400.0, f))
          throw ForceModelException("GravityField::gravity_rtq failed");
-   
-      now = epoch + dt/GmatTimeUtil::SECS_PER_DAY;
-      const Rvector6 *rv = &(body->GetState(now));
-   
-      // Precalculations for the indirect effect term
-      rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-      if (rbb3 != 0.0) {
-         rbb3 = rbb3 * sqrt(rbb3);
-         mu_rbb = mu / rbb3;
-         aIndirect[0] = mu_rbb * (*rv)[0];
-         aIndirect[1] = mu_rbb * (*rv)[1];
-         aIndirect[2] = mu_rbb * (*rv)[2];
-      }
-      else
-         aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
+
+      #ifdef DEBUG_GRAVITY_FIELD
+         MessageInterface::ShowMessage("%s %le  %le  %le\n", 
+            "gravity_rtq returned force = ", f[0], f[1], f[2]);
+         MessageInterface::ShowMessage("%s %le  %le  %le\n", 
+            "Indirect term is", aIndirect[0], aIndirect[1], aIndirect[2]);
+      #endif
+
    
       switch (dvorder)
       {
@@ -629,7 +682,7 @@ Real        GravityField::SetRealParameter(const std::string &label,
 //------------------------------------------------------------------------------
 bool GravityField::gravity_init(void)
 {
-   Integer      cc, dd, size=0;
+//   Integer      cc, dd, size=0;
    Integer      defDegree, defOrder;
    //Integer      n=0, m=0, iscomment, rtn;
 
@@ -639,82 +692,91 @@ bool GravityField::gravity_init(void)
       if (solarSystem == NULL)
          throw ForceModelException("Solar System undefined in GravityField.");
       body = solarSystem->GetBody(bodyName);
-      if (body == NULL) throw ForceModelException("Body " + bodyName + " undefined for GravityField.");
-   }
-   
-   // delete arrays, if they have already been created (useful when reading
-   // a new file)
-   if (Cbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Cbar[cc];
-      delete Cbar;
+      if (body == NULL) throw ForceModelException("Body \"" + bodyName + 
+                                           "\" undefined for GravityField.");
    }
 
-   if (Sbar) {
-      for (cc = 0;cc <= maxDegree+1; ++cc)
-         delete [] Sbar[cc];
-      delete Sbar;
-   }
+//   // delete arrays, if they have already been created (useful when reading
+//   // a new file)
+//   if (Cbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc) {
+//         delete [] Cbar[cc];
+//      }
+//      delete [] Cbar;
+//      Cbar = NULL;
+//   }
+//
+//   if (Sbar) {
+//      for (cc = 0;cc <= maxDegree+1; ++cc) {
+//         delete [] Sbar[cc];
+//      }
+//      delete [] Sbar;
+//      Sbar = NULL;
+//   }
+//
+//   if (dCbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dCbar[cc];
+//      delete [] dCbar;
+//      dCbar = NULL;
+//   }
+//
+//   if (dSbar) {
+//      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
+//         delete [] dSbar[cc];
+//      delete [] dSbar;
+//      dSbar = NULL;
+//   }
+//   
+//   for (cc = 2;cc <= maxDegree; ++cc)
+//   {
+//      for (dd = 0; dd <= cc; ++dd)
+//      {
+//         size++;
+//      }
+//   }
+//
+//   Cbar  = new Real*[maxDegree+3];
+//   Sbar  = new Real*[maxDegree+3];
+//   dCbar = new Real*[GRAV_MAX_DRIFT_DEGREE+1];
+//   dSbar = new Real*[GRAV_MAX_DRIFT_DEGREE+1];
+//
+//   if ( !Cbar || !Sbar || !dCbar || !dSbar )
+//   {
+//      throw ForceModelException("In GravityField, gravity_init: "
+//                                "memory allocation failed!");
+//      return false;
+//   }
+//   for (cc = 0;cc <= maxDegree+1; ++cc)
+//   {
+//      if ( maxOrder >= cc )
+//      {
+//         Cbar[cc] = new Real[cc+3];
+//         Sbar[cc] = new Real[cc+3];
+//      }
+//      else
+//      {
+//         Cbar[cc] = new Real[maxOrder+3];
+//         Sbar[cc] = new Real[maxOrder+3];
+//      }
+//      if ( !Cbar[cc] || !Sbar[cc] )
+//      {
+//         throw ForceModelException("GravityField::gravity_init: Cannot allocate Cbar or Sbar");
+//         return false;
+//      }
+//
+//      if ( cc <= GRAV_MAX_DRIFT_DEGREE )
+//      {
+//         dCbar[cc] = new Real[GRAV_MAX_DRIFT_DEGREE+1];
+//         dSbar[cc] = new Real[GRAV_MAX_DRIFT_DEGREE+1];
+//         if ( !dCbar[cc] || !dSbar[cc] )
+//         {
+//            throw ForceModelException("GravityField::gravity_init: Cannot allocate dCbar or dSbar");
+//            return false;
+//         }
+//      }
+//   }
 
-   if (dCbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dCbar[cc];
-      delete dCbar;
-   }
-
-   if (dSbar) {
-      for (cc = 0;cc <= GRAV_MAX_DRIFT_DEGREE; ++cc)
-         delete [] dSbar[cc];
-      delete dSbar;
-   }
-   
-   for (cc = 2;cc <= maxDegree; ++cc)
-   {
-      for (dd = 0; dd <= cc; ++dd)
-      {
-         size++;
-      }
-   }
-   Cbar  = new Real *[maxDegree+3];
-   Sbar  = new Real *[maxDegree+3];
-   dCbar = new Real *[GRAV_MAX_DRIFT_DEGREE+1];
-   dSbar = new Real *[GRAV_MAX_DRIFT_DEGREE+1];
-
-   if ( !Cbar || !Sbar || !dCbar || !dSbar )
-   {
-      throw ForceModelException("In GravityField, gravity_init: calloc failed!");
-      return false;
-   }
-   for (cc = 0;cc <= maxDegree+1; ++cc)
-   {
-      if ( maxOrder >= cc )
-      {
-         Cbar[cc] = new Real[cc+3];
-         Sbar[cc] = new Real[cc+3];
-      }
-      else
-      {
-         Cbar[cc] = new Real[maxOrder+3];
-         Sbar[cc] = new Real[maxOrder+3];
-      }
-      if ( !Cbar[cc] || !Sbar[cc] )
-      {
-         throw ForceModelException("In GravityField, gravity_init: calloc failed!");
-         return false;
-      }
-
-      if ( cc <= GRAV_MAX_DRIFT_DEGREE )
-      {
-         dCbar[cc] = new Real[GRAV_MAX_DRIFT_DEGREE+1];
-         dSbar[cc] = new Real[GRAV_MAX_DRIFT_DEGREE+1];
-         if ( !dCbar[cc] || !dSbar[cc] )
-         {
-            throw ForceModelException("In GravityField, gravity_init: calloc failed!");
-            return false;
-         }
-      }
-
-   }
    if (!ReadFile())
    {
       // try to get default coefficients from the body
@@ -782,6 +844,27 @@ bool GravityField::gravity_init(void)
    /* G.Cbar[2][0] += (Real)3.11080e-8 * 0.3 / Sqrt((Real)5.0); */
 
    gfInitialized = true;
+
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("%s%lf%s%lf\n",
+         "GravityField::gravity_init() succeeded, mu = ", mu, " r = ", a);
+      MessageInterface::ShowMessage("%s%d%s%d\n", 
+         "   maxDegree = ", maxDegree, "  maxOrder = ", maxOrder);
+      MessageInterface::ShowMessage("   C20 = %le S20 = %le\n",
+         Cbar[2][0], Sbar[2][0]);
+      MessageInterface::ShowMessage("   C21 = %le S21 = %le\n",
+         Cbar[2][1], Sbar[2][1]);
+      MessageInterface::ShowMessage("   C22 = %le S22 = %le\n",
+         Cbar[2][2], Sbar[2][2]);
+      MessageInterface::ShowMessage("   C44 = %le S44 = %le\n",
+         Cbar[4][4], Sbar[4][4]);
+      MessageInterface::ShowMessage("   dC20 = %le dS20 = %le\n",
+         dCbar[2][0], dSbar[2][0]);
+      MessageInterface::ShowMessage("   dC21 = %le dS21 = %le\n",
+         dCbar[2][1], dSbar[2][1]);
+   #endif
+   
+
    return true;
 }
 
@@ -799,6 +882,14 @@ bool GravityField::ReadFile()
    Integer      fileDegree, fileOrder;
    std::string  errMsg;
    bool         isOk = true;
+   
+   #ifdef DEBUG_GRAVITY_FIELD
+      char str[1024];
+      strcpy(str, filename.c_str());
+      MessageInterface::ShowMessage("%s \"%s\"\n",
+         "GravityField::ReadFile() called for file", str);
+   #endif
+   
 
    // Determine the type of file  --> add switch later!!!!!!!!!!
    if ((filename.find(".dat",0) != std::string::npos) ||
@@ -899,13 +990,9 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
    Real          tmpMu;
    Real          tmpA;
 
-   for ( n=0,m=0; n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER;n++,m++ )
-   {
-      Cbar[n][m] = 0.0;
-      Sbar[n][m] = 0.0;
-      Cbar[n][m] = 0.0;
-      Sbar[n][m] = 0.0;
-   }
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("Entered GravityField::ReadCofFile\n");
+   #endif
 
    std::ifstream inFile;
    inFile.open(filename.c_str());
@@ -916,6 +1003,7 @@ bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
       return false;
    }
 
+   PrepareArrays();
 
    std::string s;
    std::string firstStr;
@@ -977,6 +1065,10 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
    Real          tmpA  = 0.0;
    std::string   isNormalized;
 
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("Entered GravityField::ReadGrvFile\n");
+   #endif
+
    std::ifstream inFile;
    inFile.open(filename.c_str());
    if (!inFile)
@@ -986,11 +1078,7 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
       return false;
    }
 
-   for ( n=0,m=0; n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER;n++,m++ )
-   {
-      Cbar[n][m] = 0.0;
-      Sbar[n][m] = 0.0;
-   }
+   PrepareArrays();
 
    std::string s;
    std::string firstStr;
@@ -1058,6 +1146,13 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
 
    fileDeg = fileDegree;
    fileOrd = fileOrder;
+
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("Leaving GravityField::ReadGrvFile\n");
+      MessageInterface::ShowMessage("   dCbar[2][0] = %le   dSbar[2][0] = %le   \n",
+                                    dCbar[2][0], dSbar[2][0]);
+   #endif
+
    return true;  
 }
 
@@ -1080,6 +1175,10 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
    char         buf[CelestialBody::BUFSIZE];
    FILE        *fp;
 
+   #ifdef DEBUG_GRAVITY_FIELD
+      MessageInterface::ShowMessage("Entered GravityField::ReadDatFile\n");
+   #endif
+
    for (cc = 2;cc <= HF_MAX_DEGREE; ++cc)
    {
       for (dd = 0; dd <= cc; ++dd)
@@ -1095,6 +1194,8 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
 //      gfInitialized = false;  // ???????????????????????????????????
       return false;
    }
+
+   PrepareArrays();
 
    iscomment = 1;
    while ( iscomment )
@@ -1148,11 +1249,43 @@ bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+//  void PrepareArrays()
+//------------------------------------------------------------------------------
+/**
+ * This method zeros out the gravity field arrays prior to reading a new file.
+ * 
+ * @note: If Cbar, Sbar and their derivative arrays are made dynamic, array
+ *        allocation and deallocation should be added to this method rather than
+ *        scattered in the code above.
+ */
+//------------------------------------------------------------------------------
+void GravityField::PrepareArrays()
+{
+   Integer m, n;
+   
+   for (n=0; n <= HF_MAX_DEGREE; ++n)
+      for ( m=0; m <= HF_MAX_ORDER; ++m)
+      {
+         Cbar[n][m] = 0.0;
+         Sbar[n][m] = 0.0;
+      }
+      
+   for (n = 0; n <= GRAV_MAX_DRIFT_DEGREE; ++n) {
+      for (m = 0; m <= GRAV_MAX_DRIFT_DEGREE; ++m) {
+         dCbar[n][m] = 0.0;
+         dSbar[n][m] = 0.0;
+      }
+   }   
+}
+
+
 //------------------------------------------------------------------------------
 //  bool IsBlank(char* aLine)
 //------------------------------------------------------------------------------
 /**
- * This method returns true if teh string is empty or is all white space.
+ * This method returns true if the string is empty or is all white space.
  *
  * @return success flag.
  */
