@@ -25,18 +25,95 @@
 #include "Moon.hpp"
 
 
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
+{
+   "BodiesInUse",
+   "NumberOfBodies",
+};
+
+const Gmat::ParameterType
+SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
+{
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::INTEGER_TYPE,
+};
+
 // define default names form solar system bodies
-const std::string SolarSystem::SUN_NAME       = "Sun";
-const std::string SolarSystem::MERCURY_NAME   = "Mercury";
-const std::string SolarSystem::VENUS_NAME     = "Venus";
-const std::string SolarSystem::EARTH_NAME     = "Earth";
-const std::string SolarSystem::MOON_NAME      = "Luna";
-const std::string SolarSystem::MARS_NAME      = "Mars";
-const std::string SolarSystem::JUPITER_NAME   = "Jupiter";
-const std::string SolarSystem::SATURN_NAME    = "Saturn";
-const std::string SolarSystem::URANUS_NAME    = "Uranus";
-const std::string SolarSystem::NEPTUNE_NAME   = "Neptune";
-const std::string SolarSystem::PLUTO_NAME     = "Pluto";
+const std::string SolarSystem::SUN_NAME        = "Sun";
+
+const std::string SolarSystem::MERCURY_NAME    = "Mercury";
+
+const std::string SolarSystem::VENUS_NAME      = "Venus";
+
+const std::string SolarSystem::EARTH_NAME      = "Earth";
+const std::string SolarSystem::MOON_NAME       = "Luna";
+
+const std::string SolarSystem::MARS_NAME       = "Mars";
+const std::string SolarSystem::PHOBOS_NAME     = "Phobos";
+const std::string SolarSystem::DEIMOS_NAME     = "Deimos";
+
+const std::string SolarSystem::JUPITER_NAME    = "Jupiter";
+const std::string SolarSystem::METIS_NAME      = "Metis";
+const std::string SolarSystem::ADRASTEA_NAME   = "Adrastea";
+const std::string SolarSystem::AMALTHEA_NAME   = "Amalthea";
+const std::string SolarSystem::THEBE_NAME      = "Thebe";
+const std::string SolarSystem::IO_NAME         = "Io";
+const std::string SolarSystem::EUROPA_NAME     = "Europa";
+const std::string SolarSystem::GANYMEDE_NAME   = "Ganymede";
+const std::string SolarSystem::CALLISTO_NAME   = "Callisto";
+
+const std::string SolarSystem::SATURN_NAME     = "Saturn";
+const std::string SolarSystem::PAN_NAME        = "Pan";
+const std::string SolarSystem::ATLAS_NAME      = "Atlas";
+const std::string SolarSystem::PROMETHEUS_NAME = "Promethus";
+const std::string SolarSystem::PANDORA_NAME    = "Pandora";
+const std::string SolarSystem::EPIMETHEUS_NAME = "Epimetheus";
+const std::string SolarSystem::JANUS_NAME      = "Janus";
+const std::string SolarSystem::MIMAS_NAME      = "Mimas";
+const std::string SolarSystem::ENCELADUS_NAME  = "Enceladus";
+const std::string SolarSystem::TETHYS_NAME     = "Tethys";
+const std::string SolarSystem::TELESTO_NAME    = "Telesto";
+const std::string SolarSystem::CALYPSO_NAME    = "Calypso";
+const std::string SolarSystem::DIONE_NAME      = "Dione";
+const std::string SolarSystem::HELENE_NAME     = "Helene";
+const std::string SolarSystem::RHEA_NAME       = "Rhea";
+const std::string SolarSystem::TITAN_NAME      = "Titan";
+const std::string SolarSystem::IAPETUS_NAME    = "Iapetus";
+const std::string SolarSystem::PHOEBE_NAME     = "Phoebe";
+
+const std::string SolarSystem::URANUS_NAME     = "Uranus";
+const std::string SolarSystem::CORDELIA_NAME   = "Cordelia";
+const std::string SolarSystem::OPHELIA_NAME    = "Ophelia";
+const std::string SolarSystem::BIANCA_NAME     = "Bianca";
+const std::string SolarSystem::CRESSIDA_NAME   = "Cressida";
+const std::string SolarSystem::DESDEMONA_NAME  = "Desdemona";
+const std::string SolarSystem::JULIET_NAME     = "Juliet";
+const std::string SolarSystem::PORTIA_NAME     = "Portia";
+const std::string SolarSystem::ROSALIND_NAME   = "Rosalind";
+const std::string SolarSystem::BELINDA_NAME    = "Belinda";
+const std::string SolarSystem::PUCK_NAME       = "Puck";
+const std::string SolarSystem::MIRANDA_NAME    = "Miranda";
+const std::string SolarSystem::ARIEL_NAME      = "Ariel";
+const std::string SolarSystem::UMBRIEL_NAME    = "Umbriel";
+const std::string SolarSystem::TITANIA_NAME    = "Titania";
+const std::string SolarSystem::OBERON_NAME     = "Oberon";
+
+const std::string SolarSystem::NEPTUNE_NAME    = "Neptune";
+const std::string SolarSystem::NAIAD_NAME      = "Naiad";
+const std::string SolarSystem::THALASSA_NAME   = "Thalassa";
+const std::string SolarSystem::DESPINA_NAME    = "Despina";
+const std::string SolarSystem::GALATEA_NAME    = "Galatea";
+const std::string SolarSystem::LARISSA_NAME    = "Larissa";
+const std::string SolarSystem::PROTEUS_NAME    = "Proteus";
+const std::string SolarSystem::TRITON_NAME     = "Triton";
+
+const std::string SolarSystem::PLUTO_NAME      = "Pluto";
+const std::string SolarSystem::CHARON_NAME     = "Charon";
+
 // add other moons, asteroids, comets, as needed
 // what about libration points?
 
@@ -54,10 +131,9 @@ const std::string SolarSystem::PLUTO_NAME     = "Pluto";
  */
 //------------------------------------------------------------------------------
 SolarSystem::SolarSystem(std::string withName)
-   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName),  //loj: 4/22/04 added "SolarSystem" as typeSt
-   bodiesInUseID  (parameterCount)
+   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName)//, //loj: 4/22/04 added "SolarSystem" as typeSt
 {
-   parameterCount  += 1;
+   parameterCount   = SolarSystemParamCount;
    pvSrcForAll      = Gmat::SLP;
    anMethodForAll   = Gmat::TWO_BODY;
    pE               = NULL;
@@ -106,6 +182,7 @@ pE              (NULL),
 bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
+   parameterCount   = SolarSystemParamCount;
    // replace body pointers with clones
    Integer sz = bodiesInUse.size();
    Integer i;
@@ -397,7 +474,124 @@ SolarSystem* SolarSystem::Clone(void) const
 }
 
 //------------------------------------------------------------------------------
-//  const StringArray&   GetStringArrayParameter((const Integer id) const
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string SolarSystem::GetParameterText(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < SolarSystemParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   return GmatBase::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SolarSystem::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatBaseParamCount; i < SolarSystemParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+   
+   return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType SolarSystem::GetParameterType(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < SolarSystemParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   
+   return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string SolarSystem::GetParameterTypeString(const Integer id) const
+{
+   return SolarSystem::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SolarSystem::GetIntegerParameter(const Integer id) const
+{
+   if (id == NUMBER_OF_BODIES)          return bodiesInUse.size();
+   
+   return GmatBase::GetIntegerParameter(id); 
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the Integer parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SolarSystem::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
  * This method returns the StringArray parameter value, given the input
@@ -411,13 +605,30 @@ SolarSystem* SolarSystem::Clone(void) const
 //------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetStringArrayParameter(const Integer id) const
 {
-   if (id == bodiesInUseID)
-   {
-      return bodyStrings;
-   }
+   if (id == BODIES_IN_USE) return bodyStrings;
 
    return GmatBase::GetStringArrayParameter(id);
 }
+
+//------------------------------------------------------------------------------
+//  const StringArray&   GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the StringArray parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  StringArray value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& 
+SolarSystem::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------

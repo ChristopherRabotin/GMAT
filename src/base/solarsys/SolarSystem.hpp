@@ -80,18 +80,21 @@ public:
    
 
    // Parameter access methods - overridden from GmatBase do I need these???
-   //virtual std::string    GetParameterText(const Integer id) const;     // const?
-   //virtual Integer        GetParameterID(const std::string &str) const; // const?
-   //virtual Gmat::ParameterType
-   //   GetParameterType(const Integer id) const;
-   //virtual std::string    GetParameterTypeString(const Integer id) const;
-//
+   virtual std::string    GetParameterText(const Integer id) const;     // const?
+   virtual Integer        GetParameterID(const std::string &str) const; // const?
+   virtual Gmat::ParameterType
+                          GetParameterType(const Integer id) const;
+   virtual std::string    GetParameterTypeString(const Integer id) const;
+
+   virtual Integer        GetIntegerParameter(const Integer id) const; // const?
+   //virtual Integer        SetIntegerParameter(const Integer id,
+   //                                           const Integer value);
+   virtual Integer        GetIntegerParameter(const std::string &label) const;
+   //virtual Integer        SetIntegerParameter(const std::string &label,
+   //                                           const Integer value);
    //virtual Real           GetRealParameter(const Integer id) const;
    //virtual Real           SetRealParameter(const Integer id,
    //                                        const Real value);
-   //virtual Integer        GetIntegerParameter(const Integer id) const; // const?
-   //virtual Integer        SetIntegerParameter(const Integer id,
-   //                                           const Integer value); // const?
    //virtual std::string    GetStringParameter(const Integer id) const; // const?
    //virtual bool           SetStringParameter(const Integer id,
    //                                          const std::string &value); // const?
@@ -99,6 +102,7 @@ public:
    //virtual bool           SetBooleanParameter(const Integer id,
    //                                           const bool value); // const?
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
       
    // all classes derived from GmatBase must supply this Clone method
@@ -106,25 +110,96 @@ public:
 
    /// default names for each of the possible celestial bodies in the solar system
    static const std::string SUN_NAME;
+   
    static const std::string MERCURY_NAME;
+   
    static const std::string VENUS_NAME;
+   
    static const std::string EARTH_NAME;
    static const std::string MOON_NAME;
+   
    static const std::string MARS_NAME;
+   static const std::string PHOBOS_NAME;
+   static const std::string DEIMOS_NAME;
+   
    static const std::string JUPITER_NAME;
+   static const std::string METIS_NAME;
+   static const std::string ADRASTEA_NAME;
+   static const std::string AMALTHEA_NAME;
+   static const std::string THEBE_NAME;
+   static const std::string IO_NAME;
+   static const std::string EUROPA_NAME;
+   static const std::string GANYMEDE_NAME;
+   static const std::string CALLISTO_NAME;
+   
    static const std::string SATURN_NAME;
+   static const std::string PAN_NAME;
+   static const std::string ATLAS_NAME;
+   static const std::string PROMETHEUS_NAME;
+   static const std::string PANDORA_NAME;
+   static const std::string EPIMETHEUS_NAME;
+   static const std::string JANUS_NAME;
+   static const std::string MIMAS_NAME;
+   static const std::string ENCELADUS_NAME;
+   static const std::string TETHYS_NAME;
+   static const std::string TELESTO_NAME;
+   static const std::string CALYPSO_NAME;
+   static const std::string DIONE_NAME;
+   static const std::string HELENE_NAME;
+   static const std::string RHEA_NAME;
+   static const std::string TITAN_NAME;
+   static const std::string IAPETUS_NAME;
+   static const std::string PHOEBE_NAME;
+   
    static const std::string URANUS_NAME;
+   static const std::string CORDELIA_NAME;
+   static const std::string OPHELIA_NAME;
+   static const std::string BIANCA_NAME;
+   static const std::string CRESSIDA_NAME;
+   static const std::string DESDEMONA_NAME;
+   static const std::string JULIET_NAME;
+   static const std::string PORTIA_NAME;
+   static const std::string ROSALIND_NAME;
+   static const std::string BELINDA_NAME;
+   static const std::string PUCK_NAME;
+   static const std::string MIRANDA_NAME;
+   static const std::string ARIEL_NAME;
+   static const std::string UMBRIEL_NAME;
+   static const std::string TITANIA_NAME;
+   static const std::string OBERON_NAME;
+
    static const std::string NEPTUNE_NAME;
+   static const std::string NAIAD_NAME;
+   static const std::string THALASSA_NAME;
+   static const std::string DESPINA_NAME;
+   static const std::string GALATEA_NAME;
+   static const std::string LARISSA_NAME;
+   static const std::string PROTEUS_NAME;
+   static const std::string TRITON_NAME;
+
    static const std::string PLUTO_NAME;
+   static const std::string CHARON_NAME;
+   
    // add other moons, asteroids, comets, as needed
    // what do we do about libration points??
    
 protected:
-
+   enum
+   {
+      BODIES_IN_USE = GmatBaseParamCount,
+      NUMBER_OF_BODIES,
+      SolarSystemParamCount
+   };
+   
+   static const std::string PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount];
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount];
+   
+   
    Gmat::PosVelSource    pvSrcForAll;
    Gmat::AnalyticMethod  anMethodForAll;
    PlanetaryEphem*       pE;
-   Integer               bodiesInUseID;
+   //Integer               bodiesInUseID;
 
 private:
 
