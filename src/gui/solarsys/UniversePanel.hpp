@@ -41,7 +41,8 @@ public:
     
    
 private:
-
+    StringArray theFileTypesInUse;
+    
   //    void CreateUniverse(wxWindow *parent);
     void OnAddButton(wxCommandEvent& event);
     void OnSortButton(wxCommandEvent& event);
@@ -65,6 +66,8 @@ private:
 //      wxBoxSizer *item5;
 //      wxBoxSizer *item9;
 
+    //loj: 4/6/04
+    //@todo need DE file type combobox (DE102, DE200, DE202, DE403, DE405, DE406)
     wxTextCtrl *slpFileTextCtrl;
     wxTextCtrl *de405FileTextCtrl;
     wxTextCtrl *de200FileTextCtrl;
