@@ -48,16 +48,66 @@ const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 
 /// Build the list of type names
-const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
-      {
-        "Integer", "UnsignedInt", "Real", "String", "StringArray", "Boolean", "Rvector",
-        "Rvector3", "Rvector6", "Rmatrix", "Rmatrix33", "Cartesian",
-         "Keplerian", "A1Mjd", "UtcDate", "Object"
-      };
+const std::string
+GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
+{
+   "Integer",    "UnsignedInt", "Real",       "String",    "StringArray",
+   "Boolean",    "Rvector",     "Rvector3",   "Rvector6",  "Rmatrix",
+   "Rmatrix33",  "Cartesian",   "Keplerian",  "A1Mjd",     "UtcDate",
+   "Object"
+};
+
+/// Build the list of object type names
+const std::string
+GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
+{
+   "Spacecraft",    "Formation",     "SpaceObject",   "GroundStation",
+   "Burn",          "Command",       "Propagator",    "ForceModel",
+   "PhysicalModel", "Interpolator",  "SolarSystem",   "CelestialBody",
+   "Atmosphere",    "Parameter",     "StopCondition", "Solver",
+   "Subscriber",    "PropSetup",     "RefFrame",      "UnknownObject"
+};
 
 /// initialize the count of instances
 Integer GmatBase::instanceCount = 0; 
 
+//-------------------------------------
+// public static methods
+//-------------------------------------
+
+//---------------------------------------------------------------------------
+// std::string GetObjectTypeString(Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * @param <type> object type
+ *
+ * @return object type string for given type
+ *
+ */
+//---------------------------------------------------------------------------
+std::string GmatBase::GetObjectTypeString(Gmat::ObjectType type)
+{
+   return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
+}
+
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetObjectType(const std::string &typeString)
+//---------------------------------------------------------------------------
+/**
+ * @param <typeString> object type string
+ *
+ * @return object type for given type string
+ *
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
+{
+   for (int i=0; i<Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT; i++)
+      if (OBJECT_TYPE_STRING[i] == typeString)
+         return (Gmat::ObjectType)i;
+
+   return Gmat::UNKNOWN_OBJECT;
+}
 
 //-------------------------------------
 // public methods

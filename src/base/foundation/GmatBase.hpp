@@ -222,8 +222,13 @@ public:
    static const Rmatrix      RMATRIX_PARAMETER_UNDEFINED;
    /// String mappings for the GMAT data types
    static const std::string  PARAM_TYPE_STRING[Gmat::TypeCount];
+   /// String mappings for the GMAT object types
+   static const std::string  OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1];
+   /// Method for getting GMAT object type string
+   static std::string GetObjectTypeString(Gmat::ObjectType type);
+   /// Method for getting GMAT object type
+   static Gmat::ObjectType GetObjectType(const std::string &typeString);
    
-    
 protected:
    /// Parameter IDs
    enum
