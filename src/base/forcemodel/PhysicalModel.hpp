@@ -189,7 +189,7 @@ protected:
    /// Parameter IDs
    enum
    {
-      EPOCH = 0, // assume GmatBase has no parameters
+      EPOCH = GmatBaseParamCount, 
       ELAPSED_SECS,
       PhysicalModelParamCount
    };
