@@ -136,9 +136,11 @@ void ParameterCreateDialog::Create()
    mColorButton->SetBackgroundColour(mColor);
    
    // wxListBox
+   //loj: 8/4/04 changed GetObjectListBox to GetSpacecraftListBox
+   wxArrayString emptyArray;
    objectListBox = 
-      theGuiManager->GetObjectListBox(this, -1, wxSize(150, 200));
-       
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150, 200), emptyArray);
+   
    propertyListBox = 
       theGuiManager->GetParameterListBox(this, -1, wxSize(150, 200),
                                          objectListBox->GetStringSelection(),
