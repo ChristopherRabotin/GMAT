@@ -45,7 +45,8 @@
 OrbitRvec6::OrbitRvec6(const std::string &name, const std::string &typeStr, 
                        GmatBase *obj, const std::string &desc,
                        const std::string &unit, GmatParam::DepObject depObj)
-   : Rvec6Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit)
+   : Rvec6Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit, depObj,
+              Gmat::SPACECRAFT)
 {
    AddRefObject(obj);
 }
@@ -208,7 +209,6 @@ void OrbitRvec6::Initialize()
 // Methods inherited from GmatBase
 //-------------------------------------
 
-//loj: 11/16/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)

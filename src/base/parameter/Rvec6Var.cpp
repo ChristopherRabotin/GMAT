@@ -29,12 +29,12 @@
 const std::string
 Rvec6Var::PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount] =
 {
-   "Param1",
-   "Param2",
-   "Param3",
-   "Param4",
-   "Param5",
-   "Param6"
+   "Value1",
+   "Value2",
+   "Value3",
+   "Value4",
+   "Value5",
+   "Value6"
 }; 
 
 const Gmat::ParameterType
@@ -72,10 +72,10 @@ Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
 //------------------------------------------------------------------------------
 Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
                    GmatParam::ParameterKey key, GmatBase *obj,
-                   const std::string &desc, const std::string &unit)
-   : Parameter(name, typeStr, key, obj, desc, unit, GmatParam::NO_DEP,
-               Gmat::UNKNOWN_OBJECT, false)
-{  
+                   const std::string &desc, const std::string &unit,
+                   GmatParam::DepObject depObj, Gmat::ObjectType ownerType)
+   : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, false)
+{
    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
    // GmatBase data
    parameterCount = Rvec6VarParamCount;
@@ -153,7 +153,6 @@ bool Rvec6Var::operator!=(const Rvec6Var &right) const
    return Parameter::operator!=(right);
 }
 
-//loj: 9/7/04 added
 //------------------------------------------------------------------------------
 // std::string ToString()
 //------------------------------------------------------------------------------

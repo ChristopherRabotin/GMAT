@@ -30,24 +30,25 @@ public:
    Rvec6Var(const std::string &name = "",
             const std::string &typeStr = "Rvec6Var",
             GmatParam::ParameterKey key = GmatParam::USER_PARAM,
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "");
+            GmatBase *obj = NULL, const std::string &desc = "",
+            const std::string &unit = "",
+            GmatParam::DepObject depObj = GmatParam::NO_DEP,
+            Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT);
    Rvec6Var(const Rvec6Var &copy);
    Rvec6Var& operator= (const Rvec6Var& right);
    virtual ~Rvec6Var();
-
+   
    bool operator==(const Rvec6Var &right) const;
    bool operator!=(const Rvec6Var &right) const;
-
-   virtual std::string ToString(); //loj: 9/7/04 added
+   
+   virtual std::string ToString();
    
    virtual Rvector6 GetRvector6() const;
    virtual Rvector6 EvaluateRvector6();
-
+   
    // methods inherited from Parameter
    virtual const std::string* GetParameterList() const;
-    
+   
    // methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str) const;
@@ -61,12 +62,12 @@ protected:
     
    enum
    {
-      PARAM_1 = ParameterParamCount,
-      PARAM_2,
-      PARAM_3,
-      PARAM_4,
-      PARAM_5,
-      PARAM_6,
+      VALUE1 = ParameterParamCount,
+      VALUE2,
+      VALUE3,
+      VALUE4,
+      VALUE5,
+      VALUE6,
       Rvec6VarParamCount
    };
 
