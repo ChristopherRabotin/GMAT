@@ -81,10 +81,13 @@ public:
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
 
-    static const Integer X = 0;
-    static const Integer Y = 1;
-    static const Integer Z = 2;
-
+    static const Cartesian ZeroCartesian;
+    
+    enum
+    {
+        X, Y, Z
+    };
+    
 protected:
 
 private:

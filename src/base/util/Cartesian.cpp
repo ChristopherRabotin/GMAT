@@ -42,6 +42,8 @@ const std::string Cartesian::DATA_DESCRIPTIONS[NUM_DATA] =
    "Velocity Z"
 };
 
+const Cartesian Cartesian::ZeroCartesian = Cartesian(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
 //---------------------------------
 //  public
 //---------------------------------
