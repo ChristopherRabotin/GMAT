@@ -161,6 +161,13 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
     theGuiInterpreter->ClearResource();
     theGuiInterpreter->ClearCommandSeq();
 
+    //loj: 3/11/04 close plot window on new project
+    if (MdiGlPlot::mdiParentGlFrame != NULL)
+        MdiGlPlot::mdiParentGlFrame->Close();
+    
+    if (MdiXyPlot::mdiParentXyFrame != NULL)
+        MdiXyPlot::mdiParentXyFrame->Close();
+    
     GmatAppData::GetResourceTree()->UpdateResource();
     GmatAppData::GetMissionTree()->UpdateMission();    
 }
@@ -179,6 +186,13 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
     theGuiInterpreter->ClearResource();
     theGuiInterpreter->ClearCommandSeq();
     
+    //loj: 3/11/04 close plot window on new project
+    if (MdiGlPlot::mdiParentGlFrame != NULL)
+        MdiGlPlot::mdiParentGlFrame->Close();
+    
+    if (MdiXyPlot::mdiParentXyFrame != NULL)
+        MdiXyPlot::mdiParentXyFrame->Close();
+
     theGuiInterpreter->LoadDefaultMission();
 
     GmatAppData::GetResourceTree()->UpdateResource();
