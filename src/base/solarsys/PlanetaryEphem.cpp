@@ -59,13 +59,13 @@ PlanetaryEphem::PlanetaryEphem(std::string withFileName)
  * This method creates an object of the PlanetaryEphem class
  * (constructor).
  *
- * @param <pef> SlpFIle object whose values to copy to the new File.
+ * @param <pef> SlpFile object whose values to copy to the new File.
  */
 //------------------------------------------------------------------------------
 PlanetaryEphem::PlanetaryEphem(const PlanetaryEphem& pef)
 {
    // set class data
-   itsName = pef.itsName;
+   itsName         = pef.itsName;
    g_pef_dcb       = pef.g_pef_dcb;
 }
 
