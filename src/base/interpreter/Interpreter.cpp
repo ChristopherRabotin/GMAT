@@ -159,6 +159,15 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
         CreateBurn(objectname, true);
         return true;
     }
+
+    //loj: added
+    // Handle Parameters
+    if (find(parametermap.begin(), parametermap.end(), objecttype) != 
+        parametermap.end())
+    {
+        moderator->CreateParameter(objecttype, objectname);
+        return true;
+    }
     
     // Handle Subscribers
     if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
@@ -459,16 +468,19 @@ std::string Interpreter::GetToken(std::string tokstr)
 GmatBase* Interpreter::FindObject(std::string objName)
 {
     GmatBase *obj;
+
+    obj = moderator->GetConfiguredItem(objName);
     
-    obj = moderator->GetSpacecraft(objName);
-    if (obj == NULL)
-        obj = moderator->GetForceModel(objName);
-    if (obj == NULL)
-        obj = moderator->GetPropSetup(objName);
-    if (obj == NULL)
-        obj = moderator->GetSubscriber(objName);
-    if (obj == NULL)
-        obj = moderator->GetBurn(objName);
+    //loj: commented out, since GetConfiguredItem(std::string name) was added to Moderator
+//      obj = moderator->GetSpacecraft(objName);
+//      if (obj == NULL)
+//          obj = moderator->GetForceModel(objName);
+//      if (obj == NULL)
+//          obj = moderator->GetPropSetup(objName);
+//      if (obj == NULL)
+//          obj = moderator->GetSubscriber(objName);
+//      if (obj == NULL)
+//          obj = moderator->GetBurn(objName);
 
     return obj;
 }
