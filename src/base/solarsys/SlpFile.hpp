@@ -124,10 +124,10 @@ private:
                  int islphdo[], int islpdto[], double *eptime);
    // method to return the position of the requested body at the requested time
    int slp_pos (double time,  double elapst, int nbody, int ibody[],
-                double posslp[][3]);
+                double posslp[MAX_BODIES][3]);
    // method to return the velocity of the requested body at the requested time
    int slp_vel (double time, double elapst, int nbody, int ibody[],
-                double velslp[][3]);
+                double velslp[MAX_BODIES][3]);
    // do we need these two?
 //   char *get_slp_error(int error, char *string);
 //   char *get_a1_utc_offset_error(int error, char *string);

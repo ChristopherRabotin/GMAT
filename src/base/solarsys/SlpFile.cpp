@@ -71,7 +71,7 @@ PlanetaryEphem(withFileName)
 SlpFile::SlpFile(const SlpFile& slpf) :
 PlanetaryEphem(slpf)
 {
-   InitializeSlpFile();
+   InitializeSlpFile();  // is it correct to do this?  or do I want to copy all of the stuff?
    int i;
    for (i=0;i<lengthOfHeaderRecord;i++)
       g_slp_header[i] = slpf.g_slp_header[i];
@@ -80,7 +80,7 @@ PlanetaryEphem(slpf)
 }
 
 //------------------------------------------------------------------------------
-//  SlpFile& operator= (const SlpFile& cb)
+//  SlpFile& operator= (const SlpFile& slpf)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the SlpFile class.
