@@ -654,46 +654,46 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     // wxTextCtrl
    setting1TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting2TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting3TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting4TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting5TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting6TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    setting7TextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""),
-                      wxDefaultPosition, wxSize(120,-1), 0 );
+                      wxDefaultPosition, wxSize(100,-1), 0 );
    bodyTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(250,-1), wxTE_READONLY );
+                      wxDefaultPosition, wxSize(150,-1), wxTE_READONLY );
    gravityDegreeTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(40,-1), 0 );
+                      wxSize(25,-1), 0 );
    gravityOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(40,-1), 0 );
+                      wxSize(25,-1), 0 );
    potFileTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
-                      wxSize(300,-1), 0 );
+                      wxSize(165,-1), 0 );
    pmEditTextCtrl =
       new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition,
-                      wxSize(360,-1), wxTE_READONLY );
+                      wxSize(220,-1), wxTE_READONLY );
    magneticDegreeTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
-                      wxSize(40,-1), 0 );
+                      wxSize(25,-1), 0 );
    magneticOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
-                      wxSize(40,-1), 0 );
+                      wxSize(25,-1), 0 );
 
 #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage
@@ -702,7 +702,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    // wxButton
    bodyButton =
-      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add/Remove Body"),
+      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add/Remove"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchGravityButton =
       new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"),
@@ -711,7 +711,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    editPmfButton =
-      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Add/Remove Body"),
+      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Add/Remove"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchMagneticButton =
       new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"),
@@ -761,20 +761,20 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       intgArray, wxCB_DROPDOWN|wxCB_READONLY );
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      wxDefaultPosition,  wxSize(100,-1), 0,
+                      wxDefaultPosition,  wxSize(70,-1), 0,
                       bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
    
    gravComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(gravArray[0]),
-                      wxDefaultPosition, wxSize(100,-1), GravModelCount,
+                      wxDefaultPosition, wxSize(70,-1), GravModelCount,
                       gravArray, wxCB_DROPDOWN|wxCB_READONLY );
    atmosComboBox =
       new wxComboBox( parent, ID_CB_ATMOS, wxT(dragArray[0]),
-                      wxDefaultPosition, wxSize(100,-1), DragModelCount,
+                      wxDefaultPosition, wxSize(80,-1), DragModelCount,
                       dragArray, wxCB_DROPDOWN|wxCB_READONLY );
    magfComboBox =
       new wxComboBox( parent, ID_CB_MAG, wxT(magfArray[0]),
-                      wxDefaultPosition, wxSize(100,-1), MagfModelCount,
+                      wxDefaultPosition, wxSize(70,-1), MagfModelCount,
                       magfArray, wxCB_DROPDOWN|wxCB_READONLY );
    originComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
@@ -828,37 +828,37 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    wxStaticBox *item65 = new wxStaticBox( parent, -1, wxT("Solar Radiation Pressure") );
    wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
 
-   Integer bsize = 3; // border size
+   Integer bsize = 1; // border size
    
    // Add to wx*Sizers  
    flexGridSizer1->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting1StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting1TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting2StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting2TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting3StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting3TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting4StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting4TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting5StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting5TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting6StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting6TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( setting7StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    flexGridSizer1->Add( setting7TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
 
