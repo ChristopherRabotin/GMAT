@@ -32,6 +32,10 @@ public:
     
     // operations
     void AppendText(const wxString& text);
+    void SetMaxLength(unsigned long len)
+        { mTextCtrl->SetMaxLength(len); };
+    int GetNumberOfLines()
+        { return mTextCtrl->GetNumberOfLines(); };
     void ClearText()
         { mTextCtrl->Clear(); };
     void SetWindowMode(const wxString &mode)
