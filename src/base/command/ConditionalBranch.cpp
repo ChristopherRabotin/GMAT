@@ -830,8 +830,11 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    Real        rhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
    bool        lhFound = false, rhFound = false;
    bool        rightIsParm = false;
-   std::string theLHSParmName = lhsList.at(which);
+   bool        leftIsParm  = false;
+   std::string theLHSParmName = "";
+   //std::string theLHSParmName = lhsList.at(which);
    std::string theRHSParmName = "";
+   
    char firstChar = (rhsList.at(which)).at(0);
    if (isalpha(firstChar))  // if not a real, assume a Parameter  
    {
@@ -843,28 +846,42 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
       std::istringstream rhsStr(rhsList.at(which)); 
       rhsStr >> rhsValue;
    }
-   // iterate over the list of reference objects to find the parameter
-   std::vector<Parameter*>::iterator p = params.begin();
-   while (p != params.end())
+   firstChar = (lhsList.at(which)).at(0);
+   if (isalpha(firstChar))  // if not a real, assume a Parameter  
    {
-      if ((*p)->GetName() == theLHSParmName)
-      {
-         lhsValue = (*p)->EvaluateReal();
-         lhFound  = true;
-      }
-      if (rightIsParm && ((*p)->GetName() == theRHSParmName))
-      {
-         rhsValue = (*p)->EvaluateReal();
-         rhFound  = true;
-      }
-      ++p;
+      theLHSParmName = lhsList.at(which);
+      leftIsParm     = true;
    }
-   if (!lhFound) 
-      throw CommandException("Parameter not found for LHS string in condition " +
-                             which);
-   if (rightIsParm && !rhFound)
-      throw CommandException("Parameter not found for RHS string in condition " +
-                             which);
+   else
+   {
+      std::istringstream lhsStr(lhsList.at(which)); 
+      lhsStr >> lhsValue;
+   }
+   // iterate over the list of reference objects to find the parameter
+   if (rightIsParm || leftIsParm)
+   {
+      std::vector<Parameter*>::iterator p = params.begin();
+      while (p != params.end())
+      {
+         if (leftIsParm && ((*p)->GetName() == theLHSParmName))
+         {
+            lhsValue = (*p)->EvaluateReal();
+            lhFound  = true;
+         }
+         if (rightIsParm && ((*p)->GetName() == theRHSParmName))
+         {
+            rhsValue = (*p)->EvaluateReal();
+            rhFound  = true;
+         }
+         ++p;
+      }
+      if (leftIsParm && !lhFound) 
+         throw CommandException("Parameter not found for LHS string in condition " +
+                                which);
+      if (rightIsParm && !rhFound)
+         throw CommandException("Parameter not found for RHS string in condition " +
+                                which);
+   }
    switch (opList.at(which))
    {
       case EQUAL_TO:
