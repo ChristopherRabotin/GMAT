@@ -54,8 +54,9 @@ public:
    void RemoveChild(wxString item);
    void CloseActiveChild();
    void CloseAllChildren();
-   void CloseCurrentProject(); //loj: 9/8/04 added
-   void RunCurrentMission(); //loj: 9/24/04 added
+   void CloseCurrentProject();
+   void RunCurrentMission();
+   void NotifyRunCompleted(); //loj: 10/28/04 added
    void StartServer();
    void StopServer();
    wxToolBar* GetMainFrameToolBar();
@@ -66,9 +67,12 @@ public:
 protected:
 private:
    
-   GmatServer *mServer; //loj: 8/27/04 added
+   GmatServer *mServer;
    std::string scriptFilename;
    GuiInterpreter *theGuiInterpreter;
+   
+   wxSize mFullSize;    //loj: 10/28/04 added
+   wxSize mReducedSize; //loj: 10/28/04 added
    
    wxSashLayoutWindow* win;
    wxSashLayoutWindow* msgWin;

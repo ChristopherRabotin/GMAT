@@ -74,7 +74,6 @@
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
 
-//loj: 8/5/04 moved from GmatMainFrame.hpp
 #include "bitmaps/new.xpm"
 #include "bitmaps/open.xpm"
 #include "bitmaps/save.xpm"
@@ -170,7 +169,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    
    // set the script name
    scriptFilename = "$gmattempscript$.script";
-   
+
+   // Set frame full/reduced size (loj: 10/28/04)
+   mFullSize = size;
+   mReducedSize = wxSize(400, 200);
+
    mDocManager = (wxDocManager *) NULL;
 //   GmatSplitterWindow *splitter;
 //   GmatNotebook *leftTabs;
@@ -728,12 +731,28 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
+   mFullSize = GetSize();
+   SetSize(mReducedSize); //loj: 10/28/04 Added
    SetFocus();
    
    theGuiInterpreter->RunMission();
    
    toolBar->EnableTool(TOOL_RUN, TRUE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
+}
+
+//loj: 10/28/04 added
+//------------------------------------------------------------------------------
+// void NotifyRunCompleted()
+//------------------------------------------------------------------------------
+/*
+ * This is called by the Moderator when a mission run is completed.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::NotifyRunCompleted()
+{
+   //loj: 10/28/04 added to show full size when mission run completed
+   SetSize(mFullSize);
 }
 
 //------------------------------------------------------------------------------
@@ -936,6 +955,8 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
+   mFullSize = GetSize();
+   SetSize(mReducedSize); //loj: 10/28/04 Added
    SetFocus();
    
    theGuiInterpreter->RunMission();
@@ -959,6 +980,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
    wxYield();
+   SetSize(mFullSize); //loj: 10/28/04 Added
    
    theGuiInterpreter->ChangeRunState("Stop");
    
@@ -1588,7 +1610,7 @@ void GmatMainFrame::OnFocus(wxFocusEvent& event)
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::OnFocus() entered\n");
 #endif
-   
+
    wxYield();
    event.Skip(true);
 }
