@@ -16,23 +16,28 @@
  * Implements XyPlot class.
  */
 //------------------------------------------------------------------------------
-//#include <iomanip>
+
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp"     // for XY plot
+#include "ColorTypes.hpp"        // for namespace GmatColor::
 #include "Moderator.hpp"         // for GetParameter()
 #include "MessageInterface.hpp"  // for ShowMessage()
+
+#define DEBUG_XYPLOT 0
 
 //---------------------------------
 // static data
 //---------------------------------
 
 const std::string
-XyPlot::PARAMETER_TEXT[XyPlotParamCount] =
+XyPlot::PARAMETER_TEXT[XyPlotParamCount - SubscriberParamCount] =
 {
-   "IndVar",            //loj: 3/17/04 changed to match script
-   "DepVar",            //loj: 3/17/04 changed to match script
+   "IndVar",
+   "Add",               //loj: 6/4/04 added to match script
+   "DepVar",
    "DepVarList",
    "ClearDepVarList",
+   "Color",
    "PlotTitle",
    "XAxisTitle",
    "YAxisTitle",
@@ -42,12 +47,14 @@ XyPlot::PARAMETER_TEXT[XyPlotParamCount] =
 }; 
 
 const Gmat::ParameterType
-XyPlot::PARAMETER_TYPE[XyPlotParamCount] =
+XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
 {
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::UNSIGNED_INT_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -69,8 +76,8 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount] =
 XyPlot::XyPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle,
-               bool drawGrid)
-   : Subscriber("XyPlot", name)
+               bool drawGrid) :
+   Subscriber("XyPlot", name)
 {
    // GmatBase data
    parameterCount = XyPlotParamCount;
@@ -83,14 +90,13 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
     
    mXParam = xParam;
    if (firstYParam != NULL)
-      AddYParameter(firstYParam);
+      AddYParameter(firstYParam->GetName());
 
    mPlotTitle = plotTitle;
    mXAxisTitle = xAxisTitle;
    mYAxisTitle = yAxisTitle;
    
    mIsXyPlotWindowSet = false;
-   //mAddNewCurve = true; //loj: 5/13/04 not used, remove later
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
 }
@@ -99,9 +105,29 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
 // XyPlot(const XyPlot &copy)
 //------------------------------------------------------------------------------
 XyPlot::XyPlot(const XyPlot &copy) :
-Subscriber(copy)
+   Subscriber(copy)
 {
-   // wcs : someone else will need to complete this
+   mXParam = copy.mXParam;
+   mYParams = copy.mYParams; //loj: 6/4/04 remove this later
+   mYParamMap = copy.mYParamMap;
+   
+   mNumXParams = copy.mNumXParams;
+   mNumYParams = copy.mNumYParams;
+
+   mXParamName = copy.mXParamName;
+   mYParamNames = copy.mYParamNames;
+    
+   mPlotTitle = copy.mPlotTitle;
+   mXAxisTitle = copy.mXAxisTitle;
+   mYAxisTitle = copy.mYAxisTitle;
+   mDrawGrid = copy.mDrawGrid;
+   mIsXyPlotWindowSet = copy.mIsXyPlotWindowSet;
+    
+   mDataCollectFrequency = copy.mDataCollectFrequency;
+   mUpdatePlotFrequency = copy.mUpdatePlotFrequency;
+    
+   mNumDataPoints = copy.mNumDataPoints;
+   mNumCollected = copy.mNumCollected;
 }
 
 
@@ -112,20 +138,132 @@ XyPlot::~XyPlot(void)
 {
 }
 
-//loj: 3/8/04 added
+//------------------------------------------------------------------------------
+// Integer GetNumYParameters()
+//------------------------------------------------------------------------------
+Integer XyPlot::GetNumYParameters()
+{
+   return mNumYParams;
+}
+
+//------------------------------------------------------------------------------
+// bool SetXParameter(const std::string &paramName)
+//------------------------------------------------------------------------------
+bool XyPlot::SetXParameter(const std::string &paramName)
+{
+   //@todo Do not use Moderator
+   
+   bool status = false;
+   Moderator *theModerator = Moderator::Instance();
+
+   if (paramName != "")
+   {
+      mXParamName = paramName;
+      mXParam = NULL;
+      
+      // get parameter pointer
+      Parameter *param = theModerator->GetParameter(paramName);
+      if (param != NULL)
+      {
+         mXParam = param;
+         mNumXParams = 1; //loj: only 1 X parameter for now
+      }
+      status = true;
+   }
+
+   return status;
+}
+
+//  //------------------------------------------------------------------------------
+//  // bool SetXParameter(Parameter *param)
+//  //------------------------------------------------------------------------------
+//  bool XyPlot::SetXParameter(Parameter *param)
+//  {
+//     //loj: Do I really need to validate parameter before set?
+//     //     Validate when the parameter is actually evaluated?
+//     //if (param->Validate()) //loj: 4/27/04 commented out
+//     //{
+//        mXParamName = param->GetName();
+//        mXParam = param;
+//        return true;
+//     //}
+
+//     //return false;
+//  }
+
+//------------------------------------------------------------------------------
+// bool AddYParameter(const std::string &paramName)
+//------------------------------------------------------------------------------
+bool XyPlot::AddYParameter(const std::string &paramName)
+{
+   bool status = false;
+   Moderator *theModerator = Moderator::Instance();
+    
+   if (paramName != "")
+   {
+      mYParamNames.push_back(paramName);
+      mYParamMap[paramName] = NULL;
+      mNumYParams = mYParamNames.size();
+
+      mColorMap[paramName] = GmatColor::BLACK32;
+
+      // get parameter pointer
+      Parameter *param = theModerator->GetParameter(paramName);
+      if (param != NULL)
+      {
+#if DEBUG_XYPLOT
+         MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
+                                       param->GetName().c_str());
+#endif
+         mYParamMap[paramName] = param;
+         mYParams.push_back(param);
+      }
+      status = true;
+   }
+
+   return status;
+}
+
+//  //------------------------------------------------------------------------------
+//  // bool AddYParameter(Parameter *param)
+//  //------------------------------------------------------------------------------
+//  bool XyPlot::AddYParameter(Parameter *param)
+//  {
+//     bool added = false;
+    
+//     //loj: Do I really need to validate parameter before add?
+//     //if (param->Validate()) //loj: 4/27/04 commented out
+//     //{
+//        //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
+//        //                              param->GetName().c_str());
+//        mYParams.push_back(param);
+
+//        added = true;
+//     //}
+
+//     return added;
+//  }
+
+//----------------------------------
+// methods inherited from Subscriber
+//----------------------------------
+
 //------------------------------------------------------------------------------
 // virtual bool Initialize()
 //------------------------------------------------------------------------------
 bool XyPlot::Initialize()
 {
+   //-----------------------------------
+   //@todo
+   // need to set Parameter pointers
+   //-----------------------------------
+   // implement this later
+
+   
    //MessageInterface::ShowMessage("XyPlot::Initialize() entered\n");
    bool status = false;
    DeletePlotCurves(); //loj: 5/3/04 added to fix index out of range
    
-   //loj: 5/12/04 always add new curves to show curves when running a mission
-   //     without rebuilding objects
-   //mAddNewCurve = true; 
-
    //MessageInterface::ShowMessage("XyPlot::Initialize() active=%d\n", active);
    
    if (active)
@@ -168,7 +306,6 @@ bool XyPlot::Initialize()
       if (mIsXyPlotWindowSet)
       {        
          mIsXyPlotWindowSet = false;
-         //mAddNewCurve = true;
          status = PlotInterface::DeleteXyPlot(true);
       }
       else
@@ -178,102 +315,6 @@ bool XyPlot::Initialize()
    }
 
    return status;
-}
-
-//------------------------------------------------------------------------------
-// Integer GetNumYParameters()
-//------------------------------------------------------------------------------
-Integer XyPlot::GetNumYParameters()
-{
-   return mNumYParams;
-}
-
-//------------------------------------------------------------------------------
-// bool SetXParameter(const std::string &paramName)
-//------------------------------------------------------------------------------
-bool XyPlot::SetXParameter(const std::string &paramName)
-{
-   //@todo Do not use Moderator
-   
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-
-   if (paramName != "")
-   {
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
-      {
-         SetXParameter(param);
-         status = true;
-         mNumXParams = 1; //loj: only 1 X parameter for now
-      }
-   }
-
-   return status;
-}
-
-//------------------------------------------------------------------------------
-// bool SetXParameter(Parameter *param)
-//------------------------------------------------------------------------------
-bool XyPlot::SetXParameter(Parameter *param)
-{
-   //loj: Do I really need to validate parameter before set?
-   //     Validate when the parameter is actually evaluated?
-   //if (param->Validate()) //loj: 4/27/04 commented out
-   //{
-      mXParamName = param->GetName();
-      mXParam = param;
-      return true;
-   //}
-
-   //return false;
-}
-
-//------------------------------------------------------------------------------
-// bool AddYParameter(const std::string &paramName)
-//------------------------------------------------------------------------------
-bool XyPlot::AddYParameter(const std::string &paramName)
-{
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (paramName != "")
-   {
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
-      {
-         //MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
-         //                              param->GetName().c_str());
-         AddYParameter(param);
-         status = true;
-      }
-   }
-
-   return status;
-}
-
-//------------------------------------------------------------------------------
-// bool AddYParameter(Parameter *param)
-//------------------------------------------------------------------------------
-bool XyPlot::AddYParameter(Parameter *param)
-{
-   bool added = false;
-    
-   //loj: Do I really need to validate parameter before add?
-   //if (param->Validate()) //loj: 4/27/04 commented out
-   //{
-      //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
-      //                              param->GetName().c_str());
-      mYParamNames.push_back(param->GetName());
-      mYParams.push_back(param);
-      mNumYParams = mYParams.size();
-
-      added = true;
-   //}
-
-   return added;
 }
 
 //---------------------------------
@@ -300,8 +341,8 @@ GmatBase* XyPlot::Clone(void) const
 //------------------------------------------------------------------------------
 std::string XyPlot::GetParameterText(const Integer id) const
 {
-   if (id >= 0 && id < XyPlotParamCount)
-      return PARAMETER_TEXT[id];
+   if (id >= SubscriberParamCount && id < XyPlotParamCount)
+      return PARAMETER_TEXT[id - SubscriberParamCount];
    else
       return Subscriber::GetParameterText(id);
     
@@ -312,9 +353,9 @@ std::string XyPlot::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer XyPlot::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<XyPlotParamCount; i++)
+   for (int i=SubscriberParamCount; i<XyPlotParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - SubscriberParamCount])
          return i;
    }
    
@@ -327,7 +368,7 @@ Integer XyPlot::GetParameterID(const std::string &str) const
 Gmat::ParameterType XyPlot::GetParameterType(const Integer id) const
 {
    if (id >= 0 && id < XyPlotParamCount)
-      return PARAMETER_TYPE[id];
+      return PARAMETER_TYPE[id - SubscriberParamCount];
    else
       return Subscriber::GetParameterType(id);
 }
@@ -337,11 +378,10 @@ Gmat::ParameterType XyPlot::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string XyPlot::GetParameterTypeString(const Integer id) const
 {
-   if (id >= 0 && id < XyPlotParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   if (id >= SubscriberParamCount && id < XyPlotParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - SubscriberParamCount)];
    else
       return Subscriber::GetParameterTypeString(id);
-    
 }
 
 //------------------------------------------------------------------------------
@@ -395,6 +435,76 @@ bool XyPlot::SetBooleanParameter(const std::string &label,
 }
 
 //------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const Integer id,
+//                                     const std::string &item)
+//------------------------------------------------------------------------------
+UnsignedInt XyPlot::GetUnsignedIntParameter(const Integer id,
+                                            const std::string &item)
+{   
+   switch (id)
+   {
+   case COLOR:
+      if (mColorMap.find(item) != mColorMap.end())
+         return mColorMap[item];
+      else
+         return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   default:
+      return Subscriber::GetUnsignedIntParameter(id);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt GetUnsignedIntParameter(const std::string &label,
+//                                     const std::string &item)
+//------------------------------------------------------------------------------
+UnsignedInt XyPlot::GetUnsignedIntParameter(const std::string &label,
+                                                const std::string &item)
+{
+   return GetUnsignedIntParameter(GetParameterID(label), item);
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                     const std::string &item,
+//                                     const UnsignedInt value)
+//------------------------------------------------------------------------------
+UnsignedInt XyPlot::SetUnsignedIntParameter(const Integer id,
+                                            const std::string &item,
+                                            const UnsignedInt value)
+{
+#ifdef DEBUG_OPENGL
+   MessageInterface::ShowMessage
+      ("XyPlot::SetUnsignedIntParameter()"
+       "id=%d, item=%s, value=%d\n", id, item.c_str(), value);
+#endif
+   
+   switch (id)
+   {
+   case COLOR:
+      if (mColorMap.find(item) != mColorMap.end())
+      {
+         mColorMap[item] = value;
+         return value;
+      }
+      return GmatBase::UNSIGNED_INT_PARAMETER_UNDEFINED;
+   default:
+      return Subscriber::SetUnsignedIntParameter(id, value);
+   }
+}
+
+//------------------------------------------------------------------------------
+// UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                     const std::string &item,
+//                                     const UnsignedInt value)
+//------------------------------------------------------------------------------
+UnsignedInt XyPlot::SetUnsignedIntParameter(const std::string &label,
+                                            const std::string &item,
+                                            const UnsignedInt value)
+{
+   return SetUnsignedIntParameter(GetParameterID(label), item, value);
+}
+
+//------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string XyPlot::GetStringParameter(const Integer id) const
@@ -435,12 +545,16 @@ std::string XyPlot::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool XyPlot::SetStringParameter(const Integer id, const std::string &value)
 {
-   //MessageInterface::ShowMessage("XyPlot::SetStringParameter() id = %d, "
-   //                              "value = %s \n", id, value.c_str());
+#if DEBUG_XYPLOT
+   MessageInterface::ShowMessage("XyPlot::SetStringParameter() id = %d, "
+                                 "value = %s \n", id, value.c_str());
+#endif
    switch (id)
    {
    case IND_VAR:
       return SetXParameter(value);
+   case ADD:
+      return AddYParameter(value);
    case DEP_VAR:
       return AddYParameter(value);
    case PLOT_TITLE:
@@ -502,13 +616,15 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
 void XyPlot::BuildPlotTitle()
 {
    //set X and Y axis title
-   if (mXAxisTitle == "")// || mAddNewCurve)
+   if (mXAxisTitle == "")
       mXAxisTitle = mXParam->GetName();
-            
-   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
-   //                              mXAxisTitle.c_str());
+
+#if DEBUG_XYPLOT
+   MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
+                                 mXAxisTitle.c_str());
+#endif
    
-   if (mYAxisTitle == "")// || mAddNewCurve)
+   if (mYAxisTitle == "")
    {
       mYAxisTitle = "";
       for (int i= 0; i<mNumYParams-1; i++)
@@ -518,16 +634,20 @@ void XyPlot::BuildPlotTitle()
       mYAxisTitle += mYParams[mNumYParams-1]->GetName();
    }
             
-   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
-   //                              mYAxisTitle.c_str());
+#if DEBUG_XYPLOT
+   MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
+                                 mYAxisTitle.c_str());
+#endif
     
-   if (mPlotTitle == "")// || mAddNewCurve)
+   if (mPlotTitle == "")
    {
       mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
    }
     
-   //MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
-   //                              mPlotTitle.c_str());
+#if DEBUG_XYPLOT
+   MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
+                                 mPlotTitle.c_str());
+#endif
 }
 
 //loj: 5/4/04 added
@@ -539,8 +659,8 @@ void XyPlot::ClearYParameters()
    DeletePlotCurves();
    mYParams.clear();
    mYParamNames.clear();
+   mColorMap.clear();
    mNumYParams = 0;
-   //mAddNewCurve = true;
    mPlotTitle = "";
    mXAxisTitle = "";
    mYAxisTitle = "";
@@ -578,20 +698,25 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
       {
          // get x param
          Real xval = mXParam->EvaluateReal();
-         //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
+
+#if DEBUG_XYPLOT
+         MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
+#endif
          //xval = dat[0]; // loj: temp code to test XY plot dat[0] is time
          //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
             
          // get y params
          Rvector yvals = Rvector(mNumYParams);
 
-         //loj: 2/27/04 why parameters not getting updated value?
-         // because the spacecraft is not updated?
          // put yvals in the order of parameters added
          for (int i=0; i<mNumYParams; i++)
          {
             yvals[i] = mYParams[i]->EvaluateReal();
-            //MessageInterface::ShowMessage("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
+            
+#if DEBUG_XYPLOT
+            MessageInterface::ShowMessage
+               ("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
+#endif
             //yvals[i] = dat[1]; //loj: temp code to test XY plot dat[1] is pos X
             //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
          }
@@ -600,10 +725,11 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // X value must start from 0
          if (mIsXyPlotWindowSet)
          {
-            mNumData++;
+            mNumDataPoints++;
                 
-            if ((mNumData % mDataCollectFrequency) == 0)
+            if ((mNumDataPoints % mDataCollectFrequency) == 0)
             {
+               mNumDataPoints = 0;
                mNumCollected++;
                bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
 
@@ -613,6 +739,8 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
                                                   mPlotTitle, mXAxisTitle, mYAxisTitle,
                                                   update);
+               if (update)
+                  mNumCollected = 0;
             }
          }
       }

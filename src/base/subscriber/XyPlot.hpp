@@ -21,7 +21,7 @@
 
 #include "Subscriber.hpp"
 #include "Parameter.hpp"
-#include <sstream>
+#include <map>
 
 class XyPlot : public Subscriber
 {
@@ -33,21 +33,19 @@ public:
    XyPlot(const XyPlot &copy);
    virtual ~XyPlot(void);
 
-   // methods inherited from Subscriber
-   virtual bool Initialize(); //loj: 3/8/04 added
-    
    Integer GetNumYParameters();
     
    bool SetXParameter(const std::string &paramName);
-   bool SetXParameter(Parameter *param);
+   //bool SetXParameter(Parameter *param);
     
    bool AddYParameter(const std::string &paramName);
-   bool AddYParameter(Parameter *param);
+   //bool AddYParameter(Parameter *param);
 
-   // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-
+   // methods inherited from Subscriber
+   virtual bool Initialize();
+    
    // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -59,6 +57,15 @@ public:
    virtual bool SetBooleanParameter(const std::string &label,
                                     const bool value);
     
+   UnsignedInt GetUnsignedIntParameter(const Integer id, const std::string &item);
+   UnsignedInt GetUnsignedIntParameter(const std::string &label,
+                                       const std::string &item);
+   UnsignedInt SetUnsignedIntParameter(const Integer id, const std::string &item,
+                                       const UnsignedInt value);
+   UnsignedInt  SetUnsignedIntParameter(const std::string &label,
+                                        const std::string &item,
+                                        const UnsignedInt value);
+   
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
@@ -71,16 +78,13 @@ public:
 protected:
 
    void BuildPlotTitle();
-   void ClearYParameters(); //loj: 5/3/04 added
+   void ClearYParameters();
    void DeletePlotCurves();
     
-   // methods inherited from Subscriber
-   virtual bool Distribute(Integer len);
-   virtual bool Distribute(const Real * dat, Integer len);
-
    Parameter *mXParam;
-   std::vector<Parameter*> mYParams;
-    
+   std::vector<Parameter*> mYParams; //loj: 6/4/04 remove this later
+   std::map<std::string, Parameter*> mYParamMap;
+
    Integer mNumXParams;
    Integer mNumYParams;
 
@@ -92,20 +96,23 @@ protected:
    std::string mYAxisTitle;
    bool mDrawGrid;
    bool mIsXyPlotWindowSet;
-   bool mAddNewCurve;
     
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
     
-   Integer mNumData;
+   Integer mNumDataPoints;
    Integer mNumCollected;
+   
+   std::map<std::string, UnsignedInt> mColorMap;
     
    enum
    {
       IND_VAR = SubscriberParamCount,
+      ADD,
       DEP_VAR,
       DEP_VAR_LIST,
       CLEAR_DEP_VAR_LIST,
+      COLOR,
       PLOT_TITLE,
       X_AXIS_TITLE,
       Y_AXIS_TITLE,
@@ -115,8 +122,14 @@ protected:
       XyPlotParamCount
    };
     
-   static const Gmat::ParameterType PARAMETER_TYPE[XyPlotParamCount];
-   static const std::string PARAMETER_TEXT[XyPlotParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount];
+   static const std::string
+      PARAMETER_TEXT[XyPlotParamCount - SubscriberParamCount];
+
+   // methods inherited from Subscriber
+   virtual bool Distribute(Integer len);
+   virtual bool Distribute(const Real * dat, Integer len);
 
 };
 
