@@ -52,7 +52,8 @@ private:
    wxTreeItemId mVariableItem;
    wxTreeItemId mMatlabFunctItem;
    wxTreeItemId mCoordSysItem;
-
+   wxTreeItemId mPredefinedFunctItem;
+   wxTreeItemId specialPointsItem;
 
    int mNumSpacecraft;
    int mNumFormation;
@@ -108,6 +109,7 @@ private:
    void OnAddDiffCorr(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
    void OnAddMatlabFunction(wxCommandEvent &event);
+   void OnAddGmatFunction(wxCommandEvent &event);
    void OnAddCoordSys(wxCommandEvent &event);
 
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
@@ -144,6 +146,7 @@ private:
       
       POPUP_ADD_MATLAB_FUNCT,
       POPUP_ADD_COORD_SYS,
+      POPUP_ADD_GMAT_FUNCT,
    };
 };
 

@@ -80,6 +80,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
    EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
    EVT_MENU(POPUP_ADD_MATLAB_FUNCT, ResourceTree::OnAddMatlabFunction)
+   EVT_MENU(POPUP_ADD_GMAT_FUNCT, ResourceTree::OnAddGmatFunction)
    EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSys)
    EVT_MENU(POPUP_OPEN, ResourceTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, ResourceTree::OnClose)
@@ -261,7 +262,7 @@ void ResourceTree::AddDefaultResources()
     
    SetItemImage(universeItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
-
+                
    //----- Solver
    mSolverItem =
       AppendItem(resource, wxT("Solvers"), GmatTree::ICON_FOLDER, -1,
@@ -317,11 +318,11 @@ void ResourceTree::AddDefaultResources()
 
    //----- Matlab functions
    mMatlabFunctItem =
-      AppendItem(resource, wxT("MATLAB Functions"), GmatTree::ICON_FOLDER,
-              -1, new GmatTreeItemData(wxT("MATLAB Functions"), GmatTree::MATLAB_FUNCT_FOLDER));
+      AppendItem(resource, wxT("Functions"), GmatTree::ICON_FOLDER,
+              -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCT_FOLDER));
    SetItemImage(mMatlabFunctItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
+                
    //----- GroundStations
    AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
               -1, new GmatTreeItemData(wxT("Ground Stations"),
@@ -375,6 +376,18 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
               new GmatTreeItemData(wxT("Neptune"), GmatTree::DEFAULT_BODY));
    AppendItem(itemId, wxT("Pluto"), GmatTree::ICON_PLUTO, -1,
               new GmatTreeItemData(wxT("Pluto"), GmatTree::DEFAULT_BODY));
+
+   //----- Space Points
+   specialPointsItem =
+      AppendItem(itemId, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Special Points"),
+                                      GmatTree::SPECIAL_POINTS_FOLDER));
+    
+   SetItemImage(specialPointsItem, GmatTree::ICON_OPENFOLDER, 
+                wxTreeItemIcon_Expanded);
+
+
+
 }
 
 //------------------------------------------------------------------------------
@@ -685,9 +698,18 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_MATLAB_FUNCT));
+                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_MATLAB_FUNCTION));
    };
-
+ 
+   //----- Predefined functions
+   mPredefinedFunctItem =
+      AppendItem(itemId, wxT("Predefined Functions"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Functions"),
+                                      GmatTree::PREDEFINED_FUNCTIONS_FOLDER));
+    
+   SetItemImage(mPredefinedFunctItem, GmatTree::ICON_OPENFOLDER, 
+                wxTreeItemIcon_Expanded);
+                
    if (size > 0)
       Expand(itemId);
 
@@ -760,26 +782,26 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    wxMenu menu;
     
    if (strcmp(title, wxT("Spacecraft")) == 0)
-      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft..."));
+      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft"));
    else if (strcmp(title, wxT("Formations")) == 0)
-      menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation..."));
+      menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation"));
    else if (strcmp(title, wxT("Constellations")) == 0)
    {
-      menu.Append(POPUP_ADD_CONSTELLATION, wxT("Add Constellation..."));
+      menu.Append(POPUP_ADD_CONSTELLATION, wxT("Add Constellation"));
       menu.Enable(POPUP_ADD_CONSTELLATION, FALSE);
    }   
    else if (strcmp(title, wxT("Burns")) == 0)
       menu.Append(POPUP_ADD_BURN, wxT("Add"), CreatePopupMenu(Gmat::BURN));
    else if (strcmp(title, wxT("Propagators")) == 0)
-      menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator..."));
+      menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator"));
    else if (strcmp(title, wxT("Solvers")) == 0)
       menu.Append(POPUP_ADD_SOLVER, wxT("Add"), CreatePopupMenu(Gmat::SOLVER));
    else if (strcmp(title, wxT("Universe")) == 0)
-      menu.Append(POPUP_ADD_BODY, wxT("Add Body..."));
+      menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
    else if (strcmp(title, wxT("Variables/Arrays")) == 0) //loj: 11/03/04 added Arrays
-      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable..."));
+      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable"));
 //   else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
 //            (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
 //            (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
@@ -798,9 +820,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
    }
-   else if (dataType == GmatTree::MATLAB_FUNCT_FOLDER)
+   else if (dataType == GmatTree::FUNCT_FOLDER)
    {
       menu.Append(POPUP_ADD_MATLAB_FUNCT, wxT("Add MATLAB Function"));
+      menu.Append(POPUP_ADD_GMAT_FUNCT, wxT("Add GMAT Function"));
 //#if defined __USE_MATLAB__
 //      menu.Enable(POPUP_ADD_MATLAB_FUNCT, TRUE);
 //#else
@@ -961,8 +984,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       case GmatTree::CREATED_VARIABLE:
          objType = Gmat::PARAMETER;
          break;
-      case GmatTree::DEFAULT_MATLAB_FUNCT:
-      case GmatTree::CREATED_MATLAB_FUNCT:
+      case GmatTree::DEFAULT_MATLAB_FUNCTION:
+      case GmatTree::CREATED_MATLAB_FUNCTION:
+      case GmatTree::DEFAULT_GMAT_FUNCTION:
+      case GmatTree::CREATED_GMAT_FUNCTION:
          objType = Gmat::FUNCTION;
          break;
       default:
@@ -1531,7 +1556,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
           CreateFunction("MatlabFunction", stdWithName))
       {
          AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
-                    new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
+                    new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCTION));
 
          Expand(item);
       }
@@ -1540,6 +1565,46 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    }
    //OnRename(event); //loj: 12/7/04 commented out
 }
+
+//------------------------------------------------------------------------------
+// void OnAddGmatFunction(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a gmat function to the folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+
+   wxString withName;
+   //withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
+
+   //loj: 12/7/04 - Get name from the user first
+   withName = wxGetTextFromUser(wxT("Name: "), wxT("GMAT function"),
+                                withName, this);
+
+   if (!withName.IsEmpty())
+   {
+      ++mNumMatlabFunct;
+      const std::string stdWithName = withName.c_str();
+
+      if (GmatAppData::GetGuiInterpreter()->
+          CreateFunction("GmatFunction", stdWithName))
+      {
+         AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
+                    new GmatTreeItemData(withName, GmatTree::CREATED_GMAT_FUNCTION));
+
+         Expand(item);
+      }
+
+      SelectItem(GetLastChild(item));
+   }
+   //OnRename(event); //loj: 12/7/04 commented out
+}
+
 
 //------------------------------------------------------------------------------
 // void OnAddCoordSys(wxCommandEvent &event)

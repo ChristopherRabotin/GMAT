@@ -110,8 +110,10 @@ namespace GmatTree
         SUBSCRIPTS_FOLDER,
         VARIABLES_FOLDER,
         GROUNDSTATIONS_FOLDER,
-        MATLAB_FUNCT_FOLDER,
+        FUNCT_FOLDER,
         COORD_SYS_FOLDER,
+        SPECIAL_POINTS_FOLDER,
+        PREDEFINED_FUNCTIONS_FOLDER,
 
         DEFAULT_SPACECRAFT,
         CREATED_SPACECRAFT,
@@ -156,8 +158,11 @@ namespace GmatTree
         DEFAULT_VARIABLE,
         CREATED_VARIABLE,
 
-        DEFAULT_MATLAB_FUNCT,
-        CREATED_MATLAB_FUNCT,
+        DEFAULT_MATLAB_FUNCTION,
+        CREATED_MATLAB_FUNCTION,
+        
+        DEFAULT_GMAT_FUNCTION,
+        CREATED_GMAT_FUNCTION,
 
         DEFAULT_COORD_SYSTEM,
         CREATED_COORD_SYSTEM,
@@ -181,6 +186,7 @@ namespace GmatTree
         SAVE_COMMAND,    //loj: 10/20/04 added SAVE, TOGGLE
         TOGGLE_COMMAND,
         CALL_FUNCTION_COMMAND,  //arg: 10/20/04  addd CALL_FUNCTION
+        ASSIGNMENT_COMMAND,     //arg: 12/23/04 added ASSIGNMENT
         
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,

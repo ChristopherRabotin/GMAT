@@ -71,7 +71,9 @@
 #include "FormationSetupPanel.hpp"
 #include "CallFunctionPanel.hpp"
 #include "CoordSystemConfigPanel.hpp"
-//#include "InteractiveMatlabDialog.hpp"
+#include "InteractiveMatlabDialog.hpp"
+#include "FunctionSetupPanel.hpp"
+#include "AssignmentPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -509,6 +511,16 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
+      else if ((dataType == GmatTree::DEFAULT_GMAT_FUNCTION) ||
+               (dataType == GmatTree::CREATED_GMAT_FUNCTION))
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);  
+         sizer->Add(new FunctionSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
       else if (dataType == GmatTree::IF_CONTROL)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
@@ -549,6 +561,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
          sizer->Add (new CallFunctionPanel (panel, item->GetCommand()),
+                     0, wxGROW|wxALL, 0 );
+     }
+     else if (dataType == GmatTree::ASSIGNMENT_COMMAND)
+     {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add (new AssignmentPanel (panel, item->GetCommand()),
                      0, wxGROW|wxALL, 0 );
      }
      else if ((dataType == GmatTree::DEFAULT_COORD_SYSTEM)   ||
@@ -750,8 +771,10 @@ void GmatMainFrame::MinimizeChildren(int selection)
                 (dataType == GmatTree::CREATED_SUBSCRIPT)            ||
                 (dataType == GmatTree::DEFAULT_VARIABLE)            ||
                 (dataType == GmatTree::CREATED_VARIABLE)            ||
-                (dataType == GmatTree::DEFAULT_MATLAB_FUNCT)            ||
-                (dataType == GmatTree::CREATED_MATLAB_FUNCT)            ||
+                (dataType == GmatTree::DEFAULT_MATLAB_FUNCTION)            ||
+                (dataType == GmatTree::CREATED_MATLAB_FUNCTION)            ||
+                (dataType == GmatTree::DEFAULT_GMAT_FUNCTION)            ||
+                (dataType == GmatTree::CREATED_GMAT_FUNCTION)            ||
                 (dataType == GmatTree::DEFAULT_COORD_SYSTEM)            ||
                 (dataType == GmatTree::CREATED_COORD_SYSTEM)            ||
                 (dataType == GmatTree::DEFAULT_GROUNDSTATION)            ||
@@ -784,6 +807,7 @@ void GmatMainFrame::MinimizeChildren(int selection)
                 (dataType == GmatTree::SAVE_COMMAND)              ||
                 (dataType == GmatTree::TOGGLE_COMMAND)            ||
                 (dataType == GmatTree::CALL_FUNCTION_COMMAND)     ||
+                (dataType == GmatTree::ASSIGNMENT_COMMAND)        ||
                 (dataType == GmatTree::IF_CONTROL)                ||
                 (dataType == GmatTree::ELSE_IF_CONTROL)           ||
                 (dataType == GmatTree::ELSE_CONTROL)              ||
@@ -1376,6 +1400,7 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    matlabMenu->AppendSeparator();
    matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
                           wxT(""), FALSE);
+//   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
 
 
    toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
@@ -1725,8 +1750,8 @@ void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnMatlabInteractive(wxCommandEvent& event)
 {
-//      InteractiveMatlabDialog interactiveMatlabDlg(this);
-//      interactiveMatlabDlg.ShowModal();
+      InteractiveMatlabDialog interactiveMatlabDlg(this);
+      interactiveMatlabDlg.ShowModal();
 }
 
 //------------------------------------------------------------------------------
