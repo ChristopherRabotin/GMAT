@@ -24,19 +24,22 @@ public:
    // constructors
    CallFunctionPanel( wxWindow *parent, GmatCommand *cmd);
    ~CallFunctionPanel();
-   
+
 private:
    CallFunction *theCommand;
 
    wxGrid *inputGrid;
    wxGrid *outputGrid;
 
+   wxArrayString inputStrings;
+   wxArrayString outputStrings;
+
    wxStaticText *nameStaticText;
    wxComboBox *functionComboBox;
 
-   int numInput;
-   int numOutput;
-   
+   wxTextCtrl *inputTextCtrl;
+   wxTextCtrl *outputTextCtrl;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -47,10 +50,10 @@ private:
 
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-   
+
    // IDs for the controls and the menu commands
    enum
-   {     
+   {
       ID_TEXTCTRL = 44000,
       ID_COMBO,
       ID_BUTTON,

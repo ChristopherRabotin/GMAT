@@ -16,7 +16,7 @@
 
 #include "Function.hpp"
 #include "Parameter.hpp"
-#include "ParameterSelectDialog.hpp"
+#include "ParameterMultiSelectDialog.hpp"
 
 #define DEBUG_PROPCMD_PANEL 0
 
@@ -54,9 +54,6 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
       Create();
       Show();
       theApplyButton->Disable();
-
-      numInput = 0;
-      numOutput = 0;
    }
 }
 
@@ -79,12 +76,51 @@ void CallFunctionPanel::Create()
    //MessageInterface::ShowMessage("CallFunctionPanel::Create() entered\n");
    int bsize = 5; // bordersize
    
-   wxGridSizer *mHorizontalSizer = new wxGridSizer( 2, 0, 0 );
+   wxFlexGridSizer *mflexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
    wxBoxSizer *horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *inputSizer = new wxBoxSizer(wxHORIZONTAL);
+
+   wxStaticText *outLeftBracket =
+                     new wxStaticText( this, ID_TEXT, wxT("[  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *outRightBracket =
+                     new wxStaticText( this, ID_TEXT, wxT("  ]"),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *inLeftBracket =
+                     new wxStaticText( this, ID_TEXT, wxT("[  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *inRightBracket =
+                     new wxStaticText( this, ID_TEXT, wxT("  ]"),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *equalSign =
+                     new wxStaticText( this, ID_TEXT, wxT("  =  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *outStaticText =
+                     new wxStaticText( this, ID_TEXT, wxT("  Output  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *inStaticText =
+                     new wxStaticText( this, ID_TEXT, wxT("  Input  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+   wxStaticText *functionStaticText =
+                     new wxStaticText( this, ID_TEXT, wxT("  Function  "),
+                     wxDefaultPosition, wxDefaultSize, 0 );
+
+//   inputTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+//                                   wxDefaultPosition, wxSize(290,-1), wxTE_READONLY );
+//   outputTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+//                                   wxDefaultPosition, wxSize(290,-1), wxTE_READONLY );
 
    // wxStaticText
-   nameStaticText = new wxStaticText( this, ID_TEXT, wxT("Function Name:  "),
-                     wxDefaultPosition, wxDefaultSize, 0 );
+//   nameStaticText = new wxStaticText( this, ID_TEXT, wxT("Function Name:  "),
+//                     wxDefaultPosition, wxDefaultSize, 0 );
 
    StringArray &list =
          theGuiInterpreter->GetListOfConfiguredItems(Gmat::FUNCTION);
@@ -101,35 +137,56 @@ void CallFunctionPanel::Create()
              wxDefaultPosition, wxSize(130,-1), size, choices,
              wxCB_DROPDOWN | wxCB_READONLY );
 
-
-
    // wxGrid
    inputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(250, 275), wxWANTS_CHARS );
+      new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );
 
-   inputGrid->CreateGrid( 15, 1, wxGrid::wxGridSelectRows );
-   inputGrid->SetColSize(0, 270);
-   inputGrid->SetColLabelValue(0, _T("Input"));
+   inputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
+   inputGrid->SetColSize(0, 290);
+   inputGrid->SetRowSize(0, 23);
+   inputGrid->SetColLabelSize(0);
    inputGrid->SetRowLabelSize(0);
+   inputGrid->SetMargins(0, 0);
+   inputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
    inputGrid->EnableEditing(false);
 
    outputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(250, 275), wxWANTS_CHARS );
+      new wxGrid( this, -1, wxDefaultPosition, wxSize(290, 23), wxWANTS_CHARS );
 
-   outputGrid->CreateGrid( 15, 1, wxGrid::wxGridSelectRows );
-   outputGrid->SetColSize(0, 270);
-   outputGrid->SetColLabelValue(0, _T("Output"));
+   outputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
+   outputGrid->SetColSize(0, 290);
+   outputGrid->SetRowSize(0, 23);
+   outputGrid->SetColLabelSize(0);
    outputGrid->SetRowLabelSize(0);
+   outputGrid->SetMargins(0, 0);
+   outputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
    outputGrid->EnableEditing(false);
 
-   horizontalSizer->Add(nameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   outputSizer->Add(outLeftBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
+   outputSizer->Add(outputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
+   outputSizer->Add(outRightBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+   inputSizer->Add(inLeftBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
+   inputSizer->Add(inputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
+   inputSizer->Add(inRightBracket, 0, wxALIGN_CENTRE|wxALL, bsize);
+
+//   horizontalSizer->Add(nameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   horizontalSizer->Add(equalSign, 0, wxALIGN_CENTRE|wxALL, bsize);
    horizontalSizer->Add(functionComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-   mHorizontalSizer->Add(inputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mHorizontalSizer->Add(outputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(outputSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(outStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(horizontalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(functionStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(inputSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mflexGridSizer->Add(inStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-   theMiddleSizer->Add(horizontalSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   theMiddleSizer->Add(mHorizontalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   theMiddleSizer->Add(outputSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+//   theMiddleSizer->Add(horizontalSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+//   theMiddleSizer->Add(mHorizontalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+//   theMiddleSizer->Add(inputSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   theMiddleSizer->Add(mflexGridSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+
 }
 
 //------------------------------------------------------------------------------
@@ -140,24 +197,58 @@ void CallFunctionPanel::LoadData()
    std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
    functionComboBox->SetValue(objectName.c_str());
 
-   numInput = theCommand->GetNumInputParams();
-   numOutput = theCommand->GetNumOutputParams();
+   int numInput = theCommand->GetNumInputParams();
+   int numOutput = theCommand->GetNumOutputParams();
+
+   wxString cellValue = "";
+   inputStrings.Clear();
+   outputStrings.Clear();
 
    // get input params
-   for (int i=0; i<numInput; i++)
+   if (numInput > 0)
    {
       Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+                           "Input", 0);
+      inputStrings.Add(param->GetName().c_str());
+      cellValue = cellValue + param->GetName().c_str();
+
+      for (int i=1; i<numInput; i++)
+      {
+         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
                            "Input", i);
-      inputGrid->SetCellValue(i, 0, param->GetName().c_str());
+         cellValue = cellValue + ", " + param->GetName().c_str();
+         inputStrings.Add(param->GetName().c_str());
+      }
+
+      inputGrid->SetCellValue(0, 0, cellValue);
    }
+   else
+      inputGrid->SetCellValue(0, 0, "");
+
+   // reset the cell value
+   cellValue = "";
 
    // get output params
-   for (int i=0; i<numOutput; i++)
+   if (numOutput > 0)
    {
       Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+                           "Output", 0);
+      outputStrings.Add(param->GetName().c_str());
+      cellValue = cellValue + param->GetName().c_str();
+
+      for (int i=1; i<numOutput; i++)
+      {
+         param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
                            "Output", i);
-      outputGrid->SetCellValue(i, 0, param->GetName().c_str());
+         cellValue = cellValue + ", " + param->GetName().c_str();
+         outputStrings.Add(param->GetName().c_str());
+      }
+
+      outputGrid->SetCellValue(0, 0, cellValue);
    }
+   else
+      outputGrid->SetCellValue(0, 0, "");
+
 }
 
 //------------------------------------------------------------------------------
@@ -166,29 +257,35 @@ void CallFunctionPanel::LoadData()
 void CallFunctionPanel::SaveData()
 {
    wxString functionName = functionComboBox->GetStringSelection();
-   Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
-            std::string(functionName));
 
-   if (function != NULL)
+   // arg: for now to avoid a crash
+   if (functionName != "")
    {
-      theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
+      Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
+               std::string(functionName));
+
+      if (function != NULL)
+      {
+         theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
+      }
    }
 
+   // clear out previous parameters
+   theCommand->ClearObject(Gmat::PARAMETER);
+
    // set input parameters
-   for (int i=0; i<numInput; i++)
+   for (unsigned int i=0; i<inputStrings.Count(); i++)
    {
-      wxString string = inputGrid->GetCellValue(i, 0);
       Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-            std::string(string));
+            std::string(inputStrings[i]));
       theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
    }
 
    // set output parameters
-   for (int i=0; i<numOutput; i++)
+   for (unsigned int i=0; i<outputStrings.Count(); i++)
    {
-      wxString string = outputGrid->GetCellValue(i, 0);
       Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
-            std::string(string));
+            std::string(outputStrings[i]));
       theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
    }
 
@@ -199,69 +296,56 @@ void CallFunctionPanel::SaveData()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 {
-   int row = event.GetRow();
-   int col = event.GetCol();
+   unsigned int row = event.GetRow();
+   unsigned int col = event.GetCol();
 
    if (event.GetEventObject() == inputGrid)
    {
-      if (row <= numInput)
+      ParameterMultiSelectDialog paramDlg(this, inputStrings);
+      paramDlg.ShowModal();
+
+      inputStrings = paramDlg.GetParamNames();
+      wxString cellValue = "";
+
+      if (inputStrings.Count() > 0)
       {
-         ParameterSelectDialog paramDlg(this);
-         paramDlg.ShowModal();
+         cellValue = cellValue + inputStrings[0];
 
-         wxString newParamName = paramDlg.GetParamName();
+         for (unsigned int i=1; i<inputStrings.Count(); i++)
+         {
+            cellValue = cellValue + ", " + inputStrings[i];
+         }
 
-         if (newParamName == "") // remove propagator
-         {
-            // don't do anything for now
-//            inputGrid->SetCellValue(row, col, "");
-//            if (row+1 < numInput)
-//            {
-//               for (unsigned int i=row; i< numInput-1; i++)
-//                  inputGrid->SetCellValue(i, col, inputGrid->GetCellValue(i+1, col));
-//            }
-//            else
-//               numInput--;
-         }
-         else // change propagator
-         {
-            inputGrid->SetCellValue(row, col, newParamName);
-            numInput++;
-         }
-         theApplyButton->Enable();
+         inputGrid->SetCellValue(row, col, cellValue);
       }
+      else     // no selections
+         inputGrid->SetCellValue(row, col, "");
+
+      theApplyButton->Enable();
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      if (row <= numOutput)
+      ParameterMultiSelectDialog paramDlg(this, outputStrings);
+      paramDlg.ShowModal();
+
+      outputStrings = paramDlg.GetParamNames();
+      wxString cellValue = "";
+
+      if (outputStrings.Count() > 0)
       {
-         ParameterSelectDialog paramDlg(this);
-         paramDlg.ShowModal();
+         cellValue = cellValue + outputStrings[0];
 
-         wxString newParamName = paramDlg.GetParamName();
-
-         if (newParamName == "") // remove propagator
+         for (unsigned int i=1; i<outputStrings.Count(); i++)
          {
-            // don't do anything for now
-//            outputGrid->SetCellValue(row, col, "");
-//            if (row+1 < numInput)
-//            {
-//               for (unsigned int i=row; i< numInput-1; i++)
-//                  outputGrid->SetCellValue(i, col, inputGrid->GetCellValue(i+1, col));
-//            }
-//            else
-//               numOutput--;
-         }
-         else // change propagator
-         {
-            outputGrid->SetCellValue(row, col, newParamName);
-            numOutput++;
+            cellValue = cellValue + ", " + outputStrings[i];
          }
 
-         theApplyButton->Enable();
-
+         outputGrid->SetCellValue(row, col, cellValue);
       }
+      else     // no selections
+         outputGrid->SetCellValue(row, col, "");
 
+      theApplyButton->Enable();
    }
 }
 
