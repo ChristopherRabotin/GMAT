@@ -102,6 +102,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
+#include "ForceModelException.hpp"
 #include <math.h>
 
 class GMAT_API PhysicalModel : public GmatBase

@@ -25,8 +25,8 @@
 Sandbox::Sandbox(void) :
     solarSys        (NULL),
     publisher       (NULL),
-    sequence            (NULL),
-    current                     (NULL),
+    sequence        (NULL),
+    current         (NULL),
     state           (IDLE)
 {
 }
@@ -89,7 +89,6 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
     if (state == INITIALIZED)
         state = IDLE;
-
     if (!ss)
         return false;
     solarSys = ss;
@@ -167,11 +166,15 @@ bool Sandbox::Initialize(void)
     if (solarSys) {
         std::map<std::string, GmatBase *>::iterator omi;
         for (omi = objectMap.begin(); omi != objectMap.end(); omi++) {
-            if ((omi->second)->GetType() == Gmat::PROP_SETUP)
+            if ((omi->second)->GetType() == Gmat::PROP_SETUP) {
                 ((PropSetup*)(omi->second))->GetForceModel()
                                            ->SetSolarSystem(solarSys);
+                ((PropSetup*)(omi->second))->Initialize();
+            }
         }
     }
+    else
+        throw SandboxException("No solar system defined in the Sandbox!");
 
     while (current) {
         current->SetObjectMap(&objectMap);

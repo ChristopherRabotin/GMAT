@@ -56,6 +56,9 @@ public:
     virtual Integer     SetIntegerParameter(const Integer id, const Integer value);    
     virtual Real        GetRealParameter(const Integer id) const;
     virtual Real        SetRealParameter(const Integer id, const Real value);    
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
 
 protected:
     /// Sun pointer for bulge calculations
@@ -70,6 +73,8 @@ protected:
     Real                angVel[3];
     /// Flag to indicate if the atmosphere model is externally owned or internal
     bool                useExternalAtmosphere;
+    /// Name of the atmosphere model we want to use
+    std::string         atmosphereType;
     /// Pointer to the atmosphere model used
     AtmosphereModel     *atmos;
     /// Array of densities
@@ -90,6 +95,10 @@ protected:
     
     void                BuildPrefactors(void);
     void                GetDensity(Real *state);
+    
+    /// ID for the atmosphere model
+    const Integer       atmosphereModelID;
+    
 };
 
 #endif // DRAGFORCE_H

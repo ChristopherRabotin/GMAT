@@ -340,6 +340,11 @@ void Propagator::Initialize(void)
         inState  = physicalModel->GetState();
         outState = physicalModel->GetState();
     }
+    else
+       throw PropagatorException("Force model is not defined");
+    
+    if (!initialized)
+       throw PropagatorException("Propagator failed to initialize");
 }
 
 //------------------------------------------------------------------------------

@@ -241,7 +241,8 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 {
    wxString msg;
    msg.Printf( _T("Goddard Mission Analysis Tool.\n")
-               _T("Uses %s"), wxVERSION_STRING);
+               _T("Uses %s\n\nBuild Date: %s %s"), wxVERSION_STRING,
+               __DATE__, __TIME__);      
 
    wxMessageBox(msg, _T("About GMAT"), wxOK | wxICON_INFORMATION, this);
 }

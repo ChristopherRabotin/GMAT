@@ -31,6 +31,11 @@ all: libExecutiveConsole libExecutive
 	cp libExecutiveConsole.a ../lib
 	cp libExecutive.a ../lib
 
+clean:
+	rm *.o
+	rm *.a
+	rm ../lib/libExecutive*
+
 libExecutive : libExecutive.a
 	
 libExecutiveConsole : libExecutiveConsole.a

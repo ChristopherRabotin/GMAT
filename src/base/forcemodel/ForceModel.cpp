@@ -260,8 +260,7 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     pPhysicalModel->SetDimension(dimension);
 
     derivatives->AddForce(pPhysicalModel);
-    if (initialized)
-        pPhysicalModel->Initialize();
+    initialized = false;
 
     forceList.push_back(pPhysicalModel);
     numForces = forceList.size();
@@ -405,7 +404,12 @@ bool ForceModel::Initialize(void)
         currentPm = current->GetDerivative();
         currentPm->SetDimension(dimension);
         currentPm->SetSolarSystem(solarSystem);
-        currentPm->Initialize();
+        if (!currentPm->Initialize()) {
+           std::string msg = "Component force ";
+           msg += currentPm->GetTypeName();
+           msg += " failed to initialize";
+           throw ForceModelException(msg.c_str());
+        }
         currentPm->SetState(modelState);
         
         // Set spacecraft parameters for forces that need them

@@ -24,11 +24,9 @@
 #include "gmatdefs.hpp"
 
 // Core classes
-//#include "SolarSystem.hpp"
 #include "Publisher.hpp"
 #include "GmatBase.hpp"
 #include "Command.hpp"
-
 
 #include "Spacecraft.hpp"
 #include "PropSetup.hpp"
@@ -45,25 +43,25 @@ public:
     ~Sandbox(void);
 
     // Setup methods
-    bool				AddObject(GmatBase *obj);
-    bool				AddSpacecraft(Spacecraft *obj);
-    bool                AddPropSetup(PropSetup *propSetup);
-    bool                AddBurn(Burn *burn);
-    bool                AddSolver(Solver *s);
-    bool				AddCommand(GmatCommand *cmd);
-    bool				AddSolarSystem(SolarSystem *ss);
-    bool                AddSubscriber(Subscriber *sub);
-    bool				SetPublisher(Publisher *pub = NULL);
+    bool          AddObject(GmatBase *obj);
+    bool          AddSpacecraft(Spacecraft *obj);
+    bool          AddPropSetup(PropSetup *propSetup);
+    bool          AddBurn(Burn *burn);
+    bool          AddSolver(Solver *s);
+    bool          AddCommand(GmatCommand *cmd);
+    bool          AddSolarSystem(SolarSystem *ss);
+    bool          AddSubscriber(Subscriber *sub);
+    bool	         SetPublisher(Publisher *pub = NULL);
     
-    GmatBase*           GetInternalObject(std::string name, 
+    GmatBase*     GetInternalObject(std::string name, 
                                           Gmat::ObjectType type);
-    Spacecraft*         GetSpacecraft(std::string name);
+    Spacecraft*   GetSpacecraft(std::string name);
     
     // Execution methods
-    bool                Initialize(void);
-    bool                Execute(void);
-    bool                Interrupt(void);
-    void                Clear(void);
+    bool          Initialize(void);
+    bool          Execute(void);
+    bool          Interrupt(void);
+    void          Clear(void);
 
 protected:
     

@@ -13,7 +13,8 @@ HEADERS = -I../include -I../foundation -I../spacecraft -I../util \
 OBJECTS = DerivativeList.o ForceModel.o PhysicalModel.o \
           ForceModelException.o \
           PointMassForce.o \
-          DragForce.o
+          DragForce.o \
+          SolarRadiationPressure.o
 
 all: libForceModel
 	mkdir -p ../lib

@@ -22,15 +22,18 @@
 #include "ForceModelException.hpp"
 
 DragForce::DragForce() :
-    PhysicalModel           (Gmat::PHYSICAL_MODEL, "DragForce"),
-    sun                     (NULL),
-    centralBody             (NULL),
-    useExternalAtmosphere   (true),
-    atmos                   (NULL),
-    density                 (NULL),
-    prefactor               (NULL)
+    PhysicalModel          (Gmat::PHYSICAL_MODEL, "DragForce"),
+    sun                    (NULL),
+    centralBody            (NULL),
+    useExternalAtmosphere  (true),
+    atmosphereType         (""),  
+    atmos                  (NULL),
+    density                (NULL),
+    prefactor              (NULL),
+    atmosphereModelID      (parameterCount)
 {
     dimension = 6;
+    ++parameterCount;
     
     /// @todo Remove hard coded central body parms in DragForce
     // Sun location at MJD 21545.0, from the SLP file:
@@ -66,6 +69,7 @@ DragForce::DragForce(const DragForce& df) :
     sun                     (NULL),
     centralBody             (NULL),
     useExternalAtmosphere   (true),
+    atmosphereType          (df.atmosphereType),  
     atmos                   (NULL),
     density                 (NULL),
     prefactor               (NULL)
@@ -189,46 +193,67 @@ void DragForce::SetSatelliteParameter(const Integer i,
 
 bool DragForce::Initialize(void)
 {
-    PhysicalModel::Initialize();
-
-    satCount = dimension / 6;
-    if (satCount <= 0)
-        throw ForceModelException("Drag called with dimension zero");
-        
-    density   = new Real[satCount];
-    prefactor = new Real[satCount];
-
-    if (mass.size() > 0)
-        BuildPrefactors();
-    else
-        if (mass.size() == 0) 
-            for (Integer i = 0; i < satCount; ++i) {
-                prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
-            }
-        
-    // Set the atmosphere model
-    if (solarSystem) {
-        sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
-        if (!sun)
-            throw ForceModelException("The Sun is not in solar system");
-        
-        std::string bodyName;
-        if (dragBody.size() > 0)
-            bodyName = dragBody[0];
-        else
-            bodyName = "Earth";
-        centralBody = solarSystem->GetBody(bodyName);
-
-        if (!centralBody)
-            throw ForceModelException("Central body (for Drag) not in solar system");
-        atmos = centralBody->GetAtmosphereModel();
-        if (atmos) {
-            atmos->SetSunVector(sunLoc);
-            atmos->SetCentralBodyVector(cbLoc);
-        }
+    bool retval = PhysicalModel::Initialize();
+    
+    if (retval) {
+       satCount = dimension / 6;
+       if (satCount <= 0)
+           throw ForceModelException("Drag called with dimension zero");
+           
+       density   = new Real[satCount];
+       prefactor = new Real[satCount];
+   
+       if (mass.size() > 0)
+           BuildPrefactors();
+       else
+           if (mass.size() == 0) 
+               for (Integer i = 0; i < satCount; ++i) {
+                   prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
+               }
+           
+       // Set the atmosphere model
+       if (solarSystem) {
+           sun = solarSystem->GetBody(SolarSystem::SUN_NAME);
+           if (!sun)
+               throw ForceModelException("The Sun is not in solar system");
+           
+           std::string bodyName;
+           if (dragBody.size() > 0)
+               bodyName = dragBody[0];
+           else
+               bodyName = "Earth";
+           centralBody = solarSystem->GetBody(bodyName);
+   
+           if (!centralBody)
+               throw ForceModelException("Central body (for Drag) not in solar system");
+           if (useExternalAtmosphere) {
+               atmos = centralBody->GetAtmosphereModel();
+           }
+           else {
+               if (atmosphereType == "BodyDefault")
+                  atmos = centralBody->GetAtmosphereModel();
+               else
+                  atmos = centralBody->GetAtmosphereModel(atmosphereType);
+               if (!atmos)
+                  throw ForceModelException("Atmosphere model not defined");
+           }
+               
+           if (atmos)  {
+               atmos->SetSunVector(sunLoc);
+               atmos->SetCentralBodyVector(cbLoc);
+           }
+           else {
+              if (atmosphereType != "BodyDefault") {
+                 std::string msg = "Could not create ";
+                 msg += atmosphereType;
+                 msg += " atmosphere model";
+                 throw ForceModelException(msg);
+              }
+           }
+       }
     }
     
-    return true;
+    return retval;
 }
 
 
@@ -298,24 +323,35 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
 
 std::string DragForce::GetParameterText(const Integer id) const
 {
+    if (id == atmosphereModelID)
+       return "AtmosphereModel";
     return PhysicalModel::GetParameterText(id);
 }
 
 
 Integer DragForce::GetParameterID(const std::string &str) const
 {
+    if (str == "AtmosphereModel")
+       return atmosphereModelID;
+       
     return PhysicalModel::GetParameterID(str);
 }
 
 
 Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
 {
+    if (id == atmosphereModelID)
+       return Gmat::STRING_TYPE;
+
     return PhysicalModel::GetParameterType(id);
 }
 
 
 std::string DragForce::GetParameterTypeString(const Integer id) const
 {
+    if (id == atmosphereModelID)
+       return GmatBase::PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+
     return PhysicalModel::GetParameterTypeString(id);
 }
 
@@ -343,9 +379,39 @@ Real DragForce::SetRealParameter(const Integer id, const Real value)
     return PhysicalModel::SetRealParameter(id, value);
 }
 
+std::string DragForce::GetStringParameter(const Integer id) const
+{
+   if (id == atmosphereModelID) {
+      return atmosphereType;
+   }
+
+   return PhysicalModel::GetStringParameter(id);
+}
+
+bool DragForce::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == atmosphereModelID) {
+      atmosphereType = value;
+
+      if ((value == "") || (value == "BodyDefault"))
+         useExternalAtmosphere = true;
+      else {
+         if (!useExternalAtmosphere)
+            delete atmos;
+         atmos = NULL;
+         useExternalAtmosphere = false;
+      }
+
+      return true;
+   }
+   
+   return PhysicalModel::SetStringParameter(id, value);
+}
 
 void DragForce::GetDensity(Real *state)
 {
+    Real now = 21545.0;
+    
     // Give it a default value if the atmosphere model is not set
     if (!atmos) {
         for (Integer i = 0; i < satCount; ++i)
@@ -355,7 +421,7 @@ void DragForce::GetDensity(Real *state)
         if (atmos) {
             if (sun && centralBody) {
                 // Update the Sun vector
-                Real now = epoch + elapsedTime / 86400.0; 
+                now = epoch + elapsedTime / 86400.0; 
                 Rvector sunV = sun->GetState(now);
                 Rvector cbV  = centralBody->GetState(now);
                 
@@ -367,6 +433,6 @@ void DragForce::GetDensity(Real *state)
                 cbLoc[2]  = cbV[2];
             }
         }
-        atmos->Density(state, density, satCount);
+        atmos->Density(state, density, now, satCount);
     }
 }

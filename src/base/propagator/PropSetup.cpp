@@ -62,8 +62,9 @@ PropSetup::PARAMETER_TYPE[PropSetupParamCount] =
 //------------------------------------------------------------------------------
 PropSetup::PropSetup(const std::string &name, Propagator *propagator,
                      ForceModel *forceModel)
-   : GmatBase(Gmat::PROP_SETUP, "PropSetup", name),
-     usedrag(true)
+   : GmatBase     (Gmat::PROP_SETUP, "PropSetup", name),
+     usedrag      (false),
+     dragType     ("BodyDefault")
 {
    // GmatBase data
    parameterCount = PropSetupParamCount;
@@ -196,7 +197,7 @@ void PropSetup::SetPropagator(Propagator *propagator)
         delete mPropagator;
     
     mPropagator = propagator;
-    Initialize();
+//    Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -218,7 +219,7 @@ void PropSetup::SetForceModel(ForceModel *forceModel)
         delete mForceModel;
    
     mForceModel = forceModel;
-    Initialize();
+//    Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -408,7 +409,7 @@ std::string PropSetup::GetStringParameter(const Integer id) const
         return "InternalForceModel";
     case USE_DRAG:
         if (usedrag)
-            return "BodyDefault";
+            return dragType;
         return "Off";
     default:
         return GmatBase::GetStringParameter(id);
@@ -426,6 +427,7 @@ std::string PropSetup::GetStringParameter(const std::string &label) const
 {
     return GetStringParameter(GetParameterID(label));
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -481,8 +483,8 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
         }
         else {
             usedrag = true;
+            dragType = value;
         }
-        Initialize();
         return true;
       
     default:
@@ -545,6 +547,8 @@ void PropSetup::Initialize()
         {
             DragForce *dragForce = new DragForce;
             mForceModel->AddForce(dragForce);
+            Integer id = dragForce->GetParameterID("AtmosphereModel");
+            dragForce->SetStringParameter(id, dragType);
         }
       
         mPropagator->SetPhysicalModel(mForceModel);
