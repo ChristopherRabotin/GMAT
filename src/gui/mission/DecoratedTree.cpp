@@ -455,7 +455,7 @@ int DecoratedTree::GetParameter(int id)
  */
 void DecoratedTree::SetString(int line, std::string value)
 {
-    MessageInterface::ShowMessage("DecoratedTree::SetString() entered\n");
+//    MessageInterface::ShowMessage("DecoratedTree::SetString() entered\n");
 
     if (line < 0)
         boxData.push_back(new std::string(value));
@@ -463,7 +463,7 @@ void DecoratedTree::SetString(int line, std::string value)
         std::string *str = boxData[line];
         *str = value;
     }
-   MessageInterface::ShowMessage("DecoratedTree::SetString() exit\n");
+//   MessageInterface::ShowMessage("DecoratedTree::SetString() exit\n");
 
 }
 

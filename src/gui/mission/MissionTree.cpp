@@ -228,8 +228,8 @@ void MissionTree::UpdateCommand()
 void MissionTree::UpdateCommandTree(wxTreeItemId treeId, GmatCommand *cmd)
 {
     wxString objTypeName = cmd->GetTypeName().c_str();
-    MessageInterface::ShowMessage("MissionTree::UpdateCommand() objTypeName = " +
-                                  std::string(objTypeName.c_str()) + "\n");
+//    MessageInterface::ShowMessage("MissionTree::UpdateCommand() objTypeName = " +
+//                                  std::string(objTypeName.c_str()) + "\n");
         
     if (objTypeName == "Propagate")
     {
@@ -404,9 +404,9 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnDoubleClick(wxMouseEvent &event)
 {
-    MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
+//    MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
     wxPoint position = event.GetPosition();
-    MessageInterface::ShowMessage("Event position is %d %d\n", position.x, position.y );
+//    MessageInterface::ShowMessage("Event position is %d %d\n", position.x, position.y );
     CheckClickIn(event.GetPosition());
 }
 
@@ -1262,12 +1262,12 @@ void MissionTree::OnRun()
 //--------------------------------------------------------------------------
 bool MissionTree::CheckClickIn(wxPoint position)
 {
-    MessageInterface::ShowMessage("Click position is %d %d\n", position.x, position.y );
+//    MessageInterface::ShowMessage("Click position is %d %d\n", position.x, position.y );
     //MissionTreeItemData *missionTreeItem = (MissionTreeItemData*) GetFirstVisibleItem();
     wxTreeItemId visibleItemId = GetFirstVisibleItem();
     MissionTreeItemData *missionTreeItemData = 
             (MissionTreeItemData*) GetItemData(visibleItemId);
-    MessageInterface::ShowMessage("Got first visible");
+//    MessageInterface::ShowMessage("Got first visible");
 
     // loop through all the visible items on the mission tree
     // to compare the event click with the position of the box
@@ -1294,7 +1294,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
             (position.y <= bound.y+rowHeight+1) &&
             (position.y >= bound.y-1))
            {
-              MessageInterface::ShowMessage("\nInside a rect\n");
+//              MessageInterface::ShowMessage("\nInside a rect\n");
               
               // set this item selected
               SelectItem(visibleItemId);
@@ -1315,7 +1315,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
              if ((position.x <= w-offset-boxWidth*boxNum) &&
                (position.x >= w-offset-boxWidth*(++boxNum)))
              {
-               MessageInterface::ShowMessage("\nInside variables");
+ //              MessageInterface::ShowMessage("\nInside variables");
                MissionTreeItemData *item = new MissionTreeItemData(
                                              wxT("Variables"), 
                                              GmatTree::VIEW_SOLVER_VARIABLES);
@@ -1324,14 +1324,14 @@ bool MissionTree::CheckClickIn(wxPoint position)
              else if ((position.x <= w-offset-boxWidth*boxNum) &&
                      (position.x >= w-offset-boxWidth*(++boxNum)))
              {
-               MessageInterface::ShowMessage("\nInside goals");
+//               MessageInterface::ShowMessage("\nInside goals");
                MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
                                                 GmatTree::VIEW_SOLVER_GOALS);
                mainNotebook->CreatePage(item);
              }
              else
             {
-               MessageInterface::ShowMessage("\nOpen regular panel");
+//               MessageInterface::ShowMessage("\nOpen regular panel");
                mainNotebook->CreatePage(missionTreeItemData);
             }
             
