@@ -242,10 +242,9 @@ bool Sandbox::Initialize()
          }
          else if((omi->second)->GetType() == Gmat::PARAMETER)
          {
-            //loj: 9/13/04 moved code from Moderator::SetupRun()
             Parameter *param = (Parameter*)(omi->second);
 
-            // Set reference object for system parameters (loj: 9/22/04)
+            // Set reference object for system parameters
             if (param->GetKey() == Parameter::SYSTEM_PARAM)
             {
 #if DEBUG_SANDBOX
@@ -269,15 +268,15 @@ bool Sandbox::Initialize()
    MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Variables...\n");
 #endif
    // Note: All system parameters need to be initialized first
-   // Set reference object for user parameters (loj: 9/22/04)
+   // Set reference object for user variables. Arrays don't have reference objects
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
       if((omi->second)->GetType() == Gmat::PARAMETER)
       {
          Parameter *param = (Parameter*)(omi->second);
          GmatBase *refParam;
-                  
-         if (param->GetKey() == Parameter::USER_PARAM)
+         
+         if (param->GetTypeName() == "Variable")
          {
 #if DEBUG_SANDBOX
             MessageInterface::ShowMessage
@@ -298,7 +297,7 @@ bool Sandbox::Initialize()
    MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Subscribers...\n");
 #endif
 
-   // Initialize subscribers (loj: 9/13/04 moved code from Moderator::SetupRun())
+   // Initialize subscribers
    //std::map<std::string, GmatBase *>::iterator omi;
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
@@ -315,7 +314,7 @@ bool Sandbox::Initialize()
    while (current)
    {
       current->SetObjectMap(&objectMap);
-      current->SetSolarSystem(solarSys); //loj: 6/16/04 added
+      current->SetSolarSystem(solarSys);
       rv = current->Initialize();
       if (!rv)
          return false;
@@ -452,7 +451,7 @@ bool Sandbox::AddSubscriber(Subscriber *sub)
       ("Sandbox::AddSubscriber() name = %s\n",
        sub->GetName().c_str());
 #endif
-   publisher->Subscribe(sub); //loj: 3/9/04 added
+   publisher->Subscribe(sub);
    return  AddObject(sub);
 }
 
