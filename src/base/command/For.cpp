@@ -228,6 +228,18 @@ GmatBase* For::Clone(void) const
    return (new For(*this));
 }
 
+//loj: 11/22/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool For::RenameRefObject(const Gmat::ObjectType type,
+                          const std::string &oldName,
+                          const std::string &newName)
+{
+   return true;
+}
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------

@@ -50,6 +50,10 @@ public:
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    // Parameter access methods
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;

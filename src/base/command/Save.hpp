@@ -7,8 +7,8 @@
 class Save : public GmatCommand
 {
 public:
-	Save();
-	virtual ~Save();
+        Save();
+        virtual ~Save();
     Save(const Save& sv);
     Save&                  operator=(const Save&);
      
@@ -22,6 +22,10 @@ public:
     // inherited from GmatBase
     virtual GmatBase*      Clone(void) const;
 
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
 protected:
     /// Name of the save file -- for now, it is objectName.objectType
     std::string            filename;

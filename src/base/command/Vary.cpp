@@ -30,7 +30,7 @@
  */
 //------------------------------------------------------------------------------
 Vary::Vary(void) :
-    GmatCommand                 ("Vary"),
+    GmatCommand             ("Vary"),
     targeterName            (""),
     targeter                (NULL),
     variableID              (-1),
@@ -118,6 +118,44 @@ GmatBase* Vary::Clone(void) const
    return (new Vary(*this));
 }
 
+//loj: 11/22/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Vary::RenameRefObject(const Gmat::ObjectType type,
+                           const std::string &oldName,
+                           const std::string &newName)
+{
+   if (type != Gmat::SOLVER && type != Gmat::PARAMETER)
+      return true;
+
+   if (type == Gmat::SOLVER)
+   {
+      if (targeterName == oldName)
+      {
+         targeterName = newName;
+         return true;
+      }
+   }
+   else if (type == Gmat::PARAMETER)
+   {
+      for (unsigned int i=0; i<variableName.size(); i++)
+      {
+         if (variableName[i] == oldName)
+         {
+            variableName[i] = newName;
+            return true;
+         }
+      }
+   }
+   
+   return false;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//---------------------------------------------------------------------------
 std::string Vary::GetParameterText(const Integer id) const
 {
     if (id == targeterNameID)

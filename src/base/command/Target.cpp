@@ -212,6 +212,27 @@ GmatBase* Target::Clone(void) const
    return (new Target(*this));
 }
 
+//loj: 11/22/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Target::RenameRefObject(const Gmat::ObjectType type,
+                             const std::string &oldName,
+                             const std::string &newName)
+{
+   if (type != Gmat::SOLVER)
+      return true;
+
+   if (targeterName == oldName)
+   {
+      targeterName = newName;
+      return true;
+   }
+   
+   return false;
+}
+
 // Parameter access methods
 
 //------------------------------------------------------------------------------

@@ -214,3 +214,24 @@ GmatBase* Save::Clone(void) const
    return (new Save(*this));
 }
 
+
+//loj: 11/22/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Save::RenameRefObject(const Gmat::ObjectType type,
+                           const std::string &oldName,
+                           const std::string &newName)
+{
+   if (type != Gmat::SPACECRAFT)
+      return true;
+   
+   if (objName == oldName)
+   {
+      objName = newName;
+      return true;
+   }
+
+   return false;
+}

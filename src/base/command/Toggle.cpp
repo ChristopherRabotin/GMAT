@@ -22,9 +22,13 @@
 
 #include "Toggle.hpp" // class's header file
 #include "Publisher.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_RENAME 1
 
 // class constructor
 //------------------------------------------------------------------------------
+// Toggle()
 //------------------------------------------------------------------------------
 Toggle::Toggle() :
    GmatCommand("Toggle"),
@@ -37,6 +41,7 @@ Toggle::Toggle() :
 
 // class destructor
 //------------------------------------------------------------------------------
+// ~Toggle()
 //------------------------------------------------------------------------------
 Toggle::~Toggle()
 {
@@ -45,6 +50,7 @@ Toggle::~Toggle()
 
 
 //------------------------------------------------------------------------------
+// Toggle(const Toggle& t)
 //------------------------------------------------------------------------------
 Toggle::Toggle(const Toggle& t) :
    GmatCommand(t),
@@ -130,7 +136,6 @@ bool Toggle::Execute(void)
 }
 
 
-
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -145,6 +150,38 @@ GmatBase* Toggle::Clone(void) const
 {
    return (new Toggle(*this));
 }
+
+
+//loj: 11/22/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Toggle::RenameRefObject(const Gmat::ObjectType type,
+                             const std::string &oldName,
+                             const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Toggle::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type != Gmat::SUBSCRIBER)
+      return true;
+
+   for (unsigned int i=0; i<subNames.size(); i++)
+   {
+      if (subNames[i] == oldName)
+      {
+         subNames[i] = newName;
+         return true;
+      }
+   }
+
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
