@@ -357,7 +357,7 @@ bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::RunScript(Integer sandboxNum)
 {
-   return theModerator->RunMission(sandboxNum);
+   return theModerator->RunScript(sandboxNum);
 }
 
 
