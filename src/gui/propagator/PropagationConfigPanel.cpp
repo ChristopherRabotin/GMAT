@@ -479,8 +479,7 @@ void PropagationConfigPanel::Initialize()
          {
             theGravForce = (GravityField*)force;
             bodyName = theGravForce->GetStringParameter("BodyName");
-            potFilename = theGravForce->GetStringParameter("Filename");
-            primaryBodiesArray.Add(bodyName.c_str());                   
+            potFilename = theGravForce->GetStringParameter("Filename");                 
 
             GravModelType gravModelType;
             if (potFilename.find("JGM2") != std::string::npos)
@@ -506,7 +505,17 @@ void PropagationConfigPanel::Initialize()
             {
                forceList[currentBodyId]->potFilename = potFilename;
                potFileTextCtrl->SetValue(potFilename.c_str());  
-            }       
+            }  
+
+            bool found = false;
+            for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
+            {
+               if ( primaryBodiesArray[i].CmpNoCase(bodyName.c_str()) == 0 )
+                  found = true;
+            }
+            
+            if (!found)
+               primaryBodiesArray.Add(bodyName.c_str());     
          }
          else if (force->GetTypeName() == "DragForce")
          {
@@ -517,12 +526,21 @@ void PropagationConfigPanel::Initialize()
             //paramId = theDragForce->GetParameterID("AtmosphereBody");
             //paramId = theDragForce->GetParameterID("BodyName"); //loj: 10/25/04
             bodyName = theDragForce->GetStringParameter("BodyName");
-            primaryBodiesArray.Add(bodyName.c_str());
                         
             currentBodyId = FindBody(bodyName);
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->dragType = atmosModelString;
             forceList[currentBodyId]->dragf = theDragForce;
+            
+            bool found = false;
+            for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
+            {
+               if ( primaryBodiesArray[i].CmpNoCase(bodyName.c_str()) == 0 )
+                  found = true;
+            }
+            
+            if (!found)
+               primaryBodiesArray.Add(bodyName.c_str());
          }
       }
  
