@@ -19,27 +19,19 @@
 #define XyPlotSetupPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include "wx/sizer.h"
+#include "GmatPanel.hpp"
+#include "GuiInterpreter.hpp"
 
-#include <wx/image.h>
-#include <wx/statline.h>
-#include <wx/spinbutt.h>
-#include <wx/spinctrl.h>
-#include <wx/splitter.h>
-#include <wx/listctrl.h>
-#include <wx/treectrl.h>
-#include <wx/notebook.h>
-#include <wx/grid.h>
-
-
-class XyPlotSetupPanel: public wxPanel
+class XyPlotSetupPanel: public GmatPanel
 {
 public:
-    XyPlotSetupPanel(wxWindow *parent);
+    XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
-private:
+protected:
+    Subscriber *theSubscriber;
+    
     wxBoxSizer *pageBoxSizer;
-    wxGridSizer *paramGridSizer;
+    wxFlexGridSizer *paramGridSizer;
     wxBoxSizer *paramBoxSizer;
     wxBoxSizer *xButtonsBoxSizer;
     wxBoxSizer *yButtonsBoxSizer;
@@ -59,14 +51,23 @@ private:
     wxButton *clearYButton;
     wxButton *removeXButton;
     wxButton *removeYButton;
-    
-    void CreatePanel(wxWindow *parent);
+
+    wxCheckBox *plotCheckBox;
+
     void OnAddX(wxCommandEvent& event);
     void OnAddY(wxCommandEvent& event);
     void OnRemoveX(wxCommandEvent& event);
     void OnRemoveY(wxCommandEvent& event);
     void OnClearY(wxCommandEvent& event);
-    
+    void OnEnablePlot(wxCommandEvent& event);
+
+    // methods inherited from GmatPanel
+    virtual void Create(wxWindow *parent);
+    virtual void LoadData();
+    virtual void SaveData();
+    virtual void OnHelp();
+    virtual void OnScript();
+
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
@@ -78,7 +79,8 @@ private:
         XY_PLOT_ADD_Y,
         XY_PLOT_REMOVE_X,
         XY_PLOT_REMOVE_Y,
-        XY_PLOT_CLEAR_Y
+        XY_PLOT_CLEAR_Y,
+        XY_PLOT_ENABLE,
     };
 };
 #endif

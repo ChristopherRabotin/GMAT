@@ -16,6 +16,8 @@
  */
 //------------------------------------------------------------------------------
 #include "XyPlotSetupPanel.hpp"
+#include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -26,13 +28,14 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, wxPanel)
    EVT_BUTTON(XY_PLOT_REMOVE_X, XyPlotSetupPanel::OnRemoveX)
    EVT_BUTTON(XY_PLOT_REMOVE_Y, XyPlotSetupPanel::OnRemoveY)
    EVT_BUTTON(XY_PLOT_CLEAR_Y,  XyPlotSetupPanel::OnClearY)
+   EVT_BUTTON(XY_PLOT_ENABLE,   XyPlotSetupPanel::OnEnablePlot)
 END_EVENT_TABLE()
 
 //------------------------------
 // public methods
 //------------------------------
 //------------------------------------------------------------------------------
-// XyPlotSetupPanel(wxWindow *parent)
+// XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName)
 //------------------------------------------------------------------------------
 /**
  * Constructs XyPlotSetupPanel object.
@@ -42,112 +45,31 @@ END_EVENT_TABLE()
  * @note Creates the XyPlotSetupPanel GUI
  */
 //------------------------------------------------------------------------------
-XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent):wxPanel(parent)
+XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
+                                   const wxString &subscriberName)
+    : GmatPanel(parent)
 {
-   CreatePanel(this);
+    theSubscriber =
+        theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+    
+    Create(this);
+    LoadData();
 }
 
 //-------------------------------
-// private methods
+// protected methods
 //-------------------------------
-
-//------------------------------------------------------------------------------
-// void CreatePanel(wxWindow *parent)
-//------------------------------------------------------------------------------
-/**
- * @param <parent> input parent.
- * @param <scName> input spacecraft name.
- *
- * @note Creates the notebook for spacecraft information
- */
-//------------------------------------------------------------------------------
-void XyPlotSetupPanel::CreatePanel(wxWindow *parent)
-{
-    // SetParent(new wxFrame(0,-1,"title"));
-    // parent = GetParent();
-    
-    pageBoxSizer = new wxBoxSizer( wxVERTICAL );
-    paramGridSizer = new wxGridSizer( 5, 0, 0 );
-    paramBoxSizer = new wxBoxSizer( wxVERTICAL );
-    
-    wxString strs4[] = 
-    {
-        wxT("Cartesian X"), 
-        wxT("Cartesian Y"), 
-        wxT("Cartesian Z"), 
-    };
-
-    // parameters box
-    titleAvailbleText = new wxStaticText( parent, XY_TEXT, wxT("Parameters"), wxDefaultPosition, wxSize(80,-1), 0 );
-    paramBoxSizer->Add( titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    paramListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition, wxSize(140,125), 3, strs4, wxLB_SINGLE );
-    paramBoxSizer->Add( paramListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-    
-    // add, remove X buttons
-    xButtonsBoxSizer = new wxBoxSizer( wxVERTICAL );
-    xButtonsBoxSizer->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    addXButton = new wxButton( parent, XY_PLOT_ADD_X, wxT("<--"), wxDefaultPosition, wxDefaultSize, 0 );
-    xButtonsBoxSizer->Add( addXButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    removeXButton = new wxButton( parent, XY_PLOT_REMOVE_X, wxT("-->"), wxDefaultPosition, wxDefaultSize, 0 );
-    xButtonsBoxSizer->Add( removeXButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    // add, remove Y buttons
-    yButtonsBoxSizer = new wxBoxSizer( wxVERTICAL );
-    yButtonsBoxSizer->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    addYButton = new wxButton( parent, XY_PLOT_ADD_Y, wxT("-->"), wxDefaultPosition, wxDefaultSize, 0 );
-    yButtonsBoxSizer->Add( addYButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    removeYButton = new wxButton( parent, XY_PLOT_REMOVE_Y, wxT("<--"), wxDefaultPosition, wxDefaultSize, 0 );
-    yButtonsBoxSizer->Add( removeYButton, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    // X box label
-    xSelelectedBoxSizer = new wxBoxSizer( wxVERTICAL );
-    titleXText = new wxStaticText( parent, XY_TEXT, wxT("Selected X"), wxDefaultPosition, wxSize(80,-1), 0 );
-    xSelelectedBoxSizer->Add( titleXText, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    // Y box label
-    ySelelectedBoxSizer = new wxBoxSizer( wxVERTICAL );
-    titleYText = new wxStaticText( parent, XY_TEXT, wxT("Selected Y"), wxDefaultPosition, wxSize(80,-1), 0 );
-    ySelelectedBoxSizer->Add( titleYText, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    wxString emptyList[] = {};
-    
-    xSelectedListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition, wxSize(140,125), 0, emptyList, wxLB_SINGLE );
-    xSelelectedBoxSizer->Add( xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    ySelectedListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition, wxSize(140,125), 0, emptyList, wxLB_SINGLE );
-    ySelelectedBoxSizer->Add( ySelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    // put in the order
-    paramGridSizer->Add( xSelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-    paramGridSizer->Add( xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-    paramGridSizer->Add( paramBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-    paramGridSizer->Add( yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-    paramGridSizer->Add( ySelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-    
-    pageBoxSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
-
-    parent->SetAutoLayout( TRUE );
-    parent->SetSizer( pageBoxSizer);
-    pageBoxSizer->Fit( parent );
-    pageBoxSizer->SetSizeHints( parent );
-}
 
 //------------------------------------------------------------------------------
 // void OnAddX(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 {
-    // get string in first list and then search for it
-    // in the second list
+    // empty listbox first, only one parameter is allowed
+    xSelectedListBox->Clear();
+    
     wxString s = paramListBox->GetStringSelection();
-    int found = xSelectedListBox->FindString(s);
-    
-    // if the string wasn't found in the second list, insert it
-    if ( found == wxNOT_FOUND )
-      xSelectedListBox->Insert(s, 0);
-    
+    xSelectedListBox->Insert(s, 0);    
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +111,181 @@ void XyPlotSetupPanel::OnRemoveY(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnClearY(wxCommandEvent& event)
 {
-    int sel = ySelectedListBox->GetSelection();
-    ySelectedListBox->Delete(sel);
+    ySelectedListBox->Clear();
 }
 
+//------------------------------------------------------------------------------
+// void OnEnablePlot(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnEnablePlot(wxCommandEvent& event)
+{
+    theSubscriber->Activate(plotCheckBox->IsChecked());
+}
+
+//----------------------------------
+// methods inherited from GmatPanel
+//----------------------------------
+
+//------------------------------------------------------------------------------
+// void Create(wxWindow *parent)
+//------------------------------------------------------------------------------
+/**
+ * @param <parent> input parent.
+ * @param <scName> input spacecraft name.
+ *
+ * @note Creates the notebook for spacecraft information
+ */
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::Create(wxWindow *parent)
+{
+    unsigned int i;
+    wxString emptyList[] = {};
+
+    pageBoxSizer = new wxBoxSizer( wxVERTICAL );
+    paramGridSizer = new wxFlexGridSizer( 2, 5, 0, 0 );
+
+    //------------------------------------------------------
+    // parameters box (3rd column)
+    //------------------------------------------------------
+    paramBoxSizer = new wxBoxSizer( wxVERTICAL );
+    
+    StringArray items =
+        theGuiInterpreter->GetListOfFactoryItems(Gmat::PARAMETER);
+    unsigned int count = items.size();
+
+    wxString *paramList = new wxString[count];
+    
+    for (i=0; i<count; i++)
+        paramList[i] = items[i].c_str();
+    titleAvailbleText = new wxStaticText( parent, XY_TEXT, wxT("Parameters"),
+                                          wxDefaultPosition, wxSize(80,-1), 0 );
+    paramBoxSizer->Add( titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    paramListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition,
+                                  wxSize(140,125), 3, paramList, wxLB_SINGLE );
+    paramBoxSizer->Add( paramListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    //------------------------------------------------------
+    // add, remove X buttons (2nd column)
+    //------------------------------------------------------
+    addXButton = new wxButton( parent, XY_PLOT_ADD_X, wxT("<--"),
+                               //wxDefaultPosition, wxDefaultSize, 0 );
+                               wxDefaultPosition, wxSize(20,20), 0 );
+
+    removeXButton = new wxButton( parent, XY_PLOT_REMOVE_X, wxT("-->"),
+                                  wxDefaultPosition, wxSize(20,20), 0 );
+
+    xButtonsBoxSizer = new wxBoxSizer( wxVERTICAL );
+    xButtonsBoxSizer->Add( 30, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    xButtonsBoxSizer->Add( addXButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    xButtonsBoxSizer->Add( removeXButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    //------------------------------------------------------
+    // add, remove, clear Y buttons (4th column)
+    //------------------------------------------------------
+    addYButton = new wxButton( parent, XY_PLOT_ADD_Y, wxT("-->"),
+                               //wxDefaultPosition, wxDefaultSize, 0 );
+                               wxDefaultPosition, wxSize(20,20), 0 );
+
+    removeYButton = new wxButton( parent, XY_PLOT_REMOVE_Y, wxT("<--"),
+                                  wxDefaultPosition, wxSize(20,20), 0 );
+    
+    clearYButton = new wxButton( parent, XY_PLOT_CLEAR_Y, wxT("<="),
+                                  wxDefaultPosition, wxSize(20,20), 0 );
+    
+    yButtonsBoxSizer = new wxBoxSizer( wxVERTICAL );
+    yButtonsBoxSizer->Add( 30, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    yButtonsBoxSizer->Add( addYButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    yButtonsBoxSizer->Add( removeYButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    yButtonsBoxSizer->Add( clearYButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+
+    //------------------------------------------------------
+    // X box label (1st column)
+    //------------------------------------------------------
+    titleXText = new wxStaticText( parent, XY_TEXT, wxT("Selected X"),
+                                   wxDefaultPosition, wxSize(80,-1), 0 );
+    
+    xSelectedListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition,
+                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE );
+    
+    plotCheckBox = new wxCheckBox( parent, XY_PLOT_ENABLE, wxT("Show Plot"),
+                                   wxDefaultPosition, wxSize(100,20), 0 );
+    
+    plotCheckBox->SetValue(theSubscriber->IsActive());
+    
+    xSelelectedBoxSizer = new wxBoxSizer( wxVERTICAL );
+    xSelelectedBoxSizer->Add( titleXText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    xSelelectedBoxSizer->Add( xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+    xSelelectedBoxSizer->Add( plotCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+        
+    //------------------------------------------------------
+    // Y box label (5th column)
+    //------------------------------------------------------
+    titleYText = new wxStaticText( parent, XY_TEXT, wxT("Selected Y"),
+                                   wxDefaultPosition, wxSize(80,-1), 0 );
+
+    ySelectedListBox = new wxListBox( parent, XY_LISTBOX, wxDefaultPosition,
+                                      wxSize(140,125), 0, emptyList, wxLB_SINGLE );
+    
+    ySelelectedBoxSizer = new wxBoxSizer( wxVERTICAL );
+    ySelelectedBoxSizer->Add( titleYText, 0, wxALIGN_CENTRE|wxALL, 5 );
+    ySelelectedBoxSizer->Add( ySelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+
+    //------------------------------------------------------
+    // put in the order
+    //------------------------------------------------------
+    paramGridSizer->Add( xSelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    paramGridSizer->Add( xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    paramGridSizer->Add( paramBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    paramGridSizer->Add( yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    paramGridSizer->Add( ySelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    pageBoxSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+    
+    //loj: test this later
+    //theMiddleSizer->Add( paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5 );
+
+    parent->SetAutoLayout( TRUE );
+    parent->SetSizer( pageBoxSizer);
+    pageBoxSizer->Fit( parent );
+    pageBoxSizer->SetSizeHints( parent );
+
+    delete paramList;
+}
+
+//------------------------------------------------------------------------------
+// virtual void LoadData()
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::LoadData()
+{
+    // load data
+}
+
+//------------------------------------------------------------------------------
+// virtual void SaveData()
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::SaveData()
+{
+    // save data
+}
+
+//------------------------------------------------------------------------------
+// virtual void OnHelp()
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnHelp()
+{
+    // open the window
+    GmatPanel::OnHelp();
+
+    // fill help text
+}
+
+//------------------------------------------------------------------------------
+// virtual void OnScript()
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::OnScript()
+{
+    // open the window
+    GmatPanel::OnScript();
+
+    // fill scripts
+}
