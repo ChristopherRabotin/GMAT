@@ -308,21 +308,32 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
       mCanvas->SetFocus();
       mCanvas->ShowWireFrame(drawWireFrame);
       mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
-                                targetColor, updateCanvas);
+                                targetColor);
       if (updateCanvas)
          Update();
    }
 }
 
+//loj: 6/22/04 added
 //------------------------------------------------------------------------------
-// bool DeletePlot()
+// void RefreshPlot()
 //------------------------------------------------------------------------------
-bool MdiChildTrajFrame::DeletePlot()
+/*
+ * Activates OnPaint() event
+ */
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::RefreshPlot()
+{
+   Update();
+}
+
+//------------------------------------------------------------------------------
+// void DeletePlot()
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::DeletePlot()
 {
    // This will call OnClose()
    if (mIsMainFrame)
       MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
-
-   return true;
 }
 

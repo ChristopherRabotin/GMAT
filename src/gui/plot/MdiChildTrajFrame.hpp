@@ -62,7 +62,8 @@ public:
                          const UnsignedInt orbitColor,
                          const UnsignedInt targetColor,
                          bool updateCanvas, bool drawWireFrame = false);
-   bool DeletePlot();
+   void RefreshPlot(); //loj: 6/22/04 added
+   void DeletePlot();
 
    // getter
    wxString GetPlotName() {return mPlotName;}
