@@ -1,5 +1,6 @@
+//$Header$
 //------------------------------------------------------------------------------
-//                              PropagatorSetup
+//                              PropagatorSetupPanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -19,10 +20,10 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(PropagatorSetup, wxPanel)
-    EVT_GRID_CELL_RIGHT_CLICK(PropagatorSetup::OnRightClick)
-    EVT_CLOSE(PropagatorSetup::OnCloseWindow)
-    EVT_BUTTON(-1, PropagatorSetup::OnButton)
+BEGIN_EVENT_TABLE(PropagatorSetupPanel, wxPanel)
+    EVT_GRID_CELL_RIGHT_CLICK(PropagatorSetupPanel::OnRightClick)
+    EVT_CLOSE(PropagatorSetupPanel::OnCloseWindow)
+    EVT_BUTTON(-1, PropagatorSetupPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -32,13 +33,13 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagatorSetup::PropagatorSetup( wxWindow *parent )
-                :wxPanel(parent)
+PropagatorSetupPanel::PropagatorSetupPanel( wxWindow *parent )
+    :wxPanel(parent)
 {
-	CreateSetupWindow(this);
+        CreateSetupWindow(this);
 }
 
-void PropagatorSetup::CreateSetupWindow( wxWindow *parent)
+void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
 {
     item0 = new wxBoxSizer( wxVERTICAL );
 
@@ -201,23 +202,23 @@ void PropagatorSetup::CreateSetupWindow( wxWindow *parent)
     item0->SetSizeHints( parent );
 }
 
-void PropagatorSetup::OnRightClick()
+void PropagatorSetupPanel::OnRightClick()
 {
-	return;
+        return;
 }
 
-void PropagatorSetup::OnCloseWindow()
+void PropagatorSetupPanel::OnCloseWindow()
 {
-	Destroy();
-	Close(TRUE);
+        Destroy();
+        Close(TRUE);
 }
 
-void PropagatorSetup::OnButton(wxCommandEvent& event)
+void PropagatorSetupPanel::OnButton(wxCommandEvent& event)
 {
     if ( event.GetEventObject() == item4 )  // Create Script
     {
-		// waw - Build 1 development
-		
+                // waw - Build 1 development
+                
         //delete m_btnFocused;
         //m_btnFocused = NULL;
 
@@ -225,25 +226,25 @@ void PropagatorSetup::OnButton(wxCommandEvent& event)
     }
     else if ( event.GetEventObject() == item34 )  // User Defined
     {
-		// waw - Build 1 development
-		
+                // waw - Build 1 development
+                
         //wxGetTextFromUser(_T("Dummy prompt"),
                          // _T("Modal dialog called from dialog"),
                          // _T(""), this);
     }
-	else if ( event.GetEventObject() == item36 )  // OK
+        else if ( event.GetEventObject() == item36 )  // OK
     {
         OnCloseWindow();
     }
-	else if ( event.GetEventObject() == item37 )  // Apply
+        else if ( event.GetEventObject() == item37 )  // Apply
     {
         // waw - Build 1 development
     }
-	else if ( event.GetEventObject() == item38 )  // Cancel
+        else if ( event.GetEventObject() == item38 )  // Cancel
     {
         OnCloseWindow();
     }
-	else if ( event.GetEventObject() == item39 )  // Help
+        else if ( event.GetEventObject() == item39 )  // Help
     {
        // waw - Future development...
     }
