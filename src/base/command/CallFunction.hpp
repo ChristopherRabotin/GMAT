@@ -51,6 +51,11 @@ public:
    StringArray         GetRefObjectNameArray(const Gmat::ObjectType type) const;
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                             const std::string &name);
+   
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
+
    virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
    virtual GmatBase*   GetObject(const Gmat::ObjectType type,
                                  const std::string objName = "");
@@ -111,7 +116,7 @@ private:
 
    static const std::string PARAMETER_TEXT[
             CallFunctionParamCount - GmatCommandParamCount];
-	static const Gmat::ParameterType PARAMETER_TYPE[
+        static const Gmat::ParameterType PARAMETER_TYPE[
             CallFunctionParamCount - GmatCommandParamCount];
 
 };

@@ -26,6 +26,7 @@
 //#define DEBUG_CALL_FUNCTION 1
 //#define DEBUG_UPDATE_VAR 1
 //#define DEBUG_USE_ARRAY 1
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -38,13 +39,13 @@ CallFunction::PARAMETER_TEXT[CallFunctionParamCount - GmatCommandParamCount] =
 const Gmat::ParameterType
 CallFunction::PARAMETER_TYPE[CallFunctionParamCount - GmatCommandParamCount] =
 {
-	Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 CallFunction::CallFunction() :
-    GmatCommand     ("CallFunction"),
-    mFunction       (NULL),
-    mFunctionName   ("")
+   GmatCommand     ("CallFunction"),
+   mFunction       (NULL),
+   mFunctionName   ("")
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -54,9 +55,9 @@ CallFunction::~CallFunction()
 }
 
 CallFunction::CallFunction(const CallFunction& cf) :
-    GmatCommand     (cf),
-    mFunction       (cf.mFunction),
-    mFunctionName   (cf.mFunctionName)
+   GmatCommand     (cf),
+   mFunction       (cf.mFunction),
+   mFunctionName   (cf.mFunctionName)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -64,10 +65,10 @@ CallFunction::CallFunction(const CallFunction& cf) :
 
 CallFunction& CallFunction::operator=(const CallFunction& cf)
 {
-    if (this == &cf)
-        return *this;
+   if (this == &cf)
+      return *this;
     
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -274,6 +275,24 @@ bool CallFunction::SetRefObjectName(const Gmat::ObjectType type,
    }
 
    return GmatCommand::SetRefObjectName(type, name);
+}
+
+//loj: 12/7/04 - added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
+                                   const std::string &oldName,
+                                   const std::string &newName)
+{
+   if (type == Gmat::FUNCTION)
+   {
+      if (mFunctionName == oldName)
+         mFunctionName = newName;
+   }
+   
+   return true;
 }
 
 // Reference object accessor methods
