@@ -35,7 +35,9 @@ OBJECTS = Command.o CommandException.o \
           Save.o \
           CallFunction.o \
           BeginFiniteBurn.o \
-          EndFiniteBurn.o
+          EndFiniteBurn.o \
+          BeginScript.o \
+          EndScript.o
 
 all: libCommand 
 	mkdir -p ../lib
