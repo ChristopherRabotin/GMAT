@@ -44,6 +44,11 @@ public:
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                             const std::string &name);
+   
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
+
    virtual bool        SetObject(const std::string &name,
                                  const Gmat::ObjectType type,
                                  const std::string &associate = "",
@@ -91,7 +96,6 @@ public:
    virtual bool        TakeAction(const std::string &action,  
                                   const std::string &actionData = "");
     
-
    // Methods used to run the command
    virtual bool        InterpretAction();
     

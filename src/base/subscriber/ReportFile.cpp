@@ -25,6 +25,7 @@
 #include "Publisher.hpp"         // for Instance()
 
 //#define DEBUG_REPORTFILE 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -247,6 +248,34 @@ bool ReportFile::TakeAction(const std::string &action,
    return false;
 }
 
+
+//loj: 11/17/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ReportFile::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type == Gmat::PARAMETER)
+   {
+      // parameters
+      for (unsigned int i=0; i<mVarParamNames.size(); i++)
+      {
+         if (mVarParamNames[i] == oldName)
+            mVarParamNames[i] = newName;
+      }
+   }
+
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const

@@ -44,8 +44,13 @@ public:
    // methods inherited from Parameter
    virtual const std::string* GetParameterList() const;
    
-   // methods inherited from GmatBase //loj: 9/10/04 added
+   // methods inherited from GmatBase
    virtual GmatBase* Clone() const;
+   
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer GetParameterID(const std::string str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;

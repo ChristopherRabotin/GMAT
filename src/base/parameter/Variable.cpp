@@ -192,6 +192,27 @@ GmatBase* Variable::Clone() const
    return new Variable(*this);
 }
 
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Variable::RenameRefObject(const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Variable::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+
+   if (type == Gmat::PARAMETER)
+      return mParamDb->RenameParameter(oldName, newName);
+   
+   return false;
+}
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------

@@ -213,7 +213,18 @@ void OrbitReal::Initialize()
 // Methods inherited from GmatBase
 //-------------------------------------
 
-//loj: 9/10/04 added
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool OrbitReal::RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName)
+{
+   return OrbitData::RenameRefObject(type, oldName, newName);
+}
+
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------

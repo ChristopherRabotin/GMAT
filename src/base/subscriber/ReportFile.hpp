@@ -55,7 +55,11 @@ public:
    virtual bool TakeAction(const std::string &action,
                            const std::string &actionData = "");
    
-   virtual std::string GetParameterText(const Integer id) const;
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
+    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                      GetParameterType(const Integer id) const;
@@ -135,7 +139,7 @@ private:
 
     enum
     {
-		FILENAME = SubscriberParamCount,
+                FILENAME = SubscriberParamCount,
       PRECISION,
       ADD,
       WRITE_HEADERS,
@@ -145,7 +149,7 @@ private:
     };
 
     static const std::string PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
-	 static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
+         static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
 
 };
 

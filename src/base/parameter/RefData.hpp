@@ -41,6 +41,10 @@ public:
                           const std::string &name);
    bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                      const std::string &name = "");
+
+   bool RenameRefObject(const Gmat::ObjectType type,
+                        const std::string &oldName,
+                        const std::string &newName);
    
    virtual bool ValidateRefObjects(GmatBase *param) = 0;
    virtual const std::string* GetValidObjectList() const;

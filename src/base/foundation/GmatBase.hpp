@@ -70,6 +70,9 @@ public:
                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name);
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,

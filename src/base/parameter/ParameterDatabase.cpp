@@ -19,6 +19,9 @@
 
 #include "ParameterDatabase.hpp"
 #include "ParameterDatabaseException.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // public
@@ -125,6 +128,49 @@ bool ParameterDatabase::HasParameter(const std::string &name) const
       found = true;
    
    return found;
+}
+
+//loj: 11/17/04 added
+//------------------------------------------------------------------------------
+// bool RenameParameter(const std::string &oldName, const std::string &newName)
+//------------------------------------------------------------------------------
+/**
+ * @param <oldName> parameter name to be renamed
+ * @param <newName> new prameter name
+ *
+ * @return true if parameter is renamed, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ParameterDatabase::RenameParameter(const std::string &oldName,
+                                        const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ParameterDatabase::RenameParameter() oldName=%s, newName=%s\n",
+       oldName.c_str(), newName.c_str());
+#endif
+   
+   StringParamPtrMap::iterator pos;
+   
+   pos = mStringParamPtrMap->find(oldName);
+   
+   if (pos != mStringParamPtrMap->end())
+   {
+      // add new parameter name key and delete old
+      Add(newName, pos->second);
+      mStringParamPtrMap->erase(pos);
+
+//        for (int i=0; i<mNumParams; i++)
+//        {
+//           if (mParamNames[i] == oldName)
+//           {
+//              mParamNames[i] = newName;
+//              return true;
+//           }
+//        }
+   }
+   
+   return false;
 }
 
 //------------------------------------------------------------------------------

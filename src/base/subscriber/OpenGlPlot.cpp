@@ -29,6 +29,7 @@
 //#define DEBUG_OPENGL_PARAM 1
 //#define DEBUG_OPENGL_UPDATE 1
 //#define DEBUG_REMOVE_ACTION 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -271,6 +272,66 @@ bool OpenGlPlot::TakeAction(const std::string &action,
    else if (action == "Remove")
    {
       return RemoveSpacecraft(actionData);
+   }
+   
+   return false;
+}
+
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool OpenGlPlot::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type == Gmat::SPACECRAFT)
+   {
+      // for spacecraft name
+      for (int i=0; i<mScCount; i++)
+      {
+         if (mScNameArray[i] == oldName)
+         {
+            mScNameArray[i] = newName;
+         }
+      }
+
+      //----------------------------------------------------
+      // Since spacecraft name is used as key for spacecraft
+      // color map, I can't change the key name, so it is
+      // removed and insert back
+      //----------------------------------------------------
+      std::map<std::string, UnsignedInt>::iterator orbColorPos, targColorPos;
+      orbColorPos = mOrbitColorMap.find(oldName);
+      targColorPos = mTargetColorMap.find(oldName);
+
+      if (orbColorPos != mOrbitColorMap.end() &&
+          targColorPos != mTargetColorMap.end())
+      {
+         // add new spacecraft name key and delete old
+         mOrbitColorMap[newName] = mOrbitColorMap[oldName];
+         mTargetColorMap[newName] = mTargetColorMap[oldName];
+         mOrbitColorMap.erase(orbColorPos);
+         mTargetColorMap.erase(targColorPos);
+
+#if DEBUG_RENAME
+         MessageInterface::ShowMessage("---After rename\n");
+         for (orbColorPos = mOrbitColorMap.begin();
+              orbColorPos != mOrbitColorMap.end(); ++orbColorPos)
+         {
+            MessageInterface::ShowMessage
+               ("sc=%s, color=%d\n", orbColorPos->first.c_str(), orbColorPos->second);
+         }
+#endif
+         return true;
+      }
    }
    
    return false;

@@ -27,6 +27,7 @@
 //#define DEBUG_XYPLOT_OBJECT 1
 //#define DEBUG_XYPLOT_UPDATE 1
 //#define DEBUG_ACTION_REMOVE 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -317,6 +318,40 @@ bool XyPlot::TakeAction(const std::string &action,
    else if (action == "Remove")
    {
       return RemoveYParameter(actionData);
+   }
+   
+   return false;
+}
+
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
+                             const std::string &oldName,
+                             const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("XyPlot::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type == Gmat::PARAMETER)
+   {
+      // X parameter
+      if (mXParamName == oldName)
+         mXParamName = newName;
+      
+      // Y parameters
+      for (unsigned int i=0; i<mYParamNames.size(); i++)
+      {
+         if (mYParamNames[i] == oldName)
+            mYParamNames[i] = newName;
+      }
+      
+      return true;
    }
    
    return false;
@@ -675,7 +710,8 @@ const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 void XyPlot::BuildPlotTitle()
 {
    //set X and Y axis title
-   if (mXAxisTitle == "")
+   //if (mXAxisTitle == "")
+   //{
       if (mXParam)
          mXAxisTitle = mXParam->GetName();
       else {
@@ -684,32 +720,33 @@ void XyPlot::BuildPlotTitle()
          mPlotTitle  = "Plot not fully initialized";
          return;
       }
+      //}
       
 #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mXAxisTitle = %s\n",
                                  mXAxisTitle.c_str());
 #endif
    
-   if (mYAxisTitle == "")
-   {
+   //if (mYAxisTitle == "")
+   //{
       mYAxisTitle = "";
       for (int i= 0; i<mNumYParams-1; i++)
       {
          mYAxisTitle += (mYParams[i]->GetName() + ", ");
       }
       mYAxisTitle += mYParams[mNumYParams-1]->GetName();
-   }
-            
+      //}
+   
 #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mYAxisTitle = %s\n",
                                  mYAxisTitle.c_str());
 #endif
-    
-   if (mPlotTitle == "")
-   {
+   
+   //if (mPlotTitle == "")
+   //{
       mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
-   }
-    
+      //}
+   
 #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::BuildPlotTitle() mPlotTitle = %s\n",
                                  mPlotTitle.c_str());

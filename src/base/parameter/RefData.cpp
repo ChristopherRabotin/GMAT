@@ -21,6 +21,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_REFDATA_OBJECT 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // public methods
@@ -43,8 +44,6 @@ RefData::RefData()
    }
 
    mNumRefObjects = 0;
-   //loj: 9/10/04 old:
-   //mObjTypeObjMap = new std::map<std::string, GmatBase*>;
 }
 
 //------------------------------------------------------------------------------
@@ -66,7 +65,6 @@ RefData::RefData(const RefData &copy)
    }
    
    mNumRefObjects = copy.mNumRefObjects;
-   //loj: 9/10/04 old:mObjTypeObjMap = copy.mObjTypeObjMap;
 }
 
 //------------------------------------------------------------------------------
@@ -90,7 +88,6 @@ RefData& RefData::operator= (const RefData& right)
    }
    
    mNumRefObjects = right.mNumRefObjects;
-   //loj: 9/10/04 old:mObjTypeObjMap = right.mObjTypeObjMap;
    return *this;
 }
 
@@ -103,7 +100,6 @@ RefData& RefData::operator= (const RefData& right)
 //------------------------------------------------------------------------------
 RefData::~RefData()
 {
-   //loj: 9/10/04 old:delete mObjTypeObjMap;
 }
 
 //------------------------------------------------------------------------------
@@ -119,10 +115,6 @@ Integer RefData::GetNumRefObjects() const
 //------------------------------------------------------------------------------
 std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
 {
-#if DEBUG_REFDATA_OBJECT
-   MessageInterface::ShowMessage
-      ("RefData::GetRefObjectName() type=%d\n", type);
-#endif
    for (int i=0; i<mNumRefObjects; i++)
    {
       if (mRefObjList[i].objType == type)
@@ -130,10 +122,19 @@ std::string RefData::GetRefObjectName(const Gmat::ObjectType type) const
          //loj:
          //Notes: will return first object name.
          //       How do we handle multiple objects with same type?
+#if DEBUG_REFDATA_OBJECT
+         MessageInterface::ShowMessage
+            ("RefData::GetRefObjectName() type=%d returning:%s\n", type,
+             mRefObjList[i].objName.c_str());
+#endif
          return mRefObjList[i].objName; 
       }
    }
 
+#if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("RefData::GetRefObjectName() type=%d returning:INVALID_OBJECT_TYPE\n", type);
+#endif
    return "INVALID_OBJECT_TYPE";
 }
 
@@ -222,6 +223,41 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    return false;
 }
 
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool RefData::RenameRefObject(const Gmat::ObjectType type,
+                              const std::string &oldName,
+                              const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("RefData::RenameRefObject() type=%d, oldName=%s, newName=%s\n",
+       type, oldName.c_str(), newName.c_str());
+#endif
+
+   for (int i=0; i<mNumRefObjects; i++)
+   {
+      if (mRefObjList[i].objType == type)
+      {
+         if (mRefObjList[i].objName == oldName)
+         {
+            mRefObjList[i].objName = newName;
+#if DEBUG_RENAME
+            MessageInterface::ShowMessage
+               ("RefData::RenameRefObject() renamed to:%s\n",
+                mRefObjList[i].objName.c_str());
+#endif
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
 //------------------------------------------------------------------------------
 // virtual const std::string* GetValidObjectList() const
 //------------------------------------------------------------------------------
@@ -290,17 +326,6 @@ bool RefData::HasObjectType(const std::string &type) const
    }
 
    return false;
-   
-   //loj: 9/10/04 old code
-   //bool found = false;
-   //std::map<std::string, GmatBase*>::iterator pos;
-   
-   //pos = mObjTypeObjMap->find(objType);
-   
-   //if (pos != mObjTypeObjMap->end())
-   //   found = true;
-   
-   //return found;
 }
 
 //------------------------------------------------------------------------------

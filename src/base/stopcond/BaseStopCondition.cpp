@@ -30,6 +30,7 @@
 #endif
 
 //#define DEBUG_BASE_STOPCOND 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // static data
@@ -156,8 +157,8 @@ BaseStopCondition::BaseStopCondition(const BaseStopCondition &copy)
    mEpochParam = copy.mEpochParam;
    mStopEpoch = copy.mStopEpoch;
    mStopParam = copy.mStopParam;
-   mEccParam = copy.mEccParam;   //loj: 6/23/04 added
-   mRmagParam = copy.mRmagParam; //loj: 6/23/04 added
+   mEccParam = copy.mEccParam;
+   mRmagParam = copy.mRmagParam;
    
    //Initialize(); //loj: 9/13/04 Initialized() will be called during initialization
    CopyDynamicData(copy);
@@ -185,8 +186,8 @@ BaseStopCondition& BaseStopCondition::operator= (const BaseStopCondition &right)
       mSolarSystem = right.mSolarSystem;
       mEpochParam = right.mEpochParam;
       mStopEpoch = right.mStopEpoch;
-      mEccParam = right.mEccParam;   //loj: 6/23/04 added
-      mRmagParam = right.mRmagParam; //loj: 6/23/04 added
+      mEccParam = right.mEccParam;
+      mRmagParam = right.mRmagParam;
 
       //Initialize();
       CopyDynamicData(right);
@@ -208,7 +209,7 @@ BaseStopCondition::~BaseStopCondition()
       delete mEccParam;
 
    if (mRmagParam != NULL)
-      delete mRmagParam; //loj: 6/24/04 changed from mEccParam
+      delete mRmagParam;
 }
 
 //------------------------------------------------------------------------------
@@ -444,7 +445,12 @@ bool BaseStopCondition::SetEpochParameter(Parameter *param)
 bool BaseStopCondition::SetEpochParameter(const std::string &name)
 {
    bool status = false;
-    
+
+#if DEBUG_BASE_STOPCOND
+   MessageInterface::ShowMessage("BaseStopCondition::SetEpochParameter() name = %s\n",
+                                 name.c_str());
+#endif
+   
 #if !defined __UNIT_TEST__
    Moderator *theModerator = Moderator::Instance();
     
@@ -486,7 +492,7 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
         
       return true;
    }
-
+   
    return false;
 }
 
@@ -495,11 +501,16 @@ bool BaseStopCondition::SetStopParameter(Parameter *param)
 //------------------------------------------------------------------------------
 bool BaseStopCondition::SetStopParameter(const std::string &name)
 {
+#if DEBUG_BASE_STOPCOND
+   MessageInterface::ShowMessage("BaseStopCondition::SetStopParameter() name = %s\n",
+                                 name.c_str());
+#endif
+   
    bool status = false;
-    
+   
 #if !defined __UNIT_TEST__
    Moderator *theModerator = Moderator::Instance();
-    
+   
    if (name != "")
    {
       // get parameter pointer
@@ -513,7 +524,7 @@ bool BaseStopCondition::SetStopParameter(const std::string &name)
       }
    }
 #endif
-    
+   
    return status;
 }
 
@@ -574,7 +585,7 @@ void BaseStopCondition::Initialize()
 bool BaseStopCondition::SetSpacecraft(SpaceObject *sc)
 {
    if (mEccParam != NULL)
-      mEccParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName()); //loj: 9/13/04 new method
+      mEccParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
 
    if (mRmagParam != NULL)
       mRmagParam->SetRefObject(sc, Gmat::SPACECRAFT, sc->GetName());
@@ -640,7 +651,6 @@ bool BaseStopCondition::Validate()
          if (mEccParam  == NULL)
             mEccParam = new KepEcc("");
          
-         //loj: 9/13/04 changed AddObject() to AddRefObject()
          mEccParam->AddRefObject
             (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
                                       mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
@@ -652,7 +662,6 @@ bool BaseStopCondition::Validate()
             if (mRmagParam == NULL)
                mRmagParam = new SphRMag("");
             
-            //loj: 9/13/04 changed AddObject() to AddRefObject()
             mRmagParam->AddRefObject
                (mStopParam->GetRefObject(Gmat::SPACECRAFT,
                                          mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
@@ -682,6 +691,37 @@ bool BaseStopCondition::Validate()
 //---------------------------------
 // methods inherited from GmatBase
 //---------------------------------
+
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool BaseStopCondition::RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("BaseStopCondition::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type == Gmat::SPACECRAFT)
+   {
+      // set new StopCondition name
+      std::string name = GetName();
+      std::string::size_type pos = name.find(oldName);
+      if (pos != name.npos)
+      {
+         name.replace(pos, oldName.size(), newName);
+         SetName("StopOn" + name);
+         return true;
+      }
+   }
+   
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const

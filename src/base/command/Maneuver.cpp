@@ -20,6 +20,7 @@
 
 #include "Maneuver.hpp"
 
+//#define DEBUG_RENAME 1
 
 Maneuver::Maneuver(void) :
     GmatCommand     ("Maneuver"),
@@ -93,6 +94,44 @@ bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 GmatBase* Maneuver::Clone(void) const
 {
    return (new Maneuver(*this));
+}
+
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Maneuver::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   if (type != Gmat::SPACECRAFT && type != Gmat::BURN)
+      return true;
+   
+   if (type == Gmat::SPACECRAFT)
+   {
+      if (satName == oldName)
+      {
+         satName = newName;
+         return true;
+      }
+   }
+   else if (type == Gmat::BURN)
+   {
+      if (burnName == oldName)
+      {
+         burnName = newName;
+         return true;
+      }
+   }
+   
+   return false;
 }
 
 std::string Maneuver::GetParameterText(const Integer id) const

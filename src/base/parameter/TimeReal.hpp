@@ -47,7 +47,11 @@ public:
    virtual bool AddRefObject(GmatBase *obj);
    
    
-   // methods inherited from GmatBase //loj: 9/10/04 added
+   // methods inherited from GmatBase
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    virtual bool SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name);

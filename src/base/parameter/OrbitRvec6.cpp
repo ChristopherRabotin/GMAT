@@ -157,45 +157,7 @@ void OrbitRvec6::SetSolarSystem(SolarSystem *ss)
       OrbitData::AddRefObject(ss->GetType(), ss->GetName(), ss);
    else
       OrbitData::SetRefObject(ss, Gmat::SOLAR_SYSTEM, ss->GetName());
-
-   //loj: 9/10/04
-//     if (OrbitData::GetRefObject("SolarSystem") == NULL)
-//        OrbitData::AddRefObject(ss);
-//     else
-//        OrbitData::SetRefObject(Gmat::SOLAR_SYSTEM, ss->GetName(), ss);
 }
-
-//  //------------------------------------------------------------------------------
-//  // GmatBase* GetObject(const std::string &objTypeName)
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return reference object pointer of given object type
-//   */
-//  //------------------------------------------------------------------------------
-//  GmatBase* OrbitRvec6::GetObject(const std::string &objTypeName)
-//  {
-//     return OrbitData::GetRefObject(objTypeName);
-//  }
-
-//  //------------------------------------------------------------------------------
-//  // virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//  //                        GmatBase *obj
-//  //------------------------------------------------------------------------------
-//  /**
-//   * Sets reference object.
-//   *
-//   * @param <objType> object type
-//   * @param <objName> object name
-//   * @param <obj> object pointer
-//   *
-//   * @return true if the object has been set.
-//   */
-//  //------------------------------------------------------------------------------
-//  bool OrbitRvec6::SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                            GmatBase *obj)
-//  {
-//     return OrbitData::SetRefObject(objType, objName, obj);
-//  }
 
 //------------------------------------------------------------------------------
 // virtual bool AddRefObject(GmatBase *obj)
@@ -248,7 +210,17 @@ void OrbitRvec6::Initialize()
 // Methods inherited from GmatBase
 //-------------------------------------
 
-//loj: 9/10/04 added
+//loj: 11/16/04 added
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+bool OrbitRvec6::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   return OrbitData::RenameRefObject(type, oldName, newName);
+}
 
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
