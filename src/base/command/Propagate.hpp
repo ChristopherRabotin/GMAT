@@ -40,6 +40,9 @@ public:
    Propagate&          operator=(const Propagate &p);
 
    // Methods used for configuration
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                            const std::string &name);
    virtual bool        SetObject(const std::string &name,
                                  const Gmat::ObjectType type,
                                  const std::string &associate = "",

@@ -213,6 +213,35 @@ GmatBase* Propagate::Clone(void) const
    return (new Propagate(*this));
 }
 
+
+std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   return "NO_SUCH_REFERENCE_OBJECT";
+}
+
+
+bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   switch (type) {
+      // Propagator setups
+      case Gmat::PROP_SETUP:
+         propName = name;
+         return true;
+      
+      // Objects that get propagated
+      case Gmat::SPACECRAFT:
+//      case Gmat::FORMATION:
+         satName.push_back(name);
+         return true;
+      
+      default:
+         break;
+   }
+   
+   return GmatCommand::SetRefObjectName(type, name);
+}
+
 //loj: 6/25/04 added
 // Reference object accessor methods
 //------------------------------------------------------------------------------
@@ -547,6 +576,9 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Propagate::InterpretAction(void)
 {
+   // DJC: Uncomment the following when working Interpreter
+   //return false;
+   
    /// @todo: Clean up this hack for the Propagate::InterpretAction method
    // Sample string:  "Propagate RK89(Sat1, {Duration = 86400.0});"
     
