@@ -73,7 +73,7 @@ OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SC_COLOR] =
 // OpenGlPlot(const std::string &name)
 //------------------------------------------------------------------------------
 OpenGlPlot::OpenGlPlot(const std::string &name) :
-   Subscriber("OpenGlPlot", name)
+   Subscriber("OpenGLPlot", name) //loj: 10/28/04 Channged from OpenGlPlot
 {
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
