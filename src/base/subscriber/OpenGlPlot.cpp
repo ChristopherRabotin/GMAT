@@ -351,9 +351,11 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetStringParameter(const std::string &label) const
 {
-   //MessageInterface::ShowMessage("OpenGlPlot::GetStringParameter() label = %s\n",
-   //                              label.c_str());
-
+#if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::GetStringParameter() label = %s\n",
+       label.c_str());
+#endif
    return GetStringParameter(GetParameterID(label));
 }
 
@@ -362,8 +364,11 @@ std::string OpenGlPlot::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 {
-   //MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() id = %d, "
-   //                              "value = %s \n", id, value.c_str());
+#if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetStringParameter() id = %d, value = %s \n",
+       id, value.c_str());
+#endif
    
    switch (id)
    {
@@ -446,6 +451,12 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
       status = true;
    }
 
+#if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::AddSpacecraft() mScCount=%d name=%s\n",
+       mScCount, name.c_str());
+#endif
+   
    return status;
 }
 
