@@ -62,6 +62,9 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
    EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)    
    EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile) 
+
+   EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnScriptOpenNewEditor)
+   EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnScriptOpenFileEditor)
    
    EVT_SIZE(GmatMainFrame::OnSize)
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
@@ -120,7 +123,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    InitToolBar(GetToolBar());
    
    wxMDIChildFrame *theChild = new wxMDIChildFrame(this, -1, _T("GmatMainNotebook"),
-                        wxPoint(-1,-1), wxSize(-1,-1), wxDEFAULT_FRAME_STYLE);
+                        wxPoint(-1,-1), wxSize(-1,-1), wxMINIMIZE_BOX | 
+                        wxMAXIMIZE_BOX | wxTHICK_FRAME | wxCAPTION);
 
    // need to do before leftTabs, because they use MainNotebook
    rightTabs = new GmatMainNotebook( theChild,
@@ -331,15 +335,15 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    
 //   toolBar->AddTool( MENU_PROJECT_NEW, *(bitmaps[0]), wxNullBitmap, FALSE, currentX, -1,
 //                     (wxObject *) NULL, _T("New project"));
-   toolBar->AddTool( FILE_NEW_SCRIPT, *(bitmaps[0]), 
+   toolBar->AddTool( MENU_FILE_NEW_SCRIPT, *(bitmaps[0]), 
                      wxNullBitmap, FALSE, currentX, -1,
                      (wxObject *) NULL, _T("New Script"));
    currentX += width + 5;
-   toolBar->AddTool(FILE_OPEN_SCRIPT, *bitmaps[1], wxNullBitmap, 
+   toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, *bitmaps[1], wxNullBitmap, 
                      FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Open Script"));
    currentX += width + 5;
-   toolBar->AddTool(FILE_SAVE_SCRIPT, *bitmaps[2], wxNullBitmap, 
+   toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, *bitmaps[2], wxNullBitmap, 
                      FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Save Script"));
    currentX += width + 5;
@@ -418,16 +422,14 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
 //   fileMenu->Append(MENU_PROJECT_NEW, wxT("New Project"), wxT(""), FALSE);
 //   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Load Default Mission"), wxT(""), FALSE);
 
-   fileMenu->Append(FILE_NEW_SCRIPT, wxT("New Script"));  
-   fileMenu->Append(FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
-   fileMenu->Append(FILE_SAVE_SCRIPT, wxT("Save Script"), wxT(""), FALSE);  
-   fileMenu->Append(FILE_SAVE_AS_SCRIPT, wxT("Save Script As"), 
+   fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));  
+   fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save Script"), wxT(""), FALSE);  
+   fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save Script As"), 
                      wxT(""), FALSE);  
-                     
-   fileMenu->Enable(FILE_NEW_SCRIPT, FALSE);
-   fileMenu->Enable(FILE_OPEN_SCRIPT, FALSE);
-   fileMenu->Enable(FILE_SAVE_SCRIPT, FALSE);
-   fileMenu->Enable(FILE_SAVE_AS_SCRIPT, FALSE);
+
+   fileMenu->Enable(MENU_FILE_SAVE_SCRIPT, FALSE);
+   fileMenu->Enable(MENU_FILE_SAVE_AS_SCRIPT, FALSE);
 
 //   openMenu = new wxMenu;
 //   openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);
@@ -603,7 +605,6 @@ wxMenuBar* GmatMainFrame::CreateScriptWindowMenu(const std::string &docType)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
 {
-
    //----------------------------------------------------------------
    //not MAC mode - Create MDI frame
    //----------------------------------------------------------------
@@ -786,34 +787,38 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
     GetClientWindow()->Refresh();
 }
 
-//void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
-//{
-//   // Create a document manager
-//   mDocManager = new wxDocManager;
-//
-//   // Create a template relating text documents to their views
-//   //loj: 4/16/04 use MdiTextDocument
-//   mDocTemplate = 
-//      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-//                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-//                        CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
-//    
-//   // Create the main frame window    
-//   //loj: pass "this" so that this frame closes when the main frame closes
-//   wxDocMDIParentFrame *themdiDocMainFrame =
-//      new wxDocMDIParentFrame(mDocManager, this, -1, _T("Script Window (MDI)"),
-//                          wxPoint(0, 0), wxSize(600, 500),
-//                          (wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE), 
-//                          _T(""));
-//
-//   
-//   // Make a menubar
-//   wxMenuBar *menuBar = CreateScriptWindowMenu("mdi");
-//       
-//   // Associate the menu bar with the frame
-//   themdiDocMainFrame->SetMenuBar(menuBar);
-//    
-//   themdiDocMainFrame->Centre(wxBOTH);
-//   themdiDocMainFrame->Show(TRUE);
-//}
+//------------------------------------------------------------------------------
+// void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
+{
+   OnScriptOpenEditor(event);
+
+   if (mDocManager != NULL)
+      mDocManager->OnFileNew(event);
+}
+
+//------------------------------------------------------------------------------
+// void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenFileEditor(wxCommandEvent& event)
+{
+   OnScriptOpenEditor(event);
+
+   if (mDocManager != NULL)
+      mDocManager->OnFileOpen(event);
+}
+
 

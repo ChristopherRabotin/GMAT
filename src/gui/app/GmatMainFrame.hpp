@@ -87,6 +87,9 @@ private:
 
     void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event));
     void OnScriptBuild(wxCommandEvent& WXUNUSED(event));
+    
+    void OnScriptOpenNewEditor(wxCommandEvent& event);
+    void OnScriptOpenFileEditor(wxCommandEvent& event);
 
     void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
@@ -101,20 +104,25 @@ private:
     {
         MENU_PROJECT_NEW = 10000,
         MENU_PROJECT_LOAD_DEFAULT_MISSION,
-        MENU_PROJECT_OPEN,
-        MENU_PROJECT_OPEN_BINARY,
-        MENU_PROJECT_OPEN_ASCII,
-        MENU_PROJECT_SAVE,
-        MENU_PROJECT_SAVE_BINARY,
-        MENU_PROJECT_SAVE_ASCII,
-        MENU_PROJECT_SAVE_AS,
-        MENU_PROJECT_SAVE_AS_BINARY,
-        MENU_PROJECT_SAVE_AS_ASCII,
+//        MENU_PROJECT_OPEN,
+//        MENU_PROJECT_OPEN_BINARY,
+//        MENU_PROJECT_OPEN_ASCII,
+//        MENU_PROJECT_SAVE,
+//        MENU_PROJECT_SAVE_BINARY,
+//        MENU_PROJECT_SAVE_ASCII,
+//        MENU_PROJECT_SAVE_AS,
+//        MENU_PROJECT_SAVE_AS_BINARY,
+//        MENU_PROJECT_SAVE_AS_ASCII,
         MENU_PROJECT_PRINT,
         MENU_PROJECT_PREFERENCES,
         MENU_PROJECT_EXIT,
         MENU_SET_PATH_AND_LOG,
         MENU_INFORMATION,
+        
+        MENU_FILE_OPEN_SCRIPT,
+        MENU_FILE_NEW_SCRIPT,
+        MENU_FILE_SAVE_SCRIPT,
+        MENU_FILE_SAVE_AS_SCRIPT,
 
         MENU_SCRIPT_OPEN_EDITOR,
         MENU_SCRIPT_BUILD,
@@ -160,19 +168,15 @@ private:
         TOOL_RESUME,
         TOOL_STOP,
         
-        // it is important for the id corresponding to the "About" command to have
-        // this standard value as otherwise it won't be handled properly under Mac
-        // (where it is special and put into the "Apple" menu)    
-        MENU_HELP_ABOUT = wxID_ABOUT,
         TOOL_CLOSE_TABS,
         TOOL_SCRIPT,
         
         ID_SASH_WINDOW,
         
-        FILE_OPEN_SCRIPT,
-        FILE_NEW_SCRIPT,
-        FILE_SAVE_SCRIPT,
-        FILE_SAVE_AS_SCRIPT,
+        // it is important for the id corresponding to the "About" command to have
+        // this standard value as otherwise it won't be handled properly under Mac
+        // (where it is special and put into the "Apple" menu)    
+        MENU_HELP_ABOUT = wxID_ABOUT,
     };
 };
 
