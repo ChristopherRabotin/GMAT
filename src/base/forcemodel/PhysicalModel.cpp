@@ -96,14 +96,14 @@
 // static data
 //---------------------------------
 const std::string
-PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount] =
+PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount] =
 {
    "Epoch",
    "ElapsedSeconds",
 };
 
 const Gmat::ParameterType
-PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount] =
+PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
@@ -735,7 +735,7 @@ bool PhysicalModel::StateChanged(bool reset)
 std::string PhysicalModel::GetParameterText(const Integer id) const
 {
    if (id >= EPOCH && id < PhysicalModelParamCount)
-      return PARAMETER_TEXT[id];
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterText(id);
 }
@@ -767,7 +767,7 @@ Integer PhysicalModel::GetParameterID(const std::string &str) const
 Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 {
    if (id >= EPOCH && id < PhysicalModelParamCount)
-      return PARAMETER_TYPE[id];
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterType(id);
 }
