@@ -22,6 +22,7 @@
 #include "PhysicalModel.hpp"
 #include "PointMassForce.hpp"
 #include "DragForce.hpp"
+#include "SolarRadiationPressure.hpp"
 #include "RungeKutta89.hpp"
 #include "Moderator.hpp"
 #include "MessageInterface.hpp"
@@ -36,13 +37,15 @@ PropSetup::PARAMETER_TEXT[PropSetupParamCount] =
 {
    "FM",
    "Type",              // To match the script spec
-   "Drag"               // Place holder until we decide how to do this
+   "Drag",               // Place holder until we decide how to do this
+   "SRP"
 };
 
 
 const Gmat::ParameterType
 PropSetup::PARAMETER_TYPE[PropSetupParamCount] =
 {
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE
@@ -64,7 +67,8 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
                      ForceModel *forceModel)
    : GmatBase     (Gmat::PROP_SETUP, "PropSetup", name),
      usedrag      (false),
-     dragType     ("BodyDefault")
+     dragType     ("BodyDefault"),
+     useSRP       ("Off")
 {
    // GmatBase data
    parameterCount = PropSetupParamCount;
@@ -99,7 +103,8 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
 //------------------------------------------------------------------------------
 PropSetup::PropSetup(const PropSetup &propSetup)
    : GmatBase(propSetup),
-     usedrag(propSetup.usedrag)
+     usedrag(propSetup.usedrag),
+     useSRP(propSetup.useSRP)
 {
    // PropSetup data
    mPropagator = propSetup.mPropagator;
@@ -124,6 +129,7 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
       mPropagator = right.mPropagator;
       mForceModel = right.mForceModel;
       usedrag     = right.usedrag;
+      useSRP      = right.useSRP;
       Initialize();
    }
 
@@ -324,6 +330,7 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
     case PROPAGATOR_NAME:
     case FORCE_MODEL_NAME:
     case USE_DRAG:
+    case USE_SRP:
         return PropSetup::PARAMETER_TYPE[id];
     default:
         return GmatBase::GetParameterType(id);
@@ -344,6 +351,7 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
     case PROPAGATOR_NAME:
     case FORCE_MODEL_NAME:
     case USE_DRAG:
+    case USE_SRP:
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     default:
         return GmatBase::GetParameterTypeString(id);
@@ -364,6 +372,7 @@ std::string PropSetup::GetParameterText(const Integer id) const
     case PROPAGATOR_NAME:
     case FORCE_MODEL_NAME:
     case USE_DRAG:
+    case USE_SRP:
         return PropSetup::PARAMETER_TEXT[id];
     default:
         return GmatBase::GetParameterText(id);
@@ -410,6 +419,10 @@ std::string PropSetup::GetStringParameter(const Integer id) const
     case USE_DRAG:
         if (usedrag)
             return dragType;
+        return "Off";
+    case USE_SRP:
+        if (useSRP)
+            return "On";
         return "Off";
     default:
         return GmatBase::GetStringParameter(id);
@@ -486,6 +499,13 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
             dragType = value;
         }
         return true;
+    case USE_SRP:
+        if (value == "Off") {
+            useSRP = false;
+        }
+        else 
+            useSRP = true;
+        return true;
       
     default:
         return GmatBase::SetStringParameter(id, value);
@@ -551,10 +571,16 @@ void PropSetup::Initialize()
             dragForce->SetStringParameter(id, dragType);
         }
       
+        if (useSRP)
+        {
+            SolarRadiationPressure *srp = new SolarRadiationPressure("srp");
+            mForceModel->AddForce(srp);
+        }
+      
         mPropagator->SetPhysicalModel(mForceModel);
         //MessageInterface::ShowMessage("PropSetup::Initialize() after SetPhysicalModel(%s) \n",
         //                              mForceModel->GetName().c_str());
-      
+
         mPropagator->Initialize();
         //MessageInterface::ShowMessage("PropSetup::Initialize() after mPropagator->Initialize() \n");
     }

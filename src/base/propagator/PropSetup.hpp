@@ -71,12 +71,14 @@ private:
    
    bool           usedrag;
    std::string    dragType;
+   bool           useSRP;
 
    enum
    {
       FORCE_MODEL_NAME = 0,
       PROPAGATOR_NAME,
       USE_DRAG,
+      USE_SRP,
       PropSetupParamCount
    };
 
