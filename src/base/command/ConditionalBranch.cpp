@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <sstream>
+#include <ctype.h>      // for isalpha
 #include "gmatdefs.hpp"
 #include "ConditionalBranch.hpp"
 #include "Parameter.hpp"
@@ -820,50 +821,72 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool ConditionalBranch::EvaluateCondition(Integer which)
 {
-   //if ((which < 0) || (which >= (Integer) (lhsList.size())))
    if ((which < 0) || (which >= numberOfConditions))
    {
       return false;
    }
    Real        lhsValue;
    Real        rhsValue;
-   std::string theParmName = lhsList.at(which);
-   std::istringstream rhsStr(rhsList.at(which)); // todo: change to a parameter
-   rhsStr >> rhsValue;
-
+   bool        lhFound = false, rhFound = false;
+   bool        rightIsParm = false;
+   std::string theLHSParmName = lhsList.at(which);
+   std::string theRHSParmName = "";
+   char firstChar = (rhsList.at(which)).at(0);
+   if (isalpha(firstChar))  // if not a real, assume a Parameter  
+   {
+      theRHSParmName = rhsList.at(which);
+      rightIsParm    = true;
+   }
+   else
+   {
+      std::istringstream rhsStr(rhsList.at(which)); 
+      rhsStr >> rhsValue;
+   }
    // iterate over the list of reference objects to find the parameter
    std::vector<Parameter*>::iterator p = params.begin();
    while (p != params.end())
    {
-      if ((*p)->GetName() == theParmName)
+      if ((*p)->GetName() == theLHSParmName)
       {
          lhsValue = (*p)->EvaluateReal();
-         switch (opList.at(which))
-         {
-            case EQUAL_TO:
-               return (lhsValue == rhsValue);
-               break;
-            case NOT_EQUAL:
-               return (lhsValue != rhsValue);
-               break;
-            case GREATER_THAN:
-               return (lhsValue > rhsValue);
-               break;
-            case LESS_THAN:
-               return (lhsValue < rhsValue);
-               break;
-            case GREATER_OR_EQUAL:
-               return (lhsValue >= rhsValue);
-               break;
-            case LESS_OR_EQUAL:
-               return (lhsValue <= rhsValue);
-               break;
-            default:
-               return false;
-               break;
-         }
+         lhFound  = true;
+      }
+      if (rightIsParm && ((*p)->GetName() == theRHSParmName))
+      {
+         rhsValue = (*p)->EvaluateReal();
+         rhFound  = true;
       }
       ++p;
+   }
+   if (!lhFound) 
+      throw CommandException("Parameter not found for LHS string in condition " +
+                             which);
+   if (rightIsParm && !rhFound)
+      throw CommandException("Parameter not found for RHS string in condition " +
+                             which);
+   switch (opList.at(which))
+   {
+      case EQUAL_TO:
+         return (lhsValue == rhsValue);
+         break;
+      case NOT_EQUAL:
+         return (lhsValue != rhsValue);
+         break;
+      case GREATER_THAN:
+         return (lhsValue > rhsValue);
+         break;
+      case LESS_THAN:
+         return (lhsValue < rhsValue);
+         break;
+      case GREATER_OR_EQUAL:
+         return (lhsValue >= rhsValue);
+         break;
+      case LESS_OR_EQUAL:
+         return (lhsValue <= rhsValue);
+         break;
+      default:
+         return false;
+         break;
    }
    return false; 
    
