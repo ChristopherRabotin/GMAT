@@ -152,7 +152,7 @@ void OrbitPanel::Create()
         wxT("TAIModJulian"),
         wxT("UTCModJulian"),
         wxT("TAIGregorian"),
-        wxT("UTCGregorian ")
+        wxT("UTCGregorian")
     };
     
     // combo box for the date type
@@ -418,7 +418,7 @@ void OrbitPanel::LoadData()
     Real element6 = displayState[5];
 
     wxString epochStr;
-    epochStr.Printf("%f", epoch);
+    epochStr.Printf("%18.9f", epoch);
     epochValue->SetValue(epochStr);
     
     wxString el1;
@@ -578,7 +578,7 @@ void OrbitPanel::OnEpochChange()
 //    MessageInterface::ShowMessage("new value %f\n", epoch);
 
     wxString epochStr;
-    epochStr.Printf("%f", epoch);
+    epochStr.Printf("%18.9f", epoch);
     epochValue->SetValue(epochStr);
 
 }
