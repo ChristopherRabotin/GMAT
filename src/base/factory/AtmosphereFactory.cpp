@@ -56,7 +56,7 @@ AtmosphereFactory::CreateAtmosphereModel(const std::string &ofType,
       return new ExponentialAtmosphere();
    else if (ofType == "MSISE90")
       return new Msise90Atmosphere();
-   else if (ofType == "Jacchia-Roberts")
+   else if (ofType == "JacchiaRoberts") //loj: 10/28/04 Changed from Jacchia-Roberts
       return new JacchiaRobertsAtmosphere();
    return NULL;
 }
@@ -79,7 +79,7 @@ Factory(Gmat::ATMOSPHERE)
    {
       creatables.push_back("Exponential");
       creatables.push_back("MSISE90");
-      creatables.push_back("Jacchia-Roberts");
+      creatables.push_back("JacchiaRoberts");
    }
 }
 

@@ -203,7 +203,7 @@ const Real con_den[5][7] =
  */
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere() :
-    AtmosphereModel     ("Jacchia-Roberts")
+   AtmosphereModel("JacchiaRoberts") //loj: 10/28/04 Changed from Jacchia-Roberts
 {
    earth = NULL;
 }
