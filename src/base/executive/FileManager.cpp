@@ -37,6 +37,8 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "DE_FILE_PATH",
    "EARTH_POT_FILE_PATH",
    "TEXTURE_FILE_PATH",
+   "PLANETARY_COEFF_FILE_PATH",
+   "TIME_FILE_PATH",
    
    // file name
    "TIME_COEFF_FILE",
@@ -46,6 +48,10 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "DE405_FILE",
    "EARTH_JGM2_FILE",
    "EARTH_JGM3_FILE",
+   "EOP_FILE",
+   "PLANETARY_COEFF_FILE",
+   "NUTATION_COEFF_FILE",
+   "LEAP_SECS_FILE",
    
    "SUN_TEXTURE_FILE",
    "MERCURY_TEXTURE_FILE",
@@ -67,6 +73,10 @@ FileManager::PARAMETER_TEXT[FileManagerParamCount] =
    "FULL_DE405_FILE",
    "FULL_EARTH_JGM2_FILE",
    "FULL_EARTH_JGM3_FILE",
+   "FULL_EOP_FILE",
+   "FULL_PLANETARY_COEFF_FILE",
+   "FULL_NUTATION_COEFF_FILE",
+   "FULL_LEAP_SECS_FILE",
    
    "FULL_SUN_TEXTURE_FILE",
    "FULL_MERCURY_TEXTURE_FILE",
@@ -164,6 +174,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          theFileList[EARTH_POT_FILE_PATH] = name;
       else if (type == "TEXTURE_FILE_PATH")
          theFileList[TEXTURE_FILE_PATH] = name;
+      else if (type == "PLANETARY_COEFF_FILE_PATH")
+         theFileList[PLANETARY_COEFF_FILE_PATH] = name;
+      else if (type == "TIME_FILE_PATH")
+         theFileList[TIME_FILE_PATH] = name;
 
       // file name
       else if (type == "TIME_COEFF_FILE")
@@ -185,6 +199,18 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       else if (type == "EARTH_JGM3_FILE")
          theFileList[EARTH_JGM3_FILE] = name;
 
+      // planetary coeff. file
+      else if (type == "EOP_FILE")
+         theFileList[EOP_FILE] = name;
+      else if (type == "PLANETARY_COEFF_FILE")
+         theFileList[PLANETARY_COEFF_FILE] = name;
+      else if (type == "NUTATION_COEFF_FILE")
+         theFileList[NUTATION_COEFF_FILE] = name;
+
+      // time file
+      else if (type == "LEAP_SECS_FILE")
+         theFileList[LEAP_SECS_FILE] = name;
+      
       // texture file
       else if (type == "SUN_TEXTURE_FILE")
          theFileList[SUN_TEXTURE_FILE] = name;
@@ -231,13 +257,28 @@ void FileManager::ReadStartupFile(const std::string &fileName)
     
    theFileList[FULL_DE405_FILE]
       = theFileList[DE_FILE_PATH] + theFileList[DE405_FILE];
-    
+
+   // planetary gravity files
    theFileList[FULL_EARTH_JGM2_FILE]
       = theFileList[EARTH_POT_FILE_PATH] + theFileList[EARTH_JGM2_FILE];
     
    theFileList[FULL_EARTH_JGM3_FILE]
       = theFileList[EARTH_POT_FILE_PATH] + theFileList[EARTH_JGM3_FILE];
-    
+   
+   // planetary coeff. files
+   theFileList[FULL_EOP_FILE]
+      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[EOP_FILE];
+   
+   theFileList[FULL_PLANETARY_COEFF_FILE]
+      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[PLANETARY_COEFF_FILE];
+   
+   theFileList[FULL_NUTATION_COEFF_FILE]
+      = theFileList[PLANETARY_COEFF_FILE_PATH] + theFileList[NUTATION_COEFF_FILE];
+   
+   theFileList[FULL_LEAP_SECS_FILE]
+      = theFileList[TIME_FILE_PATH] + theFileList[LEAP_SECS_FILE];
+   
+   // texture files
    theFileList[FULL_SUN_TEXTURE_FILE]
       = theFileList[TEXTURE_FILE_PATH] + theFileList[SUN_TEXTURE_FILE];
    
@@ -246,7 +287,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    theFileList[FULL_VENUS_TEXTURE_FILE]
       = theFileList[TEXTURE_FILE_PATH] + theFileList[VENUS_TEXTURE_FILE];
-    
+
    theFileList[FULL_EARTH_TEXTURE_FILE]
       = theFileList[TEXTURE_FILE_PATH] + theFileList[EARTH_TEXTURE_FILE];
    
@@ -365,19 +406,36 @@ FileManager::FileManager()
 {    
    
    // create default paths and files
-   theFileList[OUTPUT_FILE_PATH] = ".\\output\\";
-   theFileList[SLP_FILE_PATH] = ".\\planetary_ephem\\slp\\";
-   theFileList[DE_FILE_PATH] = ".\\planetary_ephem\\de\\";
-   theFileList[EARTH_POT_FILE_PATH] = ".\\gravity\\earth\\";
-   theFileList[TEXTURE_FILE_PATH] = ".\\plot\\texture\\";
+   theFileList[OUTPUT_FILE_PATH] = ".\\files\\output\\";
+
+   // slp files
+   theFileList[SLP_FILE_PATH] = ".\\files\\planetary_ephem\\slp\\";
    theFileList[TIME_COEFF_FILE] = "timecof.pc";
    theFileList[SLP_FILE] = "mn2000.pc";
+
+   // de files
+   theFileList[DE_FILE_PATH] = ".\\files\\planetary_ephem\\de\\";
    theFileList[DE200_FILE] = "winp1941.200";
    theFileList[DE202_FILE] = "winp1950.202";
    theFileList[DE405_FILE] = "winp1941.405";
+
+   // earth gravity files
+   theFileList[EARTH_POT_FILE_PATH] = ".\\files\\gravity\\earth\\";
    theFileList[EARTH_JGM2_FILE] = "JGM2.grv";
    theFileList[EARTH_JGM3_FILE] = "JGM3.grv";
+
+   // planetary coeff. fiels
+   theFileList[PLANETARY_COEFF_FILE_PATH] = ".\\files\\planetary_coeff\\";
+   theFileList[EOP_FILE] = "eopc04.62-now";
+   theFileList[PLANETARY_COEFF_FILE] = "NUT85.DAT";
+   theFileList[NUTATION_COEFF_FILE] = "NUTATION.DAT";
+
+   // time files
+   theFileList[TIME_FILE_PATH] = ".\\files\\time\\";
+   theFileList[LEAP_SECS_FILE] = "tai-utc.dat";
    
+   // texture files
+   theFileList[TEXTURE_FILE_PATH] = ".\\files\\plot\\texture\\";
    theFileList[SUN_TEXTURE_FILE] = "sun-0512.jpg";
    theFileList[MERCURY_TEXTURE_FILE] = "mercury-0512.jpg";
    theFileList[VENUS_TEXTURE_FILE] = "venus-0512.jpg";

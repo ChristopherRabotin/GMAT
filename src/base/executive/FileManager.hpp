@@ -52,6 +52,8 @@ protected:
       DE_FILE_PATH,
       EARTH_POT_FILE_PATH,
       TEXTURE_FILE_PATH,
+      PLANETARY_COEFF_FILE_PATH,
+      TIME_FILE_PATH,
       
       // file name
       TIME_COEFF_FILE,
@@ -61,8 +63,12 @@ protected:
       DE405_FILE,
       EARTH_JGM2_FILE,
       EARTH_JGM3_FILE,
+      EOP_FILE,
+      PLANETARY_COEFF_FILE,
+      NUTATION_COEFF_FILE,
+      LEAP_SECS_FILE,
       
-      SUN_TEXTURE_FILE, //loj: 12/14/04 Added all planets
+      SUN_TEXTURE_FILE,
       MERCURY_TEXTURE_FILE,
       VENUS_TEXTURE_FILE,
       EARTH_TEXTURE_FILE,
@@ -82,8 +88,12 @@ protected:
       FULL_DE405_FILE,
       FULL_EARTH_JGM2_FILE,
       FULL_EARTH_JGM3_FILE,
+      FULL_EOP_FILE,
+      FULL_PLANETARY_COEFF_FILE,
+      FULL_NUTATION_COEFF_FILE,
+      FULL_LEAP_SECS_FILE,
 
-      FULL_SUN_TEXTURE_FILE, //loj: 12/14/04 Added all planets
+      FULL_SUN_TEXTURE_FILE,
       FULL_MERCURY_TEXTURE_FILE,
       FULL_VENUS_TEXTURE_FILE,
       FULL_EARTH_TEXTURE_FILE,
@@ -99,7 +109,6 @@ protected:
 
    std::string theFileList[FileManagerParamCount];
    static const std::string PARAMETER_TEXT[FileManagerParamCount];
-   //static const Gmat::ParameterType PARAMETER_TYPE[FileManagerParamCount];
 
 };
 #endif // FileManager_hpp
