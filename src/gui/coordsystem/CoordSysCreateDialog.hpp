@@ -77,6 +77,11 @@ private:
    wxComboBox *yComboBox;
    wxComboBox *zComboBox;
 
+   wxString wxXString;
+   wxString wxYString;
+   wxString wxZString;
+
+   bool CheckXYZ();
 };
 
 #endif

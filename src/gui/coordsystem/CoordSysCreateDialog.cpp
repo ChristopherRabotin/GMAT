@@ -128,16 +128,20 @@ void CoordSysCreateDialog::SaveData()
       std::string wxSecName = std::string(secondaryComboBox->GetValue().Trim());
       std::string wxTypeName = std::string(typeComboBox->GetValue().Trim());
       std::string wxFormatName = std::string(formatComboBox->GetValue().Trim());
-      std::string wxXString = std::string(xComboBox->GetValue().Trim());
-      std::string wxYString = std::string(yComboBox->GetValue().Trim());
-      std::string wxZString = std::string(zComboBox->GetValue().Trim());
-
+      wxXString = xComboBox->GetValue();
+      wxYString = yComboBox->GetValue();
+      wxZString = zComboBox->GetValue();
 
       Real epoch = atof(epochTextCtrl->GetValue());
+      bool validXYZ = true;
+
+      if (mCoordPanel->GetShowXyz())
+         validXYZ = CheckXYZ();
 
       // need to check if coord name is null
 
-      if (theGuiInterpreter->GetCoordinateSystem(wxCoordName) == NULL)
+      if ((theGuiInterpreter->GetCoordinateSystem(wxCoordName) == NULL) &&
+           validXYZ)
       {
          mCoordSys = theGuiInterpreter->CreateCoordinateSystem(wxCoordName);
          mCoordName = wxCoordName.c_str();
@@ -150,7 +154,6 @@ void CoordSysCreateDialog::SaveData()
          if (axis != NULL)
          {
             mCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-   //         mCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
 
             SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
                      GetConfiguredItem(wxPrimName);
@@ -173,16 +176,13 @@ void CoordSysCreateDialog::SaveData()
                axis->SetSecondaryObject((SpacePoint *)ss->GetBody(wxSecName));
             }
 
-            // get the x, y, z
-            /// @todo : Check to see if x,y,z are valid axes
-            axis->SetXAxis(wxXString);
-            axis->SetYAxis(wxYString);
-            axis->SetZAxis(wxZString);
+            // set the x, y, and z
+            axis->SetXAxis(std::string(wxXString));
+            axis->SetYAxis(std::string(wxYString));
+            axis->SetZAxis(std::string(wxZString));
 
             axis->SetEpoch(epoch);
             mIsCoordCreated = true;
-
-            mCoordPanel->EnableOptions();
          }
       }
    }
@@ -211,7 +211,9 @@ void CoordSysCreateDialog::ResetData()
 void CoordSysCreateDialog::OnOK()
 {
    SaveData();
-   Close();
+
+   if (mIsCoordCreated)
+      Close();
 }
 
 //---------------------------------
@@ -248,4 +250,60 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
 
    if (nameTextCtrl->GetValue().Trim() != "")
       theOkButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// bool CheckXYZ()
+//------------------------------------------------------------------------------
+bool CoordSysCreateDialog::CheckXYZ()
+{
+   // Check to see if x,y,z are valid axes
+   if (wxXString.Contains("R") &&
+      (wxYString.Contains("R") || wxZString.Contains("R")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+   else if (wxXString.Contains("V") &&
+           (wxYString.Contains("V") || wxZString.Contains("V")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+   else if (wxXString.Contains("N") &&
+           (wxYString.Contains("N") || wxZString.Contains("N")))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+
+   if (wxYString.Contains("R") && wxZString.Contains("R"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+   else if (wxYString.Contains("V") && wxZString.Contains("V"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+   else if (wxYString.Contains("N") && wxZString.Contains("N"))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "CoordSysCreateDialog::SaveData()\n"
+         "The x, y, and z axis must be orthognal.");
+      return false;
+   }
+
+   return true;
 }
