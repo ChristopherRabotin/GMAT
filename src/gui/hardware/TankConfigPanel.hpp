@@ -31,7 +31,7 @@
 class TankConfigPanel: public GmatPanel
 {
 public:
-    TankConfigPanel(wxWindow *parent, const wxString &tankName);
+    TankConfigPanel(wxWindow *parent, const wxString &name);
     ~TankConfigPanel();
     
 private: 
@@ -42,13 +42,14 @@ private:
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void DisplayData();
     void OnTextChange();
     
     FuelTank* theFuelTank;
     
     Integer tankCount;
     Integer currentTank;
+    
+    std::string tankName;
 
     wxTextCtrl *temperatureTextCtrl;
     wxTextCtrl *refTemperatureTextCtrl;
@@ -73,7 +74,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 30200,
+        ID_TEXT = 39000,
         ID_TEXTCTRL,
         ID_LISTBOX,
         ID_BUTTON,

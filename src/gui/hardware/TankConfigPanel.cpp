@@ -19,12 +19,17 @@
  */
 //------------------------------------------------------------------------------
 #include "TankConfigPanel.hpp"
+#include <wx/variant.h>
 #include "MessageInterface.hpp"
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(TankConfigPanel, wxPanel)
+   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
+   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
+   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
+   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_TEXT(ID_TEXTCTRL, TankConfigPanel::OnTextChange)
 END_EVENT_TABLE()
 
@@ -39,10 +44,15 @@ END_EVENT_TABLE()
  * Constructs TankConfigPanel object.
  */
 //------------------------------------------------------------------------------
-TankConfigPanel::TankConfigPanel(wxWindow *parent, const wxString &tankName):GmatPanel(parent)
-{       
-    Create();
-    Show();
+TankConfigPanel::TankConfigPanel(wxWindow *parent, const wxString &name):GmatPanel(parent)
+{           
+   tankName = std::string(name.c_str());
+    
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theFuelTank = (FuelTank*)theGuiInterpreter->GetHardware(tankName);
+    
+   Create();
+   Show();
 }
 
 //------------------------------------------------------------------------------
@@ -105,7 +115,7 @@ void TankConfigPanel::Create()
    unit6StaticText = new wxStaticText( this, ID_TEXT, wxT("m^3"),
                             wxDefaultPosition,wxDefaultSize, 0); 
                             
-   Integer bsize = 3; // border size
+   Integer bsize = 5; // border size
    
    // wx*Sizers     
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
@@ -130,20 +140,38 @@ void TankConfigPanel::Create()
    flexGridSizer1->Add(volumeTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer1->Add(unit6StaticText, 0, wxALIGN_CENTER|wxALL, bsize );
 
-   theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
-   
-//   this->SetAutoLayout( true );  
-//   this->SetSizer( boxSizer1 );
-//   boxSizer1->Fit( this );
-//   boxSizer1->SetSizeHints( this );
+   theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void TankConfigPanel::LoadData()
-{
-    DisplayData();  
+{ 
+   if (theFuelTank == NULL)
+      return; 
+       
+   Integer paramID;
+   
+   paramID = theFuelTank->GetParameterID("Temperature");
+   temperatureTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+         
+   paramID = theFuelTank->GetParameterID("RefTemperature");
+   refTemperatureTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+    
+   paramID = theFuelTank->GetParameterID("FuelMass");
+   fuelMassTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+
+   paramID = theFuelTank->GetParameterID("FuelDensity");
+   fuelDensityTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+   
+   paramID = theFuelTank->GetParameterID("Pressure");
+   pressureTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+   
+   paramID = theFuelTank->GetParameterID("Volume");
+   volumeTextCtrl->SetValue(wxVariant(theFuelTank->GetRealParameter(paramID)));
+   
+   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -151,16 +179,33 @@ void TankConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void TankConfigPanel::SaveData()
 {
-    if (!theApplyButton->IsEnabled())
-       return;
+   if (!theApplyButton->IsEnabled())
+      return;
+       
+   if (theFuelTank == NULL)
+      return; 
+       
+   Integer paramID;
+   
+   paramID = theFuelTank->GetParameterID("Temperature");
+   theFuelTank->SetRealParameter(paramID, atof(temperatureTextCtrl->GetValue()));
+        
+   paramID = theFuelTank->GetParameterID("RefTemperature");
+   theFuelTank->SetRealParameter(paramID, atof(refTemperatureTextCtrl->GetValue()));
+        
+   paramID = theFuelTank->GetParameterID("FuelMass");
+   theFuelTank->SetRealParameter(paramID, atof(fuelMassTextCtrl->GetValue()));
+        
+   paramID = theFuelTank->GetParameterID("FuelDensity");
+   theFuelTank->SetRealParameter(paramID, atof(fuelDensityTextCtrl->GetValue()));
+        
+   paramID = theFuelTank->GetParameterID("Pressure");
+   theFuelTank->SetRealParameter(paramID, atof(pressureTextCtrl->GetValue()));
+        
+   paramID = theFuelTank->GetParameterID("Volume");
+   theFuelTank->SetRealParameter(paramID, atof(volumeTextCtrl->GetValue()));
 }
-
-//------------------------------------------------------------------------------
-// void DisplayData()
-//------------------------------------------------------------------------------
-void TankConfigPanel::DisplayData()
-{   
-}    
+  
 
 //------------------------------------------------------------------------------
 // void OnTextChange()
