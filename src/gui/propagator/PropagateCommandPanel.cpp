@@ -44,7 +44,7 @@
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
 #include "MessageInterface.hpp"
-#include "SingleValueStop.hpp"
+#include "StopCondition.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -98,7 +98,6 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
     {
         tempStopCond[i].isChanged = false;
         tempStopCond[i].name = "";
-        tempStopCond[i].typeStr = "SingleValueStop";
         tempStopCond[i].varName = "";
         tempStopCond[i].typeName = "";
         tempStopCond[i].relOpStr = "=";
@@ -238,13 +237,6 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
         wxT("<="),
         wxT("!=")
     };
-    //loj: this should come from gi->GetconfiguredItem(Gmat::STOP_CONDITION)
-    wxString strArray3[] =
-    {
-        wxT("SingleValueStop"),
-        wxT("ApoapsisStop"),
-        wxT("PeriapsisStop"),
-    };
     
     // wxStaticText
     synchStaticText = new wxStaticText( parent, ID_TEXT, wxT("Synchronization Mode"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -252,7 +244,7 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     varStaticText = new wxStaticText( parent, ID_TEXT, wxT("Variable"), wxDefaultPosition, wxDefaultSize, 0 );
     repeatStaticText = new wxStaticText( parent, ID_TEXT, wxT("Repeat"), wxDefaultPosition, wxDefaultSize, 0 );
     tolStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tolerance"), wxDefaultPosition, wxDefaultSize, 0 );
-    condTypeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
+    //condTypeStaticText = new wxStaticText( parent, ID_TEXT, wxT("Type"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
     nameTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
@@ -274,7 +266,7 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     // wxComboBox
     synchComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition, wxSize(200,-1), numOfModes, strArray1, wxCB_DROPDOWN|wxCB_READONLY );
     equalityComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray2[0]), wxDefaultPosition, wxSize(50,-1), numOfEqualities, strArray2, wxCB_DROPDOWN|wxCB_READONLY );
-    condTypeComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray3[0]), wxDefaultPosition, wxSize(200,-1), 3, strArray3, wxCB_DROPDOWN|wxCB_READONLY );
+    //condTypeComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray3[0]), wxDefaultPosition, wxSize(200,-1), 3, strArray3, wxCB_DROPDOWN|wxCB_READONLY );
     
     // wx*Sizer    
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
@@ -305,10 +297,10 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     item6->Add( synchComboBox, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );    
     item6->Add( propGrid, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     
-    item10->Add( nameStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( nameTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( condTypeStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item10->Add( condTypeComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
+    item10->Add( nameStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+    item10->Add( nameTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+//      item10->Add( nameStaticText, 0, wxALIGN_CENTRE|wxALL, 5 ); //loj: 3/24/04
+//      item10->Add( nameTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
     item10->Add( 75, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
     
     item11->Add( varStaticText, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -363,7 +355,6 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     helpButton->Enable(false);
     deleteButton->Enable(false);
     equalityComboBox->Enable(false);
-    condTypeComboBox->Enable(true);
 }
 
 //------------------------------------------------------------------------------
@@ -413,7 +404,7 @@ void PropagateCommandPanel::SetData()
                 tempStopCond[i].stopCondPtr->
                     SetName(std::string(tempStopCond[i].name.c_str()));
                 
-                ((SingleValueStop*)tempStopCond[i].stopCondPtr)->
+                ((StopCondition*)tempStopCond[i].stopCondPtr)->
                     SetSingleParameter(theGuiInterpreter->
                                        GetParameter(tempStopCond[i].varName.c_str()));
                 
@@ -597,7 +588,7 @@ void PropagateCommandPanel::OnTextUpdate(wxCommandEvent& event)
 
     tempStopCond[row].isChanged = true;
     updateButton->Enable(true);
-    //applyButton->Enable(true);
+    //applyButton->Enable(true); //loj: why this was commented?
 }
 
 void PropagateCommandPanel::OnTextMaxLen(wxCommandEvent& event)
@@ -611,34 +602,7 @@ void PropagateCommandPanel::OnComboSelection(wxCommandEvent& event)
     wxArrayInt rows = stopCondGrid->GetSelectedRows();
     int row = rows[0];
     
-    if ( event.GetEventObject() == condTypeComboBox )
-    {
-        wxString type = condTypeComboBox->GetStringSelection();
-        if (!tempStopCond[row].typeStr.IsSameAs(type))
-        {
-            tempStopCond[row].typeStr = type;
-            MessageInterface::ShowMessage("PropCmdPanel::OnComboSelection() %s\n", type.c_str());
-  
-            if (type.IsSameAs("SingleValueStop"))
-            {
-                varStaticText->Enable(true);
-                variableTextCtrl->Enable(false);
-                viewButton->Enable(true);
-                equalityComboBox->Enable(true);
-                goalTextCtrl->Enable(true);            
-            }
-            else
-            {
-                varStaticText->Enable(false);
-                variableTextCtrl->Enable(false);
-                viewButton->Enable(false);
-                equalityComboBox->Enable(false);
-                goalTextCtrl->Enable(false);   
-            }
-            applyButton->Enable(true);
-        }
-    } 
-    else if ( event.GetEventObject() == synchComboBox )
+    if ( event.GetEventObject() == synchComboBox )
     {
         applyButton->Enable(true);
     }
@@ -1106,17 +1070,8 @@ wxString PropagateCommandPanel::FormatStopCondDesc(const wxString &varName,
 {
     wxString goalStr;
     wxString desc;
-    wxString stopType = condTypeComboBox->GetStringSelection();
-    
-    if (stopType.IsSameAs("SingleValueStop"))
-    {
-        goalStr.Printf("%.9f", goal);
-        desc = varName + " " + relOpStr + " " + goalStr;
-    }
-    else
-    {
-        desc = stopType;
-    }
+    goalStr.Printf("%.9f", goal);
+    desc = varName + " " + relOpStr + " " + goalStr;
     
     return desc;
 }

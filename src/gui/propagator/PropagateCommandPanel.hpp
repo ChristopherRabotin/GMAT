@@ -43,14 +43,11 @@
 #include "Command.hpp"
 #include "Propagate.hpp"
 #include "StopCondition.hpp"
-#include "SingleValueStop.hpp"
 
 class PropagateCommandPanel : public wxPanel
 {
 public:
     // constructors
-    //PropagateCommandPanel( wxWindow *parent, GmatCommand *propCommand );
-    //loj: 2/9/04 PropagateCommandPanel( wxWindow *parent, const wxString &propName );
     PropagateCommandPanel( wxWindow *parent, const wxString &propName, GmatCommand *cmd);
     
 private:
@@ -75,7 +72,6 @@ private:
         bool           isChanged;
         wxString       name;
         wxString       desc;
-        wxString       typeStr;
         wxString       varName;
         wxString       typeName;
         wxString       relOpStr;
@@ -90,7 +86,6 @@ private:
     wxStaticText *repeatStaticText;
     wxStaticText *tolStaticText;
     wxStaticText *nameStaticText;
-    wxStaticText *condTypeStaticText;
         
     wxTextCtrl *nameTextCtrl;
     wxTextCtrl *variableTextCtrl;
@@ -109,7 +104,6 @@ private:
 
     wxComboBox *synchComboBox;
     wxComboBox *equalityComboBox;
-    wxComboBox *condTypeComboBox;
 
     wxGrid *propGrid;
     wxGrid *stopCondGrid;
