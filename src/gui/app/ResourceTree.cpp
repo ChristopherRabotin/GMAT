@@ -45,7 +45,7 @@
 #include "ParameterCreateDialog.hpp"
 #include "GmatMainFrame.hpp"
 
-#define DEBUG_RESOURCE_TREE 0
+//#define DEBUG_RESOURCE_TREE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -278,11 +278,12 @@ void ResourceTree::AddDefaultResources()
 
    SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-    
+
+   //loj: 10/1/04 added Arrays
    //----- Vairables
    mVariableItem = 
-      AppendItem(resource, wxT("Variables"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Variables"),
+      AppendItem(resource, wxT("Variables/Arrays"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Variables/Arrays"),
                                       GmatTree::VARIABLES_FOLDER));
    // ag:  Should the GmatTree type of variableItem change?
 
