@@ -217,91 +217,120 @@ Rvector6 StateConverter::Convert(const Real *state,
                                  const std::string &fromElementType,
                                  const std::string &toElementType)
 {
-    Rvector6 newState;
-    newState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
+   Rvector6 newState;
+   newState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
 
 #if DEBUG_STATE_CONVERTER
-    MessageInterface::ShowMessage
+   MessageInterface::ShowMessage
        ("StateConverter::Convert() fromElementType=%s, toElementType=%s,"
         " state=\n %f %f %f %f %f %f\n", fromElementType.c_str(),
         toElementType.c_str(), state[0], state[1], state[2], state[3],
         state[4], state[5]);
 #endif
 
-    // Check if both are the same then return the state with no conversion 
-    if (fromElementType == toElementType)
-       return newState;    // @todo - should throw exception??
+   // Check if both are the same then return the state with no conversion 
+   if (fromElementType == toElementType)
+      return newState;    // @todo - should throw exception??
     
-    // Determine the input of coordinate representation 
-    if (fromElementType == "Cartesian") 
+   try
+   {
+      // Determine the input of coordinate representation 
+      if (fromElementType == "Cartesian") 
+      {
+         if (toElementType == "Keplerian" || 
+             toElementType == "ModifiedKeplerian") 
+         {
+            Real meanAnomaly;   // why use MeanAnomaly?
+            Rvector6 kepl = CartesianToKeplerian(newState,mu,&meanAnomaly);
+                      
+            if (toElementType == "ModifiedKeplerian")
+                return KeplerianToModKeplerian(kepl);
+            else
+               return kepl; 
+         } 
+
+         if (toElementType == "SphericalAZFPA")
+            return CartesianToSphericalAZFPA(newState);
+
+         if (toElementType == "SphericalRADEC")
+            return CartesianToSphericalRADEC(newState);
+
+      }
+      else if (fromElementType == "Keplerian")
+      {       
+         if (toElementType == "Cartesian")
+            return(KeplerianToCartesian(newState,mu,CoordUtil::TA));
+
+         else if (toElementType == "ModifiedKeplerian")
+            return KeplerianToModKeplerian(newState); 
+
+         else if (toElementType == "SphericalAZFPA")
+            return KeplerianToSphericalAZFPA(newState,mu);
+
+         else if (toElementType == "SphericalRADEC")
+            return KeplerianToSphericalRADEC(newState,mu);
+      }
+      else if (fromElementType == "ModifiedKeplerian")
+      {       
+         if (toElementType == "Cartesian")
+         {
+            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
+            return KeplerianToCartesian(keplerian,mu,CoordUtil::TA);
+         }
+         else if (toElementType == "Keplerian")
+            return ModKeplerianToKeplerian(newState); 
+
+         else if (toElementType == "SphericalAZFPA")
+         {
+            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
+            return KeplerianToSphericalAZFPA(keplerian,mu);
+         }
+
+         else if (toElementType == "SphericalRADEC")
+         {
+            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
+            return KeplerianToSphericalRADEC(keplerian,mu);
+         }
+      }
+      else if (fromElementType == "SphericalAZFPA")
+      {       
+         if (toElementType == "Cartesian")
+            return SphericalAZFPAToCartesian(newState);
+
+         else if (toElementType == "Keplerian")
+            return SphericalAZFPAToKeplerian(newState,mu);
+
+         else if (toElementType == "ModifiedKeplerian")
+         {
+            Rvector6 keplerian = SphericalAZFPAToKeplerian(newState,mu);
+            return KeplerianToModKeplerian(keplerian);
+         }
+
+         else if (toElementType == "SphericalRADEC")
+            return AZFPA_To_RADECV(newState);
+      }
+      else if (fromElementType == "SphericalRADEC")
+      {       
+         if (toElementType == "Cartesian")
+            return SphericalRADECToCartesian(newState);
+
+         else if (toElementType == "Keplerian")
+            return SphericalRADECToKeplerian(newState,mu);
+
+         else if (toElementType == "ModifiedKeplerian")
+         {
+            Rvector6 keplerian = SphericalRADECToKeplerian(newState,mu);
+            return KeplerianToModKeplerian(keplerian);
+         }
+
+         else if (toElementType == "SphericalAZFPA")
+            return RADECV_To_AZFPA(newState);
+      }
+    }
+    catch(UtilityException &ue)
     {
-       if (toElementType == "Keplerian")
-       {
-          Real meanAnomaly;   // why use MeanAnomaly?
-          return(CartesianToKeplerian(newState,mu,&meanAnomaly));
-       } 
+       throw ue;
+    } 
 
-       if (toElementType == "SphericalAZFPA")
-          return CartesianToSphericalAZFPA(newState);
-
-       if (toElementType == "SphericalRADEC")
-          return CartesianToSphericalRADEC(newState);
-
-    }
-    else if (fromElementType == "Keplerian")
-    {       
-       if (toElementType == "Cartesian")
-          return(KeplerianToCartesian(newState,mu,CoordUtil::TA));
-
-       else if (toElementType == "SphericalAZFPA")
-          return KeplerianToSphericalAZFPA(newState,mu);
-
-       else if (toElementType == "SphericalRADEC")
-          return KeplerianToSphericalRADEC(newState,mu);
-
-    }
-    else if (fromElementType == "ModKeplerian")
-    {       
-       if (toElementType == "Cartesian")
-          return newState;     // @todo - will add  later 
-
-       else if (toElementType == "Keplerian")
-          return newState;     // @todo - will add  later 
-
-       else if (toElementType == "SphericalAzFPA")
-          return newState;     // @todo - will add  later 
-
-       else if (toElementType == "SphericalRADEC")
-          return newState;     // @todo - will add  later 
-    }
-    else if (fromElementType == "SphericalAZFPA")
-    {       
-       if (toElementType == "Cartesian")
-          return SphericalAZFPAToCartesian(newState);
-
-       else if (toElementType == "Keplerian")
-          return SphericalAZFPAToKeplerian(newState,mu);
-
-       else if (toElementType == "ModKeplerian")
-          return newState;     // @todo - will add  later 
-
-       else if (toElementType == "SphericalRADEC")
-          return AZFPA_To_RADECV(newState);
-    }
-    else if (fromElementType == "SphericalRADEC")
-    {       
-       if (toElementType == "Cartesian")
-          return SphericalRADECToCartesian(newState);
-
-       else if (toElementType == "Keplerian")
-          return SphericalRADECToKeplerian(newState,mu);
-
-       else if (toElementType == "ModKeplerian")
-          return newState;     // @todo - will add  later 
-
-       else if (toElementType == "SphericalAZFPA")
-          return RADECV_To_AZFPA(newState);
-    }
- 
-    return newState;    // @todo - should throw exception??
+    return newState;   //  Nothing change
 }

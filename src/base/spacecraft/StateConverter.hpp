@@ -29,9 +29,11 @@
 // #include "Cartesian.hpp"
 // #include "Keplerian.hpp"
 #include "CoordUtil.hpp" 
+#include "ModKeplerian.hpp"
 #include "SphericalAZFPA.hpp"
  #include "SphericalRADEC.hpp"
 #include "Rvector6.hpp"
+#include "UtilityException.hpp"
 
 class GMAT_API StateConverter 
 {
