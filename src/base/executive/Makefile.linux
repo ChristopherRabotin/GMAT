@@ -33,8 +33,7 @@ MessageInterfaceConsole.o : MessageInterface.cpp MessageInterface.hpp
 MessageInterfaceGUI.o : MessageInterface.cpp MessageInterface.hpp
 	$(CPP) $(CPPFLAGS) $(HEADERS) -I../../gui/include \
         -I../../gui/app -I../../gui/view \
-        -c -I/usr/local/lib/wx/include/gtk-2.4 -DGTK_NO_CHECK_CASTS \
-        -D__WXGTK__ -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES \
+        -c `wx-config --cppflags`\
         -o MessageInterfaceGUI.o MessageInterface.cpp
 
 ../lib/libExecutive.a : $(OBJECTS) $(GUI_INTERFACE_OBJECTS)
