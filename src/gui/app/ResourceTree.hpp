@@ -44,6 +44,7 @@ private:
     wxTreeItemId mPropagatorItem;
     wxTreeItemId mReportItem;
     int numSc;
+    int mNumPropagator;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
