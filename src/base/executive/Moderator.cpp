@@ -2044,6 +2044,12 @@ Integer Moderator::RunMission(Integer sandboxNum)
       status = -3;
    }
 
+   //loj: 10/13/04 added run status
+   if (status == 0)
+      MessageInterface::ShowMessage("Mission ran successfully.\n");
+   else
+      MessageInterface::ShowMessage("*** Mission run failed.\n");
+      
    return status;
 }
 
