@@ -94,8 +94,10 @@ namespace Gmat
       STRING_TYPE,
       STRINGARRAY_TYPE,
       BOOLEAN_TYPE,
+      RVECTOR_TYPE,    // not 3- or 6- vector
       RVECTOR3_TYPE,
       RVECTOR6_TYPE,
+      RMATRIX_TYPE,    // not 3x3 matrix
       RMATRIX33_TYPE,
       CARTESIAN_TYPE,
       KEPLERIAN_TYPE,
