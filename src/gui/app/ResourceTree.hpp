@@ -59,6 +59,7 @@ private:
    int mNumFormation;
    int mNumPropagator;
    int mNumImpulsiveBurn;
+   int mNumFiniteBurn;
    int mNumDiffCorr;
    int mNumReportFile;
    int mNumXyPlot;
@@ -99,6 +100,7 @@ private:
    void AddIcons();   
    void OnAddBody(wxCommandEvent &event);
    void OnAddImpulsiveBurn(wxCommandEvent &event);
+   void OnAddFiniteBurn(wxCommandEvent &event);
    void OnAddPropagator(wxCommandEvent &event);
    void OnAddConstellation(wxCommandEvent &event);
    void OnAddFormation(wxCommandEvent &event);

@@ -72,6 +72,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
    EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
+   EVT_MENU(POPUP_ADD_FINITE_BURN, ResourceTree::OnAddFiniteBurn)
    EVT_MENU(POPUP_ADD_PROPAGATOR, ResourceTree::OnAddPropagator)
    EVT_MENU(POPUP_ADD_BODY, ResourceTree::OnAddBody)
    EVT_MENU(POPUP_ADD_DIFF_CORR, ResourceTree::OnAddDiffCorr)
@@ -121,6 +122,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    mNumFormation = 0;
    mNumPropagator = 0;
    mNumImpulsiveBurn = 0;
+   mNumFiniteBurn = 0;
    mNumReportFile = 0;
    mNumXyPlot = 0;
    mNumOpenGlPlot = 0;
@@ -151,6 +153,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
       mNumFormation = 0;
       mNumPropagator = 0;
       mNumImpulsiveBurn = 0;
+      mNumFiniteBurn = 0;
       mNumReportFile = 0;
       mNumXyPlot = 0;
       mNumOpenGlPlot = 0;
@@ -544,6 +547,13 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
          AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
                     new GmatTreeItemData(wxT(objName),
                                          GmatTree::DEFAULT_IMPULSIVE_BURN));
+      }
+      else if (objTypeName == "FiniteBurn")
+      {
+         //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
+                    new GmatTreeItemData(wxT(objName),
+                                         GmatTree::DEFAULT_FINITE_BURN));
       }
    };
 
@@ -967,6 +977,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          break;
       case GmatTree::DEFAULT_IMPULSIVE_BURN:
       case GmatTree::CREATED_IMPULSIVE_BURN:
+         objType = Gmat::BURN;
+         break;
+      case GmatTree::DEFAULT_FINITE_BURN:
+      case GmatTree::CREATED_FINITE_BURN:
          objType = Gmat::BURN;
          break;
       case GmatTree::DEFAULT_DIFF_CORR:
@@ -1393,6 +1407,32 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAddFiniteBurn(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add an finite burn to burn folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+  
+   wxString name;
+   name.Printf("FiniteBurn%d", ++mNumFiniteBurn);
+  
+   if (theGuiInterpreter->CreateBurn
+       ("FiniteBurn", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_BURN, -1,
+                 new GmatTreeItemData(name, GmatTree::CREATED_FINITE_BURN));
+
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
 // void OnAddDiffCorr(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
@@ -1665,6 +1705,10 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
          if (items[i] == "ImpulsiveBurn")
          {
             menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
+         }
+         else if (items[i] == "FiniteBurn")
+         {
+            menu->Append(POPUP_ADD_FINITE_BURN, wxT("FiniteBurn"));
          }
       }
       break;
