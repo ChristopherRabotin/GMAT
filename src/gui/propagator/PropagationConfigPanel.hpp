@@ -44,17 +44,16 @@
 #include "PropSetup.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
-//#include "SolarSystem.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
 
 class PropagationConfigPanel : public wxPanel
 {
 public:
-    // constructors
-    //PropagationConfigPanel(wxWindow *parent, PropSetup *propSetup;);
+    // constructor
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
 private:             
-    wxStaticText *propNameStaticText;
     wxStaticText *item8;
     wxStaticText *setting1StaticText;
     wxStaticText *setting2StaticText;
@@ -82,7 +81,6 @@ private:
     wxTextCtrl *setting7TextCtrl;
     wxTextCtrl *setting8TextCtrl;
     wxTextCtrl *setting9TextCtrl;
-    wxTextCtrl *propNameTextCtrl;
     wxTextCtrl *bodyTextCtrl;
     wxTextCtrl *gravityDegreeTextCtrl;
     wxTextCtrl *gravityOrderTextCtrl;
@@ -139,7 +137,11 @@ private:
     PropSetup      *thePropSetup;
     PhysicalModel  *thePhysicalModel;
     ForceModel     *theForceModel;
-    //SolarSystem    *theSolarSystem;
+    SolarSystem    *theSolarSystem;
+    CelestialBody*  theCelestialBody;
+    //CelestialBody  *theEarth;
+    //CelestialBody  *theSun;
+    //CelestialBody  *theMoon;
    
     // Layout & data handling methods
     void Initialize();
@@ -157,7 +159,6 @@ private:
     wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Text control event method
-    void OnPropagatorTextUpdate();
     void OnIntegratorTextUpdate();
     void OnGravityTextUpdate();
     void OnMagneticTextUpdate();

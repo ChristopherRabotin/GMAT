@@ -109,7 +109,6 @@ void PropagateCommandPanel::Initialize()
 
 void PropagateCommandPanel::Setup( wxWindow *parent)
 {
-
     //loj: 2/13/04 added
     wxBoxSizer *theMiddleBoxSizer = new wxBoxSizer(wxVERTICAL);
     
@@ -269,20 +268,15 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     editButton->Enable(false);
     synchComboBox->Enable(false);
     helpButton->Enable(false);
-    
-    applyButton->Enable(false);
 }
 
 void PropagateCommandPanel::GetData()
 {
     // Display Propagator
-    //if ( !propSetupName.empty() ) // waw: Error - returns type 'String'??
     propGrid->SetCellValue( 0, 0, wxT(propSetupName.c_str()) );
     MessageInterface::ShowMessage("PropagateCommandPanel::GetData() propSetupName = " +
                                   propSetupName + "\n");
     
-    //loj: 2/11/04 propGrid->SetCellValue( 0, 0, propNameString );
-
     // Display Spacecraft column
     if ( !scList.empty() )
     {
@@ -313,39 +307,33 @@ void PropagateCommandPanel::GetData()
 
 void PropagateCommandPanel::SetData()
 {
-    //loj: 2/12/04 added
-    //wxString newGoalStr;
+    //wxComboBox saving
+    //synchComboBox;
+    //equalityComboBox;
     
-    double newGoal = atof(valueTextCtrl->GetValue());
+    //wxTextCtrl saving
+    // waw: theStopCond->SetGoal(newGoal);
+    //descriptionTextCtrl->GetValue() waw: if/how will this be saved back?
+    //variableTextCtrl->GetValue() waw: if/how will this be saved back?
+    //theStopCond->SetRepeatCount(atof(repeatTextCtrl->GetValue)); waw: waiting for Linda
+    theStopCond->SetTolerance(atof(toleranceTextCtrl->GetValue().c_str()));
     
-    //newGoalStr.Printf("%f", newGoal);
-    theStopCond->SetGoal(newGoal);
     Integer id = thePropagateCommand->GetParameterID("ElapsedSeconds");
-    
-    //MessageInterface::ShowMessage("PropagateCommandPanel::SetData() new Goal = " +
-    //                              std::string(newGoalStr.c_str()) + "\n");
-    
-    thePropagateCommand->SetRealParameter(id, newGoal);
-    
+    thePropagateCommand->SetRealParameter(id, atof(valueTextCtrl->GetValue()));
+ 
+    //wxString newGoalStr;
+    //newGoalStr.Printf("%f", newGoal);
     //newGoal = thePropagateCommand->GetRealParameter(id);
     //newGoalStr.Printf("%f", newGoal);
     //MessageInterface::ShowMessage("PropagateCommandPanel::SetData() new Goal = " +
     //                              std::string(newGoalStr.c_str()) + "\n");
-    
+        //MessageInterface::ShowMessage("PropagateCommandPanel::SetData() new Goal = " +
+    //                              std::string(newGoalStr.c_str()) + "\n");    
 }
 
 void PropagateCommandPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == valueTextCtrl )           
-        applyButton->Enable(true);
-    else if ( event.GetEventObject() == repeatTextCtrl )
-        applyButton->Enable(true);
-    else if ( event.GetEventObject() == toleranceTextCtrl )
-        applyButton->Enable(true);
-    else if ( event.GetEventObject() == descriptionTextCtrl )
-        applyButton->Enable(true);
-    else
-        event.Skip();
+    applyButton->Enable(true);
 }
 
 void PropagateCommandPanel::OnTextMaxLen(wxCommandEvent& event)
@@ -355,12 +343,7 @@ void PropagateCommandPanel::OnTextMaxLen(wxCommandEvent& event)
 
 void PropagateCommandPanel::OnComboSelection(wxCommandEvent& event)
 {    
-    if ( event.GetEventObject() == synchComboBox )         
-        applyButton->Enable(true);
-    else if ( event.GetEventObject() == equalityComboBox )
-        applyButton->Enable(true);
-    else
-        event.Skip();
+    applyButton->Enable(true);
 }
 
 void PropagateCommandPanel::OnButton(wxCommandEvent& event)

@@ -44,6 +44,8 @@
 #include "PropSetup.hpp"
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
 
 #include <ctype.h>
 
@@ -62,7 +64,6 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, wxPanel)
     EVT_BUTTON(ID_BUTTON_MAG_SEARCH, PropagationConfigPanel::OnMagSearchButton)
     EVT_BUTTON(ID_BUTTON_PM_EDIT, PropagationConfigPanel::OnPMEditButton)
     EVT_BUTTON(ID_BUTTON_SRP_EDIT, PropagationConfigPanel::OnSRPEditButton)
-    EVT_TEXT(ID_TEXTCTRL_PROP, PropagationConfigPanel::OnPropagatorTextUpdate)
     EVT_TEXT(ID_TEXTCTRL_INTG1, PropagationConfigPanel::OnIntegratorTextUpdate)
     EVT_TEXT(ID_TEXTCTRL_INTG2, PropagationConfigPanel::OnIntegratorTextUpdate)
     EVT_TEXT(ID_TEXTCTRL_INTG3, PropagationConfigPanel::OnIntegratorTextUpdate)
@@ -94,7 +95,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
     : wxPanel(parent)
 {
     propNameString = propName;
-    //thePropSetup = pSetup;
     
     Initialize();
     Setup(this);
@@ -104,23 +104,22 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
 void PropagationConfigPanel::Initialize()
 {  
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //loj: thePropSetup = theGuiInterpreter->CreateDefaultPropSetup(propNameString.c_str());
-    thePropSetup = theGuiInterpreter->GetPropSetup(propNameString.c_str()); //loj: added
+    thePropSetup = theGuiInterpreter->GetPropSetup(propNameString.c_str());
+    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     
     thePropagator = thePropSetup->GetPropagator();
     theForceModel = thePropSetup->GetForceModel();
-    // waw: Build 2 implementation
-    //thePhysicalModel = thePropSetup->GetForce("ForceModel");
-    //theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-    //bodiesInUse = theSolarSystem->GetBodiesInUse();
     
-    /* waw: Will be removed from build 2
-    bodiesInUse.push_back("Earth");
-    bodiesInUse.push_back("Moon");
-    bodiesInUse.push_back("Sun");*/
+    theCelestialBody = theSolarSystem->GetBody(SolarSystem::EARTH_NAME);
     
+    bodiesInUse = theSolarSystem->GetBodiesInUse();
+    
+    // waw: TBD
+    primaryBodyString = SolarSystem::EARTH_NAME.c_str();
+       
+    // Default values
     numOfIntegrators = 3;
-    numOfBodies = 3;  // waw: bodiesInUse.count(); 
+    numOfBodies = bodiesInUse.size(); 
     numOfAtmosTypes = 3;
     numOfForces = 1;  // TBD thePropSetup->GetNumForces();
     numOfGraFields = 3;
@@ -130,7 +129,6 @@ void PropagationConfigPanel::Initialize()
 void PropagationConfigPanel::Setup(wxWindow *parent)
 {          
     // wxStaticText
-    propNameStaticText = new wxStaticText( parent, ID_TEXT, wxT("Propagator Name"), wxDefaultPosition, wxDefaultSize, 0 );
     item8 = new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"), wxDefaultPosition, wxDefaultSize, 0 );
     setting1StaticText = new wxStaticText( parent, ID_TEXT, wxT("Setting 1"), wxDefaultPosition, wxDefaultSize, 0 );
     setting2StaticText = new wxStaticText( parent, ID_TEXT, wxT("Setting 2"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -150,7 +148,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     item52 = new wxStaticText( parent, ID_TEXT, wxT("Degree"), wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    propNameTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_PROP, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
     setting1TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_INTG1, wxT(""), wxDefaultPosition, wxSize(120,-1), 0 );
     setting2TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_INTG2, wxT(""), wxDefaultPosition, wxSize(120,-1), 0 );
     setting3TextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL_INTG3, wxT(""), wxDefaultPosition, wxSize(120,-1), 0 );
@@ -226,7 +223,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
     wxBoxSizer *boxSizer4 = new wxBoxSizer( wxHORIZONTAL );
     
-    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 15, 0, 0 );
+    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 5, 0, 0 );
     wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
     wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 2 );
      
@@ -248,20 +245,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     wxStaticBoxSizer *item64 = new wxStaticBoxSizer( item65, wxHORIZONTAL );
     
     // Add to wx*Sizers    
-    flexGridSizer1->Add( propNameStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
-    flexGridSizer1->Add( propNameTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
-    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
+    flexGridSizer1->Add( 200, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
     flexGridSizer1->Add( scriptButton, 0, wxALIGN_RIGHT|wxALL, 5 );
     
     flexGridSizer2->Add( item8, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -367,6 +354,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     magneticDegreeTextCtrl->Enable(false);
     magneticOrderTextCtrl->Enable(false);
     searchMagneticButton->Enable(false);
+    setupButton->Enable(false);
+    editMassButton->Enable(false);
+    editPressureButton->Enable(false);
     helpButton->Enable(false);
     
     applyButton->Enable(false);
@@ -378,9 +368,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 }
 
 void PropagationConfigPanel::GetData()
-{       
-    propNameTextCtrl->AppendText(propNameString);
-    
+{           
     DisplayIntegratorData();
     DisplayPrimaryBodyData();
     DisplayGravityFieldData();
@@ -392,18 +380,30 @@ void PropagationConfigPanel::GetData()
 
 void PropagationConfigPanel::SetData()
 {
-    // = propNameString;
-
     integratorString = integratorComboBox->GetStringSelection();
-    
+        
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
-        // = setting1TextCtrl->GetValue();
-        // = setting2TextCtrl->GetValue();
-        // = setting3TextCtrl->GetValue();
-        // = setting4TextCtrl->GetValue();
-        // = setting5TextCtrl->GetValue();
+        theRK89->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
+        theRK89->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
+        theRK89->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
+        theRK89->SetRealParameter(Integrator::maximumStepSize, atof(setting4TextCtrl->GetValue()) );
+        theRK89->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
     }
+    
+    if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
+    {   
+        theCelestialBody->SetIntegerParameter(CelestialBody::orderID, atoi(gravityOrderTextCtrl->GetValue()));
+        theCelestialBody->SetIntegerParameter(CelestialBody::degreeID, atoi(gravityDegreeTextCtrl->GetValue()));
+    
+        //theCelestialBody->SetCentralBody(theEarth);
+    }
+    
+    thePropSetup->SetPropagator(theRK89);
+    
+    /*  waw: Future implementation
+    thePropSetup->SetForceModel(theForceModel);
+    
     else if (integratorString.Cmp("RKN 6(8)") == 0)
     {
         // = setting1TextCtrl->GetValue();
@@ -432,26 +432,38 @@ void PropagationConfigPanel::SetData()
     // = bodyTextCtrl->GetValue();
     
     if (gravityTypeComboBox->GetStringSelection().Cmp("None") != 0)
-        ;  // = gravityTypeComboBox->GetStringSelection();
-    // = gravityDegreeTextCtrl->GetValue();
-    // = gravityOrderTextCtrl->GetValue();
+    {
+        ;  
+        // = gravityTypeComboBox->GetStringSelection();
+        // = gravityDegreeTextCtrl->GetValue();
+        // = gravityOrderTextCtrl->GetValue();
+    }
     
     if (atmosComboBox->GetStringSelection().Cmp("None") != 0)
-         ;  // = atmosComboBox->GetStringSelection();
+    {
+         ;  
+         // = atmosComboBox->GetStringSelection();
     
-    
+    }
     if (magneticTypeComboBox->GetStringSelection().Cmp("None") != 0)
-        ;  // = magneticTypeComboBox->GetStringSelection();
-    // = magneticDegreeTextCtrl->GetValue();
-    // = magneticOrderTextCtrl->GetValue();
+    {
+        ;  
+        // = magneticTypeComboBox->GetStringSelection();
+        // = magneticDegreeTextCtrl->GetValue();
+        // = magneticOrderTextCtrl->GetValue();
+    }
     
     if ( pmEditTextCtrl->IsModified() )
-        ;// = pmEditTextCtrl->GetValue();
+    {
+        ;
+        // = pmEditTextCtrl->GetValue();
+    }
     
     // = useSRP;
     
     //thePropSetup->SetPropagator(thePropagator);
     //thePropSetup->SetForceModel(theForceModel);
+    */
 }
 
 void PropagationConfigPanel::DisplayIntegratorData()
@@ -460,17 +472,19 @@ void PropagationConfigPanel::DisplayIntegratorData()
     
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
+        theRK89 = (RungeKutta89 *)thePropagator;
+        
         setting1StaticText->SetLabel("Step Size: ");
         setting2StaticText->SetLabel("Max Int Error: ");
         setting3StaticText->SetLabel("Min Step Size: ");
         setting4StaticText->SetLabel("Max Step Size: ");
         setting5StaticText->SetLabel("Max failed steps: ");
         
-        setting1TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Propagator::stepSizeParameter)));
-        setting2TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::errorControlHold)));
-        setting3TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::minimumStepSize)));
-        setting4TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::maximumStepSize)));
-        setting5TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::numStepAttempts)));
+        setting1TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Propagator::stepSizeParameter)));
+        setting2TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::errorControlHold)));
+        setting3TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::minimumStepSize)));
+        setting4TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::maximumStepSize)));
+        setting5TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::numStepAttempts)));
 
         setting6StaticText->Show(false); 
         setting7StaticText->Show(false); 
@@ -490,11 +504,11 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting4StaticText->SetLabel("Max Step Size: ");
         setting5StaticText->SetLabel("Max failed steps: ");
         
-        setting1TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Propagator::stepSizeParameter)));
-        setting2TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::errorControlHold)));
-        setting3TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::minimumStepSize)));
-        setting4TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::maximumStepSize)));
-        setting5TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Integrator::numStepAttempts)));
+        setting1TextCtrl->SetValue(wxVariant()); 
+        setting2TextCtrl->SetValue(wxVariant());
+        setting3TextCtrl->SetValue(wxVariant());
+        setting4TextCtrl->SetValue(wxVariant());
+        setting5TextCtrl->SetValue(wxVariant());
         
         setting6StaticText->Show(false); 
         setting7StaticText->Show(false); 
@@ -518,15 +532,15 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting8StaticText->SetLabel("Step Size Fraction (Low): ");
         setting9StaticText->SetLabel("Max Iterations: "); 
         
-        setting1TextCtrl->AppendText(wxVariant(thePropagator->GetRealParameter(Propagator::stepSizeParameter)));
-        setting2TextCtrl->AppendText(wxVariant());
-        setting3TextCtrl->AppendText(wxVariant());
-        setting4TextCtrl->AppendText(wxVariant());
-        setting5TextCtrl->AppendText(wxVariant());
-        setting6TextCtrl->AppendText(wxVariant());
-        setting7TextCtrl->AppendText(wxVariant());
-        setting8TextCtrl->AppendText(wxVariant());
-        setting9TextCtrl->AppendText(wxVariant());
+        setting1TextCtrl->SetValue(wxVariant()); 
+        setting2TextCtrl->SetValue(wxVariant());
+        setting3TextCtrl->SetValue(wxVariant());
+        setting4TextCtrl->SetValue(wxVariant());
+        setting5TextCtrl->SetValue(wxVariant());
+        setting6TextCtrl->SetValue(wxVariant());
+        setting7TextCtrl->SetValue(wxVariant());
+        setting8TextCtrl->SetValue(wxVariant());
+        setting9TextCtrl->SetValue(wxVariant());
         
         setting6StaticText->Show(true); 
         setting7StaticText->Show(true); 
@@ -548,7 +562,24 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
 }
 
 void PropagationConfigPanel::DisplayGravityFieldData()
-{
+{   
+    primaryBodyString = bodyComboBox->GetStringSelection();
+    
+    if (primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0)
+    {
+        gravityDegreeTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(CelestialBody::degreeID)));
+        gravityOrderTextCtrl->SetValue(wxVariant((long)theCelestialBody->GetIntegerParameter(CelestialBody::orderID)));
+    }
+    else if (primaryBodyString.Cmp(SolarSystem::SUN_NAME.c_str()) == 0)
+    {
+        gravityDegreeTextCtrl->SetValue(wxVariant());
+        gravityOrderTextCtrl->SetValue(wxVariant());
+    }
+    else if (primaryBodyString.Cmp(SolarSystem::MOON_NAME.c_str()) == 0)
+    {
+        gravityDegreeTextCtrl->SetValue(wxVariant());
+        gravityOrderTextCtrl->SetValue(wxVariant());
+    }
 }
 
 void PropagationConfigPanel::DisplayAtmosphereModelData()
@@ -558,11 +589,9 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
     int y = atmosComboBox->FindString("Exponential");
     int z = atmosComboBox->FindString("MISISE-90");
     
-    primaryBodyString = bodyComboBox->GetStringSelection();
-    
     // waw:  Venus & Mars for future implementation
     
-    if ( primaryBodyString.CmpNoCase("Earth") == 0 )
+    if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
     {                   
         if (x == -1)
             atmosComboBox->Append("None");
@@ -597,7 +626,7 @@ void PropagationConfigPanel::DisplayPointMassData()
 
 void PropagationConfigPanel::DisplaySRPData()
 {
-    // useSRP = ?
+    useSRP = false;  // waw: TBD
     srpCheckBox->SetValue(useSRP);
 }
 
@@ -845,12 +874,6 @@ void PropagationConfigPanel::OnSRPEditButton()
 }
 
 // wxTextCtrl Events
-void PropagationConfigPanel::OnPropagatorTextUpdate()
-{
-    propNameString = propNameTextCtrl->GetValue();
-    applyButton->Enable(true);
-}
-
 void PropagationConfigPanel::OnIntegratorTextUpdate()
 {
     wxString set1 = setting1TextCtrl->GetValue();
@@ -862,6 +885,7 @@ void PropagationConfigPanel::OnIntegratorTextUpdate()
     wxString set7 = setting7TextCtrl->GetValue();
     wxString set8 = setting8TextCtrl->GetValue();
     wxString set9 = setting9TextCtrl->GetValue();
+    
     /* Look for IsDouble() method in stdlib
     if ( !set1.IsNumber() )
         setting1TextCtrl->Clear();
@@ -882,7 +906,7 @@ void PropagationConfigPanel::OnIntegratorTextUpdate()
     else if ( !set9.IsNumber() )
         setting9TextCtrl->Clear();
     else */
-        applyButton->Enable(true);
+    applyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnGravityTextUpdate()
@@ -896,6 +920,7 @@ void PropagationConfigPanel::OnGravityTextUpdate()
         gravityOrderTextCtrl->Clear();
     else
         applyButton->Enable(true);
+    
 }
 
 void PropagationConfigPanel::OnMagneticTextUpdate()
