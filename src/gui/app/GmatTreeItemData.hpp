@@ -99,6 +99,7 @@ namespace GmatTree
         // Resource Tree
         RESOURCES_FOLDER = 20000,
         SPACECRAFT_FOLDER,
+        HARDWARE_FOLDER,
         FORMATIONS_FOLDER,
         CONSTELLATIONS_FOLDER,
         BURNS_FOLDER,
@@ -190,6 +191,7 @@ namespace GmatTree
         TOGGLE_COMMAND,
         CALL_FUNCTION_COMMAND,  //arg: 10/20/04  addd CALL_FUNCTION
         ASSIGNMENT_COMMAND,     //arg: 12/23/04 added ASSIGNMENT
+        FREE_FORM_SCRIPT_COMMAND, //arg: 1/12/05 added FREE_FORM_SCRIPT
         
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,

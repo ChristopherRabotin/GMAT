@@ -175,6 +175,16 @@ void ResourceTree::UpdateResource(bool resetCounter)
    Collapse(mCoordSysItem);
 
    DeleteChildren(mSpacecraftItem);
+
+   //----- Hardware is child of spacecraft
+   mHardwareItem =
+      AppendItem(mSpacecraftItem, wxT("Hardware"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Hardware"),
+                                      GmatTree::HARDWARE_FOLDER));
+
+   SetItemImage(mHardwareItem, GmatTree::ICON_OPENFOLDER,
+                wxTreeItemIcon_Expanded);
+
    DeleteChildren(mFormationItem);
    DeleteChildren(mPropagatorItem);
    DeleteChildren(mBurnItem);
@@ -218,7 +228,7 @@ void ResourceTree::AddDefaultResources()
     
    SetItemImage(mSpacecraftItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-    
+
    //----- Formations
     mFormationItem =
       AppendItem(resource, wxT("Formations"), GmatTree::ICON_FOLDER, -1,
@@ -794,6 +804,13 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
     
    if (strcmp(title, wxT("Spacecraft")) == 0)
       menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft"));
+   else if (strcmp(title, wxT("Hardware")) == 0)
+   {
+      menu.Append(POPUP_ADD_THRUSTER, wxT("Add Thruster"));
+      menu.Enable(POPUP_ADD_THRUSTER, FALSE);
+      menu.Append(POPUP_ADD_TANK, wxT("Add Tank"));
+      menu.Enable(POPUP_ADD_TANK, FALSE);
+   }
    else if (strcmp(title, wxT("Formations")) == 0)
       menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation"));
    else if (strcmp(title, wxT("Constellations")) == 0)
@@ -1087,6 +1104,7 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
    int dataType = selItem->GetDataType();
    bool isDefaultFolder = ((dataType == GmatTree::RESOURCES_FOLDER)      ||
                            (dataType == GmatTree::SPACECRAFT_FOLDER)     ||
+                           (dataType == GmatTree::HARDWARE_FOLDER)       ||
                            (dataType == GmatTree::FORMATIONS_FOLDER)     ||
                            (dataType == GmatTree::CONSTELLATIONS_FOLDER) ||
                            (dataType == GmatTree::BURNS_FOLDER)          ||

@@ -43,6 +43,7 @@ private:
    //wxWindow *parent;
    wxTreeItemId mDraggedItem;
    wxTreeItemId mSpacecraftItem;
+   wxTreeItemId mHardwareItem;
    wxTreeItemId mFormationItem;
    wxTreeItemId mPropagatorItem;
    wxTreeItemId mReportItem;
@@ -124,6 +125,9 @@ private:
       POPUP_ADD_SC = 23000,
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
+
+      POPUP_ADD_THRUSTER,
+      POPUP_ADD_TANK,
         
       POPUP_ADD_PROPAGATOR,
       POPUP_ADD_BODY,
