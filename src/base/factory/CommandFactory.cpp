@@ -35,6 +35,7 @@
 #include "ElseCommand.hpp"    // for Else command
 #include "EndIfCommand.hpp"   // for EndIf command
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
+#include "Save.hpp"           // for Save command  
 
 
 //---------------------------------
@@ -82,6 +83,8 @@ GmatCommand* CommandFactory::CreateCommand(std::string ofType,
         return new EndIfCommand;
     else if (ofType == "GMAT")
         return new Assignment;
+    else if (ofType == "Save")
+        return new Save;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -118,6 +121,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Else");
       creatables.push_back("EndIf");
       creatables.push_back("GMAT");
+      creatables.push_back("Save");
    }
 }
 
@@ -165,6 +169,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Else");
       creatables.push_back("EndIf");
       creatables.push_back("GMAT");
+      creatables.push_back("Save");
    }
 }
 
