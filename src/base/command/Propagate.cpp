@@ -919,6 +919,11 @@ bool Propagate::Execute(void)
                   SetRealParameter("InitialEpoch", currEpoch);
             }
          }
+         // Publist the initial data
+         pubdata[0] = currEpoch;
+         memcpy(&pubdata[1], state, dim*sizeof(Real));
+         publisher->Publish(streamID, pubdata, dim+1);
+
          inProgress = true;
       }
    
