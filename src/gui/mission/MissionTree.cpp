@@ -150,7 +150,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 //------------------------------------------------------------------------------
 void MissionTree::UpdateMission()
 {
-    MessageInterface::ShowMessage("MissionTree::UpdateCommandSeq() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::UpdateCommandSeq() entered\n");
 
     this->DeleteChildren(mMissionSeqSubItem);
 
@@ -170,7 +170,7 @@ void MissionTree::UpdateMission()
 //------------------------------------------------------------------------------
 void MissionTree::UpdateCommand()
 {
-    MessageInterface::ShowMessage("MissionTree::UpdateCommand() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::UpdateCommand() entered\n");
 
     GmatCommand *cmd = theGuiInterpreter->GetNextCommand();
     wxString objTypeName;
@@ -241,7 +241,7 @@ void MissionTree::AddDefaultMission()
 //------------------------------------------------------------------------------
 void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
 {    
-    MessageInterface::ShowMessage("MissionTree::AddDefaultMission() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::AddDefaultMission() entered\n");
 
     //loj: for multiple mission sequence for b2
     //StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::MISSION_SEQ);
@@ -332,7 +332,7 @@ void MissionTree::OnItemRightClick(wxTreeEvent& event)
 //------------------------------------------------------------------------------
 void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
-    MessageInterface::ShowMessage("MissionTree::OnItemActivated() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::OnItemActivated() entered\n");
 
     // get some info about this item
     wxTreeItemId itemId = event.GetItem();
