@@ -477,7 +477,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    // Perform Command specific tasks: Setting string data, and so forth
    std::string cmdCase = cmd->GetTypeName();
    Integer condNumber = 1, index = 0;
-   if (cmdCase == "If") {
+   if ((cmdCase == "If") || (cmdCase == "While")) {
       // chain through the conditions
       while (condNumber < (Integer)topLevel.size()) {
          #ifdef DEBUG_TOKEN_PARSING
