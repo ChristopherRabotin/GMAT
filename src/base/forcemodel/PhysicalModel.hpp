@@ -92,6 +92,8 @@
 #include "GmatBase.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "Spacecraft.hpp"
+
 
 #include "ForceModelException.hpp"
 
@@ -159,6 +161,9 @@ public:
                                       const std::string parmName, 
                                       const std::string parm);
    virtual bool StateChanged(bool reset = true);
+   
+   virtual bool IsTransient();
+   virtual void SetPropList(std::vector<SpaceObject *> *soList);
 
    // Parameter accessor methods -- inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;

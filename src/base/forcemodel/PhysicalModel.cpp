@@ -92,6 +92,10 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
+
+//#define PHYSICAL_MODEL_DEBUG_INIT
+
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -465,6 +469,12 @@ Real * PhysicalModel::GetState(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::SetState(const Real * st)
 {
+   #ifdef PHYSICAL_MODEL_DEBUG_INIT
+      MessageInterface::ShowMessage(
+         "PhysicalModel::SetState() called for %s<%s>\n", 
+         typeName.c_str(), instanceName.c_str());
+   #endif
+                                 
    for (Integer i = 0; i < dimension; i++)
       modelState[i] = st[i];
    stateChanged = true;
@@ -753,6 +763,33 @@ bool PhysicalModel::StateChanged(bool reset)
    if (reset)
       stateChanged = false;
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsTransient()
+//------------------------------------------------------------------------------
+/**
+ * Specifies whether the PhysicalModel is transient or always applied.
+ * 
+ * @return true is transient, false (the default) if not.
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::IsTransient()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsTransient()
+//------------------------------------------------------------------------------
+/**
+ * Sets the list of propagated space objects for transient forces.
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetPropList(std::vector<SpaceObject*> *soList)
+{
 }
 
 
