@@ -34,6 +34,7 @@
 #include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
+#include "MdiXyPlotData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -54,7 +55,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
     EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
     EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
-    EVT_MENU(MENU_ORBIT_FILES_TRAJ_FILE, GmatMainFrame::OnTrajectoryFile)    
+    EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)    
+    EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile)    
 END_EVENT_TABLE()
 
 //------------------------------
@@ -124,6 +126,9 @@ GmatMainFrame::~GmatMainFrame()
 
     if (MdiGlPlot::mdiParentGlFrame != NULL)
         MdiGlPlot::mdiParentGlFrame->Close();
+    
+    if (MdiXyPlot::mdiParentXyFrame != NULL)
+        MdiXyPlot::mdiParentXyFrame->Close();
 }
 
 //-------------------------------
@@ -342,8 +347,10 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
                            wxT("Setup Solar Electric Conversion"), wxT(""),
                            FALSE);
 
-    orbitFileMenu->Append(MENU_ORBIT_FILES_TRAJ_FILE,
-                          wxT("Read/Plot Trajectory File"), wxT(""), FALSE);
+    orbitFileMenu->Append(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
+                          wxT("Read/OpenGl Plot Trajectory File"), wxT(""), FALSE);
+    orbitFileMenu->Append(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
+                          wxT("Read/XY Plot Trajectory File (time vs position)"), wxT(""), FALSE);
     orbitFileMenu->Append(MENU_ORBIT_FILES_EPHEM_FILE,
                           wxT("Read/Plot Ephemeris File"), wxT(""), FALSE);
     
@@ -530,15 +537,15 @@ void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
-// void OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+// void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
- * Handles opening trajectory file and plot.
+ * Handles opening trajectory file and draws 3D OpenGl plot.
  *
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 {
     if (MdiGlPlot::mdiParentGlFrame == NULL)
     {
@@ -557,5 +564,37 @@ void GmatMainFrame::OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
     
     MdiGlPlot::mdiParentGlFrame->Show(TRUE);
     //SetTopWindow(MdiGlPlot::mdiParentGlFrame);
+
+}
+
+//------------------------------------------------------------------------------
+// void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles opening trajectory file and draws XY plot. It draws position againt
+ * time.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+{
+    if (MdiXyPlot::mdiParentXyFrame == NULL)
+    {
+        MdiXyPlot::mdiParentXyFrame = 
+            new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Window"),
+                                 wxPoint(300, 200), wxSize(700, 600),
+                                 wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+    }
+    
+    // Give it an icon
+#ifdef __WXMSW__
+    MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
+#else
+    MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
+#endif
+    
+    MdiXyPlot::mdiParentXyFrame->Show(TRUE);
+    //SetTopWindow(MdiXyPlot::mdiParentXyFrame);
 
 }

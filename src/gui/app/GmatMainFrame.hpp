@@ -77,7 +77,8 @@ private:
     void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event));
     void OnScriptBuild(wxCommandEvent& WXUNUSED(event));
 
-    void OnTrajectoryFile(wxCommandEvent& WXUNUSED(event));
+    void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
+    void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     
     // IDs for the controls and the menu commands
     enum
@@ -117,7 +118,8 @@ private:
         MENU_PARAMETERS_SOLAR_SAILS,
         MENU_PARAMETERS_SOLAR_ELEC_CONV,
     
-        MENU_ORBIT_FILES_TRAJ_FILE,
+        MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
+        MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
         MENU_ORBIT_FILES_EPHEM_FILE,
     
         MENU_VARIABLES_CREATE,
