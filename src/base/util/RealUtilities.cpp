@@ -226,6 +226,22 @@ Real GmatMathUtil::Deg(Real angleInRad, bool modBy360)
 }
 
 //------------------------------------------------------------------------------
+//  Real DegToRad(Real deg, bool modBy2Pi = false)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::DegToRad(Real deg, bool modBy2Pi)
+{
+   return Rad(deg, modBy2Pi);
+}
+
+//------------------------------------------------------------------------------
+//  Real RadToDeg(Real rad, bool modBy360 = false)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::RadToDeg(Real rad, bool modBy360)
+{
+   return Deg(rad, modBy360);
+}
+
+//------------------------------------------------------------------------------
 //  Real Sin (Real angleInRad, Real cycleInRad)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
@@ -271,6 +287,45 @@ Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
       throw RealUtilitiesExceptions::ArgumentError();
    
    return tan( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+// Real Cosh (Real angleInRad, Real cycleInRad=TWO_PI)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Cosh (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return cosh( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+// Real Sinh (Real angleInRad, Real cycleInRad=TWO_PI)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Sinh (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return sinh( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+// Real Tanh (Real angleInRad, Real cycleInRad=TWO_PI)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Tanh (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return tanh( (TWO_PI/cycleInRad)*angleInRad);
 }
 
 //------------------------------------------------------------------------------
@@ -645,3 +700,4 @@ Real GmatMathUtil::Pow(Real x, Real y)
 {
    return pow(x,y);
 }
+
