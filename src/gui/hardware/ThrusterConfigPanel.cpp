@@ -207,6 +207,7 @@ void ThrusterConfigPanel::SaveData()
    {
       paramID = theThruster->GetParameterID("CoordinateSystem");
       theThruster->SetStringParameter(paramID, coordsysName);
+      isCoordSysChanged = false;
    }    
       
    theApplyButton->Disable();
