@@ -107,7 +107,7 @@ public:
    virtual const Rvector3& GetMJ2000Velocity(const A1Mjd &atTime) = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
-   // this must be derived in the 'leaf' classes
+   // this must be implemented in the 'leaf' classes
    //virtual GmatBase*       Clone(void) const;
 
    // Parameter access methods - overridden from GmatBase 
