@@ -39,16 +39,14 @@ class GMAT_API KepSMA : public OrbitReal
 {
 public:
 
-    KepSMA(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = "Km");
-    KepSMA(const KepSMA &copy);
-    const KepSMA& operator=(const KepSMA &right);
-    virtual ~KepSMA();
+   KepSMA(const std::string &name = "", GmatBase *obj = NULL,
+          const std::string &desc = "", const std::string &unit = "Km");
+   KepSMA(const KepSMA &copy);
+   const KepSMA& operator=(const KepSMA &right);
+   virtual ~KepSMA();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -66,16 +64,14 @@ class GMAT_API KepEcc : public OrbitReal
 {
 public:
 
-    KepEcc(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = " ");
-    KepEcc(const KepEcc &param);
-    const KepEcc& operator=(const KepEcc &right);
-    virtual ~KepEcc();
+   KepEcc(const std::string &name = "", GmatBase *obj = NULL,
+          const std::string &desc = "", const std::string &unit = " ");
+   KepEcc(const KepEcc &param);
+   const KepEcc& operator=(const KepEcc &right);
+   virtual ~KepEcc();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -94,16 +90,14 @@ class GMAT_API KepInc : public OrbitReal
 {
 public:
 
-    KepInc(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = "Deg");
-    KepInc(const KepInc &copy);
-    const KepInc& operator=(const KepInc &right);
-    virtual ~KepInc();
+   KepInc(const std::string &name = "", GmatBase *obj = NULL,
+          const std::string &desc = "", const std::string &unit = "Deg");
+   KepInc(const KepInc &copy);
+   const KepInc& operator=(const KepInc &right);
+   virtual ~KepInc();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -121,16 +115,14 @@ class GMAT_API KepAOP : public OrbitReal
 {
 public:
 
-    KepAOP(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = "Deg");
-    KepAOP(const KepAOP &copy);
-    const KepAOP& operator=(const KepAOP &right);
-    virtual ~KepAOP();
+   KepAOP(const std::string &name = "", GmatBase *obj = NULL,
+          const std::string &desc = "", const std::string &unit = "Deg");
+   KepAOP(const KepAOP &copy);
+   const KepAOP& operator=(const KepAOP &right);
+   virtual ~KepAOP();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -148,16 +140,14 @@ class GMAT_API KepRAAN : public OrbitReal
 {
 public:
 
-    KepRAAN(const std::string &name = "",
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "Deg");
-    KepRAAN(const KepRAAN &copy);
-    const KepRAAN& operator=(const KepRAAN &right);
-    virtual ~KepRAAN();
+   KepRAAN(const std::string &name = "", GmatBase *obj = NULL,
+           const std::string &desc = "", const std::string &unit = "Deg");
+   KepRAAN(const KepRAAN &copy);
+   const KepRAAN& operator=(const KepRAAN &right);
+   virtual ~KepRAAN();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -176,16 +166,14 @@ class GMAT_API KepTA : public OrbitReal
 {
 public:
 
-    KepTA(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "Deg");
-    KepTA(const KepTA &copy);
-    const KepTA& operator=(const KepTA &right);
-    virtual ~KepTA();
+   KepTA(const std::string &name = "", GmatBase *obj = NULL,
+         const std::string &desc = "", const std::string &unit = "Deg");
+   KepTA(const KepTA &copy);
+   const KepTA& operator=(const KepTA &right);
+   virtual ~KepTA();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -203,16 +191,14 @@ class GMAT_API KepMA : public OrbitReal
 {
 public:
 
-    KepMA(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "Deg");
-    KepMA(const KepMA &copy);
-    const KepMA& operator=(const KepMA &right);
-    virtual ~KepMA();
+   KepMA(const std::string &name = "", GmatBase *obj = NULL,
+         const std::string &desc = "", const std::string &unit = "Deg");
+   KepMA(const KepMA &copy);
+   const KepMA& operator=(const KepMA &right);
+   virtual ~KepMA();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -230,16 +216,14 @@ class GMAT_API KepMM : public OrbitReal
 {
 public:
 
-    KepMM(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "Spacecraft Kep Mean Motion",
-          const std::string &unit = "Deg");
-    KepMM(const KepMM &copy);
-    const KepMM& operator=(const KepMM &right);
-    virtual ~KepMM();
+   KepMM(const std::string &name = "", GmatBase *obj = NULL,
+         const std::string &desc = "", const std::string &unit = "Deg");
+   KepMM(const KepMM &copy);
+   const KepMM& operator=(const KepMM &right);
+   virtual ~KepMM();
 
-    // The inherited methods from Parameter
-    virtual bool Evaluate();
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
 
 protected:
 
@@ -258,28 +242,26 @@ class GMAT_API KepElem : public Rvec6Var, OrbitData
 {
 public:
 
-    KepElem(const std::string &name = "",
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "");
-    KepElem(const KepElem &copy);
-    const KepElem& operator=(const KepElem &right);
-    virtual ~KepElem();
+   KepElem(const std::string &name = "", GmatBase *obj = NULL,
+           const std::string &desc = "", const std::string &unit = "");
+   KepElem(const KepElem &copy);
+   const KepElem& operator=(const KepElem &right);
+   virtual ~KepElem();
 
-    // The inherited methods from Rvec6Var
-    virtual Rvector6 EvaluateRvector6();
+   // The inherited methods from Rvec6Var
+   virtual Rvector6 EvaluateRvector6();
     
-    // The inherited methods from Parameter
-    virtual Integer GetNumObjects() const;
-    virtual GmatBase* GetObject(const std::string &objTypeName);
+   // The inherited methods from Parameter
+   virtual Integer GetNumObjects() const;
+   virtual GmatBase* GetObject(const std::string &objTypeName);
     
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
+   virtual bool SetObject(Gmat::ObjectType objType,
+                          const std::string &objName,
+                          GmatBase *obj);
     
-    virtual bool AddObject(GmatBase *obj);
-    virtual bool Validate();
-    virtual bool Evaluate();
+   virtual bool AddObject(GmatBase *obj);
+   virtual bool Validate();
+   virtual bool Evaluate();
 
 protected:
     

@@ -44,7 +44,7 @@
 //------------------------------------------------------------------------------
 CartX::CartX(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartX", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "X", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -138,7 +138,7 @@ bool CartX::Evaluate()
 //------------------------------------------------------------------------------
 CartY::CartY(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartY", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "Y", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -232,7 +232,7 @@ bool CartY::Evaluate()
 //------------------------------------------------------------------------------
 CartZ::CartZ(const std::string &name, GmatBase *obj,
              const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartZ", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "Z", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -326,7 +326,7 @@ bool CartZ::Evaluate()
 //------------------------------------------------------------------------------
 CartVx::CartVx(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartVx", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "VX", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -419,7 +419,7 @@ bool CartVx::Evaluate()
 //------------------------------------------------------------------------------
 CartVy::CartVy(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartVy", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "VY", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
@@ -513,7 +513,7 @@ bool CartVy::Evaluate()
 //------------------------------------------------------------------------------
 CartVz::CartVz(const std::string &name, GmatBase *obj,
                const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "CartVz", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitReal(name, "VZ", SYSTEM_PARAM, obj, desc, unit, false)
 {
    AddObject(obj);
 }
