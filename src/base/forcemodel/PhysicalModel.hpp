@@ -141,27 +141,36 @@ public:
     virtual bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
     virtual Real EstimateError(Real * diffs, Real * answer) const;
     virtual bool GetComponentMap(Integer * map, Integer order = 1) const;
-
+    
+    virtual void SetSolarSystem(SolarSystem *ss);
+    virtual void SetSatelliteParameter(const Integer i, 
+                                       const std::string parmName, 
+                                       const Real parm);
+    virtual void SetSatelliteParameter(const Integer i, 
+                                       const std::string parmName, 
+                                       const std::string parm);
     virtual bool StateChanged(bool reset = true);
 
 protected:
-    // Number of parameters being modeled
+    /// Number of parameters being modeled
     Integer dimension;
-    // Flag used to tell the readiness of the model for use
+    /// Flag used to tell the readiness of the model for use
     bool initialized;
-    // Flag that is set when SetState() or SetTime() is called
+    /// Flag that is set when SetState() or SetTime() is called
     bool stateChanged;
 
-    // Array of data parameters containing the model data
+    /// Array of data parameters containing the model data
     Real *modelState;
-    // Number of seconds elapsed from the base epoch
+    /// Number of seconds elapsed from the base epoch
     Real elapsedTime;
-    // Array containing the most recent derivative calculation, when needed
+    /// Array containing the most recent derivative calculation, when needed
     Real * deriv;
-    // Threshold for switching between relative and absolute error control
+    /// Threshold for switching between relative and absolute error control
     Real relativeErrorThreshold;
+    /// Pointer to the solar system model used as a data provider for the forces
+    SolarSystem *solarSystem;
 
-    // Parameter IDs
+    /// Parameter IDs
     enum
     {
         elapsedTimeParameter = 0,

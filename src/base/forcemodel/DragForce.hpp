@@ -35,8 +35,15 @@ public:
     DragForce&          operator=(const DragForce& df); 
  
     virtual bool        GetComponentMap(Integer * map, Integer order = 1) const;
+    void                SetSatelliteParameter(const Integer i, 
+                                              const std::string parmName, 
+                                              const Real parm);
+    void                SetSatelliteParameter(const Integer i, 
+                                              const std::string parmName, 
+                                              const std::string parm);
     bool                Initialize(void);
-    virtual bool        GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
+    virtual bool        GetDerivatives(Real * state, Real dt = 0.0, 
+                                       Integer order = 1);
 
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
@@ -69,9 +76,18 @@ protected:
     Real                *prefactor;
     /// Number of spacecraft in the state vector
     Integer             satCount;
+    /// Central bodies used for atmosphere source
+    std::vector<std::string>
+                        dragBody;
+    /// Spacecraft drag areas
+    std::vector <Real>  area;
+    /// Spacecraft masses
+    std::vector <Real>  mass;
+    /// Spacecraft coefficients of drag
+    std::vector <Real>  dragCoeff;
     
+    void                BuildPrefactors(void);
     void                GetDensity(Real *state);
-
 };
 
 #endif // DRAGFORCE_H

@@ -108,8 +108,8 @@ public:
       { return forceCount; }
       //loj: 2/11/04 { return 1; }
       
-   virtual Integer GetParameterCount(void) const;
-   
+    virtual Integer GetParameterCount(void) const;
+    
     // Access methods derived classes can override
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;

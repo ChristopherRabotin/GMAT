@@ -12,6 +12,11 @@ all: libForceModel
 	mkdir -p ../lib
 	mv libForceModel.a ../lib
 
+clean:
+	rm -f *.o;
+	rm -f ../lib/libForceModel.a
+	rm -f ../../bin/linux/GMAT*
+
 libForceModel : ../lib/libForceModel.a
 
 .cpp.o:

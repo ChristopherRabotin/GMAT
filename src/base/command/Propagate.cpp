@@ -28,7 +28,7 @@
  */
 //------------------------------------------------------------------------------
 Propagate::Propagate(void) :
-    GmatCommand                     ("Propagate"),
+    GmatCommand                 ("Propagate"),
     propName                    (""),
     propCoupled                 (true),
     interruptCheckFrequency     (30),

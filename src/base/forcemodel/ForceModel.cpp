@@ -278,6 +278,8 @@ bool ForceModel::Initialize(void)
 {
     Integer stateSize = 6;      // Will change if we integrate more variables
     Integer satCount = 1;
+    std::vector<Spacecraft *>::iterator sat;
+
     if (spacecraft.size() > 0)
         satCount = spacecraft.size();
     
@@ -295,7 +297,6 @@ bool ForceModel::Initialize(void)
     }
     else {
         Integer j = 0;
-        std::vector<Spacecraft *>::iterator sat;
         Real *state;
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
             state = (*sat)->GetState();
@@ -305,12 +306,53 @@ bool ForceModel::Initialize(void)
     }
 
     DerivativeList *current = derivatives;
+    PhysicalModel *currentPm;
+
+    // Variables used to set spacecraft parameters
+    std::string parmName, stringParm;
+    Real parm;
+    Integer id, i;
 
     while (current) 
     {
-        current->GetDerivative()->SetDimension(dimension);
-        current->GetDerivative()->Initialize();
-        current->GetDerivative()->SetState(modelState);
+        currentPm = current->GetDerivative();
+        currentPm->SetDimension(dimension);
+        currentPm->SetSolarSystem(solarSystem);
+        currentPm->Initialize();
+        currentPm->SetState(modelState);
+        
+        // Set spacecraft parameters for forces that need them
+        i = 0;
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+        {
+            parmName = "ReferenceBody";
+            id = (*sat)->GetParameterID(parmName);
+            stringParm = (*sat)->GetStringParameter(id);
+            currentPm->SetSatelliteParameter(i, parmName, stringParm);
+        
+            parmName = "Mass";
+            id = (*sat)->GetParameterID(parmName);
+            parm = (*sat)->GetRealParameter(id);
+            currentPm->SetSatelliteParameter(i, parmName, parm);
+        
+            parmName = "CoefficientDrag";
+            id = (*sat)->GetParameterID(parmName);
+            parm = (*sat)->GetRealParameter(id);
+            currentPm->SetSatelliteParameter(i, parmName, parm);
+            
+            parmName = "IncidentArea";
+            id = (*sat)->GetParameterID(parmName);
+            parm = (*sat)->GetRealParameter(id);
+            currentPm->SetSatelliteParameter(i, parmName, parm);
+            
+            parmName = "ReflectivityCoefficient";
+            id = (*sat)->GetParameterID(parmName);
+            parm = (*sat)->GetRealParameter(id);
+            currentPm->SetSatelliteParameter(i, parmName, parm);
+            
+            ++i;
+        }
+
         current = current->Next();
     }
 

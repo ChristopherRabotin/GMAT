@@ -132,7 +132,8 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
     modelState                  (NULL),
     elapsedTime                 (0.0),
     deriv                       (NULL),
-    relativeErrorThreshold      (0.10)
+    relativeErrorThreshold      (0.10),
+    solarSystem                 (NULL)
 {
     parameterCount = 1;
 }
@@ -167,7 +168,8 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
     initialized                 (pm.initialized),
     stateChanged                (pm.stateChanged),
     elapsedTime                 (pm.elapsedTime),
-    relativeErrorThreshold      (pm.relativeErrorThreshold)
+    relativeErrorThreshold      (pm.relativeErrorThreshold),
+    solarSystem                 (pm.solarSystem)
 {
      if (pm.modelState != NULL) 
     {
@@ -669,6 +671,62 @@ Real PhysicalModel::EstimateError(Real * diffs, Real * answer) const
 bool PhysicalModel::GetComponentMap(Integer * map, Integer order) const
 {
     return false;
+}
+
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer
+ * 
+ * @param ss Pointer to the solar system used in the modeling.
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetSolarSystem(SolarSystem *ss)
+{
+    solarSystem = ss;
+}
+
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetSatelliteParameter(const Integer i, 
+//                                           const std::string parmName, 
+//                                           const Real parm)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters to the force model.
+ * 
+ * This default implementation just returns.
+ * 
+ * @param i ID for the spacecraft
+ * @param parmName name of the Spacecraft parameter 
+ * @param parm Parameter value
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetSatelliteParameter(const Integer i, 
+                                          const std::string parmName, 
+                                          const Real parm)
+{
+}
+
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetSatelliteParameter(const Integer i, 
+//                                           const std::string parmName, 
+//                                           const std::string parm)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters to the force model.
+ * 
+ * This default implementation just returns.
+ * 
+ * @param i ID for the spacecraft
+ * @param parmName name of the Spacecraft parameter 
+ * @param parm Parameter value
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetSatelliteParameter(const Integer i, 
+                                          const std::string parmName, 
+                                          const std::string parm)
+{
 }
 
 //------------------------------------------------------------------------------

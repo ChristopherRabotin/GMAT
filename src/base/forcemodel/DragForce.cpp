@@ -32,6 +32,8 @@ DragForce::DragForce() :
     density                 (NULL),
     prefactor               (NULL)
 {
+    dimension = 6;
+    
     /// @todo Remove hard coded central body parms in DragForce
     sunPosition = new Real[3];
     cbPosition  = new Real[3];
@@ -132,19 +134,104 @@ bool DragForce::GetComponentMap(Integer * map, Integer order) const
     return true;
 }
 
+//------------------------------------------------------------------------------
+// void SetSatelliteParameter(const Integer i, const std::string parmName, 
+//                            const Real parm)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters to the force model.
+ * 
+ * For drag modeling, this method is used to set or update C_d, area, and mass.
+ * 
+ * @param i ID for the spacecraft
+ * @param parmName name of the Spacecraft parameter 
+ * @param parm Parameter value
+ */
+//------------------------------------------------------------------------------
+void DragForce::SetSatelliteParameter(const Integer i, 
+                                      const std::string parmName, 
+                                      const Real parm)
+{
+    unsigned parmNumber = (unsigned)(i+1);
+    
+    if (parmName == "Mass")
+        if (parmNumber < mass.size())
+            mass[i] = parm;
+        else
+            mass.push_back(parm);
+    if (parmName == "CoefficientDrag")
+        if (parmNumber < dragCoeff.size())
+            dragCoeff[i] = parm;
+        else
+            dragCoeff.push_back(parm);
+    if (parmName == "IncidentArea")
+        if (parmNumber < area.size())
+            area[i] = parm;
+        else
+            area.push_back(parm);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSatelliteParameter(const Integer i, const std::string parmName, 
+//                            const std::string parm)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft parameters to the force model.
+ * 
+ * For drag modeling, this method is used to set the body with the atmosphere.
+ * 
+ * @param i ID for the spacecraft
+ * @param parmName name of the Spacecraft parameter 
+ * @param parm Parameter value
+ */
+//------------------------------------------------------------------------------
+void DragForce::SetSatelliteParameter(const Integer i, 
+                                      const std::string parmName, 
+                                      const std::string parm)
+{
+    unsigned parmNumber = (unsigned)(i+1);
+    
+    if (parmName == "ReferenceBody")
+        if (parmNumber < mass.size())
+            dragBody[i] = parm;
+        else
+            dragBody.push_back(parm);
+}
+
 
 bool DragForce::Initialize(void)
 {
+    PhysicalModel::Initialize();
+
     satCount = dimension / 6;
+    if (satCount <= 0)
+        throw ForceModelException("Drag called with dimension zero");
+        
     density   = new Real[satCount];
     prefactor = new Real[satCount];
 
     for (Integer i = 0; i < satCount; ++i) {
         prefactor[i] = -0.5 * 2.2 * 15.0 / 875.0;   // Dummy up the product
-        //prefactor[i] = -0.5 * dragCoeff[i] * Area[i] / mass[i];
     }
     
     return true;
+}
+
+
+void DragForce::BuildPrefactors(void) 
+{
+    for (Integer i = 0; i < satCount; ++i) {
+        if (mass.size() < (unsigned)(i+1))
+            throw ForceModelException("Spacecraft not set correctly");
+        if (mass[i] <= 0.0) {
+            std::string errorMsg = "Spacecraft ";
+            errorMsg += i;
+            errorMsg += " has non-physical mass; Drag modeling cannot be used.";
+            throw ForceModelException(errorMsg); 
+        }
+        prefactor[i] = -0.5 * dragCoeff[i] * area[i] / mass[i];
+    }
 }
 
 
@@ -190,7 +277,6 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[4+i6] = 0.0; 
             deriv[5+i6] = 0.0; 
         }
-        
     }
     
     return true;
@@ -247,10 +333,11 @@ Real DragForce::SetRealParameter(const Integer id, const Real value)
 
 void DragForce::GetDensity(Real *state)
 {
-//    if (!atmos) {
+    // Give it a default value if the atmosphere model is not set
+    if (!atmos) {
         for (Integer i = 0; i < satCount; ++i)
-            density[i] = 1.0e-12;
-//    }
-        
-//    return atmos->Density(state, density, satCount);
+            density[i] = 4.0e-13;
+    }
+    else
+        atmos->Density(state, density, satCount);
 }
