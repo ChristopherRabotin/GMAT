@@ -23,8 +23,8 @@ class ParameterSelectDialog : public GmatDialog
 {
 public:
     
-   ParameterSelectDialog(wxWindow *parent, bool showArray = false,
-                         bool showSysVars = true,
+   ParameterSelectDialog(wxWindow *parent, bool showArrayAndString = false,
+                         bool showSysParams = true,
                          bool canSelectMultiVars = false);
 
    bool IsParamSelected()
@@ -45,7 +45,7 @@ protected:
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
-   bool mShowArray;
+   bool mShowArrayAndString;
    bool mShowSysVars;
    bool mCanSelectMultiVars;
    

@@ -556,18 +556,63 @@ GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
+// wxListBox* GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Configured all user parameter (Varialbe, Array, String) ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
+                                                      const wxSize &size)
+{
+   wxString emptyList[] = {};
+   wxString *allUserParamList;
+   int numParams = 0;
+   int allUserParamCount = theNumUserVariable + theNumUserArray + theNumUserString;
+   
+   allUserParamList = new wxString[allUserParamCount];
+   
+   for (int i=0; i<theNumUserVariable; i++)
+      allUserParamList[numParams++] = theUserVariableList[i];
+   
+   for (int i=0; i<theNumUserString; i++)
+      allUserParamList[numParams++] = theUserStringList[i];
+   
+   for (int i=0; i<theNumUserArray; i++)
+      allUserParamList[numParams++] = theUserArrayList[i];
+   
+   if (allUserParamCount > 0)
+   {       
+      theAllUserParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, allUserParamCount,
+                       allUserParamList, wxLB_SINGLE|wxLB_SORT);
+   }
+   else
+   {       
+      theAllUserParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                       emptyList, wxLB_SINGLE|wxLB_SORT);
+   }
+   
+   delete allUserParamList;
+   
+   return theAllUserParamListBox;
+}
+
+//------------------------------------------------------------------------------
 // wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
 //                                   const wxSize &size,
 //                                   const wxString &nameToExclude = "")
 //------------------------------------------------------------------------------
 /**
- * @return Configured User Valiable ListBox pointer
+ * @return Configured User Variable ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size,
                                                   const wxString &nameToExclude)
-{       
+{
    wxString emptyList[] = {};
    wxString *newUserVariableList;
    int numParams = 0;
@@ -834,7 +879,8 @@ CreateParameterSizer(wxWindow *parent,
                      wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                      wxComboBox **originComboBox, wxWindowID originComboBoxId,
-                     wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer)
+                     wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
+                     bool showArrayAndString)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateParameterSizer() entered\n");
@@ -879,8 +925,16 @@ CreateParameterSizer(wxWindow *parent,
    
    // wxListBox
    wxArrayString emptyArray;
-   *userParamListBox =
-      GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+   if (showArrayAndString)
+   {
+      *userParamListBox =
+         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50));
+   }
+   else
+   {
+      *userParamListBox =
+         GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+   }
    
    //loj: 1/19/05 Chagned height to 80 from 100
    *propertyListBox = 
@@ -932,7 +986,8 @@ CreateParameterSizer(wxWindow *parent,
 wxBoxSizer* GuiItemManager::
 CreateUserVarSizer(wxWindow *parent,
                    wxListBox **userParamListBox, wxWindowID userParamListBoxId,
-                   wxButton **createVarButton, wxWindowID createVarButtonId)
+                   wxButton **createVarButton, wxWindowID createVarButtonId,
+                   bool showArrayAndString)
 {
    #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage("GuiItemManager::CreateUserVarSizer() entered\n");
@@ -955,8 +1010,17 @@ CreateUserVarSizer(wxWindow *parent,
    
    // wxListBox
    wxArrayString emptyArray;
-   *userParamListBox =
-      GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+
+   if (showArrayAndString)
+   {
+      *userParamListBox =
+         GetAllUserParameterListBox(parent, userParamListBoxId, wxSize(170, 50));
+   }
+   else
+   {
+      *userParamListBox =
+         GetUserVariableListBox(parent, userParamListBoxId, wxSize(170, 50), "");
+   }
    
    // wx*Sizer
    wxStaticBoxSizer *userParamBoxSizer =
@@ -1486,6 +1550,7 @@ GuiItemManager::GuiItemManager()
    theScPropertyListBox = NULL;
    thePlottableParamListBox = NULL;
    theSystemParamListBox = NULL;
+   theAllUserParamListBox = NULL;
    theUserVariableListBox = NULL;
    theUserStringListBox = NULL;
    theUserArrayListBox = NULL;

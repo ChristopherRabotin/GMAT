@@ -136,6 +136,9 @@ public:
    wxComboBox* GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
                                        const wxSize &size);
    
+   wxListBox* GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size);
+   
    wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size,
                                      const wxString &nameToExclude = "");
@@ -163,11 +166,13 @@ public:
                         wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
-                        wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer);
+                        wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
+                        bool showArrayAndString = false);
    wxBoxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,
-                      wxButton **createVarButton, wxWindowID createVarButtonId);
+                      wxButton **createVarButton, wxWindowID createVarButtonId,
+                      bool showArrayAndString = false);
    
 private:
    
@@ -226,6 +231,7 @@ private:
    wxListBox  *theScPropertyListBox;
    wxListBox  *thePlottableParamListBox;
    wxListBox  *theSystemParamListBox;
+   wxListBox  *theAllUserParamListBox;
    wxListBox  *theUserVariableListBox;
    wxListBox  *theUserStringListBox;
    wxListBox  *theUserArrayListBox;

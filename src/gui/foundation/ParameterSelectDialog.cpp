@@ -36,19 +36,19 @@ END_EVENT_TABLE()
 
    
 //------------------------------------------------------------------------------
-// ParameterSelectDialog(wxWindow *parent, 
-//                       bool showArray = false, bool showSysVars = true,
-//                       bool canSelectMultiVars = false)
+// ParameterSelectDialog(wxWindow *parent,  bool showArrayAndString = false,
+//                       bool showSysVars = true, bool canSelectMultiVars = false)
 //------------------------------------------------------------------------------
-ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, 
-                                             bool showArray,  bool showSysVars,
+ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent,
+                                             bool showArrayAndString,
+                                             bool showSysVars,
                                              bool canSelectMultiVars)
    : GmatDialog(parent, -1, wxString(_T("ParameterSelectDialog")))
 {
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
-   mShowArray = showArray;
+   mShowArrayAndString = showArrayAndString;
    mShowSysVars = showSysVars;
    mCanSelectMultiVars = canSelectMultiVars;
    mParamNameArray.Clear();
@@ -123,13 +123,14 @@ void ParameterSelectDialog::Create()
                               &mPropertyListBox, PROPERTY_LISTBOX,
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
-                              &mCoordSysLabel, &mCoordSysSizer);
+                              &mCoordSysLabel, &mCoordSysSizer,
+                              mShowArrayAndString);
    }
    else
    {
       mParamBoxSizer = theGuiManager->
          CreateUserVarSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
-                            &createVarButton, CREATE_VARIABLE);
+                            &createVarButton, CREATE_VARIABLE, mShowArrayAndString);
    }
    
    //-------------------------------------------------------
