@@ -24,17 +24,17 @@
 #include "ElapsedSecsParam.hpp" 
 #include "CurrentA1MjdParam.hpp"
 #include "CartXParam.hpp"
-//  #include "CartYParam.hpp"
-//  #include "CartZParam.hpp"
-//  #include "CartVxParam.hpp"
-//  #include "CartVyParam.hpp"
-//  #include "CartVzParam.hpp"
-//  #include "KepSmaParam.hpp"
+#include "CartYParam.hpp"
+#include "CartZParam.hpp"
+#include "CartVxParam.hpp"
+#include "CartVyParam.hpp"
+#include "CartVzParam.hpp"
+#include "KepSmaParam.hpp"
 #include "KepEccParam.hpp"
-//  #include "KepIncParam.hpp"
-//  #include "KepRaanParam.hpp"
-//  #include "KepAopParam.hpp"
-//  #include "KepTaParam.hpp"
+#include "KepIncParam.hpp"
+#include "KepRaanParam.hpp"
+#include "KepAopParam.hpp"
+#include "KepTaParam.hpp"
 
 // add others here for future builds
 
@@ -63,30 +63,30 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
       return new CurrentA1MjdParam(withName);
    if (ofType == "CartXParam")
       return new CartXParam(withName);
-//     if (ofType == "CartYParam")
-//        return new CartYParam(withName);
-//     if (ofType == "CartZParam")
-//        return new CartZParam(withName);
-//     if (ofType == "CartVxParam")
-//        return new CartVxParam(withName);
-//     if (ofType == "CartVyParam")
-//        return new CartVyParam(withName);
-//      if (ofType == "CartVzParam")
-//        return new CartVzParam(withName);
-//      if (ofType == "KepSmaParam")
-//        return new KepSmaParam(withName);
+   if (ofType == "CartYParam")
+      return new CartYParam(withName);
+   if (ofType == "CartZParam")
+      return new CartZParam(withName);
+   if (ofType == "CartVxParam")
+      return new CartVxParam(withName);
+   if (ofType == "CartVyParam")
+      return new CartVyParam(withName);
+    if (ofType == "CartVzParam")
+      return new CartVzParam(withName);
+    if (ofType == "KepSmaParam")
+      return new KepSmaParam(withName);
     if (ofType == "KepEccParam")
       return new KepEccParam(withName);
-//      if (ofType == "KepIncParam")
-//        return new KepIncParam(withName);
-//      if (ofType == "KepRaanParam")
-//        return new KepRaanParam(withName);
-//      if (ofType == "KepAopParam")
-//        return new KepAopParam(withName);
-//      if (ofType == "KepTaParam")
-//        return new KepTaParam(withName);
-//      // add others here
-//      else
+    if (ofType == "KepIncParam")
+      return new KepIncParam(withName);
+    if (ofType == "KepRaanParam")
+      return new KepRaanParam(withName);
+    if (ofType == "KepAopParam")
+      return new KepAopParam(withName);
+    if (ofType == "KepTaParam")
+      return new KepTaParam(withName);
+    // add others here
+    else
         return NULL;
 }
 
@@ -110,17 +110,17 @@ Factory(Gmat::PARAMETER)
       creatables.push_back("ElapsedSecsParam");
       creatables.push_back("CurrentA1MjdParam");
       creatables.push_back("CartXParam");
-//        creatables.push_back("CartYParam");
-//        creatables.push_back("CartZParam");
-//        creatables.push_back("CartVxParam");
-//        creatables.push_back("CartVyParam");
-//        creatables.push_back("CartVzParam");
-//        creatables.push_back("KepSmaParam");
+      creatables.push_back("CartYParam");
+      creatables.push_back("CartZParam");
+      creatables.push_back("CartVxParam");
+      creatables.push_back("CartVyParam");
+      creatables.push_back("CartVzParam");
+      creatables.push_back("KepSmaParam");
       creatables.push_back("KepEccParam");
-//        creatables.push_back("KepIncParam");
-//        creatables.push_back("KepRaanParam");
-//        creatables.push_back("KepAopParam");
-//        creatables.push_back("KepTaParam");
+      creatables.push_back("KepIncParam");
+      creatables.push_back("KepRaanParam");
+      creatables.push_back("KepAopParam");
+      creatables.push_back("KepTaParam");
    }
 }
 
