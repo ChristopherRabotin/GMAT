@@ -227,7 +227,7 @@ Integer DragForce::GetIntegerParameter(const Integer id) const
 }
 
 
-Integer DragForce::SetIntegerParameter(const Integer id, const Real value)
+Integer DragForce::SetIntegerParameter(const Integer id, const Integer value)
 {
     return PhysicalModel::SetIntegerParameter(id, value);
 }
