@@ -107,21 +107,23 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 {
-    bool status;
+    bool status = false;
     
     wxString filename = GetDocument()->GetFilename();
     
     status = GmatAppData::GetGuiInterpreter()->
         InterpretScript(std::string(filename.c_str()));
 
-    // Update ResourceTree
-    GmatAppData::GetResourceTree()->UpdateResource();
-    GmatAppData::GetMissionTree()->UpdateMission();
+    if (status)
+    {
+        // Update ResourceTree
+        GmatAppData::GetResourceTree()->UpdateResource();
+        GmatAppData::GetMissionTree()->UpdateMission();
 
-    //loj: 3/17/04 Should I close all plot window?
+        //loj: 3/17/04 Should I close all plot window?
+        status = GmatAppData::GetGuiInterpreter()->RunScript();
+    }
     
-    status = GmatAppData::GetGuiInterpreter()->RunScript();
-
     return status;
 }
 

@@ -107,18 +107,21 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 {
-    bool status;
+    bool status = false;
     
     wxString filename = GetDocument()->GetFilename();
     
     status = GmatAppData::GetGuiInterpreter()->
         InterpretScript(std::string(filename.c_str()));
 
-    // Update ResourceTree
-    GmatAppData::GetResourceTree()->UpdateResource();
-    GmatAppData::GetMissionTree()->UpdateMission();
-    status = GmatAppData::GetGuiInterpreter()->RunScript();
-
+    if (status)
+    {
+        // Update ResourceTree
+        GmatAppData::GetResourceTree()->UpdateResource();
+        GmatAppData::GetMissionTree()->UpdateMission();
+        status = GmatAppData::GetGuiInterpreter()->RunScript();
+    }
+    
     return status;
 }
 
