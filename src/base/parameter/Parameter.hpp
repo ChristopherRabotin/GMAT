@@ -49,7 +49,10 @@ public:
    bool operator==(const Parameter &right) const;
    bool operator!=(const Parameter &right) const;
 
+   virtual std::string ToString(); //loj: 9/7/04 added
+   
    virtual Real GetReal();
+   virtual Rvector6 GetRvector6();
    
    virtual Real EvaluateReal();
    virtual Rvector6 EvaluateRvector6();

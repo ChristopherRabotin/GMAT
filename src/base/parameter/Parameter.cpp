@@ -245,45 +245,78 @@ bool Parameter::operator!=(const Parameter &right) const
 }
 
 //------------------------------------------------------------------------------
-// Real EvaluateReal()
+// std::string ToString()
 //------------------------------------------------------------------------------
 /**
- * Evaluates parameter value.
+ * @return parameter value converted to std::string.
  *
- * @return REAL_PARAMETER_UNDEFINED if derived class doesn't implement this
+ * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Real Parameter::EvaluateReal()
+std::string Parameter::ToString()
 {
-   return REAL_PARAMETER_UNDEFINED;
+   throw ParameterException
+      ("Parameter: GetReal() derived class must implement this.\n");
 }
 
 //------------------------------------------------------------------------------
 // Real GetReal()
 //------------------------------------------------------------------------------
 /**
- * retrieves parameter value without evaluating.
+ * @return parameter value without evaluating.
  *
- * @return REAL_PARAMETER_UNDEFINED if derived class has no implemention
+ * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
 Real Parameter::GetReal()
 {
-   return REAL_PARAMETER_UNDEFINED;
+   throw ParameterException
+      ("Parameter: GetReal() derived class must implement this.\n");
+}
+
+//------------------------------------------------------------------------------
+// Rvector6 GetRvector6()
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value without evaluating.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+Rvector6 Parameter::GetRvector6()
+{
+   throw ParameterException
+      ("Parameter: GetRvector6() derived class must implement this.\n");
+}
+
+//------------------------------------------------------------------------------
+// Real EvaluateReal()
+//------------------------------------------------------------------------------
+/**
+ * @return newly evaluated parameter value.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+Real Parameter::EvaluateReal()
+{
+   throw ParameterException
+      ("Parameter: EvaluateReal() derived class must implement this.\n");
 }
 
 //------------------------------------------------------------------------------
 // Rvector6 EvaluateRvector6()
 //------------------------------------------------------------------------------
 /**
- * Evaluates parameter value.
+ * @return newly evaluated parameter value.
  *
- * @return RVECTOR6_PARAMETER_UNDEFINED if derived class has no implemention
+ * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
 Rvector6 Parameter::EvaluateRvector6()
 {
-   return Rvector6::RVECTOR6_UNDEFINED;
+   throw ParameterException
+      ("Parameter: EvaluateRvector6() derived class must implement this.\n");
 }
 
 //------------------------------------------------------------------------------

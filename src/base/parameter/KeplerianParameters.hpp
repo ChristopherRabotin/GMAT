@@ -21,11 +21,8 @@
 #define KeplerianParameters_hpp
 
 #include "gmatdefs.hpp"
-#include "RealVar.hpp"
-#include "Rvec6Var.hpp"
-#include "Rvector6.hpp"
-#include "OrbitData.hpp"
 #include "OrbitReal.hpp"
+#include "OrbitRvec6.hpp" //loj: 9/8/04 added
 
 //==============================================================================
 //                              KepSMA
@@ -262,7 +259,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API KepElem : public Rvec6Var, OrbitData
+class GMAT_API KepElem : public OrbitRvec6
 {
 public:
 
@@ -272,19 +269,7 @@ public:
    const KepElem& operator=(const KepElem &right);
    virtual ~KepElem();
 
-   // methods inherited from Rvec6Var
-   virtual Rvector6 EvaluateRvector6();
-    
    // methods inherited from Parameter
-   virtual Integer GetNumObjects() const;
-   virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-   virtual bool SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj);
-    
-   virtual bool AddObject(GmatBase *obj);
-   virtual bool Validate();
    virtual bool Evaluate();
 
    // methods inherited from GmatBase

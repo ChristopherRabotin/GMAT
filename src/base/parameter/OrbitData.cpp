@@ -28,7 +28,7 @@
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_ORBITDATA 0
+//#define DEBUG_ORBITDATA 1
 
 using namespace GmatMathUtil;
 
@@ -133,11 +133,14 @@ Rvector6 OrbitData::GetCartState()
       for (int i=0; i<6; i++)
          mCartState[i] = statePtr[i];
 
-      //MessageInterface::ShowMessage("OrbitData::GetCartState() scEpoch=%f, mCartEpoch=%f\n"
-      //                              "state = %f, %f, %f, %f, %f, %f\n",
-      //                              mSpacecraft->GetRealParameter("Epoch"), mCartEpoch,
-      //                              mCartState[0], mCartState[1], mCartState[2],
-      //                              mCartState[3], mCartState[4], mCartState[5]);
+#if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage("OrbitData::GetCartState() scEpoch=%f, mCartEpoch=%f\n"
+                                    "state = %f, %f, %f, %f, %f, %f\n",
+                                    mSpacecraft->GetRealParameter("Epoch"), mCartEpoch,
+                                    mCartState[0], mCartState[1], mCartState[2],
+                                    mCartState[3], mCartState[4], mCartState[5]);
+#endif
+      
    }
    else if (elemType == "Keplerian")
    {

@@ -21,11 +21,8 @@
 #define CartesianParameters_hpp
 
 #include "gmatdefs.hpp"
-#include "RealVar.hpp"
-#include "Rvec6Var.hpp"
-#include "Rvector6.hpp"
-#include "OrbitData.hpp"
 #include "OrbitReal.hpp"
+#include "OrbitRvec6.hpp" //loj: 9/8/04 added
 
 //==============================================================================
 //                               CartX
@@ -216,7 +213,7 @@ protected:
  */
 //------------------------------------------------------------------------------
 
-class GMAT_API CartState : public Rvec6Var, OrbitData
+class GMAT_API CartState : public OrbitRvec6
 {
 public:
 
@@ -228,19 +225,7 @@ public:
    CartState& operator=(const CartState &right);
    virtual ~CartState();
 
-   // methods inherited from Rvec6Var
-   virtual Rvector6 EvaluateRvector6();
-    
    // methods inherited from Parameter
-   virtual Integer GetNumObjects() const;
-   virtual GmatBase* GetObject(const std::string &objTypeName);
-    
-   virtual bool SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj);
-    
-   virtual bool AddObject(GmatBase *obj);
-   virtual bool Validate();
    virtual bool Evaluate();
 
    // methods inherited from GmatBase

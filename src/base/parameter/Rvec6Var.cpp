@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "Rvec6Var.hpp"
 #include "ParameterException.hpp"
+#include <sstream>
 
 
 //---------------------------------
@@ -153,6 +154,21 @@ bool Rvec6Var::operator==(const Rvec6Var &right) const
 bool Rvec6Var::operator!=(const Rvec6Var &right) const
 {
    return Parameter::operator!=(right);
+}
+
+//loj: 9/7/04 added
+//------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value converted to std::string.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string Rvec6Var::ToString()
+{
+   return mRvec6Value.ToString();
 }
 
 //------------------------------------------------------------------------------

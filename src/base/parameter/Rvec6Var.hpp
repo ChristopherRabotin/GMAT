@@ -27,54 +27,56 @@ class GMAT_API Rvec6Var : public Parameter
 {
 public:
 
-    Rvec6Var(const std::string &name = "",
-             const std::string &typeStr = "Rvec6Var",
-             ParameterKey key = USER_PARAM,
-             GmatBase *obj = NULL,
-             const std::string &desc = "",
-             const std::string &unit = "",
-             bool isTimeParam = false);
-    Rvec6Var(const Rvec6Var &copy);
-    Rvec6Var& operator= (const Rvec6Var& right);
-    virtual ~Rvec6Var();
+   Rvec6Var(const std::string &name = "",
+            const std::string &typeStr = "Rvec6Var",
+            ParameterKey key = USER_PARAM,
+            GmatBase *obj = NULL,
+            const std::string &desc = "",
+            const std::string &unit = "",
+            bool isTimeParam = false);
+   Rvec6Var(const Rvec6Var &copy);
+   Rvec6Var& operator= (const Rvec6Var& right);
+   virtual ~Rvec6Var();
 
-    bool operator==(const Rvec6Var &right) const;
-    bool operator!=(const Rvec6Var &right) const;
+   bool operator==(const Rvec6Var &right) const;
+   bool operator!=(const Rvec6Var &right) const;
 
-    virtual Rvector6 EvaluateRvector6();
-    virtual Rvector6 GetRvector6() const;
-
-    // methods inherited from Parameter
-    virtual const std::string* GetParameterList() const;
-    
-    // methods inherited from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual std::string ToString(); //loj: 9/7/04 added
    
-    virtual Real GetRealParameter(const Integer id) const;
-    virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Rvector6 GetRvector6() const;
+   virtual Rvector6 EvaluateRvector6();
+
+   // methods inherited from Parameter
+   virtual const std::string* GetParameterList() const;
+    
+   // methods inherited from GmatBase
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer GetParameterID(const std::string str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real SetRealParameter(const Integer id, const Real value);
 
 protected:
     
-    enum
-    {
-        PARAM_1 = ParameterParamCount,
-        PARAM_2,
-        PARAM_3,
-        PARAM_4,
-        PARAM_5,
-        PARAM_6,
-        Rvec6VarParamCount
-    };
+   enum
+   {
+      PARAM_1 = ParameterParamCount,
+      PARAM_2,
+      PARAM_3,
+      PARAM_4,
+      PARAM_5,
+      PARAM_6,
+      Rvec6VarParamCount
+   };
 
-    Rvector6 mRvec6Value;
+   Rvector6 mRvec6Value;
         
-    static const Gmat::ParameterType
-       PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
-    static const std::string
-       PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
+   static const Gmat::ParameterType
+   PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount];
+   static const std::string
+   PARAMETER_TEXT[Rvec6VarParamCount - ParameterParamCount];
     
 private:
 

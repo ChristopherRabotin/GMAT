@@ -925,8 +925,11 @@ GmatBase* KepMM::Clone(void) const
 //------------------------------------------------------------------------------
 KepElem::KepElem(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
-   : Rvec6Var(name, "KepElem", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitRvec6(name, "KepElem", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   // Parameter member data
+   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
+   
    AddObject(obj);
 }
 
@@ -940,7 +943,7 @@ KepElem::KepElem(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 KepElem::KepElem(const KepElem &copy)
-   : Rvec6Var(copy)
+   : OrbitRvec6(copy)
 {
 }
 
@@ -957,7 +960,7 @@ const KepElem&
 KepElem::operator=(const KepElem &right)
 {
    if (this != &right)
-      Rvec6Var::operator=(right);
+      OrbitRvec6::operator=(right);
 
    return *this;
 }
@@ -973,103 +976,10 @@ KepElem::~KepElem()
 {
 }
 
-//-----------------------------------------
-// Inherited methods from Rvec6Var
-//-----------------------------------------
-
-//------------------------------------------------------------------------------
-// Rvector6 EvaluateRvector6()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Rvector6 KepElem::EvaluateRvector6()
-{
-   Evaluate();
-   return mRvec6Value;
-}
-
 
 //--------------------------------------
 // Inherited methods from Parameter
 //--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer KepElem::GetNumObjects() const
-{
-   return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* KepElem::GetObject(const std::string &objTypeName)
-{
-   return OrbitData::GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool KepElem::SetObject(Gmat::ObjectType objType,
-                        const std::string &objName,
-                        GmatBase *obj)
-{
-   if (obj != NULL)
-      return OrbitData::SetRefObject(objType, objName, obj);
-   else
-      return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool KepElem::AddObject(GmatBase *obj)
-{
-   if (obj != NULL)
-   {
-      if (AddRefObject(obj))
-         ManageObject(obj);
-        
-      return true;
-   }
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool KepElem::Validate()
-{
-   return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // bool Evaluate()

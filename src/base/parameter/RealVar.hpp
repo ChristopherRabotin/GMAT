@@ -26,51 +26,53 @@ class GMAT_API RealVar : public Parameter
 {
 public:
 
-    RealVar(const std::string &name = "",
-            const std::string &typeStr = "RealVar",
-            ParameterKey key = USER_PARAM,
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "",
-            bool isTimeParam = false);
-    RealVar(const RealVar &copy);
-    RealVar& operator= (const RealVar& right);
-    virtual ~RealVar();
+   RealVar(const std::string &name = "",
+           const std::string &typeStr = "RealVar",
+           ParameterKey key = USER_PARAM,
+           GmatBase *obj = NULL,
+           const std::string &desc = "",
+           const std::string &unit = "",
+           bool isTimeParam = false);
+   RealVar(const RealVar &copy);
+   RealVar& operator= (const RealVar& right);
+   virtual ~RealVar();
 
-    bool operator==(const RealVar &right) const;
-    bool operator!=(const RealVar &right) const;
+   bool operator==(const RealVar &right) const;
+   bool operator!=(const RealVar &right) const;
 
-    virtual Real EvaluateReal() = 0;
-    virtual Real GetReal() const;
-    
-    // methods inherited from Parameter
-    virtual const std::string* GetParameterList() const;
-
-    // methods inherited from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
+   virtual std::string ToString(); //loj: 9/7/04 added
    
-    virtual Real GetRealParameter(const std::string &label) const;
-    virtual Real GetRealParameter(const Integer id) const;
-    virtual Real SetRealParameter(const Integer id, const Real value);
-    virtual Real SetRealParameter(const std::string &label, const Real value);
-    
+   virtual Real EvaluateReal() = 0;
+   virtual Real GetReal() const;
+   
+   // methods inherited from Parameter
+   virtual const std::string* GetParameterList() const;
+   
+   // methods inherited from GmatBase
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer GetParameterID(const std::string str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual Real GetRealParameter(const std::string &label) const;
+   virtual Real GetRealParameter(const Integer id) const;
+   virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Real SetRealParameter(const std::string &label, const Real value);
+   
 protected:
 
-    Real mRealValue;
+   Real mRealValue;
     
-    enum
-    {
-        PARAM_1 = ParameterParamCount,
-        RealVarParamCount
-    };
+   enum
+   {
+      PARAM_1 = ParameterParamCount,
+      RealVarParamCount
+   };
     
-    static const Gmat::ParameterType
-       PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
-    static const std::string
-       PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[RealVarParamCount - ParameterParamCount];
+   static const std::string
+      PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
     
 private:
 

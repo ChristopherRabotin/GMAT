@@ -701,8 +701,11 @@ GmatBase* SphDecV::Clone(void) const
 //------------------------------------------------------------------------------
 SphElem::SphElem(const std::string &name, GmatBase *obj,
                  const std::string &desc, const std::string &unit)
-   : Rvec6Var(name, "SphElem", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitRvec6(name, "SphElem", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   // Parameter member data
+   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
+
    AddObject(obj);
 }
 
@@ -716,7 +719,7 @@ SphElem::SphElem(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 SphElem::SphElem(const SphElem &copy)
-   : Rvec6Var(copy)
+   : OrbitRvec6(copy)
 {
 }
 
@@ -732,7 +735,7 @@ SphElem::SphElem(const SphElem &copy)
 SphElem& SphElem::operator=(const SphElem &right)
 {
    if (this != &right)
-      Rvec6Var::operator=(right);
+      OrbitRvec6::operator=(right);
 
    return *this;
 }
@@ -748,103 +751,9 @@ SphElem::~SphElem()
 {
 }
 
-//-----------------------------------------
-// Inherited methods from Rvec6Var
-//-----------------------------------------
-
-//------------------------------------------------------------------------------
-// Rvector6 EvaluateRvector6()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Rvector6 SphElem::EvaluateRvector6()
-{
-   Evaluate();
-   return mRvec6Value;
-}
-
-
 //--------------------------------------
 // Inherited methods from Parameter
 //--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer SphElem::GetNumObjects() const
-{
-   return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* SphElem::GetObject(const std::string &objTypeName)
-{
-   return OrbitData::GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool SphElem::SetObject(Gmat::ObjectType objType,
-                        const std::string &objName,
-                        GmatBase *obj)
-{
-   if (obj != NULL)
-      return OrbitData::SetRefObject(objType, objName, obj);
-   else
-      return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool SphElem::AddObject(GmatBase *obj)
-{
-   if (obj != NULL)
-   {
-      if (AddRefObject(obj))
-         ManageObject(obj);
-        
-      return true;
-   }
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool SphElem::Validate()
-{
-   return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()

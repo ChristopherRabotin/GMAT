@@ -20,6 +20,7 @@
 #include "gmatdefs.hpp"
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
+#include <sstream>
 
 
 //---------------------------------
@@ -140,6 +141,24 @@ bool RealVar::operator==(const RealVar &right) const
 bool RealVar::operator!=(const RealVar &right) const
 {
    return Parameter::operator!=(right);
+}
+
+//loj: 9/7/04 added
+//------------------------------------------------------------------------------
+// std::string ToString()
+//------------------------------------------------------------------------------
+/**
+ * @return parameter value converted to std::string.
+ *
+ * @exception <ParameterException> thrown if this method is called.
+ */
+//------------------------------------------------------------------------------
+std::string RealVar::ToString()
+{
+   std::stringstream ss("");
+   ss.precision(10);
+   ss << mRealValue;
+   return std::string(ss.str());
 }
 
 //------------------------------------------------------------------------------

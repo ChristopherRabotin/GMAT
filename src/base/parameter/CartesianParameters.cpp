@@ -21,6 +21,9 @@
 #include "CartesianParameters.hpp"
 #include "ColorTypes.hpp"
 
+//#define DEBUG_CARTESIAN_PARAM 1
+
+
 //==============================================================================
 //                              CartX
 //==============================================================================
@@ -710,8 +713,11 @@ GmatBase* CartVz::Clone(void) const
 //------------------------------------------------------------------------------
 CartState::CartState(const std::string &name, GmatBase *obj,
                      const std::string &desc, const std::string &unit)
-   : Rvec6Var(name, "CartState", SYSTEM_PARAM, obj, desc, unit, false)
+   : OrbitRvec6(name, "CartState", SYSTEM_PARAM, obj, desc, unit, false)
 {
+   // Parameter member data
+   mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable
+   
    AddObject(obj);
 }
 
@@ -725,7 +731,7 @@ CartState::CartState(const std::string &name, GmatBase *obj,
  */
 //------------------------------------------------------------------------------
 CartState::CartState(const CartState &copy)
-   : Rvec6Var(copy)
+   : OrbitRvec6(copy)
 {
 }
 
@@ -741,7 +747,7 @@ CartState::CartState(const CartState &copy)
 CartState& CartState::operator=(const CartState &right)
 {
    if (this != &right)
-      Rvec6Var::operator=(right);
+      OrbitRvec6::operator=(right);
 
    return *this;
 }
@@ -757,103 +763,9 @@ CartState::~CartState()
 {
 }
 
-//-----------------------------------------
-// methods inherited from Rvec6Var
-//-----------------------------------------
-
-//------------------------------------------------------------------------------
-// Rvector6 EvaluateRvector6()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Rvector6 CartState::EvaluateRvector6()
-{
-   Evaluate();
-   return mRvec6Value;
-}
-
-
 //--------------------------------------
 // methods inherited from Parameter
 //--------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual Integer GetNumObjects() const
-//------------------------------------------------------------------------------
-/**
- * @return number of reference objects set.
- */
-//------------------------------------------------------------------------------
-Integer CartState::GetNumObjects() const
-{
-   return GetNumRefObjects();
-}
-
-//------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &objTypeName)
-//------------------------------------------------------------------------------
-GmatBase* CartState::GetObject(const std::string &objTypeName)
-{
-   return OrbitData::GetRefObject(objTypeName);
-}
-
-//------------------------------------------------------------------------------
-// virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                        GmatBase *obj
-//------------------------------------------------------------------------------
-/**
- * Sets reference object.
- *
- * @return true if the object has been set.
- */
-//------------------------------------------------------------------------------
-bool CartState::SetObject(Gmat::ObjectType objType,
-                          const std::string &objName,
-                          GmatBase *obj)
-{
-   if (obj != NULL)
-      return OrbitData::SetRefObject(objType, objName, obj);
-   else
-      return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool AddObject(GmatBase *obj)
-//------------------------------------------------------------------------------
-/**
- * Adds reference objects.
- *
- * @return true if the object has been added.
- */
-//------------------------------------------------------------------------------
-bool CartState::AddObject(GmatBase *obj)
-{
-   if (obj != NULL)
-   {
-      if (AddRefObject(obj))
-         ManageObject(obj);
-        
-      return true;
-   }
-
-   return false;
-}
-
-//------------------------------------------------------------------------------
-// virtual bool Validate()
-//------------------------------------------------------------------------------
-/**
- * Validates reference objects.
- *
- * @return true if all objects are set; false otherwise
- */
-//------------------------------------------------------------------------------
-bool CartState::Validate()
-{
-   return ValidateRefObjects(this);
-}
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -866,13 +778,21 @@ bool CartState::Validate()
 //------------------------------------------------------------------------------
 bool CartState::Evaluate()
 {    
-   mRvec6Value.Set(GetCartReal("CartX"),
-                   GetCartReal("CartY"),
-                   GetCartReal("CartZ"),
-                   GetCartReal("CartVx"),
-                   GetCartReal("CartVy"),
-                   GetCartReal("CartVz"));
+//     mRvec6Value.Set(GetCartReal("CartX"),
+//                     GetCartReal("CartY"),
+//                     GetCartReal("CartZ"),
+//                     GetCartReal("CartVx"),
+//                     GetCartReal("CartVy"),
+//                     GetCartReal("CartVz"));
 
+   mRvec6Value = GetCartState();
+   
+#if DEBUG_CARTESIAN_PARAM
+   MessageInterface::ShowMessage
+      ("CartState::Evaluate() mRvec6Value =\n%s\n",
+       mRvec6Value.ToString().c_str());
+#endif
+   
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
 
