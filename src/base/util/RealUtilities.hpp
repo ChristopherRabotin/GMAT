@@ -54,6 +54,10 @@ namespace GmatMathUtil
    static const Real DEG_PER_RAD=
       180.0 / 3.14159265358979323846264338327950288419716939937511;
    
+   static const Real ARCSEC_PER_DEGREE = 3600.0;
+   static const Real DEG_PER_ARCSEC = 1.0 / 3600.0;
+   static const Real RAD_PER_ARCSEC = DEG_PER_ARCSEC * RAD_PER_DEG;
+   
    //Mass (kilogram)
    static const Real LBM_TO_KG = 0.45359237;
    static const Real SLUG_TO_KG = 14.59390294;
@@ -92,7 +96,9 @@ namespace GmatMathUtil
    Real    Deg(Real angleInRad, bool modBy360 = false);
    Real    DegToRad(Real deg, bool modBy2Pi = false); //loj: 4/19/04 added
    Real    RadToDeg(Real rad, bool modBy360 = false); //loj: 4/19/04 added
-
+   Real    ArcsecToDeg(Real asec,bool modBy360 = false); // wcs: 2005/02/07 added
+   Real    ArcsecToRad(Real asec,bool modBy2Pi = false); // wcs: 2005/02/07 added
+   
    Real    Sin(Real angleInRad, Real cycleInRad=TWO_PI); 
    //loj:Real    SinXOverX(Real angleInRad, Real cycleInRad=TWO_PI); 
    Real    Cos(Real angleInRad, Real cycleInRad=TWO_PI); 

@@ -242,6 +242,28 @@ Real GmatMathUtil::RadToDeg(Real rad, bool modBy360)
 }
 
 //------------------------------------------------------------------------------
+//  Real ArcsecToDeg(Real asec, bool modBy360 = false)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ArcsecToDeg(Real asec, bool modBy360)
+{
+   Real x= DEG_PER_ARCSEC * asec;
+   
+   return (modBy360 ? x - floor(x/360.0)*360.0 : x);
+}
+
+//------------------------------------------------------------------------------
+//  Real ArcsecToRad (Real asec, bool modBy2Pi)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ArcsecToRad (Real asec, bool modBy2Pi)
+{
+   Real x = RAD_PER_ARCSEC * asec;
+   
+   return (modBy2Pi ? x - floor(x/TWO_PI)*TWO_PI
+                    : x);
+}
+
+
+//------------------------------------------------------------------------------
 //  Real Sin (Real angleInRad, Real cycleInRad)
 //------------------------------------------------------------------------------
 Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
