@@ -448,7 +448,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          param = GetParameter(params[i]);
          
          // if system parameter
-         if (param->GetKey() == Parameter::SYSTEM_PARAM)
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
          {
             oldParamName = param->GetName();
             // if parameter name has old name (loj: 11/23/04 - added)
