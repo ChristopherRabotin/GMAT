@@ -27,9 +27,10 @@
 #include "SphericalParameters.hpp"
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
-#include "EnvParameters.hpp"     //loj: 12/10/04 Added
-#include "PlanetParameters.hpp"  //loj: 12/14/04 Added
+#include "EnvParameters.hpp"
+#include "PlanetParameters.hpp"
 #include "Variable.hpp"
+#include "StringVar.hpp" //loj: 1/5/05 Added
 #include "Array.hpp"
 
 //---------------------------------
@@ -52,6 +53,8 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    // User defined parameters
    if (ofType == "Variable")
       return new Variable(withName);
+   if (ofType == "String")
+      return new StringVar(withName);
    if (ofType == "Array")
       return new Array(withName);
    
@@ -88,7 +91,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepInc(withName);
    if (ofType == "RAAN")
       return new KepRAAN(withName);
-   if (ofType == "RADN") //loj: 12/10/04 Added
+   if (ofType == "RADN")
       return new KepRADN(withName);
    if (ofType == "AOP")
       return new KepAOP(withName);
@@ -142,7 +145,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    // Angular parameters
    if (ofType == "SemilatusRectum")
       return new SemilatusRectum(withName);
-   if (ofType == "HMAG") //loj: 12/10/04 Added HMAG, HX, HY, HZ
+   if (ofType == "HMAG")
       return new AngularMomentumMag(withName);
    if (ofType == "HX")
       return new AngularMomentumX(withName);
@@ -152,11 +155,11 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new AngularMomentumZ(withName);
 
    // Environmental parameters
-   if (ofType == "AtmosDensity") //loj: 12/10/04 Added AtmosDensity
+   if (ofType == "AtmosDensity")
       return new AtmosDensity(withName);
    
    // Planet parameters
-   if (ofType == "GHA") //loj: 12/14/04 Added GHA, Longitude, Latitude, LST, BetaAngle
+   if (ofType == "GHA")
       return new GHA(withName);
    if (ofType == "Longitude")
       return new Longitude(withName);
@@ -190,6 +193,7 @@ ParameterFactory::ParameterFactory()
    {
       // User defined parameters
       creatables.push_back("Variable");
+      creatables.push_back("String");
       creatables.push_back("Array");
       
       // Time parameters
