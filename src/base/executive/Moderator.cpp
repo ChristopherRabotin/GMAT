@@ -302,12 +302,28 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 {
     Spacecraft *sc =
         theFactoryManager->CreateSpacecraft(type, name);
-    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() sc = %d\n", sc);
-    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() name = " +
-    //                              sc->GetName() + "\n");
-    //MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Element1 = %f\n",
-    //                              sc->GetRealParameter("Element1"));
-    theConfigManager->AddSpacecraft(sc);
+
+    if (sc == NULL)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSpacecraft() Error Creating "
+                                      "%s.  Check SpacecraftFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating Spacecraft");
+        //return NULL;
+    }
+    
+    // Manage it if it is a named Spacecraft
+    try
+    {
+        if (sc->GetName() != "")
+            theConfigManager->AddSpacecraft(sc);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSpacecraft()\n" +
+                                      e.GetMessage());
+    }
+
     return sc;
 }
 
@@ -325,10 +341,6 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
     Spacecraft *sc = theConfigManager->GetSpacecraft(name);
-    //MessageInterface::ShowMessage("Moderator::GetSpacecraft() name = " +
-    //                              sc->GetName() + "\n");
-    //MessageInterface::ShowMessage("Moderator::GetSpacecraft() Element1 = %f\n",
-    //                              sc->GetRealParameter("Element1"));
 
     return sc;
 }
@@ -353,7 +365,13 @@ Propagator* Moderator::CreatePropagator(const std::string &type, const std::stri
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
     if (prop ==  NULL)
-        return NULL;
+    {
+        MessageInterface::ShowMessage("Moderator::CreatePropagator() Error Creating "
+                                      "%s.  Check PropagatorFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating Propagator");
+        //return NULL;
+    }
     
     // Manage it if it is a named Propagator
     try
@@ -405,7 +423,13 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
     PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
     
     if (physicalModel ==  NULL)
-        return NULL;
+    {
+        MessageInterface::ShowMessage("Moderator::CreatePhysicalModel() Error Creating "
+                                      "%s.  Check PhysicalModelFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating PhysicalModel");
+        //return NULL;
+    }
     
     // Manage it if it is a named PhysicalModel
     try
@@ -457,7 +481,13 @@ Burn* Moderator::CreateBurn(const std::string &type,
     Burn *burn = theFactoryManager->CreateBurn(type, name);
 
     if (burn ==  NULL)
-        return NULL;
+    {
+        MessageInterface::ShowMessage("Moderator::CreateBurn() Error Creating "
+                                      "%s.  Check BurnFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating Burn");
+        //return NULL;
+    }
     
     // Manage it if it is a named burn
     try
@@ -508,7 +538,14 @@ Parameter* Moderator::CreateParameter(const std::string &type, const std::string
     Parameter *parameter = theFactoryManager->CreateParameter(type, name);
 
     if (parameter == NULL)
-        return NULL;
+    {
+
+        MessageInterface::ShowMessage("Moderator::CreateParameter() Error Creating " +
+                                      type + ".  Check ParameterFactory. \n");
+
+        throw GmatBaseException("Error Creating Parameter");
+        //return NULL;
+    }
 
     // Manage it if it is a named parameter
     try
@@ -548,8 +585,28 @@ Parameter* Moderator::GetParameter(const std::string &name)
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
     ForceModel *fm = theFactoryManager->CreateForceModel(name);
-    if (name != "")
-        theConfigManager->AddForceModel(fm);
+
+    if (fm == NULL)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateForceModel() Error Creating "
+                                      "%s.  Check ForceModelFactory. \n", name.c_str());
+
+        throw GmatBaseException("Error Creating ForceModel");
+        //return NULL;
+    }
+    
+    // Manage it if it is a named parameter
+    try
+    {
+        if (fm->GetName() != "")
+            theConfigManager->AddForceModel(fm);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
+                                      e.GetMessage());
+    }
+
     return fm;
 }
 
@@ -582,8 +639,15 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
     StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+    
     if (stopCond ==  NULL)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateStopCondition() Error Creating "
+                                      "%s.  Check StopConditionFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating StopCondition");
         return NULL;
+    }
     
     // Manage it if it is a named stopCondition
     try
@@ -593,7 +657,7 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
     }
     catch (BaseException &e)
     {
-        MessageInterface::ShowMessage("Moderator::CreateStopCond()\n" +
+        MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
                                       e.GetMessage());
     }
     
@@ -624,8 +688,17 @@ StopCondition* Moderator::GetStopCondition(const std::string &name)
 Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
 {
     Solver *solver = theFactoryManager->CreateSolver(type, name);
-    // Manage it if it is a named solver
 
+    if (solver == NULL)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSolver() Error Creating "
+                                      "%s.  Check SolverFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating Solver");
+        //return NULL;
+    }
+    
+    // Manage it if it is a named solver
     try
     {
         if (solver->GetName() != "")
@@ -743,7 +816,29 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
 {
     // type is such as "Earth", "Moon" - we need const string EarthString etc.
     CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
-    theConfigManager->AddCelestialBody(body);
+    
+    if (body == NULL)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateCelestialBody() Error Creating "
+                                      "%s.  Check CelestialBodyFactory. \n", type.c_str());
+
+        throw GmatBaseException("Error Creating CelestialBody");
+        //return NULL;
+    }
+    
+    // Manage it if it is a named body
+    //loj: Do we want to add bodies tnat are not in the default solar system?
+    try
+    {
+        if (body->GetName() != "")
+            theConfigManager->AddCelestialBody(body);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+                                      e.GetMessage());
+    }
+    
     return body;
 }
 
@@ -925,6 +1020,7 @@ GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string
 bool Moderator::LoadDefaultMission()
 {
     CreateDefaultMission();
+    
     return true;
 }
 
@@ -1132,7 +1228,8 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
     }
     catch (BaseException &e)
     {
-        MessageInterface::ShowMessage(e.GetMessage() +"\n");
+        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
+                                       "\n Check type in the appropriate Factory");
         return false;
     }
 }
@@ -1153,7 +1250,17 @@ bool Moderator::SaveScript(const std::string &scriptFilename)
     MessageInterface::ShowMessage("Moderator::SaveScript() entered\n"
                                   "file: " + scriptFilename + "\n");
     MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " + scriptFilename);
-    return theScriptInterpreter->Build(scriptFilename);
+
+    try
+    {
+        return theScriptInterpreter->Build(scriptFilename);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+        return false;
+    }
+    
 }
 
 //------------------------------------------------------------------------------
@@ -1187,90 +1294,100 @@ void Moderator::CreateDefaultMission()
     MessageInterface::ShowMessage("========================================\n");
     MessageInterface::ShowMessage("Moderator creating default mission...\n");
 
-    // SolarSystem
-    theDefaultSolarSystem = new SolarSystem("DefaultSS");
+    try
+    {
+        // SolarSystem
+        theDefaultSolarSystem = new SolarSystem("DefaultSS");
 
-    // Spacecraft
-    Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
+        // Spacecraft
+        Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
 
-    // PropSetup
-    PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
+        // PropSetup
+        PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
 
-    // Parameters
-    Parameter *currTime = CreateParameter("CurrA1Mjd", "DefaultSC.CurrentTime");
-    Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-    Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
-    Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
-    Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
-    Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
-    Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
-    Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
+        // Parameters
+        Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+        Parameter *elapsedSecs = CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
+        Parameter *cartX = CreateParameter("CartX", "DefaultSC.X");
+        Parameter *cartY = CreateParameter("CartY", "DefaultSC.Y");
+        Parameter *cartZ = CreateParameter("CartZ", "DefaultSC.Z");
+        Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
+        Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
+        Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
     
-//      Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
-//      Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
-//      Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.INC");
-//      Parameter *kepRaan = CreateParameter("KepRaan", "DefaultSC.RAAN");
-//      Parameter *kepAop = CreateParameter("KepAop", "DefaultSC.AOP");
-//      Parameter *kepTa = CreateParameter("KepTa", "DefaultSC.TA");
+        //Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
+        //Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
+        //Parameter *kepInc = CreateParameter("KepInc", "DefaultSC.INC");
+        //Parameter *kepRaan = CreateParameter("KepRaan", "DefaultSC.RAAN");
+        //Parameter *kepAop = CreateParameter("KepAop", "DefaultSC.AOP");
+        //Parameter *kepTa = CreateParameter("KepTa", "DefaultSC.TA");
     
-    currTime->AddObject(sc);
-    elapsedSecs->AddObject(sc);
-    cartX->AddObject(sc);
-    cartY->AddObject(sc);
-    cartZ->AddObject(sc);
-    cartVx->AddObject(sc);
-    cartVy->AddObject(sc);
-    cartVz->AddObject(sc);
+        currTime->AddObject(sc);
+        elapsedSecs->AddObject(sc);
+        cartX->AddObject(sc);
+        cartY->AddObject(sc);
+        cartZ->AddObject(sc);
+        cartVx->AddObject(sc);
+        cartVy->AddObject(sc);
+        cartVz->AddObject(sc);
 
-    currTime->SetDesc(currTime->GetName());
-    elapsedSecs->SetDesc(elapsedSecs->GetName());
-    cartX->SetDesc(cartX->GetName());
-    cartY->SetDesc(cartY->GetName());
-    cartZ->SetDesc(cartZ->GetName());
-    cartVx->SetDesc(cartVx->GetName());
-    cartVy->SetDesc(cartVy->GetName());
-    cartVz->SetDesc(cartVz->GetName());
+        currTime->SetDesc(currTime->GetName());
+        elapsedSecs->SetDesc(elapsedSecs->GetName());
+        cartX->SetDesc(cartX->GetName());
+        cartY->SetDesc(cartY->GetName());
+        cartZ->SetDesc(cartZ->GetName());
+        cartVx->SetDesc(cartVx->GetName());
+        cartVy->SetDesc(cartVy->GetName());
+        cartVz->SetDesc(cartVz->GetName());
 
-//      kepSma->AddObject(sc);
-//      kepEcc->AddObject(sc);
-//      kepInc->AddObject(sc);
-//      kepRaan->AddObject(sc);
-//      kepAop->AddObject(sc);
-//      kepTa->AddObject(sc);
+        //kepSma->AddObject(sc);
+        //kepEcc->AddObject(sc);
+        //kepInc->AddObject(sc);
+        //kepRaan->AddObject(sc);
+        //kepAop->AddObject(sc);
+        //kepTa->AddObject(sc);
         
-    // StopCondition
-    //loj: 2/12/04 Propagate command knows "Duration" only
-    //StopCondition *stopCond = CreateStopCondition("SingleValueStop", "StopOnElapsedSecs");
-    StopCondition *stopCond = CreateStopCondition("SingleValueStop", "Duration");
-    stopCond->AddParameter(elapsedSecs);
-    stopCond->SetGoal(8640.0);
+        // StopCondition
+        //loj: 2/12/04 Propagate command knows "Duration" only
+        //StopCondition *stopCond = CreateStopCondition("SingleValueStop", "StopOnElapsedSecs");
+        StopCondition *stopCond = CreateStopCondition("SingleValueStop", "Duration");
+        stopCond->AddParameter(elapsedSecs);
+        stopCond->SetGoal(8640.0);
 
-    // Subscribers
-    // ReportFile
-    Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
-    sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-    sub->Activate(false);
+        // Subscribers
+        // ReportFile
+        Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+        sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+        sub->Activate(false);
     
-    // XyPlot
-    sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
-    sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
-    sub->SetStringParameter("DepVar", "DefaultSC.X");
-    sub->Activate(true);
+        // XyPlot
+        sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
+        sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
+        sub->SetStringParameter("DepVar", "DefaultSC.X");
+        sub->Activate(true);
     
-    // OpenGlPlot
-    sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
-    sub->Activate(true);
+        // OpenGlPlot
+        sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+        sub->Activate(true);
     
-    // Propagate Command
-    GmatCommand *propCommand = CreateCommand("Propagate");
-    propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
-    propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
-    propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
-    propCommand->SetSolarSystem(theDefaultSolarSystem);
+        // Propagate Command
+        GmatCommand *propCommand = CreateCommand("Propagate");
+        propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
+        propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);    
+        propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
+        propCommand->SetSolarSystem(theDefaultSolarSystem);
 
-    // Add propagate command
-    AppendCommand(propCommand);
-
+        // Add propagate command
+        AppendCommand(propCommand);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::PopupMessage(Gmat::ERROR_,
+                                       "Moderator::CreateDefaultMission() Error "
+                                       "occurred during default mission creation. "
+                                       "Default mission will not run");
+    }
+    
 }
 
 //------------------------------------------------------------------------------
