@@ -27,6 +27,7 @@
 
 #include "gmatwxdefs.hpp"
 
+#include "ViewTextFrame.hpp"
 #include "GmatSplitterWindow.hpp"
 #include "GmatNotebook.hpp"
 #include "GmatMainNotebook.hpp"
@@ -53,9 +54,11 @@ public:
    // constructors
    GmatMainFrame(const wxString& title, const wxPoint& pos, const wxSize& size,
                  long style);
-                 
+   static ViewTextFrame* GetViewTextFrame() { return mTextFrame; };
+    
 protected:
 private:
+   static ViewTextFrame *mTextFrame;
    GmatMainNotebook *rightTabs;
    wxMenuBar *CreateMainMenu();
    void InitToolBar(wxToolBar* toolBar);
@@ -65,6 +68,8 @@ private:
    void OnProjectExit(wxCommandEvent& WXUNUSED(event));
    void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
    void OnCloseTabs(wxCommandEvent& WXUNUSED(event));
+   //loj: addded
+   void OnDemoBatchRun(wxCommandEvent& WXUNUSED(event));
 
    // IDs for the controls and the menu commands
    enum
@@ -120,6 +125,9 @@ private:
 
       MENU_HELP_TOPICS,
       MENU_HELP_DEMOS,
+
+      MENU_DEMO_BATCH_RUN, //loj: added
+      
       // it is important for the id corresponding to the "About" command to have
       // this standard value as otherwise it won't be handled properly under Mac
       // (where it is special and put into the "Apple" menu)    
