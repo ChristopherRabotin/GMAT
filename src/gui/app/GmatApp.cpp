@@ -12,6 +12,11 @@
 // Author: Linda Jun
 // Created: 2003/08/08
 //
+// 11/24/2003 - D. Conway, Thinking Systems, Inc.
+// Changes:
+//  - Added test for Unix envirnment, and set the size if the main frame in that
+//    environment, so that the Linux build (and, presumably, Unix builds) would
+//    appear reasonably sized.
 /**
  * This class contains GMAT main application. Program starts here.
  */
@@ -85,11 +90,14 @@ bool GmatApp::OnInit()
     {
         // get GuiInterpreter
         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
-   
+
+        // Make default size larger for Linux
+        wxSize size = ((wxUSE_UNIX != 1) ? wxDefaultSize : wxSize(800, 600));
+        
         // create the main application window
         GmatMainFrame *mainFrame =
             new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
-                              wxDefaultPosition, wxDefaultSize,
+                              wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE);
 
         // and show it (the frames, unlike simple controls, are not shown when
@@ -111,7 +119,7 @@ bool GmatApp::OnInit()
         }
 
         //loj: How do I change the title?
-        wxLogError(wxT("The error occurred during the initialization. The GMAT will exit"));
+        wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));
         wxLog::FlushActive();
         status = false;
     }
