@@ -47,6 +47,7 @@ TimeReal::TimeReal(const std::string &name, const std::string &typeStr,
    AddRefObject(obj);
 }
 
+
 //------------------------------------------------------------------------------
 // TimeReal(const TimeReal &copy)
 //------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ TimeReal::TimeReal(const TimeReal &copy)
    : RealVar(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // TimeReal& operator=(const TimeReal &right)
@@ -78,6 +80,7 @@ TimeReal& TimeReal::operator=(const TimeReal &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~TimeReal()
 //------------------------------------------------------------------------------
@@ -89,21 +92,10 @@ TimeReal::~TimeReal()
 {
 }
 
-//-------------------------------------
-// Inherited methods from RealVar
-//-------------------------------------
 
-//------------------------------------------------------------------------------
-// virtual Real GetReal()
-//------------------------------------------------------------------------------
-/**
- * @return newly evaluated value of parameter
- */
-//------------------------------------------------------------------------------
-Real TimeReal::GetReal()
-{
-   return mRealValue;
-}
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual Real EvaluateReal()
@@ -118,9 +110,6 @@ Real TimeReal::EvaluateReal()
    return mRealValue;
 }
 
-//-------------------------------------
-// Inherited methods from Parameter
-//-------------------------------------
 
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const
@@ -134,41 +123,6 @@ Integer TimeReal::GetNumRefObjects() const
    return TimeData::GetNumRefObjects();
 }
 
-//  //------------------------------------------------------------------------------
-//  // GmatBase* GetObject(const std::string &objTypeName)
-//  //------------------------------------------------------------------------------
-//  /**
-//   * @return reference object pointer of given object type
-//   */
-//  //------------------------------------------------------------------------------
-//  GmatBase* TimeReal::GetObject(const std::string &objTypeName)
-//  {
-//     return TimeData::GetRefObject(objTypeName);
-//  }
-
-//  //------------------------------------------------------------------------------
-//  // virtual bool SetObject(Gmat::ObjectType objType, const std::string &objName,
-//  //                        GmatBase *obj
-//  //------------------------------------------------------------------------------
-//  /**
-//   * Sets reference object.
-//   *
-//   * @param <objType> object type
-//   * @param <objName> object name
-//   *
-//   * @return true if the object has been set.
-//   */
-//  //------------------------------------------------------------------------------
-//  bool TimeReal::SetObject(Gmat::ObjectType objType, const std::string &objName,
-//                            GmatBase *obj)
-//  {
-//     //Initialize(); //loj: 4/28/04 Initialize() will be called during run setup
-//     //loj: 3/31/04 do not check for NULL so it can reset object
-//     //if (obj != NULL) 
-//     return TimeData::SetRefObject(objType, objName, obj);
-//     //else
-//     //return false;
-//  }
 
 //------------------------------------------------------------------------------
 // virtual bool AddRefObject(GmatBase *obj)
@@ -189,6 +143,7 @@ bool TimeReal::AddRefObject(GmatBase *obj)
       return false;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual bool Validate()
 //------------------------------------------------------------------------------
@@ -202,6 +157,7 @@ bool TimeReal::Validate()
 {
    return ValidateRefObjects(this);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void Initialize()
@@ -219,11 +175,11 @@ void TimeReal::Initialize()
    InitializeRefObjects();
 }
 
+
 //-------------------------------------
 // Methods inherited from GmatBase
 //-------------------------------------
 
-//loj: 11/16/04 added
 //---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
@@ -234,6 +190,7 @@ bool TimeReal::RenameRefObject(const Gmat::ObjectType type,
 {
    return TimeData::RenameRefObject(type, oldName, newName);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -248,6 +205,7 @@ std::string TimeReal::GetRefObjectName(const Gmat::ObjectType type) const
 {
    return TimeData::GetRefObjectName(type);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetRefObjectName(const Gmat::ObjectType type,
@@ -267,6 +225,7 @@ bool TimeReal::SetRefObjectName(const Gmat::ObjectType type,
    return TimeData::SetRefObjectName(type, name);
 }
 
+
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                                const std::string &name)
@@ -285,6 +244,7 @@ GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
 {
    return TimeData::GetRefObject(type, name);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
