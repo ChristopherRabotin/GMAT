@@ -264,13 +264,12 @@ bool Maneuver::Initialize(void)
     if (!sat)
         return false;
     
-    burn->SetSpacecraftToManeuver(sat);
-    
     return true;
 }
 
 
 bool Maneuver::Execute(void)
 {
+    burn->SetSpacecraftToManeuver(sat);
     return burn->Fire();
 }

@@ -19,6 +19,10 @@
 
 
 #include "ImpulsiveBurn.hpp"
+#include "MessageInterface.hpp"
+
+
+//#define DEBUG_IMPULSIVE_BURN
 
 
 //------------------------------------------------------------------------------
@@ -77,32 +81,56 @@ ImpulsiveBurn::~ImpulsiveBurn()
  */
 bool ImpulsiveBurn::Fire(Real *burnData)
 {
-    frame = frameman->GetFrameInstance(coordFrame);
-    if (frame == NULL)
-        throw BurnException("Maneuver frame undefined");
+   #ifdef DEBUG_IMPULSIVE_BURN
+      MessageInterface::ShowMessage("ImpulsiveBurn::Fire entered for %s\n",
+         instanceName.c_str());
+   #endif
+
+   frame = frameman->GetFrameInstance(coordFrame);
+   if (frame == NULL)
+      throw BurnException("Maneuver frame undefined");
     
-    PropState *state;
-    if (sc)    
-        state = &sc->GetState();
-    else
-        throw BurnException("Maneuver initial state undefined (No spacecraft?)");
+   PropState *state;
+   if (sc)    
+      state = &sc->GetState();
+   else
+      throw BurnException("Maneuver initial state undefined (No spacecraft?)");
     
-    // Set the state 6-vector from the associated spacecraft
-    frame->SetState(state->GetState());
-    // Calculate the maneuver basis vectors
-    frame->CalculateBasis(frameBasis);
+   // Set the state 6-vector from the associated spacecraft
+   frame->SetState(state->GetState());
+   // Calculate the maneuver basis vectors
+   frame->CalculateBasis(frameBasis);
     
-    // Add in the delta-V
-    (*state)[3] += deltaV[0]*frameBasis[0][0] +
-                deltaV[1]*frameBasis[0][1] +
-                deltaV[2]*frameBasis[0][2];
-    (*state)[4] += deltaV[0]*frameBasis[1][0] +
-                deltaV[1]*frameBasis[1][1] +
-                deltaV[2]*frameBasis[1][2];
-    (*state)[5] += deltaV[0]*frameBasis[2][0] +
-                deltaV[1]*frameBasis[2][1] +
-                deltaV[2]*frameBasis[2][2];
-    return true;
+   #ifdef DEBUG_IMPULSIVE_BURN
+      MessageInterface::ShowMessage(
+         "   Maneuvering spacecraft %s\n",
+         sc->GetName().c_str());
+      MessageInterface::ShowMessage(
+         "   Position for burn:    %18le  %18le  %18le\n",
+         (*state)[0], (*state)[1], (*state)[2]);
+      MessageInterface::ShowMessage(
+         "   Velocity before burn: %18le  %18le  %18le\n",
+         (*state)[3], (*state)[4], (*state)[5]);
+   #endif
+
+   // Add in the delta-V
+   (*state)[3] += deltaV[0]*frameBasis[0][0] +
+               deltaV[1]*frameBasis[0][1] +
+               deltaV[2]*frameBasis[0][2];
+   (*state)[4] += deltaV[0]*frameBasis[1][0] +
+               deltaV[1]*frameBasis[1][1] +
+               deltaV[2]*frameBasis[1][2];
+   (*state)[5] += deltaV[0]*frameBasis[2][0] +
+               deltaV[1]*frameBasis[2][1] +
+               deltaV[2]*frameBasis[2][2];
+
+   #ifdef DEBUG_IMPULSIVE_BURN
+      MessageInterface::ShowMessage(
+         "   Velocity after burn:  %18le  %18le  %18le\n",
+         (*state)[3], (*state)[4], (*state)[5]);
+   #endif
+
+   return true;
 }
 
 //------------------------------------------------------------------------------
