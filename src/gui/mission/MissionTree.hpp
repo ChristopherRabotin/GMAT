@@ -15,15 +15,13 @@
 #ifndef MissionTree_hpp
 #define MissionTree_hpp
 
-#include "gmatwxdefs.hpp"
-
 #include "wx/treectrl.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
 
-#include "DecoratedTree.hpp"
-#include "GuiInterpreter.hpp"
 #include "GmatMainNotebook.hpp"
+#include "GuiInterpreter.hpp"
+#include "DecoratedTree.hpp"
 
 class MissionTree : public DecoratedTree
 {
@@ -32,8 +30,8 @@ public:
    MissionTree(wxWindow *parent, const wxWindowID id,
                const wxPoint& pos, const wxSize& size,
                long style);
-   void SetMainNotebook (GmatMainNotebook *mainNotebook);
-   GmatMainNotebook *GetMainNotebook();
+//   void SetMainNotebook (GmatMainNotebook *mainNotebook);
+//   GmatMainNotebook *GetMainNotebook();
 
 protected:
 
@@ -79,13 +77,13 @@ private:
       POPUP_ADD_BEFORE,
       POPUP_ADD_AFTER,
    
-      POPUP_ADD_MANEUVER_BEFORE,
-      POPUP_ADD_PROPAGATE_BEFORE,
-      POPUP_ADD_TARGET_BEFORE,
+      POPUP_ADD_BEFORE_MANEUVER,
+      POPUP_ADD_BEFORE_PROPAGATE,
+      POPUP_ADD_BEFORE_TARGET,
       
-      POPUP_ADD_MANEUVER_AFTER,
-      POPUP_ADD_PROPAGATE_AFTER,
-      POPUP_ADD_TARGET_AFTER
+      POPUP_ADD_AFTER_MANEUVER,
+      POPUP_ADD_AFTER_PROPAGATE,
+      POPUP_ADD_AFTER_TARGET
    };
 };
 

@@ -12,8 +12,15 @@
  * This class provides the tree for missions.
  */
 //------------------------------------------------------------------------------
-#include "MissionTree.hpp"
 #include "bitmaps/file.xpm"
+
+//#include "Command.hpp"
+//#include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
+#include "MissionTree.hpp"
+#include "MessageInterface.hpp"
+
+#include "Maneuver.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -35,13 +42,13 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
 
-   EVT_MENU(POPUP_ADD_MANEUVER_BEFORE, MissionTree::OnAddBeforeManeuver)
-   EVT_MENU(POPUP_ADD_PROPAGATE_BEFORE, MissionTree::OnAddBeforePropagate)
-   EVT_MENU(POPUP_ADD_TARGET_BEFORE, MissionTree::OnAddBeforeTarget)
+   EVT_MENU(POPUP_ADD_BEFORE_MANEUVER, MissionTree::OnAddBeforeManeuver)
+   EVT_MENU(POPUP_ADD_BEFORE_PROPAGATE, MissionTree::OnAddBeforePropagate)
+   EVT_MENU(POPUP_ADD_BEFORE_TARGET, MissionTree::OnAddBeforeTarget)
    
-   EVT_MENU(POPUP_ADD_MANEUVER_AFTER, MissionTree::OnAddAfterManeuver)
-   EVT_MENU(POPUP_ADD_PROPAGATE_AFTER, MissionTree::OnAddAfterPropagate)
-   EVT_MENU(POPUP_ADD_TARGET_AFTER, MissionTree::OnAddAfterTarget)
+   EVT_MENU(POPUP_ADD_AFTER_MANEUVER, MissionTree::OnAddAfterManeuver)
+   EVT_MENU(POPUP_ADD_AFTER_PROPAGATE, MissionTree::OnAddAfterPropagate)
+   EVT_MENU(POPUP_ADD_AFTER_TARGET, MissionTree::OnAddAfterTarget)
 
 END_EVENT_TABLE()
 
@@ -70,6 +77,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
               :DecoratedTree(parent, id, pos, size, style)
 {
     this->parent = parent;
+    mainNotebook = GmatAppData::GetMainNotebook();
 //    this->SetNodes();
     this->SetParameter(BOXCOUNT, 2);
     this->SetParameter(BOXWIDTH, 20);
@@ -77,33 +85,34 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
     AddDefaultMission();
 }
 
-//------------------------------------------------------------------------------
-// void SetMainNotebook (GmatMainNotebook *mainNotebook)
-//------------------------------------------------------------------------------
-/**
- * Sets GmatMainNotebook object.
- *
- * @param <mainNotebook> input GmatMainNotebook.
- */
-//------------------------------------------------------------------------------
-void MissionTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
-{
-  this->mainNotebook = mainNotebook;
-}
-
-//------------------------------------------------------------------------------
-// GmatMainNotebook *GetMainNotebook()
-//------------------------------------------------------------------------------
-/**
- * Gets the GmatMainNotebook object.
- *
- * @return GmatMainNotebook object.
- */
-//------------------------------------------------------------------------------
-GmatMainNotebook *MissionTree::GetMainNotebook()
-{
-   return this->mainNotebook;
-}
+// ag:  Removed because GmatAppData stores MainNotebook
+////------------------------------------------------------------------------------
+//// void SetMainNotebook (GmatMainNotebook *mainNotebook)
+////------------------------------------------------------------------------------
+///**
+// * Sets GmatMainNotebook object.
+// *
+// * @param <mainNotebook> input GmatMainNotebook.
+// */
+////------------------------------------------------------------------------------
+//void MissionTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
+//{
+//  this->mainNotebook = mainNotebook;
+//}
+//
+////------------------------------------------------------------------------------
+//// GmatMainNotebook *GetMainNotebook()
+////------------------------------------------------------------------------------
+///**
+// * Gets the GmatMainNotebook object.
+// *
+// * @return GmatMainNotebook object.
+// */
+////------------------------------------------------------------------------------
+//GmatMainNotebook *MissionTree::GetMainNotebook()
+//{
+//   return this->mainNotebook;
+//}
 
 //-------------------------------
 // private methods
@@ -212,15 +221,15 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 
     wxMenu *menuAddBefore = new wxMenu;;
     
-    menuAddBefore->Append(POPUP_ADD_MANEUVER_BEFORE, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_PROPAGATE_BEFORE, wxT("Propagate"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_TARGET_BEFORE, wxT("Target"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_TARGET, wxT("Target"), wxT(""), FALSE);
 
     wxMenu *menuAddAfter = new wxMenu;;
     
-    menuAddAfter->Append(POPUP_ADD_MANEUVER_AFTER, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_PROPAGATE_AFTER, wxT("Propagate"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_TARGET_AFTER, wxT("Target"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_TARGET, wxT("Target"), wxT(""), FALSE);
 
     menu->Append(POPUP_ADD_BEFORE, wxT("Insert Before"), menuAddBefore, wxT(""));
     menu->Append(POPUP_ADD_AFTER, wxT("Insert After"), menuAddAfter, wxT(""));
