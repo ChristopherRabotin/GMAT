@@ -12,8 +12,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-# Assignment.cpp - will be added in SRC later 
-SRC = Achieve.cpp BranchCommand.cpp Command.cpp \
+SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp Command.cpp \
 	CommandException.cpp ElseCommand.cpp EndIfCommand.cpp \
 	EndForCommand.cpp EndTarget.cpp ForCommand.cpp IfCommand.cpp \
 	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Toggle.cpp Vary.cpp
