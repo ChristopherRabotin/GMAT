@@ -47,7 +47,7 @@
 Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
                                              const std::string &withName)
 {
-   // User defined parameters (loj: 9/22/04 added)
+   // User defined parameters
    if (ofType == "Variable")
       return new Variable(withName);
    if (ofType == "Array")
@@ -74,7 +74,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new CartVy(withName);
    if (ofType == "VZ")
       return new CartVz(withName);
-   if (ofType == "CartState")  //loj: 9/2/04 added
+   if (ofType == "CartState")
       return new CartState(withName);
 
     // Keplerian parameters
@@ -94,7 +94,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepMA(withName);
    if (ofType == "MM")
       return new KepMM(withName);
-   if (ofType == "KepElem")  //loj: 9/2/04 added
+   if (ofType == "KepElem")
       return new KepElem(withName);
 
    // Spherical parameters
@@ -110,7 +110,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SphRAV(withName);
    if (ofType == "DECV")
       return new SphDecV(withName);
-   if (ofType == "SphElem")  //loj: 9/2/04 added
+   if (ofType == "SphElem")
       return new SphElem(withName);
 
    // Orbital parameters
@@ -124,6 +124,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Periapsis(withName);
    if (ofType == "OrbitPeriod")
       return new OrbitPeriod(withName);
+   if (ofType == "RadApo")  //loj: 10/6/04 added RadApo, RadPer, C3Energy, Energy
+      return new RadApoapsis(withName);
+   if (ofType == "RadPer")
+      return new RadPeriapsis(withName);
+   if (ofType == "C3Energy")
+      return new C3Energy(withName);
+   if (ofType == "Energy")
+      return new Energy(withName);
 
    // Angular parameters
    if (ofType == "SemilatusRectum")
@@ -150,7 +158,7 @@ ParameterFactory::ParameterFactory()
 {
    if (creatables.empty())
    {
-      // User defined parameters (loj: 9/22/04 added)
+      // User defined parameters
       creatables.push_back("Variable");
       creatables.push_back("Array");
       
@@ -166,7 +174,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VX");
       creatables.push_back("VY");
       creatables.push_back("VZ");
-      creatables.push_back("CartState"); //loj: 9/2/04 added
+      creatables.push_back("CartState");
 
       // Keplerian parameters
       creatables.push_back("SMA");
@@ -177,7 +185,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("TA");
       creatables.push_back("MA");
       creatables.push_back("MM");
-      creatables.push_back("KepElem"); //loj: 9/2/04 added
+      creatables.push_back("KepElem");
 
       // Spherical parameters
       creatables.push_back("RMAG");
@@ -186,7 +194,7 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VMAG");
       creatables.push_back("RAV");
       creatables.push_back("DECV");
-      creatables.push_back("SphElem"); //loj: 9/2/04 added
+      creatables.push_back("SphElem");
 
       // Orbital parameters
       creatables.push_back("VelApoapsis");
@@ -194,6 +202,10 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Apoapsis");
       creatables.push_back("Periapsis");
       creatables.push_back("OrbitPeriod");
+      creatables.push_back("RadApo"); //loj: 10/6/04 added RadApo, RadPer, C3Energy, Energy
+      creatables.push_back("RadPer");
+      creatables.push_back("C3Energy");
+      creatables.push_back("Energy");
 
       // Angular parameters
       creatables.push_back("SemilatusRectum");

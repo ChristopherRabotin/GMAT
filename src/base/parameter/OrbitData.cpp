@@ -423,10 +423,26 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
    {
       return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
    }
+   else if (str == "RadApoapsis")
+   {
+      return sma * (1.0 + ecc);
+   }
+   else if (str == "RadPeriapsis")
+   {
+      return sma * (1.0 - ecc);
+   }
+   else if (str == "C3Energy")
+   {
+      return -grav / sma;
+   }
+   else if (str == "Energy")
+   {
+      return -grav / (2.0 * sma);
+   }
    else
    {
-      throw ParameterException("OrbitData::GetOtherKepReal() Unknown parameter name: " +
-                               str);
+      throw ParameterException
+         ("OrbitData::GetOtherKepReal() Unknown parameter name: " + str);
    }
 }
 

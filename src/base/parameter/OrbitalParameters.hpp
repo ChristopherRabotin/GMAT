@@ -15,7 +15,8 @@
 //
 /**
  * Declares other Keplerian related parameter classes.
- *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod
+ *   VelApoapsis, VelPeriapsis, Apoapsis, Periapsis, OrbitPeriod,
+ *   RadApoapsis, RadPeriapais, C3Energy, Energy
  */
 //------------------------------------------------------------------------------
 #ifndef OrbitalParameters_hpp
@@ -172,4 +173,128 @@ public:
 protected:
 
 };
+
+//==============================================================================
+//                              RadApoapsis
+//==============================================================================
+/**
+ * Declares RadApoapsis class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API RadApoapsis : public OrbitReal
+{
+public:
+
+   RadApoapsis(const std::string &name = "",
+               GmatBase *obj = NULL,
+               const std::string &desc = "",
+               const std::string &unit = "");
+   RadApoapsis(const RadApoapsis &copy);
+   const RadApoapsis& operator=(const RadApoapsis &right);
+   virtual ~RadApoapsis();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+//==============================================================================
+//                              RadPeriapsis
+//==============================================================================
+/**
+ * Declares RadPeriapsis class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API RadPeriapsis : public OrbitReal
+{
+public:
+
+   RadPeriapsis(const std::string &name = "",
+                GmatBase *obj = NULL,
+                const std::string &desc = "",
+                const std::string &unit = "");
+   RadPeriapsis(const RadPeriapsis &copy);
+   const RadPeriapsis& operator=(const RadPeriapsis &right);
+   virtual ~RadPeriapsis();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+//==============================================================================
+//                              C3Energy
+//==============================================================================
+/**
+ * Declares C3Energy class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API C3Energy : public OrbitReal
+{
+public:
+
+   C3Energy(const std::string &name = "",
+            GmatBase *obj = NULL,
+            const std::string &desc = "",
+            const std::string &unit = "");
+   C3Energy(const C3Energy &copy);
+   const C3Energy& operator=(const C3Energy &right);
+   virtual ~C3Energy();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
+//==============================================================================
+//                              Energy
+//==============================================================================
+/**
+ * Declares Energy class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API Energy : public OrbitReal
+{
+public:
+
+   Energy(const std::string &name = "",
+          GmatBase *obj = NULL,
+          const std::string &desc = "",
+          const std::string &unit = "");
+   Energy(const Energy &copy);
+   const Energy& operator=(const Energy &right);
+   virtual ~Energy();
+
+   // The inherited methods from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
 #endif // OrbitalParameters_hpp
