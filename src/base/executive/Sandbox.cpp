@@ -74,11 +74,15 @@ bool Sandbox::AddObject(GmatBase *obj)
 
    // Check to see if the object is already in the map
    if (objectMap.find(name) == objectMap.end())
+   {
       // If not, store the new object pointer
       /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
-      if ((obj->GetType() == Gmat::SPACECRAFT) || 
+      if ((obj->GetType() == Gmat::SPACECRAFT) ||
           (obj->GetType() == Gmat::FORMATION)) {
-         objectMap[name] = obj->Clone(); // new Spacecraft(*((Spacecraft*)obj));
+         //loj: 1/13/05 Cloning causes problem rerunning
+         //objectMap[name] = obj->Clone(); // new Spacecraft(*((Spacecraft*)obj));
+         objectMap[name] = obj;
+         
          if(obj->GetType() == Gmat::SPACECRAFT)
          {
             if (solarSys)
@@ -90,7 +94,12 @@ bool Sandbox::AddObject(GmatBase *obj)
       }
       else
          objectMap[name] = obj;
-    
+   }
+   else
+   {
+      MessageInterface::ShowMessage("%s is already in the map\n", name.c_str());
+   }
+   
    return true;
 }
 
@@ -247,14 +256,14 @@ bool Sandbox::Initialize()
             Parameter *param = (Parameter*)(omi->second);
 
             // Set reference object for system parameters
-            if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
+            if (param->GetKey() == GmatParam::SYSTEM_PARAM)
             {
+               std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
 #if DEBUG_SANDBOX
                MessageInterface::ShowMessage
-                  ("Sandbox::Initialize() for parameter \"%s\"\n",
-                   param->GetName().c_str());
+                  ("Sandbox::Initialize() Set SC<%s> pointer on parameter: \"%s\"\n",
+                   scName.c_str(), param->GetName().c_str());
 #endif
-               std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
                param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
                param->SetSolarSystem(solarSys);
                param->Initialize();
@@ -313,22 +322,14 @@ bool Sandbox::Initialize()
             ("Sandbox::Initialize() subType=%s, subName=%s\n",
              sub->GetTypeName().c_str(), sub->GetName().c_str());
 #endif
-         //loj: 11/9/04
-         // Remove if block when all subscribers support GetRefObjectNameArray()
-         // and SetRefObject()
-         //loj: 11/17/04 added ReportFile
-         if (sub->GetTypeName() == "XYPlot" || sub->GetTypeName() == "ReportFile")
+         
+         StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
+         for (unsigned int i=0; i<refParamNames.size(); i++)
          {
-            StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
-            for (unsigned int i=0; i<refParamNames.size(); i++)
-            {
-               refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
-               sub->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
-            }
+            refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
+            sub->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
          }
          
-         //loj: 12/14/04 Added
-         // OpenGLPlot need planet's info 
          if (sub->GetTypeName() == "OpenGLPlot")
             sub->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
          
@@ -464,14 +465,15 @@ void Sandbox::Clear()
    state     = IDLE;
     
    // Delete the clones (currently only Spacecraft and Formations get cloned)
-   std::map<std::string, GmatBase *>::iterator omi;
-   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
-   {
-//      if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
-//          ((omi->second)->GetType() == Gmat::FORMATION))
-      if ((omi->second)->GetType() == Gmat::SPACECRAFT)
-         delete omi->second;
-   }
+   //loj: 1/13/05 comment this out. Cloning object causes problem rerunning.
+//     std::map<std::string, GmatBase *>::iterator omi;
+//     for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+//     {
+//  //        if (((omi->second)->GetType() == Gmat::SPACECRAFT) || 
+//  //            ((omi->second)->GetType() == Gmat::FORMATION))
+//        if ((omi->second)->GetType() == Gmat::SPACECRAFT)
+//           delete omi->second;
+//     }
    
    objectMap.clear();
 }
