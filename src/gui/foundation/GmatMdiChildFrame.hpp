@@ -33,15 +33,15 @@ public:
                         long style = wxDEFAULT_FRAME_STYLE, 
                         const wxString& name = "");
     ~GmatMdiChildFrame();
+    wxString GetTitle();
+    void OnClose();
    
 protected:
     wxString title;
     
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
-    void OnClose(wxCommandEvent& event);
-    wxString GetTitle();
-    
+
     // IDs for the controls and the menu commands
     enum
     {     

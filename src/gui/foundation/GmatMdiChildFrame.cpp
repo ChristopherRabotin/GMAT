@@ -49,13 +49,14 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 }
 
 
-void GmatMdiChildFrame::OnClose(wxCommandEvent& event)
+void GmatMdiChildFrame::OnClose()
 {
    // check if window is dirty?
-   
+  
    // remove from list of frames
+   GmatAppData::GetMainFrame()->RemoveChild(title);
+
 //   event.Skip();
-//   GmatAppData::GetMainFrame()->RemoveChild(title);
 }
 
 wxString GmatMdiChildFrame::GetTitle()
