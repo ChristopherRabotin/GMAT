@@ -24,7 +24,7 @@
 #include "CoordUtil.hpp"         // for Cartesian to Keplerian conversion
 #include "AngleUtil.hpp"
 #include "UtilityException.hpp"
-#include "SphericalTwo.hpp"      // for friend ToSphericalTwo()
+#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC()
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
@@ -128,12 +128,12 @@ Rvector6 OrbitData::GetCartState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
    
-#if DEBUG_ORBITDATA
+   #if DEBUG_ORBITDATA
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() stateType=%s, internalCoordName=%s, outCoordName=%s\n",
        elemType.c_str(), mInternalCoordSystem->GetName().c_str(),
        mOutCoordSystem->GetName().c_str());
-#endif
+   #endif
    
    if (elemType == "Cartesian")
    {
@@ -153,20 +153,20 @@ Rvector6 OrbitData::GetCartState()
       // convert to output CoordinateSystem (loj: 1/21/05)
       if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
       {
-#if DEBUG_ORBITDATA_CONVERT
+         #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\n"
              "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
-#endif
+         #endif
 
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
                                  mCartState, mOutCoordSystem);
          
-#if DEBUG_ORBITDATA_CONVERT
+         #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() After convert: mCartEpoch=%f\n"
              "state = %s\n", mCartEpoch, outState.ToString().c_str());
-#endif
+         #endif
          
       }
    }
@@ -181,10 +181,10 @@ Rvector6 OrbitData::GetCartState()
       Rvector6 keplState = Rvector6(kepl);
       Rvector6 cartState;
 
-#if DEBUG_ORBITDATA
+      #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage("OrbitData::GetCartState() keplState=%s\n",
                                     keplState.ToString().c_str());
-#endif
+      #endif
       
       cartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
       mCartState = cartState;
@@ -210,7 +210,7 @@ Rvector6 OrbitData::GetKepState()
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
       
-#ifdef DEBUG_ORBITDATA_DETAILS
+   #ifdef DEBUG_ORBITDATA_DETAILS
    PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
    std::cout << "   elemType == " << elemType <<"\n";
@@ -218,7 +218,7 @@ Rvector6 OrbitData::GetKepState()
    {
       std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
    }            
-#endif
+   #endif
 
    if (elemType == "Keplerian")
    {
@@ -226,9 +226,9 @@ Rvector6 OrbitData::GetKepState()
             
       for (int i=0; i<6; i++)
       {
-#ifdef DEBUG_ORBITDATA_DETAILS
+         #ifdef DEBUG_ORBITDATA_DETAILS
          std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
-#endif
+         #endif
          mKepState[i] = statePtr[i];
       }            
    }
@@ -241,10 +241,10 @@ Rvector6 OrbitData::GetKepState()
       Real grav = mGravConst;
       Rvector6 keplState;
       
-#if DEBUG_ORBITDATA
+      #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s\n",
                                     cartState.ToString().c_str());
-#endif
+      #endif
       
       Real ma;
       keplState = CartesianToKeplerian(cartState, grav, &ma);
@@ -279,20 +279,20 @@ Rvector6 OrbitData::GetSphState()
       //Rvector6 cartState = mSpacecraft->GetCartesianState(); 
       Rvector6 cartState = GetCartState();
       
-#if DEBUG_ORBITDATA
+      #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
          ("OrbitData::GetSphState() cartState=%s\n",
           cartState.ToString().c_str());
-#endif
+      #endif
       
-      // update SphericalTwo state
-      SphericalTwo sph2 = ToSphericalTwo(Cartesian(cartState));
+      // update SphericalRADEC state (loj: 2/3/05 Changed from ToSphericalTwo()
+      SphericalRADEC sph2 = CartesianToSphericalRADEC(cartState);
 
-#if DEBUG_ORBITDATA
+      #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
          ("OrbitData::GetSphState() sph2=%s\n",
           sph2.ToString().c_str());
-#endif
+      #endif
       
       mSphState[0] = sph2.GetPositionMagnitude();
       mSphState[1] = sph2.GetRightAscension();
@@ -457,11 +457,11 @@ Real OrbitData::GetSphReal(const std::string &str)
 {
    Rvector6 state = GetSphState();
 
-#if DEBUG_ORBITDATA
+   #if DEBUG_ORBITDATA
    MessageInterface::ShowMessage
       ("OrbitData::GetSphReal() str=%s state=%s\n",
        str.c_str(), state.ToString().c_str());
-#endif
+   #endif
    
    if (str == "SphRMag")
       return mSphState[RMAG];
@@ -602,10 +602,10 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void OrbitData::InitializeRefObjects()
 {
-#if DEBUG_ORBITDATA
+   #if DEBUG_ORBITDATA
    MessageInterface::ShowMessage
       ("OrbitData::InitializeRefObjects() entered.\n");
-#endif
+   #endif
    
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
 
