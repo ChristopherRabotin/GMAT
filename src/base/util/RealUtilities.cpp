@@ -305,9 +305,11 @@ Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
 {
    if (cycleInRad<=0.0) 
       throw RealUtilitiesExceptions::ArgumentError();
-   else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
-      throw RealUtilitiesExceptions::ArgumentError();
-   
+
+   //loj: 2/14/05 commented out
+   //else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0))
+   //   throw RealUtilitiesExceptions::ArgumentError();
+
    return tan( (TWO_PI/cycleInRad)*angleInRad);
 }
 
