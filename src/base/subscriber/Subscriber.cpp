@@ -66,6 +66,29 @@ Subscriber::Subscriber(const Subscriber &copy) :
 }
 
 //------------------------------------------------------------------------------
+// Subscriber& Subscriber::operator=(const Subscriber& sub)
+//------------------------------------------------------------------------------
+/**
+ * The assignment operator
+ */
+//------------------------------------------------------------------------------
+Subscriber& Subscriber::operator=(const Subscriber& sub)
+{
+    if (this == &sub)
+        return *this;
+
+    GmatBase::operator=(sub);
+    
+    // is this right?
+    data = sub.data;
+    next = sub.next;
+    active = true;
+    isEndOfReceive = false;
+
+    return *this;
+}
+
+//------------------------------------------------------------------------------
 // ~Subscriber(void)
 //------------------------------------------------------------------------------
 Subscriber::~Subscriber(void)
