@@ -13,7 +13,8 @@ GUIHEADERS = -I../../gui/include \
         -I../../gui/app \
         -I../../gui/view \
         -I../../gui/foundation \
-        -I../../gui/plot
+        -I../../gui/plot \
+        -I../../gui/mission
 
 OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
 
