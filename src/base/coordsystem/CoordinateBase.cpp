@@ -513,7 +513,7 @@ bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          {
             origin = (SpacePoint*) obj;
          }
-         else if (name == j2000BodyName)
+         if (name == j2000BodyName)
          {
             j2000Body = (SpacePoint*) obj;
          }
