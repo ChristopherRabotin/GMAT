@@ -20,7 +20,10 @@
 
 #include "Msise90Atmosphere.hpp"
 #include <math.h>
+#include "MessageInterface.hpp"
+#include "CelestialBody.hpp"
 
+#define DEBUG_MSISE90_ATMOSPHERE
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere()
@@ -32,10 +35,7 @@
 Msise90Atmosphere::Msise90Atmosphere() :
     AtmosphereModel     ("MSISE90"),
     fileData            (false),
-    fluxfilename        (""),
-    nominalF107         (125.0),
-    nominalF107a        (172.0),
-    nominalAp           (40.0)
+    fluxfilename        ("")
 {
 }
 
@@ -68,31 +68,84 @@ Msise90Atmosphere::~Msise90Atmosphere()
 bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
-    Integer i, i6;
-    Real    alt;
+   Integer i, i6;
+   Real    alt;
   
-    // For now, hard code the MSISE90 parameters.
-    Real    lon   =   -70.0;     /// @todo: longitude calculations
-    Real    lst   =    16.0;     /// @todo: Code local apparent solar time (Hrs)
-    Real    lat, rad, arg;
-    Real    den[8], temp[2];
-    
-    GetInputs(epoch);
-    for (i = 0; i < count; ++i) {
-        i6 = i*6;
-        rad = sqrt(pos[ i6 ]*pos[ i6 ] + 
-                   pos[i6+1]*pos[i6+1] + 
-                   pos[i6+2]*pos[i6+2]);
-        alt = rad - 6378.14;
-        // For now, geocentric latitude
-        arg = pos[i6+2] / rad;
-        arg = ((fabs(arg) <= 1.0) ? arg : arg / fabs(arg));
-        lat = acos(arg) * 180.0 / M_PI; 
-        msise90.GTD6(yd,sod,alt,lat,lon,lst,f107a,f107,ap,48,den,temp);
-        density[i] = den[5];
-    }
-    
-    return true;
+   Real    lon;     // longitude
+   Real    lst;     // Local apparent solar time (Hrs)
+   Real    radlat, lat, geolat, rad, geoRad, arg;
+   Real    den[8], temp[2], rad2deg = 180.0 / M_PI, ra;
+   Real    flatteningFactor = 1.0 / 298.257223563;  // WGS-84
+   Real    geodesicFactor = 6378.137 * (1.0 - flatteningFactor);
+
+////// Lifted from PlanetData
+   if (mCentralBody == NULL)
+      throw AtmosphereException(
+         "Central body pointer not set in MSISE90 model.");
+
+   Real gmst, gha = mCentralBody->GetHourAngle(epoch);
+
+   GetInputs(epoch);
+   for (i = 0; i < count; ++i) {
+      i6 = i*6;
+
+      //--------------------------------------------------
+      // Longitude
+      //--------------------------------------------------
+      // Get spacecraft RightAscension
+      ra = atan2(pos[i6+1], pos[i6]) * rad2deg;
+
+      // Compute east longitude
+      lon = ra - gha;
+
+      lat = atan2(pos[i6+2], sqrt(pos[i6]*pos[i6] + pos[i6+1]*pos[i6+1]))
+               * rad2deg;
+
+      // compute Local Sidereal Time (LST = GMST + Longitude)
+      // according to Vallado Eq. 3-41
+      gmst = -gha;
+      lst = gmst + lon;
+
+      // convert it to hours (1h = 15 deg according to Vallado 3.5)
+      lst /= 15.0;
+      rad = sqrt(pos[ i6 ]*pos[ i6 ] +
+                 pos[i6+1]*pos[i6+1] +
+                 pos[i6+2]*pos[i6+2]);
+      // Now geodetic latitude
+      arg = pos[i6+2] / rad;
+      arg = ((fabs(arg) <= 1.0) ? arg : arg / fabs(arg));
+      radlat = M_PI / 2.0 - acos(arg);
+      // Convert to geodetic latitude, in degrees
+      radlat += flatteningFactor * sin(2.0 * radlat);
+      geolat = radlat * 180.0 / M_PI;
+
+      // Geodetic altitude
+      geoRad = geodesicFactor / sqrt(1.0 - (2.0 - flatteningFactor) *
+                                flatteningFactor * cos(radlat) * cos(radlat));
+      alt = rad - geoRad;
+
+      #ifdef DEBUG_MSISE90_ATMOSPHERE
+         MessageInterface::ShowMessage(
+            "Calculating MSISE90 Density from parameters:\n   "
+            "yd = %d\n   sod = %lf   alt = %lf\n   lat = %lf\n   lon = %lf\n"
+            "   lst = %lf\n   f107a = %lf\n   f107 = %lf\n   ap = "
+            "[%lf %lf %lf %lf %lf %lf %lf]\n", yd, sod, alt, lat, lon, lst,
+            f107a, f107, ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
+         MessageInterface::ShowMessage(
+            "   Radius = %15.9lf\n   GeodesicRad = %15.9lf\n  "
+            "GeodesicLat = %lf\n", rad, geoRad, geolat);
+      #endif
+
+      msise90.GTD6(yd,sod,alt,lat,lon,lst,f107a,f107,ap,48,den,temp);
+      density[i] = den[5];
+
+      #ifdef DEBUG_MSISE90_ATMOSPHERE
+         MessageInterface::ShowMessage(
+            "   Density = %15.9le\n", density[i]);
+      #endif
+   }
+
+   return true;
 }
 
 
@@ -156,11 +209,7 @@ GmatBase* Msise90Atmosphere::Clone() const
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
 AtmosphereModel     (msise),
 fileData            (false),  // is this correct?
-fluxfilename        (msise.fluxfilename),
-nominalF107         (msise.nominalF107),
-nominalF107a        (msise.nominalF107a),
-nominalAp           (msise.nominalAp)
+fluxfilename        (msise.fluxfilename)
 {
-   
 }
 

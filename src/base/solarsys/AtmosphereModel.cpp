@@ -20,6 +20,27 @@
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+AtmosphereModel::PARAMETER_TEXT[AtmosphereModelParamCount-GmatBaseParamCount] =
+{
+   "F107",
+   "F107A",
+   "MagneticIndex"
+};
+
+const Gmat::ParameterType
+AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
+{
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE
+};
+
 //------------------------------------------------------------------------------
 //  AtmosphereModel()
 //------------------------------------------------------------------------------
@@ -30,12 +51,16 @@
 AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
     GmatBase            (Gmat::ATMOSPHERE, typeStr),
     fileReader          (NULL),
+    mCentralBody        (NULL),
     sunVector           (NULL),
     centralBody         ("Earth"),
     centralBodyLocation (NULL),
     cbRadius            (6378.14),
     newFile             (false),
-    fileRead            (false)
+    fileRead            (false),
+    nominalF107         (150.0),
+    nominalF107a        (150.0),
+    nominalAp           (13.85)     // Corresponds to kp = 3, per Vallado (8-31)
 {
     fileName = "";
 }
@@ -59,14 +84,17 @@ AtmosphereModel::~AtmosphereModel()
  */
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
-GmatBase            (am),
-fileReader          (NULL),
-sunVector           (NULL),
-centralBody         (am.centralBody),
-centralBodyLocation (NULL),
-cbRadius            (am.cbRadius),
-newFile             (am.newFile),
-fileRead            (am.fileRead)
+   GmatBase            (am),
+   fileReader          (NULL),
+   sunVector           (NULL),
+   centralBody         (am.centralBody),
+   centralBodyLocation (NULL),
+   cbRadius            (am.cbRadius),
+   newFile             (am.newFile),
+   fileRead            (am.fileRead),
+   nominalF107         (am.nominalF107),
+   nominalF107a        (am.nominalF107a),
+   nominalAp           (am.nominalAp)
 {
 }
 
@@ -136,6 +164,159 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 void AtmosphereModel::SetSolarSystem(SolarSystem *ss)
 {
    solarSystem = ss;
+}
+
+//------------------------------------------------------------------------------
+// void SetCentralBody(CelestialBody *cb)
+//------------------------------------------------------------------------------
+/**
+ * Sets the central body pointer
+ *
+ * @param cb Pointer to the central body used in the modeling.
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetCentralBody(CelestialBody *cb)
+{
+   mCentralBody = cb;
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string AtmosphereModel::GetParameterText(const Integer id) const
+{
+   if ((id >= GmatBaseParamCount) && (id < AtmosphereModelParamCount))
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   return GmatBase::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Integer AtmosphereModel::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatBaseParamCount; i < AtmosphereModelParamCount; ++i)
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType AtmosphereModel::GetParameterType(const Integer id) const
+{
+   if ((id >= GmatBaseParamCount) && (id < AtmosphereModelParamCount))
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   return GmatBase::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string AtmosphereModel::GetParameterTypeString(const Integer id) const
+{
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Real parameter value, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter value.
+ *
+ * @return  Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::GetRealParameter(const Integer id) const
+{
+   if (id == NOMINAL_FLUX)
+      return nominalF107;
+   if (id == NOMINAL_AVERGE_FLUX)
+      return nominalF107a;
+   if (id == NOMINAL_MAGNETIC_INDEX)
+      return nominalAp;
+
+   return GmatBase::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Real parameter value, given the input parameter ID.
+ *
+ * This method traps entries for F107, F107A, and the Magnetic index and ensures
+ * that these parameters have positive values.
+ *
+ * @param <id> ID for the parameter whose value to change.
+ * @param <value> value for the parameter.
+ *
+ * @return  Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == NOMINAL_FLUX)
+   {
+      if (value > 0.0)
+         nominalF107 = value;
+      return nominalF107;
+   }
+
+   if (id == NOMINAL_AVERGE_FLUX)
+   {
+      if (value > 0.0)
+         nominalF107a = value;
+      return nominalF107a;
+   }
+
+   if (id == NOMINAL_MAGNETIC_INDEX)
+   {
+      if (value > 0.0)
+         nominalAp = value;
+      return nominalAp;
+   }
+
+   return GmatBase::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------

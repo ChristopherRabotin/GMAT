@@ -659,7 +659,6 @@ void ForceModel::UpdateInitialData()
 {
    Integer cf = currentForce;
    PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
-//   PhysicalModel *currentPm;
 
    // Variables used to set spacecraft parameters
    std::string parmName, stringParm;

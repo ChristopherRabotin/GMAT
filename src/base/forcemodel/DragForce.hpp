@@ -39,12 +39,15 @@ public:
     DragForce&          operator=(const DragForce& df); 
  
     virtual bool        GetComponentMap(Integer * map, Integer order = 1) const;
-    void                SetSatelliteParameter(const Integer i, 
+    virtual void        SetSatelliteParameter(const Integer i,
                                               const std::string parmName, 
                                               const Real parm);
-    void                SetSatelliteParameter(const Integer i, 
+    virtual void        SetSatelliteParameter(const Integer i,
                                               const std::string parmName, 
                                               const std::string parm);
+    virtual void        ClearSatelliteParameters(
+                                              const std::string parmName = "");
+
     bool                Initialize();
     virtual bool        GetDerivatives(Real * state, Real dt = 0.0, 
                                        Integer order = 1);

@@ -57,9 +57,9 @@ DragForce::DragForce(const std::string &name) :
     //bodyName               ("Earth"),
     dataType               ("Constant"),
     fluxFile               (""),
-    fluxF107               (230.0),
-    fluxF107A              (210.0),
-    ap                     (40.0),
+    fluxF107               (150.0),
+    fluxF107A              (150.0),
+    ap                     (13.85),
     atmosphereModelID      (parameterCount),
     centralBodyID          (parameterCount+1), //loj: Why do we need this? PhysicalModel has the body.
     sourceTypeID           (parameterCount+2),
@@ -322,6 +322,27 @@ void DragForce::SetSatelliteParameter(const Integer i,
 
 
 //------------------------------------------------------------------------------
+// void ClearSatelliteParameters(const std::string parmName)
+//------------------------------------------------------------------------------
+/**
+ * Resets the DragForce to receive a new set of satellite parameters.
+ *
+ * @param parmName name of the Spacecraft parameter.  The empty string clear all
+ *                 of the satellite parameters for the PhysicalModel.
+ */
+//------------------------------------------------------------------------------
+void DragForce::ClearSatelliteParameters(const std::string parmName)
+{
+   if ((parmName == "DryMass") || (parmName == ""))
+      mass.clear();
+   if ((parmName == "Cd") || (parmName == ""))
+      dragCoeff.clear();
+   if ((parmName == "DragArea") || (parmName == ""))
+      area.clear();
+}
+
+
+//------------------------------------------------------------------------------
 // void Initialize(void)
 //------------------------------------------------------------------------------
 /**
@@ -377,6 +398,7 @@ bool DragForce::Initialize()
            if (atmos)  {
                atmos->SetSunVector(sunLoc);
                atmos->SetCentralBodyVector(cbLoc);
+               atmos->SetCentralBody(centralBody);
                atmos->SetSolarSystem(solarSystem);
            }
            else {
@@ -538,6 +560,16 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
                            << deriv[4+i6] << "  "
                            << deriv[5+i6] << "\n";
             #endif
+//for (Integer m = 0; m < satCount; ++m) {
+//   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
+//      state[i6], state[i6+1], state[i6+2]);
+//   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
+//      state[i6+3], state[i6+4], state[i6+5]);
+//   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+//      deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+//   MessageInterface::ShowMessage("   Density:    %16.9le\n",
+//      density[i]);
+//}
         }
         else 
         {
@@ -556,6 +588,16 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
                            << deriv[1+i6] << "  "
                            << deriv[2+i6] << "\n";
             #endif
+//for (Integer m = 0; m < satCount; ++m) {
+//   MessageInterface::ShowMessage("   Position:   %16.9le  %16.9le  %16.9le\n",
+//      state[i6], state[i6+1], state[i6+2]);
+//   MessageInterface::ShowMessage("   Velocity:   %16.9le  %16.9le  %16.9le\n",
+//      state[i6+3], state[i6+4], state[i6+5]);
+//   MessageInterface::ShowMessage("   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+//      deriv[i6], deriv[1+i6], deriv[2+i6]);
+//   MessageInterface::ShowMessage("   Density:    %16.9le\n",
+//      density[i]);
+//}
         }
     }
     
@@ -588,10 +630,10 @@ std::string DragForce::GetParameterText(const Integer id) const
        return "SolarFluxFile";
     
     if (id == fluxID)
-       return "SolarFlux";
+       return "F107";
     
     if (id == averageFluxID)
-       return "AverageSolarFlux";
+       return "F107A";
     
     if (id == magneticIndexID)
        return "MagneticIndex";
@@ -966,6 +1008,14 @@ void DragForce::GetDensity(Real *state, Real when)
                 cbLoc[0]  = cbV[0];
                 cbLoc[1]  = cbV[1];
                 cbLoc[2]  = cbV[2];
+            }
+            if (fluxFile == "")
+            {
+               atmos->SetRealParameter(atmos->GetParameterID("F107"), fluxF107);
+               atmos->SetRealParameter(atmos->GetParameterID("F107A"),
+                         fluxF107A);
+               atmos->SetRealParameter(atmos->GetParameterID("MagneticIndex"),
+                         ap);
             }
         }
 
