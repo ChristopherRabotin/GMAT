@@ -31,36 +31,36 @@
 //                             Updated interfaces based on GSFC feedback
 //
 //                           : 09/23/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/09/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
-//				Additions:
-//				  - GetParameterType()
-//				  - GetParameterText()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
-//				Removals:
-//				  - GetParameter()
-//				  - SetParameter()
-//				  - ParameterCount()
+//                              Changes:
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
+//                              Additions:
+//                                - GetParameterType()
+//                                - GetParameterText()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
+//                              Removals:
+//                                - GetParameter()
+//                                - SetParameter()
+//                                - ParameterCount()
 //
 //                           : 10/15/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
 //                - STEP_SIZE_PARAMETER to stepSizeParameter
-//				Removals:
-//				  - static Real parameterUndefined
-//				  - SetUndefinedValue()
-//				  - GetParameterName(), replaced by GetParameterText()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
+//                              Removals:
+//                                - static Real parameterUndefined
+//                                - SetUndefinedValue()
+//                                - GetParameterName(), replaced by GetParameterText()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
 //
 // **************************************************************************
 
@@ -75,20 +75,20 @@ class GMAT_API Propagator : public GmatBase
 {
 public:
     Propagator(const std::string &typeStr,
-			   const std::string &nomme = "");
+                           const std::string &nomme = "");
     virtual ~Propagator(void);
 
     Propagator(const Propagator&);
     Propagator& operator=(const Propagator&);
 
-    // Parameter accessor methods -- overridden from GmatBase	
+    // Parameter accessor methods -- overridden from GmatBase   
     virtual std::string GetParameterText(const Integer id);
     virtual Integer GetParameterID(const std::string str);
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
     virtual Real GetRealParameter(const Integer id);
     virtual Real SetRealParameter(const Integer id, const Real value);
-	
+        
     virtual void Initialize(void);
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
     virtual bool Step(Real dt);
@@ -133,20 +133,22 @@ public:
     virtual bool RawStep(void) = 0;
 
     virtual bool RawStep(Real dt);
-	
-protected:
-    // Start with the parameter IDs and associated strings
 
+    //loj: moved from protected, so that PropagationConfigPanel can be compiled
     // Parameter IDs
     enum
     {
         stepSizeParameter = 0,  /// Stepsize for the propagation
         PropagatorParamCount  /// Count of the parameters for this class
     };
+    
+protected:
+    // Start with the parameter IDs and associated strings
+
 
     static const std::string PARAMETER_TEXT[PropagatorParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[PropagatorParamCount];
-	
+        
     /// Size of the default time step
     Real stepSize;
     /// Flag used to determine if the propagator has been initialized

@@ -38,32 +38,32 @@
 //                             granularity into this class
 //
 //                           : 09/26/2003 - W. Waktola, Mission Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/10/2003 - W. Waktola, Mission Applications Branch
-//				Changes:
-//				  - SetParameter() to SetRealParameter()
-//				  - GetParameter() to GetRealParameter()
-//				  - virtual char* GetParameterName(const int parm) const to
-//				    virtual std::string GetParameterName(const int parm) const
+//                              Changes:
+//                                - SetParameter() to SetRealParameter()
+//                                - GetParameter() to GetRealParameter()
+//                                - virtual char* GetParameterName(const int parm) const to
+//                                  virtual std::string GetParameterName(const int parm) const
 //
 //                           : 10/16/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				Removals:
-//				  - GetParameterName(), replaced by GetParameterText()
-//				Additions:
-//				  - IntegratorParamCount
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetIntegerParameter()
-//				  - SetIntegerParameter()
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                              Removals:
+//                                - GetParameterName(), replaced by GetParameterText()
+//                              Additions:
+//                                - IntegratorParamCount
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetIntegerParameter()
+//                                - SetIntegerParameter()
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
 //
 // **************************************************************************
 /** \brief Base class for numerical integrators
@@ -112,7 +112,7 @@ class GMAT_API Integrator : public Propagator
 {
 public:
     Integrator(const std::string &typeStr,
-			   const std::string &nomme = "");
+                           const std::string &nomme = "");
     virtual ~Integrator(void);
 
     Integrator(const Integrator&);
@@ -120,7 +120,7 @@ public:
 
     virtual Integer GetPropagatorOrder(void) const;
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
-	
+        
     // Parameter accessor methods -- overridden from GmatBase
     virtual std::string GetParameterText(const Integer id);
     virtual Integer GetParameterID(const std::string str);
@@ -147,24 +147,25 @@ public:
 
     virtual bool RawStep(void) = 0;
 
-protected:
-    // Start with the parameter IDs and associates strings
-
+    //loj: moved from protected, so that PropagationConfigPanel can be compiled
     // Parameter IDs
     enum
     {
         integrationAccuracy = 0,  // Accuracy parameter for Integrators
-        errorControlHold,  	  // Accuracy parameter for Integrators
+        errorControlHold,         // Accuracy parameter for Integrators
         smallestTimeInterval,     // Smallest time interval -- used to hedge fixed step mode
-        minimumStepSize,  	  // Minimum stepsize for the Integrator -- smaller steps fail
-        maximumStepSize,  	  // Maximum stepsize for the Integrator -- larger steps get truncated
-        numStepAttempts,  	  // Number of attempts to take before giving up
+        minimumStepSize,          // Minimum stepsize for the Integrator -- smaller steps fail
+        maximumStepSize,          // Maximum stepsize for the Integrator -- larger steps get truncated
+        numStepAttempts,          // Number of attempts to take before giving up
         IntegratorParamCount
     };
 
+protected:
+    // Start with the parameter IDs and associates strings
+
     static const std::string PARAMETER_TEXT[IntegratorParamCount];
     static const Gmat::ParameterType PARAMETER_TYPE[IntegratorParamCount];
-	
+        
     // The level of "acceptable" relative error for the integrator
     Real tolerance;
     // Flag used to activate fixed step mode
@@ -214,7 +215,7 @@ protected:
      * responsibility for allocating and freeing the memory for this array based 
      * on their estimation needs.
      * 
-     * @return	The largest error found in the estimate
+     * @return  The largest error found in the estimate
      */
     //------------------------------------------------------------------------------
     virtual Real EstimateError(void) = 0;
@@ -232,7 +233,7 @@ protected:
      * shrink without bounds, and thus escape from the domain of interest for 
      * the system.
      * 
-     * @param maxerror	The largest error found in the propagation step.
+     * @param maxerror  The largest error found in the propagation step.
      * 
      * @return  true if the step was adapted correctly, false otherwise
      */
