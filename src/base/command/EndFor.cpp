@@ -20,6 +20,7 @@
 
 
 #include "EndFor.hpp"
+#include "BranchCommand.hpp"
 
 
 EndFor::EndFor(void) :
@@ -66,6 +67,14 @@ bool EndFor::Initialize(void)
 bool EndFor::Execute(void)
 {
    return true;
+}
+
+bool EndFor::Insert(GmatCommand *cmd, GmatCommand *prev)
+{
+   // if inserting after End statement for branch command, we want to 
+   // insert right after the entire If command
+   if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
+   return false;
 }
 
 

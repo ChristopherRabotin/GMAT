@@ -19,6 +19,7 @@
 
 
 #include "EndWhile.hpp"
+#include "BranchCommand.hpp"
 
 
 EndWhile::EndWhile(void) :
@@ -64,6 +65,15 @@ bool EndWhile::Initialize(void)
 bool EndWhile::Execute(void)
 {
    return true;
+}
+
+
+bool EndWhile::Insert(GmatCommand *cmd, GmatCommand *prev)
+{
+   // if inserting after End statement for branch command, we want to 
+   // insert right after the entire If command
+   if (this == prev) return ((BranchCommand*)next)->InsertRightAfter(cmd);
+   return false;
 }
 
 

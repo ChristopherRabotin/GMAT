@@ -36,6 +36,8 @@ public:
 
    virtual bool            Initialize(void);
    virtual bool            Execute(void);
+   
+   virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
