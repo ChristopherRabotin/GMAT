@@ -46,6 +46,7 @@
 #include "XyPlotCurve.hpp"
 
 #include <math.h>
+#include "MessageInterface.hpp"
 
 
 // ----------------------------------------------------------------------------
@@ -119,7 +120,7 @@ static wxBitmap *GetDownBitmap();
 namespace GmatPlot
 {
    const int Y_AXIS_AREA_WIDTH = 70;
-   const int X_AXIS_AREA_HEIGHT = 60;
+   const int X_AXIS_AREA_HEIGHT = 50;//60; loj: 7/26/04 
    const int LEFT_MARGIN = 30;
    const int RIGHT_MARGIN = 30;
 }
@@ -371,32 +372,32 @@ void wxPlotArea::DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
    int view_y;
    m_owner->GetViewStart( &view_x, &view_y );
    view_x *= wxPLOT_SCROLL_STEP;
-    
+   
    if (from == -1)
       from = view_x;
 
    int client_width;
    int client_height;
    GetClientSize( &client_width, &client_height);
-    
+   
    if (to == -1)
       to = view_x + client_width;
-
+   
    double zoom = m_owner->GetZoom();
    
    int start_x = wxMax( from, (int)floor(curve->GetStartX()*zoom) );
    int end_x = wxMin( to, (int)floor(curve->GetEndX()*zoom) );
-    
+   
    start_x = wxMax( view_x, start_x );
    end_x = wxMin( view_x + client_width, end_x );
-    
+   
    end_x++;
-
+   
    double double_client_height = (double)client_height;
    double range = curve->GetEndY() - curve->GetStartY();
    double end = curve->GetEndY();
    wxCoord offset_y = curve->GetOffsetY();
-            
+   
    wxCoord y=0,last_y=0;
    for (int x = start_x; x < end_x; x++)
    {
@@ -424,9 +425,9 @@ void wxPlotArea::DrawGrid(wxDC *dc)
    m_owner->GetViewStart( &view_x, &view_y );
    view_x *= wxPLOT_SCROLL_STEP;
    view_y *= wxPLOT_SCROLL_STEP;
-      
+   
    wxPlotCurve *curve = m_owner->GetCurrent();
-  
+   
    if (!curve) return;
     
    int client_width;
@@ -534,7 +535,6 @@ void wxPlotArea::DrawGrid(wxDC *dc)
    {
       //loj: why I need to change - 1 to - 2 to line up with X-axis tick
       int x = (int)ceil((xCurrent-xStart) / xRange * (double)client_width) - 2;
-      //if ((x > 4) && (x < client_width-25))
       if ((x > 0) && (x < client_width))
       {
          dc->DrawLine( x, 0, x, client_height );
@@ -774,15 +774,15 @@ void wxPlotXAxisArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
    int client_width;
    int client_height;
    GetClientSize( &client_width, &client_height);
-    
+   
    double zoom = m_owner->GetZoom();
-    
+   
    double ups = m_owner->GetUnitsPerValue() / zoom;
-    
+   
    double start = view_x * ups;
    double end = (view_x + client_width) * ups;
    double range = end - start;
-    
+   
    int int_log_range = (int)floor( log10( range ) );
    double step = 1.0;
    if (int_log_range > 0)
@@ -1002,21 +1002,22 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 {
    m_xUnitsPerValue = 1.0;
    m_xZoom = 1.0;
-    
+   m_xZoomCount = 0;
+   
    m_enlargeAroundWindowCentre = FALSE;
    m_scrollOnThumbRelease = FALSE;
-
+   
    mShowGrid = false;
    
    wxBoxSizer *mainSizer = new wxBoxSizer( wxVERTICAL );
-
+   
    //-------------------------------------------------------
    // for plot title area
    //-------------------------------------------------------
    wxPanel *topPanel = new wxPanel(this, -1, wxPoint(0,0), wxSize(400,50));
    //wxPanel *topPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(-1, -1)); //loj: title not shown
    topPanel->SetBackgroundColour(*wxWHITE);
-
+   
    mPlotTitle = plotTitle;
    mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle), wxPoint(-1,-1),
                                  wxSize(400, 50), wxALIGN_CENTRE);
@@ -1058,7 +1059,7 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
    //-------------------------------------------------------
    m_area = new wxPlotArea( this );
    wxBoxSizer *middleSizer = new wxBoxSizer( wxHORIZONTAL );
-    
+   
    if ((GetWindowStyleFlag() & wxPLOT_BUTTON_ALL) != 0)
    {
       wxBoxSizer *buttonsSizer = new wxBoxSizer( wxVERTICAL );
@@ -1087,7 +1088,7 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
       }
       middleSizer->Add( buttonsSizer, 0, wxEXPAND|wxALL, 4 );
    }
-    
+   
    wxBoxSizer *plotSizer = new wxBoxSizer( wxHORIZONTAL );
     
    if ((GetWindowStyleFlag() & wxPLOT_Y_AXIS) != 0)
@@ -1111,9 +1112,8 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
       m_xaxis = new wxPlotXAxisArea( this );
     
       wxBoxSizer *vert2 = new wxBoxSizer( wxVERTICAL );
-      vert2->Add( m_area, 1, wxEXPAND );
-      vert2->Add( m_xaxis, 0, wxEXPAND ); //loj: if 2nd arg is 0, it doesn't show X axis area
-      //vert2->Add( m_xaxis, 1, wxEXPAND ); //loj: if 2nd arg is 1, it showed proportional X axis area
+      vert2->Add( m_area, 1, wxEXPAND ); //loj: if 2nd arg is 0, it doesn't show plot area
+      vert2->Add( m_xaxis, 0, wxEXPAND ); //loj: if 2nd arg is 1, it showed proportional X axis area
       plotSizer->Add( vert2, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
    }
    else
@@ -1150,7 +1150,6 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
    SetTargetWindow(this);
    
    SetBackgroundColour( *wxWHITE );
-   
    m_current = (wxPlotCurve*) NULL;
 }
 
@@ -1161,7 +1160,6 @@ wxPlotWindow::~wxPlotWindow()
 {
 }
 
-#include "MessageInterface.hpp"
 //------------------------------------------------------------------------------
 // void wxPlotWindow::Add( wxPlotCurve *curve )
 //------------------------------------------------------------------------------
@@ -1355,7 +1353,7 @@ void wxPlotWindow::OnMoveDown( wxCommandEvent& WXUNUSED(event) )
 void wxPlotWindow::Enlarge( wxPlotCurve *curve, double factor )
 {
    m_area->DeleteCurve( curve );
-    
+   
    int client_width;
    int client_height;
    m_area->GetClientSize( &client_width, &client_height);
@@ -1363,10 +1361,10 @@ void wxPlotWindow::Enlarge( wxPlotCurve *curve, double factor )
     
    double range = curve->GetEndY() - curve->GetStartY();
    offset *= range;
-    
+   
    double new_range = range / factor;
    double new_offset = offset / factor;
-    
+   
    if (m_enlargeAroundWindowCentre)
    {
       double middle = curve->GetStartY() - offset + range/2;
@@ -1390,7 +1388,7 @@ void wxPlotWindow::Enlarge( wxPlotCurve *curve, double factor )
 void wxPlotWindow::SetUnitsPerValue( double upv )
 {
    m_xUnitsPerValue = upv;
-    
+   
    RedrawXAxis();
 }
 
@@ -1401,11 +1399,11 @@ void wxPlotWindow::SetZoom( double zoom )
 {
    double old_zoom = m_xZoom;
    m_xZoom = zoom;
-    
+   
    int view_x = 0;
    int view_y = 0;
    GetViewStart( &view_x, &view_y );
-    
+   
    wxInt32 max = 0;
    wxNode *node = m_curves.First();
    while (node)
@@ -1416,38 +1414,68 @@ void wxPlotWindow::SetZoom( double zoom )
       node = node->Next();
    }
 
-   //loj: why scroll bar doesn't change?
+   //loj: SetScrollbars automatically enlarges plot area
    SetScrollbars( wxPLOT_SCROLL_STEP, wxPLOT_SCROLL_STEP, 
                   (int)((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1, 0, 
-                  (int)(view_x*zoom/old_zoom), 0, 
-                  TRUE ); //loj: FALSE didn't update the window
+                  (int)(view_x*zoom/old_zoom), 0);
 
+#if DEBUG_XY_PLOT_WINDOW
+   int client_width;
+   int client_height;
+   m_area->GetClientSize(&client_width, &client_height);
+   MessageInterface::ShowMessage
+      ("wxPlotWindow::SetZoom() client size w=%d,h=%d\n",
+       client_width, client_height);
+#endif
+   
    RedrawXAxis();
    m_area->Refresh( TRUE );
-
-   //loj: work-around to change scroll bar
-   //Refresh(); //loj: didn't work
-   SetSize(GetSize().GetWidth()-1, GetSize().GetHeight());
-   SetSize(GetSize().GetWidth()+1, GetSize().GetHeight());
 }
 
+//------------------------------------------------------------------------------
+// void wxPlotWindow::ResetZoom()
+//------------------------------------------------------------------------------
+void wxPlotWindow::ResetZoom()
+{
+   m_xZoom = 1.0;
+   m_xZoomCount = 0;
+   SetTargetWindow(this);
+}
+
+//loj: 7/22/04 added
 //------------------------------------------------------------------------------
 // void wxPlotWindow::ZoomOut()
 //------------------------------------------------------------------------------
 void wxPlotWindow::ZoomOut()
 {
-   //@fixme
-   //loj: 4/29/04 we want to zoomout as we plot, but whole X axis is not shown
-   //static double zoom = m_xZoom;
-   //static int count = 0;
-   //count++;
-   //
-   //if ((count%20)==0)
-   //{
-   //   count = 0;
-   //   zoom = zoom * 0.6666;
-   //   SetZoom(zoom);
-   //}
+   double zoom = m_xZoom;
+   m_xZoomCount++;
+   int currEndX;
+
+   // update every 50 counts
+   if ((m_xZoomCount%50)==0)
+   {
+      m_xZoomCount = 0;
+
+      wxNode *node = m_curves.First();
+      wxPlotCurve *curve = (wxPlotCurve*) node->Data();
+      currEndX = curve->GetEndX();
+
+      double endX = currEndX * 0.001;
+
+      if (endX < 0.4)
+         zoom = 1.0;
+      else
+         zoom = (1.0/endX) * 0.3;
+      
+#if DEBUG_XY_PLOT_WINDOW
+      MessageInterface::ShowMessage
+         ("wxPlotWindow::ZoomOut() m_xZoomCount=%d currEndX=%d zoom=%f\n",
+          m_xZoomCount, currEndX, zoom);
+#endif
+      
+      SetZoom(zoom);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1478,7 +1506,7 @@ void wxPlotWindow::ResetScrollbar()
 #endif
    
    SetScrollbars( wxPLOT_SCROLL_STEP, wxPLOT_SCROLL_STEP, 
-                  (int)(((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1), 0 );
+                  (int)(((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1), 0);
 }
 
 //------------------------------------------------------------------------------
@@ -1615,7 +1643,7 @@ void wxPlotWindow::ShowLegend()
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 {
-   //SetTargetWindow( m_area ); //loj: set target window to plot frame
+   SetTargetWindow( m_area ); //loj: set target window to plot frame
    SetZoom( m_xZoom * 1.5 );
 }
 
@@ -1624,7 +1652,7 @@ void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomOut( wxCommandEvent& WXUNUSED(event) )
 {
-   //SetTargetWindow( m_area ); //loj: set target window to plot frame
+   SetTargetWindow( m_area ); //loj: set target window to plot frame
    SetZoom( m_xZoom * 0.6666 );
 }
 
@@ -1676,8 +1704,11 @@ void wxPlotWindow::OnScroll2( wxScrollWinEvent& event )
    if ((!m_scrollOnThumbRelease) || (event.GetEventType() != wxEVT_SCROLLWIN_THUMBTRACK))
    {
       wxScrolledWindow::OnScroll( event );
-      RedrawXAxis();
-      RedrawPlotArea(); //loj: 4/29/04 added since scroll applies to plot area
+      RedrawEverything(); //loj: 7/27/04 added to update everything
+      //loj: why plot doesn't match with y axis scale?
+      
+      //RedrawXAxis();
+      //RedrawPlotArea(); //loj: 4/29/04 added since scroll applies to plot area
    }
 }
 
@@ -1686,7 +1717,9 @@ void wxPlotWindow::OnScroll2( wxScrollWinEvent& event )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnSize( wxSizeEvent& event )
 {
-   RedrawEverything();
+   SetTargetWindow(m_area); //loj: 7/27/04 added
+   //loj: why plot area expands when size changes?
+   //RedrawEverything();
 }
 
 // ----------------------------------------------------------------------------

@@ -516,6 +516,21 @@ void MdiChildXyFrame::SetShowGrid(bool show)
 }
 
 //------------------------------------------------------------------------------
+// void ResetZoom()
+//------------------------------------------------------------------------------
+/*
+ * Resets plot zoom value
+ */
+//------------------------------------------------------------------------------
+void MdiChildXyFrame::ResetZoom()
+{
+   if (mXyPlot)
+   {
+      mXyPlot->ResetZoom();
+   }
+}
+
+//------------------------------------------------------------------------------
 // void OnQuit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))

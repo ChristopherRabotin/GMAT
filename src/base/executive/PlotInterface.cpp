@@ -367,6 +367,7 @@ bool PlotInterface::CreateXyPlotWindow(const std::string &plotName,
    }
 
    MdiXyPlot::mdiParentXyFrame->mainSubframe->SetShowGrid(drawGrid); //loj: 7/20/04 added
+   MdiXyPlot::mdiParentXyFrame->mainSubframe->ResetZoom(); //loj: 7/27/04 added
    MdiXyPlot::mdiParentXyFrame->Show(true);
    MdiXyPlot::mdiParentXyFrame->Raise();
    

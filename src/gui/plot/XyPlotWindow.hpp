@@ -237,7 +237,7 @@ public:
    void DeleteCurve(wxPlotCurve *curve, int from = -1, int to = -1);
 
    virtual void ScrollWindow(int dx, int dy, const wxRect *rect);
-
+   
 private:
    wxPlotWindow     *m_owner;
    bool              m_zooming;
@@ -337,7 +337,8 @@ public:
    void SetZoom(double zoom);
    double GetZoom()
       { return m_xZoom; }
-   void ZoomOut();
+   void ResetZoom(); //loj: 7/27/04 added
+   void ZoomOut();   //loj:7/27/04 added
    
    // options
    // -------
@@ -400,7 +401,8 @@ private:
       
    double m_xUnitsPerValue;
    double m_xZoom;
-
+   int    m_xZoomCount;  //loj: 7/27/04 added
+   
    wxList m_curves;
    wxList m_onOffCurves;
     

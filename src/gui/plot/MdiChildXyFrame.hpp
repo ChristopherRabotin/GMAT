@@ -71,6 +71,7 @@ public:
    void SetXAxisTitle(const wxString &str) {mXAxisTitle = str;}
    void SetYAxisTitle(const wxString &str) {mYAxisTitle = str;}
    void SetShowGrid(bool show);
+   void ResetZoom(); //loj: 7/27/04 added
    
    // menu events
    void OnClearPlot(wxCommandEvent& event);
