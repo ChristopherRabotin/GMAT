@@ -221,30 +221,30 @@ void ArraySetupPanel::LoadData()
          Real val = arrParam->GetRealParameter("SingleValue", 0, 0);
          str.Printf("%g", val);
          mArrValTextCtrl->SetValue(str);
-
+         
 #ifdef DEBUG_ARRAY_PANEL
          MessageInterface::ShowMessage("mNumRows=%d, mNumCols=%d\n",
                                        mNumRows, mNumCols);
 #endif
-
+         
          // set value (wxGrid)
          mArrGrid->CreateGrid(mNumRows, mNumCols);
-            
+         
          int row, col;
             
-         for (row=0; row<mNumCols; row++)
+         for (row=0; row<mNumRows; row++)
          {
             str.Printf("%d", row);
             mArrGrid->SetRowLabelValue(row, str);
          }
-            
+         
          for (col=0; col<mNumCols; col++)
          {
             //mArrGrid->SetColFormatFloat(col, 6, 2);
             str.Printf("%d", col);
             mArrGrid->SetColLabelValue(col, str);
          }
-
+         
          // set size to Rmatrix and initialize
          mRmat.SetSize(mNumRows, mNumCols);
          for (row=0; row<mNumRows; row++)
