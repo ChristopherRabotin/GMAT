@@ -46,6 +46,7 @@ public:
    
    void Set(const Real e1, const Real e2, const Real e3,
             const Real e4, const Real e5, const Real e6);
+   void Set(const Real v[6]);
    void SetR(const Rvector3 &v);
    void SetV(const Rvector3 &v);
 
