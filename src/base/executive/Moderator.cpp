@@ -20,7 +20,6 @@
 
 #include "Moderator.hpp"
 #include "NoOp.hpp"
-#include "PlotInterface.hpp"
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -52,7 +51,8 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
     "StopCondition",
     "Solver",
     "Subscriber",
-    "PropSetup"
+    "PropSetup",
+    "RefFrame",
 };
 
 //---------------------------------
@@ -639,7 +639,12 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
+    MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
+                                  "name = %s\n", type.c_str(), name.c_str());
+    
     StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+    MessageInterface::ShowMessage("Moderator::CreateStopCondition() *stopCond type = %s\n",
+                                  stopCond->GetTypeName().c_str());
     
     if (stopCond ==  NULL)
     {
@@ -749,8 +754,9 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 
     // create PointMass force and add to Force
     //loj: 3/15/04 do not configure force, force model has linked list of force
+    //loj: 3/25/04 PointMassForce will create default body of Earth
     PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "");
-    
+
     //loj: 3/15/ 04 always add to force model before propSetup::SetForceModel()
     // because PropSetup::Initialize() needs at least 1 force
     fm->AddForce(earthGrav);
@@ -813,7 +819,7 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
  * @param <type> object type
  * @param <name> object name
  *
- * @return a celestial body object pointer
+ * @return a CelestialBody object pointer
  */
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
@@ -855,12 +861,141 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
  *
  * @param <name> object name
  *
- * @return a celestial body object pointer, return null if name not found
+ * @return a CelestialBody object pointer, return null if name not found
  */
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 {
     return theConfigManager->GetCelestialBody(name);
+}
+
+// Interpolator //loj: 3/23/04 added
+//------------------------------------------------------------------------------
+// Interpolator* CreateInterpolator(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a Interpolator object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a Interpolator object pointer
+ */
+//------------------------------------------------------------------------------
+Interpolator* Moderator::CreateInterpolator(const std::string &type,
+                                            const std::string &name)
+{
+
+    //loj: 3/22/04 theFactoryManager->CreateInterpolator() not implemented
+    // comment out the code
+    
+//      Interpolator *interp = theFactoryManager->CreateInterpolator(type, name);
+    
+//      if (interp == NULL)
+//      {
+//          MessageInterface::ShowMessage("Moderator::CreateInterpolator() Error Creating "
+//                                        "%s.  Check InterpolatorFactory. \n", type.c_str());
+
+//          throw GmatBaseException("Error Creating Interpolator");
+//          //return NULL;
+//      }
+    
+//      // Manage it if it is a named interp
+//      try
+//      {
+//          if (interp->GetName() != "")
+//              theConfigManager->AddInterpolator(interp);
+//      }
+//      catch (BaseException &e)
+//      {
+//          MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+//                                        e.GetMessage());
+//      }
+    
+//      return interp;
+    
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// Interpolator* GetInterpolator(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a Interpolator object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a Interpolator object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Interpolator* Moderator::GetInterpolator(const std::string &name)
+{
+    //return theConfigManager->GetInterpolator(name);
+    return NULL;
+}
+
+// RefFrame //loj: 3/23/04 added
+//------------------------------------------------------------------------------
+// RefFrame* CreateRefFrame(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a celestial body object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a RefFrame object pointer
+ */
+//------------------------------------------------------------------------------
+RefFrame* Moderator::CreateRefFrame(const std::string &type,
+                                            const std::string &name)
+{
+    //loj: 3/22/04 theFactoryManager->CreateRefFrame() not implemented
+    // comment out the code
+    
+//      RefFrame *refFrame = theFactoryManager->CreateRefFrame(type, name);
+    
+//      if (refFrame == NULL)
+//      {
+//          MessageInterface::ShowMessage("Moderator::CreateRefFrame() Error Creating "
+//                                        "%s.  Check RefFrameFactory. \n", type.c_str());
+
+//          throw GmatBaseException("Error Creating RefFrame");
+//          //return NULL;
+//      }
+    
+//      // Manage it if it is a named refFrame
+//      try
+//      {
+//          if (refFrame->GetName() != "")
+//              theConfigManager->AddRefFrame(refFrame);
+//      }
+//      catch (BaseException &e)
+//      {
+//          MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
+//                                        e.GetMessage());
+//      }
+    
+//      return refFrame;
+
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// RefFrame* GetRefFrame(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a celestial body object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a RefFrame object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+RefFrame* Moderator::GetRefFrame(const std::string &name)
+{
+    //return theConfigManager->GetRefFrame(name);
+    return NULL;
 }
 
 // SolarSystem
@@ -940,7 +1075,7 @@ bool Moderator::SetSlpFileToUse(const std::string &filename)
 {
     bool status = false;
     
-    if (IsSlpAlreadyInUse)
+    if (isSlpAlreadyInUse)
     {
         MessageInterface::ShowMessage("Moderator::SetSlpFileToUse() SlpFile already set\n");
         status = true;
@@ -955,7 +1090,7 @@ bool Moderator::SetSlpFileToUse(const std::string &filename)
             {
                 theSolarSystemSourceList.push_back("SLP");
                 theSolarSystemSourceFileList.push_back(filename);
-                IsSlpAlreadyInUse = true;
+                isSlpAlreadyInUse = true;
                 status = true;
             }
         }
@@ -1160,49 +1295,58 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 {
     Integer status = 0;
 
-    // check sandbox number
-    if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
+    if (isRunReady)
     {
-        sandboxes[sandboxNum-1]->Clear();
+
+        // check sandbox number
+        if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
+        {
+            sandboxes[sandboxNum-1]->Clear();
+        }
+        else
+        {
+            status = -1;
+            MessageInterface::PopupMessage(Gmat::ERROR_,
+                                           "Invalid Sandbox number" + sandboxNum);
+        }
+
+        try
+        {
+            AddSolarSysToSandbox(sandboxNum-1);
+            AddPublisherToSandbox(sandboxNum-1);
+            AddSpacecraftToSandbox(sandboxNum-1);
+            AddPropSetupToSandbox(sandboxNum-1);
+            AddBurnToSandbox(sandboxNum-1);        
+            AddSolverToSandbox(sandboxNum-1);        
+            AddSubscriberToSandbox(sandboxNum-1);
+            AddCommandToSandbox(sandboxNum-1);
+        
+            InitializeSandbox(sandboxNum-1);
+
+            SetupRun(sandboxNum, isFromGui);
+            //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
+
+            ExecuteSandbox(sandboxNum-1);
+            //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
+        }
+        catch (BaseException &e)
+        {
+            MessageInterface::ShowMessage("Moderator::RunMission() " + e.GetMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            // assign status
+            // status = ?
+        }
+        catch (...)
+        {
+            // assign status
+            throw;
+        }
     }
     else
     {
-        status = -1;
-        MessageInterface::PopupMessage(Gmat::ERROR_,
-                                       "Invalid Sandbox number" + sandboxNum);
+        MessageInterface::PopupMessage(Gmat::ERROR_, "Mission not Complete. Cannot Run Mission");
     }
-
-    try
-    {
-        AddSolarSysToSandbox(sandboxNum-1);
-        AddPublisherToSandbox(sandboxNum-1);
-        AddSpacecraftToSandbox(sandboxNum-1);
-        AddPropSetupToSandbox(sandboxNum-1);
-        AddBurnToSandbox(sandboxNum-1);        
-        AddSolverToSandbox(sandboxNum-1);        
-        AddSubscriberToSandbox(sandboxNum-1);
-        AddCommandToSandbox(sandboxNum-1);
-        
-        InitializeSandbox(sandboxNum-1);
-
-        SetupRun(sandboxNum, isFromGui);
-        //MessageInterface::ShowMessage("Moderator::RunMission() after SetupRun() \n");
-
-        ExecuteSandbox(sandboxNum-1);
-        //MessageInterface::ShowMessage("Moderator::RunMission() after ExecuteSandbox() \n");
-    }
-    catch (BaseException &e)
-    {
-        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-        // assign status
-        // status = ?
-    }
-    catch (...)
-    {
-        // assign status
-        throw;
-    }
-
+    
     return status;
 }
 
@@ -1220,6 +1364,9 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
 //------------------------------------------------------------------------------
 bool Moderator::InterpretScript(const std::string &scriptFilename)
 {
+    bool status = false;
+    isRunReady = false;
+    
     MessageInterface::ShowMessage("========================================\n");
     MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
                                   "file: " + scriptFilename + "\n");
@@ -1230,14 +1377,18 @@ bool Moderator::InterpretScript(const std::string &scriptFilename)
     
     try
     {
-        return theScriptInterpreter->Interpret(scriptFilename);
+        status = theScriptInterpreter->Interpret(scriptFilename);
+        if (status)
+            isRunReady = true;
     }
     catch (BaseException &e)
     {
         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage() +
                                        "\n Check Type in the appropriate Factory or parameter text");
-        return false;
+        isRunReady = false;
     }
+
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -1304,12 +1455,15 @@ void Moderator::CreateDefaultMission()
     {
         // SolarSystem
         theDefaultSolarSystem = new SolarSystem("DefaultSS");
+        MessageInterface::ShowMessage("default SolarSystem created\n");
 
         // Spacecraft
         Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
+        MessageInterface::ShowMessage("default Spacecraft created\n");
 
         // PropSetup
         PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
+        MessageInterface::ShowMessage("default PropSetup created\n");
 
         // Parameters
         Parameter *currTime = CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
@@ -1320,6 +1474,7 @@ void Moderator::CreateDefaultMission()
         Parameter *cartVx = CreateParameter("CartVx", "DefaultSC.Vx");
         Parameter *cartVy = CreateParameter("CartVx", "DefaultSC.Vy");
         Parameter *cartVz = CreateParameter("CartVx", "DefaultSC.Vz");
+        MessageInterface::ShowMessage("default parameters created\n");
     
         //Parameter *kepSma = CreateParameter("KepSma", "DefaultSC.SMA");
         //Parameter *kepEcc = CreateParameter("KepEcc", "DefaultSC.ECC");
@@ -1328,15 +1483,24 @@ void Moderator::CreateDefaultMission()
         //Parameter *kepAop = CreateParameter("KepAop", "DefaultSC.AOP");
         //Parameter *kepTa = CreateParameter("KepTa", "DefaultSC.TA");
     
-        currTime->AddObject(sc);
-        elapsedSecs->AddObject(sc);
-        cartX->AddObject(sc);
-        cartY->AddObject(sc);
-        cartZ->AddObject(sc);
-        cartVx->AddObject(sc);
-        cartVy->AddObject(sc);
-        cartVz->AddObject(sc);
+        currTime->SetStringParameter("Object", "DefaultSC");
+        elapsedSecs->SetStringParameter("Object", "DefaultSC");
+        elapsedSecs->SetRealParameter("InitialEpoch", currTime->EvaluateReal());
 
+        cartX->SetStringParameter("Object", "DefaultSC");
+        cartY->SetStringParameter("Object", "DefaultSC");
+        cartZ->SetStringParameter("Object", "DefaultSC");
+        cartVx->SetStringParameter("Object", "DefaultSC");
+        cartVy->SetStringParameter("Object", "DefaultSC");
+        cartVz->SetStringParameter("Object", "DefaultSC");
+        
+        //kepSma->SetStringParameter("Object", "DefaultSC");
+        //kepEcc->SetStringParameter("Object", "DefaultSC");
+        //kepInc->SetStringParameter("Object", "DefaultSC");
+        //kepRaan->SetStringParameter("Object", "DefaultSC");
+        //kepAop->SetStringParameter("Object", "DefaultSC");
+        //kepTa->SetStringParameter("Object", "DefaultSC");
+        
         currTime->SetDesc(currTime->GetName());
         elapsedSecs->SetDesc(elapsedSecs->GetName());
         cartX->SetDesc(cartX->GetName());
@@ -1346,19 +1510,13 @@ void Moderator::CreateDefaultMission()
         cartVy->SetDesc(cartVy->GetName());
         cartVz->SetDesc(cartVz->GetName());
 
-        //kepSma->AddObject(sc);
-        //kepEcc->AddObject(sc);
-        //kepInc->AddObject(sc);
-        //kepRaan->AddObject(sc);
-        //kepAop->AddObject(sc);
-        //kepTa->AddObject(sc);
-        
         // StopCondition
         //loj: 2/12/04 Propagate command knows "Duration" only
-        //StopCondition *stopCond = CreateStopCondition("SingleValueStop", "StopOnElapsedSecs");
-        StopCondition *stopCond = CreateStopCondition("SingleValueStop", "Duration");
-        stopCond->AddParameter(elapsedSecs);
-        stopCond->SetGoal(8640.0);
+        StopCondition *stopCond = CreateStopCondition("StopCondition", "Duration");
+        stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+        stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
+        stopCond->SetRealParameter("Goal", 8640.0);
+        MessageInterface::ShowMessage("default StopCondition created\n");
 
         // Subscribers
         // ReportFile
@@ -1375,7 +1533,8 @@ void Moderator::CreateDefaultMission()
         // OpenGlPlot
         sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
         sub->Activate(true);
-    
+        MessageInterface::ShowMessage("default Subscribers created\n");
+
         // Propagate Command
         GmatCommand *propCommand = CreateCommand("Propagate");
         propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
@@ -1383,10 +1542,13 @@ void Moderator::CreateDefaultMission()
         propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
         propCommand->SetSolarSystem(theDefaultSolarSystem);
 
+        MessageInterface::ShowMessage("default Propagate command created\n");
         // Add propagate command
         AppendCommand(propCommand);
+
+        isRunReady = true;
     }
-    catch (BaseException &e)
+    catch (...)
     {
         MessageInterface::PopupMessage(Gmat::ERROR_,
                                        "Moderator::CreateDefaultMission() Error "
@@ -1597,7 +1759,8 @@ void Moderator::ExecuteSandbox(Integer index)
 Moderator::Moderator()
 {
     isInitialized = false;
-    IsSlpAlreadyInUse = false;
+    isSlpAlreadyInUse = false;
+    isRunReady = false;
     theDefaultSolarSystem = NULL;
     theDefaultSlpFile = NULL;
     theFactoryManager = FactoryManager::Instance();

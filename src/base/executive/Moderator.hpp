@@ -42,6 +42,8 @@
 #include "PropSetup.hpp"
 #include "Subscriber.hpp"
 #include "SlpFile.hpp"
+#include "Interpolator.hpp"
+#include "RefFrame.hpp"
 // factories
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
@@ -134,6 +136,14 @@ public:
     CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
     CelestialBody* GetCelestialBody(const std::string &name);
 
+    // Interpolator //loj: 3/23/04 added
+    Interpolator* CreateInterpolator(const std::string &type, const std::string &name);
+    Interpolator* GetInterpolator(const std::string &name);
+
+    // RefFrame //loj: 3/23/04 added
+    RefFrame* CreateRefFrame(const std::string &type, const std::string &name);
+    RefFrame* GetRefFrame(const std::string &name);
+
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
     SolarSystem* CreateSolarSystem(const std::string &name);
@@ -203,7 +213,8 @@ private:
 
     // member data
     bool isInitialized;
-    bool IsSlpAlreadyInUse;
+    bool isSlpAlreadyInUse;
+    bool isRunReady;
     
     std::vector<Sandbox*> sandboxes;
     std::vector<GmatCommand*> commands;
