@@ -468,10 +468,10 @@ bool Sandbox::Execute()
       }
 
       #if DEBUG_SANDBOX_RUN
-      MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
-                                    current->GetTypeName().c_str());
+         MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
+                                       current->GetTypeName().c_str());
       #endif
-      
+
       if (current->GetTypeName() == "Target") {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
             currentState = Gmat::RUNNING;

@@ -36,37 +36,47 @@ public:
    Assignment();
    virtual ~Assignment();
    Assignment(const Assignment& a);
-   Assignment&         operator=(const Assignment& a);
+   Assignment&          operator=(const Assignment& a);
     
-   virtual bool        Initialize(void);
-   virtual bool        InterpretAction(void);
-   virtual bool        Execute(void);
+   virtual bool         Initialize();
+   virtual bool         InterpretAction();
+   virtual bool         Execute();
 
+//   // Parameter access methods
+//   virtual std::string  GetParameterText(const Integer id) const;
+//   virtual Integer      GetParameterID(const std::string &str) const;
+//   virtual Gmat::ParameterType
+//                        GetParameterType(const Integer id) const;
+//   virtual std::string  GetParameterTypeString(const Integer id) const;
+//
+//   virtual std::string  GetStringParameter(const Integer id) const;
+//   virtual bool         SetStringParameter(const Integer id,
+//                                          const std::string &value);
 
    // inherited from GmatBase
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*    Clone() const;
 
 protected:
    /// Name of the object that appears on the left side of the equals sign
-   std::string         ownerName;
+   std::string          ownerName;
    /// Parameter associated with that object
-   std::string         parmName;
+   std::string          parmName;
    /// Object named by pwnerName
-   GmatBase            *parmOwner;
+   GmatBase             *parmOwner;
    /// The object used for object assignment
-   GmatBase            *rhsObject;
+   GmatBase             *rhsObject;
    /// Flag indicating if this is object assignment
-   bool                objToObj;
+   bool                 objToObj;
    /// For parameter version, the parm's ID
-   Integer             parmID;
+   Integer              parmID;
    ///  The parm's data type
-   Gmat::ParameterType parmType;
+   Gmat::ParameterType  parmType;
    /// The value that is assigned, or the name of the object providing the data
-   std::string         value;
+   std::string          value;
 };
 
 #endif // Assignment_hpp

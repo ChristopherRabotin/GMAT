@@ -1567,7 +1567,7 @@ bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
 
 
 //------------------------------------------------------------------------------
-// bool SetVariable(GmatBase *obj, const std::string &val)
+// bool SetVariable(GmatBase *obj, const std::string &val, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Sets the value of a variable equal to a string.
@@ -1575,11 +1575,13 @@ bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
  * @param obj The object that receives the string.
  * @param val The string that is set on the Variable.  If this string is the 
  *            empty string, the value is parsed from the current script line.
- * 
+ * @param cmd Assignment command used if in the command sequence
+ *
  * @return An array containing the pieces.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::SetVariable(GmatBase *obj, const std::string &val)
+bool Interpreter::SetVariable(GmatBase *obj, const std::string &val,
+                              GmatCommand *cmd)
 {
    if (obj->GetTypeName() != "Variable")
       return false;
@@ -1598,6 +1600,15 @@ bool Interpreter::SetVariable(GmatBase *obj, const std::string &val)
    }
    else
       other = val;
+      
+   if (cmd) {
+      if (cmd->GetTypeName() != "GMAT")
+         throw InterpreterException(
+            "Interpreter::SetVariable attempting to set a value using a " +
+            cmd->GetTypeName() + " command, which is not supported.");
+      cmd->InterpretAction();
+      return true;
+   }
 
    return obj->SetStringParameter("Expression", other);
 }

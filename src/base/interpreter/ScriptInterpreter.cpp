@@ -492,6 +492,35 @@ bool ScriptInterpreter::Parse(void)
                   
                   return InterpretFunctionCall();
                }
+               
+               if (isSinglet) {
+                  // hasEquals == true, is a singlet, so a variable or object
+                  GmatBase *obj = FindObject(**phrase);
+
+
+                  if (!EquateObjects(obj)) {
+                     // Arrays and variables can be set directly
+                     if (obj->GetTypeName() == "Variable") {
+                        GmatCommand *cmd = moderator->AppendCommand("GMAT", "");
+                        cmd->SetGeneratingString(line);
+                        if (SetVariable(obj, "", cmd)) {
+                           // Variable set successfully
+                           chunks.clear();
+                           branchDepth += cmd->DepthIncrement();
+                           return true;
+                        }
+                     }
+//                     else if (obj->GetTypeName() == "Array")
+//                        ???
+                     else {
+                        chunks.clear();
+                        throw InterpreterException(
+                           "Attempting to set an object in an unknown"
+                           " context; see the line\n   \"" +
+                           line + "\"");
+                     }
+                  }
+               }
                // Reset phrase and continue
                phrase = chunks.begin();
             }

@@ -179,7 +179,8 @@ protected:
    bool                          EquateObjects(GmatBase *obj, 
                                                const std::string &obj2Name="");
    bool                          SetVariable(GmatBase *obj, 
-                                             const std::string &val = "");
+                                             const std::string &val = "",
+                                             GmatCommand *cmd = NULL);
 
 // temporarily make public to test this piece
 public:
