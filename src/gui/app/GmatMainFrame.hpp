@@ -36,6 +36,9 @@
 #include "wx/toolbar.h"
 #include "wx/docview.h"
 #include "wx/laywin.h"
+#include "wx/textctrl.h"
+
+
 
 class GmatMainFrame : public wxMDIParentFrame
 {
@@ -61,6 +64,7 @@ private:
    GuiInterpreter *theGuiInterpreter;
    
    wxSashLayoutWindow* win;
+   wxSashLayoutWindow* msgWin;
    wxScrolledWindow *panel;
    wxList *mdiChildren;
    
@@ -97,6 +101,7 @@ private:
    //void OnNewScript(wxCommandEvent &event);
    
    void OnSashDrag(wxSashEvent &event);
+   void OnMsgSashDrag(wxSashEvent &event);
    void OnSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
    
@@ -164,6 +169,7 @@ private:
       TOOL_SCRIPT,
         
       ID_SASH_WINDOW,
+      ID_MSG_SASH_WINDOW,
         
       // it is important for the id corresponding to the "About" command to have
       // this standard value as otherwise it won't be handled properly under Mac

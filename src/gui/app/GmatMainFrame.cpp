@@ -112,6 +112,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnScriptOpenFileEditor)
    
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
+   EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
+
    EVT_SIZE(GmatMainFrame::OnSize)
    EVT_SET_FOCUS(GmatMainFrame::OnFocus)
 END_EVENT_TABLE()
@@ -179,25 +181,28 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_HORIZONTAL);
    InitToolBar(GetToolBar());
    
-//   wxMDIChildFrame *theChild = new wxMDIChildFrame(this, -1, _T("GmatMainNotebook"),
-//                        wxPoint(-1,-1), wxSize(-1,-1), wxMINIMIZE_BOX | wxDEFAULT_FRAME_STYLE);
-//                        wxMAXIMIZE_BOX | wxTHICK_FRAME | wxCAPTION);
-
-   // need to do before leftTabs, because they use MainNotebook
-//   rightTabs = new GmatMainNotebook( theChild,
-//                                     -1, 
-//                                     wxDefaultPosition,
-//                                     wxDefaultSize, wxCLIP_CHILDREN);
-//    
-//   // set to GmatAppData
-//   GmatAppData::SetMainNotebook(rightTabs);
-
    // used to store the list of open children
    mdiChildren = new wxList();
    
    int w, h;
    GetClientSize(&w, &h);
 
+   // A window w/sash for messages
+   msgWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
+                           wxDefaultPosition, wxSize(30, 200),
+                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+
+   msgWin->SetDefaultSize(wxSize(w, 100));
+   msgWin->SetOrientation(wxLAYOUT_HORIZONTAL);
+   msgWin->SetAlignment(wxLAYOUT_BOTTOM);
+   msgWin->SetSashVisible(wxSASH_TOP, TRUE);
+
+   // create MessageWindow and save in GmatApp for later use
+   wxTextCtrl *msgTextCtrl = new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
+                               wxTE_MULTILINE);
+   GmatAppData::GetMessageWindow()->Show(false);
+   GmatAppData::SetMessageTextCtrl(msgTextCtrl);
+   
    // A window w/sash for gmat notebook
    win = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
                            wxDefaultPosition, wxSize(200, 30),
@@ -220,13 +225,6 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // set the flag to say mdi is not open
    scriptMdiShown = false;
 
-//   splitter = new GmatSplitterWindow(this);
- 
-   // create the tabs for Resources, Mission, Output
-//   leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
-//                                wxDefaultSize, wxCLIP_CHILDREN);
-
-   //   splitter->SplitVertically( leftTabs, rightTabs, 200 );
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
 #endif
@@ -633,6 +631,7 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 {
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
+   MessageInterface::ClearMessage();
 
    // close plot window on new project
    if (MdiGlPlot::mdiParentGlFrame != NULL)
@@ -666,7 +665,8 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
-   
+    MessageInterface::ClearMessage();
+    
    //close all windows
    CloseAllChildren();
        
@@ -1389,6 +1389,28 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
    // Leaves bits of itself behind sometimes
    GetClientWindow()->Refresh();
 }
+
+//------------------------------------------------------------------------------
+// void OnMsgSashDrag(wxSashEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
+{
+   int w, h;
+   GetClientSize(&w, &h);
+
+   if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
+      return;
+        
+   msgWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
+            
+
+   wxLayoutAlgorithm layout;
+   layout.LayoutMDIFrame(this);
+
+   // Leaves bits of itself behind sometimes
+   GetClientWindow()->Refresh();
+}
+
 
 //------------------------------------------------------------------------------
 // void OnSize(wxSizeEvent& event)

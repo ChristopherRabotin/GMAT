@@ -76,7 +76,7 @@ bool GmatApp::OnInit()
     GmatAppData::theMessageWindow =
         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
                           20, 20, 600, 350, "Permanent");
-    GmatAppData::theMessageWindow->SetMaxLength(6000000);
+//    GmatAppData::theMessageWindow->SetMaxLength(6000000);
     GmatAppData::theMessageWindow->Show(false);
 
     // create the Moderator - GMAT executive

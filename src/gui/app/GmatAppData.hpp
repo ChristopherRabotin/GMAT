@@ -41,6 +41,12 @@ public:
         { return theMessageWindow;};
     static void SetMessageWindow(ViewTextFrame *msgFrame)
         { theMessageWindow = msgFrame;};
+        
+    static wxTextCtrl* GetMessageTextCtrl()
+        { return theMessageTextCtrl;};
+    static void SetMessageTextCtrl(wxTextCtrl *msgTextCtrl)
+        { theMessageTextCtrl = msgTextCtrl;};
+
 
     static ResourceTree* GetResourceTree()
         { return theResourceTree;};
@@ -68,6 +74,7 @@ public:
 private:
     static GuiInterpreter *theGuiInterpreter;
 #if !defined __CONSOLE_APP__
+    static wxTextCtrl *theMessageTextCtrl;
     static ResourceTree *theResourceTree;
     static MissionTree *theMissionTree;
 //    static GmatMainNotebook *theMainNotebook;
