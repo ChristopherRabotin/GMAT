@@ -1009,7 +1009,7 @@ const StringArray& ForceModel::BuildBodyList(std::string type) const
    
    for (i = forceList.begin(); i != forceList.end(); ++i) {
        if ((*i)->GetTypeName() == actualType) {
-          bodylist.push_back((*i)->GetStringParameter("Body"));
+          bodylist.push_back((*i)->GetStringParameter("BodyName"));
        }
    }
    return bodylist;
@@ -1053,12 +1053,14 @@ void ForceModel::SetScriptAlias(const std::string& alias,
  * This method provides access to class names given an alias in the script.
  * 
  * @param alias script string used for the force.
+ * 
  * @return The class name.
  */
 //------------------------------------------------------------------------------
 std::string& ForceModel::GetScriptAlias(const std::string& alias)
 {
-   static std::string type = alias;
+   static std::string type;
+   type = alias;
    if (scriptAliases.find(alias) != scriptAliases.end()) {
       type = scriptAliases[alias];
    }
@@ -1066,6 +1068,23 @@ std::string& ForceModel::GetScriptAlias(const std::string& alias)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Accesses an internal object used in the ForceModel.
+ * 
+ * This method provides access to the forces used in the ForceModel.  It is used
+ * to set and read the specific force attributes -- for example, the file name 
+ * used for the full field (GravityField) model.
+ * 
+ * @param type Base class type for the requested object.  Must be set to
+ *             Gmat::PHYSICAL_MODEL for this build.
+ * @param name String used for the object.
+ * 
+ * @return A pointer to the object.
+ */
+//------------------------------------------------------------------------------
 GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name)
 {
@@ -1086,6 +1105,27 @@ GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
 }
 
                                     
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name, 
+//                        const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Accesses an internal object used in the ForceModel.
+ * 
+ * This method provides access to the forces used in the ForceModel.  It is used
+ * to set and read the specific force attributes -- for example, the file name 
+ * used for the full field (GravityField) model.  This version of the method 
+ * provides a mechanism to access more than one object with the same type and
+ * name by using an index to reach later intances.
+ * 
+ * @param type Base class type for the requested object.  Must be set to
+ *             Gmat::PHYSICAL_MODEL for this build.
+ * @param name String used for the object.
+ * @param index Index into the list of objects of this type.
+ * 
+ * @return A pointer to the object.
+ */
+//------------------------------------------------------------------------------
 GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type, 
                                    const std::string &name, const Integer index)
 {
@@ -1108,23 +1148,37 @@ GmatBase* ForceModel::GetRefObject(const Gmat::ObjectType type,
 }
 
 
-//ObjectArray& ForceModel::GetRefObjectArray(const Gmat::ObjectType type)
-//{
-//   if (type != Gmat::PHYSICAL_MODEL)
-//       throw ForceModelException("Only forces are accessed in ForceModel::GetRefObject");
-//   
-//   static ObjectArray objects;
-//   objects.clear();
-//   
-//   // Run through list of forces, adding body names for GravityField instances
-//   std::vector<PhysicalModel*>::const_iterator i;
-//   
-//   std::string actualType = GetScriptAlias(name);
-//   
-//   for (i = forceList.begin(); i != forceList.end(); ++i) {
-//       if ((*i)->GetTypeName() == actualType) {
-//          objects.push_back(*i);       // Ignore names for forces.
-//       }
-//   }
-//   return objects;
-//}
+//------------------------------------------------------------------------------
+// ObjectArray& GetRefObjectArray(const std::string& typeString)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of internal objects used in the ForceModel.
+ * 
+ * @param typeString String used for the objects.
+ * 
+ * @return A reference to the ObjectArray.
+ */
+//------------------------------------------------------------------------------
+ObjectArray& ForceModel::GetRefObjectArray(const std::string& typeString)
+{
+   static ObjectArray objects;
+   objects.clear();
+   
+   // Run through list of forces, adding body names for GravityField instances
+   std::vector<PhysicalModel*>::const_iterator i;
+   std::string actualType = GetScriptAlias(typeString);
+   
+   if (typeString == "PhysicalModel") {
+      for (i = forceList.begin(); i != forceList.end(); ++i) {
+         objects.push_back(*i);       // Ignore names for forces.
+      }
+   }
+   else {
+      for (i = forceList.begin(); i != forceList.end(); ++i) {
+          if ((*i)->GetTypeName() == actualType) {
+             objects.push_back(*i);       // Ignore names for forces.
+          }
+      }
+   }
+   return objects;
+}

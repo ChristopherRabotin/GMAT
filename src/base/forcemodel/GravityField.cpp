@@ -609,7 +609,7 @@ bool GravityField::gravity_init(void)
       if (solarSystem == NULL)
          throw ForceModelException("Solar System undefined in GravityField.");
       body = solarSystem->GetBody(bodyName);
-      if (body == NULL) throw ForceModelException("Body undefined for GravityField.");
+      if (body == NULL) throw ForceModelException("Body " + bodyName + " undefined for GravityField.");
    }
    
    // delete arrays, if they have already been created (useful when reading

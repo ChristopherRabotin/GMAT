@@ -128,7 +128,7 @@ public:
                                     const std::string &name,
                                     const Integer index);
 //    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
- 
+    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
 protected:
 
