@@ -51,10 +51,10 @@ const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
 const std::string
 GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
 {
-   "Integer",    "UnsignedInt", "Real",       "String",    "StringArray",
-   "Boolean",    "Rvector",     "Rvector3",   "Rvector6",  "Rmatrix",
-   "Rmatrix33",  "Cartesian",   "Keplerian",  "A1Mjd",     "UtcDate",
-   "Object"
+   "Integer",     "UnsignedInt", "UnsignedIntArray", "Real",       "String",
+   "StringArray", "Boolean",     "Rvector",          "Rvector3",   "Rvector6",
+   "Rmatrix",     "Rmatrix33",   "Cartesian",        "Keplerian",  "A1Mjd",
+   "UtcDate",     "Object"
 };
 
 /// Build the list of object type names
@@ -848,6 +848,26 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
 
 
 //---------------------------------------------------------------------------
+//  const UnsignedIntArray& GetUnsignedIntArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of unsigned int data.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The requested UnsignedIntArray; throws if the parameter is not a 
+ *         UnsignedIntArray.
+ */
+const UnsignedIntArray& GmatBase::GetUnsignedIntArrayParameter(const Integer id) const
+{
+   char errortext[256];
+   sprintf(errortext, "No unsigned int array parameter with ID %d on %s", 
+           id, instanceName.c_str());
+   throw GmatBaseException(errortext);
+}
+
+
+//---------------------------------------------------------------------------
 //  const Rvector& GetRvectorParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -1371,6 +1391,25 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const std::string &label,
 {
    Integer id = GetParameterID(label);
    return SetUnsignedIntParameter(id, value, index);
+}
+
+//---------------------------------------------------------------------------
+//  const UnsignedIntArray&
+//  GetUnsignedIntArrayParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of unsigned int data.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The requested UnsignedIntArray; throws if the parameter is not a 
+ *         UnsignedIntArray.
+ */
+const UnsignedIntArray&
+GmatBase::GetUnsignedIntArrayParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetUnsignedIntArrayParameter(id);
 }
 
 //---------------------------------------------------------------------------

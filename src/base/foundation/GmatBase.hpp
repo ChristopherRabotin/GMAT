@@ -123,6 +123,8 @@ public:
    virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
                                                const UnsignedInt value,
                                                const Integer index);
+   virtual const UnsignedIntArray& 
+                       GetUnsignedIntArrayParameter(const Integer id) const; 
                                                
    virtual const Rvector&    GetRvectorParameter(const Integer id) const;
    virtual const Rvector&    SetRvectorParameter(const Integer id,
@@ -178,7 +180,9 @@ public:
    virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
                                                const UnsignedInt value,
                                                const Integer index);
-                                               
+   virtual const UnsignedIntArray& 
+                       GetUnsignedIntArrayParameter(const std::string &label) const;
+   
    virtual const Rvector&  GetRvectorParameter(const std::string &label) const;
    virtual const Rvector&  SetRvectorParameter(const std::string &label,
                                                const Rvector &value);
@@ -197,7 +201,7 @@ public:
                                           const Integer index);
                                           
    virtual const StringArray& 
-                       GetStringArrayParameter(const std::string &label)const;
+                       GetStringArrayParameter(const std::string &label) const;
                        
    virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const std::string &label,
