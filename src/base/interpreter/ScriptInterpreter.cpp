@@ -187,6 +187,8 @@ bool ScriptInterpreter::ReadScript(void)
         return false;
     }
     
+    chunks.clear();
+    
     while (!instream->eof()) {
         if (!ReadLine())
             return false;
@@ -213,7 +215,8 @@ bool ScriptInterpreter::ReadLine(void)
     
     instream->getline(charLine, 4095);
     line = charLine;
-    
+//    MessageInterface::ShowMessage("ScriptInterpreter::ReadLine \""
+//                                  + line + "\"\n");
     return true;
 }
 
