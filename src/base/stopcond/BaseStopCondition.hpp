@@ -143,8 +143,8 @@ protected:
       BaseStopConditionParamCount,
    };
     
-   static const Gmat::ParameterType PARAMETER_TYPE[BaseStopConditionParamCount];
-   static const std::string PARAMETER_TEXT[BaseStopConditionParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount];
+   static const std::string PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount];
 
 private:
    void CopyDynamicData(const BaseStopCondition &stopCond);

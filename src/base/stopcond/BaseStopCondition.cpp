@@ -34,7 +34,7 @@
 //---------------------------------
 
 const std::string
-BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount] =
+BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount] =
 {
    "Epoch",
    "EpochVar",
@@ -49,7 +49,7 @@ BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount] =
 };
 
 const Gmat::ParameterType
-BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount] =
+BaseStopCondition::PARAMETER_TYPE[BaseStopConditionParamCount - GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
@@ -642,8 +642,8 @@ bool BaseStopCondition::Validate()
 //------------------------------------------------------------------------------
 std::string BaseStopCondition::GetParameterText(const Integer id) const
 {
-   if (id >= 0 && id < BaseStopConditionParamCount)
-      return PARAMETER_TEXT[id];
+   if (id >= GmatBaseParamCount && id < BaseStopConditionParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterText(id);
     
@@ -656,9 +656,9 @@ Integer BaseStopCondition::GetParameterID(const std::string &str) const
 {
    //MessageInterface::ShowMessage("BaseStopCondition::GetParameterID() str = %s\n", str.c_str());
     
-   for (int i=0; i<BaseStopConditionParamCount; i++)
+   for (int i=GmatBaseParamCount; i<BaseStopConditionParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    
@@ -670,8 +670,8 @@ Integer BaseStopCondition::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType BaseStopCondition::GetParameterType(const Integer id) const
 {
-   if (id >= 0 && id < BaseStopConditionParamCount)
-      return PARAMETER_TYPE[id];
+   if (id >= GmatBaseParamCount && id < BaseStopConditionParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterType(id);
 }
@@ -681,7 +681,7 @@ Gmat::ParameterType BaseStopCondition::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string BaseStopCondition::GetParameterTypeString(const Integer id) const
 {
-   if (id >= 0 && id < BaseStopConditionParamCount)
+   if (id >= GmatBaseParamCount && id < BaseStopConditionParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return GmatBase::GetParameterTypeString(id);
