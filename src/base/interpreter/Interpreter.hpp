@@ -83,6 +83,8 @@ protected:
    Moderator                       *moderator;
    /// Flag to tell is the mappings are defined yet
    bool                            initialized;
+   /// Counter used to track branch commands
+   Integer                         branchDepth;
     
    /// Mapping between the object base class strings and the objecttypes enum
    std::map<std::string, Integer>  typemap;

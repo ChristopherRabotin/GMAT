@@ -36,7 +36,8 @@
 Interpreter::Interpreter() :
     instream            (NULL),
     outstream           (NULL),
-    initialized         (false)
+    initialized         (false),
+    branchDepth         (0)
 {
     moderator = Moderator::Instance();
     

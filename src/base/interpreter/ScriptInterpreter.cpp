@@ -180,10 +180,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadScript(void)
 {
-    StringArray::iterator current = cmdmap.begin(), last = cmdmap.end();
-    while (current != last) {
-       ++current;
-    }
+    branchDepth = 0;
     
     if (instream->fail() || instream->eof()) {
         return false;
@@ -196,7 +193,19 @@ bool ScriptInterpreter::ReadScript(void)
             return false;
         if (!Parse())
             return false;
-    } 
+    }
+    
+    if (branchDepth != 0) {
+       // Clear the command sequence
+       moderator->ClearCommandSeq();
+       if (branchDepth > 0)
+          MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
+             "completed without terminating all branch commands\n");
+       if (branchDepth < 0)
+          MessageInterface::ShowMessage("ScriptInterpreter::ReadScript "
+             "completed with more End commands than branch commands\n");
+       return false;
+    }
     
     return true;
 }
@@ -409,6 +418,7 @@ bool ScriptInterpreter::Parse(void)
                                                 line + "\"");
                }
                sequenceStarted = true;
+               branchDepth += cmd->DepthIncrement();
             }
             catch (BaseException &e)
             {
