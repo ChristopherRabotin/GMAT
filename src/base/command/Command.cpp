@@ -226,6 +226,31 @@ bool Command::SetObject(const std::string &name, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
+//  GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the objects used by the command.
+ *
+ * Objects associated with a command are not necessarily available at the time
+ * the command is parsed from the script.  This command builds the data store of
+ * object names that will be used to execute the command when the script is run.
+ * 
+ * @param <type>    The (enumerated) base type assigned to the object.
+ * @param <objName> The name of the object.
+ *
+ * @return A pointer to the requested object, obtained from the Configuration 
+ *         Manager if it is a configured object, or from the local pointer if it
+ *         is an internal object.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Command::GetObject(const Gmat::ObjectType type, 
+                             const std::string objName)
+{
+    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**

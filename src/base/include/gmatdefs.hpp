@@ -68,6 +68,7 @@ namespace Gmat
    {
       SPACECRAFT= 1001,
       GROUND_STATION,
+      BURN,
       COMMAND,
       PROPAGATOR,
       FORCE_MODEL,
