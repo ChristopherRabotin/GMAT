@@ -10,6 +10,9 @@ all: libFoundation
 	mkdir -p ../lib
 	mv libFoundation.a ../lib
 
+clean:
+	rm -f *.o ../lib/libFoundation.a
+
 libFoundation : ../lib/libFoundation.a
 
 .cpp.o:
