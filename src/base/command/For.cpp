@@ -18,9 +18,13 @@
  */
 //------------------------------------------------------------------------------
 
+#include <ctype.h>     // for isalpha
 #include "For.hpp"
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
+
+#include <iostream>
+using namespace std; // **************
 
 //---------------------------------
 // static data
@@ -30,15 +34,23 @@ For::PARAMETER_TEXT[ForParamCount - BranchCommandParamCount] =
 {
    "StartValue",
    "EndValue",
-   "Step"
+   "Step", 
+   "IndexName",
+   "StartName",
+   "EndName",
+   "IncrementName"
 };
 
 const Gmat::ParameterType
 For::PARAMETER_TYPE[ForParamCount - BranchCommandParamCount] =
 {
-Gmat::REAL_TYPE,
-Gmat::REAL_TYPE,
-Gmat::REAL_TYPE
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 const Real For::UNINITIALIZED_VALUE = -999.99;
@@ -59,7 +71,19 @@ For::For(void) :
    startValue      (DEFAULT_START),
    endValue        (DEFAULT_END),
    stepSize        (DEFAULT_INCREMENT),
-   currentValue    (UNINITIALIZED_VALUE)
+   currentValue    (UNINITIALIZED_VALUE),
+   indexParam      (NULL),
+   startParam      (NULL),
+   endParam        (NULL),
+   incrParam       (NULL),
+   indexName       (""),
+   startName       (""),
+   endName         (""),
+   incrName        (""),
+   indexIsParam    (false),
+   startIsParam    (false),
+   endIsParam      (false),
+   incrIsParam     (false)
 {
    parameterCount = ForParamCount;
 }
@@ -79,7 +103,19 @@ forName         (f.forName),
 startValue      (f.startValue),
 endValue        (f.endValue),
 stepSize        (f.stepSize),
-currentValue    (f.currentValue)
+currentValue    (f.currentValue),
+indexParam      (NULL),
+startParam      (NULL),
+endParam        (NULL),
+incrParam       (NULL),
+indexName       (f.indexName),
+startName       (f.startName),
+endName         (f.endName),
+incrName        (f.incrName),
+indexIsParam    (f.indexIsParam),
+startIsParam    (f.startIsParam),
+endIsParam      (f.endIsParam),
+incrIsParam     (f.incrIsParam)
 {
 }
 
@@ -116,6 +152,18 @@ For& For::operator=(const For& f)
    endValue      = f.endValue;
    stepSize      = f.stepSize;
    currentValue  = f.currentValue;
+   indexParam    = f.indexParam;
+   startParam    = f.startParam;
+   endParam      = f.endParam;
+   incrParam     = f.incrParam;
+   indexName     = f.indexName;
+   startName     = f.startName;
+   endName       = f.endName;
+   incrName      = f.incrName;
+   indexIsParam  = f.indexIsParam;
+   startIsParam  = f.startIsParam;
+   endIsParam    = f.endIsParam;
+   incrIsParam   = f.incrIsParam;
    return *this;
 }
 
@@ -197,14 +245,10 @@ bool For::Execute(void)
 
    if (StillLooping())
    {
-      //if (!commandComplete) {
       retval = ExecuteBranch();
       currentValue += stepSize;
-      if (indexParam)
-         indexParam->SetReal(currentValue);
-      //else
-      //   throw CommandException(
-      //         "Index parameter has not been set for For loop.");
+      cout << "current value bumped to ......." << currentValue << endl;
+      if (indexIsParam)   indexParam->SetReal(currentValue);
    }
    else
    {
@@ -254,9 +298,14 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
    switch (type)
    {
       case Gmat::PARAMETER:
-            return indexParam;
+      {
+         if (name == indexName)      return indexParam;
+         else if (name == startName) return startParam;
+         else if (name == endName)   return endParam;
+         else if (name == incrName)  return incrParam;
+      }
       default:
-         break;
+      break;
    }
    
    // Not handled here -- invoke the next higher GetRefObject call
@@ -278,11 +327,33 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
 bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                        const std::string &name)
 {
+   
+   cout << "In SetRef .... name = " << name << endl;
+   cout << "In SetRef .... startName = " << name << endl;
    switch (type)
    {
       case Gmat::PARAMETER:
       {
-         indexParam = (Parameter*) obj;
+         if (name == indexName)
+         {
+            indexParam   = (Parameter*) obj;
+            indexIsParam = true;
+         }
+         if (name == startName)
+         {
+            startParam   = (Parameter*) obj;
+            startIsParam = true;
+         }
+         if (name == endName)
+         {
+            endParam   = (Parameter*) obj;
+            endIsParam = true;
+         }
+         if (name == incrName)
+         {
+            incrParam   = (Parameter*) obj;
+            incrIsParam = true;
+         }
          return true;
       }
       default:
@@ -302,14 +373,14 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
                           const std::string &oldName,
                           const std::string &newName)
 {
-   /* ---------- do I need to add indexParamName? ------------
    if (type == Gmat::PARAMETER)
    {
-      if (indexParamName == oldName)
-         indexParamName = newName;
+      if (indexName == oldName)   indexName = newName;
+      if (startName == oldName)   startName = newName;
+      if (endName == oldName)     endName   = newName;
+      if (incrName == oldName)    incrName  = newName;
    }
-    */
-   return true;
+   return true;  // should I be calling the parent class's method for this here?
 }
 
 //------------------------------------------------------------------------------
@@ -401,9 +472,24 @@ Real For::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real For::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == START_VALUE)   return (startValue   = value);
-   if (id == END_VALUE)     return (endValue     = value);
-   if (id == STEP)          return (stepSize     = value);
+   if (id == START_VALUE)
+   {
+      startValue   = value;
+      startIsParam = false;
+      return true;
+   }
+   if (id == END_VALUE)
+   {
+      endValue     = value;
+      endIsParam   = false;
+      return true;
+   }
+   if (id == STEP)
+   {
+      stepSize     = value;
+      incrIsParam  = false;
+      return true;
+   }
    
    return BranchCommand::SetRealParameter(id, value);
 }
@@ -438,6 +524,106 @@ Real For::SetRealParameter(const std::string &label, const Real value)
 }
 
 //------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param id  ID for the requested parameter.
+ *
+ * @return  string value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string For::GetStringParameter(const Integer id) const
+{
+   if (id == INDEX_NAME)          return indexName;
+   else if (id == START_NAME)     return startName;
+   else if (id == END_NAME)       return endName;
+   else if (id == INCREMENT_NAME) return incrName;
+   
+   return BranchCommand::GetStringParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+* This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param id     ID for the requested parameter.
+ * @param value  string value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+
+bool For::SetStringParameter(const Integer id, 
+                             const std::string &value)
+{
+   if (id == INDEX_NAME) 
+   {
+      indexName    = value; 
+      return true;
+   }
+   else if (id == START_NAME)
+   {
+      startName = value;
+      return true;
+   }
+   else if (id == END_NAME)
+   {
+      endName = value;
+      return true;
+   }
+   else if (id == INCREMENT_NAME)
+   {
+      incrName = value;
+      return true;
+   }
+   
+   return BranchCommand::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* Accessor method used to get a parameter value
+ *
+ * @param    label  label ID for the parameter
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string For::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+* Accessor method used to get a parameter value
+ *
+ * @param    label  Integer ID for the parameter
+ * @param    value  The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+
+bool For::SetStringParameter(const std::string &label,
+                                        const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
 
@@ -453,15 +639,16 @@ Real For::SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
 bool For::StillLooping()
 {
-   // throw an exception if the For command has not yet been initialized fully
-   //if ((startValue == UNINITIALIZED_VALUE) || 
-   //    (endValue   == UNINITIALIZED_VALUE) )
-   //   throw CommandException(
-   //         "For command has not been initialized fully/properly.");
-   
    // initialize the loop, if it's the first time through
    if (currentValue == UNINITIALIZED_VALUE)
    {
+      cout << "First time through .........." << endl;
+      if (startIsParam)  startValue = startParam->GetReal();
+      if (endIsParam)    endValue   = endParam->GetReal();
+      if (incrIsParam)   stepSize   = incrParam->GetReal();
+      cout << "Start value = " << startValue << endl;
+      cout << "End value = " << endValue << endl;
+      cout << "Step value = " << stepSize << endl;
       if ((stepSize == 0.0) ||
           ((stepSize > 0.0) && (startValue > endValue)) ||
           ((stepSize < 0.0) && (startValue < endValue)) )
@@ -469,11 +656,11 @@ bool For::StillLooping()
                "For loop values incorrect - will result in infinite loop.");
       
       currentValue = startValue;
-      if (indexParam)
+      
+      cout << "Current value set to " << currentValue << endl;
+      
+      if (indexIsParam)
          indexParam->SetReal(currentValue);
-      //else
-      //   throw CommandException(
-      //         "Index parameter has not been set for For loop.");
       commandComplete  = false;      
    }
    if (((stepSize > 0.0) && (currentValue <= endValue)) ||

@@ -1,4 +1,3 @@
-
 //$Header$
 //------------------------------------------------------------------------------
 //                                  ForFor
@@ -45,39 +44,45 @@ public:
    virtual ~For(void);
 
    // operator = 
-   For&             operator=(const For& f);
+   For&                 operator=(const For& f);
 
    // Inherited methods that need some enhancement from the base class
-   virtual bool        Append(GmatCommand *cmd);
+   virtual bool         Append(GmatCommand *cmd);
 
    // Methods used to run the command
-   virtual bool        Initialize(void);
-   virtual bool        Execute(void);
+   virtual bool         Initialize(void);
+   virtual bool         Execute(void);
 
    // inherited from GmatBase
-   virtual GmatBase*   Clone(void) const;
+   virtual GmatBase*    Clone(void) const;
 
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name);
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-      GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value);
-   virtual Real        GetRealParameter(const std::string &label) const;
-   virtual Real        SetRealParameter(const std::string &label,
-                                        const Real value);
-
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   
     
 protected:
    enum
@@ -85,6 +90,10 @@ protected:
       START_VALUE = BranchCommandParamCount,
       END_VALUE,
       STEP,
+      INDEX_NAME,
+      START_NAME,
+      END_NAME,
+      INCREMENT_NAME,
       ForParamCount
    };
 
@@ -108,8 +117,21 @@ protected:
    Real         stepSize;
    /// Current value for the For loop counter
    Real         currentValue;
-   /// the parameter object(s) used by the For 
-   Parameter*   indexParam;
+
+   Parameter*                 indexParam;
+   Parameter*                 startParam;
+   Parameter*                 endParam;
+   Parameter*                 incrParam;
+   
+   std::string                indexName;
+   std::string                startName;
+   std::string                endName;
+   std::string                incrName;
+
+   bool                       indexIsParam;
+   bool                       startIsParam;
+   bool                       endIsParam;
+   bool                       incrIsParam;
    
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();
