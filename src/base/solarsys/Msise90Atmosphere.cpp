@@ -56,7 +56,8 @@ Msise90Atmosphere::~Msise90Atmosphere()
 //  bool Density(Real *pos, Real *density, Real epoch, Integer count)
 //------------------------------------------------------------------------------
 /**
- *  Calculates the density at each of the states in the input vector.
+ *  Calculates the density at each of the states in the input vector, using the 
+ *  MSISE90 atmosphere model.
  * 
  *  @param pos       The input vector of spacecraft states
  *  @param density   The array of output densities

@@ -13,7 +13,8 @@
 // Created: 2004/02/21
 //
 /**
- * An exponentially modeled atmosphere
+ * An exponentially modeled atmosphere based on Vallado, pp 532-534 and Wertz,
+ * p 820.
  */
 //------------------------------------------------------------------------------
 
@@ -25,30 +26,59 @@
 #include "AtmosphereModel.hpp"
 
 
+/**
+ * The exponential atmosphere model in Vallado (2001) and Wertz (1978).
+ * 
+ * This code calculates the atmosphereic density at a given position based on 
+ * the altitude of the input state above the spherical Earth.  This model does
+ * not include an atmospheric bulge due to solar heating.  The code will need
+ * to be refined to use the oblate Earth once oblateness is added to the code.
+ * 
+ * The density is given by
+ * 
+ * \f[\rho = \rho_0 e^{-{{h_{ellp} - h_0}\over{H}}}\f]
+ * 
+ * where \f$\rho_0\f$ is a reference density, specified at a reference altitude
+ * \f$h_0\f$, \f$h_{ellp}\f$ is the height of the specified position above the 
+ * body's ellipsoid, and \f$H\f$ is a scale height, used to scale the other 
+ * variables in the formula.
+ * 
+ * Developers and other users can build exponential models for bodies other than 
+ * the Earth by deriving a class off of this one and overriding the SetConstants
+ * method.
+ * 
+ * @todo Replace the spherical Earth model with an oblate Earth model.
+ * @test Check to see if the band disconituities merit smoothing.
+ */
 class ExponentialAtmosphere : public AtmosphereModel
 {
 public:
 	ExponentialAtmosphere();
 	virtual ~ExponentialAtmosphere();
     
-    bool                    Density(Real *position, Real *density, 
-                                    Real epoch=21545.0,
-                                    Integer count = 1);
+   virtual bool            Density(Real *position, Real *density, 
+                                   Real epoch=21545.0,
+                                   Integer count = 1);
 protected: 
-    /// The "Scale height"
-    Real                    scale[11];      // in km^-1
-    /// Reference heights
-    Real                    z[11];
-    /// Reference density
-    Real                    rho0;
-    /// Lag angle for the bulge trailing the Sun (in radians)
-    Real                    lagAngle;
+   /// Table of scale heights, \f$H\f$.
+   Real                    *scaleHeight;
+   /// Table of Reference heights, \f$\h_0\f$.
+   Real                    *refHeight;
+   /// Table of reference densities, \f$\rho_0\f$.
+   Real                    *refDensity;
+   /// Number of altitude bands used in the model.
+   Integer                 altitudeBands;
+   /// Flag indicating if the altitude is "at" a boundary
+   bool                    smoothDensity;
     
-    void                    SetConstants(void);
+   virtual void            SetConstants(void);
+   Real                    CalculateHeight(Real *loc);
+   Integer                 FindBand(Real height);
+   Real                    Smooth(Real height, Integer index);
 
 private:
-    ExponentialAtmosphere(const ExponentialAtmosphere& atm);
-    ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);
+   ExponentialAtmosphere(const ExponentialAtmosphere& atm);
+   ExponentialAtmosphere&  operator=(const ExponentialAtmosphere& atm);
 };
 
 

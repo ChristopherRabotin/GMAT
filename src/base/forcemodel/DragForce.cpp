@@ -22,7 +22,7 @@
 #include "ForceModelException.hpp"
 
 // Uncomment to generate drag model data for debugging:
-//#define     DEBUG      
+// #define     DEBUG      
 
 #ifdef DEBUG
    #include <fstream>
@@ -35,7 +35,7 @@
 // DragForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Default constructor for the DrageForce.
+ * Default constructor for the DragForce.
  * 
  * @param name Optional name for this force component.
  */

@@ -26,6 +26,11 @@
 #include "AtmosphereException.hpp"
 
 
+/**
+ * Base class for atmosphere models.
+ * 
+ * Atmosphere models are used to model drag forces and other aerodynamics.
+ */ 
 class AtmosphereModel : public GmatBase
 {
 public:
