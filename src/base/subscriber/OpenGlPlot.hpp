@@ -85,6 +85,7 @@ protected:
    bool mDrawAxis;
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
+   bool mDrawTarget;
    
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
@@ -113,6 +114,7 @@ protected:
       DRAW_AXIS,
       DRAW_EQUATORIAL_PLANE,
       WIRE_FRAME,
+      TARGET_STATUS,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount

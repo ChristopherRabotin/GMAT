@@ -239,8 +239,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
 bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
                                        const Real &time, const RealArray &posX,
                                        const RealArray &posY, const RealArray &posZ,
-                                       const UnsignedIntArray &orbitColor,
-                                       const UnsignedIntArray &targetColor,
+                                       const UnsignedIntArray &color,
                                        bool updateCanvas, bool drawWireFrame)
 {   
 #if defined __CONSOLE_APP__
@@ -262,8 +261,7 @@ bool PlotInterface::UpdateGlSpacecraft(const std::string &plotName,
             
       if (frame->GetPlotName().IsSameAs(owner.c_str()))
       {
-         frame->UpdateSpacecraft(time, posX, posY, posZ, orbitColor, targetColor,
-                                 updateCanvas);
+         frame->UpdateSpacecraft(time, posX, posY, posZ, color, updateCanvas); //loj: 8/5/04 color
          updated = true;
       }
    }

@@ -36,8 +36,7 @@ public:
    static bool UpdateGlSpacecraft(const std::string &plotName,
                                   const Real &time, const RealArray &posX,
                                   const RealArray &posY, const RealArray &posZ,
-                                  const UnsignedIntArray &orbitColor,
-                                  const UnsignedIntArray &targetColor,
+                                  const UnsignedIntArray &color,
                                   bool updateCanvas, bool drawWireFrame = false);
 
    // for XY plot

@@ -43,6 +43,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "Axis",
    "EquatorialPlane",
    "WireFrame",
+   "TargetStatus",
    "DataCollectFrequency",
    "UpdatePlotFrequency"
 }; 
@@ -57,6 +58,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::UNSIGNED_INT_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE
@@ -85,6 +87,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name) :
    mDrawAxis = false;
    mDrawEquatorialPlane = true;
    mDrawWireFrame = false;
+   mDrawTarget = false;
    mDataCollectFrequency = 1;
    mUpdatePlotFrequency = 10;
    mNumData = 0;
@@ -107,6 +110,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl) :
    mDrawAxis = ogl.mDrawAxis;
    mDrawEquatorialPlane = ogl.mDrawEquatorialPlane;
    mDrawWireFrame = ogl.mDrawWireFrame;
+   mDrawTarget = ogl.mDrawTarget;
    mDataCollectFrequency = ogl.mDataCollectFrequency;
    mUpdatePlotFrequency = ogl.mUpdatePlotFrequency;
    mScCount = ogl.mScCount;
@@ -365,6 +369,11 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
          return "On";
       else
          return "Off";
+   case TARGET_STATUS:
+      if (mDrawTarget)
+         return "On";
+      else
+         return "Off";
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -405,6 +414,16 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 #if DEBUG_OPENGL_PARAM
          MessageInterface::ShowMessage
             ("OpenGlPlot::SetStringParameter() mDrawWireFrame=%d\n", mDrawWireFrame);
+#endif
+         return true;
+      }
+   case TARGET_STATUS:
+      if (value == "On" || value == "Off")
+      {
+         mDrawTarget = (value == "On");
+#if DEBUG_OPENGL_PARAM
+         MessageInterface::ShowMessage
+            ("OpenGlPlot::SetStringParameter() mDrawTarget=%d\n", mDrawTarget);
 #endif
          return true;
       }
@@ -547,6 +566,12 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       return PlotInterface::RefreshGlPlot(instanceName);
    }
 
+   Publisher *thePublisher = Publisher::Instance();
+
+   // if targetting and draw target is off, just return
+   if (!mDrawTarget && (thePublisher->GetRunState() == Gmat::TARGETING))
+      return true;
+   
    if (mScCount > 0)
    {
       if (len > 0)
@@ -561,7 +586,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
 
             //loj: 7/30/04 -- try new PublishedDataMap
             StringArray labelArray =
-               Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
+               thePublisher->GetStringArrayParameter("PublishedDataMap");
 
 #if DEBUG_OPENGL_UPDATE
             MessageInterface::ShowMessage("OpenGlPlot::Distribute() labelArray=\n");
@@ -592,12 +617,23 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
 #endif
             }
 
-            //loj: 7/13/04 used new method taking arrays
-            PlotInterface::
-               UpdateGlSpacecraft(instanceName,
-                                  dat[0], mScXArray, mScYArray, mScZArray,
-                                  mOrbitColorArray, mTargetColorArray,
-                                  update, mDrawWireFrame);
+            //loj: 8/5/04 added
+            // If targeting, use targeting color
+            if (thePublisher->GetRunState() == Gmat::TARGETING)
+            {
+               //loj: 7/13/04 used new method taking arrays
+               PlotInterface::
+                  UpdateGlSpacecraft(instanceName,
+                                     dat[0], mScXArray, mScYArray, mScZArray,
+                                     mTargetColorArray, update, mDrawWireFrame);
+            }
+            else
+            {
+               PlotInterface::
+                  UpdateGlSpacecraft(instanceName,
+                                     dat[0], mScXArray, mScYArray, mScZArray,
+                                     mOrbitColorArray, update, mDrawWireFrame);
+            }
             
             if (update)
                mNumCollected = 0;
