@@ -69,6 +69,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
 //   EVT_TREE_END_DRAG(-1, ResourceTree::OnEndDrag)
    
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSpacecraft)
+   EVT_MENU(POPUP_ADD_FUELTANK, ResourceTree::OnAddFuelTank)
+   EVT_MENU(POPUP_ADD_THRUSTER, ResourceTree::OnAddThruster)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
    EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
@@ -119,6 +121,8 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 
    // set the counters to 0
    mNumSpacecraft = 0;
+   mNumFuelTank = 0;
+   mNumThruster = 0;
    mNumFormation = 0;
    mNumPropagator = 0;
    mNumImpulsiveBurn = 0;
@@ -150,6 +154,8 @@ void ResourceTree::UpdateResource(bool resetCounter)
    if (resetCounter)
    {
       mNumSpacecraft = 0;
+      mNumFuelTank = 0;
+      mNumThruster = 0;
       mNumFormation = 0;
       mNumPropagator = 0;
       mNumImpulsiveBurn = 0;
@@ -195,6 +201,7 @@ void ResourceTree::UpdateResource(bool resetCounter)
    DeleteChildren(mCoordSysItem);
 
    AddDefaultSpacecraft(mSpacecraftItem);
+   AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
    AddDefaultPropagators(mPropagatorItem);
    AddDefaultBurns(mBurnItem);
@@ -299,10 +306,10 @@ void ResourceTree::AddDefaultResources()
       AppendItem(resource, wxT("Interfaces"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Interfaces"),
                                       GmatTree::INTERFACES_FOLDER));
-    
+   
    SetItemImage(interfaceItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
-
+   
    //----- Subscripts
    wxTreeItemId subscriptItem =
       AppendItem(resource, wxT("Subscripts"), GmatTree::ICON_FOLDER, -1,
@@ -312,7 +319,6 @@ void ResourceTree::AddDefaultResources()
    SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
-   //loj: 10/1/04 added Arrays
    //----- Vairables
    mVariableItem = 
       AppendItem(resource, wxT("Variables/Arrays"), GmatTree::ICON_FOLDER, -1,
@@ -344,6 +350,7 @@ void ResourceTree::AddDefaultResources()
 
    AddDefaultBodies(universeItem);
    AddDefaultSpacecraft(mSpacecraftItem);
+   AddDefaultHardware(mHardwareItem);
    AddDefaultFormations(mFormationItem);
    AddDefaultConstellations(constellationItem);
    AddDefaultPropagators(mPropagatorItem);
@@ -367,29 +374,29 @@ void ResourceTree::AddDefaultResources()
 void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 {
    AppendItem(itemId, wxT("Sun"), GmatTree::ICON_SUN, -1,
-              new GmatTreeItemData(wxT("Sun"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Sun"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Mercury"), GmatTree::ICON_MERCURY, -1,
-              new GmatTreeItemData(wxT("Mercury"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Mercury"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Venus"), GmatTree::ICON_VENUS, -1,
-              new GmatTreeItemData(wxT("Venus"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Venus"), GmatTree::CELESTIAL_BODY));
 
    wxTreeItemId earth = AppendItem(itemId, wxT("Earth"), GmatTree::ICON_EARTH, -1,
-                                   new GmatTreeItemData(wxT("Earth"), GmatTree::DEFAULT_BODY));
+                                   new GmatTreeItemData(wxT("Earth"), GmatTree::CELESTIAL_BODY));
    AppendItem(earth, wxT("Moon"), GmatTree::ICON_MOON, -1,
-              new GmatTreeItemData(wxT("Moon"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Moon"), GmatTree::CELESTIAL_BODY));
 
    AppendItem(itemId, wxT("Mars"), GmatTree::ICON_MARS, -1,
-              new GmatTreeItemData(wxT("Mars"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Mars"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Jupiter"), GmatTree::ICON_JUPITER, -1,
-              new GmatTreeItemData(wxT("Jupiter"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Jupiter"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Saturn"), GmatTree::ICON_SATURN, -1,
-              new GmatTreeItemData(wxT("Saturn"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Saturn"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Uranus"), GmatTree::ICON_URANUS, -1,
-              new GmatTreeItemData(wxT("Uranus"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Uranus"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Neptune"), GmatTree::ICON_NEPTUNE, -1,
-              new GmatTreeItemData(wxT("Neptune"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Neptune"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Pluto"), GmatTree::ICON_PLUTO, -1,
-              new GmatTreeItemData(wxT("Pluto"), GmatTree::DEFAULT_BODY));
+              new GmatTreeItemData(wxT("Pluto"), GmatTree::CELESTIAL_BODY));
 
    //----- Space Points
    specialPointsItem =
@@ -423,7 +430,42 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_SPACECRAFT, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_SPACECRAFT));
+                 new GmatTreeItemData(wxT(objName), GmatTree::SPACECRAFT));
+   };
+
+   if (size > 0)
+      Expand(itemId);
+}
+
+//------------------------------------------------------------------------------
+// void AddDefaultHardware(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default hardware
+ *
+ * @param <itemId> tree item for the hardware folder
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultHardware(wxTreeItemId itemId)
+{
+   StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::HARDWARE);
+   int size = itemNames.size();
+   wxString objName;
+   wxString objTypeName;
+    
+   for (int i = 0; i<size; i++)
+   {
+      Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
+      objName = wxString(itemNames[i].c_str());
+      objTypeName = wxString(hw->GetTypeName().c_str());
+
+      if (objTypeName == "FuelTank")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::FUELTANK));
+      else if (objTypeName == "Thruster")
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+                    new GmatTreeItemData(wxT(objName),
+                                         GmatTree::THRUSTER));
    };
 
    if (size > 0)
@@ -452,7 +494,7 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
       
       wxTreeItemId formationItem =
       AppendItem(itemId, wxT(objName), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_FORMATION_FOLDER));
+                 new GmatTreeItemData(wxT(objName), GmatTree::FORMATION_FOLDER));
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
       
@@ -466,7 +508,7 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
       {
          objName = wxString(formSc[j].c_str());
          AppendItem(formationItem, wxT(objName), GmatTree::ICON_SPACECRAFT, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_SPACECRAFT));
+                 new GmatTreeItemData(wxT(objName), GmatTree::SPACECRAFT));
       }   
 
       Expand(formationItem);
@@ -489,17 +531,17 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
 {
 //   wxTreeItemId gps =
 //      AppendItem(itemId, wxT("GPS"), -1, -1,
-//                 new GmatTreeItemData(wxT("GPS"), GmatTree::DEFAULT_CONSTELLATION_FOLDER));
+//                 new GmatTreeItemData(wxT("GPS"), GmatTree::CONSTELLATION_FOLDER));
 //   SetItemImage(gps, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 //
 //   AppendItem(gps, wxT("GPS1"), GmatTree::ICON_SPACECRAFT, -1,
-//              new GmatTreeItemData(wxT("GPS1"), GmatTree::DEFAULT_CONSTELLATION_SATELLITE));
+//              new GmatTreeItemData(wxT("GPS1"), GmatTree::CONSTELLATION_SATELLITE));
 //   AppendItem(gps, wxT("GPS2"), GmatTree::ICON_SPACECRAFT, -1,
-//              new GmatTreeItemData(wxT("GPS2"), GmatTree::DEFAULT_CONSTELLATION_SATELLITE));
+//              new GmatTreeItemData(wxT("GPS2"), GmatTree::CONSTELLATION_SATELLITE));
 //   AppendItem(gps, wxT("GPS3"), GmatTree::ICON_SPACECRAFT, -1,
-//              new GmatTreeItemData(wxT("GPS3"), GmatTree::DEFAULT_CONSTELLATION_SATELLITE));
+//              new GmatTreeItemData(wxT("GPS3"), GmatTree::CONSTELLATION_SATELLITE));
 //   AppendItem(gps, wxT("GPS4"), GmatTree::ICON_SPACECRAFT, -1,
-//              new GmatTreeItemData(wxT("GPS4"), GmatTree::DEFAULT_CONSTELLATION_SATELLITE));
+//              new GmatTreeItemData(wxT("GPS4"), GmatTree::CONSTELLATION_SATELLITE));
 }
 
 //------------------------------------------------------------------------------
@@ -521,7 +563,7 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_PROPAGATOR, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_PROPAGATOR));
+                 new GmatTreeItemData(wxT(objName), GmatTree::PROPAGATOR));
    };
 
    if (size > 0)
@@ -556,14 +598,14 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
          //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
          AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_IMPULSIVE_BURN));
+                                         GmatTree::IMPULSIVE_BURN));
       }
       else if (objTypeName == "FiniteBurn")
       {
          //MessageInterface::ShowMessage("ResourceTree::AddDefaultBurns() objTypeName = ImpulsiveBurn\n");
          AppendItem(itemId, wxT(objName), GmatTree::ICON_BURN, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_FINITE_BURN));
+                                         GmatTree::FINITE_BURN));
       }
    };
 
@@ -596,7 +638,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
       if (objTypeName == "DifferentialCorrector")
       {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
-                    new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_DIFF_CORR));
+                    new GmatTreeItemData(wxT(objName), GmatTree::DIFF_CORR));
       }
    };
 
@@ -629,15 +671,15 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
       if (objTypeName == "ReportFile")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_REPORT, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_REPORT_FILE));
+                                         GmatTree::REPORT_FILE));
       else if (objTypeName == "XYPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_XY_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_XY_PLOT));
+                                         GmatTree::XY_PLOT));
       else if (objTypeName == "OpenGLPlot")
          AppendItem(itemId, wxT(objName), GmatTree::ICON_OPEN_GL_PLOT, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_OPENGL_PLOT));
+                                         GmatTree::OPENGL_PLOT));
    };
 
    if (size > 0)
@@ -656,9 +698,9 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
    AppendItem(itemId, wxT("TCP/IP"), GmatTree::ICON_NETWORK, -1,
-              new GmatTreeItemData(wxT("TCP/IP"), GmatTree::DEFAULT_INTERFACE));
+              new GmatTreeItemData(wxT("TCP/IP"), GmatTree::INTERFACE));
    AppendItem(itemId, wxT("Mex"), GmatTree::ICON_FILE, -1,
-              new GmatTreeItemData(wxT("Mex"), GmatTree::DEFAULT_INTERFACE));
+              new GmatTreeItemData(wxT("Mex"), GmatTree::INTERFACE));
     
 }
 
@@ -685,11 +727,11 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 
       // append only user parameters
       // all system parameters works as Object.Property
-      if (param->GetKey() == GmatParam::USER_PARAM) //loj: 12/10/04 Changed from Parameter::
+      if (param->GetKey() == GmatParam::USER_PARAM)
       {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_VARIABLE, -1,
                     new GmatTreeItemData(wxT(objName),
-                                         GmatTree::DEFAULT_VARIABLE));
+                                         GmatTree::VARIABLE));
       }
    };
 
@@ -719,7 +761,7 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_MATLAB_FUNCTION));
+                 new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
    };
  
    //----- Predefined functions
@@ -747,7 +789,6 @@ void ResourceTree::AddDefaultMatlabFunctions(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 {
-   //loj: 1/18/05 uncommented the code
    StringArray itemNames = GmatAppData::GetGuiInterpreter()->
       GetListOfConfiguredItems(Gmat::COORDINATE_SYSTEM);
    int size = itemNames.size();
@@ -757,7 +798,7 @@ void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
    {
       objName = wxString(itemNames[i].c_str());
       AppendItem(itemId, wxT(objName), GmatTree::ICON_COORDINATE_SYSTEM, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::DEFAULT_COORD_SYSTEM));
+                 new GmatTreeItemData(wxT(objName), GmatTree::COORD_SYSTEM));
    };
    
    if (size > 0)
@@ -807,9 +848,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    else if (strcmp(title, wxT("Hardware")) == 0)
    {
       menu.Append(POPUP_ADD_THRUSTER, wxT("Add Thruster"));
-      menu.Enable(POPUP_ADD_THRUSTER, FALSE);
-      menu.Append(POPUP_ADD_TANK, wxT("Add Tank"));
-      menu.Enable(POPUP_ADD_TANK, FALSE);
+      //menu.Enable(POPUP_ADD_THRUSTER, FALSE);
+      menu.Append(POPUP_ADD_FUELTANK, wxT("Add Fuel Tank"));
+      //menu.Enable(POPUP_ADD_FUELTANK, FALSE);
    }
    else if (strcmp(title, wxT("Formations")) == 0)
       menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation"));
@@ -828,12 +869,10 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
    else if (strcmp(title, wxT("Plots/Reports")) == 0)
       menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
-   else if (strcmp(title, wxT("Variables/Arrays")) == 0) //loj: 11/03/04 added Arrays
+   else if (strcmp(title, wxT("Variables/Arrays")) == 0)
       menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable"));
-//   else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER)     ||
-//            (dataType == GmatTree::CREATED_FORMATION_FOLDER)     ||
-//            (dataType == GmatTree::DEFAULT_CONSTELLATION_FOLDER) ||
-//            (dataType == GmatTree::CREATED_CONSTELLATION_FOLDER))
+//   else if ((dataType == GmatTree::FORMATION_FOLDER)     ||
+//            (dataType == GmatTree::CONSTELLATION_FOLDER))
 //   {
 //      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft..."));
 //      menu.AppendSeparator();
@@ -843,7 +882,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //      menu.Append(POPUP_RENAME, wxT("Rename"));
 //      menu.Append(POPUP_DELETE, wxT("Delete"));
 //   }
-   else if (dataType == GmatTree::DEFAULT_PROPAGATOR)
+   else if (dataType == GmatTree::PROPAGATOR)
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
@@ -977,49 +1016,38 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
 
-   //loj: 12/7/04 - added if newName != oldName
+   //if newName != oldName
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
       Gmat::ObjectType objType;
       
       switch (dataType)
       {
-      case GmatTree::DEFAULT_SPACECRAFT:
-      case GmatTree::CREATED_SPACECRAFT:
+      case GmatTree::SPACECRAFT:
          objType = Gmat::SPACECRAFT;
          break;
-      case GmatTree::DEFAULT_FORMATION_FOLDER: //loj: 11/23/04 - added
-      case GmatTree::CREATED_FORMATION_FOLDER:
+      case GmatTree::FORMATION_FOLDER:
          objType = Gmat::FORMATION;
          break;
-      case GmatTree::DEFAULT_IMPULSIVE_BURN:
-      case GmatTree::CREATED_IMPULSIVE_BURN:
+      case GmatTree::IMPULSIVE_BURN:
          objType = Gmat::BURN;
          break;
-      case GmatTree::DEFAULT_FINITE_BURN:
-      case GmatTree::CREATED_FINITE_BURN:
+      case GmatTree::FINITE_BURN:
          objType = Gmat::BURN;
          break;
-      case GmatTree::DEFAULT_DIFF_CORR:
-      case GmatTree::CREATED_DIFF_CORR:
+      case GmatTree::DIFF_CORR:
          objType = Gmat::SOLVER;
          break;
-      case GmatTree::DEFAULT_REPORT_FILE:
-      case GmatTree::CREATED_REPORT_FILE:
-      case GmatTree::DEFAULT_XY_PLOT:
-      case GmatTree::CREATED_XY_PLOT:
-      case GmatTree::DEFAULT_OPENGL_PLOT:
-      case GmatTree::CREATED_OPENGL_PLOT:
+      case GmatTree::REPORT_FILE:
+      case GmatTree::XY_PLOT:
+      case GmatTree::OPENGL_PLOT:
          objType = Gmat::SUBSCRIBER;
          break;
-      case GmatTree::DEFAULT_VARIABLE:
-      case GmatTree::CREATED_VARIABLE:
+      case GmatTree::VARIABLE:
          objType = Gmat::PARAMETER;
          break;
-      case GmatTree::DEFAULT_MATLAB_FUNCTION:
-      case GmatTree::CREATED_MATLAB_FUNCTION:
-      case GmatTree::DEFAULT_GMAT_FUNCTION:
-      case GmatTree::CREATED_GMAT_FUNCTION:
+      case GmatTree::MATLAB_FUNCTION:
+      case GmatTree::GMAT_FUNCTION:
          objType = Gmat::FUNCTION;
          break;
       default:
@@ -1040,7 +1068,6 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          selItem->SetDesc(newName);
          theGuiManager->UpdateAll();
 
-         //loj: 11/17/04 added
          // update variables which may use new object name
          Collapse(mVariableItem);
          DeleteChildren(mVariableItem);
@@ -1117,13 +1144,13 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
                            (dataType == GmatTree::VARIABLES_FOLDER)      ||
                            (dataType == GmatTree::GROUNDSTATIONS_FOLDER));
                          
-   bool isDefaultItem = ((dataType == GmatTree::DEFAULT_PROPAGATOR)  ||
-                         (dataType == GmatTree::DEFAULT_BODY)        ||
-                         (dataType == GmatTree::DEFAULT_DIFF_CORR)   ||
-                         (dataType == GmatTree::DEFAULT_REPORT_FILE) ||
-                         (dataType == GmatTree::DEFAULT_XY_PLOT)     ||
-                         (dataType == GmatTree::DEFAULT_OPENGL_PLOT) ||
-                         (dataType == GmatTree::DEFAULT_INTERFACE));
+   bool isDefaultItem = ((dataType == GmatTree::PROPAGATOR)  ||
+                         (dataType == GmatTree::CELESTIAL_BODY)      ||
+                         (dataType == GmatTree::DIFF_CORR)   ||
+                         (dataType == GmatTree::REPORT_FILE) ||
+                         (dataType == GmatTree::XY_PLOT)     ||
+                         (dataType == GmatTree::OPENGL_PLOT) ||
+                         (dataType == GmatTree::INTERFACE));
 
    //kind of redundant because OpenPage returns false for some
    //of the default folders
@@ -1160,8 +1187,7 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
       selItem->SetDesc(newLabel);
        
       // if label refers to an object reset the object name
-      if ((itemType == GmatTree::DEFAULT_SPACECRAFT)  ||
-          (itemType == GmatTree::CREATED_SPACECRAFT))
+      if (itemType == GmatTree::SPACECRAFT)
       {
          const std::string stdOldLabel = oldLabel.c_str();
          const std::string stdNewLabel = newLabel.c_str();
@@ -1262,7 +1288,7 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    AppendItem(item, wxT("New Body"), GmatTree::ICON_EARTH, -1,
-              new GmatTreeItemData(wxT("New Body"), GmatTree::CREATED_BODY));
+              new GmatTreeItemData(wxT("New Body"), GmatTree::CELESTIAL_BODY));
 }
 
 //------------------------------------------------------------------------------
@@ -1291,9 +1317,77 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
       wxString newName = wxT(sc->GetName().c_str());
   
       AppendItem(item, newName, GmatTree::ICON_SPACECRAFT, -1,
-                 new GmatTreeItemData(newName, GmatTree::CREATED_SPACECRAFT));
+                 new GmatTreeItemData(newName, GmatTree::SPACECRAFT));
 
       theGuiManager->UpdateSpacecraft();
+  
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddFuelTank(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a spacecraft to spacecraft folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+  
+   wxString withName;
+   withName.Printf("FuelTank%d", ++mNumFuelTank);
+   
+   const std::string stdWithName = withName.c_str();
+
+   Hardware *hw = theGuiInterpreter->CreateHardware("FuelTank", stdWithName);
+
+   if (hw != NULL)
+   {
+      wxString newName = wxT(hw->GetName().c_str());
+  
+      AppendItem(item, newName, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(newName, GmatTree::FUELTANK));
+
+      //loj: 2/9/05 todo
+      //theGuiManager->UpdateHardware();
+  
+      Expand(item);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddThruster(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a spacecraft to spacecraft folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddThruster(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+  
+   wxString withName;
+   withName.Printf("Thruster%d", ++mNumThruster);
+  
+   const std::string stdWithName = withName.c_str();
+
+   Hardware *hw = theGuiInterpreter->CreateHardware("Thruster", stdWithName);
+
+   if (hw != NULL)
+   {
+      wxString newName = wxT(hw->GetName().c_str());
+  
+      AppendItem(item, newName, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(newName, GmatTree::THRUSTER));
+
+      //loj: 2/9/05 todo
+      //theGuiManager->UpdateHardware();
   
       Expand(item);
    }
@@ -1327,11 +1421,11 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
   
       wxTreeItemId formationItem =
       AppendItem(item, newName, GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(newName, GmatTree::CREATED_FORMATION_FOLDER));
+                 new GmatTreeItemData(newName, GmatTree::FORMATION_FOLDER));
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
 
-      theGuiManager->UpdateFormation(); //loj: 8/5/04 added
+      theGuiManager->UpdateFormation();
   
       Expand(item);
    }
@@ -1352,14 +1446,14 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
    wxTreeItemId constellation =
       AppendItem(item, wxT("New Constellation"), -1, -1,
                  new GmatTreeItemData(wxT("New Constellation"),
-                                      GmatTree::CREATED_CONSTELLATION_FOLDER));
+                                      GmatTree::CONSTELLATION_FOLDER));
 
    SetItemImage(constellation, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
    AppendItem(constellation, wxT("GPS1"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("GPS1"), GmatTree::CREATED_CONSTELLATION_SATELLITE));
+              new GmatTreeItemData(wxT("GPS1"), GmatTree::CONSTELLATION_SATELLITE));
    AppendItem(constellation, wxT("GPS2"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("GPS2"), GmatTree::CREATED_CONSTELLATION_SATELLITE));
+              new GmatTreeItemData(wxT("GPS2"), GmatTree::CONSTELLATION_SATELLITE));
 
    Expand(item);
 }
@@ -1387,7 +1481,7 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
    if (propSetup != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_PROPAGATOR, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_PROPAGATOR));
+                 new GmatTreeItemData(name, GmatTree::PROPAGATOR));
 
       Expand(item);
    }
@@ -1418,7 +1512,7 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
        ("ImpulsiveBurn", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_BURN, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
+                 new GmatTreeItemData(name, GmatTree::IMPULSIVE_BURN));
 
       Expand(item);
    }
@@ -1444,7 +1538,7 @@ void ResourceTree::OnAddFiniteBurn(wxCommandEvent &event)
        ("FiniteBurn", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_BURN, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_FINITE_BURN));
+                 new GmatTreeItemData(name, GmatTree::FINITE_BURN));
 
       Expand(item);
    }
@@ -1470,7 +1564,7 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
        ("DifferentialCorrector", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_DIFF_CORR));
+                 new GmatTreeItemData(name, GmatTree::DIFF_CORR));
 
       Expand(item);
    }
@@ -1496,7 +1590,7 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
        ("ReportFile", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_REPORT, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_REPORT_FILE));
+                 new GmatTreeItemData(name, GmatTree::REPORT_FILE));
 
       Expand(item);
    }
@@ -1522,7 +1616,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
        ("XYPlot", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_XY_PLOT, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
+                 new GmatTreeItemData(name, GmatTree::XY_PLOT));
       
       Expand(item);
    }
@@ -1548,7 +1642,7 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
        ("OpenGLPlot", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_OPEN_GL_PLOT, -1,
-                 new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
+                 new GmatTreeItemData(name, GmatTree::OPENGL_PLOT));
 
       Expand(item);
    }
@@ -1574,12 +1668,12 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
    if (paramDlg.IsParamCreated())
    {
       //wxString name = paramDlg.GetParamName();
-      wxArrayString names = paramDlg.GetParamNames(); //loj: 9/27/04 more than 1 param
+      wxArrayString names = paramDlg.GetParamNames();
 
       for (unsigned int i=0; i<names.GetCount(); i++)
       {
          AppendItem(item, names[i], GmatTree::ICON_VARIABLE, -1,
-                    new GmatTreeItemData(names[i], GmatTree::CREATED_VARIABLE));
+                    new GmatTreeItemData(names[i], GmatTree::VARIABLE));
       }
       
       Expand(item);
@@ -1602,7 +1696,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    wxString withName;
    //withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
 
-   //loj: 12/7/04 - Get name from the user first
+   //Get name from the user first
    withName = wxGetTextFromUser(wxT("Name: "), wxT("MATLAB function"),
                                 withName, this);
 
@@ -1615,14 +1709,14 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
           CreateFunction("MatlabFunction", stdWithName))
       {
          AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
-                    new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCTION));
+                    new GmatTreeItemData(withName, GmatTree::MATLAB_FUNCTION));
 
          Expand(item);
       }
 
       SelectItem(GetLastChild(item));
    }
-   //OnRename(event); //loj: 12/7/04 commented out
+   //OnRename(event);
 }
 
 //------------------------------------------------------------------------------
@@ -1641,7 +1735,7 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
    wxString withName;
    //withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
 
-   //loj: 12/7/04 - Get name from the user first
+   //Get name from the user first
    withName = wxGetTextFromUser(wxT("Name: "), wxT("GMAT function"),
                                 withName, this);
 
@@ -1654,14 +1748,14 @@ void ResourceTree::OnAddGmatFunction(wxCommandEvent &event)
           CreateFunction("GmatFunction", stdWithName))
       {
          AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
-                    new GmatTreeItemData(withName, GmatTree::CREATED_GMAT_FUNCTION));
+                    new GmatTreeItemData(withName, GmatTree::GMAT_FUNCTION));
 
          Expand(item);
       }
 
       SelectItem(GetLastChild(item));
    }
-   //OnRename(event); //loj: 12/7/04 commented out
+   //OnRename(event);
 }
 
 
@@ -1688,7 +1782,7 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 //      CreateFunction("MatlabFunction", stdWithName))
 //   {
       AppendItem(item, withName, GmatTree::ICON_COORDINATE_SYSTEM, -1,
-                 new GmatTreeItemData(withName, GmatTree::CREATED_COORD_SYSTEM));
+                 new GmatTreeItemData(withName, GmatTree::COORD_SYSTEM));
 
       Expand(item);
 //   }
@@ -1746,11 +1840,11 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
          {
             menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
          }
-         else if (items[i] == "XYPlot") //loj: 11/01/04 changed from XyPlot
+         else if (items[i] == "XYPlot")
          {
             menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
          }
-         else if (items[i] == "OpenGLPlot") //loj: 11/01/04 changed from OpenGlPlot
+         else if (items[i] == "OpenGLPlot")
          {
             menu->Append(POPUP_ADD_OPENGL_PLOT, wxT("OpenGLPlot"));
          }
@@ -1774,10 +1868,8 @@ void ResourceTree::OnBeginDrag(wxTreeEvent& event)
       GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(mDraggedItem);
       int draggedId = theItem->GetDataType();
         
-      if ((draggedId == GmatTree::DEFAULT_SPACECRAFT )            ||
-          (draggedId == GmatTree::CREATED_SPACECRAFT )            ||
-          (draggedId == GmatTree::DEFAULT_FORMATION_SPACECRAFT )  ||
-          (draggedId == GmatTree::CREATED_FORMATION_SPACECRAFT ))
+      if ((draggedId == GmatTree::SPACECRAFT )            ||
+          (draggedId == GmatTree::FORMATION_SPACECRAFT ))
       {
          event.Allow();
       }
@@ -1804,14 +1896,13 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
    GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(itemDst);
    int destId = theItem->GetDataType();
 
-   if ((destId == GmatTree::DEFAULT_FORMATION_FOLDER )  ||
-       (destId == GmatTree::CREATED_FORMATION_FOLDER )  ||
+   if ((destId == GmatTree::FORMATION_FOLDER )  ||
        (destId == GmatTree::SPACECRAFT_FOLDER ))
    {
       wxString text = GetItemText(itemSrc);
 
       AppendItem(itemDst, text, GmatTree::ICON_SPACECRAFT, -1,
-                 new GmatTreeItemData(text, GmatTree::CREATED_SPACECRAFT));
+                 new GmatTreeItemData(text, GmatTree::SPACECRAFT));
                
       if (GetChildrenCount(mSpacecraftItem) <= 1)
       {           

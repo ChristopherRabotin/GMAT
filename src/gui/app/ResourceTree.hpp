@@ -57,6 +57,8 @@ private:
    wxTreeItemId specialPointsItem;
 
    int mNumSpacecraft;
+   int mNumFuelTank;
+   int mNumThruster;
    int mNumFormation;
    int mNumPropagator;
    int mNumImpulsiveBurn;
@@ -72,6 +74,7 @@ private:
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultSpacecraft(wxTreeItemId itemId);
+   void AddDefaultHardware(wxTreeItemId itemId);
    void AddDefaultFormations(wxTreeItemId itemId);
    void AddDefaultConstellations(wxTreeItemId itemId);
    void AddDefaultPropagators(wxTreeItemId itemId);
@@ -106,6 +109,8 @@ private:
    void OnAddConstellation(wxCommandEvent &event);
    void OnAddFormation(wxCommandEvent &event);
    void OnAddSpacecraft(wxCommandEvent &event);
+   void OnAddFuelTank(wxCommandEvent &event);
+   void OnAddThruster(wxCommandEvent &event);
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
    void OnAddOpenGlPlot(wxCommandEvent &event);
@@ -125,26 +130,26 @@ private:
       POPUP_ADD_SC = 23000,
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
-
+      
       POPUP_ADD_THRUSTER,
-      POPUP_ADD_TANK,
-        
+      POPUP_ADD_FUELTANK,
+      
       POPUP_ADD_PROPAGATOR,
       POPUP_ADD_BODY,
-        
+      
       POPUP_ADD_BURN,
       POPUP_ADD_IMPULSIVE_BURN,
       POPUP_ADD_FINITE_BURN,
-        
+      
       POPUP_ADD_SOLVER,
       POPUP_ADD_DIFF_CORR,
-        
+      
       POPUP_ADD_SUBSCRIBER,
       POPUP_ADD_REPORT_FILE,
       POPUP_ADD_XY_PLOT,
       POPUP_ADD_OPENGL_PLOT,
       POPUP_ADD_VARIABLE,
-        
+      
       POPUP_OPEN,
       POPUP_CLOSE,
       POPUP_RENAME,

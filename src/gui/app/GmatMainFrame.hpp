@@ -89,6 +89,7 @@ private:
    void InitToolBar(wxToolBar* toolBar);
    wxMenuBar* CreateMainMenu();
    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
+   wxMenu *mServerMenu;
    
    // event handling
    DECLARE_EVENT_TABLE();
