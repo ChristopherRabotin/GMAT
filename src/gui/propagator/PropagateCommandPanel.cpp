@@ -167,7 +167,8 @@ void PropagateCommandPanel::Initialize()
     
     numOfStopCond = 1;  // temp value      
 
-    ParameterPtrArray theParams;
+    //loj: 3/29/04 ParameterPtrArray theParams;
+    Parameter *stopParam;
     for (int i=0; i<numOfStopCond; i++)
     {
         // StopCondition created from the script might not have been configured (unnamed)
@@ -175,12 +176,14 @@ void PropagateCommandPanel::Initialize()
         {
             tempStopCond[i].stopCondPtr = theStopCond;
             tempStopCond[i].name = wxT(theStopCond->GetName().c_str());
-            theParams = theStopCond->GetParameters();
-            tempStopCond[i].varName = wxT(theParams[0]->GetName().c_str()); //loj: get first parameter for build2
+            //loj: 3/29/04 theParams = theStopCond->GetParameters();
+            //loj: 3/29/04 tempStopCond[i].varName = wxT(theParams[0]->GetName().c_str());
+            stopParam = theStopCond->GetStopParameter();
+            tempStopCond[i].varName = wxT(stopParam->GetName().c_str());
             tempStopCond[i].typeName = wxT(theStopCond->GetTypeName().c_str());
-            tempStopCond[i].goal = theStopCond->GetGoal();
-            tempStopCond[i].tol = theStopCond->GetTolerance();
-            tempStopCond[i].repeat = theStopCond->GetRepeatCount();
+            tempStopCond[i].goal = theStopCond->GetRealParameter("Goal");
+            tempStopCond[i].tol = theStopCond->GetRealParameter("Tol");
+            tempStopCond[i].repeat = theStopCond->GetIntegerParameter("Repeat");
             wxString str = FormatStopCondDesc(tempStopCond[i].varName,
                                               tempStopCond[i].relOpStr,
                                               tempStopCond[i].goal);
@@ -405,15 +408,15 @@ void PropagateCommandPanel::SetData()
                     SetName(std::string(tempStopCond[i].name.c_str()));
                 
                 ((StopCondition*)tempStopCond[i].stopCondPtr)->
-                    SetSingleParameter(theGuiInterpreter->
-                                       GetParameter(tempStopCond[i].varName.c_str()));
+                    SetStopParameter(theGuiInterpreter->
+                                     GetParameter(tempStopCond[i].varName.c_str()));
                 
-                tempStopCond[i].stopCondPtr->SetGoal(tempStopCond[i].goal);
+                tempStopCond[i].stopCondPtr->SetRealParameter("Goal", tempStopCond[i].goal);
                 MessageInterface::ShowMessage("PropagateCommandPanel::SetData() goal = %f\n",
                                               tempStopCond[i].goal);
                 
-                tempStopCond[i].stopCondPtr->SetTolerance(tempStopCond[i].tol);  
-                tempStopCond[i].stopCondPtr->SetRepeatCount(tempStopCond[i].repeat);
+                tempStopCond[i].stopCondPtr->SetRealParameter("Tol", tempStopCond[i].tol);  
+                tempStopCond[i].stopCondPtr->SetIntegerParameter("Repeat", tempStopCond[i].repeat);
                 //thePropagateCommand->SetObject(tempStopCond[i].stopCondPtr, Gmat::STOP_CONDITION);
             }
         }
