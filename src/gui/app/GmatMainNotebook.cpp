@@ -22,7 +22,7 @@
 #include "BurnSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
-#include "SolverCreatePanel.hpp"
+#include "DCSetupPanel.hpp"
 #include "GmatTreeItemData.hpp"
 #include "MessageInterface.hpp"
 
@@ -114,13 +114,13 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
                (dataType == GmatTree::CREATED_PROPAGATOR))
       {
-        sizer->Add( new PropagationConfigPanel(panel, "Prop Setup" ));
+        sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
       else if ((dataType == GmatTree::DEFAULT_SOLVER)   ||
                (dataType == GmatTree::CREATED_SOLVER))
       {
           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Solver\n");
-          sizer->Add( new SolverCreatePanel(panel));
+          sizer->Add( new DCSetupPanel(panel));
       }
       else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
                (dataType == GmatTree::CREATED_REPORT_FILE))
@@ -142,7 +142,7 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
       else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
       {
           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
-          sizer->Add( new PropagateCommandPanel(panel, ""), 0, wxGROW|wxALL, 0 );
+          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );
       }
       else if (dataType == GmatTree::PROPAGATE_COMMAND)
       {
