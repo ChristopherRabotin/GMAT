@@ -20,9 +20,6 @@
 #ifndef AtmosphereModel_hpp
 #define AtmosphereModel_hpp
 
-#include <math.h>
-#include <stdio.h>
-
 #include "GmatBase.hpp"
 #include "SolarFluxFileReader.hpp"
 #include "AtmosphereException.hpp"
@@ -45,20 +42,29 @@ public:
    AtmosphereModel(const AtmosphereModel& am);
    AtmosphereModel& operator=(const AtmosphereModel& am);
     
+   //---------------------------------------------------------------------------
+   // bool Density(Real *position, Real *density, Real epoch = 21545.0,
+   //              Integer count = 1)
+   //---------------------------------------------------------------------------
    /**
     * Calculates the atmospheric density at a specified location.
     *
-    * Density if the core calculation provided by classes derived from this one.
-    * The outpur array, density, must contain the density at the requested
+    * Density is the core calculation provided by classes derived from this one.
+    * The output array, density, must contain the density at the requested
     * locations, expressed in kg / m^3.
     *
-    *  @param position  The input vector of spacecraft states
-    *  @param density   The array of output densities
-    *  @param epoch     The current TAIJulian epoch
-    *  @param count     The number of spacecraft contained in position
+    * @param <position>  The input vector of spacecraft states, in MJ2000Eq
+    *                      coordinates.
+    * @param <density>   The array of output densities.
+    * @param <epoch>     The current TAI modified Julian epoch.
+    * @param <count>     The number of spacecraft contained in position.
+    *
+    * @return true on success, false if a problem is encountered.
     */
+   //---------------------------------------------------------------------------
    virtual bool Density(Real *position, Real *density, Real epoch = 21545.0,
                         Integer count = 1) = 0;
+
    void SetSunVector(Real *sv);
    void SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
@@ -76,7 +82,7 @@ public:
                                         const Real value);
 
    // Flux file methods
-   void SetSolarFluxFile(std::string file);
+   void SetSolarFluxFile(const std::string &file);
    void SetNewFileFlag(bool flag);
    void SetOpenFileFlag(bool flag);
    void CloseFile();
@@ -115,7 +121,7 @@ protected:
    
    enum {
       NOMINAL_FLUX = GmatBaseParamCount,
-      NOMINAL_AVERGE_FLUX,
+      NOMINAL_AVERAGE_FLUX,
       NOMINAL_MAGNETIC_INDEX,
       AtmosphereModelParamCount
    };

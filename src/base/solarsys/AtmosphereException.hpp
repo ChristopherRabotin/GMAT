@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              PlanetaryEphemException
+//                              AtmosphereException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -25,8 +25,19 @@
 class GMAT_API AtmosphereException : public BaseException
 {
 public:
-
-   AtmosphereException(std::string details);
+   //---------------------------------------------------------------------------
+   //  AtmosphereException(const std::string &details)
+   //---------------------------------------------------------------------------
+   /**
+    * Constructs an AtmosphereException object (default constructor).
+    *
+    * @param <details> Detailed message about why the exception was thrown.
+    */
+   //---------------------------------------------------------------------------
+   AtmosphereException(const std::string &details) :
+      BaseException  ("Atmosphere model exception: ", details)
+   {
+   }
 
 protected:
 

@@ -449,7 +449,7 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
 
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
          state = &((*sat)->GetState());
-         stateSize = state->GetDimension();
+         stateSize = state->GetSize();
          vectorSize = stateSize * sizeof(Real);
          memcpy(&previousState[j*stateSize], state->GetState(), vectorSize);
          previousTime = 
@@ -563,7 +563,7 @@ bool ForceModel::Initialize(void)
          finiteSats.push_back((*sat)->GetName());
       if ((*sat)->GetType() == Gmat::FORMATION)
          ((Formation*)(*sat))->BuildState();
-      stateSize = state->GetDimension();
+      stateSize = state->GetSize();
       dimension += stateSize;  }
     
    if (!PhysicalModel::Initialize())
@@ -584,7 +584,7 @@ bool ForceModel::Initialize(void)
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
       {
          state = &((*sat)->GetState());
-         stateSize = state->GetDimension();
+         stateSize = state->GetSize();
          memcpy(&modelState[j], state->GetState(), stateSize * sizeof(Real));
          j += stateSize;
       }

@@ -283,7 +283,7 @@ bool FiniteThrust::Initialize(void)
                   "FiniteThrust::Initialize Matched up %s\n", satName->c_str());
             #endif
          }
-         stateIndex += (*propSat)->GetState().GetDimension();
+         stateIndex += (*propSat)->GetState().GetSize();
          ++satIndex;
       }
    }

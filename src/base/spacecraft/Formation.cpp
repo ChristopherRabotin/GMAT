@@ -592,7 +592,7 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (find(components.begin(), components.end(), so) == components.end())
       {
          PropState *ps = &(so->GetState());
-         Integer size = ps->GetDimension();
+         Integer size = ps->GetSize();
          dimension += size;
          Real newepoch = so->GetEpoch();
          if (components.size() == 0)
@@ -721,7 +721,7 @@ void Formation::BuildState()
    Integer j = 0, k;
    PropState *ps;
    
-   if (state.GetDimension() < dimension)
+   if (state.GetSize() < dimension)
       state.SetSize(dimension);
    
    for (std::vector<SpaceObject*>::iterator i = components.begin();
@@ -729,11 +729,11 @@ void Formation::BuildState()
    {
       ps = &((*i)->GetState());
       st = ps->GetState();
-      for (k = 0; k < ps->GetDimension(); ++k)
+      for (k = 0; k < ps->GetSize(); ++k)
       {
          data[j + k] = st[k];
       }
-      j += ps->GetDimension();
+      j += ps->GetSize();
    }
    
    #ifdef DEBUG_FORMATION_ACTIONS
@@ -774,7 +774,7 @@ void Formation::UpdateElements()
         i != components.end(); ++i)
    {
       ps = &((*i)->GetState());
-      size = ps->GetDimension();
+      size = ps->GetSize();
       memcpy(ps->GetState(), &((state.GetState())[index]), size*sizeof(Real));
       index += size;
       if ((*i)->GetType() == Gmat::FORMATION)

@@ -32,7 +32,7 @@ public:
    InertialManeuverFrame&  operator=(const InertialManeuverFrame& imf);
  
 protected:
-   void                    CalculateBasis(void);
+   void                    CalculateBasis();
 };
 
 #endif // InertialManeuverFrame_hpp

@@ -158,7 +158,7 @@ bool ImpulsiveBurn::Fire(Real *burnData)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the ImpulsiveBurn.
@@ -167,7 +167,7 @@ bool ImpulsiveBurn::Fire(Real *burnData)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* ImpulsiveBurn::Clone(void) const
+GmatBase* ImpulsiveBurn::Clone() const
 {
    return (new ImpulsiveBurn(*this));
 }

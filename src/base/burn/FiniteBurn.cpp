@@ -54,7 +54,7 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 /**
  * FiniteBurn constructor (default constructor).
  * 
- * @param nomme Name of the constructed object.
+ * @param <nomme> Name of the constructed object.
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
@@ -84,7 +84,7 @@ FiniteBurn::~FiniteBurn()
 /**
  * Copy constructor.
  * 
- * @param fb The FiniteBurn that is copied.
+ * @param <fb> The FiniteBurn that is copied.
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
@@ -104,7 +104,7 @@ FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
 /**
  * Assignment operator.
  * 
- * @param fb The FiniteBurn that is copied.
+ * @param <fb> The FiniteBurn that is copied.
  * 
  * @return this instance, with parameters set to match fb.
  */
@@ -131,7 +131,7 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
 /**
  * Gets the name of the parameter with the input id.
  * 
- * @param id Integer id for the parameter.
+ * @param <id> Integer id for the parameter.
  * 
  * @return The string name of the parameter.
  */
@@ -151,7 +151,7 @@ std::string FiniteBurn::GetParameterText(const Integer id) const
 /**
  * Gets the id corresponding to a named parameter.
  * 
- * @param str Name of the parameter.
+ * @param <str> Name of the parameter.
  * 
  * @return The ID.
  */
@@ -174,7 +174,7 @@ Integer FiniteBurn::GetParameterID(const std::string &str) const
 /**
  * Gets the type of a parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The type of the parameter.
  */
@@ -194,7 +194,7 @@ Gmat::ParameterType FiniteBurn::GetParameterType(const Integer id) const
 /**
  * Gets the text description for the type of a parameter.
  * 
- * @param id Integer ID of the parameter.
+ * @param <id> Integer ID of the parameter.
  * 
  * @return The text description of the type of the parameter.
  */
@@ -211,8 +211,8 @@ std::string FiniteBurn::GetParameterTypeString(const Integer id) const
 /**
  * Sets the value for a std::string parameter.
  * 
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
  * 
  * @return The value of the parameter.
  */
@@ -246,9 +246,9 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
 /**
  * Sets the value for a specific std::string element in an array.
  *
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
- * @param index Index for the element
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> Index for the element
  *
  * @return true on success
  */
@@ -315,7 +315,7 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value,
  * For the Burn classes, calls to this method get passed to the maneuver frame
  * manager when the user requests the frames that are available for the system.
  *
- * @param id The integer ID for the parameter.
+ * @param <id> The integer ID for the parameter.
  *
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
@@ -339,7 +339,7 @@ const StringArray& FiniteBurn::GetStringArrayParameter(const Integer id) const
 /**
  * Access the Real data associated with this burn.
  * 
- * @param id The integer ID for the parameter.
+ * @param <id> The integer ID for the parameter.
  *
  * @return The requested Real.
  */
@@ -359,8 +359,8 @@ Real FiniteBurn::GetRealParameter(const Integer id) const
 /**
  * Change the Real data associated with this burn.
  * 
- * @param id Integer ID of the parameter.
- * @param value New value for the parameter.
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
  *
  * @return The value of the parameter at the end of the call.
  */
@@ -389,9 +389,9 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
  * BeginManeuver/EndManeuver commands replace the actions that fire would 
  * perform.
  * 
- * @param burnData Pointer to a state that will be filled with the acceleration
- *                 and mass flow data.  The data returned in burnData has the 
- *                 format
+ * @param <burnData> Pointer to an array that will be filled with the
+ *                   acceleration and mass flow data.  The data returned in 
+ *                   burnData has the format
  *                     burnData[0]  dVx/dt
  *                     burnData[1]  dVy/dt
  *                     burnData[2]  dVz/dt
@@ -505,15 +505,15 @@ bool FiniteBurn::Fire(Real *burnData)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a clone of the ImpulsiveBurn.
+ * This method returns a clone of the FiniteBurn.
  *
- * @return clone of the ImpulsiveBurn.
+ * @return clone of the FiniteBurn.
  */
 //------------------------------------------------------------------------------
-GmatBase* FiniteBurn::Clone(void) const
+GmatBase* FiniteBurn::Clone() const
 {
    return (new FiniteBurn(*this));
 }

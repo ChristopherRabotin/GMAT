@@ -25,7 +25,7 @@
 /**
  * Constructs BurnException instance (default constructor).
  * 
- * @param details A message providing the details of the exception. 
+ * @param <details> A message providing the details of the exception.
  */
 //------------------------------------------------------------------------------
 BurnException::BurnException(const std::string &details) :

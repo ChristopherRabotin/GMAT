@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              PlanetaryEphemException
+//                              AtmosphereException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -24,16 +24,17 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  AtmosphereException(std::string details)
+//  AtmosphereException(const std::string &details)
 //------------------------------------------------------------------------------
 /**
  * Constructs an AtmosphereException object (default constructor).
+ *
+ * @param <details> Detailed message about why the exception was thrown.
  */
 //------------------------------------------------------------------------------
 
-AtmosphereException::AtmosphereException(std::string details) :
+AtmosphereException::AtmosphereException(const std::string &details) :
 BaseException  ("Atmosphere model exception: ", details)
 {
-
 }
 

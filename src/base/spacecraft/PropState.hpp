@@ -40,7 +40,7 @@ public:
    void              SetSize(const Integer size);
    
    // Access methods
-   Integer           GetDimension() const;
+   Integer           GetSize() const;
    Real*             GetState();
    bool              SetState(const Real *data, const Integer size);
    Real              GetEpoch() const;

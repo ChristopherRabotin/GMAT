@@ -57,7 +57,7 @@ PropState::~PropState()
 
 
 //------------------------------------------------------------------------------
-// PropState(const Integer dim)
+// PropState(const PropState& ps)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
@@ -155,8 +155,8 @@ Real PropState::operator[](const Integer el) const
  *
  * This method changes the size of the PropState vector.  The elements of the 
  * old vector are copied into the new vector; if the new size is larger than the
- * old vector, only the elements iup to the old size are filled.  If the new
- * vector is smaller, only the elements at the start of teh old vector are
+ * old vector, only the elements up to the old size are filled.  If the new
+ * vector is smaller, only the elements at the start of the old vector are
  * copied into the new one.
  *
  * @param <size> Size of the new PropState (must be greater than 0).
@@ -166,7 +166,8 @@ Real PropState::operator[](const Integer el) const
 //------------------------------------------------------------------------------
 void PropState::SetSize(const Integer size)
 {
-   if (size != dimension) {
+   if (size != dimension)
+   {
       if (size <= 0)
          throw SpaceObjectException(
             "PropState resize requested for an unphysical state size.");
@@ -191,7 +192,7 @@ void PropState::SetSize(const Integer size)
  * @return The size of the vector.
  */
 //------------------------------------------------------------------------------
-Integer PropState::GetDimension() const
+Integer PropState::GetSize() const
 {
    return dimension;
 }
@@ -216,7 +217,7 @@ Real* PropState::GetState()
 // bool PropState::SetState(const Real *data, const Integer size)
 //------------------------------------------------------------------------------
 /**
- * Sets teh state elements to match an input array.
+ * Sets the state elements to match an input array.
  *
  * This method copies the elements of the input array into the  first size 
  * elements of the PropState vector.

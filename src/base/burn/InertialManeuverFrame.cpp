@@ -96,13 +96,13 @@ InertialManeuverFrame& InertialManeuverFrame::operator=(
 //------------------------------------------------------------------------------
 void InertialManeuverFrame::CalculateBasis()
 {
-   basisMatrix[0][0] =
-   basisMatrix[1][1] =
+   basisMatrix[0][0] = 1.0;
+   basisMatrix[1][1] = 1.0;
    basisMatrix[2][2] = 1.0;
-   basisMatrix[0][1] =
-   basisMatrix[0][2] =
-   basisMatrix[1][0] =
-   basisMatrix[1][2] =
-   basisMatrix[2][0] =
+   basisMatrix[0][1] = 0.0;
+   basisMatrix[0][2] = 0.0;
+   basisMatrix[1][0] = 0.0;
+   basisMatrix[1][2] = 0.0;
+   basisMatrix[2][0] = 0.0;
    basisMatrix[2][1] = 0.0;
 }

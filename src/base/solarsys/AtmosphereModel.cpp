@@ -46,23 +46,26 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 /**
  *  Constructor.
+ *
+ *  @param <typeStr> The type of the derived atmosphere model.
  */
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
-    GmatBase            (Gmat::ATMOSPHERE, typeStr),
-    fileReader          (NULL),
-    mCentralBody        (NULL),
-    sunVector           (NULL),
-    centralBody         ("Earth"),
-    centralBodyLocation (NULL),
-    cbRadius            (6378.14),
-    newFile             (false),
-    fileRead            (false),
-    nominalF107         (150.0),
-    nominalF107a        (150.0),
-    nominalAp           (13.85)     // Corresponds to kp = 3, per Vallado (8-31)
+   GmatBase            (Gmat::ATMOSPHERE, typeStr),
+   fileReader          (NULL),
+   mCentralBody        (NULL),
+   sunVector           (NULL),
+   centralBody         ("Earth"),
+   centralBodyLocation (NULL),
+   cbRadius            (6378.14),
+   newFile             (false),
+   fileRead            (false),
+   nominalF107         (150.0),
+   nominalF107a        (150.0),
+   nominalAp           (13.85)     // Corresponds to kp = 3, per Vallado (8-31)
 {
-    fileName = "";
+   fileName = "";
+   parameterCount = AtmosphereModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -81,6 +84,8 @@ AtmosphereModel::~AtmosphereModel()
 //------------------------------------------------------------------------------
 /**
  *  Copy constructor.
+ *
+ *  @param <am> The atmosphere model that is copied.
  */
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
@@ -96,6 +101,8 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    nominalF107a        (am.nominalF107a),
    nominalAp           (am.nominalAp)
 {
+   fileName = am.fileName;
+   parameterCount = AtmosphereModelParamCount;
 }
 
 //------------------------------------------------------------------------------
@@ -104,24 +111,31 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
 /**
  * Assignment operator.
  * 
- * @param am AtmosphereModel instance used as a template for this copy.
+ * @param <am> AtmosphereModel instance used as a template for this copy.
  * 
  * @return A reference to this class, with members set to match the template.
  */
 //------------------------------------------------------------------------------
 AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
 {
-    if (this == &am)
-        return *this;
+   if (this == &am)
+      return *this;
         
-    fileReader = NULL;
-    sunVector = NULL;
-    centralBodyLocation = NULL;
-    
-    centralBody = am.centralBody;
-    cbRadius = am.cbRadius;
-    
-    return *this;
+   GmatBase::operator=(am);
+   
+   fileReader          = NULL;
+   sunVector           = NULL;
+   centralBodyLocation = NULL;
+   fileName            = am.fileName;
+   centralBody         = am.centralBody;
+   cbRadius            = am.cbRadius;
+   newFile             = am.newFile;
+   fileRead            = am.fileRead;
+   nominalF107         = am.nominalF107;
+   nominalF107a        = am.nominalF107a;
+   nominalAp           = am.nominalAp;
+
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -130,12 +144,12 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
 /**
  *  Sets the position vector for the Sun.
  * 
- * @param sv   The Sun vector.
+ * @param <sv> The Sun vector.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetSunVector(Real *sv)
 {
-    sunVector = sv;
+   sunVector = sv;
 }
 
 //------------------------------------------------------------------------------
@@ -144,12 +158,12 @@ void AtmosphereModel::SetSunVector(Real *sv)
 /**
  *  Sets the position vector for the body with the atmosphere.
  * 
- * @param cv   The body's position vector.
+ *  @param <cv> The body's position vector.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetCentralBodyVector(Real *cv)
 {
-    centralBodyLocation = cv;
+   centralBodyLocation = cv;
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +172,7 @@ void AtmosphereModel::SetCentralBodyVector(Real *cv)
 /**
  * Sets the solar system pointer
  * 
- * @param ss Pointer to the solar system used in the modeling.
+ * @param <ss> Pointer to the solar system used in the modeling.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetSolarSystem(SolarSystem *ss)
@@ -172,7 +186,7 @@ void AtmosphereModel::SetSolarSystem(SolarSystem *ss)
 /**
  * Sets the central body pointer
  *
- * @param cb Pointer to the central body used in the modeling.
+ * @param <cb> Pointer to the central body used in the modeling.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetCentralBody(CelestialBody *cb)
@@ -263,20 +277,21 @@ std::string AtmosphereModel::GetParameterTypeString(const Integer id) const
  *
  * @param <id> ID for the requested parameter value.
  *
- * @return  Real value of the requested parameter.
+ * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
 Real AtmosphereModel::GetRealParameter(const Integer id) const
 {
    if (id == NOMINAL_FLUX)
       return nominalF107;
-   if (id == NOMINAL_AVERGE_FLUX)
+   if (id == NOMINAL_AVERAGE_FLUX)
       return nominalF107a;
    if (id == NOMINAL_MAGNETIC_INDEX)
       return nominalAp;
 
    return GmatBase::GetRealParameter(id);
 }
+
 
 //------------------------------------------------------------------------------
 //  Real  SetRealParameter(const Integer id, const Real value)
@@ -287,10 +302,10 @@ Real AtmosphereModel::GetRealParameter(const Integer id) const
  * This method traps entries for F107, F107A, and the Magnetic index and ensures
  * that these parameters have positive values.
  *
- * @param <id> ID for the parameter whose value to change.
+ * @param <id>    ID for the parameter whose value to change.
  * @param <value> value for the parameter.
  *
- * @return  Real value of the requested parameter.
+ * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
 Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
@@ -302,7 +317,7 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
       return nominalF107;
    }
 
-   if (id == NOMINAL_AVERGE_FLUX)
+   if (id == NOMINAL_AVERAGE_FLUX)
    {
       if (value > 0.0)
          nominalF107a = value;
@@ -315,18 +330,21 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
          nominalAp = value;
       return nominalAp;
    }
+   
+   /// @todo Throw exceptions when the values are unphysical here.
 
    return GmatBase::SetRealParameter(id, value);
 }
 
+
 //------------------------------------------------------------------------------
-//  void SetSolarFluxFile(std::string file)
+//  void SetSolarFluxFile(const std::string &file)
 //------------------------------------------------------------------------------
 /**
- * @param file The solar flux file
+ * @param <file> The solar flux file
  */
 //------------------------------------------------------------------------------
-void AtmosphereModel::SetSolarFluxFile(std::string file)
+void AtmosphereModel::SetSolarFluxFile(const std::string &file)
 {
    if (strcmp(fileName.c_str(), file.c_str()) == 0)
       SetOpenFileFlag(true);
@@ -343,7 +361,7 @@ void AtmosphereModel::SetSolarFluxFile(std::string file)
 /**
  * Sets the new file flag
  * 
- * @param flag
+ * @param <flag> The value for the flag.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetNewFileFlag(bool flag)
@@ -357,7 +375,7 @@ void AtmosphereModel::SetNewFileFlag(bool flag)
 /**
  * Sets the file opened flag
  * 
- * @param flag
+ * @param <flag> The value for the flag.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::SetOpenFileFlag(bool flag)
@@ -369,15 +387,13 @@ void AtmosphereModel::SetOpenFileFlag(bool flag)
 // void CloseFile()
 //------------------------------------------------------------------------------
 /**
- * Sets the new file flag
- * 
- * @param flag
+ * Closes the solar flux file.
  */
 //------------------------------------------------------------------------------
 void AtmosphereModel::CloseFile()
 {
    if (fileReader->CloseSolarFluxFile(solarFluxFile))
-       fileRead = false;
-    else
-       throw AtmosphereException("Error closing Atmosphere Model data file.\n");   
+      fileRead = false;
+   else
+      throw AtmosphereException("Error closing Atmosphere Model data file.\n");
 }

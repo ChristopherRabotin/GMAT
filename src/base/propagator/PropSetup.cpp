@@ -114,10 +114,15 @@ PropSetup::PropSetup(const PropSetup &propSetup)
 {
    ownedObjectCount = propSetup.ownedObjectCount;
 
-   // PropSetup data
+//   // PropSetup data
    mPropagator = propSetup.mPropagator;
    mForceModel = propSetup.mForceModel;
-   //Initialize(); //loj: 5/11/04
+//   //Initialize(); //loj: 5/11/04
+
+//   if (propSetup.mPropagator != NULL)
+//      mPropagator = (Propagator *)propSetup.mPropagator->Clone();
+//   if (propSetup.mForceModel != NULL)
+//      mForceModel = (ForceModel *)propSetup.mForceModel->Clone();
 }
 
 //------------------------------------------------------------------------------

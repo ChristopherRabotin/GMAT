@@ -21,6 +21,10 @@
 #include "gmatdefs.hpp"
 #include "While.hpp"
 #include "Parameter.hpp"
+#include "MessageInterface.hpp"
+
+
+//#define DEBUG_WHILE_RERUN
 
 //---------------------------------
 // static data
@@ -151,6 +155,14 @@ bool While::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool While::Execute()
 {
+   #ifdef DEBUG_WHILE_RERUN
+      MessageInterface::ShowMessage(
+         "While::Executing() status: commandComplete = %s, "
+         "commandExecuting = %s\n",
+         ((commandComplete) ? "true" : "false"),
+         ((commandExecuting) ? "true" : "false") );
+   #endif
+
    bool retval = true;
    
    ConditionalBranch::Execute();

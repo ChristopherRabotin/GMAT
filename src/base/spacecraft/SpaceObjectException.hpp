@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  CommandException
+//                                SpaceObjectException
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -26,7 +26,7 @@ class GMAT_API SpaceObjectException : public BaseException
 {
 public:
    //---------------------------------------------------------------------------
-   // SpaceObjectException(std::string details)
+   // SpaceObjectException(const std::string &details)
    //---------------------------------------------------------------------------
    /**
     * Default constructor.
@@ -34,7 +34,7 @@ public:
     * @param <details> Message explaining why the exception was thrown.
     */
    //---------------------------------------------------------------------------
-   SpaceObjectException::SpaceObjectException(std::string details) :
+   SpaceObjectException::SpaceObjectException(const std::string &details) :
       BaseException("SpaceObject Exception Thrown: ", details)
    {
    }
@@ -56,7 +56,7 @@ public:
    /**
     * Copy constructor.
     *
-    * @param <soe> Exception used to generat this one.
+    * @param <soe> Exception used to generate this one.
     */
    //---------------------------------------------------------------------------
    SpaceObjectException::SpaceObjectException(const SpaceObjectException &soe) :
