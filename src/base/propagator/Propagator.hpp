@@ -111,7 +111,8 @@ public:
      * method so that copies can be made from a base class pointer. 
      */
     //------------------------------------------------------------------------------
-    virtual Propagator* Clone(void) const = 0;
+    // wcs:2004.06.04 inherit from GmatBase
+    //virtual Propagator* Clone(void) const = 0;
 
     //------------------------------------------------------------------------------
     // virtual bool Step(void)
@@ -140,7 +141,7 @@ public:
     
     enum
     {
-        STEP_SIZE = 0,        /// Stepsize for the propagation
+        STEP_SIZE = GmatBaseParamCount,        /// Stepsize for the propagation
         PropagatorParamCount  /// Count of the parameters for this class
     };
 
