@@ -1,0 +1,28 @@
+# Makefile for GMAT Coordinate System library
+# Initial Version - D. Conway - 2003/11/19
+
+HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
+          -I../spacecraft -I../executive -I../solarsys
+
+OBJECTS = AxisSystem.o \
+          CoordinateBase.o \
+          CoordinateConverter.o \
+          CoordinateSystem.o \
+          CoordinateSystemException.o
+          
+
+all: libCoordinateSystem 
+	mkdir -p ../lib
+	mv libCoordinateSystem.a ../lib
+	
+clean:
+	rm -f *.o ../lib/libSolarSystem.a
+
+libCoordinateSystem : ../lib/libCoordinateSystem.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libCoordinateSystem.a : $(OBJECTS)
+	ar rs libCoordinateSystem.a $(OBJECTS)
+	ranlib libCoordinateSystem.a

@@ -25,7 +25,8 @@ HEADERS = -I../include \
           -I../stopcond \
           -I../subscriber \
           -I../forcemodel \
-          -I../function
+          -I../function \
+          -I../coordsystem
 
 OBJECTS = PropSetup.o \
           Propagator.o \

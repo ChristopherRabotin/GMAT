@@ -22,7 +22,8 @@ HEADERS = -I../include \
           -I../refframe \
           -I../burn \
           -I../solver \
-          -I../function
+          -I../function \
+          -I../coordsystem
           
 GUIHEADERS = -I../../gui/include \
         -I../../gui/include/bitmaps \

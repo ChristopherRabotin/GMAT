@@ -24,7 +24,8 @@ HEADERS = -I../include \
           -I../refframe \
           -I../burn \
           -I../solver \
-          -I../function
+          -I../function \
+          -I../coordsystem
 
 OBJECTS = Subscriber.o \
         ReportFile.o \

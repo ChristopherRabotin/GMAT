@@ -11,7 +11,7 @@ HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
           \
           \
           -I../interpreter -I../command -I../factory -I../configs \
-          -I../function -I../interface
+          -I../function -I../interface -I../coordsystem
 
 OBJECTS = Command.o CommandException.o \
           NoOp.o \

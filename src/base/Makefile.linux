@@ -25,6 +25,7 @@ export CPP
 LIBRARIES = lib/libUtilities.a \
             lib/libFoundation.a \
             lib/libSolarSystem.a \
+            lib/libCoordinateSystem.a \
             lib/libSpacecraft.a \
             lib/libForceModel.a \
             lib/libPropagator.a \
@@ -68,6 +69,9 @@ lib/libFoundation.a :
 
 lib/libSolarSystem.a :
 	cd solarsys ; $(MAKE) -f Makefile.linux all
+
+lib/libCoordinateSystem.a :
+	cd coordsystem ; $(MAKE) -f Makefile.linux all
 
 lib/libUtilities.a : 
 	cd util ; $(MAKE) -f Makefile.linux all

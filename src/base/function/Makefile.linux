@@ -11,7 +11,10 @@ HEADERS = -I../include \
           -I../solarsys -I../burn -I../solver \
           -I../executive
 
-OBJECTS = Function.o FunctionException.o MatlabFunction.o
+OBJECTS = Function.o \
+          FunctionException.o \
+          MatlabFunction.o \
+          GmatFunction.o
 
 all: libFunction
 	mkdir -p ../lib

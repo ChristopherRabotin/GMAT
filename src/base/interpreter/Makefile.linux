@@ -21,6 +21,7 @@ HEADERS = -I../include \
           -I../burn \
           -I../solver \
           -I../function \
+          -I../coordsystem \
           -D__CONSOLE_APP__
           
 #          \

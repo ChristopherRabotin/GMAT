@@ -17,7 +17,8 @@ HEADERS = -I../include \
           -I../burn \
           -I../function \
           -I../solver \
-          -I../executive
+          -I../executive \
+          -I../coordsystem
 
 OBJECTS = ConfigManager.o ConfigManagerException.o
 
