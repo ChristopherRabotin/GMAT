@@ -1494,6 +1494,9 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
 
       Expand(item);
    }
+
+   SelectItem(GetNextVisible(item));
+   OnRename(event);
 }
 
 //------------------------------------------------------------------------------
