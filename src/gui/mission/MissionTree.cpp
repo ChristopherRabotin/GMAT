@@ -40,6 +40,10 @@
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
+   EVT_PAINT(DecoratedTree::OnPaint)
+   EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
+   EVT_LEFT_DCLICK(MissionTree::OnItemActivated) 
+
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
    
@@ -91,8 +95,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
 //    this->SetNodes();
-//    this->SetParameter(BOXCOUNT, 2);
-//    this->SetParameter(BOXWIDTH, 20);
+    this->SetParameter(BOXCOUNT, 2);
+    this->SetParameter(BOXWIDTH, 20);
 
     numManeuver = 0;
     mNumMissionSeq = 0;
@@ -102,6 +106,10 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 
     AddIcons();
     AddDefaultMission();
+
+//    Initialize();
+//    SetNodes();
+//    ExpandAll();
 }
 
 // ag:  Removed because GmatAppData stores MainNotebook
@@ -324,6 +332,8 @@ void MissionTree::OnItemRightClick(wxTreeEvent& event)
 //------------------------------------------------------------------------------
 void MissionTree::OnItemActivated(wxTreeEvent &event)
 {
+    MessageInterface::ShowMessage("MissionTree::OnItemActivated() entered\n");
+
     // get some info about this item
     wxTreeItemId itemId = event.GetItem();
     MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
@@ -636,6 +646,8 @@ wxMenu* MissionTree::CreatePopupMenu()
         }            
     }
 
+    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", CreateControlLogicPopupMenu());
+
     return menu;
 }
 
@@ -667,6 +679,43 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
             menu->Append(POPUP_INSERT_TARGET, wxT("Target"));
         }
     }
+
+    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", CreateControlLogicPopupMenu());
+
+    return menu;
+}
+
+//------------------------------------------------------------------------------
+// wxMenu* CreateControlLogicPopupMenu()
+//------------------------------------------------------------------------------
+wxMenu* MissionTree::CreateControlLogicPopupMenu()
+{
+    //MessageInterface::ShowMessage("MissionTree::CreateControlLogicMenu() entered\n");
+    //unsigned int i;
+    wxMenu *menu = new wxMenu;
+
+    //    StringArray items = theGuiInterpreter->GetListOfFactoryItems(Gmat::COMMAND);
+
+    // for (i=0; i<items.size(); i++)
+    // {
+        //MessageInterface::ShowMessage("command = " + items[i] + "\n");
+
+    //    if (items[i] == "Propagate")
+    //    {
+                menu->Append(POPUP_WHILE_CONTROL, wxT("While"));                    //wxT(items[i].c_str()));
+                menu->Enable(POPUP_WHILE_CONTROL, false);
+    //    }
+    //    else if (items[i] == "Maneuver")
+    //     {
+                menu->Append(POPUP_FOR_CONTROL, wxT("For"));
+                menu->Enable(POPUP_FOR_CONTROL, false);
+    //    }
+    //    else if (items[i] == "Target")
+    //    {
+              menu->Append(POPUP_DO_CONTROL, wxT("Do"));
+              menu->Enable(POPUP_DO_CONTROL, false);
+    //    }
+    // }
 
     return menu;
 }

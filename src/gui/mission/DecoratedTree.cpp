@@ -273,10 +273,15 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
         dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
 
         // Top and bottom
-        dc.DrawLine(4, bound.y-1, w-20, bound.y-1);
-        dc.DrawLine(4, bound.y+rowHeight+1, w-20, bound.y+rowHeight+1);
-        dc.DrawLine(4, bound.y-1, 4, bound.y+rowHeight+1);
-        dc.DrawLine(w-20, bound.y+1, w-20, bound.y+rowHeight+1);
+        dc.DrawLine(bound.x, bound.y-1, w-5, bound.y-1);
+        dc.DrawLine(bound.x, bound.y+rowHeight+1, w-5, bound.y+rowHeight+1);
+        dc.DrawLine(bound.x, bound.y-1, bound.x, bound.y+rowHeight+1);
+        dc.DrawLine(w-5, bound.y+1, w-5, bound.y+rowHeight+1);
+
+//          dc.DrawLine(4, bound.y-1, w-20, bound.y-1);
+//          dc.DrawLine(4, bound.y+rowHeight+1, w-20, bound.y+rowHeight+1);
+//          dc.DrawLine(4, bound.y-1, 4, bound.y+rowHeight+1);
+//          dc.DrawLine(w-20, bound.y+1, w-20, bound.y+rowHeight+1);
         
         DrawOutline(current);
         current = GetNextChild(id, cookie);
@@ -311,8 +316,10 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
 
         if ((visible)) {                // Draw decorations on visible nodes
             for (int i = 0; i < boxCount; ++i) {
-                lft = w-20-boxWidth*(i+1);
-                rt  = w-20-boxWidth*i;
+//                  lft = w-20-boxWidth*(i+1);
+//                  rt  = w-20-boxWidth*i;
+                lft = w-5-boxWidth*(i+1);
+                rt  = w-5-boxWidth*i;
                 top = bound.y;
                 btm = bound.y + rowHeight;
                 

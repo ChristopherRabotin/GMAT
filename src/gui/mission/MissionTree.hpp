@@ -82,6 +82,7 @@ private:
  
     wxMenu* CreatePopupMenu();
     wxMenu* CreateInsertPopupMenu();
+    wxMenu* CreateControlLogicPopupMenu();
     
     DECLARE_EVENT_TABLE();
        
@@ -110,6 +111,11 @@ private:
         POPUP_VIEW_GOALS, 
 
         POPUP_RUN,
+
+        POPUP_CONTROL_LOGIC,
+        POPUP_WHILE_CONTROL,
+        POPUP_FOR_CONTROL,
+        POPUP_DO_CONTROL,
     };
 };
 
