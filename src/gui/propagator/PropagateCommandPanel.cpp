@@ -299,11 +299,9 @@ void PropagateCommandPanel::LoadData()
    int propID = thePropagateCommand->GetParameterID("Propagator");
    std::string propSetupName = thePropagateCommand->GetStringParameter(propID);
 
-    //loj: 3/2/04 only 1 PropSetup for build2
-   mPropCount = 1;  // waw: TBD
+   mPropCount = 1;
    mTempPropCount = mPropCount;
    
-   //loj: when multiple spacecraft is handled, move the block inside the for loop
    int scID = thePropagateCommand->GetParameterID("Spacecraft");
    StringArray soList = thePropagateCommand->GetStringArrayParameter(scID);
    mSpaceObjectCount = soList.size();
@@ -318,16 +316,32 @@ void PropagateCommandPanel::LoadData()
    {
       mTempProp[i].propName = wxT(propSetupName.c_str());
       mTempProp[i].propSetupPtr = theGuiInterpreter->GetPropSetup(propSetupName);
-      
+
+      int actualSoCount = 0;
       for (int j=0; j<mSpaceObjectCount; j++)
       {
-         mTempProp[i].soNameList.Add(soList[j].c_str());
+         // verify space object actually exist (loj:8/27/04)
+         if (theGuiInterpreter->GetSpacecraft(soList[j]) ||
+             theGuiInterpreter->GetFormation(soList[j]))
+         {
+            actualSoCount++;
+            mTempProp[i].soNameList.Add(soList[j].c_str());
 #if DEBUG_PROPCMD_PANEL
-         MessageInterface::ShowMessage
-            ("PropagateCommandPanel::LoadData() soNameList[%d]=%s\n",
-             j, mTempProp[i].soNameList[j].c_str());
+            MessageInterface::ShowMessage
+               ("PropagateCommandPanel::LoadData() soNameList[%d]=%s\n",
+                j, mTempProp[i].soNameList[j].c_str());
 #endif
+         }
+         else
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "The SpaceObject:%s was not created, "
+                "so removed from the display list", soList[j].c_str());
+                                           
+         }
       }
+
+      mSpaceObjectCount = actualSoCount;
       
       if (mSpaceObjectCount > 0)
       {
