@@ -1,5 +1,6 @@
+//$Header$
 //------------------------------------------------------------------------------
-//                              PropagationConfig
+//                              PropagationConfigPanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -16,21 +17,21 @@
 #include "PropagationConfigPanel.hpp"
 
 //------------------------------------------------------------------------------
-// PropagationConfig()
+// PropagationConfigPanel()
 //------------------------------------------------------------------------------
 /**
  * A constructor.
  */
 //------------------------------------------------------------------------------
-PropagationConfig::PropagationConfig(wxWindow *parent)
-                  :wxPanel(parent)
+PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent)
+    :wxPanel(parent)
 {
-	CreateConfigWindow(this);
+    CreateConfigWindow(this);
 }
 
-void PropagationConfig::CreateConfigWindow(wxWindow *parent)
+void PropagationConfigPanel::CreateConfigWindow(wxWindow *parent)
 {
-	item0 = new wxBoxSizer( wxVERTICAL );
+    item0 = new wxBoxSizer( wxVERTICAL );
 
     item1 = new wxBoxSizer( wxHORIZONTAL );
 
@@ -38,9 +39,9 @@ void PropagationConfig::CreateConfigWindow(wxWindow *parent)
     item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250,-1), 0 );
-	
+        
     item1->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
-	
+        
     item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item4 = new wxBoxSizer( wxHORIZONTAL );
@@ -57,7 +58,7 @@ void PropagationConfig::CreateConfigWindow(wxWindow *parent)
     {
         wxT("ComboItem")
     };
-	
+        
     item9 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs9, wxCB_DROPDOWN|wxCB_READONLY );
     item7->Add( item9, 0, wxALIGN_CENTRE|wxALL, 5 );
 
@@ -131,7 +132,7 @@ void PropagationConfig::CreateConfigWindow(wxWindow *parent)
     {
         wxT("ComboItem")
     };
-	
+        
     item33 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs33, wxCB_DROPDOWN|wxCB_READONLY );
     item32->Add( item33, 0, wxALIGN_CENTRE|wxALL, 5 );
 
@@ -179,7 +180,7 @@ void PropagationConfig::CreateConfigWindow(wxWindow *parent)
     {
         wxT("ComboItem")
     };
-	
+        
     item48 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), 1, strs48, wxCB_DROPDOWN|wxCB_READONLY );
     item45->Add( item48, 0, wxALIGN_CENTRE|wxALL, 5 );
 
