@@ -45,7 +45,6 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-
    EVT_BUTTON(ID_BUTTON_ADD_BODY, PropagationConfigPanel::OnAddBodyButton)
    EVT_BUTTON(ID_BUTTON_GRAV_SEARCH, PropagationConfigPanel::OnGravSearchButton)
    EVT_BUTTON(ID_BUTTON_SETUP, PropagationConfigPanel::OnSetupButton)
@@ -294,7 +293,7 @@ void PropagationConfigPanel::SaveData()
          delete theForceModel;
       
       theForceModel = newFm;
-      
+     
 #if DEBUG_PROP_PANEL
       ShowForceList("SaveData() AFTER  saving ForceModel");
 #endif
@@ -372,8 +371,7 @@ void PropagationConfigPanel::SaveData()
 //                    CreatePhysicalModel("DragForce", "Exponential");
 //              Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
 //              theDragForce->SetStringParameter(atmosTypeID, "Exponential");
-//              theForceModel->AddForce(theDragForce);
-            
+//              theForceModel->AddForce(theDragForce);         
 //              // Save to the PropSetup
 //              Integer dragID = thePropSetup->GetParameterID("Drag");
 //              thePropSetup->SetStringParameter(dragID, "On");
@@ -383,11 +381,9 @@ void PropagationConfigPanel::SaveData()
 //              if (!theDragForce)
 //                 theDragForce = (DragForce *)theGuiInterpreter->
 //                    CreatePhysicalModel("DragForce", "MSISE90");
-            
 //              Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
 //              theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
 //              theForceModel->AddForce(theDragForce);
-            
 //              // Save to the PropSetup
 //              Integer dragID = thePropSetup->GetParameterID("Drag");
 //              thePropSetup->SetStringParameter(dragID, "On");
@@ -398,7 +394,6 @@ void PropagationConfigPanel::SaveData()
 //           // Save to the PropSetup
 //           Integer dragID = thePropSetup->GetParameterID("Drag");
 //           thePropSetup->SetStringParameter(dragID, "Off");
-        
 //           // waw: Future implementation to remove drag force from force model
 //           //        PhysicalModel *force;
 //           //            
@@ -420,9 +415,7 @@ void PropagationConfigPanel::SaveData()
 //           if (theSRP == NULL)
 //              theSRP = (SolarRadiationPressure *)theGuiInterpreter->
 //                 CreatePhysicalModel("SolarRadiationPressure", "SRP");
-
 //           theForceModel->AddForce(theSRP);
-        
 //           Integer srpID = thePropSetup->GetParameterID("SRP");
 //           thePropSetup->SetStringParameter(srpID, "On");
 //        }
@@ -430,7 +423,6 @@ void PropagationConfigPanel::SaveData()
 //        {
 //           Integer srpID = thePropSetup->GetParameterID("SRP");
 //           thePropSetup->SetStringParameter(srpID, "Off");
-       
 //           // waw: Future implementation to remove srp force from force model
 //           //       PhysicalModel *force;
 //           //       
@@ -449,7 +441,6 @@ void PropagationConfigPanel::SaveData()
 //        // save forces to the prop setup
 //        if (theForceModel != NULL)
 //           thePropSetup->SetForceModel(theForceModel);
-           
 }
 
 //------------------------------------------------------------------------------
@@ -481,7 +472,6 @@ Integer PropagationConfigPanel::FindBody(const std::string &bodyName,
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::Initialize()
 {  
-
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
    thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
@@ -569,8 +559,7 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->gravOrder = tempStr;
             
             if (gravModelType == OTHER)
-               forceList[currentBodyId]->potFilename = potFilename;
-            
+               forceList[currentBodyId]->potFilename = potFilename;          
          }
          else if (force->GetTypeName() == "DragForce")
          {
@@ -810,14 +799,13 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                       //wxDefaultPosition,  wxSize(100,-1), numOfBodies,
                       wxDefaultPosition,  wxSize(100,-1), 0,
                       strArray2, wxCB_DROPDOWN|wxCB_READONLY );
-   
    gravComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(gravityFieldString),
                       wxDefaultPosition, wxSize(100,-1), GravModelCount,
                       strArray3, wxCB_DROPDOWN|wxCB_READONLY );
    atmosComboBox =
       new wxComboBox( parent, ID_CB_ATMOS, wxT(strArray4[0]),
-                      wxDefaultPosition, wxSize(100,-1), DragModelCount,
+                      wxDefaultPosition, wxSize(130,-1), DragModelCount,
                       strArray4, wxCB_DROPDOWN|wxCB_READONLY );
    magfComboBox =
       new wxComboBox( parent, ID_CB_MAG, wxT(strArray5[0]),
@@ -888,14 +876,14 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    //loj: 5/20/04 added
    item362->Add( potFileStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    item362->Add( potFileTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   
    item36->Add( item361, 0, wxALIGN_LEFT|wxALL, bsize);
    item36->Add( item362, 0, wxALIGN_LEFT|wxALL, bsize);
    
    item45->Add( type2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);   
    item45->Add( atmosComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   item45->Add( dragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);   
-    
+   item45->Add( dragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);       
+   
    item50->Add( type3StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    item50->Add( magfComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    item50->Add( degree2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -947,7 +935,6 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    bodyButton->Enable(true);
    srpCheckBox->Enable(true);
-   editPmfButton->Enable(false);
    dragSetupButton->Enable(false);
 }
 
@@ -980,8 +967,8 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
       else if (integratorString.IsSameAs(integratorArray[RKF56]))
       {   
          newPropName = propSetupName + "RKF56";
-         newProp = theGuiInterpreter->GetPropagator(newPropName);
-        
+         newProp = theGuiInterpreter->GetPropagator(newPropName);     
+
          if (newProp == NULL)
             newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
       }
@@ -1106,8 +1093,7 @@ void PropagationConfigPanel::DisplayGravityFieldData()
 //           {
 //              gravComboBox->SetValue("None");
 //              //                gravityDegreeTextCtrl->Enable(true);
-//              //                gravityOrderTextCtrl->Enable(true);
-                
+//              //                gravityOrderTextCtrl->Enable(true);               
 //              //                if (degreeArray.IsEmpty())
 //              //                   gravityDegreeTextCtrl->SetValue("0");
 //              //                else
@@ -1139,8 +1125,8 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
    }
    else if (forceList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
    {
-      atmosComboBox->SetSelection(EXPONENTIAL); //loj: why not working?
-      dragSetupButton->Enable(true);
+      atmosComboBox->SetSelection(EXPONENTIAL);
+      dragSetupButton->Enable(false);
    }
    else if (forceList[currentBodyId]->dragType == dragModelArray[MSISE90])
    {
@@ -1213,7 +1199,7 @@ void PropagationConfigPanel::OnBodySelection()
       primaryBodyString = bodyComboBox->GetStringSelection();
       currentBodyName = selBody;
       currentBodyId = FindBody(currentBodyName);
-      
+     
       DisplayGravityFieldData();
       DisplayAtmosphereModelData();
       DisplayMagneticFieldData();
@@ -1230,7 +1216,6 @@ void PropagationConfigPanel::OnGravitySelection()
 
    if (forceList[currentBodyId]->gravType != gravTypeName)
    {
-      
 #if DEBUG_PROP_PANEL
       MessageInterface::ShowMessage
          ("OnGravitySelection() grav changed from=%s to=%s for body=%s\n",
@@ -1238,11 +1223,11 @@ void PropagationConfigPanel::OnGravitySelection()
           forceList[currentBodyId]->bodyName.c_str());
 #endif
       
-      forceList[currentBodyId]->gravType = gravTypeName;
-      DisplayGravityFieldData();
+     forceList[currentBodyId]->gravType = gravTypeName;
+     DisplayGravityFieldData();
             
-      isForceModelChanged = true;
-      theApplyButton->Enable(true);
+     isForceModelChanged = true;
+     theApplyButton->Enable(true);
    }
       
 //waw: Future implementation
@@ -1315,8 +1300,7 @@ void PropagationConfigPanel::OnAtmosphereSelection()
 //     {
 //        jrFileStaticText->Show(true);
 //        jrFileTextCtrl->Show(true);
-//        jrFileButton->Show(true);
-        
+//        jrFileButton->Show(true);      
 //        useDragForce = false;
 //     }
 //     else if ( atmosModelString.CmpNoCase("None") == 0 )
@@ -1324,7 +1308,6 @@ void PropagationConfigPanel::OnAtmosphereSelection()
 //        jrFileStaticText->Show(false);
 //        jrFileTextCtrl->Show(false);
 //        jrFileButton->Show(false);
-        
 //        useDragForce = false;
 //     }
 //     isForceModelChanged = true;
@@ -1363,56 +1346,6 @@ void PropagationConfigPanel::OnAddBodyButton()
       theApplyButton->Enable(true);
       isForceModelChanged = true;
    }
-    
-//     CelesBodySelectDialog bodyDlg(this, primaryBodiesArray);
-//     bodyDlg.ShowModal();
-        
-//     if (bodyDlg.IsBodySelected())
-//     {        
-//        CelestialBody *body;
-//        wxArrayString &names = bodyDlg.GetBodyNames();
-//        for(Integer i=0; i < (Integer)names.GetCount(); i++)
-//        {
-//           primaryBodiesArray.Add(names[i]);
-//           body = theSolarSystem->GetBody(names[i].c_str());
-//           theBodies.push_back(body);
-//           primaryBodiesGravityArray.Add("PointMassForce");
-//           bodyTextCtrl->AppendText(names[i] + " ");
-//           bodyComboBox->Append(names[i]);
-//        }       
-//        isForceModelChanged = true;
-//        isBodiesChanged = true;
-//        theApplyButton->Enable(true);
-//     }
-    
-//     bool pmChanged = false;
-//     for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-//     {
-//        for (Integer j = 0; j < (Integer)pointmassBodiesArray.GetCount(); j++)
-//        {
-//           if (primaryBodiesArray[i].CmpNoCase(pointmassBodiesArray[j]) == 0)
-//           {
-//              wxString body = pointmassBodiesArray.Item(j);
-//              pointmassBodiesArray.Remove(body);
-//              pmChanged = true;
-//           }
-        
-//        }
-//     }
-    
-//     if (pmChanged)
-//     {
-//        pmEditTextCtrl->Clear();
-        
-//        if (!pointmassBodiesArray.IsEmpty())
-//        {
-//           for (Integer i = 0; i < (Integer)pointmassBodiesArray.GetCount(); i++)
-//           {
-//              pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
-//              pmEditTextCtrl->AppendText(" ");
-//           }
-//        }
-//     }
 }
 
 //------------------------------------------------------------------------------
@@ -1459,8 +1392,8 @@ void PropagationConfigPanel::OnSetupButton()
    {      
       if (forceList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
       {
-         ExponentialDragDialog dragDlg(this, dragForce);
-         dragDlg.ShowModal();
+         //ExponentialDragDialog dragDlg(this, dragForce);
+         //dragDlg.ShowModal();
       }
       else if (forceList[currentBodyId]->dragType == dragModelArray[MSISE90])
       {
@@ -1489,10 +1422,8 @@ void PropagationConfigPanel::OnMagSearchButton()
       wxString filename;
         
       filename = dialog.GetPath().c_str();
-        
       magfComboBox->Append(filename); 
    }
-    
    theApplyButton->Enable(true);
 }
 
@@ -1511,9 +1442,12 @@ void PropagationConfigPanel::OnPMEditButton()
       for (Integer i=0; i < (Integer)names.GetCount(); i++)
       {
          pmEditTextCtrl->AppendText(names[i] + " ");
-         pointmassBodiesArray.Add(names[i]);
+         currentBodyName = std::string(names[i].c_str());
+         currentBodyId = FindBody(currentBodyName);
+         forceList[currentBodyId]->bodyName = currentBodyName;         
       }
       theApplyButton->Enable(true);
+      isForceModelChanged = true;
    }
 }   
 
@@ -1654,3 +1588,4 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
    MessageInterface::ShowMessage("============================================\n");
 #endif
 }
+
