@@ -347,6 +347,8 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
+    MessageInterface::ShowMessage("Moderator::CreatePropagator() name = %s\n",
+                                  name.c_str());
     Propagator *prop = theFactoryManager->CreatePropagator(type, name);
     
     if (prop ==  NULL)
@@ -668,7 +670,8 @@ Solver* Moderator::GetSolver(const std::string &name)
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
     // assumes "RungeKutta89" is the default propagator
-    Propagator *prop = CreatePropagator("RungeKutta89", name+"RKV89");
+    std::string propName = name+"RKV89";
+    Propagator *prop = CreatePropagator("RungeKutta89", propName);
     
     // creates empty ForceModel
     ForceModel *fm = CreateForceModel(name+"ForceModel");
@@ -1151,7 +1154,7 @@ void Moderator::CreateDefaultMission()
     Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
 
     // PropSetup
-    PropSetup *propSetup = CreatePropSetup("DefaultProp");
+    PropSetup *propSetup = CreateDefaultPropSetup("DefaultProp");
 
     // Parameters
     Parameter *currTime = CreateParameter("CurrentA1MjdParam", "DefaultSC.CurrentTime");
