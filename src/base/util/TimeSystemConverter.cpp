@@ -181,16 +181,17 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
    else if (toType == TIME_SYSTEM_TEXT[3])
    {
       // convert time to tt
-      Real ttJd = TimeConverterUtil::ConvertFromTaiMjd("TtMjd", origValue);
+      Real ttJd = TimeConverterUtil::ConvertFromTaiMjd("TtMjd", origValue, refJd);
       // convert to ttJD
       ttJd += refJd;
 
       // compute T_TT
       Real t_TT = (ttJd - T_TT_OFFSET) / T_TT_COEFF1;
       // compute M_E
-      Real m_E = M_E_OFFSET + (M_E_COEFF1 * t_TT);
-
-      Real tdbJd = ttJd + (TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E));
+      Real m_E = (M_E_OFFSET + (M_E_COEFF1 * t_TT)) * GmatMathUtil::RAD_PER_DEG;
+      Real offset = ((TDB_COEFF1 *Sin(m_E)) + (TDB_COEFF2 * Sin(2 * m_E))) / 
+                    GmatTimeUtil::SECS_PER_DAY ;
+      Real tdbJd = ttJd + offset;
       return tdbJd - refJd;
    }
    // tcb
@@ -199,7 +200,9 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       // convert time to tdb
       Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue,
          refJd);
-      return ((L_B * (origValue - TCB_JD_MJD_OFFSET) * NUM_SECS) + tdbMjd);
+      Real offset = L_B * ((origValue + refJd) - TCB_JD_MJD_OFFSET) * GmatTimeUtil::SECS_PER_DAY;
+      // units of offset are in seconds, so convert to fraction of days
+      return ((offset / GmatTimeUtil::SECS_PER_DAY) + tdbMjd);
    }
    // tt
    else if (toType == TIME_SYSTEM_TEXT[5])
