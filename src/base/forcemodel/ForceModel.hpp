@@ -56,7 +56,7 @@
 #define ForceModel_hpp
 
 #include "PhysicalModel.hpp"
-#include "DerivativeList.hpp"
+//#include "DerivativeList.hpp"
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
 #include "gmatdefs.hpp"
@@ -71,9 +71,7 @@ public:
 //    ForceModel(void);
     ForceModel(const std::string &nomme = "");
     virtual ~ForceModel(void);
-
     ForceModel(const ForceModel& fdf);
-
     ForceModel&   operator=(const ForceModel& fdf);
 
     void AddForce(PhysicalModel *pPhyscialModel);
@@ -97,10 +95,7 @@ public:
     Real EstimateError(Real *diffs, Real *answer) const;
     
     virtual Integer GetParameterCount(void) const;
-
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
-
+    
     // Access methods derived classes can override
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
@@ -118,35 +113,14 @@ public:
     virtual const StringArray& GetStringArrayParameter(const Integer id) const;
     virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
-    // new methods for future implementation
-    
-    
-    
-//    StringArray& GetForceTypeNames(); //loj: 2/11/04 added
-//    
-//    PhysicalModel* GetForce(const std::string &name) // should return the correct force
-//      { return NULL; }
-    //loj: 2/11/04 added
-//    PhysicalModel* GetForce(Integer index)
-//        { if (forceList.size() == 0)
-//              return NULL;
-//          else
-//              return forceList[index];
-//        }
-//    
-//    Integer GetNumForces() // should return the correct number of force
-//    { 
-//        return forceCount; 
-//    }
-    //loj: 2/11/04 { return 1; }
-
 protected:
 
-    DerivativeList * derivatives;
+//    DerivativeList * derivatives;  waw: 06/03/04
 //    Integer          forceCount;  waw: 05/06/04
-    Integer          numForces;
+
+    Integer numForces;
+    Integer currentForce;
     
-    Real estimationMethod;
     /// List of spacecraft that get propagated
     std::vector<Spacecraft *> spacecraft;
     StringArray forceTypeNames;
@@ -156,6 +130,7 @@ protected:
     Real *previousState;
     /// Epoch for the previous state
     Real previousTime;
+    Real estimationMethod;
 
     enum
     {

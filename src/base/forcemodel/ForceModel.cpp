@@ -107,13 +107,14 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const std::string &nomme) :
     PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
-    derivatives       (NULL),
+//    derivatives       (NULL),  waw:  06/03/04
 //    forceCount        (0),  waw: 05/06/04
     estimationMethod  (2.0),
     previousState     (NULL)
 {
     numForces = 0;
     dimension = 6;
+    currentForce = 0;  // waw: added 06/04/04
     parameterCount = ForceModelParamCount;
 }
 
@@ -127,8 +128,9 @@ ForceModel::ForceModel(const std::string &nomme) :
 //------------------------------------------------------------------------------
 ForceModel::~ForceModel(void)
 {
-    if (derivatives)
-        delete derivatives;
+//  waw: 06/03/04
+//    if (derivatives)
+//        delete derivatives;
     if (previousState)
         delete [] previousState;
 }
@@ -184,7 +186,7 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
  * state vectors.
  * 
  * The force that is passed in is owned by this class (actually, by the member 
- * DerivativeList), and should not ne destructed externally.  In addition, every 
+ * DerivativeList), and should not be destructed externally.  In addition, every 
  * force that is passed to this class needs to have a copy constructor and an 
  * assignment operator so that it can be cloned for distribution to multiple
  * satellites.
@@ -198,13 +200,13 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     
     if (pPhysicalModel == NULL)
         return;
-
-    if (derivatives == NULL)
-        derivatives = new DerivativeList;
+// waw: 06/03/04
+//    if (derivatives == NULL)
+//        derivatives = new DerivativeList;
 
     pPhysicalModel->SetDimension(dimension);
-
-    derivatives->AddForce(pPhysicalModel);
+// waw: 06/03/04
+//    derivatives->AddForce(pPhysicalModel);
     initialized = false;
 
     forceList.push_back(pPhysicalModel);
@@ -223,22 +225,22 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 //------------------------------------------------------------------------------
 void ForceModel::DeleteForce(const std::string &name)
 {
-//    std::vector<PhysicalModel *>::iterator force;
-//    Integer i = 0;
-//    for (force = forceList.begin(); force != forceList.end(); ++force) 
-//    {
-//        PhysicalModel *pm = forceList[i];
-//        std::string pmName = pm->GetName().c_str();
-//        
-//        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
-//        {
-//            forceList.erase(force);
-//            //delete pm;
-//            numForces = forceList.size();
-//            return;
-//        }
-//        i++;
-//    }
+    std::vector<PhysicalModel *>::iterator force;
+    Integer i = 0;
+    for (force = forceList.begin(); force != forceList.end(); force++) 
+    {
+        PhysicalModel *pm = forceList[i];
+        std::string pmName = pm->GetName().c_str();
+        
+        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
+        {
+            forceList.erase(force);
+            //delete pm;
+            numForces = forceList.size();
+            return;
+        }
+        i++;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -252,6 +254,19 @@ void ForceModel::DeleteForce(const std::string &name)
 //------------------------------------------------------------------------------
 bool ForceModel::HasForce(const std::string &name)
 {
+    std::vector<PhysicalModel *>::iterator force;
+    Integer i = 0;
+    for (force = forceList.begin(); force != forceList.end(); force++) 
+    {
+        PhysicalModel *pm = forceList[i];
+        std::string pmName = pm->GetName().c_str();
+        
+        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
+        {
+            return true;
+        }
+        i++;
+    }
     return false; 
 }
 
@@ -390,12 +405,14 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
 //------------------------------------------------------------------------------
 void ForceModel::UpdateFromSpacecraft(void)
 {
-    if (spacecraft.size() > 0) {
+    if (spacecraft.size() > 0) 
+    {
         Integer j = 0;
         Integer stateSize = 6;
         std::vector<Spacecraft *>::iterator sat;
         Real *state;
-        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+        {
             state = (*sat)->GetState();
             memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
             ++j;
@@ -442,7 +459,8 @@ bool ForceModel::Initialize(void)
         return false;
     previousState = new Real[dimension];
 
-    if (spacecraft.size() == 0) {
+    if (spacecraft.size() == 0) 
+    {
         modelState[0] = 7000.0;
         modelState[1] =    0.0;
         modelState[2] = 1000.0;
@@ -450,10 +468,12 @@ bool ForceModel::Initialize(void)
         modelState[4] =    7.4;
         modelState[5] =    0.0;
     }
-    else {
+    else 
+    {
         Integer j = 0;
         Real *state;
-        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
+        {
             state = (*sat)->GetState();
             memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
             ++j;
@@ -463,7 +483,9 @@ bool ForceModel::Initialize(void)
     previousTime = 0.0;
     memcpy(previousState, modelState, dimension*sizeof(Real));
 
-    DerivativeList *current = derivatives;
+//    DerivativeList *current = derivatives;  waw: 06/03/04
+    Integer cf = currentForce;
+    PhysicalModel *current = GetForce(cf);  // waw: added 06/04/04
     PhysicalModel *currentPm;
 
     // Variables used to set spacecraft parameters
@@ -473,10 +495,12 @@ bool ForceModel::Initialize(void)
 
     while (current) 
     {
-        currentPm = current->GetDerivative();
+//        currentPm = current->GetDerivative();  waw: 06/03/04
+        currentPm = current;  // waw: added 06/04/04 
         currentPm->SetDimension(dimension);
         currentPm->SetSolarSystem(solarSystem);
-        if (!currentPm->Initialize()) {
+        if (!currentPm->Initialize()) 
+        {
            std::string msg = "Component force ";
            msg += currentPm->GetTypeName();
            msg += " failed to initialize";
@@ -521,8 +545,10 @@ bool ForceModel::Initialize(void)
             
             ++i;
         }
-
-        current = current->Next();
+        // current = current->Next(); waw: 06/04/04
+        // waw: added 06/04/04
+        cf++;
+        current = GetForce(cf);
     }
 
     return true;
@@ -534,12 +560,13 @@ bool ForceModel::Initialize(void)
 void ForceModel::IncrementTime(Real dt)
 {
     PhysicalModel::IncrementTime(dt);
-    DerivativeList *current = derivatives;
-    while (current) 
-    {
-        current->GetDerivative()->IncrementTime(dt);
-        current = current->Next();
-    }
+// waw: 06/03/04
+//    DerivativeList *current = derivatives;
+//    while (current) 
+//    {
+//        current->GetDerivative()->IncrementTime(dt);
+//        current = current->Next();
+//    }
 }
 
 //------------------------------------------------------------------------------
@@ -548,13 +575,14 @@ void ForceModel::IncrementTime(Real dt)
 void ForceModel::SetTime(Real t)
 {
     PhysicalModel::SetTime(t);
-    DerivativeList *current = derivatives;
-
-    while (current) 
-    {
-        current->GetDerivative()->SetTime(t);
-        current = current->Next();
-    }
+// waw: 06/03/04
+//    DerivativeList *current = derivatives;
+//
+//    while (current) 
+//    {
+//        current->GetDerivative()->SetTime(t);
+//        current = current->Next();
+//    }
 }
 
 //------------------------------------------------------------------------------
@@ -592,13 +620,20 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
         deriv[0] = deriv[1] = deriv[2] = 
         deriv[3] = deriv[4] = deriv[5] = 0.0;
     }
+// waw: 06/03/04
+//    DerivativeList *current = derivatives;
+    // waw: added 06/04/04
+    Integer cf = currentForce;
+    PhysicalModel *current = GetForce(cf);  
 
-    DerivativeList *current = derivatives;
     const Real * ddt;
     while (current) 
     {
-        ddt = current->GetDerivative()->GetDerivativeArray();
-        if (!current->GetDerivative()->GetDerivatives(state, dt, order))
+        // waw: 06/04/04
+        //ddt = current->GetDerivative()->GetDerivativeArray();
+        ddt = GetForce(cf)->GetDerivativeArray();
+        //if (!current->GetDerivative()->GetDerivatives(state, dt, order)) 
+        if (!current->GetDerivatives(state, dt, order))
             return false;
 
         if (order == 1) //loj: changed from =
@@ -613,7 +648,10 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
             deriv[1] += ddt[1];
             deriv[2] += ddt[2];
         }
-        current = current->Next();
+        //current = current->Next(); waw: 06/04/04
+        // waw: added 06/04/04
+        cf++;
+        current = GetForce(cf);
     }
 
     return true;
@@ -733,21 +771,6 @@ Integer ForceModel::GetParameterCount(void) const
     return parameterCount;
 }
 
-
-//------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
-//------------------------------------------------------------------------------
-/**
- * This method returns a clone of the ForceModel.
- *
- * @return clone of the ForceModel.
- *
- */
-//------------------------------------------------------------------------------
-GmatBase* ForceModel::Clone(void) const
-{
-   return (new ForceModel(*this));
-}
 
 // Access methods 
 //------------------------------------------------------------------------------
