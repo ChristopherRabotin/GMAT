@@ -38,7 +38,7 @@
 //------------------------------------------------------------------------------
 CartXParam::CartXParam(const std::string &name, GmatBase *obj,
                        const std::string &desc, const std::string &unit)
-    : RealParameter(name, "CartXParam", SYSTEM_PARAM, obj, desc, unit)
+    : RealParameter(name, "CartXParam", SYSTEM_PARAM, obj, desc, unit, false)
 {
     AddObject(obj);
 }

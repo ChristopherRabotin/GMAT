@@ -39,7 +39,7 @@
 //------------------------------------------------------------------------------
 CurrentA1MjdParam::CurrentA1MjdParam(const std::string &name, GmatBase *obj,
                                      const std::string &desc, const std::string &unit)
-    : RealParameter(name, "CurrentA1MjdParam", SYSTEM_PARAM, obj, desc, unit)
+    : RealParameter(name, "CurrentA1MjdParam", SYSTEM_PARAM, obj, desc, unit, true)
 {
     AddObject(obj);
 }

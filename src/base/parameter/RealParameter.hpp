@@ -28,7 +28,8 @@ public:
 
     RealParameter(const std::string &name, const std::string &typeStr,
                   ParameterKey key, GmatBase *obj,
-                  const std::string &desc, const std::string &unit);
+                  const std::string &desc, const std::string &unit,
+                  bool isTimeParam);
     RealParameter(const RealParameter &param);
     RealParameter& operator= (const RealParameter& right);
     virtual ~RealParameter();

@@ -54,7 +54,7 @@ ElapsedDaysParam::PARAMETER_TYPE[ElapsedDaysParamCount] =
 //------------------------------------------------------------------------------
 ElapsedDaysParam::ElapsedDaysParam(const std::string &name, GmatBase *obj,
                                    const std::string &desc, const std::string &unit)
-    : RealParameter(name, "ElapsedDaysParam", SYSTEM_PARAM, obj, desc, unit)
+    : RealParameter(name, "ElapsedDaysParam", SYSTEM_PARAM, obj, desc, unit, true)
 {
     // GmatBase data
     parameterCount = ElapsedDaysParamCount;

@@ -41,7 +41,8 @@ RealParameter::PARAMETER_TYPE[RealParameterCount] =
 
 //------------------------------------------------------------------------------
 // RealParameter(const std::string &name, const std::string &typeStr,
-//               ParameterKey key, GmatBase *obj, const std::string &desc)
+//               ParameterKey key, GmatBase *obj, const std::string &desc,
+//               bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -52,14 +53,15 @@ RealParameter::PARAMETER_TYPE[RealParameterCount] =
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
+ * @param <isTimeParam> true if parameter is time related, false otherwise
  *
  * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 RealParameter::RealParameter(const std::string &name, const std::string &typeStr,
-                             ParameterKey key, GmatBase *obj,
-                             const std::string &desc, const std::string &unit)
-    : Parameter(name, typeStr, key, obj, desc, unit)
+                             ParameterKey key, GmatBase *obj, const std::string &desc,
+                             const std::string &unit, bool isTimeParam)
+    : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
 {  
     mValue = REAL_PARAMETER_UNDEFINED;
     // GmatBase data
