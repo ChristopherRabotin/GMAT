@@ -156,8 +156,8 @@ public:
    // method to return the alpha, delta, W, and Wdot for the body (specifying
    // the direction of the north pole of rotation (right ascension and
    // declination) and the prime meridian.  
-   // Units are degrees (alpha), degrees (delta), and deg/day (W); also,
-   // the time derivative of W (??)
+   // Units are degrees (alpha), degrees (delta), and degrees (W); also,
+   // the time derivative of W (deg/day)
    // For more information, see
    // "Report of the IAU/IAG Working Group on Cartographic Coordinates and
    // Rotational Elements of the Planets and Satellites: 2000"
@@ -267,8 +267,10 @@ protected:
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
    static const Real JD_EPOCH_2000_TCB = 2451545.0;
-   static const Real dDot              = 1.0 / GmatTimeUtil::SECS_PER_DAY;
-   static const Real TDot              = dDot / 36525.0;
+   //static const Real dDot              = 1.0 / GmatTimeUtil::SECS_PER_DAY;
+   //static const Real TDot              = dDot / 36525.0;
+   static const Real dDot              = 1.0;
+   static const Real TDot              = 1.0;
    
    // body type of the body
    Gmat::BodyType         bodyType;

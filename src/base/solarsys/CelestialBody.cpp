@@ -2051,7 +2051,7 @@ bool CelestialBody::IsBlank(char* aLine)
 Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 {
    Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
-                 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941);      
+                 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941); 
    Real jdTCB  = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
    return (jdTCB - JD_EPOCH_2000_TCB);
 }
