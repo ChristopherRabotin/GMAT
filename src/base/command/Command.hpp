@@ -79,6 +79,9 @@ public:
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetPublisher(Publisher *p);
    
+   virtual bool         SetCondition(std::string lhs, std::string operation, 
+                                     std::string rhs);
+   
    // Sequence methods
    virtual bool         Initialize();
    virtual GmatCommand* GetNext();

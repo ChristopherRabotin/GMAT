@@ -321,6 +321,12 @@ void GmatCommand::SetPublisher(Publisher *p)
 }
 
 
+bool GmatCommand::SetCondition(std::string lhs, std::string operation, 
+                               std::string rhs)
+{
+   return false;
+}
+
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------
