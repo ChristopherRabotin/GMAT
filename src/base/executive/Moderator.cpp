@@ -114,6 +114,8 @@ bool Moderator::Initialize()
 {
     if (!isInitialized)
     {
+        MessageInterface::ShowMessage("Moderator is creating core engine ...\n");
+        
         // Create interpreters and managers
         theGuiInterpreter = GuiInterpreter::Instance();
         theScriptInterpreter = ScriptInterpreter::Instance();
@@ -155,6 +157,8 @@ bool Moderator::Initialize()
         //loj: creates initial commands and add to sandbox
         //loj: at this point the sandbox is ready to run without GUI.
 
+        MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+        
         isInitialized = true;
     }
 
@@ -453,11 +457,14 @@ SolarSystem* Moderator::GetSolarSystemInUse()
 
 // subscriber
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(const std::string &type, const std::string &name)
+// Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
+//                              const std::string &filename)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::CreateSubscriber(const std::string &type, const std::string &name)
+Subscriber* Moderator::CreateSubscriber(const std::string &type,
+                                        const std::string &name,
+                                        const std::string &filename)
 {
-    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name);
+    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
     theConfigManager->AddSubscriber(subs);
     return subs;
 }

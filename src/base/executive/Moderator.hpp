@@ -123,7 +123,8 @@ public:
    SolarSystem* GetSolarSystemInUse();
 
    // Subscriber
-   Subscriber* CreateSubscriber(const std::string &type, const std::string &name);
+   Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
+                                const std::string &filename = "");
    Subscriber* GetSubscriber(const std::string &name);
 
    // Command

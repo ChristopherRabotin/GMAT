@@ -60,26 +60,27 @@ public:
     //future build:GroundStation* GetGroundStation(const std::string &name);
 
     // Propagator
-    Propagator* CreatePropagator(const std::string &name, std::string type);
+    Propagator* CreatePropagator(const std::string &type, const std::string &name);
     Propagator* GetPropagator(const std::string &name);
 
     // PhysicalModel
-    PhysicalModel* CreatePhysicalModel(const std::string &name, std::string type);
+    PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
     PhysicalModel* GetPhysicalModel(const std::string &name);
 
     // Parameter
-    Parameter* CreateParameter(const std::string &name, std::string type);
+    Parameter* CreateParameter(const std::string &type, const std::string &name);
     Parameter* GetParameter(const std::string &name);
 
     // Celestial body
-    CelestialBody* CreateCelestialBody(const std::string &name, std::string type);
+    CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
     CelestialBody* GetCelestialBody(const std::string &name);
 
     // SolarSystem
     SolarSystem* GetDefaultSolarSystem();
 
     // Subscriber
-    Subscriber* CreateSubscriber(const std::string &name, std::string type);
+    Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
+                                 const std::string &filename = "");
     Subscriber* GetSubscriber(const std::string &name);
 
     // Command

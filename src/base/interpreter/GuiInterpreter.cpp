@@ -91,7 +91,8 @@ void GuiInterpreter::Initialize()
 StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 {
    //loj: such as: "RungeKuttaVerner89" under Propagator
-   //loj: returns names of all creatable subfactory items. if none returns empty array.
+   //loj: returns names of all creatable subfactory items.
+   //loj: if none returns empty array.
    return theModerator->GetListOfFactoryItems(type);
 }
 
@@ -107,7 +108,8 @@ StringArray GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 // bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
+bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type,
+                                          const std::string &name)
 {
    //loj: to remove item from configuration
    return theModerator->RemoveConfiguredItem(type, name);
@@ -138,13 +140,14 @@ Spacecraft* GuiInterpreter::GetSpacecraft(const std::string &name)
 
 // propagator
 //------------------------------------------------------------------------------
-// Propagator* CreatePropagator(const std::string &name, std::string type)
+// Propagator* CreatePropagator(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Propagator* GuiInterpreter::CreatePropagator(const std::string &name, std::string type)
+Propagator* GuiInterpreter::CreatePropagator(const std::string &type,
+                                             const std::string &name)
 {
    //loj: for creating an existing or a new Propagator instance.
-   //loj: new Propagator should have derived from the Propagator.(source can be DLL, MATLAB)
-   return theModerator->CreatePropagator(name, type);
+   //loj: new Propagator should have derived from the Propagator.
+   return theModerator->CreatePropagator(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -158,13 +161,14 @@ Propagator* GuiInterpreter::GetPropagator(const std::string &name)
 
 // PhysicalModel
 //------------------------------------------------------------------------------
-// PhysicalModel* CreatePhysicalModel(const std::string &name, std::string type)
+// PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-PhysicalModel* GuiInterpreter::CreatePhysicalModel(const std::string &name, std::string type)
+PhysicalModel* GuiInterpreter::CreatePhysicalModel(const std::string &type,
+                                                   const std::string &name)
 {
    //loj: for creating an existing or a new PhysicalModel.
-   //loj: MyNewPhysicalModel should have derived from the PhysicalModel.(source can be DLL, MATLAB)
-   return theModerator->CreatePhysicalModel(name, type);
+   //loj: MyNewPhysicalModel should have derived from the PhysicalModel.
+   return theModerator->CreatePhysicalModel(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -178,13 +182,14 @@ PhysicalModel* GuiInterpreter::GetPhysicalModel(const std::string &name)
 
 // Parameter
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &name, std::string type)
+// Parameter* CreateParameter(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Parameter* GuiInterpreter::CreateParameter(const std::string &name, std::string type)
+Parameter* GuiInterpreter::CreateParameter(const std::string &type,
+                                           const std::string &name)
 {
    //loj: for creating an existing or a new Parameter.
    //loj: new Parameter should have derived from the Parameter.(source can be DLL, MATLAB)
-   return theModerator->CreateParameter(name, type);
+   return theModerator->CreateParameter(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -198,15 +203,16 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 
 // CelestialBody
 //------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(const std::string &name, std::string type)
+// CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &name, std::string type)
+CelestialBody* GuiInterpreter::CreateCelestialBody(const std::string &type,
+                                                   const std::string &name)
 {
    //loj: for creating a new body type. such as "NewJupiterMoon".
    //loj: newType should have derived from the CelestialBody.(source can be DLL, MATLAB)
    //loj: assumes there is only 1 SolarSystem so container name is ignored.
    //loj: this will add a newbody into SolarSystem
-   return theModerator->CreateCelestialBody(name, type);
+   return theModerator->CreateCelestialBody(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -232,12 +238,15 @@ SolarSystem* GuiInterpreter::GetDefaultSolarSystem()
 
 // subscriber
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(const std::string &name, std::string type)
+// Subscriber* CreateSubscriber(const std::string &type, const const std::string &name,
+//                              const std::string &filename)
 //------------------------------------------------------------------------------
-Subscriber* GuiInterpreter::CreateSubscriber(const std::string &name, std::string type)
+Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
+                                             const std::string &name,
+                                             const std::string &filename)
 {
    //loj: for creating new subscriber. such as "MyEphem" or "MyMovieClip"
-   return theModerator->CreateSubscriber(name, type);
+   return theModerator->CreateSubscriber(type, name, filename);
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +262,8 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
 // Command* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::CreateCommand(const std::string &type, const std::string &name)
+Command* GuiInterpreter::CreateCommand(const std::string &type,
+                                       const std::string &name)
 {
    //loj: for creating a new Command, such as "MyNewCommand", "DoMyLittleThing"
    return theModerator->CreateCommand(type, name);
@@ -294,7 +304,8 @@ bool GuiInterpreter::DeleteCommand(const std::string &name, Integer position,
 // Command* InsertCommand(const std::string &type, const std::string &name,
 //                        Integer position, bool addAbove, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::InsertCommand(const std::string &type, const std::string &name,
+Command* GuiInterpreter::InsertCommand(const std::string &type,
+                                       const std::string &name,
                                        Integer position, bool addAbove,
                                        Integer sandboxNum)
 {
@@ -306,7 +317,8 @@ Command* GuiInterpreter::InsertCommand(const std::string &type, const std::strin
 // Command* AppendCommand(const std::string &type, const std::string &name,
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
+Command* GuiInterpreter::AppendCommand(const std::string &type,
+                                       const std::string &name,
                                        Integer sandboxNum)
 {
    //appends command
