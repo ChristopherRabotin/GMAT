@@ -72,9 +72,8 @@ bool FactoryManager::RegisterFactory(Factory* fact)
        return false;    // write some kind of error or throw an exception?
    }
 
-   //===> debug
-   MessageInterface::ShowMessage
-      ("FactoryManager::RegisterFactory() adding factory %d\n", fact->GetFactoryType());
+   //MessageInterface::ShowMessage
+   //   ("FactoryManager::RegisterFactory() adding factory %d\n", fact->GetFactoryType());
    
    factoryList.push_back(fact);  // better to put it at the back of the list?
    return true;
