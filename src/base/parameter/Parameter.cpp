@@ -19,6 +19,9 @@
 #include "gmatdefs.hpp"
 #include "Parameter.hpp"
 #include "ParameterException.hpp"
+#include "Moderator.hpp"
+//  #include "MessageInterface.hpp"
+//  #include <sstream>
 
 //---------------------------------
 // static data
@@ -28,6 +31,18 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 {
    "SystemParam",
    "UserParam"
+};
+
+const std::string
+Parameter::PARAMETER_TEXT[ParameterParamCount] =
+{
+    "ObjectName"
+};
+
+const Gmat::ParameterType
+Parameter::PARAMETER_TYPE[ParameterParamCount] =
+{
+    Gmat::STRING_TYPE
 };
 
 //---------------------------------
@@ -230,6 +245,33 @@ void Parameter::SetUnit(const std::string &unit)
 }
 
 //------------------------------------------------------------------------------
+// bool AddObject(const std::string &name)
+//------------------------------------------------------------------------------
+bool Parameter::AddObject(const std::string &name)
+{
+    bool status = false;
+    Moderator *theModerator = Moderator::Instance();
+    
+//      MessageInterface::ShowMessage("Parameter::AddObject entered: "
+//                                    "name = " + name + "\n");
+    if (name != "")
+    {
+        //loj: should check name first to see if it's already added - do this later
+        
+        GmatBase *obj = theModerator->GetConfiguredItem(name);
+        if (obj != NULL)
+        {
+            mObjectNames.push_back(name);
+            mNumObjects = mObjectNames.size();
+            AddObject(obj);
+            status = true;
+        }
+    }
+
+    return status;
+}
+
+//------------------------------------------------------------------------------
 // bool operator==(const Parameter &right) const
 //------------------------------------------------------------------------------
 /**
@@ -293,4 +335,120 @@ Rvector6 Parameter::EvaluateRvector6()
 const std::string* Parameter::GetParameterList() const
 {
     return NULL;
+}
+
+//---------------------------------
+// methods inherited from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetParameterText(const Integer id) const
+{
+    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+        return PARAMETER_TEXT[id];
+    else
+        return GmatBase::GetParameterText(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer Parameter::GetParameterID(const std::string &str) const
+{
+   for (int i=0; i<ParameterParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i])
+          return i;
+   }
+   
+   return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
+{
+    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+        return PARAMETER_TYPE[id];
+    else
+        return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetParameterTypeString(const Integer id) const
+{
+    if (id >= OBJECT_NAME && id <= OBJECT_NAME)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    else
+       return GmatBase::GetParameterTypeString(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetStringParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case OBJECT_NAME: //loj: return first object name for now
+        if (mNumObjects > 0)
+            return mObjectNames[0];
+        else
+            return GmatBase::GetStringParameter(id);
+    default:
+        return GmatBase::GetStringParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool Parameter::SetStringParameter(const Integer id, const std::string &value)
+{
+//      std::stringstream ss("");
+//      ss << id;
+//      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
+//                                    "id = " + ss.str() + ", value = " + value + "\n");
+    switch (id)
+    {
+    case OBJECT_NAME:
+        return AddObject(value);
+    default:
+        return GmatBase::SetStringParameter(id, value);
+    }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Parameter::GetStringParameter(const std::string &label) const
+{
+    for (int i=0; i<ParameterParamCount; i++)
+        if (label == PARAMETER_TEXT[i])
+            return GetStringParameter(i);
+
+    return GmatBase::GetStringParameter(label);
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool Parameter::SetStringParameter(const std::string &label,
+                                   const std::string &value)
+{
+//      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
+//                                    "label = " + label + ", value = " + value + "\n");
+    for (int i=0; i<ParameterParamCount; i++)
+        if (label == PARAMETER_TEXT[i])
+            return SetStringParameter(i, value);
+
+    return GmatBase::SetStringParameter(label, value);
 }

@@ -48,7 +48,7 @@ public:
     void SetKey(const ParameterKey &key);
     void SetDesc(const std::string &desc);
     void SetUnit(const std::string &unit);
-
+    
     bool operator==(const Parameter &right) const;
     bool operator!=(const Parameter &right) const;
 
@@ -57,11 +57,23 @@ public:
     
     virtual const std::string* GetParameterList() const;
     
+    virtual bool AddObject(const std::string &name);
     virtual bool AddObject(GmatBase *object) = 0;
     virtual Integer GetNumObjects() const = 0;
     virtual bool Evaluate() = 0;
     virtual bool Validate() = 0;
     
+    // methods inherited from GmatBase
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool SetStringParameter(const Integer id, const std::string &value);
+    virtual std::string GetStringParameter(const std::string &label) const;
+    virtual bool SetStringParameter(const std::string &label,
+                                    const std::string &value);
 protected:
     
     static const std::string PARAMETER_KEY_STRING[KeyCount];
@@ -70,6 +82,18 @@ protected:
     std::string   mDesc;
     std::string   mUnit;
     bool mIsTimeParam;
+
+    StringArray mObjectNames;
+    Integer mNumObjects;
+    
+    enum
+    {
+        OBJECT_NAME = 0,
+        ParameterParamCount
+    };
+    
+    static const Gmat::ParameterType PARAMETER_TYPE[ParameterParamCount];
+    static const std::string PARAMETER_TEXT[ParameterParamCount];
 };
 #endif // Parameter_hpp
 
