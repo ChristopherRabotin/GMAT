@@ -263,7 +263,7 @@ void GregorianDate::ParseOut(const std::string &str)
                 timeToken.GetToken(2).length() != 6)
             {
                MessageInterface::ShowMessage(
-                  "\nWarning: invalid gregorain format with time"); 
+                  "\nWarning: invalid Gregorian format with time"); 
                return;
             }
 
@@ -284,7 +284,7 @@ void GregorianDate::ParseOut(const std::string &str)
                 timeToken.GetToken(1).length() != 3)
             {
                MessageInterface::ShowMessage(
-                  "\nWarning: invalid gregorain format with seconds"); 
+                  "\nWarning: invalid Gregorian format with seconds"); 
                return;
             }
             
@@ -297,7 +297,7 @@ void GregorianDate::ParseOut(const std::string &str)
             if (!IsValidTime(yearNum,monthNum,dayNum,hour,minute,second))
             {
                MessageInterface::ShowMessage(
-                  "\nWarning: invalid gregorain format from DateUtil"); 
+                  "\nWarning: invalid Gregorian format from DateUtil"); 
                return;
             } 
  
@@ -308,13 +308,13 @@ void GregorianDate::ParseOut(const std::string &str)
       else
       {
          MessageInterface::ShowMessage(
-             "\nWarning: invalid gregorain format: %s",str.c_str());  
+             "\nWarning: invalid Gregorian format: %s",str.c_str());  
       }
    }
    else
    {
        MessageInterface::ShowMessage(
-         "\nWarning: invalid gregorain format since there is no value.");  
+         "\nWarning: invalid Gregorian format since there is no value.");  
    } 
 
 }
