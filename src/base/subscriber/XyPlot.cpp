@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 #include <iomanip>
 #include "XyPlot.hpp"
-#include "PlotInterface.hpp" // for XY plot
-#include "Moderator.hpp"
+#include "PlotInterface.hpp"     // for XY plot
+#include "Moderator.hpp"         // for GetParameter()
 #include "MessageInterface.hpp"
 
 //---------------------------------
@@ -74,17 +74,17 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
     // GmatBase data
     parameterCount = XyPlotParamCount;
     
-    if (plotTitle == "")
-        mPlotTitle = "XyPlot";
-    if (xAxisTitle == "")
-        mXAxisTitle = "X-Axis Title";
-    if (yAxisTitle == "")
-        mYAxisTitle = "Y-Axis Title";
+//      if (plotTitle == "")
+//          mPlotTitle = "XyPlot";
+//      if (xAxisTitle == "")
+//          mXAxisTitle = "X-Axis Title";
+//      if (yAxisTitle == "")
+//          mYAxisTitle = "Y-Axis Title";
     
     mDrawGrid = drawGrid;
     mNumYParams = 0;
 
-    mXParamName = "UndefinedXParam";
+    mXParamName = "";
     mNumXParams = 0;
     
     mXParam = xParam;
@@ -92,8 +92,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
         AddYParameter(firstYParam);
 
     mIsXyPlotWindowSet = false;
-    mFirstXVal = 0.0;
-    
+    mAddNewCurve = true;
     mDataCollectFrequency = 1;
     mUpdatePlotFrequency = 10;
 }
@@ -103,6 +102,82 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
 //------------------------------------------------------------------------------
 XyPlot::~XyPlot(void)
 {
+}
+
+//loj: 3/8/04 added
+//------------------------------------------------------------------------------
+// virtual bool Initialize()
+//------------------------------------------------------------------------------
+bool XyPlot::Initialize()
+{
+    MessageInterface::ShowMessage("XyPlot::Initialize() entered\n");
+    bool status = false;
+    
+    if (active)
+    {
+        if (!mIsXyPlotWindowSet)
+        {
+
+            BuildPlotTitle();
+                        
+            // Create XyPlotWindow
+            MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
+            PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
+                                              mXAxisTitle, mYAxisTitle);
+
+            mAddNewCurve = true;
+            mIsXyPlotWindowSet = true;
+        }
+
+        if (mAddNewCurve)
+        {
+            // update plot title
+            BuildPlotTitle();
+            PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
+            
+            // add to Y params to XyPlotWindow
+            //loj: temp code
+            int yOffset = 0; //loj: I don't know how this is used
+            Real yMin = -40000.0; //loj: should parameter provide minimum value?
+            Real yMax =  40000.0; //loj: should parameter provide maximum value?
+
+            for (int i=0; i<mNumYParams; i++)
+            {
+                std::string curveTitle = mYParams[i]->GetName();
+                std::string penColor = "RED"; //loj: should parameter provide pen color?
+
+                MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+                                              curveTitle.c_str());
+                
+                PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
+                                              curveTitle, penColor);
+            }
+
+            mAddNewCurve = false;
+            status = true;
+        }
+        
+        MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
+        //@fixme:
+        //loj: If I call ClearXyPlotData(), the plot doesn't show in the 2nd run
+        //     If I don't clear the data, it keeps adding the data.
+        PlotInterface::ClearXyPlotData(instanceName);
+    }
+    else
+    {
+        if (mIsXyPlotWindowSet)
+        {        
+            mIsXyPlotWindowSet = false;
+            mAddNewCurve = true;
+            status = PlotInterface::DeleteXyPlot(true);
+        }
+        else
+        {
+            status = true;
+        }
+    }
+
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -166,6 +241,8 @@ bool XyPlot::AddYParameter(const std::string &paramName)
         Parameter *param = theModerator->GetParameter(paramName);
         if (param != NULL)
         {
+            MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
+                                          param->GetName().c_str());
             AddYParameter(param);
             status = true;
         }
@@ -184,8 +261,8 @@ bool XyPlot::AddYParameter(Parameter *param)
     //loj: Do I really need to validate parameter before add?
     if (param->Validate())
     {
-        //MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
-        //                              param->GetName().c_str());
+        MessageInterface::ShowMessage("XyPlot::AddYParameter() param name = %s\n",
+                                      param->GetName().c_str());
         mYParamNames.push_back(param->GetName());
         mYParams.push_back(param);
         mNumYParams = mYParams.size();
@@ -274,9 +351,12 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
         mDrawGrid = value;
         return mDrawGrid;
     case CLEAR_Y_PARAM_LIST:
+        DeletePlotCurves();
         mYParams.clear();
         mYParamNames.clear();
         mNumYParams = 0;
+        mAddNewCurve = true;
+        mIsXyPlotWindowSet = false;
         return true;
     default:
         return Subscriber::SetBooleanParameter(id, value);
@@ -317,15 +397,12 @@ std::string XyPlot::GetStringParameter(const Integer id) const
     switch (id)
     {
     case X_PARAM_NAME:
-        if (mNumXParams == 1)
-            return mXParamName;
-        else
-            return Subscriber::GetStringParameter(id);
+        return mXParamName;
     case Y_PARAM_NAME:
         if (mNumYParams > 0)
-            return mYParamNames[0]; // first Y param name
+            return mYParamNames[0]; //loj: return first Y Param
         else
-            return Subscriber::GetStringParameter(id);
+            return "";
     case PLOT_TITLE:
         return mPlotTitle;
     case X_AXIS_TITLE:
@@ -381,6 +458,8 @@ std::string XyPlot::GetStringParameter(const std::string &label) const
 bool XyPlot::SetStringParameter(const std::string &label,
                                 const std::string &value)
 {
+    MessageInterface::ShowMessage("XyPlot::SetStringParameter() label = %s, "
+                                  "value = %s \n", label.c_str(), value.c_str());
     for (int i=0; i<XyPlotParamCount; i++)
         if (label == PARAMETER_TEXT[i])
             return SetStringParameter(i, value);
@@ -419,7 +498,42 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// bool XyPlot::Distribute(int len)
+// void DeletePlotCurves()
+//------------------------------------------------------------------------------
+void XyPlot::DeletePlotCurves()
+{
+    // delete exiting curves
+    PlotInterface::DeleteAllXyPlotCurves(instanceName);
+}
+
+//------------------------------------------------------------------------------
+// void BuildPlotTitle()
+//------------------------------------------------------------------------------
+void XyPlot::BuildPlotTitle()
+{
+    //set X and Y axis title
+    if (mXAxisTitle == "" || mAddNewCurve)
+        mXAxisTitle = mXParam->GetName();
+            
+    if (mYAxisTitle == "" || mAddNewCurve)
+    {
+        mYAxisTitle = "";
+        for (int i= 0; i<mNumYParams-1; i++)
+        {
+            mYAxisTitle += (mYParams[i]->GetName() + ", ");
+        }
+        mYAxisTitle += mYParams[mNumYParams-1]->GetName();
+    }
+            
+    if (mPlotTitle == "" || mAddNewCurve)
+    {
+        mPlotTitle = "(" + mXAxisTitle + ")" + " vs " + "(" + mYAxisTitle + ")";
+    }
+}
+
+// methods inherited from Subscriber
+//------------------------------------------------------------------------------
+// bool Distribute(int len)
 //------------------------------------------------------------------------------
 bool XyPlot::Distribute(int len)
 {
@@ -432,8 +546,6 @@ bool XyPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool XyPlot::Distribute(const Real * dat, Integer len)
 {
-//      PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle, mXAxisTitle,
-//                                        mYAxisTitle);
     if (len > 0)
     {
         if (mXParam != NULL && mNumYParams > 0)
@@ -453,42 +565,9 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             for (int i=0; i<mNumYParams; i++)
             {
                 yvals[i] = mYParams[i]->EvaluateReal();
-                //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
+                //MessageInterface::ShowMessage("XyPlot::Distribute() yvals[%d] = %f\n", i, yvals[i]);
                 //yvals[i] = dat[1]; //loj: temp code to test XY plot dat[1] is pos X
                 //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
-            }
-
-            if (!mIsXyPlotWindowSet)
-            {
-                
-                //loj: 2/27/04 temp code to set X and Y axis title
-                mXAxisTitle = "Time";
-                mYAxisTitle = "Position X";
-                
-                // Create XyPlotWindow
-                PlotInterface::CreateXyPlotWindow(false, instanceName, mPlotTitle,
-                                                  mXAxisTitle, mYAxisTitle);
-                
-                // add to Y params to XyPlotWindow
-                //loj: temp code
-                int yOffset = 0; //loj: I don't how this is used
-                Real yMin = -40000.0; //loj: should parameter provide minimum value?
-                Real yMax =  40000.0; //loj: should parameter provide maximum value?
-
-                for (int i=0; i<mNumYParams; i++)
-                {
-                    std::string curveTitle = mYParams[i]->GetName();
-                    std::string penColor = "RED"; //loj: should parameter provide pen color?
-
-                    MessageInterface::ShowMessage("XyPlot::Distribute() curveTitle = %s\n",
-                                                  curveTitle.c_str());
-                    if (PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                                      curveTitle, penColor))
-                    {
-                        mIsXyPlotWindowSet = true;
-                        mFirstXVal = xval;
-                    }
-                }
             }
             
             // update xy plot
@@ -505,15 +584,13 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                     return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
                                                        mPlotTitle, mXAxisTitle, mYAxisTitle,
                                                        update);
-                    //loj: 2/27/04 just pass xval instead of xval-mFirstXVal
-//                      return PlotInterface::UpdateXyPlot(instanceName, xval-mFirstXVal, yvals,
-//                                                         mPlotTitle, mXAxisTitle, mYAxisTitle,
-//                                                         update);
                 }
             }
         }
     }
 
-    return false;
+    //loj: always return true otherwise next subscriber will not call ReceiveData()
+    //     in Publisher::Publish()
+    return true;
 }
 

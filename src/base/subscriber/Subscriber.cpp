@@ -53,6 +53,12 @@ Subscriber::~Subscriber(void)
 {
 }
 
+//loj: 3/8/04 added
+bool Subscriber::Initialize()
+{
+    return true;
+}
+
 bool Subscriber::ReceiveData( const char * datastream)
 {
     if (!active)        // Not currently processing data

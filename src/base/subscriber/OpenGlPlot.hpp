@@ -27,6 +27,9 @@ class OpenGlPlot : public Subscriber
 public:
     OpenGlPlot(const std::string &name);
     virtual ~OpenGlPlot(void);
+
+    // methods inherited from Subscriber
+    virtual bool Initialize(); //loj: 3/8/04 added
     
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;

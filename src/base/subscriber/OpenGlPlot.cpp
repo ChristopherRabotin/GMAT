@@ -18,7 +18,8 @@
 //------------------------------------------------------------------------------
 #include <iomanip>
 #include "OpenGlPlot.hpp"
-#include "PlotInterface.hpp" // for UpdatePlot()
+#include "PlotInterface.hpp" // for UpdateGlSpacecraft()
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -68,8 +69,26 @@ OpenGlPlot::~OpenGlPlot(void)
 {
 }
 
+//loj: 3/8/04 added
 //------------------------------------------------------------------------------
-// bool OpenGlPlot::Distribute(int len)
+// virtual bool Initialize()
+//------------------------------------------------------------------------------
+bool OpenGlPlot::Initialize()
+{
+    if (active)
+    {
+        MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
+        return PlotInterface::CreateGlPlotWindow();
+    }
+    else
+    {
+        MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
+        return PlotInterface::DeleteGlPlot();
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool Distribute(int len)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Distribute(int len)
 {
@@ -82,7 +101,6 @@ bool OpenGlPlot::Distribute(int len)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::Distribute(const Real * dat, Integer len)
 {
-    bool status = false;
     if (len > 0)
     {
         mNumData++;
@@ -91,14 +109,16 @@ bool OpenGlPlot::Distribute(const Real * dat, Integer len)
         {
             mNumCollected++;
             bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-            
+
             //loj: assumes data in time, x, y, z order
             return PlotInterface::UpdateGlSpacecraft(dat[0], dat[1], dat[2], dat[3],
                                                      update);
         }
     }
     
-    return status;
+    //loj: always return true otherwise next subscriber will not call ReceiveData()
+    //     in Publisher::Publish()
+    return true;
 }
 
 //------------------------------------------------------------------------------

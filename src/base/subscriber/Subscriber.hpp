@@ -45,6 +45,7 @@ public:
     Subscriber& operator=(const Subscriber &right);
     virtual ~Subscriber(void);
 
+    virtual bool        Initialize(); //loj: 3/8/04 added
     virtual bool        ReceiveData(const char * datastream);
     virtual bool        ReceiveData(const char * datastream, const Integer len);
     virtual bool        ReceiveData(const Real * datastream, const Integer len = 0);

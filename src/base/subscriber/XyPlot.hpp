@@ -32,6 +32,9 @@ public:
            bool drawGrid = false);
     virtual ~XyPlot(void);
 
+    // methods inherited from Subscriber
+    virtual bool Initialize(); //loj: 3/8/04 added
+    
     Integer GetNumYParameters();
     
     bool SetXParameter(const std::string &paramName);
@@ -62,6 +65,9 @@ public:
     virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
+
+    void DeletePlotCurves();
+    void BuildPlotTitle();
     
     // methods inherited from Subscriber
     virtual bool Distribute(Integer len);
@@ -81,7 +87,7 @@ protected:
     std::string mYAxisTitle;
     bool mDrawGrid;
     bool mIsXyPlotWindowSet;
-    double mFirstXVal;
+    bool mAddNewCurve;
     
     Integer mDataCollectFrequency;
     Integer mUpdatePlotFrequency;
