@@ -20,50 +20,85 @@
 
 #ifndef IfCommand_hpp
 #define IfCommand_hpp
- 
+
+#include "gmatdefs.hpp"
 #include "BranchCommand.hpp"
+#include "Parameter.hpp"
 
 /**
  * Command that manages processing for entry to the IF statement 
  *
- * The IfCommand command manages the for loop.  All targeters implement a 
- * state machine that evaluates the current state of the targeting process, and 
- * provides data to the command sequence about the next step to be taken in the 
- * targeting process.  As far as the Target command is concerned, there are 3 
- * possible steps to take: 
- *
- * 1.  Fire the IF Statement to perform a calculation.
- *
- * 2.  Run through the Commands in the for IF statement.
- *
- * 3.  On convergence, continue with the command sequence following the 
- *     IF statement. 
+ * The IfCommand command manages the If statement.  
  *
  */
-class IfCommand : public BranchCommand
+class GMAT_API IfCommand : public BranchCommand
 {
 public:
-    IfCommand(void);
-    virtual ~IfCommand(void);
+   // default constructor
+   IfCommand();
+   // copy constructor
+   IfCommand(const IfCommand &ic);
+   // operator =
+   IfCommand& operator=(const IfCommand &ic);
+   // destructor
+   virtual ~IfCommand(void);
+   
+   // Inherited methods that need some enhancement from the base class
+   virtual bool         Append(GmatCommand *cmd);
+   
+   // Methods used to run the command
+   virtual bool         Initialize();
+   virtual bool         Execute();
+   
+   // Method to set up the condition(s) for the If command
+   virtual bool         SetCondition(std::string lhs, std::string operation,
+                                       std::string rhs);
+   
+   // inherited from GmatBase
+   virtual GmatBase*    Clone() const;
+   // Reference object accessor methods ----- wcs: 2004.07.08 added
+   //virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   //virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+   //                                       const std::string &name);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                       const std::string &name,
+                                       const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                       const std::string &name,
+                                       const Integer index);
+   //virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   
     
-    IfCommand(const IfCommand& ic);
-    IfCommand&             operator=(const IfCommand& ic);
-    
-    // Inherited methods that need some enhancement from the base class
-    virtual bool        Append(GmatCommand *cmd);
-    
-    // Methods used to run the command
-    virtual bool        Initialize(void);
-    virtual bool        Execute(void);
-
-    // inherited from GmatBase
-    virtual GmatBase* Clone(void) const;
-
     
 protected:
-    /// The name of the spacecraft that gets maneuvered
-    std::string         ifName;
-    Integer             numberOfConditions; 
-    
+
+   bool                 EvaluateCondition(Integer which);
+
+   enum OpType
+   {
+      EQUAL_TO = 0,
+      NOT_EQUAL,
+      GREATER_THAN,
+      LESS_THAN,
+      GREATER_OR_EQUAL,
+      LESS_OR_EQUAL,
+      NumberOfOperators
+   };
+
+   static const std::string OPTYPE_TEXT[NumberOfOperators];
+
+   /// Number of consitions for the If
+   Integer                  numberOfConditions;
+   /// Counter to track how deep the If nesting is
+   Integer                  nestLevel;
+   /// The object array used in GetRefObjectArray()
+   ObjectArray              objectArray;
+   /// Arrays representing conditions
+   StringArray              lhsList;
+   std::vector<OpType>      opList;
+   StringArray              rhsList;
+   /// list of parameter objects used by the conditions
+   std::vector<Parameter*>   params;
+   
 };
 #endif  // IfCommand_hpp
