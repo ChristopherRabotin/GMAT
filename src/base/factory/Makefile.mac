@@ -1,0 +1,18 @@
+# Project:    GMAT
+# Module:     Makefile.mac for factory directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/13
+
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = CommandFactory.cpp Factory.cpp FactoryException.cpp FactoryManager.cpp \
+	ForceModelFactory.cpp ParameterFactory.cpp PhysicalModelFactory.cpp \
+	PropSetupFactory.cpp PropagatorFactory.cpp SpacecraftFactory.cpp \
+	StopConditionFactory.cpp SubscriberFactory.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
