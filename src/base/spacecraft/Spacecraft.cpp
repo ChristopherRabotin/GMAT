@@ -57,18 +57,46 @@ Spacecraft::Spacecraft() :
 }
 
 //---------------------------------------------------------------------------
-//  Spacecraft(Gmat::ObjectTypes typeId, std::string &typeStr, 
+//  Spacecraft(Gmat::ObjectTypes typeId, std::string &typeStr,
 //             std::string &nomme)
 //---------------------------------------------------------------------------
 /**
- * Creates constructors with parameters. 
+ * Creates constructors with parameters.
  *
  * @param <typeStr> GMAT script string associated with this type of object.
  * @param <nomme> Optional name for the object.  Defaults to "".
  *
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &noname) :
-    GmatBase(Gmat::SPACECRAFT,typeStr,noname),
+    GmatBase(Gmat::SPACECRAFT, typeStr, noname),
+    epochID(parameterCount),
+    state1ID(parameterCount + 1),
+    state2ID(parameterCount + 2),
+    state3ID(parameterCount + 3),
+    state4ID(parameterCount + 4),
+    state5ID(parameterCount + 5),
+    state6ID(parameterCount + 6),
+    refBodyID(parameterCount + 7),
+    refFrameID(parameterCount + 8),
+    refPlaneID(parameterCount + 9)
+{
+    parameterCount += 10;
+}
+
+
+// DJC: This method is in the header, but missing in the source
+//---------------------------------------------------------------------------
+//  Spacecraft(std::string &nomme)
+//---------------------------------------------------------------------------
+/**
+ * Creates constructors with parameters.
+ *
+ * @param <typeStr> GMAT script string associated with this type of object.
+ * @param <nomme> Optional name for the object.  Defaults to "".
+ *
+ */
+Spacecraft::Spacecraft(const std::string &nomme) :
+    GmatBase(Gmat::SPACECRAFT, "Spacecraft", nomme),
     epochID(parameterCount),
     state1ID(parameterCount + 1),
     state2ID(parameterCount + 2),
@@ -182,6 +210,43 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 }
 
 
+std::string Spacecraft::GetParameterText(const Integer id) const
+{
+    if (id == epochID) return "Epoch";
+    if (id == state1ID) return "Element1";
+    if (id == state2ID) return "Element2";
+    if (id == state3ID) return "Element3";
+    if (id == state4ID) return "Element4";
+    if (id == state5ID) return "Element5";
+    if (id == state6ID) return "Element6";
+    if (id == refBodyID) return "ReferenceBody";
+    if (id == refFrameID) return "CoordinateRepresentation";
+    if (id == refPlaneID) return "PrincipalPlane";
+    
+    return GmatBase::GetParameterText(id);
+}
+
+Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
+{
+    if (id == epochID) return Gmat::REAL_TYPE;
+    if (id == state1ID) return Gmat::REAL_TYPE;
+    if (id == state2ID) return Gmat::REAL_TYPE;
+    if (id == state3ID) return Gmat::REAL_TYPE;
+    if (id == state4ID) return Gmat::REAL_TYPE;
+    if (id == state5ID) return Gmat::REAL_TYPE;
+    if (id == state6ID) return Gmat::REAL_TYPE;
+    if (id == refBodyID) return Gmat::STRING_TYPE;
+    if (id == refFrameID) return Gmat::STRING_TYPE;
+    if (id == refPlaneID) return Gmat::STRING_TYPE;
+    
+    return GmatBase::GetParameterType(id);
+}
+
+std::string Spacecraft::GetParameterTypeString(const Integer id) const
+{
+    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
 //---------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //---------------------------------------------------------------------------
@@ -194,17 +259,15 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
  */
 Real Spacecraft::GetRealParameter(const Integer id) const
 {
-    switch(id)
-    {
-        epochID  : return epoch;
-        stateID1 : return state[0];
-        stateID2 : return state[1];
-        stateID3 : return state[2];
-        stateID4 : return state[3];
-        stateID5 : return state[4];
-        stateID6 : return state[5];
-        default  : return REAL_PARAMETER_UNDEFINED;
-    }
+    if (id == epochID) return epoch;
+    if (id == state1ID) return state[0];
+    if (id == state2ID) return state[1];
+    if (id == state3ID) return state[2];
+    if (id == state4ID) return state[3];
+    if (id == state5ID) return state[4];
+    if (id == state6ID) return state[5];
+    
+    return GmatBase::GetRealParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -222,17 +285,15 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
-    switch(id)
-    {
-        epochID  : return epoch = value;
-        stateID1 : return state[0] = value;
-        stateID2 : return state[1] = value;
-        stateID3 : return state[2] = value;
-        stateID4 : return state[3] = value;
-        stateID5 : return state[4] = value;
-        stateID6 : return state[5] = value;
-        default  : return REAL_PARAMETER_UNDEFINED;
-    }
+    if (id == epochID) return epoch = value;
+    if (id == state1ID) return state[0] = value;
+    if (id == state2ID) return state[1] = value;
+    if (id == state3ID) return state[2] = value;
+    if (id == state4ID) return state[3] = value;
+    if (id == state5ID) return state[4] = value;
+    if (id == state6ID) return state[5] = value;
+
+    return GmatBase::SetRealParameter(id, value);
 }
 
 //---------------------------------------------------------------------------
@@ -257,7 +318,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == refPlaneID)
        return refPlane;
 
-    return "";
+    return GmatBase::GetStringParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -274,7 +335,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id != refBodyID && id != refFrameID && id != refPlaneID)
-       return false;
+       return GmatBase::SetStringParameter(id, value);
 
     if (id == refBodyID)
        refBody = value; 
@@ -285,3 +346,4 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
     return true;
 }
+

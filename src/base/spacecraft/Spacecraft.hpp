@@ -28,7 +28,7 @@ public:
     // Default constructor
     Spacecraft();
     Spacecraft(const std::string &nomme);
-    Spacecraft(const std::string &typeStr, const std::string &nomme = "");
+    Spacecraft(const std::string &typeStr, const std::string &nomme);
     // Copy constructor
     Spacecraft(const Spacecraft &a);
     // Assignment operator
@@ -45,6 +45,12 @@ public:
     virtual Real SetRealParameter(const Integer id, const Real value);
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool SetStringParameter(const Integer id, const std::string &value);
+    
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
     
     // Default values for spacecraft 
     static const Real EPOCH; 
