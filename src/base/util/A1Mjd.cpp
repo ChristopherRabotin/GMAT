@@ -447,10 +447,6 @@ std::string* A1Mjd::ToValueStrings()
    return stringValues;   
 }
 
-//---------------------------------
-// private
-//---------------------------------
-
 //------------------------------------------------------------------------------
 // Real ToUtcMjd()
 //------------------------------------------------------------------------------
@@ -487,6 +483,24 @@ UtcMjd A1Mjd::ToUtcMjd()
 
    return utcmjd;
 }
+
+
+//------------------------------------------------------------------------------
+// Ut1Mjd ToUt1Mjd()
+//------------------------------------------------------------------------------
+Ut1Mjd A1Mjd::ToUt1Mjd()
+{
+   // will eventually read the UT1-UTC value from the file or read the
+   // timing coefficients file
+   Real Ut1MinusUtc = -.456647/SECS_PER_DAY; // June 16, 2004 value
+   return (Ut1Mjd) (((Real) ToUtcMjd()) + Ut1MinusUtc);
+}
+
+
+//---------------------------------
+// private
+//---------------------------------
+
 
 //------------------------------------------------------------------------------
 // Real GetA1UtcDiff(const UtcMjd &utcmjd)

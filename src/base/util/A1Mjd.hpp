@@ -69,7 +69,9 @@ public:
    A1Date ToA1Date();
 
    Real   UtcMjdToA1Mjd(const Real utcMjd);
+   //Real   Ut1MjdToA1Mjd(const Real ut1Mjd); //wcs: add later
    UtcMjd ToUtcMjd();
+   Ut1Mjd ToUt1Mjd();
 
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
@@ -81,6 +83,7 @@ protected:
 private:
 
    Real GetA1UtcDiff(const UtcMjd &utcmjd);
+   //Real GetA1Ut1Diff(const UtcMjd &utcmjd); //wcs: add later
    Real GetA1UtcDiffAnalytic(const UtcMjd &utcmjd);
    GmatTimeUtil::CalDate A1MjdToCalDate(const A1Mjd &a1mjd);
    GmatTimeUtil::CalDate UtcMjdToCalDate(const UtcMjd &utcmjd);
