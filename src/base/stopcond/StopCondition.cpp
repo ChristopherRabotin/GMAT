@@ -111,21 +111,21 @@ bool StopCondition::Evaluate()
    Real rval;
    Real stopEpoch; //in A1Mjd
     
-   if (!Validate())
-   {
-      throw StopConditionException
-         ("StopCondition::Evaluate() Validate() failed.\n");
-   }
+//     if (!Validate())
+//     {
+//        throw StopConditionException
+//           ("StopCondition::Evaluate() Validate() failed.\n");
+//     }
    
    //loj: Do I really need to validate parameter before evaluate?
    //     Is validating parameter in AddParameter enough?
-   if (mStopParam->Validate() == false)
-   {
-      throw StopConditionException
-         ("StopCondition::Evaluate()::Cannot evaluate the stop condition: " + 
-          mStopParam->GetTypeName() + ":" + mStopParam->GetName() +
-          " Validate() failed\n");
-   }
+//     if (mStopParam->Validate() == false)
+//     {
+//        throw StopConditionException
+//           ("StopCondition::Evaluate()::Cannot evaluate the stop condition: " + 
+//            mStopParam->GetTypeName() + ":" + mStopParam->GetName() +
+//            " Validate() failed\n");
+//     }
 
    // set current epoch
    if (mUseInternalEpoch)
@@ -290,17 +290,7 @@ GmatBase* StopCondition::Clone(void) const
 // bool CheckOnPeriapsis()
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnPeriapsis()
-{
-   //loj: 11/4/04 commented out
-   //static int count = 0;
-   //count++;
-   //
-   //if (count > 100)
-   //{
-   //   count = 0;
-   //   return true;
-   //}
-   
+{   
    bool backwards = false; //loj: from Propagator?
    Real ecc = mEccParam->EvaluateReal();
    Real rmag = mRmagParam->EvaluateReal();

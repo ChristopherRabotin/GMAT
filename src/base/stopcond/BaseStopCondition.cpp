@@ -534,7 +534,7 @@ bool BaseStopCondition::SetStopParameter(const std::string &name)
 void BaseStopCondition::Initialize()
 {
    mInitialized = false;
-
+   
    if (Validate())
    {
       if (mStopParam->GetTypeName() == "Apoapsis" ||
@@ -621,7 +621,7 @@ bool BaseStopCondition::Validate()
    // check on epoch parameter
    if (mUseInternalEpoch || mEpochParam != NULL)
       valid = true;
-
+   
    // check on stop parameter
    if (valid)
    {
@@ -640,7 +640,7 @@ bool BaseStopCondition::Validate()
          }
       }
    }
-    
+   
    // Apoapsis and Periapsis need additional parameters
    if (valid)
    {
@@ -649,24 +649,47 @@ bool BaseStopCondition::Validate()
       {
          // check on Ecc parameter
          if (mEccParam  == NULL)
+         {
+#if DEBUG_BASE_STOPCOND
+            MessageInterface::ShowMessage
+               ("BaseStopCondition::Validate(): Creating KepEcc...\n");
+#endif
             mEccParam = new KepEcc("");
          
-         mEccParam->AddRefObject
-            (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
-                                      mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
-         mEccParam->AddRefObject(mSolarSystem);
+            mEccParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::SPACECRAFT, 
+                                         mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+            mEccParam->AddRefObject
+               (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM, 
+                                         mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
+         
+            mEccParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
+            
+            mEccParam->AddRefObject(mSolarSystem);
+         }
          
          // check on SphRMag parameter if "Periapsis"
          if (mStopParam->GetTypeName() == "Periapsis")
          {
             if (mRmagParam == NULL)
+            {
+#if DEBUG_BASE_STOPCOND
+               MessageInterface::ShowMessage
+                  ("BaseStopCondition::Validate(): Creating SphRMag...\n");
+#endif
                mRmagParam = new SphRMag("");
             
-            mRmagParam->AddRefObject
-               (mStopParam->GetRefObject(Gmat::SPACECRAFT,
-                                         mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
-            mRmagParam->AddRefObject(mSolarSystem);
+               mRmagParam->AddRefObject
+                  (mStopParam->GetRefObject(Gmat::SPACECRAFT,
+                                            mStopParam->GetRefObjectName(Gmat::SPACECRAFT)));
+               mRmagParam->AddRefObject
+                  (mStopParam->GetRefObject(Gmat::COORDINATE_SYSTEM,
+                                            mStopParam->GetRefObjectName(Gmat::COORDINATE_SYSTEM)));
             
+               mRmagParam->SetInternalCoordSystem(mStopParam->GetInternalCoordSystem());
+            
+               mRmagParam->AddRefObject(mSolarSystem);
+            }
          }
       }
    }
@@ -681,7 +704,7 @@ bool BaseStopCondition::Validate()
    }
 
    MessageInterface::ShowMessage
-      ("BaseStopCondition::Validate() valid=%d\n", valid);
+      ("BaseStopCondition::Validate() Exiting valid=%d\n", valid);
    
 #endif
    
