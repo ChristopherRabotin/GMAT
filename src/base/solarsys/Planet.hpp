@@ -86,11 +86,11 @@ protected:
    static const Real                  FLATTENING[NumberOfPlanets];
    //static const Real                  POLAR_RADIUS[NumberOfPlanets];
    static const Real                  MU[NumberOfPlanets];
-   //static const Integer               ORDER[NumberOfPlanets];
-   //static const Integer               DEGREE[NumberOfPlanets];
    //static const Integer               COEFFICIENT_SIZE[NumberOfPlanets];
-   //static const Rmatrix               SIJ[NumberOfPlanets];
-   //static const Rmatrix               CIJ[NumberOfPlanets];
+   static const Integer               ORDER[NumberOfPlanets];
+   static const Integer               DEGREE[NumberOfPlanets];
+   static const Rmatrix               SIJ[NumberOfPlanets];
+   static const Rmatrix               CIJ[NumberOfPlanets];
    // add other ones as needed
 
    

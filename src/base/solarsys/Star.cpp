@@ -18,6 +18,7 @@
 #include "CelestialBody.hpp"
 #include "Star.hpp"
 #include "PhysicalConstants.hpp"
+#include "MessageInterface.hpp"
 
 // initialize static default values
 // default values for CelesitalBody data
@@ -31,16 +32,16 @@ const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Buil
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
-//const Integer               Star::ORDER               = 4;      
-//const Integer               Star::DEGREE              = 4;
+const Integer               Star::ORDER               = 4;      
+const Integer               Star::DEGREE              = 4;
+const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
+const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
+      1.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0,
+      0.0, 0.0,             0.0,             0.0,             0.0);
 //const Integer               Star::COEFFICIENT_SIZE    = 4;
-//const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
-//const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
-//      1.0, 0.0,             0.0,             0.0,             0.0,
-//      0.0, 0.0,             0.0,             0.0,             0.0,
-//      0.0, 0.0,             0.0,             0.0,             0.0,
-//      0.0, 0.0,             0.0,             0.0,             0.0,
-//      0.0, 0.0,             0.0,             0.0,             0.0); 
 
 
 const Real                  Star::STAR_RADIANT_POWER       = 1358.0;       // W / m^2
@@ -358,8 +359,6 @@ void Star::InitializeStar()
    centralBody         = "";
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
-   //order               = Star::ORDER;
-   //degree              = Star::DEGREE;
 
    atmManager          = NULL;
    
@@ -368,18 +367,20 @@ void Star::InitializeStar()
    referenceDistance   = Star::STAR_REFERENCE_DISTANCE;
    photosphereRadius   = Star::STAR_PHOTOSPHERE_RADIUS;
 
+   order               = Star::ORDER;
+   degree              = Star::DEGREE;
+   sij                 = Star::SIJ;
+   cij                 = Star::CIJ;
+   defaultMu           = Star::MU;
+   defaultEqRadius     = Star::EQUATORIAL_RADIUS;
    //coefficientSize     = Star::COEFFICIENT_SIZE;
-   //sij                 = Star::SIJ;
-   //cij                 = Star::CIJ;  
    //defaultSij          = Star::SIJ;
    //defaultCij          = Star::CIJ;
    //defaultCoefSize     = Star::COEFFICIENT_SIZE;
-   defaultMu           = Star::MU;
-   defaultEqRadius     = Star::EQUATORIAL_RADIUS;
-
-   //if (instanceName != SolarSystem::SUN_NAME)
-      //MessageInterface::ShowMessage(
-      // "Unknown star created - please supply physical parameter values");
+   
+   if (instanceName != SolarSystem::SUN_NAME)
+      MessageInterface::ShowMessage(
+       "Unknown star created - please supply physical parameter values");
 }
 
 //------------------------------------------------------------------------------

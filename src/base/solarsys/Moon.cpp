@@ -18,6 +18,8 @@
 #include "CelestialBody.hpp"
 #include "Moon.hpp"
 #include "PhysicalConstants.hpp"
+#include "MessageInterface.hpp"
+
 
 // initialize static default values
 // default values for CelesitalBody data
@@ -31,23 +33,23 @@ const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Buil
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const Integer               Moon::BODY_NUMBER         = 2; 
 const Integer               Moon::REF_BODY_NUMBER     = 3; 
-//const Integer               Moon::ORDER               = 4; 
-//const Integer               Moon::DEGREE              = 4;  
+const Integer               Moon::ORDER               = 4; 
+const Integer               Moon::DEGREE              = 4;  
 
 //const Integer               Moon::COEFFICIENT_SIZE    = 4;
 
-//const Rmatrix               Moon::SIJ                 = Rmatrix(5,5,
-//   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
-//   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
-//   0.0, 4.78976286742000E-09, 1.19043314469000E-08,                  0.0,                 0.0,
-//   0.0, 5.46564929895000E-06, 4.88875341590000E-06,-1.76416063010000E-06,                 0.0,
-//   0.0, 1.63304293851000E-06,-6.76012176494000E-06,-1.34287028168000E-05, 3.94334642990000E-06);
-//const Rmatrix               Moon::CIJ                 = Rmatrix(5,5,
-//                     1.0,                 0.0,                  0.0,                  0.0,                   0.0,
-//                     0.0,                 0.0,                  0.0,                  0.0,                   0.0,
-//   -9.09314486280000E-05, 9.88441569067000E-09, 3.47139237760000E-05,                  0.0,                  0.0,
-//   -3.17765981183000E-06, 2.63497832935000E-05, 1.42005317544000E-05, 1.22860504604000E-05,                  0.0,
-//    3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,-1.37041711834000E-06,-6.03652719918000E-06);
+const Rmatrix               Moon::SIJ                 = Rmatrix(5,5,
+   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
+   0.0,                  0.0,                  0.0,                  0.0,                 0.0,
+   0.0, 4.78976286742000E-09, 1.19043314469000E-08,                  0.0,                 0.0,
+   0.0, 5.46564929895000E-06, 4.88875341590000E-06,-1.76416063010000E-06,                 0.0,
+   0.0, 1.63304293851000E-06,-6.76012176494000E-06,-1.34287028168000E-05, 3.94334642990000E-06);
+const Rmatrix               Moon::CIJ                 = Rmatrix(5,5,
+                     1.0,                 0.0,                  0.0,                  0.0,                   0.0,
+                     0.0,                 0.0,                  0.0,                  0.0,                   0.0,
+   -9.09314486280000E-05, 9.88441569067000E-09, 3.47139237760000E-05,                  0.0,                  0.0,
+   -3.17765981183000E-06, 2.63497832935000E-05, 1.42005317544000E-05, 1.22860504604000E-05,                  0.0,
+    3.21502582986000E-06,-6.01154071094000E-06,-7.10667037450000E-06,-1.37041711834000E-06,-6.03652719918000E-06);
 
 
 // add other ones as needed
@@ -184,14 +186,14 @@ void Moon::InitializeMoon(const std::string &cBody)
    centralBody         = cBody;
    bodyNumber          = Moon::BODY_NUMBER;
    referenceBodyNumber = Moon::REF_BODY_NUMBER;
-   //order               = Moon::ORDER;
-   //degree              = Moon::DEGREE;
 
    atmManager          = new AtmosphereManager(instanceName);
 
    //coefficientSize     = Moon::COEFFICIENT_SIZE;
-   //sij                 = Moon::SIJ;
-   //cij                 = Moon::CIJ;
+   order               = Moon::ORDER;
+   degree              = Moon::DEGREE;
+   sij                 = Moon::SIJ;
+   cij                 = Moon::CIJ;
 
    //defaultSij          = sij;
    //defaultCij          = cij;
@@ -199,9 +201,9 @@ void Moon::InitializeMoon(const std::string &cBody)
    defaultEqRadius     = Moon::EQUATORIAL_RADIUS;
    //defaultCoefSize     = Moon::COEFFICIENT_SIZE;
    
-   //if (instanceName != SolarSystem::MOON_NAME)
-   //MessageInterface::ShowMessage(
-   // "Unknown moon created - please supply physical parameter values");
+   if (instanceName != SolarSystem::MOON_NAME)
+   MessageInterface::ShowMessage(
+    "Unknown moon created - please supply physical parameter values");
 }
 
 //------------------------------------------------------------------------------
