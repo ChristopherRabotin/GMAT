@@ -89,6 +89,12 @@ void TankSelectionDialog::Create()
                               
    // wxSizers   
    theMiddleSizer->Add(flexGridSizer1, 0, wxALIGN_CENTRE|wxALL, 3);
+   
+   selectButton->Enable(false);
+   removeButton->Enable(false);
+   
+   selectAllButton->Enable(false);
+   removeAllButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
