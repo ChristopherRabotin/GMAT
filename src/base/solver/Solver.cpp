@@ -91,6 +91,25 @@ Solver& Solver::operator=(const Solver& sol)
 
 
 //------------------------------------------------------------------------------
+//  bool UpdateSolverGoal(Integer id, Real newValue)
+//------------------------------------------------------------------------------
+/**
+ * Updates the targeter goals, for floating end point problems.
+ * 
+ * This default method just returns false.
+ * 
+ * @param id Id for the goal that is being reset.
+ * @param newValue The new goal value.
+ * 
+ * @return The ID used for this variable.
+ */
+bool Solver::UpdateSolverGoal(Integer id, Real newValue)
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 //  Solver::SolverState AdvanceState(void)
 //------------------------------------------------------------------------------
 /**

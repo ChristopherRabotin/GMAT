@@ -62,6 +62,7 @@ public:
     }
     
     virtual SolverState AdvanceState();
+    virtual bool        UpdateSolverGoal(Integer id, Real newValue);    
     
     /**
      * Derived classes implement this method to set object pointers and validate
@@ -105,7 +106,7 @@ public:
      * @return The ID used for this variable.
      */
     virtual Integer     SetSolverResults(Real *data, std::string name) = 0;
-
+    
     /**
      * Passes in the results obtained from a run in the solver loop.
      * 

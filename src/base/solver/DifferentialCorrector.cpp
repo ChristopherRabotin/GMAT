@@ -44,7 +44,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     ludMatrix               (NULL),
     useCentralDifferences   (false),
     initialized             (false),
-    solverTextFile          ("targeter.data"),
+    instanceNumber          (0),       // 0 indicated instance is not a clone
     solverTextFileID        (parameterCount),
     variableNamesID         (parameterCount+1),
     goalNamesID             (parameterCount+2),
@@ -53,6 +53,9 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
 {
     parameterCount += 5;
     // textFileMode = "Verbose";
+    solverTextFile = "targeter_";
+    solverTextFile += instanceName;
+    solverTextFile += ".data";
 }
 
 
@@ -85,6 +88,7 @@ DifferentialCorrector::DifferentialCorrector(const DifferentialCorrector &dc) :
     useCentralDifferences   (dc.useCentralDifferences),
     initialized             (false),
     solverTextFile          (dc.solverTextFile),
+    instanceNumber          (dc.instanceNumber),
     solverTextFileID        (dc.solverTextFileID),
     variableNamesID         (dc.variableNamesID),
     goalNamesID             (dc.goalNamesID),
@@ -117,8 +121,10 @@ DifferentialCorrector&
 //------------------------------------------------------------------------------
 GmatBase* DifferentialCorrector::Clone(void) const
 {
-   return (new DifferentialCorrector(*this));
+   GmatBase *clone = new DifferentialCorrector(*this);
+   return (clone);
 }
+
 
 // Access methods overriden from the base class
 
@@ -294,14 +300,24 @@ const StringArray& DifferentialCorrector::GetStringArrayParameter(
 }
 
 
+bool DifferentialCorrector::TakeAction(const std::string &action,  
+                                       const std::string &actionData)
+{
+   if (action == "IncrementInstanceCount")
+      ++instanceNumber;
+ 
+   return Solver::TakeAction(action, actionData);
+}
+
+
 /**
  * Derived classes use this method to pass in parameter data specific to
  * the algorithm implemented.
  * 
- * @param <data> An array of data appropriate to the variables used in the 
- *               algorithm.
- * @param <name> A label for the data parameter.  Defaults to the empty 
- *               string.
+ * @param data An array of data appropriate to the variables used in the 
+ *              algorithm.
+ * @param name A label for the data parameter.  Defaults to the empty 
+ *             string.
  * 
  * @return The ID used for the variable.
  */
@@ -323,7 +339,7 @@ Integer DifferentialCorrector::SetSolverVariables(Real *data, std::string name)
  * Derived classes use this method to pass in parameter data specific to
  * the algorithm implemented.
  * 
- * @param <id> The ID used for the variable.
+ * @param id The ID used for the variable.
  * 
  * @return The value used for this variable
  */
@@ -336,10 +352,10 @@ Real DifferentialCorrector::GetSolverVariable(Integer id)
 /**
  * Sets up the data fields used for the results of an iteration.
  * 
- * @param <data> An array of data appropriate to the results used in the 
- *               algorithm (for instance, tolerances for targeter goals).
- * @param <name> A label for the data parameter.  Defaults to the empty 
- *               string.
+ * @param data An array of data appropriate to the results used in the 
+ *             algorithm (for instance, tolerances for targeter goals).
+ * @param name A label for the data parameter.  Defaults to the empty 
+ *             string.
  * 
  * @return The ID used for this variable.
  */
@@ -355,10 +371,28 @@ Integer DifferentialCorrector::SetSolverResults(Real *data, std::string name)
 
 
 /**
+ * Updates the targeter goals, for floating end point targeting.
+ * 
+ * @param id Id for the goal that is being reset.
+ * @param newValue The new goal value.
+ * 
+ * @return The ID used for this variable.
+ */
+bool DifferentialCorrector::UpdateSolverGoal(Integer id, Real newValue)
+{
+   // Only update during nominal runs
+   if (currentState == NOMINAL) {
+      goal[id] = newValue;
+   }
+   return true;
+}
+
+
+/**
  * Passes in the results obtained from a run in the solver loop.
  * 
- * @param <id> The ID used for this result.
- * @param <value> The corresponding result.
+ * @param id The ID used for this result.
+ * @param value The corresponding result.
  */
 void DifferentialCorrector::SetResultValue(Integer id, Real value)
 {
@@ -372,7 +406,7 @@ void DifferentialCorrector::SetResultValue(Integer id, Real value)
 }
 
 
-bool DifferentialCorrector::Initialize(void)
+bool DifferentialCorrector::Initialize()
 {
     // Setup the variable data structures
     Integer localVariableCount = variableNames.size();
@@ -422,9 +456,12 @@ bool DifferentialCorrector::Initialize(void)
     
     // Prepare the text file for output
     if (solverTextFile != "") {
-        textFile.open(solverTextFile.c_str());
-        textFile.precision(16);
-        WriteToTextFile();
+       if (instanceNumber == 1)
+          textFile.open(solverTextFile.c_str());
+       else
+          textFile.open(solverTextFile.c_str(), std::ios::app);
+       textFile.precision(16);
+       WriteToTextFile();
     }
     
     // Allocate the LU arrays
@@ -700,44 +737,75 @@ void DifferentialCorrector::WriteToTextFile(void)
     StringArray::iterator current;
     Integer i, j;
     if (!initialized) {
-        // Variables and goals are not yet fully initialized, so the counts are 
-        // still 0.
-        Integer localVariableCount = variableNames.size(), 
-                localGoalCount = goalNames.size();
-        textFile << "********************************************************\n"
-                 << "*** Targeter Text File\n"
-                 << "*** \n"
-                 << "*** Using Differential Correction\n***\n";
-                 
-        // Write out the setup data
-        textFile << "*** " << localVariableCount << " variables\n*** "
-                 << localGoalCount << " goals\n***\n*** Variables:\n***    ";
-                 
-        // Iterate through the variables and goals, writing them to the file
-        for (current = variableNames.begin(), i = 0; 
-             current != variableNames.end(); ++current) 
-        {
-             textFile << *current << "\n***    ";
-        }
-        
-        textFile << "\n*** Goals:\n***    ";
-        
-        for (current = goalNames.begin(), i = 0; 
-             current != goalNames.end(); ++current) 
-        {
-             textFile << *current << "\n***    ";
-        }
-        
-        textFile << "\n****************************" 
-                 << "****************************\n"
-                 << std::endl;
+//        // Variables and goals are not yet fully initialized, so the counts are 
+//        // still 0.
+//        Integer localVariableCount = variableNames.size(), 
+//                localGoalCount = goalNames.size();
+//        textFile << "********************************************************\n"
+//                 << "*** Targeter Text File\n"
+//                 << "*** \n"
+//                 << "*** Using Differential Correction\n***\n";
+//                 
+//        // Write out the setup data
+//        textFile << "*** " << localVariableCount << " variables\n*** "
+//                 << localGoalCount << " goals\n***\n*** Variables:\n***    ";
+//                 
+//        // Iterate through the variables and goals, writing them to the file
+//        for (current = variableNames.begin(), i = 0; 
+//             current != variableNames.end(); ++current) 
+//        {
+//             textFile << *current << "\n***    ";
+//        }
+//        
+//        textFile << "\n*** Goals:\n***    ";
+//        
+//        for (current = goalNames.begin(), i = 0; 
+//             current != goalNames.end(); ++current) 
+//        {
+//             textFile << *current << "\n***    ";
+//        }
+//        
+//        textFile << "\n****************************" 
+//                 << "****************************\n"
+//                 << std::endl;
     }
     else {
         switch (currentState) {
             case INITIALIZING:
                 // This state is basically a "paused state" used for the Target
                 // command to finalize the initial data for the variables and 
-                // goals.  No output is written here.
+                // goals.  All that is written here is the header information.
+               {
+                  Integer localVariableCount = variableNames.size(), 
+                          localGoalCount = goalNames.size();
+                  textFile << "********************************************************\n"
+                           << "*** Targeter Text File\n"
+                           << "*** \n"
+                           << "*** Using Differential Correction\n***\n";
+                           
+                  // Write out the setup data
+                  textFile << "*** " << localVariableCount << " variables\n*** "
+                           << localGoalCount << " goals\n***\n*** Variables:\n***    ";
+                           
+                  // Iterate through the variables and goals, writing them to the file
+                  for (current = variableNames.begin(), i = 0; 
+                       current != variableNames.end(); ++current) 
+                  {
+                       textFile << *current << "\n***    ";
+                  }
+                 
+                  textFile << "\n*** Goals:\n***    ";
+                 
+                  for (current = goalNames.begin(), i = 0; 
+                       current != goalNames.end(); ++current) 
+                  {
+                       textFile << *current << "\n***    ";
+                  }
+                 
+                  textFile << "\n****************************" 
+                           << "****************************\n"
+                           << std::endl;
+                }
                 break;
             
             case NOMINAL:
@@ -831,7 +899,9 @@ void DifferentialCorrector::WriteToTextFile(void)
                      current != goalNames.end(); ++current) 
                 {
                      textFile << *current << "  Desired: " << goal[i] 
-                              << " Achieved: " << nominal[i] << "\n   ";
+                              << " Achieved: " << nominal[i] 
+                              << "\n   Tolerance: " << tolerance[i]
+                              << "\n   ";
                      ++i;
                 }
                 
@@ -848,6 +918,7 @@ void DifferentialCorrector::WriteToTextFile(void)
                          << "\n****************************" 
                          << "****************************\n"
                          << std::endl;
+                         
                 break;
             
             case ITERATING:     // Intentional fall through

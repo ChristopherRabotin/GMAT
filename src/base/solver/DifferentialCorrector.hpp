@@ -65,11 +65,15 @@ public:
                                            const std::string &value);
     virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
+    virtual bool        TakeAction(const std::string &action,  
+                                  const std::string &actionData = "");
 
+    
     // Solver interfaces used to talk to the Vary and Achieve commands
     virtual Integer     SetSolverVariables(Real *data, std::string name);
     virtual Real        GetSolverVariable(Integer id);
     virtual Integer     SetSolverResults(Real *data, std::string name);
+    virtual bool        UpdateSolverGoal(Integer id, Real newValue);
     virtual void        SetResultValue(Integer id, Real value);
 
 protected:
@@ -123,6 +127,9 @@ protected:
     // Reporting parameters
     /// Name of the targeter text file.  An empty string turns the file off.
     std::string                 solverTextFile;
+    /// Used to indicate if data should append to the text file
+    Integer                     instanceNumber;
+    
     /// List of variables
     StringArray                 variableNames;
     /// List of goals
