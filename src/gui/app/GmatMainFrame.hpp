@@ -76,6 +76,8 @@ private:
 
     void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event));
     void OnScriptBuild(wxCommandEvent& WXUNUSED(event));
+
+    void OnTrajectoryFile(wxCommandEvent& WXUNUSED(event));
     
     // IDs for the controls and the menu commands
     enum

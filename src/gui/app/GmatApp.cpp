@@ -95,15 +95,15 @@ bool GmatApp::OnInit()
         wxSize size = ((wxUSE_UNIX != 1) ? wxDefaultSize : wxSize(800, 600));
         
         // create the main application window
-        GmatMainFrame *mainFrame =
+        theMainFrame =
             new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE);
 
         // and show it (the frames, unlike simple controls, are not shown when
         // created initially)
-        mainFrame->CenterOnScreen(wxBOTH);
-        mainFrame->Show(true);
+        theMainFrame->CenterOnScreen(wxBOTH);
+        theMainFrame->Show(true);
         
         status = true;
     }
@@ -230,7 +230,7 @@ wxMDIChildFrame* GmatApp::CreateMdiChildFrame(wxDocument *doc, wxView *view, boo
     wxDocMDIChildFrame *subframe =
         new wxDocMDIChildFrame(doc, view, GetMdiMainFrame(), -1, _T("Child Frame"),
                                //wxPoint(10, 10), wxSize(500, 400),
-                               wxPoint(10, 10), wxSize(width, height),
+                               wxPoint(0, 0), wxSize(width, height),
                                wxDEFAULT_FRAME_STYLE |
                                wxNO_FULL_REPAINT_ON_RESIZE);
     
@@ -263,6 +263,7 @@ wxMDIChildFrame* GmatApp::CreateMdiChildFrame(wxDocument *doc, wxView *view, boo
     {
         scriptMenu = new wxMenu;
         scriptMenu->Append(MENU_SCRIPT_BUILD_OBJECT, _T("&Build Object"));
+        scriptMenu->Append(MENU_SCRIPT_BUILD_AND_RUN, _T("&Build and Run"));
         scriptMenu->Append(MENU_SCRIPT_RUN, _T("&Run"));
     }
     
@@ -352,7 +353,7 @@ bool MdiTextEditView::OnCreate(wxDocument *doc, long WXUNUSED(flags))
     textsw = new MdiTextSubFrame(this, frame, wxPoint(0, 0), wxSize(width, height),
                                  wxTE_MULTILINE);
     frame->SetTitle(_T("MdiTextEditView"));
-    
+
 #ifdef __X__
     // X seems to require a forced resize
     int x, y;

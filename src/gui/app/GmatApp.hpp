@@ -21,8 +21,9 @@
 
 #include "gmatwxdefs.hpp"
 #include "Moderator.hpp"
-#include "wx/docview.h"   // for wxDocument
+#include "GmatMainFrame.hpp"
 
+#include "wx/docview.h"   // for wxDocument
 class wxDocManager;
 
 class GmatApp : public wxApp
@@ -47,8 +48,9 @@ public:
 protected:
 
 private:
+    
     Moderator *theModerator;
-
+    GmatMainFrame *theMainFrame;
 };
 
 DECLARE_APP(GmatApp)

@@ -33,6 +33,7 @@
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
+#include "MdiGlPlotData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -53,6 +54,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
     EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
     EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
+    EVT_MENU(MENU_ORBIT_FILES_TRAJ_FILE, GmatMainFrame::OnTrajectoryFile)    
 END_EVENT_TABLE()
 
 //------------------------------
@@ -119,6 +121,9 @@ GmatMainFrame::~GmatMainFrame()
 {
     if (GmatAppData::GetMessageWindow() != NULL)
         GmatAppData::GetMessageWindow()->Close();
+
+    if (MdiPlot::mdiParentGlFrame != NULL)
+        MdiPlot::mdiParentGlFrame->Close();
 }
 
 //-------------------------------
@@ -521,4 +526,36 @@ void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
 {
     bool status = GmatAppData::GetGuiInterpreter()->
         SaveScript("$gmattempscript$.script");
+}
+
+
+//------------------------------------------------------------------------------
+// void OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles opening trajectory file and plot.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnTrajectoryFile(wxCommandEvent& WXUNUSED(event))
+{
+    if (MdiPlot::mdiParentGlFrame == NULL)
+    {
+        MdiPlot::mdiParentGlFrame = 
+            new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
+                                 wxPoint(300, 200), wxSize(600, 500),
+                                 wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+    }
+    
+    // Give it an icon
+#ifdef __WXMSW__
+    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
+#else
+    MdiPlot::mdiParentGlFrame->SetIcon(wxIcon( mondrian_xpm ));
+#endif
+    
+    MdiPlot::mdiParentGlFrame->Show(TRUE);
+    //SetTopWindow(MdiPlot::mdiParentGlFrame);
+
 }
