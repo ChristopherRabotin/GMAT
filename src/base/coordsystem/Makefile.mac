@@ -1,0 +1,19 @@
+# Project:    GMAT
+# Module:     Makefile.mac for foundation directory 
+# Created:    Wendy Shoan
+# Date:       2004/12/07
+#
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+#SRC =	AxisSystem.cpp CoordinateBase.cpp CoordinateConverter.cpp \
+#	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
+#	InertialAxes.cpp
+SRC =	AxisSystem.cpp CoordinateBase.cpp CoordinateConverter.cpp \
+	CoordinateSystem.cpp CoordinateSystemException.cpp 
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
