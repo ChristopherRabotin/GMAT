@@ -131,6 +131,7 @@ private:
     Integer degreeID;
     
     bool useSRP;
+    bool useDragForce;
     bool isForceModelChanged;
     bool isIntegratorChanged;
     

@@ -75,7 +75,6 @@ END_EVENT_TABLE()
 PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString &propName)
     : wxPanel(parent)
 {
-MessageInterface::ShowMessage("Entering PropagationConfigPanel()\n");
     propSetupName = std::string(propName.c_str());
     Initialize();
     Setup(this);
@@ -86,7 +85,6 @@ MessageInterface::ShowMessage("Entering PropagationConfigPanel()\n");
 
 void PropagationConfigPanel::Initialize()
 {  
-MessageInterface::ShowMessage("Entering Initialize()\n");
     // Default integrator values
     newPropName      = "";
     thePropSetup     = NULL;
@@ -101,6 +99,7 @@ MessageInterface::ShowMessage("Entering Initialize()\n");
     numOfMagFields      = 1; 
     isForceModelChanged = false;
     useSRP              = false;
+    useDragForce        = false;
     numOfForces         = 0;
     theForceModel       = NULL;
     theSRP              = NULL;
@@ -120,7 +119,6 @@ MessageInterface::ShowMessage("Entering Initialize()\n");
     
         if (thePropSetup != NULL)
         {
-MessageInterface::ShowMessage("Entering if (thePropSetup != NULL)\n");
             thePropagator = thePropSetup->GetPropagator();            
             theForceModel = thePropSetup->GetForceModel();
             numOfForces   = thePropSetup->GetNumForces();
@@ -129,21 +127,15 @@ MessageInterface::ShowMessage("Entering if (thePropSetup != NULL)\n");
             
             for (Integer i = 0; i < numOfForces; i++)
             {
-MessageInterface::ShowMessage("Entering for (Integer i = 0; i < numOfForces; i++)\n");
                 force = theForceModel->GetForce(i);
                 //MessageInterface::ShowMessage("forcetype=%s\n", force->GetTypeName().c_str());
                 if (force->GetTypeName() == "PointMassForce")
                 {
-MessageInterface::ShowMessage("if (force->GetTypeName() == 'PointMassForce')\n");
                     thePMForces.push_back((PointMassForce *)force);
-MessageInterface::ShowMessage("thePMForces.push_back((PointMassForce *)force);\n");                
                     theBodies.push_back(thePMForces[i]->GetBody());
-MessageInterface::ShowMessage("theBodies.push_back(thePMForces[i]->GetBody());\n");
                     //primaryBodiesArray.Add(theBodies[i]->GetName().c_str());
                     primaryBodiesArray.Add("Earth");
-MessageInterface::ShowMessage("primaryBodiesArray.Add('Earth');\n");
                     primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());
-MessageInterface::ShowMessage("primaryBodiesGravityArray.Add(thePMForces[i]->GetTypeName().c_str());\n");
                     degreeID = theBodies[i]->GetParameterID("Degree");
                     orderID = theBodies[i]->GetParameterID("Order");
                     degreeArray.Add(wxVariant((long)theBodies[i]->GetIntegerParameter(degreeID)));
@@ -151,32 +143,26 @@ MessageInterface::ShowMessage("primaryBodiesGravityArray.Add(thePMForces[i]->Get
                 }
                 else if (force->GetTypeName() == "SolarRadiationPressure")
                 {
-MessageInterface::ShowMessage("Entering if (force->GetTypeName() == 'SolarRadiationPressure')\n");
                     useSRP = true;
                     theSRP = (SolarRadiationPressure*)force;
                 }
                 else if (force->GetTypeName() == "DragForce")
                 {
+                    useDragForce = true;
                     theDragForce = (DragForce*)force;
                     Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
                     atmosModelString = theDragForce->GetStringParameter(atmosTypeID).c_str();
                 }
             }
-MessageInterface::ShowMessage("Exited for loop\n");
 
             if (primaryBodiesArray.IsEmpty())
             {
-MessageInterface::ShowMessage("Entering if (primaryBodiesArray.IsEmpty())\n");
                StringArray ss = theSolarSystem->GetBodiesInUse();
-MessageInterface::ShowMessage("StringArray ss = theSolarSystem->GetBodiesInUse();\n");
                for (Integer i = 0; i < (Integer)ss.size(); i++)
                {
                   primaryBodiesArray.Add(ss[i].c_str());
-MessageInterface::ShowMessage("primaryBodiesGravityArray.Add('NULL');\n");
                   primaryBodiesGravityArray.Add("NULL");
-MessageInterface::ShowMessage("StringArray ss = theSolarSystem->GetBodiesInUse();\n");
                }
-MessageInterface::ShowMessage("primaryBodiesGravityArray[i] = 'NULL';\n");
             }
             primaryBodyString = primaryBodiesArray.Item(0).c_str();
             savedBodiesArray = primaryBodiesArray;
@@ -197,7 +183,6 @@ MessageInterface::ShowMessage("primaryBodiesGravityArray[i] = 'NULL';\n");
 
 void PropagationConfigPanel::Setup(wxWindow *parent)
 {              
-MessageInterface::ShowMessage("Entering Setup()\n");
     // wxStaticText
     integratorStaticText =
         new wxStaticText( parent, ID_TEXT, wxT("Integrator Type"),
@@ -422,7 +407,6 @@ MessageInterface::ShowMessage("Entering Setup()\n");
     
     // waw: future implementation
     helpButton->Enable(false);
-    srpCheckBox->Enable(false);
     
     parent->SetAutoLayout(true);
     parent->SetSizer( boxSizer1 );
@@ -432,7 +416,6 @@ MessageInterface::ShowMessage("Entering Setup()\n");
 
 void PropagationConfigPanel::LoadData()
 {
-MessageInterface::ShowMessage("Entering LoadData()\n");
     std::string propType = thePropagator->GetTypeName();
         
     Integer typeId = 0;
@@ -447,9 +430,7 @@ MessageInterface::ShowMessage("Entering LoadData()\n");
     integratorComboBox->SetSelection(typeId);
     integratorString = integratorArray[typeId]; 
     DisplayIntegratorData(false);
-MessageInterface::ShowMessage("DisplayIntegratorData(false);\n");
     DisplayForceData();
-MessageInterface::ShowMessage("DisplayForceData();\n");
 }
 
 void PropagationConfigPanel::SaveData()
@@ -467,7 +448,7 @@ void PropagationConfigPanel::SaveData()
         
         thePropSetup->SetPropagator(newProp);
     }
-    
+
     //------------------------
     // Saving the force model
     //------------------------
@@ -504,25 +485,62 @@ void PropagationConfigPanel::SaveData()
         }    
     }
     // the drag force data
-    Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
-    if ( atmosModelString.CmpNoCase("Exponential") == 0 )
+    if (useDragForce)
     {
-        // future implementation
-        //theDragForce->SetStringParameter(atmosTypeID, "Exponential");
-        //theForceModel->AddForce(theDragForce);
+        Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
+        if ( atmosModelString.CmpNoCase("Exponential") == 0 )
+        {
+            // future implementation
+            //theDragForce->SetStringParameter(atmosTypeID, "Exponential");
+            //theForceModel->AddForce(theDragForce);
+        }
+        else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
+        {
+            theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
+            theForceModel->AddForce(theDragForce);
+        }
     }
-    else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
+    else
     {
-        theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
-        theForceModel->AddForce(theDragForce);
+        PhysicalModel *force;
+            
+        for (Integer i = 0; i < numOfForces; i++)
+        {
+            force = theForceModel->GetForce(i);
+           
+            if (force->GetTypeName() == "DragForce")
+            {
+                useDragForce = false;
+                wxString forceName = theSRP->GetName().c_str();
+                theForceModel->DeleteForce(forceName.c_str());
+            }
+        }    
     }
+    
     // the srp data
     if (useSRP)
     {
         if (theSRP == NULL)
-            theSRP = (SolarRadiationPressure *)theGuiInterpreter->CreatePhysicalModel("SolarRadiationPressure", "");
-            
+        {
+            theSRP = (SolarRadiationPressure *)theGuiInterpreter->CreatePhysicalModel("SolarRadiationPressure", "SRP");
+        }
         theForceModel->AddForce(theSRP);
+   }
+   else
+   {
+       PhysicalModel *force;
+       
+       for (Integer i = 0; i < numOfForces; i++)
+       {
+           force = theForceModel->GetForce(i);
+           
+           if (force->GetTypeName() == "SolarRadiationPressure")
+           {
+              useSRP = false;
+              wxString forceName = theSRP->GetName().c_str();
+              theForceModel->DeleteForce(forceName.c_str());
+           }
+       }
    }
    // save forces to the prop setup
    if (theForceModel != NULL)
@@ -580,15 +598,10 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 void PropagationConfigPanel::DisplayForceData()
 {    
     DisplayPrimaryBodyData();
-MessageInterface::ShowMessage("DisplayPrimaryBodyData();\n");
     DisplayGravityFieldData();
-MessageInterface::ShowMessage("DisplayGravityFieldData();\n");
     DisplayAtmosphereModelData();
-MessageInterface::ShowMessage("DisplayAtmosphereModelData();\n");
     DisplayMagneticFieldData();
-MessageInterface::ShowMessage("DisplayMagneticFieldData();\n");
     DisplaySRPData();
-MessageInterface::ShowMessage("DisplaySRPData();\n");
 }
 
 void PropagationConfigPanel::DisplayPrimaryBodyData()
@@ -623,22 +636,17 @@ void PropagationConfigPanel::DisplayGravityFieldData()
             else
             {
                 gravityTypeComboBox->SetValue("None");
-MessageInterface::ShowMessage("gravityTypeComboBox->SetValue('None');\n");
                 gravityDegreeTextCtrl->Enable(true);
-MessageInterface::ShowMessage("gravityDegreeTextCtrl->Enable(true);\n");
                 gravityOrderTextCtrl->Enable(true);
-MessageInterface::ShowMessage("gravityOrderTextCtrl->Enable(true);\n");
                 
                 if (degreeArray.IsEmpty())
                    gravityDegreeTextCtrl->SetValue("0");
                 else
                    gravityDegreeTextCtrl->SetValue(degreeArray.Item(i));
-MessageInterface::ShowMessage("if (degreeArray.IsEmpty())\n");
                 if (orderArray.IsEmpty())
                    gravityOrderTextCtrl->SetValue("0");
                 else
                    gravityOrderTextCtrl->SetValue(orderArray.Item(i));
-MessageInterface::ShowMessage("if (orderArray.IsEmpty())\n");
             }
         }
     }       
@@ -726,6 +734,15 @@ void PropagationConfigPanel::OnGravitySelection()
 void PropagationConfigPanel::OnAtmosphereSelection()
 {
     atmosModelString = atmosComboBox->GetStringSelection();
+    if ( ( atmosModelString.CmpNoCase("Exponential") == 0 ) ||
+         ( atmosModelString.CmpNoCase("MSISE90") == 0 ) )
+    {
+        useDragForce = true;
+    }
+    else if ( atmosModelString.CmpNoCase("None") == 0 )
+    {
+        useDragForce = false;
+    }
     applyButton->Enable(true);
     isForceModelChanged = true;
 }
@@ -964,6 +981,7 @@ void PropagationConfigPanel::OnSetupButton()
         MSISE90Dialog dragDlg(this, theDragForce);
         dragDlg.ShowModal();
         theDragForce = dragDlg.GetForce();
+        useDragForce = true;
         applyButton->Enable(true);
     }
 }
