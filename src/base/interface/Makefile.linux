@@ -1,0 +1,30 @@
+# Makefile for GMAT Interface library
+# Initial Version - D. Conway - 2004/10/18
+
+#HEADERS = -I../include -I../foundation -I../util
+
+HEADERS = -I../include -I../foundation -I../executive -I../spacecraft \
+          -I../forcemodel -I../propagator -I../subscriber -I../command \
+          -I../solarsys -I../factory -I../stopcond -I../interpreter \
+          -I../util -I../interpolator -I../parameter -I../configs \
+          -I../refframe -I../burn -I../solver -I../function
+
+OBJECTS = GmatInterface.o \
+          MatlabInterface.o
+
+all: libInterface
+	mkdir -p ../lib
+	mv libInterface.a ../lib
+
+clean:
+	rm -f *.o
+	rm -f ../lib/libInterface.a
+
+libInterface : ../lib/libInterface.a
+
+.cpp.o:
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c $<
+
+../lib/libInterface.a : $(OBJECTS)
+	ar rs libInterface.a $(OBJECTS)
+	ranlib libInterface.a
