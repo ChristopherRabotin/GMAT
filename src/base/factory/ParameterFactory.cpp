@@ -20,21 +20,29 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "ParameterFactory.hpp"
-#include "ElapsedDaysParam.hpp" 
-#include "ElapsedSecsParam.hpp" 
-#include "CurrentA1MjdParam.hpp"
-#include "CartXParam.hpp"
-#include "CartYParam.hpp"
-#include "CartZParam.hpp"
-#include "CartVxParam.hpp"
-#include "CartVyParam.hpp"
-#include "CartVzParam.hpp"
-#include "KepSmaParam.hpp"
-#include "KepEccParam.hpp"
-#include "KepIncParam.hpp"
-#include "KepRaanParam.hpp"
-#include "KepAopParam.hpp"
-#include "KepTaParam.hpp"
+
+#include "TimeParameters.hpp"
+#include "CartesianParameters.hpp"
+#include "KeplerianParameters.hpp"
+#include "SphericalParameters.hpp"
+#include "AngularParameters.hpp"
+
+//loj: 3/18/04 grouped relevant classes into one file
+//  #include "ElapsedDaysParam.hpp" 
+//  #include "ElapsedSecsParam.hpp" 
+//  #include "CurrentA1MjdParam.hpp"
+//  #include "CartXParam.hpp"
+//  #include "CartYParam.hpp"
+//  #include "CartZParam.hpp"
+//  #include "CartVxParam.hpp"
+//  #include "CartVyParam.hpp"
+//  #include "CartVzParam.hpp"
+//  #include "KepSmaParam.hpp"
+//  #include "KepEccParam.hpp"
+//  #include "KepIncParam.hpp"
+//  #include "KepRaanParam.hpp"
+//  #include "KepAopParam.hpp"
+//  #include "KepTaParam.hpp"
 
 #include "SMA.hpp"
 #include "Ecc.hpp"
@@ -60,42 +68,66 @@
 Parameter* ParameterFactory::CreateParameter(std::string ofType,
                                              std::string withName)
 {
-   if (ofType == "ElapsedDaysParam")
-      return new ElapsedDaysParam(withName);
-   if (ofType == "ElapsedSecsParam")
-      return new ElapsedDaysParam(withName);
-   if (ofType == "CurrentA1MjdParam")
-      return new CurrentA1MjdParam(withName);
-   if (ofType == "CartXParam")
-      return new CartXParam(withName);
-   if (ofType == "CartYParam")
-      return new CartYParam(withName);
-   if (ofType == "CartZParam")
-      return new CartZParam(withName);
-   if (ofType == "CartVxParam")
-      return new CartVxParam(withName);
-   if (ofType == "CartVyParam")
-      return new CartVyParam(withName);
-    if (ofType == "CartVzParam")
-      return new CartVzParam(withName);
-    if (ofType == "KepSmaParam")
-      return new KepSmaParam(withName);
-    if (ofType == "KepEccParam")
-      return new KepEccParam(withName);
-    if (ofType == "KepIncParam")
-      return new KepIncParam(withName);
-    if (ofType == "KepRaanParam")
-      return new KepRaanParam(withName);
-    if (ofType == "KepAopParam")
-      return new KepAopParam(withName);
-    if (ofType == "KepTaParam")
-      return new KepTaParam(withName);
+    // Time parameters
+    if (ofType == "ElapsedDays")
+        return new ElapsedDays(withName);
+    if (ofType == "ElapsedSecs")
+        return new ElapsedSecs(withName);
+    if (ofType == "CurrA1Mjd")
+        return new CurrA1Mjd(withName);
+
+    // Cartesian paramters
+    if (ofType == "CartX")
+        return new CartX(withName);
+    if (ofType == "CartY")
+        return new CartY(withName);
+    if (ofType == "CartZ")
+        return new CartZ(withName);
+    if (ofType == "CartVx")
+        return new CartVx(withName);
+    if (ofType == "CartVy")
+        return new CartVy(withName);
+    if (ofType == "CartVz")
+        return new CartVz(withName);
+
+    // Keplerian parameters
+    if (ofType == "KepSMA")
+        return new KepSMA(withName);
+    if (ofType == "KepEcc")
+        return new KepEcc(withName);
+    if (ofType == "KepInc")
+        return new KepInc(withName);
+    if (ofType == "KepRAAN")
+        return new KepRAAN(withName);
+    if (ofType == "KepAOP")
+        return new KepAOP(withName);
+    if (ofType == "KepTA")
+        return new KepTA(withName);
+    if (ofType == "KepMA")
+        return new KepMA(withName);
+    if (ofType == "KepMM")
+        return new KepMM(withName);
+    if (ofType == "VelApoapsis")
+        return new VelApoapsis(withName);
+    if (ofType == "VelPeriapsis")
+        return new VelPeriapsis(withName);
     if (ofType == "SMA")
-      return new SMA(withName);
+        return new SMA(withName);
     if (ofType == "Ecc")
-      return new Ecc(withName);
+        return new Ecc(withName);
     if (ofType == "Inc")
-      return new Inc(withName);
+        return new Inc(withName);
+
+    // Spherical parameters
+    if (ofType == "SphRA")
+        return new SphRA(withName);
+    if (ofType == "SphDec")
+        return new SphDec(withName);
+    
+    // Angular parameters
+    if (ofType == "SemilatusRectum")
+        return new SemilatusRectum(withName);
+
     // add others here
     else
         return NULL;
@@ -112,30 +144,46 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
  *
  */
 //------------------------------------------------------------------------------
-ParameterFactory::ParameterFactory() :
-Factory(Gmat::PARAMETER)
+ParameterFactory::ParameterFactory()
+    : Factory(Gmat::PARAMETER)
 {
-   if (creatables.empty())
-   {
-      creatables.push_back("ElapsedDaysParam");
-      creatables.push_back("ElapsedSecsParam");
-      creatables.push_back("CurrentA1MjdParam");
-      creatables.push_back("CartXParam");
-      creatables.push_back("CartYParam");
-      creatables.push_back("CartZParam");
-      creatables.push_back("CartVxParam");
-      creatables.push_back("CartVyParam");
-      creatables.push_back("CartVzParam");
-      creatables.push_back("KepSmaParam");
-      creatables.push_back("KepEccParam");
-      creatables.push_back("KepIncParam");
-      creatables.push_back("KepRaanParam");
-      creatables.push_back("KepAopParam");
-      creatables.push_back("KepTaParam");
-      creatables.push_back("SMA");
-      creatables.push_back("Ecc");
-      creatables.push_back("Inc");
-   }
+    if (creatables.empty())
+    {
+        // Time parameters
+        creatables.push_back("ElapsedDays");
+        creatables.push_back("ElapsedSecs");
+        creatables.push_back("CurrA1Mjd");
+
+        // Cartesian parameters
+        creatables.push_back("CartX");
+        creatables.push_back("CartY");
+        creatables.push_back("CartZ");
+        creatables.push_back("CartVx");
+        creatables.push_back("CartVy");
+        creatables.push_back("CartVz");
+
+        // Keplerian parameters
+        creatables.push_back("KepSMA");
+        creatables.push_back("KepEcc");
+        creatables.push_back("KepInc");
+        creatables.push_back("KepRAAN");
+        creatables.push_back("KepAOP");
+        creatables.push_back("KepTA");
+        creatables.push_back("SMA");
+        creatables.push_back("Ecc");
+        creatables.push_back("Inc");
+        creatables.push_back("KepMA");
+        creatables.push_back("KepMM");
+        creatables.push_back("VelApoapsis");
+        creatables.push_back("VelPeriapsis");
+
+        // Spherical parameters
+        creatables.push_back("SphRA");
+        creatables.push_back("SphDec");
+
+        // Angular parameters
+        creatables.push_back("SemilatusRectum");
+    }
 }
 
 //------------------------------------------------------------------------------
