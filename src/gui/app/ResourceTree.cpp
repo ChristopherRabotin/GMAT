@@ -98,9 +98,11 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     mNumDiffCorr = 0;
     mNumVariable = 0;
 
-    theGuiManager->UpdateObject();
-    theGuiManager->UpdateSpacecraft();
-    theGuiManager->UpdateParameter();
+    theGuiManager->UpdateAll();
+    //loj: 2/27/04 commented out
+    //theGuiManager->UpdateObject();
+    //theGuiManager->UpdateSpacecraft();
+    //theGuiManager->UpdateParameter();
 }
 
 //------------------------------------------------------------------------------
@@ -961,11 +963,18 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
   
     Burn* burn =
         theGuiInterpreter->CreateBurn("ImpulsiveBurn", std::string(name.c_str()));
-    
-    this->AppendItem(item, name, GmatTree::ICON_BURN, -1,
-                     new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
 
-    Expand(item);
+    if (burn != NULL)
+    {
+        this->AppendItem(item, name, GmatTree::ICON_BURN, -1,
+                         new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
+
+        Expand(item);
+    }
+    else
+    {
+        MessageInterface::ShowMessage("ResourceTree::OnAddImpulsiveBurn() burn is NULL\n");
+    }
 }
 
 //------------------------------------------------------------------------------
