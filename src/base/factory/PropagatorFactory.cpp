@@ -20,14 +20,14 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "PropagatorFactory.hpp"
-#include "RungeKutta89.hpp"             // for RungeKutta89 class
-#include "DormandElMikkawyPrince68.hpp" // for DormandElMikkawyPrince68 class
-#include "RungeKuttaFehlberg56.hpp"     // for RungeKuttaFehlberg56 class
-#include "PrinceDormand45.hpp"          // for PrinceDormand45 class
-#include "PrinceDormand78.hpp"          // for PrinceDormand78 class
-#include "AdamsBashforthMoulton.hpp"     // for AdamsBashforthMoulton class
-#include "BulirschStoer.hpp"            // for BulirschStoer class
-// add others here for future builds
+#include "RungeKutta89.hpp"
+#include "DormandElMikkawyPrince68.hpp" 
+#include "RungeKuttaFehlberg56.hpp" 
+#include "PrinceDormand45.hpp" 
+#include "PrinceDormand78.hpp" 
+#include "AdamsBashforthMoulton.hpp"
+#include "BulirschStoer.hpp"
+/// @todo add others here for future builds
 
 //---------------------------------
 //  public methods
@@ -41,9 +41,6 @@
  *
  * @param <ofType> the Propagator object to create and return.
  * @param <withName> the name to give the newly-created Propagator object.
- *
- * @note As of 2003/10/14, we are ignoring the withName parameter.  Use of this
- *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
 Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
@@ -63,7 +60,7 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
       return new DormandElMikkawyPrince68(withName);
    if (ofType == "RungeKuttaFehlberg56")
       return new RungeKuttaFehlberg56(withName);
-   // add others here
+   /// @todo add others here as needed
    else
       return NULL;
 }
@@ -79,8 +76,9 @@ Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
  *
  */
 //------------------------------------------------------------------------------
-PropagatorFactory::PropagatorFactory() :
-Factory(Gmat::PROPAGATOR)
+PropagatorFactory::PropagatorFactory() 
+   :
+   Factory(Gmat::PROPAGATOR)
 {
    if (creatables.empty())
    {
@@ -105,13 +103,14 @@ Factory(Gmat::PROPAGATOR)
  *
  */
 //------------------------------------------------------------------------------
-PropagatorFactory::PropagatorFactory(StringArray createList) :
-Factory(createList, Gmat::PROPAGATOR)
+PropagatorFactory::PropagatorFactory(StringArray createList) 
+   :
+   Factory(createList, Gmat::PROPAGATOR)
 {
 }
 
 //------------------------------------------------------------------------------
-//  PropagatorFactory(const PropagatorFactory& fact)
+//  PropagatorFactory(const PropagatorFactory &fact)
 //------------------------------------------------------------------------------
 /**
    * This method creates an object of the class PropagatorFactory 
@@ -120,14 +119,15 @@ Factory(createList, Gmat::PROPAGATOR)
    * @param <fact> the factory object to copy to "this" factory.
    */
 //------------------------------------------------------------------------------
-PropagatorFactory::PropagatorFactory(const PropagatorFactory& fact) :
-Factory(fact)
+PropagatorFactory::PropagatorFactory(const PropagatorFactory &fact) 
+   :
+   Factory(fact)
 {
 
 }
 
 //------------------------------------------------------------------------------
-//  PropagatorFactory& operator= (const PropagatorFactory& fact)
+//  PropagatorFactory& operator= (const PropagatorFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the PropagatorFactory base class.
@@ -138,7 +138,7 @@ Factory(fact)
  * @return "this" PropagatorFactory with data of input factory fact.
  */
 //------------------------------------------------------------------------------
-PropagatorFactory& PropagatorFactory::operator= (const PropagatorFactory& fact)
+PropagatorFactory& PropagatorFactory::operator= (const PropagatorFactory &fact)
 {
    Factory::operator=(fact);
    return *this;

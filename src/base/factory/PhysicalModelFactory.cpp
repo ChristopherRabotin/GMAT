@@ -20,10 +20,10 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "PhysicalModelFactory.hpp"
-#include "PointMassForce.hpp"   // for PointMassForce class
-#include "SolarRadiationPressure.hpp" // for SolarRadiationPressure class
-#include "DragForce.hpp"  // for DragForce class
-#include "GravityField.hpp"  // for DragForce class
+#include "PointMassForce.hpp"
+#include "SolarRadiationPressure.hpp"
+#include "DragForce.hpp" 
+#include "GravityField.hpp" 
 
 
 //---------------------------------
@@ -34,7 +34,8 @@
 //  CreatePhysicalModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates and returns an object of the requested PhysicalModel class
+ * This method creates and returns an object of the requested PhysicalModel 
+ * class.
  *
  * @param <ofType> the PhysicalModel object to create and return.
  * @param <withName> the name to give the newly-created PhysicalModel object.
@@ -43,8 +44,9 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(const std::string &ofType,
-                                                         const std::string &withName)
+PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(
+                                     const std::string &ofType,
+                                     const std::string &withName)
 {
    if (ofType == "PointMassForce")
        return new PointMassForce(withName);
@@ -68,8 +70,9 @@ PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(const std::string &ofTy
  *
  */
 //------------------------------------------------------------------------------
-PhysicalModelFactory::PhysicalModelFactory() :
-Factory(Gmat::PHYSICAL_MODEL)
+PhysicalModelFactory::PhysicalModelFactory() 
+   :
+   Factory(Gmat::PHYSICAL_MODEL)
 {
    if (creatables.empty())
    {
@@ -91,13 +94,14 @@ Factory(Gmat::PHYSICAL_MODEL)
  *
  */
 //------------------------------------------------------------------------------
-PhysicalModelFactory::PhysicalModelFactory(StringArray createList) :
-Factory(createList,Gmat::PHYSICAL_MODEL)
+PhysicalModelFactory::PhysicalModelFactory(StringArray createList) 
+   :
+   Factory(createList,Gmat::PHYSICAL_MODEL)
 {
 }
 
 //------------------------------------------------------------------------------
-//  PhysicalModelFactory(const PhysicalModelFactory& fact)
+//  PhysicalModelFactory(const PhysicalModelFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the class PhysicalModelFactory
@@ -106,13 +110,14 @@ Factory(createList,Gmat::PHYSICAL_MODEL)
  * @param <fact> the factory object to copy to "this" factory.
  */
 //------------------------------------------------------------------------------
-PhysicalModelFactory::PhysicalModelFactory(const PhysicalModelFactory& fact) :
-Factory(fact)
+PhysicalModelFactory::PhysicalModelFactory(const PhysicalModelFactory &fact) 
+   :
+   Factory(fact)
 {
 }
 
 //------------------------------------------------------------------------------
-//  PhysicalModelFactory& operator= (const PhysicalModelFactory& fact)
+//  PhysicalModelFactory& operator= (const PhysicalModelFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the PhysicalModelFactory class.
@@ -124,7 +129,7 @@ Factory(fact)
  */
 //------------------------------------------------------------------------------
 PhysicalModelFactory& PhysicalModelFactory::operator= (
-                                             const PhysicalModelFactory& fact)
+                                             const PhysicalModelFactory &fact)
 {
    Factory::operator=(fact);
    return *this;
@@ -150,8 +155,4 @@ PhysicalModelFactory::~PhysicalModelFactory()
 //---------------------------------
 //  private methods
 //---------------------------------
-
-
-
-
 

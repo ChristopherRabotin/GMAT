@@ -17,7 +17,6 @@
  *  creating PropSetup objects.
  */
 //------------------------------------------------------------------------------
-#include <string.h>
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "PropSetupFactory.hpp"
@@ -58,8 +57,9 @@ PropSetup* PropSetupFactory::CreatePropSetup(const std::string &ofType,
  *
  */
 //------------------------------------------------------------------------------
-PropSetupFactory::PropSetupFactory() :
-Factory(Gmat::PROP_SETUP)
+PropSetupFactory::PropSetupFactory() 
+   :
+   Factory(Gmat::PROP_SETUP)
 {
    if (creatables.empty())
    {
@@ -79,8 +79,9 @@ Factory(Gmat::PROP_SETUP)
  *
  */
 //------------------------------------------------------------------------------
-PropSetupFactory::PropSetupFactory(StringArray createList) :
-Factory(createList,Gmat::PROP_SETUP)
+PropSetupFactory::PropSetupFactory(StringArray createList) 
+   :
+   Factory(createList,Gmat::PROP_SETUP)
 {
    if (creatables.empty())
    {
@@ -90,7 +91,7 @@ Factory(createList,Gmat::PROP_SETUP)
 }
 
 //------------------------------------------------------------------------------
-//  PropSetupFactory(const PropSetupFactory& fact)
+//  PropSetupFactory(const PropSetupFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the class PropSetupFactory
@@ -99,8 +100,9 @@ Factory(createList,Gmat::PROP_SETUP)
  * @param <fact> the factory object to copy to "this" factory.
  */
 //------------------------------------------------------------------------------
-PropSetupFactory::PropSetupFactory(const PropSetupFactory& fact) :
-Factory(fact)
+PropSetupFactory::PropSetupFactory(const PropSetupFactory &fact) 
+   :
+   Factory(fact)
 {
    if (creatables.empty())
    {
@@ -110,7 +112,7 @@ Factory(fact)
 }
 
 //------------------------------------------------------------------------------
-//  PropSetupModelFactory& operator= (const PropSetupFactory& fact)
+//  PropSetupModelFactory& operator= (const PropSetupFactory &fact)
 //------------------------------------------------------------------------------
 /**
 * Assignment operator for the PropSetupFactory class.
@@ -121,7 +123,7 @@ Factory(fact)
  * @return "this" PropSetupFactory with data of input factory fact.
  */
 //------------------------------------------------------------------------------
-PropSetupFactory& PropSetupFactory::operator= (const PropSetupFactory& fact)
+PropSetupFactory& PropSetupFactory::operator= (const PropSetupFactory &fact)
 {
    Factory::operator=(fact);
    if (creatables.empty())
@@ -152,8 +154,4 @@ PropSetupFactory::~PropSetupFactory()
 //---------------------------------
 //  private methods
 //---------------------------------
-
-
-
-
 

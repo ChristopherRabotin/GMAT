@@ -34,9 +34,9 @@ public:
    // constructor
    PropSetupFactory(StringArray createList);
    // copy constructor
-   PropSetupFactory(const PropSetupFactory& fact);
+   PropSetupFactory(const PropSetupFactory &fact);
    // assignment operator
-   PropSetupFactory& operator= (const PropSetupFactory& fact);
+   PropSetupFactory& operator= (const PropSetupFactory &fact);
 
    // destructor
    ~PropSetupFactory();
@@ -51,7 +51,4 @@ private:
 };
 
 #endif // PropSetupFactory_hpp
-
-
-
 

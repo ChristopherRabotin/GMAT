@@ -34,9 +34,9 @@ public:
    // constructor
    PhysicalModelFactory(StringArray createList);
    // copy constructor
-   PhysicalModelFactory(const PhysicalModelFactory& fact);
+   PhysicalModelFactory(const PhysicalModelFactory &fact);
    // assignment operator
-   PhysicalModelFactory& operator= (const PhysicalModelFactory& fact);
+   PhysicalModelFactory& operator= (const PhysicalModelFactory &fact);
 
    // destructor
    ~PhysicalModelFactory();
@@ -51,7 +51,3 @@ private:
 };
 
 #endif // PhysicalModelFactory_hpp
-
-
-
-

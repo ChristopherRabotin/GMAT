@@ -34,9 +34,9 @@ public:
    // constructor
    PropagatorFactory(StringArray createList);
    // copy constructor
-   PropagatorFactory(const PropagatorFactory& fact);
+   PropagatorFactory(const PropagatorFactory &fact);
    // assignment operator
-   PropagatorFactory& operator= (const PropagatorFactory& fact);
+   PropagatorFactory& operator= (const PropagatorFactory &fact);
 
    // destructor
    ~PropagatorFactory();
@@ -51,7 +51,4 @@ private:
 };
 
 #endif // PropagatorFactory_hpp
-
-
-
 
