@@ -52,26 +52,6 @@ int MatlabInterface::Open()
 } // end Open()
 
 //------------------------------------------------------------------------------
-//  int IsOpen()
-//------------------------------------------------------------------------------
-//  Purpose:
-//     Checks if Matlab engine is open
-//
-//  Returns:
-//     1 = no error, 0 = error
-//------------------------------------------------------------------------------
-int MatlabInterface::IsOpen()
-{
-#if defined __USE_MATLAB__
-   if (enginePtrD != NULL)
-      return 1;
-   else
-      return 0;
-#endif
-   return 0;
-} // end Open()
-
-//------------------------------------------------------------------------------
 //  int Close()
 //------------------------------------------------------------------------------
 //  Purpose:
@@ -84,6 +64,7 @@ int MatlabInterface::Close()
 {
 #if defined __USE_MATLAB__
    engClose(enginePtrD);
+   enginePtrD = NULL;      // set to NULL, so it can be reopened
 #endif
    return 1;
 

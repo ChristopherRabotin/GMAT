@@ -23,7 +23,6 @@ class MatlabInterface
 public:
 
 static int Open();
-static int IsOpen();
 static int Close();
 static int PutVariable(const std::string &matlabVarName, int numElements, double inArray[]);
 static int GetVariable(const std::string &matlabVarName, int numElements, double outArray[]);
