@@ -1509,7 +1509,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
       Expand(item);
    }
 
-   SelectItem(GetNextVisible(item));
+   SelectItem(GetLastChild(item));
    OnRename(event);
 }
 

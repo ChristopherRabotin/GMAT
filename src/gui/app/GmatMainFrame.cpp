@@ -124,7 +124,10 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    
    EVT_MENU(MENU_START_SERVER, GmatMainFrame::OnStartServer)
    EVT_MENU(MENU_STOP_SERVER, GmatMainFrame::OnStopServer)
-   
+
+   EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
+   EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
+
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
 
@@ -1240,6 +1243,18 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
    toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
 
+   wxMenu *matlabMenu = new wxMenu;
+   matlabMenu->Append(MENU_TOOLS_MATLAB_OPEN, wxT("Open"),
+                          wxT(""), FALSE);
+   matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
+                          wxT(""), FALSE);
+   matlabMenu->AppendSeparator();
+   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
+                          wxT(""), FALSE);
+
+
+   toolsMenu->Append(MENU_TOOLS_MATLAB, wxT("Matlab"), matlabMenu, wxT(""));
+
    // Server
    wxMenu *serverMenu = new wxMenu;
    serverMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
@@ -1544,6 +1559,36 @@ void GmatMainFrame::OnStartServer(wxCommandEvent& event)
 void GmatMainFrame::OnStopServer(wxCommandEvent& event)
 {
    StopServer();
+}
+
+//------------------------------------------------------------------------------
+// void OnOpenMatlab(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles opening matlab from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
+{
+   if (!MatlabInterface::IsOpen())
+      MatlabInterface::Open();
+}
+
+//------------------------------------------------------------------------------
+// void OnCloseMatlab(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles closing matlab from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
+{
+   if (MatlabInterface::IsOpen())
+      MatlabInterface::Close();
 }
 
 //------------------------------------------------------------------------------
