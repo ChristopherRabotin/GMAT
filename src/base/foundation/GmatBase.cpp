@@ -40,13 +40,17 @@
 /// Set the static "undefined" parameters
 const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
 const Integer     GmatBase::INTEGER_PARAMETER_UNDEFINED = -987654321;
+const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
+                  GmatBase::REAL_PARAMETER_UNDEFINED);
+const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
+                  GmatBase::REAL_PARAMETER_UNDEFINED);
 
 /// Build the list of type names
 const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
       {
-        "Integer", "Real", "String", "StringArray", "Boolean",
-        "Rvector3", "Rvector6", "Rmatrix33", "Cartesian", "Keplerian",
-        "A1Mjd", "UtcDate", "Object"
+        "Integer", "Real", "String", "StringArray", "Boolean", "Rvector",
+        "Rvector3", "Rvector6", "Rmatrix", "Rmatrix33", "Cartesian",
+         "Keplerian", "A1Mjd", "UtcDate", "Object"
       }; 
 
 
@@ -348,6 +352,76 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
 }
 
 //---------------------------------------------------------------------------
+//  const Rvector& GetRvectorParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Rvector parameter.
+*
+* @param <id> The integer ID for the parameter.
+*
+* @return The parameter's value.
+*/
+const Rvector& GmatBase::GetRvectorParameter(const Integer id) const
+{
+   return RVECTOR_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rvector& SetRvectorParameter(const Integer id, const Rvector& value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Rvector parameter.
+*
+* @param <id> The integer ID for the parameter.
+* @param <value> The new parameter value.
+*
+* @return the parameter value at the end of this call, or 
+*         RVECTOR_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+*         parameter type is not Rvector.
+*/
+const Rvector& GmatBase::SetRvectorParameter(const Integer id,
+                                             const Rvector& value)
+{
+   return RVECTOR_PARAMETER_UNDEFINED;
+}
+
+//---------------------------------------------------------------------------
+//  const Rmatrix& GetRmatrixParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Rmatrix parameter.
+*
+* @param <id> The integer ID for the parameter.
+*
+* @return The parameter's value.
+*/
+const Rmatrix& GmatBase::GetRmatrixParameter(const Integer id) const
+{
+   return RMATRIX_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rmatrix& SetRmatrixParameter(const Integer id, const Rmatrix& value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Rmatrix parameter.
+*
+* @param <id> The integer ID for the parameter.
+* @param <value> The new parameter value.
+*
+* @return the parameter value at the end of this call, or 
+*         RMATRIX_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+*         parameter type is not Rmatrix.
+*/
+const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
+                                             const Rmatrix& value)
+{
+   return RMATRIX_PARAMETER_UNDEFINED;
+}
+
+//---------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -477,7 +551,7 @@ Real GmatBase::SetRealParameter(const std::string &label, const Real value)
 
 
 //---------------------------------------------------------------------------
-//  Real GetIntegerParameter(const std::string &label) const
+//  Integer GetIntegerParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the value for an Integer parameter.
@@ -511,6 +585,82 @@ Integer GmatBase::SetIntegerParameter(const std::string &label,
 {
     Integer id = GetParameterID(label);
     return SetIntegerParameter(id, value);
+}
+
+//---------------------------------------------------------------------------
+// const  Rvector& GetRvectorParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Rvector parameter.
+*
+* @param <label> The (string) label for the parameter.
+*
+* @return The parameter's value.
+*/
+const Rvector& GmatBase::GetRvectorParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetRvectorParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rvector& SetRvectorParameter(const std::string &label,
+//                                     const Rvector& value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Rvector parameter.
+*
+* @param <label> The (string) label for the parameter.
+* @param <value> The new parameter value.
+*
+* @return the parameter value at the end of this call, or 
+*         RVECTOR_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+*         parameter type is not Rvector.
+*/
+const Rvector& GmatBase::SetRvectorParameter(const std::string &label,
+                                             const Rvector& value)
+{
+   Integer id = GetParameterID(label);
+   return SetRvectorParameter(id, value);
+}
+
+//---------------------------------------------------------------------------
+//  const Rmatrix& GetRmatrixParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Rmatrix parameter.
+*
+* @param <label> The (string) label for the parameter.
+*
+* @return The parameter's value.
+*/
+const Rmatrix& GmatBase::GetRmatrixParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetRmatrixParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rmatrix& SetRmatrixParameter(const std::string &label,
+//                                     const Rmatrix& value)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Rmatrix parameter.
+*
+* @param <label> The (string) label for the parameter.
+* @param <value> The new parameter value.
+*
+* @return the parameter value at the end of this call, or 
+*         RMATRIX_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+*         parameter type is not Rmatrix.
+*/
+const Rmatrix& GmatBase::SetRmatrixParameter(const std::string &label,
+                                             const Rmatrix& value)
+{
+   Integer id = GetParameterID(label);
+   return SetRmatrixParameter(id, value);
 }
 
 //---------------------------------------------------------------------------
@@ -561,7 +711,8 @@ bool GmatBase::SetStringParameter(const std::string &label,
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
-const StringArray& GmatBase::GetStringArrayParameter(const std::string &label) const
+const StringArray& GmatBase::GetStringArrayParameter(
+                                          const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetStringArrayParameter(id);

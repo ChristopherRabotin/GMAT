@@ -45,6 +45,8 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBaseException.hpp"
+#include "Rvector.hpp"
+#include "Rmatrix.hpp"
 
 
 class GMAT_API GmatBase
@@ -77,6 +79,12 @@ public:
     virtual Integer     GetIntegerParameter(const Integer id) const;
     virtual Integer     SetIntegerParameter(const Integer id,
                                             const Integer value);
+    virtual const Rvector&    GetRvectorParameter(const Integer id) const;
+    virtual const Rvector&    SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+    virtual const Rmatrix&    GetRmatrixParameter(const Integer id) const;
+    virtual const Rmatrix&    SetRmatrixParameter(const Integer id,
+                                            const Rmatrix &value);
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
@@ -92,6 +100,12 @@ public:
     virtual Integer     GetIntegerParameter(const std::string &label) const;
     virtual Integer     SetIntegerParameter(const std::string &label,
                                             const Integer value);
+    virtual const Rvector&    GetRvectorParameter(const std::string &label) const;
+    virtual const Rvector&    SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+    virtual const Rmatrix&    GetRmatrixParameter(const std::string &label) const;
+    virtual const Rmatrix&    SetRmatrixParameter(const std::string &label,
+                                            const Rmatrix &value);
     virtual std::string GetStringParameter(const std::string &label) const;
     virtual bool        SetStringParameter(const std::string &label, 
                                            const std::string &value);
@@ -102,9 +116,13 @@ public:
                                             const bool value);
     
     /// Return value used if the parameter is not accessible as a Real
-    static const Real    REAL_PARAMETER_UNDEFINED;
+    static const Real     REAL_PARAMETER_UNDEFINED;
     /// Return value used if the parameter is not accessible as an Integer
-    static const Integer INTEGER_PARAMETER_UNDEFINED;
+    static const Integer  INTEGER_PARAMETER_UNDEFINED;
+    /// Return value used if the parameter is not accessible as a Rvector
+    static const Rvector  RVECTOR_PARAMETER_UNDEFINED;
+    /// Return value used if the parameter is not accessible as a Rmatrix
+    static const Rmatrix  RMATRIX_PARAMETER_UNDEFINED;
     /// String mappings for the GMAT data types
     static const std::string PARAM_TYPE_STRING[Gmat::TypeCount];
 
