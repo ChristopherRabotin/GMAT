@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                           SphericalOne
+//                           SphericalAZFPA
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,40 +13,53 @@
 // Created: 2004/01/08 
 //
 /**
- * Definition for the SphericalOne class including Azimuth and Flight Path 
+ * Definition for the SphericalAZFPA class including Azimuth and Flight Path 
  * Angle with first four spherical elements.
  * 
  * @note:   This code is revived from the original argosy and swingby
  */
 //------------------------------------------------------------------------------
-#ifndef SphericalOne_hpp
-#define SphericalOne_hpp
+#ifndef SphericalAZFPA_hpp
+#define SphericalAZFPA_hpp
 
 #include "Spherical.hpp"
-#include "Cartesian.hpp"
+#include "CoordUtil.hpp"
 
-class SphericalOne : public Spherical
+class SphericalAZFPA : public Spherical
 {
 public:
-    SphericalOne();
-    SphericalOne(Real rMag, Real ra, Real dec, Real vmag, Real az, Real fPA);
-    SphericalOne(const SphericalOne &spherical);
-    SphericalOne& operator=(const SphericalOne &spherical);
-    virtual ~SphericalOne();
+    SphericalAZFPA();
+    SphericalAZFPA(const Rvector6& state);
+    SphericalAZFPA(Real rMag, Real ra, Real dec, Real vmag, Real az, Real fPA);
+    SphericalAZFPA(const SphericalAZFPA &spherical);
+    SphericalAZFPA& operator=(const SphericalAZFPA &spherical);
+    virtual ~SphericalAZFPA();
 
     //  Friend functions
-    friend std::ostream& operator<<(std::ostream& output, SphericalOne& s);
-    friend std::istream& operator>>(std::istream& input, SphericalOne& s);
+    friend std::ostream& operator<<(std::ostream& output, SphericalAZFPA& s);
+    friend std::istream& operator>>(std::istream& input, SphericalAZFPA& s);
+
+    friend Rvector6 CartesianToSphericalAZFPA(const Rvector6& cartVector);
+    friend Rvector6 SphericalAZFPAToCartesian(const Rvector6& sphVector);
+
+    friend Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, 
+                                              const Real mu);
+    friend Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, 
+                                              const Real mu);
 
     // public methods
+    Rvector6 GetState();
+    void SetState(const Rvector6& state);
+    void SetState(const Rvector6& state, 
+                      const std::string &fromElementType);
+
     Real GetAzimuth() const;
     void SetAzimuth(const Real az);
 
     Real GetFlightPathAngle() const;
     void SetFlightPathAngle(const Real fPA);
 
-    bool      ToSphericalOne(const Cartesian &c);
-    Cartesian GetCartesian(); 
+    Rvector6  GetCartesian(); 
 
     Integer GetNumData() const;
     const std::string* GetDataDescriptions() const;
@@ -69,4 +82,4 @@ private:
    std::string stringValues[NUM_DATA];
 
 };
-#endif // SphericalOne_hpp
+#endif // SphericalAZFPA_hpp

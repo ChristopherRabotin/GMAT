@@ -1,6 +1,6 @@
 //$Header$ 
 //------------------------------------------------------------------------------
-//                             SphericalOne
+//                             SphericalAZFPA
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -13,19 +13,20 @@
 // Created: 2003/12/16 Joey Gurganus
 //
 /**
- * Implements SphericalOne class for spherical elements including Azimuth and 
+ * Implements SphericalAZFPA class for spherical elements including Azimuth and 
  * Flight Path Angle.
  *
  * @note:   This code is revived from the original argosy and swingby 
  */
 //------------------------------------------------------------------------------
 
-#include "SphericalOne.hpp"
+#include "SphericalAZFPA.hpp"
+#include "UtilityException.hpp"
 
 //---------------------------------
 //  static data
 //---------------------------------
-const std::string SphericalOne::DATA_DESCRIPTIONS[NUM_DATA] =
+const std::string SphericalAZFPA::DATA_DESCRIPTIONS[NUM_DATA] =
 {
    "Radical Magnitude",
    "Right Ascension",
@@ -40,12 +41,12 @@ const std::string SphericalOne::DATA_DESCRIPTIONS[NUM_DATA] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  SphericalOne::SphericalOne() 
+//  SphericalAZFPA::SphericalAZFPA() 
 //------------------------------------------------------------------------------
 /**
  * Constructs base Spherical structures 
  */
-SphericalOne::SphericalOne() :
+SphericalAZFPA::SphericalAZFPA() :
     Spherical       (),
     azimuth         (0.0),
     flightPathAngle (0.0)
@@ -53,10 +54,20 @@ SphericalOne::SphericalOne() :
 }
 
 //------------------------------------------------------------------------------
-//  SphericalOne::SphericalOne(Real rMag,  Real ra, Real dec, Real vMag, 
+//  SphericalAZFPA::SphericalAZFPA(const Rvector6& state)
+//------------------------------------------------------------------------------
+SphericalAZFPA::SphericalAZFPA(const Rvector6& state) :
+   Spherical       (state[0], state[1], state[2], state[3]),
+   azimuth         (state[4]),
+   flightPathAngle (state[5])
+{
+}
+
+//------------------------------------------------------------------------------
+//  SphericalAZFPA::SphericalAZFPA(Real rMag,  Real ra, Real dec, Real vMag, 
 //                             Real az, Real fltPathAngle)
 //------------------------------------------------------------------------------
-SphericalOne::SphericalOne(Real rMag,  Real ra, Real dec, Real vMag,
+SphericalAZFPA::SphericalAZFPA(Real rMag,  Real ra, Real dec, Real vMag,
                            Real az, Real fltPathAngle) :
     Spherical        (rMag,ra,dec,vMag),
     azimuth          (az),
@@ -65,9 +76,9 @@ SphericalOne::SphericalOne(Real rMag,  Real ra, Real dec, Real vMag,
 }
 
 //------------------------------------------------------------------------------
-//   SphericalOne::SphericalOne(const SphericalOne &spherical)
+//   SphericalAZFPA::SphericalAZFPA(const SphericalAZFPA &spherical)
 //------------------------------------------------------------------------------
-SphericalOne::SphericalOne(const SphericalOne &spherical) :
+SphericalAZFPA::SphericalAZFPA(const SphericalAZFPA &spherical) :
     Spherical        (spherical.positionMagnitude, spherical.rightAscension,
                       spherical.declination, spherical.velocityMagnitude),
     azimuth          (spherical.azimuth),
@@ -76,10 +87,11 @@ SphericalOne::SphericalOne(const SphericalOne &spherical) :
 }
 
 //------------------------------------------------------------------------------
-//  SphericalOne& SphericalOne::operator=(const SphericalOne &spherical)
+//  SphericalAZFPA& SphericalAZFPA::operator=(const SphericalAZFPA &spherical)
 //------------------------------------------------------------------------------
-SphericalOne& SphericalOne::operator=(const SphericalOne &spherical)
+SphericalAZFPA& SphericalAZFPA::operator=(const SphericalAZFPA &spherical)
 {
+   Spherical::operator=(spherical);
    if (this != &spherical)
    {
       SetPositionMagnitude( spherical.GetPositionMagnitude() );
@@ -93,16 +105,20 @@ SphericalOne& SphericalOne::operator=(const SphericalOne &spherical)
 }
 
 //------------------------------------------------------------------------------
-//  SphericalOne::~SphericalOne() 
+//  SphericalAZFPA::~SphericalAZFPA() 
 //------------------------------------------------------------------------------
-SphericalOne::~SphericalOne() 
+SphericalAZFPA::~SphericalAZFPA() 
 {
 }
 
 //------------------------------------------------------------------------------
-//  std::ostream& operator<<(std::ostream& output, SphericalOne &s)
+//     friend functions
 //------------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& output, SphericalOne &s)
+
+//------------------------------------------------------------------------------
+//  friend std::ostream& operator<<(std::ostream& output, SphericalAZFPA &s)
+//------------------------------------------------------------------------------
+std::ostream& operator<<(std::ostream& output, SphericalAZFPA &s)
 {
     Rvector v(6, s.positionMagnitude, s.rightAscension, s.declination,
               s.velocityMagnitude, s.azimuth, s.flightPathAngle);
@@ -113,10 +129,9 @@ std::ostream& operator<<(std::ostream& output, SphericalOne &s)
 }
 
 //------------------------------------------------------------------------------
-//  <friend>
-//  std::istream& operator>>(std::istream& input, SphericalOne &s)
+//  friend std::istream& operator>>(std::istream& input, SphericalAZFPA &s)
 //------------------------------------------------------------------------------
-std::istream& operator>>(std::istream& input, SphericalOne &s )
+std::istream& operator>>(std::istream& input, SphericalAZFPA &s )
 {
     input >> s.positionMagnitude >> s.rightAscension 
           >> s.declination >> s.velocityMagnitude
@@ -126,81 +141,173 @@ std::istream& operator>>(std::istream& input, SphericalOne &s )
 }
 
 //------------------------------------------------------------------------------
-// Real SphericalOne::GetAzimuth() const
+//  friend Rvector6 CartesianToSphericalAZFPA(const Rvector6& cartesian)
 //------------------------------------------------------------------------------
-Real SphericalOne::GetAzimuth() const
+Rvector6 CartesianToSphericalAZFPA(const Rvector6& cartesian)
 {
-        return azimuth;
-}
+    SphericalAZFPA newSph;
 
-//------------------------------------------------------------------------------
-// void SphericalOne::SetAzimuth(const Real az) 
-//------------------------------------------------------------------------------
-void SphericalOne::SetAzimuth(const Real az)
-{
-        azimuth = az;
-}
+//    if (!Spherical::CartesianToSpherical(cartesian))
 
-//------------------------------------------------------------------------------
-// Real SphericalOne::GetFlightPathAngle() const
-//------------------------------------------------------------------------------
-Real SphericalOne::GetFlightPathAngle() const
-{
-        return flightPathAngle;
-}
-
-//------------------------------------------------------------------------------
-// void SphericalOne::SetFlightPathAngle(const Real fPA) 
-//------------------------------------------------------------------------------
-void SphericalOne::SetFlightPathAngle(const Real fPA) 
-{
-        flightPathAngle = fPA;
-}
-
-//------------------------------------------------------------------------------
-// bool SphericalOne::ToSphericalOne(const Cartesian &cartesian)
-//------------------------------------------------------------------------------
-bool SphericalOne::ToSphericalOne(const Cartesian &cartesian)
-{
-    if (!Spherical::ToSpherical(cartesian,true))
+    if (!newSph.CartesianToSpherical(cartesian,true))
     {
-        return false;
+        throw UtilityException("SphericalAZFPA::CartesianToSphericalAZFPA(): "
+                               "failure of converting to Spherical elements\n");
     }
 
     // Get position and velocity vectors from Cartesian  
-    Rvector3 position = cartesian.GetPosition();
-    Rvector3 velocity = cartesian.GetVelocity();
+    Rvector3 position = cartesian.GetR();
+    Rvector3 velocity = cartesian.GetV();
     
     // Calculate the local plane coordinate system of the spacecraft
     Rvector3 x_hat_lp, y_hat_lp, z_hat_lp;
-    CalculateLocalPlaneCoord(position,x_hat_lp,y_hat_lp,z_hat_lp);
+    newSph.CalculateLocalPlaneCoord(position,x_hat_lp,y_hat_lp,z_hat_lp);
 
     // Calculate azimuth angle measured with clockwise from the z_hat_lp to 
     // the projection of the velocity vector onto the y_hat_lp - z_hat_lp plane
     Real mState = GmatMathUtil::ATan(velocity*y_hat_lp , velocity*z_hat_lp);
-    mState = Spherical::GetDegree(mState,0.0,GmatMathUtil::TWO_PI);
-    SetAzimuth(mState);
+    mState = newSph.GetDegree(mState,0.0,GmatMathUtil::TWO_PI);
+
+    newSph.SetAzimuth(mState);
 
     // Set Flight Path Angle measured from the x_hat_lp axis to the velocity
     // vector
-    if (velocity.GetMagnitude() <= ORBIT_TOLERANCE)
+    if (velocity.GetMagnitude() <= Spherical::ORBIT_TOLERANCE)
     {
        mState = 0.0;
     } 
     else
     {
        mState = GmatMathUtil::ACos((velocity*x_hat_lp)/velocity.GetMagnitude());
-       mState = Spherical::GetDegree(mState,-GmatMathUtil::PI,GmatMathUtil::PI);
+       mState = newSph.GetDegree(mState,-GmatMathUtil::PI,GmatMathUtil::PI);
     }
-    SetFlightPathAngle(mState);
 
-    return true;
-} 
+    newSph.SetFlightPathAngle(mState);
+
+    return newSph.GetState();
+}
 
 //------------------------------------------------------------------------------
-// Cartesian SphericalOne::GetCartesian() 
+//  friend Rvector6 SphericalAZFPAToCartesian(const Rvector6& sphVector)
 //------------------------------------------------------------------------------
-Cartesian SphericalOne::GetCartesian()
+Rvector6 SphericalAZFPAToCartesian(const Rvector6& sphVector)
+{
+   SphericalAZFPA newSph(sphVector);
+
+   return(newSph.GetCartesian());
+}
+
+//------------------------------------------------------------------------------
+//  friend Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, 
+//                                            const Real mu)
+//------------------------------------------------------------------------------
+Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, const Real mu)
+{
+   Rvector6 cartesian;
+
+   cartesian = KeplerianToCartesian(keplerian,mu,CoordUtil::TA);
+   return (CartesianToSphericalAZFPA(cartesian)); 
+}
+
+//------------------------------------------------------------------------------
+//  friend Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, 
+//                                            const Real mu)
+//------------------------------------------------------------------------------
+Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, const Real mu)
+{
+   Rvector6 cartesian;
+   Real     meanAnomaly;
+
+   cartesian = SphericalAZFPAToCartesian(spherical);
+   return (CartesianToKeplerian(cartesian,mu,&meanAnomaly));
+}
+
+
+//------------------------------------------------------------------------------
+//     public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Rvector6 SphericalAZFPA::GetState() 
+//------------------------------------------------------------------------------
+Rvector6 SphericalAZFPA::GetState()
+{
+   return Rvector6(positionMagnitude, rightAscension, declination,
+                  velocityMagnitude, azimuth, flightPathAngle);
+}
+
+//------------------------------------------------------------------------------
+// void SphericalAZFPA::SetState(const Rvector6& state) 
+//------------------------------------------------------------------------------
+void SphericalAZFPA::SetState(const Rvector6& state) 
+{
+   SetPositionMagnitude(state[0]);
+   SetRightAscension(state[1]);
+   SetDeclination(state[2]);
+   SetVelocityMagnitude(state[3]);
+   SetAzimuth(state[4]);
+   SetFlightPathAngle(state[5]);
+}
+
+//------------------------------------------------------------------------------
+// void SphericalAZFPA::SetState(const Rvector6& state, 
+//                               const std::string& fromElementType) 
+//------------------------------------------------------------------------------
+void SphericalAZFPA::SetState(const Rvector6& state, 
+                              const std::string& fromElementType) 
+{
+   if (fromElementType == "Cartesian")
+      SetState(CartesianToSphericalAZFPA(state));
+
+   else if (fromElementType == "Keplerian")
+   {
+      Real mu = 0.3986004415e+06;  // km^3/s^2 
+      SetState(KeplerianToSphericalAZFPA(state,mu));  // @todo will fix it later
+   }
+   else if (fromElementType == "SphericalAZFPA")
+      SetState(state);   // no change
+   else if (fromElementType == "SphericalRADEC")
+      SetState(state);    // @todo - will add RADECV_To_AZFPA 
+   // @todo - will add else for throw or return false
+}
+
+//------------------------------------------------------------------------------
+// Real SphericalAZFPA::GetAzimuth() const
+//------------------------------------------------------------------------------
+Real SphericalAZFPA::GetAzimuth() const
+{
+        return azimuth;
+}
+
+//------------------------------------------------------------------------------
+// void SphericalAZFPA::SetAzimuth(const Real az) 
+//------------------------------------------------------------------------------
+void SphericalAZFPA::SetAzimuth(const Real az)
+{
+        azimuth = az;
+}
+
+//------------------------------------------------------------------------------
+// Real SphericalAZFPA::GetFlightPathAngle() const
+//------------------------------------------------------------------------------
+Real SphericalAZFPA::GetFlightPathAngle() const
+{
+        return flightPathAngle;
+}
+
+//------------------------------------------------------------------------------
+// void SphericalAZFPA::SetFlightPathAngle(const Real fPA) 
+//------------------------------------------------------------------------------
+void SphericalAZFPA::SetFlightPathAngle(const Real fPA) 
+{
+        flightPathAngle = fPA;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 SphericalAZFPA::GetCartesian() 
+//------------------------------------------------------------------------------
+Rvector6 SphericalAZFPA::GetCartesian()
 {
     // Get the position after converting to part of cartesian 
     Rvector3 position = GetPosition();
@@ -233,11 +340,11 @@ Cartesian SphericalOne::GetCartesian()
                         sinBeta * cosA * z_hat_lp.Get(2));
     
     velocity.Set(vX,vY,vZ);
-    return Cartesian(position,velocity);
+    return Rvector6(position,velocity);
 }
 
 //------------------------------------------------------------------------------
-// void SphericalOne::CalculateLocalPlaneCoord(const Rvector3 position,
+// void SphericalAZFPA::CalculateLocalPlaneCoord(const Rvector3 position,
 //                    Rvector3 &x_hat_lp,Rvector3 &y_hat_lp,Rvector3 &z_hat_lp)
 //------------------------------------------------------------------------------
 /**
@@ -252,7 +359,7 @@ Cartesian SphericalOne::GetCartesian()
 
  *
  */
-void SphericalOne::CalculateLocalPlaneCoord(const Rvector3 position,
+void SphericalAZFPA::CalculateLocalPlaneCoord(const Rvector3 position,
                    Rvector3 &x_hat_lp,Rvector3 &y_hat_lp,Rvector3 &z_hat_lp)
 {
     // Get the position vector magnitude
@@ -278,25 +385,25 @@ void SphericalOne::CalculateLocalPlaneCoord(const Rvector3 position,
 
 
 //------------------------------------------------------------------------------
-// Integer SphericalOne::GetNumData() const
+// Integer SphericalAZFPA::GetNumData() const
 //------------------------------------------------------------------------------
-Integer SphericalOne::GetNumData() const
+Integer SphericalAZFPA::GetNumData() const
 {
    return NUM_DATA;
 }
 
 //------------------------------------------------------------------------------
-// const std::string* SphericalOne::GetDataDescriptions() const
+// const std::string* SphericalAZFPA::GetDataDescriptions() const
 //------------------------------------------------------------------------------
-const std::string* SphericalOne::GetDataDescriptions() const
+const std::string* SphericalAZFPA::GetDataDescriptions() const
 {
    return DATA_DESCRIPTIONS;
 }
 
 //------------------------------------------------------------------------------
-//  std::string* SphericalOne::ToValueStrings(void)
+//  std::string* SphericalAZFPA::ToValueStrings(void)
 //------------------------------------------------------------------------------
-std::string* SphericalOne::ToValueStrings(void)
+std::string* SphericalAZFPA::ToValueStrings(void)
 {
    std::stringstream ss("");
 
