@@ -3,6 +3,7 @@
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
 # Modified:   2004/05/21 - Added controllogic directory
+#             2004/09/24 - Added 'testing' target, but nothing.
 #
 #
 SUBS = app burn controllogic foundation forcemodel maneuver mission plot \
@@ -10,7 +11,7 @@ SUBS = app burn controllogic foundation forcemodel maneuver mission plot \
 
 # Holding 'resource' directory for later
 
-all clean bare:
+all clean bare testing:
 	-X=`pwd`; \
 	for i in $(SUBS); \
 	do echo '<<<' $$i '>>>'; cd $$X/$$i; ${MAKE} -f Makefile.mac $@; done

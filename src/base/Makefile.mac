@@ -4,12 +4,13 @@
 # Date:       2003/11/13
 # Modified:   2004/01/14 - Added burn directory
 #             2004/09/23 - W. Shoan - added interface and function directories
+#             2004/09/24 - J. Gurganus - added new target 'testing'
 
 SUBS = burn command configs executive factory forcemodel foundation function \
 	interface interpolator interpreter parameter propagator refframe \
 	solarsys solver spacecraft stopcond subscriber util
 
-all clean bare:
+all clean bare testing :
 	-X=`pwd`; \
 	for i in $(SUBS); \
 	do echo '<<<' $$i '>>>'; cd $$X/$$i; ${MAKE} -f Makefile.mac $@; done
