@@ -7,7 +7,10 @@
 HEADERS = -I../include -I../foundation -I../subscriber -I../executive \
           -I../propagator -I../forcemodel -I../spacecraft -I../stopcond \
           -I../parameter -I../util -I../refframe -I../interpolator \
-          -I../solarsys -I../solver -I../burn
+          -I../solarsys -I../solver -I../burn \
+          \
+          \
+          -I../interpreter -I../command -I../factory -I../configs
 
 OBJECTS = Command.o CommandException.o \
           NoOp.o \
@@ -24,8 +27,8 @@ OBJECTS = Command.o CommandException.o \
           IfCommand.o \
           ElseCommand.o \
           EndIfCommand.o \
-          Assignment.o
-
+          Assignment.o \
+          Save.o
 
 all: libCommand 
 	mkdir -p ../lib

@@ -19,6 +19,8 @@
 
 
 #include "Achieve.hpp"
+/// @todo Rework command so it doesn't need the Moderator!!!
+#include "Moderator.hpp" 
 
 
 //------------------------------------------------------------------------------
@@ -32,6 +34,7 @@ Achieve::Achieve(void) :
     GmatCommand     ("Achieve"),
     targeterName    (""),
     targeter        (NULL),
+    goalParm        (NULL),
     targeterNameID  (parameterCount),
     goalNameID      (parameterCount+1),
     goalID          (parameterCount+2),
@@ -49,7 +52,10 @@ Achieve::Achieve(void) :
  */
 //------------------------------------------------------------------------------
 Achieve::~Achieve(void)
-{}
+{
+    if (goalParm)
+        delete goalParm;
+}
 
     
 //------------------------------------------------------------------------------
@@ -65,6 +71,7 @@ Achieve::Achieve(const Achieve& t) :
     GmatCommand     (t),
     targeterName    (t.targeterName),
     targeter        (NULL),
+    goalParm        (NULL),
     targeterNameID  (t.targeterNameID),
     goalNameID      (t.goalNameID),
     goalID          (t.goalID),
@@ -233,7 +240,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
  *
  * The Achieve command has the following syntax:
  *
- *     Achieve myDC;
+ *     Achieve myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});
  *
  * where myDC is a Solver used to Achieve a set of variables to achieve the
  * corresponding goals.  This method breaks the script line into the 
@@ -278,6 +285,14 @@ void Achieve::InterpretAction(void)
     component = generatingString.substr(loc, strend-loc+1);
     goalName = component;
 
+    // Get an instance if this is a Parameter
+    Moderator *mod = Moderator::Instance();
+
+    std::string parmName;
+    loc = goalName.find(".");
+    parmName = goalName.substr(loc+1, goalName.length() - (loc+1));
+    goalParm = mod->CreateParameter(parmName, "");
+    
     // Find the value
     loc = end + 1;
     
@@ -330,22 +345,30 @@ bool Achieve::Initialize(void)
         errorstr += objectName;
         throw CommandException(errorstr);
     }
-    id = obj->GetParameterID(parmName);
-    if (id == -1) {
-        std::string errorstr = "Could not find parameter ";
-        errorstr += parmName;
-        errorstr += " on object ";
-        errorstr += objectName;
-        throw CommandException(errorstr);
+    
+    if (goalParm != NULL) {
+        // temporary exit
+        goalParm->AddObject(obj);
+//        throw CommandException("Parameter access not yet built");
     }
-    Gmat::ParameterType type = obj->GetParameterType(id);
-    if (type != Gmat::REAL_TYPE) {
-        std::string errorstr = "The targeter goal ";
-        errorstr += parmName;
-        errorstr += " on object ";
-        errorstr += objectName;
-        errorstr += " is not Real.";
-        throw CommandException(errorstr);
+    else {
+        id = obj->GetParameterID(parmName);
+        if (id == -1) {
+            std::string errorstr = "Could not find parameter ";
+            errorstr += parmName;
+            errorstr += " on object ";
+            errorstr += objectName;
+            throw CommandException(errorstr);
+        }
+        Gmat::ParameterType type = obj->GetParameterType(id);
+        if (type != Gmat::REAL_TYPE) {
+            std::string errorstr = "The targeter goal ";
+            errorstr += parmName;
+            errorstr += " on object ";
+            errorstr += objectName;
+            errorstr += " is not Real.";
+            throw CommandException(errorstr);
+        }
     }
     
     goalObject = obj;
@@ -386,7 +409,11 @@ bool Achieve::Execute(void)
     }
     
     // Evaluate goal and pass it to the targeter
-    Real val = goalObject->GetRealParameter(parmId);
+    Real val;
+    if (goalParm != NULL)
+        val = goalParm->EvaluateReal();
+    else
+        val = goalObject->GetRealParameter(parmId);
     targeter->SetResultValue(goalId, val);
     return retval;
 }
