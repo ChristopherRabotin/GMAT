@@ -16,6 +16,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
+#include "CallFunction.hpp"
 
 class CallFunctionPanel : public GmatPanel
 {
@@ -25,13 +26,16 @@ public:
    ~CallFunctionPanel();
    
 private:
-   GmatCommand *theCommand;
+   CallFunction *theCommand;
 
    wxGrid *inputGrid;
    wxGrid *outputGrid;
 
    wxStaticText *nameStaticText;
    wxComboBox *functionComboBox;
+
+   int numInput;
+   int numOutput;
    
    // methods inherited from GmatPanel
    virtual void Create();

@@ -15,6 +15,8 @@
 #include "MessageInterface.hpp"
 
 #include "Function.hpp"
+#include "Parameter.hpp"
+#include "ParameterSelectDialog.hpp"
 
 #define DEBUG_PROPCMD_PANEL 0
 
@@ -44,14 +46,17 @@ END_EVENT_TABLE()
 CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
-//   theCommand = (CallFunction *)cmd;
-   theCommand = cmd;
+   theCommand = (CallFunction *)cmd;
+//   theCommand = cmd;
 
    if (theCommand != NULL)
    {
       Create();
       Show();
       theApplyButton->Disable();
+
+      numInput = 0;
+      numOutput = 0;
    }
 }
 
@@ -134,6 +139,25 @@ void CallFunctionPanel::LoadData()
 {
    std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
    functionComboBox->SetValue(objectName.c_str());
+
+   numInput = theCommand->GetNumInputParams();
+   numOutput = theCommand->GetNumOutputParams();
+
+   // get input params
+   for (int i=0; i<numInput; i++)
+   {
+      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+                           "Input", i);
+      inputGrid->SetCellValue(i, 0, param->GetName().c_str());
+   }
+
+   // get output params
+   for (int i=0; i<numOutput; i++)
+   {
+      Parameter *param = (Parameter *)theCommand->GetRefObject(Gmat::PARAMETER,
+                           "Output", i);
+      outputGrid->SetCellValue(i, 0, param->GetName().c_str());
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -144,7 +168,29 @@ void CallFunctionPanel::SaveData()
    wxString functionName = functionComboBox->GetStringSelection();
    Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
             std::string(functionName));
-   theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
+
+   if (function != NULL)
+   {
+      theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
+   }
+
+   // set input parameters
+   for (int i=0; i<numInput; i++)
+   {
+      wxString string = inputGrid->GetCellValue(i, 0);
+      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+            std::string(string));
+      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
+   }
+
+   // set output parameters
+   for (int i=0; i<numOutput; i++)
+   {
+      wxString string = outputGrid->GetCellValue(i, 0);
+      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+            std::string(string));
+      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
+   }
 
 }
 
@@ -153,14 +199,69 @@ void CallFunctionPanel::SaveData()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 {
-//   int row = event.GetRow();
-//   int col = event.GetCol();
+   int row = event.GetRow();
+   int col = event.GetCol();
 
    if (event.GetEventObject() == inputGrid)
    {
+      if (row <= numInput)
+      {
+         ParameterSelectDialog paramDlg(this);
+         paramDlg.ShowModal();
+
+         wxString newParamName = paramDlg.GetParamName();
+
+         if (newParamName == "") // remove propagator
+         {
+            // don't do anything for now
+//            inputGrid->SetCellValue(row, col, "");
+//            if (row+1 < numInput)
+//            {
+//               for (unsigned int i=row; i< numInput-1; i++)
+//                  inputGrid->SetCellValue(i, col, inputGrid->GetCellValue(i+1, col));
+//            }
+//            else
+//               numInput--;
+         }
+         else // change propagator
+         {
+            inputGrid->SetCellValue(row, col, newParamName);
+            numInput++;
+         }
+         theApplyButton->Enable();
+      }
    }
    else if (event.GetEventObject() == outputGrid)
    {
+      if (row <= numOutput)
+      {
+         ParameterSelectDialog paramDlg(this);
+         paramDlg.ShowModal();
+
+         wxString newParamName = paramDlg.GetParamName();
+
+         if (newParamName == "") // remove propagator
+         {
+            // don't do anything for now
+//            outputGrid->SetCellValue(row, col, "");
+//            if (row+1 < numInput)
+//            {
+//               for (unsigned int i=row; i< numInput-1; i++)
+//                  outputGrid->SetCellValue(i, col, inputGrid->GetCellValue(i+1, col));
+//            }
+//            else
+//               numOutput--;
+         }
+         else // change propagator
+         {
+            outputGrid->SetCellValue(row, col, newParamName);
+            numOutput++;
+         }
+
+         theApplyButton->Enable();
+
+      }
+
    }
 }
 
