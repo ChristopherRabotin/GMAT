@@ -378,7 +378,7 @@ Command* FactoryManager::CreateCommand(std::string ofType, std::string withName)
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfItems(Gmat::ObjectType byType) const
+StringArray FactoryManager::GetListOfItems(Gmat::ObjectType byType)// const
 {
    return GetList(byType);
 }
@@ -392,7 +392,7 @@ StringArray FactoryManager::GetListOfItems(Gmat::ObjectType byType) const
  * @return list of creatable items of type Spacecraft.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSpacecraft(void) const
+StringArray FactoryManager::GetListOfSpacecraft(void)// const
 {
    return GetList(Gmat::SPACECRAFT);
 }
@@ -420,7 +420,7 @@ StringArray FactoryManager::GetListOfSpacecraft(void) const
  * @return list of creatable items of type Propagator.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPropagator(void) const
+StringArray FactoryManager::GetListOfPropagator(void)// const
 {
    return GetList(Gmat::PROPAGATOR);
 }
@@ -434,7 +434,7 @@ StringArray FactoryManager::GetListOfPropagator(void) const
  * @return list of creatable items of type ForceModel.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfForceModel(void) const
+StringArray FactoryManager::GetListOfForceModel(void)// const
 {
    return GetList(Gmat::FORCE_MODEL);
 }
@@ -448,7 +448,7 @@ StringArray FactoryManager::GetListOfForceModel(void) const
  * @return list of creatable items of type Force.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPhysicalModel(void) const
+StringArray FactoryManager::GetListOfPhysicalModel(void)// const
 {
    return GetList(Gmat::PHYSICAL_MODEL);
 }
@@ -462,7 +462,7 @@ StringArray FactoryManager::GetListOfPhysicalModel(void) const
  * @return list of creatable items of type PropSetup.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfPropSetup(void) const
+StringArray FactoryManager::GetListOfPropSetup(void)// const
 {
    return GetList(Gmat::PROP_SETUP);
 }
@@ -490,7 +490,7 @@ StringArray FactoryManager::GetListOfPropSetup(void) const
  * @return list of creatable items of type StopCondition.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfStopCondition(void) const
+StringArray FactoryManager::GetListOfStopCondition(void)// const
 {
    return GetList(Gmat::STOP_CONDITION);
 }
@@ -546,7 +546,7 @@ StringArray FactoryManager::GetListOfStopCondition(void) const
  * @return list of creatable items of type Subscriber.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfSubscriber(void) const
+StringArray FactoryManager::GetListOfSubscriber(void)// const
 {
    return GetList(Gmat::SUBSCRIBER);
 }
@@ -560,7 +560,7 @@ StringArray FactoryManager::GetListOfSubscriber(void) const
  * @return list of creatable items of type Command.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetListOfCommand(void) const
+StringArray FactoryManager::GetListOfCommand(void)// const
 {
    return GetList(Gmat::COMMAND);
 }
@@ -692,13 +692,15 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-StringArray FactoryManager::GetList(Gmat::ObjectType ofType) const
+StringArray FactoryManager::GetList(Gmat::ObjectType ofType)// const
 {
-   StringArray entireList;
+    entireList.clear();
+
    // Search through factoryList for the factory that creates objects of type
    // ofType
-   std::list<Factory*>::iterator f = ((std::list<Factory*>)factoryList).begin();
-   //Factory** f = factoryList.begin();     // returns a bidirectional iterator
+//   std::list<Factory*>::iterator f = ((std::list<Factory*>)factoryList).begin();
+
+   std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())
    {
       if ((*f)->GetFactoryType() == ofType)

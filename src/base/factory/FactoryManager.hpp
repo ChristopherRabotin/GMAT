@@ -90,28 +90,29 @@ public:
 
     // method to return a list of strings representing the objects of the input
     // type that may be created in the system
-    StringArray            GetListOfItems(Gmat::ObjectType byType) const;
+    StringArray            GetListOfItems(Gmat::ObjectType byType);// const;
 
     // individual methods to return a list of strings representing the types of
     // objects that may be created in the system, by Gmat::ObjectType
-    StringArray            GetListOfSpacecraft(void) const;
+    StringArray            GetListOfSpacecraft(void);// const;
 //    StringArray            GetListofGroundStation(void) const;
-    StringArray            GetListOfPropagator(void) const;
-    StringArray            GetListOfForceModel(void) const;
-    StringArray            GetListOfPhysicalModel(void) const;
-    StringArray            GetListOfPropSetup(void) const;
+    StringArray            GetListOfPropagator(void);// const;
+    StringArray            GetListOfForceModel(void);// const;
+    StringArray            GetListOfPhysicalModel(void);// const;
+    StringArray            GetListOfPropSetup(void);// const;
 //    StringArray            GetListofCalculatedParameter(void) const;
-    StringArray            GetListOfStopCondition(void) const;
-    StringArray            GetListOfCelestialBody(void) const;
-    StringArray            GetListOfSolarSystem(void) const;
+    StringArray            GetListOfStopCondition(void);// const;
+    StringArray            GetListOfCelestialBody(void);// const;
+    StringArray            GetListOfSolarSystem(void);// const;
 //    StringArray            GetListofSolver(void) const;
-    StringArray            GetListOfSubscriber(void) const;
-    StringArray            GetListOfCommand(void) const;
+    StringArray            GetListOfSubscriber(void);// const;
+    StringArray            GetListOfCommand(void);// const;
 
     // class destructor
     ~FactoryManager();
     
 protected:
+    StringArray            entireList;
 
 private:
 
@@ -131,7 +132,7 @@ private:
     
     // private methods 
     Factory* FindFactory(Gmat::ObjectType ofType, std::string forType);
-    StringArray GetList(Gmat::ObjectType ofType) const;
+    StringArray GetList(Gmat::ObjectType ofType);// const;
 
 };
 
