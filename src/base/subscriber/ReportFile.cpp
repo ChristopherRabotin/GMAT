@@ -21,7 +21,7 @@
 
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
-#include "Moderator.hpp"         // for GetParameter()
+//#include "Moderator.hpp"         // for GetParameter()
 #include "Publisher.hpp"         // for Instance()
 
 //#define DEBUG_REPORTFILE 1
@@ -34,9 +34,7 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
 {
    "Filename",
    "Precision",
-   "VarList",
    "Add",
-   "Clear",
    "WriteHeaders",
    "ColumnWidth",
 //   "WriteStateFile",
@@ -48,8 +46,6 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
         Gmat::STRING_TYPE,
         Gmat::INTEGER_TYPE,
         Gmat::STRINGARRAY_TYPE,
-        Gmat::STRING_TYPE,
-        Gmat::BOOLEAN_TYPE,
         Gmat::STRING_TYPE,
         Gmat::INTEGER_TYPE,
 //      Gmat::STRING_TYPE,
@@ -79,7 +75,7 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    mNumVarParams = 0;
 
    if (firstVarParam != NULL)
-      AddVarParameter(firstVarParam->GetName());
+      AddVarParameter(firstVarParam->GetName(), mNumVarParams);
    
    parameterCount = ReportFileParamCount;
    initial = true;
@@ -120,7 +116,6 @@ ReportFile::ReportFile(const ReportFile &rf) :
 //   dstream = NULL;
 
    mVarParams = rf.mVarParams; 
-   mVarParamMap = rf.mVarParamMap;
    mNumVarParams = rf.mNumVarParams;
    mVarParamNames = rf.mVarParamNames;
 
@@ -152,7 +147,6 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    //ag: what to do with the stream?
 //    dstream = NULL;  // output data stream
     mVarParams = rf.mVarParams; 
-    mVarParamMap = rf.mVarParamMap;
     mNumVarParams = rf.mNumVarParams;
     mVarParamNames = rf.mVarParamNames;
 
@@ -181,6 +175,17 @@ bool ReportFile::Initialize()
              "No parameters selected for ReportFile.\n");
          return false;
       }
+
+      if (mVarParams[0] == NULL)
+      {
+         active = false;
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "ReportFile::Initialize() ReportFile will not be created.\n"
+             "The first parameter selected for the report file is NULL\n");
+         return false;
+      }
+
    }
    
    Subscriber::Initialize();
@@ -216,6 +221,32 @@ GmatBase* ReportFile::Clone(void) const
 {
    return (new ReportFile(*this));
 }
+
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,
+//                         const std::string &actionData = "");
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool ReportFile::TakeAction(const std::string &action,
+                        const std::string &actionData)
+{
+   if (action == "Clear")
+   {
+      ClearVarParameters();
+      return true;
+   }
+
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -311,8 +342,6 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
       return filename;
-   else if (id == ADD)
-      return "";
    else if (id == WRITE_HEADERS)
    {
       if (writeHeaders)
@@ -329,6 +358,15 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 //   }
    return Subscriber::GetStringParameter(id);
 }
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string ReportFile::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -364,7 +402,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == ADD)
    {
-      return AddVarParameter(value);
+      return AddVarParameter(value, mNumVarParams);
    }
    else if (id == WRITE_HEADERS)
    {
@@ -401,6 +439,48 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
    return Subscriber::SetStringParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool ReportFile::SetStringParameter(const std::string &label,
+                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool ReportFile::SetStringParameter(const Integer id, const std::string &value,
+                                const Integer index)
+{
+   switch (id)
+   {
+   case ADD:
+      return AddVarParameter(value, index);
+   default:
+      return Subscriber::SetStringParameter(id, value, index);
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool ReportFile::SetStringParameter(const std::string &label,
+                                const std::string &value,
+                                const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+
+
 //------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -408,7 +488,7 @@ const StringArray& ReportFile::GetStringArrayParameter(const Integer id) const
 {
    switch (id)
    {
-   case VAR_LIST:
+   case ADD:
       return mVarParamNames;
    default:
       return Subscriber::GetStringArrayParameter(id);
@@ -423,52 +503,52 @@ const StringArray& ReportFile::GetStringArrayParameter(const std::string &label)
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+//arg: 11/16/04 added
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const Integer id) const
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
 //------------------------------------------------------------------------------
-bool ReportFile::GetBooleanParameter(const Integer id) const
+GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
+                               const std::string &name)
 {
-   switch (id)
+   // name is Y parameter
+   for (int i=0; i<mNumVarParams; i++)
    {
-   case CLEAR:
-      return true;
-   default:
-         return Subscriber::GetBooleanParameter(id);
+      if (mVarParamNames[i] == name)
+         return mVarParams[i];
    }
+
+   throw GmatBaseException("ReportFile::GetRefObject() the object name: " + name +
+                           "not found\n");
 }
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label) const
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
 //------------------------------------------------------------------------------
-bool ReportFile::GetBooleanParameter(const std::string &label) const
+bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                          const std::string &name)
 {
-   return GetBooleanParameter(GetParameterID(label));
-}
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
-//------------------------------------------------------------------------------
-bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
-{
-   switch (id)
+   for (int i=0; i<mNumVarParams; i++)
    {
-   case CLEAR:
-      ClearVarParameters();
-      return true;
-   default:
-      return Subscriber::SetBooleanParameter(id, value);
+      if (mVarParamNames[i] == name)
+      {
+         mVarParams[i] = (Parameter*)obj;
+         return true;
+      }
    }
+
+   return false;
 }
 
 //------------------------------------------------------------------------------
-// bool SetBooleanParameter(const std::string &label,
-//                          const bool value)
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
-bool ReportFile::SetBooleanParameter(const std::string &label,
-                                 const bool value)
+const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   return SetBooleanParameter(GetParameterID(label), value);
+   return mVarParamNames;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetNumVarParameters()
@@ -479,40 +559,50 @@ Integer ReportFile::GetNumVarParameters()
 }
 
 //------------------------------------------------------------------------------
-// bool AddVarParameter(const std::string &paramName)
+// bool AddVarParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
-bool ReportFile::AddVarParameter(const std::string &paramName)
+bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 {
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-    
-   if (paramName != "")
+   if (paramName != "" && index == mNumVarParams)
    {
-      //-----------------------------------------------------------------
-      //loj: 11/01/04 Until SetRefObject() is implemented, add parameter
-      // if the parameter has been created and configured already
-      //-----------------------------------------------------------------
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
-      {
-         mVarParamNames.push_back(paramName);
-         mVarParamMap[paramName] = NULL;
-         mNumVarParams = mVarParamNames.size();
-
-         mVarParamMap[paramName] = param;
-         mVarParams.push_back(param);
-         status = true;
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("ReportFile::AddVarParameter() Unconfigured parameter:%s will not be "
-             "added to ReportFile.\n", paramName.c_str());
-      }
+      mVarParamNames.push_back(paramName);
+      mNumVarParams = mVarParamNames.size();
+      mVarParams.push_back(NULL);
+      return true;
    }
-   
-   return status;
+
+   return false;
+
+//   bool status = false;
+//   Moderator *theModerator = Moderator::Instance();
+//
+//   if (paramName != "")
+//   {
+//      //-----------------------------------------------------------------
+//      //loj: 11/01/04 Until SetRefObject() is implemented, add parameter
+//      // if the parameter has been created and configured already
+//      //-----------------------------------------------------------------
+//      // get parameter pointer
+//      Parameter *param = theModerator->GetParameter(paramName);
+//      if (param != NULL)
+//      {
+//         mVarParamNames.push_back(paramName);
+//         mVarParamMap[paramName] = NULL;
+//         mNumVarParams = mVarParamNames.size();
+//
+//         mVarParamMap[paramName] = param;
+//         mVarParams.push_back(param);
+//         status = true;
+//      }
+//      else
+//      {
+//         MessageInterface::ShowMessage
+//            ("ReportFile::AddVarParameter() Unconfigured parameter:%s will not be "
+//             "added to ReportFile.\n", paramName.c_str());
+//      }
+//   }
+//
+//   return status;
 }
 
 //--------------------------------------

@@ -51,6 +51,9 @@ public:
                       
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+
+   virtual bool TakeAction(const std::string &action,
+                           const std::string &actionData = "");
    
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -61,21 +64,32 @@ public:
    virtual Integer     GetIntegerParameter(const Integer id) const;
    virtual Integer     SetIntegerParameter(const Integer id,
                                           const Integer value);
+
    virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool        SetStringParameter(const Integer id,
-                                          const std::string &value);
-                                          
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value);
+
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
    
-   virtual bool GetBooleanParameter(const Integer id) const;
-   virtual bool GetBooleanParameter(const std::string &label) const;
-   virtual bool SetBooleanParameter(const Integer id, const bool value);
-   virtual bool SetBooleanParameter(const std::string &label,
-                                    const bool value);
+
+   //arg: 11/16/04 added
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
+
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
 
    Integer GetNumVarParameters();
-   bool AddVarParameter(const std::string &paramName);
+   bool AddVarParameter(const std::string &paramName, Integer index);
    
 protected:
    /// Name of the report file
@@ -102,7 +116,6 @@ protected:
 //   std::ofstream       stateStream;  //output data for state
 
    std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
-   std::map<std::string, Parameter*> mVarParamMap;
 
    Integer mNumVarParams;
 
@@ -124,9 +137,7 @@ private:
     {
 		FILENAME = SubscriberParamCount,
       PRECISION,
-      VAR_LIST,
       ADD,
-      CLEAR,
       WRITE_HEADERS,
       COL_WIDTH,
 //      WRITE_STATE_FILE,
