@@ -73,9 +73,14 @@ public:
    virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
+
    virtual std::string GetStringParameter(const Integer id) const;
-   const StringArray& GetStringArrayParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label, 
+                                   const std::string &value);
+
+   const StringArray& GetStringArrayParameter(const Integer id) const;
     
    virtual std::string GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
@@ -124,7 +129,7 @@ protected:
       // EPOCH_ID = SpaceObjectParamCount, 
       ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, 
       ELEMENT4_ID, ELEMENT5_ID, ELEMENT6_ID, 
-      STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
+      STATE_TYPE_ID, ANOMALY_ID, BODY_ID, FRAME_ID, PLANE_ID, 
       DRY_MASS_ID,DATE_FORMAT_ID, CD_ID, CR_ID, DRAG_AREA_ID, SRP_AREA_ID,
       FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
       SC_ParamCount
@@ -144,12 +149,12 @@ protected:
    Real           dragArea;
    Real           srpArea;
    Real           reflectCoeff;
-   std::string    subType;      // @todo will add it later
    std::string    dateFormat;
-   std::string    stateType;   
-   std::string    refBody; 
-   std::string    refFrame;   
-   std::string    refPlane; 
+   std::string    stateType;
+   std::string    anomalyType;
+   std::string    refBody;
+   std::string    refFrame;
+   std::string    refPlane;
    
    // for non-internal spacecraft information
    SolarSystem    *solarSystem;
