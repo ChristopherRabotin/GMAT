@@ -80,6 +80,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    integratorString = "RKV 8(9)";
     
    forceList.clear();
+   pmForceList.clear();
    gravModelArray.clear();
    dragModelArray.clear();
    magfModelArray.clear();
@@ -115,15 +116,16 @@ PropagationConfigPanel::~PropagationConfigPanel()
 {
    for (unsigned int i=0; i<forceList.size(); i++)
       delete forceList[i];
-   
+   for (unsigned int i=0; i<pmForceList.size(); i++)
+      delete pmForceList[i]; 
+        
    gravModelArray.clear();
    dragModelArray.clear();
    magfModelArray.clear();
 
    primaryBodiesArray.Clear();
-   savedBodiesArray.Clear();
-   pointmassBodiesArray.Clear();    
-   primaryBodiesGravityArray.Clear();
+//   savedBodiesArray.Clear(); 
+//   primaryBodiesGravityArray.Clear();
    integratorArray.Clear();
 }
 
@@ -263,6 +265,15 @@ void PropagationConfigPanel::SaveData()
       //----------------------------------------------------
       // save gravity force model
       //----------------------------------------------------
+      // Secondary bodies
+      for (unsigned int i=0; i<pmForceList.size(); i++)
+      {
+         thePMF = new PointMassForce();
+         thePMF->SetBodyName(pmForceList[i]->bodyName);
+         pmForceList[i]->pmf = thePMF;
+         newFm->AddForce(thePMF);
+      }
+      // Primary bodies
       for (unsigned int i=0; i<forceList.size(); i++)
       {
          if (forceList[i]->gravType == gravModelArray[POINT_MASS])
@@ -457,21 +468,21 @@ void PropagationConfigPanel::Initialize()
       Integer paramId;
       PhysicalModel *force;
       //CelestialBody *body;
-      std::string typeName;
+//      std::string typeName;
       std::string bodyName;
       wxString tempStr;
       
       for (Integer i = 0; i < numOfForces; i++)
       {
          force = theForceModel->GetForce(i);
-         typeName = force->GetTypeName();
+//         typeName = force->GetTypeName();
             
          if (force->GetTypeName() == "PointMassForce")
          {
             thePMF = (PointMassForce *)force;
             bodyName = thePMF->GetStringParameter("BodyName");
             primaryBodiesArray.Add(bodyName.c_str());
-            primaryBodiesGravityArray.Add(typeName.c_str());                    
+//            primaryBodiesGravityArray.Add(typeName.c_str());                    
 
             currentBodyId = FindBody(bodyName, gravModelArray[POINT_MASS]);
             forceList[currentBodyId]->bodyName = bodyName;
@@ -484,7 +495,7 @@ void PropagationConfigPanel::Initialize()
             bodyName = theGravForce->GetStringParameter("BodyName");
             potFilename = theGravForce->GetStringParameter("Filename");
             primaryBodiesArray.Add(bodyName.c_str());
-            primaryBodiesGravityArray.Add(typeName.c_str());                    
+//            primaryBodiesGravityArray.Add(typeName.c_str());                    
 
             GravModelType gravModelType;
             if (potFilename.find("JGM2") != std::string::npos)
@@ -556,14 +567,14 @@ void PropagationConfigPanel::Initialize()
          for (Integer i = 0; i < (Integer)ss.size(); i++)
          {
             primaryBodiesArray.Add(ss[i].c_str());
-            primaryBodiesGravityArray.Add("NULL");
+//            primaryBodiesGravityArray.Add("NULL");
          }
       }
          
       primaryBodyString = primaryBodiesArray.Item(0).c_str();
       currentBodyName = std::string(primaryBodyString.c_str());
       currentBodyId = FindBody(currentBodyName);
-      savedBodiesArray = primaryBodiesArray;
+//      savedBodiesArray = primaryBodiesArray;
 
 #if DEBUG_PROP_PANEL
       MessageInterface::ShowMessage("primaryBodyString=%s\n", primaryBodyString.c_str());
@@ -1363,11 +1374,12 @@ void PropagationConfigPanel::OnAddBodyButton()
       wxString magfDegree;
       wxString magfOrder;
       std::string potFilename;
-      PointMassForce *pmf;
-      GravityField *gravf;
-      DragForce *dragf;
-      SolarRadiationPressure *srpf;
-      bool useSrp;
+      PointMassForce *pmf = NULL;
+      GravityField *gravf =  NULL;
+      DragForce *dragf = NULL;
+      SolarRadiationPressure *srpf = NULL;
+      bool useSrp = false;
+      bool isPrimaryBody = true;
                  
       fl = forceList;
       forceList.clear();
@@ -1399,6 +1411,7 @@ void PropagationConfigPanel::OnAddBodyButton()
                   dragf = fl[j]->dragf;
                   srpf = fl[j]->srpf;
                   useSrp = fl[j]->useSrp;
+                  isPrimaryBody = true;
                }            
                else
                {
@@ -1414,7 +1427,8 @@ void PropagationConfigPanel::OnAddBodyButton()
                   gravf = NULL;
                   dragf = NULL;
                   srpf = NULL;
-                  useSrp = false;            
+                  useSrp = false;       
+                  isPrimaryBody = true; 
                }
             }
             forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
@@ -1429,6 +1443,7 @@ void PropagationConfigPanel::OnAddBodyButton()
             forceList[i]->dragf = dragf;
             forceList[i]->srpf = srpf;
             forceList[i]->useSrp = useSrp;
+            forceList[i]->isPrimaryBody = isPrimaryBody;
             
             primaryBodiesArray.Add(bodyName.c_str());
          }
@@ -1459,6 +1474,7 @@ void PropagationConfigPanel::OnAddBodyButton()
                   dragf = fl[j]->dragf;
                   srpf = fl[j]->srpf;
                   useSrp = fl[j]->useSrp;
+                  isPrimaryBody = true;
                   
                   forceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
                   
@@ -1472,6 +1488,7 @@ void PropagationConfigPanel::OnAddBodyButton()
                   forceList[i]->dragf = dragf;
                   forceList[i]->srpf = srpf;
                   forceList[i]->useSrp = useSrp;
+                  forceList[i]->isPrimaryBody = isPrimaryBody;
                   
                   primaryBodiesArray.Add(bodyName.c_str());
                }            
@@ -1584,20 +1601,108 @@ void PropagationConfigPanel::OnMagSearchButton()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnPMEditButton()
 {
-   CelesBodySelectDialog bodyDlg(this, primaryBodiesArray);
+   wxArrayString selectedBodies;
+   selectedBodies.Clear();
+   
+   if (!primaryBodiesArray.IsEmpty())
+   {
+      for (Integer i = 0; i < primaryBodiesArray.GetCount(); i++)
+         selectedBodies.Add(primaryBodiesArray.Item(i));
+   }
+   
+   if (!secondaryBodiesArray.IsEmpty())
+   {
+      for (Integer i = 0; i < secondaryBodiesArray.GetCount(); i++)
+         selectedBodies.Add(secondaryBodiesArray.Item(i));
+   }
+   
+   CelesBodySelectDialog bodyDlg(this, selectedBodies);
    bodyDlg.ShowModal();
-    
-   if (bodyDlg.IsBodySelected())
-   {        
-      wxArrayString &names = bodyDlg.GetBodyNames();
         
+   if (bodyDlg.IsBodySelected())
+   {
+      wxArrayString &names = bodyDlg.GetBodyNames();
+      
+      std::string bodyName;
+      std::string gravType;
+      std::string dragType;
+      std::string magfType;
+      wxString gravDegree;
+      wxString gravOrder;
+      wxString magfDegree;
+      wxString magfOrder;
+      std::string potFilename;
+      PointMassForce *pmf;
+      GravityField *gravf;
+      DragForce *dragf;
+      SolarRadiationPressure *srpf;
+      bool useSrp;
+      bool isPrimaryBody;
+      
+      pmForceList.clear();
+      secondaryBodiesArray.Clear();
+      pmEditTextCtrl->Clear();
+        
+      // Remove bodies from array that are already selected as primary body 
+      for (Integer i = 0; i < (Integer)names.GetCount(); i++)
+      {
+         for (Integer j = 0; j < bodyComboBox->GetCount(); j++)
+         {
+            std::string bName = bodyComboBox->GetString(j).c_str();
+            if (strcmp(names[i].c_str(), bName.c_str()) == 0)
+               names.Remove(names[i].c_str());
+         }    
+      }
+      
+      // Remove deselected bodies from array
+      bool isSelected = false;
+      for (Integer i = 0; i < (Integer)secondaryBodiesArray.GetCount(); i++)
+      {
+         isSelected = false;
+         for (Integer j = 0; j < (Integer)names.GetCount(); j++)
+         {
+            if (strcmp(secondaryBodiesArray[i].c_str(), names[j].c_str()) == 0)
+               isSelected = true;
+         }
+         if (!isSelected)
+            secondaryBodiesArray.Remove(secondaryBodiesArray[i].c_str());
+      }
+      
+      // Add bodies to pmForceList
       for (Integer i=0; i < (Integer)names.GetCount(); i++)
       {
+         bodyName = names[i].c_str();
+         gravType = gravModelArray[POINT_MASS];
+         dragType = dragModelArray[NONE_DM];
+         magfType = magfModelArray[NONE_MM];   
+         gravDegree = "4";
+         gravOrder = "4";
+         magfDegree = "0";
+         magfOrder = "0";
+         potFilename = "";
+         pmf = NULL;
+         gravf = NULL;
+         dragf = NULL;
+         srpf = NULL;
+         useSrp = false;       
+         isPrimaryBody = false; 
+
+         pmForceList.push_back(new ForceType(bodyName, gravType, dragType, magfType));
+         pmForceList[i]->gravDegree = gravDegree;
+         pmForceList[i]->gravOrder = gravOrder;
+         pmForceList[i]->magfDegree = magfDegree;
+         pmForceList[i]->magfOrder = magfOrder;
+         pmForceList[i]->potFilename = potFilename;
+         pmForceList[i]->pmf = pmf;
+         pmForceList[i]->gravf = gravf;
+         pmForceList[i]->dragf = dragf;
+         pmForceList[i]->srpf = srpf;
+         pmForceList[i]->useSrp = useSrp;
+         pmForceList[i]->isPrimaryBody = isPrimaryBody;
+            
+         secondaryBodiesArray.Add(bodyName.c_str());
          pmEditTextCtrl->AppendText(names[i] + " ");
-         currentBodyName = std::string(names[i].c_str());
-         currentBodyId = FindBody(currentBodyName);
-         forceList[currentBodyId]->bodyName = currentBodyName;         
-      }
+      } 
       theApplyButton->Enable(true);
       isForceModelChanged = true;
    }

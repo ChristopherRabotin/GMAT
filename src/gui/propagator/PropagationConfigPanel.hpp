@@ -94,6 +94,7 @@ private:
       DragForce *dragf;
       SolarRadiationPressure *srpf;
       bool useSrp;
+      bool isPrimaryBody;
       
       ForceType(const std::string &body, const std::string &grav,
                 const std::string &drag, const std::string &mag)
@@ -168,9 +169,9 @@ private:
    StringArray magfModelArray;
    
    wxArrayString primaryBodiesArray;
-   wxArrayString savedBodiesArray;
-   wxArrayString pointmassBodiesArray;    
-   wxArrayString primaryBodiesGravityArray;
+   wxArrayString secondaryBodiesArray;
+//   wxArrayString savedBodiesArray;   
+//   wxArrayString primaryBodiesGravityArray;
    wxArrayString integratorArray;
     
    Integer numOfBodies;
@@ -198,6 +199,7 @@ private:
    std::vector<PointMassForce *>  thePMForces;
    //std::vector<CelestialBody *>   theBodies;
    std::vector<ForceType*> forceList;
+   std::vector<ForceType*> pmForceList;
 
    // methods inherited from GmatPanel
    virtual void Create();
