@@ -478,14 +478,14 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
     if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC")
        return state3ID;
 
-    if (str == "Element4" || str == "Vx" || str == "RAAN" || str == "VMAG") 
+    if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG") 
        return state4ID;
 
-    if (str == "Element5" || str == "Vy" || str == "AOP" || str == "AZI" 
+    if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" 
         || str == "RAV")
        return state5ID;
 
-    if (str == "Element6" || str == "Vz" || str == "TA" || str == "FPA" 
+    if (str == "Element6" || str == "VZ" || str == "TA" || str == "FPA" 
         || str == "DECV") 
        return state6ID;
 
@@ -718,9 +718,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == state1ID) return SetRealParameter("X",value); 
        if (id == state2ID) return SetRealParameter("Y",value); 
        if (id == state3ID) return SetRealParameter("Z",value); 
-       if (id == state4ID) return SetRealParameter("Vx",value); 
-       if (id == state5ID) return SetRealParameter("Vy",value); 
-       if (id == state6ID) return SetRealParameter("Vz",value); 
+       if (id == state4ID) return SetRealParameter("VX",value); 
+       if (id == state5ID) return SetRealParameter("VY",value); 
+       if (id == state6ID) return SetRealParameter("VZ",value); 
     }
     else if (displayCoordType == "Keplerian" || displayCoordType == "ModifiedKeplerian")
     {
@@ -853,7 +853,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[2] = value;
     }
 
-    if (label == "Vx" || label == "RAAN" || label == "VMAG")  
+    if (label == "VX" || label == "RAAN" || label == "VMAG")  
     {
        displayState[3] = value;
 
@@ -871,7 +871,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[3] = value;
     }
 
-    if (label == "Vy" || label == "AOP" || label == "AZI" || label == "RAV")  
+    if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV")  
     {
        displayState[4] = value;
 
@@ -889,7 +889,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        //return state[4] = value;
     }
 
-    if (label == "Vz" || label == "TA" || label == "FPA" || label == "DECV")  
+    if (label == "VZ" || label == "TA" || label == "FPA" || label == "DECV")  
     {
        displayState[5] = value;
 
@@ -1692,9 +1692,9 @@ std::string Spacecraft::GetElementName(const Integer id) const
        if (id == state1ID) return("X");  
        if (id == state2ID) return("Y");  
        if (id == state3ID) return("Z");  
-       if (id == state4ID) return("Vx");  
-       if (id == state5ID) return("Vy");  
-       if (id == state6ID) return("Vz");  
+       if (id == state4ID) return("VX");  
+       if (id == state5ID) return("VY");  
+       if (id == state6ID) return("VZ");  
     }
     else if (localCoordType == "Keplerian")
     {
