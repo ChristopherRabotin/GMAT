@@ -17,7 +17,11 @@ GUIHEADERS = -I../../gui/include \
         -I../../gui/plot \
         -I../../gui/mission
 
-OBJECTS = Moderator.o Sandbox.o SandboxException.o Publisher.o
+OBJECTS = FileManager.o \
+          Moderator.o \
+          Publisher.o \
+          Sandbox.o \
+          SandboxException.o 
 
 CONSOLE_INTERFACE_OBJECTS = MessageInterfaceConsole.o PlotInterfaceConsole.o
 GUI_INTERFACE_OBJECTS = MessageInterfaceGUI.o PlotInterfaceGUI.o

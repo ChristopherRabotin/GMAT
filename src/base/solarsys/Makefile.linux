@@ -3,14 +3,22 @@
 
 HEADERS = -I../include -I../foundation -I../util -I../forcemodel -I../spacecraft
 
-OBJECTS = CelestialBody.o SolarSystem.o Moon.o Planet.o Star.o \
-          PlanetaryEphem.o PlanetaryEphemException.o SlpFile.o \
+OBJECTS = AtmosphereException.o \
           AtmosphereManager.o \
-          AtmosphereException.o \
           AtmosphereModel.o \
+          CelestialBody.o \
+          DeFile.o \
           ExponentialAtmosphere.o \
+          Moon.o \
           msise90.o \
-          Msise90Atmosphere.o
+          Msise90Atmosphere.o \
+          Planet.o \
+          PlanetaryEphem.o \
+          PlanetaryEphemException.o \
+          SlpFile.o \
+          SolarSystem.o \
+          SolarSystemException.o \
+          Star.o
 
 all: libSolarSystem 
 	mkdir -p ../lib

@@ -39,6 +39,14 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 const Integer DeFile::SUN_ID              = 10;
 const Integer DeFile::MERCURY_ID          = 0;
 const Integer DeFile::VENUS_ID            = 1;
