@@ -25,6 +25,8 @@
 #include "GmatAppData.hpp"
 #include "GmatMainNotebook.hpp"
 #include "CelesBodySelectDialog.hpp"
+#include "ExponentialDragDialog.hpp"
+#include "MSISE90Dialog.hpp"
 #include "PropagationConfigPanel.hpp"
 
 // base includes
@@ -934,7 +936,24 @@ void PropagationConfigPanel::OnGravSearchButton()
 
 void PropagationConfigPanel::OnSetupButton()
 {
-    applyButton->Enable(true);
+    wxString atmosTypeString = atmosComboBox->GetStringSelection();
+    
+    if ( atmosTypeString.CmpNoCase("Exponential") == 0 )
+    {
+        wxString name = wxT("Exponential");
+        ExponentialDragDialog dragDlg(this, name);
+        dragDlg.ShowModal();
+    
+        applyButton->Enable(true);
+    }
+    else if ( atmosTypeString.CmpNoCase("MISISE-90") == 0 )
+    {
+        wxString name = wxT("MISISE-90");
+        MSISE90Dialog dragDlg(this, name);
+        dragDlg.ShowModal();
+    
+        applyButton->Enable(true);
+    }
 }
 
 void PropagationConfigPanel::OnMagSearchButton()
