@@ -791,10 +791,27 @@ void CallFunction::SendInParam(Parameter *param)
      //status =  
      MatlabInterface::EvalString(inParamString);
   }
+  else if (param->GetTypeName() == "String")
+  {
+#if DEBUG_CALL_FUNCTION
+     MessageInterface::ShowMessage("Parameter type is string\n");
+#endif
+       
+     StringVar *stringVar = (StringVar *)param;
+     std::string inParamString = param->GetName() +" = '" + 
+                               stringVar->GetString() +"';";
+#if DEBUG_CALL_FUNCTION
+     MessageInterface::ShowMessage("Message sent to matlab: %s\n",
+           inParamString.c_str());
+#endif
+
+     //status =  
+     MatlabInterface::EvalString(inParamString);
+  }
   else
   {
 #if DEBUG_CALL_FUNCTION
-     MessageInterface::ShowMessage("Parameter type is not array: %s\n",
+     MessageInterface::ShowMessage("Parameter type is not array or string: %s\n",
            param->GetTypeName().c_str());
 #endif
      try
@@ -829,7 +846,7 @@ void CallFunction::GetOutParams()
    for (unsigned int i=0; i<mOutputList.size(); i++)
    {
       Parameter *param = (Parameter *)mOutputList[i];
-      MessageInterface::ShowMessage("Out param type = %s\n", param->GetTypeName().c_str());
+//      MessageInterface::ShowMessage("Out param type = %s\n", param->GetTypeName().c_str());
 
       if (param->GetTypeName() == "Array")
       {
@@ -862,42 +879,45 @@ void CallFunction::GetOutParams()
          // assign rmatrix to array
          array->SetRmatrixParameter("RmatValue", rmatrix);
       }
+      else if (param->GetTypeName() == "String")
+      {  
+         std::string varName = param->GetName();
+         double buffer[128];
+         
+//         MatlabInterface::GetVariable(varName, 128, buffer);         
+         // need to output string value to buffer
+         MatlabInterface::OutputBuffer((char *)buffer, 128);
+         MatlabInterface::EvalString(varName);
+         
+         // get rid of "var ="
+         char *ptr = strtok((char *)buffer, "=");
+         ptr = strtok(NULL, "\n");
+         
+         param->SetStringParameter("Expression", ptr);
+#if DEBUG_CALL_FUNCTION
+         MessageInterface::ShowMessage("Set the expression to %s\n", ptr);
+#endif
+      }  
       else
 //      if (param->GetTypeName() == "Variable")
       {
-//         try
-//         {
-            std::string varName = param->GetName();
-            
-            // set ans to this variable
-            MatlabInterface::EvalString(varName);
-            
-            double outArray[500];   // array size???
-  //          int status = 
-               MatlabInterface::GetVariable(varName, 1, outArray);
-//            MessageInterface::ShowMessage("The status is : %d\n", status);
-//            MessageInterface::ShowMessage("The varName is %s\n", varName.c_str());
-//            MessageInterface::ShowMessage("The outArray is %f\n", outArray[0]);
-            param->SetRealParameter("Param1", outArray[0]);
-            std::ostringstream ss;
-            ss << outArray[0];
-            param->SetStringParameter("Expression", ss.str());
+         std::string varName = param->GetName();
+         double outArray[500];   // array size???
+
+//          int status = 
+         MatlabInterface::GetVariable(varName, 1, outArray);
+         param->SetRealParameter("Param1", outArray[0]);
+         std::ostringstream ss;
+         ss << outArray[0];
+         param->SetStringParameter("Expression", ss.str());
+         
 #if DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
             MessageInterface::ShowMessage("The GetReal is %f\n", param->GetReal());
             MessageInterface::ShowMessage("The GetRealParameter is %f\n", param->GetRealParameter("Param1"));
 #endif
-//         }
-//         catch (BaseException &ex)
-//         {
-//            throw CommandException("Unknown parameter type\n");
-//         }
 
       }
-//      else
-//      {
-//         throw CommandException("Unknown parameter type\n");
-//      }
    }
 #endif  //__USE_MATLAB__
 }
@@ -975,11 +995,13 @@ bool CallFunction::InterpretAction(void)
 
 Integer CallFunction::GetNumInputParams()
 {
+   mNumInputParams = mInputList.size();
    return mNumInputParams;
 }
 
 Integer CallFunction::GetNumOutputParams()
 {
+   mNumOutputParams = mOutputList.size();
    return mNumOutputParams;
 }
 

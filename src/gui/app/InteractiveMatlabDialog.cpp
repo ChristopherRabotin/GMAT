@@ -322,20 +322,14 @@ void InteractiveMatlabDialog::SetupCommand()
 
    // clear out previous parameters
    theCmd->ClearObject(Gmat::PARAMETER);
+//   MessageInterface::ShowMessage("Cleared objects \n");
 
    // set input parameters
    for (unsigned int i=0; i<inputStrings.Count(); i++)
    {
-      try
-      {
-          Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
                 std::string(inputStrings[i]));
-          theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
-      }
-      catch (BaseException &ex)
-      {
-         throw ("Unknown parameter\n");
-      }
+      theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
    }
 
 //   MessageInterface::ShowMessage("Set input \n");
@@ -343,21 +337,12 @@ void InteractiveMatlabDialog::SetupCommand()
    // set output parameters
    for (unsigned int i=0; i<outputStrings.Count(); i++)
    {
-      try
-      {
-         Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
+      Parameter *parameter = (Parameter *)theGuiInterpreter->GetConfiguredItem(
                std::string(outputStrings[i]));
-         theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
-      }
-      catch (BaseException &ex)
-      {
-         throw ("Unknown parameter\n");
-      }
+      theCmd->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
    }
 
 //   MessageInterface::ShowMessage("Set output \n");
-
-
 }
 
 void InteractiveMatlabDialog::SetResults()
@@ -410,25 +395,22 @@ void InteractiveMatlabDialog::SetResults()
          outputTextCtrl->AppendText(paramString.c_str());
 
       }
+      else if (param->GetTypeName() == "String")
+      {
+         wxString paramString;
+         StringVar *stringVar = (StringVar *)param;
+         paramString.Printf("%s = %s\n", param->GetName().c_str(),
+                                           stringVar->GetString().c_str());
+         outputTextCtrl->AppendText(paramString);
+      }
       else
 //      if (param->GetTypeName() == "Variable")
       {
-         try
-         {
-            wxString paramString;
-            paramString.Printf("%s = %f\n", param->GetName().c_str(),
-                                             param->EvaluateReal());
-            outputTextCtrl->AppendText(paramString);
-         }
-         catch (BaseException &ex)
-         {
-//            throw BaseException("Unknown type");
-         }
+         wxString paramString;
+         paramString.Printf("%s = %f\n", param->GetName().c_str(),
+                                           param->EvaluateReal());
+         outputTextCtrl->AppendText(paramString);
       }
-//      else
-//      {
-//         MessageInterface::ShowMessage("not sure what param is \n");
-//      }
    }
 }
 

@@ -194,11 +194,16 @@ void CallFunctionPanel::Create()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::LoadData()
 {
+//   MessageInterface::ShowMessage("Loading data...\n"); 
+     
    std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
    functionComboBox->SetValue(objectName.c_str());
 
    int numInput = theCommand->GetNumInputParams();
    int numOutput = theCommand->GetNumOutputParams();
+   
+//   MessageInterface::ShowMessage("Number of input: %d, Number of output: %d\n", 
+//      numInput, numOutput);
 
    wxString cellValue = "";
    inputStrings.Clear();
@@ -257,6 +262,7 @@ void CallFunctionPanel::LoadData()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::SaveData()
 {
+//   MessageInterface::ShowMessage("Saving data...\n");
    wxString functionName = functionComboBox->GetStringSelection();
 
    // arg: for now to avoid a crash

@@ -26,6 +26,7 @@
 
 #include "Parameter.hpp"
 #include "Array.hpp"
+#include "StringVar.hpp"
 
 //#include <map>
 #include <iostream>
