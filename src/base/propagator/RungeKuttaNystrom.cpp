@@ -25,10 +25,10 @@
 // Development Environment   : Visual C++ 7.0
 // Modification History      : 1/21/03 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
-//				      Changes
+//                                    Changes
 //                           : 02/21/2004 - L. Ruley, Missions Applications Branch
-//				              - Updated style using GMAT cpp style guide
-//				              - All Real types to Real types
+//                                            - Updated style using GMAT cpp style guide
+//                                            - All Real types to Real types
 //                            - All int types to Integer types
 // **************************************************************************
 
@@ -62,8 +62,8 @@
 //RungeKuttaNystrom::RungeKuttaNystrom(const std::string &nomme) :
 //    RungeKutta (9, 8, "RungeKuttaNystrom", nomme)
 RungeKuttaNystrom::RungeKuttaNystrom(Integer st, Integer order, const std::string &typeStr,
-					   const std::string &nomme) :
-    RungeKutta          (9, 8, "", nomme),
+                                           const std::string &nomme) :
+    RungeKutta          (9, 8, typeStr, nomme),
     cdotj               (NULL),
     derivativeMap       (NULL),
     inverseMap          (NULL),
