@@ -50,7 +50,7 @@ bool Sandbox::AddObject(GmatBase *obj)
 
     std::string name = obj->GetName();
     if (name == "")
-        return false;		// No unnamed objects in the andbox tables
+        return false;		// No unnamed objects in the Sandbox tables
 
     // Check to see if the object is already in the map
     if (objectMap.find(name) == objectMap.end())
@@ -112,6 +112,7 @@ bool Sandbox::Initialize(void)
 {
     bool rv;
 
+    // Already initialized
     if (state == INITIALIZED)
         return true;
 
@@ -120,6 +121,7 @@ bool Sandbox::Initialize(void)
         return false;
 
     while (current) {
+        current->SetObjectMap(&objectMap);
         rv = current->Initialize();
         if (!rv)
             return false;

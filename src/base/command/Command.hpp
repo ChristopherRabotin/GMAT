@@ -29,6 +29,7 @@
 #include <algorithm>        // for find()
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "CommandException.hpp"
 
 
 // Forward references for classes that we'll have eventually

@@ -523,17 +523,19 @@ Integer Moderator::RunMission(Integer sandboxNum)
       AddSpacecraftToSandbox(sandboxNum-1);
       AddPropSetupToSandbox(sandboxNum-1);
       AddSubscriberToSandbox(sandboxNum-1);
-      InitializeSandbox(sandboxNum-1);
       AddCommandToSandbox(sandboxNum-1);
+      InitializeSandbox(sandboxNum-1);
       ExecuteSandbox(sandboxNum-1);
    }
    catch (BaseException &e)
    {
       // assign status
+      throw;
    }
    catch (...)
    {
       // assign status
+      throw;
    }
 
    return status;
@@ -604,15 +606,12 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
-   Command *cmd;
+   Command *cmd = commands[index]->GetNext();
 
-   while (true)
+   while (cmd != NULL)
    {
-      cmd = commands[index]->GetNext();
-      if (cmd != NULL)
-         sandboxes[index]->AddCommand(cmd);
-      else
-         break;
+      sandboxes[index]->AddCommand(cmd);
+      cmd = cmd->GetNext();
    }
 }
 

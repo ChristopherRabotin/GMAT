@@ -400,4 +400,10 @@ void PropSetup::Initialize()
       mInitialized = false;
    else if (mForceModel->GetNumForces() == 0)
       mInitialized = false;
+      
+   if (mInitialized == true) {
+      mPropagator->SetPhysicalModel(mForceModel);
+      mPropagator->Initialize();
+   }
 }
+

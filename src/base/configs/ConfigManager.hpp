@@ -56,7 +56,7 @@ class ConfigManager
         void                AddStopCondition(StopCondition* stopCond);
                                            
         bool                SetSolarSystemInUse(const std::string &name);
-        StringArray         GetListOfItems(Gmat::ObjectType itemType) const;
+        StringArray&        GetListOfItems(Gmat::ObjectType itemType);// const;
         bool                RemoveItem(Gmat::ObjectType type,
                                        const std::string &name);
         
@@ -92,6 +92,7 @@ class ConfigManager
 		
         std::vector<GmatBase*>
                             objects;
+        StringArray         listOfItems;
         std::map<std::string, GmatBase *>
                             mapping;
 };

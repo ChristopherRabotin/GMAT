@@ -144,10 +144,17 @@ bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 
 
 
-StringArray ConfigManager::GetListOfItems(Gmat::ObjectType itemType) const
+StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 {
-    StringArray strarr;
-    return strarr;
+    listOfItems.erase(listOfItems.begin(), listOfItems.end());
+    
+    std::vector<GmatBase*>::iterator current = (std::vector<GmatBase*>::iterator)(objects.begin());
+    while (current != (std::vector<GmatBase*>::iterator)(objects.end())) {
+        if ((*current)->GetType() == itemType)
+            listOfItems.push_back((*current)->GetName());
+        ++current;
+    }
+    return listOfItems;
 }
 
 

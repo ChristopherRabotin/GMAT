@@ -232,12 +232,16 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
 
 bool Propagate::Initialize(void)
 {
+    if (objectMap->find(propName) == objectMap->end())
+        throw CommandException("Propagate command cannot find Propagator Setup");
+    prop = (PropSetup *)((*objectMap)[propName]);
     if (!prop)
         return false;
     Propagator *p = prop->GetPropagator();
     if (!p)
-        return false;
+        throw CommandException("Propagator not set in PropSetup");
     p->Initialize();
+    initialized = true;
     return true;
 }
 
@@ -250,11 +254,14 @@ bool Propagate::Initialize(void)
 bool Propagate::Execute(void)
 {
     if (initialized == false)
-        return false;
+        throw CommandException("Propagate Command was not Initialized");
 
     Propagator *p = prop->GetPropagator();
-    p->Step();
-    
+    p->Initialize();
+    for (Integer i = 0; i < 30; ++i)
+        if (!p->Step())
+            throw CommandException("Propagator Failed to Step");
+
     return true;
 }
 
