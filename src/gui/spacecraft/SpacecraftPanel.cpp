@@ -23,18 +23,17 @@
 #include "SpacecraftPanel.hpp"
 #include "GmatAppData.hpp"
 
-#include "gmatdefs.hpp" //put this one after GUI includes
+#include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 #include "RealUtilities.hpp"
-
-#include "MessageInterface.hpp"
 
 #include <stdlib.h>
 
 //------------------------------
 // public methods
 //------------------------------
+
 //------------------------------------------------------------------------------
 // SpacecraftPanel(wxWindow *parent, const wxString &scName)
 //------------------------------------------------------------------------------
@@ -54,90 +53,102 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
     theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
     
     if (theSpacecraft != NULL)
-    {
+    {            
         Create();
         Show();
     }
-    else
-    {
-        // show error message
-    }
 }
 
+//------------------------------------------------------------------------------
+// ~SpacecraftPanel()
+//------------------------------------------------------------------------------
 SpacecraftPanel::~SpacecraftPanel()
 {
-    // need to delete child from list in mainFrame
- 
+// need to delete child from list in mainFrame
 //    delete(theBallisticMassPanel);
 //    delete(theOrbitPanel);
 //    delete(currentSpacecraft);
 }
 
-
 //-------------------------------
 // private methods
 //-------------------------------
+
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
 void SpacecraftPanel::Create()
 {
+    SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
     currentSpacecraft = new Spacecraft(*theSpacecraft);
-
-    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
     
+    // wxNotebook
     spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
                          wxDefaultSize, wxGROW );
-    sizer = new wxNotebookSizer( spacecraftNotebook );
- 
-    SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
-//    MessageInterface::ShowMessage
-//         ("SpacecraftPanel:: got the solar sys\n");
-    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft, 
-                                   theSolarSystem,
-                                   theApplyButton);
-    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
-
-    attitude = new wxPanel( spacecraftNotebook, -1 );
-    spacecraftNotebook->AddPage( attitude, wxT("Attitude") );
-
-    theBallisticMassPanel = 
-                    new BallisticsMassPanel(spacecraftNotebook, currentSpacecraft,
-                                    theApplyButton);
-    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
-
     actuators = new wxPanel( spacecraftNotebook, -1 );
-    spacecraftNotebook->AddPage( actuators, wxT("Actuators") );
-
-    sensors = new wxPanel( spacecraftNotebook, -1 );
+    actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition, 
+                         wxDefaultSize, wxGROW );
+    // wxNotebookSizer                     
+    spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
+    actuatorSizer = new wxNotebookSizer( actuatorNotebook );
+ 
+    // wxSizer
+    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
+    
+    //wx*Panel
+    attitude = new wxPanel( spacecraftNotebook, -1 ); 
+    sensors = new wxPanel( spacecraftNotebook, -1 );   
+    
+    theOrbitPanel = new OrbitPanel(spacecraftNotebook, currentSpacecraft, 
+                        theSolarSystem, theApplyButton);                        
+    theBallisticMassPanel = new BallisticsMassPanel(spacecraftNotebook, 
+                                currentSpacecraft, theApplyButton);
+    theTankPanel = new TankPanel(spacecraftNotebook, currentSpacecraft, 
+                       theApplyButton);
+    theThrusterPanel = new ThrusterPanel(actuatorNotebook, currentSpacecraft, 
+                       theApplyButton); 
+    // visuals = new wxPanel( mainNotebook, -1 );
+    
+    // Adding panels to notebook
+    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );                                                               
+    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
+    spacecraftNotebook->AddPage( attitude, wxT("Attitude") );
+    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
     spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
-
-    tanks = new wxPanel( spacecraftNotebook, -1 );
-    spacecraftNotebook->AddPage( tanks, wxT("Tanks") );
-
-//    visuals = new wxPanel( mainNotebook, -1 );
-    spacecraftNotebook->AddPage( tanks, wxT("Visualization") );
-
-    theGridSizer->Add(sizer, 1, wxGROW, 5);
-//    theMiddleSizer->Add(sizer, 0, wxGROW, 5);
+    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
+    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
+    //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );  
+    
+    theGridSizer->Add(spacecraftSizer, 1, wxGROW, 5);
     theMiddleSizer->Add(theGridSizer, 1, wxGROW, 5);
 }
 
-
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
 void SpacecraftPanel::LoadData()
 {
     theOrbitPanel->LoadData();
     theBallisticMassPanel->LoadData();
+    theTankPanel->LoadData();
+
     
     // explicitly disable apply button
     // it is turned on in each of the panels
     theApplyButton->Disable();
 }
 
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
     theOrbitPanel->SaveData();
     theBallisticMassPanel->SaveData();   
+    theTankPanel->SaveData();  
      
     // what's wrong with this?
-      // copy the current info into theSpacecraft
+    // copy the current info into theSpacecraft
     delete(theSpacecraft);
     theSpacecraft = new Spacecraft(*currentSpacecraft);
     

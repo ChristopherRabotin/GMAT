@@ -24,12 +24,16 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
-#include "GuiInterpreter.hpp"
-
-#include "Spacecraft.hpp"
-#include "GmatPanel.hpp"
 #include "BallisticsMassPanel.hpp"
 #include "OrbitPanel.hpp"
+#include "TankPanel.hpp"
+#include "ThrusterPanel.hpp"
+#include "GuiInterpreter.hpp"
+
+#include "gmatdefs.hpp"
+#include "Spacecraft.hpp"
+#include "FuelTank.hpp"
+
 
 class SpacecraftPanel: public GmatPanel
 {
@@ -37,8 +41,7 @@ public:
     SpacecraftPanel(wxWindow *parent, const wxString &scName);
     ~SpacecraftPanel();   
        
-private:
-
+private:    
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
@@ -48,6 +51,7 @@ private:
     //virtual void OnScript();
 
     GuiInterpreter *theGuiInterpreter;
+    
     Spacecraft *theSpacecraft;
     Spacecraft *currentSpacecraft;
     
@@ -73,15 +77,20 @@ private:
     wxStaticText *label6;
 
     wxNotebook *spacecraftNotebook;
-    wxNotebookSizer *sizer;
+    wxNotebook *actuatorNotebook;
+    
+    wxNotebookSizer *spacecraftSizer;
+    wxNotebookSizer *actuatorSizer;
+    
     wxPanel *attitude;
     wxPanel *actuators;
     wxPanel *sensors;
-    wxPanel *tanks;
     wxPanel *visuals;
     
     BallisticsMassPanel *theBallisticMassPanel;
     OrbitPanel *theOrbitPanel;
+    TankPanel *theTankPanel;
+    ThrusterPanel *theThrusterPanel;
        
     // IDs for the controls and the menu commands
     enum
