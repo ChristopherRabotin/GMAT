@@ -420,9 +420,10 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
       if (value == "On" || value == "Off")
       {
          mDrawWireFrame = (value == "On");
+#if DEBUG_OPENGL
          MessageInterface::ShowMessage
             ("OpenGlPlot::SetStringParameter() mDrawWireFrame=%d\n", mDrawWireFrame);
-             
+#endif
          return true;
       }
       else
@@ -441,9 +442,11 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 bool OpenGlPlot::SetStringParameter(const std::string &label,
                                     const std::string &value)
 {
+#if DEBUG_OPENGL
    MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
                                  "value = %s \n", label.c_str(), value.c_str());
-
+#endif
+   
    return SetStringParameter(GetParameterID(label), value);
 }
 
