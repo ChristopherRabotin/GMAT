@@ -17,24 +17,20 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
-/*
-ReportFile::ReportFile(char * filename)
-{
-    if (filename)
-        dstream.open(filename);
-    else
-        dstream.open("ReportFile.txt");
-}
-*/
+
+#define DEBUG_REPORTFILE 0
+
+//------------------------------------------------------------------------------
+// ReportFile(const std::string &name, const std::string &fileName)
+//------------------------------------------------------------------------------
 ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
-Subscriber      ("ReportFile", name),
-filename        (fileName),
-precision       (12),
-filenameID      (parameterCount),
-precisionID     (parameterCount + 1)
+   Subscriber      ("ReportFile", name),
+   filename        (fileName),
+   precision       (12),
+   filenameID      (parameterCount),
+   precisionID     (parameterCount + 1)
 {
    if (fileName != "")
       dstream.open(fileName.c_str());
@@ -46,12 +42,15 @@ precisionID     (parameterCount + 1)
    parameterCount += 2;
 }
 
+//------------------------------------------------------------------------------
+// ReportFile(const ReportFile &rf)
+//------------------------------------------------------------------------------
 ReportFile::ReportFile(const ReportFile &rf) :
-Subscriber      (rf),
-filename        (rf.filename),
-precision       (rf.precision),
-filenameID      (parameterCount),
-precisionID     (parameterCount + 1)
+   Subscriber      (rf),
+   filename        (rf.filename),
+   precision       (rf.precision),
+   filenameID      (parameterCount),
+   precisionID     (parameterCount + 1)
 {
    if (filename != "")
       dstream.open(filename.c_str());
@@ -64,58 +63,15 @@ precisionID     (parameterCount + 1)
 }
 
 
+//------------------------------------------------------------------------------
+// ~ReportFile(void)
+//------------------------------------------------------------------------------
 ReportFile::~ReportFile(void)
 {
-	dstream.flush();
-    dstream.close();
+   dstream.flush();
+   dstream.close();
 }
 
-
-bool ReportFile::Distribute(int len)
-{
-    if (!dstream.is_open())
-        if (!OpenReportFile())
-            return false;
-
-    if (len == 0)
-        dstream << data;
-    else
-        for (int i = 0; i < len; ++i)
-            dstream << data[i];
-
-    return true;
-}
-
-
-bool ReportFile::Distribute(const Real * dat, Integer len)
-{
-    if (!dstream.is_open())
-        if (!OpenReportFile())
-            return false;
-        
-    dstream.precision(precision);
-
-    if (len == 0)
-        return false;
-    else {
-        for (int i = 0; i < len-1; ++i)
-            dstream << dat[i] << "  ";
-        dstream << dat[len-1] << std::endl;
-    }
-
-    return true;
-}
-
-
-bool ReportFile::OpenReportFile(void)
-{
-     MessageInterface::ShowMessage("ReportFile() filename = %s\n", filename.c_str());
-
-    dstream.open(filename.c_str());
-    if (!dstream.is_open())
-        return false;
-    return true;
-}
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -132,87 +88,176 @@ GmatBase* ReportFile::Clone(void) const
    return (new ReportFile(*this));
 }
 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ReportFile::GetParameterText(const Integer id) const
 {
-    if (id == filenameID)
-        return "Filename";
-    if (id == precisionID)
-        return "Precision";
-    return Subscriber::GetParameterText(id);
+   if (id == filenameID)
+      return "Filename";
+   if (id == precisionID)
+      return "Precision";
+   return Subscriber::GetParameterText(id);
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
 Integer ReportFile::GetParameterID(const std::string &str) const
 {
-    if (str == "Filename")
-        return filenameID;
-    if (str == "Precision")
-        return precisionID;
-    return Subscriber::GetParameterID(str);
+   if (str == "Filename")
+      return filenameID;
+   if (str == "Precision")
+      return precisionID;
+   return Subscriber::GetParameterID(str);
 }
 
 
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
 Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 {
-    if (id == filenameID)
-        return Gmat::STRING_TYPE;
-    if (id == precisionID)
-        return Gmat::INTEGER_TYPE;
-    return Subscriber::GetParameterType(id);
+   if (id == filenameID)
+      return Gmat::STRING_TYPE;
+   if (id == precisionID)
+      return Gmat::INTEGER_TYPE;
+   return Subscriber::GetParameterType(id);
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ReportFile::GetParameterTypeString(const Integer id) const
 {
-    if (id == filenameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-    if (id == precisionID)
-        return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
-    return Subscriber::GetParameterTypeString(id);
+   if (id == filenameID)
+      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+   if (id == precisionID)
+      return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
+   return Subscriber::GetParameterTypeString(id);
 }
 
 
-
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
 Integer ReportFile::GetIntegerParameter(const Integer id) const
 {
-    if (id == precisionID)
-        return precision;
-    return Subscriber::GetIntegerParameter(id);
+   if (id == precisionID)
+      return precision;
+   return Subscriber::GetIntegerParameter(id);
 }
 
 
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
 Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
 {
-    if (id == precisionID) {
-        if (value > 0)
-            precision = value;
-        return precision;
-    }
-    return Subscriber::SetIntegerParameter(id, value);
+   if (id == precisionID)
+   {
+      if (value > 0)
+         precision = value;
+      return precision;
+   }
+   return Subscriber::SetIntegerParameter(id, value);
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
 std::string ReportFile::GetStringParameter(const Integer id) const
 {
-    if (id == filenameID)
-        return filename;
-    return Subscriber::GetStringParameter(id);
+   if (id == filenameID)
+      return filename;
+   return Subscriber::GetStringParameter(id);
 }
 
-
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
 bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
 {
-    if (id == filenameID) {
-        // Close the stream if it is open
-        if (dstream.is_open())
-        {
-           dstream.close();
-           dstream.open(value.c_str());
-        }
+   if (id == filenameID)
+   {
+      // Close the stream if it is open
+      if (dstream.is_open())
+      {
+         dstream.close();
+         dstream.open(value.c_str());
+      }
            
-        filename = value;
-        return true;
-    }
-    return Subscriber::SetStringParameter(id, value);
+      filename = value;
+      return true;
+   }
+   return Subscriber::SetStringParameter(id, value);
 }
+
+//--------------------------------------
+// protected methods
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+bool ReportFile::OpenReportFile(void)
+{
+#if DEBUG_REPORTFILE
+   MessageInterface::ShowMessage
+      ("ReportFile::OpenReportFile filename = %s\n", filename.c_str());
+#endif
+   
+   dstream.open(filename.c_str());
+   if (!dstream.is_open())
+      return false;
+   return true;
+}
+
+//--------------------------------------
+// methods inherited from Subscriber
+//--------------------------------------
+
+//------------------------------------------------------------------------------
+// bool Distribute(int len)
+//------------------------------------------------------------------------------
+bool ReportFile::Distribute(int len)
+{
+   if (!dstream.is_open())
+      if (!OpenReportFile())
+         return false;
+
+   if (len == 0)
+      dstream << data;
+   else
+      for (int i = 0; i < len; ++i)
+         dstream << data[i];
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Distribute(const Real * dat, Integer len)
+//------------------------------------------------------------------------------
+bool ReportFile::Distribute(const Real * dat, Integer len)
+{
+   if (!dstream.is_open())
+      if (!OpenReportFile())
+         return false;
+        
+   dstream.precision(precision);
+
+   if (len == 0)
+      return false;
+   else {
+      for (int i = 0; i < len-1; ++i)
+         dstream << dat[i] << "  ";
+      dstream << dat[len-1] << std::endl;
+   }
+
+   return true;
+}
+
 
