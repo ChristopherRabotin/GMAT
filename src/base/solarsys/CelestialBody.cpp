@@ -36,6 +36,7 @@
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
+#include "UtcDate.hpp"
 
 using namespace GmatMathUtil;
 using namespace std; 
@@ -44,7 +45,7 @@ using namespace std;
 // static data
 //---------------------------------
 const std::string
-CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount] =
+CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount] =
 {
    "BodyType",
    "Mass",
@@ -75,7 +76,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount] =
 };
 
 const Gmat::ParameterType
-CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount] =
+CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - GmatBaseParamCount] =
 {
 Gmat::STRING_TYPE,
 Gmat::REAL_TYPE,
@@ -199,14 +200,16 @@ hourAngle           (cb.hourAngle)//,
 //atmManager          (cb.atmManager),  
 //atmModel            (cb.atmModel)
 {
+   
    state                  = cb.state;
    stateTime              = cb.stateTime;
    angularVelocity        = cb.angularVelocity;
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
    atmManager             = new AtmosphereManager(instanceName);
-   atmModel               = atmManager->GetAtmosphere(
-                                    cb.atmModel->GetTypeName());
+   if (cb.atmModel) atmModel = atmManager->GetAtmosphere(
+                               cb.atmModel->GetTypeName());
+   else             atmModel = NULL;
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
@@ -613,6 +616,9 @@ const Rvector3& CelestialBody::GetAngularVelocity()
 //------------------------------------------------------------------------------
 Real  CelestialBody:: GetHourAngle(Real offset) 
 {
+   //Real offset = UtcDate::UtcUt1Offset();
+   //UtcDate ud = epoch.toUtcDate();  // assuming epoch is an A1Mjd time
+   //
    Real ghaEpoch = (/*epoch +*/ offset - 21545.5) / 100.0, gha;
 
    gha = fmod(100.4606184 + ghaEpoch * (36000.770053610 +
@@ -814,6 +820,29 @@ AtmosphereModel* CelestialBody::GetAtmosphereModel(const std::string &type)
       return atmModel;
       
    return atmManager->GetAtmosphere(type, false);
+}
+
+//------------------------------------------------------------------------------
+//  bool GetDensity(Real *position, Real *density, Real epoch, Integer count)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the atmospheric density at a specified location.
+ *
+ * Density if the core calculation provided by classes derived from this one.
+ * The outpur array, density, must contain the density at the requested
+ * locations, expressed in kg / m^3.
+ *
+ *  @param position  The input vector of spacecraft states
+ *  @param density   The array of output densities
+ *  @param epoch     The current TAIJulian epoch
+ *  @param count     The number of spacecraft contained in position
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::GetDensity(Real *position, Real *density, Real epoch,
+                               Integer count)
+{
+   if (!atmModel) return false;
+   return atmModel->Density(position,density,epoch,count);
 }
 
 //------------------------------------------------------------------------------
@@ -1124,8 +1153,8 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetParameterText(const Integer id) const
 {
-   if (id < CelestialBodyParamCount)
-      return PARAMETER_TEXT[id];
+   if (id >= GmatBaseParamCount && id < CelestialBodyParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
    return GmatBase::GetParameterText(id);
 }
 
@@ -1143,9 +1172,9 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer     CelestialBody::GetParameterID(const std::string &str) const
 {
-   for (Integer i = 0; i < CelestialBodyParamCount; i++)
+   for (Integer i = GmatBaseParamCount; i < CelestialBodyParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    
@@ -1166,8 +1195,8 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
 {
-   if (id < CelestialBodyParamCount)
-      return PARAMETER_TYPE[id];
+   if (id >= GmatBaseParamCount && id < CelestialBodyParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
       
    return GmatBase::GetParameterType(id);
 }

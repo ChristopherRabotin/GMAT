@@ -123,6 +123,9 @@ public:
    virtual const StringArray&   GetSupportedAtmospheres() const;
    virtual std::string          GetAtmosphereModelType();
    virtual AtmosphereModel*     GetAtmosphereModel(const std::string& type = "");
+   virtual bool                 GetDensity(Real *position, Real *density,
+                                        Real epoch = 21545.0,
+                                        Integer count = 1);
    
 
    // methods to return the body type, central body,
@@ -145,7 +148,6 @@ public:
    //                                             Real bodyPolarRad, Real bodyMu,
    //                                             Integer coeffSize, Rmatrix& bodySij,
    //                                             Rmatrix& bodyCij);
-
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string    GetParameterText(const Integer id) const;     // const?
@@ -192,7 +194,7 @@ public:
      * method so that copies can be made from a base class pointer.
      */
    //------------------------------------------------------------------------------
-   virtual CelestialBody* Clone(void) const = 0;
+   //virtual CelestialBody* Clone(void) const = 0;
 
    // strings representing the possible celestial body types
    static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
@@ -209,7 +211,7 @@ protected:
 
    enum
    {
-      BODY_TYPE = 0, // need Gmatbase::BaseParameterCount, in case something added to GmatBase
+      BODY_TYPE = GmatBaseParamCount, 
       MASS,
       EQUATORIAL_RADIUS,
       FLATTENING,
@@ -237,9 +239,9 @@ protected:
       SUPPORTED_ATMOS_MODELS,
       CelestialBodyParamCount
    };
-   static const std::string PARAMETER_TEXT[CelestialBodyParamCount];
+   static const std::string PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount];
 
-   static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - GmatBaseParamCount];
    
    // body type of the body
    Gmat::BodyType         bodyType;
