@@ -30,7 +30,7 @@
 #include <list>
 #include <string>
 #include "gmatdefs.hpp"
-#include "Gmatbase.hpp"
+#include "GmatBase.hpp"
 #include "CelestialBody.hpp"
 /**
  * SolarSystem class, containing pointers to all of the objects currently in

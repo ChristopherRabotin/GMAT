@@ -1,7 +1,7 @@
 # Makefile for GMAT Solar System library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include -I../foundation
+HEADERS = -I../include -I../foundation -I../util -I../forcemodel -I../spacecraft
 OBJECTS = CelestialBody.o SolarSystem.o
 
 all: libSolarSystem 
