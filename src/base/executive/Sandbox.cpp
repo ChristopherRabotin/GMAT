@@ -153,7 +153,7 @@ Spacecraft* Sandbox::GetSpacecraft(std::string name)
 // Execution methods
 bool Sandbox::Initialize(void)
 {
-    bool rv;
+    bool rv = false;
 
     // Already initialized
     if (state == INITIALIZED)
@@ -162,6 +162,16 @@ bool Sandbox::Initialize(void)
     current = sequence;
     if (!current)
         return false;
+        
+    // Set the solar system on each force model
+    if (solarSys) {
+        std::map<std::string, GmatBase *>::iterator omi;
+        for (omi = objectMap.begin(); omi != objectMap.end(); omi++) {
+            if ((omi->second)->GetType() == Gmat::PROP_SETUP)
+                ((PropSetup*)(omi->second))->GetForceModel()
+                                           ->SetSolarSystem(solarSys);
+        }
+    }
 
     while (current) {
         current->SetObjectMap(&objectMap);
