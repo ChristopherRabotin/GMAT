@@ -63,4 +63,3 @@ wxString GmatMdiChildFrame::GetTitle()
 {
    return title;
 }
-

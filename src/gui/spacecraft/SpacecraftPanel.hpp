@@ -38,8 +38,7 @@ public:
     ~SpacecraftPanel();   
        
 private:
-    void CreateNotebook(wxWindow *parent, const wxString &scName);
-    
+
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
