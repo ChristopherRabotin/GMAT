@@ -401,10 +401,20 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
       GmatBase *obj = mapping[oldName];
       if (obj->GetType() == type)
       {
-         mapping.erase(oldName);
-         mapping[newName] = obj;
-         obj->SetName(newName);
-         renamed = true;
+         // if newName does not exist, change name (loj: 11/19/04 - added)
+         if (mapping.find(newName) == mapping.end())
+         {
+            mapping.erase(oldName);
+            mapping[newName] = obj;
+            obj->SetName(newName);
+            renamed = true;
+         }
+         else
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "%s already exist, Please enter different name.\n",
+                newName.c_str());
+         }
       }
    }
    
