@@ -411,7 +411,7 @@ std::string PropSetup::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer PropSetup::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<PropSetupParamCount; i++)
+   for (int i=GmatBaseParamCount; i<PropSetupParamCount; i++)
    {
       if (str == PropSetup::PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
