@@ -58,9 +58,12 @@
 #include "PhysicalModel.hpp"
 #include "DerivativeList.hpp"
 #include "Spacecraft.hpp"
+#include "MessageInterface.hpp"
+#include "gmatdefs.hpp"
 
 #include <fstream>
 #include <vector>
+#include <string.h>
 
 class GMAT_API ForceModel : public PhysicalModel
 {
@@ -74,6 +77,13 @@ public:
     ForceModel&   operator=(const ForceModel& fdf);
 
     void AddForce(PhysicalModel *pPhyscialModel);
+    void DeleteForce(const std::string &name);
+    bool HasForce(const std::string &name);
+    Integer GetNumForces();
+    StringArray& GetForceTypeNames(); //loj: 3/4/04 added
+    std::string GetForceTypeName(Integer index);
+    void ClearSpacecraft(); //loj: 4/1/04 added
+    PhysicalModel* GetForce(Integer index);
     bool AddSpacecraft(Spacecraft *sc);
     void UpdateSpacecraft(Real newEpoch = -1.0);
     void UpdateFromSpacecraft(void);
@@ -85,14 +95,7 @@ public:
 
     bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
     Real EstimateError(Real *diffs, Real *answer) const;
-
-    Integer GetNumForces();
-    StringArray& GetForceTypeNames(); //loj: 3/4/04 added
-    std::string GetForceTypeName(Integer index);
-    void ClearSpacecraft(); //loj: 4/1/04 added
     
-    PhysicalModel* GetForce(Integer index);
-      
     virtual Integer GetParameterCount(void) const;
     
     // Access methods derived classes can override
@@ -112,10 +115,32 @@ public:
     virtual const StringArray& GetStringArrayParameter(const Integer id) const;
     virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
+    // new methods for future implementation
+    
+    
+    
+//    StringArray& GetForceTypeNames(); //loj: 2/11/04 added
+//    
+//    PhysicalModel* GetForce(const std::string &name) // should return the correct force
+//      { return NULL; }
+    //loj: 2/11/04 added
+//    PhysicalModel* GetForce(Integer index)
+//        { if (forceList.size() == 0)
+//              return NULL;
+//          else
+//              return forceList[index];
+//        }
+//    
+//    Integer GetNumForces() // should return the correct number of force
+//    { 
+//        return forceCount; 
+//    }
+    //loj: 2/11/04 { return 1; }
+
 protected:
 
     DerivativeList * derivatives;
-    Integer          forceCount;
+//    Integer          forceCount;  waw: 05/06/04
     Integer          numForces;
     
     Real estimationMethod;

@@ -48,6 +48,7 @@
 //===> loj: 3/30/04 NO changes - just commented out the debug statements for delivery
 
 #include "ForceModel.hpp"
+#include <string.h> // waw: added 03/10/04
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
 
@@ -107,7 +108,7 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 ForceModel::ForceModel(const std::string &nomme) :
     PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
     derivatives       (NULL),
-    forceCount        (0),  
+//    forceCount        (0),  waw: 05/06/04
     estimationMethod  (2.0),
     previousState     (NULL)
 {
@@ -170,6 +171,91 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
 }
 
 //------------------------------------------------------------------------------
+// void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
+//------------------------------------------------------------------------------
+/**
+ * Method used to add a new force to the force model
+ *
+ * This method takes the pointer to the new force and adds it to the force model
+ * list for later use.  Each force should supply first derivative information 
+ * for elements 4 through 6 of a state vector, and zeros for the first three 
+ * elements.  The forces should have the ability to act on state vectors for 
+ * formations as well, by filling in elements (6*n+4) through (6*n+6) for larger
+ * state vectors.
+ * 
+ * The force that is passed in is owned by this class (actually, by the member 
+ * DerivativeList), and should not ne destructed externally.  In addition, every 
+ * force that is passed to this class needs to have a copy constructor and an 
+ * assignment operator so that it can be cloned for distribution to multiple
+ * satellites.
+ * 
+ * @param pPhysicalModel        The force that is being added to the force model
+ */
+//------------------------------------------------------------------------------
+void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
+{
+    //MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
+    
+    if (pPhysicalModel == NULL)
+        return;
+
+    if (derivatives == NULL)
+        derivatives = new DerivativeList;
+
+    pPhysicalModel->SetDimension(dimension);
+
+    derivatives->AddForce(pPhysicalModel);
+    initialized = false;
+
+    forceList.push_back(pPhysicalModel);
+    numForces = forceList.size();
+    
+    //++forceCount;  waw: 05/06/04
+}
+
+//------------------------------------------------------------------------------
+// void DeleteForce(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Deletes force from the force model.
+ * @param    name   The force name to delete
+ */
+//------------------------------------------------------------------------------
+void ForceModel::DeleteForce(const std::string &name)
+{
+    std::vector<PhysicalModel *>::iterator force;
+    Integer i = 0;
+    for (force = forceList.begin(); force != forceList.end(); ++force) 
+    {
+        PhysicalModel *pm = forceList[i];
+        std::string pmName = pm->GetName().c_str();
+        
+        if ( strcmp(name.c_str(), pmName.c_str()) == 0 )
+        {
+            forceList.erase(force);
+            //delete pm;
+            numForces = forceList.size();
+            return;
+        }
+        i++;
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool HasForce(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Search force in the force model.
+ * @param  name The force name to look up
+ * @return true if force exists, else false
+ */
+//------------------------------------------------------------------------------
+bool ForceModel::HasForce(const std::string &name)
+{
+    return false; 
+}
+
+//------------------------------------------------------------------------------
 // Integer GetNumForces()
 //------------------------------------------------------------------------------
 Integer ForceModel::GetNumForces()
@@ -227,50 +313,6 @@ PhysicalModel* ForceModel::GetForce(Integer index)
     
     return NULL;
 }
-
-//------------------------------------------------------------------------------
-// void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
-//------------------------------------------------------------------------------
-/**
- * Method used to add a new force to the force model
- *
- * This method takes the pointer to the new force and adds it to the force model
- * list for later use.  Each force should supply first derivative information 
- * for elements 4 through 6 of a state vector, and zeros for the first three 
- * elements.  The forces should have the ability to act on state vectors for 
- * formations as well, by filling in elements (6*n+4) through (6*n+6) for larger
- * state vectors.
- * 
- * The force that is passed in is owned by this class (actually, by the member 
- * DerivativeList), and should not ne destructed externally.  In addition, every 
- * force that is passed to this class needs to have a copy constructor and an 
- * assignment operator so that it can be cloned for distribution to multiple
- * satellites.
- * 
- * @param pPhysicalModel        The force that is being added to the force model
- */
-//------------------------------------------------------------------------------
-void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
-{
-    //MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
-    
-    if (pPhysicalModel == NULL)
-        return;
-
-    if (derivatives == NULL)
-        derivatives = new DerivativeList;
-
-    pPhysicalModel->SetDimension(dimension);
-
-    derivatives->AddForce(pPhysicalModel);
-    initialized = false;
-
-    forceList.push_back(pPhysicalModel);
-    numForces = forceList.size();
-    
-    ++forceCount;  
-}
-
 
 //------------------------------------------------------------------------------
 // bool ForceModel::AddSpacecraft(Spacecraft *sc)
@@ -682,26 +724,12 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
     return retval;
 }
 
-
 //------------------------------------------------------------------------------
 // Integer GetParameterCount(void) const
 //------------------------------------------------------------------------------
 Integer ForceModel::GetParameterCount(void) const
 {
     return parameterCount;
-
-    //loj: 3/19/04 commented out
-//      Integer count = parameterCount;
-    
-//      DerivativeList *current = derivatives;
-//      while (current) 
-//      {
-//  //        count += current->GetDerivative()->GetParameterCount() + 1;
-//          ++count;
-//          current = current->Next();
-//      }
-    
-//      return count;
 }
 
 
@@ -715,20 +743,6 @@ std::string ForceModel::GetParameterText(const Integer id) const
         return PARAMETER_TEXT[id - PhysicalModelParamCount];
     else
         return PhysicalModel::GetParameterText(id);
-
-    //loj: 3/19/04 commented out
-//      Integer count = parameterCount + forceCount, i;
-      
-//      if ((id < count) && (id > 0)) {
-//          if (id >= parameterCount) {
-//              DerivativeList *current = derivatives;
-//              for (i = parameterCount; i < id; ++i)
-//                  current = current->Next();
-//              return current->GetDerivative()->GetTypeName();
-//          }
-//      }
-    
-//      return PhysicalModel::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -743,24 +757,6 @@ Integer ForceModel::GetParameterID(const std::string &str) const
     }
 
     return PhysicalModel::GetParameterID(str);
-    
-    //loj: 3/19/04 commented out
-//      Integer i;
-//      Integer retval = PhysicalModel::GetParameterID(str);
-//      if (retval == -1) {
-//          // could be a member force
-//          i = parameterCount;
-//          DerivativeList *current = derivatives;
-//          while (current) {
-//              if (current->GetDerivative()->GetTypeName() == str) {
-//                  retval = i;
-//                  break;
-//              }
-//              current = current->Next();
-//              ++i;
-//          }
-//      }
-//      return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -772,11 +768,6 @@ Gmat::ParameterType ForceModel::GetParameterType(const Integer id) const
         return PARAMETER_TYPE[id - PhysicalModelParamCount];
     else
         return PhysicalModel::GetParameterType(id);
-
-    //loj: 3/19/04 commented out
-//      if ((id >= parameterCount) && (id < parameterCount + forceCount)) 
-//          return Gmat::OBJECT_TYPE;
-//      return PhysicalModel::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -789,11 +780,6 @@ std::string ForceModel::GetParameterTypeString(const Integer id) const
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PhysicalModelParamCount)];
     else
         return PhysicalModel::GetParameterTypeString(id);
-
-    //loj: 3/19/04 commented out
-//      if ((id > parameterCount) && (id < parameterCount + forceCount)) 
-//          return PARAM_TYPE_STRING[Gmat::OBJECT_TYPE];
-//      return PhysicalModel::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -815,21 +801,6 @@ std::string ForceModel::GetStringParameter(const Integer id) const
     default:
         return PhysicalModel::GetStringParameter(id);
     }
-
-    //loj: 3/19/04 commented out
-//      Integer count = parameterCount + forceCount, i;
-      
-//      if ((id < count) && (id > 0)) {
-//          if (id >= parameterCount) {
-//              DerivativeList *current = derivatives;
-//              for (i = parameterCount; i < id; ++i)
-//                  current = current->Next();
-//              return current->GetDerivative()->GetTypeName();
-//          }
-//      }
-    
-//      return PhysicalModel::GetStringParameter(id);
-
 }
 
 //------------------------------------------------------------------------------
@@ -845,9 +816,6 @@ std::string ForceModel::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
-    //MessageInterface::ShowMessage("ForceModel::SetStringParameter() id = %d, value = %s\n",
-    //                              id, value.c_str());
-    
     switch (id)
     {
     case POINT_MASS:
@@ -875,17 +843,6 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
     default:
         return PhysicalModel::SetStringParameter(id, value);
     }
-
-    //loj: 3/19/04 commented out
-//      Integer count = parameterCount + forceCount;
-      
-//      if ((id < count) && (id > 0)) {
-//          if (id >= parameterCount) {     // Cannot set these yet
-//              return false;
-//          }
-//      }
-    
-//      return PhysicalModel::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
