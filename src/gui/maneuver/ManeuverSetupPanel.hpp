@@ -96,7 +96,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_BUTTON_OK,
+        ID_BUTTON_OK = 80000,
         ID_BUTTON_APPLY,
         ID_BUTTON_CANCEL,
         ID_BUTTON_HELP,
@@ -116,7 +116,7 @@ private:
         ID_STATIC_COORD,
         ID_STATIC_VECTOR,
 
-        ID_TEXT = 10000,
+        ID_TEXT,
         ID_TEXTCTRL
     };
 };

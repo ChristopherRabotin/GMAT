@@ -94,7 +94,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {
-        ID_TEXT = 20040,
+        ID_TEXT = 6000,
         ID_TEXTCTRL,
         ID_FILE_NAME,
         ID_RADIOBOX,     

@@ -70,7 +70,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 10003,
+        ID_TEXT = 6100,
         ID_LISTBOX,
         ID_BUTTON,
         ID_BUTTON_ADD,

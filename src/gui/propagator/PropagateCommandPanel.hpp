@@ -96,7 +96,7 @@ private:
 
     // Layout & data handling methods
     void Initialize();
-	void Setup(wxWindow *parent);
+        void Setup(wxWindow *parent);
     void GetData();
     void SetData();
     
@@ -107,33 +107,33 @@ private:
     // Combobox event method
     void OnComboSelection(wxCommandEvent& event);
 
-	// Button event methods
-	void OnButton(wxCommandEvent& event);
-	void CreateScript();
+        // Button event methods
+        void OnButton(wxCommandEvent& event);
+        void CreateScript();
     wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Popup menu event methods
     void ShowContextMenu(const wxPoint& pos);
 
-	// Grid table event methods
-	void OnCellValueChanged(wxGridEvent& event);
+        // Grid table event methods
+        void OnCellValueChanged(wxGridEvent& event);
     void OnCellRightClick(wxGridEvent& ev, wxMouseEvent& event);
-	void OnCellLeftClick(wxGridEvent& event);
-	void OnCellLeftDoubleClick(wxGridEvent& event);
-	void InsertPropagatorRow();
-	void InsertStopCondRow();
-	void ClearPropagatorTable();
-	void ClearStopCondTable();
-	void DeleteSelectedPropagatorRows();
-	void DeleteSelectedStopCondRows();
-		
+        void OnCellLeftClick(wxGridEvent& event);
+        void OnCellLeftDoubleClick(wxGridEvent& event);
+        void InsertPropagatorRow();
+        void InsertStopCondRow();
+        void ClearPropagatorTable();
+        void ClearStopCondTable();
+        void DeleteSelectedPropagatorRows();
+        void DeleteSelectedStopCondRows();
+                
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 10000,
+        ID_TEXT = 8400,
         ID_TEXTCTRL,
         ID_COMBO,
         ID_BUTTON,

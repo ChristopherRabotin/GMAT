@@ -21,7 +21,7 @@ namespace GmatPlot
 {
     enum XyEventType
     {
-        MDI_XY_QUIT = 200,
+        MDI_XY_QUIT = 92000,
         MDI_XY_OPEN_PLOT_FILE,
         MDI_XY_CLEAR_PLOT,
         MDI_XY_CHANGE_TITLE,

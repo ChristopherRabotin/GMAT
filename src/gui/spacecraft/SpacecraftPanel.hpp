@@ -141,7 +141,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {
-        ID_TEXT = 10000,
+        ID_TEXT = 30000,
         ID_COMBO,
         ID_TEXTCTRL,
         ID_NOTEBOOK,

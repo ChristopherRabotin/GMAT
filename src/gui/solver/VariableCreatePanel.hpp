@@ -79,9 +79,9 @@ private:
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
  
-	// Layout & data handling methods
-	void Setup(wxWindow *parent);
-	void Initialize();
+        // Layout & data handling methods
+        void Setup(wxWindow *parent);
+        void Initialize();
     void GetData();
     void SetData();
     void CreateScript();
@@ -93,15 +93,15 @@ private:
     // Combobox event method
     void OnComboSelection(wxCommandEvent& event);
 
-	// Button event methods
-	void OnButton(wxCommandEvent& event);
+        // Button event methods
+        void OnButton(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE();
 
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 10003,
+        ID_TEXT = 54000,
         ID_LISTBOX,
         ID_BUTTON,
         ID_COMBO,

@@ -67,7 +67,7 @@ private:
    
    enum
    {
-      POPUP_SWAP_BEFORE = 4000,
+      POPUP_SWAP_BEFORE = 25000,
       POPUP_SWAP_AFTER,
       POPUP_CUT,
       POPUP_COPY,
