@@ -17,9 +17,38 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
+// executive
+#include "Sandbox.hpp"
+#include "GuiInterpreter.hpp"
+#include "ScriptInterpreter.hpp"
+#include "FactoryManager.hpp"
+#include "ConfigManager.hpp"
+#include "Publisher.hpp"
+// core
+#include "PhysicalModel.hpp"
+#include "ForceModel.hpp"
+#include "Propagator.hpp"
+#include "Spacecraft.hpp"
+#include "Parameter.hpp"
+#include "StopCondition.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
+#include "PropSetup.hpp"
+#include "Command.hpp"
+#include "Subscriber.hpp"
+// factories
+#include "CommandFactory.hpp"
+#include "ForceModelFactory.hpp"
+#include "PhysicalModelFactory.hpp"
+#include "PropSetupFactory.hpp"
+#include "PropagatorFactory.hpp"
+#include "SpacecraftFactory.hpp"
+#include "StopConditionFactory.hpp"
+#include "SubscriberFactory.hpp"
+
 #include "BaseException.hpp"
-#include "Moderator.hpp"
 #include "NoOp.hpp"
+#include "Moderator.hpp"
 
 //---------------------------------
 // static data
@@ -72,7 +101,6 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 //------------------------------------------------------------------------------
 Moderator* Moderator::Instance()
 {
-//   if (instance = NULL)       // DJC: Changed to ==
    if (instance == NULL)
       instance = new Moderator;
    return instance;
@@ -113,6 +141,13 @@ bool Moderator::Initialize()
    theFactoryManager->RegisterFactory(theSpacecraftFactory);
    theFactoryManager->RegisterFactory(theStopConditionFactory);
    theFactoryManager->RegisterFactory(theSubscriberFactory);
+
+   // create default Spacecraft
+   Spacecraft *defaultSc = CreateSpacecraft("Spacecraft", "DefaultSC");
+
+   // create default SolarSystem
+   
+   return true; //loj: for now
    
    //loj: reads in initial files, such as, system parameters, default mission script file.
    //loj: calls ScriptInterpreter to interpret initial script and create necessary objects
