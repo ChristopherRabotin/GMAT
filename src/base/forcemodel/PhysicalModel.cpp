@@ -100,6 +100,7 @@ PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount] =
 {
    "Epoch",
    "ElapsedSeconds",
+   "BodyName",
 };
 
 const Gmat::ParameterType
@@ -107,6 +108,7 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -252,56 +254,52 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    return *this;
 }
 
-//  //------------------------------------------------------------------------------
-//  // CelestialBody* GetBody()
-//  //------------------------------------------------------------------------------
-//  /**
-//   * 
-//   */
-//  //------------------------------------------------------------------------------
-//  CelestialBody* PhysicalModel::GetBody()
-//  {
-//     return theBody;
-//  }
+//------------------------------------------------------------------------------
+// CelestialBody* GetBody()
+//------------------------------------------------------------------------------
+/**
+*
+ */
+//------------------------------------------------------------------------------
+CelestialBody* PhysicalModel::GetBody()
+{
+   return body;
+}
 
-//  //------------------------------------------------------------------------------
-//  // void SetBody(CelestialBody *body)
-//  //------------------------------------------------------------------------------
-//  /**
-//   *
-//   */
-//  //------------------------------------------------------------------------------
-//  void PhysicalModel::SetBody(CelestialBody *body)
-//  {  
-//      if (body != NULL)
-//      {
-//          if (theBody != NULL)
-//          {
-//              delete theBody;
-//          }
-//      }
-  
-//      theBody = body;
-//  //    mu = theBody->GetGravitationalConstant();
-//  }
+//------------------------------------------------------------------------------
+// CelestialBody* GetBodyName()
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+std::string PhysicalModel::GetBodyName()
+{
+   return bodyName;
+}
 
-//  //------------------------------------------------------------------------------
-//  // bool SetBody(const std::string &name)
-//  //------------------------------------------------------------------------------
-//  /**
-//   *
-//   */
-//  //------------------------------------------------------------------------------
-//  bool PhysicalModel::SetBody(const std::string &name)
-//  {
-//      CelestialBody *body = solarSystem->GetBody(name);
-//      if (body != NULL)
-//      {
-//          SetBody(body);
-//          return true;
-//      }
-//      return false;
-//  }
+//------------------------------------------------------------------------------
+// void SetBody(CelestialBody *body)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetBody(CelestialBody *theBody)
+{  
+   if (theBody != NULL)
+   {
+      if (body != NULL)
+      {
+            delete body;
+      }
+   }
+      
+   body = theBody;
+   bodyName = body->GetName();
+//    mu = theBody->GetGravitationalConstant();
+}
+
 
 //------------------------------------------------------------------------------
 // bool PhysicalModel::Initialize(void)
@@ -342,6 +340,39 @@ bool PhysicalModel::Initialize(void)
    }
   
    return initialized;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetBody(const std::string &theBody)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the body for this PhysicalModel object.
+ *
+ * @param <theBody> body name to use.
+ *
+ * @return flag indicating success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetBody(const std::string &theBody)
+{
+   bodyName = theBody;
+   // initialize the body
+   if (solarSystem == NULL) throw ForceModelException( // or just return false?
+                                                       "Solar System undefined for Harmonic Field.");
+   body = solarSystem->GetBody(bodyName);  // catch errors here?
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// void SetBodyName(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetBodyName(const std::string &theBody)
+{
+   bodyName = theBody;
 }
 
 //------------------------------------------------------------------------------
@@ -825,4 +856,94 @@ Real PhysicalModel::SetRealParameter(const Integer id, const Real value)
       return epoch;
    }
    return GmatBase::SetRealParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <id>  Integer ID for the parameter
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string PhysicalModel::GetStringParameter(const Integer id) const
+{
+   if (id == BODY_NAME) return bodyName;
+   return GmatBase::GetStringParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <id>    Integer ID for the parameter
+ * @param    <value> The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetStringParameter(const Integer id,
+                                       const std::string &value)
+{
+   if (id == BODY_NAME)
+   {
+      if (!solarSystem)
+      {
+         SetBodyName(value);
+         return true;
+      }
+      else
+      {
+         return SetBody(value);
+      }
+//      if (!solarSystem) throw ForceModelException(
+//          "In PhysicalModel, cannot set body, as no solar system has been set");
+//      if (value != bodyName)
+//      {
+//         body = solarSystem->GetBody(value);
+//         if (body)
+//         {
+//            bodyName = body->GetName();
+//            return true;
+//         }
+//         else      return false;
+//      }
+//      else return true;
+   }
+   return GmatBase::SetStringParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <label>  Integer ID for the parameter
+ *
+ * @return the value of the parameter
+ */
+//------------------------------------------------------------------------------
+std::string PhysicalModel::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to get a parameter value
+ *
+ * @param    <label> Integer ID for the parameter
+ * @param    <value> The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetStringParameter(const std::string &label,
+                                       const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
 }

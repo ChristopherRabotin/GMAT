@@ -75,7 +75,7 @@ PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
    "GravConst",
    "Radius",
    "EstimateMethod",
-   "Body",
+//   "Body",
 };
 
 const Gmat::ParameterType
@@ -85,7 +85,7 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::STRING_TYPE,
+//   Gmat::STRING_TYPE,
 };
 
 #define DEBUG_PMF_BODY 0
@@ -110,10 +110,10 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 {
    parameterCount = PointMassParamCount;
    dimension = 6 * satcount;
-   theBody = NULL;
+   body = NULL;
     
    // create default body
-   theBodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
+   bodyName = SolarSystem::EARTH_NAME; //loj: 5/20/04 added
 }
 
 //------------------------------------------------------------------------------
@@ -189,28 +189,28 @@ bool PointMassForce::Initialize(void)
     
    if (solarSystem != NULL)
    {
-      //MessageInterface::ShowMessage("PointMassForce::Initialize() theBodyName=%s\n",
-      //                              theBodyName.c_str());
+      //MessageInterface::ShowMessage("PointMassForce::Initialize() bodyName=%s\n",
+      //                              bodyName.c_str());
       
       //SetBodyName("Earth"); //loj: 5/7/04 commented out
-      theBody = solarSystem->GetBody(theBodyName); //loj: 5/7/04 added
+      body = solarSystem->GetBody(bodyName); //loj: 5/7/04 added
        
-      if (theBody != NULL)
+      if (body != NULL)
       {
-         mu = theBody->GetGravitationalConstant();
+         mu = body->GetGravitationalConstant();
          
 #if DEBUG_PMF_BODY
          MessageInterface::ShowMessage
             ("PointMassForce::Initialize() setting mu=%f for type=%s, "
-             "name=%s\n", mu, theBody->GetTypeName().c_str(), theBody->GetName().c_str());
+             "name=%s\n", mu, body->GetTypeName().c_str(), body->GetName().c_str());
 #endif
          
       }
       else
       {
-         MessageInterface::ShowMessage("PointMassForce::Initialize() theBody is NULL\n");
+         MessageInterface::ShowMessage("PointMassForce::Initialize() body is NULL\n");
          initialized = false;
-         throw ForceModelException("PointMassForce::Initialize() theBody is NULL\n");
+         throw ForceModelException("PointMassForce::Initialize() body is NULL\n");
          //return false;
       }
    }
@@ -284,11 +284,11 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
     
    //waw: 04/27/04
    Real now = epoch + dt/86400.0;
-   Rvector6 rv = theBody->GetState(now), relativePosition;
+   Rvector6 rv = body->GetState(now), relativePosition;
    
 #if DEBUG_PMF_BODY
    ShowBodyState("PointMassForce::GetDerivatives() BEFORE compute " +
-                 theBody->GetName(), now, rv);
+                 body->GetName(), now, rv);
 #endif
 
 #if DEBUG_PMF_DERV
@@ -443,65 +443,6 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
    }
 
    return retval;
-}
-
-//------------------------------------------------------------------------------
-// CelestialBody* GetBody()
-//------------------------------------------------------------------------------
-/**
- * 
- */
-//------------------------------------------------------------------------------
-CelestialBody* PointMassForce::GetBody()
-{
-   return theBody;
-}
-
-//------------------------------------------------------------------------------
-// std::string GetBodyName()
-//------------------------------------------------------------------------------
-/**
- * 
- */
-//------------------------------------------------------------------------------
-std::string PointMassForce::GetBodyName()
-{
-   return theBodyName;
-}
-
-//------------------------------------------------------------------------------
-// void SetBody(CelestialBody *body)
-//------------------------------------------------------------------------------
-/**
- *
- */
-//------------------------------------------------------------------------------
-void PointMassForce::SetBody(CelestialBody *body)
-{
-   //MessageInterface::ShowMessage("PointMassForce::SetBody() body name=%s\n",
-   //                              body->GetName().c_str());
-   
-   theBody = body;
-   if (theBody != NULL)
-   {
-      theBodyName = theBody->GetName();
-      //MessageInterface::ShowMessage("PointMassForce::SetBody() set theBodyName=%s\n",
-      //                              theBodyName.c_str());
-      //mu = theBody->GetGravitationalConstant();
-      //MessageInterface::ShowMessage("PointMassForce::SetBody() set mu=%f\n", mu);
-   }
-}
-
-//------------------------------------------------------------------------------
-// void SetBodyName(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- *
- */
-//------------------------------------------------------------------------------
-void PointMassForce::SetBodyName(const std::string &name)
-{
-   theBodyName = name;
 }
 
 //---------------------------------
@@ -667,8 +608,8 @@ std::string PointMassForce::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case BODY:
-      return theBodyName;
+  // case BODY:
+  //    return bodyName;
    default:
       return PhysicalModel::GetStringParameter(id);
    }
@@ -692,9 +633,9 @@ bool PointMassForce::SetStringParameter(const Integer id, const std::string &val
 
    switch (id)
    {
-   case BODY:
-      SetBodyName(value);
-      return true;
+   //case BODY:
+   //   SetBodyName(value);
+   //   return true;
    default:
       return PhysicalModel::SetStringParameter(id, value);
    }

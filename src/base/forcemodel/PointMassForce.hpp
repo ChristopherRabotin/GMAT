@@ -78,11 +78,11 @@ public:
    bool Initialize(void);
    virtual Real EstimateError(Real *diffs, Real *answer) const;
 
-   CelestialBody* GetBody();
-   std::string GetBodyName(); //loj: 5/7/04 added
+   //CelestialBody* GetBody();  // wcs: 2004/06/21 moved to PhysicalModel
+   //std::string GetBodyName(); //loj: 5/7/04 added
 
-   void SetBody(CelestialBody *body);
-   void SetBodyName(const std::string &name); //loj: 5/7/04 added
+   //void SetBody(CelestialBody *body);
+   //void SetBodyName(const std::string &name); //loj: 5/7/04 added
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -118,7 +118,7 @@ protected:
       //poleRadiusParameter,  
       /// Error estimate type: 1.0 for component estimate, 2.0 for vector
       ESTIMATE_METHOD,  
-      BODY,    
+      //BODY,    
       PointMassParamCount
    };
 
@@ -131,8 +131,8 @@ protected:
    Real epoch;
    /// Type of error estimate to perform
    Real estimationMethod;
-   CelestialBody *theBody;
-   std::string theBodyName; //loj: 5/6/04 added
+   //CelestialBody *theBody; // wcs - 2004/06/21 - exists in PhysicalModel
+   //std::string theBodyName; //loj: 5/6/04 added // wcs - 2004/06/21 - exists in PhysicalModel
 
    // for Debug
    void ShowBodyState(const std::string &header, Real time, Rvector6 &rv);

@@ -103,7 +103,7 @@ protected:
     
     // Optional input parameters used by atmospheric models
     /// Name of the body with the atmosphere
-    std::string         bodyName;
+    //std::string         bodyName;
     /// Type of input data -- "File" or "Constant"
     std::string         dataType;
     /// Solar flux file name

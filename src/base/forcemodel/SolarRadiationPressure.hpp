@@ -122,7 +122,7 @@ protected:
    //waw solarmodel::SolarData *ss;
 //   SolarSystem *theSolarSystem;
    CelestialBody *theSun;
-   CelestialBody *theCentralBody;
+   //CelestialBody *theCentralBody;
 
    /// Flag used to indicate using an analytic model to locate the Sun
    bool useAnalytic;

@@ -106,11 +106,11 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const std::string &nomme) :
-    PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
+PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
 //    derivatives       (NULL),  waw:  06/03/04
 //    forceCount        (0),  waw: 05/06/04
-    estimationMethod  (2.0),
-    previousState     (NULL)
+previousState     (NULL),
+estimationMethod  (2.0)
 {
     numForces = 0;
     dimension = 6;

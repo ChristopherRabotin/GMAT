@@ -128,10 +128,15 @@ public:
 
    virtual bool Initialize(void);
 
-   virtual Integer GetDimension(void);
-   virtual Real *  GetState(void);
-   const Real *    GetDerivativeArray(void);
+   virtual CelestialBody* GetBody();
+   virtual std::string    GetBodyName();
+   virtual Integer        GetDimension(void);
+   virtual Real *         GetState(void);
+   const Real *           GetDerivativeArray(void);
 
+   virtual bool SetBody(const std::string& theBody);
+   virtual void SetBodyName(const std::string& theBody);
+   virtual void SetBody(CelestialBody* toBody);
    virtual void SetDimension(Integer);
    virtual void SetState(const Real * st);
 
@@ -162,8 +167,19 @@ public:
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual Real GetRealParameter(const Integer id) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual bool        SetStringParameter(const Integer id,
+                                          const std::string &value);
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool        SetStringParameter(const std::string &label,
+                                          const std::string &value);
    
 protected:
+      
+   /// pointer to the body for which this force is computed
+   CelestialBody*          body;
+   /// name of the body
+   std::string             bodyName;
    /// Number of parameters being modeled
    Integer dimension;
    /// Flag used to tell the readiness of the model for use
@@ -191,6 +207,7 @@ protected:
    {
       EPOCH = GmatBaseParamCount, 
       ELAPSED_SECS,
+      BODY_NAME,
       PhysicalModelParamCount
    };
 

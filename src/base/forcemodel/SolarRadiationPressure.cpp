@@ -464,12 +464,15 @@ bool SolarRadiationPressure::Initialize(void)
          throw ForceModelException("Solar system does not contain the Sun for SRP force.");
 
       /// @todo: Update to get the central body for solar radiation pressure
-      theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+      //theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+      body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
 
-      if (!theCentralBody)
+      //if (!theCentralBody)
+      if (!body)
          throw ForceModelException("Central body not set for SRP force.");
-         
-      bodyRadius = theCentralBody->GetEquatorialRadius();
+
+      //bodyRadius = theCentralBody->GetEquatorialRadius();
+      bodyRadius = body->GetEquatorialRadius();
 
       if (forceVector)
          delete [] forceVector;
@@ -505,12 +508,15 @@ bool SolarRadiationPressure::SetCentralBody()
    // DJC: Changed to use the Earth as the SRP central body for now
    /// @todo: Update to get the central body for solar radiation pressure
 //   theCentralBody = theSun->GetCentralBody();
-   theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
-   
-   if (!theCentralBody)
+   //theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+   body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
+
+   //if (!theCentralBody)
+   if (!body)
       throw ForceModelException("Central body not set for SRP force.");
-   
-   bodyRadius = theCentralBody->GetEquatorialRadius();
+
+   //bodyRadius = theCentralBody->GetEquatorialRadius();
+   bodyRadius = body->GetEquatorialRadius();
 
    return true;
 }
@@ -529,8 +535,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
 
     if (!theSun)
        throw ForceModelException("The Sun is not set in SRP::GetDerivatives");
-    
-    if (!theCentralBody)
+
+    //if (!theCentralBody)
+      if (!body)
        throw ForceModelException("The central body is not set in SRP::GetDerivatives");
     
     if (!cbSunVector)
@@ -542,7 +549,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     
     Real ep = epoch + dt / 86400.0;
     Rvector6 sunrv = theSun->GetState(ep);
-    Rvector6 cbrv = theCentralBody->GetState(ep);
+    //Rvector6 cbrv = theCentralBody->GetState(ep);
+    Rvector6 cbrv = body->GetState(ep);
     cbSunVector[0] = sunrv[0] - cbrv[0];
     cbSunVector[1] = sunrv[1] - cbrv[1];
     cbSunVector[2] = sunrv[2] - cbrv[2];

@@ -78,7 +78,6 @@ public:
 
     virtual bool            Initialize(void);
     virtual bool            SetDegreeOrder(Integer degree, Integer order);
-    virtual bool            SetBody(const std::string &theBody);
     virtual bool            SetFilename(const std::string &fn);
     bool                    legendreP_rtq(Real *R );
 
@@ -114,7 +113,6 @@ protected:
       MAX_ORDER,
       DEGREE,
       ORDER,
-      BODY,
       FILENAME,
       HarmonicFieldParamCount
    };
@@ -125,10 +123,6 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[
       HarmonicFieldParamCount - PhysicalModelParamCount];
 
-   /// pointer to the body of th field
-   CelestialBody*          body;
-   /// name of the body
-   std::string bodyName;
    /// Flag indicating if the system has been initialized
    bool                    hMinitialized;  // inherit from PhysicalModel?
    /// Maximum degree for the field

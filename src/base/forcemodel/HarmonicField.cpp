@@ -56,7 +56,6 @@
 #include "Rmatrix.hpp"
 #include "MessageInterface.hpp"
 
-
 using namespace GmatMathUtil;
 
 
@@ -70,7 +69,6 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
    "MaxOrder",
    "Degree",
    "Order",
-   "Body",
    "Filename",
 };
 
@@ -81,7 +79,6 @@ Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
-Gmat::STRING_TYPE,
 Gmat::STRING_TYPE,
 };
 
@@ -104,7 +101,6 @@ Gmat::STRING_TYPE,
 HarmonicField::HarmonicField(const std::string &name, const std::string &typeName,
                              Integer maxDeg, Integer maxOrd) :
 PhysicalModel           (Gmat::PHYSICAL_MODEL, typeName, name),
-body                    (NULL),
 hMinitialized           (false),
 maxDegree               (maxDeg),
 maxOrder                (maxOrd),
@@ -161,8 +157,6 @@ HarmonicField::~HarmonicField(void)
 //------------------------------------------------------------------------------
 HarmonicField::HarmonicField(const HarmonicField& hf) :
 PhysicalModel           (hf),
-body                    (NULL),  // or do I want gf.body?????
-bodyName                (hf.bodyName),
 hMinitialized           (false),
 maxDegree               (hf.maxDegree),
 maxOrder                (hf.maxOrder),
@@ -196,8 +190,6 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
       return *this;
 
    PhysicalModel::operator=(hf);
-   body           = NULL;  // or do I want hf.body?
-   bodyName       = hf.bodyName;
    hMinitialized  = false;  // or hf.hMinitialized?
    maxDegree      = hf.maxDegree;
    maxOrder       = hf.maxOrder;
@@ -232,7 +224,7 @@ bool HarmonicField::Initialize(void)
    // initialize the body
    if (solarSystem == NULL) throw ForceModelException(
                             "Solar System undefined for Harmonic Field.");
-   body = solarSystem->GetBody(bodyName);
+   //body = solarSystem->GetBody(bodyName);
    return legendreP_init();
 }
 
@@ -274,27 +266,6 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
     }
 
     return retval;
-}
-
-//------------------------------------------------------------------------------
-//  bool SetBody(const std::string &theBody)
-//------------------------------------------------------------------------------
-/**
- * This method sets the body for this HarmonicField object.
- *
- * @param <theBody> body name to use.
- *
- * @return flag indicating success of the operation.
- */
-//------------------------------------------------------------------------------
-bool HarmonicField::SetBody(const std::string &theBody)
-{
-   bodyName = theBody;
-   // initialize the body
-   if (solarSystem == NULL) throw ForceModelException( // or just return false?
-                            "Solar System undefined for Harmonic Field.");
-   body = solarSystem->GetBody(bodyName);  // catch errors here?
-   return true;
 }
 
 
@@ -533,7 +504,6 @@ Integer HarmonicField::SetIntegerParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string HarmonicField::GetStringParameter(const Integer id) const
 {
-   if (id == BODY) return bodyName;
    if (id == FILENAME) return filename;
    return PhysicalModel::GetStringParameter(id);
 }
@@ -551,22 +521,6 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 bool HarmonicField::SetStringParameter(const Integer id,
                                        const std::string &value)
 {
-   if (id == BODY)
-   {
-      if (!solarSystem) throw ForceModelException(
-          "In HarmonicField, cannot set body, as no solar system has been set");
-      if (value != bodyName)
-      {
-         body = solarSystem->GetBody(value);
-         if (body)
-         {
-            bodyName = body->GetName();
-            return true;
-         }
-         else      return false;
-      }
-      else return true;
-   }
    if (id == FILENAME)
    {
       if (filename != value)
