@@ -18,6 +18,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
+#include <wx/string.h> // for wxArrayString
 
 class ParameterCreateDialog : public GmatDialog
 {
@@ -25,13 +26,16 @@ public:
     
    ParameterCreateDialog(wxWindow *parent);
 
-   wxString GetParamName()
-      { return mParamName; }
+   //wxString GetParamName()
+   //   { return mParamName; }
+   wxArrayString& GetParamNames() //loj: 9/27/04 return wxArrayString&
+      { return mParamNames; }
    bool IsParamCreated()
       { return mIsParamCreated; }
     
 private:
-   wxString mParamName;
+   //wxString mParamName;
+   wxArrayString mParamNames;
    bool mIsParamCreated;
    
    wxColour mColor;

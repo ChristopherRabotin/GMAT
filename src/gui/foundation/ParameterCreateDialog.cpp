@@ -21,7 +21,7 @@
 
 #include "wx/colordlg.h"   // for wxColourDialog
 
-#define DEBUG_PARAM_DIALOG 1
+//#define DEBUG_PARAM_DIALOG 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -43,7 +43,8 @@ END_EVENT_TABLE()
 ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
 {
-   mParamName = "";
+   //mParamName = "";
+   mParamNames.Clear();
    mIsParamCreated = false;
    mColor.Set(0, 0, 0); // initialize to black
    
@@ -320,19 +321,15 @@ void ParameterCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::SaveData()
 {
-   std::string objName = std::string(mObjectListBox->GetStringSelection().c_str());
    std::string varName = std::string(mNameTextCtrl->GetValue().c_str());
-   std::string varType = std::string(mPropertyListBox->GetStringSelection().c_str());
-   //std::string varDesc = std::string(mExprTextCtrl->GetValue().c_str());
    std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
 
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage
-      ("ParameterCreateDialog::SaveData() objName = " + objName +
-       " varName = " + varName + "varType = " + varType + "\n");
+      ("ParameterCreateDialog::SaveData() varName = "  + varName +
+       " varExpr = " + varExpr + "\n");
 #endif
    
-   //if (varName != "" && varDesc != "")
    if (varName != "" && varExpr != "")
    {
       // if new user variable to create
@@ -340,9 +337,7 @@ void ParameterCreateDialog::SaveData()
       {
          Parameter *param;
          
-         //param = theGuiInterpreter->CreateParameter(varType, varName);
          param = theGuiInterpreter->CreateParameter("Variable", varName);
-         //param->SetStringParameter("Description", varDesc); //loj: 9/23/04
          param->SetStringParameter("Expression", varExpr);
 
          // Parse the Parameter
@@ -370,7 +365,8 @@ void ParameterCreateDialog::SaveData()
              varName.c_str());
 #endif
          
-         mParamName = wxString(varName.c_str());
+         //mParamName = wxString(varName.c_str());
+         mParamNames.Add(varName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
 
