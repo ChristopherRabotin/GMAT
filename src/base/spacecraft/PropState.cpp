@@ -5,7 +5,7 @@
 PropState::PropState(Integer dim) :
    dimension      (dim)
 {
-   state = new Real[dim];
+   state = new Real[dimension];
 }
 
 
@@ -15,13 +15,27 @@ PropState::~PropState()
 }
 
 
-PropState::PropState(const PropState& ps)
+PropState::PropState(const PropState& ps) :
+   dimension      (ps.dimension)
 {
+   state = new Real[dimension];
+   for (Integer i = 0; i < dimension; ++i)
+      state[i] = ps.state[i];
 }
 
 
 PropState& PropState::operator=(const PropState& ps)
 {
+   if (this == &ps)
+      return *this;
+      
+   if (state)
+      delete [] state;
+   dimension = ps.dimension;
+   state = new Real[dimension];
+   for (Integer i = 0; i < dimension; ++i)
+      state[i] = ps.state[i];
+   
    return *this;
 }
 

@@ -21,6 +21,10 @@ all: libBurn
 	mkdir -p ../lib
 	mv libBurn.a ../lib
 
+clean:
+	rm -f *.o
+	rm -f ../lib/libBurn.a
+
 libBurn : ../lib/libBurn.a
 
 .cpp.o:

@@ -81,25 +81,25 @@ bool ImpulsiveBurn::Fire(Real *burnData)
     if (frame == NULL)
         throw BurnException("Maneuver frame undefined");
     
-    PropState state;
+    PropState *state;
     if (sc)    
-        state = sc->GetState();
+        state = &sc->GetState();
     else
         throw BurnException("Maneuver initial state undefined (No spacecraft?)");
     
     // Set the state 6-vector from the associated spacecraft
-    frame->SetState(state.GetState());
+    frame->SetState(state->GetState());
     // Calculate the maneuver basis vectors
     frame->CalculateBasis(frameBasis);
     
     // Add in the delta-V
-    state[3] += deltaV[0]*frameBasis[0][0] +
+    (*state)[3] += deltaV[0]*frameBasis[0][0] +
                 deltaV[1]*frameBasis[0][1] +
                 deltaV[2]*frameBasis[0][2];
-    state[4] += deltaV[0]*frameBasis[1][0] +
+    (*state)[4] += deltaV[0]*frameBasis[1][0] +
                 deltaV[1]*frameBasis[1][1] +
                 deltaV[2]*frameBasis[1][2];
-    state[5] += deltaV[0]*frameBasis[2][0] +
+    (*state)[5] += deltaV[0]*frameBasis[2][0] +
                 deltaV[1]*frameBasis[2][1] +
                 deltaV[2]*frameBasis[2][2];
     return true;
