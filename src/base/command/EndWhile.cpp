@@ -23,16 +23,19 @@
 
 EndWhile::EndWhile(void) :
 GmatCommand         ("EndWhile")
-{}
+{
+}
 
 
 EndWhile::~EndWhile(void)
-{}
+{
+}
 
 
 EndWhile::EndWhile(const EndWhile& ew) :
 GmatCommand         (ew)
-{}
+{
+}
 
 
 EndWhile& EndWhile::operator=(const EndWhile& ew)
