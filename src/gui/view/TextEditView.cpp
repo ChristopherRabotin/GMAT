@@ -30,9 +30,9 @@
 #include "TextEditView.hpp"
 
 BEGIN_EVENT_TABLE(TextEditView, wxView)
-    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, TextEditView::OnScriptBuildObject)
-    EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, TextEditView::OnScriptBuildAndRun)
-    EVT_MENU(GmatScript::MENU_SCRIPT_RUN, TextEditView::OnScriptRun)
+   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_OBJECT, TextEditView::OnScriptBuildObject)
+   EVT_MENU(GmatScript::MENU_SCRIPT_BUILD_AND_RUN, TextEditView::OnScriptBuildAndRun)
+   EVT_MENU(GmatScript::MENU_SCRIPT_RUN, TextEditView::OnScriptRun)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -41,8 +41,8 @@ END_EVENT_TABLE()
 TextEditView::TextEditView()
     : wxView()
 {
-    frame = (wxFrame *) NULL;
-    textsw = (TextSubFrame *) NULL; 
+   frame = (wxFrame *) NULL;
+   textsw = (TextSubFrame *) NULL; 
 }
     
 //------------------------------------------------------------------------------
@@ -72,17 +72,17 @@ void TextEditView::OnUpdate(wxView *WXUNUSED(sender), wxObject *WXUNUSED(hint) )
 //------------------------------------------------------------------------------
 bool TextEditView::OnClose(bool deleteWindow)
 {
-    if (!GetDocument()->Close())
-        return FALSE;
+   if (!GetDocument()->Close())
+      return false;
     
-    Activate(FALSE);
+   Activate(false);
     
-    if (deleteWindow)
-    {
-        delete frame;
-        return TRUE;
-    }
-    return TRUE;
+   if (deleteWindow)
+   {
+      delete frame;
+      return true;
+   }
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -90,16 +90,16 @@ bool TextEditView::OnClose(bool deleteWindow)
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
-    wxString filename = GetDocument()->GetFilename();
+   wxString filename = GetDocument()->GetFilename();
     
-    bool status = GmatAppData::GetGuiInterpreter()->
-        InterpretScript(std::string(filename.c_str()));
+   bool status = GmatAppData::GetGuiInterpreter()->
+      InterpretScript(std::string(filename.c_str()));
     
-    // Update ResourceTree and MissionTree
-    GmatAppData::GetResourceTree()->UpdateResource();
-    GmatAppData::GetMissionTree()->UpdateMission();
+   // Update ResourceTree and MissionTree
+   GmatAppData::GetResourceTree()->UpdateResource();
+   GmatAppData::GetMissionTree()->UpdateMission();
 
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -107,22 +107,22 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 {
-    bool status = false;
+   bool status = false;
     
-    wxString filename = GetDocument()->GetFilename();
+   wxString filename = GetDocument()->GetFilename();
     
-    status = GmatAppData::GetGuiInterpreter()->
-        InterpretScript(std::string(filename.c_str()));
+   status = GmatAppData::GetGuiInterpreter()->
+      InterpretScript(std::string(filename.c_str()));
 
-    if (status)
-    {
-        // Update ResourceTree
-        GmatAppData::GetResourceTree()->UpdateResource();
-        GmatAppData::GetMissionTree()->UpdateMission();
-        status = GmatAppData::GetGuiInterpreter()->RunScript();
-    }
+   if (status)
+   {
+      // Update ResourceTree
+      GmatAppData::GetResourceTree()->UpdateResource();
+      GmatAppData::GetMissionTree()->UpdateMission();
+      status = GmatAppData::GetGuiInterpreter()->RunScript();
+   }
     
-    return status;
+   return status;
 }
 
 //------------------------------------------------------------------------------
@@ -130,6 +130,7 @@ bool TextEditView::OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-    //MessageInterface::ClearMessage();
-    bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+   //MessageInterface::ClearMessage();
+   bool status = GmatAppData::GetGuiInterpreter()->RunScript();
+   return status; //loj: added 4/27/04
 }
