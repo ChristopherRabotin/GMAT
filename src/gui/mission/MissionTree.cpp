@@ -368,6 +368,15 @@ wxTreeItemId& MissionTree::UpdateCommandTree(wxTreeItemId parent,
       
       Expand(parent);
    }
+   else if (cmdTypeName == "CallFunction")
+   {
+      mNewTreeId =
+         AppendCommand(parent, GmatTree::ICON_FILE, GmatTree::CALL_FUNCTION_COMMAND,
+                       cmd, &mNumFunct, mNumFunct);
+
+      Expand(parent);
+   }
+
 
    return mNewTreeId;
 }
@@ -468,6 +477,12 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                            GmatTree::ItemType type, GmatCommand *prevCmd,
                            GmatCommand *cmd, int *cmdCount, int endCount)
 {
+#if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertCommand()\n");
+#endif
+
+
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId);   
    GmatCommand *currCmd = currItem->GetCommand();
    wxString typeName = cmd->GetTypeName().c_str();
@@ -1341,10 +1356,10 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnAddFunction(wxCommandEvent &event)
 {
-   wxTreeItemId item = GetSelection();
-   wxString name;
-   name.Printf("CallFunction%d", ++mNumFunct);
-
+//   wxTreeItemId item = GetSelection();
+//   wxString name;
+//   name.Printf("CallFunction%d", ++mNumFunct);
+//
 //   GmatCommand *cmd =
 //      theGuiInterpreter->CreateCommand("CallFunction", std::string(name.c_str()));
 //
@@ -1353,12 +1368,43 @@ void MissionTree::OnAddFunction(wxCommandEvent &event)
 //      if (theGuiInterpreter->AppendCommand(cmd))
 //      {
 //         wxTreeItemId targetId =
-            AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                       new MissionTreeItemData(name, GmatTree::CALL_FUNCTION_COMMAND,
-                                               name, NULL));
-
+//            AppendItem(item, name, GmatTree::ICON_FILE, -1,
+//                       new MissionTreeItemData(name, GmatTree::CALL_FUNCTION_COMMAND,
+//                                               name, NULL));
+//
 //      }
 //   }
+#if DEBUG_MISSION_TREE
+   ShowCommands("Before OnAddFunction()");
+#endif
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId lastId = GetLastChild(itemId);
+   wxTreeItemId prevId = GetPrevVisible(lastId);
+   MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
+
+   GmatCommand *prevCmd = prevItem->GetCommand();
+
+   if (prevCmd != NULL)
+   {
+      #if DEBUG_MISSION_TREE
+         MessageInterface::ShowMessage("Adding call function to gui interpreter");
+      #endif
+      GmatCommand *cmd = theGuiInterpreter->CreateCommand("CallFunction");
+
+      if (cmd != NULL)
+      {
+         InsertCommand(itemId, itemId, prevId, GmatTree::ICON_FILE,
+                       GmatTree::CALL_FUNCTION_COMMAND, prevCmd, cmd, &mNumFunct);
+
+         Expand(itemId);
+      }
+   }
+
+#if DEBUG_MISSION_TREE
+   ShowCommands("After OnAddFunction()");
+#endif
+
+
 }
 
 //------------------------------------------------------------------------------
