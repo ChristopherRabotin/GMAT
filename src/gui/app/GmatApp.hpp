@@ -15,7 +15,7 @@
 #ifndef GmatApp_hpp
 #define GmatApp_hpp
 
-#include "gmatwxdefs.h"
+#include "gmatwxdefs.hpp"
 
 
 //  // ----------------------------------------------------------------------------
