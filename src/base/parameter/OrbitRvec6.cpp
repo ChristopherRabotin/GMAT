@@ -279,7 +279,7 @@ std::string OrbitRvec6::GetRefObjectName(const Gmat::ObjectType type) const
 bool OrbitRvec6::SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name)
 {
-   OrbitData::SetRefObjectName(type, name);
+   return OrbitData::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------

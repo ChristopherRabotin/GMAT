@@ -252,7 +252,7 @@ std::string OrbitReal::GetRefObjectName(const Gmat::ObjectType type) const
 bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name)
 {
-   OrbitData::SetRefObjectName(type, name);
+   return OrbitData::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------

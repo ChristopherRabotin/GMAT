@@ -256,7 +256,7 @@ std::string TimeReal::GetRefObjectName(const Gmat::ObjectType type) const
 bool TimeReal::SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name)
 {
-   TimeData::SetRefObjectName(type, name);
+   return TimeData::SetRefObjectName(type, name);
 }
 
 //------------------------------------------------------------------------------
