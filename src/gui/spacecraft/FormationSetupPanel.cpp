@@ -16,9 +16,8 @@
  */
 //------------------------------------------------------------------------------
 #include "FormationSetupPanel.hpp"
-#include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-
+#include "Formation.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -31,10 +30,9 @@ BEGIN_EVENT_TABLE(FormationSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
     
-   EVT_BUTTON(ADD_VAR_BUTTON, FormationSetupPanel::OnAddSpacecraft)
-   EVT_BUTTON(REMOVE_VAR_BUTTON, FormationSetupPanel::OnRemoveSpacecraft)
-   EVT_BUTTON(CLEAR_VAR_BUTTON, FormationSetupPanel::OnClearSpacecraft)
-
+   EVT_BUTTON(ADD_BUTTON, FormationSetupPanel::OnAddSpaceObject)
+   EVT_BUTTON(REMOVE_BUTTON, FormationSetupPanel::OnRemoveSpaceObject)
+   EVT_BUTTON(CLEAR_BUTTON, FormationSetupPanel::OnClearSpaceObject)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -53,12 +51,13 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
-                                   const wxString &formationName)
-    : GmatPanel(parent)
+                                         const wxString &formationName)
+   : GmatPanel(parent)
 {
-    Create();
-    Show();
-    theApplyButton->Disable();
+   mFormationName = std::string(formationName.c_str());
+   Create();
+   Show();
+   theApplyButton->Disable();
 }
 
 //-------------------------------
@@ -80,75 +79,77 @@ FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 void FormationSetupPanel::Create()
 {
-    //MessageInterface::ShowMessage("FormationSetupPanel::Create() entering...\n");
+   //MessageInterface::ShowMessage("FormationSetupPanel::Create() entering...\n");
 
-    Integer bsize = 3; // border size
-    wxString emptyList[] = {};
+   Integer bsize = 3; // border size
+   wxString emptyList[] = {};
 
-    wxBoxSizer *variablesBoxSizer = new wxBoxSizer(wxVERTICAL);
-    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-           
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+   
    //------------------------------------------------------
-   // available Spacecraft list (1st column)
+   // available SpaceObject list (1st column)
    //------------------------------------------------------
-   mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
-    
+   wxBoxSizer *availableBoxSizer = new wxBoxSizer(wxVERTICAL);
+   
    wxStaticText *titleAvailable =
       new wxStaticText(this, -1, wxT("Space Objects"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   wxArrayString empty;
    
-   mVarListBox = 
-       theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), empty);
-    
-   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   wxArrayString soExcList;
+   soExcList.Add(mFormationName.c_str());
+   
+   mSoAvailableListBox = 
+       theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200), soExcList);
+   
+   availableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availableBoxSizer->Add(mSoAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    //------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
-   wxButton *addScButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
+   wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("-->"),
                               wxDefaultPosition, wxSize(20,20), 0);
 
-   wxButton *removeScButton = new wxButton(this, REMOVE_VAR_BUTTON, wxT("<--"),
+   wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT("<--"),
                                  wxDefaultPosition, wxSize(20,20), 0);
     
-   wxButton *clearScButton = new wxButton(this, CLEAR_VAR_BUTTON, wxT("<="),
+   wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<="),
                                 wxDefaultPosition, wxSize(20,20), 0);
     
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
    //------------------------------------------------------
    // selected spacecraft list (4th column)
    //------------------------------------------------------
    wxStaticText *titleSelected =
-      new wxStaticText(this, -1, wxT("Selected Space Objects"),
+      new wxStaticText(this, -1, wxT("Space Objects in Formation"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-
-   mVarSelectedListBox =
-      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
+   
+   mSoSelectedListBox =
+      new wxListBox(this, SEL_LISTBOX, wxDefaultPosition,
                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
-        
-   wxBoxSizer *mVarSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mVarSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
+   wxBoxSizer *mSoSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
+   mSoSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mSoSelectedBoxSizer->Add(mSoSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    //------------------------------------------------------
    // put in the order
    //------------------------------------------------------    
-   mFlexGridSizer->Add(mVarBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(availableBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mSoSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   variablesBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-    //------------------------------------------------------
-    // add to parent sizer
-    //------------------------------------------------------
-    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   //------------------------------------------------------
+   // add to parent sizer
+   //------------------------------------------------------
+   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +157,14 @@ void FormationSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::LoadData()
 {
+   Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
+   StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
 
+   for (unsigned int i=0; i<scList.size(); i++)
+   {
+      mSoSelectedListBox->Append(scList[i].c_str());
+      mSoSelectedListBox->SetSelection(0);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -164,55 +172,62 @@ void FormationSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::SaveData()
 {
+   Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
 
+   int soCount = mSoSelectedListBox->GetCount();
+   for (int i=0; i<soCount; i++)
+   {
+      form->SetStringParameter(form->GetParameterID("Add"),
+                               std::string(mSoSelectedListBox->GetString(i).c_str()));
+   }
+
+   theGuiManager->UpdateFormation();
 }
 
 //------------------------------------------------------------------------------
-// void OnAddSpacecraft(wxCommandEvent& event)
+// void OnAddSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void FormationSetupPanel::OnAddSpacecraft(wxCommandEvent& event)
+void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 {
    // get string in first list and then search for it
    // in the second list
-   wxString s = mVarListBox->GetStringSelection();
-   int found = mVarSelectedListBox->FindString(s);
+   wxString s = mSoAvailableListBox->GetStringSelection();
+   int found = mSoSelectedListBox->FindString(s);
     
    // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      mVarSelectedListBox->Append(s);
-      mVarSelectedListBox->SetStringSelection(s);
+      mSoSelectedListBox->Append(s);
+      mSoSelectedListBox->SetStringSelection(s);
       theApplyButton->Enable();
    }
 }
 
 //------------------------------------------------------------------------------
-// void OnRemoveSpacecraft(wxCommandEvent& event)
+// void OnRemoveSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void FormationSetupPanel::OnRemoveSpacecraft(wxCommandEvent& event)
+void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
 {
-   int sel = mVarSelectedListBox->GetSelection();
-   mVarSelectedListBox->Delete(sel);
+   int sel = mSoSelectedListBox->GetSelection();
+   mSoSelectedListBox->Delete(sel);
 
    if (sel-1 < 0)
    {
-      mVarSelectedListBox->SetSelection(0);
+      mSoSelectedListBox->SetSelection(0);
    }
    else
    {
-      mVarSelectedListBox->SetSelection(sel-1);
+      mSoSelectedListBox->SetSelection(sel-1);
    }
    
    theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
-// void OnClearSpacecraft(wxCommandEvent& event)
+// void OnClearSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void FormationSetupPanel::OnClearSpacecraft(wxCommandEvent& event)
+void FormationSetupPanel::OnClearSpaceObject(wxCommandEvent& event)
 {
-   mVarSelectedListBox->Clear();
+   mSoSelectedListBox->Clear();
    theApplyButton->Enable();
 }
-
-

@@ -20,39 +20,37 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
-#include "GuiInterpreter.hpp"
-#include "GuiItemManager.hpp"
-#include "ReportFile.hpp"
 
 class FormationSetupPanel: public GmatPanel
 {
 public:
-    FormationSetupPanel(wxWindow *parent, const wxString &formationName);
+   FormationSetupPanel(wxWindow *parent, const wxString &formationName);
    
 protected:
    
-    wxBoxSizer *mVarBoxSizer;
-    wxListBox *mVarListBox;
-    wxListBox *mVarSelectedListBox;
+   wxListBox *mSoAvailableListBox;
+   wxListBox *mSoSelectedListBox;
 
-    void OnAddSpacecraft(wxCommandEvent& event);
-    void OnRemoveSpacecraft(wxCommandEvent& event);
-    void OnClearSpacecraft(wxCommandEvent& event);
+   std::string mFormationName;
+   
+   void OnAddSpaceObject(wxCommandEvent& event);
+   void OnRemoveSpaceObject(wxCommandEvent& event);
+   void OnClearSpaceObject(wxCommandEvent& event);
 
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
-    
-    DECLARE_EVENT_TABLE();
-    
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ADD_VAR_BUTTON = 99000,
-        REMOVE_VAR_BUTTON,
-        CLEAR_VAR_BUTTON,
-        VAR_SEL_LISTBOX
-    };
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+   
+   DECLARE_EVENT_TABLE();
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ADD_BUTTON = 99000,
+      REMOVE_BUTTON,
+      CLEAR_BUTTON,
+      SEL_LISTBOX
+   };
 };
 #endif
