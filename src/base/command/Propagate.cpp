@@ -687,6 +687,11 @@ bool Propagate::TakeAction(const std::string &action,
          return true;
       }
    }
+   else if (action == "SetStopSpacecraft")
+   {
+      stopSatNames.push_back(actionData);
+      return true;
+   }
    
    return GmatCommand::TakeAction(action, actionData);
 }
@@ -977,7 +982,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          
          SetObject(stopCond, Gmat::STOP_CONDITION);
          // Store the spacecraft name for use when setting the epoch data
-         stopSatNames.push_back(paramObj);
+//         stopSatNames.push_back(paramObj);
+         TakeAction("SetStopSpacecraft", paramObj);
    //      stopSatNames[index] = paramObj;
       
          if (paramType != "Apoapsis" && paramType != "Periapsis")
@@ -1314,6 +1320,20 @@ bool Propagate::Execute(void)
          baseEpoch.clear();
 
          for (Integer n = 0; n < (Integer)prop.size(); ++n) {
+            #if DEBUG_PROPAGATE_EXE
+               MessageInterface::ShowMessage
+                  ("Propagate::Execute() SpaceObject names\n");
+               
+               MessageInterface::ShowMessage
+                  ("SpaceObject Count = %d\n", satName[n]->size());
+               StringArray *sar = satName[n];
+               for (int i=0; i < (Integer)satName[n]->size(); i++)
+               {
+                  MessageInterface::ShowMessage
+                     ("   SpaceObjectName[%d] = %s\n", i, (*sar)[i].c_str());
+               }
+            #endif
+            
             if (satName[n]->empty())
                throw CommandException("Propagator has no associated space objects.");
             GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
@@ -1348,14 +1368,21 @@ bool Propagate::Execute(void)
          Real stopEpochBase;
          
          try {
-            
             for (unsigned int i = 0; i<stopWhen.size(); i++)
             {
+               if (i >= stopSats.size())
+                  throw CommandException("Stopping condition " + 
+                     stopWhen[i]->GetName() + " has no associated spacecraft.");
+
+               #if DEBUG_PROPAGATE_EXE
+                  MessageInterface::ShowMessage("Propagate::Execute() stopSat = %s\n",
+                                                stopSats[i]->GetName().c_str());
+               #endif
+
                epochID = stopSats[i]->GetParameterID("Epoch");
                stopEpochBase = stopSats[i]->GetRealParameter(epochID);
                // StopCondition need new base epoch
                stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
-   
                // ElapsedTime parameters need new initial epoch
                stopVar = stopWhen[i]->GetStringParameter("StopVar");
                if (stopVar.find("Elapsed") != stopVar.npos)
@@ -1371,7 +1398,6 @@ bool Propagate::Execute(void)
             inProgress = false;
             throw;
          }
-         
 
          // Publish the initial data
          pubdata[0] = currEpoch[0];
