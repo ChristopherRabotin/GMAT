@@ -57,6 +57,7 @@
 #include "SolverEventPanel.hpp"
 #include "ParameterSetupPanel.hpp"
 #include "ConditionalStatementPanel.hpp"
+#include "ForLoopPanel.hpp"
 #include "GmatMdiChildFrame.hpp"
 
 //------------------------------
@@ -1022,7 +1023,31 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
             newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                      wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
             panel = new wxScrolledWindow(newChild);  
-            sizer->Add (new ConditionalStatementPanel (panel),
+            sizer->Add (new ConditionalStatementPanel (panel, "IF"),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::WHILE_CONTROL)
+        {
+            newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                     wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+            panel = new wxScrolledWindow(newChild);  
+            sizer->Add (new ConditionalStatementPanel (panel, "WHILE"),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::DO_CONTROL)
+        {
+            newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                     wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+            panel = new wxScrolledWindow(newChild);  
+            sizer->Add (new ConditionalStatementPanel (panel, "DO WHILE"),
+                        0, wxGROW|wxALL, 0 );
+        }
+        else if (dataType == GmatTree::FOR_CONTROL)
+        {
+            newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                     wxPoint(-1,-1), wxSize(-1,-1), wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+            panel = new wxScrolledWindow(newChild);  
+            sizer->Add (new ForLoopPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
         else
