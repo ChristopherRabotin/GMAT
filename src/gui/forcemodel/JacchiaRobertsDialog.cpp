@@ -51,7 +51,7 @@ JacchiaRobertsDialog::JacchiaRobertsDialog(wxWindow *parent, DragForce *dragForc
         theForce = dragForce;
        
     Create();
-    Show();
+    ShowData(); //loj: 3/7/05 Changed from Show()
 }
 
 //------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ ExponentialDragDialog::ExponentialDragDialog(wxWindow *parent, DragForce *dragFo
       theForce = dragForce;
        
    Create();
-   Show();
+   ShowData(); //loj: 3/7/05 Changed from Show()
 }
 
 //------------------------------------------------------------------------------

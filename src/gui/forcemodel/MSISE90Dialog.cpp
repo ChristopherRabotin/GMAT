@@ -52,7 +52,7 @@ MSISE90Dialog::MSISE90Dialog(wxWindow *parent, DragForce *dragForce)
         theForce = dragForce;
        
     Create();
-    Show();
+    ShowData(); //loj: 3/7/05 Chagned from Show()
 }
 
 //------------------------------------------------------------------------------
