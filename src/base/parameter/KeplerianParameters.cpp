@@ -359,10 +359,10 @@ GmatBase* KepInc::Clone(void) const
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
+//loj: 1/19/05 Changed to COORD_SYS dependent
 KepAOP::KepAOP(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg", GmatParam::ORIGIN)
+   : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg", GmatParam::COORD_SYS)
 {
-   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
