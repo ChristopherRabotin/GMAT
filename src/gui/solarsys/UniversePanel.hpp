@@ -16,6 +16,9 @@
 #define UniversePanel_hpp
 
 #include "gmatwxdefs.hpp"
+#include "GmatPanel.hpp"
+#include "GuiInterpreter.hpp"
+
 #include "wx/sizer.h"
 
 
@@ -38,7 +41,7 @@
 //  #define ID_BUTTON_SORT   10009
 //  #define ID_BUTTON_REMOVE 10010
 
-class UniversePanel: public wxPanel
+class UniversePanel: public GmatPanel
 {
 public:
     UniversePanel(wxWindow *parent);
@@ -47,8 +50,8 @@ private:
     wxBoxSizer *item0;
     wxGridSizer *item1;
     wxBoxSizer *item2;
-    wxBoxSizer *item5;
-    wxBoxSizer *item9;
+//      wxBoxSizer *item5;
+//      wxBoxSizer *item9;
     
     wxStaticText *item3;
     wxStaticText *item10;
@@ -60,10 +63,17 @@ private:
     wxButton *item7;
     wxButton *item8;
     
-    void CreateUniverse(wxWindow *parent);
+  //    void CreateUniverse(wxWindow *parent);
     void OnAddButton(wxCommandEvent& event);
     void OnSortButton(wxCommandEvent& event);
     void OnRemoveButton(wxCommandEvent& event);
+
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    virtual void OnHelp();
+    virtual void OnScript();
     
     DECLARE_EVENT_TABLE();
     
