@@ -178,6 +178,7 @@ public:
 
    // GUI control
    void SetInputFocus();
+   void NotifyRunCompleted(); //loj: 10/28/04 added
    void UpdateResourceTree();
    void UpdateMissionTree();
    void CloseCurrentProject();

@@ -920,6 +920,17 @@ void GuiInterpreter::SetInputFocus()
 #endif
 }
 
+//loj: 10/28/04 added
+//------------------------------------------------------------------------------
+// void NotifyRunCompleted()
+//------------------------------------------------------------------------------
+void GuiInterpreter::NotifyRunCompleted()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::GetMainFrame()->NotifyRunCompleted();
+#endif
+}
+
 //------------------------------------------------------------------------------
 // void UpdateResourceTree()
 //------------------------------------------------------------------------------
