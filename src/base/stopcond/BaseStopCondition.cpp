@@ -35,6 +35,7 @@
 //---------------------------------
 // static data
 //---------------------------------
+const Real BaseStopCondition::STOP_COND_TOL = 1.0e-11;
 
 const std::string
 BaseStopCondition::PARAMETER_TEXT[BaseStopConditionParamCount - GmatBaseParamCount] =

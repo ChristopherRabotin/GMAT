@@ -32,7 +32,7 @@ class GMAT_API BaseStopCondition : public GmatBase
 {
 public:
    
-   static const Real STOP_COND_TOL = 1.0e-11;
+   static const Real STOP_COND_TOL;
    
    BaseStopCondition(const std::string &name = "",
                      const std::string &desc = "",
