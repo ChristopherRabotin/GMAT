@@ -38,8 +38,6 @@ public:
     virtual ~Spacecraft(void);
 
     // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetName(void) const;
-    virtual bool SetName(const std::string &name);
     virtual Integer GetParameterID(const std::string &str) const;
     virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);

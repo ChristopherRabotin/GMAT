@@ -162,37 +162,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
     return *this;
 }
 
-//---------------------------------------------------------------------------
-//  std::string GetName(void) const
-//---------------------------------------------------------------------------
-/**
- * Retrieve the name of the instance.
- *
- * @return This object's name, or the empty string ("").
- *
- * @note Some classes are unnamed.
- */
-std::string Spacecraft::GetName(void) const
-{
-    return instanceName;
-}
-
-//---------------------------------------------------------------------------
-//  bool SetName(std::string &name)
-//---------------------------------------------------------------------------
-/**
- * Set the name for this instance.
- *
- * @param <name> the object's name.
- *
- * @return true if the name was changed, false if an error was encountered.
- *
- */
-bool Spacecraft::SetName(const std::string &name)
-{
-    instanceName = name;
-    return true;
-}
 
 //---------------------------------------------------------------------------
 //  Integer GetParameterID(const std::string &str) const
