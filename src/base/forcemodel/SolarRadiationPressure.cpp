@@ -578,18 +578,21 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     cbSunVector[1] = sunrv[1] - cbrv[1];
     cbSunVector[2] = sunrv[2] - cbrv[2];
 
-    FindShadowState(inSunlight, inShadow, state);
-
     if (order > 2)
         return false;
 
     // The following is an approximation -- the vector and sun distance both
     // are set to the central body rather than the satellite.
+    Integer i6;
     for (Integer i = 0; i < dimension/6; ++i) 
     {
         distancefactor = nominalSun / sunDistance;
         distancefactor *= distancefactor;
+        i6 = i*6;
       
+        // Test shadow condition for surrent spacecraft
+        FindShadowState(inSunlight, inShadow, &state[i6]);
+        
         if (!inShadow) 
         {
             mag = percentSun * cr * fluxPressure * area / 
@@ -597,23 +600,23 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
 
             if (order == 1) 
             {
-                deriv[i*6] = deriv[i*6 + 1] = deriv[i*6 + 2] = 0.0;
-                deriv[i*6 + 3] = mag * forceVector[0];
-                deriv[i*6 + 4] = mag * forceVector[1];
-                deriv[i*6 + 5] = mag * forceVector[2];
+                deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                deriv[i6 + 3] = mag * forceVector[0];
+                deriv[i6 + 4] = mag * forceVector[1];
+                deriv[i6 + 5] = mag * forceVector[2];
             }
             else 
             {
-                deriv[ i*6 ] = mag * forceVector[0];
-                deriv[i*6+1] = mag * forceVector[1];
-                deriv[i*6+2] = mag * forceVector[2];
-                deriv[i*6 + 3] = deriv[i*6 + 4] = deriv[i*6 + 5] = 0.0;
+                deriv[ i6 ] = mag * forceVector[0];
+                deriv[i6+1] = mag * forceVector[1];
+                deriv[i6+2] = mag * forceVector[2];
+                deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
             }
         }
         else 
         {
-            deriv[i*6] = deriv[i*6 + 1] = deriv[i*6 + 2] = 
-            deriv[i*6 + 3] = deriv[i*6 + 4] = deriv[i*6 + 5] = 0.0;
+            deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 
+            deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
         }
     }
 
