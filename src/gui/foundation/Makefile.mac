@@ -2,13 +2,17 @@
 # Module:     Makefile.mac for foundation directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/18
+# Modified:   2004/02/26 - Added GmatDialog.cpp, ParameterCreateDialog.cpp, and 
+#                          ParameterSelectDialog.cpp
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = GmatPanel.cpp GuiItemManager.cpp ParameterSetupPanel.cpp
+SRC = GmatDialog.cpp GmatPanel.cpp GuiItemManager.cpp \
+	ParameterCreateDialog.cpp ParameterSelectDialog.cpp \
+	ParameterSetupPanel.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
