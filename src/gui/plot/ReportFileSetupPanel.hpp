@@ -104,7 +104,7 @@ protected:
 
 private:
    wxString GetParamName();
-   Parameter* CreateParameter(const wxString &name);
+   Parameter* GetParameter(const wxString &name);
    void ShowCoordSystem();
 };
 #endif

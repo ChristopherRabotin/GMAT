@@ -113,6 +113,6 @@ private:
    void ShowParameterOption(const wxString &scName, bool show = true);
    void ShowCoordSystem();
    wxString GetParamName();
-   Parameter* CreateParameter(const wxString &name);
+   Parameter* GetParameter(const wxString &name);
 };
 #endif

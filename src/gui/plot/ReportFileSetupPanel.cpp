@@ -19,6 +19,7 @@
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "ParameterCreateDialog.hpp"
+#include "ParameterInfo.hpp"            // for GetDepObjectType()
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -364,7 +365,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
    if (found == wxNOT_FOUND)
    {
       // Create a paramete if it does not exist
-      Parameter *param = CreateParameter(newParam);
+      Parameter *param = GetParameter(newParam);
 
       if (param->IsPlottable())
       {
@@ -477,35 +478,53 @@ wxString ReportFileSetupPanel::GetParamName()
       
       if (mCoordSysComboBox->IsShown())
          depObj = mCoordSysComboBox->GetStringSelection();
-      
-      return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
-         mPropertyListBox->GetStringSelection();
+      else if (mCentralBodyComboBox->IsShown())
+         depObj = mCentralBodyComboBox->GetStringSelection();
+
+      if (depObj == "")
+         return mObjectComboBox->GetStringSelection() + "." + 
+            mPropertyListBox->GetStringSelection();
+      else
+         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+            mPropertyListBox->GetStringSelection();
    }
 }
 
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const wxString &paramName)
+// Parameter* GetParameter(const wxString &name)
 //------------------------------------------------------------------------------
 /*
- * @return newly created parameter pointer if it does not exist,
- *         return existing parameter pointer otherwise
+ * @return existing parameter pointer, return newly created parameter pointer
+ *         if it does not exist.
  */
 //------------------------------------------------------------------------------
-Parameter* ReportFileSetupPanel::CreateParameter(const wxString &name)
+Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
 {
-   std::string paramName(name.c_str());
-   std::string objName(mObjectComboBox->GetStringSelection().c_str());
-   std::string propName(mPropertyListBox->GetStringSelection().c_str());
-
-   Parameter *param = theGuiInterpreter->GetParameter(paramName);
+   Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
 
    // create a parameter if it does not exist
    if (param == NULL)
    {
+      std::string paramName(name.c_str());
+      std::string objName(mObjectComboBox->GetStringSelection().c_str());
+      std::string propName(mPropertyListBox->GetStringSelection().c_str());
+      std::string depObjName = "";
+            
+      if (mCoordSysComboBox->IsShown())
+         depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+      else if (mCentralBodyComboBox->IsShown())
+         depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
+
       param = theGuiInterpreter->CreateParameter(propName, paramName);
       param->SetRefObjectName(Gmat::SPACECRAFT, objName);
+      
+      if (depObjName != "")
+         param->SetStringParameter("DepObject", depObjName);
+      
+      if (param->NeedCoordSystem())
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
    }
-
+   
    return param;
 }
 
@@ -514,17 +533,16 @@ Parameter* ReportFileSetupPanel::CreateParameter(const wxString &name)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::ShowCoordSystem()
 {
-   // get parameter pointer
-   wxString paramName = GetParamName();
-   Parameter *mCurrParam = CreateParameter(paramName);
-   
-      if (mCurrParam->IsCoordSysDependent())
+   //loj: 1/24/05 use ParameterInfo for dependent object type
+   std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
+   GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
+
+   if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
       
-      mCoordSysComboBox->SetStringSelection
-         (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCoordSysComboBox->SetSelection(0);
       
       mCoordSysSizer->Remove(mCoordSysComboBox);
       mCoordSysSizer->Remove(mCentralBodyComboBox);
@@ -533,13 +551,12 @@ void ReportFileSetupPanel::ShowCoordSystem()
       mCentralBodyComboBox->Hide();
       mParamBoxSizer->Layout();
    }
-   else if (mCurrParam->IsOriginDependent())
+   else if (depObj == GmatParam::ORIGIN)
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
       
-      mCentralBodyComboBox->SetStringSelection
-         (mCurrParam->GetStringParameter("DepObject").c_str());
+      mCentralBodyComboBox->SetStringSelection("Earth");
       
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Remove(mCoordSysComboBox);
