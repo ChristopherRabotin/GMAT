@@ -26,25 +26,23 @@
 
 //------------------------------------------------------------------------------
 // TimeReal(const std::string &name, const std::string &typeStr, 
-//          ParameterKey key, GmatBase *obj, const std::string &desc,
-//          const std::string &unit, bool isTimeParam)
+//          GmatBase *obj, const std::string &desc, const std::string &unit)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <typeStr> type of the parameter
- * @param <key> SYSTEM_PARAM or USER_PARAM
  * @param <obj> reference object pointer
  * @param <desc> description of the parameter
  * @param <unit> unit of the parameter
- * @param <isTimeParam> true if time related parameter
  */
 //------------------------------------------------------------------------------
 TimeReal::TimeReal(const std::string &name, const std::string &typeStr, 
-                   ParameterKey key, GmatBase *obj, const std::string &desc,
-                   const std::string &unit, bool isTimeParam)
-   : RealVar(name, typeStr, key, obj, desc, unit, isTimeParam)
+                   GmatBase *obj, const std::string &desc,
+                   const std::string &unit)
+   : RealVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
+             GmatParam::NO_DEP, Gmat::SPACECRAFT, true)
 {
    AddRefObject(obj);
 }

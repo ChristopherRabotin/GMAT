@@ -24,21 +24,18 @@
 //==============================================================================
 
 //------------------------------------------------------------------------------
-// CurrA1MJD(const std::string &name, GmatBase *obj,
-//           const std::string &desc, const std::string &unit)
+// CurrA1MJD(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj,
-                     const std::string &desc, const std::string &unit)
-   : TimeReal(name, "CurrA1MJD", SYSTEM_PARAM, obj, desc, unit, true)
+CurrA1MJD::CurrA1MJD(const std::string &name, GmatBase *obj)
+   : TimeReal(name, "CurrA1MJD", obj, "A1 Mod. Julian Days",
+              "day")
 {
    AddRefObject(obj);
 }
@@ -140,21 +137,17 @@ ElapsedDays::PARAMETER_TYPE[ElapsedDaysParamCount - RealVarParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// ElapsedDays(const std::string &name, GmatBase *obj,
-//             const std::string &desc, const std::string &unit)
+// ElapsedDays(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-   : TimeReal(name, "ElapsedDays", SYSTEM_PARAM, obj, desc, unit, true)
+ElapsedDays::ElapsedDays(const std::string &name, GmatBase *obj)
+   : TimeReal(name, "ElapsedDays", obj, "Elapsed Days", "Day")
 {
    // GmatBase data
    parameterCount = ElapsedDaysParamCount;
@@ -406,21 +399,17 @@ ElapsedSecs::PARAMETER_TYPE[ElapsedSecsParamCount - RealVarParamCount] =
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// ElapsedSecs(const std::string &name, GmatBase *obj,
-//             const std::string &desc, const std::string &unit)
+// ElapsedSecs(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-   : TimeReal(name, "ElapsedSecs", SYSTEM_PARAM, obj, desc, unit, true)
+ElapsedSecs::ElapsedSecs(const std::string &name, GmatBase *obj)
+   : TimeReal(name, "ElapsedSecs", obj, "Elapsed Seconds", "s")
 {
    // GmatBase data
    parameterCount = ElapsedSecsParamCount;

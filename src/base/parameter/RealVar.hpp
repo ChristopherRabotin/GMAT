@@ -28,10 +28,11 @@ public:
 
    RealVar(const std::string &name = "",
            const std::string &typeStr = "RealVar",
-           ParameterKey key = USER_PARAM,
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
+           GmatParam::ParameterKey key = GmatParam::USER_PARAM,
+           GmatBase *obj = NULL, const std::string &desc = "",
            const std::string &unit = "",
+           GmatParam::DepObject depObj = GmatParam::NO_DEP,
+           Gmat::ObjectType ownerType = Gmat::UNKNOWN_OBJECT,
            bool isTimeParam = false);
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);
@@ -41,7 +42,7 @@ public:
    bool operator!=(const RealVar &right) const;
 
    // methods inherited from Parameter
-   virtual std::string ToString(); //loj: 9/7/04 added
+   virtual std::string ToString();
    
    virtual Real GetReal() const;
    

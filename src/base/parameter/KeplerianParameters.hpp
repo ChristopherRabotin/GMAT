@@ -22,7 +22,7 @@
 
 #include "gmatdefs.hpp"
 #include "OrbitReal.hpp"
-#include "OrbitRvec6.hpp" //loj: 9/8/04 added
+#include "OrbitRvec6.hpp"
 
 //==============================================================================
 //                              KepSMA
@@ -36,8 +36,7 @@ class GMAT_API KepSMA : public OrbitReal
 {
 public:
 
-   KepSMA(const std::string &name = "", GmatBase *obj = NULL,
-          const std::string &desc = "", const std::string &unit = "Km");
+   KepSMA(const std::string &name = "", GmatBase *obj = NULL);
    KepSMA(const KepSMA &copy);
    const KepSMA& operator=(const KepSMA &right);
    virtual ~KepSMA();
@@ -64,8 +63,7 @@ class GMAT_API KepEcc : public OrbitReal
 {
 public:
 
-   KepEcc(const std::string &name = "", GmatBase *obj = NULL,
-          const std::string &desc = "", const std::string &unit = " ");
+   KepEcc(const std::string &name = "", GmatBase *obj = NULL);
    KepEcc(const KepEcc &param);
    const KepEcc& operator=(const KepEcc &right);
    virtual ~KepEcc();
@@ -93,8 +91,7 @@ class GMAT_API KepInc : public OrbitReal
 {
 public:
 
-   KepInc(const std::string &name = "", GmatBase *obj = NULL,
-          const std::string &desc = "", const std::string &unit = "Deg");
+   KepInc(const std::string &name = "", GmatBase *obj = NULL);
    KepInc(const KepInc &copy);
    const KepInc& operator=(const KepInc &right);
    virtual ~KepInc();
@@ -121,8 +118,7 @@ class GMAT_API KepAOP : public OrbitReal
 {
 public:
 
-   KepAOP(const std::string &name = "", GmatBase *obj = NULL,
-          const std::string &desc = "", const std::string &unit = "Deg");
+   KepAOP(const std::string &name = "", GmatBase *obj = NULL);
    KepAOP(const KepAOP &copy);
    const KepAOP& operator=(const KepAOP &right);
    virtual ~KepAOP();
@@ -149,11 +145,38 @@ class GMAT_API KepRAAN : public OrbitReal
 {
 public:
 
-   KepRAAN(const std::string &name = "", GmatBase *obj = NULL,
-           const std::string &desc = "", const std::string &unit = "Deg");
+   KepRAAN(const std::string &name = "", GmatBase *obj = NULL);
    KepRAAN(const KepRAAN &copy);
    const KepRAAN& operator=(const KepRAAN &right);
    virtual ~KepRAAN();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//==============================================================================
+//                              KepRADN
+//==============================================================================
+/**
+ * Declares Keplerian Right Ascention of Ascending Node class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API KepRADN : public OrbitReal
+{
+public:
+
+   KepRADN(const std::string &name = "", GmatBase *obj = NULL);
+   KepRADN(const KepRADN &copy);
+   const KepRADN& operator=(const KepRADN &right);
+   virtual ~KepRADN();
 
    // methods inherited from Parameter
    virtual bool Evaluate();
@@ -178,8 +201,7 @@ class GMAT_API KepTA : public OrbitReal
 {
 public:
 
-   KepTA(const std::string &name = "", GmatBase *obj = NULL,
-         const std::string &desc = "", const std::string &unit = "Deg");
+   KepTA(const std::string &name = "", GmatBase *obj = NULL);
    KepTA(const KepTA &copy);
    const KepTA& operator=(const KepTA &right);
    virtual ~KepTA();
@@ -206,8 +228,7 @@ class GMAT_API KepMA : public OrbitReal
 {
 public:
 
-   KepMA(const std::string &name = "", GmatBase *obj = NULL,
-         const std::string &desc = "", const std::string &unit = "Deg");
+   KepMA(const std::string &name = "", GmatBase *obj = NULL);
    KepMA(const KepMA &copy);
    const KepMA& operator=(const KepMA &right);
    virtual ~KepMA();
@@ -234,8 +255,7 @@ class GMAT_API KepMM : public OrbitReal
 {
 public:
 
-   KepMM(const std::string &name = "", GmatBase *obj = NULL,
-         const std::string &desc = "", const std::string &unit = "Deg");
+   KepMM(const std::string &name = "", GmatBase *obj = NULL);
    KepMM(const KepMM &copy);
    const KepMM& operator=(const KepMM &right);
    virtual ~KepMM();
@@ -263,8 +283,7 @@ class GMAT_API KepElem : public OrbitRvec6
 {
 public:
 
-   KepElem(const std::string &name = "", GmatBase *obj = NULL,
-           const std::string &desc = "", const std::string &unit = "");
+   KepElem(const std::string &name = "", GmatBase *obj = NULL);
    KepElem(const KepElem &copy);
    const KepElem& operator=(const KepElem &right);
    virtual ~KepElem();

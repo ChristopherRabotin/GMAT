@@ -54,7 +54,7 @@ Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
 
 //------------------------------------------------------------------------------
 // Rvec6Var(const std::string &name, const std::string &typeStr,
-//          ParameterKey key, GmatBase *obj, const std::string &desc,
+//          GmatParam:;ParameterKey key, GmatBase *obj, const std::string &desc,
 //          const std::string &unit, bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
@@ -66,18 +66,15 @@ Rvec6Var::PARAMETER_TYPE[Rvec6VarParamCount - ParameterParamCount] =
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
- * @param <isTimeParam> true if parameter is time related, false otherwise
  *
  * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
-Rvec6Var::Rvec6Var(const std::string &name,
-                   const std::string &typeStr,
-                   ParameterKey key, GmatBase *obj,
-                   const std::string &desc,
-                   const std::string &unit,
-                   bool isTimeParam)
-   : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
+Rvec6Var::Rvec6Var(const std::string &name, const std::string &typeStr,
+                   GmatParam::ParameterKey key, GmatBase *obj,
+                   const std::string &desc, const std::string &unit)
+   : Parameter(name, typeStr, key, obj, desc, unit, GmatParam::NO_DEP,
+               Gmat::UNKNOWN_OBJECT, false)
 {  
    mRvec6Value = Rvector6::RVECTOR6_UNDEFINED;
    // GmatBase data
@@ -181,7 +178,7 @@ std::string Rvec6Var::ToString()
 //------------------------------------------------------------------------------
 Rvector6 Rvec6Var::EvaluateRvector6()
 {
-   if (mKey == SYSTEM_PARAM)
+   if (mKey == GmatParam::SYSTEM_PARAM)
    {
       throw ParameterException("Parameter: EvaluateReal() should be implemented "
                                "for Parameter Type:" + GetTypeName());

@@ -14,7 +14,8 @@
 //
 /**
  * Implements Angular related parameter classes.
- *   SemilatusRectum
+ *   SemilatusRectum, AngularMomemtumMag, AngularMomentumX, AngularMomentumY,
+ *   AngularMomentumZ
  */
 //------------------------------------------------------------------------------
 
@@ -24,27 +25,24 @@
 //                              SemilatusRectum
 //==============================================================================
 /**
- * Implements Semilatus Rectum parameter class.
+ * Implements SemilatusRectum parameter class.
  */
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SemilatusRectum(const std::string &name, GmatBase *obj,
-//                 const std::string &desc, const std::string &unit)
+// SemilatusRectum(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj,
-                                 const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "SemilatusRectum", SYSTEM_PARAM, obj, desc, unit, false)
+SemilatusRectum::SemilatusRectum(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "SemilatusRectum", obj, "Semilatus Rectum", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -128,4 +126,432 @@ bool SemilatusRectum::Evaluate()
 GmatBase* SemilatusRectum::Clone(void) const
 {
    return new SemilatusRectum(*this);
+}
+
+
+//==============================================================================
+//                              AngularMomentumMag
+//==============================================================================
+/**
+ * Implements AngularMomentumMag parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// AngularMomentumMag(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+AngularMomentumMag::AngularMomentumMag(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HMAG", obj, "Angular Momentum Mag", "Km^2/s", GmatParam::COORD_SYS)
+{
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// AngularMomentumMag(const AngularMomentumMag &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+AngularMomentumMag::AngularMomentumMag(const AngularMomentumMag &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const AngularMomentumMag& operator=(const AngularMomentumMag &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const AngularMomentumMag&
+AngularMomentumMag::operator=(const AngularMomentumMag &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~AngularMomentumMag()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+AngularMomentumMag::~AngularMomentumMag()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool AngularMomentumMag::Evaluate()
+{
+   mRealValue = OrbitData::GetAngularReal("HMAG");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* AngularMomentumMag::Clone(void) const
+{
+   return new AngularMomentumMag(*this);
+}
+
+
+//==============================================================================
+//                              AngularMomentumX
+//==============================================================================
+/**
+ * Implements AngularMomentumX parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// AngularMomentumX(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+AngularMomentumX::AngularMomentumX(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HX", obj, "Angular Momentum X", "Km^2/s", GmatParam::COORD_SYS)
+{
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// AngularMomentumX(const AngularMomentumX &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+AngularMomentumX::AngularMomentumX(const AngularMomentumX &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const AngularMomentumX& operator=(const AngularMomentumX &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const AngularMomentumX&
+AngularMomentumX::operator=(const AngularMomentumX &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~AngularMomentumX()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+AngularMomentumX::~AngularMomentumX()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool AngularMomentumX::Evaluate()
+{
+   mRealValue = OrbitData::GetAngularReal("HX");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* AngularMomentumX::Clone(void) const
+{
+   return new AngularMomentumX(*this);
+}
+
+
+//==============================================================================
+//                              AngularMomentumY
+//==============================================================================
+/**
+ * Implements AngularMomentumY parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// AngularMomentumY(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+AngularMomentumY::AngularMomentumY(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HY", obj, "Angular Momentum Y", "Km^2/s", GmatParam::COORD_SYS)
+{
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// AngularMomentumY(const AngularMomentumY &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+AngularMomentumY::AngularMomentumY(const AngularMomentumY &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const AngularMomentumY& operator=(const AngularMomentumY &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const AngularMomentumY&
+AngularMomentumY::operator=(const AngularMomentumY &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~AngularMomentumY()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+AngularMomentumY::~AngularMomentumY()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool AngularMomentumY::Evaluate()
+{
+   mRealValue = OrbitData::GetAngularReal("HY");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* AngularMomentumY::Clone(void) const
+{
+   return new AngularMomentumY(*this);
+}
+
+
+//==============================================================================
+//                              AngularMomentumZ
+//==============================================================================
+/**
+ * Implements AngularMomentumZ parameter class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// AngularMomentumZ(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+AngularMomentumZ::AngularMomentumZ(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HZ", obj, "Angular Momentum Z", "Km^2/s", GmatParam::COORD_SYS)
+{
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// AngularMomentumZ(const AngularMomentumZ &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+AngularMomentumZ::AngularMomentumZ(const AngularMomentumZ &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const AngularMomentumZ& operator=(const AngularMomentumZ &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const AngularMomentumZ&
+AngularMomentumZ::operator=(const AngularMomentumZ &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~AngularMomentumZ()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+AngularMomentumZ::~AngularMomentumZ()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool AngularMomentumZ::Evaluate()
+{
+   mRealValue = OrbitData::GetAngularReal("HZ");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* AngularMomentumZ::Clone(void) const
+{
+   return new AngularMomentumZ(*this);
 }

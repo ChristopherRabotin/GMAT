@@ -46,7 +46,8 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
 
 //------------------------------------------------------------------------------
 // RealVar(const std::string &name, const std::string &typeStr, 
-//         ParameterKey key, GmatBase *obj, const std::string &desc,
+//         GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
+//         const std::string &unit, GmatParam::DepObject depObj, Gmat::ObjectType,
 //         bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
@@ -58,15 +59,16 @@ RealVar::PARAMETER_TYPE[RealVarParamCount - ParameterParamCount] =
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
+ * @param <ownerType> object type who owns this parameter as property
+ * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <isTimeParam> true if parameter is time related, false otherwise
- *
- * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 RealVar::RealVar(const std::string &name, const std::string &typeStr, 
-                 ParameterKey key, GmatBase *obj, const std::string &desc,
-                 const std::string &unit, bool isTimeParam)
-   : Parameter(name, typeStr, key, obj, desc, unit, isTimeParam)
+                 GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
+                 const std::string &unit, GmatParam::DepObject depObj,
+                 Gmat::ObjectType ownerType, bool isTimeParam)
+   : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam)
 {  
    mRealValue = REAL_PARAMETER_UNDEFINED;
    // GmatBase data

@@ -27,7 +27,7 @@
 // static data
 //---------------------------------
 const std::string
-Parameter::PARAMETER_KEY_STRING[KeyCount] =
+Parameter::PARAMETER_KEY_STRING[GmatParam::KeyCount] =
 {
    "SystemParam",
    "UserParam"
@@ -36,23 +36,23 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 const std::string
 Parameter::PARAMETER_TEXT[ParameterParamCount] =
 {
-   "Object",       //loj: 4/23/04 this will be removed later (need for current script)
-   "Spacecraft",
+   "Object",
    "Expression",
    "Description",
    "Unit",
+   "DepObject",
    "Color",
 };
 
 const Gmat::ParameterType
 Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::UNSIGNED_INT_TYPE,
+   Gmat::STRING_TYPE,          //"Object",
+   Gmat::STRING_TYPE,          //"Expression",
+   Gmat::STRING_TYPE,          //"Description",
+   Gmat::STRING_TYPE,          //"Unit",
+   Gmat::STRING_TYPE,          //"DepObject",
+   Gmat::UNSIGNED_INT_TYPE,    //"Color",
 };
 
 //---------------------------------
@@ -61,8 +61,9 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 
 //------------------------------------------------------------------------------
 // Parameter(const std::string &name, const std::string &typeStr,
-//           ParameterKey key, GmatBase *obj, const std::string &desc,
-//           const std::string &unit, bool isTimeParam)
+//           GmatParam::ParameterKey key, GmatBase *obj, const std::string &desc,
+//           const std::string &unit, GmatParam::DepObject depObj,
+//           Gmat::ObjectType ownerType, bool isTimeParam)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -73,14 +74,18 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
  * @param <obj>  reference object pointer
  * @param <desc> parameter description
  * @param <unit> parameter unit
+ * @param <ownerType> object type who owns this parameter as property
+ * @param <depObj> object which parameter is dependent on (COORD_SYS, ORIGIN, NONE)
  * @param <isTimeParam> true if parameter is time related, false otherwise
  *
  * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
-                     ParameterKey key, GmatBase *obj, const std::string &desc,
-                     const std::string &unit, bool isTimeParam)
+                     GmatParam::ParameterKey key, GmatBase *obj,
+                     const std::string &desc, const std::string &unit,
+                     GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+                     bool isTimeParam)
    : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
    mKey = key;
@@ -88,7 +93,6 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    //if ((name != "" && name != " "))
    if (name != "")
    {
-      //loj: 4/26/04
       //if constructor throws an exception, it isn't caught in the caller code.
       //so replace blank space with underscore "_"
       std::string tempName = name;
@@ -111,9 +115,19 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 
    mExpr = "";
    mUnit = unit;
+   mDepObjectName = "";
+   mOwnerType = ownerType;
    mColor = 0; // black
    
    mIsTimeParam = isTimeParam;
+   mIsCoordSysDependent = false;
+   mIsOriginDependent = false;
+   
+   if (depObj == GmatParam::COORD_SYS)
+      mIsCoordSysDependent = true;
+   else if (depObj == GmatParam::ORIGIN)
+      mIsOriginDependent = true;
+   
    mIsPlottable = true;
 }
 
@@ -129,11 +143,14 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 Parameter::Parameter(const Parameter &copy)
    : GmatBase(copy)
 {
-   mKey = copy.mKey;
+   mKey  = copy.mKey;
    mExpr = copy.mExpr;
    mDesc = copy.mDesc;
    mUnit = copy.mUnit;
+   mDepObjectName = copy.mDepObjectName;
    mIsTimeParam = copy.mIsTimeParam;
+   mIsCoordSysDependent = copy.mIsCoordSysDependent;
+   mIsOriginDependent = copy.mIsOriginDependent;
    mIsPlottable = copy.mIsPlottable;
 }
 
@@ -156,7 +173,11 @@ Parameter& Parameter::operator= (const Parameter& right)
       mKey = right.mKey;
       mExpr = right.mExpr;
       mDesc = right.mDesc;
+      mUnit = right.mUnit;
+      mDepObjectName = right.mDepObjectName;
       mIsTimeParam = right.mIsTimeParam;
+      mIsCoordSysDependent = right.mIsCoordSysDependent;
+      mIsOriginDependent = right.mIsOriginDependent;
       mIsPlottable = right.mIsPlottable;
    }
 
@@ -175,15 +196,27 @@ Parameter::~Parameter()
 }
 
 //------------------------------------------------------------------------------
-// ParameterKey GetKey() const
+// GmatParam::ParameterKey GetKey() const
 //------------------------------------------------------------------------------
 /**
  * @return enumeration value of parameter key.
  */
 //------------------------------------------------------------------------------
-Parameter::ParameterKey Parameter::GetKey() const
+GmatParam::ParameterKey Parameter::GetKey() const
 {
    return mKey;
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ObjectType GetOwnerType() const
+//------------------------------------------------------------------------------
+/**
+ * @return enumeration value of object type.
+ */
+//------------------------------------------------------------------------------
+Gmat::ObjectType Parameter::GetOwnerType() const
+{
+   return mOwnerType;
 }
 
 //------------------------------------------------------------------------------
@@ -211,7 +244,31 @@ bool Parameter::IsPlottable() const
 }
 
 //------------------------------------------------------------------------------
-// void SetKey(const ParameterKey &key)
+// bool IsCoordSysDependent() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is plottble.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsCoordSysDependent() const
+{
+   return mIsCoordSysDependent;
+}
+
+//------------------------------------------------------------------------------
+// bool IsOriginDependent() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is plottble.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsOriginDependent() const
+{
+   return mIsOriginDependent;
+}
+
+//------------------------------------------------------------------------------
+// void SetKey(const GmatParam::ParameterKey &key)
 //------------------------------------------------------------------------------
 /**
  * Sets parameter key.
@@ -219,7 +276,7 @@ bool Parameter::IsPlottable() const
  * @param <key> key of parameter.
  */
 //------------------------------------------------------------------------------
-void Parameter::SetKey(const ParameterKey &key)
+void Parameter::SetKey(const GmatParam::ParameterKey &key)
 {
    mKey = key;
 }
@@ -359,9 +416,7 @@ void Parameter::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void Parameter::Initialize()
 {
-   //if (mKey == SYSTEM_PARAM)
-   //   throw ParameterException("Parameter: Initialize() should be implemented "
-   //                            "for Parameter Type: " + GetTypeName());
+   ; // do nothing here
 }
 
 //------------------------------------------------------------------------------
@@ -369,7 +424,7 @@ void Parameter::Initialize()
 //------------------------------------------------------------------------------
 bool Parameter::Evaluate()
 {
-   if (mKey == SYSTEM_PARAM)
+   if (mKey == GmatParam::SYSTEM_PARAM)
       throw ParameterException("Parameter: Evaluate() should be implemented "
                                "for Parameter Type: " + GetTypeName() + "\n");
 
@@ -385,7 +440,7 @@ bool Parameter::Evaluate()
 //------------------------------------------------------------------------------
 bool Parameter::AddRefObject(GmatBase *object)
 {
-   if (mKey == SYSTEM_PARAM)
+   if (mKey == GmatParam::SYSTEM_PARAM)
       throw ParameterException("Parameter: AddObject() should be implemented "
                                "for Parameter Type:" + GetTypeName() + "\n");
 
@@ -397,7 +452,7 @@ bool Parameter::AddRefObject(GmatBase *object)
 //------------------------------------------------------------------------------
 Integer Parameter::GetNumRefObjects() const
 {
-   if (mKey == SYSTEM_PARAM)
+   if (mKey == GmatParam::SYSTEM_PARAM)
       throw ParameterException("Parameter: GetNumRefObjects() should be implemented"
                                "for Parameter Type: " + GetTypeName() + "\n");
 
@@ -409,7 +464,7 @@ Integer Parameter::GetNumRefObjects() const
 //------------------------------------------------------------------------------
 bool Parameter::Validate()
 {
-   if (mKey == SYSTEM_PARAM)
+   if (mKey == GmatParam::SYSTEM_PARAM)
       throw ParameterException("Parameter: Validate() should be implemented "
                                "for Parameter Type: " + GetTypeName() + "\n");
 
@@ -476,7 +531,7 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 UnsignedInt Parameter::GetUnsignedIntParameter(const Integer id) const
 {
-#if DEBUG_PARAMETER
+#ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::GetUnsignedIntParameter() "
                                  "id=%d\n", id);
 #endif
@@ -504,7 +559,7 @@ UnsignedInt Parameter::GetUnsignedIntParameter(const std::string &label) const
 UnsignedInt Parameter::SetUnsignedIntParameter(const Integer id,
                                                const UnsignedInt value)
 {
-#if DEBUG_PARAMETER
+#ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetUnsignedIntParameter() "
                                  "id=%d value=%d\n", id, value);
 #endif
@@ -537,19 +592,20 @@ std::string Parameter::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
-   case OBJECT: //loj: 9/13/04 return first object name of spacecraft
+   case OBJECT:
       if (GetNumRefObjects() > 0)
-         return GetRefObjectName(Gmat::SPACECRAFT);
+         //return GetRefObjectName(Gmat::SPACECRAFT);
+         return GetRefObjectName(mOwnerType);
       else
          return GmatBase::GetStringParameter(id);
-   case SPACECRAFT: //loj: 9/13/04 dded
-      return GetRefObjectName(Gmat::SPACECRAFT);
    case EXPRESSION:
       return mExpr;
    case DESCRIPTION:
       return mDesc;
    case UNIT:
       return mUnit;
+   case DEP_OBJECT: //loj: 12/8/04 added
+      return mDepObjectName;
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -568,17 +624,17 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
-#if DEBUG_PARAMETER
+#ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetStringParameter() id=%d, value=%s\n",
                                  id, value.c_str());
 #endif
    
    switch (id)
    {
-   case OBJECT: //loj: 9/13/04 only spacecraft is allowed for now
-      return SetRefObjectName(Gmat::SPACECRAFT, value);
-   case SPACECRAFT: //loj: 9/13/04 added
-      return SetRefObjectName(Gmat::SPACECRAFT, value);
+   case OBJECT:
+      //return SetRefObjectName(Gmat::SPACECRAFT, value);
+      //loj: 12/10/04  Changed to use owner type
+      return SetRefObjectName(mOwnerType, value);
    case EXPRESSION:
       mExpr = value;
       return true;
@@ -587,6 +643,9 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
       return true;
    case UNIT:
       mUnit = value;
+      return true;
+   case DEP_OBJECT: //loj: 12/8/04 added
+      mDepObjectName = value;
       return true;
    default:
       return GmatBase::SetStringParameter(id, value);
@@ -600,7 +659,7 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 bool Parameter::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-#if DEBUG_PARAMETER
+#ifdef DEBUG_PARAMETER
    MessageInterface::ShowMessage("Parameter::SetStringParameter() label=%s value=%s\n",
                                  label.c_str(), value.c_str());
 #endif

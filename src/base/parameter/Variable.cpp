@@ -60,7 +60,8 @@ Variable::PARAMETER_TYPE[VariableParamCount - RealVarParamCount] =
 //------------------------------------------------------------------------------
 Variable::Variable(const std::string &name, const std::string &desc,
                    const std::string &unit)
-   : RealVar(name, "Variable", USER_PARAM, NULL, desc, unit, false)
+   : RealVar(name, "Variable", GmatParam::USER_PARAM, NULL, desc, unit,
+             GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
 {
    mParamDb = new ParameterDatabase();
    mExpParser = new ExpressionParser();

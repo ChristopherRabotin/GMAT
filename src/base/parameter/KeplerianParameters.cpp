@@ -28,22 +28,19 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepSMA(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// KepSMA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepSMA::KepSMA(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "SMA", SYSTEM_PARAM, obj, desc, unit, false)
+KepSMA::KepSMA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -138,22 +135,19 @@ GmatBase* KepSMA::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepEcc(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// KepEcc(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepEcc::KepEcc(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "ECC", SYSTEM_PARAM, obj, desc, unit, false)
+KepEcc::KepEcc(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -249,22 +243,19 @@ GmatBase* KepEcc::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepInc(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// KepInc(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepInc::KepInc(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "INC", SYSTEM_PARAM, obj, desc, unit, false)
+KepInc::KepInc(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "INC", obj, "Inclination", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -359,22 +350,19 @@ GmatBase* KepInc::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepAOP(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// KepAOP(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepAOP::KepAOP(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "AOP", SYSTEM_PARAM, obj, desc, unit, false)
+KepAOP::KepAOP(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -469,22 +457,19 @@ GmatBase* KepAOP::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepRAAN(const std::string &name, GmatBase *obj,
-//              const std::string &desc, const std::string &unit)
+// KepRAAN(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepRAAN::KepRAAN(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RAAN", SYSTEM_PARAM, obj, desc, unit, false)
+KepRAAN::KepRAAN(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RAAN", obj, "RA of Asscending Node", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -571,6 +556,113 @@ GmatBase* KepRAAN::Clone(void) const
 }
 
 //==============================================================================
+//                              KepRADN
+//==============================================================================
+/**
+ * Implements Keplerian Right Ascention of Ascending Node class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// KepRADN(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+KepRADN::KepRADN(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RADN", obj, "RA of Asscending Node", "Deg", GmatParam::ORIGIN)
+{
+   mDepObjectName = "Earth";
+   AddRefObject(obj);
+}
+
+//------------------------------------------------------------------------------
+// KepRADN(const KepRADN &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+KepRADN::KepRADN(const KepRADN &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const KepRADN& operator=(const KepRADN &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const KepRADN&
+KepRADN::operator=(const KepRADN &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+    
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~KepRADN()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+KepRADN::~KepRADN()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool KepRADN::Evaluate()
+{
+   mRealValue = OrbitData::GetKepReal("KepRADN");    
+    
+   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepRADN::Clone(void) const
+{
+   return new KepRADN(*this);
+}
+
+//==============================================================================
 //                              KepTA
 //==============================================================================
 /**
@@ -579,22 +671,19 @@ GmatBase* KepRAAN::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepTA(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// KepTA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepTA::KepTA(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "TA", SYSTEM_PARAM, obj, desc, unit, false)
+KepTA::KepTA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -689,22 +778,19 @@ GmatBase* KepTA::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepMA(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// KepMA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepMA::KepMA(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "MA", SYSTEM_PARAM, obj, desc, unit, false)
+KepMA::KepMA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -799,22 +885,19 @@ GmatBase* KepMA::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepMM(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// KepMM(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepMM::KepMM(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "MM", SYSTEM_PARAM, obj, desc, unit, false)
+KepMM::KepMM(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "MM", obj, "Mean Motion", "Deg", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -876,7 +959,7 @@ KepMM::~KepMM()
 //------------------------------------------------------------------------------
 bool KepMM::Evaluate()
 {
-   mRealValue = OrbitData::GetOtherKepReal("KepMM");  //loj: 4/28/04 changed from KepMm
+   mRealValue = OrbitData::GetOtherKepReal("KepMM");
     
    if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
       return false;
@@ -911,21 +994,17 @@ GmatBase* KepMM::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// KepElem(const std::string &name, GmatBase *obj,
-//         const std::string &desc, const std::string &unit)
+// KepElem(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-KepElem::KepElem(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitRvec6(name, "KepElem", SYSTEM_PARAM, obj, desc, unit, false)
+KepElem::KepElem(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "KepElem", obj, "Keplerian Elements", " ", GmatParam::NO_DEP)
 {
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable

@@ -36,8 +36,7 @@ class GMAT_API SphRMag : public OrbitReal
 {
 public:
 
-   SphRMag(const std::string &name = "", GmatBase *obj = NULL,
-           const std::string &desc = "", const std::string &unit = "Km/Sec");
+   SphRMag(const std::string &name = "", GmatBase *obj = NULL);
    SphRMag(const SphRMag &copy);
    SphRMag& operator=(const SphRMag &right);
    virtual ~SphRMag();
@@ -63,10 +62,7 @@ class GMAT_API SphRA : public OrbitReal
 {
 public:
 
-   SphRA(const std::string &name = "",
-         GmatBase *obj = NULL,
-         const std::string &desc = "",
-         const std::string &unit = "Deg");
+   SphRA(const std::string &name = "", GmatBase *obj = NULL);
    SphRA(const SphRA &copy);
    SphRA& operator=(const SphRA &right);
    virtual ~SphRA();
@@ -93,10 +89,7 @@ class GMAT_API SphDec : public OrbitReal
 {
 public:
 
-   SphDec(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "Deg");
+   SphDec(const std::string &name = "", GmatBase *obj = NULL);
    SphDec(const SphDec &copy);
    SphDec& operator=(const SphDec &right);
    virtual ~SphDec();
@@ -123,8 +116,7 @@ class GMAT_API SphVMag : public OrbitReal
 {
 public:
 
-   SphVMag(const std::string &name = "", GmatBase *obj = NULL,
-           const std::string &desc = "", const std::string &unit = "Km/Sec");
+   SphVMag(const std::string &name = "", GmatBase *obj = NULL);
    SphVMag(const SphVMag &copy);
    SphVMag& operator=(const SphVMag &right);
    virtual ~SphVMag();
@@ -150,8 +142,7 @@ class GMAT_API SphRAV : public OrbitReal
 {
 public:
 
-   SphRAV(const std::string &name = "", GmatBase *obj = NULL,
-          const std::string &desc = "", const std::string &unit = "Deg");
+   SphRAV(const std::string &name = "", GmatBase *obj = NULL);
    SphRAV(const SphRAV &copy);
    SphRAV& operator=(const SphRAV &right);
    virtual ~SphRAV();
@@ -177,8 +168,7 @@ class GMAT_API SphDecV : public OrbitReal
 {
 public:
 
-   SphDecV(const std::string &name = "", GmatBase *obj = NULL,
-        const std::string &desc = "", const std::string &unit = "Deg");
+   SphDecV(const std::string &name = "", GmatBase *obj = NULL);
    SphDecV(const SphDecV &copy);
    SphDecV& operator=(const SphDecV &right);
    virtual ~SphDecV();
@@ -205,10 +195,7 @@ class GMAT_API SphElem : public OrbitRvec6
 {
 public:
 
-   SphElem(const std::string &name = "",
-           GmatBase *obj = NULL,
-           const std::string &desc = "",
-           const std::string &unit = "");
+   SphElem(const std::string &name = "", GmatBase *obj = NULL);
    SphElem(const SphElem &copy);
    SphElem& operator=(const SphElem &right);
    virtual ~SphElem();

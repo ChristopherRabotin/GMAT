@@ -68,7 +68,8 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
 //------------------------------------------------------------------------------
 Array::Array(const std::string &name, const std::string &desc,
              const std::string &unit)
-   : Parameter(name, "Array", USER_PARAM, NULL, desc, unit, false)
+   : Parameter(name, "Array", GmatParam::USER_PARAM, NULL, desc, unit,
+               GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
 {
    mNumRows = 0;
    mNumCols = 0;

@@ -30,21 +30,17 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphRMag(const std::string &name, GmatBase *obj,
-//         const std::string &desc, const std::string &unit)
+// SphRMag(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphRMag::SphRMag(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RMAG", SYSTEM_PARAM, obj, desc, unit, false)
+SphRMag::SphRMag(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RMAG", obj, "Spherical R mag", "Km", GmatParam::ORIGIN)
 {
    AddRefObject(obj);
 }
@@ -139,21 +135,17 @@ GmatBase* SphRMag::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphRA(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// SphRA(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphRA::SphRA(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RA", SYSTEM_PARAM, obj, desc, unit, false)
+SphRA::SphRA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RA", obj, "Sph. Right Ascension", "Deg", GmatParam::ORIGIN)
 {
    AddRefObject(obj);
 }
@@ -249,21 +241,17 @@ GmatBase* SphRA::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphDec(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// SphDec(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphDec::SphDec(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "DEC", SYSTEM_PARAM, obj, desc, unit, false)
+SphDec::SphDec(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "DEC", obj, "Sph. Declination", "Deg", GmatParam::COORD_SYS)
 {
    AddRefObject(obj);
 }
@@ -358,21 +346,17 @@ GmatBase* SphDec::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphVMag(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// SphVMag(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphVMag::SphVMag(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VMAG", SYSTEM_PARAM, obj, desc, unit, false)
+SphVMag::SphVMag(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VMAG", obj, "Sph. Mag of Velocity", "Km/s", GmatParam::COORD_SYS)
 {
    AddRefObject(obj);
 }
@@ -467,21 +451,17 @@ GmatBase* SphVMag::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphRAV(const std::string &name, GmatBase *obj,
-//     const std::string &desc, const std::string &unit)
+// SphRAV(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphRAV::SphRAV(const std::string &name, GmatBase *obj,
-         const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RAV", SYSTEM_PARAM, obj, desc, unit, false)
+SphRAV::SphRAV(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RAV", obj, "Sph. RA of Velocity", "Deg", GmatParam::ORIGIN)
 {
    AddRefObject(obj);
 }
@@ -577,21 +557,17 @@ GmatBase* SphRAV::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphDecV(const std::string &name, GmatBase *obj,
-//         const std::string &desc, const std::string &unit)
+// SphDecV(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphDecV::SphDecV(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "DECV", SYSTEM_PARAM, obj, desc, unit, false)
+SphDecV::SphDecV(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "DECV", obj, "Sph. Dec of Velocity", "Deg", GmatParam::COORD_SYS)
 {
    AddRefObject(obj);
 }
@@ -687,21 +663,17 @@ GmatBase* SphDecV::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// SphElem(const std::string &name, GmatBase *obj,
-//         const std::string &desc, const std::string &unit)
+// SphElem(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-SphElem::SphElem(const std::string &name, GmatBase *obj,
-                 const std::string &desc, const std::string &unit)
-   : OrbitRvec6(name, "SphElem", SYSTEM_PARAM, obj, desc, unit, false)
+SphElem::SphElem(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "SphElem", obj, "Spherical Elements", " ", GmatParam::NO_DEP)
 {
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable

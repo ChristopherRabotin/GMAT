@@ -30,8 +30,8 @@ class GMAT_API OrbitRvec6 : public Rvec6Var, public OrbitData
 public:
 
    OrbitRvec6(const std::string &name, const std::string &typeStr, 
-             ParameterKey key, GmatBase *obj, const std::string &desc,
-             const std::string &unit, bool isTimeParam);
+             GmatBase *obj, const std::string &desc,
+             const std::string &unit, GmatParam::DepObject depObj);
    OrbitRvec6(const OrbitRvec6 &copy);
    OrbitRvec6& operator=(const OrbitRvec6 &right);
    virtual ~OrbitRvec6();

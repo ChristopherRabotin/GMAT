@@ -24,32 +24,45 @@
 #include "Rvector6.hpp"
 #include "SolarSystem.hpp"
 
-class GMAT_API Parameter : public GmatBase
+namespace GmatParam
 {
-public:
-
    enum ParameterKey
    {
       SYSTEM_PARAM, USER_PARAM, KeyCount
    };
+   
+   enum DepObject
+   {
+      COORD_SYS, ORIGIN, NO_DEP, DepObjectCount
+   };
+};
+
+class GMAT_API Parameter : public GmatBase
+{
+public:
 
    Parameter(const std::string &name, const std::string &typeStr,
-             ParameterKey key, GmatBase *obj, const std::string &desc,
-             const std::string &unit, bool isTimeParam);
+             GmatParam::ParameterKey key, GmatBase *obj,
+             const std::string &desc, const std::string &unit,
+             GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
+             bool isTimeParam);
    Parameter(const Parameter &copy);
    Parameter& operator= (const Parameter& right);
    virtual ~Parameter();
-
-   ParameterKey GetKey() const;
+   
+   GmatParam::ParameterKey GetKey() const;
+   Gmat::ObjectType GetOwnerType() const;
    bool IsTimeParameter() const;
    bool IsPlottable() const;
+   bool IsCoordSysDependent() const;
+   bool IsOriginDependent() const;
    
-   void SetKey(const ParameterKey &key);
-    
+   void SetKey(const GmatParam::ParameterKey &key);
+   
    bool operator==(const Parameter &right) const;
    bool operator!=(const Parameter &right) const;
 
-   virtual std::string ToString(); //loj: 9/7/04 added
+   virtual std::string ToString();
    
    virtual Real GetReal();
    virtual Rvector6 GetRvector6();
@@ -61,14 +74,6 @@ public:
   
    virtual void SetSolarSystem(SolarSystem *ss);
    
-   //================== loj: 9/13/04 obsolete ===================
-   //virtual GmatBase* GetObject(const std::string &objTypeName);
-   //virtual bool SetObject(Gmat::ObjectType objType,
-   //                       const std::string &objName,
-   //                       GmatBase *obj);
-   //virtual bool AddObject(const std::string &name);
-   //============================================================
-
    virtual void Initialize();
    virtual bool Evaluate();
    
@@ -98,25 +103,29 @@ public:
                                    const std::string &value);
 protected:
    
-   static const std::string PARAMETER_KEY_STRING[KeyCount];
+   static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
 
-   ParameterKey  mKey;
+   GmatParam::ParameterKey  mKey;
    std::string   mDesc;
    std::string   mUnit;
    std::string   mExpr;
+   std::string   mDepObjectName;
    
+   Gmat::ObjectType   mOwnerType;
    UnsignedInt   mColor;
    
    bool mIsTimeParam;
    bool mIsPlottable;
-   
+   bool mIsCoordSysDependent;
+   bool mIsOriginDependent;
+
    enum
    {
-      OBJECT = GmatBaseParamCount, //loj: this will be removed eventually
-      SPACECRAFT, //loj: 9/13/04 added
+      OBJECT = GmatBaseParamCount,
       EXPRESSION,
       DESCRIPTION,
       UNIT,
+      DEP_OBJECT,
       COLOR,
       ParameterParamCount
    };

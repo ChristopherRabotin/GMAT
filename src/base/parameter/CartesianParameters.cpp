@@ -33,23 +33,19 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartX(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// CartX(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartX::CartX(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "X", SYSTEM_PARAM, obj, desc, unit, false)
+CartX::CartX(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "X", obj, "Cartesian X", "Km", GmatParam::COORD_SYS)
 {
-   mColor = GmatColor::RED32; //loj: 7/13/04 changed from BLUE32
+   mColor = GmatColor::RED32;
    AddRefObject(obj);
 }
 
@@ -144,21 +140,17 @@ GmatBase* CartX::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartY(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// CartY(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartY::CartY(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Y", SYSTEM_PARAM, obj, desc, unit, false)
+CartY::CartY(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Y", obj, "Cartesian Y", "Km", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::GREEN32;
    AddRefObject(obj);
@@ -255,21 +247,17 @@ GmatBase* CartY::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartZ(const std::string &name, GmatBase *obj,
-//       const std::string &desc, const std::string &unit)
+// CartZ(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartZ::CartZ(const std::string &name, GmatBase *obj,
-             const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Z", SYSTEM_PARAM, obj, desc, unit, false)
+CartZ::CartZ(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Z", obj, "Cartesian Z", "Km", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::BLUE32;
    AddRefObject(obj);
@@ -366,21 +354,17 @@ GmatBase* CartZ::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartVx(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// CartVx(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartVx::CartVx(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VX", SYSTEM_PARAM, obj, desc, unit, false)
+CartVx::CartVx(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VX", obj, "Cartesian VX", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::RED32;
    AddRefObject(obj);
@@ -476,21 +460,17 @@ GmatBase* CartVx::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartVy(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// CartVy(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartVy::CartVy(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VY", SYSTEM_PARAM, obj, desc, unit, false)
+CartVy::CartVy(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VY", obj, "Cartesian Y", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::GREEN32;
    AddRefObject(obj);
@@ -587,21 +567,17 @@ GmatBase* CartVy::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartVz(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// CartVz(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartVz::CartVz(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VZ", SYSTEM_PARAM, obj, desc, unit, false)
+CartVz::CartVz(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VZ", obj, "Cartesian VZ", "Km/s", GmatParam::COORD_SYS)
 {
    mColor = GmatColor::BLUE32;
    AddRefObject(obj);
@@ -699,21 +675,18 @@ GmatBase* CartVz::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CartState(const std::string &name, GmatBase *obj,
-//                const std::string &desc, const std::string &unit)
+// CartState(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-CartState::CartState(const std::string &name, GmatBase *obj,
-                     const std::string &desc, const std::string &unit)
-   : OrbitRvec6(name, "CartState", SYSTEM_PARAM, obj, desc, unit, false)
+CartState::CartState(const std::string &name, GmatBase *obj)
+   : OrbitRvec6(name, "CartState", obj, "Cartesian State Vector",
+                "Km/s", GmatParam::COORD_SYS)
 {
    // Parameter member data
    mIsPlottable = false; //loj: 9/8/04 need more work in Plot to make this plottable

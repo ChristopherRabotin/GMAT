@@ -37,10 +37,7 @@ class GMAT_API VelApoapsis : public OrbitReal
 {
 public:
 
-   VelApoapsis(const std::string &name = "",
-               GmatBase *obj = NULL,
-               const std::string &desc = "",
-               const std::string &unit = "Km/Sec");
+   VelApoapsis(const std::string &name = "", GmatBase *obj = NULL);
    VelApoapsis(const VelApoapsis &copy);
    const VelApoapsis& operator=(const VelApoapsis &right);
    virtual ~VelApoapsis();
@@ -67,10 +64,7 @@ class GMAT_API VelPeriapsis : public OrbitReal
 {
 public:
 
-   VelPeriapsis(const std::string &name = "",
-                GmatBase *obj = NULL,
-                const std::string &desc = "",
-                const std::string &unit = "Km/Sec");
+   VelPeriapsis(const std::string &name = "", GmatBase *obj = NULL);
    VelPeriapsis(const VelPeriapsis &copy);
    const VelPeriapsis& operator=(const VelPeriapsis &right);
    virtual ~VelPeriapsis();
@@ -97,10 +91,7 @@ class GMAT_API Apoapsis : public OrbitReal
 {
 public:
 
-   Apoapsis(const std::string &name = "",
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "Km/Sec");
+   Apoapsis(const std::string &name = "", GmatBase *obj = NULL);
    Apoapsis(const Apoapsis &copy);
    const Apoapsis& operator=(const Apoapsis &right);
    virtual ~Apoapsis();
@@ -127,10 +118,7 @@ class GMAT_API Periapsis : public OrbitReal
 {
 public:
 
-   Periapsis(const std::string &name = "",
-             GmatBase *obj = NULL,
-             const std::string &desc = "",
-             const std::string &unit = "");
+   Periapsis(const std::string &name = "", GmatBase *obj = NULL);
    Periapsis(const Periapsis &copy);
    const Periapsis& operator=(const Periapsis &right);
    virtual ~Periapsis();
@@ -157,10 +145,7 @@ class GMAT_API OrbitPeriod : public OrbitReal
 {
 public:
 
-   OrbitPeriod(const std::string &name = "",
-               GmatBase *obj = NULL,
-               const std::string &desc = "",
-               const std::string &unit = "");
+   OrbitPeriod(const std::string &name = "", GmatBase *obj = NULL);
    OrbitPeriod(const OrbitPeriod &copy);
    const OrbitPeriod& operator=(const OrbitPeriod &right);
    virtual ~OrbitPeriod();
@@ -187,10 +172,7 @@ class GMAT_API RadApoapsis : public OrbitReal
 {
 public:
 
-   RadApoapsis(const std::string &name = "",
-               GmatBase *obj = NULL,
-               const std::string &desc = "",
-               const std::string &unit = "");
+   RadApoapsis(const std::string &name = "", GmatBase *obj = NULL);
    RadApoapsis(const RadApoapsis &copy);
    const RadApoapsis& operator=(const RadApoapsis &right);
    virtual ~RadApoapsis();
@@ -217,10 +199,7 @@ class GMAT_API RadPeriapsis : public OrbitReal
 {
 public:
 
-   RadPeriapsis(const std::string &name = "",
-                GmatBase *obj = NULL,
-                const std::string &desc = "",
-                const std::string &unit = "");
+   RadPeriapsis(const std::string &name = "", GmatBase *obj = NULL);
    RadPeriapsis(const RadPeriapsis &copy);
    const RadPeriapsis& operator=(const RadPeriapsis &right);
    virtual ~RadPeriapsis();
@@ -248,10 +227,7 @@ class GMAT_API C3Energy : public OrbitReal
 {
 public:
 
-   C3Energy(const std::string &name = "",
-            GmatBase *obj = NULL,
-            const std::string &desc = "",
-            const std::string &unit = "");
+   C3Energy(const std::string &name = "", GmatBase *obj = NULL);
    C3Energy(const C3Energy &copy);
    const C3Energy& operator=(const C3Energy &right);
    virtual ~C3Energy();
@@ -279,10 +255,7 @@ class GMAT_API Energy : public OrbitReal
 {
 public:
 
-   Energy(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "");
+   Energy(const std::string &name = "", GmatBase *obj = NULL);
    Energy(const Energy &copy);
    const Energy& operator=(const Energy &right);
    virtual ~Energy();
@@ -310,10 +283,7 @@ class GMAT_API Altitude : public OrbitReal
 {
 public:
    
-   Altitude(const std::string &name = "",
-          GmatBase *obj = NULL,
-          const std::string &desc = "",
-          const std::string &unit = "");
+   Altitude(const std::string &name = "", GmatBase *obj = NULL);
    Altitude(const Altitude &copy);
    const Altitude& operator=(const Altitude &right);
    virtual ~Altitude();

@@ -117,10 +117,6 @@ OrbitData::~OrbitData()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetCartState()
 {
-   //------------------------------------------------------
-   //loj: 4/1/04 until Spacecraft::GetCartState() is done
-   //------------------------------------------------------
-    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
@@ -149,16 +145,6 @@ Rvector6 OrbitData::GetCartState()
    }
    else if (elemType == "Keplerian")
    {
-//        Integer id = mSpacecraft->GetParameterID("ReferenceBody");
-//        std::string bodyName = mSpacecraft->GetStringParameter(id);
-//        CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
-            
-//        if (!centralBody)
-//           throw ParameterException("OrbitData::GetCartState() Body not found in the "
-//                                    "SolarSystem: " + bodyName);
-            
-//        Real grav = centralBody->GetGravitationalConstant();
-
       Real grav = mGravConst;
       
       PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
@@ -191,10 +177,6 @@ Rvector6 OrbitData::GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetKepState()
 {
-   //------------------------------------------------------
-   //loj: 4/1/04 until Spacecraft::GetKepState() is done
-   //------------------------------------------------------
-        
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
@@ -204,8 +186,8 @@ Rvector6 OrbitData::GetKepState()
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
 
-      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
-            
+   PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+      
 #ifdef DEBUG_ORBITDATA_DETAILS
    PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
@@ -234,15 +216,6 @@ Rvector6 OrbitData::GetKepState()
       Real cart[6];
       memcpy(cart, statePtr.GetState(), 6*sizeof(Real));
                 
-//        Integer id = mSpacecraft->GetParameterID("ReferenceBody");
-//        std::string bodyName = mSpacecraft->GetStringParameter(id);
-//        CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
-            
-//        if (!centralBody)
-//           throw ParameterException("OrbitData::GetKepState() Body not found in the "
-//                                    "SolarSystem: " + bodyName);
-            
-//        Real grav = centralBody->GetGravitationalConstant();
       Real grav = mGravConst;
       Rvector6 cartState = Rvector6(cart);
       Rvector6 keplState;
@@ -273,10 +246,6 @@ Rvector6 OrbitData::GetKepState()
 //------------------------------------------------------------------------------
 Rvector6 OrbitData::GetSphState()
 {
-   //--------------------------------------------------------------
-   //loj: 4/19/04 until Spacecraft::GetSphericalTwoState() is done
-   //--------------------------------------------------------------
-    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
@@ -284,14 +253,8 @@ Rvector6 OrbitData::GetSphState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
 
    if (elemType == "Cartesian")
-   {
-      //Real *statePtr = mSpacecraft->GetState(); // should be cartesian state
-      //for (int i=0; i<6; i++)
-      //   mCartState[i] = statePtr[i];
-      
-      //Rvector6 cartState = mCartState;
-      
-      Rvector6 cartState = mSpacecraft->GetCartesianState(); //loj: 4/19/04 use new method
+   {      
+      Rvector6 cartState = mSpacecraft->GetCartesianState(); 
 
 #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
@@ -399,23 +362,9 @@ Real OrbitData::GetKepReal(const std::string &str)
 Real OrbitData::GetOtherKepReal(const std::string &str)
 {
 
-   //if (mSpacecraft == NULL || mSolarSystem == NULL)
-   //   InitializeRefObjects();
-   
    Real sma = GetKepReal("KepSMA");
    Real ecc = GetKepReal("KepEcc");
    
-//     Integer id = mSpacecraft->GetParameterID("ReferenceBody");
-//     std::string bodyName = mSpacecraft->GetStringParameter(id);
-
-//     CelestialBody* centralBody = mSolarSystem->GetBody(bodyName);
-      
-//     if (!centralBody)
-//        throw ParameterException("OrbitData::GetOtherKepReal() Body not found in the "
-//                                 "SolarSystem: " + bodyName);
-      
-//     Real grav = centralBody->GetGravitationalConstant();
-
    Real grav = mGravConst;
    Real E, R;
         
@@ -524,26 +473,13 @@ Real OrbitData::GetSphReal(const std::string &str)
 //------------------------------------------------------------------------------
 Real OrbitData::GetAngularReal(const std::string &str)
 {    
-   //if (mSpacecraft == NULL || mSolarSystem == NULL)
-   //   InitializeRefObjects();
-   
-//     Integer id = mSpacecraft->GetParameterID("ReferenceBody");
-//     std::string bodyName = mSpacecraft->GetStringParameter(id);
-//     CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
-      
-//     if (!centralBody)
-//        throw ParameterException("OrbitData::GetAngularReal() Body not found in the "
-//                                 "SolarSystem: " + bodyName);
-      
-   //Rvector6 state = mSpacecraft->GetCartesianState();
    Rvector6 state = GetCartState();
    Rvector3 pos = Rvector3(state[0], state[1], state[2]);
    Rvector3 vel = Rvector3(state[3], state[4], state[5]);
               
    Rvector3 hVec3 = Cross(pos, vel);
-   Real h = Sqrt(hVec3*hVec3);
+   Real h = Sqrt(hVec3 * hVec3);
         
-//     Real grav = centralBody->GetGravitationalConstant();
    Real grav = mGravConst;
    
    if (str == "SemilatusRectum")
@@ -552,6 +488,22 @@ Real OrbitData::GetAngularReal(const std::string &str)
          return 0.0;
       else
          return (h / grav) * h;      // B M W; eq. 1.6-1
+   }
+   else if (str == "HMAG") //loj: 12/8/04 - added HMAG, HX, HY, HZ
+   {
+      return h; 
+   }
+   else if (str == "HX")
+   {
+      return hVec3[0];
+   }
+   else if (str == "HY")
+   {
+      return hVec3[1];
+   }
+   else if (str == "HZ")
+   {
+      return hVec3[2];
    }
    else
    {
@@ -613,7 +565,6 @@ void OrbitData::InitializeRefObjects()
    
    Integer id = mSpacecraft->GetParameterID("ReferenceBody");
    std::string bodyName = mSpacecraft->GetStringParameter(id);
-   //loj: 11/5/04 CelestialBody *centralBody = mSolarSystem->GetBody(bodyName);
    mCentralBody = mSolarSystem->GetBody(bodyName);
    
    if (!mCentralBody)
@@ -644,39 +595,4 @@ bool OrbitData::IsValidObjectType(Gmat::ObjectType type)
    return false;
 
 }
-
-//  //------------------------------------------------------------------------------
-//  // virtual bool IsValidObject(GmatBase *obj)
-//  //------------------------------------------------------------------------------
-//  /**
-//   * Checks reference object type.
-//   *
-//   * @return return true if object is valid object, false otherwise
-//   */
-//  //------------------------------------------------------------------------------
-//  bool OrbitData::IsValidObject(GmatBase *obj)
-//  {
-//     bool valid = false;
-    
-//     // check for object type if not NULL
-//     if (obj != NULL)
-//     {      
-//        for (int i=0; i<OrbitDataObjectCount; i++)
-//        {
-//           if (obj->GetTypeName() == VALID_OBJECT_TYPE_LIST[i])
-//           {
-//              valid = true;
-//              break;
-//           }
-//        }
-//     }
-//     else
-//     {
-//        valid = false;
-//     }
-
-//     return valid;
-
-//  }
-
 

@@ -29,11 +29,10 @@ public:
 
    Rvec6Var(const std::string &name = "",
             const std::string &typeStr = "Rvec6Var",
-            ParameterKey key = USER_PARAM,
+            GmatParam::ParameterKey key = GmatParam::USER_PARAM,
             GmatBase *obj = NULL,
             const std::string &desc = "",
-            const std::string &unit = "",
-            bool isTimeParam = false);
+            const std::string &unit = "");
    Rvec6Var(const Rvec6Var &copy);
    Rvec6Var& operator= (const Rvec6Var& right);
    virtual ~Rvec6Var();

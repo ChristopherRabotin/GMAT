@@ -30,8 +30,8 @@ class GMAT_API OrbitReal : public RealVar, public OrbitData
 public:
 
    OrbitReal(const std::string &name, const std::string &typeStr, 
-             ParameterKey key, GmatBase *obj, const std::string &desc,
-             const std::string &unit, bool isTimeParam);
+             GmatBase *obj, const std::string &desc,
+             const std::string &unit,  GmatParam::DepObject depObj);
    OrbitReal(const OrbitReal &copy);
    OrbitReal& operator=(const OrbitReal &right);
    virtual ~OrbitReal();
@@ -42,7 +42,7 @@ public:
 
    // methods inherited from Parameter
    virtual Integer GetNumRefObjects() const;
-   virtual void SetSolarSystem(SolarSystem *ss); //loj: 6/24/04 added
+   virtual void SetSolarSystem(SolarSystem *ss);
    virtual bool AddRefObject(GmatBase*obj);
    virtual bool Validate();
    virtual void Initialize();

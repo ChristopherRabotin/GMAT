@@ -31,10 +31,7 @@ class GMAT_API CurrA1MJD : public TimeReal
 {
 public:
 
-   CurrA1MJD(const std::string &name = "",
-             GmatBase *obj = NULL,
-             const std::string &desc = "",
-             const std::string &unit = "A1 Mod. Julian days");
+   CurrA1MJD(const std::string &name = "", GmatBase *obj = NULL);
    CurrA1MJD(const CurrA1MJD &copy);
    CurrA1MJD& operator= (const CurrA1MJD &right); 
    virtual ~CurrA1MJD();
@@ -46,7 +43,6 @@ public:
    virtual GmatBase* Clone(void) const;
    
 protected:
-    
 private:
 
 };
@@ -59,10 +55,7 @@ class GMAT_API ElapsedDays : public TimeReal
 {
 public:
 
-   ElapsedDays(const std::string &name = "",
-               GmatBase *obj = NULL,
-               const std::string &desc = "",
-               const std::string &unit = "Days");
+   ElapsedDays(const std::string &name = "", GmatBase *obj = NULL);
    ElapsedDays(const ElapsedDays &copy);
    const ElapsedDays& operator= (const ElapsedDays &right); 
    virtual ~ElapsedDays();
@@ -106,10 +99,7 @@ class GMAT_API ElapsedSecs : public TimeReal
 {
 public:
 
-   ElapsedSecs(const std::string &name = "",
-               GmatBase *obj = NULL,
-               const std::string &desc = "",
-               const std::string &unit = "Sec");
+   ElapsedSecs(const std::string &name = "", GmatBase *obj = NULL);
    ElapsedSecs(const ElapsedSecs &copy);
    const ElapsedSecs& operator= (const ElapsedSecs &right); 
    virtual ~ElapsedSecs();

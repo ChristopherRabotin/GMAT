@@ -34,22 +34,20 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// VelApoapsis(const std::string &name, GmatBase *obj,
-//             const std::string &desc, const std::string &unit)
+// VelApoapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VelApoapsis", SYSTEM_PARAM, obj, desc, unit, false)
+VelApoapsis::VelApoapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VelApoapsis", obj, "Velocity at Apoapsis", "Km/s",
+               GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -148,22 +146,20 @@ GmatBase* VelApoapsis::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// VelPeriapsis(const std::string &name, GmatBase *obj,
-//              const std::string &desc, const std::string &unit)
+// VelPeriapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj,
-                           const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "VelPeriapsis", SYSTEM_PARAM, obj, desc, unit, false)
+VelPeriapsis::VelPeriapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "VelPeriapsis", obj, "Velocity at Periapsis", "Km/s",
+               GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -253,7 +249,7 @@ GmatBase* VelPeriapsis::Clone(void) const
 //                              Apoapsis
 //==============================================================================
 /**
- * Implements Periapsis class.
+ * Implements Apoapsis class.
  */
 //------------------------------------------------------------------------------
 
@@ -262,22 +258,19 @@ GmatBase* VelPeriapsis::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Apoapsis(const std::string &name, GmatBase *obj,
-//          const std::string &desc, const std::string &unit)
+// Apoapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-Apoapsis::Apoapsis(const std::string &name, GmatBase *obj,
-                   const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Apoapsis", SYSTEM_PARAM, obj, desc, unit, false)
+Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Apoapsis", obj, "Apoapsis", " ", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -388,22 +381,19 @@ GmatBase* Apoapsis::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Periapsis(const std::string &name, GmatBase *obj,
-//          const std::string &desc, const std::string &unit)
+// Periapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
 * Constructor.
 *
 * @param <name> name of the parameter
 * @param <obj> reference object pointer
-* @param <desc> description of the parameter
-* @param <unit> unit of the parameter
 */
 //------------------------------------------------------------------------------
-Periapsis::Periapsis(const std::string &name, GmatBase *obj,
-                     const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Periapsis", SYSTEM_PARAM, obj, desc, unit, false)
+Periapsis::Periapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Periapsis", obj, "Periapsis", " ", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -512,22 +502,19 @@ GmatBase* Periapsis::Clone(void) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// OrbitPeriod(const std::string &name, GmatBase *obj,
-//             const std::string &desc, const std::string &unit)
+// OrbitPeriod(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
 * Constructor.
 *
 * @param <name> name of the parameter
 * @param <obj> reference object pointer
-* @param <desc> description of the parameter
-* @param <unit> unit of the parameter
 */
 //------------------------------------------------------------------------------
-OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "OrbitPeriod", SYSTEM_PARAM, obj, desc, unit, false)
+OrbitPeriod::OrbitPeriod(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "OrbitPeriod", obj, "Orbit Period", "Km/s", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -624,22 +611,19 @@ GmatBase* OrbitPeriod::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// RadApoapsis(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// RadApoapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj,
-                         const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RadApo", SYSTEM_PARAM, obj, desc, unit, false)
+RadApoapsis::RadApoapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RadApo", obj, "Radius at Apoapsis", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -735,22 +719,19 @@ GmatBase* RadApoapsis::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// RadPeriapsis(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// RadPeriapsis(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj,
-                           const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "RadPer", SYSTEM_PARAM, obj, desc, unit, false)
+RadPeriapsis::RadPeriapsis(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "RadPer", obj, "Radius at Periapsis", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -846,22 +827,19 @@ GmatBase* RadPeriapsis::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// C3Energy(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// C3Energy(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-C3Energy::C3Energy(const std::string &name, GmatBase *obj,
-                   const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "C3Energy", SYSTEM_PARAM, obj, desc, unit, false)
+C3Energy::C3Energy(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "C3Energy", obj, "C-3 Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -957,22 +935,19 @@ GmatBase* C3Energy::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Energy(const std::string &name, GmatBase *obj,
-//        const std::string &desc, const std::string &unit)
+// Energy(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-Energy::Energy(const std::string &name, GmatBase *obj,
-               const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Energy", SYSTEM_PARAM, obj, desc, unit, false)
+Energy::Energy(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Energy", obj, "Energy", "Km^2/s^2", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
@@ -1068,22 +1043,19 @@ GmatBase* Energy::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Altitude(const std::string &name, GmatBase *obj,
-//          const std::string &desc, const std::string &unit)
+// Altitude(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
  * @param <obj> reference object pointer
- * @param <desc> description of the parameter
- * @param <unit> unit of the parameter
  */
 //------------------------------------------------------------------------------
-Altitude::Altitude(const std::string &name, GmatBase *obj,
-                   const std::string &desc, const std::string &unit)
-   : OrbitReal(name, "Altitude", SYSTEM_PARAM, obj, desc, unit, false)
+Altitude::Altitude(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "Altitude", obj, "Altitude", "Km", GmatParam::ORIGIN)
 {
+   mDepObjectName = "Earth";
    AddRefObject(obj);
 }
 
