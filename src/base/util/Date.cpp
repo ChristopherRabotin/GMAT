@@ -400,7 +400,10 @@ Date::Date(const std::string& time)
    datePart = atoi(tempTime);
    tempTime = strstr(tempTime, ".");
 
-   timePart = atoi(tempTime + 1);
+   if (tempTime != NULL)
+      timePart = atoi(tempTime + 1);
+   else
+      timePart = 1;
    
    try
    {
