@@ -490,34 +490,38 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    dstream.precision(precision);
 
 // DJC 07/29/04 Commented out -- not sure how this works...
-//   // get var params
-//   Rvector varvals = Rvector(mNumVarParams);
+   // get var params
+   // ag: uncommented 7/30/04
+   Rvector varvals = Rvector(mNumVarParams);
 
    if (len == 0)
       return false;
    else {
-      if (lastUsedProvider != currentProvider) {
-         // Write out a line with data labels
-         StringArray sar = 
-             Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
-         for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
-            dstream << (*i) << "  ";
-         dstream << "\n";
-      }      
-     
-      for (int i = 0; i < len-1; ++i)
-         dstream << dat[i] << "  ";
-      dstream << dat[len-1] << std::endl;
+// ag: commented out 7/30/04      
+//      if (lastUsedProvider != currentProvider) {
+//         // Write out a line with data labels
+//         StringArray sar = 
+//             Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
+//         for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+//            dstream << (*i) << "  ";
+//         dstream << "\n";
+//      }      
+//     
+//      for (int i = 0; i < len-1; ++i)
+//         dstream << dat[i] << "  ";
+//      dstream << dat[len-1] << std::endl;
       
 // DJC 07/29/04 Commented out -- not sure how this works...
-//      for (int i=0; i < mNumVarParams; i++)
-//      {
-//          varvals[i] = mVarParams[i]->EvaluateReal();
-//          dstream << varvals[i] << " ";
-//      }   
-//      dstream << std::endl;
+      //ag:  uncommented 7/30/04
+      for (int i=0; i < mNumVarParams; i++)
+      {
+          varvals[i] = mVarParams[i]->EvaluateReal();
+          dstream << varvals[i] << " ";
+      }   
+      dstream << std::endl;
 
-      lastUsedProvider = currentProvider;
+      //ag: commented 7/30/04
+      //lastUsedProvider = currentProvider;
    }
 
    return true;
