@@ -20,8 +20,6 @@
 #ifndef Linear_hpp
 #define Linear_hpp
 
-//#include <sstream>
-//#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include "Rvector.hpp"
@@ -35,16 +33,16 @@ namespace GmatRealUtil
    // spherical coordinate types and operations 
    struct RaCodec
    {
-   Real radiusD;
-   Real rightAscensionD;
-   Real coDeclinationD;
+      Real radiusD;
+      Real rightAscensionD;
+      Real coDeclinationD;
    };
 
    struct RaDec
    {
-   Real radiusD;
-   Real rightAscensionD;
-   Real declinationD;
+      Real radiusD;
+      Real rightAscensionD;
+      Real declinationD;
    };
 
    // Conversion Functions for Spherical coordinates
@@ -55,16 +53,46 @@ namespace GmatRealUtil
    Rvector3 RaDecToCartesian(const RaDec &r);
    RaCodec  RaDecToRaCodec(const RaDec &r);
 
-   // I/O formatting
-   //loj: Do this later.
-   //OMANIP(int) SetSpacing(int i);
-   //OMANIP(int) SetHorizontal(bool h);
-   //IMANIP(int) SetBinaryIn(bool b);
-   //OMANIP(int) SetBinaryOut(bool b);
-   bool        IsHorizontal();
-   bool        IsBinaryIn();
-   bool        IsBinaryOut();
-   int         GetSpacing();
+   // I/O formatting   
+   struct IoFormat
+   {
+      IoFormat(int width = 10, int precision = 9, int spacing = 2,
+               bool horizontal = false, bool binaryIn = false,
+               bool binaryOut = false)
+      {
+         mWidth = width;
+         mPrecision = precision;
+         mSpacing = spacing;
+         mHorizontal = horizontal;
+         mBinaryIn = binaryIn;
+         mBinaryOut = binaryOut;
+      };
+      
+      int  mWidth;      /// the field width
+      int  mPrecision;  /// the number of digits of precision
+      int  mSpacing;    /// determines number of spaces in between each element
+      bool mHorizontal; /// print horizontally if true. Default is false
+      bool mBinaryIn;   /// read in binary if true. Default is false
+      bool mBinaryOut;  /// print in binary if true. Default is false
+
+   };
+
+   static IoFormat format;
+   const static IoFormat DEFAULT_FORMAT;
+
+   void SetWidth(int w);
+   void SetPrecision(int p);
+   void SetSpacing(int s);
+   void SetHorizontal(bool h);
+   void SetBinaryIn(bool b);
+   void SetBinaryOut(bool b);
+   
+   int  GetWidth();
+   int  GetPrecision();
+   int  GetSpacing();
+   bool IsHorizontal();
+   bool IsBinaryIn();
+   bool IsBinaryOut();
 
    // Math Utilities
    Real Min(const Rvector &numbers);
@@ -72,10 +100,13 @@ namespace GmatRealUtil
 
    //  I/O stream operations
    std::istream& operator>> (std::istream &input, Rvector &a);
-   std::ostream& operator<< (std::ostream &output, const Rvector &a);
-
+   std::ostream& operator<< (std::ostream &output, const Rvector &a); 
    std::istream& operator>> (std::istream &input, Rmatrix &a);
-   std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
+   std::ostream& operator<< (std::ostream &output, const Rmatrix &a); 
+
+   //loj: 9/21/04 added width and precision
+   std::string ToString(const Real &val, Integer width=10, Integer precision=9);
+   std::string ToString(const Integer &val);
 }
 #endif // Linear_hpp
 

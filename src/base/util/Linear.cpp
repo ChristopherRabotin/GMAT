@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "RealTypes.hpp"
 #include "RealUtilities.hpp" // for PI, TWO_PI, Acos(), Atan()
 #include "Rvector.hpp"
@@ -44,33 +45,33 @@ using namespace GmatMathUtil;
 //------------------------------------------------------------------------------
 GmatRealUtil::RaCodec GmatRealUtil::CartesianToRaCodec(const Rvector3 &r)
 {
-    RaCodec s;
-    if ( (r[0] == 0.0) && (r[1] == 0.0) ) 
-    {
-        if (r[2] == 0.0) 
-        {
-            throw RealUtilitiesExceptions::ArgumentError();
-        } 
-        else if( r[2]<0.0 ) 
-        {
-            s.radiusD = -r[2];
-            s.coDeclinationD = GmatMathUtil::PI;
-            s.rightAscensionD = 0.0;
-        } 
-        else if( r[2]>0.0) 
-        {
-            s.radiusD = r[2];
-            s.coDeclinationD = 0.0;
-            s.rightAscensionD =0.0;
-        }
-    } 
-    else
-    {
-        s.radiusD = r.GetMagnitude();
-        s.coDeclinationD = ACos(r[2] / s.radiusD);
-        s.rightAscensionD = ATan(r[1],r[0]);
-    }
-    return s;
+   RaCodec s;
+   if ( (r[0] == 0.0) && (r[1] == 0.0) ) 
+   {
+      if (r[2] == 0.0) 
+      {
+         throw RealUtilitiesExceptions::ArgumentError();
+      } 
+      else if( r[2]<0.0 ) 
+      {
+         s.radiusD = -r[2];
+         s.coDeclinationD = GmatMathUtil::PI;
+         s.rightAscensionD = 0.0;
+      } 
+      else if( r[2]>0.0) 
+      {
+         s.radiusD = r[2];
+         s.coDeclinationD = 0.0;
+         s.rightAscensionD =0.0;
+      }
+   } 
+   else
+   {
+      s.radiusD = r.GetMagnitude();
+      s.coDeclinationD = ACos(r[2] / s.radiusD);
+      s.rightAscensionD = ATan(r[1],r[0]);
+   }
+   return s;
 }
 
 //------------------------------------------------------------------------------
@@ -83,34 +84,34 @@ GmatRealUtil::RaCodec GmatRealUtil::CartesianToRaCodec(const Rvector3 &r)
 //------------------------------------------------------------------------------
 GmatRealUtil::RaDec GmatRealUtil::CartesianToRaDec(const Rvector3 &r)
 {
-    RaDec RD;
+   RaDec RD;
 
-    if ( r[0] == 0.0 && r[1] == 0.0) 
-    {
-        if(r[2] == 0.0) 
-        {
-            throw RealUtilitiesExceptions::ArgumentError();
-        } 
-        else if(r[2]<0.0) 
-        {
-            RD.radiusD = -r[2];
-            RD.rightAscensionD = 0.0;
-            RD.declinationD = -GmatMathUtil::PI_OVER_TWO;
-        } 
-        else if(r[2]>0.0) 
-        {
-            RD.radiusD = r[2];
-            RD.rightAscensionD = 0.0;
-            RD.declinationD  = GmatMathUtil::PI_OVER_TWO;
-        }
-    } 
-    else 
-    {
-        RD.radiusD = r.GetMagnitude();
-        RD.rightAscensionD = ATan(r[1],r[0]);
-        RD.declinationD = ASin(r[2]/RD.radiusD);
-    }
-    return RD;
+   if ( r[0] == 0.0 && r[1] == 0.0) 
+   {
+      if(r[2] == 0.0) 
+      {
+         throw RealUtilitiesExceptions::ArgumentError();
+      } 
+      else if(r[2]<0.0) 
+      {
+         RD.radiusD = -r[2];
+         RD.rightAscensionD = 0.0;
+         RD.declinationD = -GmatMathUtil::PI_OVER_TWO;
+      } 
+      else if(r[2]>0.0) 
+      {
+         RD.radiusD = r[2];
+         RD.rightAscensionD = 0.0;
+         RD.declinationD  = GmatMathUtil::PI_OVER_TWO;
+      }
+   } 
+   else 
+   {
+      RD.radiusD = r.GetMagnitude();
+      RD.rightAscensionD = ATan(r[1],r[0]);
+      RD.declinationD = ASin(r[2]/RD.radiusD);
+   }
+   return RD;
 }
 
 //------------------------------------------------------------------------------
@@ -118,11 +119,11 @@ GmatRealUtil::RaDec GmatRealUtil::CartesianToRaDec(const Rvector3 &r)
 //------------------------------------------------------------------------------
 Rvector3 GmatRealUtil::RaCodecToCartesian(const RaCodec &r)
 {
-    Rvector3 v;
-    v[0] = r.radiusD * Sin(r.coDeclinationD) * Cos(r.rightAscensionD);
-    v[1] = r.radiusD * Sin(r.coDeclinationD) * Sin(r.rightAscensionD);
-    v[2] = r.radiusD * Cos(r.coDeclinationD);
-    return v;
+   Rvector3 v;
+   v[0] = r.radiusD * Sin(r.coDeclinationD) * Cos(r.rightAscensionD);
+   v[1] = r.radiusD * Sin(r.coDeclinationD) * Sin(r.rightAscensionD);
+   v[2] = r.radiusD * Cos(r.coDeclinationD);
+   return v;
 }
 
 //------------------------------------------------------------------------------
@@ -130,11 +131,11 @@ Rvector3 GmatRealUtil::RaCodecToCartesian(const RaCodec &r)
 //------------------------------------------------------------------------------
 GmatRealUtil::RaDec GmatRealUtil::RaCodecToRaDec(const RaCodec &r)
 {
-    RaDec rD;
-    rD.radiusD = r.radiusD;
-    rD.rightAscensionD = r.rightAscensionD;
-    rD.declinationD = GmatMathUtil::PI_OVER_TWO - r.coDeclinationD;
-    return rD;
+   RaDec rD;
+   rD.radiusD = r.radiusD;
+   rD.rightAscensionD = r.rightAscensionD;
+   rD.declinationD = GmatMathUtil::PI_OVER_TWO - r.coDeclinationD;
+   return rD;
 }
 
 //------------------------------------------------------------------------------
@@ -142,11 +143,11 @@ GmatRealUtil::RaDec GmatRealUtil::RaCodecToRaDec(const RaCodec &r)
 //------------------------------------------------------------------------------
 Rvector3 GmatRealUtil::RaDecToCartesian(const RaDec &r)
 {
-    Rvector3 v;
-    v[0] = r.radiusD * Cos(r.rightAscensionD) * Cos(r.declinationD);
-    v[1] = r.radiusD * Sin(r.rightAscensionD) * Cos(r.declinationD);
-    v[2] = r.radiusD * Sin(r.declinationD);
-    return v;
+   Rvector3 v;
+   v[0] = r.radiusD * Cos(r.rightAscensionD) * Cos(r.declinationD);
+   v[1] = r.radiusD * Sin(r.rightAscensionD) * Cos(r.declinationD);
+   v[2] = r.radiusD * Sin(r.declinationD);
+   return v;
 }
 
 //------------------------------------------------------------------------------
@@ -154,11 +155,11 @@ Rvector3 GmatRealUtil::RaDecToCartesian(const RaDec &r)
 //------------------------------------------------------------------------------
 GmatRealUtil::RaCodec GmatRealUtil::RaDecToRaCodec(const RaDec &r)
 {
-    RaCodec s;
-    s.radiusD = r.radiusD;
-    s.rightAscensionD = r.rightAscensionD;
-    s.coDeclinationD = GmatMathUtil::PI_OVER_TWO - r.declinationD;
-    return s;
+   RaCodec s;
+   s.radiusD = r.radiusD;
+   s.rightAscensionD = r.rightAscensionD;
+   s.coDeclinationD = GmatMathUtil::PI_OVER_TWO - r.declinationD;
+   return s;
 }
 
 //------------------------------------------------------------------------------
@@ -166,18 +167,16 @@ GmatRealUtil::RaCodec GmatRealUtil::RaDecToRaCodec(const RaDec &r)
 //------------------------------------------------------------------------------
 Real GmatRealUtil::Min(const Rvector &numbers)
 {
-    int i;
-    int end = numbers.GetSize();
-    Real smallest = numbers[0];
+   int i;
+   int end = numbers.GetSize();
+   Real smallest = numbers[0];
     
-    for ( i = 1; i<end;i++) 
-    {
-        if (numbers[i]<smallest) 
-        {
-            smallest = numbers[i];
-        }
-    }
-    return smallest;
+   for ( i = 1; i<end;i++) 
+   {
+      if (numbers[i]<smallest) 
+         smallest = numbers[i];
+   }
+   return smallest;
 }
 
 //------------------------------------------------------------------------------
@@ -185,153 +184,88 @@ Real GmatRealUtil::Min(const Rvector &numbers)
 //------------------------------------------------------------------------------
 Real GmatRealUtil::Max(const Rvector &numbers)
 {
-    int i;
-    int end = numbers.GetSize();
-    Real biggest = numbers[0];
+   int i;
+   int end = numbers.GetSize();
+   Real biggest = numbers[0];
 
-    for ( i = 1; i<end; i++) 
-    {
-        if (numbers[i]>biggest) 
-        {
-            biggest = numbers[i];
-        }
-    }
-    return biggest;
+   for ( i = 1; i<end; i++) 
+   {
+      if (numbers[i]>biggest) 
+         biggest = numbers[i];
+   }
+   return biggest;
 }
 
-struct LinearIODefaults 
+//------------------------------------------------------------------------------
+// void GmatRealUtil::SetWidth(int w)
+//------------------------------------------------------------------------------
+void GmatRealUtil::SetWidth(int w)
 {
-    static const int  spacing = 4;
-    static const bool horizontal = false;
-    static const bool binaryIn = false;
-    static const bool binaryOut = false;
-};
-
-//  const int  LinearIODefaults::spacing    = 4;
-//  const bool LinearIODefaults::horizontal = false;
-//  const bool LinearIODefaults::binaryIn   = false;
-//  const bool LinearIODefaults::binaryOut  = false;
-
-static int  spacing    = 4;     //determines number of spaces in between
-                                //  each element
-static bool horizontal = false; //print horizontally if true. Default is false
-static bool binaryIn   = false; //read in binary if true. Default is false
-static bool binaryOut  = false; //print in binary if true. Default is false
+   format.mWidth = w;
+}
 
 //------------------------------------------------------------------------------
-//  std::ostream& SetSpacing(std::ostream& outFile, int i) 
+// void GmatRealUtil::SetPrecision(int p)
 //------------------------------------------------------------------------------
-/**
- * Modifies the variable spacing
- *
- * @param <std::ostream&> output stream
- * @param <i> the value to set spacing with
- * @return output stream
- */
-//------------------------------------------------------------------------------
-//  std::ostream& SetSpacing(std::ostream &outFile, int i)
-//  {
-//      spacing = i;
-//      return outFile;
-//  }
+void GmatRealUtil::SetPrecision(int p)
+{
+   format.mPrecision = p;
+}
 
 //------------------------------------------------------------------------------
-//  OMANIP(int) SetSpacing(int i) 
+// void GmatRealUtil::SetSpacing(int s)
 //------------------------------------------------------------------------------
-//  std::OMANIP(int)(int)
-//  SetSpacing(int i) 
-//  {
-//      return OMANIP(int)(&SetSpacing,i);
-//  }
+void GmatRealUtil::SetSpacing(int s)
+{
+   format.mSpacing = s;
+}
 
 //------------------------------------------------------------------------------
-//  std::ostream &SetHorizontal(std::ostream &outFile, int h) 
+// void GmatRealUtil::SetHorizontal(bool h)
 //------------------------------------------------------------------------------
-/**
- * Modifies the variable indicating horizontal or vertical output
- *
- * @param <std::ostream&> output stream
- * @param <h> the value to set horizontal/vertical flag
- * @return output stream
- */
-//------------------------------------------------------------------------------
-//  std::ostream& SetHorizontal(std::ostream &outFile, bool h) 
-//  {
-//      horizontal = h;
-//      return outFile;
-//  }
+void GmatRealUtil::SetHorizontal(bool h)
+{
+   format.mHorizontal = h;
+}
 
 //------------------------------------------------------------------------------
-//  OMANIP(int) SetHorizontal(bool h)
+// void GmatRealUtil::SetBinaryIn(bool b)
 //------------------------------------------------------------------------------
-//  OMANIP(int)
-//  SetHorizontal(bool h)
-//  {
-//      return OMANIP(int)(&SetHorizontal,(int)h);
-//  }
+void GmatRealUtil::SetBinaryIn(bool b)
+{
+   format.mBinaryIn = b;
+}
 
 //------------------------------------------------------------------------------
-//  std::istream& SetBinaryIn(std::istream &inFile, int b) 
-//
-//  Description: modifies the variable binaryIn, setting input to binary or
-//               non-binary
-//
-//  Arguments:
-//  <std::istream&>   <-  input stream
-//  <b>          <-  the value to set input binary/non-binary flag with
-//
-//  Returns: <std::istream&> input stream
-// 
+// void GmatRealUtil::SetBinaryOut(bool b)
 //------------------------------------------------------------------------------
-//  std::istream& SetBinaryIn(std::istream &inFile, int b) 
-//  {
-//      binaryIn = (bool) b;
-//      return inFile;
-//  }
+void GmatRealUtil::SetBinaryOut(bool b)
+{
+   format.mBinaryOut = b;
+}
 
 //------------------------------------------------------------------------------
-//  IMANIP(int) SetBinaryIn(bool b)
+//  int GmatRealUtil::GetWidth() 
 //------------------------------------------------------------------------------
-//  IMANIP(int)
-//  SetBinaryIn(bool b)
-//  {
-//      return IMANIP(int)(&SetBinaryIn,(int)b);
-//  }
+int GmatRealUtil::GetWidth()
+{
+   return format.mWidth;
+}
 
 //------------------------------------------------------------------------------
-//  <"private">
-//  std::ostream& SetBinaryOut(std::ostream &outFile, int b) 
-//
-//  Description: modifies the variable binaryOut, setting output to binary or
-//               non-binary
-//
-//  Arguments:
-//  <std::ostream&>   <-  output stream
-//  <b>          <-  the value to set output binary/non-binary flag with
-//
-//  Returns: <std::ostream&>  output stream
+//  int GmatRealUtil::GetPrecision() 
 //------------------------------------------------------------------------------
-//  std::ostream& SetBinaryOut(std::ostream &outFile, int b) 
-//  {
-//      binaryOut = (bool) b;
-//      return outFile;
-//  }
-
-//------------------------------------------------------------------------------
-//  OMANIP(int) SetBinaryOut(bool b)
-//------------------------------------------------------------------------------
-//  OMANIP(int)
-//  SetBinaryOut(bool b)
-//  {
-//      return OMANIP(int)(&SetBinaryOut,(int)b);
-//  }
+int GmatRealUtil::GetPrecision()
+{
+   return format.mPrecision;
+}
 
 //------------------------------------------------------------------------------
 //  int GmatRealUtil::GetSpacing() 
 //------------------------------------------------------------------------------
 int GmatRealUtil::GetSpacing()
 {
-    return spacing;
+   return format.mSpacing;
 }
 
 //------------------------------------------------------------------------------
@@ -339,7 +273,7 @@ int GmatRealUtil::GetSpacing()
 //------------------------------------------------------------------------------
 bool GmatRealUtil::IsHorizontal() 
 {
-    return horizontal;
+   return format.mHorizontal;
 }
 
 //------------------------------------------------------------------------------
@@ -347,7 +281,7 @@ bool GmatRealUtil::IsHorizontal()
 //------------------------------------------------------------------------------
 bool GmatRealUtil::IsBinaryIn() 
 {
-    return binaryIn;
+   return format.mBinaryIn;
 }
 
 //------------------------------------------------------------------------------
@@ -355,7 +289,7 @@ bool GmatRealUtil::IsBinaryIn()
 //------------------------------------------------------------------------------
 bool GmatRealUtil::IsBinaryOut() 
 {
-    return binaryOut;
+   return format.mBinaryOut;
 }
 
 //------------------------------------------------------------------------------
@@ -363,29 +297,26 @@ bool GmatRealUtil::IsBinaryOut()
 //------------------------------------------------------------------------------
 std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a) 
 {
-    int size = a.GetSize();
-    int i;
+   int size = a.GetSize();
+   int i;
    
-    if (binaryIn)
-    {
-        for (i=0; i<size; i++)  
-        {
-            input.read((char*)&a[i], sizeof(Real));
-        }
-    }
-    else
-    {
-        for (i=0; i<size; i++)  
-        {
-            input>>a[i];
-        }
-    }
-    binaryIn = LinearIODefaults::binaryIn;
-    return input;
+   if (format.mBinaryIn)
+   {
+      for (i=0; i<size; i++)  
+         input.read((char*)&a[i], sizeof(Real));
+   }
+   else
+   {
+      for (i=0; i<size; i++)  
+         input>>a[i];
+   }
+   
+   format.mBinaryIn = DEFAULT_FORMAT.mBinaryIn;
+   return input;
 }
 
 //------------------------------------------------------------------------------
-//  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a) 
+//  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
 //------------------------------------------------------------------------------
 /**
  * @note Resets format to default.
@@ -393,45 +324,51 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a) 
 {
-    int size = a.GetSize();
-    int i;
+   int size = a.GetSize();
+   int i;
    
-    if (binaryOut)
-    {
-        for (i=0; i<size; i++)  
-        {
-            output.write((char*)&a[i], sizeof(Real));
-        }
-    }
-    else
-    {
-        if (horizontal) 
-        {
-            char *spaces = new char[spacing + 1];
-            for (i=0; i<spacing; i++) 
-            {
-                spaces[i] = ' ';
-            }
-            spaces[spacing] = '\0';
-            for (i=0; i<size; i++) 
-            {
-                output << a[i] << spaces;
-            }
-            output << std::endl;
-        } 
-        else 
-        {
-            for (i=0; i<size; i++) 
-            {
-                output << a[i] << std::endl;
-            }
-        }
-    }
+   if (format.mBinaryOut)
+   {
+      for (i=0; i<size; i++)  
+      {
+         output.write((char*)&a[i], sizeof(Real));
+      }
+   }
+   else
+   {      
+      if (format.mHorizontal) 
+      {
+         char *spaces = new char[format.mSpacing + 1];
+         for (i=0; i<format.mSpacing; i++) 
+         {
+            spaces[i] = ' ';
+         }
+         spaces[format.mSpacing] = '\0';
+         for (i=0; i<size; i++) 
+         {
+            output.width(format.mWidth);
+            output.precision(format.mPrecision);
+            output << a[i] << spaces;
+         }
+         output << std::endl;
+      } 
+      else 
+      {
+         for (i=0; i<size; i++) 
+         {
+            output.width(format.mWidth);
+            output.precision(format.mPrecision);
+            output << a[i] << std::endl;
+         }
+      }
+   }
 
-    spacing = LinearIODefaults::spacing;
-    horizontal = LinearIODefaults::horizontal;
-    binaryOut = LinearIODefaults::binaryOut;
-    return output;
+   format.mWidth = DEFAULT_FORMAT.mWidth;
+   format.mPrecision = DEFAULT_FORMAT.mPrecision;
+   format.mSpacing = DEFAULT_FORMAT.mSpacing;
+   format.mHorizontal = DEFAULT_FORMAT.mHorizontal;
+   format.mBinaryOut = DEFAULT_FORMAT.mBinaryOut;
+   return output;
 }
 
 //------------------------------------------------------------------------------
@@ -439,36 +376,29 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
 //------------------------------------------------------------------------------
 std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a) 
 {
-    int row = a.GetNumRows();
-    int column = a.GetNumColumns();
-    int i,j;
+   int row = a.GetNumRows();
+   int column = a.GetNumColumns();
+   int i,j;
 
-    if (binaryIn)
-    {
-        for (i=0; i<row; i++) 
-        {
-            for (j=0; j<column; j++) 
-            {
-                input.read((char*)&a(i,j), sizeof(Real));
-            }
-        }
-    }
-    else
-    {
-        for (i=0; i<row; i++) 
-        {
-            for (j=0; j<column; j++) 
-            {
-                input >> a(i,j);
-            }
-        }
-    }
-    binaryIn = LinearIODefaults::binaryIn;
-    return input;
+   if (format.mBinaryIn)
+   {
+      for (i=0; i<row; i++) 
+         for (j=0; j<column; j++) 
+            input.read((char*)&a(i,j), sizeof(Real));
+   }
+   else
+   {
+      for (i=0; i<row; i++) 
+         for (j=0; j<column; j++) 
+            input >> a(i,j);
+   }
+   
+   format.mBinaryIn = DEFAULT_FORMAT.mBinaryIn;
+   return input;
 }
 
 //------------------------------------------------------------------------------
-//  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a) 
+//  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &)
 //------------------------------------------------------------------------------
 /**
  * @note Resets format to default.
@@ -476,53 +406,83 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a) 
 {
-    int row = a.GetNumRows();
-    int column = a.GetNumColumns();
-    int i,j;
-    char *spaces = new char[spacing + 1];
+   int row = a.GetNumRows();
+   int column = a.GetNumColumns();
+   int i,j;
+   char *spaces = new char[format.mSpacing + 1];
 
-    if (binaryOut)
-    {
-        for (i=0; i<row; i++) 
-        {
+   if (format.mBinaryOut)
+   {
+      for (i=0; i<row; i++) 
+      {
+         for (j=0; j<column; j++) 
+            output.write((char*)&a(i,j), sizeof(Real));
+      }
+   }
+   else
+   {
+      for(i=0; i<format.mSpacing; i++) 
+      {
+         spaces[i] = ' ';
+      }
+      
+      spaces[format.mSpacing] = '\0';
+      
+      if (format.mHorizontal) 
+      {
+         for (i=0; i<row; i++) 
+         {
             for (j=0; j<column; j++) 
             {
-                output.write((char*)&a(i,j), sizeof(Real));
+               output.width(format.mWidth);
+               output.precision(format.mPrecision);
+               output  << a.GetElement(i,j) << spaces;
             }
-        }
-    }
-    else
-    {
-        for(i=0; i<spacing; i++) 
-        {
-            spaces[i] = ' ';
-        }
-        spaces[spacing] = '\0';
-      
-        if (horizontal) 
-        {
-            for (i=0; i<row; i++) 
+         }
+      }   
+      else 
+      {
+         for (i=0; i<row; i++) 
+         {
+            for (j=0; j<column; j++) 
             {
-                for (j=0; j<column; j++) 
-                {
-                    output << a.GetElement(i,j) << spaces;
-                }
+               output.width(format.mWidth);
+               output.precision(format.mPrecision);
+               output << a.GetElement(i,j) << spaces;
             }
-        }   
-        else 
-        {
-            for (i=0; i<row; i++) 
-            {
-                for (j=0; j<column; j++) 
-                {
-                    output << a.GetElement(i,j) << spaces;
-                }
-                output << std::endl;
-            }
-        }
-    }
-    spacing = LinearIODefaults::spacing;
-    horizontal = LinearIODefaults::horizontal;
-    binaryOut = LinearIODefaults::binaryOut;
-    return output;
+            output << std::endl;
+         }
+      }
+   }
+   
+   format.mWidth = DEFAULT_FORMAT.mWidth;
+   format.mPrecision = DEFAULT_FORMAT.mPrecision;
+   format.mSpacing = DEFAULT_FORMAT.mSpacing;
+   format.mHorizontal = DEFAULT_FORMAT.mHorizontal;
+   format.mBinaryOut = DEFAULT_FORMAT.mBinaryOut;
+   return output;
+}
+
+//loj: 9/21/04 added width and precision
+//------------------------------------------------------------------------------
+// std::string ToString(const Real &val, Integer width=10, Integer precision=9)
+//------------------------------------------------------------------------------
+std::string GmatRealUtil::ToString(const Real &val, Integer width,
+                                   Integer precision)
+{
+   std::stringstream ss("");
+   ss.width(width);
+   ss.precision(precision);
+   ss << val;
+   return std::string(ss.str());
+}
+
+//------------------------------------------------------------------------------
+// std::string ToString(const Integer &val)
+//------------------------------------------------------------------------------
+std::string GmatRealUtil::ToString(const Integer &val)
+{
+   std::stringstream ss("");
+   ss << val;
+   return std::string(ss.str());
 }
