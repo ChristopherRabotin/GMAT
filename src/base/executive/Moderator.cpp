@@ -23,6 +23,7 @@
 
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
+//#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
 //#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 1
@@ -294,7 +295,46 @@ GmatBase* Moderator::GetConfiguredItem(const std::string &name)
 bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &oldName,
                                      const std::string &newName)
 {
-   return theConfigManager->RenameItem(type, oldName, newName);
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Moderator::RenameConfiguredItem() type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+#endif
+   
+   bool renamed = theConfigManager->RenameItem(type, oldName, newName);
+   
+   //--------------------------------------------------
+   // rename object name used in mission sequence
+   //--------------------------------------------------
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Moderator::RenameConfiguredItem() ===> Change Command ref object names\n");
+#endif
+   int sandboxIndex = 0; //handles one sandbox for now
+   GmatCommand *cmd = commands[sandboxIndex]->GetNext();
+   GmatCommand *child;
+   
+   while (renamed && cmd != NULL)
+   {
+      renamed = cmd->RenameRefObject(type, oldName, newName);
+      child = cmd->GetChildCommand(0);
+
+      while (renamed && (child != NULL) && (child != cmd))
+      {
+         renamed = child->RenameRefObject(type, oldName, newName);
+         child = child->GetNext();
+      }
+      
+      cmd = cmd->GetNext();
+   }
+   
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Moderator::RenameConfiguredItem() rename status=%d\n", renamed);
+#endif
+
+   
+   return renamed;
 }
 
 //------------------------------------------------------------------------------
@@ -1528,14 +1568,18 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    else if (type == "Target") //loj: 11/4/04 added
    {
       // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      Solver *solver = CreateSolver("DifferentialCorrector",
+                                    GetDefaultSolver()->GetName());
+                                    //"DefaultDC");
       id = cmd->GetParameterID("Targeter");
       cmd->SetStringParameter(id, solver->GetName());
    }
    else if (type == "Vary") //loj: 10/6/04 added
    {
       // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      Solver *solver = CreateSolver("DifferentialCorrector",
+                                    GetDefaultSolver()->GetName());
+                                    //"DefaultDC");
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
 
@@ -1573,19 +1617,21 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    else if (type == "Achieve") //loj: 10/6/04 added
    {
       // set solver
-      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      Solver *solver = CreateSolver("DifferentialCorrector",
+                                    GetDefaultSolver()->GetName());
+                                    //"DefaultDC");
       id = cmd->GetParameterID("TargeterName");
       cmd->SetStringParameter(id, solver->GetName());
-
+      
       // set goal parameter
       id = cmd->GetParameterID("Goal");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".SMA");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".INC");
-
+      
       id = cmd->GetParameterID("GoalValue");
       cmd->SetRealParameter(id, 8500.0);
       cmd->SetRealParameter(id, 30.0);
-
+      
       id = cmd->GetParameterID("Tolerance");
       cmd->SetRealParameter(id, 0.1);
       cmd->SetRealParameter(id, 0.1);
@@ -2768,6 +2814,25 @@ Burn* Moderator::GetDefaultBurn()
    {
       // create ImpulsiveBurn
       return CreateBurn("ImpulsiveBurn", "DefaultBurn");
+   }
+}
+
+//------------------------------------------------------------------------------
+// Solver* GetDefaultSolver()
+//------------------------------------------------------------------------------
+Solver* Moderator::GetDefaultSolver()
+{
+   StringArray &configList = GetListOfConfiguredItems(Gmat::SOLVER);
+   
+   if (configList.size() > 0)
+   {
+      // return 1st Burn from the list
+      return GetSolver(configList[0]);
+   }
+   else
+   {
+      // create Solver
+      return CreateSolver("DifferentialCorrector", "DefaultDC");
    }
 }
 
