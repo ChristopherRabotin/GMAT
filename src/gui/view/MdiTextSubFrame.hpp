@@ -24,7 +24,7 @@
 
 #include "gmatwxdefs.hpp"
 
-//#include "wx/docview.h"
+#include "wx/docview.h"
 
 class MdiTextSubFrame: public wxTextCtrl
 {
