@@ -420,7 +420,8 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
          (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
 #if DEBUG_FORCEMODEL
          MessageInterface::ShowMessage
-            ("ForceModel::UpdateSpacecraft() newepoch=%f\n", newepoch);
+            ("ForceModel::UpdateSpacecraft() prevElapsedTime=%f elapsedTime=%f "
+             "newepoch=%f\n", prevElapsedTime, elapsedTime, newepoch);
 #endif
       }
    }
@@ -428,7 +429,7 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
 
 
 //------------------------------------------------------------------------------
-// void ForceModel::UpdateSpacecraft(void)
+// void ForceModel::UpdateFromSpacecraft(void)
 //------------------------------------------------------------------------------
 /**
  * Updates the model state data from the spacecraft state -- useful to revert
@@ -468,7 +469,13 @@ void ForceModel::UpdateFromSpacecraft(void)
 //------------------------------------------------------------------------------
 void ForceModel::RevertSpacecraft(void)
 {
-   elapsedTime = previousTime;
+#if DEBUG_FORCEMODEL
+   MessageInterface::ShowMessage
+      ("ForceModel::RevertSpacecraft() prevElapsedTime=%f elapsedTime=%f\n",
+       prevElapsedTime, elapsedTime);
+#endif
+   //loj: 7/1/04 elapsedTime = previousTime;
+   elapsedTime = prevElapsedTime;
    memcpy(modelState, previousState, dimension*sizeof(Real)); 
 }
 
