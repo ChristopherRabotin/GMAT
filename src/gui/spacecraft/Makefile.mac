@@ -2,13 +2,14 @@
 # Module:     Makefile.mac for spacecraft directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/18
+# Modified:   2004/04/19 - Added BallisticsMassPanel.cpp and OrbitPanel.cpp
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = SpacecraftPanel.cpp
+SRC = BallisticsMassPanel.cpp OrbitPanel.cpp SpacecraftPanel.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
