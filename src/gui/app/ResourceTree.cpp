@@ -50,6 +50,7 @@
 #include "MessageInterface.hpp"
 #include "GmatTreeItemData.hpp"
 #include "ParameterCreateDialog.hpp"
+#include "CoordSysCreateDialog.hpp"
 #include "GmatMainFrame.hpp"
 
 //#define DEBUG_RESOURCE_TREE 1
@@ -1763,21 +1764,20 @@ void ResourceTree::OnAddCoordSys(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
 
-   wxString withName;
-   withName.Printf("CoordinateSystem%d", ++mNumCoordSys);
+   // show dialog to create user parameter
+   CoordSysCreateDialog coordDlg(this);
+   coordDlg.ShowModal();
 
-   const std::string stdWithName = withName.c_str();
+   if (coordDlg.IsCoordCreated())
+   {
+      //wxString name = coordDlg.GetParamName();
+      wxString name = coordDlg.GetCoordName();
 
-   /// @todo check gui interpreter if coordinate system is created
-//   if (GmatAppData::GetGuiInterpreter()->
-//      CreateFunction("MatlabFunction", stdWithName))
-//   {
-      AppendItem(item, withName, GmatTree::ICON_COORDINATE_SYSTEM, -1,
-                 new GmatTreeItemData(withName, GmatTree::COORD_SYSTEM));
+      AppendItem(item, name, GmatTree::ICON_COORDINATE_SYSTEM, -1,
+                    new GmatTreeItemData(name, GmatTree::COORD_SYSTEM));
 
       Expand(item);
-//   }
-
+   }
 }
 
 //---------------------------------

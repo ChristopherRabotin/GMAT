@@ -122,8 +122,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
    EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
    EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
-   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)    
-   EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile) 
+//   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)
+//   EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile)
 
    EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnScriptOpenNewEditor)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnScriptOpenFileEditor)
@@ -133,7 +133,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
    EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
-   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
+//   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
 
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
@@ -487,24 +487,24 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new VaryPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
-//      else if (dataType == GmatTree::SAVE_COMMAND)
-//      {
-//         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
-//                                          wxPoint(-1,-1), wxSize(-1,-1),
-//                                          style);
-//         panel = new wxScrolledWindow(newChild);
-//         sizer->Add(new SavePanel(panel, item->GetCommand()),
-//                    0, wxGROW|wxALL, 0);
-//      }
-//      else if (dataType == GmatTree::TOGGLE_COMMAND)
-//      {
-//         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
-//                                          wxPoint(-1,-1), wxSize(-1,-1),
-//                                          style);
-//         panel = new wxScrolledWindow(newChild);
-//         sizer->Add(new TogglePanel(panel, item->GetCommand()),
-//                    0, wxGROW|wxALL, 0);
-//      }
+      else if (dataType == GmatTree::SAVE_COMMAND)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new SavePanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if (dataType == GmatTree::TOGGLE_COMMAND)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          style);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new TogglePanel(panel, item->GetCommand()),
+                    0, wxGROW|wxALL, 0);
+      }
       else if (dataType == GmatTree::SCRIPT_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
@@ -629,7 +629,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           style);
          panel = new wxScrolledWindow(newChild);
-         sizer->Add(new CoordSystemConfigPanel(panel),
+         sizer->Add(new CoordSystemConfigPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
       else
@@ -1305,12 +1305,12 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    wxMenuBar *menuBar = new wxMenuBar;
    wxMenu *fileMenu = new wxMenu;
    wxMenu *editMenu = new wxMenu;
-   wxMenu *parametersMenu = new wxMenu;
-   wxMenu *orbitFileMenu = new wxMenu;
+//   wxMenu *parametersMenu = new wxMenu;
+//   wxMenu *orbitFileMenu = new wxMenu;
    wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
  
-   wxMenu *propagatorMenu;  
+//   wxMenu *propagatorMenu;
 
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));  
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
@@ -1351,50 +1351,50 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    editMenu->Enable(MENU_EDIT_RESOURCES, FALSE);
    editMenu->Enable(MENU_EDIT_MISSION, FALSE);
         
-   parametersMenu->Append(MENU_PARAMETERS_PROP_CONFIG,
-                          wxT("Propagation Configuration"), wxT(""), FALSE);
-    
-   propagatorMenu = new wxMenu;
-   parametersMenu->Append(MENU_PARAMETERS_PROPAGATOR, wxT("Propagator"),
-                          propagatorMenu, wxT(""));
-                           
-   parametersMenu->Append(MENU_PARAMETERS_LAUNCH_MODEL, wxT("Launch Model"),
-                          wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_INJECTION_BURN_MODEL,
-                          wxT("Injection Burn Model"), wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_SOLAR_RAD, wxT("Solar Radiation"),
-                          wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_ORBIT_INFO,
-                          wxT("Setup Orbit Information"), wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_ATTITUDE_MODES,
-                          wxT("Setup Attitude Modes"), wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_SOLAR_SAILS,
-                          wxT("Setup Solar Sails"), wxT(""), FALSE);
-   parametersMenu->Append(MENU_PARAMETERS_SOLAR_ELEC_CONV,
-                          wxT("Setup Solar Electric Conversion"), wxT(""),
-                          FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_PROP_CONFIG,
+//                          wxT("Propagation Configuration"), wxT(""), FALSE);
+//
+//   propagatorMenu = new wxMenu;
+//   parametersMenu->Append(MENU_PARAMETERS_PROPAGATOR, wxT("Propagator"),
+//                          propagatorMenu, wxT(""));
+//
+//   parametersMenu->Append(MENU_PARAMETERS_LAUNCH_MODEL, wxT("Launch Model"),
+//                          wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_INJECTION_BURN_MODEL,
+//                          wxT("Injection Burn Model"), wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_SOLAR_RAD, wxT("Solar Radiation"),
+//                          wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_ORBIT_INFO,
+//                          wxT("Setup Orbit Information"), wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_ATTITUDE_MODES,
+//                          wxT("Setup Attitude Modes"), wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_SOLAR_SAILS,
+//                          wxT("Setup Solar Sails"), wxT(""), FALSE);
+//   parametersMenu->Append(MENU_PARAMETERS_SOLAR_ELEC_CONV,
+//                          wxT("Setup Solar Electric Conversion"), wxT(""),
+//                          FALSE);
+//
+//   parametersMenu->Enable(MENU_PARAMETERS_PROP_CONFIG, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_PROPAGATOR, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_LAUNCH_MODEL, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_INJECTION_BURN_MODEL, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_RAD, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_ORBIT_INFO, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_ATTITUDE_MODES, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_SAILS, FALSE);
+//   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_ELEC_CONV, FALSE);
+//
+//   orbitFileMenu->Append(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
+//                         wxT("Read/OpenGl Plot Trajectory File"), wxT(""), FALSE);
+//   orbitFileMenu->Append(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
+//                         wxT("Read/XY Plot Trajectory File (time vs position)"), wxT(""), FALSE);
+//   orbitFileMenu->Append(MENU_ORBIT_FILES_EPHEM_FILE,
+//                         wxT("Read/Plot Ephemeris File"), wxT(""), FALSE);
+//
+//   orbitFileMenu->Enable(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, FALSE);
+//   orbitFileMenu->Enable(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, FALSE);
+//   orbitFileMenu->Enable(MENU_ORBIT_FILES_EPHEM_FILE, FALSE);
 
-   parametersMenu->Enable(MENU_PARAMETERS_PROP_CONFIG, FALSE);     
-   parametersMenu->Enable(MENU_PARAMETERS_PROPAGATOR, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_LAUNCH_MODEL, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_INJECTION_BURN_MODEL, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_RAD, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_ORBIT_INFO, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_ATTITUDE_MODES, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_SAILS, FALSE);
-   parametersMenu->Enable(MENU_PARAMETERS_SOLAR_ELEC_CONV, FALSE);
-                     
-   orbitFileMenu->Append(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
-                         wxT("Read/OpenGl Plot Trajectory File"), wxT(""), FALSE);
-   orbitFileMenu->Append(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
-                         wxT("Read/XY Plot Trajectory File (time vs position)"), wxT(""), FALSE);
-   orbitFileMenu->Append(MENU_ORBIT_FILES_EPHEM_FILE,
-                         wxT("Read/Plot Ephemeris File"), wxT(""), FALSE);
-   
-   orbitFileMenu->Enable(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, FALSE);
-   orbitFileMenu->Enable(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, FALSE);
-   orbitFileMenu->Enable(MENU_ORBIT_FILES_EPHEM_FILE, FALSE);
-   
    // Tools
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
    toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
@@ -1404,9 +1404,9 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
                           wxT(""), FALSE);
    matlabMenu->Append(MENU_TOOLS_MATLAB_CLOSE, wxT("Close"),
                           wxT(""), FALSE);
-   matlabMenu->AppendSeparator();
-   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
-                          wxT(""), FALSE);
+//   matlabMenu->AppendSeparator();
+//   matlabMenu->Append(MENU_TOOLS_MATLAB_INTERACTIVE, wxT("Interact"),
+//                          wxT(""), FALSE);
 //   matlabMenu->Enable(MENU_TOOLS_MATLAB_INTERACTIVE, FALSE);
 
 
@@ -1427,8 +1427,8 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
   
    menuBar->Append(fileMenu, wxT("File"));
    menuBar->Append(editMenu, wxT("Edit"));
-   menuBar->Append(parametersMenu, wxT("Parameters"));
-   menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
+//   menuBar->Append(parametersMenu, wxT("Parameters"));
+//   menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
    menuBar->Append(toolsMenu, wxT("Tools"));
    menuBar->Append(mServerMenu, wxT("Server"));
    menuBar->Append(helpMenu, wxT("Help"));
@@ -1506,13 +1506,25 @@ void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
    // Create a document manager
    mDocManager = new wxDocManager;
 
+   (void) new wxDocTemplate((wxDocManager *) mDocManager, _T("Script"),
+          _T("*.script"), _T(""), _T("script"), _T("Script"), _T("Script"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
+   (void) new wxDocTemplate(mDocManager, _T("M File"), _T("*.m"), _T(""),
+          _T("m"), _T("M File"), _T("M File"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
+   (void) new wxDocTemplate(mDocManager, _T("All Files"), _T("*.*"), _T(""),
+          _T("*"), _T("All Files"), _T("All Files"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
    // Create a template relating text documents to their views
    // use MdiTextDocument
-   mDocTemplate = 
-      new wxDocTemplate(mDocManager, _T("Script files"),
-                        _T("*.script;*.m"),
-                        _T(""), _T(""), _T("Text Doc"), _T("Text View"),
-                        CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+//   mDocTemplate =
+//      new wxDocTemplate(mDocManager, _T("Script Files"),
+//                        _T("*.script;*.m;"),
+//                        _T(""), _T("*.script"), _T("Text Doc"), _T("Text View"),
+//                        CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
 
 //      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
 //                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
@@ -1551,11 +1563,23 @@ void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
    mDocManager = new wxDocManager;
 
    // Create a template relating text documents to their views
-   mDocTemplate = 
-      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-                        CLASSINFO(TextDocument), CLASSINFO(TextEditView));
-    
+   (void) new wxDocTemplate((wxDocManager *) mDocManager, _T("Script"),
+          _T("*.script"), _T(""), _T("script"), _T("Script"), _T("Script"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
+   (void) new wxDocTemplate(mDocManager, _T("M File"), _T("*.m"), _T(""),
+          _T("m"), _T("M File"), _T("M File"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
+   (void) new wxDocTemplate(mDocManager, _T("All Files"), _T("*.*"), _T(""),
+          _T("*"), _T("All Files"), _T("All Files"),
+          CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
+//   mDocTemplate =
+//      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+//                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+//                        CLASSINFO(TextDocument), CLASSINFO(TextEditView));
+
    // Create the main frame window    
    // pass "this" so that this frame closes when the main frame closes
    docMainFrame =
