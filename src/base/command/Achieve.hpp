@@ -50,7 +50,7 @@ public:
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-   GetParameterType(const Integer id) const;
+                       GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
    virtual Real        GetRealParameter(const Integer id) const;
@@ -94,22 +94,25 @@ protected:
    /// Class that performs the goal calculation
    Parameter           *goalParm;
     
-    // Parameter IDs 
-    /// ID for the burn object
-   const Integer       targeterNameID;
-   /// ID for the goal name
-   const Integer       goalNameID;
-   /// ID for the goal
-   const Integer       goalID;
-   /// ID for the tolerance
-   const Integer       toleranceID;
+   // Parameter IDs
+   enum {
+      targeterNameID = GmatCommandParamCount,
+      goalNameID,
+      goalID,
+      toleranceID,
+      AchieveParamCount
+   };
+   static const std::string
+                     PARAMETER_TEXT[AchieveParamCount - GmatCommandParamCount];
+   static const Gmat::ParameterType
+                     PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount];
+
 
    bool                InterpretParameter(const std::string text,
                                  std::string &paramType,
                                  std::string &paramObj,
                                  std::string &parmSystem);
    bool                ConstructGoal(const char* str);
-
 };
 
 

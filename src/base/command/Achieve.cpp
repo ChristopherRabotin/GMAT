@@ -24,8 +24,35 @@
 
 //#define DEBUG_ACHIEVE 1
 
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+   Achieve::PARAMETER_TEXT[AchieveParamCount - GmatCommandParamCount] =
+   {
+      "TargeterName",
+      "Goal",
+      "GoalValue",
+      "Tolerance"
+   };
+   
+const Gmat::ParameterType
+   Achieve::PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount] =
+   {
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE,
+      Gmat::REAL_TYPE
+   };
+
+
 //------------------------------------------------------------------------------
-//  Achieve(void)
+// public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  Achieve()
 //------------------------------------------------------------------------------
 /**
  * Creates an Achieve command.  (default constructor)
@@ -43,18 +70,14 @@ Achieve::Achieve() :
    goalId                  (-1),
    targeter                (NULL),
    targeterDataFinalized   (false),
-   goalParm                (NULL),
-   targeterNameID          (parameterCount),
-   goalNameID              (parameterCount+1),
-   goalID                  (parameterCount+2),
-   toleranceID             (parameterCount+3)
+   goalParm                (NULL)
 {
-   parameterCount += 4;
+   parameterCount = AchieveParamCount;
 }
 
 
 //------------------------------------------------------------------------------
-//  ~Achieve(void)
+//  ~Achieve()
 //------------------------------------------------------------------------------
 /**
  * Destroys the Achieve command.  (destructor)
@@ -62,10 +85,6 @@ Achieve::Achieve() :
 //------------------------------------------------------------------------------
 Achieve::~Achieve()
 {
-//   if (goalParm)
-//      delete goalParm;
-//   if (goalTarget)
-//      delete goalTarget;
 }
 
     
@@ -75,7 +94,7 @@ Achieve::~Achieve()
 /**
  * Constructor that replicates a Achieve command.  (Copy constructor)
  *
- * @return A reference to this instance.
+ * @param t Command that is replicated here.
  */
 //------------------------------------------------------------------------------
 Achieve::Achieve(const Achieve& t) :
@@ -90,13 +109,9 @@ Achieve::Achieve(const Achieve& t) :
    goalId                  (t.goalId),
    targeter                (NULL),
    targeterDataFinalized   (false),
-   goalParm                (NULL),
-   targeterNameID          (t.targeterNameID),
-   goalNameID              (t.goalNameID),
-   goalID                  (t.goalID),
-   toleranceID             (t.toleranceID)
+   goalParm                (NULL)
 {
-   parameterCount = t.parameterCount;
+   parameterCount = AchieveParamCount;
 }
 
 
@@ -105,6 +120,8 @@ Achieve::Achieve(const Achieve& t) :
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the Achieve command.
+ *
+ * @param t Command that is replicated here.
  *
  * @return A reference to this instance.
  */
@@ -133,25 +150,34 @@ Achieve& Achieve::operator=(const Achieve& t)
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Achieve.
  *
  * @return clone of the Achieve.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* Achieve::Clone(void) const
+GmatBase* Achieve::Clone() const
 {
    return (new Achieve(*this));
 }
 
-//loj: 11/22/04 added
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param type Type of the object that is renamed.
+ * @param oldName The current name for the object.
+ * @param newName The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
 bool Achieve::RenameRefObject(const Gmat::ObjectType type,
                               const std::string &oldName,
                               const std::string &newName)
@@ -178,88 +204,99 @@ bool Achieve::RenameRefObject(const Gmat::ObjectType type,
 }
 
 // Parameter accessors
-//---------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param id Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Achieve::GetParameterText(const Integer id) const
 {
-   if (id == targeterNameID)
-      return "TargeterName";
-        
-   if (id == goalNameID)
-      return "Goal";
-        
-   if (id == goalID)
-      return "GoalValue";
-        
-   if (id == toleranceID)
-      return "Tolerance";
-    
+   if (id >= GmatCommandParamCount && id < AchieveParamCount)
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
    return GmatCommand::GetParameterText(id);
 }
 
 
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param str string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer Achieve::GetParameterID(const std::string &str) const
 {
-   if (str == "TargeterName")
-      return targeterNameID;
-        
-   if (str == "Goal")
-      return goalNameID;
-        
-   if (str == "GoalValue")
-      return goalID;
-        
-   if (str == "Tolerance")
-      return toleranceID;
-    
+   for (Integer i = GmatCommandParamCount; i < AchieveParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
+
    return GmatCommand::GetParameterID(str);
 }
 
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType Achieve::GetParameterType(const Integer id) const
 {
-   if (id == targeterNameID)
-      return Gmat::STRING_TYPE;
-        
-   if (id == goalNameID)
-      return Gmat::STRING_TYPE;
-        
-   if (id == goalID)
-//      return Gmat::REAL_TYPE;
-      return Gmat::STRING_TYPE;
-        
-   if (id == toleranceID)
-      return Gmat::REAL_TYPE;
-    
+   if (id >= GmatCommandParamCount && id < AchieveParamCount)
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
+
    return GmatCommand::GetParameterType(id);
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Achieve::GetParameterTypeString(const Integer id) const
 {
-   if (id == targeterNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-   if (id == goalNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-   if (id == goalID)
-//      return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-   if (id == toleranceID)
-      return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-    
-   return GmatCommand::GetParameterTypeString(id);
+   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the Real parameter value, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter value.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real Achieve::GetRealParameter(const Integer id) const
 {
-//   if (id == goalID)
-//      return goal;
-        
    if (id == toleranceID)
       return tolerance;
     
@@ -267,13 +304,20 @@ Real Achieve::GetRealParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Real  SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the Real parameter value, given the input parameter ID.
+ *
+ * @param id    ID for the parameter whose value to change.
+ * @param value value for the parameter.
+ *
+ * @return Real value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Real Achieve::SetRealParameter(const Integer id, const Real value)
 {
-//   if (id == goalID) {
-//      goal = value;
-//      return goal;
-//   }
-        
    if (id == toleranceID) {
       tolerance = value;
       return tolerance;
@@ -283,6 +327,18 @@ Real Achieve::SetRealParameter(const Integer id, const Real value)
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return  string value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Achieve::GetStringParameter(const Integer id) const
 {
    if (id == targeterNameID)
@@ -299,6 +355,19 @@ std::string Achieve::GetStringParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param id    ID for the requested parameter.
+ * @param value string value for the requested parameter.
+ *
+ * @return  success flag.
+ */
+//------------------------------------------------------------------------------
 bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == targeterNameID) {
@@ -320,7 +389,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
-// Multiple variables specified on the same line are not allowed in build 2 or 3
+// Multiple variables on the same line are not allowed in the current build.
 // const StringArray& Achieve::GetStringArrayParameter(const Integer id) const; 
 
 
@@ -409,20 +478,20 @@ bool Achieve::InterpretAction(void)
    // Get an instance if this is a Parameter
    Moderator *mod = Moderator::Instance();
 
-#if DEBUG_ACHIEVE
-   MessageInterface::ShowMessage
-      ("Achieve::InterpretAction() goalName = \"%s\"\n", goalName.c_str());
-#endif
+   #if DEBUG_ACHIEVE
+      MessageInterface::ShowMessage
+         ("Achieve::InterpretAction() goalName = \"%s\"\n", goalName.c_str());
+   #endif
 
    std::string parmObj, parmType, parmSystem;
    InterpretParameter(goalName, parmType, parmObj, parmSystem);
 
-#if DEBUG_ACHIEVE
-   MessageInterface::ShowMessage
-      ("Achieve::InterpretAction() parmObj=%s, parmType=%s, "
-       "parmSystem = \"%s\"\n", parmObj.c_str(),
-       parmType.c_str(), parmSystem.c_str());
-#endif
+   #if DEBUG_ACHIEVE
+      MessageInterface::ShowMessage
+         ("Achieve::InterpretAction() parmObj=%s, parmType=%s, "
+          "parmSystem = \"%s\"\n", parmObj.c_str(),
+          parmType.c_str(), parmSystem.c_str());
+   #endif
     
    goalParm = mod->CreateParameter(parmType, goalName);
    if (!goalParm)
@@ -525,7 +594,7 @@ bool Achieve::ConstructGoal(const char* str)
          goalTarget = mod->CreateParameter(parmType, goalString);
          if (!goalTarget)
             throw CommandException("Unable to create parameter " + goalString);
-         goalTarget->SetRefObjectName(Gmat::SPACECRAFT, parmObj); //loj: 9/13/04 added
+         goalTarget->SetRefObjectName(Gmat::SPACECRAFT, parmObj);
 
          if (goalTarget->IsCoordSysDependent()) {
             if (parmSystem == "")
@@ -540,7 +609,8 @@ bool Achieve::ConstructGoal(const char* str)
             goalTarget->SetStringParameter("DepObject", parmSystem);
             if (goalTarget->NeedCoordSystem())
                /// @todo Update coordinate system to better value for body parms
-               goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+               goalTarget->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                  "EarthMJ2000Eq");
          }
          return true;
       }
@@ -598,8 +668,9 @@ bool Achieve::InterpretParameter(const std::string text,
    paramType = text.substr(start);
    
    #ifdef DEBUG_PROPAGATE_INIT
-      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
-         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+      MessageInterface::ShowMessage(
+         "Built parameter %s for object %s with CS %s", paramType.c_str(),
+         paramObj.c_str(), parmSystem.c_str());
    #endif
    
    return true;
@@ -620,18 +691,10 @@ bool Achieve::Initialize()
    bool retval = GmatCommand::Initialize();
 
    if (targeter == NULL)
-      throw CommandException("Targeter not initialized for Achieve command\n  \""
-                             + generatingString + "\"\n");
-//    // Achieve specific initialization goes here:
-//    
-//    if (objectMap->find(targeterName) == objectMap->end()) {
-//        std::string errorString = "Target command cannot find targeter \"";
-//        errorString += targeterName;
-//        errorString += "\"";
-//        throw CommandException(errorString);
-//    }
-//
-//    targeter = (Solver *)((*objectMap)[targeterName]);
+      throw CommandException(
+         "Targeter not initialized for Achieve command\n  \""
+         + generatingString + "\"\n");
+
    Integer id = targeter->GetParameterID("Goals");
    targeter->SetStringParameter(id, goalName);
     

@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include "CelestialBody.hpp"
 
-#define DEBUG_MSISE90_ATMOSPHERE
+// #define DEBUG_MSISE90_ATMOSPHERE
 
 //------------------------------------------------------------------------------
 //  Msise90Atmosphere()
@@ -78,7 +78,6 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    Real    flatteningFactor = 1.0 / 298.257223563;  // WGS-84
    Real    geodesicFactor = 6378.137 * (1.0 - flatteningFactor);
 
-////// Lifted from PlanetData
    if (mCentralBody == NULL)
       throw AtmosphereException(
          "Central body pointer not set in MSISE90 model.");
