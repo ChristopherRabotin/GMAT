@@ -23,7 +23,8 @@ class ParameterMultiSelectDialog : public GmatDialog
 {
 public:
     
-   ParameterMultiSelectDialog(wxWindow *parent, wxArrayString &paramNames);
+   ParameterMultiSelectDialog(wxWindow *parent, wxArrayString &paramNames,
+                              bool showArray = false);
 
    wxArrayString GetParamNames()
       { return mParamNames; }
@@ -40,6 +41,7 @@ private:
    bool mIsParamSelected;
    bool mCanClose;
    bool mUseUserParam;
+   bool mShowArray;
    
    wxButton *mAddParamButton;
    wxButton *mRemoveParamButton;

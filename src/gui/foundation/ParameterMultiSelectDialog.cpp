@@ -35,7 +35,7 @@ END_EVENT_TABLE()
 // ParameterMultiSelectDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 ParameterMultiSelectDialog::ParameterMultiSelectDialog(wxWindow *parent,
-                                                       wxArrayString &paramNames)
+                                 wxArrayString &paramNames, bool showArray)
    : GmatDialog(parent, -1, wxString(_T("ParameterMultiSelectDialog")))
 {
    mParamNames = paramNames;
@@ -43,6 +43,7 @@ ParameterMultiSelectDialog::ParameterMultiSelectDialog(wxWindow *parent,
    mIsParamSelected = false;
    mCanClose = true;
    mUseUserParam = false;
+   mShowArray = showArray;
 
    Create();
    Show();
@@ -110,9 +111,17 @@ void ParameterMultiSelectDialog::Create()
       theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX, wxSize(150, 20));
    
    // wxListBox
-   mUserParamListBox =
-      theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
-   
+   if (mShowArray)
+   {
+      mUserParamListBox =
+         theGuiManager->GetUserParameterListBox(this, ID_LISTBOX, wxSize(150, 50));
+   }
+   else
+   {
+      mUserParamListBox =
+         theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
+   }
+
    //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = theGuiManager->
       GetPropertyListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
@@ -243,17 +252,17 @@ void ParameterMultiSelectDialog::OnButton(wxCommandEvent& event)
          // Create a paramete if it does not exist
          Parameter *param = CreateParameter(newParam);
 
-        if (param->IsPlottable())
-        {
+//        if (param->IsPlottable())
+//        {
            mParamSelectedListBox->Append(newParam);
            mIsParamSelected = true;
            theOkButton->Enable();
-        }
-        else
-        {
-           wxLogMessage("Selected parameter:%s is not a single value. Please select "
-                      "another parameter\n", newParam.c_str());
-        }
+//        }
+//        else
+//        {
+//           wxLogMessage("Selected parameter:%s is not a single value. Please select "
+//                      "another parameter\n", newParam.c_str());
+//        }
       }
    }
    else if ( event.GetEventObject() == mRemoveParamButton )
@@ -287,13 +296,17 @@ void ParameterMultiSelectDialog::OnButton(wxCommandEvent& event)
       ParameterCreateDialog paramDlg(this);
       paramDlg.ShowModal();
       
-      if (paramDlg.IsParamCreated())
+      if (mShowArray)
       {
-         //loj: 9/30/04 chagnged *UserParameter() to *UserVariable()
+         mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
+                                theGuiManager->GetUserParameterList());
+      }
+      else
+      {
          mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
                                 theGuiManager->GetUserVariableList());
-         mAddParamButton->Disable();
       }
+      mAddParamButton->Disable();
    }
 }
 
