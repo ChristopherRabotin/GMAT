@@ -2,13 +2,16 @@
 # Module:     Makefile.mac for propagator directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
-
+# Modified:   2004/02/27 - Added DormandElMikkawyPrince68.cpp, 
+#                          RungeKuttaFehlberg56.cpp, and RungeKuttaNystrom.cpp
+#
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Integrator.cpp PropSetup.cpp Propagator.cpp RungeKutta.cpp \
-	RungeKutta89.cpp
+SRC = DormandElMikkawyPrince68.cpp Integrator.cpp PropSetup.cpp \
+	Propagator.cpp RungeKutta.cpp RungeKuttaFehlberg56.cpp \
+	RungeKuttaNystrom.cpp RungeKutta89.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
