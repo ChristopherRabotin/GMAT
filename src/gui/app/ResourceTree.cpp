@@ -613,15 +613,20 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
    int size = itemNames.size();
    wxString objName;
    Parameter *param;
-    
+   
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
       param = theGuiInterpreter->GetParameter(itemNames[i]);
-        
-      AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(wxT(objName),
-                                      GmatTree::DEFAULT_VARIABLE));
+
+      // append only user parameters (loj: 9/22/04)
+      // all system parameters works as Object.Property
+      if (param->GetKey() == Parameter::USER_PARAM)
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_FILE, -1,
+                    new GmatTreeItemData(wxT(objName),
+                                         GmatTree::DEFAULT_VARIABLE));
+      }
    };
 
    theGuiManager->UpdateParameter();
