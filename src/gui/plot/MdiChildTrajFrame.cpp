@@ -18,6 +18,8 @@
 #include "TrajPlotCanvas.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_GL_FRAME 1
+
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
    EVT_MENU(GmatPlot::MDI_GL_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
@@ -48,6 +50,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    mCanvas = (TrajPlotCanvas *) NULL;
    mIsMainFrame = isMainFrame;
    mPlotName = plotName;
+   mPlotTitle = plotName;
    MdiGlPlot::mdiChildren.Append(this);
    
     // Give it an icon
@@ -119,9 +122,9 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
       new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height));
-
+   
    mCanvas = canvas;
-    
+   
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
 }
@@ -148,17 +151,19 @@ void MdiChildTrajFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 {
    //#if wxUSE_TEXTDLG
-   static wxString s_title = _T("Canvas Frame");
+   //static wxString s_title = _T("Canvas Frame");
 
    wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
                                       _T(""),
-                                      s_title,
+                                      mPlotTitle, //s_title,
                                       GetParent()->GetParent());
    if ( !title )
       return;
 
-   s_title = title;
-   SetTitle(s_title);
+   mPlotTitle = title;
+   //s_title = title;
+   //SetTitle(s_title);
+   SetTitle(title);
    //#endif
 }
 
@@ -335,6 +340,21 @@ void MdiChildTrajFrame::DeletePlot()
    // This will call OnClose()
    if (mIsMainFrame)
       MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
+}
+
+//------------------------------------------------------------------------------
+// void SetPlotName(const wxString &name)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetPlotName(const wxString &name)
+{
+#if DEBUG_GL_FRAME
+   MessageInterface::ShowMessage("MdiChildTrajFrame::SetPlotName() name=%s\n",
+                                 name.c_str());
+#endif
+   
+   mPlotName = name;
+   mPlotTitle = name;
+   SetTitle(mPlotTitle);
 }
 
 //------------------------------------------------------------------------------

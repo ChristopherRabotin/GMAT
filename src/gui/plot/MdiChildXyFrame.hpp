@@ -48,10 +48,10 @@ public:
    int  ReadXyPlotFile(const wxString &filename);
    bool DeletePlot();
    void SetPlotTitle(const wxString &title);
-   void ShowPlotLegend(); //loj: 7/14/04 added
+   void ShowPlotLegend();
    void AddPlotCurve(int curveIndex, int yOffset, double yMin,
                      double yMax, const wxString &curveTitle,
-                     UnsignedInt penColor); //loj: 7/13/04 changed from wxString penColor
+                     UnsignedInt penColor);
    void DeleteAllPlotCurves();
    void DeletePlotCurve(int curveIndex);
    void AddDataPoints(int curveIndex, double xData, double yData);
@@ -67,11 +67,11 @@ public:
    bool GetShowGrid() {return mXyPlot->GetShowGrid();}
    
    // setter
-   void SetPlotName(const wxString &str) {mPlotName = str;}
-   void SetXAxisTitle(const wxString &str) {mXAxisTitle = str;}
-   void SetYAxisTitle(const wxString &str) {mYAxisTitle = str;}
+   void SetPlotName(const wxString &name);
+   void SetXAxisTitle(const wxString &title) {mXAxisTitle = title;}
+   void SetYAxisTitle(const wxString &title) {mYAxisTitle = title;}
    void SetShowGrid(bool show);
-   void ResetZoom(); //loj: 7/27/04 added
+   void ResetZoom();
    
    // menu events
    void OnClearPlot(wxCommandEvent& event);

@@ -72,12 +72,13 @@ public:
    bool GetOverlapPlot() {return mOverlapPlot;}
    
    // setter
-   void SetPlotName(const wxString &str) {mPlotName = str;}
+   void SetPlotName(const wxString &name);
    void SetDrawWireFrame(bool flag);
    void SetOverlapPlot(bool overlap);
 
 protected:
    wxString mPlotName;
+   wxString mPlotTitle;
    bool mDrawWireFrame;
    bool mOverlapPlot;
    

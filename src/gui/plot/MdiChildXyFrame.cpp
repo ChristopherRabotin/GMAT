@@ -29,7 +29,8 @@
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_XY_MDI_FRAME 0
+//#define DEBUG_XY_MDI_FRAME 1
+//#define DEBUG_RENAME 1
 
 BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
@@ -293,13 +294,12 @@ void MdiChildXyFrame::SetPlotTitle(const wxString &title)
    
    mPlotTitle = title;
 
-   SetTitle(title); //loj: 7/13/04 added
+   //SetTitle(title);
    
    if (mXyPlot)
       mXyPlot->SetPlotTitle(title);
 }
 
-//loj: 7/13/04 added
 //------------------------------------------------------------------------------
 // void ShowPlotLegend()
 //------------------------------------------------------------------------------
@@ -500,6 +500,19 @@ void MdiChildXyFrame::RedrawCurve()
 }
 
 //------------------------------------------------------------------------------
+// void SetPlotName(const wxString &name)
+//------------------------------------------------------------------------------
+void MdiChildXyFrame::SetPlotName(const wxString &name)
+{
+#if DEBUG_RENAME
+   MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotName() name=%s\n",
+                                 name.c_str());
+#endif
+   mPlotName = name;
+   SetTitle(name);
+}
+
+//------------------------------------------------------------------------------
 // void SetShowGrid(bool show)
 //------------------------------------------------------------------------------
 /*
@@ -543,7 +556,6 @@ void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 {
-//#if wxUSE_TEXTDLG
    if (mXyPlot)
    {
       //static wxString s_title = _T("Plot Frame");
@@ -558,12 +570,10 @@ void MdiChildXyFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 
       //s_title = title;
       //SetTitle(s_title);
-      SetTitle(newTitle);
+      //SetTitle(newTitle);//loj: 11/19/04 - commented out
       
-      //loj: 5/13/04
       mXyPlot->SetPlotTitle(newTitle);
    }
-//#endif
 }
 
 //------------------------------------------------------------------------------
