@@ -87,13 +87,13 @@ bool Moderator::Initialize(bool fromGui)
          
          // Create factories
          theAtmosphereFactory = new AtmosphereFactory();
-         theAxisSystemFactory = new AxisSystemFactory(); //loj: 01/18/05 - added
+         theAxisSystemFactory = new AxisSystemFactory();
          theBurnFactory = new BurnFactory();
          theCommandFactory = new CommandFactory();
-         theCoordinateSystemFactory = new CoordinateSystemFactory(); //loj: 01/18/05 - added
+         theCoordinateSystemFactory = new CoordinateSystemFactory();
          theForceModelFactory = new ForceModelFactory();
          theFunctionFactory = new FunctionFactory();
-         theHardwareFactory = new HardwareFactory(); //djc: 11/10/04 - added
+         theHardwareFactory = new HardwareFactory();
          theParameterFactory = new ParameterFactory();
          thePhysicalModelFactory = new PhysicalModelFactory();
          thePropagatorFactory = new PropagatorFactory();
@@ -343,7 +343,6 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
          #if DEBUG_RENAME
          MessageInterface::ShowMessage("----typeName=%s\n", typeName.c_str());
          #endif
-         // if command is not End* (loj: 11/22/04 - added)
          if (typeName.find("End") == typeName.npos)
             renamed = child->RenameRefObject(type, oldName, newName);
          
@@ -1370,7 +1369,6 @@ RefFrame* Moderator::GetRefFrame(const std::string &name)
    return NULL;
 }
 
-//loj: 1/18/05 Added
 // CoordinateSystem
 //------------------------------------------------------------------------------
 // CoordinateSystem* CreateCoordinateSystem(const std::string &name,
@@ -1425,7 +1423,6 @@ CoordinateSystem* Moderator::GetCoordinateSystem(const std::string &name)
       return theConfigManager->GetCoordinateSystem(name);
 }
 
-//loj: 1/18/05 Added
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxisSystem(const std::string &type,
 //                              const std::string &name)
@@ -1458,7 +1455,6 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
       throw GmatBaseException("Error Creating AxisSystem: " + type);
    }
    
-   //loj: 1/18/05
    // Notes: AxisSystem is not configured. It is local to CoordinateSystem
    // and gets deleted when CoordinateSystem is deleted.
    
@@ -1521,7 +1517,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
             {
                // add default spacecraft and coordinate system
                sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0);
-               sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq"); //loj: 1/28/05 Added
+               sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
             }
             else if (type == "XYPlot")
             {
@@ -1530,7 +1526,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                sub->SetStringParameter("Add", GetDefaultY()->GetName(), 0);
                sub->Activate(true);
             }
-            else if (type == "ReportFile") //loj: 1/5/04 Added
+            else if (type == "ReportFile")
             {
                // add default parameters to ReportFile
                sub->SetStringParameter(sub->GetParameterID("Filename"),
@@ -1692,7 +1688,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
    Integer id;
    
-   if (type == "Toggle") //loj: 1/5/05 Added
+   if (type == "Toggle")
    {
       cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
                               GetDefaultSubscriber()->GetName());
@@ -1704,7 +1700,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
 
       StringArray &formList = GetListOfConfiguredItems(Gmat::FORMATION);
       
-      // if formation exist, set first formation to command (loj: 1/7/05)
+      // if formation exist, set first formation to command
       if (formList.size() > 0)
          cmd->SetObject(formList[0], Gmat::SPACECRAFT);
       else
@@ -1748,27 +1744,27 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       //----------------------------------------------------
       
       cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".V");
-      cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".N");
+      //cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".N");
       
       id = cmd->GetParameterID("InitialValue");
       cmd->SetRealParameter(id, 0.5);
-      cmd->SetRealParameter(id, 0.5);
+      //cmd->SetRealParameter(id, 0.5);
       
       id = cmd->GetParameterID("Perturbation");
       cmd->SetRealParameter(id, 0.000001);
-      cmd->SetRealParameter(id, 0.00001);
+      //cmd->SetRealParameter(id, 0.00001);
 
       id = cmd->GetParameterID("MinimumValue");
       cmd->SetRealParameter(id, -9.000e30);
-      cmd->SetRealParameter(id, -9.000e30);
+      //cmd->SetRealParameter(id, -9.000e30);
       
       id = cmd->GetParameterID("MaximumValue");
       cmd->SetRealParameter(id, 9.000e30);
-      cmd->SetRealParameter(id, 9.000e30);
+      //cmd->SetRealParameter(id, 9.000e30);
       
       id = cmd->GetParameterID("MaximumChange");
       cmd->SetRealParameter(id, 9.000e30);
-      cmd->SetRealParameter(id, 9.000e30);
+      //cmd->SetRealParameter(id, 9.000e30);
    }
    else if (type == "Achieve")
    {
@@ -1782,15 +1778,15 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       // set goal parameter
       id = cmd->GetParameterID("Goal");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".SMA");
-      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".INC");
+      //cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".INC");
       
       id = cmd->GetParameterID("GoalValue");
-      cmd->SetRealParameter(id, 8500.0);
-      cmd->SetRealParameter(id, 30.0);
+      cmd->SetStringParameter(id, "8500.0"); //loj: 2/4/05 Changed from RealParameter
+      //cmd->SetStringParameter(id, "30.0");
       
       id = cmd->GetParameterID("Tolerance");
       cmd->SetRealParameter(id, 0.1);
-      cmd->SetRealParameter(id, 0.1);
+      //cmd->SetRealParameter(id, 0.1);
    }
    
    return cmd;
@@ -2741,9 +2737,6 @@ void Moderator::CreateDefaultMission()
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
-      //loj: 1/03/05 Added CentralBody info
-      //loj: 1/18/05 Added CoordinateSystem info
-      
       // Cartesian parameters
       CreateParameter("X", "DefaultSC.EarthMJ2000Eq.X");
       CreateParameter("Y", "DefaultSC.EarthMJ2000Eq.Y");
@@ -2869,7 +2862,7 @@ void Moderator::CreateDefaultMission()
       // OpenGLPlot
       sub = CreateSubscriber("OpenGLPlot", "DefaultOpenGl");
       sub->SetStringParameter("Add", "DefaultSC", 0);
-      sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq"); //loj: 1/29/05 Added
+      sub->SetStringParameter("CoordinateSystem", "EarthMJ2000Eq");
       
       #if DEBUG_ACTION_REMOVE
          sub->SetStringParameter("Add", "Spacecraft1", 1);
@@ -3090,7 +3083,7 @@ Burn* Moderator::GetDefaultBurn()
    }
    else
    {
-      // create ImpulsiveBurn (loj: 1/26/05 Changed the name to DefaultImpulsiveBurn)
+      // create ImpulsiveBurn
       return CreateBurn("ImpulsiveBurn", "DefaultImpulsiveBurn");
    }
 }
@@ -3163,12 +3156,6 @@ StopCondition* Moderator::CreateDefaultStopCondition()
        scName.c_str(), epochVar.c_str(), stopVar.c_str());
    #endif
    
-//     if (GetParameter(epochVar) == NULL)
-//        CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
-
-//     if (GetParameter(stopVar) == NULL)
-//        CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-
    if (GetParameter(epochVar) == NULL)
    {
       param = CreateParameter("CurrA1MJD", epochVar);
