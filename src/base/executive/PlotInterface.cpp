@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 #if !defined __CONSOLE_APP__
 #include "gmatwxdefs.hpp"
+#include "gmatwxrcs.hpp"
 #include "GmatAppData.hpp"
 // for OpenGL plot
 #include "MdiParentGlFrame.hpp"
