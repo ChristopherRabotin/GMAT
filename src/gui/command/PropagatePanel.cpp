@@ -1077,8 +1077,9 @@ void PropagatePanel::OnCellValueChange(wxGridEvent &event)
               mTempProp[row].propName = name;
               MessageInterface::ShowMessage
               ("PropagatePanel::OnCellValueChange(4) propName = %s\n", mTempProp[row].propName.c_str());    
-           }   
-           theApplyButton->Enable(true);     
+           }                 
+           theApplyButton->Enable(true); 
+           mPropChanged = true;    
        }    
    }    
 }
