@@ -32,9 +32,6 @@ public:
     ResourceTree(wxWindow *parent, const wxWindowID id,
                  const wxPoint& pos, const wxSize& size,
                  long style);
-//    void SetMainNotebook (GmatMainNotebook *mainNotebook);
-//    GmatMainNotebook *GetMainNotebook();
-
     void UpdateResource();
     
 private:
@@ -71,19 +68,19 @@ private:
     void AddDefaultSubscribers(wxTreeItemId itemId);
     void AddDefaultInterfaces(wxTreeItemId itemId);
     void AddDefaultVariables(wxTreeItemId itemId);
-    void AddIcons();
     
     // event handlers
     void OnItemRightClick(wxTreeEvent& event);
-    void OnItemActivated(wxTreeEvent &event);
     void ShowMenu(wxTreeItemId id, const wxPoint& pt);
-    void OnEndLabelEdit(wxTreeEvent &event);
-    void OnBeginLabelEdit(wxTreeEvent &event);
+    void OnItemActivated(wxTreeEvent &event);
     void OnOpen(wxCommandEvent &event);
     void OnClose(wxCommandEvent &event);
-    void OnDelete(wxCommandEvent &event);
     void OnRename(wxCommandEvent &event);
-    
+    void OnDelete(wxCommandEvent &event);
+    void OnEndLabelEdit(wxTreeEvent &event);
+    void OnBeginLabelEdit(wxTreeEvent &event);
+
+    void AddIcons();   
     void OnAddBody(wxCommandEvent &event);
     void OnAddImpulsiveBurn(wxCommandEvent &event);
     void OnAddPropagator(wxCommandEvent &event);

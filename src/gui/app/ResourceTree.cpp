@@ -4,6 +4,11 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: Allison Greene
 // Created: 2003/08/29
 //
@@ -74,6 +79,12 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 /**
  * A constructor.
+ *
+ * @param <parent> parent window
+ * @param <id> window id for referencing events
+ * @param <pos> position
+ * @param <size> size 
+ * @param <style> style flags
  */
 //------------------------------------------------------------------------------
 ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
@@ -89,6 +100,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     AddIcons();
     AddDefaultResources();
 
+    // set the counters to 0
     mNumSpacecraft = 0;
     mNumPropagator = 0;
     mNumImpulsiveBurn = 0;
@@ -103,6 +115,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 
 //------------------------------------------------------------------------------
 // void UpdateResource()
+//------------------------------------------------------------------------------
+/**
+ * Reset counters, delete all nodes that are not folders, add default nodes
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::UpdateResource()
 {
@@ -145,6 +161,11 @@ void ResourceTree::UpdateResource()
 
 //------------------------------------------------------------------------------
 //  void AddDefaultResources()
+//------------------------------------------------------------------------------
+/**
+ * Add default folders
+ *
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultResources()
 {
@@ -273,6 +294,12 @@ void ResourceTree::AddDefaultResources()
 //------------------------------------------------------------------------------
 // void AddDefaultBodies(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default bodies
+ *
+ * @param <itemId> tree item for the solar system folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 {
     AppendItem(itemId, wxT("Sun"), GmatTree::ICON_SUN, -1,
@@ -304,6 +331,12 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 // void AddDefaultSpacecraft(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default spacecraft
+ *
+ * @param <itemId> tree item for the spacecraft folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
 {
     StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
@@ -325,6 +358,12 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 // void AddDefaultFormations(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default formations
+ *
+ * @param <itemId> tree item for the formation folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
 {
     wxTreeItemId mms =
@@ -344,6 +383,12 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
 
 //------------------------------------------------------------------------------
 // void AddDefaultConstellations(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default constellations
+ *
+ * @param <itemId> tree item for the constellation folder
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
 {
@@ -365,6 +410,12 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 // void AddDefaultPropagators(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default propagator
+ *
+ * @param <itemId> tree item for the propagators folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
 {
     StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
@@ -384,6 +435,12 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId itemId)
 
 //------------------------------------------------------------------------------
 // void AddDefaultBurns(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default burns
+ *
+ * @param <itemId> tree item for the burn folder
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
 {
@@ -415,6 +472,12 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 // void AddDefaultSolvers(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default solvers
+ *
+ * @param <itemId> tree item for the solvers folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
 {
     StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SOLVER);
@@ -441,6 +504,12 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId)
 
 //------------------------------------------------------------------------------
 // void AddDefaultSubscribers(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default subscribers
+ *
+ * @param <itemId> tree item for the subscribers folder
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 {
@@ -476,6 +545,12 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 // void AddDefaultInterfaces(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
+/**
+ * Add the default interfaces
+ *
+ * @param <itemId> tree item for the interfaces folder
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
     AppendItem(itemId, wxT("TCP/IP"), GmatTree::ICON_NETWORK, -1,
@@ -487,6 +562,12 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 
 //------------------------------------------------------------------------------
 // void AddDefaultVariables(wxTreeItemId itemId)
+//------------------------------------------------------------------------------
+/**
+ * Add the default variables
+ *
+ * @param <itemId> tree item for the variables folder
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 {
@@ -510,8 +591,18 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 //    if (size > 0)
 //        Expand(itemId);
 }
+
+//==============================================================================
+//                         On Action Events
+//==============================================================================
+
 //------------------------------------------------------------------------------
 // void OnItemRightClick(wxTreeEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * On right click show the pop up menu
+ *
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 {
@@ -520,6 +611,13 @@ void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 
 //------------------------------------------------------------------------------
 // void ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
+//------------------------------------------------------------------------------
+/**
+ * Create the popup menu
+ *
+ * @param <itemId> tree item that was right clicked
+ * @param <pt> location of right click
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
@@ -602,6 +700,12 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //------------------------------------------------------------------------------
 // void OnItemActivated(wxTreeEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Double click on tree item
+ *
+ * @param <event> tree event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnItemActivated(wxTreeEvent &event)
 {
     // get some info about this item
@@ -611,25 +715,14 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
     mainNotebook->CreatePage(item);
 }
 
-// ag:  Removed - can use GmatAppData::Set/Get MainNotebook
-////------------------------------------------------------------------------------
-//// void SetMainNotebook (GmatMainNotebook *mainNotebook)
-////------------------------------------------------------------------------------
-//void ResourceTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
-//{
-//  mainNotebook = mainNotebook;
-//}
-//
-////------------------------------------------------------------------------------
-//// GmatMainNotebook *GetMainNotebook()
-////------------------------------------------------------------------------------
-//GmatMainNotebook *ResourceTree::GetMainNotebook()
-//{
-//   return mainNotebook;
-//}
-
 //------------------------------------------------------------------------------
 // void OnOpen(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Open chosen from popup menu
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnOpen(wxCommandEvent &event)
 {
@@ -641,6 +734,12 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Close chosen from popup menu
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnClose(wxCommandEvent &event)
 {
     // make item most current, then close it
@@ -651,6 +750,12 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnRename(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Rename chosen from popup menu
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
@@ -720,6 +825,13 @@ void ResourceTree::OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnDelete(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Delete chosen from popup menu
+ *
+ * @param <event> command event
+ * @todo Finish this when items can be deleted from interpreter
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnDelete(wxCommandEvent &event)
 {
     event.Skip();
@@ -741,6 +853,12 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnBeginLabelEdit(wxTreeEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Rename chosen from popup menu
+ *
+ * @param <event> tree event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 {
@@ -783,6 +901,12 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnEndLabelEdit(wxTreeEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Finished changing label on the tree
+ *
+ * @param <event> tree event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
 {
@@ -828,6 +952,10 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
 
 //------------------------------------------------------------------------------
 // void AddIcons()
+//------------------------------------------------------------------------------
+/**
+ * Add icons for items in the tree
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::AddIcons()
 {
@@ -881,6 +1009,12 @@ void ResourceTree::AddIcons()
 //------------------------------------------------------------------------------
 // void OnAddBody(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add a body to solar system folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddBody(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -890,6 +1024,12 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnAddSpacecraft(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a spacecraft to spacecraft folder
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 {
@@ -919,6 +1059,12 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddFormation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add a formation to formation folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddFormation(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -938,6 +1084,12 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddConstellation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add a constellation to constellation folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddConstellation(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -956,6 +1108,12 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnAddPropagator(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a propagator to propagator folder
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 {
@@ -984,6 +1142,12 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddImpulsiveBurn(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add an impulsive burn to burn folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -1010,6 +1174,12 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddDiffCorr(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add a differential corrector to solvers folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -1028,6 +1198,12 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnAddReportFile(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a report file to reports folder
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddReportFile(wxCommandEvent &event)
 {
@@ -1048,6 +1224,12 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddXyPlot(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add an xy plot to plots folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -1067,6 +1249,12 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // void OnAddOpenGlPlot(wxCommandEvent &event)
 //------------------------------------------------------------------------------
+/**
+ * Add an opengl plot to plots folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
 {
     wxTreeItemId item = GetSelection();
@@ -1085,6 +1273,12 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // void OnAddVariable(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a variable to variable folder
+ *
+ * @param <event> command event
+ */
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddVariable(wxCommandEvent &event)
 {
@@ -1110,6 +1304,13 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // wxMenu* CreatePopupMenu(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Create the popup menu
+ *
+ * @param <type> Type of object to create and add to tree
+ * @return <wxMenu> Return popup menu
+ */
 //------------------------------------------------------------------------------
 wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
 {
