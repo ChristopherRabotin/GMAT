@@ -51,6 +51,9 @@ public:
    // initializes the EopFile (reads it and stores the data)
    virtual void Initialize();
    
+   // method to return the name of the EOP file
+   virtual std::string GetFileName() const;
+   
    // method to return the UT1-UTC offset for the given UTCMjd - use UtcMjd???
    virtual Real    GetUt1UtcOffset(const Real utcMjd);
    
