@@ -51,7 +51,7 @@
 #define HarmonicField_hpp
 
 #include "PhysicalModel.hpp"
-#include "Celestialbody.hpp"
+#include "CelestialBody.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
 
