@@ -182,21 +182,21 @@ polarRadius         (cb.polarRadius),
 mu                  (cb.mu),
 posVelSrc           (cb.posVelSrc),
 analyticMethod      (cb.analyticMethod),
-//order               (cb.order),
-//degree              (cb.degree),
 centralBody         (cb.centralBody),
 bodyNumber          (cb.bodyNumber),
 referenceBodyNumber (cb.referenceBodyNumber),
 sourceFilename      (cb.sourceFilename),
-theSourceFile       (cb.theSourceFile),
+theSourceFile       (cb.theSourceFile), // ????????????????
 usePotentialFile    (cb.usePotentialFile),
 potentialFileName   (cb.potentialFileName),
+hourAngle           (cb.hourAngle)//,
 //coefficientSize     (cb.coefficientSize),
 //dCbar               (cb.dCbar),
 //dSbar               (cb.dSbar),
 //sij                 (cb.sij),
 //cij                 (cb.cij),
-hourAngle           (cb.hourAngle)//,
+//order               (cb.order),
+//degree              (cb.degree),
 //atmManager          (cb.atmManager),  
 //atmModel            (cb.atmModel)
 {
@@ -206,6 +206,7 @@ hourAngle           (cb.hourAngle)//,
    angularVelocity        = cb.angularVelocity;
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
+   potentialFileRead      = false;
    atmManager             = new AtmosphereManager(instanceName);
    if (cb.atmModel) atmModel = atmManager->GetAtmosphere(
                                cb.atmModel->GetTypeName());
@@ -243,30 +244,34 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    analyticMethod      = cb.analyticMethod;
    state               = cb.state;
    stateTime           = cb.stateTime;
-   //order               = cb.order;
-   //degree              = cb.degree;
    centralBody         = cb.centralBody;
    bodyNumber          = cb.bodyNumber;
    referenceBodyNumber = cb.referenceBodyNumber;
    sourceFilename      = cb.sourceFilename;
-   theSourceFile       = cb.theSourceFile;
+   theSourceFile       = cb.theSourceFile;   // ??????????????
    usePotentialFile    = cb.usePotentialFile;
    potentialFileName   = cb.potentialFileName;
    angularVelocity     = cb.angularVelocity;
+   hourAngle           = cb.hourAngle;
+   atmManager          = new AtmosphereManager(instanceName);
+   if (cb.atmModel)
+      atmModel            = atmManager->GetAtmosphere(
+                            cb.atmModel->GetTypeName());
+   else
+      atmModel = NULL;
+   potentialFileRead   = false;
+   defaultMu           = cb.defaultMu;
+   defaultEqRadius     = cb.defaultEqRadius;
+
    //coefficientSize     = cb.coefficientSize;
    //sij                 = cb.sij;
    //cij                 = cb.cij;
    //dCbar               = cb.dCbar;
    //dSbar               = cb.dSbar;
-   hourAngle           = cb.hourAngle;
+   //order               = cb.order;
+   //degree              = cb.degree;
    //atmModel            = cb.atmModel;
    //atmManager          = cb.atmManager; // do I want to do this??????
-   atmManager             = new AtmosphereManager(instanceName);
-   atmModel               = atmManager->GetAtmosphere(
-                                                      cb.atmModel->GetTypeName());
-   defaultMu              = cb.defaultMu;
-   defaultEqRadius        = cb.defaultEqRadius;
-      
    return *this;
 }
 

@@ -263,10 +263,6 @@ protected:
    Rvector6               state ;
    // time of the state
    A1Mjd                  stateTime;
-   // order of the gravity model
-   //Integer                order;     // are these the same as coefficientSize?
-   // degree of the gravity model
-   //Integer                degree;     // are these the same as coefficientSize?
 
    /// central body around which this body revolves
    std::string            centralBody;
@@ -276,26 +272,38 @@ protected:
    Integer                referenceBodyNumber;
    /// name of file that is the source of position and velocity for this body
    std::string            sourceFilename;
-   /// date and time of start of source file
-   //A1Mjd                  sourceStart;      // currently unused
-   /// date and time of end of sourcce file
-   //A1Mjd                  sourceEnd;        // currently unused  
    // the source file
    PlanetaryEphem*        theSourceFile;
 
    bool                   usePotentialFile;
    std::string            potentialFileName;
    Rvector3               angularVelocity;
+   Real                   hourAngle;
+   AtmosphereManager*     atmManager;
+   AtmosphereModel*       atmModel;
+
+   // has the potential file been read already?
+   bool                   potentialFileRead;
+
+   // defaults if potential file is not used
+   Real                   defaultMu;
+   Real                   defaultEqRadius;
+   
+   // order of the gravity model
+   //Integer                order;     // are these the same as coefficientSize?
+   // degree of the gravity model
+   //Integer                degree;     // are these the same as coefficientSize?
+   /// date and time of start of source file
+   //A1Mjd                  sourceStart;      // currently unused
+   /// date and time of end of sourcce file
+   //A1Mjd                  sourceEnd;        // currently unused
    //Integer                coefficientSize;      // n   // same as degree, order above?
    //Rmatrix                Cbar, Sbar;
    //Rmatrix                dCbar, dSbar; // from original GravityField
    //Rmatrix                sij;                  // n x n
    //Rmatrix                cij;                  // n x n
-   Real                   hourAngle;
-   AtmosphereManager*     atmManager;
-   AtmosphereModel*       atmModel;
-
-    // initialze the body
+   
+   // initialze the body
    void Initialize(std::string withBodyType = "Planet");
    // read the potential file, if requested
    bool          ReadPotentialFile();
@@ -308,12 +316,6 @@ protected:
    
    bool          IsBlank(char* aLine);
    
-   // has the potential file been read already?
-   bool          potentialFileRead;
-
-   // defaults if potential file is not used
-   Real          defaultMu;
-   Real          defaultEqRadius;
    //Integer       defaultCoefSize;
    //Rmatrix       defaultSij;
    //Rmatrix       defaultCij;

@@ -282,7 +282,7 @@ Planet& Planet::operator=(const Planet &pl)
    if (&pl == this)
       return *this;
 
-   GmatBase::operator=(pl);
+   CelestialBody::operator=(pl);
    return *this;
 }
 

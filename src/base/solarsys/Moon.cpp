@@ -123,7 +123,7 @@ Moon& Moon::operator=(const Moon &m)
    if (&m == this)
       return *this;
 
-   GmatBase::operator=(m);
+   CelestialBody::operator=(m);
    return *this;
 }
 

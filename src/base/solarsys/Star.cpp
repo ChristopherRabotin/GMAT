@@ -43,9 +43,29 @@ const Integer               Star::REF_BODY_NUMBER     = 3;
 //      0.0, 0.0,             0.0,             0.0,             0.0); 
 
 
-const Real                  Star::RADIANT_POWER       = 1358.0;       // W / m^2
-const Real                  Star::REFERENCE_DISTANCE  = 1.49597870e8; // km (1 AU)
+const Real                  Star::STAR_RADIANT_POWER       = 1358.0;       // W / m^2
+const Real                  Star::STAR_REFERENCE_DISTANCE  = 1.49597870e8; // km (1 AU)
+const Real                  Star::STAR_PHOTOSPHERE_RADIUS  = 695990000.0;  // m
 // add other ones as needed
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+Star::PARAMETER_TEXT[StarParamCount - CelestialBodyParamCount] =
+{
+   "RadiantPower",
+   "ReferenceDistance",
+   "PhotosphereRadius"
+};
+
+const Gmat::ParameterType
+Star::PARAMETER_TYPE[StarParamCount - CelestialBodyParamCount] =
+{
+Gmat::REAL_TYPE,
+Gmat::REAL_TYPE,
+Gmat::REAL_TYPE
+};
 
 
 //------------------------------------------------------------------------------
@@ -63,11 +83,9 @@ const Real                  Star::REFERENCE_DISTANCE  = 1.49597870e8; // km (1 A
  */
 //------------------------------------------------------------------------------
 Star::Star(std::string name) :
-CelestialBody       ("Star",name),
-radiantPowerID      (parameterCount),
-referenceDistanceID (parameterCount +1)
+CelestialBody       ("Star",name)
 {
-   parameterCount += 2;
+   parameterCount = StarParamCount;
    InitializeStar();  // should this be the default?
 }
 
@@ -85,8 +103,7 @@ Star::Star(const Star &st) :
 CelestialBody       (st),
 radiantPower        (st.radiantPower),
 referenceDistance   (st.referenceDistance),
-radiantPowerID      (st.radiantPowerID),
-referenceDistanceID (st.referenceDistanceID)
+photosphereRadius   (st.photosphereRadius)  
 {
 }
 
@@ -107,12 +124,11 @@ Star& Star::operator=(const Star &st)
    if (&st == this)
       return *this;
 
-   GmatBase::operator=(st);
+   CelestialBody::operator=(st);
    radiantPower        = st.radiantPower;
    referenceDistance   = st.referenceDistance;
+   photosphereRadius   = st.photosphereRadius;
 
-   radiantPowerID      = st.radiantPowerID;
-   referenceDistanceID = st.referenceDistanceID;
    return *this;
 }
 
@@ -205,9 +221,8 @@ GmatBase* Star::Clone(void) const
 //------------------------------------------------------------------------------
 std::string Star::GetParameterText(const Integer id) const
 {
-   if (id == radiantPowerID)          return "RadiantPower";
-   if (id == referenceDistanceID)     return "ReferenceDistance";
-
+   if ((id >= CelestialBodyParamCount) && (id < StarParamCount))
+      return PARAMETER_TEXT[id - CelestialBodyParamCount];
    return CelestialBody::GetParameterText(id);
 }
 
@@ -225,8 +240,11 @@ std::string Star::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer     Star::GetParameterID(const std::string &str) const
 {
-   if (str == "RadiantPower")               return radiantPowerID;
-   if (str == "ReferenceDistance")          return referenceDistanceID;
+   for (Integer i = CelestialBodyParamCount; i < StarParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - CelestialBodyParamCount])
+         return i;
+   }
    
    return CelestialBody::GetParameterID(str);
 }
@@ -245,8 +263,8 @@ Integer     Star::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Star::GetParameterType(const Integer id) const
 {
-   if (id == radiantPowerID)          return Gmat::REAL_TYPE;
-   if (id == referenceDistanceID)     return Gmat::REAL_TYPE;
+   if ((id >= CelestialBodyParamCount) && (id < StarParamCount))
+      return PARAMETER_TYPE[id - CelestialBodyParamCount];
       
    return CelestialBody::GetParameterType(id);
 }
@@ -282,8 +300,9 @@ std::string Star::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real        Star::GetRealParameter(const Integer id) const
 {
-   if (id == radiantPowerID)             return radiantPower;
-   if (id == referenceDistanceID)        return referenceDistanceID;
+   if (id == RADIANT_POWER)              return radiantPower;
+   if (id == REFERENCE_DISTANCE)         return referenceDistance;
+   if (id == PHOTOSPHERE_RADIUS)         return photosphereRadius;
 
    return CelestialBody::GetRealParameter(id);
 }
@@ -303,8 +322,9 @@ Real        Star::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real        Star::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == radiantPowerID)             return (radiantPower        = value);
-   if (id == referenceDistanceID)        return (referenceDistance   = value);
+   if (id == RADIANT_POWER)              return (radiantPower        = value);
+   if (id == REFERENCE_DISTANCE)         return (referenceDistance   = value);
+   if (id == PHOTOSPHERE_RADIUS)         return (photosphereRadius   = value);
    
    return CelestialBody::SetRealParameter(id, value);
 }
@@ -344,8 +364,9 @@ void Star::InitializeStar()
    atmManager          = NULL;
    
    // fill in default values for Star-specific stuff
-   radiantPower        = Star::RADIANT_POWER;
-   referenceDistance   = Star::REFERENCE_DISTANCE;
+   radiantPower        = Star::STAR_RADIANT_POWER;
+   referenceDistance   = Star::STAR_REFERENCE_DISTANCE;
+   photosphereRadius   = Star::STAR_PHOTOSPHERE_RADIUS;
 
    //coefficientSize     = Star::COEFFICIENT_SIZE;
    //sij                 = Star::SIJ;
