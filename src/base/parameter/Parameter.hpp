@@ -80,8 +80,8 @@ public:
     virtual std::string GetParameterTypeString(const Integer id) const;
 
     virtual std::string GetStringParameter(const Integer id) const;
-    virtual bool SetStringParameter(const Integer id, const std::string &value);
     virtual std::string GetStringParameter(const std::string &label) const;
+    virtual bool SetStringParameter(const Integer id, const std::string &value);
     virtual bool SetStringParameter(const std::string &label,
                                     const std::string &value);
 protected:
