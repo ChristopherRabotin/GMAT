@@ -40,7 +40,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
-   : GmatPanel(parent)
+   : GmatPanel(parent, false)
 {
    mEnableLoad = false;
    mEnableSave = false;
@@ -127,6 +127,10 @@ void FunctionSetupPanel::LoadData()
 
    int pathId = theGmatFunction->GetParameterID("FunctionPath");
    std::string path = theGmatFunction->GetStringParameter(pathId);
+
+   if (path == "")
+      path = theGmatFunction->GetName() + ".script";
+
    mFileNameTextCtrl->SetValue(path.c_str());
 }
 
@@ -172,6 +176,12 @@ void FunctionSetupPanel::OnTextUpdate(wxCommandEvent& event)
    {
       mEnableLoad = true;
       theApplyButton->Enable(true);
+
+      if (mFileNameTextCtrl->GetValue() == "")
+      {
+         mEnableSave = false;
+         mEnableLoad = false;
+      }
    }
    else if (event.GetEventObject() == mFileContentsTextCtrl)
    {
