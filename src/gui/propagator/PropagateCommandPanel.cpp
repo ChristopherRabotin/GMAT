@@ -108,12 +108,18 @@ void PropagateCommandPanel::Initialize()
 }
 
 void PropagateCommandPanel::Setup( wxWindow *parent)
-{   
+{
+
+    //loj: 2/13/04 added
+    wxBoxSizer *theMiddleBoxSizer = new wxBoxSizer(wxVERTICAL);
+    
     // wxGrid
-    propGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(150,160), wxWANTS_CHARS );
+    //loj: 2/13/04 changed wxSize(150,160) to wxSize(100,160) to match with stopCond width
+    propGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, wxSize(100,160), wxWANTS_CHARS );
     propGrid->CreateGrid( numOfPropRows, 2, wxGrid::wxGridSelectCells );
     propGrid->SetColSize(0, 200);
-    propGrid->SetColSize(1, 585);
+    //loj: 2/13/04 changed SetColSize(1, 585) to SetColSize(1, 460)
+    propGrid->SetColSize(1, 460);
     propGrid->SetColLabelValue(0, _T("Propagator"));
     propGrid->SetColLabelValue(1, _T("Spacecraft List"));
     propGrid->SetRowLabelSize(0);
@@ -241,11 +247,16 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     item2->Add( applyButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     item2->Add( cancelButton, 0, wxALIGN_CENTRE|wxALL, 5 );
     item2->Add( helpButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+
+    theMiddleBoxSizer->Add( item6, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
+    theMiddleBoxSizer->Add( item7, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
     
     item0->Add( item1, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-    item0->Add( item6, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-    item0->Add( item7, 0, wxALIGN_CENTRE|wxALL, 5 );
-    item0->Add( item2, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    item0->Add( theMiddleBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 ); //loj: added
+    //loj: 2/13/04 item0->Add( item6, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    //loj: 2/13/04 item0->Add( item7, 0, wxALIGN_CENTRE|wxALL, 5 );
+    //loj: 2/13/04 item0->Add( item2, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    item0->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
 
     parent->SetAutoLayout( true );
     parent->SetSizer( item0 );
