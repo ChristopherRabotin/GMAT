@@ -53,9 +53,9 @@ const std::string SolarSystem::PLUTO_NAME     = "Pluto";
  *                   system (default is "").
  */
 //------------------------------------------------------------------------------
-SolarSystem::SolarSystem(std::string withName) :
-GmatBase(Gmat::SOLAR_SYSTEM,"",withName),  // what is the typeStr for this?
-bodiesInUseID  (parameterCount)
+SolarSystem::SolarSystem(std::string withName)
+   : GmatBase(Gmat::SOLAR_SYSTEM, "SolarSystem", withName),  //loj: 4/22/04 added "SolarSystem" as typeSt
+   bodiesInUseID  (parameterCount)
 {
    parameterCount  += 1;
    pvSrcForAll      = Gmat::SLP;
