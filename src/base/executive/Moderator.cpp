@@ -232,9 +232,9 @@ StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 
 // Spacecraft
 //------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(const std::string type, const std::string &name)
+// Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Spacecraft* Moderator::CreateSpacecraft(const std::string type, const std::string &name)
+Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
    Spacecraft *sc =
       theFactoryManager->CreateSpacecraft(type, name);
@@ -252,9 +252,9 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 
 // Propagator
 //------------------------------------------------------------------------------
-// Propagator* CreatePropagator(const std::string type, const std::string &name)
+// Propagator* CreatePropagator(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Propagator* Moderator::CreatePropagator(const std::string type, const std::string &name)
+Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
    Propagator *prop = theFactoryManager->CreatePropagator(type, name);
 //   theConfigManager->AddPropagator(prop);
@@ -271,9 +271,9 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 
 // PhysicalModel
 //------------------------------------------------------------------------------
-// PhysicalModel* CreatePhysicalModel(const std::string type, const std::string &name)
+// PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-PhysicalModel* Moderator::CreatePhysicalModel(const std::string type,
+PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
    PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
@@ -291,9 +291,9 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 
 // Parameter
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string type, const std::string &name)
+// Parameter* CreateParameter(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Parameter* Moderator::CreateParameter(const std::string type, const std::string &name)
+Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
    Parameter *parameter = theFactoryManager->CreateParameter(type, name);
    // Manage it if it is a named parameter
@@ -387,9 +387,9 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 
 // celestial body
 //------------------------------------------------------------------------------
-// CelestialBody* CreateCelestialBody(const std::string type, const std::string &name)
+// CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-CelestialBody* Moderator::CreateCelestialBody(const std::string type,
+CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
                                               const std::string &name)
 {
    // type is such as "Earth", "Moon" - we need const string EarthString etc.
@@ -443,9 +443,9 @@ SolarSystem* Moderator::GetSolarSystemInUse()
 
 // subscriber
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(const std::string type, const std::string &name)
+// Subscriber* CreateSubscriber(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::CreateSubscriber(const std::string type, const std::string &name)
+Subscriber* Moderator::CreateSubscriber(const std::string &type, const std::string &name)
 {
    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name);
    theConfigManager->AddSubscriber(subs);
@@ -462,9 +462,9 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 
 // command
 //------------------------------------------------------------------------------
-// Command* CreateCommand(const std::string type, const std::string &name)
+// Command* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Command* Moderator::CreateCommand(const std::string type, const std::string &name)
+Command* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
    Command *cmd = theFactoryManager->CreateCommand(type, name);
 //   theConfigManager->AddCommand(cmd);
@@ -503,10 +503,10 @@ bool Moderator::DeleteCommand(const std::string &name, Integer position,
 
 //loj: future build implementation
 //------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string type, const std::string &name,
+// Command* InsertCommand(const std::string &type, const std::string &name,
 //                        Integer position, bool addAbove, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::InsertCommand(const std::string type, const std::string &name,
+Command* Moderator::InsertCommand(const std::string &type, const std::string &name,
                                   Integer position, bool addAbove,
                                   Integer sandboxNum)
 {
@@ -518,10 +518,10 @@ Command* Moderator::InsertCommand(const std::string type, const std::string &nam
 }
 
 //------------------------------------------------------------------------------
-// Command* AppendCommand(const std::string type, const std::string &name,
+// Command* AppendCommand(const std::string &type, const std::string &name,
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::AppendCommand(const std::string type, const std::string &name,
+Command* Moderator::AppendCommand(const std::string &type, const std::string &name,
                                   Integer sandboxNum)
 {
    bool status;
