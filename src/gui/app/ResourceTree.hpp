@@ -80,7 +80,20 @@ private:
         ICON_FILE,
         ICON_OPENFOLDER,
         ICON_SPACECRAFT,
-        ICON_EARTH
+        
+        ICON_SUN,
+        ICON_MERCURY,
+        ICON_VENUS,
+        ICON_EARTH,
+        ICON_MARS,
+        ICON_JUPITER,
+        ICON_SATURN,
+        ICON_URANUS,
+        ICON_NEPTUNE,
+        ICON_PLUTO,
+        
+        ICON_REPORT,
+        ICON_NETWORK,
     };
 
     // for popup menu

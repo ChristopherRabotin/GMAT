@@ -16,7 +16,18 @@
 #include "bitmaps/openfolder.xpm"
 #include "bitmaps/file.xpm"
 #include "bitmaps/spacecraft.xpm"
+#include "bitmaps/sun.xpm"
+#include "bitmaps/mercury.xpm"
+#include "bitmaps/triton.xpm"    //couldn't find venus, use this for now
 #include "bitmaps/earth.xpm"
+#include "bitmaps/mars.xpm"
+#include "bitmaps/jupiter.xpm"
+#include "bitmaps/saturn.xpm"
+#include "bitmaps/uranus.xpm"
+#include "bitmaps/neptune.xpm"
+#include "bitmaps/pluto.xpm"
+#include "bitmaps/report.xpm"
+#include "bitmaps/network.xpm"
 
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
@@ -113,7 +124,7 @@ void ResourceTree::UpdateResources()
     for (int i = 0; i<size; i++)
     {
         wxString objname = wxString(itemNames[i].c_str());
-        this->AppendItem(mReportItem, wxT(objname), ICON_FILE, -1,
+        this->AppendItem(mReportItem, wxT(objname), ICON_REPORT, -1,
                          new GmatTreeItemData(wxT(objname), DEFAULT_REPORT));
     };
 
@@ -215,11 +226,11 @@ void ResourceTree::AddDefaultResources()
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
 {
-    this->AppendItem(universe, wxT("Sun"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Sun"), ICON_SUN, -1,
                      new GmatTreeItemData(wxT("Sun"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Mercury"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Mercury"), ICON_MERCURY, -1,
                      new GmatTreeItemData(wxT("Mercury"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Venus"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Venus"), ICON_VENUS, -1,
                      new GmatTreeItemData(wxT("Venus"), DEFAULT_BODY));
 
     wxTreeItemId earth = this->AppendItem(universe, wxT("Earth"), ICON_EARTH, -1,
@@ -227,17 +238,17 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
     this->AppendItem(earth, wxT("Moon"), ICON_EARTH, -1,
                      new GmatTreeItemData(wxT("Moon"), DEFAULT_BODY));
 
-    this->AppendItem(universe, wxT("Mars"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Mars"), ICON_MARS, -1,
                      new GmatTreeItemData(wxT("Mars"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Jupiter"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Jupiter"), ICON_JUPITER, -1,
                      new GmatTreeItemData(wxT("Jupiter"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Saturn"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Saturn"), ICON_SATURN, -1,
                      new GmatTreeItemData(wxT("Saturn"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Uranus"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Uranus"), ICON_URANUS, -1,
                      new GmatTreeItemData(wxT("Uranus"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Neptune"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Neptune"), ICON_NEPTUNE, -1,
                      new GmatTreeItemData(wxT("Neptune"), DEFAULT_BODY));
-    this->AppendItem(universe, wxT("Pluto"), ICON_EARTH, -1,
+    this->AppendItem(universe, wxT("Pluto"), ICON_PLUTO, -1,
                      new GmatTreeItemData(wxT("Pluto"), DEFAULT_BODY));
 }
 
@@ -362,7 +373,7 @@ void ResourceTree::AddDefaultReports(wxTreeItemId subs)
     for (int i = 0; i<size; i++)
     {
         wxString objname = wxString(itemNames[i].c_str());
-        this->AppendItem(subs, wxT(objname), -1, -1,
+        this->AppendItem(subs, wxT(objname), ICON_REPORT, -1,
                          new GmatTreeItemData(wxT(objname), DEFAULT_REPORT));
     };
 }
@@ -372,7 +383,7 @@ void ResourceTree::AddDefaultReports(wxTreeItemId subs)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId interfaceTree)
 {
-    this->AppendItem(interfaceTree, wxT("TCP/IP"), ICON_FILE, -1,
+    this->AppendItem(interfaceTree, wxT("TCP/IP"), ICON_NETWORK, -1,
           new GmatTreeItemData(wxT("TCP/IP"), DEFAULT_INTERFACE));
     this->AppendItem(interfaceTree, wxT("Mex"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Mex"), DEFAULT_INTERFACE));
@@ -652,13 +663,24 @@ void ResourceTree::AddIcons()
   wxImageList *images = new wxImageList ( size, size, true );
   
   wxBusyCursor wait;
-  wxIcon icons[5];
+  wxIcon icons[16];
 
   icons[0] = wxIcon ( folder_xpm );
   icons[1] = wxIcon ( file_xpm );
   icons[2] = wxIcon ( openfolder_xpm );
   icons[3] = wxIcon ( spacecrapt_xpm );
-  icons[4] = wxIcon ( earth_xpm );
+  icons[4] = wxIcon ( sun_xpm );
+  icons[5] = wxIcon ( mercury_xpm );
+  icons[6] = wxIcon ( triton_xpm );
+  icons[7] = wxIcon ( earth_xpm );
+  icons[8] = wxIcon ( mars_xpm );
+  icons[9] = wxIcon ( jupiter_xpm );
+  icons[10] = wxIcon ( saturn_xpm );
+  icons[11] = wxIcon ( uranus_xpm );
+  icons[12] = wxIcon ( neptune_xpm );
+  icons[13] = wxIcon ( pluto_xpm );
+  icons[14] = wxIcon ( report_xpm );
+  icons[15] = wxIcon ( network_xpm );
   
   int sizeOrig = icons[0].GetWidth();
     for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
