@@ -65,9 +65,14 @@ public:
    std::string         GetName(void) const;
    bool                SetName(const std::string &who);
    virtual Integer     GetParameterCount(void) const;
-   virtual std::string GetRefObjectName() const;
-   virtual bool        SetRefObjectName(const std::string &nm);
-
+   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                                        const std::string &name);
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name = "");
+   
    // Method to return the current number of instantaited objects
    static Integer      GetInstanceCount();
    
@@ -78,56 +83,56 @@ public:
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                     GetParameterType(const Integer id) const;
+                       GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        SetRealParameter(const Integer id,
-                                       const Real value);
+                                        const Real value);
    virtual Integer     GetIntegerParameter(const Integer id) const;
    virtual Integer     SetIntegerParameter(const Integer id,
-                                          const Integer value);
+                                           const Integer value);
    virtual UnsignedInt GetUnsignedIntParameter(const Integer id) const;
    virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                             const UnsignedInt value);
+                                               const UnsignedInt value);
    virtual const Rvector&    GetRvectorParameter(const Integer id) const;
    virtual const Rvector&    SetRvectorParameter(const Integer id,
-                                          const Rvector &value);
+                                                 const Rvector &value);
    virtual const Rmatrix&    GetRmatrixParameter(const Integer id) const;
    virtual const Rmatrix&    SetRmatrixParameter(const Integer id,
-                                          const Rmatrix &value);
+                                                 const Rmatrix &value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
    virtual const StringArray& 
-                     GetStringArrayParameter(const Integer id) const; 
+                       GetStringArrayParameter(const Integer id) const; 
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
-                                          const bool value);
+                                           const bool value);
    
    virtual Real        GetRealParameter(const std::string &label) const;
    virtual Real        SetRealParameter(const std::string &label,
-                                       const Real value);
+                                        const Real value);
    virtual Integer     GetIntegerParameter(const std::string &label) const;
    virtual Integer     SetIntegerParameter(const std::string &label,
-                                          const Integer value);
+                                           const Integer value);
    virtual UnsignedInt GetUnsignedIntParameter(const std::string &label) const;
    virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                             const UnsignedInt value);
+                                               const UnsignedInt value);
    virtual const Rvector&  GetRvectorParameter(const std::string &label) const;
    virtual const Rvector&  SetRvectorParameter(const std::string &label,
-                                             const Rvector &value);
+                                               const Rvector &value);
    virtual const Rmatrix&  GetRmatrixParameter(const std::string &label) const;
    virtual const Rmatrix&  SetRmatrixParameter(const std::string &label,
-                                             const Rmatrix &value);
+                                               const Rmatrix &value);
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool        SetStringParameter(const std::string &label, 
                                           const std::string &value);
    virtual const StringArray& 
-                     GetStringArrayParameter(const std::string &label)const;
+                       GetStringArrayParameter(const std::string &label)const;
    virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const std::string &label,
-                                          const bool value);
+                                           const bool value);
    
    /// Return value used if the parameter is not accessible as a Real
    static const Real         REAL_PARAMETER_UNDEFINED;

@@ -78,10 +78,10 @@ Integer GmatBase::instanceCount = 0;
  */
 GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr, 
                    const std::string &nomme) :
-    parameterCount  (GmatBaseParamCount),
-    typeName        (typeStr),
-    instanceName    (nomme),
-    type            (typeId)
+   parameterCount  (GmatBaseParamCount),
+   typeName        (typeStr),
+   instanceName    (nomme),
+   type            (typeId)
 {
    // one more instance - add to the instanceCount
    instanceCount++;
@@ -133,14 +133,14 @@ GmatBase::GmatBase(const GmatBase &a) :
  */
 GmatBase& GmatBase::operator=(const GmatBase &a)
 {
-    // Don't do anything if copying self
-    if (&a == this)
-        return *this;
-        
-    // Currently nothing to do from the base class; this may change in a later 
-    // build
+   // Don't do anything if copying self
+   if (&a == this)
+      return *this;
+   
+   // Currently nothing to do from the base class; this may change in a later 
+   // build
 
-    return *this;
+   return *this;
 }
 
 
@@ -154,7 +154,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
  */
 Gmat::ObjectType GmatBase::GetType(void) const
 {
-    return type;
+   return type;
 }
 
 
@@ -168,7 +168,7 @@ Gmat::ObjectType GmatBase::GetType(void) const
  */
 std::string GmatBase::GetTypeName(void) const
 {
-    return typeName;
+   return typeName;
 }
 
 
@@ -215,39 +215,80 @@ bool GmatBase::SetName(const std::string &who)
  */
 Integer GmatBase::GetParameterCount(void) const
 {
-    return parameterCount;
+   return parameterCount;
 }
 
 //---------------------------------------------------------------------------
-//  std::string GetRefObjectName() const
+//  std::string GetRefObjectName(const Gmat::ObjectType type) const
 //---------------------------------------------------------------------------
 /**
  * Returns the name of the reference object. (Derived classes should implement
  * this as needed.)
  *
+ * @param <type> reference object type.
+ *
  * @return The name of the reference object.
  */
-std::string GmatBase::GetRefObjectName() const
+std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
 {
    return STRING_PARAMETER_UNDEFINED;
 }
 
 //---------------------------------------------------------------------------
-//  bool SetRefObjectName(const std::string &nm) 
+//  bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name) 
 //---------------------------------------------------------------------------
 /**
  * Sets the name of the reference object.  (Derived classes should implement
  * this as needed.)
  *
- * @param <nm> name of the reference object.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
  *
  * @return success of the operation.
  */
-bool GmatBase::SetRefObjectName(const std::string &nm)
+bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
+                                const std::string &name)
 {
    return false;
 }
 
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Returns the reference object pointer.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return reference object pointer.
+ */
+GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
+                                 const std::string &name)
+{
+   return NULL;
+}
+
+//---------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the reference object.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <obj> reference object pointer.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                            const std::string &name)
+{
+   return false;
+}
 
 //---------------------------------------------------------------------------
 //  static Integer GetInstanceCount()
@@ -276,7 +317,7 @@ Integer GmatBase::GetInstanceCount()
  */
 Gmat::ParameterType GmatBase::GetParameterType(const Integer id) const
 {
-    return Gmat::UNKNOWN_PARAMETER_TYPE;
+   return Gmat::UNKNOWN_PARAMETER_TYPE;
 }
 
 
@@ -293,11 +334,11 @@ Gmat::ParameterType GmatBase::GetParameterType(const Integer id) const
  */
 std::string GmatBase::GetParameterTypeString(const Integer id) const
 {
-    std::string retval = "";
-    Gmat::ParameterType t = GetParameterType(id);
-    if (t != Gmat::UNKNOWN_PARAMETER_TYPE)
-        retval = PARAM_TYPE_STRING[t];
-    return retval;
+   std::string retval = "";
+   Gmat::ParameterType t = GetParameterType(id);
+   if (t != Gmat::UNKNOWN_PARAMETER_TYPE)
+      retval = PARAM_TYPE_STRING[t];
+   return retval;
 }
 
 
@@ -316,7 +357,7 @@ std::string GmatBase::GetParameterTypeString(const Integer id) const
  */
 std::string GmatBase::GetParameterText(const Integer id) const
 {
-    return "";
+   return "";
 }
 
 
@@ -332,7 +373,7 @@ std::string GmatBase::GetParameterText(const Integer id) const
  */
 Integer GmatBase::GetParameterID(const std::string &str) const
 {
-    return -1;
+   return -1;
 }
 
 
@@ -348,7 +389,7 @@ Integer GmatBase::GetParameterID(const std::string &str) const
  */
 Real GmatBase::GetRealParameter(const Integer id) const
 {
-    return REAL_PARAMETER_UNDEFINED;
+   return REAL_PARAMETER_UNDEFINED;
 }
 
 
@@ -367,7 +408,7 @@ Real GmatBase::GetRealParameter(const Integer id) const
  */
 Real GmatBase::SetRealParameter(const Integer id, const Real value)
 {
-    return REAL_PARAMETER_UNDEFINED;
+   return REAL_PARAMETER_UNDEFINED;
 }
 
 
@@ -524,7 +565,7 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
  */
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
-    return STRING_PARAMETER_UNDEFINED;
+   return STRING_PARAMETER_UNDEFINED;
 }
 
 
@@ -541,7 +582,7 @@ std::string GmatBase::GetStringParameter(const Integer id) const
  */
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
 {
-    return false;
+   return false;
 }
 
 
@@ -558,9 +599,9 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
  */
 const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
 {
-    std::string errorText = "No StringArrays defined for the ID ";
-    errorText += id;
-    throw GmatBaseException(errorText);
+   std::string errorText = "No StringArrays defined for the ID ";
+   errorText += id;
+   throw GmatBaseException(errorText);
 }
 
 
@@ -580,9 +621,9 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
  */
 bool GmatBase::GetBooleanParameter(const Integer id) const
 {
-    std::string errorText = "No Boolean data defined for the ID ";
-    errorText += id;
-    throw GmatBaseException(errorText);
+   std::string errorText = "No Boolean data defined for the ID ";
+   errorText += id;
+   throw GmatBaseException(errorText);
 }
 
 
@@ -599,7 +640,7 @@ bool GmatBase::GetBooleanParameter(const Integer id) const
  */
 bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
 {
-    return false;
+   return false;
 }
 
 
@@ -615,8 +656,8 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
  */
 Real GmatBase::GetRealParameter(const std::string &label) const
 {
-    Integer id = GetParameterID(label);
-    return GetRealParameter(id);
+   Integer id = GetParameterID(label);
+   return GetRealParameter(id);
 }
 
 
@@ -635,8 +676,8 @@ Real GmatBase::GetRealParameter(const std::string &label) const
  */
 Real GmatBase::SetRealParameter(const std::string &label, const Real value)
 {
-    Integer id = GetParameterID(label);
-    return SetRealParameter(id, value);
+   Integer id = GetParameterID(label);
+   return SetRealParameter(id, value);
 }
 
 
@@ -804,8 +845,8 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const std::string &label,
  */
 std::string GmatBase::GetStringParameter(const std::string &label) const
 {
-    Integer id = GetParameterID(label);
-    return GetStringParameter(id);
+   Integer id = GetParameterID(label);
+   return GetStringParameter(id);
 }
 
 //---------------------------------------------------------------------------
@@ -822,8 +863,8 @@ std::string GmatBase::GetStringParameter(const std::string &label) const
 bool GmatBase::SetStringParameter(const std::string &label, 
                                   const std::string &value)
 {
-    Integer id = GetParameterID(label);
-    return SetStringParameter(id, value);
+   Integer id = GetParameterID(label);
+   return SetStringParameter(id, value);
 }
 
 
@@ -842,8 +883,8 @@ bool GmatBase::SetStringParameter(const std::string &label,
 const StringArray& GmatBase::GetStringArrayParameter(
                                           const std::string &label) const
 {
-    Integer id = GetParameterID(label);
-    return GetStringArrayParameter(id);
+   Integer id = GetParameterID(label);
+   return GetStringArrayParameter(id);
 }
 
 
@@ -863,8 +904,8 @@ const StringArray& GmatBase::GetStringArrayParameter(
  */
 bool GmatBase::GetBooleanParameter(const std::string &label) const
 {
-    Integer id = GetParameterID(label);
-    return GetBooleanParameter(id);
+   Integer id = GetParameterID(label);
+   return GetBooleanParameter(id);
 }
 
 
@@ -881,8 +922,8 @@ bool GmatBase::GetBooleanParameter(const std::string &label) const
  */
 bool GmatBase::SetBooleanParameter(const std::string &label, const bool value)
 {
-    Integer id = GetParameterID(label);
-    return SetBooleanParameter(id, value);
+   Integer id = GetParameterID(label);
+   return SetBooleanParameter(id, value);
 }
 
 
@@ -896,38 +937,38 @@ bool GmatBase::SetBooleanParameter(const std::string &label, const bool value)
  */
 void GmatBase::CopyParameters(const GmatBase &a)
 {
-    Integer i, iVal;
-    Real rVal;
-    std::string sVal;
-    bool bVal;
-    Gmat::ParameterType parmType;
+   Integer i, iVal;
+   Real rVal;
+   std::string sVal;
+   bool bVal;
+   Gmat::ParameterType parmType;
     
-    for (i = 0; i < parameterCount; ++i) {
-        parmType = a.GetParameterType(i);
+   for (i = 0; i < parameterCount; ++i) {
+      parmType = a.GetParameterType(i);
         
-        if (parmType == Gmat::REAL_TYPE) 
-        {
-            rVal = a.GetRealParameter(i);
-            SetRealParameter(i, rVal);
-        }
+      if (parmType == Gmat::REAL_TYPE) 
+      {
+         rVal = a.GetRealParameter(i);
+         SetRealParameter(i, rVal);
+      }
         
-        if (parmType == Gmat::INTEGER_TYPE) 
-        {
-            iVal = a.GetIntegerParameter(i);
-            SetIntegerParameter(i, iVal);
-        }
+      if (parmType == Gmat::INTEGER_TYPE) 
+      {
+         iVal = a.GetIntegerParameter(i);
+         SetIntegerParameter(i, iVal);
+      }
         
-        if (parmType == Gmat::STRING_TYPE)
-        {
-            sVal = a.GetStringParameter(i);
-            SetStringParameter(i, sVal);
-        }
+      if (parmType == Gmat::STRING_TYPE)
+      {
+         sVal = a.GetStringParameter(i);
+         SetStringParameter(i, sVal);
+      }
 
-        if (parmType == Gmat::BOOLEAN_TYPE)
-        {
-            bVal = a.GetBooleanParameter(i);
-            SetBooleanParameter(i, bVal);
-        }
-    }    
+      if (parmType == Gmat::BOOLEAN_TYPE)
+      {
+         bVal = a.GetBooleanParameter(i);
+         SetBooleanParameter(i, bVal);
+      }
+   }    
 }
 
