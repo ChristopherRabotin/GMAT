@@ -1301,7 +1301,7 @@ bool Propagate::Execute(void)
    }
    catch (BaseException &ex) {
       MessageInterface::ShowMessage
-         ("Propagate::Execute() setting inProgress to false");
+         ("Propagate::Execute() setting inProgress to false\n");
       inProgress = false;
       throw;
    }
