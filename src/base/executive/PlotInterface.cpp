@@ -404,7 +404,7 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
 // bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
 //                     int yOffset, Real yMin, Real yMax,
 //                     const std::string &curveTitle,
-//                     const std::string &penColor)
+//                     UnsignedInt penColor)
 //------------------------------------------------------------------------------
 /*
  * Adds a plot curve to XY plow window.
@@ -413,7 +413,7 @@ bool PlotInterface::DeleteXyPlot(bool hideFrame)
 bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
                                    int yOffset, Real yMin, Real yMax,
                                    const std::string &curveTitle,
-                                   const std::string &penColor)
+                                   UnsignedInt penColor)
 {
 #if defined __CONSOLE_APP__
    return true;
@@ -440,8 +440,7 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName, int curveIndex,
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
          frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,
-                             wxString(curveTitle.c_str()),
-                             wxString(penColor.c_str()));
+                             wxString(curveTitle.c_str()), penColor);
          added = true;
       }
    }
@@ -567,6 +566,31 @@ void PlotInterface::SetXyPlotTitle(const std::string &plotName,
              " frame->SetPlotTitle() \n");
 #endif
          frame->SetPlotTitle(wxString(plotTitle.c_str()));
+      }
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void ShowXyPlotLegend(const std::string &plotName)
+//------------------------------------------------------------------------------
+void PlotInterface::ShowXyPlotLegend(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+      
+   for (int i=0; i<MdiXyPlot::numChildren; i++)
+   {
+      MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
+
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      {
+#if DEBUG_PLOTIF_XY
+         MessageInterface::ShowMessage
+            ("PlotInterface::ShowXyPlotLegend() calling  frame->ShowPlotLegend() \n");
+#endif
+         frame->ShowPlotLegend();
       }
    }
 #endif

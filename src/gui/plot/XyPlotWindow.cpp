@@ -61,6 +61,9 @@
    #include "wx/plot/plot_dwn.xpm"
 #endif
 
+
+#define DEBUG_XY_PLOT_WINDOW 0
+
 //----------------------------------------------------------------------------
 // event types
 //----------------------------------------------------------------------------
@@ -108,6 +111,7 @@ namespace GmatPlot
 {
    const int Y_AXIS_AREA_WIDTH = 70;
    const int X_AXIS_AREA_HEIGHT = 60;
+   const int RIGHT_MARGIN = 30;
 }
 
 //======================================
@@ -503,20 +507,22 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
          //   dc.SetPen( *wxBLACK_PEN );
          //else
          //   dc.SetPen( *wxGREY_PEN );
-            
+
+         //loj: 7/13/04 It looks better without selected line showing different color
+         // so commented out
          //loj: added to use customized pen
-         if (curve == m_owner->GetCurrent())
-            dc.SetPen(curve->GetPenSelected());
-         else
+         //if (curve == m_owner->GetCurrent())
+         //   dc.SetPen(curve->GetPenSelected());
+         //else
             dc.SetPen(curve->GetPenNormal());
                 
          DrawCurve( &dc, curve, update_x-1, update_x + update_width + 2 );
 
          node = node->Next();
       }
-        
+      
       dc.SetPen( *wxRED_PEN );
-        
+      
       node = m_owner->m_onOffCurves.First();
       while (node)
       {
@@ -526,7 +532,7 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
             
          node = node->Next();
       }
-        
+      
       upd ++;
    }
 }
@@ -842,9 +848,9 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 
    wxBoxSizer *mainSizer = new wxBoxSizer( wxVERTICAL );
 
-   //----------------------------------------------------------------
+   //-------------------------------------------------------
    // for plot title area
-   //----------------------------------------------------------------
+   //-------------------------------------------------------
    wxPanel *topPanel = new wxPanel(this, -1, wxPoint(0,0), wxSize(400,50));
    //wxPanel *topPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(-1, -1)); //loj: title not shown
    topPanel->SetBackgroundColour(*wxWHITE);
@@ -854,28 +860,45 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
                                  wxSize(400, 50), wxALIGN_CENTRE);
    mTopPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-   topPanel->SetSizer(mTopPanelSizer); //loj: do this before mTopPanelSizer->Add()
+   topPanel->SetSizer(mTopPanelSizer);
    mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxALL, 10); 
    mTopPanelSizer->Fit(mTitleText); //loj: 7/13/04 added
    
-   //----------------------------------------------------------------
+   //-------------------------------------------------------
    // for plot legend area
-   //----------------------------------------------------------------
-   wxPanel *bottomPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(400, 50));
-   bottomPanel->SetBackgroundColour(*wxWHITE);
-    
-   //wxStaticText *legendText = new wxStaticText(bottomPanel, -1, wxT("...Legend Area..."));
-   wxStaticText *legendText =
-      new wxStaticText(bottomPanel, -1, wxT("...Legend Area..."), wxPoint(-1,-1),
-                       wxSize(400, 50), wxALIGN_CENTRE);
-   wxBoxSizer *bottomPanelSizer = new wxBoxSizer(wxVERTICAL);
-   
-   bottomPanel->SetSizer(bottomPanelSizer);
-   bottomPanelSizer->Add(legendText, 0, wxALIGN_CENTER | wxALL, 5);
+   //-------------------------------------------------------
+   mLegendPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(400, 50));
+   mLegendPanel->SetBackgroundColour(*wxWHITE);
 
-   //----------------------------------------------------------------
+   //loj: 7/14/04 added initializing legend area
+   // allow maximum of GmatPlot::MAX_XY_CURVE lines
+   wxFlexGridSizer *mLegendPanelSizer =
+      new wxFlexGridSizer(GmatPlot::MAX_XY_CURVE, 0, 0);
+
+   // The legend will be updated by ShowLegend()
+   for (int i=0; i<GmatPlot::MAX_XY_CURVE; i++)
+   {
+      //mLegendPanelSizer->AddGrowableCol(i);
+      
+      mCurveColor[i] =
+         new wxStaticText(mLegendPanel, -1, wxT("======"), wxPoint(-1,-1),
+                          wxSize(-1, -1), wxALIGN_RIGHT);
+      
+      mCurveDesc[i] =
+         new wxStaticText(mLegendPanel, -1, wxT("Desc..."), wxPoint(-1,-1),
+                          wxSize(120, -1), wxALIGN_LEFT);
+
+      mLegendPanelSizer->Add(mCurveColor[i], 0, wxALIGN_CENTER | wxALL, 3);
+      mLegendPanelSizer->Add(mCurveDesc[i], 0, wxALIGN_CENTER | wxALL, 3);
+   }
+   
+   mLegendPanelSizer->AddGrowableCol(1);
+   mLegendPanelSizer->AddGrowableCol(3);
+   mLegendPanelSizer->AddGrowableCol(5);
+   
+   //-------------------------------------------------------
    // for plot area
-   //----------------------------------------------------------------
+   //-------------------------------------------------------
    m_area = new wxPlotArea( this );
    wxBoxSizer *middleSizer = new wxBoxSizer( wxHORIZONTAL );
     
@@ -942,14 +965,27 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
       m_xaxis = (wxPlotXAxisArea*) NULL;
    }
 
-   middleSizer->Add( plotSizer, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
-
+   //-------------------------------------------------------
+   // add to mainSizer
+   //-------------------------------------------------------
+   
+   //loj: if 2nd arg is 0, plot is not showing
+   middleSizer->Add( plotSizer, 1, wxEXPAND );
+   middleSizer->Add(GmatPlot::RIGHT_MARGIN, 20); //loj: 7/15/04 added
+   
+   mBottomSizer = new wxBoxSizer( wxVERTICAL );
+   mBottomSizer->Add(mLegendPanelSizer, 1, wxALIGN_CENTER | wxEXPAND | wxLEFT,
+                     GmatPlot::Y_AXIS_AREA_WIDTH);
+   
    mainSizer->Add( topPanel, 0, wxALIGN_CENTER | wxEXPAND );
-   mainSizer->Add( middleSizer, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
-   mainSizer->Add( bottomPanel, 0, wxALIGN_CENTER | wxEXPAND );
-
+   //loj: if 2nd arg is 0, plot is not showing
+   mainSizer->Add( middleSizer, 1, wxEXPAND);
+   mainSizer->Add( mLegendPanel, 0, wxALIGN_CENTER | wxEXPAND ); //why LegendPanel doesn't center?
+   
    SetAutoLayout( TRUE );
    SetSizer( mainSizer );
+   mLegendPanel->SetSizer(mBottomSizer);
+   mBottomSizer->Fit(mLegendPanel); // no effect
 
    //loj: 3/11/04 commented out because we want scroll on this frame,
    // otherwise, the plot will not be shown until mission run is done.
@@ -974,7 +1010,10 @@ wxPlotWindow::~wxPlotWindow()
 //------------------------------------------------------------------------------
 void wxPlotWindow::Add( wxPlotCurve *curve )
 {
-   //MessageInterface::ShowMessage("wxPlotWindow::Add() before appending curve... \n");
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::Add() before appending curve... \n");
+#endif
+   
    m_curves.Append( curve );
    if (!m_current) m_current = curve;
     
@@ -1036,8 +1075,11 @@ void wxPlotWindow::SetCurrent( wxPlotCurve* current )
 //------------------------------------------------------------------------------
 void wxPlotWindow::Delete( wxPlotCurve* curve )
 {
-   //MessageInterface::ShowMessage("wxPlotWindow::Delete() %s\n",
-   //                              curve->GetCurveTitle().c_str());
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::Delete() %s\n",
+                                 curve->GetCurveTitle().c_str());
+#endif
+   
    wxNode *node = m_curves.Find( curve );
    if (!node) return;
     
@@ -1255,7 +1297,10 @@ void wxPlotWindow::ZoomOut()
 //------------------------------------------------------------------------------
 void wxPlotWindow::ResetScrollbar()
 {
-   //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() entered \n");
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() entered \n");
+#endif
+   
    wxInt32 max = 0;
    wxNode *node = m_curves.First();
    while (node)
@@ -1269,7 +1314,11 @@ void wxPlotWindow::ResetScrollbar()
       //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
    }
 
-   //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() before SetScrollbars \n");
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage
+      ("wxPlotWindow::ResetScrollbar() before SetScrollbars \n");
+#endif
+   
    SetScrollbars( wxPLOT_SCROLL_STEP, wxPLOT_SCROLL_STEP, 
                   (int)(((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1), 0 );
 }
@@ -1325,11 +1374,53 @@ wxString wxPlotWindow::GetPlotTitle()
 //------------------------------------------------------------------------------
 void wxPlotWindow::SetPlotTitle(const wxString &title)
 {
-   //MessageInterface::ShowMessage("wxPlotWindow::SetPlotTitle() title = %s\n",
-   //                              title.c_str());
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::SetPlotTitle() title = %s\n",
+                                 title.c_str());
+#endif
+   
    mPlotTitle = title;
    mTitleText->SetLabel(title);
    mTopPanelSizer->Fit(mTitleText);
+}
+
+//loj: 7/14/04 added
+//------------------------------------------------------------------------------
+// void wxPlotWindow::ShowLegend()
+//------------------------------------------------------------------------------
+void wxPlotWindow::ShowLegend()
+{
+#if DEBUG_XY_PLOT_WINDOW
+   MessageInterface::ShowMessage("wxPlotWindow::ShowLegend() entered\n");
+#endif
+   
+   int curveCount = 0;
+   
+   wxNode *node = m_curves.First();
+
+   // clear legend area
+   for (int i=0; i<GmatPlot::MAX_XY_CURVE; i++)
+   {
+      mCurveColor[i]->SetLabel("");
+      mCurveDesc[i]->SetLabel("");
+   }
+   
+   while (node)
+   {
+      wxPlotCurve *curve = (wxPlotCurve*) node->Data();
+      wxString curveTitle = curve->GetCurveTitle();
+      wxString curveNumString;
+      wxPen curvePen = curve->GetPenNormal();
+      
+      mCurveColor[curveCount]->SetLabel("======");
+      mCurveColor[curveCount]->SetForegroundColour(curvePen.GetColour());
+      mCurveDesc[curveCount]->SetLabel(curveTitle);
+
+      node = node->Next();
+      curveCount++;
+   }
+   
+   mBottomSizer->Fit(mLegendPanel); //no effect
 }
 
 //------------------------------------------------------------------------------

@@ -279,7 +279,6 @@ bool XyPlot::Initialize()
                                         mXAxisTitle, mYAxisTitle);
       
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle); //loj: 7/13/04 added
-
       mIsXyPlotWindowSet = true; //loj: 5/12/04 Do I need this flag?
       
       // add to Y params to XyPlotWindow
@@ -291,8 +290,10 @@ bool XyPlot::Initialize()
       for (int i=0; i<mNumYParams; i++)
       {
          std::string curveTitle = mYParams[i]->GetName();
-         std::string penColor = "RED"; //loj: should parameter provide pen color?
-
+         //std::string penColor = "RED"; //loj: should parameter provide pen color?
+         //loj: 7/13/04 changed to use UnsignedInt for color
+         UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
+         
          //MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
          //                              curveTitle.c_str());
                 
@@ -300,6 +301,7 @@ bool XyPlot::Initialize()
                                        curveTitle, penColor);
       }
 
+      PlotInterface::ShowXyPlotLegend(instanceName); //loj: 7/14/04 added
       status = true;
         
       //MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");

@@ -1,5 +1,5 @@
 //$Header$
-/////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 // Name:        XyPlotWindow.h
 // Purpose:     wxPlotWindow
 // Author:      Robert Roebling
@@ -10,7 +10,7 @@
 // Copyright:   (c) Robert Roebling
 // RCS-ID:      $Id$
 // Licence:     wxWindows licence
-/////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 #ifndef _WX_XY_PLOT_WINDOW_H_
 #define _WX_XY_PLOT_WINDOW_H_
@@ -25,8 +25,10 @@
 #include "wx/scrolwin.h"
 #include "wx/event.h"
 #include "wx/dynarray.h"
-#include "wx/stattext.h" //loj: 3/11/04 added
+#include "wx/stattext.h"
 #include "wx/sizer.h"
+
+#include "PlotTypes.hpp" // for GmatPlot::MAX_XY_CURVE
 
 //-----------------------------------------------------------------------------
 // classes
@@ -218,6 +220,7 @@ private:
 class WXDLLEXPORT wxPlotArea: public wxWindow
 {
 public:
+
    wxPlotArea() {}
    wxPlotArea( wxPlotWindow *parent );
 
@@ -369,7 +372,8 @@ public:
    
    wxString GetPlotTitle(); //loj: 5/13/04 added
    void SetPlotTitle(const wxString &title);
-
+   void ShowLegend(); //loj: 7/13/04 added
+   
 private:
    friend class wxPlotArea;
    friend class wxPlotXAxisArea;
@@ -378,7 +382,13 @@ private:
    wxString mPlotTitle;
    wxStaticText *mTitleText;
    wxBoxSizer *mTopPanelSizer;
-    
+   
+   wxPanel *mLegendPanel;
+   wxBoxSizer *mBottomSizer;
+   
+   wxStaticText *mCurveColor[GmatPlot::MAX_XY_CURVE];
+   wxStaticText *mCurveDesc[GmatPlot::MAX_XY_CURVE];
+      
    double             m_xUnitsPerValue;
    double             m_xZoom;
 

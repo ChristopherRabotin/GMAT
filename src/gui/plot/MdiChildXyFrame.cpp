@@ -26,7 +26,10 @@
 #include "wx/intl.h"
 #include "wx/gdicmn.h" // for color
 
+#include "RgbColor.hpp"
 #include "MessageInterface.hpp"
+
+#define DEBUG_XY_FRAME 0
 
 BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
    EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
@@ -283,8 +286,11 @@ bool MdiChildXyFrame::DeletePlot()
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::SetPlotTitle(const wxString &title)
 {
-   //MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
-   //                              title.c_str());
+#if DEBUG_XY_FRAME
+   MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
+                                 title.c_str());
+#endif
+   
    mPlotTitle = title;
 
    SetTitle(title); //loj: 7/13/04 added
@@ -293,60 +299,89 @@ void MdiChildXyFrame::SetPlotTitle(const wxString &title)
       mXyPlot->SetPlotTitle(title);
 }
 
+//loj: 7/13/04 added
+//------------------------------------------------------------------------------
+// void ShowPlotLegend()
+//------------------------------------------------------------------------------
+void MdiChildXyFrame::ShowPlotLegend()
+{
+#if DEBUG_XY_FRAME
+   MessageInterface::ShowMessage("MdiChildXyFrame::ShowPlotLegend() entered\n");
+#endif
+      
+   if (mXyPlot)
+      mXyPlot->ShowLegend();
+}
+
+//loj: 7/13/04 changed penColor type
 //------------------------------------------------------------------------------   
 // void AddPlotCurve(int curveIndex, int yOffset, double yMin, double yMax,
-//                   const wxString &curveTitle, const wxString &penColorName)
+//                   const wxString &curveTitle, UnsignedInt penColor)
 //------------------------------------------------------------------------------   
-void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin, double yMax,
-                                   const wxString &curveTitle,
-                                   const wxString &penColorName)
+void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
+                                   double yMax, const wxString &curveTitle,
+                                   UnsignedInt penColor)
 {
-   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
-   //                              yMin, yMax);
-    
+#if DEBUG_XY_FRAME
+   MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
+                                 yMin, yMax);
+#endif
+   
    mHasFirstXSet[curveIndex] = false;
     
    // Create XyPlotCurve
    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
     
-   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
-   //                              curve->GetCurveTitle().c_str());
+#if DEBUG_XY_FRAME
+   MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
+                                 curve->GetCurveTitle().c_str());
+#endif
     
-   // Find the color
-   wxColour *color = wxTheColourDatabase->FindColour(penColorName);
-   if (color == NULL)
-   {
-      // Set normal pen to black dashed pen
-      curve->SetPenNormal(*wxBLACK_DASHED_PEN);
-      MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
-   }
-   else
-   {
-      wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
-      curve->SetPenNormal(*pen);
-      //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
-   }
+   //========== new code
+   RgbColor rgb = RgbColor(penColor);
+   wxColour color = wxColour(rgb.Red(), rgb.Green(), rgb.Blue());
+   wxPen pen = wxPen(color, 1, wxSOLID);
+   curve->SetPenNormal(pen);
 
-   //loj: Set selected pen to black for now (build2)
+//     //========== old code
+//     // Find the color
+//     wxColour *color = wxTheColourDatabase->FindColour(penColorName);
+   
+//     if (color == NULL)
+//     {
+//        // Set normal pen to black dashed pen
+//        curve->SetPenNormal(*wxBLACK_DASHED_PEN);
+//        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
+//     }
+//     else
+//     {
+//        wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
+//        curve->SetPenNormal(*pen);
+//        //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
+//     }
+//     //========== old code
+
+   
+   //loj: Set selected pen to black for now
    curve->SetPenSelected(*wxBLACK_PEN);
+   //curve->SetPenSelected(*wxGREY_PEN);
 
-   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() adding curve... \n");
 
    if (mXyPlot != NULL)
    {
       mXyPlot->Add(curve);
-      //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve count = %d\n",
-      //                              mXyPlot->GetCount());
+#if DEBUG_XY_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildXyFrame::AddPlotCurve() curve count = %d added\n",
+          mXyPlot->GetCount());
+#endif
    }
    else
    {
       MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
    }
-        
-
 }
 
-//loj: 3/8/04 added
 //------------------------------------------------------------------------------   
 // void DeleteAllPlotCurves()
 //------------------------------------------------------------------------------   
@@ -374,7 +409,6 @@ void MdiChildXyFrame::DeleteAllPlotCurves()
    }
 }
 
-//loj: 3/8/04 added
 //------------------------------------------------------------------------------   
 // void DeletePlotCurve(int curveIndex)
 //------------------------------------------------------------------------------   

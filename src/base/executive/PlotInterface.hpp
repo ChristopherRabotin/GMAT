@@ -44,17 +44,18 @@ public:
                                   const std::string &plotTitle,
                                   const std::string &xAxisTitle,
                                   const std::string &yAxisTitle);
-   static bool DeleteXyPlot(bool hideFrame); //loj: 3/8/04 added
+   static bool DeleteXyPlot(bool hideFrame);
    static bool AddXyPlotCurve(const std::string &plotName, int curveIndex,
                               int yOffset, Real yMin, Real yMax,
                               const std::string &curveTitle,
-                              const std::string &penColor);
+                              UnsignedInt penColor); //loj: 7/13/04 changed from string
    static bool DeleteAllXyPlotCurves(const std::string &plotName);
    static bool DeleteXyPlotCurve(const std::string &plotName, int curveIndex);
    static void ClearXyPlotData(const std::string &plotName);
    static void SetXyPlotTitle(const std::string &plotName,
                               const std::string &plotTitle);
-   static bool RefreshXyPlot(const std::string &plotName); //loj: 6/22/04 added
+   static void ShowXyPlotLegend(const std::string &plotName); //loj: 7/14/04 added
+   static bool RefreshXyPlot(const std::string &plotName);
    static bool UpdateXyPlot(const std::string &plotName,
                             const Real &xval, const Rvector &yvals,
                             const std::string &plotTitle,
