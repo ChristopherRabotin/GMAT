@@ -85,7 +85,7 @@ bool GmatApp::OnInit()
     GmatAppData::theMessageWindow->Show(false);
 
     // create Plot window
-    PlotInterface::CreatePlotWindow();
+    PlotInterface::CreatePlotWindow(false);
     MdiPlot::mdiParentGlFrame->Show(FALSE);
 
     // create the Moderator - GMAT executive
