@@ -192,17 +192,62 @@ void MSISE90Dialog::LoadData()
 {   
     Initialize();
     
-    solarFluxID = theForce->GetParameterID("SolarFlux");
-    avgSolarFluxID = theForce->GetParameterID("AverageSolarFlux");
-    geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
-    solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
-    inputSourceID = theForce->GetParameterID("InputSource");
+    try
+    {
+       solarFluxID = theForce->GetParameterID("F107");
+       solarFluxTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       avgSolarFluxID = theForce->GetParameterID("F107A");
+       avgSolarFluxTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
+       geomagneticIndexTextCtrl->
+          SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }
+    try
+    {
+       solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
+       wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
 
-    solarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
-    avgSolarFluxTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
-    geomagneticIndexTextCtrl->SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
-    
-    inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+       if (!filename.IsNull())
+          fileNameTextCtrl->SetValue(filename);
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }    
+    try
+    {
+       inputSourceID = theForce->GetParameterID("InputSource");
+       inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+    }
+    catch (BaseException &e)
+    {
+       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+          e.GetMessage()); 
+    }       
     
     if ( inputSourceString.CmpNoCase("Constant") == 0 )
     {
@@ -216,11 +261,6 @@ void MSISE90Dialog::LoadData()
        userInputRadioButton->SetValue(false);
        fileInputRadioButton->SetValue(true);
     }
-       
-    wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
-
-    if (!filename.IsNull())
-       fileNameTextCtrl->SetValue(filename);
     
     Update();
 }
