@@ -77,8 +77,17 @@ bool Sandbox::AddObject(GmatBase *obj)
       // If not, store the new object pointer
       /// @todo Replace copy c'tor call with Clone() -- Build 3 issue
       if ((obj->GetType() == Gmat::SPACECRAFT) || 
-          (obj->GetType() == Gmat::FORMATION))
+          (obj->GetType() == Gmat::FORMATION)) {
          objectMap[name] = obj->Clone(); // new Spacecraft(*((Spacecraft*)obj));
+         if(obj->GetType() == Gmat::SPACECRAFT)
+         {
+            if (solarSys)
+               ((Spacecraft*)(obj))->SetSolarSystem(solarSys);
+            // Finalize the state data -- this call moves the display state data
+            // into the internal state.
+            ((Spacecraft*)(obj))->SaveDisplay();
+         }
+      }
       else
          objectMap[name] = obj;
     
@@ -227,6 +236,9 @@ bool Sandbox::Initialize()
          else if((omi->second)->GetType() == Gmat::SPACECRAFT)
          {
             ((Spacecraft*)(omi->second))->SetSolarSystem(solarSys);
+            // Finalize the state data -- this call moves the display state data
+            // into the internal state.
+            ((Spacecraft*)(omi->second))->SaveDisplay();
          }
          else if((omi->second)->GetType() == Gmat::PARAMETER)
          {
@@ -236,6 +248,11 @@ bool Sandbox::Initialize()
             // Set reference object for system parameters (loj: 9/22/04)
             if (param->GetKey() == Parameter::SYSTEM_PARAM)
             {
+#if DEBUG_SANDBOX
+               MessageInterface::ShowMessage
+                  ("Sandbox::Initialize() for parameter \"%s\"\n",
+                   param->GetName().c_str());
+#endif
                std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
                param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
                param->SetSolarSystem(solarSys);
