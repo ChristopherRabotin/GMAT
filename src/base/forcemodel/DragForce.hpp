@@ -1,3 +1,23 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                DragForce
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author: Darrel J. Conway
+// Created: 2004/02/29
+//
+/**
+ * Drag force modeling
+ */
+//------------------------------------------------------------------------------
+
+
 #ifndef DRAGFORCE_H
 #define DRAGFORCE_H
 

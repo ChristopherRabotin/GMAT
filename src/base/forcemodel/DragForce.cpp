@@ -1,5 +1,25 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                DragForce
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author: Darrel J. Conway
+// Created: 2004/02/29
+//
+/**
+ * Drag force modeling
+ */
+//------------------------------------------------------------------------------
+
+
 #include "DragForce.hpp"
-#include "GmatBaseException.hpp"
+#include "ForceModelException.hpp"
 
 DragForce::DragForce() :
     PhysicalModel           (Gmat::PHYSICAL_MODEL, "DragForce"),
@@ -22,7 +42,8 @@ DragForce::~DragForce()
 
 DragForce::DragForce(const DragForce& df) :
     PhysicalModel           (df)
-{}
+{
+}
 
 
 DragForce& DragForce::operator=(const DragForce& df)
@@ -36,9 +57,26 @@ DragForce& DragForce::operator=(const DragForce& df)
  
 bool DragForce::GetComponentMap(Integer * map, Integer order) const
 {
+    Integer i6;
+
     if (order != 1)
-        throw GmatBaseException("Drag supports 1st order equations of motion only");
-    return false;
+        throw ForceModelException("Drag supports 1st order equations of motion only");
+
+    // Calculate how many spacecraft are in the model
+    Integer satCount = (Integer)(dimension / 6);
+    for (Integer i = 0; i < satCount; i++) 
+    {
+        i6 = i * 6;
+
+        map[ i6 ] = i6 + 3;
+        map[i6+1] = i6 + 4;
+        map[i6+2] = i6 + 5;
+        map[i6+3] = -1;
+        map[i6+4] = -1;
+        map[i6+5] = -1;
+    }
+
+    return true;
 }
 
 
