@@ -172,7 +172,7 @@ void PropagationConfigPanel::LoadData()
       typeId = PD78;
    else if (propType == "BulirschStoer")
       typeId = BS;
-   else if (propType == "AdamsBashfordMoulton")
+   else if (propType == "AdamsBashforthMoulton")
       typeId = ABM;
 
    // fill body combobox
@@ -1036,7 +1036,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          newProp = theGuiInterpreter->GetPropagator(newPropName);
         
          if (newProp == NULL)
-            newProp = theGuiInterpreter->CreatePropagator("AdamsBashfordMoulton", newPropName);
+            newProp = theGuiInterpreter->CreatePropagator("AdamsBashforthMoulton", newPropName);
       }
    }
    else
