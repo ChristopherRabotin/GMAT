@@ -42,6 +42,9 @@ Gmat::REAL_TYPE
 };
 
 const Real For::UNINITIALIZED_VALUE = -999.99;
+const Real For::DEFAULT_START       = 1;
+const Real For::DEFAULT_END         = 10;
+const Real For::DEFAULT_INCREMENT   = 1;
 
 //------------------------------------------------------------------------------
 //  For(void)
@@ -53,9 +56,9 @@ const Real For::UNINITIALIZED_VALUE = -999.99;
 For::For(void) :
    BranchCommand   ("For"),
    forName         (""),
-   startValue      (UNINITIALIZED_VALUE),
-   endValue        (UNINITIALIZED_VALUE),
-   stepSize        (1.0),
+   startValue      (DEFAULT_START),
+   endValue        (DEFAULT_END),
+   stepSize        (DEFAULT_INCREMENT),
    currentValue    (UNINITIALIZED_VALUE)
 {
    parameterCount = ForParamCount;
@@ -382,10 +385,10 @@ Real For::SetRealParameter(const std::string &label, const Real value)
 bool For::StillLooping()
 {
    // throw an exception if the For command has not yet been initialized fully
-   if ((startValue == UNINITIALIZED_VALUE) || 
-       (endValue   == UNINITIALIZED_VALUE) )
-      throw CommandException(
-            "For command has not been initialized fully/properly.");
+   //if ((startValue == UNINITIALIZED_VALUE) || 
+   //    (endValue   == UNINITIALIZED_VALUE) )
+   //   throw CommandException(
+   //         "For command has not been initialized fully/properly.");
    
    // initialize the loop, if it's the first time through
    if (currentValue == UNINITIALIZED_VALUE)

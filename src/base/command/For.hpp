@@ -90,6 +90,9 @@ protected:
       ForParamCount - BranchCommandParamCount];
    
    static const Real UNINITIALIZED_VALUE;
+   static const Real DEFAULT_START;
+   static const Real DEFAULT_END;
+   static const Real DEFAULT_INCREMENT;
 
    std::string         forName;
    /// Start value for the For loop
