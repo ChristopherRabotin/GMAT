@@ -245,6 +245,9 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
    
    // Construct the generating string
    Integer index = 0;
+   
+   if (currentPropMode != "")
+      gen += (currentPropMode + " ");
    for (StringArray::iterator prop = propName.begin(); prop != propName.end();
         ++prop) {
       gen += (*prop) + "(";
