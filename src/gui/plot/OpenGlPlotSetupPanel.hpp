@@ -31,7 +31,7 @@ public:
    OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-   Subscriber *mSubscriber;
+   //Subscriber *mSubscriber; //loj: 9/28/04 commented out
    OpenGlPlot *mOpenGlPlot;
    
    bool mIsScChanged;

@@ -20,9 +20,9 @@
 #include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
-#include "wx/colordlg.h"   // for wxColourDialog
+#include "wx/colordlg.h"            // for wxColourDialog
 
-#define DEBUG_OPENGL_PANEL 0
+//#define DEBUG_OPENGL_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -66,9 +66,9 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
                                  std::string(subscriberName.c_str()) + "\n");
 #endif
-   mSubscriber =
+   Subscriber *subscriber =
       theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
-   mOpenGlPlot = (OpenGlPlot*)mSubscriber;
+   mOpenGlPlot = (OpenGlPlot*)subscriber;
 
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
@@ -368,12 +368,13 @@ void OpenGlPlotSetupPanel::LoadData()
 #endif
 
    // load data from the core engine
-   plotCheckBox->SetValue(mSubscriber->IsActive());
-   wireFrameCheckBox->SetValue(mSubscriber->GetStringParameter("WireFrame") == "On");
-   targetStatusCheckBox->SetValue(mSubscriber->GetStringParameter("TargetStatus") == "On");
+   plotCheckBox->SetValue(mOpenGlPlot->IsActive());
+   wireFrameCheckBox->SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
+   targetStatusCheckBox->SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
 
    // get spacecraft list to plot
-   StringArray scNameList = mSubscriber->GetStringArrayParameter("SpacecraftList");
+   //StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("SpacecraftList");
+   StringArray scNameList = mOpenGlPlot->GetStringArrayParameter("Add");
    mScCount = scNameList.size();
    
    if (mScCount > 0)
@@ -382,10 +383,16 @@ void OpenGlPlotSetupPanel::LoadData()
       for (int i=0; i<mScCount; i++)
       {
          scNames[i] = scNameList[i].c_str();
+         
          mOrbitColorMap[scNameList[i]]
-            = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("OrbitColor", scNameList[i]));
+            = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameList[i]));
          mTargetColorMap[scNameList[i]]
-            = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("TargetColor", scNameList[i]));
+            = RgbColor(mOpenGlPlot->GetColor("Target", scNameList[i]));
+         
+         //mOrbitColorMap[scNameList[i]]
+         //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("OrbitColor", scNameList[i]));
+         //mTargetColorMap[scNameList[i]]
+         //   = RgbColor(mOpenGlPlot->GetUnsignedIntParameter("TargetColor", scNameList[i]));
       }
     
       mScSelectedListBox->Set(mScCount, scNames);
@@ -412,16 +419,16 @@ void OpenGlPlotSetupPanel::SaveData()
 {
    
    // save data to core engine
-   mSubscriber->Activate(plotCheckBox->IsChecked());
+   mOpenGlPlot->Activate(plotCheckBox->IsChecked());
    if (wireFrameCheckBox->IsChecked())
-      mSubscriber->SetStringParameter("WireFrame", "On");
+      mOpenGlPlot->SetStringParameter("WireFrame", "On");
    else
-      mSubscriber->SetStringParameter("WireFrame", "Off");
+      mOpenGlPlot->SetStringParameter("WireFrame", "Off");
    
    if (targetStatusCheckBox->IsChecked())
-      mSubscriber->SetStringParameter("TargetStatus", "On");
+      mOpenGlPlot->SetStringParameter("TargetStatus", "On");
    else
-      mSubscriber->SetStringParameter("TargetStatus", "Off");
+      mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
 
    // save spacecraft list
    if (mIsScChanged)
@@ -434,19 +441,21 @@ void OpenGlPlotSetupPanel::SaveData()
       if (mScCount == 0 && plotCheckBox->IsChecked())
       {
          wxLogMessage(wxT("Spacecraft not selected. The plot will not be activated."));
-         mSubscriber->Activate(false);
+         mOpenGlPlot->Activate(false);
       }
 
       if (mScCount >= 0) // >=0 because the list needs to be cleared
       {
-         mSubscriber->SetBooleanParameter("ClearSpacecraftList", true);
+         mOpenGlPlot->TakeAction("Clear"); //loj: 9/28/04 added
+         //mOpenGlPlot->SetBooleanParameter("ClearSpacecraftList", true);
+         
          for (int i=0; i<mScCount; i++)
          {
             mSelScName = std::string(mScSelectedListBox->GetString(i).c_str());
             //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() SC = %s\n",
             //                              mSelScName.c_str());
-            mSubscriber->
-               SetStringParameter("Add", mSelScName);
+            mOpenGlPlot->
+               SetStringParameter("Add", mSelScName, i);
          }
       }
    }
@@ -459,12 +468,20 @@ void OpenGlPlotSetupPanel::SaveData()
       for (int i=0; i<mScCount; i++)
       {
          mSelScName = std::string(mScSelectedListBox->GetString(i).c_str());
+         
          mOpenGlPlot->
-            SetUnsignedIntParameter("OrbitColor", mSelScName,
-                                    mOrbitColorMap[mSelScName].GetIntColor());
+            SetColor("Orbit", mSelScName,
+                     mOrbitColorMap[mSelScName].GetIntColor());
          mOpenGlPlot->
-            SetUnsignedIntParameter("TargetColor", mSelScName,
-                                    mTargetColorMap[mSelScName].GetIntColor());
+            SetColor("Target", mSelScName,
+                     mTargetColorMap[mSelScName].GetIntColor());
+         
+         //mOpenGlPlot->
+         //   SetUnsignedIntParameter("OrbitColor", mSelScName,
+         //                           mOrbitColorMap[mSelScName].GetIntColor());
+         //mOpenGlPlot->
+         //   SetUnsignedIntParameter("TargetColor", mSelScName,
+         //                           mTargetColorMap[mSelScName].GetIntColor());
       }
    }
 }
