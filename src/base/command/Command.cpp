@@ -566,6 +566,36 @@ GmatCommand* GmatCommand::GetChildCommand(Integer whichOne)
 
 
 //------------------------------------------------------------------------------
+//  Integer GetVariableCount()
+//------------------------------------------------------------------------------
+/**
+ * Counts up variables.
+ * 
+ * @return The number of variables in this command and its children.
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::GetVariableCount()
+{
+   return 0;
+}
+
+
+//------------------------------------------------------------------------------
+//  Integer GetGoalCount()
+//------------------------------------------------------------------------------
+/**
+ * Counts up goals.
+ * 
+ * @return The number of goals in this command and its children.
+ */
+//------------------------------------------------------------------------------
+Integer GmatCommand::GetGoalCount()
+{
+   return 0;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool AssignObjects()
 //------------------------------------------------------------------------------
 /**
@@ -606,6 +636,20 @@ bool GmatCommand::ClearObjects()
 }
 
 
-
-
+//------------------------------------------------------------------------------
+//  bool GmatCommand::InterpretAction()
+//------------------------------------------------------------------------------
+/**
+ * Performs command actions.
+ *
+ * This default implementation always returns false because the base class does
+ * not perform any actions.
+ *
+ * @return true if an action was taken, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::InterpretAction()
+{
+   return false;
+}
 

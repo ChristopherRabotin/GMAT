@@ -142,51 +142,63 @@ bool Assignment::Execute(void)
     bool retval = false;
 
     // Get the parameter ID and ID type
-    parmID    = parmOwner->GetParameterID(parmName);
-    parmType  = parmOwner->GetParameterType(parmID);
-    
-    if (parmOwner == NULL)
-        throw CommandException("Parameter Owner Not Initialized");
-    
-    switch (parmType) {
-        case Gmat::INTEGER_TYPE:
-            parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
-            retval = true;
-            break;
-            
-        case Gmat::REAL_TYPE:
-            parmOwner->SetRealParameter(parmID, atof(value.c_str()));
-            retval = true;
-            break;
-            
-        case Gmat::STRING_TYPE:
-        case Gmat::STRINGARRAY_TYPE:
-            parmOwner->SetStringParameter(parmID, value);
-            retval = true;
-            break;
-            
-        case Gmat::BOOLEAN_TYPE:
-            bool tf;
-            if (value == "true")
-               tf = true;
-            else
-               tf = false;
-            parmOwner->SetBooleanParameter(parmID, tf);
-            retval = true;
-            break;
-
-        default:
-            break;
-    }
-    
-    // "Add" parameters could also mean to set reference objects
-    if (parmName == "Add") {
-       if (objectMap->find(value) != objectMap->end())
-       {
-          GmatBase *obj = (*objectMap)[value];
-          if (obj)
-             parmOwner->SetRefObject(obj, obj->GetType(), value);
+    try {
+       parmID    = parmOwner->GetParameterID(parmName);
+       parmType  = parmOwner->GetParameterType(parmID);
+       
+       if (parmOwner == NULL)
+           throw CommandException("Parameter Owner Not Initialized");
+       
+       switch (parmType) {
+           case Gmat::INTEGER_TYPE:
+               parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
+               retval = true;
+               break;
+               
+           case Gmat::REAL_TYPE:
+               parmOwner->SetRealParameter(parmID, atof(value.c_str()));
+               retval = true;
+               break;
+               
+           case Gmat::STRING_TYPE:
+           case Gmat::STRINGARRAY_TYPE:
+               parmOwner->SetStringParameter(parmID, value);
+               retval = true;
+               break;
+               
+           case Gmat::BOOLEAN_TYPE:
+               bool tf;
+               if (value == "true")
+                  tf = true;
+               else
+                  tf = false;
+               parmOwner->SetBooleanParameter(parmID, tf);
+               retval = true;
+               break;
+   
+           default:
+               break;
        }
+       
+       // "Add" parameters could also mean to set reference objects
+       if (parmName == "Add") {
+          if (objectMap->find(value) != objectMap->end())
+          {
+             GmatBase *obj = (*objectMap)[value];
+             if (obj)
+                parmOwner->SetRefObject(obj, obj->GetType(), value);
+          }
+       }
+    }
+    catch (BaseException& ex) 
+    {
+       if (parmOwner == NULL)
+           throw;
+       // Could be an action rather than a parameter
+       if (!parmOwner->TakeAction(parmName, value))
+          throw;
+       
+       retval = true;
     }
     
     return retval;

@@ -101,11 +101,10 @@ public:
    virtual GmatCommand* Remove(GmatCommand *cmd);
    
    virtual GmatCommand* GetChildCommand(Integer whichOne = 0);
+   virtual Integer      GetVariableCount();
+   virtual Integer      GetGoalCount();
    
-   virtual bool         InterpretAction()
-   {
-      return false;
-   }
+   virtual bool         InterpretAction();
             
    /** 
    * The method that is fired to perform the GmatCommand.
