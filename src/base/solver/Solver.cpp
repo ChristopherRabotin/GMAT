@@ -23,7 +23,8 @@
 
 Solver::Solver(std::string type, std::string name) :
     GmatBase        (Gmat::SOLVER, type, name),
-    currentState    (INITIALIZING)
+    currentState    (INITIALIZING),
+    textFileMode    ("Normal")
 {
 }
 
@@ -35,7 +36,8 @@ Solver::~Solver()
 
 Solver::Solver(const Solver& sol) :
     GmatBase        (sol),
-    currentState    (sol.currentState)
+    currentState    (sol.currentState),
+    textFileMode    (sol.textFileMode)
 {
 }
 
@@ -44,6 +46,9 @@ Solver& Solver::operator=(const Solver& sol)
 {
     if (&sol == this)
         return *this;
+        
+    currentState = INITIALIZING;
+    textFileMode = sol.textFileMode;
 
     return *this;
 }

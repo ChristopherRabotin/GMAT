@@ -119,6 +119,8 @@ public:
 protected:
     /// Current state for the state machine
     SolverState         currentState;
+    /// Output mode: Compact, Normal, and Verbose
+    std::string         textFileMode;
     
     // Methods that correspond to the solver states.  Implement the methods
     // that correspond to the Solver's state machine.  The default 
