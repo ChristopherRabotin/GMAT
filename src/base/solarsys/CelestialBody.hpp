@@ -27,6 +27,7 @@
 #include <math.h>
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "SpacePoint.hpp"
 #include "A1Mjd.hpp"
 #include "PlanetaryEphem.hpp"
 #include "AtmosphereModel.hpp"
@@ -77,10 +78,11 @@ namespace Gmat
 /**
  * CelestialBody base class, from which all types of celestial bodies will derive.
  *
- * The CelestialBody class is primarily a base class, from which all types of
- * celestial bodies will derive.  CelestialBody itself derives from GmatBase.
+ * The CelestialBody class is primarily an intermediate base class, from which
+ * all types of celestial bodies will derive.  CelestialBody itself derives from
+ * SpacePoint.
  */
-class GMAT_API CelestialBody : public GmatBase
+class GMAT_API CelestialBody : public SpacePoint
 {
 public:
    // additional constructor, specifying body type (as string) and name
@@ -143,6 +145,20 @@ public:
    virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
    virtual bool           SetAtmosphereModel(AtmosphereModel *toAtmModel);
    virtual bool           SetPotentialFilename(const std::string &fn);
+
+   // methods inherited from SpacePoint, that must be implemented here (and/or
+   // in the derived classes
+   virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
+
+   // method to return the alpha, delta, and capital-W for the body (specifying
+   // the direction of the north pole of rotation (right ascension and
+   // declination) and the prime meridian.  For more information, see
+   // "Report of the IAU/IAG Working Group on Cartographic Coordinates and
+   // Rotational Elements of the Planets and Satellites: 2000"
+   virtual Rvector3       GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string    GetParameterText(const Integer id) const;     // const?
@@ -215,7 +231,7 @@ protected:
 
    enum
    {
-      BODY_TYPE = GmatBaseParamCount, 
+      BODY_TYPE = SpacePointParamCount, 
       MASS,
       EQUATORIAL_RADIUS,
       FLATTENING,
@@ -243,9 +259,9 @@ protected:
       //CIJ,
       CelestialBodyParamCount
    };
-   static const std::string PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount];
+   static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
 
-   static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
    
    // body type of the body
    Gmat::BodyType         bodyType;

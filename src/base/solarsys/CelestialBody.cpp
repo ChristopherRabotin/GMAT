@@ -24,6 +24,7 @@
 #include <sstream>
 #include <iomanip>
 #include "gmatdefs.hpp"
+#include "SpacePoint.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
 #include "SolarSystemException.hpp"
@@ -45,7 +46,7 @@ using namespace std;
 // static data
 //---------------------------------
 const std::string
-CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount] =
+CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
 {
    "BodyType",
    "Mass",
@@ -76,7 +77,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount] =
 };
 
 const Gmat::ParameterType
-CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - GmatBaseParamCount] =
+CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
 {
 Gmat::STRING_TYPE,
 Gmat::REAL_TYPE,
@@ -137,7 +138,7 @@ const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCou
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
-GmatBase            (Gmat::CELESTIAL_BODY, itsBodyType, name)
+SpacePoint(Gmat::CELESTIAL_BODY, itsBodyType, name)
 {
    parameterCount = CelestialBodyParamCount;
    Initialize(itsBodyType);
@@ -155,8 +156,8 @@ GmatBase            (Gmat::CELESTIAL_BODY, itsBodyType, name)
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
-GmatBase          (Gmat::CELESTIAL_BODY,
-                   CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name)
+SpacePoint(Gmat::CELESTIAL_BODY,
+           CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name)
 {
    parameterCount = CelestialBodyParamCount;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
@@ -173,7 +174,7 @@ GmatBase          (Gmat::CELESTIAL_BODY,
  */
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(const CelestialBody &cb) :
-GmatBase            (cb),
+SpacePoint          (cb),
 bodyType            (cb.bodyType),
 mass                (cb.mass),
 equatorialRadius    (cb.equatorialRadius),
@@ -235,7 +236,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    if (&cb == this)
       return *this;
 
-   GmatBase::operator=(cb);
+   SpacePoint::operator=(cb);
    bodyType            = cb.bodyType;
    mass                = cb.mass;
    equatorialRadius    = cb.equatorialRadius;
@@ -1096,6 +1097,68 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
    return true;
 }
 
+const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
+{
+   // If j2000Body is this body, return the zero state vector
+   if(j2000Body->GetName() == instanceName) 
+      return Rvector6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+   Rvector6         stateEphem    = GetState(atTime);
+   Rvector6         j2kEphemState;
+   Gmat::ObjectType ot            = j2000Body->GetType();
+   if (ot == Gmat::CELESTIAL_BODY)
+   {
+      j2kEphemState = ((CelestialBody*)j2000Body)->GetState(atTime);
+   }
+   else if (ot == Gmat::CALCULATED_POINT)
+   {
+      // fill in with calculated point stuff when it's done
+      //j2kEphemState = ((CalculatedPoint*)j2000Body)->GetState(atTime);
+   }
+   else
+   {
+      throw SolarSystemException("j2000Body is of incorrect type.");
+   }
+   
+   return (stateEphem - j2kEphemState);
+   
+}
+const Rvector3 CelestialBody::GetMJ2000Position(const A1Mjd &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetR());
+}
+
+const Rvector3 CelestialBody::GetMJ2000Velocity(const A1Mjd &atTime)
+{
+   Rvector6 tmp = GetMJ2000State(atTime);
+   return (tmp.GetV());
+}
+
+//------------------------------------------------------------------------------
+//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the cartographic coordinates for the body.
+ *
+ * @return vector containing alpha, delta, W, where:
+ *         alpha is the right ascension of the north pole of rotation
+ *         delta is the declination of the north pole of rotation
+ *         W specifies the ephemeris position of the prime meridian
+ *
+ * @note currently only implemented for the Star, Planets, and Major Moons of
+ *       our Solar System.
+ *
+ */
+//------------------------------------------------------------------------------
+Rvector3 CelestialBody::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+{
+   // should be implemented in derived classes
+   throw SolarSystemException(
+         "Cartographic Coordinates not yet computed for body " + instanceName);
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
 //                             Real bodyPolarRad, Real bodyMu,
@@ -1165,9 +1228,9 @@ bool CelestialBody::SetPotentialFilename(const std::string &fn)
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetParameterText(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < CelestialBodyParamCount)
-      return PARAMETER_TEXT[id - GmatBaseParamCount];
-   return GmatBase::GetParameterText(id);
+   if (id >= SpacePointParamCount && id < CelestialBodyParamCount)
+      return PARAMETER_TEXT[id - SpacePointParamCount];
+   return SpacePoint::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1184,13 +1247,13 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer     CelestialBody::GetParameterID(const std::string &str) const
 {
-   for (Integer i = GmatBaseParamCount; i < CelestialBodyParamCount; i++)
+   for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (str == PARAMETER_TEXT[i - SpacePointParamCount])
          return i;
    }
    
-   return GmatBase::GetParameterID(str);
+   return SpacePoint::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -1207,10 +1270,10 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < CelestialBodyParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   if (id >= SpacePointParamCount && id < CelestialBodyParamCount)
+      return PARAMETER_TYPE[id - SpacePointParamCount];
       
-   return GmatBase::GetParameterType(id);
+   return SpacePoint::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1227,7 +1290,7 @@ Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetParameterTypeString(const Integer id) const
 {
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return SpacePoint::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 //------------------------------------------------------------------------------
@@ -1251,7 +1314,7 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
    if (id == MU)                 return mu;
    if (id == HOUR_ANGLE)         return hourAngle;
 
-   return GmatBase::GetRealParameter(id);
+   return SpacePoint::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1286,7 +1349,7 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
    if (id == MU)                return (mu                 = value);
    if (id == HOUR_ANGLE)        return (hourAngle          = value);
    
-   return GmatBase::SetRealParameter(id, value);
+   return SpacePoint::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1310,7 +1373,7 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
    if (id == REF_BODY_NUMBER)      return referenceBodyNumber;
   // if (id == COEFFICIENT_SIZE)     return coefficientSize;
    
-   return GmatBase::GetIntegerParameter(id); // add others in later?
+   return SpacePoint::GetIntegerParameter(id); // add others in later?
 }
 
 //------------------------------------------------------------------------------
@@ -1336,7 +1399,7 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
    if (id == REF_BODY_NUMBER)      return (referenceBodyNumber = value);
    //if (id == COEFFICIENT_SIZE)     return (coefficientSize     = value);
    
-   return GmatBase::SetIntegerParameter(id,value);  // add others in later
+   return SpacePoint::SetIntegerParameter(id,value);  // add others in later
 }
 
 //------------------------------------------------------------------------------
@@ -1366,7 +1429,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    }
    if (id == CENTRAL_BODY)          return centralBody;
 
-   return GmatBase::GetStringParameter(id);
+   return SpacePoint::GetStringParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1439,7 +1502,7 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       return true;
    }
    
-   return GmatBase::SetStringParameter(id, value);
+   return SpacePoint::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1459,7 +1522,7 @@ bool        CelestialBody::GetBooleanParameter(const Integer id) const
 {
    if (id == USE_POTENTIAL_FILE_FLAG)       return usePotentialFile;
 
-   return GmatBase::GetBooleanParameter(id);
+   return SpacePoint::GetBooleanParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1481,7 +1544,7 @@ bool        CelestialBody::SetBooleanParameter(const Integer id,
 {
    if (id == USE_POTENTIAL_FILE_FLAG)   return (usePotentialFile = value); 
 
-   return GmatBase::SetBooleanParameter(id,value);
+   return SpacePoint::SetBooleanParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -1502,7 +1565,7 @@ const Rvector&  CelestialBody::GetRvectorParameter(const Integer id) const
    if (id == STATE)               return state;
    if (id == ANGULAR_VELOCITY)    return angularVelocity;
 
-   return GmatBase::GetRvectorParameter(id);
+   return SpacePoint::GetRvectorParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1540,7 +1603,7 @@ const Rvector&  CelestialBody::SetRvectorParameter(const Integer id,
       return angularVelocity;
    }
 
-   return GmatBase::SetRvectorParameter(id,value);
+   return SpacePoint::SetRvectorParameter(id,value);
 }
 
 //------------------------------------------------------------------------------
@@ -1600,7 +1663,7 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
 //   if (id == SIJ)               return sij;
 //   if (id == CIJ)               return cij;
 //   
-//   return GmatBase::GetRmatrixParameter(id);
+//   return SpacePoint::GetRmatrixParameter(id);
 //}
 
 //------------------------------------------------------------------------------
@@ -1623,7 +1686,7 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
 //   if (id == SIJ)               return (sij = value);
 //   if (id == CIJ)               return (cij = value);
 //
-//   return GmatBase::SetRmatrixParameter(id,value);
+//   return SpacePoint::SetRmatrixParameter(id,value);
 //}
 
 //------------------------------------------------------------------------------
@@ -1685,7 +1748,7 @@ const StringArray& CelestialBody::GetStringArrayParameter(const Integer id) cons
    //   return GetSupportedAtmospheres();
    //}
 
-   return GmatBase::GetStringArrayParameter(id);
+   return SpacePoint::GetStringArrayParameter(id);
 }
 
 //------------------------------------------------------------------------------
