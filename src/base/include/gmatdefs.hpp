@@ -62,7 +62,7 @@ typedef unsigned int    UnsignedInt;       // 4 byte unsigned integer
 
 typedef std::vector<Real>        RealArray;
 typedef std::vector<Integer>     IntegerArray;
-typedef std::vector<UnsignedInt> UnsignedIntArray; //loj: 7/12/04 added
+typedef std::vector<UnsignedInt> UnsignedIntArray;
 typedef std::vector<std::string> StringArray;
 
 class GmatBase;                            // Forward reference for ObjectArray
@@ -107,7 +107,8 @@ namespace Gmat
    enum ParameterType
    {
       INTEGER_TYPE,
-      UNSIGNED_INT_TYPE,  //wcs: added 2004.06.01
+      UNSIGNED_INT_TYPE,
+      UNSIGNED_INTARRAY_TYPE,  //loj: 9/28/04 added
       REAL_TYPE,
       STRING_TYPE,
       STRINGARRAY_TYPE,
