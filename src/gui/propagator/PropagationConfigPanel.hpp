@@ -48,6 +48,8 @@ private:
       RKN68,
       RKF56,
       PD78,
+      BS,
+      ABM,
       IntegratorCount,
    };
    
@@ -268,3 +270,4 @@ private:
 };
 
 #endif // PropagationConfigPanel_hpp
+

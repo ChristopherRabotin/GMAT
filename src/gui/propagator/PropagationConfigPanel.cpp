@@ -26,7 +26,7 @@
 // base includes
 #include "MessageInterface.hpp"
 
-#define DEBUG_PROP_PANEL 0
+#define DEBUG_PROP_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -168,6 +168,10 @@ void PropagationConfigPanel::LoadData()
       typeId = RKF56;
    else if (propType == "PrinceDormand78")
       typeId = PD78;
+   else if (propType == "BulirschStoer")
+      typeId = BS;
+   else if (propType == "AdamsBashfordMoulton")
+      typeId = ABM;
 
    // fill body combobox
    if ( !primaryBodiesArray.IsEmpty() )
@@ -370,121 +374,6 @@ void PropagationConfigPanel::SaveData()
 #endif
       
    } // end if(isForceModelChange)
-
-//        // the primary body data  
-//        for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-//        {       
-//           if (!primaryBodiesArray.IsEmpty())
-//           {
-//              for (Integer j = 0; j < (Integer)savedBodiesArray.GetCount(); j++)
-//                 if (primaryBodiesArray[i].CmpNoCase(savedBodiesArray[j].c_str()) == 0)
-//                    primaryBodiesArray[i] = wxT("NULL");
-//           }
-//        }
-//        for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-//        { 
-//           if ( (primaryBodiesArray[i].CmpNoCase("NULL") != 0)&&
-//                (primaryBodiesGravityArray[i].CmpNoCase("PointMassForce") == 0) )
-//           {
-//              thePMForces[i] = (PointMassForce *)theGuiInterpreter->
-//                 CreatePhysicalModel("PointMassForce", "");
-//              thePMForces[i]->SetBody(theBodies[i]);
-//              theForceModel->AddForce(thePMForces[i]);       
-//           }
-//        }
-//        // the point mass body data
-//        CelestialBody *body;
-//        PointMassForce *pm;
-//        if (!pointmassBodiesArray.IsEmpty())
-//        {
-//           for (Integer i = 0; i < (Integer)pointmassBodiesArray.GetCount(); i++)
-//           {
-//              body = theSolarSystem->GetBody(pointmassBodiesArray[i].c_str());
-//              pm = (PointMassForce *)theGuiInterpreter->CreatePhysicalModel("PointMassForce", "");
-//              pm->SetBody(body);
-//              theForceModel->AddForce(pm);
-//           }    
-//        }
-//        // the drag force data
-//        if (useDragForce)
-//        {
-//           if ( atmosModelString.CmpNoCase("Exponential") == 0 )
-//           {
-//              if (theDragForce == NULL)
-//                 theDragForce = (DragForce *)theGuiInterpreter->
-//                    CreatePhysicalModel("DragForce", "Exponential");
-//              Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
-//              theDragForce->SetStringParameter(atmosTypeID, "Exponential");
-//              theForceModel->AddForce(theDragForce);         
-//              // Save to the PropSetup
-//              Integer dragID = thePropSetup->GetParameterID("Drag");
-//              thePropSetup->SetStringParameter(dragID, "On");
-//           }
-//           else if ( atmosModelString.CmpNoCase("MSISE90") == 0 )
-//           {
-//              if (!theDragForce)
-//                 theDragForce = (DragForce *)theGuiInterpreter->
-//                    CreatePhysicalModel("DragForce", "MSISE90");
-//              Integer atmosTypeID = theDragForce->GetParameterID("AtmosphereModel");
-//              theDragForce->SetStringParameter(atmosTypeID, "MSISE90");
-//              theForceModel->AddForce(theDragForce);
-//              // Save to the PropSetup
-//              Integer dragID = thePropSetup->GetParameterID("Drag");
-//              thePropSetup->SetStringParameter(dragID, "On");
-//           }
-//        }
-//        else
-//        {
-//           // Save to the PropSetup
-//           Integer dragID = thePropSetup->GetParameterID("Drag");
-//           thePropSetup->SetStringParameter(dragID, "Off");
-//           // waw: Future implementation to remove drag force from force model
-//           //        PhysicalModel *force;
-//           //            
-//           //        for (Integer i = 0; i < numOfForces; i++)
-//           //        {
-//           //            force = theForceModel->GetForce(i);
-//           //           
-//           //            if (force->GetTypeName() == "DragForce")
-//           //            {
-//           //                useDragForce = false;
-//           //                wxString forceName = theSRP->GetName().c_str();
-//           //                theForceModel->DeleteForce(forceName.c_str());
-//           //            }
-//           //        }    
-//        }
-//        // the srp data
-//        if (useSRP)
-//        {
-//           if (theSRP == NULL)
-//              theSRP = (SolarRadiationPressure *)theGuiInterpreter->
-//                 CreatePhysicalModel("SolarRadiationPressure", "SRP");
-//           theForceModel->AddForce(theSRP);
-//           Integer srpID = thePropSetup->GetParameterID("SRP");
-//           thePropSetup->SetStringParameter(srpID, "On");
-//        }
-//        else
-//        {
-//           Integer srpID = thePropSetup->GetParameterID("SRP");
-//           thePropSetup->SetStringParameter(srpID, "Off");
-//           // waw: Future implementation to remove srp force from force model
-//           //       PhysicalModel *force;
-//           //       
-//           //       for (Integer i = 0; i < numOfForces; i++)
-//           //       {
-//           //           force = theForceModel->GetForce(i);
-//           //           
-//           //           if (force->GetTypeName() == "SolarRadiationPressure")
-//           //           {
-//           //              useSRP = false;
-//           //              wxString forceName = theSRP->GetName().c_str();
-//           //              theForceModel->DeleteForce(forceName.c_str());
-//           //           }
-//           //       }
-//        }
-//        // save forces to the prop setup
-//        if (theForceModel != NULL)
-//           thePropSetup->SetForceModel(theForceModel);
 }
 
 //------------------------------------------------------------------------------
@@ -528,6 +417,8 @@ void PropagationConfigPanel::Initialize()
    integratorArray.Add("RKN 6(8)");
    integratorArray.Add("RKF 5(6)");
    integratorArray.Add("PD  7(8)");
+   integratorArray.Add("BS");
+   integratorArray.Add("ABM");
     
    // initialize gravity model type array
    gravModelArray.push_back("Point Mass");
@@ -566,7 +457,7 @@ void PropagationConfigPanel::Initialize()
          if (force->GetTypeName() == "PointMassForce")
          {
             thePMF = (PointMassForce *)force;
-            bodyName = thePMF->GetStringParameter("Body");
+            bodyName = thePMF->GetStringParameter("BodyName");
             primaryBodiesArray.Add(bodyName.c_str());
             primaryBodiesGravityArray.Add(typeName.c_str());                    
 
@@ -578,7 +469,7 @@ void PropagationConfigPanel::Initialize()
          else if (force->GetTypeName() == "GravityField") //loj: 5/28/04 added
          {
             theGravForce = (GravityField*)force;
-            bodyName = theGravForce->GetStringParameter("Body");
+            bodyName = theGravForce->GetStringParameter("BodyName");
             potFilename = theGravForce->GetStringParameter("Filename");
             primaryBodiesArray.Add(bodyName.c_str());
             primaryBodiesGravityArray.Add(typeName.c_str());                    
@@ -1057,6 +948,22 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
          if (newProp == NULL)
             newProp = theGuiInterpreter->CreatePropagator("PrinceDormand78", newPropName);
       }
+      else if (integratorString.IsSameAs(integratorArray[BS]))
+      {   
+         newPropName = propSetupName + "BS";
+         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
+         if (newProp == NULL)
+            newProp = theGuiInterpreter->CreatePropagator("BulirschStoer", newPropName);
+      }
+      else if (integratorString.IsSameAs(integratorArray[ABM]))
+      {   
+         newPropName = propSetupName + "ABM";
+         newProp = theGuiInterpreter->GetPropagator(newPropName);
+        
+         if (newProp == NULL)
+            newProp = theGuiInterpreter->CreatePropagator("AdamsBashfordMoulton", newPropName);
+      }
    }
    else
    {
@@ -1153,35 +1060,6 @@ void PropagationConfigPanel::DisplayGravityFieldData()
 
    // TextCtrl->SetValue() fires EVT_TEXT event
    isGravTextChanged = false;
-
-//     for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-//     {
-//        if ( primaryBodiesArray[i].CmpNoCase(primaryBodyString) == 0 )
-//        {
-//           if ( primaryBodiesGravityArray[i].CmpNoCase("PointMassForce") == 0 )
-//           {
-//              gravComboBox->SetValue("Point Mass");
-//              //                gravityDegreeTextCtrl->SetValue("0");
-//              //                gravityOrderTextCtrl->SetValue("0");
-//              //                gravityDegreeTextCtrl->Enable(false);
-//              //                gravityOrderTextCtrl->Enable(false);
-//           }
-//           else
-//           {
-//              gravComboBox->SetValue("None");
-//              //                gravityDegreeTextCtrl->Enable(true);
-//              //                gravityOrderTextCtrl->Enable(true);               
-//              //                if (degreeArray.IsEmpty())
-//              //                   gravityDegreeTextCtrl->SetValue("0");
-//              //                else
-//              //                   gravityDegreeTextCtrl->SetValue(degreeArray.Item(i));
-//              //                if (orderArray.IsEmpty())
-//              //                   gravityOrderTextCtrl->SetValue("0");
-//              //                else
-//              //                   gravityOrderTextCtrl->SetValue(orderArray.Item(i));
-//           }
-//        }
-//     }
 }
 
 //------------------------------------------------------------------------------
@@ -1215,20 +1093,6 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
       atmosComboBox->SetSelection(JR);
       dragSetupButton->Enable(true);
    }
-   
-//     // Atmospheric model available for Earth, Venus & Mars    
-//     if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 ) 
-//        //( primaryBodyString.Cmp(SolarSystem::VENUS_NAME.c_str()) == 0 )
-//        //( primaryBodyString.Cmp(SolarSystem::MARS_NAME.c_str()) == 0 )
-//     {                   
-//        atmosComboBox->SetValue(atmosModelString.c_str());
-//        //dragSetupButton->Enable(true); 
-//     }
-//     else
-//     {
-//        atmosComboBox->SetValue("None");        
-//        dragSetupButton->Enable(false);
-//     }
 }
 
 //------------------------------------------------------------------------------
@@ -1306,33 +1170,6 @@ void PropagationConfigPanel::OnGravitySelection()
      isForceModelChanged = true;
      theApplyButton->Enable(true);
    }
-      
-//waw: Future implementation
-//   wxString gravityTypeString = gravComboBox->GetStringSelection();
-//   primaryBodyString = bodyComboBox->GetStringSelection();
-//
-//     for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-//     {
-//        if ( primaryBodiesArray[i].CmpNoCase(primaryBodyString) == 0 )
-//        {     
-//           if (gravityTypeString.CmpNoCase("Point Mass") == 0)
-//           {
-//              primaryBodiesGravityArray[i] = "PointMassForce";
-//              editPmfButton->Enable(true);
-//              //gravityDegreeTextCtrl->Enable(false);
-//              //gravityOrderTextCtrl->Enable(false);
-//           }
-//           else //waw:future implementation
-//           {
-//              primaryBodiesGravityArray[i] = "NULL";
-//              editPmfButton->Enable(false);
-//              //gravityDegreeTextCtrl->Enable(true);
-//              //gravityOrderTextCtrl->Enable(true);
-//           }
-//           isForceModelChanged = true;
-//           theApplyButton->Enable(true);
-//        }
-//     }
 }
 
 //------------------------------------------------------------------------------
@@ -1362,33 +1199,6 @@ void PropagationConfigPanel::OnAtmosphereSelection()
       isForceModelChanged = true;
       theApplyButton->Enable(true);
    }
-   
-//     atmosModelString = atmosComboBox->GetStringSelection();
-//     if ( ( atmosModelString.CmpNoCase("Exponential") == 0 ) ||
-//          ( atmosModelString.CmpNoCase("MSISE90") == 0 ) )
-//     {
-//        jrFileStaticText->Show(false);
-//        jrFileTextCtrl->Show(false);
-//        jrFileButton->Show(false);
-        
-//        useDragForce = true;
-//     }
-//     else if ( atmosModelString.CmpNoCase("Jacchia-Roberts") == 0 )
-//     {
-//        jrFileStaticText->Show(true);
-//        jrFileTextCtrl->Show(true);
-//        jrFileButton->Show(true);      
-//        useDragForce = false;
-//     }
-//     else if ( atmosModelString.CmpNoCase("None") == 0 )
-//     {
-//        jrFileStaticText->Show(false);
-//        jrFileTextCtrl->Show(false);
-//        jrFileButton->Show(false);
-//        useDragForce = false;
-//     }
-//     isForceModelChanged = true;
-//     theApplyButton->Enable(true);
 }
 
 // wxButton events
@@ -1580,14 +1390,6 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 {
    theApplyButton->Enable(true);
    isMagfTextChanged = true;
-   
-//     // waw: Future build implementation
-//     if ( event.GetEventObject() == magneticDegreeTextCtrl )
-//     {
-//     }
-//     else if ( event.GetEventObject() == magneticOrderTextCtrl )
-//     {
-//     }
 }
 
 // wxCheckBox Events
@@ -1631,11 +1433,11 @@ void PropagationConfigPanel::ShowPropData(const std::string &header)
       {
          paramId = force->GetParameterID("AtmosphereBody");
          forceBody = force->GetStringParameter(paramId);
-         forceBody = force->GetStringParameter("Body");
+         forceBody = force->GetStringParameter("BodyName");
       }
       else 
       {
-         forceBody = force->GetStringParameter("Body");
+         forceBody = force->GetStringParameter("BodyName");
       }
       
       MessageInterface::ShowMessage("forceBody=%s, forceType=%s\n", forceBody.c_str(),
