@@ -24,6 +24,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
@@ -44,6 +45,7 @@ private:
     // Event Handling
     DECLARE_EVENT_TABLE();
     void OnTextChange();
+    void OnComboBoxChange();
     void OnButtonClick(wxCommandEvent &event);
     
     std::string thrusterName;
@@ -51,7 +53,9 @@ private:
     
     Thruster* theThruster;
     
-    Integer coordsysCount;
+    GuiItemManager *theGuiManager;
+    
+    bool isCoordSysChanged;
     
     wxButton *cCoefButton;
     wxButton *kCoefButton;
@@ -76,7 +80,7 @@ private:
         ID_TEXTCTRL,
         ID_LISTBOX,
         ID_BUTTON,
-        ID_COMBO,
+        ID_COMBOBOX,
     };
 };
 #endif

@@ -33,6 +33,7 @@ BEGIN_EVENT_TABLE(ThrusterConfigPanel, wxPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_TEXT(ID_TEXTCTRL, ThrusterConfigPanel::OnTextChange)
+   EVT_COMBOBOX(ID_COMBOBOX, ThrusterConfigPanel::OnComboBoxChange)
    EVT_BUTTON(ID_BUTTON, ThrusterConfigPanel::OnButtonClick)
 END_EVENT_TABLE()
 
@@ -49,14 +50,16 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent, 
                                   const wxString &name):GmatPanel(parent)
-{
-   coordsysCount = 0;
-   
+{  
    thrusterName = std::string(name.c_str());
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    
+   theGuiManager = GuiItemManager::GetInstance();
+   
    theThruster = (Thruster*)theGuiInterpreter->GetHardware(thrusterName);
+   
+   isCoordSysChanged = false;
     
    Create();
    Show();
@@ -85,9 +88,6 @@ void ThrusterConfigPanel::Create()
     // Integer
     Integer bsize = 5; // border size
     
-    // wxString
-    wxString emptyList[] = {};
-    
     // wxButton
     cCoefButton = new wxButton( this, ID_BUTTON, wxT("Edit Thruster Coef."),
                               wxDefaultPosition, wxDefaultSize, 0 );
@@ -95,9 +95,8 @@ void ThrusterConfigPanel::Create()
                               wxDefaultPosition, wxDefaultSize, 0 );  
                                 
     // wxComboBox 
-    coordsysComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                      wxDefaultPosition, wxSize(125,-1), coordsysCount,
-                      emptyList, wxCB_DROPDOWN|wxCB_READONLY );;
+    coordsysComboBox  =
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
    
     // wxTextCtrl
     XTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
@@ -162,14 +161,8 @@ void ThrusterConfigPanel::LoadData()
    paramID = theThruster->GetParameterID("CoordinateSystem");
    coordsysName = theThruster->GetStringParameter(paramID);
    
-   coordsysCount = 1; // Temp value
-   coordsysComboBox->Clear();
-   for (Integer i = 0; i < coordsysCount; i++)
-   {
-       coordsysComboBox->Append(coordsysName.c_str());
-   }
-   coordsysComboBox->SetSelection(0);
-  
+   coordsysComboBox->SetValue(coordsysName.c_str());
+   
    paramID = theThruster->GetParameterID("X_Direction");
    XTextCtrl->SetValue(wxVariant(theThruster->GetRealParameter(paramID)));
     
@@ -209,6 +202,12 @@ void ThrusterConfigPanel::SaveData()
    
    paramID = theThruster->GetParameterID("ThrustScaleFactor");
    theThruster->SetRealParameter(paramID, atof(scaleFactorTextCtrl->GetValue())); 
+   
+   if (isCoordSysChanged)
+   {
+      paramID = theThruster->GetParameterID("CoordinateSystem");
+      theThruster->SetStringParameter(paramID, coordsysName);
+   }    
       
    theApplyButton->Disable();
 }
@@ -220,6 +219,16 @@ void ThrusterConfigPanel::OnTextChange()
 {
     theApplyButton->Enable();
 } 
+
+//------------------------------------------------------------------------------
+// void OnComboBoxChange()
+//------------------------------------------------------------------------------
+void ThrusterConfigPanel::OnComboBoxChange()
+{
+   isCoordSysChanged =  true;
+   coordsysName = coordsysComboBox->GetStringSelection().c_str();
+   theApplyButton->Enable();
+}    
 
 //------------------------------------------------------------------------------
 // void OnButtonClick()
