@@ -51,11 +51,11 @@ Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
       return new ReportFile(withName, fileName);
    else if (ofType == "MessageWindow")
       return new MessageWindow(withName);
-   else if (ofType == "OpenGlPlot")
+   else if (ofType == "OpenGLPlot") //loj: 10/28/04 Changed from OpenGlPlot
       return new OpenGlPlot(withName);
-   else if (ofType == "XyPlot")
+   else if (ofType == "XYPlot")     //loj: 10/28/04 Changed from XyPlot
       return new XyPlot(withName);
-   else if (ofType == "MatlabWs")
+   else if (ofType == "MatlabWS")   //loj: 10/28/04 Changed from MatlabWs
       return new MatlabWs(withName);
    return NULL;
 }
@@ -78,9 +78,9 @@ Factory(Gmat::SUBSCRIBER)
    {
       creatables.push_back("ReportFile");
       creatables.push_back("MessageWindow");
-      creatables.push_back("OpenGlPlot");
-      creatables.push_back("XyPlot");
-      creatables.push_back("MatlabWs");
+      creatables.push_back("OpenGLPlot");
+      creatables.push_back("XYPlot");
+      creatables.push_back("MatlabWS");
    }
 }
 
