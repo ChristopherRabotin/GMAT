@@ -33,26 +33,26 @@ using namespace GmatMathUtil;
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// Keplerian ToKeplerian(const Rvector3& position, const Rvector3& velocity,
+// Keplerian ToKeplerian(const Rvector3 &position, const Rvector3 &velocity,
 //                       Real mu)
 //------------------------------------------------------------------------------
-Keplerian ToKeplerian(const Rvector3& position, const Rvector3& velocity,
+Keplerian ToKeplerian(const Rvector3 &position, const Rvector3 &velocity,
                       Real mu)
 {
-   Real a, e, i, ra, arg, ma;
-   ToKeplerian(position, velocity, mu, a, e, i, ra, arg, ma);
-   return Keplerian(a, e, i, ra, arg, ma);
+   Real sma, ecc, inc, raan, aop, ma;
+   ToKeplerian(position, velocity, mu, sma, ecc, inc, raan, aop, ma);
+   return Keplerian(sma, ecc, inc, raan, aop, ma);
 }
 
 //------------------------------------------------------------------------------
 //  <friend>
-//  void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
-//                   Real mu, Real& a, Real& e, Real& i,
-//                   Real& ra, Real& arg, Real& ma)
+//  void ToKeplerian(const Rvector3 &position, const Rvector3 &velocity,
+//                   Real mu, Real &sma, Real &ecc, Real &inc,
+//                   Real &raan, Real &aop, Real &ma)
 //------------------------------------------------------------------------------
-void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
-                 Real mu, Real& a, Real& e, Real& i,
-                 Real& ra, Real& arg, Real& ma)
+void ToKeplerian(const Rvector3 &position, const Rvector3 &velocity,
+                 Real mu, Real &sma, Real &ecc, Real &inc,
+                 Real &raan, Real &aop, Real &ma)
 {
     Real eSquared;
     const Rvector3 h = Cross(position, velocity);
@@ -80,25 +80,25 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
     //  If position or velocity magnitude are zero, return all zeros
     if ((GmatMathUtil::IsEqual(r, 0.0)) || (GmatMathUtil::IsEqual(v, 0.0)))
     {
-        a   = 0.0;
-        e   = 0.0;
-        i   = 0.0;
-        ra  = 0.0;
-        arg = 0.0;
+        sma  = 0.0;
+        ecc  = 0.0;
+        inc  = 0.0;
+        raan = 0.0;
+        aop  = 0.0;
         ma   = 0.0;
         return;
     }
 
     //  Compute semimajor Axis (A)
-    a = (mu * r) / (2.0 * mu - r * vSquared);
+    sma = (mu * r) / (2.0 * mu - r * vSquared);
 
-    if (a <= 0.0)
+    if (sma <= 0.0)
     {
         throw EphemerisUtil::InvalidEllipticalElements();
     }
 
     //  Compute eccentricity;
-    eSquared = 1.0 - p/a;
+    eSquared = 1.0 - p/sma;
 
     if (eSquared < -GmatRealConst::REAL_EPSILON)
     {
@@ -106,29 +106,29 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
     }
     else if (eSquared < 0.0)
     {
-        e = 0.0;
+        ecc = 0.0;
     }
     else
     {
-        e = GmatMathUtil::Sqrt(eSquared);
+        ecc = GmatMathUtil::Sqrt(eSquared);
     }
 
-    if (e >= (1.0 + GmatRealConst::REAL_EPSILON))
+    if (ecc >= (1.0 + GmatRealConst::REAL_EPSILON))
     {
         throw EphemerisUtil::InvalidEllipticalElements();
     }
-    else if (e > 1.0)
+    else if (ecc > 1.0)
     {
-        e = 1.0;
+        ecc = 1.0;
     }
 
     //  Compute inclination
-    i = ATan(GmatMathUtil::Sqrt(h[0]*h[0] + h[1]*h[1]), h[2]);
+    inc = ATan(GmatMathUtil::Sqrt(h[0]*h[0] + h[1]*h[1]), h[2]);
 
     //  Compute the Right Ascension of the Ascending Node (RA)
-    if (GmatMathUtil::IsEqual(i, 0.0))
+    if (GmatMathUtil::IsEqual(inc, 0.0))
     {
-        ra = 0.0;
+        raan = 0.0;
         if (GmatMathUtil::IsEqual(position[2], r))
         {
             argLat = PI_OVER_TWO;
@@ -140,10 +140,10 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
     }
     else
     {
-        ra = ATan(h[0], -h[1]);
-        ra = Mod(ra, TWO_PI);
-        argLat = ATan(position[2], Sin(i) * (position[0]*Cos(ra) + 
-                 position[1]* Sin(ra)));
+        raan = ATan(h[0], -h[1]);
+        raan = Mod(raan, TWO_PI);
+        argLat = ATan(position[2], Sin(inc) * (position[0]*Cos(raan) + 
+                 position[1]* Sin(raan)));
     }
 
     if (argLat < 0.0)
@@ -152,13 +152,13 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
     }
 
     //  Make Right Ascension of Ascending Node positive
-    if (ra < 0.0)
+    if (raan < 0.0)
     {
-        ra += TWO_PI;
+        raan += TWO_PI;
     }
 
     //  Compute the argument of Periapsis (argPer)
-    if (GmatMathUtil::IsEqual(e, 0.0))
+    if (GmatMathUtil::IsEqual(ecc, 0.0))
     {
         trueAnomaly = argLat;
     }
@@ -173,37 +173,37 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
            trueAnomaly += TWO_PI;
        }
     }
-    arg = argLat - trueAnomaly;
+    aop = argLat - trueAnomaly;
 
     //  Make argument of Periapsis positive
-    if (arg < 0.0)
+    if (aop < 0.0)
     {
-        arg += TWO_PI;
+        aop += TWO_PI;
     }
 
     //  Compute Mean Anomaly
-    if (GmatMathUtil::IsEqual(e, 0.0))
+    if (GmatMathUtil::IsEqual(ecc, 0.0))
     {
         ma = argLat;
     }
     else
     {
         //  Compute eccentric Anomaly (eccAnomaly)
-        muA = mu * a;
+        muA = mu * sma;
 
         if (muA < 0.0)
         {
-            a   = 0.0;
-            e   = 0.0;
-            i   = 0.0;
-            ra  = 0.0;
-            arg = 0.0;
+            sma   = 0.0;
+            ecc   = 0.0;
+            inc   = 0.0;
+            raan  = 0.0;
+            aop   = 0.0;
             ma   = 0.0;
             return;
         }
 
         sqRootMuA   = GmatMathUtil::Sqrt(muA);
-        eccAnomaly  = ATan((rDotV / sqRootMuA), (1.0 - (r/a)));
+        eccAnomaly  = ATan((rDotV / sqRootMuA), (1.0 - (r/sma)));
         eccAnomaly  = Mod(eccAnomaly, TWO_PI);
 
         //  Make eccentric Anomaly positive
@@ -226,22 +226,22 @@ void ToKeplerian(const Rvector3& position, const Rvector3& velocity,
 
 //------------------------------------------------------------------------------
 //  <friend>
-//  void ToCartesian(Real a, Real e, Real i, Real ra,
-//                   Real arg, Real m, Real mu,
+//  void ToCartesian(Real sma, Real ecc, Real inc, Real raan,
+//                   Real aop, Real ma, Real mu,
 //                   const Rvector3 &p, const Rvector3 &q,
-//                   Rvector3& position, Rvector3& velocity)
+//                   Rvector3 &position, Rvector3 &velocity)
 //------------------------------------------------------------------------------
-void ToCartesian(Real a, Real e, Real i, Real ra,
-                 Real arg, Real m, Real mu,
+void ToCartesian(Real sma, Real ecc, Real inc, Real raan,
+                 Real aop, Real ma, Real mu,
                  const Rvector3 &p, const Rvector3 &q,
-                 Rvector3& position, Rvector3& velocity)
+                 Rvector3 &position, Rvector3 &velocity)
 {
-    Radians eccAnomaly = MeanToEccentricAnomaly(m, e);
+    Radians eccAnomaly = MeanToEccentricAnomaly(ma, ecc);
  
     const Real sinEA = Sin(eccAnomaly);
     const Real cosEA = Cos(eccAnomaly);
  
-    if (a < 0.0 || e < 0.0 || e > 1.0)
+    if (sma < 0.0 || ecc < 0.0 || ecc > 1.0)
     {
         throw EphemerisUtil::InvalidEllipticalElements();
     }
@@ -249,31 +249,31 @@ void ToCartesian(Real a, Real e, Real i, Real ra,
     int j;
     for (j = 0; j <= 2; j++)
     {
-        position[j] = p[j] * a * (cosEA - e) +
-                 q[j] * a * GmatMathUtil::Sqrt(1.0 - e*e) * sinEA;
+        position[j] = p[j] * sma * (cosEA - ecc) +
+                 q[j] * sma * GmatMathUtil::Sqrt(1.0 - ecc*ecc) * sinEA;
     }
     Real r = position.GetMagnitude();
  
     for (j = 0; j <= 2; j++)
     {
-        velocity[j] = GmatMathUtil::Sqrt(mu * a) * (q[j] *
-                 GmatMathUtil::Sqrt(1.0 - (e*e)) * cosEA - p[j] *
+        velocity[j] = GmatMathUtil::Sqrt(mu * sma) * (q[j] *
+                 GmatMathUtil::Sqrt(1.0 - (ecc*ecc)) * cosEA - p[j] *
                  sinEA) / r;
     }
 }
 
 //------------------------------------------------------------------------------
 //  <friend>
-//  void ToCartesian(Real a, Real e, Real i, Real ra,
-//                   Real arg, Real m, Real mu,
-//                   Rvector3& position, Rvector3& velocity)
+//  void ToCartesian(Real sma, Real ecc, Real inc, Real raan,
+//                   Real aop, Real ma, Real mu,
+//                   Rvector3 &position, Rvector3 &velocity)
 //------------------------------------------------------------------------------
-void ToCartesian(Real a, Real e, Real i, Real ra,
-                 Real arg, Real m, Real mu,
-                 Rvector3& position, Rvector3& velocity)
+void ToCartesian(Real sma, Real ecc, Real inc, Real raan,
+                 Real aop, Real ma, Real mu,
+                 Rvector3 &position, Rvector3 &velocity)
 {
-    ToCartesian(a, e, i, ra, arg, m, mu, P(i, ra, arg),
-                Q(i, ra, arg), position, velocity);
+    ToCartesian(sma, ecc, inc, raan, aop, ma, mu, P(inc, raan, aop),
+                Q(inc, raan, aop), position, velocity);
 }
 
 //------------------------------------------------------------------------------

@@ -48,8 +48,8 @@ public:
     friend Keplerian ToKeplerian(const Rvector3 &position,
                                  const Rvector3 &velocity, Real mu);
     friend void ToKeplerian(const Rvector3 &position, const Rvector3 &velocity,
-                            Real mu, Real &a, Real &e, Real &i, 
-                            Real &ra, Real &arg, Real &ma);
+                            Real mu, Real &sma, Real &ecc, Real &inc, 
+                            Real &raan, Real &aop, Real &ma);
 
     friend void ToCartesian(Real a, Real e, Real i, Real ra,
                             Real arg, Real ma, Real mu,
