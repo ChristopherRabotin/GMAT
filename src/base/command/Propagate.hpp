@@ -44,7 +44,7 @@ public:
                                       const Gmat::ObjectType type,
                                       const std::string &associate = "",
                                       const Gmat::ObjectType associateType =
-                                      Gmat::UNKNOWN_OBJECT);    
+                                                          Gmat::UNKNOWN_OBJECT);
 
     virtual bool            SetObject(GmatBase *obj,
                                       const Gmat::ObjectType type);

@@ -53,8 +53,10 @@
 
 #include "PhysicalModel.hpp"
 #include "DerivativeList.hpp"
+#include "Spacecraft.hpp"
 
 #include <fstream>
+#include <vector>
 
 class GMAT_API ForceModel : public PhysicalModel
 {
@@ -68,6 +70,9 @@ public:
     ForceModel&   operator=(const ForceModel& fdf);
 
     void AddForce(PhysicalModel *pPhyscialModel);
+    bool AddSpacecraft(Spacecraft *sc);
+    void UpdateSpacecraft(void);
+    
     virtual bool Initialize(void);
     virtual void IncrementTime(Real dt);
     virtual void SetTime(Real t);
@@ -77,17 +82,19 @@ public:
 
     // new methods for future implementation
     bool HasForce(const std::string &name) // should check if list has the name
-      { return false;};
+      { return false; }
     void DeleteForce(const std::string &name) // should delete the force
-      { ;};
+      { }
     PhysicalModel* GetForce(const std::string &name) // should return the correct force
-      { return NULL;};
+      { return NULL; }
     Integer GetNumForces() // should return the correct number of force
-      { return 1;};
+      { return 1; }
 
 protected:
     DerivativeList * derivatives;
     Real estimationMethod;
+    /// List of spacecraft that get propagated
+    std::vector<Spacecraft *> spacecraft;
 
 };
 

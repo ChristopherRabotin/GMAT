@@ -169,6 +169,53 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
         pPhysicalModel->Initialize();
 }
 
+
+//------------------------------------------------------------------------------
+// bool ForceModel::AddSpacecraft(Spacecraft *sc)
+//------------------------------------------------------------------------------
+/**
+ * Sets spacecraft that use this force model.
+ *
+ * @param sc The spacecraft
+ *
+ * @return true is the spacecraft is added to the list, false if it was already
+ *         in the list, or if it is NULL.
+ */
+//------------------------------------------------------------------------------
+bool ForceModel::AddSpacecraft(Spacecraft *sc)
+{
+    if (sc == NULL)
+        return false;
+    if (find(spacecraft.begin(), spacecraft.end(), sc) != spacecraft.end())
+        return false;
+    spacecraft.push_back(sc);
+    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void ForceModel::UpdateSpacecraft(void)
+//------------------------------------------------------------------------------
+/**
+ * Updates the state data for the spacecraft that use this force model.
+ */
+//------------------------------------------------------------------------------
+void ForceModel::UpdateSpacecraft(void)
+{
+    if (spacecraft.size() > 0) {
+        Integer j = 0;
+        Integer stateSize = 6;
+        std::vector<Spacecraft *>::iterator sat;
+        Real *state;
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+            state = (*sat)->GetState();
+            memcpy(state, &modelState[j*stateSize], stateSize * sizeof(Real));
+            ++j;
+        }
+    }
+}
+
+
 //------------------------------------------------------------------------------
 // bool ForceModel::Initialize(void)
 //------------------------------------------------------------------------------
@@ -178,15 +225,33 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 //------------------------------------------------------------------------------
 bool ForceModel::Initialize(void)
 {
+    Integer stateSize = 6;      // Will change if we integrate more variables
+    Integer satCount = 1;
+    if (spacecraft.size() > 0)
+        satCount = spacecraft.size();
+    
+    dimension = stateSize * satCount;
     if (!PhysicalModel::Initialize())
         return false;
 
-    modelState[0] = 7000.0;
-    modelState[1] =    0.0;
-    modelState[2] = 1000.0;
-    modelState[3] =    0.0;
-    modelState[4] =    7.4;
-    modelState[5] =    0.0;
+    if (spacecraft.size() == 0) {
+        modelState[0] = 7000.0;
+        modelState[1] =    0.0;
+        modelState[2] = 1000.0;
+        modelState[3] =    0.0;
+        modelState[4] =    7.4;
+        modelState[5] =    0.0;
+    }
+    else {
+        Integer j = 0;
+        std::vector<Spacecraft *>::iterator sat;
+        Real *state;
+        for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
+            state = (*sat)->GetState();
+            memcpy(&modelState[j*stateSize], state, stateSize * sizeof(Real));
+            ++j;
+        }
+    }
 
     DerivativeList *current = derivatives;
 

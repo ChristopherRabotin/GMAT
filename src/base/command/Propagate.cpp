@@ -240,6 +240,15 @@ bool Propagate::Initialize(void)
     Propagator *p = prop->GetPropagator();
     if (!p)
         throw CommandException("Propagator not set in PropSetup");
+        
+    // Toss the spacecraft into the force model
+    ForceModel *fm = prop->GetForceModel();
+    StringArray::iterator scName;
+    for (scName = satName.begin(); scName != satName.end(); ++scName) {
+        sats.push_back((Spacecraft*)(*objectMap)[*scName]);
+        fm->AddSpacecraft((Spacecraft*)(*objectMap)[*scName]);
+    }
+    
     p->Initialize();
     initialized = true;
     return true;
@@ -257,11 +266,13 @@ bool Propagate::Execute(void)
         throw CommandException("Propagate Command was not Initialized");
 
     Propagator *p = prop->GetPropagator();
+    ForceModel *fm = prop->GetForceModel();
     p->Initialize();
-    for (Integer i = 0; i < 30; ++i)
+    for (Integer i = 0; i < 1; ++i) {
         if (!p->Step())
             throw CommandException("Propagator Failed to Step");
-
+        fm->UpdateSpacecraft();
+    }
     return true;
 }
 
