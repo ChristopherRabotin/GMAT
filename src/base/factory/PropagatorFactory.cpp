@@ -20,7 +20,9 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "PropagatorFactory.hpp"
-#include "RungeKutta89.hpp"   // for RungeKutta89 class
+#include "RungeKutta89.hpp"             // for RungeKutta89 class
+#include "DormandElMikkawyPrince68.hpp" // for DormandElMikkawyPrince68 class
+#include "RungeKuttaFehlberg56.hpp"     // for RungeKuttaFehlberg56 class
 // add others here for future builds
 
 //---------------------------------
@@ -45,6 +47,10 @@ Propagator* PropagatorFactory::CreatePropagator(std::string ofType,
 {
    if (ofType == "RungeKutta89")
       return new RungeKutta89();
+   if (ofType == "DormandElMikkawyPrince68")
+      return new DormandElMikkawyPrince68();
+   if (ofType == "RungeKuttaFehlberg56")
+      return new DormandElMikkawyPrince68();
    // add others here
    else
       return NULL;
@@ -65,7 +71,11 @@ PropagatorFactory::PropagatorFactory() :
 Factory(Gmat::PROPAGATOR)
 {
    if (creatables.empty())
+   {
       creatables.push_back("RungeKutta89");
+      creatables.push_back("DormandElMikkawyPrince68");
+      creatables.push_back("RungeKuttaFehlberg56");
+   }
 }
 
 //------------------------------------------------------------------------------
