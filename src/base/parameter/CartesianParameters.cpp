@@ -51,6 +51,7 @@ CartX::CartX(const std::string &name, GmatBase *obj)
    mColor = GmatColor::RED32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartX(const CartX &copy)
 //------------------------------------------------------------------------------
@@ -64,6 +65,7 @@ CartX::CartX(const CartX &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartX& operator=(const CartX &right)
@@ -82,6 +84,7 @@ CartX& CartX::operator=(const CartX &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartX()
 //------------------------------------------------------------------------------
@@ -92,6 +95,7 @@ CartX& CartX::operator=(const CartX &right)
 CartX::~CartX()
 {
 }
+
 
 //-------------------------------------
 // methods inherited from Parameter
@@ -115,6 +119,7 @@ bool CartX::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -159,6 +164,7 @@ CartY::CartY(const std::string &name, GmatBase *obj)
    mColor = GmatColor::GREEN32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartY(const CartY &copy)
 //------------------------------------------------------------------------------
@@ -172,6 +178,7 @@ CartY::CartY(const CartY &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartY& operator=(const CartY &right)
@@ -190,6 +197,7 @@ CartY& CartY::operator=(const CartY &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartY()
 //------------------------------------------------------------------------------
@@ -200,6 +208,7 @@ CartY& CartY::operator=(const CartY &right)
 CartY::~CartY()
 {
 }
+
 
 //-------------------------------------
 // methods inherited from Parameter
@@ -223,6 +232,7 @@ bool CartY::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -267,6 +277,7 @@ CartZ::CartZ(const std::string &name, GmatBase *obj)
    mColor = GmatColor::BLUE32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartZ(const CartZ &copy)
 //------------------------------------------------------------------------------
@@ -298,6 +309,7 @@ CartZ& CartZ::operator=(const CartZ &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartZ()
 //------------------------------------------------------------------------------
@@ -308,6 +320,7 @@ CartZ& CartZ::operator=(const CartZ &right)
 CartZ::~CartZ()
 {
 }
+
 
 //--------------------------------------
 // methods inherited from Parameter
@@ -331,6 +344,7 @@ bool CartZ::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -375,6 +389,7 @@ CartVx::CartVx(const std::string &name, GmatBase *obj)
    mColor = GmatColor::RED32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartVx(const CartVx &copy)
 //------------------------------------------------------------------------------
@@ -388,6 +403,7 @@ CartVx::CartVx(const CartVx &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartVx& operator=(const CartVx &right)
@@ -406,6 +422,7 @@ CartVx& CartVx::operator=(const CartVx &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartVx()
 //------------------------------------------------------------------------------
@@ -416,6 +433,7 @@ CartVx& CartVx::operator=(const CartVx &right)
 CartVx::~CartVx()
 {
 }
+
 
 //--------------------------------------
 // methods inherited from Parameter
@@ -440,6 +458,7 @@ bool CartVx::Evaluate()
       return true;
 }
 
+
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -455,6 +474,7 @@ GmatBase* CartVx::Clone(void) const
 {
    return new CartVx(*this);
 }
+
 
 //==============================================================================
 //                              CartVy
@@ -482,6 +502,7 @@ CartVy::CartVy(const std::string &name, GmatBase *obj)
    mColor = GmatColor::GREEN32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartVy(const CartVy &param)
 //------------------------------------------------------------------------------
@@ -495,6 +516,7 @@ CartVy::CartVy(const CartVy &param)
    : OrbitReal(param)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartVy& operator=(const CartVy &right)
@@ -513,6 +535,7 @@ CartVy& CartVy::operator=(const CartVy &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartVy()
 //------------------------------------------------------------------------------
@@ -523,6 +546,7 @@ CartVy& CartVy::operator=(const CartVy &right)
 CartVy::~CartVy()
 {
 }
+
 
 //-------------------------------------
 // methods inherited from Parameter
@@ -546,6 +570,7 @@ bool CartVy::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -590,6 +615,7 @@ CartVz::CartVz(const std::string &name, GmatBase *obj)
    mColor = GmatColor::BLUE32;
 }
 
+
 //------------------------------------------------------------------------------
 // CartVz(const CartVz &copy)
 //------------------------------------------------------------------------------
@@ -603,6 +629,7 @@ CartVz::CartVz(const CartVz &copy)
    : OrbitReal(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartVz& operator=(const CartVz &right)
@@ -621,6 +648,7 @@ CartVz& CartVz::operator=(const CartVz &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartVz()
 //------------------------------------------------------------------------------
@@ -631,6 +659,7 @@ CartVz& CartVz::operator=(const CartVz &right)
 CartVz::~CartVz()
 {
 }
+
 
 //--------------------------------------
 // methods inherited from Parameter
@@ -654,6 +683,7 @@ bool CartVz::Evaluate()
    else
       return true;
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
@@ -681,6 +711,8 @@ GmatBase* CartVz::Clone(void) const
  */
 //------------------------------------------------------------------------------
 
+
+//loj: 2/16/05 changed the name "CartState" to "Cartesian"
 //------------------------------------------------------------------------------
 // CartState(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
@@ -692,7 +724,7 @@ GmatBase* CartVz::Clone(void) const
  */
 //------------------------------------------------------------------------------
 CartState::CartState(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "CartState", obj, "Cartesian State Vector",
+   : OrbitRvec6(name, "Cartesian", obj, "Cartesian State Vector",
                 "Km/s", GmatParam::COORD_SYS)
 {
    // Parameter member data
@@ -700,6 +732,7 @@ CartState::CartState(const std::string &name, GmatBase *obj)
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mIsPlottable = false;
 }
+
 
 //------------------------------------------------------------------------------
 // CartState(const CartState &copy)
@@ -714,6 +747,7 @@ CartState::CartState(const CartState &copy)
    : OrbitRvec6(copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // CartState& operator=(const CartState &right)
@@ -732,6 +766,7 @@ CartState& CartState::operator=(const CartState &right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~CartState()
 //------------------------------------------------------------------------------
@@ -742,6 +777,7 @@ CartState& CartState::operator=(const CartState &right)
 CartState::~CartState()
 {
 }
+
 
 //--------------------------------------
 // methods inherited from Parameter
@@ -760,14 +796,15 @@ bool CartState::Evaluate()
 {
    mRvec6Value = GetCartState();
    
-#if DEBUG_CARTESIAN_PARAM
+   #if DEBUG_CARTESIAN_PARAM
    MessageInterface::ShowMessage
       ("CartState::Evaluate() mRvec6Value =\n%s\n",
        mRvec6Value.ToString().c_str());
-#endif
+   #endif
    
    return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
 }
+
 
 //-------------------------------------
 // methods inherited from GmatBase
