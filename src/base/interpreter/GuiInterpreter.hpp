@@ -66,13 +66,15 @@ public:
    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
    // Spacecraft
-   Spacecraft* CreateSpacecraft(const std::string&type, const std::string &name);
+   Spacecraft* CreateSpacecraft(const std::string&type,
+                                const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
    //future build:GroundStation* CreateGroundStation(const std::string &name);
    //future build:GroundStation* GetGroundStation(const std::string &name);
 
    // Propagator
-   Propagator* CreatePropagator(const std::string &type, const std::string &name);
+   Propagator* CreatePropagator(const std::string &type,
+                                const std::string &name);
    Propagator* GetPropagator(const std::string &name);
 
    // PropSetup
@@ -81,7 +83,8 @@ public:
 
    // ForceModel/PhysicalModel
    ForceModel* CreateForceModel(const std::string &name);
-   PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
+   PhysicalModel* CreatePhysicalModel(const std::string &type,
+                                      const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
 
    // Burn
@@ -97,7 +100,8 @@ public:
    Parameter* GetParameter(const std::string &name);
 
    // Celestial body
-   CelestialBody* CreateCelestialBody(const std::string &type, const std::string &name);
+   CelestialBody* CreateCelestialBody(const std::string &type,
+                                      const std::string &name);
    CelestialBody* GetCelestialBody(const std::string &name);
 
    // SolarSystem
@@ -117,12 +121,15 @@ public:
 
    
    // Subscriber
-   Subscriber* CreateSubscriber(const std::string &type, const std::string &name,
-                                const std::string &filename = "");
+   Subscriber* CreateSubscriber(const std::string &type,
+                                const std::string &name,
+                                const std::string &filename = "",
+                                bool createDefault = true); //loj: 6/21/04 added
    Subscriber* GetSubscriber(const std::string &name);
 
    // StopCondition
-   StopCondition* CreateStopCondition(const std::string &type, const std::string &name);
+   StopCondition* CreateStopCondition(const std::string &type,
+                                      const std::string &name);
    StopCondition* GetStopCondition(const std::string &name);
     
    // Command

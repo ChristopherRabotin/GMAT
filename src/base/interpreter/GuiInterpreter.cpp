@@ -542,8 +542,10 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &filetype)
 
 // Subscriber
 //------------------------------------------------------------------------------
-// Subscriber* CreateSubscriber(const std::string &type, const const std::string &name,
-//                              const std::string &filename)
+// Subscriber* CreateSubscriber(const std::string &type,
+//                              const const std::string &name,
+//                              const std::string &filename = "",
+//                              bool createDefault = true)
 //------------------------------------------------------------------------------
 /**
  * Creates a subscriber object by given type and name.
@@ -557,9 +559,10 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &filetype)
 //------------------------------------------------------------------------------
 Subscriber* GuiInterpreter::CreateSubscriber(const std::string &type,
                                              const std::string &name,
-                                             const std::string &filename)
+                                             const std::string &filename,
+                                             bool createDefault)
 {
-   return moderator->CreateSubscriber(type, name, filename);
+   return moderator->CreateSubscriber(type, name, filename, createDefault);
 }
 
 //------------------------------------------------------------------------------

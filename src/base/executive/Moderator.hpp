@@ -97,8 +97,9 @@ public:
    Spacecraft* CreateSpacecraft(const std::string &type,
                                 const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
-   //future build:GroundStation* CreateGroundStation(const std::string &type, const std::string &name);
-   //future build:GroundStation* GetGroundStation(const std::string &name);
+   //future build:
+   //GroundStation* CreateGroundStation(const std::string &type, const std::string &name);
+   //GroundStation* GetGroundStation(const std::string &name);
 
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -160,7 +161,20 @@ public:
                             const std::string &name);
    RefFrame* GetRefFrame(const std::string &name);
 
-   // SolarSystem
+   // Subscriber
+   Subscriber* CreateSubscriber(const std::string &type,
+                                const std::string &name,
+                                const std::string &fileName = "",
+                                bool createDefault = false); //loj: 6/21/04 added
+   Subscriber* GetSubscriber(const std::string &name);
+
+   // GmatCommand
+   GmatCommand* CreateCommand(const std::string &type,
+                              const std::string &name = "");
+   GmatCommand* CreateDefaultCommand(const std::string &type,
+                                     const std::string &name = "");
+
+    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
    SolarSystem* CreateSolarSystem(const std::string &name);
    SolarSystem* GetSolarSystemInUse();
@@ -173,25 +187,14 @@ public:
    std::string GetPlanetaryFileName(const std::string &fileType);
    bool SetPlanetaryFileName(const std::string &fileType,
                              const std::string &fileName);
-   Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); //loj: 6/14/04 changed bool to Integer
+   //loj: 6/14/04 changed bool to Integer
+   Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes); 
    Integer GetPlanetaryFileId(const std::string &fileType);
     
    // Potential field files
    std::string GetPotentialFileName(const std::string &fileType);
 
-   // Subscriber
-   Subscriber* CreateSubscriber(const std::string &type,
-                                const std::string &name,
-                                const std::string &fileName = "");
-   Subscriber* GetSubscriber(const std::string &name);
-
-   // GmatCommand
-   GmatCommand* CreateCommand(const std::string &type,
-                              const std::string &name = "");
-   GmatCommand* CreateDefaultCommand(const std::string &type,
-                                     const std::string &name = "");
-
-   // Mission
+  // Mission
    bool LoadDefaultMission();
     
    // Resource
@@ -236,6 +239,8 @@ private:
    PropSetup* GetDefaultPropSetup();
    Burn* GetDefaultBurn();
    StopCondition* CreateDefaultStopCondition();
+   Parameter* GetDefaultX();
+   Parameter* GetDefaultY();
    
    // sandbox
    void AddSolarSysToSandbox(Integer index);

@@ -27,11 +27,12 @@ class PlotInterface
 
 public:
    // for OpenGL Plot
-   static bool CreateGlPlotWindow();
+   static bool CreateGlPlotWindow(const std::string &plotName);
    static bool DeleteGlPlot();
    
    //loj: 5/6/04 added drawWireFrame
-   static bool UpdateGlSpacecraft(const Real &time, const Real &posX,
+   static bool UpdateGlSpacecraft(const std::string &plotName,
+                                  const Real &time, const Real &posX,
                                   const Real &posY, const Real &posZ,
                                   const UnsignedInt orbitColor,
                                   const UnsignedInt targetColor,
