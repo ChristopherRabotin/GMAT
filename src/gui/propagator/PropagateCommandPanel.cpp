@@ -34,6 +34,7 @@
 #include "MdiDocViewFrame.hpp"
 #include "GmatMainNotebook.hpp"
 #include "PropagateCommandPanel.hpp"
+#include "ParameterSelectDialog.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -167,7 +168,9 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     
     // wxButton
     scriptButton = new wxButton( parent, ID_BUTTON, wxT("Create Script"), wxDefaultPosition, wxDefaultSize, 0 );
-    editButton = new wxButton( parent, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
+    //loj: View is the better word?
+    //editButton = new wxButton( parent, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
+    editButton = new wxButton( parent, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0 );
     userDefButton = new wxButton( parent, ID_BUTTON, wxT("User Defined"), wxDefaultPosition, wxDefaultSize, 0 );
     okButton = new wxButton( parent, ID_BUTTON, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
     applyButton = new wxButton( parent, ID_BUTTON, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -265,7 +268,7 @@ void PropagateCommandPanel::Setup( wxWindow *parent)
     
     // waw: Future Implementation
     userDefButton->Enable(false);
-    editButton->Enable(false);
+    editButton->Enable();
     synchComboBox->Enable(false);
     helpButton->Enable(false);
 }
@@ -353,8 +356,22 @@ void PropagateCommandPanel::OnButton(wxCommandEvent& event)
         CreateScript();
         applyButton->Enable(true);
     }
-    else if ( event.GetEventObject() == userDefButton )           
+    else if ( event.GetEventObject() == editButton ) //loj: 2/25 added for testing ParameterSelectDialog
+    {
+        // show dialog to select parameter
+        ParameterSelectDialog paramDlg(this);
+        paramDlg.ShowModal();
+
+        if (paramDlg.IsParamSelected())
+        {
+            newParamName = paramDlg.GetParamName();
+            variableTextCtrl->SetValue(newParamName);
+        }
+    }
+    else if ( event.GetEventObject() == userDefButton )
+    {
         ;
+    }
     else if ( event.GetEventObject() == okButton )  
     {
         //loj: 2/11/04 added if block

@@ -95,6 +95,7 @@ private:
     std::string propSetupName;
     wxString propNameString;
     wxString scListString;
+    wxString newParamName;
     StringArray scList;
     
     GuiInterpreter *theGuiInterpreter;
