@@ -21,8 +21,6 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
-#include <math.h>
-
 //---------------------------------
 // public methods
 //---------------------------------
@@ -36,8 +34,8 @@
 //------------------------------------------------------------------------------
 RefData::RefData()
 {
-    mNumRefObjects = 0;
-    mStringObjectMap = new std::map<std::string, GmatBase*>;
+   mNumRefObjects = 0;
+   mObjTypeObjMap = new std::map<std::string, GmatBase*>;
 }
 
 //------------------------------------------------------------------------------
@@ -51,8 +49,8 @@ RefData::RefData()
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &data)
 {
-    mNumRefObjects = data.mNumRefObjects;
-    mStringObjectMap = data.mStringObjectMap;
+   mNumRefObjects = data.mNumRefObjects;
+   mObjTypeObjMap = data.mObjTypeObjMap;
 }
 
 //------------------------------------------------------------------------------
@@ -68,9 +66,9 @@ RefData::RefData(const RefData &data)
 //------------------------------------------------------------------------------
 RefData& RefData::operator= (const RefData& right)
 {
-    mNumRefObjects = right.mNumRefObjects;
-    mStringObjectMap = right.mStringObjectMap;
-    return *this;
+   mNumRefObjects = right.mNumRefObjects;
+   mObjTypeObjMap = right.mObjTypeObjMap;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -82,7 +80,7 @@ RefData& RefData::operator= (const RefData& right)
 //------------------------------------------------------------------------------
 RefData::~RefData()
 {
-   delete mStringObjectMap;
+   delete mObjTypeObjMap;
 }
 
 
@@ -91,15 +89,15 @@ RefData::~RefData()
 //------------------------------------------------------------------------------
 Integer RefData::GetNumRefObjects() const
 {
-    return mNumRefObjects;
+   return mNumRefObjects;
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* GetRefObject(const std::string &objTypeName)
+// GmatBase* GetRefObject(const std::string &objType)
 //------------------------------------------------------------------------------
-GmatBase* RefData::GetRefObject(const std::string &objTypeName)
+GmatBase* RefData::GetRefObject(const std::string &objType)
 {
-    return FindObject(objTypeName);
+   return FindFirstObject(objType);
 }
 
 //------------------------------------------------------------------------------
@@ -113,27 +111,28 @@ GmatBase* RefData::GetRefObject(const std::string &objTypeName)
  */
 //------------------------------------------------------------------------------
 bool RefData::SetRefObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj)
+                           const std::string &objName, GmatBase *obj)
 {
-    bool status = false;
+   bool status = false;
 
+   //MessageInterface::ShowMessage("RefData::SetRefObject() objName=%s\n", objName.c_str());
+   if (obj->GetType() == objType)
+   {
 
-    if (obj->GetType() == objType)
-    {
+      std::string objTypeName = obj->GetTypeName();
 
-        std::string objTypeName = obj->GetTypeName();
-
-        std::map<std::string, GmatBase*>::iterator pos;
-        pos = mStringObjectMap->find(objTypeName);
-        if (pos != mStringObjectMap->end())
-        {
-            pos->second = obj;
-            status = true;
-        }
-    }
+      std::map<std::string, GmatBase*>::iterator pos;
+      pos = mObjTypeObjMap->find(objTypeName);
+      if (pos != mObjTypeObjMap->end())
+      {
+         pos->second = obj;
+         status = true;
+         //MessageInterface::ShowMessage("RefData::SetRefObject() obj set to %s\n",
+         //                              obj->GetName().c_str());
+      }
+   }
     
-    return status;
+   return status;
 }
 
 
@@ -148,28 +147,32 @@ bool RefData::SetRefObject(Gmat::ObjectType objType,
 //------------------------------------------------------------------------------
 bool RefData::AddRefObject(GmatBase*obj)
 {
-    bool added;
-    
-    if (IsValidObject(obj))
-    {
-        std::string objTypeName = obj->GetTypeName();
-        if (HasObject(objTypeName))
-        {
-            added = false;
-        }
-        else
-        {
-            mStringObjectMap->insert(std::pair<std::string, GmatBase*>(objTypeName, obj));
-            mNumRefObjects = mStringObjectMap->size();
-            added = true;
-        }
-    }
-    else
-    {
-        added = false;
-    }
+   bool added;
+   //MessageInterface::ShowMessage("RefData::AddRefObject() objType=%s, objName=%s\n",
+   //                              obj->GetTypeName().c_str(), obj->GetName().c_str());
 
-    return added;
+   if (IsValidObject(obj))
+   {
+      std::string objTypeName = obj->GetTypeName();
+      if (HasObjectType(objTypeName))
+      {
+         added = false;
+      }
+      else
+      {
+         mObjTypeObjMap->insert(std::pair<std::string, GmatBase*>(objTypeName, obj));
+         mNumRefObjects = mObjTypeObjMap->size();
+         added = true;
+         //MessageInterface::ShowMessage("RefData::AddRefObject() object added\n");
+
+      }
+   }
+   else
+   {
+      added = false;
+   }
+
+   return added;
 }
 
 //------------------------------------------------------------------------------
@@ -177,7 +180,7 @@ bool RefData::AddRefObject(GmatBase*obj)
 //------------------------------------------------------------------------------
 const std::string* RefData::GetValidObjectList() const
 {
-    return NULL;
+   return NULL;
 }
 
 //---------------------------------
@@ -185,48 +188,53 @@ const std::string* RefData::GetValidObjectList() const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void Initialize()
+// virtual void InitializeRefObjects()
 //------------------------------------------------------------------------------
-void RefData::Initialize()
+void RefData::InitializeRefObjects()
 {
 }
 
 //------------------------------------------------------------------------------
-// bool HasObject(const std::string &objTypeName) const
+// bool HasObjectType(const std::string &objType) const
 //------------------------------------------------------------------------------
 /**
  * @return true if the map has the object, false otherwise
  */
 //------------------------------------------------------------------------------
-bool RefData::HasObject(const std::string &objTypeName) const
+bool RefData::HasObjectType(const std::string &objType) const
 {
-    bool found = false;
-    std::map<std::string, GmatBase*>::iterator pos;
+   bool found = false;
+   std::map<std::string, GmatBase*>::iterator pos;
    
-    pos = mStringObjectMap->find(objTypeName);
+   pos = mObjTypeObjMap->find(objType);
    
-    if (pos != mStringObjectMap->end())
-        found = true;
+   if (pos != mObjTypeObjMap->end())
+      found = true;
    
-    return found;
+   return found;
 }
 
 //------------------------------------------------------------------------------
-// GmatBase* FindObject(const std::string &objTypeName) const
+// GmatBase* FindFirstObject(const std::string &objType) const
 //------------------------------------------------------------------------------
 /**
- * @return object for given type name.
+ * @return forst object found for given type name.
  */
 //------------------------------------------------------------------------------
-GmatBase* RefData::FindObject(const std::string &objTypeName) const
+GmatBase* RefData::FindFirstObject(const std::string &objType) const
 {
-    std::map<std::string, GmatBase*>::iterator pos;
+   std::map<std::string, GmatBase*>::iterator pos;
    
-    pos = mStringObjectMap->find(objTypeName);
+   pos = mObjTypeObjMap->find(objType);
    
-    if (pos != mStringObjectMap->end())
-        return pos->second;
+   if (pos != mObjTypeObjMap->end())
+   {
+      //MessageInterface::ShowMessage("RefData::FindFirstObject(): objType=%s "
+      //                              "objName=%s\n", (pos->second->GetTypeName()).c_str(),
+      //                              (pos->second->GetName()).c_str());
+      return pos->second;
+   }
    
-    return NULL;
+   return NULL;
 }
 

@@ -27,32 +27,32 @@ class GMAT_API RefData
 {
 public:
 
-    RefData();
-    RefData(const RefData &data);
-    RefData& operator= (const RefData& right);
-    virtual ~RefData();
+   RefData();
+   RefData(const RefData &data);
+   RefData& operator= (const RefData& right);
+   virtual ~RefData();
 
-    Integer GetNumRefObjects() const;
-    virtual GmatBase* GetRefObject(const std::string &objTypeName);
+   Integer GetNumRefObjects() const;
+   virtual GmatBase* GetRefObject(const std::string &objType);
     
-    virtual bool SetRefObject(Gmat::ObjectType objType,
-                              const std::string &objName,
-                              GmatBase *obj);
+   virtual bool SetRefObject(Gmat::ObjectType objType,
+                             const std::string &objName,
+                             GmatBase *obj);
     
-    bool AddRefObject(GmatBase *obj);
+   bool AddRefObject(GmatBase *obj);
 
-    virtual bool ValidateRefObjects(GmatBase *param) = 0;
-    virtual const std::string* GetValidObjectList() const;
+   virtual bool ValidateRefObjects(GmatBase *param) = 0;
+   virtual const std::string* GetValidObjectList() const;
 
 protected:
-    bool HasObject(const std::string &objTypeName) const;
-    GmatBase* FindObject(const std::string &objTypeName) const;
+   bool HasObjectType(const std::string &objType) const;
+   GmatBase* FindFirstObject(const std::string &objType) const; //loj: 4/27/04 added
      
-    virtual void Initialize(); //loj: 3/31/04 added
-    virtual bool IsValidObject(GmatBase *obj) = 0;
-    std::map<std::string, GmatBase*> *mStringObjectMap;
-    StringArray mObjectTypeNames;
-    Integer mNumRefObjects;
+   virtual void InitializeRefObjects(); //loj: 3/31/04 added
+   virtual bool IsValidObject(GmatBase *obj) = 0;
+   std::map<std::string, GmatBase*> *mObjTypeObjMap;
+   StringArray mObjectTypeNames;
+   Integer mNumRefObjects;
 };
 #endif // RefData_hpp
 
