@@ -712,13 +712,17 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllParamNames.clear();
+
+   //loj: 12/19/04 Added type check
+   if (type == Gmat::PARAMETER)
+   {
+      // add x parameter
+      mAllParamNames.push_back(mXParamName);
    
-   // add x parameter
-   mAllParamNames.push_back(mXParamName);
-   
-   // add y parameters
-   for (int i=0; i<mNumYParams; i++)
-      mAllParamNames.push_back(mYParamNames[i]);
+      // add y parameters
+      for (int i=0; i<mNumYParams; i++)
+         mAllParamNames.push_back(mYParamNames[i]);
+   }
    
    return mAllParamNames;
 }
