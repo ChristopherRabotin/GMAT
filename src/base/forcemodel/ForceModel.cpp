@@ -763,6 +763,22 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
     return retval;
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the ForceModel.
+ *
+ * @return clone of the ForceModel.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ForceModel::Clone(void) const
+{
+   return (new ForceModel(*this));
+}
+
 //------------------------------------------------------------------------------
 // Integer GetParameterCount(void) const
 //------------------------------------------------------------------------------

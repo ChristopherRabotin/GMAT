@@ -95,7 +95,11 @@ public:
     Real EstimateError(Real *diffs, Real *answer) const;
     
     virtual Integer GetParameterCount(void) const;
-    
+
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Access methods derived classes can override
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
