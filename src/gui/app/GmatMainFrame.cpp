@@ -62,6 +62,21 @@
 
 #include <wx/gdicmn.h>
 
+//loj: 8/5/04 moved from GmatMainFrame.hpp
+#include "bitmaps/new.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/save.xpm"
+#include "bitmaps/copy.xpm"
+#include "bitmaps/cut.xpm"
+#include "bitmaps/paste.xpm"
+#include "bitmaps/print.xpm"
+#include "bitmaps/help.xpm"
+#include "bitmaps/run.xpm"
+#include "bitmaps/pause.xpm"
+#include "bitmaps/stop.xpm"
+#include "bitmaps/close.xpm"
+#include "bitmaps/script.xpm"
+
 #define DEBUG_MAINFRAME 0
 
 //------------------------------
@@ -80,6 +95,8 @@
 BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
    EVT_MENU(MENU_PROJECT_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
+   EVT_MENU(MENU_FILE_SAVE_SCRIPT, GmatMainFrame::OnSaveScript)
+   EVT_MENU(MENU_FILE_SAVE_AS_SCRIPT, GmatMainFrame::OnSaveScriptAs)
    EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
@@ -128,6 +145,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
               : wxMDIParentFrame(parent, id, title, pos, size, 
                                  style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
+   // set the script name
+   scriptFilename = "$gmattempscript$.script";
+   
    mDocManager = (wxDocManager *) NULL;
 //   GmatSplitterWindow *splitter;
 //   GmatNotebook *leftTabs;
@@ -281,6 +301,56 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
+// void OnSaveScript(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles saving the gui to a script.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
+{
+   if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
+   {
+      //open up dialog box to get the script name
+      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"));
+    
+      if (dialog.ShowModal() == wxID_OK)
+      {
+        scriptFilename = dialog.GetPath().c_str();
+        GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+      }
+   }
+   else
+   {
+      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+   }   
+}
+
+//------------------------------------------------------------------------------
+// void OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles saving the gui to a script.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
+{
+   //open up dialog box to get the script name
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"));
+    
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      scriptFilename = dialog.GetPath().c_str();
+      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -386,7 +456,6 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                      FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Save Script"));
    currentX += width + 5;
-   toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, FALSE);
    toolBar->AddSeparator();
 
    toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, *bitmaps[12], 
@@ -477,9 +546,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save Script"), wxT(""), FALSE);  
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save Script As"), 
                      wxT(""), FALSE);  
-
-   fileMenu->Enable(MENU_FILE_SAVE_SCRIPT, FALSE);
-   fileMenu->Enable(MENU_FILE_SAVE_AS_SCRIPT, FALSE);
 
 //   openMenu = new wxMenu;
 //   openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);

@@ -37,21 +37,6 @@
 #include "wx/docview.h"
 #include "wx/laywin.h"
 
-#include "bitmaps/new.xpm"
-#include "bitmaps/open.xpm"
-#include "bitmaps/save.xpm"
-#include "bitmaps/copy.xpm"
-#include "bitmaps/cut.xpm"
-#include "bitmaps/paste.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/run.xpm"
-#include "bitmaps/pause.xpm"
-#include "bitmaps/stop.xpm"
-#include "bitmaps/close.xpm"
-#include "bitmaps/script.xpm"
-
-
 class GmatMainFrame : public wxMDIParentFrame
 {
 public:
@@ -68,6 +53,8 @@ public:
     
 protected:
 private:
+   
+    std::string scriptFilename;
     GuiInterpreter *theGuiInterpreter;
     
     wxSashLayoutWindow* win;
@@ -87,6 +74,8 @@ private:
     DECLARE_EVENT_TABLE();
     void OnProjectNew(wxCommandEvent& WXUNUSED(event));
     void OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event));
+    void OnSaveScriptAs(wxCommandEvent& WXUNUSED(event));
+    void OnSaveScript(wxCommandEvent& WXUNUSED(event));
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
     void OnRun(wxCommandEvent& WXUNUSED(event));
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
