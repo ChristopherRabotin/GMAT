@@ -179,7 +179,7 @@ PredictorCorrector::PredictorCorrector(const PredictorCorrector& pc) :
     starter                         (NULL),
     invOrder                        (pc.invOrder)
 {
-//    parameterCount = PredictorCorrectorParamCount;
+    parameterCount = PredictorCorrectorParamCount;
     tolerance = pc.tolerance;
     initialized = false;
 }
