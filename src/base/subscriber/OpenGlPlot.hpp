@@ -28,22 +28,22 @@ public:
    OpenGlPlot(const std::string &name);
    OpenGlPlot(const OpenGlPlot &ogl);
    virtual ~OpenGlPlot(void);
-
+   
    // methods inherited from Subscriber
    virtual bool Initialize(); //loj: 3/8/04 added
-    
+   
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-
+   
    // methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
-
+   
    virtual bool GetBooleanParameter(const Integer id) const;
    virtual bool SetBooleanParameter(const Integer id, const bool value);
-
+   
    //virtual UnsignedInt GetUnsignedIntParameter(const Integer id) const;
    UnsignedInt GetUnsignedIntParameter(const Integer id, const std::string &item);
    //virtual UnsignedInt GetUnsignedIntParameter(const std::string &label) const;
@@ -59,7 +59,7 @@ public:
    UnsignedInt  SetUnsignedIntParameter(const std::string &label,
                                         const std::string &item,
                                         const UnsignedInt value);
-
+   
    virtual std::string GetStringParameter(const Integer id) const;
    virtual std::string GetStringParameter(const std::string &label) const;
 //     virtual std::string GetStringParameter(const std::string &label,
@@ -76,17 +76,19 @@ public:
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
 protected:
-
+   
    bool AddSpacecraft(const std::string &name);
    void ClearSpacecraftList();
+   Integer FindIndexOfElement(StringArray &labelArray,
+                              const std::string &label);
    
    bool mDrawAxis;
    bool mDrawEquatorialPlane;
    bool mDrawWireFrame;
-    
+   
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
-
+   
    Integer mNumData;
    Integer mNumCollected;
    
@@ -100,7 +102,7 @@ protected:
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
-
+   
    enum
    {
       ADD = SubscriberParamCount,
@@ -115,14 +117,18 @@ protected:
       UPDATE_PLOT_FREQUENCY,
       OpenGlPlotParamCount
    };
-    
+   
    static const Gmat::ParameterType
       PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount];
    static const std::string
       PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount];
-    
+
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);
+   
+   const static int MAX_SC_COLOR = 15;
+   static const UnsignedInt DEFAULT_ORBIT_COLOR[MAX_SC_COLOR];
+   
 };
 
 #endif

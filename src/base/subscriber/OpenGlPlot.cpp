@@ -20,8 +20,9 @@
 #include "OpenGlPlot.hpp"
 #include "PlotInterface.hpp"     // for UpdateGlSpacecraft()
 #include "ColorTypes.hpp"        // for namespace GmatColor::
+#include "Publisher.hpp"         // for Instance()
 #include "MessageInterface.hpp"  // for ShowMessage()
-#include "GmatBaseException.hpp"
+#include <algorithm>             // for find(), distance()
 
 #define DEBUG_OPENGL_INIT 0
 #define DEBUG_OPENGL_PARAM 0
@@ -59,6 +60,17 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE
+};
+
+//loj: 7/30/04 added
+const UnsignedInt
+OpenGlPlot::DEFAULT_ORBIT_COLOR[MAX_SC_COLOR] =
+{
+   GmatColor::RED32,     GmatColor::YELLOW32,  GmatColor::LIME32,
+   GmatColor::AQUA32,    GmatColor::BLUE32,    GmatColor::FUCHSIA32,
+   GmatColor::PINK32,    GmatColor::ORANGE32,  GmatColor::L_BLUE32,
+   GmatColor::BEIGE32,   GmatColor::SILVER32,  GmatColor::GREEN32,
+   GmatColor::L_BROWN32, GmatColor::PURPLE32,  GmatColor::NAVY32
 };
 
 //------------------------------------------------------------------------------
@@ -463,8 +475,17 @@ bool OpenGlPlot::AddSpacecraft(const std::string &name)
       mTargetColorArray.push_back(0);
       mScCount = mScNameArray.size();
 
-      mOrbitColorMap[name] = GmatColor::RED32;
-      mTargetColorMap[name] = GmatColor::ORANGE32;
+      if (mScCount < MAX_SC_COLOR)
+      {
+         mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mScCount-1];
+         mTargetColorMap[name] = GmatColor::ORANGE32;
+      }
+      else
+      {
+         mOrbitColorMap[name] = GmatColor::RED32;
+         mTargetColorMap[name] = GmatColor::ORANGE32;
+      }
+      
       status = true;
    }
 
@@ -489,6 +510,17 @@ void OpenGlPlot::ClearSpacecraftList()
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
    mScCount = 0;
+}
+
+//------------------------------------------------------------------------------
+// Integer FindIndexOfElement(StringArray &labelArray, const std::string &label)
+//------------------------------------------------------------------------------
+Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
+                                       const std::string &label)
+{
+   std::vector<std::string>::iterator pos;
+   pos = find(labelArray.begin(), labelArray.end(),  label);
+   return distance(labelArray.begin(), pos);
 }
 
 //--------------------------------------
@@ -527,25 +559,29 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             mNumCollected++;
             bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
 
-            //loj: assumes data in time, x, y, z order
-            //loj: 6/8/04 try color
+            //loj: 7/30/04 -- try new PublishedDataMap
+            StringArray labelArray =
+               Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
 
 #if DEBUG_OPENGL_UPDATE
-            MessageInterface::ShowMessage
-               ("OpenGlPlot::Distribute() time=%f pos=%f %f %f update=%d\n",
-                dat[0], dat[1], dat[2], dat[3], update);
+            MessageInterface::ShowMessage("OpenGlPlot::Distribute() labelArray=\n");
+            for (int j=0; j<(int)labelArray.size(); j++)
+            {
+               MessageInterface::ShowMessage
+                  ("%s ", labelArray[j].c_str());
+            }
+            MessageInterface::ShowMessage("\n");
 #endif
-
-#if TEST_MULTI_SC
-            //--------------------------------------------------------
-            // multiple spacecraft
-            //--------------------------------------------------------
+            
+            Integer idX, idY, idZ;
             for (int i=0; i<mScCount; i++)
             {
-               // increment data by 500 just for testing
-               mScXArray[i] = dat[1] + i*500;
-               mScYArray[i] = dat[2] + i*500;
-               mScZArray[i] = dat[3] + i*500;
+               idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");
+               idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
+               idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
+               mScXArray[i] = dat[idX];
+               mScYArray[i] = dat[idY];
+               mScZArray[i] = dat[idZ];
                mOrbitColorArray[i] = mOrbitColorMap[mScNameArray[i]];
                mTargetColorArray[i] = mTargetColorMap[mScNameArray[i]];
                
@@ -555,22 +591,6 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                    i, mScXArray[i], mScYArray[i], mScZArray[i]);
 #endif
             }
-            
-            PlotInterface::
-               UpdateGlSpacecraft(instanceName,
-                                  dat[0], mScXArray, mScYArray, mScZArray,
-                                  mOrbitColorArray, mTargetColorArray,
-                                  update, mDrawWireFrame);
-#else
-            //--------------------------------------------------------
-            // single spacecraft
-            //--------------------------------------------------------
-
-            mScXArray[0] = dat[1];
-            mScYArray[0] = dat[2];
-            mScZArray[0] = dat[3];
-            mOrbitColorArray[0] = mOrbitColorMap[mScNameArray[0]];
-            mTargetColorArray[0] = mTargetColorMap[mScNameArray[0]];
 
             //loj: 7/13/04 used new method taking arrays
             PlotInterface::
@@ -578,8 +598,6 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                                   dat[0], mScXArray, mScYArray, mScZArray,
                                   mOrbitColorArray, mTargetColorArray,
                                   update, mDrawWireFrame);
-                        
-#endif
             
             if (update)
                mNumCollected = 0;
