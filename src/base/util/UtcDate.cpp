@@ -22,13 +22,14 @@
  */
 //------------------------------------------------------------------------------
 #include <cmath>
-#include <iostream>       // for debug printout
 #include "gmatdefs.hpp"
+#include "RealUtilities.hpp"   // for Round() 
 #include "A1Mjd.hpp"     // for A1Mjd
 #include "UtcDate.hpp"   // for UtcDate
 //  #include "A1Date.hpp"    // for A1Date
 
 using namespace GmatTimeUtil;
+using namespace GmatMathUtil;
 
 //---------------------------------
 //  public methods
@@ -253,11 +254,10 @@ Real UtcDate::ToA1Mjd() const
    A1Mjd newA1Mjd; 
    utcmjd = newA1Mjd.UtcMjdToA1Mjd(utcmjd);
 
-   Real testUtc = fabs(utcmjd - (Integer)utcmjd);
-
    // Check for the tolerance then round-off 
+   Real testUtc = fabs(utcmjd - (Integer)utcmjd);
    if (testUtc < 1.0e-07) 
-      utcmjd = round(utcmjd);
+      utcmjd = Round(utcmjd);
       
    return utcmjd;
 
