@@ -906,7 +906,9 @@ void CallFunction::GetOutParams()
 
 //          int status = 
          MatlabInterface::GetVariable(varName, 1, outArray);
-         param->SetRealParameter("Param1", outArray[0]);
+         //loj: 1/26/05 "Param1" has been removed
+         //param->SetRealParameter("Param1", outArray[0]);
+         param->SetReal(outArray[0]);
          std::ostringstream ss;
          ss << outArray[0];
          param->SetStringParameter("Expression", ss.str());
@@ -914,7 +916,9 @@ void CallFunction::GetOutParams()
 #if DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage("The EvaluateReal is %f\n", param->EvaluateReal());
             MessageInterface::ShowMessage("The GetReal is %f\n", param->GetReal());
-            MessageInterface::ShowMessage("The GetRealParameter is %f\n", param->GetRealParameter("Param1"));
+            //loj: 1/26/05 "Param1" has been removed
+            //MessageInterface::ShowMessage("The GetRealParameter is %f\n", param->GetRealParameter("Param1"));
+            MessageInterface::ShowMessage("The GetRealParameter is %f\n", param->GetReal());
 #endif
 
       }
