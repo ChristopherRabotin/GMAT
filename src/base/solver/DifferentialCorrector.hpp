@@ -44,6 +44,9 @@ public:
     virtual bool                Initialize(void);
     virtual SolverState         AdvanceState(void);
 
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Access methods overriden from the base class
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;

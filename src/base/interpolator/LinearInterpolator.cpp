@@ -133,4 +133,18 @@ bool LinearInterpolator::Interpolate(const Real ind, Real *results)
     return false;
 }
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the LinearInterpolator.
+ *
+ * @return clone of the LinearInterpolator.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* LinearInterpolator::Clone(void) const
+{
+   return (new LinearInterpolator(*this));
+}
 

@@ -105,6 +105,21 @@ DifferentialCorrector&
 }
 
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+ /**
+* This method returns a clone of the DifferentialCorrector.
+ *
+ * @return clone of the DifferentialCorrector.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* DifferentialCorrector::Clone(void) const
+{
+   return (new DifferentialCorrector(*this));
+}
+
 // Access methods overriden from the base class
 
 std::string DifferentialCorrector::GetParameterText(const Integer id) const

@@ -240,6 +240,21 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
     return *this;
 }
 
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the Spacecraft.
+ *
+ * @return clone of the Spacecraft.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* Spacecraft::Clone(void) const
+{
+   return (new Spacecraft(*this));
+}
+
 //---------------------------------------------------------------------------
 //  Integer GetParameterID(const std::string &str) const
 //---------------------------------------------------------------------------

@@ -37,6 +37,10 @@ public:
     LinearInterpolator& operator=(const LinearInterpolator &li);
 
     virtual bool Interpolate(const Real ind, Real *results);
+    
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 };
 
 

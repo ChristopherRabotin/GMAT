@@ -34,7 +34,10 @@ public:
     CubicSplineInterpolator&    operator=(const CubicSplineInterpolator &csi);
 
     virtual bool                Interpolate(const Real ind, Real *results);
-    
+
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 protected:
     /// Array of ordered independent variables used to construct the splines,
     Real                        x[5];

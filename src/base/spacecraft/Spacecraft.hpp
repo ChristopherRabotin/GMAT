@@ -40,6 +40,9 @@ public:
     // Destructor
     virtual ~Spacecraft(void);
 
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
     // Parameter accessor methods -- overridden from GmatBase
     virtual Integer GetParameterID(const std::string &str) const;
     virtual Real GetRealParameter(const Integer id) const;
