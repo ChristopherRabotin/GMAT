@@ -44,7 +44,7 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
 
 
 //------------------------------------------------------------------------------
-// bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
+// bool GetDerivatives(Real * state, Real dt, Integer order)
 //------------------------------------------------------------------------------
 /**
  * Method invoked to calculate derivatives
@@ -67,7 +67,7 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
  * @return              true if the call succeeds, false on failure.
  */
 //------------------------------------------------------------------------------
-bool PhysicalModel::GetDerivatives(Real * state, Real dt, Integer order)
+bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
 {
    return false;
 }
