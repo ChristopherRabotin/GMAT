@@ -20,6 +20,8 @@
 #include "Moderator.hpp"
 #include "NoOp.hpp"
 #include "GravityField.hpp"
+#include "TimeSystemConverter.hpp" // for SetLeapSecsFileReader(), SetEopFile()
+#include "BodyFixedAxes.hpp"       // for SetEopFile(), SetCoefficientsFile()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RUN 1
@@ -136,6 +138,8 @@ bool Moderator::Initialize(bool fromGui)
          // Read startup file
          theFileManager->ReadStartupFile();
          InitializePlanetarySource();
+         InitializePlanetaryCoeffFile();
+         InitializeTimeFile();
          
          if (fromGui)
          {
@@ -1921,6 +1925,7 @@ bool Moderator::SetPlanetaryFileName(const std::string &fileType,
    return status;
 }
 
+
 // Potential field files
 //------------------------------------------------------------------------------
 // std::string GetPotentialFileName(const std::string &fileType)
@@ -1934,6 +1939,7 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
    else
       return "Unknown Potential File Type:" + fileType;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer SetPlanetaryFileTypesInUse(const StringArray &fileTypes)
@@ -2676,6 +2682,50 @@ void Moderator::InitializePlanetarySource()
    SetPlanetaryFileTypesInUse(thePlanetaryFileTypesInUse);
 }
 
+
+//------------------------------------------------------------------------------
+// void InitializePlanetaryCoeffFile()
+//------------------------------------------------------------------------------
+void Moderator::InitializePlanetaryCoeffFile()
+{
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator initializing planetary coeff. file...\n");
+   
+   std::string nutFileName =
+      theFileManager->GetStringParameter("FULL_NUTATION_COEFF_FILE");
+   MessageInterface::ShowMessage("Moderator setting nutation file to %s...\n",
+                                 nutFileName.c_str());
+   std::string planFileName =
+      theFileManager->GetStringParameter("FULL_PLANETARY_COEFF_FILE");
+   MessageInterface::ShowMessage("Moderator setting planetary coeff. file to %s...\n",
+                                 planFileName.c_str());
+   
+   theItrfFile = new ItrfCoefficientsFile(nutFileName, planFileName);
+   theItrfFile->Initialize();
+}
+
+
+//------------------------------------------------------------------------------
+// void InitializeTimeFile()
+//------------------------------------------------------------------------------
+void Moderator::InitializeTimeFile()
+{
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator initializing time file...\n");
+   
+   std::string filename = theFileManager->GetStringParameter("FULL_LEAP_SECS_FILE");
+   theLeapSecsFile = new LeapSecsFileReader(filename);
+   theLeapSecsFile->Initialize();
+
+   filename = theFileManager->GetStringParameter("FULL_EOP_FILE");
+   theEopFile = new EopFile(filename);
+   theEopFile->Initialize();
+   
+   TimeConverterUtil::SetLeapSecsFileReader(theLeapSecsFile);
+   TimeConverterUtil::SetEopFile(theEopFile);
+}
+
+
 //------------------------------------------------------------------------------
 // void CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
@@ -2690,11 +2740,20 @@ void Moderator::CreateDefaultCoordSystems()
       CreateCoordinateSystem("EarthMJ2000Eq", true);
       
       // EarthMJ2000Ec
-      CoordinateSystem *cs = CreateCoordinateSystem("EarthMJ2000Ec", false);
-      AxisSystem *axis = CreateAxisSystem("MJ2000Ec", "");
-      cs->SetStringParameter("OriginName", "Earth");
-      cs->SetStringParameter("J2000BodyName", "Earth");
-      cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+      CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
+      AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
+      eccs->SetStringParameter("OriginName", "Earth");
+      eccs->SetStringParameter("J2000BodyName", "Earth");
+      eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
+
+      // EarthFixed
+      CoordinateSystem *bfcs = CreateCoordinateSystem("EarthFixed", false);
+      BodyFixedAxes *bfecAxis = (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "EarthFixed");
+      bfecAxis->SetEopFile(theEopFile);
+      bfecAxis->SetCoefficientsFile(theItrfFile);
+      bfcs->SetStringParameter("OriginName", "Earth");
+      bfcs->SetStringParameter("J2000BodyName", "Earth");
+      bfcs->SetRefObject(bfecAxis, Gmat::AXIS_SYSTEM, bfecAxis->GetName());
    }
    catch (BaseException &e)
    {

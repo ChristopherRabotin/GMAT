@@ -70,6 +70,9 @@
 // files
 #include "SlpFile.hpp"
 #include "DeFile.hpp"
+#include "EopFile.hpp"
+#include "ItrfCoefficientsFile.hpp"
+#include "LeapSecsFileReader.hpp"
 
 namespace Gmat
 {
@@ -267,6 +270,9 @@ private:
 
    // initialization
    void InitializePlanetarySource();
+   void InitializePlanetaryCoeffFile();
+   void InitializeTimeFile();
+   
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
    bool CreateSlpFile(const std::string &fileName);
@@ -348,6 +354,10 @@ private:
    StringArray thePlanetaryFileTypesInUse;
    StringArray theTempFileList;
 
+   EopFile *theEopFile;
+   ItrfCoefficientsFile *theItrfFile;
+   LeapSecsFileReader *theLeapSecsFile;
+   
    enum
    {
       SLP = 0,
