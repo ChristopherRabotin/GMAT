@@ -34,8 +34,10 @@ class MdiChildTrajFrame: public wxMDIChildFrame
 {
 public:
    TrajPlotCanvas *mCanvas;
+   wxMenu         *mViewOptionMenu;
+
    bool mIsMainFrame;
-    
+   
    MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
                      const wxString& plotName, const wxString& title,
                      const wxPoint& pos, const wxSize& size,
@@ -57,29 +59,26 @@ public:
    void OnMove(wxMoveEvent& event);
    void OnClose(wxCloseEvent& event);
    
-   //loj: 5/6/04 added drawWireFrame
-   void UpdateSpacecraft(const Real &time, const Real &posX,
-                         const Real &posY, const Real &posZ,
-                         const UnsignedInt orbitColor,
-                         const UnsignedInt targetColor,
-                         bool updateCanvas, bool drawWireFrame = false);
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
                          const UnsignedIntArray &orbitColor,
                          const UnsignedIntArray &targetColor,
-                         bool updateCanvas, bool drawWireFrame = false);
-   void RefreshPlot(); //loj: 6/22/04 added
+                         bool updateCanvas);
+   void RefreshPlot();
    void DeletePlot();
 
    // getter
    wxString GetPlotName() {return mPlotName;}
+   bool GetDrawWireFrame() {return mDrawWireFrame;}
    
    // setter
    void SetPlotName(const wxString &str) {mPlotName = str;}
+   void SetDrawWireFrame(bool draw);
 
 protected:
    wxString mPlotName;
-
+   bool mDrawWireFrame;
+   
    DECLARE_EVENT_TABLE();
 };
 #endif

@@ -49,7 +49,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    mIsMainFrame = isMainFrame;
    mPlotName = plotName;
    MdiGlPlot::mdiChildren.Append(this);
-    
+   
     // Give it an icon
 #ifdef __WXMSW__
    SetIcon(wxIcon(_T("chrt_icn")));
@@ -79,27 +79,27 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
    viewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
    viewMenu->AppendSeparator();
 
-    // View Option submenu
-   wxMenu *viewOptionMenu = new wxMenu;
+   // View Option submenu
+   mViewOptionMenu = new wxMenu; //loj: 7/20/04 used member data
    wxMenuItem *item =
       new wxMenuItem(viewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
-                     _T("Show bodies in wire frame"), wxITEM_NORMAL, viewOptionMenu);
-   viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
+                     _T("Show bodies in wire frame"), wxITEM_NORMAL, mViewOptionMenu);
+   mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
                           _T("Show Wire Frame"),
                           _T("Show bodies in wire frame"), wxITEM_CHECK);
-   viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
+   mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
                           _T("Show Equatorial Plane"),
                           _T("Show equatorial plane lines"), wxITEM_CHECK);
-
-   viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
-        
+   
+   mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
+   
    viewMenu->Append(item);
 
    // Help menu
    wxMenu *helpMenu = new wxMenu;
    helpMenu->Append(GmatPlot::MDI_GL_HELP_VIEW, _T("View"), _T("View mouse control"));
 
-    // menu bar
+   // menu bar
    wxMenuBar *menuBar = new wxMenuBar;
 
    menuBar->Append(fileMenu, _T("&File"));
@@ -292,44 +292,19 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void UpdateSpacecraft(const Real &time, const Real &posX,const Real &posY,
-//                       const Real &posZ, bool updateCanvas,
-//                       bool drawWireFrame = false)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
-                                         const Real &posY, const Real &posZ,
-                                         const UnsignedInt orbitColor,
-                                         const UnsignedInt targetColor,
-                                         bool updateCanvas, bool drawWireFrame)
-{
-   //loj: 5/6/04 added drawWireFrame
-   if (mCanvas)
-   {
-      mCanvas->SetFocus();
-      mCanvas->ShowWireFrame(drawWireFrame);
-      mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
-                                targetColor);
-      if (updateCanvas)
-         Update();
-   }
-}
-
-//------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const RealArray &posX,
 //                       const RealArray &posY, const RealArray &posZ,
-//                       bool updateCanvas, bool drawWireFrame = false)
+//                       bool updateCanvas)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX,
                                          const RealArray &posY, const RealArray &posZ,
                                          const UnsignedIntArray &orbitColor,
                                          const UnsignedIntArray &targetColor,
-                                         bool updateCanvas, bool drawWireFrame)
+                                         bool updateCanvas)
 {
-   //loj: 5/6/04 added drawWireFrame
    if (mCanvas)
    {
       mCanvas->SetFocus();
-      mCanvas->ShowWireFrame(drawWireFrame);
       mCanvas->UpdateSpacecraft(time, posX, posY, posZ, orbitColor,
                                 targetColor);
       if (updateCanvas)
@@ -337,7 +312,6 @@ void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const RealArray &posX
    }
 }
 
-//loj: 6/22/04 added
 //------------------------------------------------------------------------------
 // void RefreshPlot()
 //------------------------------------------------------------------------------
@@ -358,5 +332,17 @@ void MdiChildTrajFrame::DeletePlot()
    // This will call OnClose()
    if (mIsMainFrame)
       MdiGlPlot::mdiParentGlFrame->mainSubframe->Close();
+}
+
+//------------------------------------------------------------------------------
+// void SetDrawWireFrame(bool draw)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetDrawWireFrame(bool draw)
+{
+   if (mCanvas)
+   {
+      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, draw);
+      mCanvas->SetShowWireFrame(draw);
+   }
 }
 

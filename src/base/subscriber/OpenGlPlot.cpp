@@ -40,7 +40,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "OrbitColor",
    "TargetColor",
    "Axis",
-   "DrawEquatorialPlane",
+   "EquatorialPlane",
    "WireFrame",
    "DataCollectFrequency",
    "UpdatePlotFrequency"
@@ -139,7 +139,7 @@ bool OpenGlPlot::Initialize()
 #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage("OpenGlPlot::Initialize() CreateGlPlotWindow()\n");
 #endif
-         return PlotInterface::CreateGlPlotWindow(instanceName);
+         return PlotInterface::CreateGlPlotWindow(instanceName, mDrawWireFrame);
       }
       else
       {

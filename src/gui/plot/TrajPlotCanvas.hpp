@@ -48,15 +48,12 @@ public:
    void ShowDefaultView();
    void ZoomIn();
    void ZoomOut();
+   void SetShowWireFrame(bool flag);
    void ShowWireFrame(bool flag);
    void ShowEquatorialPlane(bool flag);
 
    // data
    int  ReadTextTrajectory(const wxString &filename);
-   void UpdateSpacecraft(const Real &time, const Real &posX,
-                         const Real &posY, const Real &posZ,
-                         const UnsignedInt orbitColor,
-                         const UnsignedInt targetColor);
    void UpdateSpacecraft(const Real &time, const RealArray &posX,
                          const RealArray &posY, const RealArray &posZ,
                          const UnsignedIntArray &orbitColor,
