@@ -29,6 +29,8 @@
 
 #include "Parameter.hpp"
 #include <map>
+#include <iostream>
+#include <iomanip>
 
 class ReportFile :
     public Subscriber
@@ -77,6 +79,13 @@ protected:
    std::string         filename;
    /// Precision for output of real data
    Integer             precision;
+   
+   /// Width of column
+   Integer              columnWidth;
+   
+   /// Write the headers on the top of the column
+   bool                  writeHeaders;
+   
    /// ID for the file name
 //   Integer             filenameID;
    /// ID for the precision information
@@ -98,7 +107,6 @@ protected:
    virtual bool        OpenReportFile(void);
    
 private:
-    
     void ClearVarParameters();
     void WriteHeaders();
     bool initial;
@@ -110,6 +118,8 @@ private:
       VAR_LIST,
       ADD,
       CLEAR,
+      WRITE_HEADERS,
+      COL_WIDTH,
       ReportFileParamCount  /// Count of the parameters for this class
     };
 

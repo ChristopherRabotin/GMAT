@@ -37,6 +37,8 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "VarList",
    "Add",
    "Clear",
+   "WriteHeaders",
+   "ColumnWidth",
 };
 
 const Gmat::ParameterType
@@ -47,6 +49,8 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 	Gmat::STRINGARRAY_TYPE,
 	Gmat::STRING_TYPE,
 	Gmat::BOOLEAN_TYPE,
+	Gmat::BOOLEAN_TYPE,
+	Gmat::INTEGER_TYPE,
 };
 
 ////------------------------------------------------------------------------------
@@ -78,6 +82,8 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    Subscriber      ("ReportFile", name),
    filename        (fileName),
    precision       (12),
+   columnWidth     (20),
+   writeHeaders    (true),
 //   filenameID      (parameterCount),
 //   precisionID     (parameterCount + 1)
    lastUsedProvider (-1)
@@ -89,7 +95,7 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    }
    
    mNumVarParams = 0;
-   
+
    if (firstVarParam != NULL)
       AddVarParameter(firstVarParam->GetName());
    
@@ -118,6 +124,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    Subscriber      (rf),
    filename        (rf.filename),
    precision       (rf.precision),
+   columnWidth         (rf.columnWidth),
+   writeHeaders    (rf.writeHeaders),
 //   filenameID      (parameterCount),
 //   precisionID     (parameterCount + 1)
    lastUsedProvider (-1)
@@ -156,6 +164,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
     
     filename = rf.filename;
     precision = rf.precision;
+    columnWidth = rf.columnWidth;
+    writeHeaders = rf.writeHeaders;
 //    filenameID = rf.filenameID;
 //    precisionID = rf.precisionID;
 
@@ -265,6 +275,8 @@ Integer ReportFile::GetIntegerParameter(const Integer id) const
 {
    if (id == PRECISION)
       return precision;
+   else if (id == COL_WIDTH)
+      return columnWidth;
    return Subscriber::GetIntegerParameter(id);
 }
 
@@ -280,6 +292,13 @@ Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
          precision = value;
       return precision;
    }
+   else if (id == COL_WIDTH)
+   {
+      if (value > 0)
+         columnWidth = value;
+      return columnWidth;
+   }
+
    return Subscriber::SetIntegerParameter(id, value);
 }
 
@@ -352,6 +371,8 @@ bool ReportFile::GetBooleanParameter(const Integer id) const
    {
    case CLEAR:
       return true;
+   case WRITE_HEADERS:
+      return writeHeaders;
    default:
          return Subscriber::GetBooleanParameter(id);
    }
@@ -375,6 +396,9 @@ bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
    case CLEAR:
       ClearVarParameters();
       return true;
+   case WRITE_HEADERS:
+      writeHeaders = value;
+      return writeHeaders;
    default:
       return Subscriber::SetBooleanParameter(id, value);
    }
@@ -524,11 +548,14 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       
 // DJC 07/29/04 Commented out -- not sure how this works...
       //ag:  uncommented 7/30/04
+      
       for (int i=0; i < mNumVarParams; i++)
       {
           varvals[i] = mVarParams[i]->EvaluateReal();
-          dstream << varvals[i] << " ";
+          dstream.width(columnWidth);
+          dstream << varvals[i];
       }   
+
       dstream << std::endl;
 
       //ag: commented 7/30/04
@@ -560,12 +587,16 @@ void ReportFile::ClearVarParameters()
 //------------------------------------------------------------------------------
 void ReportFile::WriteHeaders()
 {
-   // write heading for each item
-   for (int i=0; i < mNumVarParams; i++)
+   if (writeHeaders)
    {
-       dstream << mVarParamNames[i] << " ";
-   }   
-   dstream << std::endl;
+      // write heading for each item
+      for (int i=0; i < mNumVarParams; i++)
+      {
+          dstream.width(columnWidth);
+          dstream << mVarParamNames[i];
+      }   
+      dstream << std::endl;
+   }
    
    initial = false;
 }
