@@ -29,7 +29,6 @@
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
 #include "PlanetaryEphem.hpp"
-#include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "Rmatrix.hpp"
 #include "Rvector6.hpp"
@@ -120,11 +119,8 @@ public:
    virtual const Rmatrix&       GetHarmonicCoefficientsCij(); // const??
    virtual Integer              GetDegree();
    virtual Integer              GetOrder();
-   //virtual const Rmatrix&       GetCoefDriftS();
-   //virtual const Rmatrix&       GetCoefDriftC();
-   virtual const StringArray&   GetSupportedAtmospheres() const;
    virtual std::string          GetAtmosphereModelType();
-   virtual AtmosphereModel*     GetAtmosphereModel(const std::string& type = "");
+   virtual AtmosphereModel*     GetAtmosphereModel();
    virtual bool                 GetDensity(Real *position, Real *density,
                                         Real epoch = 21545.0,
                                         Integer count = 1);
@@ -144,12 +140,9 @@ public:
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
    virtual bool           SetUsePotentialFile(bool useIt);
    
-   virtual bool           SetAtmosphereModel(std::string toAtmModel);
+   virtual bool           SetAtmosphereModelType(std::string toAtmModelType);
+   virtual bool           SetAtmosphereModel(AtmosphereModel *toAtmModel);
    virtual bool           SetPotentialFilename(const std::string &fn);
-   //virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-   //                                             Real bodyPolarRad, Real bodyMu,
-   //                                             Integer coeffSize, Rmatrix& bodySij,
-   //                                             Rmatrix& bodyCij);
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string    GetParameterText(const Integer id) const;     // const?
@@ -186,6 +179,14 @@ public:
 
    // need methods to get/set stateTime (a1MJD type)?
 
+   //virtual const Rmatrix&       GetCoefDriftS();
+   //virtual const Rmatrix&       GetCoefDriftC();
+   //virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
+   //                                             Real bodyPolarRad, Real bodyMu,
+   //                                             Integer coeffSize, Rmatrix& bodySij,
+   //                                             Rmatrix& bodyCij);
+   
+
    
    //------------------------------------------------------------------------------
    // virtual CelestialBody* Clone(void) const
@@ -204,10 +205,11 @@ public:
    static const std::string ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount];
 
    // local constants
+   static const Integer BUFSIZE               = 256;
+   
    //static const Integer MAX_DEGREE            = 360;
    //static const Integer MAX_ORDER             = 360;
    //static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
-   static const Integer BUFSIZE               = 256;
 
 protected:
 
@@ -234,7 +236,7 @@ protected:
       //COEFFICIENT_SIZE,
       HOUR_ANGLE,
       ATMOS_MODEL_NAME,
-      SUPPORTED_ATMOS_MODELS,
+      //SUPPORTED_ATMOS_MODELS,
       //ORDER,  // may need to access these through general methods at some point
       //DEGREE,
       //SIJ,
@@ -277,24 +279,36 @@ protected:
    // the source file
    PlanetaryEphem*        theSourceFile;
 
+   /// flag indicating whether or not to get data from potential file
    bool                   usePotentialFile;
+   /// file name of the potential file to use
    std::string            potentialFileName;
+   /// angular velocity
    Rvector3               angularVelocity;
+   /// the hour angle 
    Real                   hourAngle;
-   AtmosphereManager*     atmManager;
+   /// pointer to the atmosphere model to use for the body
    AtmosphereModel*       atmModel;
+   /// the type of the atmosphere model (e.g. "Exponential")
+   std::string            atmModelType;
 
-   // has the potential file been read already?
+   /// has the potential file been read already?
    bool                   potentialFileRead;
 
-   // defaults if potential file is not used
+   /// defaults mu to use if potential file is not used
    Real                   defaultMu;
+   /// defaults eauatorial radius to use if potential file is not used
    Real                   defaultEqRadius;
    
-   // order of the gravity model
+   /// order of the gravity model
    Integer                order;    
-   // degree of the gravity model
+   /// degree of the gravity model
    Integer                degree;  
+   /// spherical harmonic coefficients (Sij) for the body
+   Rmatrix                sij;
+   /// spherical harmonic coefficients (Cij) for the body
+   Rmatrix                cij;
+
    /// date and time of start of source file
    //A1Mjd                  sourceStart;      // currently unused
    /// date and time of end of sourcce file
@@ -302,8 +316,6 @@ protected:
    //Integer                coefficientSize;      // n   // same as degree, order above?
    //Rmatrix                Cbar, Sbar;
    //Rmatrix                dCbar, dSbar; // from original GravityField
-   Rmatrix                sij;  
-   Rmatrix                cij;
    //Integer                defaultCoefSize;
    //Rmatrix                defaultSij;
    //Rmatrix                defaultCij;
@@ -311,14 +323,11 @@ protected:
    
    // initialze the body
    void Initialize(std::string withBodyType = "Planet");
-   // read the potential file, if requested
+   // method to read the potential file, if requested
    bool          ReadPotentialFile();
    bool          ReadCofFile();
    bool          ReadGrvFile();
    bool          ReadDatFile();
-   //bool          ReadCofFile(Integer& fileDeg, Integer& fileOrd);
-   //bool          ReadGrvFile(Integer& fileDeg, Integer& fileOrd);
-   //bool          ReadDatFile(Integer& fileDeg, Integer& fileOrd);
    
    bool          IsBlank(char* aLine);
    

@@ -31,7 +31,6 @@
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "Rmatrix.hpp"
-#include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
@@ -73,7 +72,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - GmatBaseParamCount] =
    //"Cij",
    "HourAngle",
    "AtmosphereModelName",
-   "SupportedAtmosModels",
+   //"SupportedAtmosModels",
 };
 
 const Gmat::ParameterType
@@ -104,7 +103,7 @@ Gmat::RVECTOR3_TYPE,
 //Gmat::RMATRIX_TYPE,
 Gmat::REAL_TYPE,
 Gmat::STRING_TYPE,
-Gmat::STRINGARRAY_TYPE,
+//Gmat::STRINGARRAY_TYPE,
 };
 
 
@@ -190,15 +189,14 @@ sourceFilename      (cb.sourceFilename),
 theSourceFile       (cb.theSourceFile), // ????????????????
 usePotentialFile    (cb.usePotentialFile),
 potentialFileName   (cb.potentialFileName),
-hourAngle           (cb.hourAngle)//,
+hourAngle           (cb.hourAngle),
 //coefficientSize     (cb.coefficientSize),
 //dCbar               (cb.dCbar),
 //dSbar               (cb.dSbar),
-//sij                 (cb.sij),
-//cij                 (cb.cij),
-//order               (cb.order),
-//degree              (cb.degree),
-//atmManager          (cb.atmManager),  
+order               (cb.order),
+degree              (cb.degree),
+sij                 (cb.sij),
+cij                 (cb.cij)//,
 //atmModel            (cb.atmModel)
 {
    
@@ -208,10 +206,13 @@ hourAngle           (cb.hourAngle)//,
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
    potentialFileRead      = false;
-   atmManager             = new AtmosphereManager(instanceName);
-   if (cb.atmModel) atmModel = atmManager->GetAtmosphere(
-                               cb.atmModel->GetTypeName());
-   else             atmModel = NULL;
+   if (cb.atmModel)
+   {
+      if (atmModel) delete atmModel;   // do I want to do this?
+      atmModel = (AtmosphereModel*)(cb.atmModel)->Clone();
+   }
+   else
+      atmModel = NULL;
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
@@ -254,25 +255,24 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    potentialFileName   = cb.potentialFileName;
    angularVelocity     = cb.angularVelocity;
    hourAngle           = cb.hourAngle;
-   atmManager          = new AtmosphereManager(instanceName);
    if (cb.atmModel)
-      atmModel            = atmManager->GetAtmosphere(
-                            cb.atmModel->GetTypeName());
+   {
+      if (atmModel) delete atmModel;   // do I want to do this?
+      atmModel = (AtmosphereModel*)(cb.atmModel)->Clone();
+   }
    else
       atmModel = NULL;
    potentialFileRead   = false;
    defaultMu           = cb.defaultMu;
    defaultEqRadius     = cb.defaultEqRadius;
 
-   //coefficientSize     = cb.coefficientSize;
+   //coefficientSize     = cb.coefficientSize;  // what about all of these?
    //sij                 = cb.sij;
    //cij                 = cb.cij;
    //dCbar               = cb.dCbar;
    //dSbar               = cb.dSbar;
    //order               = cb.order;
    //degree              = cb.degree;
-   //atmModel            = cb.atmModel;
-   //atmManager          = cb.atmManager; // do I want to do this??????
    return *this;
 }
 
@@ -285,11 +285,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
 //------------------------------------------------------------------------------
 CelestialBody::~CelestialBody()
 {
-   //atmModel will be destroyed by the atmManager 
-   if (atmManager != NULL) delete atmManager;
-   // don't delete the central body
-   // should I delete the source file?
-   // shoudl i delete the potential file?
+   delete atmModel;  
 }
 
 //------------------------------------------------------------------------------
@@ -633,9 +629,7 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
    Ut1Mjd ut1Time  = atTime.ToUt1Mjd();
    // Now convert to UT1 Julian Date
    Real ut1Jd      = ((Real) ut1Time) + GmatTimeUtil::JULIAN_DATE_OF_010541;
-   //cout << "DEBUG::UT1 JD for this date = " << ut1Jd << endl;
    Real timeUt1    = (ut1Jd - 2451545.0) / 36525;
-   //cout << "DEBUG::timeUt1 = " << timeUt1 << endl;
 
    // compute mean sidereal time, in degrees
    // according to Vallado Eq. 3-45, converted to degrees, where
@@ -649,7 +643,6 @@ Real  CelestialBody:: GetHourAngle(A1Mjd atTime)
    // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
    hourAngle = AngleUtil::PutAngleInDegRange(mst,0.0,360.0);
 
-   //cout << "DEBUG::hourAngle (to 0-360) = " << hourAngle << endl;
    return hourAngle; 
 }
 
@@ -787,24 +780,6 @@ Integer CelestialBody::GetOrder()
 }
 
 //------------------------------------------------------------------------------
-//  const StringArray& GetSupportedAtmospheres() const
-//------------------------------------------------------------------------------
-/**
- * This method returns a list of the supported atmosphere models for the body.
- *
- * @return a list of supported atmosphere models for the body.
- *
- */
-//------------------------------------------------------------------------------
-const StringArray&   CelestialBody::GetSupportedAtmospheres() const
-{
-   if (!atmManager) throw SolarSystemException("Atmosphere Manager for body "
-       + instanceName +
-       " must be set before supported atmospheres can be determined.");
-   return atmManager->GetSupportedAtmospheres();
-}
-
-//------------------------------------------------------------------------------
 //  std::string GetAtmosphereModelType()
 //------------------------------------------------------------------------------
 /**
@@ -825,22 +800,19 @@ std::string  CelestialBody::GetAtmosphereModelType()
 }
 
 //------------------------------------------------------------------------------
-//  AtmosphereModel* GetAtmosphereModel(const std::string &type)
+//  AtmosphereModel* GetAtmosphereModel()
 //------------------------------------------------------------------------------
 /**
  * This method returns a pointer to the current atmosphere model for the body.
  *
- * @param <type> type of atmosphere model
  * @return a pointer to the current atmosphere model for the body.
  *
  */
 //------------------------------------------------------------------------------
-AtmosphereModel* CelestialBody::GetAtmosphereModel(const std::string &type)
+AtmosphereModel* CelestialBody::GetAtmosphereModel()
 {
-   if (type == "")
-      return atmModel;
+   return atmModel;
       
-   return atmManager->GetAtmosphere(type, false);
 }
 
 //------------------------------------------------------------------------------
@@ -1066,23 +1038,42 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
 }
 
 //------------------------------------------------------------------------------
-//  bool SetAtmosphereModel(std::string toAtmModel)
+//  bool SetAtmosphereModelType(std::string toAtmModelType)
 //------------------------------------------------------------------------------
 /**
- * This method sets the atmosphere model for the body.
+* This method sets the atmosphere model type for the body.
  *
  * @param <toAtmModel> name (type) of the atmosphere model to use.
  *
  * @return flag indicating success of the method.
  *
+ * @note This method no longer sets the actual atmosphere model pointer.  A call
+ *       to SetAtmosphereModel must be executed for that to happen.
+ *
  */
 //------------------------------------------------------------------------------
-bool CelestialBody::SetAtmosphereModel(std::string toAtmModel)
+bool CelestialBody::SetAtmosphereModelType(std::string toAtmModelType)
 {
-   atmModel = atmManager->GetAtmosphere(toAtmModel);
-   //if (atmModel == NULL) return false; // error creating a new atmos. model
-   if (atmModel == NULL) throw SolarSystemException(
-            "Error creating a new atmosphere model for " + instanceName + ".");
+   atmModelType = toAtmModelType;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+//  bool SetAtmosphereModel(AtmosphereModel *toAtmModel)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the atmosphere model pointer for the body.
+ *
+ * @param <toAtmModel> pointer to the atmosphere model to use.
+ *
+ * @return flag indicating success of the method.
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetAtmosphereModel(AtmosphereModel *toAtmModel)
+{
+   if (atmModel) delete atmModel;
+   atmModel = toAtmModel;
    return true;
 }
 
@@ -1438,7 +1429,9 @@ bool        CelestialBody::SetStringParameter(const Integer id,
    }
    if (id == ATMOS_MODEL_NAME)
    {
-      return SetAtmosphereModel(value);
+      atmModelType = value;
+      return true;
+      //return SetAtmosphereModel(value);
    }
    if (id == CENTRAL_BODY)
    {
@@ -1687,10 +1680,10 @@ const Rvector& CelestialBody::SetRvectorParameter(const std::string &label,
 //------------------------------------------------------------------------------
 const StringArray& CelestialBody::GetStringArrayParameter(const Integer id) const
 {
-   if (id == SUPPORTED_ATMOS_MODELS)
-   {
-      return GetSupportedAtmospheres();
-   }
+   //if (id == SUPPORTED_ATMOS_MODELS)
+   //{
+   //   return GetSupportedAtmospheres();
+   //}
 
    return GmatBase::GetStringArrayParameter(id);
 }
@@ -1720,7 +1713,6 @@ void CelestialBody::Initialize(std::string withBodyType)
    state             = Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
    angularVelocity   = Rvector3(0.0,0.0,0.0);
    potentialFileRead = false;
-   atmManager        = NULL;
    atmModel          = NULL;
    int i;
    bodyType = Gmat::PLANET;  // default to Planet
