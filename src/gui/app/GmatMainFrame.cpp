@@ -44,11 +44,9 @@
 #include "SpacecraftPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
-//#include "PropagateCommandPanel.hpp" //loj: 10/20/04 renamed
 #include "PropagatePanel.hpp"
 #include "ImpulsiveBurnSetupPanel.hpp"
 #include "DCSetupPanel.hpp"
-//#include "ManeuverSetupPanel.hpp" //loj: 10/20/04 renamed
 #include "ManeuverPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
 #include "OpenGlPlotSetupPanel.hpp"
@@ -56,13 +54,13 @@
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
-//nclude "SolverEventPanel.hpp" /loj: 10/20/04 renamed to TargetPanel
 #include "TargetPanel.hpp"
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
-#include "SavePanel.hpp" //loj: 10/20/04 added
-#include "TogglePanel.hpp" //loj: 10/20/04 added
+#include "SavePanel.hpp"
+#include "TogglePanel.hpp"
 #include "ParameterSetupPanel.hpp"
+#include "ArraySetupPanel.hpp" //loj: 12/29/04 Added
 #include "IfPanel.hpp"
 #include "ForLoopPanel.hpp"
 #include "WhilePanel.hpp"
@@ -178,7 +176,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // set the script name
    scriptFilename = "$gmattempscript$.script";
 
-   // Set frame full/reduced size (loj: 10/28/04)
+   // Set frame full/reduced size
    mFullSize = size;
    mReducedSize = wxSize(400, 200);
 
@@ -414,7 +412,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          MessageInterface::ShowMessage
             ("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
 #endif
-         //loj: 10/6/04 removed item->GetDesc() from the arg. list
          sizer->Add(new PropagatePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
@@ -424,7 +421,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
-         //loj: 10/6/04 removed item->GetDesc() from the arg. list
          sizer->Add(new PropagatePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
@@ -443,9 +439,6 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
-         //loj: 11/4/04 used TargetPanel
-         //sizer->Add(new SolverEventPanel(panel, item->GetCommand()),
-         //           0, wxGROW|wxALL, 0);
          sizer->Add(new TargetPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
@@ -467,7 +460,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new VaryPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
-      else if (dataType == GmatTree::SAVE_COMMAND) //loj: 10/20/04 added
+      else if (dataType == GmatTree::SAVE_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
@@ -476,7 +469,7 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add(new SavePanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
-      else if (dataType == GmatTree::TOGGLE_COMMAND) //loj: 10/20/04 added
+      else if (dataType == GmatTree::TOGGLE_COMMAND)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
@@ -507,9 +500,23 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
-         panel = new wxScrolledWindow(newChild);  
-         sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
-                    0, wxGROW|wxALL, 0);
+         panel = new wxScrolledWindow(newChild);
+
+         //loj: 12/30/04 Show separate variable or array panel
+         if (theGuiInterpreter->GetParameter
+             (std::string(item->GetDesc().c_str()))->GetTypeName() == "Variable")
+         {
+            sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
+                       0, wxGROW|wxALL, 0);
+         }
+         else if (theGuiInterpreter->GetParameter
+                  (std::string(item->GetDesc().c_str()))->GetTypeName() == "Array")
+         {
+            sizer->Add(new ArraySetupPanel(panel, item->GetDesc()),
+                       0, wxGROW|wxALL, 0);
+         }
+         //sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
+         //           0, wxGROW|wxALL, 0);
       }
       else if ((dataType == GmatTree::DEFAULT_GMAT_FUNCTION) ||
                (dataType == GmatTree::CREATED_GMAT_FUNCTION))
@@ -851,7 +858,6 @@ void GmatMainFrame::MinimizeChildren(int selection)
 }
 
 
-//loj: 9/8/04 added
 //------------------------------------------------------------------------------
 // void CloseCurrentProject()
 //------------------------------------------------------------------------------
@@ -875,19 +881,17 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData::GetMissionTree()->UpdateMission(true);
 }
 
-//loj: 9/24/04 added
 //------------------------------------------------------------------------------
 // void RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::RunCurrentMission()
 {
-   //loj: 8/16/04 added toolBar enable/disable
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
    mFullSize = GetSize();
-   SetSize(mReducedSize); //loj: 10/28/04 Added
+   SetSize(mReducedSize);
    SetFocus();
    
    theGuiInterpreter->RunMission();
@@ -896,7 +900,6 @@ void GmatMainFrame::RunCurrentMission()
    toolBar->EnableTool(TOOL_STOP, FALSE);
 }
 
-//loj: 10/28/04 added
 //------------------------------------------------------------------------------
 // void NotifyRunCompleted()
 //------------------------------------------------------------------------------
@@ -906,7 +909,7 @@ void GmatMainFrame::RunCurrentMission()
 //------------------------------------------------------------------------------
 void GmatMainFrame::NotifyRunCompleted()
 {
-   //loj: 10/28/04 added to show full size when mission run completed
+   //show full size when mission run completed
    SetSize(mFullSize);
 }
 
@@ -972,20 +975,6 @@ wxToolBar* GmatMainFrame::GetMainFrameToolBar()
 void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 {
    CloseCurrentProject();
-   
-//     theGuiInterpreter->ClearResource();
-//     theGuiInterpreter->ClearCommandSeq();
-//     MessageInterface::ClearMessage();
-
-//     // close plot window on new project
-//     if (MdiGlPlot::mdiParentGlFrame != NULL)
-//        MdiGlPlot::mdiParentGlFrame->Close();
-    
-//     if (MdiXyPlot::mdiParentXyFrame != NULL)
-//        MdiXyPlot::mdiParentXyFrame->Close();
-    
-//     GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-//     GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
 }
 
 //------------------------------------------------------------------------------
@@ -1008,21 +997,6 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    }
 
    CloseCurrentProject();
-   
-//     theGuiInterpreter->ClearResource();
-//     theGuiInterpreter->ClearCommandSeq();
-//     MessageInterface::ClearMessage();
-    
-//     //close all windows
-//     CloseAllChildren();
-       
-//     //close plot window on new project
-//     if (MdiGlPlot::mdiParentGlFrame != NULL)
-//        MdiGlPlot::mdiParentGlFrame->Close();
-    
-//     if (MdiXyPlot::mdiParentXyFrame != NULL)
-//        MdiXyPlot::mdiParentXyFrame->Close();
-
    theGuiInterpreter->LoadDefaultMission();
 
    GmatAppData::GetResourceTree()->UpdateResource(true);
@@ -1105,13 +1079,12 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 {
-   //loj: 8/16/04 added toolBar enable/disable
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_RUN, FALSE);
    toolBar->EnableTool(TOOL_STOP, TRUE);
    wxYield();
    mFullSize = GetSize();
-   SetSize(mReducedSize); //loj: 10/28/04 Added
+   SetSize(mReducedSize);
    SetFocus();
    
    theGuiInterpreter->RunMission();
@@ -1120,7 +1093,6 @@ void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
    toolBar->EnableTool(TOOL_STOP, FALSE);
 }
 
-//loj: 8/17/04 added
 //------------------------------------------------------------------------------
 // void OnStop(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -1135,7 +1107,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
    wxToolBar* toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_STOP, FALSE);
    wxYield();
-   SetSize(mFullSize); //loj: 10/28/04 Added
+   SetSize(mFullSize);
    
    theGuiInterpreter->ChangeRunState("Stop");
    
