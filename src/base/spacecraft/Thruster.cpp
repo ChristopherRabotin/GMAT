@@ -19,7 +19,7 @@
 #include "Thruster.hpp"
 #include <math.h>          // for pow(real, real)
 
-#define DEBUG_THRUSTER
+// #define DEBUG_THRUSTER
 
 
 #ifdef DEBUG_THRUSTER
