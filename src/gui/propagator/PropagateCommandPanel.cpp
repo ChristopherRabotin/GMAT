@@ -52,7 +52,11 @@ PropagateCommandPanel::PropagateCommandPanel( wxWindow *parent, const wxString &
                                               GmatCommand *cmd )
    : GmatPanel(parent)
 {
-   //MessageInterface::ShowMessage("PropagateCommandPanel::PropagateCommandPanel() entered\n");
+#if DEBUG_PROPCMD_PANEL
+   MessageInterface::ShowMessage
+      ("PropagateCommandPanel::PropagateCommandPanel() entered\n");
+#endif
+   
    propNameString = propName;
    theCommand = cmd;
    thePropagateCommand = (Propagate *)theCommand;
@@ -159,15 +163,17 @@ void PropagateCommandPanel::Create()
    synchStaticText =
       new wxStaticText(this, -1, wxT("Synchronization Mode"),
                         wxDefaultPosition, wxDefaultSize, 0);
+
+   //loj: 7/28/04 changed wxDefaultSize to wxSize(40, -1)
    nameStaticText =
       new wxStaticText(this, -1, wxT("Name"), 
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT);
    varStaticText =
       new wxStaticText(this, -1, wxT("Variable"), 
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT);
    repeatStaticText =
       new wxStaticText(this, -1, wxT("Repeat"), 
-                        wxDefaultPosition, wxDefaultSize, 0);
+                        wxDefaultPosition, wxSize(40, -1), wxALIGN_RIGHT);
    tolStaticText =
       new wxStaticText(this, -1, wxT("Tolerance"), 
                         wxDefaultPosition, wxDefaultSize, 0);
@@ -190,16 +196,17 @@ void PropagateCommandPanel::Create()
                       wxDefaultPosition, wxSize(80,-1), 0);
 
    // wxButton
+   //loj: 7/28/04 changed wxDefaultSize to wxSize(60, -1)
    viewButton =
       new wxButton(this, ID_BUTTON, wxT("View"),
-                    wxDefaultPosition, wxDefaultSize, 0);
+                    wxDefaultPosition, wxSize(75, -1), 0);
    updateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
                     wxDefaultPosition, wxDefaultSize, 0);
    deleteButton =
       new wxButton(this, ID_BUTTON, wxT("Delete"),
                     wxDefaultPosition, wxDefaultSize, 0);
-    
+   
    // wxComboBox
    synchComboBox =
       new wxComboBox(this, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition,
@@ -209,17 +216,17 @@ void PropagateCommandPanel::Create()
       new wxComboBox(this, ID_COMBO, wxT(logicalOpArray[0]), wxDefaultPosition,
                       wxSize(50,-1), numOfEqualities, logicalOpArray,
                       wxCB_DROPDOWN|wxCB_READONLY);
-       
+   
    // wx*Sizer    
    wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-    
+   
    wxStaticBox *propStaticBox =
       new wxStaticBox(this, -1, wxT("Propagators and Spacecraft"));
    wxStaticBox *stopCondStaticBox =
       new wxStaticBox(this, -1, wxT("Stopping Conditions"));
    wxStaticBox *stopDetailStaticBox =
       new wxStaticBox(this, -1, wxT("Stopping Condition Details"));
-    
+   
    wxStaticBoxSizer *propSizer =
       new wxStaticBoxSizer(propStaticBox, wxVERTICAL);
    //wxStaticBoxSizer *stopSizer =
@@ -229,7 +236,7 @@ void PropagateCommandPanel::Create()
       new wxStaticBoxSizer(stopDetailStaticBox, wxVERTICAL);    
    
    wxBoxSizer *item9 = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *item10 = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *stopNameSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *item11 = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *item12 = new wxBoxSizer(wxHORIZONTAL);
    //wxBoxSizer *item13 = new wxBoxSizer(wxHORIZONTAL);
@@ -239,10 +246,10 @@ void PropagateCommandPanel::Create()
    propSizer->Add(synchComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    propSizer->Add(propGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
-   item10->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   item10->Add(stopNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   item10->Add(75, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   stopNameSizer->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopNameSizer->Add(stopNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopNameSizer->Add(75, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    item11->Add(varStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    item11->Add(varNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    item11->Add(viewButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -256,23 +263,23 @@ void PropagateCommandPanel::Create()
    item12->Add(toleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    item12->Add(updateButton, 0, wxALIGN_RIGHT|wxALL, bsize);
    item12->Add(deleteButton, 0, wxALIGN_RIGHT|wxALL, bsize);
-    
-   item9->Add(item10, 0, wxALIGN_LEFT|wxALL, bsize);    
+   
+   item9->Add(stopNameSizer, 0, wxALIGN_LEFT|wxALL, bsize);    
    item9->Add(item11, 0, wxALIGN_LEFT|wxALL, bsize);
    item9->Add(item12, 0, wxALIGN_LEFT|wxALL, bsize);
 
    detailSizer->Add(item9, 0, wxALIGN_CENTRE|wxALL, bsize);
-    
+   
    mStopSizer->Add(stopCondGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    mStopSizer->Add(detailSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    mMiddleBoxSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    mMiddleBoxSizer->Add(mStopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-
+   
    panelSizer->Add(mMiddleBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-    
+   
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-    
+   
    // waw: Future Implementation
    synchComboBox->Enable(false);
    deleteButton->Enable(true);
@@ -401,11 +408,24 @@ void PropagateCommandPanel::SaveData()
    MessageInterface::ShowMessage
       ("PropagateCommandPanel::SaveData() mTempPropCount=%d\n", mTempPropCount);
 #endif
-         
+   
    if (mTempPropCount > 1)
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Synchronized mode has not been implemented. "
-          "The first propagator in the list will be used");
+   {
+      
+      //for (int i=1; i<numOfProp; i++)
+      for (int i=1; i<mTempPropCount; i++)
+      {
+         //loj: 7/26/04 check for PropSetup name first
+         if (mTempProp[0].propName != mTempProp[i].propName)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::WARNING_, "Synchronized mode has not been implemented. "
+                "The first propagator in the list will be used");
+            numOfProp = 1;
+            break;
+         }
+      }
+   }
    
    //-------------------------------------------------------
    // Saving propagator
@@ -423,10 +443,13 @@ void PropagateCommandPanel::SaveData()
          //---------------------------------------
          numOfSC = mTempProp[i].scNameList.Count();
          
-         if (numOfSC > 1)
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_, "Multiple spacecraft has not been implemented. "
-                "The first spacecraft in the list will be used");
+         //if (numOfSC > 1)
+         //{
+         //   MessageInterface::PopupMessage
+         //      (Gmat::WARNING_, "Multiple spacecraft has not been implemented. "
+         //       "The first spacecraft in the list will be used");
+         //   numOfSC = 1;
+         //}
          
 #if DEBUG_PROPCMD_PANEL
          MessageInterface::ShowMessage
@@ -434,8 +457,8 @@ void PropagateCommandPanel::SaveData()
 #endif
          // Propagate::SetObject(SPACECRAFT) adds to the list, so clear first
          thePropagateCommand->ClearObject(Gmat::SPACECRAFT);
-         //for (int j=0; j<numOfSC; j++) // when multiple spacecraft is ready
-         for (int j=0; j<1; j++)
+         
+         for (int j=0; j<numOfSC; j++)
          {
             thePropagateCommand->
                SetObject(std::string(mTempProp[i].scNameList[j].c_str()),
@@ -466,7 +489,7 @@ void PropagateCommandPanel::SaveData()
    
 #if DEBUG_PROPCMD_PANEL
    MessageInterface::ShowMessage
-      ("SaveData() stopCount=%d\n", stopCount);
+      ("PropagateCommandPanel::SaveData() stopCount=%d\n", stopCount);
 #endif
 
    //loj: 6/28/04 Do we need to show message?
@@ -498,7 +521,7 @@ void PropagateCommandPanel::SaveData()
       {
 #if DEBUG_PROPCMD_PANEL
          MessageInterface::ShowMessage
-            ("SaveData() tempStopCond[%d].isChanged=%d\n", i,
+            ("PropagateCommandPanel::SaveData() tempStopCond[%d].isChanged=%d\n", i,
              tempStopCond[i].isChanged);
 #endif
          if (tempStopCond[i].stopCondPtr != NULL)
@@ -528,7 +551,7 @@ void PropagateCommandPanel::SaveData()
                GetRefObject(Gmat::STOP_CONDITION, tempStopCond[i].stopCondPtr->GetName(),
                             i);
             MessageInterface::ShowMessage
-               ("PropagateCommandPanel::SetData() name=%s, stopVarTYpe=%s, goal = %f\n",
+               ("PropagateCommandPanel::SaveData() name=%s, stopVarTYpe=%s, goal = %f\n",
                 stopCond->GetName().c_str(),
                 stopCond->GetStringParameter("StopVar").c_str(),
                 stopCond->GetRealParameter("Goal"));

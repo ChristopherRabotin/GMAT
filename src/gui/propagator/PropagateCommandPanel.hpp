@@ -80,7 +80,7 @@ private:
    wxButton *updateButton;
    wxButton *deleteButton;
    wxButton *viewButton;
-
+   
    wxComboBox *synchComboBox;
    wxComboBox *equalityComboBox;
 
