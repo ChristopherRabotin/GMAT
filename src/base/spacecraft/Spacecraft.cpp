@@ -307,6 +307,17 @@ std::string Spacecraft::GetParameterText(const Integer id) const
     return GmatBase::GetParameterText(id);
 }
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the type of a parameter.
+ *
+ * @param <id> Integer ID of the parameter.
+ *
+ * @return The type of the parameter.
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 {
     if (id == epochID) return Gmat::REAL_TYPE;
@@ -321,10 +332,24 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
     if (id == refFrameID) return Gmat::STRING_TYPE;
     if (id == refPlaneID) return Gmat::STRING_TYPE;
     if (id == massID) return Gmat::REAL_TYPE;
-    
+    if (id == coeffDragID) return Gmat::REAL_TYPE;
+    if (id == incidentAreaID) return Gmat::REAL_TYPE;
+    if (id == reflectCoeffID) return Gmat::REAL_TYPE;
+ 
     return GmatBase::GetParameterType(id);
 }
 
+//------------------------------------------------------------------------------
+//  std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Gets the text description for the type of a parameter.
+ *
+ * @param <id> Integer ID of the parameter.
+ *
+ * @return The text description of the type of the parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Spacecraft::GetParameterTypeString(const Integer id) const
 {
     return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
