@@ -136,7 +136,7 @@ void CoordSystemConfigPanel::Setup( wxWindow *parent)
 
     boxsizer1->Add( flexgridsizer1, 0, wxALIGN_CENTER|wxALL, 5 );
    
-    theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
+    theMiddleSizer->Add(flexgridsizer1, 0, wxGROW, 5);
 }
 
 //------------------------------------------------------------------------------

@@ -59,6 +59,9 @@ private:
     void OnTextUpdate(wxCommandEvent& event); 
     void OnComboUpdate(wxCommandEvent& event);
     
+    // event handling
+    DECLARE_EVENT_TABLE();
+
     // IDs for the controls and the menu commands
     enum
     {     
