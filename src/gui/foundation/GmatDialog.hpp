@@ -35,19 +35,19 @@ public:
    // constructors
    GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
     
+   virtual void OnOK();
+   virtual void OnCancel();
+   virtual void OnHelp();
+
 protected:
    // member functions
-   //loj: 12/21/04 changed from Show(), because it conflicts with wxDialog::Show()
+   // Changed Show() to ShowDate(), because it conflicts with wxDialog::Show()
    virtual void ShowData();   
    virtual void Create() = 0;
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
    virtual void ResetData() = 0;
    
-   virtual void OnOK();
-   virtual void OnCancel();
-   virtual void OnHelp();
-
     // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
@@ -56,7 +56,7 @@ protected:
    wxBoxSizer *theDialogSizer;
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
-   wxBoxSizer *theButtonSizer; //loj: 10/19/04 added
+   wxBoxSizer *theButtonSizer;
 
    wxButton *theOkButton;
    wxButton *theCancelButton;
