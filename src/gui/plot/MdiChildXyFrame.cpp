@@ -29,20 +29,20 @@
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(MdiChildXyFrame, wxMDIChildFrame)
-    EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
-    EVT_MENU(GmatPlot::MDI_XY_CHANGE_TITLE, MdiChildXyFrame::OnChangeTitle)
-    EVT_MENU(GmatPlot::MDI_XY_CLEAR_PLOT, MdiChildXyFrame::OnClearPlot)
-    EVT_MENU(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, MdiChildXyFrame::OnShowDefaultView)
-    EVT_MENU(GmatPlot::MDI_XY_DRAW_GRID, MdiChildXyFrame::OnDrawGrid)
-    EVT_MENU(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, MdiChildXyFrame::OnDrawDottedLine)
-    EVT_MENU(GmatPlot::MDI_XY_HELP_VIEW, MdiChildXyFrame::OnHelpView)
+   EVT_MENU(GmatPlot::MDI_XY_CHILD_QUIT, MdiChildXyFrame::OnQuit)
+   EVT_MENU(GmatPlot::MDI_XY_CHANGE_TITLE, MdiChildXyFrame::OnChangeTitle)
+   EVT_MENU(GmatPlot::MDI_XY_CLEAR_PLOT, MdiChildXyFrame::OnClearPlot)
+   EVT_MENU(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, MdiChildXyFrame::OnShowDefaultView)
+   EVT_MENU(GmatPlot::MDI_XY_DRAW_GRID, MdiChildXyFrame::OnDrawGrid)
+   EVT_MENU(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, MdiChildXyFrame::OnDrawDottedLine)
+   EVT_MENU(GmatPlot::MDI_XY_HELP_VIEW, MdiChildXyFrame::OnHelpView)
 
-    EVT_PLOT_CLICKED(-1, MdiChildXyFrame::OnPlotClick)
-    EVT_ACTIVATE(MdiChildXyFrame::OnActivate)
-    EVT_SIZE(MdiChildXyFrame::OnSize)
-    EVT_MOVE(MdiChildXyFrame::OnMove)
-    EVT_CLOSE(MdiChildXyFrame::OnClose)
-END_EVENT_TABLE()
+   EVT_PLOT_CLICKED(-1, MdiChildXyFrame::OnPlotClick)
+   EVT_ACTIVATE(MdiChildXyFrame::OnActivate)
+   EVT_SIZE(MdiChildXyFrame::OnSize)
+   EVT_MOVE(MdiChildXyFrame::OnMove)
+   EVT_CLOSE(MdiChildXyFrame::OnClose)
+   END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
@@ -50,138 +50,138 @@ END_EVENT_TABLE()
 //                 const wxString& xAxisTitle, const wxString& yAxisTitle,
 //                 const wxPoint& pos, const wxSize& size, const long style)
 //------------------------------------------------------------------------------
-MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
-                                 const wxString &plotName, const wxString& plotTitle,
-                                 const wxString& xAxisTitle, const wxString& yAxisTitle,
-                                 const wxPoint& pos, const wxSize& size, const long style)
-    : wxMDIChildFrame(parent, -1, plotName, pos, size,
-                      style | wxNO_FULL_REPAINT_ON_RESIZE)
+   MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
+                                    const wxString &plotName, const wxString& plotTitle,
+                                    const wxString& xAxisTitle, const wxString& yAxisTitle,
+                                    const wxPoint& pos, const wxSize& size, const long style)
+      : wxMDIChildFrame(parent, -1, plotName, pos, size,
+                        style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
-    mXyPlot = (wxPlotWindow *) NULL;
-    mIsMainFrame = isMainFrame;
-    mPlotName = plotName;
-    mPlotTitle = plotTitle;
-    mXAxisTitle = xAxisTitle;
-    mYAxisTitle = yAxisTitle;
+   mXyPlot = (wxPlotWindow *) NULL;
+   mIsMainFrame = isMainFrame;
+   mPlotName = plotName;
+   mPlotTitle = plotTitle;
+   mXAxisTitle = xAxisTitle;
+   mYAxisTitle = yAxisTitle;
 
-    for (int i=0; i<MAX_NUM_CURVE; i++)
-        mHasFirstXSet[i] = false;
+   for (int i=0; i<MAX_NUM_CURVE; i++)
+      mHasFirstXSet[i] = false;
     
-//      MessageInterface::ShowMessage("MdiChildXyFrame::MdiChildXyFrame() "
-//                                    "X Axis Title = %s  Y Axis Title = %s "
-//                                    "isMainFrame = %d\n",
-//                                    xAxisTitle.c_str(), yAxisTitle.c_str(),
-//                                    isMainFrame);
+   //      MessageInterface::ShowMessage("MdiChildXyFrame::MdiChildXyFrame() "
+   //                                    "X Axis Title = %s  Y Axis Title = %s "
+   //                                    "isMainFrame = %d\n",
+   //                                    xAxisTitle.c_str(), yAxisTitle.c_str(),
+   //                                    isMainFrame);
     
-    MdiXyPlot::mdiChildren.Append(this);
+   MdiXyPlot::mdiChildren.Append(this);
     
-    // Give it an icon
+   // Give it an icon
 #ifdef __WXMSW__
-    SetIcon(wxIcon(_T("chrt_icn")));
+   SetIcon(wxIcon(_T("chrt_icn")));
 #else
-    SetIcon(wxIcon( mondrian_xpm ));
+   SetIcon(wxIcon( mondrian_xpm ));
 #endif
 
-    // File menu
-    wxMenu *fileMenu = new wxMenu;
+   // File menu
+   wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(GmatPlot::MDI_XY_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
-    fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
+   fileMenu->Append(GmatPlot::MDI_XY_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
+   fileMenu->Append(GmatPlot::MDI_XY_QUIT, _T("&Exit"));
 
-    // Plot menu
-    wxMenu *plotMenu = new wxMenu;
+   // Plot menu
+   wxMenu *plotMenu = new wxMenu;
 
-    plotMenu->Append(GmatPlot::MDI_XY_CLEAR_PLOT, _T("Clear Plot"));
-    plotMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close"), _T("Close this window"));
-    plotMenu->AppendSeparator();
-    plotMenu->Append(GmatPlot::MDI_XY_CHANGE_TITLE, _T("Change &title..."));
+   plotMenu->Append(GmatPlot::MDI_XY_CLEAR_PLOT, _T("Clear Plot"));
+   plotMenu->Append(GmatPlot::MDI_XY_CHILD_QUIT, _T("&Close"), _T("Close this window"));
+   plotMenu->AppendSeparator();
+   plotMenu->Append(GmatPlot::MDI_XY_CHANGE_TITLE, _T("Change &title..."));
 
-    // View menu
-    wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                     _("Reset to default view"));
-    viewMenu->AppendSeparator();
+   // View menu
+   wxMenu *viewMenu = new wxMenu;
+   viewMenu->Append(GmatPlot::MDI_XY_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
+                    _("Reset to default view"));
+   viewMenu->AppendSeparator();
 
-    // View Option submenu
-    wxMenu *viewOptionMenu = new wxMenu;
-    wxMenuItem *item =
-        new wxMenuItem(viewMenu, GmatPlot::MDI_XY_VIEW_OPTION, _T("Option"),
-                       _T("view options"), wxITEM_NORMAL, viewOptionMenu);
-    viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
-                           _T("Draw Grids"),
-                           _T("Draw Grids"), wxITEM_CHECK);
-    viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
-                           _T("Draw dotted line"),
-                           _T("Draw dotted line"), wxITEM_CHECK);
+   // View Option submenu
+   wxMenu *viewOptionMenu = new wxMenu;
+   wxMenuItem *item =
+      new wxMenuItem(viewMenu, GmatPlot::MDI_XY_VIEW_OPTION, _T("Option"),
+                     _T("view options"), wxITEM_NORMAL, viewOptionMenu);
+   viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_GRID,
+                          _T("Draw Grids"),
+                          _T("Draw Grids"), wxITEM_CHECK);
+   viewOptionMenu->Append(GmatPlot::MDI_XY_DRAW_DOTTED_LINE,
+                          _T("Draw dotted line"),
+                          _T("Draw dotted line"), wxITEM_CHECK);
 
-    viewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
+   viewOptionMenu->Check(GmatPlot::MDI_XY_DRAW_DOTTED_LINE, false);
         
-    viewMenu->Append(item);
+   viewMenu->Append(item);
 
-    // Help menu
-    wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(GmatPlot::MDI_XY_HELP_VIEW, _T("View"), _T("View mouse control"));
+   // Help menu
+   wxMenu *helpMenu = new wxMenu;
+   helpMenu->Append(GmatPlot::MDI_XY_HELP_VIEW, _T("View"), _T("View mouse control"));
 
-    // menu bar
-    wxMenuBar *menuBar = new wxMenuBar;
+   // menu bar
+   wxMenuBar *menuBar = new wxMenuBar;
 
-    menuBar->Append(fileMenu, _T("&File"));
-    menuBar->Append(plotMenu, _T("&Plot"));
-    menuBar->Append(viewMenu, _T("&View"));
-    menuBar->Append(helpMenu, _T("&Help"));
+   menuBar->Append(fileMenu, _T("&File"));
+   menuBar->Append(plotMenu, _T("&Plot"));
+   menuBar->Append(viewMenu, _T("&View"));
+   menuBar->Append(helpMenu, _T("&Help"));
 
-    // Associate the menu bar with the frame
-    SetMenuBar(menuBar);
+   // Associate the menu bar with the frame
+   SetMenuBar(menuBar);
 
-    // status bar
-    //CreateStatusBar();
-    //SetStatusText(title);
+   // status bar
+   //CreateStatusBar();
+   //SetStatusText(title);
 
-    // Create XyPlotFrame
-    int width, height;
-    GetClientSize(&width, &height);
-    wxPlotWindow *frame =
-        new wxPlotWindow(this, -1, wxPoint(0, 0), wxSize(width, height), wxPLOT_DEFAULT,
-                         plotTitle);
+   // Create XyPlotFrame
+   int width, height;
+   GetClientSize(&width, &height);
+   wxPlotWindow *frame =
+      new wxPlotWindow(this, -1, wxPoint(0, 0), wxSize(width, height), wxPLOT_DEFAULT,
+                       plotTitle);
 
-    mXyPlot = frame;
+   mXyPlot = frame;
 
-    // Set units per X value
-    mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
+   // Set units per X value
+   mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
 
-    // Create log window
-    //loj: 2/24/04 MdiChildXyFrame::OnPlotClick() calls wxLogMessage(),
-    // so used wxLogStatus() instead
-    // If I don't have this, it doesn't scroll
-    //mLogTextCtrl = new wxTextCtrl( this, -1, "",
-    //                               wxPoint(0,0), wxSize(100,20), wxTE_MULTILINE );
-    //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLogTextCtrl ) );
-    //delete oldLog;
+   // Create log window
+   //loj: 2/24/04 MdiChildXyFrame::OnPlotClick() calls wxLogMessage(),
+   // so used wxLogStatus() instead
+   // If I don't have this, it doesn't scroll
+   //mLogTextCtrl = new wxTextCtrl( this, -1, "",
+   //                               wxPoint(0,0), wxSize(100,20), wxTE_MULTILINE );
+   //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLogTextCtrl ) );
+   //delete oldLog;
 
-//      //loj: 3/11/04 moved to XyPlotWindow constructor
-//      //================================================================
-//      wxPanel *panel = new wxPanel(this, -1, wxPoint(0,0), wxSize(100,30));
-//      panel->SetBackgroundColour(*wxLIGHT_GREY);
+   //      //loj: 3/11/04 moved to XyPlotWindow constructor
+   //      //================================================================
+   //      wxPanel *panel = new wxPanel(this, -1, wxPoint(0,0), wxSize(100,30));
+   //      panel->SetBackgroundColour(*wxLIGHT_GREY);
     
-//      wxStaticText *titleText = new wxStaticText(panel, -1, plotTitle);
+   //      wxStaticText *titleText = new wxStaticText(panel, -1, plotTitle);
     
-//      wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-//      panelSizer->Add(titleText, 0, wxALIGN_CENTER | wxALL, 5);
-//      panel->SetSizer(panelSizer);
-//      //================================================================
+   //      wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
+   //      panelSizer->Add(titleText, 0, wxALIGN_CENTER | wxALL, 5);
+   //      panel->SetSizer(panelSizer);
+   //      //================================================================
     
-    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
     
-    //loj: If mLogTextCtrl or panel is not added, I had to resize the frame to see the plot
-    //topSizer->Add( mLogTextCtrl, 0, wxEXPAND );
-//      topSizer->Add(panel, 0, wxALIGN_CENTER | wxEXPAND);
-    topSizer->Add(mXyPlot, 1, wxALIGN_CENTER |wxEXPAND);
+   //loj: If mLogTextCtrl or panel is not added, I had to resize the frame to see the plot
+   //topSizer->Add( mLogTextCtrl, 0, wxEXPAND );
+   //      topSizer->Add(panel, 0, wxALIGN_CENTER | wxEXPAND);
+   topSizer->Add(mXyPlot, 1, wxALIGN_CENTER |wxEXPAND);
 
-    SetAutoLayout( TRUE ); //loj: this is called implicitly by SetSizer()
-    SetSizer( topSizer );
+   SetAutoLayout( TRUE ); //loj: this is called implicitly by SetSizer()
+   SetSizer( topSizer );
             
-    // this should work for MDI frames as well as for normal ones
-    SetSizeHints(100, 100);
+   // this should work for MDI frames as well as for normal ones
+   SetSizeHints(100, 100);
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, bool isMainFrame,
 //------------------------------------------------------------------------------
 MdiChildXyFrame::~MdiChildXyFrame()
 {
-    MdiXyPlot::mdiChildren.DeleteObject(this);
+   MdiXyPlot::mdiChildren.DeleteObject(this);
 }
 
 //------------------------------------------------------------------------------   
@@ -197,74 +197,74 @@ MdiChildXyFrame::~MdiChildXyFrame()
 //------------------------------------------------------------------------------   
 int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
 {
-    std::ifstream inStream;  // input data stream
-    double tempData[7]; //loj: time, x, y, z, vx, vy, vz for build 2
-    int numData = 0;
-    double startTime;
+   std::ifstream inStream;  // input data stream
+   double tempData[7]; //loj: time, x, y, z, vx, vy, vz for build 2
+   int numData = 0;
+   double startTime;
     
-    if (filename != "")
-    {       
-        inStream.open(filename.c_str());
-        if (inStream.is_open())
-        {
-            XyPlotCurve *xCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position X");
-            XyPlotCurve *yCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position Y");
-            XyPlotCurve *zCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position Z");
+   if (filename != "")
+   {       
+      inStream.open(filename.c_str());
+      if (inStream.is_open())
+      {
+         XyPlotCurve *xCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position X");
+         XyPlotCurve *yCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position Y");
+         XyPlotCurve *zCurve = new XyPlotCurve(0, -40000.0, 40000.0, "Position Z");
 
-            // set pen color
-            xCurve->SetPenNormal(*wxRED_PEN);
-            yCurve->SetPenNormal(*wxGREEN_PEN);
-            zCurve->SetPenNormal(*wxCYAN_PEN);
+         // set pen color
+         xCurve->SetPenNormal(*wxRED_PEN);
+         yCurve->SetPenNormal(*wxGREEN_PEN);
+         zCurve->SetPenNormal(*wxCYAN_PEN);
             
-            xCurve->SetPenSelected(*wxBLACK_PEN);
-            yCurve->SetPenSelected(*wxBLACK_PEN);
-            zCurve->SetPenSelected(*wxBLACK_PEN);
+         xCurve->SetPenSelected(*wxBLACK_PEN);
+         yCurve->SetPenSelected(*wxBLACK_PEN);
+         zCurve->SetPenSelected(*wxBLACK_PEN);
             
-            // read 1st line to get start time
+         // read 1st line to get start time
+         for (int i=0; i<7; i++)
+            inStream >> tempData[i];
+
+         startTime = tempData[0];
+
+         // set startX (time)
+         xCurve->SetFirstX(startTime);
+         yCurve->SetFirstX(startTime);
+         zCurve->SetFirstX(startTime);
+            
+         // set time, X, Y, Z
+         xCurve->AddData(0.0, tempData[1]); // time, X
+         yCurve->AddData(0.0, tempData[2]); // time, Y
+         zCurve->AddData(0.0, tempData[3]); // time, Z
+         numData++;
+
+         while(!inStream.eof())
+         {
+            // read time, X, Y, Z, Vx, Vy, Vz
             for (int i=0; i<7; i++)
-                inStream >> tempData[i];
+               inStream >> tempData[i];
 
-            startTime = tempData[0];
-
-            // set startX (time)
-            xCurve->SetFirstX(startTime);
-            yCurve->SetFirstX(startTime);
-            zCurve->SetFirstX(startTime);
-            
             // set time, X, Y, Z
-            xCurve->AddData(0.0, tempData[1]); // time, X
-            yCurve->AddData(0.0, tempData[2]); // time, Y
-            zCurve->AddData(0.0, tempData[3]); // time, Z
+            xCurve->AddData(tempData[0]-startTime, tempData[1]); // time, X
+            yCurve->AddData(tempData[0]-startTime, tempData[2]); // time, Y
+            zCurve->AddData(tempData[0]-startTime, tempData[3]); // time, Z
+
             numData++;
-
-            while(!inStream.eof())
-            {
-                // read time, X, Y, Z, Vx, Vy, Vz
-                for (int i=0; i<7; i++)
-                    inStream >> tempData[i];
-
-                // set time, X, Y, Z
-                xCurve->AddData(tempData[0]-startTime, tempData[1]); // time, X
-                yCurve->AddData(tempData[0]-startTime, tempData[2]); // time, Y
-                zCurve->AddData(tempData[0]-startTime, tempData[3]); // time, Z
-
-                numData++;
-            }
+         }
             
-            //loj: use this for A1Mjd time only
-            //loj: 21545.xxx
-            mXyPlot->SetUnitsPerValue(0.001);
+         //loj: use this for A1Mjd time only
+         //loj: 21545.xxx
+         mXyPlot->SetUnitsPerValue(0.001);
 
-            mXyPlot->Add(xCurve);
-            mXyPlot->Add(yCurve);
-            mXyPlot->Add(zCurve);
+         mXyPlot->Add(xCurve);
+         mXyPlot->Add(yCurve);
+         mXyPlot->Add(zCurve);
 
-        }
+      }
 
-        Update();
-    }
+      Update();
+   }
 
-    return numData;
+   return numData;
 }
 
 //------------------------------------------------------------------------------
@@ -272,10 +272,10 @@ int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
 //------------------------------------------------------------------------------
 bool MdiChildXyFrame::DeletePlot()
 {
-    if (mIsMainFrame)
-        MdiXyPlot::mdiParentXyFrame->mainSubframe->Close();
+   if (mIsMainFrame)
+      MdiXyPlot::mdiParentXyFrame->mainSubframe->Close();
 
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -283,12 +283,12 @@ bool MdiChildXyFrame::DeletePlot()
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::SetPlotTitle(const wxString &title)
 {
-    //MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
-    //                              title.c_str());
-    mPlotTitle = title;
+   //MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
+   //                              title.c_str());
+   mPlotTitle = title;
     
-    if (mXyPlot)
-        mXyPlot->SetPlotTitle(title);
+   if (mXyPlot)
+      mXyPlot->SetPlotTitle(title);
 }
 
 //------------------------------------------------------------------------------   
@@ -299,47 +299,47 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin, dou
                                    const wxString &curveTitle,
                                    const wxString &penColorName)
 {
-    //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
-    //                              yMin, yMax);
+   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
+   //                              yMin, yMax);
     
-    mHasFirstXSet[curveIndex] = false;
+   mHasFirstXSet[curveIndex] = false;
     
-    // Create XyPlotCurve
-    XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
+   // Create XyPlotCurve
+   XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
     
-    //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
-    //                              curve->GetCurveTitle().c_str());
+   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
+   //                              curve->GetCurveTitle().c_str());
     
-    // Find the color
-    wxColour *color = wxTheColourDatabase->FindColour(penColorName);
-    if (color == NULL)
-    {
-        // Set normal pen to black dashed pen
-        curve->SetPenNormal(*wxBLACK_DASHED_PEN);
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
-    }
-    else
-    {
-        wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
-        curve->SetPenNormal(*pen);
-        //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
-    }
+   // Find the color
+   wxColour *color = wxTheColourDatabase->FindColour(penColorName);
+   if (color == NULL)
+   {
+      // Set normal pen to black dashed pen
+      curve->SetPenNormal(*wxBLACK_DASHED_PEN);
+      MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() color is NULL... \n");
+   }
+   else
+   {
+      wxPen *pen = wxThePenList->FindOrCreatePen(*color, 1, wxSOLID); //loj: check width of 1
+      curve->SetPenNormal(*pen);
+      //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() found color ... \n");
+   }
 
-    //loj: Set selected pen to black for now (build2)
-    curve->SetPenSelected(*wxBLACK_PEN);
+   //loj: Set selected pen to black for now (build2)
+   curve->SetPenSelected(*wxBLACK_PEN);
 
-    //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() adding curve... \n");
+   //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() adding curve... \n");
 
-    if (mXyPlot != NULL)
-    {
-        mXyPlot->Add(curve);
-        //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve count = %d\n",
-        //                              mXyPlot->GetCount());
-    }
-    else
-    {
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
-    }
+   if (mXyPlot != NULL)
+   {
+      mXyPlot->Add(curve);
+      //MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve count = %d\n",
+      //                              mXyPlot->GetCount());
+   }
+   else
+   {
+      MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() mXyPlot is NULL... \n");
+   }
         
 
 }
@@ -350,26 +350,26 @@ void MdiChildXyFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin, dou
 //------------------------------------------------------------------------------   
 void MdiChildXyFrame::DeleteAllPlotCurves()
 {
-    //MessageInterface::ShowMessage("MdiChildXyFrame::DeleteAllPlotCurve() entered \n");
+   //MessageInterface::ShowMessage("MdiChildXyFrame::DeleteAllPlotCurve() entered \n");
                                  
-    if (mXyPlot != NULL)
-    {
-        while (mXyPlot->GetCount() > 0)
-        {
-            wxPlotCurve* curve = mXyPlot->GetAt(0);
-            mXyPlot->Delete(curve);
-            //MessageInterface::ShowMessage("MdiChildXyFrame::DeleteAllPlotCurve() curveCount = %d\n",
-            //                              mXyPlot->GetCount());
-        }
+   if (mXyPlot != NULL)
+   {
+      while (mXyPlot->GetCount() > 0)
+      {
+         wxPlotCurve* curve = mXyPlot->GetAt(0);
+         mXyPlot->Delete(curve);
+         //MessageInterface::ShowMessage("MdiChildXyFrame::DeleteAllPlotCurve() curveCount = %d\n",
+         //                              mXyPlot->GetCount());
+      }
         
-        for (int i=0; i<MAX_NUM_CURVE; i++)
-            mHasFirstXSet[i] = false;
+      for (int i=0; i<MAX_NUM_CURVE; i++)
+         mHasFirstXSet[i] = false;
 
-    }
-    else
-    {
-        MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() mXyPlot is NULL... \n");
-    }
+   }
+   else
+   {
+      MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() mXyPlot is NULL... \n");
+   }
 }
 
 //loj: 3/8/04 added
@@ -378,19 +378,19 @@ void MdiChildXyFrame::DeleteAllPlotCurves()
 //------------------------------------------------------------------------------   
 void MdiChildXyFrame::DeletePlotCurve(int curveIndex)
 {
-    //MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() curveIndex = %d\n",
-    //                              curveIndex);
+   //MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() curveIndex = %d\n",
+   //                              curveIndex);
     
-    if (mXyPlot != NULL)
-    {
-        wxPlotCurve* curve = mXyPlot->GetAt(curveIndex);
-        mXyPlot->Delete(curve);
-        mHasFirstXSet[curveIndex] = false;
-    }
-    else
-    {
-        MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() mXyPlot is NULL... \n");
-    }
+   if (mXyPlot != NULL)
+   {
+      wxPlotCurve* curve = mXyPlot->GetAt(curveIndex);
+      mXyPlot->Delete(curve);
+      mHasFirstXSet[curveIndex] = false;
+   }
+   else
+   {
+      MessageInterface::ShowMessage("MdiChildXyFrame::DeletePlotCurve() mXyPlot is NULL... \n");
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -406,23 +406,23 @@ void MdiChildXyFrame::DeletePlotCurve(int curveIndex)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::AddDataPoints(int curveIndex, double xData, double yData)
 {
-    if (mXyPlot)
-    {
-        //MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() curveIndex = %d "
-        //                              "X = %f  Y = %f\n", curveIndex, xData, yData);
+   if (mXyPlot)
+   {
+      //MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() curveIndex = %d "
+      //                              "X = %f  Y = %f\n", curveIndex, xData, yData);
         
-        XyPlotCurve *curve = (XyPlotCurve*)(mXyPlot->GetAt(curveIndex));
-        //MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() curveTitle = %s\n",
-        //                              curve->GetCurveTitle().c_str());
+      XyPlotCurve *curve = (XyPlotCurve*)(mXyPlot->GetAt(curveIndex));
+      //MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() curveTitle = %s\n",
+      //                              curve->GetCurveTitle().c_str());
         
-        if (!mHasFirstXSet[curveIndex])
-        {
-            curve->SetFirstX(xData);
-            mHasFirstXSet[curveIndex] = true;
-        }
+      if (!mHasFirstXSet[curveIndex])
+      {
+         curve->SetFirstX(xData);
+         mHasFirstXSet[curveIndex] = true;
+      }
     
-        curve->AddData((xData - curve->GetFirstX()), yData); //loj: should I check for curve title?
-    }
+      curve->AddData((xData - curve->GetFirstX()), yData); //loj: should I check for curve title?
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -434,10 +434,10 @@ void MdiChildXyFrame::AddDataPoints(int curveIndex, double xData, double yData)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::ClearPlotData()
 {
-    if (mXyPlot)
-    {
-        mXyPlot->ClearAllCurveData();
-    }
+   if (mXyPlot)
+   {
+      mXyPlot->ClearAllCurveData();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -449,15 +449,16 @@ void MdiChildXyFrame::ClearPlotData()
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::RedrawCurve()
 {
-    if (mXyPlot)
-    {
-        //mXyPlot->SetFocus(); // If SetFocus() is called OpenGl plot flickers
-        mXyPlot->RedrawEverything(); // need to draw everything
-        //mXyPlot->RedrawPlotArea();
-        //mXyPlot->RedrawXAxis();
-        Update(); // need Update to show plot as it runs
-        //Refresh(true); // doesn't update the frame
-    }
+   if (mXyPlot)
+   {
+      //mXyPlot->SetFocus(); // If SetFocus() is called OpenGl plot flickers
+      //mXyPlot->RedrawEverything();
+      mXyPlot->RedrawPlotArea(); // 4/29/04 redraw plot area only since X/Y axis don't change
+      //mXyPlot->RedrawXAxis();
+      mXyPlot->ZoomOut();
+      Update(); // need Update to show plot as it runs
+      //Refresh(true); // doesn't update the frame
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -465,7 +466,7 @@ void MdiChildXyFrame::RedrawCurve()
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 {
-    Close(TRUE);
+   Close(TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -474,17 +475,17 @@ void MdiChildXyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MdiChildXyFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 {
 //#if wxUSE_TEXTDLG
-    static wxString s_title = _T("Plot Frame");
+   static wxString s_title = _T("Plot Frame");
 
-    wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
-                                       _T(""),
-                                       s_title,
-                                       GetParent()->GetParent());
-    if ( !title )
-        return;
+   wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
+                                      _T(""),
+                                      s_title,
+                                      GetParent()->GetParent());
+   if ( !title )
+      return;
 
-    s_title = title;
-    SetTitle(s_title);
+   s_title = title;
+   SetTitle(s_title);
 //#endif
 }
 
@@ -493,8 +494,8 @@ void MdiChildXyFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
 {
-//      if (mXyPlot)
-//          mXyPlot->ClearPlot();
+   //if (mXyPlot)
+   //   mXyPlot->ClearPlot();
 }
 
 //------------------------------------------------------------------------------
@@ -502,8 +503,8 @@ void MdiChildXyFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnShowDefaultView(wxCommandEvent& event)
 {
-//      if (mXyPlot)
-//          mXyPlot->ShowDefaultView();
+   //if (mXyPlot)
+   //   mXyPlot->ShowDefaultView();
 }
 
 //------------------------------------------------------------------------------
@@ -511,8 +512,8 @@ void MdiChildXyFrame::OnShowDefaultView(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnDrawGrid(wxCommandEvent& event)
 {
-//      if (mXyPlot)
-//          mXyPlot->DrawGrid(event.IsChecked());
+   //if (mXyPlot)
+   //   mXyPlot->DrawGrid(event.IsChecked());
 }
 
 //------------------------------------------------------------------------------
@@ -520,8 +521,8 @@ void MdiChildXyFrame::OnDrawGrid(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnDrawDottedLine(wxCommandEvent& event)
 {
-//      if (mXyPlot)
-//          mXyPlot->DrawDottedLine(event.IsChecked());
+   //if (mXyPlot)
+   //   mXyPlot->DrawDottedLine(event.IsChecked());
 }
 
 //------------------------------------------------------------------------------
@@ -536,29 +537,29 @@ void MdiChildXyFrame::OnHelpView(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
 {
-    if (mXyPlot)
-    {
-        XyPlotCurve *curve = (XyPlotCurve*)event.GetCurve();
-        double x = (event.GetPosition() * mXyPlot->GetUnitsPerValue()) +
-            curve->GetFirstX();
-        double y = event.GetCurve()->GetY( event.GetPosition() );
+   if (mXyPlot)
+   {
+      XyPlotCurve *curve = (XyPlotCurve*)event.GetCurve();
+      double x = (event.GetPosition() * mXyPlot->GetUnitsPerValue()) +
+         curve->GetFirstX();
+      double y = event.GetCurve()->GetY( event.GetPosition() );
         
-        //MessageInterface::ShowMessage("MdiChildXyFrame::OnPlotClick() xpos = %d  "
-        //                              "firstx = %f  unitspervalue = %g\n", event.GetPosition(),
-        //                              curve->GetFirstX(), mXyPlot->GetUnitsPerValue());
+      //MessageInterface::ShowMessage("MdiChildXyFrame::OnPlotClick() xpos = %d  "
+      //                              "firstx = %f  unitspervalue = %g\n", event.GetPosition(),
+      //                              curve->GetFirstX(), mXyPlot->GetUnitsPerValue());
         
-        wxString info;
-        info.Printf("%s: %5.3f  %s: %f\n", GetXAxisTitle().c_str(), x,
-                    curve->GetCurveTitle().c_str(), y);
+      wxString info;
+      info.Printf("%s: %5.3f  %s: %f\n", GetXAxisTitle().c_str(), x,
+                  curve->GetCurveTitle().c_str(), y);
         
-        //loj: 2/26/04 changed to wxLogStatus
-        wxLogStatus(MdiXyPlot::mdiParentXyFrame, info);
+      //loj: 2/26/04 changed to wxLogStatus
+      wxLogStatus(MdiXyPlot::mdiParentXyFrame, info);
         
-        //mLogTextCtrl->AppendText(info);
+      //mLogTextCtrl->AppendText(info);
         
-        //wxLogMessage(GetXAxisTitle() + ": %5.3f, " +
-        //             curve->GetCurveTitle() + ": %f", x, y);
-    }
+      //wxLogMessage(GetXAxisTitle() + ": %5.3f, " +
+      //             curve->GetCurveTitle() + ": %f", x, y);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -566,10 +567,10 @@ void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnActivate(wxActivateEvent& event)
 {
-    if ( event.GetActive() && mXyPlot )
-    {
-        mXyPlot->SetFocus();
-    }
+   if ( event.GetActive() && mXyPlot )
+   {
+      mXyPlot->SetFocus();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -577,17 +578,17 @@ void MdiChildXyFrame::OnActivate(wxActivateEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnMove(wxMoveEvent& event)
 {
-    // VZ: here everything is totally wrong under MSW, the positions are
-    //     different and both wrong (pos2 is off by 2 pixels for me which seems
-    //     to be the width of the MDI canvas border)
+   // VZ: here everything is totally wrong under MSW, the positions are
+   //     different and both wrong (pos2 is off by 2 pixels for me which seems
+   //     to be the width of the MDI canvas border)
     
-//      wxPoint pos1 = event.GetPosition(),
-//              pos2 = GetPosition();
-//      wxLogStatus(MdiXyPlot::mdiChildXyFrame,
-//                  wxT("position from event: (%d, %d), from frame (%d, %d)"),
-//                  pos1.x, pos1.y, pos2.x, pos2.y);
+   //      wxPoint pos1 = event.GetPosition(),
+   //              pos2 = GetPosition();
+   //      wxLogStatus(MdiXyPlot::mdiChildXyFrame,
+   //                  wxT("position from event: (%d, %d), from frame (%d, %d)"),
+   //                  pos1.x, pos1.y, pos2.x, pos2.y);
 
-    event.Skip();
+   event.Skip();
 }
 
 //------------------------------------------------------------------------------
@@ -595,18 +596,18 @@ void MdiChildXyFrame::OnMove(wxMoveEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnSize(wxSizeEvent& event)
 {
-    // VZ: under MSW the size event carries the client size (quite
-    //     unexpectedly) *except* for the very first one which has the full
-    //     size... what should it really be? TODO: check under wxGTK
+   // VZ: under MSW the size event carries the client size (quite
+   //     unexpectedly) *except* for the very first one which has the full
+   //     size... what should it really be? TODO: check under wxGTK
     
-//      wxSize size1 = event.GetSize(),
-//             size2 = GetSize(),
-//             size3 = GetClientSize();
-//      wxLogStatus(MdiXyPlot::mdiChildXyFrame,
-//                  wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
-//                  size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
+   //      wxSize size1 = event.GetSize(),
+   //             size2 = GetSize(),
+   //             size3 = GetClientSize();
+   //      wxLogStatus(MdiXyPlot::mdiChildXyFrame,
+   //                  wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
+   //                  size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
 
-    event.Skip();
+   event.Skip();
 }
 
 //------------------------------------------------------------------------------
@@ -614,14 +615,14 @@ void MdiChildXyFrame::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildXyFrame::OnClose(wxCloseEvent& event)
 {    
-    MdiXyPlot::numChildren--;
+   MdiXyPlot::numChildren--;
         
-    if (mIsMainFrame)
-        MdiXyPlot::mdiParentXyFrame->mainSubframe = NULL;
+   if (mIsMainFrame)
+      MdiXyPlot::mdiParentXyFrame->mainSubframe = NULL;
     
-    if (MdiXyPlot::numChildren == 0)
-        MdiXyPlot::mdiParentXyFrame->subframe = NULL;
+   if (MdiXyPlot::numChildren == 0)
+      MdiXyPlot::mdiParentXyFrame->subframe = NULL;
     
-    event.Skip();
+   event.Skip();
 }
 
