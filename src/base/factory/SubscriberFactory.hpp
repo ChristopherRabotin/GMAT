@@ -27,7 +27,8 @@ class GMAT_API SubscriberFactory : public Factory
 {
 public:
    Subscriber*  CreateSubscriber(std::string ofType,
-                                 std::string withName = "");
+                                 std::string withName = "",
+                                 std::string fileName = "");
 
    // default constructor
    SubscriberFactory();

@@ -39,9 +39,10 @@
  */
 //------------------------------------------------------------------------------
 Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
-                                                std::string withName)
+                                                std::string withName,
+                                                std::string fileName)
 {
-   return new ReportFile(withName);
+   return new ReportFile(withName, fileName);
 }
 
 
