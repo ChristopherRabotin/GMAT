@@ -888,7 +888,7 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
    if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
    {
       //open up dialog box to get the script name
-      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"));
+      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
     
       if (dialog.ShowModal() == wxID_OK)
       {
@@ -914,7 +914,7 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
 void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
 {
    //open up dialog box to get the script name
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"));
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
     
    if (dialog.ShowModal() == wxID_OK)
    {
