@@ -18,7 +18,7 @@
 #include "Parameter.hpp"
 #include "ParameterSelectDialog.hpp"
 
-//#define DEBUG_PROPCMD_PANEL 1
+//#define DEBUG_CALLFUNCTION_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -194,67 +194,87 @@ void CallFunctionPanel::Create()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::LoadData()
 {
-//   MessageInterface::ShowMessage("Loading data...\n");
+   #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage("Loading data...\n");
+   #endif
 
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
 
-//   std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
-//   functionComboBox->SetValue(objectName.c_str());
-    int id = theCommand->GetParameterID("FunctionName");
-    std::string filename = theCommand->GetStringParameter(id);
-    functionComboBox->SetValue(wxT(filename.c_str()));
+   int id = theCommand->GetParameterID("FunctionName");
+   std::string filename = theCommand->GetStringParameter(id);
+   functionComboBox->SetValue(wxT(filename.c_str()));
 
-//   MessageInterface::ShowMessage("Number of input: %d, Number of output: %d\n",
-//      numInput, numOutput);
+   #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage("   Function name is: %s\n",
+         filename.c_str());
+   #endif
 
-    // get input parameters
-    StringArray inputList = theCommand->GetStringArrayParameter("AddInput");
-    mNumInput = inputList.size();
-    inputStrings.Clear();
+   // get input parameters
+   StringArray inputList = theCommand->GetStringArrayParameter("AddInput");
+   mNumInput = inputList.size();
+   inputStrings.Clear();
 
-    if (mNumInput > 0)
-    {
+   #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage("   Found %d input parameters:\n",
+         mNumInput);
+      for (StringArray::iterator i = inputList.begin(); i != inputList.end(); ++i)
+         MessageInterface::ShowMessage("      '%s'\n", i->c_str());
+   #endif
 
-       wxString *inputNames = new wxString[mNumInput];
-       Parameter *param;
-       wxString cellValue = "";
+   if (mNumInput > 0)
+   {
+      wxString *inputNames = new wxString[mNumInput];
+      GmatBase *param;
+      wxString cellValue = "";
 
-       for (int i=0; i<mNumInput; i++)
-       {
-          inputNames[i] = inputList[i].c_str();
-          param = theGuiInterpreter->GetParameter(inputList[i]);
-          cellValue = cellValue + param->GetName().c_str() + "  ";
-          inputStrings.Add(param->GetName().c_str());
-       }
+      for (int i=0; i<mNumInput; i++)
+      {
+         inputNames[i] = inputList[i].c_str();
+         #ifdef DEBUG_CALLFUNCTION_PANEL
+            MessageInterface::ShowMessage("   Looking up " + inputList[i] + "\n");
+         #endif
+         param = theGuiInterpreter->GetConfiguredItem(inputList[i]);
+         cellValue = cellValue + param->GetName().c_str() + "  ";
+         inputStrings.Add(param->GetName().c_str());
+      }
 
-       inputGrid->SetCellValue(0, 0, cellValue);
-       delete inputNames;
-    }
+      inputGrid->SetCellValue(0, 0, cellValue);
+      delete [] inputNames;
+   }
 
-    // get output parameters
-    StringArray outputList = theCommand->GetStringArrayParameter("AddOutput");
-    mNumOutput = outputList.size();
-    outputStrings.Clear();
+   // get output parameters
+   StringArray outputList = theCommand->GetStringArrayParameter("AddOutput");
+   mNumOutput = outputList.size();
+   outputStrings.Clear();
 
-    if (mNumOutput > 0)
-    {
+   #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage("   Found %d output parameters:\n",
+         mNumOutput);
+      for (StringArray::iterator i = outputList.begin(); i != outputList.end(); ++i)
+         MessageInterface::ShowMessage("      '%s'\n", i->c_str());
+   #endif
 
-       wxString *outputNames = new wxString[mNumOutput];
-       Parameter *param;
-       wxString cellValue = "";
+   if (mNumOutput > 0)
+   {
+      wxString *outputNames = new wxString[mNumOutput];
+      GmatBase *param;
+      wxString cellValue = "";
 
-       for (int i=0; i<mNumOutput; i++)
-       {
-          outputNames[i] = outputList[i].c_str();
-          param = theGuiInterpreter->GetParameter(outputList[i]);
-          cellValue = cellValue + param->GetName().c_str() + "  ";
-          outputStrings.Add(param->GetName().c_str());
-       }
+      for (int i=0; i<mNumOutput; i++)
+      {
+         outputNames[i] = outputList[i].c_str();
+         #ifdef DEBUG_CALLFUNCTION_PANEL
+            MessageInterface::ShowMessage("   Looking up " + outputList[i] + "\n");
+         #endif
+         param = theGuiInterpreter->GetConfiguredItem(outputList[i]);
+         cellValue = cellValue + param->GetName().c_str() + "  ";
+         outputStrings.Add(param->GetName().c_str());
+      }
 
-       outputGrid->SetCellValue(0, 0, cellValue);
-       delete outputNames;
-    }
+      outputGrid->SetCellValue(0, 0, cellValue);
+      delete [] outputNames;
+   }
 
 //   int numInput = theCommand->GetNumInputParams();
 //   int numOutput = theCommand->GetNumOutputParams();
