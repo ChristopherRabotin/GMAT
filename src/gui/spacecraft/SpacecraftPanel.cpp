@@ -27,6 +27,7 @@
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 #include "RealUtilities.hpp"
+#include "GmatMainNotebook.hpp"
 
 #include <stdlib.h>
 
@@ -577,10 +578,11 @@ void SpacecraftPanel::UpdateValues()
 void SpacecraftPanel::OnOk()
 {
     OnApply();
-    
-    // need to figure out the best way to close
-    // the notebook page
-    this->Destroy();
+
+    // Close page from main notebook    
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
+
 }
 
 //------------------------------------------------------------------------------
@@ -592,15 +594,9 @@ void SpacecraftPanel::OnOk()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::OnCancel()
 {
-    // need to figure out the best way to close
-    // the notebook page
-    this->Destroy();
-//    this->Close();
-    
-    /* // make item most current, then close it
- GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
- mainNotebook->CreatePage(item);
- mainNotebook->ClosePage();*/
+    // Close page from main notebook
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
 }
 
 //------------------------------------------------------------------------------
@@ -680,4 +676,6 @@ void SpacecraftPanel::OnEpochChange()
 {
     applyButton->Enable();
 }
+
+
 
