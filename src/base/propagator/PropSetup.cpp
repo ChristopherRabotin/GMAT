@@ -74,17 +74,20 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    /// @note: For build 1, the PropSetup internal objects are defaulted
    if (propagator != NULL)
        mPropagator = propagator;
-   else {
-       mPropagator = new RungeKutta89;
-   }
+   else 
+       mPropagator = new RungeKutta89("InternalRKV89"); //loj: 3/12/04 added the name
 
    if (forceModel != NULL)
+   {
        mForceModel = forceModel;
-   else {
+   }
+   else
+   {
        mForceModel = new ForceModel("InternalForceModel");
        PhysicalModel *pmf = new PointMassForce;
        mForceModel->AddForce(pmf);
    }
+   
    Initialize();
 }
 
@@ -187,10 +190,14 @@ ForceModel* PropSetup::GetForceModel()
 //------------------------------------------------------------------------------
 void PropSetup::SetPropagator(Propagator *propagator)
 {
-   //if (mPropagator)
-   //   delete mPropagator;
-   mPropagator = propagator;
-   Initialize();
+    if (propagator == NULL)
+       throw PropSetupException("PropSetup::SetPropagator failed: propagator is NULL");
+       
+    if (mPropagator->GetName() == "InternalRKV89") //loj: 3/12/04 added
+        delete mPropagator;
+    
+    mPropagator = propagator;
+    Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -206,10 +213,10 @@ void PropSetup::SetForceModel(ForceModel *forceModel)
 {
    if (forceModel == NULL)
        throw PropSetupException("PropSetup::SetForceModel failed: ForceModel is NULL");
-//       return;
        
-   //if (mForceModel->GetName() == "InternalForceModel")
-   //    delete mForceModel;
+   if (mForceModel->GetName() == "InternalForceModel")
+       delete mForceModel;
+   
    mForceModel = forceModel;
    Initialize();
 }
