@@ -40,8 +40,8 @@
  *
  */
 //------------------------------------------------------------------------------
-CelestialBody* CelestialBodyFactory::CreateCelestialBody(std::string ofType,
-                                                         std::string withName)
+CelestialBody* CelestialBodyFactory::CreateCelestialBody(const std::string &ofType,
+                                                         const std::string &withName)
 {
    if (ofType == "Star")
       return new Star(withName);
@@ -88,7 +88,7 @@ Factory(Gmat::CELESTIAL_BODY)
  *
  */
 //------------------------------------------------------------------------------
-CelestialBodyFactory::CelestialBodyFactory(StringArray createList) :
+CelestialBodyFactory::CelestialBodyFactory(const StringArray &createList) :
 Factory(createList,Gmat::CELESTIAL_BODY)
 {
    if (creatables.empty())

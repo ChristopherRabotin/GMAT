@@ -26,13 +26,13 @@
 class GMAT_API CelestialBodyFactory : public Factory
 {
 public:
-   CelestialBody*  CreateCelestialBody(std::string ofType,
-                                   std::string withName = "");
+   CelestialBody*  CreateCelestialBody(const std::string &ofType,
+                                       const std::string &withName = "");
 
    // default constructor
    CelestialBodyFactory();
    // constructor
-   CelestialBodyFactory(StringArray createList);
+   CelestialBodyFactory(const StringArray &createList);
    // copy constructor
    CelestialBodyFactory(const CelestialBodyFactory &fact);
    // assignment operator
