@@ -467,8 +467,11 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    m_fStartY = fEndY;
     
    wxLogStatus(MdiGlPlot::mdiParentGlFrame,
-               wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
-               event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);
+               wxT("X = %d Y = %d"), event.GetX(), event.GetY());
+   //loj: 6/14/04 do not show debug info
+   //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
+   //            wxT("X = %d Y = %d lastX = %f lastY = %f Zoom amount = %f Distance = %f"),
+   //            event.GetX(), event.GetY(), m_fStartX, m_fStartY, mZoomAmount, mAxisLength);
    event.Skip();
 }
 
