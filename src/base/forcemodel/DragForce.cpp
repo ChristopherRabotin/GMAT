@@ -30,10 +30,16 @@ DragForce::DragForce() :
     atmos                  (NULL),
     density                (NULL),
     prefactor              (NULL),
-    atmosphereModelID      (parameterCount)
+    atmosphereModelID      (parameterCount),
+    centralBodyID          (parameterCount+1),
+    sourceTypeID           (parameterCount+2),
+    fluxFileID             (parameterCount+3),
+    fluxID                 (parameterCount+4),
+    averageFluxID          (parameterCount+5),
+    magneticIndexID        (parameterCount+6)
 {
     dimension = 6;
-    ++parameterCount;
+    parameterCount+=7;
     
     /// @todo Remove hard coded central body parms in DragForce
     // Sun location at MJD 21545.0, from the SLP file:
@@ -72,8 +78,16 @@ DragForce::DragForce(const DragForce& df) :
     atmosphereType          (df.atmosphereType),  
     atmos                   (NULL),
     density                 (NULL),
-    prefactor               (NULL)
+    prefactor               (NULL),
+    atmosphereModelID       (parameterCount),
+    centralBodyID           (parameterCount+1),
+    sourceTypeID            (parameterCount+2),
+    fluxFileID              (parameterCount+3),
+    fluxID                  (parameterCount+4),
+    averageFluxID           (parameterCount+5),
+    magneticIndexID         (parameterCount+6)
 {
+    parameterCount += 7;
     dimension = df.dimension;
 
     /// @todo Remove hard coded central body parms in DragForce
@@ -325,6 +339,25 @@ std::string DragForce::GetParameterText(const Integer id) const
 {
     if (id == atmosphereModelID)
        return "AtmosphereModel";
+    
+    if (id == centralBodyID)
+       return "AtmosphereBody";
+    
+    if (id == sourceTypeID)
+       return "InputSource";
+    
+    if (id == fluxFileID)
+       return "SolarFluxFile";
+    
+    if (id == fluxID)
+       return "SolarFlux";
+    
+    if (id == averageFluxID)
+       return "AverageSolarFlux";
+    
+    if (id == magneticIndexID)
+       return "MagneticIndex";
+    
     return PhysicalModel::GetParameterText(id);
 }
 
@@ -334,6 +367,24 @@ Integer DragForce::GetParameterID(const std::string &str) const
     if (str == "AtmosphereModel")
        return atmosphereModelID;
        
+    if (str == "AtmosphereBody")
+       return centralBodyID;
+    
+    if (str == "InputSource")
+       return  sourceTypeID;
+    
+    if (str == "SolarFluxFile")
+       return  fluxFileID;
+    
+    if (str == "SolarFlux")
+       return  fluxID;
+    
+    if (str == "AverageSolarFlux")
+       return  averageFluxID;
+    
+    if (str == "MagneticIndex")
+       return  magneticIndexID;
+    
     return PhysicalModel::GetParameterID(str);
 }
 
@@ -342,6 +393,24 @@ Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
 {
     if (id == atmosphereModelID)
        return Gmat::STRING_TYPE;
+    
+    if (id == centralBodyID)
+       return Gmat::STRING_TYPE;
+    
+    if (id == sourceTypeID)
+       return Gmat::STRING_TYPE;    // "File" or "Constant" for now
+    
+    if (id == fluxFileID)
+       return Gmat::STRING_TYPE;
+    
+    if (id == fluxID)
+       return Gmat::REAL_TYPE;
+    
+    if (id == averageFluxID)
+       return Gmat::REAL_TYPE;
+    
+    if (id == magneticIndexID)
+       return Gmat::REAL_TYPE;
 
     return PhysicalModel::GetParameterType(id);
 }
@@ -349,8 +418,14 @@ Gmat::ParameterType DragForce::GetParameterType(const Integer id) const
 
 std::string DragForce::GetParameterTypeString(const Integer id) const
 {
-    if (id == atmosphereModelID)
-       return GmatBase::PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+    if ( (id == atmosphereModelID) ||
+         (id == centralBodyID) ||
+         (id == sourceTypeID) ||
+         (id == fluxFileID) ||
+         (id == fluxID) ||
+         (id == averageFluxID) ||
+         (id == magneticIndexID) )
+       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 
     return PhysicalModel::GetParameterTypeString(id);
 }
@@ -370,23 +445,60 @@ Integer DragForce::SetIntegerParameter(const Integer id, const Integer value)
 
 Real DragForce::GetRealParameter(const Integer id) const
 {
+    if (id == fluxID)
+       return fluxF107;
+    
+    if (id == averageFluxID)
+       return fluxF107A;
+    
+    if (id == magneticIndexID)
+       return ap;
+
     return PhysicalModel::GetRealParameter(id);
 }
 
 
 Real DragForce::SetRealParameter(const Integer id, const Real value)
 {
+    if (id == fluxID) {
+       if (value >= 0.0)
+          fluxF107 = value;
+       return fluxF107;
+    }
+    
+    if (id == averageFluxID) {
+       if (value >= 0.0)
+          fluxF107A = value;
+       return fluxF107A;
+    }
+    
+    if (id == magneticIndexID) {
+       if (value >= 0.0)
+          ap = value;
+       return ap;
+    }
+
     return PhysicalModel::SetRealParameter(id, value);
 }
 
+
 std::string DragForce::GetStringParameter(const Integer id) const
 {
-   if (id == atmosphereModelID) {
+   if (id == atmosphereModelID) 
       return atmosphereType;
-   }
 
+   if (id == centralBodyID)
+      return bodyName;
+    
+   if (id == sourceTypeID)
+      return dataType;
+    
+   if (id == fluxFileID)
+      return fluxFile;
+    
    return PhysicalModel::GetStringParameter(id);
 }
+
 
 bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 {
@@ -405,6 +517,26 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
    
+   if (id == centralBodyID) {
+      if (value == "")
+         return false;
+      bodyName = value;
+      return true;
+   }
+      
+    
+   if (id == sourceTypeID) {     // "File" or "Constant" for now
+      if ((value != "File") && (value != "Constant"))
+         return false;
+      dataType = value;
+      return true;
+   }
+    
+   if (id == fluxFileID) {
+      fluxFile = value;
+      return true;
+   }
+    
    return PhysicalModel::SetStringParameter(id, value);
 }
 

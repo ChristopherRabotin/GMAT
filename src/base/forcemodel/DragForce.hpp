@@ -59,6 +59,9 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
+                                           
+    // Special access methods used by drag forces
+    AtmosphereModel*    GetAtmosphereModel(void);
 
 protected:
     /// Sun pointer for bulge calculations
@@ -93,12 +96,37 @@ protected:
     /// Spacecraft coefficients of drag
     std::vector <Real>  dragCoeff;
     
+    // Optional input parameters used by atmospheric models
+    /// Name of the body with the atmosphere
+    std::string         bodyName;
+    /// Type of input data -- "File" or "Constant"
+    std::string         dataType;
+    /// Solar flux file name
+    std::string         fluxFile;
+    /// "Current" value of F10.7
+    Real                fluxF107;
+    /// Running average of the F10.7
+    Real                fluxF107A;
+    /// Magnetic field index, Ap
+    Real                ap;
+       
     void                BuildPrefactors(void);
     void                GetDensity(Real *state);
     
     /// ID for the atmosphere model
     const Integer       atmosphereModelID;
-    
+    /// ID for the central body
+    const Integer       centralBodyID;
+    /// ID for the atmosphere model
+    const Integer       sourceTypeID;
+    /// ID for the central body
+    const Integer       fluxFileID;
+    /// ID for the atmosphere model
+    const Integer       fluxID;
+    /// ID for the atmosphere model
+    const Integer       averageFluxID;
+    /// ID for the atmosphere model
+    const Integer       magneticIndexID;
 };
 
 #endif // DRAGFORCE_H
