@@ -34,7 +34,8 @@
 
 // Headers for the referenced classes
 #include "SolarSystem.hpp"   // for SolarSystem
-#include "Subscriber.hpp"    // For the Publisher and base Subscribers
+#include "Publisher.hpp"     // For the Publisher and ...
+#include "Subscriber.hpp"    // ... base of the Subscribers
 
 
 /**
