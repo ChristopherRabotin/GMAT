@@ -21,6 +21,8 @@
 #include "NoOp.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_MODERATOR 0
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -44,12 +46,14 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Interpolator",
    "SolarSystem",
    "CelestialBody",
+   "Atmosphere",
    "Parameter",
    "StopCondition",
    "Solver",
    "Subscriber",
    "PropSetup",
    "RefFrame",
+   "UnknownObjectType"
 };
 
 const std::string
@@ -1847,7 +1851,7 @@ void Moderator::CreateDefaultMission()
       for (unsigned int i=0; i<params.size(); i++)
       {
          param = GetParameter(params[i]);
-         param->SetDesc(param->GetName());
+         param->SetStringParameter("Description", param->GetName());
          param->SetStringParameter("Object", "DefaultSC");
       }
     
@@ -1867,11 +1871,12 @@ void Moderator::CreateDefaultMission()
       // XyPlot
       sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
-      sub->SetStringParameter("DepVar", "DefaultSC.X");
+      sub->SetStringParameter("Add", "DefaultSC.X");
       sub->Activate(true);
     
       // OpenGlPlot
       sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+      sub->SetStringParameter("Add", "DefaultSC"); //loj: 6/2/04 added
       sub->Activate(true);
       //MessageInterface::ShowMessage("-->default Subscribers created\n");
 
@@ -1926,10 +1931,12 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
       {
          param = GetParameter(params[i]);
 
-         //MessageInterface::ShowMessage("Moderator::SetupRun() ParamType = %s, "
-         //                              "ParamName = %s\n", param->GetTypeName().c_str(),
-         //                              param->GetName().c_str());
-         
+#if DEBUG_MODERATOR
+         MessageInterface::ShowMessage
+            ("Moderator::SetupRun() ParamType = %s, "
+             "ParamName = %s\n", param->GetTypeName().c_str(),
+             param->GetName().c_str());
+#endif
          // set SolarSystem to orbit related parameters
          if (!param->IsTimeParameter())
             param->AddObject(theDefaultSolarSystem);
@@ -1947,9 +1954,12 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
                param->SetObject(Gmat::SPACECRAFT, objName, sc);
             }
             
-            //MessageInterface::ShowMessage("Moderator::SetupRun() SetObject ParamName = %s, "
-            //                              "ObjName = %s\n", param->GetName().c_str(),
-            //                              objName.c_str());
+#if DEBUG_MODERATOR
+            MessageInterface::ShowMessage
+               ("Moderator::SetupRun() SetObject ParamName = %s, "
+                "ObjName = %s\n", param->GetName().c_str(),
+                objName.c_str());
+#endif
          }
 
          param->Initialize();
@@ -1976,9 +1986,12 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
          stopCond = GetStopCondition(stopconds[i]);
          stopCond->SetSolarSystem(theDefaultSolarSystem);
          stopCond->Initialize();
-         //objName = stopCond->GetName();
-         //MessageInterface::ShowMessage("Moderator::SetupRun() %s:goal = %f\n",
-         //                              objName.c_str(), stopCond->GetRealParameter("Goal"));
+#if DEBUG_MODERATOR
+         objName = stopCond->GetName();
+         MessageInterface::ShowMessage
+            ("Moderator::SetupRun() %s:goal = %f\n",
+             objName.c_str(), stopCond->GetRealParameter("Goal"));
+#endif
       }
       catch (BaseException &e)
       {
@@ -1999,8 +2012,11 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
       sub = GetSubscriber(subs[i]);
       objTypeName = sub->GetTypeName();
       objName = sub->GetName();
-      //MessageInterface::ShowMessage("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-      //                              objTypeName.c_str(), objName.c_str());
+#if DEBUG_MODERATOR
+      MessageInterface::ShowMessage
+         ("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
+          objTypeName.c_str(), objName.c_str());
+#endif
       sub->Initialize();
       //MessageInterface::ShowMessage("Moderator::SetupRun() subscriber initialized\n");
    }
