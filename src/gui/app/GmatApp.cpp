@@ -38,6 +38,10 @@
 #include "wx/docmdi.h"
 #include "wx/docview.h"
 #include "wx/cmdproc.h"
+#include "wx/splash.h"
+#include "wx/image.h"
+
+#include "bitmaps/splash.xpm"
 
 DocViewFrame *docMainFrame = (DocViewFrame *) NULL;
 MdiDocViewFrame *mdiDocMainFrame = (MdiDocViewFrame *) NULL;
@@ -96,6 +100,17 @@ bool GmatApp::OnInit()
 //            new GmatMainFrame(_T("GMAT - Goddard Mission Analysis Tool"),
 //                              wxDefaultPosition, size,
 //                              wxDEFAULT_FRAME_STYLE);
+
+         //testing the splash screen
+        wxBitmap bitmap = wxBitmap( splash_xpm );
+
+        new wxSplashScreen(bitmap,
+                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+                6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
+                wxSIMPLE_BORDER|wxSTAY_ON_TOP);
+
+        wxYield();
+
         theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
                               _T("GMAT - Goddard Mission Analysis Tool"),
