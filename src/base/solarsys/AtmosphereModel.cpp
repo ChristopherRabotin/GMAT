@@ -20,6 +20,14 @@
 
 #include "AtmosphereModel.hpp"
 
+
+//------------------------------------------------------------------------------
+//  AtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ *  Constructor.
+ */
+//------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
     GmatBase            (Gmat::ATMOSPHERE, typeStr),
     sunVector           (NULL),
@@ -30,17 +38,42 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
 }
 
 
+//------------------------------------------------------------------------------
+//  ~AtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ *  Destructor.
+ */
+//------------------------------------------------------------------------------
 AtmosphereModel::~AtmosphereModel()
 {
 }
 
 
+//------------------------------------------------------------------------------
+//  void SetSunVector(Real *sv)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the position vector for the Sun.
+ * 
+ * @param sv   The Sun vector.
+ */
+//------------------------------------------------------------------------------
 void AtmosphereModel::SetSunVector(Real *sv)
 {
     sunVector = sv;
 }
 
 
+//------------------------------------------------------------------------------
+//  void SetCentralBodyVector(Real *cv)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the position vector for the body with the atmosphere.
+ * 
+ * @param cv   The body's position vector.
+ */
+//------------------------------------------------------------------------------
 void AtmosphereModel::SetCentralBodyVector(Real *cv)
 {
     centralBodyLocation = cv;

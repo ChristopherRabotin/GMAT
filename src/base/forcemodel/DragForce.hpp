@@ -25,6 +25,10 @@
 #include "AtmosphereModel.hpp"
 #include <vector>
 
+
+/**
+ * Class used to model accelerations due to drag.
+ */
 class DragForce : public PhysicalModel
 {
 public:
@@ -52,8 +56,6 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
     
-    virtual Integer     GetIntegerParameter(const Integer id) const;
-    virtual Integer     SetIntegerParameter(const Integer id, const Integer value);    
     virtual Real        GetRealParameter(const Integer id) const;
     virtual Real        SetRealParameter(const Integer id, const Real value);    
     virtual std::string GetStringParameter(const Integer id) const;
@@ -111,7 +113,7 @@ protected:
     Real                ap;
        
     void                BuildPrefactors(void);
-    void                GetDensity(Real *state);
+    void                GetDensity(Real *state, Real when = 21545.0);
     
     /// ID for the atmosphere model
     const Integer       atmosphereModelID;

@@ -83,17 +83,7 @@
 // **************************************************************************
 /** 
  * Base class used to model the physical system
- * This class is a base class used to model the physics of the system being
- * studied.  The propagators work in tandem with classes derived from this one 
- * to advance the system over time.  
- *
- * Propagators fall into two basic subclasses: Integrators and analytic 
- * solutions.  The analytic solutions typically require minimal interaction with
- * the system; for example, for two body orbit propagation, the PhysicalModel
- * supplies the gravitational constant for the centralbody.  Integrators require
- * more detailed information to evolve their models; see the text of the 
- * PhysicalModelIntegrator class description for details of their requirements.
-*/
+ */
 
 #ifndef PhysicalModel_hpp
 #define PhysicalModel_hpp
@@ -107,6 +97,20 @@
 
 #include <math.h>
 
+/** 
+ * Base class used to model the physical system
+ * 
+ * This class is a base class used to model the physics of the system being
+ * studied.  The propagators work in tandem with classes derived from this one 
+ * to advance the system over time.  
+ *
+ * Propagators fall into two basic subclasses: Integrators and analytic 
+ * solutions.  The analytic solutions typically require minimal interaction with
+ * the system; for example, for two body orbit propagation, the PhysicalModel
+ * supplies the gravitational constant for the centralbody.  Integrators require
+ * more detailed information to evolve their models; see the text of the 
+ * PhysicalModelIntegrator class description for details of their requirements.
+ */
 class GMAT_API PhysicalModel : public GmatBase
 {
 public:

@@ -314,6 +314,7 @@ PhysicalModel* ForceModel::GetForce(Integer index)
     return NULL;
 }
 
+
 //------------------------------------------------------------------------------
 // bool ForceModel::AddSpacecraft(Spacecraft *sc)
 //------------------------------------------------------------------------------
@@ -498,7 +499,7 @@ bool ForceModel::Initialize(void)
             stringParm = (*sat)->GetStringParameter(id);
             currentPm->SetSatelliteParameter(i, parmName, stringParm);
         
-            parmName = "Mass";
+            parmName = "DryMass";
             id = (*sat)->GetParameterID(parmName);
             parm = (*sat)->GetRealParameter(id);
             currentPm->SetSatelliteParameter(i, parmName, parm);
@@ -508,7 +509,7 @@ bool ForceModel::Initialize(void)
             parm = (*sat)->GetRealParameter(id);
             currentPm->SetSatelliteParameter(i, parmName, parm);
             
-            parmName = "IncidentArea";
+            parmName = "DragArea";
             id = (*sat)->GetParameterID(parmName);
             parm = (*sat)->GetRealParameter(id);
             currentPm->SetSatelliteParameter(i, parmName, parm);

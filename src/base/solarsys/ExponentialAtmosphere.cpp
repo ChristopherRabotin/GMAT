@@ -113,7 +113,7 @@ bool ExponentialAtmosphere::Density(Real *position, Real *density, Real epoch, I
 
 void ExponentialAtmosphere::SetConstants(void)
 {
-    rho0 = 1.0;
+    rho0 = 1.0e-3;              // Account for extra 10^3 in accel
     lagAngle = 0.523599;        // radians
     
     scale[ 0] =    0.0;             z[ 0]     = -0.160;

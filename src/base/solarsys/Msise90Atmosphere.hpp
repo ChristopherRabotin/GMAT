@@ -25,6 +25,10 @@
 #include "msise90.hpp"
 
 
+/**
+ * Wraps the MSISE90 atmosphere code, ported by a.i. Solutions from the FORTRAN,
+ * into the GMAT atmosphere model format.
+ */
 class Msise90Atmosphere : public AtmosphereModel
 {
 public:
@@ -36,7 +40,30 @@ public:
                                     Integer count = 1);
                                     
 protected:
+    /// Instance of the calculation engine
     MSISE90                 msise90;
+    /// Flag to indicate if data comes from a file
+    bool                    fileData;
+    /// Name of the file
+    std::string             fluxfilename;
+    /// Second of day
+    Real                    sod;
+    /// Year + Day of year, in the form YYYYDDD
+    Integer                 yd;
+    /// Value of F10.7 to use
+    Real                    f107;
+    /// Nominal value of F10.7 to use
+    Real                    nominalF107;
+    /// 3 month average of the F10.7 data
+    Real                    f107a;
+    /// Nominal 3 month average of the F10.7 data
+    Real                    nominalF107a;
+    /// Geomagnetic index (Ap, not Kp)
+    Real                    ap[7];
+    /// Nominal geomagnetic index
+    Real                    nominalAp;
+    
+    void                    GetInputs(Real epoch);   
 
 private:
     Msise90Atmosphere(const Msise90Atmosphere& msise);

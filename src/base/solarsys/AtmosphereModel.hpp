@@ -33,6 +33,18 @@ public:
     AtmosphereModel(const std::string &typeStr);
     virtual ~AtmosphereModel();
     
+    /**
+     * Calculates the atmospheric density at a specified location.
+     * 
+     * Density if the core calculation provided by classes derived from this one.
+     * The outpur array, density, must contain the density at the requested
+     * locations, expressed in kg / m^3.
+     * 
+     *  @param position  The input vector of spacecraft states
+     *  @param density   The array of output densities
+     *  @param epoch     The current TAIJulian epoch
+     *  @param count     The number of spacecraft contained in position
+     */
     virtual bool            Density(Real *position, Real *density, 
                                     Real epoch = 21545.0,
                                     Integer count = 1) = 0;

@@ -898,6 +898,8 @@ MSISE90::MSISE90()
 
    //DATA ISDATE/'12 - M','AR - 9','0   '/,ISTIME/'15:0','9:04'/
    //DATA NAME/'MSIS','E 90'/
+   
+   METER6(1);     // Set output to kg / m^3
 }
 
 
