@@ -29,6 +29,7 @@
 
 #include "ViewTextFrame.hpp"
 #include "GmatSplitterWindow.hpp"
+#include "GuiInterpreter.hpp"
 #include "GmatNotebook.hpp"
 #include "GmatMainNotebook.hpp"
 
@@ -59,6 +60,8 @@ public:
 
 protected:
 private:
+    GuiInterpreter *theGuiInterpreter;
+
     wxDocManager *mDocManager;
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
@@ -71,6 +74,7 @@ private:
     // event handling
     DECLARE_EVENT_TABLE();
     void OnProjectExit(wxCommandEvent& WXUNUSED(event));
+    void OnRun(wxCommandEvent& WXUNUSED(event));
     void OnHelpAbout(wxCommandEvent& WXUNUSED(event));
     void OnCloseTabs(wxCommandEvent& WXUNUSED(event));
 
@@ -138,6 +142,11 @@ private:
 
         MENU_HELP_TOPICS,
         
+        TOOL_RUN,
+        TOOL_PAUSE,
+        TOOL_RESUME,
+        TOOL_STOP,
+        
         // it is important for the id corresponding to the "About" command to have
         // this standard value as otherwise it won't be handled properly under Mac
         // (where it is special and put into the "Apple" menu)    
@@ -147,3 +156,10 @@ private:
 };
 
 #endif // GmatMainFrame_hpp
+
+
+
+
+
+
+

@@ -27,8 +27,9 @@ public:
     GmatTreeItemData(const wxString desc,
                      const int dType);
 
-    wxString GetDesc();
     int GetDataType();
+    wxString GetDesc();
+    
     void SetDesc(wxString description);
     
     virtual GmatCommand* GetCommand();
@@ -144,6 +145,8 @@ namespace GmatTree
         VIEW_SOLVER_VARIABLES,
         VIEW_SOLVER_GOALS, 
 
+        // Instead of Variable_Folder
+        VARIABLES,
     };
 }
 #endif // GmatTreeItemData_hpp

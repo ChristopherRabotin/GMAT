@@ -59,17 +59,19 @@ private:
     int mNumOpenGlPlot;
     int mNumVariable;
     
-    // event handlers
     void AddDefaultResources();
-    void AddDefaultBodies(wxTreeItemId universe);
-    void AddDefaultSpacecraft(wxTreeItemId spacecraft);
-    void AddDefaultFormations(wxTreeItemId formation);
-    void AddDefaultConstellations(wxTreeItemId constellation);
-    void AddDefaultPropagators(wxTreeItemId propagator);
-    void AddDefaultSolvers(wxTreeItemId solver);
-    void AddDefaultSubscribers(wxTreeItemId subscriber);
-    void AddDefaultInterfaces(wxTreeItemId interfaceTree);
+    void AddDefaultBodies(wxTreeItemId itemId);
+    void AddDefaultSpacecraft(wxTreeItemId itemId);
+    void AddDefaultFormations(wxTreeItemId itemId);
+    void AddDefaultConstellations(wxTreeItemId itemId);
+    void AddDefaultPropagators(wxTreeItemId itemId);
+    void AddDefaultBurns(wxTreeItemId itemId);
+    void AddDefaultSolvers(wxTreeItemId itemId);
+    void AddDefaultSubscribers(wxTreeItemId itemId);
+    void AddDefaultInterfaces(wxTreeItemId itemId);
     void AddIcons();
+    
+    // event handlers
     void OnItemRightClick(wxTreeEvent& event);
     void OnItemActivated(wxTreeEvent &event);
     void ShowMenu(wxTreeItemId id, const wxPoint& pt);
@@ -90,7 +92,7 @@ private:
     void OnAddXyPlot(wxCommandEvent &event);
     void OnAddOpenGlPlot(wxCommandEvent &event);
     void OnAddDiffCorr(wxCommandEvent &event);
-    void OnAddVariable(wxCommandEvent &event);
+//    void OnAddVariable(wxCommandEvent &event);
   
     wxMenu* CreatePopupMenu(Gmat::ObjectType type);
     

@@ -51,6 +51,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxFrame)
     EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
+    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
     EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
     EVT_MENU(TOOL_CLOSE_TABS, GmatMainFrame::OnCloseTabs)
     EVT_MENU(MENU_SCRIPT_OPEN_EDITOR, GmatMainFrame::OnScriptOpenEditor)    
@@ -87,7 +88,9 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
     mDocManager = (wxDocManager *) NULL;
     GmatSplitterWindow *splitter;
     GmatNotebook *leftTabs;
-    
+
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+  
 #if wxUSE_MENUS
     // create a menu bar 
     SetMenuBar(CreateMainMenu());
@@ -154,6 +157,21 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
 {
     // true is to force the frame to close
    Close(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnRun(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles run command from the tool bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
+{
+    theGuiInterpreter->RunMission();  
 }
 
 
@@ -242,12 +260,22 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
                     (wxObject *) NULL, _T("Print"));
     currentX += width + 5;
     toolBar->AddSeparator();
-    toolBar->AddTool(7, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
+    
+    toolBar->AddTool(TOOL_RUN, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Run"));
-    toolBar->AddTool(8, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
+    toolBar->AddTool(TOOL_PAUSE, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Pause"));
-    toolBar->AddTool(9, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
+    toolBar->AddTool(TOOL_STOP, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
                     (wxObject *) NULL, _T("Stop"));
+
+    //loj: 2/12/04 commented out
+//      toolBar->AddTool(7, *bitmaps[8], wxNullBitmap, FALSE, currentX, -1,
+//                      (wxObject *) NULL, _T("Run"));
+//      toolBar->AddTool(TOOL_RUN, *bitmaps[9], wxNullBitmap, FALSE, currentX, -1,
+//                      (wxObject *) NULL, _T("Pause"));
+//      toolBar->AddTool(9, *bitmaps[10], wxNullBitmap, FALSE, currentX, -1,
+//                      (wxObject *) NULL, _T("Stop"));
+    
     toolBar->AddSeparator();
     toolBar->AddTool(TOOL_CLOSE_TABS, *bitmaps[11], wxNullBitmap, FALSE,
                     currentX, -1, (wxObject *) NULL, _T("Close Current Tab"));

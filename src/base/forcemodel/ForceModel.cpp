@@ -32,14 +32,14 @@
 //                             discontinuous forces (e.g. SRP)
 //
 //                           : 10/01/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
-//				  - Changed FlightDynamicsForces class to ForceModel class
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
+//                                - Changed FlightDynamicsForces class to ForceModel class
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
 //
 //                           : 11/9/2003 - D. Conway, Thinking Systems, Inc.
 //                             Overrode GetParameterCount so the count 
@@ -109,7 +109,7 @@ ForceModel::~ForceModel(void)
  * NOTE: The ForceModel copy constructor is not yet implemented.  This
  * method should be completed before the class is used in external code.
  *
- * @param fdf	The original of the ForceModel that are copied
+ * @param fdf   The original of the ForceModel that are copied
  */
 //------------------------------------------------------------------------------
 ForceModel::ForceModel(const ForceModel& fdf) :
@@ -126,7 +126,7 @@ ForceModel::ForceModel(const ForceModel& fdf) :
  * NOTE: The ForceModel assignment operator is not yet implemented.  
  * This method should be completed before the class is used in external code.
  * 
- * @param fdf	The original of the ForceModel that are copied
+ * @param fdf   The original of the ForceModel that are copied
  */
 //------------------------------------------------------------------------------
 ForceModel& ForceModel::operator=(const ForceModel& fdf)
@@ -136,6 +136,17 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
 
     return *this;
 }
+
+//  //------------------------------------------------------------------------------
+//  // PhysicalModel* GetForce(Integer index)
+//  //------------------------------------------------------------------------------
+//  PhysicalModel* ForceModel::GetForce(Integer index)
+//  {
+//      if (forceList.size() == 0)
+//          return NULL;
+//      else
+//          return forceList[index];
+//  }
 
 //------------------------------------------------------------------------------
 // void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
@@ -156,7 +167,7 @@ ForceModel& ForceModel::operator=(const ForceModel& fdf)
  * assignment operator so that it can be cloned for distribution to multiple
  * satellites.
  * 
- * @param pPhysicalModel	The force that is being added to the force model
+ * @param pPhysicalModel        The force that is being added to the force model
  */
 //------------------------------------------------------------------------------
 void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
@@ -173,6 +184,9 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     if (initialized)
         pPhysicalModel->Initialize();
 
+    //loj: 2/11/04 added
+    forceList.push_back(pPhysicalModel);
+    
     ++forceCount;  
 }
 
@@ -418,9 +432,9 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
  * should never be negative, so a return value less than 0.0 can be used to 
  * indicate an error condition.
  *     
- * @param diffs		Array of differences calculated by the integrator.  This array 
+ * @param diffs         Array of differences calculated by the integrator.  This array 
  *                  must be the same size as the state vector
- * @param answer	Candidate new state from the integrator
+ * @param answer        Candidate new state from the integrator
  */
 //------------------------------------------------------------------------------
 Real ForceModel::EstimateError(Real *diffs, Real *answer) const

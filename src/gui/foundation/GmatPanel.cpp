@@ -52,7 +52,7 @@ GmatPanel::GmatPanel(wxWindow *parent)
     thePanelSizer = new wxBoxSizer(wxVERTICAL);
     theTopSizer = new wxBoxSizer(wxVERTICAL);
     theMiddleSizer = new wxBoxSizer(wxVERTICAL);
-    theBottomSizer = new wxBoxSizer(wxVERTICAL);
+    theBottomSizer = new wxBoxSizer(wxHORIZONTAL);
    
     // create script button
     theScriptButton = new wxButton(parent, ID_BUTTON_SCRIPT, "Show Script", 
@@ -105,6 +105,8 @@ void GmatPanel::Show()
     thePanelSizer->SetSizeHints(theParent);
 
     LoadData();
+
+    theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -118,6 +120,10 @@ void GmatPanel::OnOK()
 {
     if (theApplyButton->IsEnabled())
         OnApply();
+    
+    // Close page from main notebook    
+    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    gmatMainNotebook->ClosePage();
 }
 
 //------------------------------------------------------------------------------
@@ -144,8 +150,6 @@ void GmatPanel::OnCancel()
 void GmatPanel::OnApply()
 {
     SaveData();
-    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-    gmatMainNotebook->ClosePage();
 }
 
 //------------------------------------------------------------------------------

@@ -92,7 +92,7 @@ private:
     Integer propID;
     Integer scID;
     
-    std::string propType;
+    std::string propSetupName;
     wxString propNameString;
     wxString scListString;
     StringArray scList;

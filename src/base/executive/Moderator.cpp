@@ -22,44 +22,6 @@
 #include "NoOp.hpp"
 #include "MessageInterface.hpp"
 
-/* Already included in Moderator.hpp
-#include "gmatdefs.hpp"
-// executive
-#include "Sandbox.hpp"
-#include "GuiInterpreter.hpp"
-#include "ScriptInterpreter.hpp"
-#include "FactoryManager.hpp"
-#include "ConfigManager.hpp"
-#include "Publisher.hpp"
-// core
-#include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
-#include "Propagator.hpp"
-#include "Spacecraft.hpp"
-#include "Parameter.hpp"
-#include "StopCondition.hpp"
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
-#include "PropSetup.hpp"
-#include "Command.hpp"
-#include "Subscriber.hpp"
-#include "Burn.hpp"
-// factories
-#include "CommandFactory.hpp"
-#include "ForceModelFactory.hpp"
-#include "PhysicalModelFactory.hpp"
-#include "PropSetupFactory.hpp"
-#include "PropagatorFactory.hpp"
-#include "SpacecraftFactory.hpp"
-#include "StopConditionFactory.hpp"
-#include "SubscriberFactory.hpp"
-#include "BurnFactory.hpp"
-#include "ParameterFactory.hpp"
-
-#include "BaseException.hpp"
-*/
-
-
 //---------------------------------
 // static data
 //---------------------------------
@@ -151,22 +113,14 @@ bool Moderator::Initialize(bool fromGui)
         theFactoryManager->RegisterFactory(theSubscriberFactory);
         theFactoryManager->RegisterFactory(theSolverFactory);
         
-        MessageInterface::ShowMessage("Moderator creating default SolarSystem...\n");
-        theDefaultSolarSystem = new SolarSystem("Default");
-
-        if (theDefaultSolarSystem != NULL)
+        if (fromGui)
         {
-
-            if (fromGui)
-            {
-                MessageInterface::ShowMessage("Moderator creating predefined parameters...\n");
-                CreatePredefinedParameters();
-            }
-        
-            MessageInterface::ShowMessage("Moderator successfully created core engine\n");
-        
-            isInitialized = true;
+            CreateDefaultMission();
         }
+        
+        MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+        
+        isInitialized = true;
     }
 
     return isInitialized;
@@ -639,16 +593,22 @@ Solver* Moderator::GetSolver(const std::string &name)
 PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
     // assumes "RungeKutta89" is the default propagator
-    Propagator *prop = CreatePropagator("RungeKutta89", "DefaultPropagator");
+    Propagator *prop = CreatePropagator("RungeKutta89", "DefaultRKV89");
+    
     // creates empty ForceModel
     ForceModel *fm = CreateForceModel("DefaultForceModel");
-    //loj: What forces shoul be in the default ForceModel?
+    
+    // create PointMass force and add to Force
+    PhysicalModel *earthGrav = CreatePhysicalModel("PointMassForce", "EarthGravity");
+    fm->AddForce(earthGrav);
     
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+    
     if (prop)
         propSetup->SetPropagator(prop);
     if (fm)
         propSetup->SetForceModel(fm);
+    
     theConfigManager->AddPropSetup(propSetup);
     return propSetup;
 }
@@ -1021,26 +981,83 @@ Integer Moderator::RunScript(Integer sandboxNum)
 
 // initialization
 //------------------------------------------------------------------------------
-// void CreatePredefinedParameters()
+// void CreateDefaultMission()
 //------------------------------------------------------------------------------
-void Moderator::CreatePredefinedParameters()
+void Moderator::CreateDefaultMission()
 {
-    CreateParameter("CurrentA1MjdParam", "CurrentTime");
-    CreateParameter("ElapsedSecsParam", "ElapsedSecs");
+    MessageInterface::ShowMessage("Moderator creating default mission...\n");
+
+    // SolarSystem
+    theDefaultSolarSystem = new SolarSystem("DefaultSS");
+
+    // Spacecraft
+    Spacecraft *sc = CreateSpacecraft("Spacecraft", "DefaultSC");
+
+    // PropSetup
+    PropSetup *propSetup = CreatePropSetup("DefaultProp");
+
+    // Parameters
+    Parameter *currTime = CreateParameter("CurrentA1MjdParam", "DefaultSC.CurrentTime");
+    Parameter *elapsedSecs = CreateParameter("ElapsedSecsParam", "DefaultSC.ElapsedSecs");
+    Parameter *cartX = CreateParameter("CartXParam", "DefaultSC.X");
+    Parameter *cartY = CreateParameter("CartYParam", "DefaultSC.Y");
+    Parameter *cartZ = CreateParameter("CartZParam", "DefaultSC.Z");
+    Parameter *cartVx = CreateParameter("CartVxParam", "DefaultSC.Vx");
+    Parameter *cartVy = CreateParameter("CartVxParam", "DefaultSC.Vy");
+    Parameter *cartVz = CreateParameter("CartVxParam", "DefaultSC.Vz");
     
-    CreateParameter("CartXParam", "X");
-    CreateParameter("CartYParam", "Y");
-    CreateParameter("CartZParam", "Z");
-    CreateParameter("CartVxParam", "Vx");
-    CreateParameter("CartVxParam", "Vy");
-    CreateParameter("CartVxParam", "Vz");
+//      Parameter *kepSma = CreateParameter("KepSmaParam", "DefaultSC.SMA");
+//      Parameter *kepEcc = CreateParameter("KepEccParam", "DefaultSC.ECC");
+//      Parameter *kepInc = CreateParameter("KepIncParam", "DefaultSC.INC");
+//      Parameter *kepRaan = CreateParameter("KepRaanParam", "DefaultSC.RAAN");
+//      Parameter *kepAop = CreateParameter("KepAopParam", "DefaultSC.AOP");
+//      Parameter *kepTa = CreateParameter("KepTaParam", "DefaultSC.TA");
     
-    CreateParameter("KepSmaParam", "SMA");
-    CreateParameter("KepEccParam", "ECC");
-    CreateParameter("KepIncParam", "INC");
-    CreateParameter("KepRaanParam", "RAAN");
-    CreateParameter("KepAopParam", "AOP");
-    CreateParameter("KepTaParam", "TA");
+    currTime->AddObject(sc);
+    elapsedSecs->AddObject(sc);
+    cartX->AddObject(sc);
+    cartY->AddObject(sc);
+    cartZ->AddObject(sc);
+    cartVx->AddObject(sc);
+    cartVy->AddObject(sc);
+    cartVz->AddObject(sc);
+    
+//      kepSma->AddObject(sc);
+//      kepEcc->AddObject(sc);
+//      kepInc->AddObject(sc);
+//      kepRaan->AddObject(sc);
+//      kepAop->AddObject(sc);
+//      kepTa->AddObject(sc);
+        
+    // StopCondition
+    //loj: 2/12/04 Propagate command knows "Duration" only
+    //StopCondition *stopCond = CreateStopCondition("SingleValueStop", "StopOnElapsedSecs");
+    StopCondition *stopCond = CreateStopCondition("SingleValueStop", "Duration");
+    stopCond->AddParameter(elapsedSecs);
+    stopCond->SetGoal(86400.0);
+
+    // Subscribers
+    // ReportFile
+    Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+    sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+    // XyPlot
+    sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
+    sub->SetStringParameter("XParamName", "DefaultSC.CurrentTime");
+    sub->SetStringParameter("YParamName", "DefaultSC.X");
+    sub->Activate(false);
+    // OpenGlPlot
+    sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
+    
+    // Propagate Command
+    GmatCommand *propCommand = CreateCommand("Propagate");
+    propCommand->SetObject("DefaultSC", Gmat::SPACECRAFT);
+    propCommand->SetObject("DefaultProp", Gmat::PROP_SETUP);
+    propCommand->SetObject("Duration", Gmat::STOP_CONDITION);
+    propCommand->SetObject(stopCond, Gmat::STOP_CONDITION);
+    propCommand->SetSolarSystem(theDefaultSolarSystem);
+
+    // Add propagate command
+    AppendCommand(propCommand);
     
 }
 

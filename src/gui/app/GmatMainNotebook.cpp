@@ -23,11 +23,14 @@
 #include "DCSetupPanel.hpp"
 #include "ManeuverSetupPanel.hpp"
 #include "XyPlotSetupPanel.hpp"
+#include "OpenGlPlotSetupPanel.hpp"
+#include "ReportFileSetupPanel.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
 #include "SolverEventPanel.hpp"
-#include "VariableCreatePanel.hpp"
+//loj: 2/12/04 #include "VariableCreatePanel.hpp"
+#include "ParameterSetupPanel.hpp" //loj: use this instead
 
 //------------------------------
 // event tables for wxWindows
@@ -130,9 +133,8 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
                  (dataType == GmatTree::CREATED_REPORT_FILE))
         {
-            //loj: ReportFileSetupPanel is not ready yet.
-            // sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()),
-            //             0, wxGROW|wxALL, 0 );
+            sizer->Add( new ReportFileSetupPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
         }
         else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
                  (dataType == GmatTree::CREATED_XY_PLOT))
@@ -143,9 +145,8 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
                  (dataType == GmatTree::CREATED_OPENGL_PLOT))
         {
-            //loj: OpenGlSetupPanel is not ready yet.
-            // sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()),
-            //             0, wxGROW|wxALL, 0 );
+            sizer->Add( new OpenGlPlotSetupPanel(panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
         {
@@ -187,10 +188,12 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
            sizer->Add ( new SolverVariablesPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
-        else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
-                 (dataType == GmatTree::CREATED_VARIABLE))
+        else if (dataType == GmatTree::VARIABLES)
         {
-            sizer->Add (new VariableCreatePanel (panel, item->GetDesc()),
+            //loj: 2/10/04
+            //sizer->Add (new VariableCreatePanel (panel, item->GetDesc()),
+            //            0, wxGROW|wxALL, 0 );
+            sizer->Add (new ParameterSetupPanel (panel, item->GetDesc()),
                         0, wxGROW|wxALL, 0 );
         }
 

@@ -111,19 +111,19 @@ Real OrbitData::GetCartReal(const std::string &str)
     else
     {
         if (str == "Epoch")
-            return obj->GetRealParameter(0); //("Epoch"); -- just to compile
+            return obj->GetRealParameter("Epoch");
         if (str == "CartX")
-            return obj->GetRealParameter(1); //("CartX");
+            return obj->GetRealParameter("X");
         if (str == "CartY")
-            return obj->GetRealParameter(2); //("CartY");
+            return obj->GetRealParameter("Y");
         if (str == "CartZ")
-            return obj->GetRealParameter(3); //("CartZ");
+            return obj->GetRealParameter("Z");
         if (str == "CartVx")
-            return obj->GetRealParameter(4); //("CartVx");
+            return obj->GetRealParameter("Vx");
         if (str == "CartVy")
-            return obj->GetRealParameter(5); //("CartVy");
+            return obj->GetRealParameter("Vy");
         if (str == "CartVz")
-            return obj->GetRealParameter(6); //("CartVz");
+            return obj->GetRealParameter("VZ");
     }
     return ORBIT_REAL_UNDEFINED;
 }
@@ -147,19 +147,19 @@ Real OrbitData::GetKepReal(const std::string &str)
     else
     {
         if (str == "KepSma")
-            return obj->GetRealParameter(1); //("KepSma");
+            return obj->GetRealParameter("SMA");
         if (str == "KepEcc")
-            return obj->GetRealParameter(2); //("KepEcc");
+            return obj->GetRealParameter("ECC");
         if (str == "KepInc")
-            return obj->GetRealParameter(3); //("KepInc");
+            return obj->GetRealParameter("INC");
         if (str == "KepRaan")
-            return obj->GetRealParameter(4); //("KepRaan");
+            return obj->GetRealParameter("RAAN");
         if (str == "KepAop")
-            return obj->GetRealParameter(5); //("KepAop");
+            return obj->GetRealParameter("AOP");
         if (str == "KepTa")
-            return obj->GetRealParameter(6); //("KepTa");
+            return obj->GetRealParameter("TA");
         if (str == "KepMa")
-            return obj->GetRealParameter(6); //("KepMa");
+            return obj->GetRealParameter("MA");
     }
     return ORBIT_REAL_UNDEFINED;
 }
@@ -181,10 +181,12 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
     }
     else
     {
-        Real sma = obj->GetRealParameter(1); //("KepSma"); -- just to compile
-        Real ecc = obj->GetRealParameter(2); //("KepEcc"); -- just to compile
-        //Real grav = obj->GetRealParameter("RefBody");
-        Real grav = 0.398600448073446198e+06; //loj: temp code
+        Real sma = obj->GetRealParameter("SMA");
+        Real ecc = obj->GetRealParameter("ECC");
+        Integer id = obj->GetParameterID("ReferenceBody");
+        std::string bodyName = obj->GetStringParameter(id);
+        
+        Real grav = 0.398600448073446198e+06; //loj: temp code for B2
         Real E, R;
         
         if (str == "KepMm")
@@ -254,18 +256,18 @@ Real OrbitData::GetAngularReal(const std::string &str)
     
     if (obj != NULL)
     {
-        Rvector3 pos = Rvector3(obj->GetRealParameter(1),  //("CartX"),
-                                obj->GetRealParameter(2),  //("CartY"),
-                                obj->GetRealParameter(3)); //("CartZ");
-        Rvector3 vel = Rvector3(obj->GetRealParameter(4),  //("CartVx"),
-                                obj->GetRealParameter(5),  //("CartVy"),
-                                obj->GetRealParameter(6)); //("CartVz");
+        Rvector3 pos = Rvector3(obj->GetRealParameter("X"),
+                                obj->GetRealParameter("Y"),
+                                obj->GetRealParameter("Z"));
+        Rvector3 vel = Rvector3(obj->GetRealParameter("Vx"),
+                                obj->GetRealParameter("Vy"),
+                                obj->GetRealParameter("Vz"));
         
         Rvector3 hVec3 = Cross(pos, vel);
         Real h = Sqrt(hVec3*hVec3);
         
         //grav = get_grav_constant(temp.coord.central_body); // Swingby
-        Real grav = 0.398600448073446198e+06; //loj: temp code - use mu for now
+        Real grav = 0.398600448073446198e+06; //loj: temp code for B2 - use mu for now
 
         if (h < ORBIT_TOL)
         {

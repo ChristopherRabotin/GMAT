@@ -44,6 +44,7 @@ public:
    void AddForce(PhysicalModel *force);
    void DeleteForce(const std::string &name);
    PhysicalModel* GetForce(const std::string &name);
+   PhysicalModel* GetForce(Integer index); //loj: 2/11/04 added
    Integer GetNumForces();
 
    virtual const std::string* GetParameterList() const;

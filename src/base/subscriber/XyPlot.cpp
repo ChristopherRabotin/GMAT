@@ -75,7 +75,8 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
     mDrawGrid = drawGrid;
     mNumYParams = 0;
 
-    mXParamName = "Undefined";
+    mXParamName = "UndefinedXParam";
+    mNumXParams = 0;
     
     mXParam = xParam;
     if (firstYParam != NULL)
@@ -114,6 +115,7 @@ bool XyPlot::SetXParameter(const std::string &paramName)
         {
             SetXParameter(param);
             status = true;
+            mNumXParams = 1; //loj: only 1 X parameter for now
         }
     }
 
@@ -304,7 +306,10 @@ std::string XyPlot::GetStringParameter(const Integer id) const
     switch (id)
     {
     case X_PARAM_NAME:
-        return mXParamName;
+        if (mNumXParams == 1)
+            return mXParamName;
+        else
+            return Subscriber::GetStringParameter(id);
     case Y_PARAM_NAME: //loj: return first Y parameter name for now
         if (mNumYParams > 0)
             return mYParamNames[0];

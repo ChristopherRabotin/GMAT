@@ -95,8 +95,9 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
     bool status = GmatAppData::GetGuiInterpreter()->
         InterpretScript(std::string(filename.c_str()));
 
-    // Update ResourceTree
+    // Update ResourceTree and MissionTree
     GmatAppData::GetResourceTree()->UpdateResources();
+    GmatAppData::GetMissionTree()->UpdateMissionSeq();
 
     return status;
 }

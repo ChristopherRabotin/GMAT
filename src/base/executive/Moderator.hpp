@@ -170,7 +170,7 @@ public:
 private:
 
     // initialization
-    void CreatePredefinedParameters();
+    void CreateDefaultMission();
     
     // sandbox
     void AddSolarSysToSandbox(Integer index);

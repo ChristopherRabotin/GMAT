@@ -22,6 +22,7 @@
 #if !defined __CONSOLE_APP__
 #include "ViewTextFrame.hpp"
 #include "ResourceTree.hpp"
+#include "MissionTree.hpp"
 #include "GmatMainNotebook.hpp"
 #endif
 
@@ -45,6 +46,11 @@ public:
     static void SetResourceTree(ResourceTree *resourceTree)
         { theResourceTree = resourceTree;};
         
+    static MissionTree* GetMissionTree()
+        { return theMissionTree;};
+    static void SetMissionTree(MissionTree *missionTree)
+        { theMissionTree = missionTree;};
+        
     static GmatMainNotebook* GetMainNotebook()
         { return theMainNotebook;};
     static void SetMainNotebook(GmatMainNotebook *mainNotebook)
@@ -57,6 +63,7 @@ private:
     static GuiInterpreter *theGuiInterpreter;
 #if !defined __CONSOLE_APP__
     static ResourceTree *theResourceTree;
+    static MissionTree *theMissionTree;
     static GmatMainNotebook *theMainNotebook;
 #endif
     

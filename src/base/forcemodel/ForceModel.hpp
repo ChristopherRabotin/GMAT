@@ -32,14 +32,14 @@
 //                             discontinuous forces (e.g. SRP)
 //
 //                           : 10/01/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
-//				  - Changed FlightDynamicsForces class to ForceModel class
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
+//                                - Changed FlightDynamicsForces class to ForceModel class
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
 //
 //                           : 11/9/2003 - D. Conway, Thinking Systems, Inc.
 //                             Overrode GetParameterCount so the count 
@@ -90,10 +90,23 @@ public:
       { return false; }
     void DeleteForce(const std::string &name) // should delete the force
       { }
+    
+    StringArray& GetForceTypeNames(); //loj: 2/11/04 added
+    
     PhysicalModel* GetForce(const std::string &name) // should return the correct force
       { return NULL; }
+
+    //loj: 2/11/04 added
+    PhysicalModel* GetForce(Integer index)
+        { if (forceList.size() == 0)
+              return NULL;
+          else
+              return forceList[index];
+        }
+    
     Integer GetNumForces() // should return the correct number of force
-      { return 1; }
+      { return forceCount; }
+      //loj: 2/11/04 { return 1; }
       
    virtual Integer GetParameterCount(void) const;
    
@@ -114,7 +127,7 @@ protected:
     Real estimationMethod;
     /// List of spacecraft that get propagated
     std::vector<Spacecraft *> spacecraft;
-
+    std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
 };
 
 #endif  // ForceModel_hpp

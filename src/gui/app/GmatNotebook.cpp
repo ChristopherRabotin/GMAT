@@ -139,6 +139,9 @@ wxPanel *GmatNotebook::CreateMissionPage()
     missionTree = new MissionTree(panel, -1, wxDefaultPosition,
                   wxDefaultSize, style);
 
+    // set to GmatAppData
+    GmatAppData::SetMissionTree(missionTree);
+
     sizer->Add( missionTree, 0, wxGROW|wxALL, 0 );
 
     panel->SetAutoLayout( TRUE );

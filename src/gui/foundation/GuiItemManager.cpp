@@ -20,14 +20,20 @@
 //------------------------------
 // static data
 //------------------------------
-int GuiItemManager::theNumSpacecraft = 0;
-int GuiItemManager::theNumParameter = 0;
 GuiItemManager* GuiItemManager::theInstance = NULL;
 GuiInterpreter* GuiItemManager::theGuiInterpreter = NULL;
-wxString* GuiItemManager::theParameterList = NULL;
+
+int GuiItemManager::theNumSpacecraft = 0;
+int GuiItemManager::theNumParam = 0;
+int GuiItemManager::theNumConfigParam = 0;
+
+wxString* GuiItemManager::theParamList = NULL;
+wxString* GuiItemManager::theConfigParamList = NULL;
 wxString* GuiItemManager::theSpacecraftList = NULL;
+
 wxComboBox* GuiItemManager::theSpacecraftComboBox = NULL;
-wxListBox* GuiItemManager::theParameterListBox = NULL;
+wxListBox* GuiItemManager::theParamListBox = NULL;
+wxListBox* GuiItemManager::theConfigParamListBox = NULL;
 
 //------------------------------
 // public methods
@@ -64,15 +70,27 @@ void GuiItemManager::UpdateSpacecraft()
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateParameter(const wxString &objName)
+//  void UpdateParameter()
 //------------------------------------------------------------------------------
 /**
- * Updates spacecraft related gui components.
+ * Updates parameter related gui components.
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameter(const wxString &objName)
 {
     UpdateParameterList(objName);
+}
+
+//------------------------------------------------------------------------------
+//  void UpdateConfigParameter(const wxString &objName)
+//------------------------------------------------------------------------------
+/**
+ * Updates parameter related gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateConfigParameter(const wxString &objName)
+{
+    UpdateConfigParameterList(objName);
 }
 
 //------------------------------------------------------------------------------
@@ -88,11 +106,9 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
     // combo box for avaliable spacecrafts
 
     int numSc = theNumSpacecraft;
+    
     if (theNumSpacecraft == 0)
         numSc = 1;
-
-    if (theSpacecraftComboBox != NULL)
-        delete theSpacecraftComboBox;
     
     theSpacecraftComboBox =
         new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
@@ -110,24 +126,57 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 //                                const wxString &objName, int numObj)
 //------------------------------------------------------------------------------
 /**
- * @return Parameter ListBox pointer
+ * @return Available Parameter ListBox pointer
  */
 //------------------------------------------------------------------------------
 wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, const wxSize &size,
                                                const wxString &objName, int numObj)
 {
-    
-    if (theParameterListBox != NULL)
-        delete theParameterListBox;
-    
+        
+    wxString emptyList[] = {};
+        
     if (numObj > 0)
     {       
-        theParameterListBox =
-            new wxListBox(parent, -1, wxDefaultPosition, size, theNumParameter,
-                          theParameterList, wxLB_SINGLE);
+        theParamListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, theNumParam,
+                          theParamList, wxLB_SINGLE);
+    }
+    else
+    {       
+        theParamListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE);
     }
    
-    return theParameterListBox;
+    return theParamListBox;
+}
+
+//------------------------------------------------------------------------------
+// wxListBox* GetConfigParameterListBox(wxWindow *parent, const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Configured ConfigParameter ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent, const wxSize &size)
+{
+        
+    wxString emptyList[] = {};
+        
+    if (theNumConfigParam > 0)
+    {       
+        theConfigParamListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, theNumConfigParam,
+                          theConfigParamList, wxLB_SINGLE);
+    }
+    else
+    {       
+        theConfigParamListBox =
+            new wxListBox(parent, -1, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE);
+    }
+   
+    return theConfigParamListBox;
 }
 
 
@@ -178,30 +227,69 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
 //  void UpdateParameterList(const wxString &objName, bool firstTime = false)
 //------------------------------------------------------------------------------
 /**
- * updates spacecraft list
+ * Updates available parameter list
  */
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime)
 {
-    MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
-                                  std::string(objName.c_str()) + "\n");
+    //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+    //                              std::string(objName.c_str()) + "\n");
     
-    if (theParameterList != NULL)
+    if (theParamList != NULL)
     {
-        delete theParameterList;
-        theParameterList = NULL;
+        delete theParamList;
+        theParamList = NULL;
+    }
+
+    //loj: How do I know which parameter belong to which object type?
+    //loj: for B2 show all paramters
+    StringArray items =
+        theGuiInterpreter->GetListOfFactoryItems(Gmat::PARAMETER);
+    theNumParam = items.size();
+
+    theParamList = new wxString[theNumParam];
+    
+    for (int i=0; i<theNumParam; i++)
+    {
+        theParamList[i] = items[i].c_str();
+        
+        //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+        //                              std::string(theParamList[i].c_str()) + "\n");
+    }
+}
+
+//------------------------------------------------------------------------------
+//  void UpdateConfigParameterList(const wxString &objName = "", bool firstTime = false)
+//------------------------------------------------------------------------------
+/**
+ * Updates confugured parameter list
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdateConfigParameterList(const wxString &objName, bool firstTime)
+{
+    //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigParameterList() " +
+    //                              std::string(objName.c_str()) + "\n");
+    
+    if (theConfigParamList != NULL)
+    {
+        delete theConfigParamList;
+        theConfigParamList = NULL;
     }
 
     StringArray items =
         theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
-    theNumParameter = items.size();
+    theNumConfigParam = items.size();
 
-    theParameterList = new wxString[theNumParameter];
+    theConfigParamList = new wxString[theNumConfigParam];
     
-    for (int i=0; i<theNumParameter; i++)
+    for (int i=0; i<theNumConfigParam; i++)
     {
-        theParameterList[i] = objName + "." + items[i].c_str();
-        MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
-                                      std::string(theParameterList[i].c_str()) + "\n");
+        if (objName == "")
+            theConfigParamList[i] = items[i].c_str();
+        else
+            theConfigParamList[i] = objName + "." + items[i].c_str();
+        
+        //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigParameterList() " +
+        //                             std::string(theConfigParamList[i].c_str()) + "\n");
     }
 }

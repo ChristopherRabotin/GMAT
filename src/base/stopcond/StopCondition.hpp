@@ -42,18 +42,32 @@ public:
     StopCondition& operator= (const StopCondition &right); 
     virtual ~StopCondition();
 
-    bool IsInitialized();
-    Integer GetNumParameters();
-    Integer GetBufferSize();
-
-    Real GetGoal();
-    Real GetTolerance();
-    ParameterPtrArray GetParameters() const;
-    RefFrame* GetRefFrame();
-    Interpolator* GetInterpolator();
-
-    void SetGoal(const Real &goal);
-    void SetTolerance(const Real &tol);
+    bool IsInitialized()
+        { return mInitialized; }
+    Integer GetNumParameters()
+        { return mNumParams; }
+    Integer GetBufferSize()
+        { return mBufferSize; }
+    
+    Real GetGoal()
+        { return mGoal; }
+    Real GetTolerance()
+        { return mTolerance; }
+    Integer GetRepeatCount()
+        { return mRepeatCount; }
+    
+    ParameterPtrArray GetParameters() const
+        { return mParameters; }
+    RefFrame* GetRefFrame()
+        { return mRefFrame; }
+    Interpolator* GetInterpolator()
+        { return mInterpolator; }
+    
+    void SetGoal(const Real &goal)
+        { mGoal = goal; }
+    void SetTolerance(const Real &tol)
+        { mTolerance = tol; }
+    
     bool SetInterpolator(Interpolator *interp);
     bool SetRefFrame(RefFrame *refFrame);
     bool SetEpochParameter(Parameter *epochParam);

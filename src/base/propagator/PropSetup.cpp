@@ -240,6 +240,18 @@ void PropSetup::DeleteForce(const std::string &name)
 }
 
 //------------------------------------------------------------------------------
+// PhysicalModel* GetForce(Integer index)
+//------------------------------------------------------------------------------
+/**
+ * @return Force pointer give by index, NULL if invalid index
+ */
+//------------------------------------------------------------------------------
+PhysicalModel* PropSetup::GetForce(Integer index)
+{
+    return mForceModel->GetForce(index);      
+}
+
+//------------------------------------------------------------------------------
 // PhysicalModel* GetForce(const std::string &name)
 //------------------------------------------------------------------------------
 /**

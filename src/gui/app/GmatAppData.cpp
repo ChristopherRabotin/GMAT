@@ -24,5 +24,6 @@ GuiInterpreter* GmatAppData::theGuiInterpreter = NULL;
 #if !defined __CONSOLE_APP__
 ViewTextFrame* GmatAppData::theMessageWindow = NULL;
 ResourceTree* GmatAppData::theResourceTree = NULL;
+MissionTree* GmatAppData::theMissionTree = NULL;
 GmatMainNotebook *GmatAppData::theMainNotebook = NULL;
 #endif

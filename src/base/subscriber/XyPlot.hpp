@@ -65,6 +65,8 @@ protected:
 
     Parameter *mXParam;
     std::vector<Parameter*> mYParams;
+    
+    Integer mNumXParams;
     Integer mNumYParams;
 
     std::string mXParamName;

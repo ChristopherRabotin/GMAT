@@ -34,6 +34,8 @@ public:
     //   void SetMainNotebook (GmatMainNotebook *mainNotebook);
     //   GmatMainNotebook *GetMainNotebook();
 
+    void UpdateMissionSeq();
+    
 protected:
 
 private:
@@ -51,9 +53,9 @@ private:
     int mNumManeuver;
     int mNumTarget;
 
+    void UpdateCommand();
     void AddDefaultMission();
     void AddDefaultMissionSeq(wxTreeItemId universe);
-    
     void AddIcons();
 
     // event handlers
@@ -75,7 +77,9 @@ private:
     
     void OnViewVariables();
     void OnViewGoals();
-    
+
+    void OnRun();   
+ 
     wxMenu* CreatePopupMenu();
     wxMenu* CreateInsertPopupMenu();
     
@@ -104,6 +108,8 @@ private:
 
         POPUP_VIEW_VARIABLES,
         POPUP_VIEW_GOALS, 
+
+        POPUP_RUN,
     };
 };
 
