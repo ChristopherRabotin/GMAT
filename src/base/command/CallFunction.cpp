@@ -23,8 +23,8 @@
 #include "MatlabInterface.hpp"   // for Matlab Engine functions
 #endif
 
-#define DEBUG_CALL_FUNCTION 1
-#define DEBUG_UPDATE_VAR 1
+//#define DEBUG_CALL_FUNCTION 1
+//#define DEBUG_UPDATE_VAR 1
 //#define DEBUG_USE_ARRAY 1
 
 //---------------------------------
@@ -870,11 +870,11 @@ void CallFunction::GetOutParams()
             MatlabInterface::EvalString(varName);
             
             double outArray[500];   // array size???
-            int status = 
-               MatlabInterface::GetVariable("ans", 1, outArray);
-            MessageInterface::ShowMessage("The status is : %d\n", status);
-            MessageInterface::ShowMessage("The varName is %s\n", varName.c_str());
-            MessageInterface::ShowMessage("The outArray is %f\n", outArray[0]);
+  //          int status = 
+               MatlabInterface::GetVariable(varName, 1, outArray);
+//            MessageInterface::ShowMessage("The status is : %d\n", status);
+//            MessageInterface::ShowMessage("The varName is %s\n", varName.c_str());
+//            MessageInterface::ShowMessage("The outArray is %f\n", outArray[0]);
             param->SetRealParameter("Param1", outArray[0]);
             std::ostringstream ss;
             ss << outArray[0];
