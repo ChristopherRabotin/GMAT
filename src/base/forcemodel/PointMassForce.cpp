@@ -351,9 +351,9 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 //         deriv[ i6 ] = relativePosition[ i6 ] * mu_r; 
 //         deriv[i6+1] = relativePosition[i6+1] * mu_r; 
 //         deriv[i6+2] = relativePosition[i6+2] * mu_r; 
-         deriv[ i6 ] = relativePosition[0] * mu_r; 
-         deriv[i6+1] = relativePosition[1] * mu_r; 
-         deriv[i6+2] = relativePosition[2] * mu_r; 
+         deriv[ i6 ] = relativePosition[0] * mu_r - a_indirect[0]; 
+         deriv[i6+1] = relativePosition[1] * mu_r - a_indirect[1]; 
+         deriv[i6+2] = relativePosition[2] * mu_r - a_indirect[2]; 
          deriv[i6+3] = 0.0; 
          deriv[i6+4] = 0.0; 
          deriv[i6+5] = 0.0; 
