@@ -1,0 +1,74 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                  MdiDocViewFrame
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Original File: /samples/docvwmdi/docview.hpp
+// Author: Julian Smart
+// Created: 1998/04/01
+// Modified:
+//   2003/11/04 Linda Jun - Followed GMAT coding standards.
+//
+/**
+ * Defines operations on MDI document view.
+ */
+//------------------------------------------------------------------------------
+#include "gmatwxdefs.hpp"
+
+#if !wxUSE_DOC_VIEW_ARCHITECTURE
+#error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in setup.h!
+#endif
+
+#include "wx/docview.h"
+
+#include "MdiDocViewFrame.hpp"
+//  #include "TextDocument.hpp"
+//  #include "TextEditView.hpp"
+
+
+/*
+* This is the top-level window of the application.
+*/
+
+IMPLEMENT_CLASS(MdiDocViewFrame, wxDocParentFrame)
+//  BEGIN_EVENT_TABLE(MdiDocViewFrame, wxDocParentFrame)
+//      EVT_MENU(DOCVIEW_ABOUT, MdiDocViewFrame::OnAbout)
+//  END_EVENT_TABLE()
+
+//------------------------------------------------------------------------------
+// MdiDocViewFrame(wxDocManager *manager, wxFrame *frame, 
+//              const wxString& title, const wxPoint& pos,
+//              const wxSize& size, const long type)
+//------------------------------------------------------------------------------
+MdiDocViewFrame::MdiDocViewFrame(wxDocManager *manager, wxFrame *frame, 
+                           const wxString& title, const wxPoint& pos,
+                           const wxSize& size, const long type)
+    : wxDocMDIParentFrame(manager, frame, -1, title, pos, size, type,
+                          _T("MdiDocViewFrame"))
+{
+    editMenu = (wxMenu *) NULL;
+}
+
+//  //------------------------------------------------------------------------------
+//  // void OnAbout(wxCommandEvent& WXUNUSED(event) )
+//  //------------------------------------------------------------------------------
+//  void MdiDocViewFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
+//  {
+//      (void)wxMessageBox(_T("Author: Julian Smart\n"),
+//                         _T("About DocView"));
+//  }
+
+//------------------------------------------------------------------------------
+// MdiDocViewFrame *GetMdiMainFrame(void)
+//------------------------------------------------------------------------------
+MdiDocViewFrame *GetMdiMainFrame(void)
+{
+    return mdiDocMainFrame;
+}
+
