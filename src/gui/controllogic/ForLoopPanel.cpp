@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ForLoopPanel, GmatPanel)
-    EVT_TEXT(ID_TEXTCTRL, ForLoopPanel::OnTextUpdate)
-    EVT_BUTTON(ID_BUTTON, ForLoopPanel::OnButtonClick)
+    EVT_GRID_CELL_RIGHT_CLICK(ForLoopPanel::OnCellRightClick)
+    EVT_GRID_CELL_CHANGE(ForLoopPanel::OnCellValueChange)    
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -47,6 +47,13 @@ ForLoopPanel::ForLoopPanel(wxWindow *parent, GmatCommand *cmd)
    Show();
 }
 
+//------------------------------------------------------------------------------
+// ~ForLoopPanel()
+//------------------------------------------------------------------------------
+/**
+ * A destructor.
+ */
+//------------------------------------------------------------------------------
 ForLoopPanel::~ForLoopPanel()
 {
 }
@@ -61,75 +68,42 @@ void ForLoopPanel::Create()
 
 void ForLoopPanel::Setup( wxWindow *parent)
 {
-   // wxStaticText
-   indexStaticText =
-      new wxStaticText(this, ID_TEXT , wxT("Index"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   startStaticText =
-      new wxStaticText(this, ID_TEXT , wxT("Start"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   incrStaticText =
-      new wxStaticText(this, ID_TEXT , wxT("Increment"), 
-                        wxDefaultPosition, wxDefaultSize, 0);
-   endStaticText =
-      new wxStaticText(this, ID_TEXT , wxT("End"), 
-                        wxDefaultPosition, wxDefaultSize, 0);
-                        
-   // wxTextCtrl
-   indexTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(250,-1), 0);
-   startTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(250,-1), 0);
-   incrTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(150,-1), 0);
-   endTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                      wxDefaultPosition, wxSize(250,-1), 0);
-   indexTextCtrl->SetEditable(false);
-                      
-   // wxButton
-   indexButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                    wxDefaultPosition, wxSize(75, -1), 0);
-   startButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                    wxDefaultPosition, wxSize(75, -1), 0);
-   stepButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                    wxDefaultPosition, wxSize(75, -1), 0);
-   endButton =
-      new wxButton(this, ID_BUTTON, wxT("View"),
-                    wxDefaultPosition, wxSize(75, -1), 0);
-                      
-   Integer bsize = 10; // border size
+   // wxGrid
+   conditionGrid =
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(503,55), wxWANTS_CHARS);
+   
+   conditionGrid->CreateGrid(1,4,wxGrid::wxGridSelectCells);
+   conditionGrid->SetSelectionMode(wxGrid::wxGridSelectCells);
+   
+   //conditionGrid->EnableEditing(true);
+   //conditionGrid->EnableCellEditControl(true);
+   //conditionGrid->ShowCellEditControl();
+   
+   conditionGrid->EnableDragColSize(false);
+   conditionGrid->EnableDragRowSize(false);
+   conditionGrid->EnableDragGridSize(false);
+   
+   conditionGrid->SetColSize(0, 125);
+   conditionGrid->SetColSize(1, 125);
+   conditionGrid->SetColSize(2, 125);
+   conditionGrid->SetColSize(3, 125);
+   
+   conditionGrid->SetColLabelValue(0, _T("Index"));
+   conditionGrid->SetColLabelValue(1, _T("Start"));
+   conditionGrid->SetColLabelValue(2, _T("Increment"));
+   conditionGrid->SetColLabelValue(3, _T("End"));
+   
+   conditionGrid->SetRowLabelSize(0);
+   
+   conditionGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);   
+   
+   Integer bsize = 5;
    
    // wx*Sizers
-   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 4, 0, 0 );
-   
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( indexStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( indexTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( indexButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( startStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( startTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize); 
-   flexGridSizer1->Add( startButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-    
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize); 
-   flexGridSizer1->Add( incrStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( incrTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( stepButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   
-   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( endStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( endTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( endButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   
-   theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
+   wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
+   item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, bsize);
+
+   theMiddleSizer->Add(item0, 0, wxGROW, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -150,7 +124,7 @@ void ForLoopPanel::LoadData()
 
        if (mIndexString.IsEmpty())
        {
-          mIndexString = "Default set to internal index";
+          mIndexString = "Default";
           mIndexIsSet = false;
        } 
        else
@@ -167,8 +141,8 @@ void ForLoopPanel::LoadData()
                 
              mIndexString = param->GetName().c_str();
           }  
-       } 
-       indexTextCtrl->SetValue(mIndexString);     
+       }    
+       conditionGrid->SetCellValue(0, INDEX_COL, mIndexString); 
     
        paramId = theForCommand->GetParameterID("StartIsParam");
        mStartIsParam = theForCommand->GetBooleanParameter(paramId);
@@ -182,14 +156,14 @@ void ForLoopPanel::LoadData()
                              (Gmat::PARAMETER, mStartString.c_str());
            
            mStartString = param->GetName().c_str(); 
-           startTextCtrl->SetValue(mStartString);
+           conditionGrid->SetCellValue(0, START_COL, mStartString); 
        }
        else
        {    
           paramId = theForCommand->GetParameterID("StartValue");
           mStartValue = theForCommand->GetRealParameter(paramId);
           s1.Printf("%.10f", mStartValue);
-          startTextCtrl->SetValue(s1);
+          conditionGrid->SetCellValue(0, START_COL, s1); 
        }    
        
        paramId = theForCommand->GetParameterID("IncrIsparam");
@@ -203,14 +177,14 @@ void ForLoopPanel::LoadData()
            Parameter *param = (Parameter*)theForCommand->GetRefObject
                              (Gmat::PARAMETER, mIncrString.c_str());
            mIncrString = param->GetName().c_str();
-           incrTextCtrl->SetValue(mIncrString);
+           conditionGrid->SetCellValue(0, INCR_COL, mIncrString); 
        }
        else
        {    
           paramId = theForCommand->GetParameterID("Step");
           mIncrValue = theForCommand->GetRealParameter(paramId);
           s2.Printf("%.10f", mIncrValue);
-          incrTextCtrl->SetValue(s2);
+          conditionGrid->SetCellValue(0, INCR_COL, s2); 
        }    
        
        paramId = theForCommand->GetParameterID("EndIsParam");
@@ -223,15 +197,15 @@ void ForLoopPanel::LoadData()
            
            Parameter *param = (Parameter*)theForCommand->GetRefObject
                              (Gmat::PARAMETER, mEndString.c_str());
-           mEndString = param->GetName().c_str();
-           endTextCtrl->SetValue(mEndString); 
+           mEndString = param->GetName().c_str(); 
+           conditionGrid->SetCellValue(0, END_COL, mEndString);
        }
        else
        {    
           paramId = theForCommand->GetParameterID("EndValue");
           mEndValue = theForCommand->GetRealParameter(paramId);
           s3.Printf("%.10f", mEndValue);
-          endTextCtrl->SetValue(s3); 
+          conditionGrid->SetCellValue(0, END_COL, s3);
        }   
     }
 }
@@ -295,81 +269,13 @@ void ForLoopPanel::SaveData()
 }
 
 //------------------------------------------------------------------------------
-// void OnTextUpdate(wxCommandEvent& event)
+// void OnCellRightClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
-void ForLoopPanel::OnTextUpdate(wxCommandEvent& event)
+void ForLoopPanel::OnCellRightClick(wxGridEvent& event)
 {
-   wxString temp;
-   
-   if (event.GetEventObject() == indexTextCtrl)
-   {
-      temp = indexTextCtrl->GetValue();
-      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
-      
-      if (theParam != NULL)
-      {
-         mIndexString = indexTextCtrl->GetValue();
-         mIndexIsParam = true; 
-         mIndexIsSet = true;   
-      } 
-   }    
-   else if (event.GetEventObject() == startTextCtrl)
-   {
-      temp = startTextCtrl->GetValue();
-      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
-
-      if (theParam == NULL)
-      {
-          mStartValue = atof(startTextCtrl->GetValue());
-          mStartIsParam = false;
-      } 
-      else
-      {
-         mStartString = startTextCtrl->GetValue();
-         mStartIsParam = true;    
-      }    
-   }    
-   else if (event.GetEventObject() == incrTextCtrl)
-   {
-      temp = incrTextCtrl->GetValue();
-      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
-
-      if (theParam == NULL)
-      {
-          mIncrValue = atof(incrTextCtrl->GetValue());
-          mIncrIsParam = false;
-      } 
-      else
-      {
-         mIncrString = incrTextCtrl->GetValue();
-         mIncrIsParam = true;    
-      } 
-   }    
-   else if (event.GetEventObject() == endTextCtrl)
-   {
-      temp = endTextCtrl->GetValue();
-      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
-
-      if (theParam == NULL)
-      {
-          mEndValue = atof(endTextCtrl->GetValue());
-          mEndIsParam = false;
-      } 
-      else
-      {
-         mEndString = endTextCtrl->GetValue();
-         mEndIsParam = true;    
-      } 
-   }    
-   
-   theApplyButton->Enable(true);
-}   
-
-//------------------------------------------------------------------------------
-// void OnButtonClick(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ForLoopPanel::OnButtonClick(wxCommandEvent& event)
-{
+   int row = event.GetRow();
+   int col = event.GetCol();
+    
    ParameterSelectDialog paramDlg(this);
    paramDlg.ShowModal();
 
@@ -377,13 +283,73 @@ void ForLoopPanel::OnButtonClick(wxCommandEvent& event)
    {
       wxString newParamName = paramDlg.GetParamName();
       
-      if (event.GetEventObject() == indexButton)
-         indexTextCtrl->SetValue(newParamName);    
-      else if (event.GetEventObject() == startButton)
-         startTextCtrl->SetValue(newParamName);
-      else if (event.GetEventObject() == stepButton)
-         incrTextCtrl->SetValue(newParamName);
-      else if (event.GetEventObject() == endButton)
-         endTextCtrl->SetValue(newParamName); 
-   }      
+      if (newParamName == conditionGrid->GetCellValue(row, col))
+         return;
+               
+      conditionGrid->SetCellValue(row, col, newParamName);
+      
+      if (col == INDEX_COL)
+      {
+         mIndexString = conditionGrid->GetCellValue(row, INDEX_COL);
+         mIndexIsParam = true; 
+         mIndexIsSet = true;   
+      }    
+      else if (col == START_COL)
+      {
+         mStartString = conditionGrid->GetCellValue(row, START_COL);
+         mStartIsParam = true;
+      }    
+      else if (col == INCR_COL)
+      {
+         mIncrString = conditionGrid->GetCellValue(row, INCR_COL);
+         mIncrIsParam = true;
+      }    
+      else if (col == END_COL)
+      {
+         mEndString = conditionGrid->GetCellValue(row, END_COL);
+         mEndIsParam = true;
+      }  
+      theApplyButton->Enable(true);  
+   }  
+} 
+    
+//------------------------------------------------------------------------------
+// void OnCellValueChange(wxGridEvent& event)
+//------------------------------------------------------------------------------
+void ForLoopPanel::OnCellValueChange(wxGridEvent& event)
+{
+   int row = event.GetRow();
+   int col = event.GetCol();
+  
+//   wxString temp = conditionGrid->GetCellValue(row, col);
+//   double *value = NULL;
+//   
+// @todo add check pointer for invalid entries,
+// check why ToDouble() returns false in every case.  
+//   if ( !temp.ToDouble(value) )
+//   {
+//      conditionGrid->SetCellValue(row, col, "0.0");
+//      return;
+//   }    
+
+   if (col == INDEX_COL)
+   {
+      conditionGrid->SetCellValue(row, INDEX_COL, mIndexString);
+   }   
+   else if (col == START_COL)
+   {
+      mStartValue = atof(conditionGrid->GetCellValue(row, col).c_str());
+      mStartIsParam = false;
+   }    
+   else if (col == INCR_COL)
+   {
+      mIncrValue = atof(conditionGrid->GetCellValue(row, INCR_COL));
+      mIncrIsParam = false;
+   }    
+   else if (col == END_COL)
+   {
+      mEndValue = atof(conditionGrid->GetCellValue(row, END_COL));
+      mEndIsParam = false;
+   }    
+   theApplyButton->Enable(true);
 }    

@@ -41,6 +41,11 @@ private:
     bool mEndIsParam;
     bool mIncrIsParam;
     
+    static const int INDEX_COL = 0;
+    static const int START_COL = 1;
+    static const int INCR_COL = 2;
+    static const int END_COL = 3;
+    
     wxString mIndexString;
     wxString mStartString;
     wxString mEndString;
@@ -52,20 +57,7 @@ private:
     
     Parameter* mIndexParam;  
     
-    wxStaticText *indexStaticText;
-    wxStaticText *startStaticText;
-    wxStaticText *incrStaticText;
-    wxStaticText *endStaticText;
-   
-    wxTextCtrl *indexTextCtrl;
-    wxTextCtrl *startTextCtrl;
-    wxTextCtrl *incrTextCtrl;
-    wxTextCtrl *endTextCtrl;
-    
-    wxButton *indexButton;
-    wxButton *startButton;
-    wxButton *stepButton;
-    wxButton *endButton;
+    wxGrid *conditionGrid;
    
     // methods inherited from GmatPanel
     virtual void Create();
@@ -74,8 +66,8 @@ private:
 
     // Layout & data handling methods
     void Setup(wxWindow *parent);
-    void OnTextUpdate(wxCommandEvent& event); 
-    void OnButtonClick(wxCommandEvent &event);
+    void OnCellRightClick(wxGridEvent& event);
+    void OnCellValueChange(wxGridEvent& event);
                
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
@@ -83,9 +75,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXTCTRL = 46000,
-        ID_TEXT,
-        ID_BUTTON,
+        ID_GRID = 99000
     };
 };
 
