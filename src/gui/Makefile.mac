@@ -6,7 +6,7 @@
 #             2004/09/24 - Added 'testing' target, but nothing.
 #
 #
-SUBS = app burn controllogic foundation forcemodel maneuver mission plot \
+SUBS = app burn command controllogic foundation forcemodel maneuver mission plot \
 	propagator solarsys solver spacecraft view
 
 # Holding 'resource' directory for later

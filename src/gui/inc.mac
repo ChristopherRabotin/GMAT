@@ -38,6 +38,7 @@ B_UTIL       = $(PROJECT_ROOT)/base/util
 # Define macros for the gui directory
 APP        = $(PROJECT_ROOT)/gui/app
 BURN       = $(PROJECT_ROOT)/gui/burn
+COMMAND    = $(PROJECT_ROOT)/gui/command
 CTRLLOGIC  = $(PROJECT_ROOT)/gui/controllogic
 FORCEMODEL = $(PROJECT_ROOT)/gui/forcemodel
 FOUNDATION = $(PROJECT_ROOT)/gui/foundation
@@ -61,7 +62,7 @@ BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
 	-I$(B_REFFRAME) -I$(B_SOLARSYS) -I$(B_SOLVER) -I$(B_SPACECRAFT) \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
 
-GUI_INCS = -I$(APP) -I$(BURN) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
+GUI_INCS = -I$(APP) -I$(BURN) -I$(COMMAND) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
 	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(MANEUVER) \
 	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
 	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
