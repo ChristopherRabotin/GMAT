@@ -12,14 +12,8 @@
  * This class provides the tree for missions.
  */
 //------------------------------------------------------------------------------
-#include "gmatwxdefs.hpp"
-#include "bitmaps/file.xpm"
-
-#include "GuiInterpreter.hpp"
-#include "GmatAppData.hpp"
 #include "MissionTree.hpp"
-#include "MessageInterface.hpp"
-#include "Command.hpp"
+#include "bitmaps/file.xpm"
 
 //------------------------------
 // event tables for wxWindows
@@ -41,13 +35,13 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_BEFORE, MissionTree::OnBefore)
    EVT_MENU_HIGHLIGHT(POPUP_SWAP_AFTER, MissionTree::OnAfter)
 
-   EVT_MENU(POPUP_ADD_MANEUVER_BEFORE, MissionTree::OnAddManeuverBefore)
-   EVT_MENU(POPUP_ADD_PROPAGATE_BEFORE, MissionTree::OnAddPropagateBefore)
-   EVT_MENU(POPUP_ADD_TARGET_BEFORE, MissionTree::OnAddTargetBefore)
+   EVT_MENU(POPUP_ADD_BEFORE_MANEUVER, MissionTree::OnAddBeforeManeuver)
+   EVT_MENU(POPUP_ADD_BEFORE_PROPAGATE, MissionTree::OnAddBeforePropagate)
+   EVT_MENU(POPUP_ADD_BEFORE_TARGET, MissionTree::OnAddBeforeTarget)
    
-   EVT_MENU(POPUP_ADD_MANEUVER_AFTER, MissionTree::OnAddManeuverAfter)
-   EVT_MENU(POPUP_ADD_PROPAGATE_AFTER, MissionTree::OnAddPropagateAfter)
-   EVT_MENU(POPUP_ADD_TARGET_AFTER, MissionTree::OnAddTargetAfter)
+   EVT_MENU(POPUP_ADD_AFTER_MANEUVER, MissionTree::OnAddAfterManeuver)
+   EVT_MENU(POPUP_ADD_AFTER_PROPAGATE, MissionTree::OnAddAfterPropagate)
+   EVT_MENU(POPUP_ADD_AFTER_TARGET, MissionTree::OnAddAfterTarget)
 
 END_EVENT_TABLE()
 
@@ -75,7 +69,6 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
               const wxPoint &pos, const wxSize &size, long style)
               :DecoratedTree(parent, id, pos, size, style)
 {
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     this->parent = parent;
 //    this->SetNodes();
     this->SetParameter(BOXCOUNT, 2);
@@ -131,7 +124,7 @@ void MissionTree::AddDefaultMission()
 
     // hard code mission in for now
     this->AppendItem(resource, wxT("Propagate"), -1, -1,
-          new GmatTreeItemData(wxT("Propagate"), DEFAULT_PROPAGATE_COMMAND));
+          new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
 }
 
 //------------------------------------------------------------------------------
@@ -219,15 +212,15 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 
     wxMenu *menuAddBefore = new wxMenu;;
     
-    menuAddBefore->Append(POPUP_ADD_MANEUVER_BEFORE, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_PROPAGATE_BEFORE, wxT("Propagate"), wxT(""), FALSE);
-    menuAddBefore->Append(POPUP_ADD_TARGET_BEFORE, wxT("Target"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddBefore->Append(POPUP_ADD_BEFORE_TARGET, wxT("Target"), wxT(""), FALSE);
 
     wxMenu *menuAddAfter = new wxMenu;;
     
-    menuAddAfter->Append(POPUP_ADD_MANEUVER_AFTER, wxT("Maneuver"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_PROPAGATE_AFTER, wxT("Propagate"), wxT(""), FALSE);
-    menuAddAfter->Append(POPUP_ADD_TARGET_AFTER, wxT("Target"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_MANEUVER, wxT("Maneuver"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_PROPAGATE, wxT("Propagate"), wxT(""), FALSE);
+    menuAddAfter->Append(POPUP_ADD_AFTER_TARGET, wxT("Target"), wxT(""), FALSE);
 
     menu->Append(POPUP_ADD_BEFORE, wxT("Insert Before"), menuAddBefore, wxT(""));
     menu->Append(POPUP_ADD_AFTER, wxT("Insert After"), menuAddAfter, wxT(""));
@@ -257,7 +250,7 @@ void MissionTree::OnAfter ()
     before = false;
 }
 
-void MissionTree::OnAddManeuverBefore(wxCommandEvent &event)
+void MissionTree::OnAddBeforeManeuver(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
@@ -268,7 +261,7 @@ void MissionTree::OnAddManeuverBefore(wxCommandEvent &event)
         new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
 }
 
-void MissionTree::OnAddPropagateBefore(wxCommandEvent &event)
+void MissionTree::OnAddBeforePropagate(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
@@ -279,7 +272,7 @@ void MissionTree::OnAddPropagateBefore(wxCommandEvent &event)
         new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
 }
 
-void MissionTree::OnAddTargetBefore(wxCommandEvent &event)
+void MissionTree::OnAddBeforeTarget(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
@@ -290,7 +283,7 @@ void MissionTree::OnAddTargetBefore(wxCommandEvent &event)
         new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
 }
 
-void MissionTree::OnAddManeuverAfter(wxCommandEvent &event)
+void MissionTree::OnAddAfterManeuver(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
@@ -299,7 +292,7 @@ void MissionTree::OnAddManeuverAfter(wxCommandEvent &event)
         new GmatTreeItemData(wxT("Maneuver"), MANEUVER_COMMAND));
 }
 
-void MissionTree::OnAddPropagateAfter(wxCommandEvent &event)
+void MissionTree::OnAddAfterPropagate(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
@@ -308,33 +301,13 @@ void MissionTree::OnAddPropagateAfter(wxCommandEvent &event)
         new GmatTreeItemData(wxT("Propagate"), PROPAGATE_COMMAND));
 }
 
-void MissionTree::OnAddTargetAfter(wxCommandEvent &event)
+void MissionTree::OnAddAfterTarget(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
   wxTreeItemId itemParent = GetItemParent(item);
   
   this->InsertItem(itemParent, item, wxT("Target"), -1, -1,
         new GmatTreeItemData(wxT("Target"), TARGET_COMMAND));
-}
-
-//------------------------------------------------------------------------------
-// void AddManeuver(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void MissionTree::AddManeuver()
-{
-  wxTreeItemId item = GetSelection();
-  
-  wxString withName;
-  withName.Printf("Maneuver%d", numManeuver++);
-  
-/*  Command *theManeuver = theGuiInterpreter->
-                  CreateCommand((const std::string) withName);
-
-  wxString newName = wxT(theManeuver->GetName().c_str());
-  
-  this->AppendItem(item, newName, -1, -1,
-              new GmatTreeItemData(newName, MANEUVER_COMMAND));
-*/
 }
 
 
