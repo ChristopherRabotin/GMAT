@@ -374,7 +374,8 @@ Rvector Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    else if (instanceName == SolarSystem::NEPTUNE_NAME)
    {
       Real N    = 357.85 + 52.316 * T;
-      Real NDot = 52.316 * CelestialBody::TDot;
+      //Real NDot = 52.316 * CelestialBody::TDot;
+      Real NDot = 6.0551e-04;   // per new specs 2004.02.22
       alpha     = 299.36 + 0.70 * Sin(Rad(N));
       delta     = 43.46  - 0.51 * Cos(Rad(N));
       W         = 253.18 + 536.3128492 * d - 0.48 * Sin(Rad(N));
