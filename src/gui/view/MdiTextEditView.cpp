@@ -103,6 +103,6 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-    //GmatAppData::theMessageWindow->ClearText();
+    GmatAppData::theMessageWindow->ClearText();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }

@@ -99,5 +99,6 @@ bool TextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool TextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
+    GmatAppData::theMessageWindow->ClearText();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }
