@@ -13,28 +13,24 @@
 // Created: 2003/10/09
 //
 /**
- * Declares propagator stopping condition class.
+ * Declares stopping condition class.
  */
 //------------------------------------------------------------------------------
 #ifndef StopCondition_hpp
 #define StopCondition_hpp
 
 #include "gmatdefs.hpp"
+#include "BaseStopCondition.hpp"
 #include "RealTypes.hpp"
-#include "paramdefs.hpp"
-#include "GmatBase.hpp"
 #include "Interpolator.hpp"
-#include "RefFrame.hpp"
 
-class GMAT_API StopCondition : public GmatBase
+class GMAT_API StopCondition : public BaseStopCondition
 {
 public:
 
-    StopCondition(const std::string &name,
-                  const std::string &typeStr = "StopCondition",
+    StopCondition(const std::string &name = "",
                   const std::string &desc = "",
-                  Parameter *epochParam = NULL,
-                  Parameter *stopParam = NULL,
+                  Parameter *epochParam = NULL, Parameter *stopParam = NULL,
                   const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                   const Real &tol = GmatRealConst::REAL_TOL,
                   const Integer repeatCount = 1,
@@ -44,87 +40,58 @@ public:
     StopCondition& operator= (const StopCondition &right); 
     virtual ~StopCondition();
 
-    bool IsInitialized()
-        { return mInitialized; }
-    Integer GetNumParameters()
-        { return mNumParams; }
-    Integer GetBufferSize()
-        { return mBufferSize; }
+    bool SetSingleParameter(Parameter *param);
     
-    Real GetGoal()
-        { return mGoal; }
-    Real GetTolerance()
-        { return mTolerance; }
-    Integer GetRepeatCount()
-        { return mRepeatCount; }
-    std::string& GetDescription()
-        { return mDescription; }
-    
-    ParameterPtrArray GetParameters() const
-        { return mParameters; }
-    RefFrame* GetRefFrame()
-        { return mRefFrame; }
-    Interpolator* GetInterpolator()
-        { return mInterpolator; }
-    
-    void SetGoal(const Real &goal)
-        { mGoal = goal; }
-    void SetTolerance(const Real &tol)
-        { mTolerance = tol; }
-    void SetRepeatCount(const Integer &repeatCount)
-        { mRepeatCount = repeatCount; }
-    void SetDescription(const std::string &desc)
-        { mDescription = desc; }
+    // methods inherited from BaseStopCondition
+    virtual bool Evaluate();
+    virtual bool Validate();
 
-    bool SetInterpolator(Interpolator *interp);
-    bool SetRefFrame(RefFrame *refFrame);
-    bool SetEpochParameter(Parameter *epochParam);
-    
-    Real GetStopEpoch();
-    
-    virtual bool SetObjectOfParameter(Gmat::ObjectType objType, GmatBase *obj);
-    virtual bool AddParameter(Parameter *param);
+    // methods inherited from GmatBase
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
 
-    /**
-     * Evaluates stopping condition.
-     * All derived classes must implement this method.
-     */
-    virtual bool Evaluate() = 0;
-    /**
-     * Validates stopping condition.
-     * All derived classes must implement this method.
-     */
-    virtual bool Validate() = 0;
+    virtual Integer GetIntegerParameter(const Integer id) const;
+    virtual Integer GetIntegerParameter(const std::string &label) const;
+    virtual Integer SetIntegerParameter(const Integer id,
+                                        const Integer value);
+    virtual Integer SetIntegerParameter(const std::string &label,
+                                        const Integer value);
 
+    virtual Real GetRealParameter(const Integer id) const;
+    virtual Real GetRealParameter(const std::string &label) const;
+    virtual Real SetRealParameter(const Integer id, const Real value);
+    virtual Real SetRealParameter(const std::string &label, const Real value);
+
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual std::string GetStringParameter(const std::string &label) const;
+    virtual bool SetStringParameter(const Integer id, const std::string &value);
+    virtual bool SetStringParameter(const std::string &label,
+                                    const std::string &value);
+    
 protected:
-
-    void Initialize();
+    // The inherited methods from StopCondition
     virtual bool SetParameter(Parameter *param);
 
-    Real mGoal;
-    Real mTolerance;
-    Integer mRepeatCount;
-    RefFrame *mRefFrame;
-    Interpolator *mInterpolator;
-    std::string mDescription;
+    enum
+    {
+        EPOCH = 0,
+        EPOCH_VAR,
+        STOP_VAR,
+        GOAL,
+        TOLERANCE,
+        REPEAT_COUNT,
+        INTERPOLATOR,
+        REF_FRAME,
+        StopConditionParamCount,
+    };
     
-    Parameter *mEpochParam;
-    ParameterPtrArray mParameters;
-    Integer mNumParams;
-
-    /// ring buffer for epoches
-    RealArray mEpochBuffer;
-    /// ring buffer for associated values
-    RealArray mValueBuffer;
-    Integer mNumValidPoints;
-    Integer mBufferSize;
-    Real mStopEpoch;
-    
-    bool mInitialized;
+    static const Gmat::ParameterType PARAMETER_TYPE[StopConditionParamCount];
+    static const std::string PARAMETER_TEXT[StopConditionParamCount];
 
 private:
-    StopCondition();
-    void CopyDynamicData(const StopCondition &stopCond);
+
 };
 
 #endif // StopCondition_hpp
