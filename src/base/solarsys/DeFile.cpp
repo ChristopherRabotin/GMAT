@@ -97,7 +97,14 @@ DeFile::DeFile(Gmat::DeFileType ofType, std::string fileName,
 PlanetaryEphem(fileName)
 {
    defType = ofType;
-   InitializeDeFile(fileName, fmt);
+   try
+   {
+      InitializeDeFile(fileName, fmt);
+   }
+   catch (PlanetaryEphemException &pe)
+   {
+      throw PlanetaryEphemException(pe.GetMessage());
+   }
 }
 
 //------------------------------------------------------------------------------
