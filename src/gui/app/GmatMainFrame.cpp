@@ -59,6 +59,7 @@
 #include "ConditionalStatementPanel.hpp"
 #include "ForLoopPanel.hpp"
 #include "GmatMdiChildFrame.hpp"
+#include "FormationSetupPanel.hpp"
 
 #include <wx/gdicmn.h>
 
@@ -1008,6 +1009,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          sizer->Add( new SpacecraftPanel(panel, item->GetDesc()),
                      0, wxGROW|wxALL, 0 );
       }
+      else if ((dataType == GmatTree::DEFAULT_FORMATION_FOLDER) ||
+               (dataType == GmatTree::CREATED_FORMATION_FOLDER))
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);  
+         sizer->Add( new FormationSetupPanel(panel, item->GetDesc()), 0, wxGROW|wxALL, 0 );         
+      }   
       else if (dataType == GmatTree::UNIVERSE_FOLDER)
       {
          newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
