@@ -75,8 +75,8 @@ public:
 
     Rvector6 GetCartesianState();
     Rvector6 GetKeplerianState();
+    Rvector6 GetModifiedKeplerianState();
 //    Will add more methods below later
-//    Rvector6 GetModifiedKeplerianState() const;
 //    Rvector6 GetSphericalOneState() const;
 //    Rvector6 GetSphericalTwoState() const;
 
@@ -85,8 +85,8 @@ public:
 
     std::string GetDisplayDateFormat() const;
     void SetDisplayDateFormat(const std::string &dateType);
-    Real GetDisplayEpoch();
-    void SetDisplayEpoch(const Real value);
+    std::string GetDisplayEpoch();
+    void SetDisplayEpoch(const std::string &value);
 
     std::string GetDisplayCoordType() const;
     void SetDisplayCoordType(const std::string &coordType);
@@ -153,11 +153,11 @@ protected:
     TimeConverter  timeConverter;
     Rvector6       cartesianState;
     Rvector6       keplerianState;
-    Rvector6       modifiedKeplerainState;
+    Rvector6       modifiedKeplerianState;
     Rvector6       sphericalOneState;
     Rvector6       sphericalTwoState;
     bool           isForDisplay;
-    Real           displayEpoch;
+    std::string    displayEpoch;
     Real           displayState[6];
     std::string    displayDateFormat;
     std::string    displayCoordType; 
@@ -170,6 +170,7 @@ private:
     void        SetInitialDisplay();
 
     bool        initialDisplay;
+    std::string ToString(const Real value); 
 };
 
 #endif // Spacecraft_hpp

@@ -576,10 +576,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
     if (label == "Epoch") return epoch = value;
 
-    if (label == "X" || label == "SMA" || label == "RMAG")  
+    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
        return state[0] = value;
 
-    if (label == "Y" || label == "ECC" || label == "RA")  
+    if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA")  
        return state[1] = value;
 
     if (label == "Z" || label == "INC" || label == "DEC")  
@@ -664,7 +664,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     {  
        // Check for invalid input then return unknown value from GmatBase 
        if (value != "Cartesian" && value != "Keplerian" && 
-           value != "Spherical1" && value != "Spherical2")
+           value != "ModifiedKeplerian" && value != "Spherical1" && 
+           value != "Spherical2")
        {   
           return GmatBase::SetStringParameter(id, value);
        }
@@ -702,11 +703,20 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
  */
 void Spacecraft::SetEpoch()
 {
-    if (displayDateFormat == "UTCGregorian")
-       epoch = timeConverter.Convert(displayEpoch,displayDateFormat,
-                                     "TAIModJulian");
-    else
-       epoch = displayEpoch;
+   // Check if date format is not TAIModJulian, then convert it
+   if (displayDateFormat != "TAIModJulian")
+   {
+      try
+      {
+         displayEpoch = timeConverter.Convert(displayEpoch,displayDateFormat,
+                                              "TAIModJulian");
+         epoch = atof(displayEpoch.c_str());
+      }
+      catch (TimeConverter::TimeConverterException& e)
+      {
+         // do  nothing - retain with epoch
+      }
+   }
 }
 
 //---------------------------------------------------------------------------
@@ -743,6 +753,10 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
     if (elementType == "Keplerian")
     {
        newState = stateConverter.Convert(instate,elementType,"Cartesian");
+    }
+    else if (elementType == "ModifiedKeplerian")
+    {
+       // @todo - add converion from ModifiedKep to Cartesian
     }
     cartesianState = newState;
 
@@ -787,9 +801,7 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
  */
 Rvector6 Spacecraft::GetCartesianState() 
 {
-   cartesianState = stateConverter.Convert(state,stateType,"Cartesian"); 
-
-   return cartesianState;
+   return(cartesianState = stateConverter.Convert(state,stateType,"Cartesian"));
 }
 
 //---------------------------------------------------------------------------
@@ -803,9 +815,35 @@ Rvector6 Spacecraft::GetCartesianState()
  */
 Rvector6 Spacecraft::GetKeplerianState() 
 {
-   keplerianState = stateConverter.Convert(state,stateType,"Keplerian"); 
+   return(keplerianState = stateConverter.Convert(state,stateType,"Keplerian"));
+}
 
-   return keplerianState;
+//---------------------------------------------------------------------------
+//  Rvector6 GetModifiedKeplerianState() 
+//---------------------------------------------------------------------------
+/**
+ * Get the converted Modified Keplerian states from states in different 
+ * coordinate type.
+ * 
+ * @return converted Modified Keplerain states   
+ *
+ */
+Rvector6 Spacecraft::GetModifiedKeplerianState() 
+{
+   modifiedKeplerianState = 
+      stateConverter.Convert(state,stateType,"ModifiedKeplerian");
+
+#if 0
+   // @todo- this won't work
+   if (modifiedKeplerianState == NULL) 
+   {
+      MessageInterface::ShowMessage("Spacecraft::GetModifiedKeplerianState()\n"
+                                    "Warning:  Unable to get Modified Keplerian"
+                                    " state for the conversion so"); 
+   }
+#endif
+   return (modifiedKeplerianState);
+            
 }
 
 //---------------------------------------------------------------------------
@@ -861,18 +899,29 @@ std::string Spacecraft::GetDisplayDateFormat() const
  */
 void Spacecraft::SetDisplayDateFormat(const std::string &dateType) 
 {
+   std::string tempType = dateType;
+
    if (initialDisplay)
       SetInitialDisplay();
 
    // Check if different coordinate type then convert the state
    if (displayDateFormat != dateType)
    {
-      Real newEpoch = timeConverter.Convert(displayEpoch,displayDateFormat,
-                                            dateType);
-      SetDisplayEpoch(newEpoch);
+      try
+      {
+         std::string newEpoch = timeConverter.Convert(displayEpoch,
+                                displayDateFormat,dateType);
+                                            
+         SetDisplayEpoch(newEpoch);
+      }
+      catch (TimeConverter::TimeConverterException e)
+      {
+         // Stay with the original date format due to failure of conversion
+         tempType = displayDateFormat;
+      }
    }
 
-   displayDateFormat = dateType;
+   displayDateFormat = tempType;
 }
 
 //---------------------------------------------------------------------------
@@ -884,7 +933,7 @@ void Spacecraft::SetDisplayDateFormat(const std::string &dateType)
  * @return display's epoch. 
  *
  */
-Real Spacecraft::GetDisplayEpoch()
+std::string Spacecraft::GetDisplayEpoch()
 {
     if (initialDisplay)
        SetInitialDisplay();
@@ -893,7 +942,7 @@ Real Spacecraft::GetDisplayEpoch()
 }
 
 //---------------------------------------------------------------------------
-//  void SetDisplayEpoch(const Real value) 
+//  void SetDisplayEpoch(const std::string &value) 
 //---------------------------------------------------------------------------
 /**
  * Set the display's epoch.
@@ -901,7 +950,7 @@ Real Spacecraft::GetDisplayEpoch()
  * @param <value> Epoch input from GUI. 
  *
  */
-void Spacecraft::SetDisplayEpoch(const Real value) 
+void Spacecraft::SetDisplayEpoch(const std::string &value) 
 {
     displayEpoch = value;
 }
@@ -1085,8 +1134,9 @@ void Spacecraft::InitializeValues()
 
     for (int i=0; i < 6; i++)
         displayState[i] = state[i];
+ 
 
-    displayEpoch = epoch; 
+    displayEpoch = ToString(epoch); 
     displayDateFormat = dateFormat; 
     displayCoordType = stateType;
 
@@ -1201,8 +1251,26 @@ void Spacecraft::SetInitialDisplay()
     for (int i=0; i < 6; i++)
          displayState[i] = state[i];
 
-    displayEpoch = epoch;
+    displayEpoch = ToString(epoch);
     displayDateFormat = dateFormat;
     displayCoordType = stateType;
     initialDisplay = false;
+}
+
+//---------------------------------------------------------------------------
+//  std::string ToString(const Real value) 
+//---------------------------------------------------------------------------
+/**
+ * Set the initial display's states from the internal epoch and states.
+ * 
+ *
+ */
+std::string Spacecraft::ToString(const Real value)
+{
+    std::ostringstream valueBuffer;
+    valueBuffer.precision(9);
+    valueBuffer.setf(std::ios::fixed);
+    valueBuffer << value;
+
+    return valueBuffer.str();
 }
