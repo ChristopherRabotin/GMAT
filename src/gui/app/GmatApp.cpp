@@ -103,7 +103,7 @@ bool GmatApp::OnInit()
 
          //testing the splash screen
         wxImage::AddHandler(new wxTIFFHandler);
-        wxBitmap *bitmap = new wxBitmap("../../gui/include/bitmaps/GMATSplashScreen.tif",
+        wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
                            wxBITMAP_TYPE_TIF);
 
         new wxSplashScreen(*bitmap,
