@@ -22,6 +22,7 @@
 #include "CommandFactory.hpp"
 #include "Propagate.hpp"   // for Propagate command
 #include "Toggle.hpp"      // for Toggle command
+#include "Maneuver.hpp"    // for Maneuver command
 
 //---------------------------------
 //  public methods
@@ -42,10 +43,12 @@
 Command* CommandFactory::CreateCommand(std::string ofType,
                                        std::string withName)
 {
-   if (ofType == "Propagate")
-      return new Propagate;
-   else if (ofType == "Toggle")
-      return new Toggle;
+    if (ofType == "Propagate")
+        return new Propagate;
+    else if (ofType == "Toggle")
+        return new Toggle;
+    else if (ofType == "Maneuver")
+        return new Maneuver;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -70,6 +73,7 @@ Factory(Gmat::COMMAND)
    {
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
+      creatables.push_back("Maneuver");
    }
 }
 
@@ -105,6 +109,7 @@ Factory(fact)
    {
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
+      creatables.push_back("Maneuver");
    }
 }
 

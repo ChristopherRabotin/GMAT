@@ -156,7 +156,6 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     
     if (objecttype == "ImpulsiveBurn") {
         // ForceModel *prop =
-std::cout << "Creating ImpulsiveBurn object named " << objectname << "\n";
         CreateBurn(objectname, true);
         return true;
     }
@@ -176,11 +175,9 @@ std::cout << "Creating ImpulsiveBurn object named " << objectname << "\n";
 // The "Build" methods take GMAT objects and write out scripts or subscripts
 bool Interpreter::BuildObject(std::string &objectname)
 {
-std::cout << "Building object " << objectname << "\n";
     GmatBase *obj = FindObject(objectname);
     
     if (obj == NULL) {
-std::cout << "    **** Object pointer for " << objectname << " is NULL\n";
         return true; //false;
     }
     
