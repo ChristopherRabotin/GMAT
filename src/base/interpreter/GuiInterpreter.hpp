@@ -38,75 +38,77 @@ class GMAT_API GuiInterpreter
 {
 public:
 
-   static GuiInterpreter* Instance();
-   ~GuiInterpreter();
+    static GuiInterpreter* Instance();
+    ~GuiInterpreter();
 
-   bool IsInitialized();
-   bool Initialize();
+    bool IsInitialized();
+    void Initialize();
 
-   //----- factory
-   //loj:Do we need this?
-   //StringArray GetListOfContainer();
-   StringArray GetListOfFactoryItems(Gmat::ObjectType type);
+    //----- factory
+    //loj:Do we need this?
+    //StringArray GetListOfContainer();
+    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
 
-   bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
+    //----- config
+    StringArray GetListOfConfiguredItems(Gmat::ObjectType type);
+    bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name);
 
-   // Spacecraft
-   Spacecraft* CreateSpacecraft(const std::string type, const std::string &name);
-   Spacecraft* GetSpacecraft(const std::string &name);
-   //future build:GroundStation* CreateGroundStation(const std::string &name);
-   //future build:GroundStation* GetGroundStation(const std::string &name);
+    // Spacecraft
+    Spacecraft* CreateSpacecraft(const std::string&type, const std::string &name);
+    Spacecraft* GetSpacecraft(const std::string &name);
+    //future build:GroundStation* CreateGroundStation(const std::string &name);
+    //future build:GroundStation* GetGroundStation(const std::string &name);
 
-   // Propagator
-   Propagator* CreatePropagator(const std::string &name, std::string type);
-   Propagator* GetPropagator(const std::string &name);
+    // Propagator
+    Propagator* CreatePropagator(const std::string &name, std::string type);
+    Propagator* GetPropagator(const std::string &name);
 
-   // PhysicalModel
-   PhysicalModel* CreatePhysicalModel(const std::string &name, std::string type);
-   PhysicalModel* GetPhysicalModel(const std::string &name);
+    // PhysicalModel
+    PhysicalModel* CreatePhysicalModel(const std::string &name, std::string type);
+    PhysicalModel* GetPhysicalModel(const std::string &name);
 
-   // Parameter
-   Parameter* CreateParameter(const std::string &name, std::string type);
-   Parameter* GetParameter(const std::string &name);
+    // Parameter
+    Parameter* CreateParameter(const std::string &name, std::string type);
+    Parameter* GetParameter(const std::string &name);
 
-   // Celestial body
-   CelestialBody* CreateCelestialBody(const std::string &name, std::string type);
-   CelestialBody* GetCelestialBody(const std::string &name);
+    // Celestial body
+    CelestialBody* CreateCelestialBody(const std::string &name, std::string type);
+    CelestialBody* GetCelestialBody(const std::string &name);
 
-   // SolarSystem
-   SolarSystem* GetDefaultSolarSystem();
+    // SolarSystem
+    SolarSystem* GetDefaultSolarSystem();
 
-   // Subscriber
-   Subscriber* CreateSubscriber(const std::string &name, std::string type);
-   Subscriber* GetSubscriber(const std::string &name);
+    // Subscriber
+    Subscriber* CreateSubscriber(const std::string &name, std::string type);
+    Subscriber* GetSubscriber(const std::string &name);
 
-   // Command
-   Command* CreateCommand(const std::string type, const std::string &name);
-   Command* GetCommand(const std::string name);
-   Command* GetNextCommand(Integer sandboxNum = 1);
-   bool DeleteCommand(const std::string name, Integer position,
-                      Integer sandboxNum = 1);
-   Command* InsertCommand(const std::string type, const std::string name,
-                          Integer position, bool addAbove = true,
-                          Integer sandboxNum = 1);
-//     Command* AppendCommand(const std::string type, const std::string &name,
-//                            Integer sandboxNum = 1);
+    // Command
+    Command* CreateCommand(const std::string&type, const std::string &name);
+    Command* GetCommand(const std::string &name);
+    Command* GetNextCommand(Integer sandboxNum = 1);
+    bool DeleteCommand(const std::string &name, Integer position,
+                       Integer sandboxNum = 1);
+    Command* InsertCommand(const std::string&type, const std::string &name,
+                           Integer position, bool addAbove = true,
+                           Integer sandboxNum = 1);
+    Command* AppendCommand(const std::string&type, const std::string &name,
+                           Integer sandboxNum = 1);
 
-   // Sandbox
-   void ClearAllSandboxes();
-   Integer RunMission(Integer sandboxNum = 1);
+    // Sandbox
+    void ClearAllSandboxes();
+    Integer RunMission(Integer sandboxNum = 1);
 
 private:
 
-   GuiInterpreter();
-   GuiInterpreter(const GuiInterpreter&);
-   GuiInterpreter& operator=(const GuiInterpreter &guiInterpreter);
+    GuiInterpreter();
+    GuiInterpreter(const GuiInterpreter&);
+    GuiInterpreter& operator=(const GuiInterpreter &guiInterpreter);
 
-   // member data
-   bool isInitialized;
-   Moderator *theModerator;
+    // member data
+    bool isInitialized;
+    Moderator *theModerator;
 
-   static GuiInterpreter *instance;
+    static GuiInterpreter *instance;
 };
 
 

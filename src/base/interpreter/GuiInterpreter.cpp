@@ -65,9 +65,9 @@ bool GuiInterpreter::IsInitialized()
 }
 
 //------------------------------------------------------------------------------
-// bool Initialize()
+// void Initialize()
 //------------------------------------------------------------------------------
-bool GuiInterpreter::Initialize()
+void GuiInterpreter::Initialize()
 {
    //loj: Is there anything to initialize?
    isInitialized = true;
@@ -95,6 +95,15 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
    return theModerator->GetListOfFactoryItems(type);
 }
 
+//----- configuration
+//------------------------------------------------------------------------------
+// StringArray GetListOfConfiguredItems(Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+StringArray GuiInterpreter::GetListOfConfiguredItems(Gmat::ObjectType type)
+{
+   return theModerator->GetListOfConfiguredItems(type);
+}
+
 //------------------------------------------------------------------------------
 // bool RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 //------------------------------------------------------------------------------
@@ -107,9 +116,9 @@ bool GuiInterpreter::RemoveConfiguredItem(Gmat::ObjectType type, const std::stri
 
 // asset
 //------------------------------------------------------------------------------
-// Spacecraft* CreateSpacecraft(const std::string type, const std::string &name)
+// Spacecraft* CreateSpacecraft(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string type,
+Spacecraft* GuiInterpreter::CreateSpacecraft(const std::string &type,
                                              const std::string &name)
 {
    //loj: for creating another Spacecraft
@@ -144,7 +153,7 @@ Propagator* GuiInterpreter::CreatePropagator(const std::string &name, std::strin
 Propagator* GuiInterpreter::GetPropagator(const std::string &name)
 {
    //loj: for getting existing propagator.
-   Propagator *prop = theModerator->GetPropagator(name);
+   return theModerator->GetPropagator(name);
 }
 
 // PhysicalModel
@@ -242,21 +251,21 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
 
 // command
 //------------------------------------------------------------------------------
-// Command* CreateCommand(const std::string type, const std::string &name)
+// Command* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::CreateCommand(const std::string type, const std::string &name)
+Command* GuiInterpreter::CreateCommand(const std::string &type, const std::string &name)
 {
    //loj: for creating a new Command, such as "MyNewCommand", "DoMyLittleThing"
    return theModerator->CreateCommand(type, name);
 }
 
 //------------------------------------------------------------------------------
-// Command* GetCommand(const std::string command)
+// Command* GetCommand(const std::string &name)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::GetCommand(const std::string command)
+Command* GuiInterpreter::GetCommand(const std::string &name)
 {
    //loj: for getting a Command object by command
-   return theModerator->GetCommand(command);
+   return theModerator->GetCommand(name);
 }
 
 // command sequence
@@ -271,21 +280,21 @@ Command* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 }
 
 //------------------------------------------------------------------------------
-// bool DeleteCommand(const std::string command, Integer position,
+// bool DeleteCommand(const std::string &name, Integer position,
 //                    Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::DeleteCommand(const std::string command, Integer position,
+bool GuiInterpreter::DeleteCommand(const std::string &name, Integer position,
                                    Integer snadboxNum)
 {
    //deletes command at current position
-   return theModerator->DeleteCommand(command, position, snadboxNum);
+   return theModerator->DeleteCommand(name, position, snadboxNum);
 }
 
 //------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string type, const std::string name,
+// Command* InsertCommand(const std::string &type, const std::string &name,
 //                        Integer position, bool addAbove, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::InsertCommand(const std::string type, const std::string name,
+Command* GuiInterpreter::InsertCommand(const std::string &type, const std::string &name,
                                        Integer position, bool addAbove,
                                        Integer sandboxNum)
 {
@@ -294,15 +303,15 @@ Command* GuiInterpreter::InsertCommand(const std::string type, const std::string
 }
 
 //------------------------------------------------------------------------------
-// Command* AppendCommand(const std::string type, const std::string name,
+// Command* AppendCommand(const std::string &type, const std::string &name,
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-//  Command* GuiInterpreter::AppendCommand(const std::string type, const std::string name,
-//                                         Integer sandboxNum)
-//  {
-//     //appends command
-//     return theModerator->AppendCommand(type, name, sandboxNum);
-//  }
+Command* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
+                                       Integer sandboxNum)
+{
+   //appends command
+   return theModerator->AppendCommand(type, name, sandboxNum);
+}
 
 // sandbox
 //------------------------------------------------------------------------------
@@ -340,4 +349,3 @@ GuiInterpreter::GuiInterpreter(const GuiInterpreter&)
 GuiInterpreter& GuiInterpreter::operator=(const GuiInterpreter &guiInterpreter)
 {
 }
-
