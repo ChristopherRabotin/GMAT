@@ -21,6 +21,7 @@
 
 #if !defined __CONSOLE_APP__
 #include "ViewTextFrame.hpp"
+#include "ResourceTree.hpp"
 #endif
 
 #include "GuiInterpreter.hpp"
@@ -37,13 +38,18 @@ public:
         { return theMessageWindow;};
     static void SetMessageWindow(ViewTextFrame *msgFrame)
         { theMessageWindow = msgFrame;};
+
+    static ResourceTree* GetResourceTree()
+        { return theResourceTree;};
+    static void SetResourceTree(ResourceTree *resourceTree)
+        { theResourceTree = resourceTree;};
+
+    static ViewTextFrame *theMessageWindow;
 #endif
     
 private:
     static GuiInterpreter *theGuiInterpreter;
+    static ResourceTree *theResourceTree;
     
-#if !defined __CONSOLE_APP__
-    static ViewTextFrame *theMessageWindow;
-#endif
 };
 #endif // GmatAppData_hpp

@@ -21,6 +21,7 @@
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "ResourceTree.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -65,6 +66,30 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
+// void UpdateResources()
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateResources()
+{
+    MessageInterface::ShowMessage(" In ResourceTree::UpdateResources()\n");
+
+    // update spacecraft
+    StringArray scNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    int size = scNames.size();
+
+    this->DeleteChildren(mSpacecraftItem);
+    
+    for (int i = 0; i<size; i++)
+    {
+        wxString scname = wxString(scNames[i].c_str());
+        MessageInterface::ShowMessage(" SC name: " + scNames[i] + "\n");
+        this->AppendItem(mSpacecraftItem, wxT(scname), ICON_SPACECRAFT, -1,
+                         new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
+    };
+
+    // update other tree items
+}
+
+//------------------------------------------------------------------------------
 //  void AddDefaultResources()
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultResources()
@@ -73,10 +98,17 @@ void ResourceTree::AddDefaultResources()
                                   new GmatTreeItemData(wxT("Resources"),
                                   RESOURCES_FOLDER));
 
-    wxTreeItemId spacecraftItem = this->AppendItem(resource, wxT("Spacecraft"),
-                                  -1, -1, new GmatTreeItemData(wxT("Spacecraft"),
-                                  SPACECRAFT_FOLDER));
-    SetItemImage(spacecraftItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+//      wxTreeItemId spacecraftItem = this->AppendItem(resource, wxT("Spacecraft"),
+//                                    -1, -1, new GmatTreeItemData(wxT("Spacecraft"),
+//                                    SPACECRAFT_FOLDER));
+//      SetItemImage(spacecraftItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+    
+    mSpacecraftItem =
+        this->AppendItem(resource, wxT("Spacecraft"),
+                         -1, -1, new GmatTreeItemData(wxT("Spacecraft"),
+                                                      SPACECRAFT_FOLDER));
+    
+    SetItemImage(mSpacecraftItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
     
     wxTreeItemId formationItem = this->AppendItem(resource, wxT("Formations"),
                                  -1, -1, new GmatTreeItemData(wxT("Formations"),
@@ -121,7 +153,8 @@ void ResourceTree::AddDefaultResources()
                      new GmatTreeItemData(wxT("Ground Stations"), GROUNDSTATIONS_FOLDER));
 
     AddDefaultBodies(universeItem);
-    AddDefaultSpacecraft(spacecraftItem);
+//      AddDefaultSpacecraft(spacecraftItem);
+    AddDefaultSpacecraft(mSpacecraftItem);
     AddDefaultFormations(formationItem);
     AddDefaultConstellations(constellationItem);
     AddDefaultPropagators(propagatorItem);
@@ -166,20 +199,23 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSpacecraft(wxTreeItemId spacecraft)
 {
+    MessageInterface::ShowMessage(" In ResourceTree::AddDefaultSpacecraft()\n");
     StringArray scNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
     int size = scNames.size();
     for (int i = 0; i<size; i++)
     {
         wxString scname = wxString(scNames[i].c_str());
+        MessageInterface::ShowMessage(" SC name: " + scNames[i] + "\n");
         this->AppendItem(spacecraft, wxT(scname), ICON_SPACECRAFT, -1,
                          new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
     };
 
-    this->AppendItem(spacecraft, wxT("Sat1"), ICON_SPACECRAFT, -1,
-                     new GmatTreeItemData(wxT("Sat1"), DEFAULT_SPACECRAFT));
-    this->AppendItem(spacecraft, wxT("Sat2"), ICON_SPACECRAFT, -1,
-                     new GmatTreeItemData(wxT("Sat2"), DEFAULT_SPACECRAFT));
+    this->AppendItem(spacecraft, wxT("TempSat1"), ICON_SPACECRAFT, -1,
+                     new GmatTreeItemData(wxT("TempSat1"), DEFAULT_SPACECRAFT));
+    this->AppendItem(spacecraft, wxT("TempSat2"), ICON_SPACECRAFT, -1,
+                     new GmatTreeItemData(wxT("TempSat2"), DEFAULT_SPACECRAFT));
 }
+
 
 //------------------------------------------------------------------------------
 // void AddDefaultFormations(wxTreeItemId formation)

@@ -23,4 +23,5 @@ GuiInterpreter* GmatAppData::theGuiInterpreter = NULL;
 
 #if !defined __CONSOLE_APP__
 ViewTextFrame* GmatAppData::theMessageWindow = NULL;
+ResourceTree* GmatAppData::theResourceTree = NULL;
 #endif

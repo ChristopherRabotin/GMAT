@@ -13,6 +13,7 @@
  */
 //------------------------------------------------------------------------------
 #include "GmatNotebook.hpp"
+#include "GmatAppData.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -105,6 +106,9 @@ wxPanel *GmatNotebook::CreateResourcePage()
     resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
                    wxDefaultSize, style);
 
+    // set to GmatAppData
+    GmatAppData::SetResourceTree(resourceTree);
+    
     sizer->Add( resourceTree, 0, wxGROW|wxALL, 0 );
 
     panel->SetAutoLayout( TRUE );
