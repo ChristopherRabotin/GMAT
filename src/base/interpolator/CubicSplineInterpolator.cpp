@@ -314,7 +314,6 @@ void CubicSplineInterpolator::LoadArrays(void)
     for (i = 0; i < bufferSize; ++i, ++start) {
         if (start == bufferSize)
             start = 0;
-            
         x[i] = independent[start];
         for (j = 0; j < dimension; ++j)
             y[i][j] = dependent[start][j];
