@@ -175,6 +175,10 @@ protected:
    /// drag model
    //Drag                   *dragModel;
    ForceModel                   *dragModel;  // should be drag
+   // order of the gravity model
+   Integer                order;
+   // degree of the gravity model
+   Integer                degree;
    
    /// flag indicting whether or not this body has been initialized
    bool                   isInitialized;
@@ -214,6 +218,8 @@ protected:
    Integer                centralBodyID;    // ID for pointer? is this even needed?
    Integer                potentialModelID; // ???
    Integer                dragModelID;      // ???
+   Integer                orderID;
+   Integer                degreeID;
    Integer                isInitializedID;
    Integer                bodyNumberID;
    Integer                refBodyNumberID;

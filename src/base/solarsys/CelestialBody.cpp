@@ -65,14 +65,16 @@ effRangeID        (parameterCount +20),
 centralBodyID     (parameterCount +21),
 potentialModelID  (parameterCount +22),
 dragModelID       (parameterCount +23),
-isInitializedID   (parameterCount +24),
-bodyNumberID      (parameterCount +25),
-refBodyNumberID   (parameterCount +26),
-sourceFilenameID  (parameterCount +27),
-sourceStartID     (parameterCount +28),
-sourceEndID       (parameterCount +29)
+orderID           (parameterCount +24),
+degreeID          (parameterCount +25),
+isInitializedID   (parameterCount +26),
+bodyNumberID      (parameterCount +27),
+refBodyNumberID   (parameterCount +28),
+sourceFilenameID  (parameterCount +29),
+sourceStartID     (parameterCount +30),
+sourceEndID       (parameterCount +31)
 {
-   parameterCount += 30;
+   parameterCount += 32;
    Initialize("Planet");  // should this be the default?
 }
 
@@ -113,14 +115,16 @@ effRangeID        (parameterCount +20),
 centralBodyID     (parameterCount +21),
 potentialModelID  (parameterCount +22),
 dragModelID       (parameterCount +23),
-isInitializedID   (parameterCount +24),
-bodyNumberID      (parameterCount +25),
-refBodyNumberID   (parameterCount +26),
-sourceFilenameID  (parameterCount +27),
-sourceStartID     (parameterCount +28),
-sourceEndID       (parameterCount +29)
+orderID           (parameterCount +24),
+degreeID          (parameterCount +25),
+isInitializedID   (parameterCount +26),
+bodyNumberID      (parameterCount +27),
+refBodyNumberID   (parameterCount +28),
+sourceFilenameID  (parameterCount +29),
+sourceStartID     (parameterCount +30),
+sourceEndID       (parameterCount +31)
 {
-   parameterCount += 30;
+   parameterCount += 32;
    Initialize(itsBodyType);
 }
 
@@ -162,14 +166,16 @@ effRangeID        (parameterCount +20),
 centralBodyID     (parameterCount +21),
 potentialModelID  (parameterCount +22),
 dragModelID       (parameterCount +23),
-isInitializedID   (parameterCount +24),
-bodyNumberID      (parameterCount +25),
-refBodyNumberID   (parameterCount +26),
-sourceFilenameID  (parameterCount +27),
-sourceStartID     (parameterCount +28),
-sourceEndID       (parameterCount +29)
+orderID           (parameterCount +24),
+degreeID          (parameterCount +25),
+isInitializedID   (parameterCount +26),
+bodyNumberID      (parameterCount +27),
+refBodyNumberID   (parameterCount +28),
+sourceFilenameID  (parameterCount +29),
+sourceStartID     (parameterCount +30),
+sourceEndID       (parameterCount +31)
 {
-   parameterCount += 30;
+   parameterCount += 32;
    Initialize(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
@@ -198,21 +204,25 @@ effectiveRange      (cb.effectiveRange),
 centralBody         (cb.centralBody),
 potentialModel      (cb.potentialModel),
 dragModel           (cb.dragModel),
+order               (cb.order),
+degree              (cb.degree),
 bodyNumber          (cb.bodyNumber),
 referenceBodyNumber (cb.referenceBodyNumber),
 sourceFilename      (cb.sourceFilename),
 sourceStart         (cb.sourceStart),
 sourceEnd           (cb.sourceEnd)
 {
-   int i;
-   for (i=0;i++;i<5)
-   {
-      zonals[i] = cb.zonals[i];
-   }
-   for (i=0;i++;i<6)
-   {
-      state[i] = cb.state[i];
-   }
+   //int i = 0;
+   //for (i=0;i++;i<5)
+   //{
+   //   zonals[i] = cb.zonals[i];
+   //}
+   //for (i=0;i++;i<6)
+   //{
+   //   state[i] = cb.state[i];
+   //}
+      zonals = cb.zonals;
+      state  = cb.state;
 }
 
 //------------------------------------------------------------------------------
@@ -246,6 +256,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    centralBody         = cb.centralBody;
    potentialModel      = cb.potentialModel;
    dragModel           = cb.dragModel;
+   order               = cb.order;
+   degree              = cb.degree;
    bodyNumber          = cb.bodyNumber;
    referenceBodyNumber = cb.referenceBodyNumber;
    sourceFilename      = cb.sourceFilename;
@@ -253,15 +265,17 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    sourceEnd           = cb.sourceEnd;
 
    // how about the IDs?
-   int i;
-   for (i=0;i++;i<5)
-   {
-      zonals[i] = cb.zonals[i];
-   }
-   for (i=0;i++;i<6)
-   {
-      state[i] = cb.state[i];
-   }
+   //int i = 0;
+   //for (i=0;i++;i<5)
+   //{
+   //   zonals[i] = cb.zonals[i];
+   //}
+   //for (i=0;i++;i<6)
+   //{
+   //   state[i] = cb.state[i];
+   //}
+      zonals = cb.zonals;
+      state  = cb.state;
    
    return *this;
 }
@@ -418,7 +432,7 @@ Gmat::AnalyticMethod CelestialBody::GetAnalyticMethod() const
 //------------------------------------------------------------------------------
 bool CelestialBody::SetBodyType(Gmat::BodyType bType)
 {
-   bodyType = bType; // will need to change default parameters here too, if they
+   return (bodyType = bType); // will need to change default parameters here too, if they
                      // are set to values that make no sense for this type of body?
 }
 
@@ -436,7 +450,7 @@ bool CelestialBody::SetBodyType(Gmat::BodyType bType)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetCentralBody(CelestialBody* cBody)
 {
-   centralBody = cBody;  // what else needs to be checked or changed here?
+   return (centralBody = cBody);  // what else needs to be checked or changed here?
 }
 
 //------------------------------------------------------------------------------
@@ -453,7 +467,7 @@ bool CelestialBody::SetCentralBody(CelestialBody* cBody)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 {
-   posVelSrc = pvSrc;
+   return (posVelSrc = pvSrc);
 }
 
 //------------------------------------------------------------------------------
@@ -470,7 +484,7 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAnalyticMethod(Gmat::AnalyticMethod aM)
 {
-   analyticMethod = aM;
+   return (analyticMethod = aM);
 }
 
 //------------------------------------------------------------------------------
@@ -511,6 +525,8 @@ std::string CelestialBody::GetParameterText(const Integer id) const
    if (id == centralBodyID)     return "CentralBody";
    if (id == potentialModelID)  return "PotentialModel";
    if (id == dragModelID)       return "DragModel";
+   if (id == orderID)           return "Order";
+   if (id == degreeID)          return "Degree";
 //   if (id == isInitializedID)   return "IsInitialized"; // does NOT make sense
    if (id == bodyNumberID)      return "BodyNumber";
    if (id == refBodyNumberID)   return "ReferenceBodyNumber";
@@ -559,6 +575,8 @@ Integer     CelestialBody::GetParameterID(const std::string &str) const
    if (str == "CentralBody")            return centralBodyID;
    if (str == "PotentialModel")         return potentialModelID;
    if (str == "DragModel")              return dragModelID;
+   if (str == "Order")                  return orderID;
+   if (str == "Degree")                 return degreeID;
    //   if (id == "IsInitialized")        return isInitializedID; // does NOT make sense
    if (str == "BodyNumber")             return bodyNumberID;
    if (str == "ReferenceBodyNumber")    return refBodyNumberID;
@@ -607,6 +625,8 @@ Gmat::ParameterType CelestialBody::GetParameterType(const Integer id) const
    if (id == centralBodyID)     return Gmat::OBJECT_TYPE;  // what is right?
    if (id == potentialModelID)  return Gmat::OBJECT_TYPE;  // ???
    if (id == dragModelID)       return Gmat::OBJECT_TYPE;  // ???
+   if (id == orderID)           return Gmat::INTEGER_TYPE;
+   if (id == degreeID)          return Gmat::INTEGER_TYPE;
 //   if (id == isInitializedID)   return Gmat::INTEGER_TYPE; // does NOT make sense
    if (id == bodyNumberID)      return Gmat::INTEGER_TYPE;
    if (id == refBodyNumberID)   return Gmat::INTEGER_TYPE;
@@ -724,6 +744,8 @@ Integer     CelestialBody::GetIntegerParameter(const Integer id) const
 {
    if (id == bodyNumberID)          return bodyNumber;
    if (id == refBodyNumberID)       return referenceBodyNumber;
+   if (id == orderID)               return order;
+   if (id == degreeID)              return degree;
    
    return GmatBase::GetIntegerParameter(id); // add others in later?
 }
@@ -747,6 +769,8 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
 {
    if (id == bodyNumberID)          return bodyNumber          = value;
    if (id == refBodyNumberID)       return referenceBodyNumber = value;
+   if (id == orderID)               return order               = value;
+   if (id == degreeID)              return degree              = value;
    
    return GmatBase::SetIntegerParameter(id,value);  // add others in later
 }
