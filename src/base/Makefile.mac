@@ -1,0 +1,13 @@
+# Project:    GMAT
+# Module:     Makefile.mac for base directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/13
+
+SUBS = command configs executive factory forcemodel foundation interpolator \
+	interpreter parameter propagator refframe solarsys solver spacecraft \
+	stopcond subscriber util
+
+all clean bare:
+	-X=`pwd`; \
+	for i in $(SUBS); \
+	do echo '<<<' $$i '>>>'; cd $$X/$$i; ${MAKE} -f Makefile.mac $@; done
