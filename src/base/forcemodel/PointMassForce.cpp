@@ -37,31 +37,31 @@
 //                             Updated parameter strings to include units
 //
 //                           : 10/01/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				  - EPOCH_PARAMETER to epochParameter
-//				  - MU_PARAMETER to muParameter
-//				  - RADIUS_PARAMETER to radiusParameter
-//				  - FLATTENING_PARAMETER to flatteningParameter
-//				  - POLERADIUS_PARAMETER to poleRadiusParameter
-//				  - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
-//				  - PARAMETER_COUNT to parameterCount
-//				Removals:
-//				  - GetParameterName()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                                - EPOCH_PARAMETER to epochParameter
+//                                - MU_PARAMETER to muParameter
+//                                - RADIUS_PARAMETER to radiusParameter
+//                                - FLATTENING_PARAMETER to flatteningParameter
+//                                - POLERADIUS_PARAMETER to poleRadiusParameter
+//                                - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
+//                                - PARAMETER_COUNT to parameterCount
+//                              Removals:
+//                                - GetParameterName()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
 // **************************************************************************
 
 #include "PointMassForce.hpp"
@@ -95,15 +95,16 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
 // public
 //---------------------------------
 
+//loj: 3/12/04 added name
 //------------------------------------------------------------------------------
-// PointMassForce::PointMassForce(Integer satcount)
+// PointMassForce::PointMassForce(const std::string &name, Integer satcount)
 //------------------------------------------------------------------------------
 /**
  * Constructor for point mass gravitational model
  */
 //------------------------------------------------------------------------------
-PointMassForce::PointMassForce(Integer satcount) :
-    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce"),
+PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
+    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
     mu                     (398600.4415),
     epoch                  (21545.0),
     estimationMethod       (1.0)
@@ -130,7 +131,7 @@ PointMassForce::~PointMassForce(void)
  * The copy constructor
  * Note that the actual states are not copied over for this implementation.
  *
- * @param pmf	The original that is being copied
+ * @param pmf   The original that is being copied
  */
 //------------------------------------------------------------------------------
 PointMassForce::PointMassForce(const PointMassForce& pmf) :
@@ -151,7 +152,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
  * The assignment operator
  * Note that the actual states are not copied over for this implementation.
  *
- * @param pmf	The original that is being copied
+ * @param pmf   The original that is being copied
  */
 //------------------------------------------------------------------------------
 PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
@@ -234,7 +235,7 @@ std::string PointMassForce::GetParameterTypeString(const Integer id) const
 /**
  * Accessor method used to obtain a parameter value 
  *
- * @param id	Integer ID for the requested parameter
+ * @param id    Integer ID for the requested parameter
  */
 //------------------------------------------------------------------------------
 Real PointMassForce::GetRealParameter(const Integer id) const

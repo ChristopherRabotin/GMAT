@@ -34,33 +34,33 @@
 //                             Updated interfaces to support Nystrom code
 //
 //                           : 10/01/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - Updated style using GMAT cpp style guide
+//                              Changes:
+//                                - Updated style using GMAT cpp style guide
 //
 //                           : 10/20/2003 - W. Waktola, Missions Applications Branch
-//				Changes:
-//				  - All double types to Real types
-//				  - All primitive int types to Integer types
-//				  - EPOCH_PARAMETER to epochParameter
-//				  - MU_PARAMETER to muParameter
-//				  - RADIUS_PARAMETER to radiusParameter
-//				  - FLATTENING_PARAMETER to flatteningParameter
-//				  - POLERADIUS_PARAMETER to poleRadiusParameter
-//				  - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
-//				  - PARAMETER_COUNT to parameterCount
-//				  - GetParameter to GetRealParameter
-//				  - SetParameter to SetRealParameter
-//				Removals:
-//				  - GetParameterName()
-//				Additions:
-//				  - PARAMTER_TEXT[]
-//				  - PARAMETER_TYPE[]
-//				  - GetParameterText()
-//				  - GetParameterID()
-//				  - GetParameterType()
-//				  - GetParameterTypeString()
-//				  - GetRealParameter()
-//				  - SetRealParameter()
+//                              Changes:
+//                                - All double types to Real types
+//                                - All primitive int types to Integer types
+//                                - EPOCH_PARAMETER to epochParameter
+//                                - MU_PARAMETER to muParameter
+//                                - RADIUS_PARAMETER to radiusParameter
+//                                - FLATTENING_PARAMETER to flatteningParameter
+//                                - POLERADIUS_PARAMETER to poleRadiusParameter
+//                                - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
+//                                - PARAMETER_COUNT to parameterCount
+//                                - GetParameter to GetRealParameter
+//                                - SetParameter to SetRealParameter
+//                              Removals:
+//                                - GetParameterName()
+//                              Additions:
+//                                - PARAMTER_TEXT[]
+//                                - PARAMETER_TYPE[]
+//                                - GetParameterText()
+//                                - GetParameterID()
+//                                - GetParameterType()
+//                                - GetParameterTypeString()
+//                                - GetRealParameter()
+//                                - SetRealParameter()
 // **************************************************************************
 
 #ifndef PointMassForce_hpp
@@ -72,7 +72,9 @@
 class GMAT_API PointMassForce : public PhysicalModel
 {
 public:
-    PointMassForce(Integer satcount = 1);
+    
+    //loj: 3/12/04 added name
+    PointMassForce(const std::string &name = "", Integer satcount = 1);
     virtual ~PointMassForce(void);
     PointMassForce(const PointMassForce& pmf);
     PointMassForce& operator= (const PointMassForce& pmf);
