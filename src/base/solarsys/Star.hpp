@@ -81,18 +81,32 @@ public:
    //static const Rmatrix               SIJ;
    //static const Rmatrix               CIJ;
 
-   static const Real                  RADIANT_POWER;       // W / m^2
-   static const Real                  REFERENCE_DISTANCE;  // km
+   static const Real                  STAR_RADIANT_POWER;       // W / m^2
+   static const Real                  STAR_REFERENCE_DISTANCE;  // km
+   static const Real                  STAR_PHOTOSPHERE_RADIUS;  // m
    // add other ones as needed
 
 protected:
 
+   enum
+   {
+      RADIANT_POWER = CelestialBodyParamCount,
+      REFERENCE_DISTANCE,
+      PHOTOSPHERE_RADIUS,
+      StarParamCount
+   };
+
+
+   static const std::string PARAMETER_TEXT[
+      StarParamCount - CelestialBodyParamCount];
+
+   static const Gmat::ParameterType PARAMETER_TYPE[
+      StarParamCount - CelestialBodyParamCount];
+   
    // radiant power and reference distance
    Real      radiantPower;
    Real      referenceDistance;
-
-   Integer   radiantPowerID;
-   Integer   referenceDistanceID;
+   Real      photosphereRadius;  // m
 
    void InitializeStar();
 
