@@ -667,6 +667,7 @@ void ForceModel::UpdateInitialData()
    Integer i;
    while (current) 
    {
+      current->ClearSatelliteParameters();
       i = 0;
       // Set spacecraft parameters for forces that need them
       for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 

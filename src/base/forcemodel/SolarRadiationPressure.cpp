@@ -293,27 +293,27 @@ Real SolarRadiationPressure::GetRealParameter(const Integer id) const
       return bodyRadius;
    if (id == SUN_RADIUS)
       return sunRadius;
-   if (id == CR)
-      if (cr.size() > 0)
-         return cr[0];
-      else
-         throw ForceModelException(
-            "Attempting to access C_r for SRP force before any spacecraft "
-            "parameters were set.");
-   if (id == AREA)
-      if (area.size() > 0)
-         return area[0];
-      else
-         throw ForceModelException(
-            "Attempting to access area for SRP force before any spacecraft "
-            "parameters were set.");
-   if (id == MASS)
-      if (mass.size() > 0)
-         return mass[0];
-      else
-         throw ForceModelException(
-            "Attempting to access mass for SRP force before any spacecraft "
-            "parameters were set.");
+//   if (id == CR)
+//      if (cr.size() > 0)
+//         return cr[0];
+//      else
+//         throw ForceModelException(
+//            "Attempting to access C_r for SRP force before any spacecraft "
+//            "parameters were set.");
+//   if (id == AREA)
+//      if (area.size() > 0)
+//         return area[0];
+//      else
+//         throw ForceModelException(
+//            "Attempting to access area for SRP force before any spacecraft "
+//            "parameters were set.");
+//   if (id == MASS)
+//      if (mass.size() > 0)
+//         return mass[0];
+//      else
+//         throw ForceModelException(
+//            "Attempting to access mass for SRP force before any spacecraft "
+//            "parameters were set.");
    if (id == FLUX)
       return flux;
    if (id == FLUX_PRESSURE)
@@ -351,22 +351,22 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
       sunRadius = value;
       return sunRadius;
    }
-   if (id == CR)
-   {
-      cr.push_back(value);
-      return cr[cr.size()-1];
-   }
-   if (id == AREA)
-   {
-      area.push_back(value);
-      return area[area.size()-1];
-   }
-   /// @todo Revise this when mass is depleted
-   if (id == MASS)
-   {
-      mass.push_back(value);
-      return mass[mass.size()-1];
-   }
+//   if (id == CR)
+//   {
+//      cr.push_back(value);
+//      return cr[cr.size()-1];
+//   }
+//   if (id == AREA)
+//   {
+//      area.push_back(value);
+//      return area[area.size()-1];
+//   }
+//   /// @todo Revise this when mass is depleted
+//   if (id == MASS)
+//   {
+//      mass.push_back(value);
+//      return mass[mass.size()-1];
+//   }
    if (id == FLUX)
    {
       flux = value;
@@ -591,7 +591,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
        throw ForceModelException(msg.str());
     }
 
-    if (cr.size() != satCount)
+    if (area.size() != satCount)
     {
        std::stringstream msg;
        msg << "Mismatch between satellite count (" << satCount   
@@ -599,7 +599,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
        throw ForceModelException(msg.str());
     }
 
-    if (cr.size() != satCount)
+    if (mass.size() != satCount)
     {
        std::stringstream msg;
        msg << "Mismatch between satellite count (" << satCount   
@@ -903,3 +903,24 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
             area.push_back(parm);
 }
 
+
+//------------------------------------------------------------------------------
+// void ClearSatelliteParameters(const std::string parmName)
+//------------------------------------------------------------------------------
+/**
+ * Resets the PhysicalModel to receive a new set of satellite parameters.
+ *
+ * @param parmName name of the Spacecraft parameter.  The empty string clear all
+ *                 of the satellite parameters for the PhysicalModel.
+ */
+//------------------------------------------------------------------------------
+void SolarRadiationPressure::ClearSatelliteParameters(
+                                                   const std::string parmName)
+{
+   if ((parmName == "DryMass") || (parmName == ""))
+      mass.clear();
+   if ((parmName == "Cr") || (parmName == ""))
+      cr.clear();
+   if ((parmName == "SRPArea") || (parmName == ""))
+      area.clear();
+}

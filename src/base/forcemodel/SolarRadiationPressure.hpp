@@ -99,6 +99,7 @@ public:
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const Real parm);
+   virtual void ClearSatelliteParameters(const std::string parmName = "");
 
 protected:
    // Parameter IDs

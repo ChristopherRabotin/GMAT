@@ -754,6 +754,25 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 }
 
 //------------------------------------------------------------------------------
+// void PhysicalModel::SetSatelliteParameter(const Integer i,
+//                                           const std::string parmName,
+//                                           const std::string parm)
+//------------------------------------------------------------------------------
+/**
+ * Resets the PhysicalModel to receive a new set of satellite parameters.
+ *
+ * This default implementation just returns.
+ *
+ * @param parmName name of the Spacecraft parameter.  The empty string clear all
+ *                 of the satellite parameters for the PhysicalModel.
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::ClearSatelliteParameters(const std::string parmName)
+{
+}
+
+
+//------------------------------------------------------------------------------
 // bool PhysicalModel::StateChanged(bool reset)
 //------------------------------------------------------------------------------
 // DJC: Probably should document this a bit better -- want me to do it? :
