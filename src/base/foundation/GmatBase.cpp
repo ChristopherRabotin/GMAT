@@ -257,15 +257,36 @@ bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 /**
  * Returns the reference object pointer.  (Derived classes should implement
- * this as needed.)
+ * this method as needed.)
  *
- * @param <type> type of the reference object.
- * @param <name> name of the reference object.
+ * @param type type of the reference object.
+ * @param name name of the reference object.
  *
  * @return reference object pointer.
  */
 GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
                                  const std::string &name)
+{
+   return NULL;
+}
+
+
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
+//                        const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Returns the reference object pointer.  (Derived classes should implement
+ * this method as needed.)
+ *
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ * @param index Index into the object array.
+ * 
+ * @return reference object pointer.
+ */
+GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
+                                 const std::string &name, const Integer index)
 {
    return NULL;
 }
@@ -276,7 +297,7 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
 //---------------------------------------------------------------------------
 /**
  * Sets the reference object.  (Derived classes should implement
- * this as needed.)
+ * this method as needed.)
  *
  * @param <obj> reference object pointer.
  * @param <type> type of the reference object.
@@ -288,6 +309,46 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                             const std::string &name)
 {
    return false;
+}
+
+
+//---------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name, const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Sets the reference object.  (Derived classes should implement
+ * this method as needed.)
+ *
+ * @param obj reference object pointer.
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ * @param index Index into the object array.
+ *
+ * @return success of the operation.
+ */
+bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                            const std::string &name, const Integer index)
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers.
+ * 
+ * @param type The type of objects requested
+ *
+ * @return Reference to the array.  This default method returns an empty vector.
+ */
+ObjectArray& GmatBase::GetRefObjectArray(const Gmat::ObjectType type)
+{
+   static ObjectArray oa;
+   oa.clear();
+   return oa;
 }
 
 //---------------------------------------------------------------------------
@@ -413,6 +474,45 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value)
 
 
 //---------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id, Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for objecs in arrays.
+ *
+ * @return The parameter's value.
+ */
+Real GmatBase::GetRealParameter(const Integer id, const Integer index) const
+{
+   return REAL_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value, Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or 
+ *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+ *         parameter type is not Real.
+ */
+Real GmatBase::SetRealParameter(const Integer id, const Real value, 
+                                const Integer index)
+{
+   return REAL_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
 //  Integer GetIntegerParameter(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -445,6 +545,47 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
 {
    return INTEGER_PARAMETER_UNDEFINED;
 }
+
+//---------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Integer parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for objecs in arrays.
+ *
+ * @return The parameter's value.
+ */
+Integer GmatBase::GetIntegerParameter(const Integer id, 
+                                      const Integer index) const
+{
+   return INTEGER_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const Integer id, const Integer value, 
+//                              const Integer index)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Integer parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or
+ *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the
+ *         parameter type is not an Integer.
+ */
+Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value, 
+                                      const Integer index)
+{
+   return INTEGER_PARAMETER_UNDEFINED;
+}
+
 
 //---------------------------------------------------------------------------
 //  UnsignedInt GetUnsignedIntParameter(const Integer id) const
@@ -481,6 +622,50 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
 {
    return UNSIGNED_INT_PARAMETER_UNDEFINED;
 }
+
+
+//---------------------------------------------------------------------------
+//  UnsignedInt GetUnsignedIntParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an UnsignedInt parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The parameter's value.
+ */
+UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id, 
+                                              const Integer index) const
+{
+   return UNSIGNED_INT_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                      const UnsignedInt value, 
+//                                      const Integer index)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an UnsignedInt parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or
+ *         UNSIGNED_INT_PARAMETER_UNDEFINED if the parameter id is invalid or
+ *         the parameter type is not an UnsignedInt.
+ */
+UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
+                                              const UnsignedInt value,
+                                              const Integer index)
+{
+   return UNSIGNED_INT_PARAMETER_UNDEFINED;
+}
+
 
 //---------------------------------------------------------------------------
 //  const Rvector& GetRvectorParameter(const Integer id) const
@@ -552,6 +737,7 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
    return RMATRIX_PARAMETER_UNDEFINED;
 }
 
+
 //---------------------------------------------------------------------------
 //  std::string GetStringParameter(const Integer id) const
 //---------------------------------------------------------------------------
@@ -581,6 +767,47 @@ std::string GmatBase::GetStringParameter(const Integer id) const
  * @return true if the string is stored, false if not.
  */
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+std::string GmatBase::GetStringParameter(const Integer id, 
+                                         const Integer index) const
+{
+   return STRING_PARAMETER_UNDEFINED;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value, 
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+bool GmatBase::SetStringParameter(const Integer id, const std::string &value, 
+                                  const Integer index)
 {
    return false;
 }
@@ -633,12 +860,59 @@ bool GmatBase::GetBooleanParameter(const Integer id) const
 /**
  * Sets the value for a boolean parameter.
  *
- * @param <id> The integer ID for the parameter.
- *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ * 
  * @return the boolean value for this parameter, or false if the parameter is
  *         not boolean.
  */
 bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ *
+ * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
+ *       parameter accesses.
+ */
+bool GmatBase::GetBooleanParameter(const Integer id, const Integer index) const
+{
+   std::string errorText = "No Boolean data defined for the ID ";
+   errorText += id;
+   throw GmatBaseException(errorText);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value, 
+//                           const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param value The new value for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+bool GmatBase::SetBooleanParameter(const Integer id, const bool value, 
+                                   const Integer index)
 {
    return false;
 }
@@ -682,6 +956,49 @@ Real GmatBase::SetRealParameter(const std::string &label, const Real value)
 
 
 //---------------------------------------------------------------------------
+//  Real GetRealParameter(const std::string &label, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The parameter's value.
+ */
+Real GmatBase::GetRealParameter(const std::string &label, 
+                                const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetRealParameter(id, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  Real SetRealParameter(const std::string &label, const Real value, 
+//                        const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Set the value for a Real parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or 
+ *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
+ *         parameter type is not Real.
+ */
+Real GmatBase::SetRealParameter(const std::string &label, const Real value, 
+                                const Integer index)
+{
+   Integer id = GetParameterID(label);
+   return SetRealParameter(id, value, index);
+}
+
+
+//---------------------------------------------------------------------------
 //  Integer GetIntegerParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
@@ -716,6 +1033,50 @@ Integer GmatBase::SetIntegerParameter(const std::string &label,
 {
    Integer id = GetParameterID(label);
    return SetIntegerParameter(id, value);
+}
+
+//---------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const std::string &label,
+//                              const Integer index) const
+//---------------------------------------------------------------------------
+/**
+* Retrieve the value for an Integer parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The parameter's value.
+ */
+Integer GmatBase::GetIntegerParameter(const std::string &label,
+                                      const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetIntegerParameter(id, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const std::string &label, const Integer value,
+//                              const Integer index)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an Integer parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or
+ *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the
+ *         parameter type is not an Integer.
+ */
+Integer GmatBase::SetIntegerParameter(const std::string &label,
+                                      const Integer value,
+                                      const Integer index)
+{
+   Integer id = GetParameterID(label);
+   return SetIntegerParameter(id, value, index);
 }
 
 //---------------------------------------------------------------------------
@@ -754,6 +1115,52 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const std::string &label,
 {
    Integer id = GetParameterID(label);
    return SetUnsignedIntParameter(id, value);
+}
+
+//---------------------------------------------------------------------------
+//  UnsignedInt GetUnsignedIntParameter(const std::string &label, 
+//                                      const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for an UnsignedInt parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return The parameter's value.
+ */
+UnsignedInt GmatBase::GetUnsignedIntParameter(const std::string &label, 
+                                              const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetUnsignedIntParameter(id, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  UnsignedInt SetUnsignedIntParameter(const std::string &label,
+//                                      const UnsignedInt value,
+//                                      const Integer index)
+//---------------------------------------------------------------------------
+/**
+* Set the value for an UnsignedInt parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new parameter value.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the parameter value at the end of this call, or
+ *         UNSIGNED_INT_PARAMETER_UNDEFINED if the parameter id is invalid
+ *         or the parameter type is not an UnsignedInt.
+ */
+UnsignedInt GmatBase::SetUnsignedIntParameter(const std::string &label,
+                                              const UnsignedInt value,
+                                              const Integer index)
+{
+   Integer id = GetParameterID(label);
+   return SetUnsignedIntParameter(id, value, index);
 }
 
 //---------------------------------------------------------------------------
@@ -870,6 +1277,49 @@ bool GmatBase::SetStringParameter(const std::string &label,
 
 
 //---------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label,
+//                                 const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+std::string GmatBase::GetStringParameter(const std::string &label,
+                                         const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetStringParameter(id, index);
+}
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value,
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+bool GmatBase::SetStringParameter(const std::string &label, 
+                                  const std::string &value,
+                                  const Integer index)
+{
+   Integer id = GetParameterID(label);
+   return SetStringParameter(id, value, index);
+}
+
+
+//---------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
@@ -924,6 +1374,50 @@ bool GmatBase::SetBooleanParameter(const std::string &label, const bool value)
 {
    Integer id = GetParameterID(label);
    return SetBooleanParameter(id, value);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const std::string &label, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param index Index for parameters in arrays.  
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ *
+ * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
+ *       parameter accesses.
+ */
+bool GmatBase::GetBooleanParameter(const std::string &label, 
+                                   const Integer index) const
+{
+   Integer id = GetParameterID(label);
+   return GetBooleanParameter(id, index);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const std::string &label, const bool value)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+bool GmatBase::SetBooleanParameter(const std::string &label, const bool value, 
+                                   const Integer index)
+{
+   Integer id = GetParameterID(label);
+   return SetBooleanParameter(id, value, index);
 }
 
 
