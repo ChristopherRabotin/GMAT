@@ -15,6 +15,10 @@
 /**
  * This is the class for planets.
  *
+ * @note Currently, this code assumes that it can set the parameter default
+ *       values, based on the input name of the planet (e.g., if the planet's
+ *       name is Mercury, the default values for Mercury will be used)
+ *
  */
 //------------------------------------------------------------------------------
 
@@ -58,26 +62,44 @@ public:
    //------------------------------------------------------------------------------
    Planet* Clone(void) const;
 
-   // default values for CelesitalBody data
-   static const Gmat::BodyType        BODY_TYPE;
-   static const Real                  MASS;
-   static const Real                  EQUATORIAL_RADIUS;
-   static const Real                  POLAR_RADIUS;
-   static const Real                  MU;
-   static const Gmat::PosVelSource    POS_VEL_SOURCE;
-   static const Gmat::AnalyticMethod  ANALYTIC_METHOD;
-   static const Integer               BODY_NUMBER;
-   static const Integer               REF_BODY_NUMBER;
-   static const Integer               ORDER;
-   static const Integer               DEGREE;
-   static const Integer               COEFFICIENT_SIZE;
-   static const Rmatrix               SIJ;
-   static const Rmatrix               CIJ;
-   // add other ones as needed
 
 protected:
 
-   // what other star-specifi parameters do I need?
+   enum
+   {
+      MERCURY = 0,
+      VENUS,
+      EARTH,
+      MARS,
+      JUPITER,
+      SATURN,
+      URANUS,
+      NEPTUNE,
+      PLUTO,
+      NumberOfPlanets
+      // add Sedna later??
+   };
+
+   // default values for CelestialBody data
+   static const Gmat::BodyType        DEFAULT_BODY_TYPE;
+   static const Gmat::PosVelSource    DEFAULT_POS_VEL_SOURCE;
+   static const Gmat::AnalyticMethod  DEFAULT_ANALYTIC_METHOD;
+   static const Integer               DEFAULT_BODY_NUMBER;
+   static const Integer               DEFAULT_REF_BODY_NUMBER;
+
+   static const Real                  MASS[NumberOfPlanets];
+   static const Real                  EQUATORIAL_RADIUS[NumberOfPlanets];
+   static const Real                  POLAR_RADIUS[NumberOfPlanets];
+   static const Real                  MU[NumberOfPlanets];
+   static const Integer               ORDER[NumberOfPlanets];
+   static const Integer               DEGREE[NumberOfPlanets];
+   static const Integer               COEFFICIENT_SIZE[NumberOfPlanets];
+   static const Rmatrix               SIJ[NumberOfPlanets];
+   static const Rmatrix               CIJ[NumberOfPlanets];
+   // add other ones as needed
+
+   
+   // what other planet-specific parameters do I need?
 
    void InitializePlanet(CelestialBody* cBody);
 
