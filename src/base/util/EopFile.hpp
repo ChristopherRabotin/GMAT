@@ -38,7 +38,7 @@ class GMAT_API EopFile
 {
 public:
    // default constructor
-   EopFile(const std::string &fileName, 
+   EopFile(const std::string &fileName = "eopc04.62-now", 
            GmatEop::EopFileType eop = GmatEop::EOP_C04);
    // copy constructor
    EopFile(const EopFile &eopF);
