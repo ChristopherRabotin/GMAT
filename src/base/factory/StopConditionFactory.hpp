@@ -17,7 +17,7 @@
  */
 //------------------------------------------------------------------------------
 #ifndef StopConditionFactory_hpp
-#define StopConditiontFactory_hpp
+#define StopConditionFactory_hpp
 
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
