@@ -72,7 +72,7 @@
 class GMAT_API SolarRadiationPressure : public PhysicalModel
 {
 public:
-   SolarRadiationPressure(const std::string &name);
+   SolarRadiationPressure(const std::string &name = ""); //loj: 5/28/04 added default
    virtual ~SolarRadiationPressure(void);
    SolarRadiationPressure(const SolarRadiationPressure &srp);
    SolarRadiationPressure& operator=(const SolarRadiationPressure &srp);
