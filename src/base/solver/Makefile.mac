@@ -3,13 +3,13 @@
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
 # Modified:   2003/01/16 - Added new cpp files
-
+#             2005/03/30 - Removed SolverException.cpp
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = DifferentialCorrector.cpp Solver.cpp SolverException.cpp
+SRC = DifferentialCorrector.cpp Solver.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
