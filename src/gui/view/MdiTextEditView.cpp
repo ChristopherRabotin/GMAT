@@ -20,7 +20,8 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
-#include "GmatAppData.hpp"  // for GuiInterpreter pointer
+#include "GmatAppData.hpp"      // for GuiInterpreter pointer
+#include "MessageInterface.hpp" // for ClearMessage()
 
 #if !wxUSE_DOC_VIEW_ARCHITECTURE
 #error You must set wxUSE_DOC_VIEW_ARCHITECTURE to 1 in setup.h!
@@ -88,7 +89,6 @@ bool MdiTextEditView::OnClose(bool deleteWindow)
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
-    //GmatAppData::theMessageWindow->ClearText();
     wxString filename = GetDocument()->GetFilename();
     
     bool status = GmatAppData::GetGuiInterpreter()->
@@ -103,6 +103,6 @@ bool MdiTextEditView::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 bool MdiTextEditView::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-    GmatAppData::theMessageWindow->ClearText();
+    MessageInterface::ClearMessage();
     bool status = GmatAppData::GetGuiInterpreter()->RunScript();
 }
