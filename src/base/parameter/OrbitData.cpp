@@ -24,9 +24,11 @@
 #include "EphemerisUtil.hpp"
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
+//#include "Moderator.hpp"
 
 #if !defined __UNIT_TEST__
 #include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
 #endif
 
 using namespace GmatMathUtil;
@@ -316,7 +318,15 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
         Real ecc = GetKepReal("KepEcc");
         Integer id = sc->GetParameterID("ReferenceBody");
         std::string bodyName = sc->GetStringParameter(id);
-        
+
+        // wcs: added for Build 3, and OrbitPeriod
+        // @todo maybe add AddObject to OrbitalParameters (?) so don't have to use Moderator???????
+        //Moderator* theModerator    = Moderator::Instance();
+        //SolarSystem* ss            = theModerator->GetSolarSystemInUse();
+        //CelestialBody* centralBody = ss->GetBody(bodyName);
+        //if (!centralBody) return ORBIT_REAL_UNDEFINED;
+        //Real grav = centralBody->GetGravitationalConstant();
+
         Real grav = 0.398600448073446198e+06; //loj: temp code for B2
         Real E, R;
         
@@ -335,6 +345,10 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
             E = -grav / (2.0 * sma);
             R = sma * (1.0 - ecc);
             return Sqrt (2.0 * (E + grav/R));
+        }
+        if (str == "OrbitPeriod")
+        {
+           return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
         }
     }
     
