@@ -2,13 +2,15 @@
 # Module:     Makefile.mac for burn directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/01/14
+# Modified:   2005/01/06 - added FiniteBurn
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = Burn.cpp BurnException.cpp ImpulsiveBurn.cpp InertialManeuverFrame.cpp \
-	ManeuverFrame.cpp ManeuverFrameManager.cpp VnbManeuverFrame.cpp
+SRC = Burn.cpp BurnException.cpp FiniteBurn.cpp ImpulsiveBurn.cpp \
+	InertialManeuverFrame.cpp ManeuverFrame.cpp ManeuverFrameManager.cpp \
+	VnbManeuverFrame.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
