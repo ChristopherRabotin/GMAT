@@ -20,6 +20,7 @@
 #include "PhysicalConstants.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
+#include "TimeSystemConverter.hpp"
 
 using namespace GmatMathUtil;
 
@@ -166,7 +167,7 @@ Rvector3 Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real p9  = 0.0, p10 = 0.0, p11 = 0.0, p12 = 0.0;
    Real p13 = 0.0;
    // Real p14 = 0.0, p15 = 0.0, p16 = 0.0;
-   Real d = forTime.JulianDaysFromTCBEpoch(); // interval in Julian days
+   Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
    Real T = d / 36525;                        // interval in Julian centuries
    // Compute for Eath's Moon
    if (centralBody == SolarSystem::EARTH_NAME) 

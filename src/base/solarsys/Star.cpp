@@ -212,7 +212,8 @@ Rvector3 Star::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 {
    if (instanceName == SolarSystem::SUN_NAME)
    {
-      Real W = Star::w1 + Star::w2 * forTime.JulianDaysFromTCBEpoch();
+      Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
+      Real W = Star::w1 + Star::w2 * d;
       return Rvector3(Star::alpha, Star::delta, W);
    }
    return CelestialBody::GetBodyCartographicCoordinates(forTime);

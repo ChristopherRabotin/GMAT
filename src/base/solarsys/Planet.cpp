@@ -319,7 +319,7 @@ Rvector3 Planet::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real alpha = 0;
    Real delta = 0;
    Real W = 0;
-   Real d = forTime.JulianDaysFromTCBEpoch(); // interval in Julian days
+   Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
    Real T = d / 36525;                        // interval in Julian centuries
    if (instanceName == SolarSystem::MERCURY_NAME)
    {
