@@ -189,7 +189,7 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
         Real grav = 0.398600448073446198e+06; //loj: temp code for B2
         Real E, R;
         
-        if (str == "KepMm")
+        if (str == "KepMM")
         {
             return Sqrt((grav / sma ) / (sma * sma));
         }
