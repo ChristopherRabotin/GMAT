@@ -18,18 +18,6 @@
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
-#include "PhysicalModel.hpp"
-#include "ForceModel.hpp"
-#include "Propagator.hpp"
-#include "Spacecraft.hpp"
-#include "Parameter.hpp"
-#include "StopCondition.hpp"
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
-#include "PropSetup.hpp"
-#include "Command.hpp"
-#include "Subscriber.hpp"
-#include "Burn.hpp"
 #include "Moderator.hpp"
 
 GuiInterpreter* GuiInterpreter::instance = NULL;
@@ -271,7 +259,23 @@ PropSetup* GuiInterpreter::GetPropSetup(const std::string &name)
     return theModerator->GetPropSetup(name);
 }
 
-// PhysicalModel
+// ForceModel/PhysicalModel
+//------------------------------------------------------------------------------
+// ForceModel* CreateForceModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a force model object by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a force model object pointer
+ */
+//------------------------------------------------------------------------------
+ForceModel* GuiInterpreter::CreateForceModel(const std::string &name)
+{
+    return theModerator->CreateForceModel(name);
+}
+
 //------------------------------------------------------------------------------
 // PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------

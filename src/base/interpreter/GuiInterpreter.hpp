@@ -72,7 +72,8 @@ public:
     PropSetup* CreateDefaultPropSetup(const std::string &name);
     PropSetup* GetPropSetup(const std::string &name);
 
-    // PhysicalModel
+    // ForceModel/PhysicalModel
+    ForceModel* CreateForceModel(const std::string &name);
     PhysicalModel* CreatePhysicalModel(const std::string &type, const std::string &name);
     PhysicalModel* GetPhysicalModel(const std::string &name);
 
