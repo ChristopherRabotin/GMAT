@@ -460,20 +460,41 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          double y2 = pow(mouseY - mLastMouseY, 2);
          double length = sqrt(x2 + y2);
          mZoomAmount = length * 100;
-         
-         // if mouse moves toward left, then zoom in
-         if (mouseX < mLastMouseX)
+
+         //loj: 11/4/04 add another dragging direction (Build 3.2)
+         if (mouseX < mLastMouseX && mouseY > mLastMouseY)
+         {
+            // dragging from upper right corner to lower left corner
             ZoomIn();
-         else
+         }
+         else if (mouseX > mLastMouseX && mouseY < mLastMouseY)
+         {
+            // dragging from lower left corner to upper right corner
             ZoomOut();
+         }
+         else
+         {
+            // if mouse moves toward left then zoom in
+            if (mouseX < mLastMouseX || mouseY < mLastMouseY)
+               ZoomIn();
+            else
+               ZoomOut();
+         }
+         
+         //loj: 11/4/04 commented out
+         // if mouse moves toward left, then zoom in (Build 3)
+         //if (mouseX < mLastMouseX)
+         //   ZoomIn();
+         //else
+         //   ZoomOut();
          
          //loj: 7/12/04 commented out
-         //// if mouse moves toward the upper left, then zoom in
+         // if mouse moves toward the upper left, then zoom in (Build 2)
          //if (mouseX < mLastMouseX || mouseY < mLastMouseY)
          //   ZoomIn();
          //else
          //   ZoomOut();
-            
+         
       }
    } // end if (event.Dragging())
    
