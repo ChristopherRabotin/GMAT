@@ -153,7 +153,7 @@ namespace GmatTree
         FOR_CONTROL,
         DO_CONTROL,
         SWITCH_CONTROL,
-        END_CONTROL,
+        END_IF_CONTROL,
         ELSE_IF_CONTROL,
         ELSE_CONTROL,
     };

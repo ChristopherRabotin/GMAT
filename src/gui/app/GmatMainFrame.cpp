@@ -845,7 +845,9 @@ void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
 {
    if (scriptMdiShown == false)
       OnScriptOpenEditor(event);
-
+//   else
+//      mdiDocMainFrame->Iconize(false);
+   
    if (mDocManager != NULL)
       mDocManager->OnFileNew(event);
 }

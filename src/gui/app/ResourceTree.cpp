@@ -374,19 +374,19 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultFormations(wxTreeItemId itemId)
 {
-   wxTreeItemId mms =
-      AppendItem(itemId, wxT("MMS"), -1, -1,
-                 new GmatTreeItemData(wxT("MMS"), GmatTree::DEFAULT_FORMATION_FOLDER));
-   SetItemImage(mms, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+//   wxTreeItemId mms =
+//      AppendItem(itemId, wxT("MMS"), -1, -1,
+//                 new GmatTreeItemData(wxT("MMS"), GmatTree::DEFAULT_FORMATION_FOLDER));
+//   SetItemImage(mms, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
     
-   AppendItem(mms, wxT("MMS1"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS1"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
-   AppendItem(mms, wxT("MMS2"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS2"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
-   AppendItem(mms, wxT("MMS3"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS3"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
-   AppendItem(mms, wxT("MMS4"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS4"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
+//   AppendItem(mms, wxT("MMS1"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS1"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
+//   AppendItem(mms, wxT("MMS2"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS2"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
+//   AppendItem(mms, wxT("MMS3"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS3"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
+//   AppendItem(mms, wxT("MMS4"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS4"), GmatTree::DEFAULT_FORMATION_SPACECRAFT));
 }
 
 //------------------------------------------------------------------------------
@@ -1089,11 +1089,13 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
                                       GmatTree::CREATED_FORMATION_FOLDER));
 
    SetItemImage(formation, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+   
+   Expand(item);
 
-   AppendItem(formation, wxT("MMS1"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS1"), GmatTree::CREATED_FORMATION_SPACECRAFT));
-   AppendItem(formation, wxT("MMS2"), GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(wxT("MMS2"), GmatTree::CREATED_FORMATION_SPACECRAFT));
+//   AppendItem(formation, wxT("MMS1"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS1"), GmatTree::CREATED_FORMATION_SPACECRAFT));
+//   AppendItem(formation, wxT("MMS2"), GmatTree::ICON_SPACECRAFT, -1,
+//              new GmatTreeItemData(wxT("MMS2"), GmatTree::CREATED_FORMATION_SPACECRAFT));
 }
 
 //------------------------------------------------------------------------------
@@ -1387,8 +1389,10 @@ void ResourceTree::OnBeginDrag(wxTreeEvent& event)
       GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(mDraggedItem);
       int draggedId = theItem->GetDataType();
         
-      if ((draggedId == GmatTree::DEFAULT_SPACECRAFT )  ||
-          (draggedId == GmatTree::CREATED_SPACECRAFT ))
+      if ((draggedId == GmatTree::DEFAULT_SPACECRAFT )            ||
+          (draggedId == GmatTree::CREATED_SPACECRAFT )            ||
+          (draggedId == GmatTree::DEFAULT_FORMATION_SPACECRAFT )  ||
+          (draggedId == GmatTree::CREATED_FORMATION_SPACECRAFT ))
       {
          event.Allow();
       }
@@ -1417,7 +1421,8 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
    int destId = theItem->GetDataType();
 
    if ((destId == GmatTree::DEFAULT_FORMATION_FOLDER )  ||
-       (destId == GmatTree::CREATED_FORMATION_FOLDER ))
+       (destId == GmatTree::CREATED_FORMATION_FOLDER )  ||
+       (destId == GmatTree::SPACECRAFT_FOLDER ))
    {
       wxString text = GetItemText(itemSrc);
 

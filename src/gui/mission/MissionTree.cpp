@@ -635,6 +635,7 @@ void MissionTree::OnAddIfStatement(wxCommandEvent &event)
    wxString name;
    wxString endName;
    name.Printf("If%d", ++mNumIfStatement);
+   endName.Printf("End If%d", mNumIfStatement);
    //    endName.Printf("End If%d", mNumIfStatement);
    //    ++mNumIfStatement;
    // ag: need gui interpreter to get control logic
@@ -656,6 +657,11 @@ void MissionTree::OnAddIfStatement(wxCommandEvent &event)
    //                                               endName, NULL));
 
    Expand(item);
+   
+   targetId =
+      AppendItem(item, endName, GmatTree::ICON_FILE, -1,
+                 new MissionTreeItemData(endName, GmatTree::END_IF_CONTROL, 
+                                         endName, NULL));
    //        }
    //    }
 }
@@ -795,9 +801,23 @@ void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxTreeItemId parent = GetItemParent(item);
-
+   
+   // go through the items in the command sequence to find either
+   // last else or the end
+   GmatTreeItemData *itemData = (GmatTreeItemData *)GetItemData(item);
+   while ( (itemData->GetDataType() != GmatTree::ELSE_CONTROL) &&
+           (itemData->GetDataType() != GmatTree::END_IF_CONTROL) )
+   {
+//      MessageInterface::ShowMessage("The cur sibling is %s\n", itemData->GetDesc().c_str());
+      item = GetNextSibling(item);  
+      itemData = (GmatTreeItemData *)GetItemData(item);
+      MessageInterface::ShowMessage("The next sibling is %s\n", itemData->GetDesc().c_str());
+   }   
+   
+   // add the "else if" to the sibling before that last else or end
+   item = GetPrevSibling(item);
+   
    wxString name;
-   wxString endName;
    name.Printf("Else If%d", ++mNumIfStatement);
    //    endName.Printf("End If%d", mNumIfStatement);
    //    ++mNumIfStatement;
@@ -831,9 +851,28 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxTreeItemId parent = GetItemParent(item);
+   
+   // go through the items in the command sequence to find either
+   // last else or the end
+   GmatTreeItemData *itemData = (GmatTreeItemData *)GetItemData(item);
+   while ( (itemData->GetDataType() != GmatTree::ELSE_CONTROL) &&
+           (itemData->GetDataType() != GmatTree::END_IF_CONTROL) )
+   {
+//      MessageInterface::ShowMessage("The cur sibling is %s\n", itemData->GetDesc().c_str());
+      item = GetNextSibling(item);  
+      itemData = (GmatTreeItemData *)GetItemData(item);
+//      MessageInterface::ShowMessage("The next sibling is %s\n", itemData->GetDesc().c_str());
+   }   
+   
+   if (itemData->GetDataType() == GmatTree::ELSE_CONTROL)
+      // need to output message to user that they can't have 2 elses
+      return;
+   
+   // add the "else if" to the sibling before that last else or end
+   item = GetPrevSibling(item);
+   
    wxString name;
-   wxString endName;
-   name.Printf("Else%d", ++mNumIfStatement);
+   name.Printf("Else%d", mNumIfStatement);
    //    endName.Printf("End If%d", mNumIfStatement);
    //    ++mNumIfStatement;
    // ag: need gui interpreter to get control logic
@@ -857,6 +896,7 @@ void MissionTree::OnAddElseStatement(wxCommandEvent &event)
    Expand(item);
    //        }
    //    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -1008,7 +1048,9 @@ void MissionTree::OnInsertIfStatement(wxCommandEvent &event)
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId parentItemId = GetItemParent(itemId);
    wxString name;
+   wxString endName;
    name.Printf("If%d", ++mNumIfStatement); 
+   endName.Printf("End If%d", mNumIfStatement);
  
    wxTreeItemId prevItemId = GetPrevSibling(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevItemId);
@@ -1047,7 +1089,12 @@ void MissionTree::OnInsertIfStatement(wxCommandEvent &event)
       
       SetItemImage(targetId, GmatTree::ICON_OPENFOLDER, 
                    wxTreeItemIcon_Expanded);
-      
+                   
+                   
+      InsertItem(parentItemId, targetId, endName, GmatTree::ICON_FILE, -1,
+                    new MissionTreeItemData(endName, GmatTree::END_IF_CONTROL,
+                                            endName, NULL));
+                                            
       Expand(itemId);
       //        }
    }
