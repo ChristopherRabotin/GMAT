@@ -899,7 +899,8 @@ bool Propagate::Execute(void)
       inProgress = true;
    }
 
-fm->UpdateInitialData();
+   /// @todo Find a more elegant way to perform epoch refresh during propagation
+   fm->UpdateInitialData();
    
    while (!stopCondMet)
    {
