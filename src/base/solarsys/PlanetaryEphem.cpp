@@ -23,7 +23,7 @@
 const Integer PlanetaryEphem::MAX_PATH_LEN        = 260;
 
 // Max number of bodies that can be modeled
-const Integer PlanetaryEphem::MAX_BODIES          = 3;             // increase later -> 20;
+//const Integer PlanetaryEphem::MAX_BODIES          = 3;             // increase later -> 20;
 // Max number of zonal values that are enterable
 const Integer PlanetaryEphem::MAX_ZONALS          =  5;
 // Max length of the name of a potential field name

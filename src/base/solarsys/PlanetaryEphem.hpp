@@ -23,6 +23,23 @@
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"
 
+namespace Gmat  // does this belong in DeFIle.hpp???????????????
+{
+   // different types of DE files
+   enum DeFileTypes
+   {
+      DE_202 = 0,
+      DE_403,
+      DE_405           // do we need more?
+   };
+   // different types of DE files
+   enum DeFileFormat
+   {
+      DE_ASCII = 0,
+      DE_BINARY
+   };
+};
+
 class PlanetaryEphem
 {
 public:
@@ -52,7 +69,7 @@ public:
 
    // from Swingby bodies_types.h
    // Max number of bodies that can be modeled
-   static const Integer MAX_BODIES;
+   static const Integer MAX_BODIES = 3;
    // Max number of zonal values that are enterable
    static const Integer MAX_ZONALS;
    // Max length of the name of a potential field name
