@@ -22,6 +22,21 @@
 #include "While.hpp"
 #include "Parameter.hpp"
 
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+While::PARAMETER_TEXT[WhileParamCount - ConditionalBranchParamCount] =
+{
+   "NestLevel",
+};
+
+const Gmat::ParameterType
+While::PARAMETER_TYPE[WhileParamCount - ConditionalBranchParamCount] =
+{
+   Gmat::INTEGER_TYPE,     
+};
+
 //------------------------------------------------------------------------------
 //  While()
 //------------------------------------------------------------------------------
@@ -153,6 +168,165 @@ bool While::Execute()
    }
    
    return retval;
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter text, given the input parameter ID.
+ *
+ * @param <id> Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string While::GetParameterText(const Integer id) const
+{
+   if (id >= ConditionalBranchParamCount && id < WhileParamCount)
+      return PARAMETER_TEXT[id - ConditionalBranchParamCount];
+   return ConditionalBranch::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter ID, given the input parameter string.
+ *
+ * @param <str> string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer While::GetParameterID(const std::string &str) const
+{
+   for (Integer i = ConditionalBranchParamCount; i < WhileParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ConditionalBranchParamCount])
+         return i;
+   }
+   
+   return ConditionalBranch::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter type, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType While::GetParameterType(const Integer id) const
+{
+   if (id >= ConditionalBranchParamCount && id < WhileParamCount)
+      return PARAMETER_TYPE[id - ConditionalBranchParamCount];
+   
+   return ConditionalBranch::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string While::GetParameterTypeString(const Integer id) const
+{
+   return ConditionalBranch::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer While::GetIntegerParameter(const Integer id) const
+{
+   if (id == NEST_LEVEL)          return nestLevel;
+   
+   return ConditionalBranch::GetIntegerParameter(id); 
+}
+
+//------------------------------------------------------------------------------
+//  Integer  SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+* This method sets the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> Integer value for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer While::SetIntegerParameter(const Integer id,
+                                const Integer value) 
+{
+   if (id == NEST_LEVEL)          return (nestLevel  = value);
+   
+   return ConditionalBranch::SetIntegerParameter(id,value);  // add others in later
+}
+
+//------------------------------------------------------------------------------
+//  Integer  GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+* This method returns the Integer parameter value, given the input
+ * parameter ID.
+ *
+ * @param <label> label for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer While::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+//  Integer  SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+* This method sets the Integer parameter value, given the input
+ * parameter label.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <value> Integer value for the requested parameter.
+ *
+ * @return  Integer value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer While::SetIntegerParameter(const std::string &label,
+                                const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------

@@ -50,14 +50,36 @@ public:
    virtual bool         Execute();
    
    // inherited from GmatBase
-   virtual GmatBase*    Clone() const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+
+virtual GmatBase*    Clone() const;
     
 protected:
+   enum
+   {
+      NEST_LEVEL = ConditionalBranchParamCount,
+      IfParamCount
+   };
 
+   static const std::string PARAMETER_TEXT[IfParamCount - ConditionalBranchParamCount];
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[IfParamCount - ConditionalBranchParamCount];
+   
+   
    /// Counter to track how deep the If nesting is
    Integer                  nestLevel;
    /// The object array used in GetRefObjectArray()
-   ObjectArray              objectArray;
+   //ObjectArray              objectArray;
    
 };
 #endif  // If_hpp
