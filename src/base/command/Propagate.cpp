@@ -718,6 +718,8 @@ bool Propagate::Execute(void)
         memcpy(&pubdata[1], state, dim*sizeof(Real));
         publisher->Publish(pubdata, dim+1);
     }
+
+    publisher->FlushBuffers(); //loj: 6/22/04 added
     
 //      //---------------------------------------
 //      //loj: 3/22/04 old code
