@@ -247,7 +247,7 @@ bool Sandbox::Initialize()
             Parameter *param = (Parameter*)(omi->second);
 
             // Set reference object for system parameters
-            if (param->GetKey() == Parameter::SYSTEM_PARAM)
+            if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
             {
 #if DEBUG_SANDBOX
                MessageInterface::ShowMessage
