@@ -20,9 +20,14 @@
 #define Moderator_hpp
 
 #include "gmatdefs.hpp"
+// executive
 #include "Sandbox.hpp"
 #include "GuiInterpreter.hpp"
 #include "ScriptInterpreter.hpp"
+#include "FactoryManager.hpp"
+#include "ConfigManager.hpp"
+#include "Publisher.hpp"
+// core
 #include "PhysicalModel.hpp"
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
@@ -33,10 +38,16 @@
 #include "CelestialBody.hpp"
 #include "PropSetup.hpp"
 #include "Command.hpp"
-#include "CommandSequence.hpp"
 #include "Subscriber.hpp"
-#include "FactoryManager.hpp"
-#include "ConfigManager.hpp"
+// factories
+#include "CommandFactory.hpp"
+#include "ForceModelFactory.hpp"
+#include "PhysicalModelFactory.hpp"
+#include "PropSetupFactory.hpp"
+#include "PropagatorFactory.hpp"
+#include "SpacecraftFactory.hpp"
+#include "StopConditionFactory.hpp"
+#include "SubscriberFactory.hpp"
 
 namespace Gmat
 {
@@ -67,40 +78,41 @@ public:
    bool RemoveConfiguredItem(Gmat::ObjectType, const std::string &name);
 
    // Spacecraft
-   Spacecraft* CreateSpacecraft(std::string type, const std::string &name);
+   Spacecraft* CreateSpacecraft(const std::string type, const std::string &name);
    Spacecraft* GetSpacecraft(const std::string &name);
-   //future build:GroundStation* CreateGroundStation(std::string type, const std::string &name);
+   //future build:GroundStation* CreateGroundStation(const std::string type, const std::string &name);
    //future build:GroundStation* GetGroundStation(const std::string &name);
 
    // Propagator
-   Propagator* CreatePropagator(std::string type, const std::string &name);
+   Propagator* CreatePropagator(const std::string type, const std::string &name);
    Propagator* GetPropagator(const std::string &name);
 
    // PhysicalModel
-   PhysicalModel* CreatePhysicalModel(std::string type, const std::string &name);
+   PhysicalModel* CreatePhysicalModel(const std::string type, const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
 
    // Parameter
-   Parameter* CreateParameter(std::string type, const std::string &name);
+   Parameter* CreateParameter(const std::string type, const std::string &name);
    Parameter* GetParameter(const std::string &name);
 
    // ForceModel
    ForceModel* CreateForceModel(const std::string &name);
    ForceModel* GetForceModel(const std::string &name);
-   bool AddToForceModel(std::string forceModelName, std::string forceName);
+   bool AddToForceModel(const std::string forceModelName, std::string forceName);
 
    // StopCondition
    StopCondition* CreateStopCondition(const std::string &name);
    StopCondition* GetStopCondition(const std::string &name);
-   bool AddToStopCondition(std::string stopCondName, std::string paramName);
+   bool AddToStopCondition(const std::string stopCondName, std::string paramName);
 
    // PropSetup
-   PropSetup* CreatePropSetup(const std::string &name, std::string propagatorName,
+   PropSetup* CreatePropSetup(const std::string &name,
+                              std::string propagatorName,
                               std::string forceModelName);
    PropSetup* GetPropSetup(const std::string &name);
 
    // CelestialBody
-   CelestialBody* CreateCelestialBody(std::string type, const std::string &name);
+   CelestialBody* CreateCelestialBody(const std::string type, const std::string &name);
    CelestialBody* GetCelestialBody(const std::string &name);
 
    // SolarSystem
@@ -110,17 +122,21 @@ public:
    SolarSystem* GetSolarSystemInUse();
 
    // Subscriber
-   Subscriber* CreateSubscriber(std::string type, const std::string &name);
+   Subscriber* CreateSubscriber(const std::string type, const std::string &name);
    Subscriber* GetSubscriber(const std::string &name);
 
    // Command
-   Command* CreateCommand(std::string type, const std::string &name);
+   Command* CreateCommand(const std::string type, const std::string &name);
    Command* GetCommand(const std::string &name);
 
    Command* GetNextCommand(Integer sanboxNum = 1);
-   bool DeleteCommand(const std::string &name, Integer position, Integer sandboxNum = 1);
-   Command* InsertCommand(std::string type, const std::string &name, Integer position,
-                          bool addAbove = true, Integer sandboxNum = 1);
+   bool DeleteCommand(const std::string &name, Integer position,
+                      Integer sandboxNum = 1);
+   Command* InsertCommand(const std::string type, const std::string &name,
+                          Integer position, bool addAbove = true,
+                          Integer sandboxNum = 1);
+   Command* AppendCommand(const std::string type, const std::string &name,
+                          Integer sandboxNum = 1);
 
    // Sandbox
    void ClearAllSandboxes();
@@ -145,13 +161,24 @@ private:
    // member data
    bool isInitialized;
    std::vector<Sandbox*> sandboxes;
-   std::vector<CommandSequence*> commandSeqs;
+   std::vector<Command*> commands;
 
    static Moderator *instance;
+   static ConfigManager *theConfigManager;
+   static FactoryManager *theFactoryManager;
    static GuiInterpreter *theGuiInterpreter;
    static ScriptInterpreter *theScriptInterpreter;
-   static FactoryManager *theFactoryManager;
-   static ConfigManager *theConfigManager;
+
+   Publisher *thePublisher;
+   CommandFactory *theCommandFactory;
+   ForceModelFactory *theForceModelFactory;
+   PhysicalModelFactory *thePhysicalModelFactory;
+   PropSetupFactory *thePropSetupFactory;
+   PropagatorFactory *thePropagatorFactory;
+   SpacecraftFactory *theSpacecraftFactory;
+   StopConditionFactory *theStopConditionFactory;
+   SubscriberFactory *theSubscriberFactory;
+
    static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
 };
