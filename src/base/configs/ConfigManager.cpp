@@ -450,36 +450,40 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          // if system parameter
          if (param->GetKey() == Parameter::SYSTEM_PARAM)
          {
-            // rename ref. object name
-            param->RenameRefObject(type, oldName, newName);
-            
-            // rename actual parameter name
             oldParamName = param->GetName();
-            newParamName = newName + "." + param->GetTypeName();
-
-            // rename configured parameter name
-            renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
-
-#if DEBUG_RENAME
-            MessageInterface::ShowMessage
-               ("newParamName=%s\n", param->GetName().c_str());
-            MessageInterface::ShowMessage
-               ("===> Change Subscriber ref object names\n");
-#endif
-            //--------------------------------------------------
-            // rename ref. objects used in subscribers
-            //--------------------------------------------------
-            for (unsigned int i=0; i<subs.size(); i++)
+            // if parameter name has old name (loj: 11/23/04 - added)
+            if (oldParamName.find(oldName) != oldParamName.npos)
             {
-               sub = GetSubscriber(subs[i]);
-               if (sub->GetTypeName() == "OpenGLPlot")
+               // rename ref. object name
+               param->RenameRefObject(type, oldName, newName);
+               
+               // rename actual parameter name
+               newParamName = newName + "." + param->GetTypeName();
+               
+               // rename configured parameter name
+               renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
+               
+#if DEBUG_RENAME
+               MessageInterface::ShowMessage
+                  ("newParamName=%s\n", param->GetName().c_str());
+               MessageInterface::ShowMessage
+                  ("===> Change Subscriber ref object names\n");
+#endif
+               //--------------------------------------------------
+               // rename ref. objects used in subscribers
+               //--------------------------------------------------
+               for (unsigned int i=0; i<subs.size(); i++)
                {
-                  sub->RenameRefObject(type, oldName, newName);
-               }
-               else if (sub->GetTypeName() == "XYPlot" ||
-                        sub->GetTypeName() == "ReportFile")
-               {
-                  sub->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
+                  sub = GetSubscriber(subs[i]);
+                  if (sub->GetTypeName() == "OpenGLPlot")
+                  {
+                     sub->RenameRefObject(type, oldName, newName);
+                  }
+                  else if (sub->GetTypeName() == "XYPlot" ||
+                           sub->GetTypeName() == "ReportFile")
+                  {
+                     sub->RenameRefObject(Gmat::PARAMETER, oldParamName, newParamName);
+                  }
                }
             }
          }
