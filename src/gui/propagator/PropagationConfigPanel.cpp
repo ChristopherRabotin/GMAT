@@ -702,7 +702,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    // wxButton
    bodyButton =
-      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add/Remove"),
+      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Select"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchGravityButton =
       new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"),
@@ -711,7 +711,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    editPmfButton =
-      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Add/Remove"),
+      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Select"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchMagneticButton =
       new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"),
