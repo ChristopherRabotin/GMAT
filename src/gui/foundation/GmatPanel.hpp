@@ -34,7 +34,7 @@ class GmatPanel : public wxPanel
 {
 public:
    // constructors
-   GmatPanel( wxWindow *parent);
+   GmatPanel( wxWindow *parent, bool showScriptButton = true);
     
 protected:
    // member functions
@@ -53,6 +53,7 @@ protected:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool canClose;
+   bool mShowScriptButton;
    
    wxWindow *theParent;
     

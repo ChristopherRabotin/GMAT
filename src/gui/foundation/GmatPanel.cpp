@@ -43,30 +43,31 @@ END_EVENT_TABLE()
  *
  */
 //------------------------------------------------------------------------------
-GmatPanel::GmatPanel(wxWindow *parent)
+GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
     : wxPanel(parent)
 {
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    canClose = true;
-    
+   mShowScriptButton = showScriptButton;
+
    theParent = parent;
-    
+
    int borderSize = 3;
    wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
    wxStaticBox *middleStaticBox = new wxStaticBox( this, -1, wxT("") );
    wxStaticBox *bottomStaticBox = new wxStaticBox( this, -1, wxT("") );
-    
+
    // create sizers
    thePanelSizer = new wxBoxSizer(wxVERTICAL);
    theTopSizer = new wxStaticBoxSizer( topStaticBox, wxVERTICAL );
    theMiddleSizer = new wxStaticBoxSizer( middleStaticBox, wxVERTICAL );
    theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
    wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
-    
+
    // create script button
-   theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script", 
+   theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script",
                                   wxDefaultPosition, wxDefaultSize, 0);
 
    // create bottom buttons
@@ -78,18 +79,20 @@ GmatPanel::GmatPanel(wxWindow *parent)
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
    theHelpButton =
       new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-    
+
    // add items to top sizer
    theTopSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
-    
-   // adds the buttons to button sizer    
+
+   // adds the buttons to button sizer
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    
+
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
-   
+
+   topStaticBox->Show(mShowScriptButton);
+
    mObject = NULL;
 }
 
@@ -107,10 +110,15 @@ GmatPanel::GmatPanel(wxWindow *parent)
 void GmatPanel::Show()
 {
     // add items to middle sizer
-    
+
     thePanelSizer->Add(theTopSizer, 0, wxGROW | wxALL, 1);
     thePanelSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
     thePanelSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
+
+    // displays the script button
+    thePanelSizer->Show(theTopSizer, mShowScriptButton);
+    theScriptButton->Show(mShowScriptButton);
+    thePanelSizer->Layout();
     
     // tells the enclosing window to adjust to the size of the sizer
     SetAutoLayout( TRUE );
@@ -200,6 +208,6 @@ void GmatPanel::OnScript()
       title += mObject->GetName().c_str();
    }
    ShowScriptDialog ssd(this, -1, title, mObject);
-   ssd.ShowModal();   
+   ssd.ShowModal();
 }
 
