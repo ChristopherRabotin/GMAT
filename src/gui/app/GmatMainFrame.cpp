@@ -68,6 +68,7 @@
 #include "DoWhilePanel.hpp"
 #include "GmatMdiChildFrame.hpp"
 #include "FormationSetupPanel.hpp"
+#include "CallFunctionPanel.hpp"
 
 #include <wx/gdicmn.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
@@ -529,6 +530,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new ForLoopPanel(panel), 0, wxGROW|wxALL, 0);
       }
+     else if (dataType == GmatTree::CALL_FUNCTION_COMMAND)
+     {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add (new CallFunctionPanel (panel, item->GetDesc()),
+                     0, wxGROW|wxALL, 0 );
+     }
       else
       {
          // if no panel set up then just exit function

@@ -150,6 +150,7 @@ namespace GmatTree
         VARY_COMMAND,
         SAVE_COMMAND,    //loj: 10/20/04 added SAVE, TOGGLE
         TOGGLE_COMMAND,
+        CALL_FUNCTION_COMMAND,  //arg: 10/20/04  addd CALL_FUNCTION
         
         // Temporary to show the panel
         VIEW_SOLVER_VARIABLES,
