@@ -1333,10 +1333,15 @@ void GmatMainFrame::OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
    // Create a template relating text documents to their views
    // use MdiTextDocument
    mDocTemplate = 
-      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+      new wxDocTemplate(mDocManager, _T("Script files"),
+                        _T("*.script;*.m"),
+                        _T(""), _T(""), _T("Text Doc"), _T("Text View"),
                         CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
-    
+
+//      new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+//                        _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+//                        CLASSINFO(MdiTextDocument), CLASSINFO(MdiTextEditView));
+
    // Create the main frame window    
    //loj: pass "this" so that this frame closes when the main frame closes
    mdiDocMainFrame =
