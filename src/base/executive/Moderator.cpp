@@ -900,7 +900,12 @@ StopCondition* Moderator::GetStopCondition(const std::string &name)
 //------------------------------------------------------------------------------
 Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
 {
-   if (GetParameter(name) == NULL)
+#if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateSolver() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+#endif
+
+   if (GetSolver(name) == NULL)
    {
       Solver *solver = theFactoryManager->CreateSolver(type, name);
 
@@ -1386,7 +1391,8 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
 #endif
 
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
-
+   Integer id;
+   
    if (type == "Propagate")
    {
       //loj: 10/4/04 switched PROP_SETUP AND SPACECRAFT
@@ -1397,15 +1403,71 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    }
    else if (type == "Maneuver")
    {
-      Integer id;
-      
-      // save burn
+      // set burn
       id = cmd->GetParameterID("Burn");
       cmd->SetStringParameter(id, GetDefaultBurn()->GetName());
 
-      // save spacecraft
+      // set spacecraft
       id = cmd->GetParameterID("Spacecraft");
       cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
+   }
+   else if (type == "Vary") //loj: 10/6/04 added
+   {
+      // set solver
+      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      id = cmd->GetParameterID("TargeterName");
+      cmd->SetStringParameter(id, solver->GetName());
+
+      // set variable parameter
+      id = cmd->GetParameterID("Variable");
+      //----------------------------------------------------
+      //@note loj: 10/6/04
+      // I should create a burn parameter of V.
+      // But use temp code for now.
+      //----------------------------------------------------
+      
+      cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".V");
+      cmd->SetStringParameter(id, GetDefaultBurn()->GetName() + ".N");
+      
+      id = cmd->GetParameterID("InitialValue");
+      cmd->SetRealParameter(id, 0.5);
+      cmd->SetRealParameter(id, 0.5);
+      
+      id = cmd->GetParameterID("Perturbation");
+      cmd->SetRealParameter(id, 0.000001);
+      cmd->SetRealParameter(id, 0.00001);
+
+      id = cmd->GetParameterID("MinimumValue");
+      cmd->SetRealParameter(id, -9.000e30);
+      cmd->SetRealParameter(id, -9.000e30);
+      
+      id = cmd->GetParameterID("MaximumValue");
+      cmd->SetRealParameter(id, 9.000e30);
+      cmd->SetRealParameter(id, 9.000e30);
+      
+      id = cmd->GetParameterID("MaximumChange");
+      cmd->SetRealParameter(id, 9.000e30);
+      cmd->SetRealParameter(id, 9.000e30);
+   }
+   else if (type == "Achieve") //loj: 10/6/04 added
+   {
+      // set solver
+      Solver *solver = CreateSolver("DifferentialCorrector", "DefaultDC");
+      id = cmd->GetParameterID("TargeterName");
+      cmd->SetStringParameter(id, solver->GetName());
+
+      // set goal parameter
+      id = cmd->GetParameterID("Goal");
+      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".SMA");
+      cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName() + ".INC");
+
+      id = cmd->GetParameterID("GoalValue");
+      cmd->SetRealParameter(id, 8500.0);
+      cmd->SetRealParameter(id, 30.0);
+
+      id = cmd->GetParameterID("Tolerance");
+      cmd->SetRealParameter(id, 0.1);
+      cmd->SetRealParameter(id, 0.1);
    }
    
    return cmd;
