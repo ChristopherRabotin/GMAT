@@ -519,24 +519,60 @@ Command* GuiInterpreter::CreateCommand(const std::string &type,
     return theModerator->CreateCommand(type, name);
 }
 
+// command sequence
 //------------------------------------------------------------------------------
-// Command* GetCommand(const std::string &name)
+// bool AppendCommand(Command *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a command object pointer by given name.
+ * Appends a command.
  *
- * @param <name> object name
+ * @param <cmd> command to append
  *
- * @return a command object pointer, return null if name not found
+ * @return a command object pointer, return null if not appended
  */
 //------------------------------------------------------------------------------
-//loj: Do we need this?
-Command* GuiInterpreter::GetCommand(const std::string &name)
+bool GuiInterpreter::AppendCommand(Command *cmd, Integer sandboxNum)
 {
-    return theModerator->GetCommand(name);
+    return theModerator->AppendCommand(cmd, sandboxNum);
 }
 
-// command sequence
+//------------------------------------------------------------------------------
+// Command* AppendCommand(const std::string &type, const std::string &name,
+//                        Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
+                                  Integer sandboxNum)
+{
+    return theModerator->AppendCommand(type, name, sandboxNum);
+}
+
+//------------------------------------------------------------------------------
+// bool InsertCommand(Command *cmd, Command *prevCmd, Integer sandboxNum)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::InsertCommand(Command *cmd, Command *prevCmd,
+                                   Integer sandboxNum)
+{
+    return theModerator->InsertCommand(cmd, prevCmd, sandboxNum);
+}
+
+//------------------------------------------------------------------------------
+// Command* InsertCommand(const std::string &type, const std::string &currName,
+//                        const std::string &prevName, Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* GuiInterpreter::InsertCommand(const std::string &type, const std::string &currName,
+                                  const std::string &prevName, Integer sandboxNum)
+{
+    return theModerator->InsertCommand(type, currName, prevName, sandboxNum);
+}
+
+//------------------------------------------------------------------------------
+// Command* DeleteCommand(Command *cmd, Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* GuiInterpreter::DeleteCommand(Command *cmd, Integer snadboxNum)
+{
+    return theModerator->DeleteCommand(cmd, snadboxNum);
+}
+
 //------------------------------------------------------------------------------
 // Command* GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
@@ -551,58 +587,6 @@ Command* GuiInterpreter::GetCommand(const std::string &name)
 Command* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 {
     return theModerator->GetNextCommand(sandboxNum);
-}
-
-//------------------------------------------------------------------------------
-// bool DeleteCommand(const std::string &name, Integer position,
-//                    Integer sandboxNum)
-//------------------------------------------------------------------------------
-/**
- * Deletes a command at given position.
- *
- * @param <name> object name
- * @param <position> command position
- * @param <sandboxNum> sandbox number
- *
- * @return true if command has been deleted; false otherwise
- */
-//------------------------------------------------------------------------------
-bool GuiInterpreter::DeleteCommand(const std::string &name, Integer position,
-                                   Integer snadboxNum)
-{
-    return theModerator->DeleteCommand(name, position, snadboxNum);
-}
-
-//------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string &type, const std::string &name,
-//                        Integer position, bool addAbove, Integer sandboxNum)
-//------------------------------------------------------------------------------
-Command* GuiInterpreter::InsertCommand(const std::string &type,
-                                       const std::string &name,
-                                       Integer position, bool addAbove,
-                                       Integer sandboxNum)
-{
-    //inserts command above or below current position
-    return theModerator->InsertCommand(type, name, position, addAbove, sandboxNum);
-}
-
-//------------------------------------------------------------------------------
-// Command* AppendCommand(const std::string &type, const std::string &name,
-//                        Integer sandboxNum)
-//------------------------------------------------------------------------------
-/**
- * Appends a command.
- *
- * @param <name> object name
- *
- * @return a command object pointer, return null if name not found
- */
-//------------------------------------------------------------------------------
-Command* GuiInterpreter::AppendCommand(const std::string &type,
-                                       const std::string &name,
-                                       Integer sandboxNum)
-{
-    return theModerator->AppendCommand(type, name, sandboxNum);
 }
 
 // sandbox

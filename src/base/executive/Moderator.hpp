@@ -64,7 +64,7 @@ class GMAT_API Moderator
 public:
 
     static Moderator* Instance();
-    bool Initialize();
+    bool Initialize(bool fromGui = false);
 
     //----- ObjectType
     std::string GetObjectTypeString(Gmat::ObjectType type);  
@@ -145,17 +145,18 @@ public:
     Subscriber* GetSubscriber(const std::string &name);
 
     // Command
-    Command* CreateCommand(const std::string &type, const std::string &name);
-    Command* GetCommand(const std::string &name);
+    Command* CreateCommand(const std::string &type, const std::string &name = "");
 
-    Command* GetNextCommand(Integer sanboxNum = 1);
-    bool DeleteCommand(const std::string &name, Integer position,
-                       Integer sandboxNum = 1);
-    Command* InsertCommand(const std::string &type, const std::string &name,
-                           Integer position, bool addAbove = true,
-                           Integer sandboxNum = 1);
+    // Command sequence
+    bool AppendCommand(Command *cmd, Integer sandboxNum = 1);
     Command* AppendCommand(const std::string &type, const std::string &name,
                            Integer sandboxNum = 1);
+    bool InsertCommand(Command *cmd, Command *prevCmd,
+                       Integer sandboxNum = 1);
+    Command* InsertCommand(const std::string &type, const std::string &currName,
+                           const std::string &prevName, Integer sandboxNum = 1);
+    Command* DeleteCommand(Command *cmd, Integer sandboxNum = 1);
+    Command* GetNextCommand(Integer sanboxNum = 1);
 
     // Sandbox
     void ClearAllSandboxes();
@@ -168,6 +169,9 @@ public:
     
 private:
 
+    // initialization
+    void CreatePredefinedParameters();
+    
     // sandbox
     void AddSolarSysToSandbox(Integer index);
     void AddSpacecraftToSandbox(Integer index);
@@ -208,6 +212,8 @@ private:
     SubscriberFactory *theSubscriberFactory;
     SolverFactory *theSolverFactory;
 
+    SolarSystem *theDefaultSolarSystem;
+    
     static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
 };

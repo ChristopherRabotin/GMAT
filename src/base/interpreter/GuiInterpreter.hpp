@@ -101,16 +101,18 @@ public:
     Subscriber* GetSubscriber(const std::string &name);
 
     // Command
-    Command* CreateCommand(const std::string&type, const std::string &name = "");
-    Command* GetCommand(const std::string &name);
-    Command* GetNextCommand(Integer sandboxNum = 1);
-    bool DeleteCommand(const std::string &name, Integer position,
+    Command* CreateCommand(const std::string &type, const std::string &name);
+    
+    // Command sequence
+    bool AppendCommand(Command *cmd, Integer sandboxNum = 1);
+    Command* AppendCommand(const std::string &type, const std::string &name,
+                           Integer sandboxNum = 1);
+    bool InsertCommand(Command *cmd, Command *prevCmd,
                        Integer sandboxNum = 1);
-    Command* InsertCommand(const std::string&type, const std::string &name,
-                           Integer position, bool addAbove = true,
-                           Integer sandboxNum = 1);
-    Command* AppendCommand(const std::string&type, const std::string &name,
-                           Integer sandboxNum = 1);
+    Command* InsertCommand(const std::string &type, const std::string &currName,
+                           const std::string &prevName, Integer sandboxNum = 1);
+    Command* DeleteCommand(Command *cmd, Integer sandboxNum = 1);
+    Command* GetNextCommand(Integer sandboxNum = 1);
 
     // Sandbox
     void ClearAllSandboxes();

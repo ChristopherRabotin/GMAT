@@ -103,13 +103,14 @@ Moderator* Moderator::Instance()
 {
     if (instance == NULL)
         instance = new Moderator;
+    
     return instance;
 }
 
 //------------------------------------------------------------------------------
-// bool Initialize()
+// bool Initialize(bool fromGui = false)
 //------------------------------------------------------------------------------
-bool Moderator::Initialize()
+bool Moderator::Initialize(bool fromGui)
 {
     if (!isInitialized)
     {
@@ -149,17 +150,23 @@ bool Moderator::Initialize()
         theFactoryManager->RegisterFactory(theStopConditionFactory);
         theFactoryManager->RegisterFactory(theSubscriberFactory);
         theFactoryManager->RegisterFactory(theSolverFactory);
-
-        // create default SolarSystem
-     
-        //loj: reads in initial files, such as, system parameters, default mission script file.
-        //loj: calls ScriptInterpreter to interpret initial script and create necessary objects
-        //loj: creates initial commands and add to sandbox
-        //loj: at this point the sandbox is ready to run without GUI.
-
-        MessageInterface::ShowMessage("Moderator successfully created core engine\n");
         
-        isInitialized = true;
+        MessageInterface::ShowMessage("Moderator creating default SolarSystem...\n");
+        theDefaultSolarSystem = new SolarSystem("Default");
+
+        if (theDefaultSolarSystem != NULL)
+        {
+
+            if (fromGui)
+            {
+                MessageInterface::ShowMessage("Moderator creating predefined parameters...\n");
+                CreatePredefinedParameters();
+            }
+        
+            MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+        
+            isInitialized = true;
+        }
     }
 
     return isInitialized;
@@ -724,7 +731,8 @@ CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetDefaultSolarSystem()
 {
-    return theConfigManager->GetDefaultSolarSystem();
+    //return theConfigManager->GetDefaultSolarSystem();
+    return theDefaultSolarSystem;
 }
 
 //------------------------------------------------------------------------------
@@ -798,59 +806,21 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 
 // Command
 //------------------------------------------------------------------------------
-// Command* CreateCommand(const std::string &type, const std::string &name)
+// Command* CreateCommand(const std::string &type,const std::string &name )
 //------------------------------------------------------------------------------
 Command* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
     Command *cmd = theFactoryManager->CreateCommand(type, name);
-    //   theConfigManager->AddCommand(cmd);
     return cmd;
 }
 
+// Command sequence
 //------------------------------------------------------------------------------
-// Command* GetCommand(const std::string &name)
+// bool AppendCommand(Command *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::GetCommand(const std::string &name)
+bool Moderator::AppendCommand(Command *cmd, Integer sandboxNum)
 {
-    return theConfigManager->GetCommand(name);
-}
-
-// command sequence
-//------------------------------------------------------------------------------
-// Command* GetNextCommand(Integer sandboxNum)
-//------------------------------------------------------------------------------
-Command* Moderator::GetNextCommand(Integer sandboxNum)
-{
-    return commands[sandboxNum-1]->GetNext();
-}
-
-//loj: future build implementation
-//------------------------------------------------------------------------------
-// bool DeleteCommand(const std::string &name, Integer position,
-//                    Integer sandboxNum)
-//------------------------------------------------------------------------------
-bool Moderator::DeleteCommand(const std::string &name, Integer position,
-                              Integer sandboxNum)
-{
-    // delete command from default sandbox 1
-    //commands[sandboxNum-1]->DeleteCommand(name, position);
-    return false;
-}
-
-//loj: future build implementation
-//------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string &type, const std::string &name,
-//                        Integer position, bool addAbove, Integer sandboxNum)
-//------------------------------------------------------------------------------
-Command* Moderator::InsertCommand(const std::string &type, const std::string &name,
-                                  Integer position, bool addAbove,
-                                  Integer sandboxNum)
-{
-    //     bool status = false;
-    //     Command *cmd = theFactoryManager->CreateCommand(type, name);
-    //     status = commands[sandboxNum-1]->Insert(cmd, position, addAbove);
-    //     return cmd;
-    return NULL;
+    return commands[sandboxNum-1]->Append(cmd);
 }
 
 //------------------------------------------------------------------------------
@@ -862,8 +832,67 @@ Command* Moderator::AppendCommand(const std::string &type, const std::string &na
 {
     bool status;
     Command *cmd = theFactoryManager->CreateCommand(type, name);
-    status = commands[sandboxNum-1]->Append(cmd);
+
+    if (cmd != NULL)
+    {
+        if (name != "")
+            theConfigManager->AddCommand(cmd);
+    
+        status = commands[sandboxNum-1]->Append(cmd);
+    }
+    
     return cmd;
+}
+
+//------------------------------------------------------------------------------
+// bool InsertCommand(Command *cmd, Command *prevCmd, Integer sandboxNum)
+//------------------------------------------------------------------------------
+bool Moderator::InsertCommand(Command *cmd, Command *prevCmd,
+                              Integer sandboxNum)
+{
+    return commands[sandboxNum-1]->Insert(cmd, prevCmd);
+}
+
+//------------------------------------------------------------------------------
+// Command* InsertCommand(const std::string &type, const std::string &currName,
+//                        const std::string &prevName, Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* Moderator::InsertCommand(const std::string &type, const std::string &currName,
+                                  const std::string &prevName, Integer sandboxNum)
+{
+//      bool status = false;
+//      Command *currCmd = theFactoryManager->CreateCommand(type, currName);
+//      Command *prevCmd = NULL;
+
+//      if (currCmd != NULL)
+//      {
+//          if (currName != "")
+//              theConfigManager->AddCommand(currCmd);
+    
+//          if (prevName != "")
+//              prevCmd = theConfigManager->GetCommand(prevName);
+    
+//          status = commands[sandboxNum-1]->Insert(currCmd, prevCmd);
+//      }
+    
+//      return currCmd;
+    return NULL;
+}
+
+//------------------------------------------------------------------------------
+// Command* DeleteCommand(Command *cmd, Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* Moderator::DeleteCommand(Command *cmd, Integer sandboxNum)
+{
+    return commands[sandboxNum-1]->Remove(cmd);
+}
+
+//------------------------------------------------------------------------------
+// Command* GetNextCommand(Integer sandboxNum)
+//------------------------------------------------------------------------------
+Command* Moderator::GetNextCommand(Integer sandboxNum)
+{
+    return commands[sandboxNum-1]->GetNext();
 }
 
 // sandbox
@@ -894,7 +923,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
         MessageInterface::PopupMessage(Gmat::ERROR_,
                                        "Invalid Sandbox number" + sandboxNum);
     }
-    
+
     try
     {
         AddSolarSysToSandbox(sandboxNum-1);
@@ -987,8 +1016,33 @@ Integer Moderator::RunScript(Integer sandboxNum)
 }
 
 //---------------------------------
-//  protected
+//  private
 //---------------------------------
+
+// initialization
+//------------------------------------------------------------------------------
+// void CreatePredefinedParameters()
+//------------------------------------------------------------------------------
+void Moderator::CreatePredefinedParameters()
+{
+    CreateParameter("CurrentA1MjdParam", "CurrentTime");
+    CreateParameter("ElapsedSecsParam", "ElapsedSecs");
+    
+    CreateParameter("CartXParam", "X");
+    CreateParameter("CartYParam", "Y");
+    CreateParameter("CartZParam", "Z");
+    CreateParameter("CartVxParam", "Vx");
+    CreateParameter("CartVxParam", "Vy");
+    CreateParameter("CartVxParam", "Vz");
+    
+    CreateParameter("KepSmaParam", "SMA");
+    CreateParameter("KepEccParam", "ECC");
+    CreateParameter("KepIncParam", "INC");
+    CreateParameter("KepRaanParam", "RAAN");
+    CreateParameter("KepAopParam", "AOP");
+    CreateParameter("KepTaParam", "TA");
+    
+}
 
 // sandbox
 //------------------------------------------------------------------------------
@@ -1117,6 +1171,7 @@ void Moderator::ExecuteSandbox(Integer index)
 Moderator::Moderator()
 {
     isInitialized = false;
+    theDefaultSolarSystem = NULL;
     theFactoryManager = FactoryManager::Instance();
     theConfigManager = ConfigManager::Instance();
     sandboxes.reserve(Gmat::MAX_SANDBOX);
