@@ -201,7 +201,7 @@ bool For::Execute(void)
       retval = ExecuteBranch();
       currentValue += stepSize;
       if (indexParam)
-         indexParam->SetRealParameter("Param1",currentValue);
+         indexParam->SetReal(currentValue);
       //else
       //   throw CommandException(
       //         "Index parameter has not been set for For loop.");
@@ -470,7 +470,7 @@ bool For::StillLooping()
       
       currentValue = startValue;
       if (indexParam)
-         indexParam->SetRealParameter("Param1", currentValue);
+         indexParam->SetReal(currentValue);
       //else
       //   throw CommandException(
       //         "Index parameter has not been set for For loop.");
