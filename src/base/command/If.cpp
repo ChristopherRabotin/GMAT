@@ -105,7 +105,7 @@ bool If::Append(GmatCommand *cmd)
     // Check for the end of "If" branch, point that end back to this command
     if (cmd->GetTypeName() == "EndIf" || cmd->GetTypeName() == "Else")
     {
-       if (nestLevel == 0)
+       if ((nestLevel== 0) && (branchToFill != -1))
        {
           cmd->Append(this);
           // IF statement is complete; -1 points us back to the main sequence.

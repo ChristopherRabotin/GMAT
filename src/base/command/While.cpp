@@ -103,7 +103,7 @@ bool While::Append(GmatCommand *cmd)
     // Check for the end of "While" branch, point that end back to this command
     if (cmd->GetTypeName() == "EndWhile")
     {
-       if (nestLevel == 0)
+       if ((nestLevel== 0) && (branchToFill != -1))
        {
           cmd->Append(this);
           // While statement is complete; -1 points us back to the main sequence.
