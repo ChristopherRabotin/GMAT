@@ -56,10 +56,9 @@ const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
 const std::string
 GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
 {
-   "Integer",     "UnsignedInt", "UnsignedIntArray", "Real",       "String",
-   "StringArray", "Boolean",     "Rvector",          "Rvector3",   "Rvector6",
-   "Rmatrix",     "Rmatrix33",   "Cartesian",        "Keplerian",  "A1Mjd",
-   "UtcDate",     "Object"
+   "Integer",     "UnsignedInt", "UnsignedIntArray", "Real",       
+   "RealElement", "String",      "StringArray",      "Boolean",     
+   "Rvector",     "Rmatrix",     "Time",             "Object"
 };
 
 /**
@@ -714,6 +713,31 @@ Real GmatBase::GetRealParameter(const Integer id, const Integer index) const
 
 
 //---------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id, const Integer row, 
+//                        const Integer col) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param row Row index for parameters in arrays.
+ * @param col Column index for parameters in arrays.
+ *
+ * @return The parameter's value.
+ */
+Real GmatBase::GetRealParameter(const Integer id, const Integer row, 
+                                const Integer col) const
+{
+   std::stringstream indexString, idString;
+   idString << id;
+   indexString << ", row " << row << " and column " << col;
+   throw GmatBaseException("Cannot get real array element with ID " + 
+                           idString.str() + indexString.str() + 
+                           " on " + typeName + " named " + instanceName);
+}
+
+
+//---------------------------------------------------------------------------
 //  Real SetRealParameter(const Integer id, const Real value, Integer index)
 //---------------------------------------------------------------------------
 /**
@@ -1328,6 +1352,28 @@ Real GmatBase::GetRealParameter(const std::string &label,
 
 
 //---------------------------------------------------------------------------
+//  Real GetRealParameter(const std::string &label, const Integer row, 
+//                        const Integer col) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the value for a Real parameter from an array.
+ *
+ * @param label The (string) label for the parameter.
+ * @param row Row index for parameters in arrays.
+ * @param col Column index for parameters in arrays.
+ *
+ * @return The parameter's value.
+ */
+Real GmatBase::GetRealParameter(const std::string &label, const Integer row, 
+                                const Integer col) const
+{
+   Integer id = GetParameterID(label);
+   return GetRealParameter(id, row, col);
+}
+
+
+
+//---------------------------------------------------------------------------
 //  Real SetRealParameter(const std::string &label, const Real value, 
 //                        const Integer index)
 //---------------------------------------------------------------------------
@@ -1876,3 +1922,209 @@ void GmatBase::CopyParameters(const GmatBase &a)
    }    
 }
 
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName)
+{
+   std::stringstream data;
+
+   data.precision(18);   // Crank up the data precision so we don't use anything
+   std::string preface = "", nomme;
+   
+   if (mode == Gmat::SCRIPTING)
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if (mode == Gmat::SCRIPTING) {
+      std::string tname = typeName;
+      if (tname == "PropSetup")
+         tname = "Propagator";
+      data << "Create " << tname << " " << nomme << ";\n";
+      preface = "GMAT ";
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+   
+   generatingString = data.str();
+   return generatingString;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingStringArray(Gmat::WriteMode mode,
+//                       const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string array containing the line-by-line text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string array containing the text.
+ * 
+ * @note The current implementation just calls GetGeneratingString, and returns
+ *       a multiline string in the first element of the string array.  A later
+ *       update is needed to break that string into multiple entries in the
+ *       string array.
+ */
+//------------------------------------------------------------------------------
+StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName)
+{
+   StringArray sar;
+   
+   std::string genstr = GetGeneratingString(mode, prefix, useName);
+   sar.push_back(genstr);
+   
+   return sar;
+}
+
+//------------------------------------------------------------------------------
+// void WriteParameters(std::string &prefix, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Code that writes the parameter details for an object.
+ * 
+ * @param prefix Starting portion of the script string used for the parameter.
+ * @param obj The object that is written.
+ */
+//------------------------------------------------------------------------------
+void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
+                               std::stringstream &stream)
+{
+    Integer i;
+    Gmat::ParameterType parmType;
+    
+    for (i = 0; i < parameterCount; ++i) 
+    {
+        parmType = GetParameterType(i);
+        // Handle StringArray parameters separately
+        if (parmType != Gmat::STRINGARRAY_TYPE) {
+           // Skip unhandled types
+           if (
+               (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+               (parmType != Gmat::RVECTOR_TYPE) &&
+//               (parmType != Gmat::RVECTOR3_TYPE) &&
+//               (parmType != Gmat::RVECTOR6_TYPE) &&
+               (parmType != Gmat::RMATRIX_TYPE) &&
+//               (parmType != Gmat::RMATRIX33_TYPE) &&
+//               (parmType != Gmat::CARTESIAN_TYPE) &&
+//               (parmType != Gmat::KEPLERIAN_TYPE) &&
+//               (parmType != Gmat::A1MJD_TYPE) &&
+//               (parmType != Gmat::UTCDATE_TYPE) &&
+               (parmType != Gmat::OBJECT_TYPE) &&
+               (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)               
+              ) {
+              // Fill in the l.h.s.
+              stream << prefix << GetParameterText(i) << " = ";
+              WriteParameterValue(i, stream);
+              stream << ";\n";
+           }
+        }
+        else {
+           stream << prefix << GetParameterText(i) << " = {";
+           StringArray sar = GetStringArrayParameter(i);
+           for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n) {
+              if (n != sar.begin())
+                 stream << ", ";
+              if (inMatlabMode)
+                 stream << "'";
+              stream << (*n);
+              if (inMatlabMode)
+                 stream << "'";
+           }
+           stream << "};\n";
+        }
+    }
+
+    GmatBase *ownedObject;
+    std::string nomme, newprefix;
+    for (i = 0; i < GetOwnedObjectCount(); ++i) {
+       newprefix = prefix + ".";
+       ownedObject = GetOwnedObject(i);
+       nomme = ownedObject->GetName();
+       if (nomme != "")
+          newprefix += nomme;
+       else
+          newprefix += ownedObject->GetTypeName();
+       ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
+    }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteParameterValue(Integer id, std::stringstream stream)
+//------------------------------------------------------------------------------
+/**
+ * Writes out parameters in the GMAT script syntax.
+ * 
+ * @param obj Pointer to the object containing the parameter.
+ * @param id  ID for the parameter that gets written.
+ */
+//------------------------------------------------------------------------------
+void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
+{
+    Gmat::ParameterType tid = GetParameterType(id);
+    
+    switch (tid) {
+        case Gmat::OBJECT_TYPE:
+        case Gmat::STRING_TYPE:     // Strings and objects write out a string
+            if (inMatlabMode)
+               stream << "'";
+            stream << GetStringParameter(id);
+            if (inMatlabMode)
+               stream << "'";
+            break;
+            
+        case Gmat::INTEGER_TYPE:
+            stream << GetIntegerParameter(id);
+            break;
+            
+        case Gmat::UNSIGNED_INT_TYPE:
+            stream << GetUnsignedIntParameter(id);
+            break;
+            
+        case Gmat::REAL_TYPE:
+            stream << GetRealParameter(id);
+            break;
+            
+        case Gmat::BOOLEAN_TYPE:
+            stream << ((GetBooleanParameter(id)) ? "true" : "false");
+            break;
+            
+        default:
+            break;
+    }
+}

@@ -110,6 +110,8 @@ public:
                                         const Real value);
    virtual Real        GetRealParameter(const Integer id,
                                         const Integer index) const;
+   virtual Real        GetRealParameter(const Integer id, const Integer row,
+                                        const Integer col) const;
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value,
                                         const Integer index);
@@ -174,6 +176,9 @@ public:
    virtual Real        SetRealParameter(const std::string &label,
                                         const Real value,
                                         const Integer index);
+   virtual Real        GetRealParameter(const std::string &label, 
+                                        const Integer row, 
+                                        const Integer col) const;
                                         
    virtual Integer     GetIntegerParameter(const std::string &label) const;
    virtual Integer     SetIntegerParameter(const std::string &label,
@@ -251,6 +256,15 @@ public:
    /// Method for getting GMAT object type
    static Gmat::ObjectType GetObjectType(const std::string &typeString);
    
+   virtual const std::string&  
+                           GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                               const std::string &prefix = "",
+                                               const std::string &useName = "");
+   virtual StringArray     GetGeneratingStringArray(
+                                         Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                         const std::string &prefix = "",
+                                         const std::string &useName = "");
+   
 protected:
    /// Parameter IDs
    enum
@@ -271,8 +285,19 @@ protected:
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance
    Integer             ownedObjectCount;
+   /// Script string used to build the object
+   std::string          generatingString;
    
+   // Scripting interfaces
+   /// flag used to deterine if the current write is in Matlab mode
+   bool                inMatlabMode;   
    void                CopyParameters(const GmatBase &a);
+   void                WriteParameters(Gmat::WriteMode mode, 
+                                       std::string &prefix, 
+                                       std::stringstream &stream);
+   void                WriteParameterValue(Integer id, 
+                                           std::stringstream &stream);
+
 };
 
 

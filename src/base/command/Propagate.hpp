@@ -63,7 +63,9 @@ public:
    virtual GmatBase* Clone(void) const;
    
    virtual const std::string&
-                        GetGeneratingString();
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
 
    // Reference object accessor methods
    //loj: 6/25/04 added

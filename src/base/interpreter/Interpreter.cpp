@@ -336,19 +336,24 @@ bool Interpreter::BuildObject(std::string &objectname)
     
     (*outstream).precision(18);        /// @todo Make output precision generic
     
-    // For now, "Create Propagator" creates a PropSetup.  This kludge handles 
-    // that special case.
-    std::string tname = obj->GetTypeName();
-    if (tname == "PropSetup")
-        tname = "Propagator";
-    *outstream << "Create " << tname << " " 
-               << obj->GetName() << "\n";
-               
-    std::string prefix = "GMAT ";
-    prefix += objectname;
-    prefix += ".";
+//    // For now, "Create Propagator" creates a PropSetup.  This kludge handles 
+//    // that special case.
+//    std::string tname = obj->GetTypeName();
+//    if (tname == "PropSetup")
+//        tname = "Propagator";
+//    *outstream << "Create " << tname << " " 
+//               << obj->GetName() << "\n";
+//               
+//    std::string prefix = "GMAT ";
+//    prefix += objectname;
+//    prefix += ".";
+//
+//    WriteParameters(prefix, obj);
 
-    WriteParameters(prefix, obj);
+    std::string genstring = obj->GetGeneratingString(Gmat::SCRIPTING);
+    *outstream << genstring << "\n\n\n***MATLAB Version:\n\n";
+    genstring = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
+    *outstream << genstring << "\n***\n\n";
     
     *outstream << "\n";
     return true;

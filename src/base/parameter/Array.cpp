@@ -45,7 +45,7 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::RMATRIX_TYPE,
-   Gmat::REAL_TYPE,
+   Gmat::REAL_ELEMENT_TYPE,  // was Gmat::REAL_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
 };

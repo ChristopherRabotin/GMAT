@@ -237,9 +237,11 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
  * @return The script line that was interpreted to define this GmatCommand.
  */
 //------------------------------------------------------------------------------
-const std::string& Propagate::GetGeneratingString()
+const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName)
 {
-   std::string gen = "% Generated live from GMAT!!\nPropagate ";
+   std::string gen = "Propagate ";
    
    // Construct the generating string
    Integer index = 0;

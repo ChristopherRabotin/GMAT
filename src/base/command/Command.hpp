@@ -65,7 +65,9 @@ public:
    
    void                 SetGeneratingString(const std::string &gs);
    virtual const std::string&  
-                        GetGeneratingString();
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
@@ -132,8 +134,6 @@ protected:
       GmatCommandParamCount = GmatBaseParamCount,
    };
    
-   /// Script string that was used to build the GmatCommand
-   std::string          generatingString;
    /// Map containing names and associated types
    std::map<std::string, Gmat::ObjectType> 
                         association;

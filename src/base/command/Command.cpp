@@ -39,18 +39,18 @@
  */
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const std::string &typeStr) :
-GmatBase        (Gmat::COMMAND, typeStr),
-generatingString(""),
-initialized     (false),
-next            (NULL),
-level           (-1),   // Not set
-objectMap       (NULL),
-solarSys        (NULL),
-publisher       (NULL),
-streamID        (-1),
-depthChange     (0),
-propStateChanged(false)
+   GmatBase        (Gmat::COMMAND, typeStr),
+   initialized     (false),
+   next            (NULL),
+   level           (-1),   // Not set
+   objectMap       (NULL),
+   solarSys        (NULL),
+   publisher       (NULL),
+   streamID        (-1),
+   depthChange     (0),
+   propStateChanged(false)
 {
+   generatingString = "";
    parameterCount = GmatCommandParamCount;
 }
 
@@ -97,20 +97,20 @@ GmatCommand::~GmatCommand()
  */
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const GmatCommand &c) :
-GmatBase        (c),
-generatingString(c.generatingString),
-association     (c.association),
-objects         (c.objects),
-initialized     (false),
-next            (NULL),
-level           (-1),   // Not set
-objectMap       (c.objectMap),
-solarSys        (c.solarSys),
-publisher       (c.publisher),
-streamID        (c.streamID),
-depthChange     (c.depthChange),
-propStateChanged(c.propStateChanged)
+   GmatBase        (c),
+   association     (c.association),
+   objects         (c.objects),
+   initialized     (false),
+   next            (NULL),
+   level           (-1),   // Not set
+   objectMap       (c.objectMap),
+   solarSys        (c.solarSys),
+   publisher       (c.publisher),
+   streamID        (c.streamID),
+   depthChange     (c.depthChange),
+   propStateChanged(c.propStateChanged)
 {
+   generatingString = c.generatingString;
    parameterCount = GmatCommandParamCount;
 }
 
@@ -187,7 +187,9 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
  * @return The script line that was interpreted to define this GmatCommand.
  */
 //------------------------------------------------------------------------------
-const std::string& GmatCommand::GetGeneratingString()
+const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName)
 {
    static std::string empty;
    if (generatingString == "") {

@@ -130,20 +130,15 @@ namespace Gmat
    {
       INTEGER_TYPE,
       UNSIGNED_INT_TYPE,
-      UNSIGNED_INTARRAY_TYPE,  //loj: 9/28/04 added
+      UNSIGNED_INTARRAY_TYPE,
       REAL_TYPE,
+      REAL_ELEMENT_TYPE,
       STRING_TYPE,
       STRINGARRAY_TYPE,
       BOOLEAN_TYPE,
-      RVECTOR_TYPE,    // not 3- or 6- vector
-      RVECTOR3_TYPE,
-      RVECTOR6_TYPE,
-      RMATRIX_TYPE,    // not 3x3 matrix
-      RMATRIX33_TYPE,
-      CARTESIAN_TYPE,
-      KEPLERIAN_TYPE,
-      A1MJD_TYPE,
-      UTCDATE_TYPE,
+      RVECTOR_TYPE,
+      RMATRIX_TYPE,
+      TIME_TYPE,
       OBJECT_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
@@ -159,7 +154,13 @@ namespace Gmat
       WAITING
    };
 
+   enum WriteMode 
+   {
+      SCRIPTING,
+      OWNED_OBJECT,
+      MATLAB_STRUCT,
+   };
+
 }
 
 #endif //GMATDEFS_HPP
-

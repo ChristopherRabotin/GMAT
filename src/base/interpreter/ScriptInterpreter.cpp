@@ -22,7 +22,7 @@
 #include <fstream>
 
 // Maybe put something like this in the Gmat namespace?
-#define REV_STRING "Build 3.2, October 2004"
+#define REV_STRING "Build 4, February 2005"
 
 
 //#define DEBUG_SCRIPTINTERPRETER
