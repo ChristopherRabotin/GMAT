@@ -502,9 +502,11 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
 
-         //loj: 12/30/04 Show separate variable or array panel
+         //loj: 1/7/05 Added to show String
          if (theGuiInterpreter->GetParameter
-             (std::string(item->GetDesc().c_str()))->GetTypeName() == "Variable")
+             (std::string(item->GetDesc().c_str()))->GetTypeName() == "Variable" ||
+             theGuiInterpreter->GetParameter
+             (std::string(item->GetDesc().c_str()))->GetTypeName() == "String")
          {
             sizer->Add(new ParameterSetupPanel(panel, item->GetDesc()),
                        0, wxGROW|wxALL, 0);
