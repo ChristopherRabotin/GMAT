@@ -123,16 +123,22 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                                                     const std::string &prefix,
                                                     const std::string &useName)
 {
-   Integer whichOne;
+   Integer whichOne, start;
    std::stringstream gen;
-   std::string indent = "   ";
+   std::string indent = "   ", cmdstr;
    
    gen << "BeginScript\n";
    
    GmatCommand *current = next;
    while (current != NULL) {
       if (current->GetTypeName() != "EndScript") {
-         gen << indent << current->GetGeneratingString() << "\n";
+         cmdstr = current->GetGeneratingString();
+         start = 0;
+         while (cmdstr[start] == ' ')
+            ++start;
+         cmdstr = cmdstr.substr(start);
+
+         gen << indent << cmdstr << "\n";
          
          // Handle the branches for branch commands
          whichOne = 0;
@@ -168,15 +174,21 @@ const std::string BeginScript::GetChildString(const std::string &prefix,
                                               GmatCommand *parent)
 {
    #ifdef DEBUG_BEGIN_SCRIPT
-      MessageInterface("BeginScript::GetChildString entered\n");
+      MessageInterface::ShowMessage("BeginScript::GetChildString entered\n");
    #endif
    
    std::stringstream sstr;
-   Integer whichOne;
+   std::string cmdstr;
+   Integer whichOne, start;
    GmatCommand *current = cmd;
    
    while ((current != parent) && (current != NULL)) {
-      sstr << prefix << current->GetGeneratingString() << "\n";
+      cmdstr = current->GetGeneratingString();
+      start = 0;
+      while (cmdstr[start] == ' ')
+         ++start;
+      cmdstr = cmdstr.substr(start);
+      sstr << prefix << cmdstr << "\n";
       whichOne = 0;
       GmatCommand* child = current->GetChildCommand(whichOne);
       while ((child != NULL) && (child != cmd)) {

@@ -120,31 +120,38 @@ void Interpreter::Initialize(void)
     
     #ifdef DEBUG_OBJECT_LISTS
         std::cout << "\nCommands:\n   ";
-        for (std::vector<std::string>::iterator c = cmds.begin(); c != cmds.end(); ++c)
+        for (std::vector<std::string>::iterator c = cmds.begin();
+             c != cmds.end(); ++c)
             std::cout << *c << "\n   ";
 
         std::cout << "\nPropagators:\n   ";
-        for (std::vector<std::string>::iterator p = props.begin(); p != props.end(); ++p)
+        for (std::vector<std::string>::iterator p = props.begin();
+             p != props.end(); ++p)
             std::cout << *p << "\n   ";
 
         std::cout << "\nForces:\n   ";
-        for (std::vector<std::string>::iterator f = forces.begin(); f != forces.end(); ++f)
+        for (std::vector<std::string>::iterator f = forces.begin();
+             f != forces.end(); ++f)
             std::cout << *f << "\n   ";
 
         std::cout << "\nSubscribers:\n   ";
-        for (std::vector<std::string>::iterator s = subs.begin(); s != subs.end(); ++s)
+        for (std::vector<std::string>::iterator s = subs.begin();
+             s != subs.end(); ++s)
             std::cout << *s << "\n   ";
 
         std::cout << "\nParameters:\n   ";
-        for (std::vector<std::string>::iterator pm = parms.begin(); pm != parms.end(); ++pm)
+        for (std::vector<std::string>::iterator pm = parms.begin();
+             pm != parms.end(); ++pm)
             std::cout << *pm << "\n   ";
 
         std::cout << "\nStopConds:\n   ";
-        for (std::vector<std::string>::iterator sc = sconds.begin(); sc != sconds.end(); ++sc)
+        for (std::vector<std::string>::iterator sc = sconds.begin();
+             sc != sconds.end(); ++sc)
            std::cout << *sc << "\n   ";
 
         std::cout << "\nSolvers:\n   ";
-        for (std::vector<std::string>::iterator sc = svers.begin(); sc != svers.end(); ++sc)
+        for (std::vector<std::string>::iterator sc = svers.begin();
+             sc != svers.end(); ++sc)
            std::cout << *sc << "\n   ";
 
         std::cout << "\n";
@@ -212,7 +219,7 @@ bool Interpreter::Interpret(void)
 // bool InterpretObject(std::string objecttype, std::string objectname)
 //------------------------------------------------------------------------------
 /**
- * Calls the Moderator to build core objects and place them in the ConfigManager.
+ * Calls the Moderator to build core objects and put them in the ConfigManager.
  *  
  * @param objecttype Text type for the requested object.
  * @param objectname Name for the object, used for references to the object.
@@ -220,7 +227,8 @@ bool Interpreter::Interpret(void)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::InterpretObject(std::string objecttype, std::string objectname)
+bool Interpreter::InterpretObject(std::string objecttype,
+                                  std::string objectname)
 {
     if (objecttype == "Spacecraft") {
         CreateSpacecraft(objectname);
@@ -281,7 +289,8 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
            if (parm->IsOriginDependent()) {
               parm->SetStringParameter("DepObject", "Earth");
               if (parm->NeedCoordSystem())
-                 parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+                 parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                    "EarthMJ2000Eq");
            }
         }        
         return true;
@@ -645,7 +654,8 @@ Hardware* Interpreter::CreateHardware(std::string hwname, std::string type)
  * @return true on success, false on failure.
  */
 //------------------------------------------------------------------------------
-bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cmd)
+bool Interpreter::AssembleCommand(const std::string& scriptline,
+                                  GmatCommand *cmd)
 {
    #ifdef DEBUG_TOKEN_PARSING
       MessageInterface::ShowMessage(
@@ -720,8 +730,8 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
                          << topLevel[condNumber+3] << std::endl;
             #endif
             if (!cmd->SetConditionOperator(topLevel[condNumber+3]))
-               throw CommandException("Cannot set condition operator on command " + 
-                                      scriptline);
+               throw CommandException(
+                  "Cannot set condition operator on command " + scriptline);
          }
       
          sublevel[cl] = Decompose(topLevel[condNumber]);
@@ -771,7 +781,8 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
       return AssembleForCommand(topLevel, cmd);
    
    // Handle all other commands here
-   for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
+   for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i)
+   {
       // If we see a comment character, we're done
       if ((*i)[0] == '%')
          break;
@@ -779,8 +790,9 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
       #ifdef DEBUG_TOKEN_PARSING
-         MessageInterface::ShowMessage("Decomposing \"%s\"; found %d elements\n", 
-                                       i->c_str(), sublevel[cl].size());
+         MessageInterface::ShowMessage(
+            "Decomposing \"%s\"; found %d elements\n", i->c_str(),
+            sublevel[cl].size());
          for (StringArray::iterator z = sublevel[cl].begin(); 
               z != sublevel[cl].end(); ++z)
             MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
@@ -805,13 +817,14 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
                #endif
                if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
                   throw InterpreterException("Cannot set object " + (*i) + 
-                                             " for command " + (cmd->GetTypeName()));
+                     " for command " + (cmd->GetTypeName()));
             }
             catch (BaseException &ex) {
                #ifdef DEBUG_TOKEN_PARSING
                   MessageInterface::ShowMessage("   Trying ref object\n");
                #endif
-               if (!cmd->SetRefObject(object[ol], type, object[ol]->GetName(), 0))
+               if (!cmd->SetRefObject(object[ol], type,
+                                      object[ol]->GetName(), 0))
                   throw;
             }
          }
@@ -833,7 +846,8 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
 }
 
 
-bool Interpreter::AssembleForCommand(const StringArray topLevel, GmatCommand *cmd)
+bool Interpreter::AssembleForCommand(const StringArray topLevel,
+                                     GmatCommand *cmd)
 {
    Real start, step = 1.0, stop;
    
@@ -875,8 +889,8 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel, GmatCommand *cm
          stop = atof(w->c_str());
       }
       // Commented out because of the possibility of trailing white space
-      // else
-      //    throw InterpreterException("For loop missing second \":\" character");
+      //else
+      //  throw InterpreterException("For loop missing second \":\" character");
    }
    
    #ifdef DEBUG_TOKEN_PARSING
@@ -941,14 +955,16 @@ bool Interpreter::InterpretFunctionCall()
    
    cmd->SetStringParameter("FunctionName", funct);
    
-   for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str) {
+   for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str)
+   {
       #ifdef DEBUG_TOKEN_PARSING
          MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
       #endif
       cmd->SetStringParameter("AddInput", *str);
    }
       
-   for (StringArray::iterator str = outputs.begin(); str != outputs.end(); ++str) {
+   for (StringArray::iterator str = outputs.begin(); str != outputs.end();
+        ++str) {
       #ifdef DEBUG_TOKEN_PARSING
          MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
       #endif
@@ -999,7 +1015,8 @@ GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
          ref = moderator->GetConfiguredItem(phrase[0]);
       }
       else {
-         for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i) {
+         for (StringArray::iterator i = phrase.begin(); i != phrase.end(); ++i)
+         {
             #ifdef DEBUG_TOKEN_PARSING
                std::cout << "   Breaking down subphrase " << *i << "\n";
             #endif
@@ -1194,7 +1211,8 @@ SolarSystem* Interpreter::CreateSolarSystem(std::string ssname)
  * @return Pointer to the constructed CelestialBody.
  */
 //------------------------------------------------------------------------------
-CelestialBody* Interpreter::CreateCelestialBody(std::string cbname, std::string type)
+CelestialBody* Interpreter::CreateCelestialBody(std::string cbname,
+                                                std::string type)
 {
     return moderator->CreateCelestialBody(cbname, type);
 }
@@ -1301,9 +1319,9 @@ Burn* Interpreter::CreateBurn(std::string name, bool isImpulsive)
  */
 //------------------------------------------------------------------------------
 bool Interpreter::InterpretPropSetupParameter(GmatBase *obj, 
-                                              StringArray& items,
-                                              std::vector<std::string*>::iterator& phrase,
-                                              Integer index)
+                                  StringArray& items,
+                                  std::vector<std::string*>::iterator& phrase,
+                                  Integer index)
 {
    bool retval = true;
    // Set object associations
@@ -1331,12 +1349,14 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                if (**phrase == "=")
                    ++phrase;
                else
-                   throw InterpreterException("Syntax error creating Propagator");
+                   throw InterpreterException(
+                      "Syntax error creating Propagator");
                Propagator *prop = moderator->CreatePropagator(**phrase, "");
                if (prop)
                    ((PropSetup*)obj)->SetPropagator(prop);
                else
-                   throw InterpreterException("Propagator could not be created");
+                   throw InterpreterException(
+                      "Propagator could not be created");
            }
            else if (objParm == "ForceModelName") {
                ++phrase;
@@ -1344,7 +1364,8 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                if (**phrase == "=")
                    ++phrase;
                else
-                   throw InterpreterException("Syntax error accessing Force Model");
+                   throw InterpreterException(
+                      "Syntax error accessing Force Model");
                ForceModel *fm = moderator->GetForceModel(**phrase);
                if (fm)
                    ((PropSetup*)obj)->SetForceModel(fm);
@@ -1355,11 +1376,13 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
                // Could be a subitem -- Drag.Earth = Exponential, for example
                std::string subparm = GetToken();
                if (subparm == "")
-                   throw InterpreterException("Assignment string does not parse");
+                   throw InterpreterException(
+                      "Assignment string does not parse");
                // Find the owned object
                if (objParm == "Drag") {
                    if (subparm != "Earth")
-                       throw InterpreterException("Only Earth drag is supported in build 2");
+                       throw InterpreterException(
+                          "Only Earth drag is supported in build 2");
                }
                    
                // Set the parm on the owned object
@@ -1381,7 +1404,8 @@ bool Interpreter::InterpretPropSetupParameter(GmatBase *obj,
          
       Integer id = prop->GetParameterID(objParm);
 #ifdef DEBUG_INTERPRETER
-      std::cout << "Setting " << objParm << " on " << prop->GetTypeName() << " to " << **phrase << "\n";
+      std::cout << "Setting " << objParm << " on " << prop->GetTypeName()
+                << " to " << **phrase << "\n";
 #endif
       if (!SetParameter(prop, id, **phrase))
          throw;
@@ -1528,7 +1552,8 @@ Integer Interpreter::SkipWhiteSpace(Integer start, const std::string &text)
  * @note This method is not implemented, and always returns -1.
  */
 //------------------------------------------------------------------------------
-Integer Interpreter::FindDelimiter(const std::string &str, const std::string &specChar)
+Integer Interpreter::FindDelimiter(const std::string &str,
+                                   const std::string &specChar)
 {
     return -1;
 }
@@ -1627,7 +1652,8 @@ bool Interpreter::EquateObjects(GmatBase *obj, const std::string &obj2Name)
       obj->Copy(orig);
 
       #ifdef DEBUG_INTERPRET_OBJECTEQUATES
-         MessageInterface::ShowMessage("Interpreter::EquateObjects succeeded\n");
+         MessageInterface::ShowMessage(
+            "Interpreter::EquateObjects succeeded\n");
       #endif
       
       return true;
@@ -1785,7 +1811,8 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
          while (str[i] != closebrace) {
             ++i;
             if (i > chunk.length())
-               throw InterpreterException("Missing closing brace in line " + chunk);
+               throw InterpreterException("Missing closing brace in line " +
+                  chunk);
          }
          token.assign(str, pos, i-pos+1);
          chunkArray.push_back(token);
@@ -2019,7 +2046,8 @@ StringArray& Interpreter::SeparateBrackets(const std::string &chunk)
       throw InterpreterException("Missing closing bracket \"]\"");
 
    if (start > stop)
-      throw InterpreterException("Closing bracket found before opening bracket");
+      throw InterpreterException(
+         "Closing bracket found before opening bracket");
 
    loc = start;
 
@@ -2085,7 +2113,8 @@ GmatBase* Interpreter::FindOwnedObject(StringArray tokenList, GmatBase *owner,
                 << "\" of type \"" << owner->GetTypeName()  
                 << "\"\n";
       std::cout << "Token list:\n   ";
-      for (StringArray::iterator ix = tokenList.begin(); ix != tokenList.end(); ++ix)
+      for (StringArray::iterator ix = tokenList.begin(); ix != tokenList.end();
+           ++ix)
          std::cout << *ix << "\n   ";
       std::cout << "\n";
    #endif
@@ -2256,10 +2285,12 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
       pm->SetName(parm);
       if (!pm->SetStringParameter("BodyName", parm))
          if ((forcetype == "GravityField") || (forcetype == "PointMassForce"))
-            throw InterpreterException("Unable to set body for force " + objParm);
+            throw InterpreterException("Unable to set body for force " +
+               objParm);
       if (forcetype == "DragForce") {
          if (!pm->SetStringParameter("AtmosphereModel", parm))
-            throw InterpreterException("Unable to set AtmosphereModel for drag force.");
+            throw InterpreterException(
+               "Unable to set AtmosphereModel for drag force.");
          /// @todo Add the body name for drag at other bodies
          if (parm != "BodyDefault") {
             //---------------------------------------------------------------
@@ -2278,8 +2309,8 @@ bool Interpreter::ConfigureForce(ForceModel *obj, std::string& objParm,
          if (potFilename == "") {
             // No file name set, so set to a default value
             potFilename = "./files/gravity/earth/JGM2.grv";
-            MessageInterface::ShowMessage("No potential file set, so using \"%s\"",
-                                          potFilename.c_str());
+            MessageInterface::ShowMessage(
+               "No potential file set, so using \"%s\"", potFilename.c_str());
          }
          if (!pm->SetStringParameter("Filename", potFilename))
             throw InterpreterException("Unable to set full field model file.");
@@ -2312,12 +2343,9 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
 {
    #ifdef DEBUG_RHS_PARSING
       MessageInterface::ShowMessage("%s%s%s%s%s%s\"\n",
-                                    "Interpreter::ConstructRHS called with string \"",
-                                    rhs.c_str(), 
-                                    "\" registered using \"",
-                                    label.c_str(),
-                                    "\" for object \"", 
-                                    lhsObject->GetName().c_str());
+         "Interpreter::ConstructRHS called with string \"", rhs.c_str(),
+         "\" registered using \"", label.c_str(), "\" for object \"",
+         lhsObject->GetName().c_str());
    #endif
    
    StringArray sar = Decompose(rhs);
@@ -2362,8 +2390,9 @@ bool Interpreter::ConstructRHS(GmatBase *lhsObject, const std::string& rhs,
                      parmSystem = "Earth";
                   parm->SetStringParameter("DepObject", parmSystem);
                   if (parm->NeedCoordSystem())
-                     /// @todo Update coordinate system to better value for body parms
-                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+                     /// @todo Update coordinate system to better body parms
+                     parm->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                        "EarthMJ2000Eq");
                }
 
                lhsObject->SetStringParameter(label, name);
@@ -2418,8 +2447,9 @@ bool Interpreter::InterpretParameter(const std::string text,
    paramType = text.substr(start);
 
    #ifdef DEBUG_PROPAGATE_INIT
-      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
-         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+      MessageInterface::ShowMessage(
+         "Built parameter %s for object %s with CS %s", paramType.c_str(),
+         paramObj.c_str(), parmSystem.c_str());
    #endif
 
    return true;
@@ -2447,6 +2477,7 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
    #endif
 
    StringArray sar = SeparateLines(block);
+   StringArray cmdList = moderator->GetListOfFactoryItems(Gmat::COMMAND);
    
    if (cmd->GetTypeName() == "BeginScript") {
       // First check to be sure that the command block has matched nesting
@@ -2492,17 +2523,31 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          cmdLine >> cmdType;
          if ((cmdType == "") || (cmdType[0] == '%'))
             continue;
+         // Strip off a trailing semicolon if one exists
+         if (cmdType.find(";") != std::string::npos) {
+            Integer scLoc = cmdType.find(";");
+            cmdType = cmdType.substr(0, scLoc);
+            MessageInterface::ShowMessage("Found a semicolon; new text is " +
+               cmdType);
+         }
+         
          // Prevent multiple "EndScript" commands
          if (cmdType == "EndScript")
             continue;
-//            break;
 
-         #ifdef DEBUG_TOKEN_PARSING
+//         #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
                "   Constructing a command of type %s\n", cmdType.c_str());
-         #endif
+//         #endif
 
          // Create the command
+         if (find(cmdList.begin(), cmdList.end(), cmdType) == cmdList.end()) {
+            MessageInterface::PopupMessage(Gmat::WARNING_, 
+               "Cannot create a command from the command line\n  " +
+               (*i) + "\nUnknown command " + cmdType + 
+               "\nAttempting to continue...");
+            continue;
+         }
          subsequent = moderator->CreateCommand(cmdType);
          if (!subsequent)
             throw InterpreterException(
@@ -2575,8 +2620,8 @@ StringArray Interpreter::SeparateLines(const std::string block)
    }
    
    #ifdef DEBUG_TOKEN_PARSING
-      MessageInterface::ShowMessage("Broke this text:\n\n%s\ninto these lines:\n",
-         block.c_str());
+      MessageInterface::ShowMessage(
+         "Broke this text:\n\n%s\ninto these lines:\n", block.c_str());
       for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
    #endif

@@ -180,7 +180,7 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
    while ((end > 0) && (gs[end] == ' '))
       --end;
 
-   generatingString = gs.substr(0, end);
+   generatingString = gs.substr(0, end+1);
 }
 
 //------------------------------------------------------------------------------
