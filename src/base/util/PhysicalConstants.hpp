@@ -25,6 +25,9 @@ namespace GmatPhysicalConst
     //Speed Of Light Constant
     const Real SPEED_OF_LIGHT_VACUUM = 299792458.0;  // m/s
     const Real c = 299792458.0;  // m/s
+    
+    // gravitational constant
+    const Real UNIVERSAL_GRAVITATIONAL_CONSTANT = 6.672E10-11;  //  N.m2/kg2
 
     //Astronomical Constants
     const Real MOON_GRAVITATION_CONSTANT = 4.902794e12;  // m^3/s^2
