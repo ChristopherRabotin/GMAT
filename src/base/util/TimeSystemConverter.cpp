@@ -87,10 +87,10 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 
       Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue + offsetValue);
       Real utcOffset = theEopFile->GetUt1UtcOffset((origValue + offsetValue)
-          - ut1Offset);
+          - (ut1Offset/GmatTimeUtil::SECS_PER_DAY));
 
-      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue - utcOffset),
-               refJd));
+      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue -
+               (utcOffset/GmatTimeUtil::SECS_PER_DAY)), refJd));
    }
    // tdb
    else if (fromType == TIME_SYSTEM_TEXT[3])
@@ -124,6 +124,7 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
 Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       Real refJd)
 {
+   // a1
    if (toType == TIME_SYSTEM_TEXT[0])
    {
       return (origValue +

@@ -82,9 +82,8 @@ namespace TimeConverterUtil
    Real ConvertFromTaiMjd(std::string toType, Real origValue,
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);
 
-   void SetEopFile(EopFile *eopFile);// {theEopFile = eopFile;};
+   void SetEopFile(EopFile *eopFile);
    void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
-//      {theLeapSecsFileReader = leapSecsFileReader;};
 }
 
 #endif // TimeSystemConverter_hpp
