@@ -48,25 +48,27 @@ void GmatInterface::OpenScript()
    if (!mInStringStream)
       mInStringStream = new std::istringstream;
 
-   //ClearScript();
 }
+
 
 //------------------------------------------------------------------------------
 // void ClearScrip()
 //------------------------------------------------------------------------------
 void GmatInterface::ClearScript()
 {
-   //Moderator *moderator = Moderator::Instance();
    mStringStream.str("");
-   //moderator->ClearResource();
-   //moderator->ClearCommandSeq();
-   //Moderator::GetGuiInterpreter()->UpdateResourceTree();
-   //Moderator::GetGuiInterpreter()->UpdateMissionTree();
    Moderator::GetGuiInterpreter()->CloseCurrentProject();
 }
 
+
 //------------------------------------------------------------------------------
 // void PutScript(char *str)
+//------------------------------------------------------------------------------
+/*
+ * Appends script to a string stream.
+ *
+ * @param <str> string to append
+ */
 //------------------------------------------------------------------------------
 void GmatInterface::PutScript(char *str)
 {
@@ -76,8 +78,13 @@ void GmatInterface::PutScript(char *str)
    #endif
 }
 
+
 //------------------------------------------------------------------------------
 // void BuildObject()
+//------------------------------------------------------------------------------
+/*
+ * Clears resource and build new objects from a internal string stream.
+ */
 //------------------------------------------------------------------------------
 void GmatInterface::BuildObject()
 {
@@ -107,8 +114,14 @@ void GmatInterface::BuildObject()
    mStringStream.str("");
 }
 
+
 //------------------------------------------------------------------------------
 // void UpdateObject()
+//------------------------------------------------------------------------------
+/*
+ * Build and updates objects from a internal string stream without clearing the
+ * resource.
+ */
 //------------------------------------------------------------------------------
 void GmatInterface::UpdateObject()
 {
@@ -137,8 +150,13 @@ void GmatInterface::UpdateObject()
    mStringStream.str("");
 }
 
+
 //------------------------------------------------------------------------------
 // void RunScript()
+//------------------------------------------------------------------------------
+/*
+ * Executues commands from existing objects.
+ */
 //------------------------------------------------------------------------------
 void GmatInterface::RunScript()
 {
@@ -149,17 +167,22 @@ void GmatInterface::RunScript()
    Moderator::Instance()->RunScript();
 }
 
+
 //------------------------------------------------------------------------------
-// char* GetParameterData(const std::string &name)
+// char* GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
-char* GmatInterface::GetParameterData(const std::string &name)
+/*
+ * @return string value of the parameter.
+ */
+//------------------------------------------------------------------------------
+char* GmatInterface::GetParameter(const std::string &name)
 {
    #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
-      ("GmatInterface::GetParameterData() name=%s\n", name.c_str());
+      ("GmatInterface::GetParameter() name=%s\n", name.c_str());
    #endif
-
-   static char dataString[MAX_DATA_STRING];
+   
+   static char dataString[MAX_PARAM_VAL_STRING];
    static char *undefindString = "-123456789.123456789\0";
    //static char *tempString2 = "[123456.12345, 234567.12345, 345678.12345]\0";
    strcpy(dataString, undefindString);
@@ -171,7 +194,7 @@ char* GmatInterface::GetParameterData(const std::string &name)
    {
       #if DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
-         ("Now evaluate the parameter:%s, type=%s\n",
+         ("GmatInterface::GetParameter() evaluate the parameter:%s, type=%s\n",
           param->GetName().c_str(), param->GetTypeName().c_str());
       #endif
       
@@ -182,7 +205,8 @@ char* GmatInterface::GetParameterData(const std::string &name)
       str = "[" + str + "]";
       
       #if DEBUG_GMAT_INTERFACE
-      MessageInterface::ShowMessage("str=%s\n", str.c_str());
+      MessageInterface::ShowMessage
+         ("GmatInterface::GetParameter() str=%s\n", str.c_str());
       #endif
       
       sprintf(dataString, "%s", str.c_str());
@@ -190,6 +214,58 @@ char* GmatInterface::GetParameterData(const std::string &name)
    
    return dataString;
 }
+
+
+//------------------------------------------------------------------------------
+// char* GetObject(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * @return serialized string value of the object.
+ */
+//------------------------------------------------------------------------------
+char* GmatInterface::GetObject(const std::string &name)
+{
+   #if DEBUG_GMAT_INTERFACE
+   MessageInterface::ShowMessage
+      ("GmatInterface::GetObject() name=%s\n", name.c_str());
+   #endif
+
+   static char dataString[MAX_OBJECT_VAL_STRING];
+   static char *undefindString = "-123456789.123456789\0";
+   //static char *tempString2 = "[123456.12345, 234567.12345, 345678.12345]\0";
+   strcpy(dataString, undefindString);
+   //dataString[0] = '\0';
+   GmatBase *obj;
+   
+   //obj = Moderator::Instance()->GetConfiguredItem(name);
+   obj = Moderator::Instance()->GetInternalObject(name);
+   
+   if (obj != NULL)
+   {
+      #if DEBUG_GMAT_INTERFACE
+      MessageInterface::ShowMessage
+         ("GmatInterface::GetObject() get serialized string of object name:"
+          "%s, type=%s\n", obj->GetName().c_str(), obj->GetTypeName().c_str());
+      #endif
+      
+      std::string str = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
+      
+      #if DEBUG_GMAT_INTERFACE
+      MessageInterface::ShowMessage("str=%s\n", str.c_str());
+      #endif
+      
+      sprintf(dataString, "%s", str.c_str());
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("GmatInterface::GetObject() the pointer of object name:%s is null\n",
+          name.c_str());
+   }
+   
+   return dataString;
+}
+
 
 //---------------------------------
 // private methods
@@ -202,6 +278,7 @@ GmatInterface::GmatInterface()
 {
    mInStringStream = NULL;
 }
+
 
 //------------------------------------------------------------------------------
 // GmatInterface()

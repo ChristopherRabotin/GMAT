@@ -35,14 +35,16 @@ public:
    void UpdateObject();
    void RunScript();
 
-   char* GetParameterData(const std::string &name);
+   char* GetObject(const std::string &name);
+   char* GetParameter(const std::string &name);
    
 private:
-   static const int MAX_DATA_STRING = 256;
+   static const int MAX_PARAM_VAL_STRING = 512;
+   static const int MAX_OBJECT_VAL_STRING = 4096;
    
    void RedirectBuffer(std::ios *stream, std::streambuf* newBuff) 
       { stream->rdbuf(newBuff); }
-
+   
    GmatInterface();
    ~GmatInterface();
    
