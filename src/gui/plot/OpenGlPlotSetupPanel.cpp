@@ -19,6 +19,7 @@
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "GuiItemManager.hpp"
+#include "CelesBodySelectDialog.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -30,7 +31,7 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
     EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
     EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-    EVT_BUTTON(OPENGL_PLOT_CHECKBOX, OpenGlPlotSetupPanel::OnPlotCheckBoxChange)
+    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
 
     EVT_CHECKBOX(OPENGL_PLOT_CHECKBOX, OpenGlPlotSetupPanel::OnPlotCheckBoxChange)
 END_EVENT_TABLE()
@@ -50,20 +51,81 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
-                                   const wxString &subscriberName)
+                                           const wxString &subscriberName)
     : GmatPanel(parent)
 {
     //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() entering...\n");
     //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
     //                              std::string(subscriberName.c_str()) + "\n");
     
-    theParent = parent;
     theSubscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
-
-    theGuiManager = GuiItemManager::GetInstance();
     
     Create();
+    Show();
+
+    //===================================================
+    //loj: just for testing CelesBodySelectDialog
+    //===================================================
+
+    //----- no exclusion
+    wxArrayString exclBodies;
+    CelesBodySelectDialog dlg1(this, exclBodies);
+    dlg1.ShowModal();
+
+    if (dlg1.IsBodySelected())
+    {
+        wxArrayString &names = dlg1.GetBodyNames();
+        for (int i=0; i<names.GetCount(); i++)
+            MessageInterface::ShowMessage("OpenGlPlotSetupPanel::**JUST TEST** body name = %s\n",
+                                          names[i].c_str());
+    }
+    
+    //----- exclude Sun
+    exclBodies.Add("Sun");
+    
+    CelesBodySelectDialog dlg2(this, exclBodies);
+    dlg2.ShowModal();
+
+
+    if (dlg2.IsBodySelected())
+    {
+        wxArrayString &names = dlg2.GetBodyNames();
+        for (int i=0; i<names.GetCount(); i++)
+            MessageInterface::ShowMessage("OpenGlPlotSetupPanel::**JUST TEST** body name = %s\n",
+                                          names[i].c_str());
+    }
+    
+    //----- exclude Sun, Earth
+    exclBodies.Add("Earth");
+    
+    CelesBodySelectDialog dlg3(this, exclBodies);
+    dlg3.ShowModal();
+
+
+    if (dlg3.IsBodySelected())
+    {
+        wxArrayString &names = dlg3.GetBodyNames();
+        for (int i=0; i<names.GetCount(); i++)
+            MessageInterface::ShowMessage("OpenGlPlotSetupPanel:: **JUST TEST** body name = %s\n",
+                                          names[i].c_str());
+    }
+
+    //----- exclude Sun, Earth, Luna
+    exclBodies.Add("Luna");
+    
+    CelesBodySelectDialog dlg4(this, exclBodies);
+    dlg4.ShowModal();
+
+    if (dlg4.IsBodySelected())
+    {
+        wxArrayString &names = dlg4.GetBodyNames();
+        for (int i=0; i<names.GetCount(); i++)
+            MessageInterface::ShowMessage("OpenGlPlotSetupPanel:: **JUST TEST** body name = %s\n",
+                                          names[i].c_str());
+    }
+
+
 }
 
 //-------------------------------
@@ -102,9 +164,9 @@ void OpenGlPlotSetupPanel::Create()
     //------------------------------------------------------
     plotCheckBox = new wxCheckBox(this, OPENGL_PLOT_CHECKBOX, wxT("Show Plot"),
                                   wxDefaultPosition, wxSize(100, -1), 0);
-            
+    
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
-    optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
+    optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_CENTER|wxALL, 5);
             
     //------------------------------------------------------
     // put in the order
@@ -115,7 +177,6 @@ void OpenGlPlotSetupPanel::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
 }
 
@@ -137,26 +198,3 @@ void OpenGlPlotSetupPanel::SaveData()
     // save data to core engine
     theSubscriber->Activate(plotCheckBox->IsChecked());
 }
-
-//------------------------------------------------------------------------------
-// virtual void OnHelp()
-//------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnHelp()
-{
-    // open the window
-    GmatPanel::OnHelp();
-
-    // fill help text
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnScript()
-//------------------------------------------------------------------------------
-void OpenGlPlotSetupPanel::OnScript()
-{
-    // open the window
-    GmatPanel::OnScript();
-
-    // fill scripts
-}
-

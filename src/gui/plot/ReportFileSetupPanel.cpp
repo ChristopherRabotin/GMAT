@@ -30,6 +30,8 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
     EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
     EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
+    
     EVT_BUTTON(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
     EVT_CHECKBOX(RF_WRITE_CHECKBOX, ReportFileSetupPanel::OnWriteCheckBoxChange)
 END_EVENT_TABLE()
@@ -57,13 +59,11 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
     //MessageInterface::ShowMessage("ReportFileSetupPanel() subscriberName = " +
     //                              std::string(subscriberName.c_str()) + "\n");
     
-    theParent = parent;
     theSubscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
 
-    theGuiManager = GuiItemManager::GetInstance();
-    
     Create();
+    Show();
 }
 
 //-------------------------------
@@ -115,7 +115,6 @@ void ReportFileSetupPanel::Create()
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
 }
 
@@ -136,27 +135,5 @@ void ReportFileSetupPanel::SaveData()
 {
     // save data to core engine
     theSubscriber->Activate(writeCheckBox->IsChecked());
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnHelp()
-//------------------------------------------------------------------------------
-void ReportFileSetupPanel::OnHelp()
-{
-    // open the window
-    GmatPanel::OnHelp();
-
-    // fill help text
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnScript()
-//------------------------------------------------------------------------------
-void ReportFileSetupPanel::OnScript()
-{
-    // open the window
-    GmatPanel::OnScript();
-
-    // fill scripts
 }
 

@@ -29,6 +29,8 @@ BEGIN_EVENT_TABLE(XyPlotSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
     EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
     EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
+    
     EVT_BUTTON(XY_PLOT_ADD_X, XyPlotSetupPanel::OnAddX)
     EVT_BUTTON(XY_PLOT_ADD_Y, XyPlotSetupPanel::OnAddY)
     EVT_BUTTON(XY_PLOT_REMOVE_X, XyPlotSetupPanel::OnRemoveX)
@@ -57,9 +59,9 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
                                    const wxString &subscriberName)
     : GmatPanel(parent)
 {
-    MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
-    MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
-                                  std::string(subscriberName.c_str()) + "\n");
+    //MessageInterface::ShowMessage("XyPlotSetupPanel() entering...\n");
+    //MessageInterface::ShowMessage("XyPlotSetupPanel() subscriberName = " +
+    //                              std::string(subscriberName.c_str()) + "\n");
     
     theSubscriber =
         theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
@@ -67,6 +69,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
     theParamList = NULL;
     
     Create();
+    Show();
 }
 
 //-------------------------------
@@ -144,7 +147,7 @@ void XyPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::Create()
 {
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() entering...\n");
+    //MessageInterface::ShowMessage("XyPlotSetupPanel::Create() entering...\n");
     wxString emptyList[] = {};
 
     pageBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -163,7 +166,6 @@ void XyPlotSetupPanel::Create()
     optionBoxSizer = new wxBoxSizer(wxVERTICAL);
     optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_LEFT|wxALL, 5);
         
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 2nd col...\n");
     //------------------------------------------------------
     // X box label (2nd column)
     //------------------------------------------------------
@@ -171,7 +173,7 @@ void XyPlotSetupPanel::Create()
                                   wxDefaultPosition, wxSize(80,-1), 0);
     
     xSelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
-                                     wxSize(140,125), 0, emptyList, wxLB_SINGLE);
+                                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
 
     
     // get X parameter
@@ -184,7 +186,6 @@ void XyPlotSetupPanel::Create()
     xSelelectedBoxSizer->Add(titleXText, 0, wxALIGN_CENTRE|wxALL, 5);
     xSelelectedBoxSizer->Add(xSelectedListBox, 0, wxALIGN_CENTRE|wxALL, 5);
             
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 3rd col...\n");
     //------------------------------------------------------
     // add, remove X buttons (3rd column)
     //------------------------------------------------------
@@ -199,7 +200,6 @@ void XyPlotSetupPanel::Create()
     xButtonsBoxSizer->Add(addXButton, 0, wxALIGN_CENTRE|wxALL, 5);
     xButtonsBoxSizer->Add(removeXButton, 0, wxALIGN_CENTRE|wxALL, 5);
       
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 4th col...\n");
     //------------------------------------------------------
     // parameters box (4th column)
     //------------------------------------------------------
@@ -211,12 +211,11 @@ void XyPlotSetupPanel::Create()
     theGuiManager->UpdateParameter();
     
     paramListBox =
-        theGuiManager->GetConfigParameterListBox(this, wxSize(140,125));
+        theGuiManager->GetConfigParameterListBox(this, wxSize(150,200));
     
     paramBoxSizer->Add(titleAvailbleText, 0, wxALIGN_CENTRE|wxALL, 5);
     paramBoxSizer->Add(paramListBox, 0, wxALIGN_CENTRE|wxALL, 5);
     
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 5th col...\n");
     //------------------------------------------------------
     // add, remove, clear Y buttons (5th column)
     //------------------------------------------------------
@@ -234,7 +233,6 @@ void XyPlotSetupPanel::Create()
     yButtonsBoxSizer->Add(removeYButton, 0, wxALIGN_CENTRE|wxALL, 5);
     yButtonsBoxSizer->Add(clearYButton, 0, wxALIGN_CENTRE|wxALL, 5);
     
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before 6th col...\n");
     //------------------------------------------------------
     // Y box label (6th column)
     //------------------------------------------------------
@@ -242,7 +240,7 @@ void XyPlotSetupPanel::Create()
                                   wxDefaultPosition, wxSize(80,-1), 0);
 
     ySelectedListBox = new wxListBox(this, XY_PLOT_LISTBOX, wxDefaultPosition,
-                                     wxSize(140,125), 0, emptyList, wxLB_SINGLE);
+                                     wxSize(150,200), 0, emptyList, wxLB_SINGLE);
     
     //loj: for B2, 1 Y axis parameter
     wxString *yParam = new wxString[1];
@@ -265,14 +263,11 @@ void XyPlotSetupPanel::Create()
     paramGridSizer->Add(ySelelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     
     pageBoxSizer->Add(paramGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    
-    MessageInterface::ShowMessage("XyPlotSetupPanel::Create() before adding to parent sizer...\n");
-    
+        
     //------------------------------------------------------
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-    Show();
 
     delete xParam;
     delete yParam;
@@ -301,27 +296,5 @@ void XyPlotSetupPanel::SaveData()
     
     //loj: for B2, do not plot, it doesn't work!!!
     //theSubscriber->Activate(false);
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnHelp()
-//------------------------------------------------------------------------------
-void XyPlotSetupPanel::OnHelp()
-{
-    // open the window
-    GmatPanel::OnHelp();
-
-    // fill help text
-}
-
-//------------------------------------------------------------------------------
-// virtual void OnScript()
-//------------------------------------------------------------------------------
-void XyPlotSetupPanel::OnScript()
-{
-    // open the window
-    GmatPanel::OnScript();
-
-    // fill scripts
 }
 

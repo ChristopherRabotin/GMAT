@@ -71,8 +71,6 @@ protected:
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    virtual void OnHelp();
-    virtual void OnScript();
     
     DECLARE_EVENT_TABLE();
     

@@ -99,6 +99,12 @@ static wxBitmap *GetDownBitmap();
 
 #define wxPLOT_SCROLL_STEP  30
 
+namespace GmatPlot
+{
+    const int Y_AXIS_AREA_WIDTH = 70;
+    const int X_AXIS_AREA_HEIGHT = 40;
+}
+
 //-----------------------------------------------------------------------------
 // wxPlotEvent
 //-----------------------------------------------------------------------------
@@ -213,13 +219,15 @@ BEGIN_EVENT_TABLE(wxPlotArea, wxWindow)
 END_EVENT_TABLE()
 
 wxPlotArea::wxPlotArea( wxPlotWindow *parent )
-        : wxWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, "plotarea" )
+    : wxWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, "plotarea" )
 {
     m_owner = parent;
     
     m_zooming = FALSE;
 
-    SetBackgroundColour( *wxWHITE );
+    //loj: 2/27/04 set to gray
+    //SetBackgroundColour( *wxWHITE );
+    SetBackgroundColour( *wxLIGHT_GREY );
 }
 
 void wxPlotArea::OnMouse( wxMouseEvent &event )
@@ -479,11 +487,14 @@ BEGIN_EVENT_TABLE(wxPlotXAxisArea, wxWindow)
 END_EVENT_TABLE()
 
 wxPlotXAxisArea::wxPlotXAxisArea( wxPlotWindow *parent )
-        : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,40), 0, "plotxaxisarea" )
+    //loj: 2/27/04 : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,40), 0, "plotxaxisarea" )
+    : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,GmatPlot::X_AXIS_AREA_HEIGHT),
+                0, "plotxaxisarea" )
 {
     m_owner = parent;
     
-    SetBackgroundColour( *wxWHITE );
+    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
+    SetBackgroundColour( *wxCYAN );
     SetFont( *wxSMALL_FONT );
 }
 
@@ -609,11 +620,14 @@ BEGIN_EVENT_TABLE(wxPlotYAxisArea, wxWindow)
 END_EVENT_TABLE()
 
 wxPlotYAxisArea::wxPlotYAxisArea( wxPlotWindow *parent )
-        : wxWindow( parent, -1, wxDefaultPosition, wxSize(60,-1), 0, "plotyaxisarea" )
+    //loj: 2/27/04 : wxWindow( parent, -1, wxDefaultPosition, wxSize(60,-1), 0, "plotyaxisarea" )
+    : wxWindow( parent, -1, wxDefaultPosition, wxSize(GmatPlot::Y_AXIS_AREA_WIDTH,-1),
+                0, "plotyaxisarea" )
 {
     m_owner = parent;
     
-    SetBackgroundColour( *wxWHITE );
+    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
+    SetBackgroundColour( *wxGREEN );
     SetFont( *wxSMALL_FONT );
 }
 
@@ -747,48 +761,50 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
     m_scrollOnThumbRelease = FALSE;
 
     m_area = new wxPlotArea( this );
-    wxBoxSizer *mainsizer = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *mainSizer = new wxBoxSizer( wxHORIZONTAL );
     
     if ((GetWindowStyleFlag() & wxPLOT_BUTTON_ALL) != 0)
     {
-        wxBoxSizer *buttonlist = new wxBoxSizer( wxVERTICAL );
+        wxBoxSizer *buttonsSizer = new wxBoxSizer( wxVERTICAL );
         if ((GetWindowStyleFlag() & wxPLOT_BUTTON_ENLARGE) != 0)
         {
-            buttonlist->Add( new wxBitmapButton( this, ID_ENLARGE, *GetEnlargeBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_ENLARGE, *GetEnlargeBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
-            buttonlist->Add( new wxBitmapButton( this, ID_SHRINK, *GetShrinkBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_SHRINK, *GetShrinkBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
-            buttonlist->Add( 20,10, 0 );
+            buttonsSizer->Add( 20,10, 0 );
         }
         if ((GetWindowStyleFlag() & wxPLOT_BUTTON_MOVE) != 0)
         {
-            buttonlist->Add( new wxBitmapButton( this, ID_MOVE_UP, *GetUpBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_MOVE_UP, *GetUpBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
-            buttonlist->Add( new wxBitmapButton( this, ID_MOVE_DOWN, *GetDownBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_MOVE_DOWN, *GetDownBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
-            buttonlist->Add( 20,10, 0 );
+            buttonsSizer->Add( 20,10, 0 );
         }
         if ((GetWindowStyleFlag() & wxPLOT_BUTTON_ZOOM) != 0)
         {
-            buttonlist->Add( new wxBitmapButton( this, ID_ZOOM_IN, *GetZoomInBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_ZOOM_IN, *GetZoomInBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
-            buttonlist->Add( new wxBitmapButton( this, ID_ZOOM_OUT, *GetZoomOutBitmap() ),
+            buttonsSizer->Add( new wxBitmapButton( this, ID_ZOOM_OUT, *GetZoomOutBitmap() ),
                              0, wxEXPAND|wxALL, 2 );
         }
-        mainsizer->Add( buttonlist, 0, wxEXPAND|wxALL, 4 );
+        mainSizer->Add( buttonsSizer, 0, wxEXPAND|wxALL, 4 );
     }
     
-    wxBoxSizer *plotsizer = new wxBoxSizer( wxHORIZONTAL );
+    wxBoxSizer *plotSizer = new wxBoxSizer( wxHORIZONTAL );
     
     if ((GetWindowStyleFlag() & wxPLOT_Y_AXIS) != 0)
     {
         m_yaxis = new wxPlotYAxisArea( this );
     
         wxBoxSizer *vert1 = new wxBoxSizer( wxVERTICAL );
-        plotsizer->Add( vert1, 0, wxEXPAND );
         vert1->Add( m_yaxis, 1 );
+        plotSizer->Add( vert1, 0, wxEXPAND );
+
         if ((GetWindowStyleFlag() & wxPLOT_X_AXIS) != 0)
-            vert1->Add( 60, 40 );
+            //loj: 2/27/04 vert1->Add( 60, 40 );
+            vert1->Add( GmatPlot::Y_AXIS_AREA_WIDTH, GmatPlot::X_AXIS_AREA_HEIGHT );
     }
     else
     {
@@ -800,24 +816,26 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
         m_xaxis = new wxPlotXAxisArea( this );
     
         wxBoxSizer *vert2 = new wxBoxSizer( wxVERTICAL );
-        plotsizer->Add( vert2, 1, wxEXPAND );
         vert2->Add( m_area, 1, wxEXPAND );
         vert2->Add( m_xaxis, 0, wxEXPAND );
+        //vert2->Add( m_xaxis, 1, wxEXPAND ); //loj: showed X axis area, but it's too big
+        plotSizer->Add( vert2, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
     }
     else
     {
-        plotsizer->Add( m_area, 1, wxEXPAND );
+        plotSizer->Add( m_area, 1, wxEXPAND );
         m_xaxis = (wxPlotXAxisArea*) NULL;
     }
 
-    mainsizer->Add( plotsizer, 1, wxEXPAND );    
+    mainSizer->Add( plotSizer, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
     
     SetAutoLayout( TRUE );
-    SetSizer( mainsizer );
+    SetSizer( mainSizer );
 
     SetTargetWindow( m_area );
 
-    SetBackgroundColour( *wxWHITE );
+    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
+    SetBackgroundColour( *wxLIGHT_GREY );
     
     m_current = (wxPlotCurve*) NULL;
 }

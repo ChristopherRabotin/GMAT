@@ -131,7 +131,7 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     int width, height;
     GetClientSize(&width, &height);
     wxPlotWindow *frame =
-        new wxPlotWindow(this, -1, wxPoint(0, 0), wxSize(width, height));
+        new wxPlotWindow(this, -1, wxPoint(0, 0), wxSize(width, height), wxPLOT_DEFAULT);
 
     mXyPlot = frame;
 
@@ -139,20 +139,20 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
 
     // Create log window
-    //loj: 2/24/04 Do we need this TextCtrl? - Yes, it will crash otherwise
-    mLog = new wxTextCtrl( this, -1, "This is the log window.\n",
-                           wxPoint(0,0), wxSize(100,50), wxTE_MULTILINE );
-    mLog->Hide();
+    //loj: 2/24/04 Do we need this TextCtrl? - Yes, it will crash if MdiChildXyFrame::OnPlotClick()
+    // calls wxLogMessage(), so used wxLogStatus() instead
+    //mLog = new wxTextCtrl( this, -1, "This is the log window.\n",
+    //                       wxPoint(0,0), wxSize(100,50), wxTE_MULTILINE );
     //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLog ) );
     //delete oldLog;
     
-    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+    //wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
     
-    topsizer->Add( mXyPlot, 1, wxEXPAND );
-    topsizer->Add( mLog, 0, wxEXPAND );
+    //topsizer->Add( mXyPlot, 1, wxEXPAND );
+    //topsizer->Add( mLog, 0, wxEXPAND );
     
-    SetAutoLayout( TRUE );
-    SetSizer( topsizer );
+    //SetAutoLayout( TRUE );
+    //SetSizer( topsizer );
             
     // this should work for MDI frames as well as for normal ones
     SetSizeHints(100, 100);
@@ -253,8 +253,13 @@ void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
         double x = (event.GetPosition() * mXyPlot->GetUnitsPerValue()) +
             curve->GetFirstX();
         double y = event.GetCurve()->GetY( event.GetPosition() );
-        wxLogMessage(GetXAxisTitle() + ": %5.3f, " +
-                     curve->GetCurveTitle() + ": %f, ", x, y);
+        //loj: 2/26/04 changed to wxLogStatus
+        wxLogStatus(MdiXyPlot::mdiParentXyFrame,
+                    GetXAxisTitle() + ": %5.3f, " +
+                    curve->GetCurveTitle() + ": %f, ", x, y);
+
+        //wxLogMessage(GetXAxisTitle() + ": %5.3f, " +
+        //             curve->GetCurveTitle() + ": %f, ", x, y);
         //" at x: %f, y: %f", x, y );
     }
 }

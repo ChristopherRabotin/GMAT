@@ -29,8 +29,6 @@ public:
     OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    wxWindow *theParent;
-    GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
     Subscriber *theSubscriber;
     wxString *theParamList;
     
@@ -40,13 +38,11 @@ protected:
     wxCheckBox *plotCheckBox;
 
     void OnPlotCheckBoxChange(wxCommandEvent& event);
-
+    
     // methods inherited from GmatPanel
     virtual void Create();
     virtual void LoadData();
     virtual void SaveData();
-    virtual void OnHelp();
-    virtual void OnScript();
     
     DECLARE_EVENT_TABLE();
     
