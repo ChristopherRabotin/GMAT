@@ -728,6 +728,13 @@ bool CallFunction::ExecuteMatlabFunction()
 #if defined __USE_MATLAB__
     MatlabInterface::Open();
     
+    // add path to matlab workspace
+    // send string to matlab - path(path ,'a:\')
+   Integer pathId = mFunction->GetParameterID("FunctionPath");
+   std::string thePath = mFunction->GetStringParameter(pathId);
+   std::string setPath = "path(path ,'" + thePath + "')";
+   status =  MatlabInterface::EvalString(setPath);
+
     // send the in parameters
    for (unsigned int i=0; i<mInputList.size(); i++)
    {

@@ -74,6 +74,7 @@
 #include "CoordSystemConfigPanel.hpp"
 #include "InteractiveMatlabDialog.hpp"
 #include "FunctionSetupPanel.hpp"
+#include "MatlabFunctionSetupPanel.hpp"
 #include "AssignmentPanel.hpp"
 //#include "FreeFormScriptPanel.hpp"
 
@@ -560,6 +561,15 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);  
          sizer->Add(new FunctionSetupPanel(panel, item->GetDesc()),
+                    0, wxGROW|wxALL, 0);
+      }
+      else if (dataType == GmatTree::MATLAB_FUNCTION)
+      {
+         newChild = new GmatMdiChildFrame(this, -1, item->GetDesc(),
+                                          wxPoint(-1,-1), wxSize(-1,-1),
+                                          wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
+         panel = new wxScrolledWindow(newChild);
+         sizer->Add(new MatlabFunctionSetupPanel(panel, item->GetDesc()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::IF_CONTROL)

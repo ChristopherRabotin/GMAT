@@ -26,7 +26,7 @@
 const std::string
 Function::PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount] =
 {
-   "FunctionName",
+   "FunctionPath",
 };
 
 const Gmat::ParameterType
@@ -48,7 +48,7 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &nomme) :
     GmatBase        (Gmat::FUNCTION, typeStr, nomme),
-    functionName      ("")
+    functionPath      ("")
 {
    parameterCount = FunctionParamCount;
 }
@@ -77,7 +77,7 @@ Function::~Function()
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
     GmatBase        (f),
-    functionName    (f.functionName)
+    functionPath    (f.functionPath)
 {
     parameterCount = FunctionParamCount;
 }
@@ -101,7 +101,7 @@ Function& Function::operator=(const Function &f)
         
     GmatBase::operator=(f);
 
-    functionName  = f.functionName;
+    functionPath  = f.functionPath;
 
     return *this;
 }
@@ -135,7 +135,7 @@ GmatBase* Function::Clone(void) const
 //------------------------------------------------------------------------------
 std::string Function::GetParameterText(const Integer id) const
 {
-    if (id >= FUNCTION_NAME && id < FunctionParamCount)
+    if (id >= FUNCTION_PATH && id < FunctionParamCount)
         return PARAMETER_TEXT[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterText(id);
@@ -155,7 +155,7 @@ std::string Function::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Function::GetParameterID(const std::string &str) const
 {
-    for (Integer i = FUNCTION_NAME; i < FunctionParamCount; i++)
+    for (Integer i = FUNCTION_PATH; i < FunctionParamCount; i++)
     {
         if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
             return i;
@@ -178,7 +178,7 @@ Integer Function::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Function::GetParameterType(const Integer id) const
 {
-    if (id >= FUNCTION_NAME&& id < FunctionParamCount)
+    if (id >= FUNCTION_PATH&& id < FunctionParamCount)
         return PARAMETER_TYPE[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterType(id);
@@ -198,7 +198,7 @@ Gmat::ParameterType Function::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Function::GetParameterTypeString(const Integer id) const
 {
-   if (id >= FUNCTION_NAME&& id < FunctionParamCount)
+   if (id >= FUNCTION_PATH&& id < FunctionParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return GmatBase::GetParameterTypeString(id);
@@ -218,8 +218,8 @@ std::string Function::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Function::GetStringParameter(const Integer id) const
 {
-   if (id == FUNCTION_NAME)
-      return functionName;
+   if (id == FUNCTION_PATH)
+      return functionPath;
    return GmatBase::GetStringParameter(id);
 }
 
@@ -238,9 +238,9 @@ std::string Function::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Function::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == FUNCTION_NAME)
+   if (id == FUNCTION_PATH)
    {
-      functionName = value;
+      functionPath = value;
       return true;
    }
 

@@ -48,12 +48,12 @@ public:
                                            const std::string &value);
 
 protected:
-    /// Name of the Matlab function
-    std::string functionName;
+    /// Path for function script
+    std::string functionPath;
 
     enum
     {
-      FUNCTION_NAME = GmatBaseParamCount,
+      FUNCTION_PATH = GmatBaseParamCount,
       FunctionParamCount  /// Count of the parameters for this class
     };
 
