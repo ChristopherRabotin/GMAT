@@ -66,8 +66,8 @@ public:
 
    virtual std::string ToString();
    
-   virtual Real GetReal();
-   virtual Rvector6 GetRvector6();
+   virtual Real GetReal() const;
+   virtual Rvector6 GetRvector6() const;
    
    virtual void SetReal(Real val);
    virtual void SetRvector6(const Rvector6 &val);

@@ -355,7 +355,7 @@ std::string Parameter::ToString()
 }
 
 //------------------------------------------------------------------------------
-// Real GetReal()
+// Real GetReal() const
 //------------------------------------------------------------------------------
 /**
  * @return parameter value without evaluating.
@@ -363,7 +363,7 @@ std::string Parameter::ToString()
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Real Parameter::GetReal()
+Real Parameter::GetReal() const
 {
    throw ParameterException
       ("Parameter: GetReal(): " + this->GetTypeName() + " has no "
@@ -372,7 +372,7 @@ Real Parameter::GetReal()
 }
 
 //------------------------------------------------------------------------------
-// Rvector6 GetRvector6()
+// Rvector6 GetRvector6() const
 //------------------------------------------------------------------------------
 /**
  * @return parameter value without evaluating.
@@ -380,7 +380,7 @@ Real Parameter::GetReal()
  * @exception <ParameterException> thrown if this method is called.
  */
 //------------------------------------------------------------------------------
-Rvector6 Parameter::GetRvector6()
+Rvector6 Parameter::GetRvector6() const
 {
    throw ParameterException
       ("Parameter: GetRvector6(): " + this->GetTypeName() + " has no "
