@@ -112,6 +112,7 @@ protected:
       DEGREE,
       ORDER,
       BODY,
+      FILENAME,
       HarmonicFieldParamCount
    };
 

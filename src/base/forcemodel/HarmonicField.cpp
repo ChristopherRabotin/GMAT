@@ -71,6 +71,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
    "Degree",
    "Order",
    "Body",
+   "Filename",
 };
 
 const Gmat::ParameterType
@@ -80,6 +81,7 @@ Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
+Gmat::STRING_TYPE,
 Gmat::STRING_TYPE,
 };
 
@@ -309,8 +311,11 @@ bool HarmonicField::SetBody(const std::string &theBody)
 //------------------------------------------------------------------------------
 bool HarmonicField::SetFilename(const std::string &fn)
 {
-   if (filename != fn)  fileRead = false;
-   filename = fn;
+   if (filename != fn)
+   {
+      fileRead = false;
+      filename = fn;
+   }
    return true;
 }
 
@@ -499,6 +504,7 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 std::string HarmonicField::GetStringParameter(const Integer id) const
 {
    if (id == BODY) return bodyName;
+   if (id == FILENAME) return filename;
    return PhysicalModel::GetStringParameter(id);
 }
 
@@ -530,6 +536,15 @@ bool HarmonicField::SetStringParameter(const Integer id,
          else      return false;
       }
       else return true;
+   }
+   if (id == FILENAME)
+   {
+      if (filename != value)
+      {
+         fileRead = false;
+         filename = value;
+      }
+      return true;
    }
    return PhysicalModel::SetStringParameter(id, value);
 }
