@@ -16,6 +16,7 @@
 #include "gmatdefs.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
+#include "Rmatrix.hpp"
 #include "Planet.hpp"
 
 // initialize static default values
@@ -23,17 +24,19 @@
 const Gmat::BodyType        Planet::BODY_TYPE           = Gmat::PLANET;
 const Real                  Planet::MASS                = 5.976e24;     // kg
 const Real                  Planet::EQUATORIAL_RADIUS   = 6378.140;     // km
-const Real                  Planet::POLAR_RADIUS        = 6356.755;       // km - need more precision
+const Real                  Planet::POLAR_RADIUS        = 6356.755;       // km - need more precision?
 const Real                  Planet::MU                  = 3.986005e14;      // m^3/s^2
 const Gmat::PosVelSource    Planet::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Planet::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
-const CelestialBody*        Planet::CENTRAL_BODY        = NULL;        // doesn't make sense?
 const Integer               Planet::BODY_NUMBER         = 1;  
 const Integer               Planet::REF_BODY_NUMBER     = 3; 
 const Integer               Planet::ORDER               = 4;  
-const Integer               Planet::DEGREE              = 4;   
-// add other ones as needed
-
+const Integer               Planet::DEGREE              = 4;
+const Integer               Planet::COEFFICIENT_SIZE    = 4;
+const Rmatrix               Planet::SIJ                 = Rmatrix(4,4,
+        0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+const Rmatrix               Planet::CIJ                 = Rmatrix(4,4,
+       0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
 
 //------------------------------------------------------------------------------
 // public methods
@@ -42,7 +45,7 @@ const Integer               Planet::DEGREE              = 4;
 //  Planet(std::string name)
 //------------------------------------------------------------------------------
 /**
-* This method creates an object of the Planet class
+ * This method creates an object of the Planet class
  * (default constructor).
  *
  * @param <name> optional parameter indicating the name of the celestial
@@ -51,8 +54,7 @@ const Integer               Planet::DEGREE              = 4;
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
 CelestialBody     (name)
-{
-   //parameterCount += 30; -- ???
+{   
    InitializePlanet(NULL);  
 }
 
@@ -71,7 +73,6 @@ CelestialBody     (name)
 Planet::Planet(std::string name, CelestialBody* cBody) :
 CelestialBody     (name)
 {
-   //parameterCount += 30; -- ???
    InitializePlanet(cBody); 
 }
 
@@ -122,23 +123,6 @@ Planet::~Planet()
 {
 }
 
-//------------------------------------------------------------------------------
-//  RealArray GetState(A1Mjd atTime)
-//------------------------------------------------------------------------------
-/**
- * This method returns the state (position and velocity) of the body at the
- * requested time.
- *
- * @param <atTime>  time for which state of the body is requested.
- *
- * @return state of the body at the requested time.
- *
- */
-//------------------------------------------------------------------------------
-//RealArray  Planet::GetState(A1Mjd atTime)
-//{
-//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-//}
 
 //------------------------------------------------------------------------------
 //  Planet* Clone(void) const
@@ -152,7 +136,8 @@ Planet::~Planet()
 //------------------------------------------------------------------------------
 Planet* Planet::Clone(void) const
 {
-   return NULL;  // TBD
+   Planet* theClone = new Planet(*this);
+   return theClone;   // huh??????????????????????????????
 }
 
 //------------------------------------------------------------------------------
@@ -171,6 +156,7 @@ Planet* Planet::Clone(void) const
 void Planet::InitializePlanet(CelestialBody* cBody)
 {
    CelestialBody::Initialize();
+   
    // fill in with default values, for the Sun
    bodyType            = Planet::BODY_TYPE;
    mass                = Planet::MASS;
@@ -179,12 +165,26 @@ void Planet::InitializePlanet(CelestialBody* cBody)
    mu                  = Planet::MU;
    posVelSrc           = Planet::POS_VEL_SOURCE;
    analyticMethod      = Planet::ANALYTIC_METHOD;
-   //centralBody         = Planet::CENTRAL_BODY;
    centralBody         = cBody;
    bodyNumber          = Planet::BODY_NUMBER;
    referenceBodyNumber = Planet::REF_BODY_NUMBER;
    order               = Planet::ORDER;
    degree              = Planet::DEGREE;
+   coefficientSize     = Planet::COEFFICIENT_SIZE;
+
+   sij                 = Planet::SIJ;
+   cij                 = Planet::CIJ;
+   defaultSij          = Planet::SIJ;
+   defaultCij          = Planet::CIJ;
+
+   atmManager          = new AtmosphereManager(instanceName);
+
+
+   // set defaults in case use chooses to go back to not using potential file
+   defaultMu           = Planet::MU;
+   defaultEqRadius     = Planet::EQUATORIAL_RADIUS;
+   defaultCoefSize     = Planet::COEFFICIENT_SIZE;
+
 }
 
 //------------------------------------------------------------------------------
