@@ -101,6 +101,7 @@ PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount - GmatBaseParamCount] =
    "Epoch",
    "ElapsedSeconds",
    "BodyName",
+   "PrimaryBody",
 };
 
 const Gmat::ParameterType
@@ -109,6 +110,7 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 //---------------------------------
@@ -140,7 +142,8 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    prevElapsedTime             (0.0),
    deriv                       (NULL),
    relativeErrorThreshold      (0.10),
-   solarSystem                 (NULL)
+   solarSystem                 (NULL),
+   isPrimaryBody               (true)
 {
    parameterCount = PhysicalModelParamCount;
 }
@@ -950,4 +953,45 @@ bool PhysicalModel::SetStringParameter(const std::string &label,
                                        const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  bool  GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  bool value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::GetBooleanParameter(const Integer id) const
+{
+   if (id == PRIMARY_BODY)       return isPrimaryBody;
+
+   return GmatBase::GetBooleanParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  bool  SetBooleanParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> bool value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == PRIMARY_BODY)   return (isPrimaryBody = value); 
+
+   return GmatBase::SetBooleanParameter(id,value);
 }
