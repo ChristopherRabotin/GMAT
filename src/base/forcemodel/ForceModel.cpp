@@ -45,6 +45,7 @@
 //                             Overrode GetParameterCount so the count 
 //                             increases based on the member forces
 // **************************************************************************
+//===> loj: 3/30/04 NO changes - just commented out the debug statements for delivery
 
 #include "ForceModel.hpp"
 #include "PointMassForce.hpp"
@@ -204,6 +205,14 @@ std::string ForceModel::GetForceTypeName(Integer index)
 }
 
 //------------------------------------------------------------------------------
+// void ClearSpacecraft()
+//------------------------------------------------------------------------------
+void ForceModel::ClearSpacecraft()
+{
+    spacecraft.clear();
+}
+
+//------------------------------------------------------------------------------
 // PhysicalModel* GetForce(Integer index)
 //------------------------------------------------------------------------------
 PhysicalModel* ForceModel::GetForce(Integer index)
@@ -240,7 +249,7 @@ PhysicalModel* ForceModel::GetForce(Integer index)
 //------------------------------------------------------------------------------
 void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
 {
-    MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
+    //MessageInterface::ShowMessage("ForceModel::AddForce() entered\n");
     
     if (pPhysicalModel == NULL)
         return;
@@ -280,7 +289,7 @@ bool ForceModel::AddSpacecraft(Spacecraft *sc)
     if (find(spacecraft.begin(), spacecraft.end(), sc) != spacecraft.end())
         return false;
     spacecraft.push_back(sc);
-    
+
     // Quick fix for the epoch update
     epoch = sc->GetRealParameter(sc->GetParameterID("Epoch"));
     return true;
@@ -301,10 +310,11 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
         Integer stateSize = 6;
         std::vector<Spacecraft *>::iterator sat;
         Real *state;
+
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
-            state = (*sat)->GetState();
+            state = (*sat)->GetState();           
             memcpy(state, &modelState[j*stateSize], stateSize * sizeof(Real));
-            ++j;
+            ++j;            
 //            // Update the epoch if it was passed in
 //            if (newEpoch != -1.0)
 //                (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newEpoch);
@@ -802,8 +812,9 @@ std::string ForceModel::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
 {
-    MessageInterface::ShowMessage("ForceModel::SetStringParameter() id = %d, value = %s\n",
-                                  id, value.c_str());
+    //MessageInterface::ShowMessage("ForceModel::SetStringParameter() id = %d, value = %s\n",
+    //                              id, value.c_str());
+    
     switch (id)
     {
     case POINT_MASS:

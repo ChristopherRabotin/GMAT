@@ -88,6 +88,7 @@ public:
     Integer GetNumForces();
     StringArray& GetForceTypeNames(); //loj: 3/4/04 added
     std::string GetForceTypeName(Integer index);
+    void ClearSpacecraft(); //loj: 4/1/04 added
     
     PhysicalModel* GetForce(Integer index);
       
