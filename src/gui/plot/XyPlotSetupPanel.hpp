@@ -21,6 +21,7 @@
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
 
 class XyPlotSetupPanel: public GmatPanel
 {
@@ -28,7 +29,9 @@ public:
     XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
+    GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
     Subscriber *theSubscriber;
+    wxString *theParamList;
     
     wxBoxSizer *pageBoxSizer;
     wxFlexGridSizer *paramGridSizer;
