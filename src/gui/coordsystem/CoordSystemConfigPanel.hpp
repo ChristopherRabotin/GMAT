@@ -1,4 +1,4 @@
-//$Header: 
+//$Header$
 //------------------------------------------------------------------------------
 //                              CoordSystemConfigPanel
 //------------------------------------------------------------------------------
@@ -15,60 +15,56 @@
 
 // gui includes
 #include "gmatwxdefs.hpp"
+#include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
-
-// base includes
-#include "gmatdefs.hpp"
-#include "Command.hpp"
-#include "For.hpp"
+#include "CoordinateSystem.hpp"
+#include "CoordPanel.hpp"
 
 class CoordSystemConfigPanel : public GmatPanel
 {
 public:
     // constructors
-    CoordSystemConfigPanel(wxWindow *parent);
+    CoordSystemConfigPanel(wxWindow *parent, const wxString &coordName);
     ~CoordSystemConfigPanel();  
 
 private:
-    wxStaticText *nameStaticText;
-    wxStaticText *originStaticText;
-    wxStaticText *typeStaticText;
-    wxStaticText *primaryStaticText;
-    wxStaticText *formatStaticText;
-    wxStaticText *secondaryStaticText;
-    wxStaticText *epochStaticText;
-    
-    wxTextCtrl *nameTextCtrl;
-    
-    wxComboBox *originComboBox;
-    wxComboBox *typeComboBox;
-    wxComboBox *primaryComboBox;
-    wxComboBox *formatComboBox;
-    wxComboBox *secondaryComboBox;
-    wxComboBox *epochComboBox;
-    
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
+   CoordinateSystem *theCoordSys;
+   CoordPanel *mCoordPanel;
 
-    // Layout & data handling methods
-    void Setup(wxWindow *parent);
-    
-    void OnTextUpdate(wxCommandEvent& event); 
-    void OnComboUpdate(wxCommandEvent& event);
-    
-    // event handling
-    DECLARE_EVENT_TABLE();
+   wxTextCtrl *epochTextCtrl;
 
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_TEXTCTRL = 46000,
-        ID_COMBO,
-        ID_TEXT,
-    };
+   wxComboBox *originComboBox;
+   wxComboBox *typeComboBox;
+   wxComboBox *primaryComboBox;
+   wxComboBox *formatComboBox;
+   wxComboBox *secondaryComboBox;
+
+   wxComboBox *xComboBox;
+   wxComboBox *yComboBox;
+   wxComboBox *zComboBox;
+
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
+
+   // Layout & data handling methods
+   void Setup(wxWindow *parent);
+    
+   void OnTextUpdate(wxCommandEvent& event);
+   void OnComboUpdate(wxCommandEvent& event);
+
+   // event handling
+   DECLARE_EVENT_TABLE();
+
+   // IDs for the controls and the menu commands
+   enum
+   {
+       ID_TEXTCTRL = 46000,
+       ID_COMBO,
+       ID_TEXT,
+   };
 };
 
 #endif // CoordSystemConfigPanel_hpp
