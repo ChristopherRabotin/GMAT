@@ -16,6 +16,12 @@
 #include "JacchiaRobertsAtmosphere.hpp"
 #include "AtmosphereException.hpp"
 
+// #define DEBUG_JR_DRAG 1
+
+#ifdef DEBUG_JR_DRAG
+   #include "MessageInterface.hpp"
+#endif
+
 const Real pi         = 3.141592653589793238;
 const Real ra         = 6356.766;              /// Average radius of the earth (km) 
 const Real earth_rate = 0.7292115855306586e-4; /// Rotational rate of earth (rad/sec) 
@@ -250,6 +256,9 @@ GmatBase* JacchiaRobertsAtmosphere::Clone(void) const
 bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density called\n");
+#endif
    Real height, rho;
    Integer istat = 0;
    Real utc_time;
@@ -259,8 +268,17 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
    //  height = sqrt(pos[0]*pos[0] + pos[1]*pos[1]
    //             + pos[2]*pos[2]) - ra;
    
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Getting Earth\n");
+#endif
    GetEarth();  
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Getting Eq Radius\n");
+#endif
    Real earthRadius = earth->GetEquatorialRadius();
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Getting Geo Height\n");
+#endif
    height = get_geodetic_height(earthRadius, pos, flat);
    
    // Obtain density of atmosphere at spacecraft height
@@ -273,17 +291,26 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
    //  used for heights below 90 KM.
    if (height > 0.0)
    {         
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Getting rho\n");
+#endif
       rho = 1.0e12*JacchiaRoberts(height, pos, sunVector, utc_time, sfFileName, 
                                   true, istat);
    }
    else
    {
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Scaling rho\n");
+#endif
       rho = 1.0e12*rho_zero;
    }
 
    // Output density in units of kg/m3
    *density = 1.0e-9*rho;
    
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density complete\n");
+#endif
    return true;
 }
 
@@ -316,10 +343,22 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
 Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3], 
           Real sun[3], Real a1_time, FILE *tkptr, bool new_file, Integer istat)
 {
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::JacchiaRoberts() called\n");
+#endif
+
    GEOPARMS geo;
    Real density, temperature, t_500, sun_dec, geo_lat;
 
    // Read minimum temperature and geomagnetic indices
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("   Loading File\n");
+#endif
+
+   // Added 12/9 by DJC.  Waka -- Check this to see what we really want to do here!
+   if (tkptr == NULL)
+      throw AtmosphereException("Flux file pointer is NULL!\n");
+
    if((istat = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo)) != 0)
    {
       return 0.0;
@@ -334,6 +373,9 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
                         space_craft[1]*space_craft[1]) *
                    ((1.0-flat)*(1.0-flat)));
 
+#ifdef DEBUG_JR_DRAG
+   MessageInterface::ShowMessage("Switching on height\n");
+#endif
    // Compute height dependent density
    if (height<=90.0)
    {

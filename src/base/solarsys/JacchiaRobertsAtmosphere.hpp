@@ -50,7 +50,7 @@ public:
    
    Real length_of(Real v[3]);
    Real dot_product(Real a[3] , Real b[3]);
-   void SetSolarSystem(SolarSystem *solsys);
+   virtual void SetSolarSystem(SolarSystem *solsys);
    void GetEarth();                             
                                                                                                  
 protected:
