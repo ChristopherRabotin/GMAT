@@ -39,6 +39,7 @@ EndIfCommand& EndIfCommand::operator=(const EndIfCommand& ic)
 {
     if (this == &ic)
         return *this;
+    GmatCommand::operator=(ic);
     
     return *this;
 }

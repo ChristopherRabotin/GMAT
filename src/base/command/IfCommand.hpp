@@ -13,7 +13,7 @@
 // Created: 2004/01/30
 //
 /**
- * Definition for the IF command class
+ * Declaration for the IF command class
  */
 //------------------------------------------------------------------------------
 
@@ -56,18 +56,12 @@ public:
    
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
-   // Reference object accessor methods ----- wcs: 2004.07.08 added
-   //virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
-   //virtual bool         SetRefObjectName(const Gmat::ObjectType type,
-   //                                       const std::string &name);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                        const std::string &name,
                                        const Integer index);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                        const std::string &name,
                                        const Integer index);
-   //virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
-   
     
     
 protected:

@@ -11,7 +11,7 @@
 //
 // Author:  Joey Gurganus/GSFC
 // Created: 2004/01/30
-// Modified: 2004.07.08 Wendy Shoan/GSFC
+// Modified: 2004.07.08 Wendy Shoan/GSFC - updated with conditions, etc.
 //
 /**
  * Definition for the IfCommand command class
@@ -163,11 +163,7 @@ bool IfCommand::Initialize()
 //  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Target the variables defined for this for IF statement.
- *
- * This method (will eventually) runs the state machine in order to
- * determine the variable values needed to achieve the user specified 
- * goals.
+ * Execute the proper branch for this IF statement.
  *
  * @return true if the Command runs to completion, false if an error
  *         occurs.
@@ -177,22 +173,18 @@ bool IfCommand::Execute()
 {
    bool retval = true;
    
-   BranchCommand::Execute(); // ??
-   commandComplete  = false;
-   commandExecuting = true;
+   BranchCommand::Execute(); 
    
    if (EvaluateCondition(0)) // must deal with multiple conditions later
    {
       retval = ExecuteBranch();
-      commandComplete  = true;
-      commandExecuting = false;
    }
-   else if ((Integer)branch.size() > 1)  // for now, there could be an 'Else'
+   else if ((Integer)branch.size() > 1)  // there could be an 'Else'
    {
       retval = ExecuteBranch(1);
-      commandComplete  = true;
-      commandExecuting = false;
    }
+   commandComplete  = true;
+   commandExecuting = false;
    
    return retval;
 }
@@ -247,9 +239,6 @@ GmatBase* IfCommand::Clone() const
 }
 
 
-//std::string IfCommand::GetRefObjectName(const Gmat::ObjectType type) const;
-//bool IfCommand::SetRefObjectName(const Gmat::ObjectType type,
-//                      const std::string &name);
 //------------------------------------------------------------------------------
 //  GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                         const std::string &name,
@@ -342,7 +331,6 @@ bool IfCommand::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Not handled here -- invoke the next higher SetRefObject call
    return BranchCommand::SetRefObject(obj, type, name, index);
 }
-//ObjectArray& IfCommand::GetRefObjectArray(const Gmat::ObjectType type);
 
 
 //------------------------------------------------------------------------------
