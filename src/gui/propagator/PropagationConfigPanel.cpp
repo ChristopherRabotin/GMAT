@@ -152,6 +152,9 @@ void PropagationConfigPanel::Create()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::LoadData()
 {
+   // Enable the "Show Script" button
+   mObject = thePropSetup;
+
 #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage("LoadData() entered\n");
 #endif
