@@ -39,12 +39,15 @@ public:
    
    Rvector6 GetCartState();
    Rvector6 GetKepState();
-   Rvector6 GetSphState();
+   Rvector6 GetModKepState();   //loj: 2/16/05 Added
+   Rvector6 GetSphRaDecState(); //loj: 2/16/05 Changed from GetSphState()
+   Rvector6 GetSphAzFpaState(); //loj: 2/16/05 Added
    
    Real GetCartReal(const std::string &str);
    Real GetKepReal(const std::string &str);
    Real GetOtherKepReal(const std::string &str);
-   Real GetSphReal(const std::string &str);
+   Real GetSphRaDecReal(const std::string &str); //loj: 2/16/05 Changed from GetSphReal()
+   Real GetSphAzFpaReal(const std::string &str); //loj: 2/16/05 Added
    Real GetAngularReal(const std::string &str);
    
    // The inherited methods from RefData
@@ -67,7 +70,9 @@ protected:
    
    Rvector6 mCartState;
    Rvector6 mKepState;
-   Rvector6 mSphState;
+   Rvector6 mModKepState;
+   Rvector6 mSphRaDecState;
+   Rvector6 mSphAzFpaState;
    
    Real mMA;
    Real mCartEpoch;
@@ -76,14 +81,15 @@ protected:
    Spacecraft *mSpacecraft;
    SolarSystem *mSolarSystem;
    CelestialBody *mCentralBody;
-   CoordinateSystem *mInternalCoordSystem; //loj: 1/21/05 Added.
-   CoordinateSystem *mOutCoordSystem;      //loj: 1/21/05 Added.
+   CoordinateSystem *mInternalCoordSystem;
+   CoordinateSystem *mOutCoordSystem;
    
-   CoordinateConverter mCoordConverter;    //loj: 1/24/05 Added
+   CoordinateConverter mCoordConverter;
    
    enum {PX, PY, PZ, VX, VY, VZ};
    enum {SMA, ECC, INC, RAAN, AOP, TA};
-   enum {RMAG, RRA, RDEC, VMAG, RAV, DECV};
+   enum {RD_RMAG, RD_RRA, RD_RDEC, RD_VMAG, RD_RAV, RD_DECV};
+   enum {AF_RMAG, AF_RRA, AF_RDEC, AF_VMAG, AF_AZI, AF_FPA};
    
    enum
    {

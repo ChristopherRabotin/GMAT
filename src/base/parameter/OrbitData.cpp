@@ -24,13 +24,14 @@
 #include "CoordUtil.hpp"         // for Cartesian to Keplerian conversion
 #include "AngleUtil.hpp"
 #include "UtilityException.hpp"
-#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC()
+#include "SphericalRADEC.hpp"    // for friend CartesianToSphericalRADEC/AZFPA()
+#include "ModKeplerian.hpp"      // for friend KeplerianToModKeplerian()
 #include "CelestialBody.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITDATA 1
 //#define DEBUG_ORBITDATA_CONVERT 1
-//#define DEBUG_ORBITDATA_DETAILS 1
+//#define DEBUG_ORBITDATA_RUN 1
 
 using namespace GmatMathUtil;
 
@@ -62,7 +63,9 @@ OrbitData::OrbitData()
 {
    mCartState = Rvector6::RVECTOR6_UNDEFINED;
    mKepState = Rvector6::RVECTOR6_UNDEFINED;
-   mSphState = Rvector6::RVECTOR6_UNDEFINED;
+   mModKepState = Rvector6::RVECTOR6_UNDEFINED;
+   mSphRaDecState = Rvector6::RVECTOR6_UNDEFINED;
+   mSphAzFpaState = Rvector6::RVECTOR6_UNDEFINED;
    mMA = ORBIT_REAL_UNDEFINED;
    mSpacecraft = NULL;
    mSolarSystem = NULL;
@@ -71,6 +74,7 @@ OrbitData::OrbitData()
    mCartEpoch = 0.0;
    mGravConst = 0.0;
 }
+
 
 //------------------------------------------------------------------------------
 // OrbitData(const OrbitData &data)
@@ -85,6 +89,7 @@ OrbitData::OrbitData(const OrbitData &data)
    : RefData(data)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // OrbitData& operator= (const OrbitData& right)
@@ -105,6 +110,7 @@ OrbitData& OrbitData::operator= (const OrbitData& right)
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~OrbitData()
 //------------------------------------------------------------------------------
@@ -115,6 +121,7 @@ OrbitData& OrbitData::operator= (const OrbitData& right)
 OrbitData::~OrbitData()
 {
 }
+
 
 //------------------------------------------------------------------------------
 // Rvector6 GetCartState()
@@ -128,7 +135,7 @@ Rvector6 OrbitData::GetCartState()
    std::string elemType = mSpacecraft->GetStringParameter(id);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
    
-   #if DEBUG_ORBITDATA
+   #if DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() stateType=%s, internalCoordName=%s, outCoordName=%s\n",
        elemType.c_str(), mInternalCoordSystem->GetName().c_str(),
@@ -179,15 +186,13 @@ Rvector6 OrbitData::GetCartState()
       memcpy(kepl, statePtr.GetState(), 6*sizeof(Real));
 
       Rvector6 keplState = Rvector6(kepl);
-      Rvector6 cartState;
 
       #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage("OrbitData::GetCartState() keplState=%s\n",
                                     keplState.ToString().c_str());
       #endif
       
-      cartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
-      mCartState = cartState;
+      mCartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
    }
    else
    {
@@ -198,6 +203,7 @@ Rvector6 OrbitData::GetCartState()
    
    return mCartState;
 }
+
 
 //------------------------------------------------------------------------------
 // Rvector6 GetKepState()
@@ -210,7 +216,7 @@ Rvector6 OrbitData::GetKepState()
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
       
-   #ifdef DEBUG_ORBITDATA_DETAILS
+   #ifdef DEBUG_ORBITDATA_RUN
    PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
    std::cout << "OrbitData::GetKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
    std::cout << "   elemType == " << elemType <<"\n";
@@ -226,7 +232,7 @@ Rvector6 OrbitData::GetKepState()
             
       for (int i=0; i<6; i++)
       {
-         #ifdef DEBUG_ORBITDATA_DETAILS
+         #ifdef DEBUG_ORBITDATA_RUN
          std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
          #endif
          mKepState[i] = statePtr[i];
@@ -234,12 +240,10 @@ Rvector6 OrbitData::GetKepState()
    }
    else if (elemType == "Cartesian")
    {
-      //loj: 1/26/05 Call GetCartState() since it provides the Coord Sys conversion
-      //Rvector6 cartState = mSpacecraft->GetCartesianState(); 
+      // call GetCartState() since it provides the Coord Sys conversion
       Rvector6 cartState = GetCartState();
       
       Real grav = mGravConst;
-      Rvector6 keplState;
       
       #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s\n",
@@ -247,9 +251,7 @@ Rvector6 OrbitData::GetKepState()
       #endif
       
       Real ma;
-      keplState = CartesianToKeplerian(cartState, grav, &ma);
-
-      mKepState = keplState;
+      mKepState = CartesianToKeplerian(cartState, grav, &ma);
       mMA = ma;
    }
    else
@@ -262,10 +264,74 @@ Rvector6 OrbitData::GetKepState()
    return mKepState;
 }
 
+
 //------------------------------------------------------------------------------
-// Rvector6 OrbitData::GetSphState()
+// Rvector6 GetModKepState()
 //------------------------------------------------------------------------------
-Rvector6 OrbitData::GetSphState()
+Rvector6 OrbitData::GetModKepState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   Integer id = mSpacecraft->GetParameterID("StateType");
+   std::string elemType = mSpacecraft->GetStringParameter(id);
+   
+   #ifdef DEBUG_ORBITDATA_RUN
+   PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
+   std::cout << "OrbitData::GetModKepState for spacecraft " << mSpacecraft->GetName() <<"\n";
+   std::cout << "   elemType == " << elemType <<"\n";
+   for (int i=0; i<6; i++)
+   {
+      std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+   }            
+   #endif
+   
+   if (elemType == "Keplerian")
+   {
+      PropState statePtr = mSpacecraft->GetState(); // should be keplerian state
+      
+      for (int i=0; i<6; i++)
+      {
+         #ifdef DEBUG_ORBITDATA_RUN
+         std::cout << "  el[" << i << "] = " << statePtr[i] << "\n";
+         #endif
+         mKepState[i] = statePtr[i];
+      }
+
+      mModKepState = KeplerianToModKeplerian(mKepState);
+   }
+   else if (elemType == "Cartesian")
+   {
+      // call GetCartState() since it provides the Coord Sys conversion
+      Rvector6 cartState = GetCartState();
+      
+      Real grav = mGravConst;
+      
+      #if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage("OrbitData::GetModKepState() cartState=%s\n",
+                                    cartState.ToString().c_str());
+      #endif
+      
+      Real ma;
+      mKepState = CartesianToKeplerian(cartState, grav, &ma);
+      mModKepState = KeplerianToModKeplerian(mKepState);
+      mMA = ma;
+   }
+   else
+   {
+      throw ParameterException
+         ("OrbitData::GetModKepState() input state types other than Cartesian "
+          "and Keplerian are not supported at this time.\n");
+   }
+   
+   return mModKepState;
+}
+
+
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetSphRaDecState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetSphRaDecState()
 {
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
@@ -281,35 +347,73 @@ Rvector6 OrbitData::GetSphState()
       
       #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
-         ("OrbitData::GetSphState() cartState=%s\n",
+         ("OrbitData::GetSphRaDecState() cartState=%s\n",
           cartState.ToString().c_str());
       #endif
       
-      // update SphericalRADEC state (loj: 2/3/05 Changed from ToSphericalTwo()
-      SphericalRADEC sph2 = CartesianToSphericalRADEC(cartState);
+      // update SphericalRADEC state
+      mSphRaDecState = CartesianToSphericalRADEC(cartState);
 
       #if DEBUG_ORBITDATA
       MessageInterface::ShowMessage
-         ("OrbitData::GetSphState() sph2=%s\n",
-          sph2.ToString().c_str());
+         ("OrbitData::GetSphRaDecState() sphRaDec=%s\n",
+          sphRaDec.ToString().c_str());
       #endif
       
-      mSphState[0] = sph2.GetPositionMagnitude();
-      mSphState[1] = sph2.GetRightAscension();
-      mSphState[2] = sph2.GetDeclination();
-      mSphState[3] = sph2.GetVelocityMagnitude();
-      mSphState[4] = sph2.GetVelocityRA();
-      mSphState[5] = sph2.GetVelocityDeclination();
    }
    else
    {
       throw ParameterException
-         ("OrbitData::GetSphState() input state types other than Cartesian "
+         ("OrbitData::GetSphRaDecState() input state types other than Cartesian "
           "are not supported at this time\n");
    }
 
-   return mSphState;
+   return mSphRaDecState;
 }
+
+
+//------------------------------------------------------------------------------
+// Rvector6 OrbitData::GetSphAzFpaState()
+//------------------------------------------------------------------------------
+Rvector6 OrbitData::GetSphAzFpaState()
+{
+   if (mSpacecraft == NULL || mSolarSystem == NULL)
+      InitializeRefObjects();
+   
+   Integer id = mSpacecraft->GetParameterID("StateType");
+   std::string elemType = mSpacecraft->GetStringParameter(id);
+
+   if (elemType == "Cartesian")
+   {
+      // call GetCartState() since it provides the Coord. System conversion
+      Rvector6 cartState = GetCartState();
+      
+      #if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphAzFpaState() cartState=%s\n",
+          cartState.ToString().c_str());
+      #endif
+      
+      // update SphericalAZFPA state
+      mSphAzFpaState = CartesianToSphericalAZFPA(cartState);
+      
+      #if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage
+         ("OrbitData::GetSphAzFpaState() sphAzFpa=%s\n",
+          sphAzFpa.ToString().c_str());
+      #endif
+      
+   }
+   else
+   {
+      throw ParameterException
+         ("OrbitData::GetSphAzFpaState() input state types other than Cartesian "
+          "are not supported at this time\n");
+   }
+
+   return mSphAzFpaState;
+}
+
 
 //------------------------------------------------------------------------------
 // Real GetCartReal(const std::string &str)
@@ -374,6 +478,7 @@ Real OrbitData::GetKepReal(const std::string &str)
       throw ParameterException("OrbitData::GetCartReal() Unknown parameter name: " +
                                str);
 }
+
 
 //------------------------------------------------------------------------------
 // Real GetOtherKepReal(const std::string &str)
@@ -446,46 +551,85 @@ Real OrbitData::GetOtherKepReal(const std::string &str)
    }
 }
 
+
 //------------------------------------------------------------------------------
-// Real GetSphReal(const std::string &str)
+// Real GetSphRaDecReal(const std::string &str)
 //------------------------------------------------------------------------------
 /**
  * Retrives Spherical element.
  */
 //------------------------------------------------------------------------------
-Real OrbitData::GetSphReal(const std::string &str)
+Real OrbitData::GetSphRaDecReal(const std::string &str)
 {
-   Rvector6 state = GetSphState();
+   Rvector6 state = GetSphRaDecState();
 
    #if DEBUG_ORBITDATA
    MessageInterface::ShowMessage
-      ("OrbitData::GetSphReal() str=%s state=%s\n",
+      ("OrbitData::GetSphRaDecReal() str=%s state=%s\n",
        str.c_str(), state.ToString().c_str());
    #endif
    
    if (str == "SphRMag")
-      return mSphState[RMAG];
+      return mSphRaDecState[RD_RMAG];
    else if (str == "SphRA")
-      return mSphState[RRA];
+      return mSphRaDecState[RD_RRA];
    else if (str == "SphDec")
-      return mSphState[RDEC];
+      return mSphRaDecState[RD_RDEC];
    else if (str == "SphVMag")
-      return mSphState[VMAG];
+      return mSphRaDecState[RD_VMAG];
    else if (str == "SphRAV")
-      return mSphState[RAV];
+      return mSphRaDecState[RD_RAV];
    else if (str == "SphDecV")
-      return mSphState[DECV];
-   else if (str == "Altitude") //loj: 11/5/04 added
+      return mSphRaDecState[RD_DECV];
+   else if (str == "Altitude")
    {
       //loj: Do I need to use other radius?
-      return mSphState[RMAG] - mCentralBody->GetEquatorialRadius();
+      return mSphRaDecState[RD_RMAG] - mCentralBody->GetEquatorialRadius();
    }
    else
    {
-      throw ParameterException("OrbitData::GetSphReal() Unknown parameter name: " +
+      throw ParameterException("OrbitData::GetSphRaDecReal() Unknown parameter name: " +
                                str);
    }
 }
+
+
+//------------------------------------------------------------------------------
+// Real GetSphAzFpaReal(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Retrives Spherical element.
+ */
+//------------------------------------------------------------------------------
+Real OrbitData::GetSphAzFpaReal(const std::string &str)
+{
+   Rvector6 state = GetSphAzFpaState();
+
+   #if DEBUG_ORBITDATA
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphAzFpaReal() str=%s state=%s\n",
+       str.c_str(), state.ToString().c_str());
+   #endif
+   
+   if (str == "SphRMag")
+      return mSphAzFpaState[AF_RMAG];
+   else if (str == "SphRA")
+      return mSphAzFpaState[AF_RRA];
+   else if (str == "SphDec")
+      return mSphAzFpaState[AF_RDEC];
+   else if (str == "SphVMag")
+      return mSphAzFpaState[AF_VMAG];
+   else if (str == "SphAzi")
+      return mSphAzFpaState[AF_AZI];
+   else if (str == "SphFPA")
+      return mSphAzFpaState[AF_FPA];
+   else
+   {
+      throw ParameterException("OrbitData::GetSphAzFpaReal() Unknown parameter name: " +
+                               str);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // Real GetAngularReal(const std::string &str)
@@ -535,6 +679,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
    }
 }
 
+
 //-------------------------------------
 // Inherited methods from RefData
 //-------------------------------------
@@ -569,6 +714,7 @@ bool OrbitData::ValidateRefObjects(GmatBase *param)
       return false;
 }
 
+
 //------------------------------------------------------------------------------
 // SolarSystem* GetSolarSystem()
 //------------------------------------------------------------------------------
@@ -577,6 +723,7 @@ SolarSystem* OrbitData::GetSolarSystem()
    return mSolarSystem;
 }
 
+
 //------------------------------------------------------------------------------
 // CoordinateSystem* GetInternalCoordSys()
 //------------------------------------------------------------------------------
@@ -584,6 +731,7 @@ CoordinateSystem* OrbitData::GetInternalCoordSys()
 {
    return mInternalCoordSystem;
 }
+
 
 //------------------------------------------------------------------------------
 // void SetInternalCoordSystem(CoordinateSystem *cs)
@@ -596,6 +744,7 @@ void OrbitData::SetInternalCoordSys(CoordinateSystem *cs)
 {
    mInternalCoordSystem = cs;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void InitializeRefObjects()
@@ -639,6 +788,7 @@ void OrbitData::InitializeRefObjects()
    //assume gravitational constant doesn't change through the mission run
    mGravConst = mCentralBody->GetGravitationalConstant();
 }
+
 
 //------------------------------------------------------------------------------
 // virtual bool IsValidObjectType(Gmat::ObjectType type)
