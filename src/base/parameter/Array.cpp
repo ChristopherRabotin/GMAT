@@ -23,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-#define DEBUG_ARRAY 1
+//#define DEBUG_ARRAY 1 //loj: 11/23/04
 
 //---------------------------------
 // static data
@@ -64,8 +64,6 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
  * @param <name> parameter name
  * @param <desc> parameter description
  * @param <unit> parameter unit
- *
- * @exception <ParameterException> thrown if parameter name has blank spaces
  */
 //------------------------------------------------------------------------------
 Array::Array(const std::string &name, const std::string &desc,
@@ -371,6 +369,23 @@ const std::string* Array::GetParameterList() const
    return PARAMETER_TEXT;
 }
 
+
+//------------------------------------
+// methods inherited from GmatBase
+//------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* Array::Clone() const
+{
+   return new Array(*this);
+}
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
@@ -588,22 +603,5 @@ const Rmatrix& Array::SetRmatrixParameter(const std::string &label,
                                           const Rmatrix &value)
 {
    return SetRmatrixParameter(GetParameterID(label), value);
-}
-
-
-//------------------------------------
-// methods inherited from GmatBase
-//------------------------------------
-
-//------------------------------------------------------------------------------
-// virtual GmatBase* Clone() const
-//------------------------------------------------------------------------------
-/**
- * Method used to create a copy of the object
- */
-//------------------------------------------------------------------------------
-GmatBase* Array::Clone() const
-{
-   return new Array(*this);
 }
 
