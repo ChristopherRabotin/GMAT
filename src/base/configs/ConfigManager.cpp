@@ -225,6 +225,49 @@ StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* GetItem(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* ConfigManager::GetItem(const std::string &name)
+{   
+    GmatBase *obj = NULL;
+    
+    if (mapping.find(name) != mapping.end())
+    {
+        if (mapping[name]->GetName() == name)
+        {
+            obj = mapping[name];
+        }
+    }
+    
+    return obj;
+}
+
+//------------------------------------------------------------------------------
+// bool RenameItem(Gmat::ObjectType itemType, const std::string &oldName,
+//                 const std::string &newName)
+//------------------------------------------------------------------------------
+bool ConfigManager::RenameItem(Gmat::ObjectType itemType,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+    bool status = false;
+    
+    if (mapping.find(oldName) != mapping.end())
+    {
+        GmatBase *obj = mapping[oldName];
+        if (obj->GetType() == itemType)
+        {
+            mapping.erase(oldName);
+            mapping[newName] = obj;
+            obj->SetName(newName);
+            status = true;
+        }
+    }
+    
+    return status;
+}
+
 
 //------------------------------------------------------------------------------
 // bool RemoveItem(Gmat::ObjectType type, const std::string &name)
