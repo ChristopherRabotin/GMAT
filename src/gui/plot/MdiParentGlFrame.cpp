@@ -24,10 +24,10 @@
 #include "bitmaps/zoomout.xpm"
 
 BEGIN_EVENT_TABLE(MdiParentGlFrame, wxMDIParentFrame)
-    EVT_MENU(GmatPlot::MDI_OPEN_TRAJECTORY_FILE, MdiParentGlFrame::OnOpenTrajectoryFile)
-    EVT_MENU(GmatPlot::MDI_CHILD_ZOOM_IN, MdiParentGlFrame::OnZoomIn)
-    EVT_MENU(GmatPlot::MDI_CHILD_ZOOM_OUT, MdiParentGlFrame::OnZoomOut)
-    EVT_MENU(GmatPlot::MDI_QUIT, MdiParentGlFrame::OnQuit)
+    EVT_MENU(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, MdiParentGlFrame::OnOpenTrajectoryFile)
+    EVT_MENU(GmatPlot::MDI_GL_CHILD_ZOOM_IN, MdiParentGlFrame::OnZoomIn)
+    EVT_MENU(GmatPlot::MDI_GL_CHILD_ZOOM_OUT, MdiParentGlFrame::OnZoomOut)
+    EVT_MENU(GmatPlot::MDI_GL_QUIT, MdiParentGlFrame::OnQuit)
 
     EVT_CLOSE(MdiParentGlFrame::OnClose)
     EVT_SIZE(MdiParentGlFrame::OnSize)
@@ -58,9 +58,9 @@ MdiParentGlFrame::MdiParentGlFrame(wxWindow *parent,
     // file menu
     wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(GmatPlot::MDI_OPEN_TRAJECTORY_FILE, _T("Open &Trajectory File\tCtrl-T"),
+    fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("Open &Trajectory File\tCtrl-T"),
                       _T("Open a trajectory file"));
-    fileMenu->Append(GmatPlot::MDI_QUIT, _T("&Exit\tAlt-X"), _T("Quit the program"));
+    fileMenu->Append(GmatPlot::MDI_GL_QUIT, _T("&Exit\tAlt-X"), _T("Quit the program"));
 
     // help menu
     wxMenu *helpMenu = new wxMenu;
@@ -82,8 +82,8 @@ MdiParentGlFrame::MdiParentGlFrame(wxWindow *parent,
     
    // Accelerators
     wxAcceleratorEntry entries[2];
-    entries[0].Set(wxACCEL_CTRL, (int) 'O', GmatPlot::MDI_OPEN_TRAJECTORY_FILE);
-    entries[1].Set(wxACCEL_CTRL, (int) 'X', GmatPlot::MDI_QUIT);
+    entries[0].Set(wxACCEL_CTRL, (int) 'O', GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE);
+    entries[1].Set(wxACCEL_CTRL, (int) 'X', GmatPlot::MDI_GL_QUIT);
     wxAcceleratorTable accel(2, entries);
     SetAcceleratorTable(accel);
 }
@@ -93,15 +93,15 @@ MdiParentGlFrame::MdiParentGlFrame(wxWindow *parent,
 //------------------------------------------------------------------------------
 void MdiParentGlFrame::UpdateUI()
 {
-    if (MdiGlPlot::numChildFrames > 0)
+    if (MdiGlPlot::numChildren > 0)
     {
-        GetToolBar()->EnableTool(GmatPlot::MDI_CHILD_ZOOM_IN, TRUE);
-        GetToolBar()->EnableTool(GmatPlot::MDI_CHILD_ZOOM_OUT, TRUE);
+        GetToolBar()->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_IN, TRUE);
+        GetToolBar()->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_OUT, TRUE);
     }
     else
     {
-        GetToolBar()->EnableTool(GmatPlot::MDI_CHILD_ZOOM_IN, FALSE);
-        GetToolBar()->EnableTool(GmatPlot::MDI_CHILD_ZOOM_OUT, FALSE);
+        GetToolBar()->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_IN, FALSE);
+        GetToolBar()->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_OUT, FALSE);
     }
 }
 
@@ -130,10 +130,10 @@ void MdiParentGlFrame::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiParentGlFrame::OnClose(wxCloseEvent& event)
 {
-    if ( event.CanVeto() && (MdiGlPlot::numChildFrames > 0) )
+    if ( event.CanVeto() && (MdiGlPlot::numChildren > 0) )
     {
 //          wxString msg;
-//          msg.Printf(_T("%d windows still open, close anyhow?"), MdiGlPlot::numChildFrames);
+//          msg.Printf(_T("%d windows still open, close anyhow?"), MdiGlPlot::numChildren);
 //          if ( wxMessageBox(msg, _T("Please confirm"),
 //                            wxICON_QUESTION | wxYES_NO) != wxYES )
 //          {
@@ -142,7 +142,7 @@ void MdiParentGlFrame::OnClose(wxCloseEvent& event)
 //          }
     }
     MdiGlPlot::mdiParentGlFrame = NULL;
-    MdiGlPlot::numChildFrames = 0;
+    MdiGlPlot::numChildren = 0;
     event.Skip();
 }
 
@@ -191,7 +191,7 @@ void MdiParentGlFrame::OnOpenTrajectoryFile(wxCommandEvent& WXUNUSED(event) )
                                   wxPoint(-1, -1), wxSize(-1, -1),
                                   wxDEFAULT_FRAME_STYLE);
         
-        ++MdiGlPlot::numChildFrames;
+        ++MdiGlPlot::numChildren;
         
         subframe->SetTitle(trajectoryFileName);
 
@@ -239,24 +239,24 @@ void MdiParentGlFrame::InitToolBar(wxToolBar* toolBar)
     toolBar->SetMargins(5, 5);
     toolBar->SetToolBitmapSize(wxSize(16, 16));
 
-    toolBar->AddTool(GmatPlot::MDI_OPEN_TRAJECTORY_FILE,
+    toolBar->AddTool(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE,
                      tbBitmaps[0], wxNullBitmap, FALSE, -1, -1,
                      (wxObject*)NULL, _T("Open"), _T("Open an trajectory file"));
     
     toolBar->AddSeparator();
     
-    toolBar->AddTool(GmatPlot::MDI_CHILD_ZOOM_IN,
+    toolBar->AddTool(GmatPlot::MDI_GL_CHILD_ZOOM_IN,
                      tbBitmaps[1], wxNullBitmap, FALSE, -1, -1,
                      (wxObject*)NULL, _T("Zoom in"), _T("Zoom in"));
     
-    toolBar->AddTool(GmatPlot::MDI_CHILD_ZOOM_OUT,
+    toolBar->AddTool(GmatPlot::MDI_GL_CHILD_ZOOM_OUT,
                      tbBitmaps[2], wxNullBitmap, FALSE, -1, -1,
                      (wxObject*)NULL, _T("Zoom out"), _T("Zoom out"));
 
     
     toolBar->Realize();
     
-    toolBar->EnableTool(GmatPlot::MDI_CHILD_ZOOM_IN, FALSE);    // must be after Realize() !
-    toolBar->EnableTool(GmatPlot::MDI_CHILD_ZOOM_OUT, FALSE); 
+    toolBar->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_IN, FALSE);    // must be after Realize() !
+    toolBar->EnableTool(GmatPlot::MDI_GL_CHILD_ZOOM_OUT, FALSE); 
 
 }
