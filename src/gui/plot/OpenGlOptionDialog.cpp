@@ -43,6 +43,7 @@ BEGIN_EVENT_TABLE(OpenGlOptionDialog, wxDialog)
    EVT_CLOSE(OpenGlOptionDialog::OnClose)
 END_EVENT_TABLE()
 
+using namespace GmatPlot;
 
 //------------------------------
 // public methods
@@ -126,7 +127,7 @@ void OpenGlOptionDialog::SetDrawWireFrame(bool flag)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::SetGotoStdBody(int bodyId)
 {
-   mGotoBodyComboBox->SetStringSelection(wxString(GmatPlot::BODY_NAME[bodyId].c_str()));
+   mGotoBodyComboBox->SetStringSelection(wxString(BodyInfo::BODY_NAME[bodyId].c_str()));
 }
 
 
@@ -339,7 +340,7 @@ void OpenGlOptionDialog::LoadData()
 
    // goto body
    mGotoBodyComboBox->
-      SetStringSelection(GmatPlot::BODY_NAME[mTrajFrame->GetGotoBodyId()].c_str());
+      SetStringSelection(BodyInfo::BODY_NAME[mTrajFrame->GetGotoBodyId()].c_str());
 
    // equatorial plane, wire frame
    mEquPlaneCheckBox->SetValue(mTrajFrame->GetDrawEquPlane());
