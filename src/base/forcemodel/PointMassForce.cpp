@@ -163,7 +163,8 @@ PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 {
    if (&pmf == this)
       return *this;
-
+      
+   PhysicalModel::operator=(pmf);
    epoch = pmf.epoch;
    mu = pmf.mu;
    dimension = pmf.dimension;
