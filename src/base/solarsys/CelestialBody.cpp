@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <strstream>
+#include <sstream>
 #include <iomanip>
 #include "gmatdefs.hpp"
 #include "CelestialBody.hpp"
@@ -36,7 +37,7 @@
 #include "MessageInterface.hpp"
 
 using namespace GmatMathUtil;
-using namespace std; // ************** temporary ************
+using namespace std; 
 
 //---------------------------------
 // static data
@@ -1616,12 +1617,6 @@ void CelestialBody::Initialize(std::string withBodyType)
 //------------------------------------------------------------------------------
 bool CelestialBody::ReadPotentialFile()
 {
-   //Cbar  = Rmatrix(MAX_DEGREE+4,MAX_ORDER+4);  // right size?
-   //Sbar  = Rmatrix(MAX_DEGREE+4,MAX_ORDER+4);
-   //dCbar = Rmatrix(MAX_DEGREE+4,MAX_ORDER+4);
-   //dSbar = Rmatrix(MAX_DEGREE+4,MAX_ORDER+4);
-   
-   //Integer fileDegree = 0, fileOrder = 0;
    if (potentialFileRead) return true;
    if (potentialFileName == "") return false;
 
@@ -1652,18 +1647,11 @@ bool CelestialBody::ReadPotentialFile()
       throw SolarSystemException("Gravity file " + potentialFileName +
                                 " is of unknown format.");
    }
-   //degree            = fileDegree;
-   //order             = fileOrder;
-   // I will need to call the method of the full field force to read the file
-   // set mu, radius, sij, cij, coefficientSize
    potentialFileRead = true;
-   //sij = Sbar;
-   //cij = Cbar;	
    return true;
 }
 
 //------------------------------------------------------------------------------
-//  bool ReadCofFile(Integer& fileDeg, Integer& fileOrd)
 //  bool ReadCofFile()
 //------------------------------------------------------------------------------
 /**
@@ -1672,75 +1660,54 @@ bool CelestialBody::ReadPotentialFile()
  * @return success flag.
  */
 //------------------------------------------------------------------------------
-//bool CelestialBody::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
 bool CelestialBody::ReadCofFile()
 {
-   //Integer       n, m;
    Integer       fileOrder, fileDegree;
-   //Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
-   char          buf[CelestialBody::BUFSIZE];
-   char          firstToken[CelestialBody::BUFSIZE];
    Integer       noIdea;
    Real          noClue;
    Real          tmpMu;
    Real          tmpA;
 
-  // for ( n=0,m=0; n <= MAX_DEGREE && m <= MAX_ORDER;n++,m++ )
-  // {
-  //    //Cbar(n,m) = 0.0;
-  //    //Sbar(n,m) = 0.0;
-  //    Cbar(n,m) = 0.0;
-  //    Sbar(n,m) = 0.0;
-  // }
-
-   std::ifstream inFile(potentialFileName.c_str(),std::ios::in);
+   std::ifstream inFile;
+   inFile.open(potentialFileName.c_str());
    if (!inFile)
       throw SolarSystemException("Cannot open file " + potentialFileName);
-   
+   std::string s;
+   std::string firstStr;
    while (!inFile.eof())
    {
-      inFile.getline(buf,CelestialBody::BUFSIZE);
-      std::istrstream  lineStr(buf,CelestialBody::BUFSIZE);
+      getline(inFile,s);
+      std::istringstream lineStr;
+      lineStr.str(s);
       // ignore comment lines
-      if (buf[0] != 'C')
+      if (s[0] != 'C')
       {
-         lineStr >> firstToken;
-         if (strcmp(firstToken, "END") == 0) break;
-         if (strcmp(firstToken,"POTFIELD") == 0)
+         lineStr >> firstStr;
+         if (firstStr == "END") break;
+         if (firstStr == "POTFIELD")
          {
             lineStr >> fileDegree >> fileOrder >> noIdea >> tmpMu >> tmpA >> noClue;
             if (tmpMu == 0.0)
                mu = defaultMu;
             else
-               mu = tmpMu;
+               mu = tmpMu / 1.0e09;  // -> Km^3/sec^2
             if (tmpA  == 0.0)
                equatorialRadius  = defaultEqRadius;
             else
-               equatorialRadius = tmpA;
+               equatorialRadius = tmpA / 1000.0;  // -> km
             break;  // stop after reading the mu and a
          }
-         else if (strcmp(firstToken,"RECOEF") == 0)
+         else
          {
-            //lineStr >> n >> m >> Cnm >> Snm; 
-            //   if ( n <= MAX_DEGREE && m <= MAX_ORDER )
-            //   {
-            //      Cbar(n,m) = (Real)Cnm;
-            //      Sbar(n,m) = (Real)Snm;
-            //   }
+            // ignore anything else
          }
       }
    }
 
-   //fileDeg = fileDegree;
-   //fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   equatorialRadius  = equatorialRadius / 1000.0;
-   mu                = mu / 1.0e09;
-   return true;   // TBD
+   return true; 
 }
 
 //------------------------------------------------------------------------------
-//  bool ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
 //  bool ReadGrvFile()
 //------------------------------------------------------------------------------
 /**
@@ -1749,12 +1716,9 @@ bool CelestialBody::ReadCofFile()
  * @return success flag.
  */
 //------------------------------------------------------------------------------
-//bool CelestialBody::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
 bool CelestialBody::ReadGrvFile()
 {
-   //Integer       n, m;
    Integer       fileOrder, fileDegree;
-   //Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
    char          buf[CelestialBody::BUFSIZE];
    char          firstToken[CelestialBody::BUFSIZE];
    Real          tmpMu = 0.0;
@@ -1764,12 +1728,6 @@ bool CelestialBody::ReadGrvFile()
    std::ifstream inFile(potentialFileName.c_str(),std::ios::in);
    if (!inFile)
       throw SolarSystemException("Cannot open file " + potentialFileName);
-
-  // for ( n=0,m=0; n <= MAX_DEGREE && m <= MAX_ORDER;n++,m++ )
-  // {
-  //    Cbar(n,m) = 0.0;
-  //    Sbar(n,m) = 0.0;
-  // }
 
    while (!inFile.eof())
    {
@@ -1803,7 +1761,7 @@ bool CelestialBody::ReadGrvFile()
                if (tmpMu == 0.0)
                   mu = defaultMu;
                else
-                  mu = tmpMu;
+                  mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
                // break as soon as both mu and a are read
                if ((tmpMu != 0.0) && (tmpA != 0.0)) break;
             }
@@ -1813,7 +1771,7 @@ bool CelestialBody::ReadGrvFile()
                if (tmpA == 0.0)
                   equatorialRadius = defaultEqRadius;
                else
-                  equatorialRadius = tmpA;
+                  equatorialRadius = tmpA / 1000.0;  // -> Km
                // break as soon as both mu and a are read
                if ((tmpMu != 0.0) && (tmpA != 0.0)) break;            
             }
@@ -1826,29 +1784,17 @@ bool CelestialBody::ReadGrvFile()
              }
             else
             {
-              // n = (Integer) atoi(firstToken);
-              // lineStr >> m >> Cnm >> Snm;
-              // if ( n <= MAX_DEGREE && m <= MAX_ORDER )
-              // {
-              //    Cbar(n,m) = (Real)Cnm;
-              //    Sbar(n,m) = (Real)Snm;
-              // }
+               // ignore
             }
 
          }
       }
    }
 
-   //fileDeg = fileDegree;
-   //fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   equatorialRadius  = equatorialRadius / 1000.0;
-   mu                = mu / 1.0e09;
    return true;  
 }
 
 //------------------------------------------------------------------------------
-//  bool ReadDatFile(Integer& fileDeg, Integer& fileOrd)
 //  bool ReadDatFile()
 //------------------------------------------------------------------------------
 /**
@@ -1857,30 +1803,17 @@ bool CelestialBody::ReadGrvFile()
  * @return success flag.
  */
 //------------------------------------------------------------------------------
-//bool CelestialBody::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
 bool CelestialBody::ReadDatFile()
 {
-   //Integer      cc, dd, sz=0;
    Integer      iscomment, rtn;
-   //Integer      n=0, m=0;
-   //Integer      fileDegree, fileOrder;
-   //Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
    char         buf[CelestialBody::BUFSIZE];
    FILE        *fp;
 
-  // for (cc = 2;cc <= MAX_DEGREE; ++cc)
-  // {
-  //    for (dd = 0; dd <= cc; ++dd)
-  //    {
-  //       sz++;
-  //    }
-  // }
    
    /* read coefficients from file */
    fp = fopen( potentialFileName.c_str(), "r");
    if (!fp)
    {
-//      gFinitialized = false;  // ???????????????????????????????????
       return false;
    }
 
@@ -1901,39 +1834,6 @@ bool CelestialBody::ReadDatFile()
 
    fscanf(fp, "%lg\n", &mu ); mu = (Real)mu;
    fscanf(fp, "%lg\n", &equatorialRadius ); equatorialRadius = (Real)equatorialRadius;
-   //fgets( buf, CelestialBody::BUFSIZE, fp );
-   //while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
-   //{
-   //   ungetc( rtn, fp );
-   //   fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
-   //   if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
-   //   {
-   //      dCbar(n,m) = (Real)dCnm;
-   //      dSbar(n,m) = (Real)dSnm;
-   //   }
-   //}
-
-   //fgets( buf, CelestialBody::BUFSIZE, fp );
-
-   //fileDegree = 0;
-   //fileOrder  = 0;
-   //cc=0;n=0;m=0;
-   //do
-   //{
-   //   if ( n <= MAX_DEGREE && m <= MAX_ORDER )
-   //   {
-   //      Cbar(n,m) = (Real)Cnm;
-   //      Sbar(n,m) = (Real)Snm;
-   //   }
-   //   if (n > fileDegree) fileDegree = n;
-   //   if (n > fileOrder)  fileOrder  = n;
-   //   
-   //   cc++;
-   //} while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
-
-   //fileDeg = fileDegree;
-   //fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
    equatorialRadius  = equatorialRadius / 1000.0;
    mu                = mu / 1.0e09;
    return true;
@@ -1953,7 +1853,7 @@ bool CelestialBody::IsBlank(char* aLine)
    Integer i;
    for (i=0;i<(int)strlen(aLine);i++)
    {
-      if (!isblank(aLine[i])) return false;
+      if (!isspace(aLine[i])) return false;
    }
    return true;
 }
