@@ -48,7 +48,7 @@ public:
    // destructor
    virtual ~Moon();
 
-   virtual Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
+   virtual Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const;
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;

@@ -20,7 +20,6 @@
 #include "PhysicalConstants.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
-#include "TimeSystemConverter.hpp"
 
 using namespace GmatMathUtil;
 
@@ -143,12 +142,12 @@ Moon::~Moon()
 }
 
 //------------------------------------------------------------------------------
-//  Rvector3 GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+//  Rvector GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 /**
 * This method returns the cartographic coordinates for the planet.
  *
- * @return vector containing alpha, delta, W.
+ * @return vector containing alpha, delta, W, Wdot.
  *
  * @note currently only implemented for the moons (listed in IAU doc) of our
  *       Solar System.  See "Report of the IAU/IAG Working Group on
@@ -156,11 +155,12 @@ Moon::~Moon()
  *       and Satellites: 2000"
  */
 //------------------------------------------------------------------------------
-Rvector3 Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
+Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
 {
    Real alpha = 0;
    Real delta = 0;
-   Real W = 0;
+   Real W     = 0;
+   Real Wdot  = 0.0; // *************** temporary ***************
    // intermediate angle computations, in radians (for trig functions)
    Real p1  = 0.0, p2  = 0.0, p3  = 0.0, p4  = 0.0;
    Real p5  = 0.0, p6  = 0.0, p7  = 0.0, p8  = 0.0;
@@ -228,7 +228,7 @@ Rvector3 Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
       return CelestialBody::GetBodyCartographicCoordinates(forTime);
    }
    
-   return Rvector3(alpha, delta, W);
+   return Rvector(4, alpha, delta, W, Wdot);
 }
 
 //------------------------------------------------------------------------------
