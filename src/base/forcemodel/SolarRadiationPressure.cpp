@@ -129,7 +129,6 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    sunDistance         (149597870.691),
    nominalSun          (149597870.691)
 {
-//    SRPParamCount = VECTORTYPE;  //waw: 04/19/04
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +139,22 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
  */
 //------------------------------------------------------------------------------
 SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp) :
-   PhysicalModel     (srp)
+   PhysicalModel       (srp),  
+   useAnalytic         (srp.useAnalytic),
+   shadowModel         (srp.shadowModel),
+   vectorModel         (srp.vectorModel),
+   bodyRadius          (srp.bodyRadius),
+   cbSunVector         (srp.cbSunVector),
+   forceVector         (srp.forceVector),
+   sunRadius           (srp.sunRadius),
+   hasMoons            (srp.hasMoons),
+   cr                  (srp.cr),
+   area                (srp.area),
+   mass                (srp.mass),
+   flux                (srp.flux),           // W/m^2, IERS 1996
+   fluxPressure        (srp.fluxPressure),   // converted to N/m^2
+   sunDistance         (srp.sunDistance),
+   nominalSun          (srp.nominalSun)
 {
 
 }
@@ -464,14 +478,11 @@ bool SolarRadiationPressure::Initialize(void)
          throw ForceModelException("Solar system does not contain the Sun for SRP force.");
 
       /// @todo: Update to get the central body for solar radiation pressure
-      //theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
       body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
 
-      //if (!theCentralBody)
       if (!body)
          throw ForceModelException("Central body not set for SRP force.");
 
-      //bodyRadius = theCentralBody->GetEquatorialRadius();
       bodyRadius = body->GetEquatorialRadius();
 
       if (forceVector)
@@ -507,15 +518,11 @@ bool SolarRadiationPressure::SetCentralBody()
    
    // DJC: Changed to use the Earth as the SRP central body for now
    /// @todo: Update to get the central body for solar radiation pressure
-//   theCentralBody = theSun->GetCentralBody();
-   //theCentralBody = solarSystem->GetBody(SolarSystem::EARTH_NAME);
    body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
 
-   //if (!theCentralBody)
    if (!body)
       throw ForceModelException("Central body not set for SRP force.");
 
-   //bodyRadius = theCentralBody->GetEquatorialRadius();
    bodyRadius = body->GetEquatorialRadius();
 
    return true;
@@ -536,7 +543,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     if (!theSun)
        throw ForceModelException("The Sun is not set in SRP::GetDerivatives");
 
-    //if (!theCentralBody)
       if (!body)
        throw ForceModelException("The central body is not set in SRP::GetDerivatives");
     
@@ -549,7 +555,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     
     Real ep = epoch + dt / 86400.0;
     Rvector6 sunrv = theSun->GetState(ep);
-    //Rvector6 cbrv = theCentralBody->GetState(ep);
     Rvector6 cbrv = body->GetState(ep);
     cbSunVector[0] = sunrv[0] - cbrv[0];
     cbSunVector[1] = sunrv[1] - cbrv[1];

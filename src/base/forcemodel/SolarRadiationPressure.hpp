@@ -119,10 +119,7 @@ protected:
    };
             
    /// Pointer to the source of planetary ephemerides
-   //waw solarmodel::SolarData *ss;
-//   SolarSystem *theSolarSystem;
    CelestialBody *theSun;
-   //CelestialBody *theCentralBody;
 
    /// Flag used to indicate using an analytic model to locate the Sun
    bool useAnalytic;
@@ -175,7 +172,7 @@ private:
    /// Parameter IDs
    enum
    {
-      USE_ANALYTIC = 0,
+      USE_ANALYTIC = PhysicalModelParamCount,
       SHADOW_MODEL,
       VECTOR_MODEL,
       BODY_ID,
