@@ -38,6 +38,8 @@ public:
    virtual PropState&   GetState();
    virtual Real         GetEpoch();
    virtual Real         SetEpoch(const Real ep);
+   virtual bool         IsManeuvering();
+   virtual void         IsManeuvering(bool mnvrFlag);
    
    virtual Integer GetParameterID(const std::string &str) const;
    virtual Real GetRealParameter(const Integer id) const;
@@ -59,7 +61,10 @@ public:
    virtual std::string GetParameterTypeString(const Integer id) const;
 
 protected:
+   /// The spacecraft state
    PropState            state;
+   /// true when a finite burn needs to be applied to this SpaceObject
+   bool                 isManeuvering;
    
    /// Enumerated parameter IDs   
    enum

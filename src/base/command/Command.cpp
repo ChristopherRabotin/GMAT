@@ -323,6 +323,22 @@ void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 
 
 //------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Passes the transient force vector into the commands that need them
+ * 
+ * @param tf The vector of transient forces
+ * 
+ * @note The default behavior in the GmatCommands is to ignore the vector.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+}
+
+
+//------------------------------------------------------------------------------
 //  void SetPublisher(Publisher *p)
 //------------------------------------------------------------------------------
 /**

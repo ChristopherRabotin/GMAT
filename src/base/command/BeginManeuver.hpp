@@ -23,6 +23,7 @@
 
 #include "Command.hpp"
 #include "FiniteBurn.hpp"
+#include "FiniteThrust.hpp"
 #include "Spacecraft.hpp"
 #include "Thruster.hpp"
 
@@ -38,13 +39,18 @@ public:
    BeginManeuver(const BeginManeuver& begman);
    BeginManeuver&       operator=(const BeginManeuver& begman);
    
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                         const std::string &name);
    
+   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+                                  const std::string objName = "");
+
    virtual GmatBase*    Clone() const;
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   
    virtual bool         Initialize();
    virtual bool         Execute();
    
@@ -53,6 +59,11 @@ protected:
    std::string          burnName;
    /// The FiniteBurn object
    FiniteBurn           *maneuver;
+   /// The FiniteThrust that is available for the force models
+   FiniteThrust         *burnForce;
+   /// The vector of forces managed by the Sandbox
+   std::vector<PhysicalModel*> 
+                        *transientForces;
    /// The names of the spacecraft that get maneuvered
    StringArray          satNames;
    /// The spacecraft that get maneuvered

@@ -25,6 +25,7 @@
 #include "FiniteBurn.hpp"
 #include "Spacecraft.hpp"
 #include "Thruster.hpp"
+#include "FiniteThrust.hpp"
 
 
 /**
@@ -45,14 +46,24 @@ public:
                                         const std::string &name);
 
    virtual GmatBase*    Clone() const;
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   
    virtual bool         Initialize();
    virtual bool         Execute();
 
 protected:
    /// Name of the FiniteBurn object used to set the maneuver details
+   std::string          thrustName;
+   /// The FiniteThrust that is available for the force models
+   FiniteThrust         *burnForce;
+
+   /// Name of the FiniteBurn object used to set the maneuver details
    std::string          burnName;
    /// The FiniteBurn object
    FiniteBurn           *maneuver;
+   /// The vector of forces managed by the Sandbox
+   std::vector<PhysicalModel*> 
+                        *transientForces;
    /// The names of the spacecraft that get maneuvered
    StringArray          satNames;
    /// The spacecraft that get maneuvered

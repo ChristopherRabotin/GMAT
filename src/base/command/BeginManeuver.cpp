@@ -21,6 +21,7 @@
 
 
 //#define DEBUG_BEGIN_MANEUVER
+//#define DEBUG_BEGIN_MANEUVER_EXE
 
 #ifdef DEBUG_BEGIN_MANEUVER
   #include "MessageInterface.hpp"
@@ -35,7 +36,11 @@
  */
 //------------------------------------------------------------------------------
 BeginManeuver::BeginManeuver() :
-   GmatCommand    ("BeginManeuver")
+   GmatCommand    ("BeginManeuver"),
+   burnName       (""),
+   maneuver       (NULL),
+   burnForce      (NULL),
+   transientForces(NULL)
 {
    if (instanceName == "")
       instanceName = "BeginManeuver";
@@ -51,6 +56,8 @@ BeginManeuver::BeginManeuver() :
 //------------------------------------------------------------------------------
 BeginManeuver::~BeginManeuver()
 {
+   if (burnForce)
+      delete burnForce;
 }
 
 
@@ -66,6 +73,9 @@ BeginManeuver::~BeginManeuver()
 BeginManeuver::BeginManeuver(const BeginManeuver& begman) :
    GmatCommand       (begman),
    burnName          (begman.burnName),
+   maneuver          (NULL),
+   burnForce         (NULL),
+   transientForces   (NULL),
    satNames          (begman.satNames)
 {
 }
@@ -91,6 +101,8 @@ BeginManeuver& BeginManeuver::operator=(const BeginManeuver& begman)
    GmatCommand::operator=(begman);
    burnName = begman.burnName;
    satNames = begman.satNames;
+   transientForces = NULL;
+   
    return *this;
 }
 
@@ -165,6 +177,14 @@ bool BeginManeuver::SetRefObjectName(const Gmat::ObjectType type,
 }
 
 
+GmatBase* BeginManeuver::GetObject(const Gmat::ObjectType type, 
+                                   const std::string objName)
+{
+   if (type == Gmat::TRANSIENT_FORCE)
+      return burnForce;
+   return GmatCommand::GetObject(type, objName);
+}
+                                  
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -180,6 +200,12 @@ GmatBase* BeginManeuver::Clone() const
 }
 
 
+void BeginManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   transientForces = tf;
+}
+
+
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------
@@ -192,6 +218,10 @@ GmatBase* BeginManeuver::Clone() const
 bool BeginManeuver::Initialize()
 {
    bool retval = GmatCommand::Initialize();
+
+   #ifdef DEBUG_BEGIN_MANEUVER
+      MessageInterface::ShowMessage("BeginManeuver::Initialize() entered\n");
+   #endif
    
    if (retval) {
       // Look up the maneuver object
@@ -199,14 +229,25 @@ bool BeginManeuver::Initialize()
          throw CommandException("Unknown finite burn \"" + burnName + "\"");
       if ((*objectMap)[burnName]->GetTypeName() != "FiniteBurn")
          throw CommandException((burnName) + " is not a FiniteBurn");
+
+      #ifdef DEBUG_BEGIN_MANEUVER
+         MessageInterface::ShowMessage("BeginManeuver::Initialize() found %s\n", 
+            burnName.c_str());
+      #endif      
+
       maneuver = (FiniteBurn*)((*objectMap)[burnName]);
-      
+
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
       for (scName = satNames.begin(); scName != satNames.end(); ++scName) {
          if (objectMap->find(*scName) == objectMap->end()) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
+
+         #ifdef DEBUG_BEGIN_MANEUVER
+            MessageInterface::ShowMessage(
+               "BeginManeuver::Initialize() found %s\n", scName->c_str());
+         #endif
          
          if ((*objectMap)[*scName]->GetType() != Gmat::SPACECRAFT)
             throw CommandException((*scName) + " is not a Spacecraft");
@@ -245,7 +286,26 @@ bool BeginManeuver::Initialize()
             }
          }
       }
+      
+      // If all is okay, create the FiniteThrust object and configure it.
+      std::string thrustName = burnName + "_FiniteThrust";
+      burnForce = new FiniteThrust(thrustName);
+      
+      Gmat::ObjectType type = Gmat::SPACECRAFT;
+      StringArray::iterator iter;
+      
+      // load up the spacecraft name list
+      for (iter = satNames.begin(); iter != satNames.end(); ++iter) {
+         #ifdef DEBUG_BEGIN_MANEUVER
+            MessageInterface::ShowMessage(
+               "BeginManeuver::Initialize() setting %s on %s\n", 
+               iter->c_str(), thrustName.c_str());
+         #endif
+         burnForce->SetRefObjectName(type, *iter);
+      }
+      
    }
+   
    
    return initialized;
 }
@@ -266,21 +326,34 @@ bool BeginManeuver::Execute()
    // Turn on all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 
         i != thrusters.end(); ++i) {
-      #ifdef DEBUG_BEGIN_MANEUVER
+      #ifdef DEBUG_BEGIN_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Activating engine %s\n", 
              (*i)->GetName().c_str());
       #endif
       (*i)->SetBooleanParameter((*i)->GetParameterID("IsFiring"), true);
 
-      #ifdef DEBUG_BEGIN_MANEUVER
+      #ifdef DEBUG_BEGIN_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Checking to see if engine is active: returned %s\n", 
              ((*i)->GetBooleanParameter((*i)->GetParameterID("IsFiring")) ? 
               "true" : "false"));
-      #endif
-      
+      #endif      
    }
+   
+   // Tell active spacecraft that they are now firing
+   for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
+      (*s)->IsManeuvering(true);
+      
+   // Insert the force into the list of transient forces
+   transientForces->push_back(burnForce);
+
+   #ifdef DEBUG_BEGIN_MANEUVER_EXE
+      MessageInterface::ShowMessage("Current TransientForces list:\n");
+      for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
+           j != transientForces->end(); ++j)
+         MessageInterface::ShowMessage("   %s\n", (*j)->GetName().c_str());
+   #endif
    
    return true;
 }

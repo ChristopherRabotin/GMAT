@@ -22,6 +22,7 @@
 #include "Moderator.hpp"
 #include "SandboxException.hpp"
 #include "Parameter.hpp"
+#include "FiniteThrust.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SANDBOX_OBJ 1
@@ -54,6 +55,7 @@ Sandbox::~Sandbox()
       delete sequence;
     
    // Delete the local objects
+   Clear();
 }
     
 // Setup methods
@@ -233,6 +235,8 @@ bool Sandbox::Initialize()
    
    if (moderator == NULL)
       moderator = Moderator::Instance();
+      
+   transientForces.empty();
 
    // Already initialized
    if (state == INITIALIZED)
@@ -248,12 +252,12 @@ bool Sandbox::Initialize()
    {
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
-#if DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage
-            ("Sandbox::Initialize() objTypeName=%s, objName=%s\n",
-             (omi->second)->GetTypeName().c_str(),
-             (omi->second)->GetName().c_str());
-#endif
+         #if DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage
+               ("Sandbox::Initialize() objTypeName=%s, objName=%s\n",
+                (omi->second)->GetTypeName().c_str(),
+                (omi->second)->GetName().c_str());
+         #endif
          if ((omi->second)->GetType() == Gmat::COORDINATE_SYSTEM)
          {
             CoordinateSystem *cs = (CoordinateSystem*)(omi->second);
@@ -338,9 +342,9 @@ bool Sandbox::Initialize()
       throw SandboxException("No solar system defined in the Sandbox!");
 
    
-#if DEBUG_SANDBOX_INIT
-   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Variables...\n");
-#endif
+   #if DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Variables...\n");
+   #endif
    // Note: All system parameters need to be initialized first
    // Set reference object for user variables. Arrays don't have reference objects
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
@@ -369,9 +373,9 @@ bool Sandbox::Initialize()
       }
    }
 
-#if DEBUG_SANDBOX_INIT
-   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Subscribers...\n");
-#endif
+   #if DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Subscribers...\n");
+   #endif
 
    // Initialize subscribers
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
@@ -381,11 +385,11 @@ bool Sandbox::Initialize()
          Subscriber *sub = (Subscriber*)(omi->second);
          GmatBase *refParam;
          
-#if DEBUG_SANDBOX_INIT > 1
-         MessageInterface::ShowMessage
-            ("Sandbox::Initialize() subType=%s, subName=%s\n",
-             sub->GetTypeName().c_str(), sub->GetName().c_str());
-#endif
+         #if DEBUG_SANDBOX_INIT > 1
+            MessageInterface::ShowMessage
+               ("Sandbox::Initialize() subType=%s, subName=%s\n",
+                sub->GetTypeName().c_str(), sub->GetName().c_str());
+         #endif
          
          StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
          for (unsigned int i=0; i<refParamNames.size(); i++)
@@ -401,23 +405,29 @@ bool Sandbox::Initialize()
       }
    }
    
-#if DEBUG_SANDBOX_INIT
-   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Commands...\n");
-#endif
+   #if DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Commands...\n");
+   #endif
    // Initialize commands
    while (current)
    {
+      #if DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage(
+            "Initializing %s command\n", current->GetTypeName().c_str());
+      #endif
       current->SetObjectMap(&objectMap);
       current->SetSolarSystem(solarSys);
       rv = current->Initialize();
       if (!rv)
          return false;
+
+      current->SetTransientForces(&transientForces);
       current = current->GetNext();
    }
    
-#if DEBUG_SANDBOX_INIT
-   MessageInterface::ShowMessage("Sandbox::Initialize() Successfully initialized\n");
-#endif
+   #if DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("Sandbox::Initialize() Successfully initialized\n");
+   #endif
    
    return rv;
 }
@@ -463,7 +473,7 @@ bool Sandbox::Execute()
       }
       
       rv = current->Execute();
-
+      
       // Possible fix for displaying the last iteration...
       if (current->GetTypeName() == "Target") {
          if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
@@ -540,6 +550,8 @@ void Sandbox::Clear()
    }
    
    objectMap.clear();
+   
+   transientForces.clear();
 }
 
 
@@ -567,11 +579,28 @@ void Sandbox::BuildAssociations(GmatBase * obj)
    if (obj->GetType() == Gmat::SPACECRAFT) {
       StringArray hw = obj->GetRefObjectNameArray(Gmat::HARDWARE);
       for (StringArray::iterator i = hw.begin(); i < hw.end(); ++i) {
+       
+         #if DEBUG_SANDBOX
+            MessageInterface::ShowMessage
+               ("Sandbox::BuildAssociations() setting \"%s\" on \"%s\"\n",
+                i->c_str(), obj->GetName().c_str());
+         #endif
+       
          if (objectMap.find(*i) == objectMap.end())
             throw SandboxException("Sandbox::BuildAssociations: Cannot find "
                                    "hardware element \"" + (*i) + "\"\n");
          GmatBase *el = objectMap[*i];
-         obj->SetRefObject(el->Clone(), el->GetType(), el->GetName());
+         GmatBase *newEl = el->Clone();
+         #if DEBUG_SANDBOX
+            MessageInterface::ShowMessage
+               ("Sandbox::BuildAssociations() created clone \"%s\" of type \"%s\"\n", 
+               newEl->GetName().c_str(), newEl->GetTypeName().c_str());
+         #endif
+         if (!obj->SetRefObject(newEl, newEl->GetType(), newEl->GetName()))
+            MessageInterface::ShowMessage
+               ("Sandbox::BuildAssociations() failed to set %s\n", 
+               newEl->GetName().c_str());
+         ;
       }
       
       obj->TakeAction("SetupHardware");

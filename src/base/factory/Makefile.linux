@@ -25,6 +25,8 @@ OBJECTS = Factory.o \
           AtmosphereFactory.o \
           CelestialBodyFactory.o \
           FunctionFactory.o \
+          AxisSystemFactory.o \
+          CoordinateSystemFactory.o \
           SolarSystemFactory.o
 
 all: libFactory

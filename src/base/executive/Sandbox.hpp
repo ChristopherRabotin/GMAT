@@ -34,7 +34,7 @@
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 //  #include "Solver.hpp"
-//  #include "Burn.hpp"
+#include "Burn.hpp"
 
 class Moderator;        // Forward reference for the moderator pointer
 
@@ -76,26 +76,30 @@ private:
    };
     
    /// Object store for this run
-   std::map<std::string, GmatBase *> objectMap;
+   std::map<std::string, GmatBase *>   objectMap;
    /// Solar System model for this Sandbox
-   SolarSystem    *solarSys;
+   SolarSystem                         *solarSys;
    /// CoordinateSystem used internally
-   CoordinateSystem    *internalCoordSys;
+   CoordinateSystem                    *internalCoordSys;
    /// GMAT Publisher singleton
-   Publisher      *publisher;
+   Publisher                           *publisher;
    /// Command sequence for the run
-   GmatCommand    *sequence;
+   GmatCommand                         *sequence;
    /// The executing Command
-   GmatCommand    *current;
+   GmatCommand                         *current;
    /// Pointer to the moderator, used to check Pause/Stop status
-   Moderator      *moderator;
+   Moderator                           *moderator;
    /// Execution mode for the sandbox
-   runMode        state;
+   runMode                             state;
+   
+   // Additions made for finite maneuvers
+   /// List of FiniteThrust objects that are currently available
+   std::vector<PhysicalModel *>        transientForces;
 
    Sandbox(const Sandbox&);
    Sandbox& operator=(const Sandbox&);
    
-   void           BuildAssociations(GmatBase * obj);
+   void                                BuildAssociations(GmatBase * obj);
 };
 
 #endif

@@ -37,7 +37,8 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
 
 SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr, 
                          const std::string &nomme) :
-   SpacePoint       (typeId, typeStr, nomme)
+   SpacePoint       (typeId, typeStr, nomme),
+   isManeuvering    (false)
 {
 }
 
@@ -49,7 +50,8 @@ SpaceObject::~SpaceObject()
 
 SpaceObject::SpaceObject(const SpaceObject& so) :
    SpacePoint     (so),
-   state          (so.state)
+   state          (so.state),
+   isManeuvering  (so.isManeuvering)
 {
 }
 
@@ -60,6 +62,7 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
       return *this;
       
    state = so.state;
+   isManeuvering = so.isManeuvering;
    return *this;
 }
 
@@ -81,6 +84,39 @@ Real SpaceObject::SetEpoch(const Real ep)
    return state.SetEpoch(ep);
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsManeuvering()
+//------------------------------------------------------------------------------
+/**
+ * Function that checks to see if finite burn needs to be applied to this object.
+ * 
+ * @return true if a finite burn is active, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool SpaceObject::IsManeuvering()
+{
+   return isManeuvering;
+}
+
+//------------------------------------------------------------------------------
+// void IsManeuvering(bool mnvrFlag)
+//------------------------------------------------------------------------------
+/**
+ * Function that sets or clears the maneuvering flag.
+ * 
+ * Derived classes may override this method so that the flag is updated based on
+ * the state of the hardware attached to the SpaceObjects.
+ * 
+ * @param mnvrFlag The new value for the flag.
+ */
+//------------------------------------------------------------------------------
+void SpaceObject::IsManeuvering(bool mnvrFlag)
+{
+   isManeuvering = mnvrFlag;
+}
+
+
 // temporarily here *************************************************
 const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
 {
@@ -88,6 +124,7 @@ const Rvector6 SpaceObject::GetMJ2000State(const A1Mjd &atTime)
   // Rvector6& itsState(ps.GetState());
    return Rvector6(ps.GetState()); // temporary
 }
+
 const Rvector3 SpaceObject::GetMJ2000Position(const A1Mjd &atTime)
 {
    PropState ps    = GetState();

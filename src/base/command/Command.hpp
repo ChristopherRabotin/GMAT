@@ -37,6 +37,9 @@
 #include "Publisher.hpp"     // For the Publisher and ...
 #include "Subscriber.hpp"    // ... base of the Subscribers
 
+// Forward reference for the transient force vector
+class PhysicalModel;
+
 
 /**
  * GMAT GmatCommand Base Class, used for timeline elements in the script
@@ -77,6 +80,8 @@ public:
    
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   
    virtual void         SetPublisher(Publisher *p);
    
    

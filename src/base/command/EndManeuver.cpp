@@ -18,9 +18,11 @@
 //------------------------------------------------------------------------------
 
 #include "EndManeuver.hpp"
+#include "ForceModel.hpp"
 
 
 //#define DEBUG_END_MANEUVER
+//#define DEBUG_END_MANEUVER_EXE
 
 #ifdef DEBUG_END_MANEUVER
   #include "MessageInterface.hpp"
@@ -35,7 +37,9 @@
  */
 //------------------------------------------------------------------------------
 EndManeuver::EndManeuver() :
-   GmatCommand    ("EndManeuver")
+   GmatCommand    ("EndManeuver"),
+   burnForce      (NULL),
+   transientForces(NULL)
 {
    if (instanceName == "")
       instanceName = "EndManeuver";
@@ -65,7 +69,10 @@ EndManeuver::~EndManeuver()
 //------------------------------------------------------------------------------
 EndManeuver::EndManeuver(const EndManeuver& endman) :
    GmatCommand       (endman),
+   thrustName        (endman.thrustName),
+   burnForce         (NULL),
    burnName          (endman.burnName),
+   transientForces   (NULL),
    satNames          (endman.satNames)
 {
 }
@@ -89,7 +96,10 @@ EndManeuver& EndManeuver::operator=(const EndManeuver& endman)
       return *this;
       
    GmatCommand::operator=(endman);
+   thrustName = endman.thrustName;
+   burnForce = NULL;
    burnName = endman.burnName;
+   transientForces = NULL;
    satNames = endman.satNames;
    return *this;
 }
@@ -180,6 +190,11 @@ GmatBase* EndManeuver::Clone() const
 }
 
 
+void EndManeuver::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   transientForces = tf;
+}
+
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------
@@ -247,6 +262,13 @@ bool EndManeuver::Initialize()
       }
    }
    
+   thrustName = burnName + "_FiniteThrust";
+   #ifdef DEBUG_END_MANEUVER
+      MessageInterface::ShowMessage
+         ("EndManeuver initialized with thrust force named \"%s\"\n", 
+          thrustName.c_str());
+   #endif
+   
    return initialized;
 }
 
@@ -263,24 +285,60 @@ bool EndManeuver::Initialize()
 //------------------------------------------------------------------------------
 bool EndManeuver::Execute()
 {
-   // Turn on all of the referenced thrusters
+   // Turn off all of the referenced thrusters
    for (std::vector<Thruster*>::iterator i = thrusters.begin(); 
         i != thrusters.end(); ++i) {
-      #ifdef DEBUG_END_MANEUVER
+      #ifdef DEBUG_END_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Deactivating engine %s\n", 
              (*i)->GetName().c_str());
       #endif
       (*i)->SetBooleanParameter((*i)->GetParameterID("IsFiring"), false);
 
-      #ifdef DEBUG_END_MANEUVER
+      #ifdef DEBUG_END_MANEUVER_EXE
          MessageInterface::ShowMessage
             ("Checking to see if engine is inactive: returned %s\n", 
              ((*i)->GetBooleanParameter((*i)->GetParameterID("IsFiring")) ? 
               "true" : "false"));
-      #endif
-      
+      #endif      
    }
+   
+   // Remove the thrust force from all force models
+   ForceModel* fm;
+   for (std::map<std::string, GmatBase *>::iterator n = objectMap->begin(); 
+        n != objectMap->end(); ++n) {
+      if (n->second->GetType() == Gmat::FORCE_MODEL) {
+         fm = (ForceModel*)(n->second);
+         #ifdef DEBUG_END_MANEUVER_EXE
+            MessageInterface::ShowMessage
+               ("Attempting to remove %s from %s\n", thrustName.c_str(), 
+                fm->GetName().c_str());
+         #endif
+//         fm->DeleteForce(thrustName);
+      }
+   }
+   
+   // Tell active spacecraft that they are no longer firing
+   for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s) {
+      /// todo: Be sure that no other maneuver has the spacecraft maneuvering
+      (*s)->IsManeuvering(false);
+   }
+   
+   // Remove the force from the list of transient forces
+   for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
+        j != transientForces->end(); ++j) {
+      if (((*j)->GetName()) == thrustName) {
+         transientForces->erase(j);
+         break;
+      }
+   }
+
+   #ifdef DEBUG_END_MANEUVER_EXE
+      MessageInterface::ShowMessage("Current TransientForces list:\n");
+      for (std::vector<PhysicalModel*>::iterator j = transientForces->begin();
+           j != transientForces->end(); ++j)
+         MessageInterface::ShowMessage("   %s\n", (*j)->GetName().c_str());
+   #endif
    
    return true;
 }
