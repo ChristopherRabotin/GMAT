@@ -103,7 +103,8 @@ void GmatPanel::Show()
     theParent->SetSizer(thePanelSizer);
     thePanelSizer->Fit(theParent);
     thePanelSizer->SetSizeHints(theParent);
-    
+
+    LoadData();
 }
 
 //------------------------------------------------------------------------------
