@@ -80,9 +80,11 @@ SpacecraftPanel::~SpacecraftPanel()
 void SpacecraftPanel::Create()
 {
     currentSpacecraft = new Spacecraft(*theSpacecraft);
+
+    wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
     
     spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition, 
-                         wxSize(350,300), wxGROW );
+                         wxDefaultSize, wxGROW );
     sizer = new wxNotebookSizer( spacecraftNotebook );
  
     SolarSystem *theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
@@ -113,7 +115,9 @@ void SpacecraftPanel::Create()
 //    visuals = new wxPanel( mainNotebook, -1 );
     spacecraftNotebook->AddPage( tanks, wxT("Visualization") );
 
-    theMiddleSizer->Add(sizer, 0, wxGROW, 5);
+    theGridSizer->Add(sizer, 0, wxGROW, 5);
+//    theMiddleSizer->Add(sizer, 0, wxGROW, 5);
+    theMiddleSizer->Add(theGridSizer, 0, wxGROW, 5);
 }
 
 

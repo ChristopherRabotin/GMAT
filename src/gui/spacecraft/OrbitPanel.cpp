@@ -97,12 +97,12 @@ void OrbitPanel::Create()
     wxStaticText *referenceBodyStaticText = new wxStaticText( this, ID_TEXT, 
                           wxT("Reference Body"), wxDefaultPosition, 
                           wxDefaultSize, 0 );
-    item3->Add( referenceBodyStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item3->Add( referenceBodyStaticText, 0, wxALIGN_CENTER, 5 );
     
     wxStaticText *referenceFrameStaticText = new wxStaticText( this, ID_TEXT, 
                            wxT("Reference Frame"), wxDefaultPosition,
                            wxDefaultSize, 0 );
-    item3->Add( referenceFrameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item3->Add( referenceFrameStaticText, 0, wxALIGN_CENTER, 5 );
 
     StringArray items = theSolarSystem->GetBodiesInUse();
     int theNumConfigBody = items.size();
@@ -113,11 +113,11 @@ void OrbitPanel::Create()
     }    
       
     referenceBodyComboBox = new wxComboBox( this, ID_COMBO, wxT(""), 
-                         wxDefaultPosition, wxDefaultSize, 
+                         wxDefaultPosition, wxSize(110, -1), 
                          theNumConfigBody, bodiesArray, 
                          wxCB_DROPDOWN | wxCB_READONLY);        
                          
-    item3->Add( referenceBodyComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+    item3->Add( referenceBodyComboBox, 0, wxALIGN_CENTER, 5 );
 
     // hard coded for now
     wxString strs7[] =
@@ -125,12 +125,12 @@ void OrbitPanel::Create()
         wxT("Mean-of-J2000.0")
     };
     wxComboBox *referenceFrameComboBox = new wxComboBox( this, ID_COMBO, wxT(""),
-                         wxDefaultPosition, wxDefaultSize, 1, strs7, 
+                         wxDefaultPosition, wxSize(130,-1), 1, strs7, 
                          wxCB_DROPDOWN | wxCB_READONLY );
     referenceFrameComboBox->SetValue(wxT("Mean-of-J2000.0"));
-    item3->Add( referenceFrameComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+    item3->Add( referenceFrameComboBox, 0, wxALIGN_CENTER, 5 );
 
-    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
+    item1->Add( item3, 0, wxALIGN_CENTER, 5 );
 
     //static box for the orbit state
     wxStaticBox *item9 = new wxStaticBox( this, ID_STATIC_ORBIT, 
@@ -143,9 +143,9 @@ void OrbitPanel::Create()
     wxStaticText *item11 = new wxStaticText( this, ID_TEXT, 
                             wxT("Epoch"), wxDefaultPosition,
                             wxDefaultSize, 0 );
-    item10->Add( item11, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( item11, 0, wxALIGN_CENTER, 5 );
 
-    item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
 
     wxString strs12[] =
     {
@@ -157,24 +157,24 @@ void OrbitPanel::Create()
     
     // combo box for the date type
    dateComboBox = new wxComboBox( this, ID_CB_EPOCH, wxT(""), 
-             wxDefaultPosition, wxSize(100,-1), 4, strs12, 
+             wxDefaultPosition, wxSize(110,-1), 4, strs12, 
              wxCB_DROPDOWN | wxCB_READONLY );
-    item10->Add( dateComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( dateComboBox, 0, wxALIGN_CENTER, 5 );
 //    dateComboBox->Disable();
 
     // textfield for the epochvalue
     epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                 wxDefaultPosition, wxSize(150,-1), 0 );
+                 wxDefaultPosition, wxSize(130,-1), 0 );
    
-    item10->Add( epochValue, 0, wxALIGN_CENTER|wxALL, 5 );
-    item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( epochValue, 0, wxALIGN_CENTER, 5 );
+    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
 
     wxStaticText *item14 = new wxStaticText( this, ID_TEXT, 
                             wxT("State Type"), wxDefaultPosition,
                             wxDefaultSize, 0 );
-    item10->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( item14, 0, wxALIGN_CENTER, 5 );
 
-    item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( 20, 20, 0, wxALIGN_CENTER, 5 );
 
     wxString strs15[] =
     {
@@ -187,14 +187,14 @@ void OrbitPanel::Create()
     
     // combo box for the state
     stateComboBox = new wxComboBox( this, ID_CB_STATE, wxT(""), 
-              wxDefaultPosition, wxSize(100,-1), 2, strs15, 
+              wxDefaultPosition, wxSize(130,-1), 2, strs15, 
               wxCB_DROPDOWN | wxCB_READONLY);
 
 //      stateComboBox = new wxComboBox( orbitPanel, ID_CB_STATE, wxT(""), 
 //                wxDefaultPosition, wxSize(100,-1), 5, strs15, wxCB_DROPDOWN );
-    item10->Add( stateComboBox, 0, wxALIGN_CENTER|wxALL, 5 );
+    item10->Add( stateComboBox, 0, wxALIGN_CENTER, 5 );
 
-    item8->Add( item10, 0, wxALIGN_CENTER|wxALL, 5 );
+    item8->Add( item10, 0, wxALIGN_CENTER, 5 );
 
     // static box for the elements
     wxStaticBox *elementBox = 
@@ -207,19 +207,19 @@ void OrbitPanel::Create()
 //    elementsPanel = (wxPanel *)NULL; 
     // adds default descriptors/labels 
     AddElements(this);
-    elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER|wxALL, 5);
+    elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER, 5);
 
-    item8->Add( elementSizer, 0, wxALIGN_CENTER|wxALL, 5 );
+    item8->Add( elementSizer, 0, wxALIGN_CENTER, 5 );
 
-    orbitSizer->Add( item1, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
-    orbitSizer->Add( item8, 0, wxGROW|wxALIGN_CENTER|wxALL, 5 );
+    orbitSizer->Add( item1, 0, wxGROW|wxALIGN_CENTER, 5 );
+    orbitSizer->Add( item8, 0, wxGROW|wxALIGN_CENTER, 5 );
 
     theSpacecraft->SetDisplay(true);
 
-    this->SetAutoLayout( TRUE );
+//    this->SetAutoLayout( TRUE );
     this->SetSizer( orbitSizer );
-    orbitSizer->Fit( this );
-    orbitSizer->SetSizeHints( this );
+//    orbitSizer->Fit( this );
+//    orbitSizer->SetSizeHints( this );
 }
 
 //------------------------------------------------------------------------------
