@@ -33,3 +33,8 @@ SolarSystem::~SolarSystem()
 	// insert your code here
 }
 
+StringArray SolarSystem::GetBodiesInUse()
+{
+   return bodiesInUse;
+}
+
