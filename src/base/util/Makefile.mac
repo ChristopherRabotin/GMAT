@@ -1,0 +1,18 @@
+# Project:    GMAT
+# Module:     Makefile.mac for util directory 
+# Created:    Joey Gurgnaus 
+# Date:       2003/11/13
+
+# Define the marco for the top-level directories
+PROJECT_ROOT    = ../..
+#
+# Source file for creating new library
+SRC = A1Date.cpp DateUtil.cpp RealUtilities.cpp Rvector6.cpp A1Mjd.cpp \
+	ElapsedTime.cpp Rmatrix.cpp \
+	EphemerisUtil.cpp Rmatrix33.cpp UtcDate.cpp Cartesian.cpp Keplerian.cpp \
+	Rvector.cpp Date.cpp Linear.cpp Rvector3.cpp
+#
+# Define macro for using the included file 
+INCMK = $(PROJECT_ROOT)/base/inc.mac
+include ${INCMK}
+#
