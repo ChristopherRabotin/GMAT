@@ -84,12 +84,12 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
 {
    if (this == &cf)
       return *this;
-      
+
    GmatCommand::operator=(cf);
 
    mFunction = cf.mFunction;
    mFunctionName = cf.mFunctionName;
-      
+
    mNumInputParams = cf.mNumInputParams;
    mNumOutputParams = cf.mNumOutputParams;
 
@@ -99,7 +99,7 @@ CallFunction& CallFunction::operator=(const CallFunction& cf)
 
    mInputListNames = cf.mInputListNames;
    mOutputListNames = cf.mOutputListNames;
-    
+
    return *this;
 }
 
@@ -391,7 +391,7 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
 
    }
 
-   
+
    return true;
 }
 
@@ -504,14 +504,14 @@ bool CallFunction::Initialize()
    #if DEBUG_CALL_FUNCTION
       MessageInterface::ShowMessage("In Initialized\n");
    #endif
-   
+
    GmatCommand::Initialize();
 
    if (objectMap->find(mFunctionName)  == objectMap->end())
       throw CommandException("CallFunction command cannot find Function " +
                mFunctionName);
    mFunction = (Function *)((*objectMap)[mFunctionName]);
-   
+
    // need to initialize parameters
    mInputList.clear();
 
@@ -657,7 +657,7 @@ bool CallFunction::ExecuteMatlabFunction()
 
       // get the value for the out parameters
       GetOutParams();
-      
+
       // DJC, 03/02/05
       status = true;
 
@@ -668,6 +668,10 @@ bool CallFunction::ExecuteMatlabFunction()
 
 void CallFunction::SendInParam(Parameter *param)
 {
+   #if DEBUG_CALL_FUNCTION
+      MessageInterface::ShowMessage("CallFunction::SendInParam()");
+   #endif
+
    #if defined __USE_MATLAB__
       if (param == NULL)
       {
@@ -675,7 +679,11 @@ void CallFunction::SendInParam(Parameter *param)
          return;
       }
 
-//      MessageInterface::ShowMessage("Parameter type is: %d", param->GetType());
+      #if DEBUG_CALL_FUNCTION
+         MessageInterface::ShowMessage("Parameter %s, type is: %s",
+               param->GetName().c_str(),
+               param->GetTypeName().c_str());
+      #endif
 
       if (param->GetTypeName() == "Array")
       {
@@ -729,13 +737,13 @@ void CallFunction::SendInParam(Parameter *param)
           os << param->EvaluateReal();
 
           std::string inParamString = param->GetName() +" = " + os.str() +";";
-          EvalMatlabString(inParamString);
 
           #if DEBUG_UPDATE_VAR
              MessageInterface::ShowMessage("Sent string %s to matlab\n",
                               inParamString.c_str());
           #endif
 
+          EvalMatlabString(inParamString);
       }
    #endif  //__USE_MATLAB__
 }
@@ -767,12 +775,12 @@ void CallFunction::GetOutParams()
                   rmatrix(k, j) = outArray[(j*numRows) + k];
 
             #if DEBUG_USE_ARRAY
-                     for (int j=0; j<numRows; j++)
-                     {
-                       for (int k=0; k<numCols; k++)
-                         MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
-                       MessageInterface::ShowMessage("\n");
-                     }
+               for (int j=0; j<numRows; j++)
+               {
+                  for (int k=0; k<numCols; k++)
+                     MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
+                  MessageInterface::ShowMessage("\n");
+               }
             #endif
 
             // assign rmatrix to array
@@ -931,7 +939,7 @@ void CallFunction::ClearInputParameters()
 {
    mInputList.clear();
    mInputListNames.clear();
-   mNumInputParams = 0; 
+   mNumInputParams = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -941,6 +949,6 @@ void CallFunction::ClearOutputParameters()
 {
    mOutputList.clear();
    mOutputListNames.clear();
-   mNumOutputParams = 0; 
+   mNumOutputParams = 0;
 }
 
