@@ -58,6 +58,8 @@ public:
    
    void Activate(bool state = true);
    bool IsActive();
+   
+   virtual void SetProviderId(Integer id);
     
 protected:
    enum
@@ -69,6 +71,7 @@ protected:
    Subscriber *next;
    bool        active;
    bool        isEndOfReceive;
+   Integer     currentProvider;
    
    virtual bool Distribute(Integer len) = 0;
    virtual bool Distribute(const Real *dat, Integer len);

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "Publisher.hpp"
+#include "PublisherException.hpp"
 #include <string>
 #include "MessageInterface.hpp"
 
@@ -39,7 +40,9 @@ Publisher* Publisher::Instance(void)
 //------------------------------------------------------------------------------
 // Publisher(void)
 //------------------------------------------------------------------------------
-Publisher::Publisher(void)
+Publisher::Publisher(void) :
+   providerCount     (0),
+   currentProvider   (-1)
 {
 }
 
@@ -65,6 +68,7 @@ bool Publisher::Subscribe(Subscriber *s)
       return false;
 
    subs.push_back(s);
+   s->SetProviderId(currentProvider);
    return true;
 }
 
@@ -92,13 +96,21 @@ bool Publisher::UnsubscribeAll()
 //------------------------------------------------------------------------------
 // bool Publish(Real *data, Integer count = false)
 //------------------------------------------------------------------------------
-bool Publisher::Publish(Real *data, Integer count)
+bool Publisher::Publish(Integer id, Real *data, Integer count)
 {
    // No subscribers
    if (subs.empty()) {
       return false;
    }
+   
+   if ((id < 0) || (id >= providerCount))
+      throw PublisherException("Data provider has not registered with the Publisher.");
 
+   if (id != currentProvider) {
+      currentProvider = id;
+      UpdateProviderID(id);
+   }
+   
    // Convert the data into a string for distribution
    char stream[4096] = "";
     
@@ -111,12 +123,14 @@ bool Publisher::Publish(Real *data, Integer count)
          strcat(stream, "\n");
    }
 
+
 #if DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
        subs.size());
 #endif
-   
+
+int j = 0;   
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
@@ -130,14 +144,13 @@ bool Publisher::Publish(Real *data, Integer count)
          return false;
       current++;
    }
-
    return true;
 }
 
 //------------------------------------------------------------------------------
 // bool Publish(char *data, Integer count = 0)
 //------------------------------------------------------------------------------
-bool Publisher::Publish(char *data, Integer count)
+bool Publisher::Publish(Integer id, char *data, Integer count)
 {
    Integer i;
     
@@ -145,6 +158,14 @@ bool Publisher::Publish(char *data, Integer count)
    if (subs.empty())
       return false;
 
+   if ((id < 0) || (id >= providerCount))
+      throw PublisherException("Data provider has not registered with the Publisher.");
+
+   if (id != currentProvider) {
+      currentProvider = id;
+      UpdateProviderID(id);
+   }
+   
    // Convert the data into a string for distribution
    char stream[4096];
 
@@ -173,13 +194,21 @@ bool Publisher::Publish(char *data, Integer count)
 }
 
 //------------------------------------------------------------------------------
-// bool Publish(Integer *data, Integer count = false)
+// bool Publish(Integer id, Integer *data, Integer count = false)
 //------------------------------------------------------------------------------
-bool Publisher::Publish(Integer *data, Integer count)
+bool Publisher::Publish(Integer id, Integer *data, Integer count)
 {
    // No subscribers
    if (subs.empty())
       return false;
+
+   if ((id < 0) || (id >= providerCount))
+      throw PublisherException("Data provider has not registered with the Publisher.");
+
+   if (id != currentProvider) {
+      currentProvider = id;
+      UpdateProviderID(id);
+   }
 
    // Convert the data into a string for distribution
    char stream[4096];
@@ -222,4 +251,41 @@ bool Publisher::FlushBuffers()
    }
    
    return true;
+}
+
+
+Integer Publisher::RegisterPublishedData(const StringArray& owners, 
+                                         const StringArray& elements)
+{
+   objectMap.push_back(StringArray(owners));
+   elementMap.push_back(StringArray(elements));
+   
+   ++providerCount;
+   return providerCount-1;
+}
+
+
+const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
+{
+   if ((currentProvider < 0) || (currentProvider >= providerCount))
+      throw PublisherException("Data provider id out of range.");
+   
+   if (type == "SpaceObjectMap")
+      return objectMap[currentProvider];
+   
+   if (type == "PublishedDataMap")
+      return elementMap[currentProvider];
+      
+   throw PublisherException("Unknown StringArray type requested.");
+}
+
+
+void Publisher::UpdateProviderID(Integer newId)
+{
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->SetProviderId(newId);
+      current++;
+   }
 }

@@ -49,7 +49,8 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    data (NULL),
    next (NULL),
    active (true),
-   isEndOfReceive(false)
+   isEndOfReceive(false),
+   currentProvider(0)
 {
 }
 
@@ -61,7 +62,8 @@ Subscriber::Subscriber(const Subscriber &copy) :
    data (NULL),
    next (NULL),
    active (true),
-   isEndOfReceive(false)
+   isEndOfReceive(false),
+   currentProvider(copy.currentProvider)
 {
 }
 
@@ -84,6 +86,7 @@ Subscriber& Subscriber::operator=(const Subscriber& sub)
     next = sub.next;
     active = true;
     isEndOfReceive = false;
+    currentProvider = sub.currentProvider;
 
     return *this;
 }
@@ -217,6 +220,14 @@ void Subscriber::Activate(bool state)
 bool Subscriber::IsActive()
 {
    return active;
+}
+
+//------------------------------------------------------------------------------
+// void SetProviderId(Integer id)
+//------------------------------------------------------------------------------
+void Subscriber::SetProviderId(Integer id)
+{
+   currentProvider = id;
 }
 
 //---------------------------------

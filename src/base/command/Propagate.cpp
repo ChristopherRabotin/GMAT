@@ -764,18 +764,29 @@ bool Propagate::Initialize(void)
    fm->ClearSpacecraft();
    StringArray::iterator scName;
    SpaceObject *so;
+   StringArray owners, elements;
+
+   owners.push_back("All");
+   elements.push_back("All.epoch");
+   
    for (scName = satName.begin(); scName != satName.end(); ++scName) {
       so = (SpaceObject*)(*objectMap)[*scName];
       sats.push_back(so);
       fm->AddSpaceObject(so);
       if (so->GetType() == Gmat::FORMATION)
-         FillFormation(so);
+         FillFormation(so, owners, elements);
+      else {
+         SetNames(so->GetName(), owners, elements);
+      }
    }
+
+   streamID = publisher->RegisterPublishedData(owners, elements);
+
    
    p->SetPhysicalModel(fm); 
    p->Initialize();
    initialized = true;
-    
+   
    //loj: 6/16/04
    // Set SolarSystem in StopCondition
    if (solarSys != NULL)
@@ -816,7 +827,8 @@ bool Propagate::Initialize(void)
  * @param so The SpaceObject that needs to be filled.
  */
 //------------------------------------------------------------------------------
-void Propagate::FillFormation(SpaceObject *so)
+void Propagate::FillFormation(SpaceObject *so, StringArray& owners, 
+                              StringArray& elements)
 {
    if ((so == NULL) || (so->GetType() != Gmat::FORMATION))
       throw CommandException("Invalid SpaceObject passed to FillFormation");
@@ -827,7 +839,9 @@ void Propagate::FillFormation(SpaceObject *so)
       el = (SpaceObject*)(*objectMap)[*i];
       so->SetRefObject(el, el->GetType(), el->GetName()); 
       if (el->GetType() == Gmat::FORMATION)
-         FillFormation(el);
+         FillFormation(el, owners, elements);
+      else     // Setup spacecraft data descriptions
+         SetNames(el->GetName(), owners, elements);
    }
    
    ((Formation*)(so))->BuildState();
@@ -939,7 +953,7 @@ bool Propagate::Execute(void)
          // Publish the data here
          pubdata[0] = currEpoch;
          memcpy(&pubdata[1], state, dim*sizeof(Real));
-         publisher->Publish(pubdata, dim+1);
+         publisher->Publish(streamID, pubdata, dim+1);
       }
       else
       {
@@ -979,7 +993,7 @@ bool Propagate::Execute(void)
       // Publish the final data point here
       pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
       memcpy(&pubdata[1], state, dim*sizeof(Real));
-      publisher->Publish(pubdata, dim+1);
+      publisher->Publish(streamID, pubdata, dim+1);
       
 #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
@@ -1010,7 +1024,7 @@ bool Propagate::Execute(void)
 //          // Publish the data here
 //          pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
 //          memcpy(&pubdata[1], state, dim*sizeof(Real));
-//          publisher->Publish(pubdata, dim+1);
+//          publisher->Publish(streamID, pubdata, dim+1);
 //      }    
 //    
 //      if (secondsToProp - elapsedTime > 0.0) {
@@ -1020,7 +1034,7 @@ bool Propagate::Execute(void)
 //          pubdata[0] = baseEpoch + fm->GetTime() / 86400.0;
         
 //          memcpy(&pubdata[1], state, dim*sizeof(Real));
-//          publisher->Publish(pubdata, dim+1);
+//          publisher->Publish(streamID, pubdata, dim+1);
 //          fm->UpdateSpacecraft(baseEpoch + fm->GetTime() / 86400.0);
 //      }
 //      //---------------------------------------
@@ -1048,3 +1062,18 @@ bool Propagate::Execute(void)
    return true;
 }
 
+
+void Propagate::SetNames(const std::string& name, StringArray& owners, 
+                         StringArray& elements)
+{
+   // Add satellite labels
+   for (Integer i = 0; i < 6; ++i)
+      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
+      
+   elements.push_back(name+".X");
+   elements.push_back(name+".Y");
+   elements.push_back(name+".Z");
+   elements.push_back(name+".Vx");
+   elements.push_back(name+".Vy");
+   elements.push_back(name+".Vz");
+}

@@ -71,7 +71,7 @@ public:
 
    Integer GetNumVarParameters();
    bool AddVarParameter(const std::string &paramName);
-
+   
 protected:
    /// Name of the report file
    std::string         filename;
@@ -89,6 +89,9 @@ protected:
    Integer mNumVarParams;
 
    StringArray mVarParamNames;
+   
+   // DJC added 07/19/04 for labeling data
+   Integer lastUsedProvider;
    
    virtual bool        Distribute(Integer len);
    virtual bool        Distribute(const Real * dat, Integer len);

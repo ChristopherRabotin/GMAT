@@ -20,6 +20,10 @@ OBJECTS = Subscriber.o \
 all: libSubscriber
 	mkdir -p ../lib
 	mv libSubscriber.a ../lib
+	
+clean:
+	rm -f *.o
+	rm -f ../lib/libSubscriber.a
 
 libSubscriber : ../lib/libSubscriber.a
 

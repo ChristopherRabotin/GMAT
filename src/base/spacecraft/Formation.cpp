@@ -35,9 +35,8 @@ const Gmat::ParameterType
 Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
-   Gmat::UNKNOWN_PARAMETER_TYPE     // Don't output the "remove" parms
+   Gmat::UNKNOWN_PARAMETER_TYPE     // Don't write the "remove" parms
 };
-
 
 
 Formation::Formation(Gmat::ObjectType typeId, const std::string &typeStr, 

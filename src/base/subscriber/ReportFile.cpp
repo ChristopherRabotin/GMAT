@@ -22,6 +22,7 @@
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
 #include "Moderator.hpp"         // for GetParameter()
+#include "Publisher.hpp"         // for Instance()
 
 #define DEBUG_REPORTFILE 0
 
@@ -76,9 +77,10 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
                         Parameter *firstVarParam) :
    Subscriber      ("ReportFile", name),
    filename        (fileName),
-   precision       (12)
+   precision       (12),
 //   filenameID      (parameterCount),
 //   precisionID     (parameterCount + 1)
+   lastUsedProvider (-1)
 {
    if (fileName != "")
       dstream.open(fileName.c_str());
@@ -114,9 +116,10 @@ ReportFile::~ReportFile(void)
 ReportFile::ReportFile(const ReportFile &rf) :
    Subscriber      (rf),
    filename        (rf.filename),
-   precision       (rf.precision)
+   precision       (rf.precision),
 //   filenameID      (parameterCount),
 //   precisionID     (parameterCount + 1)
+   lastUsedProvider (-1)
 {
    if (filename != "")
       dstream.open(filename.c_str());
@@ -147,6 +150,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
         return *this;
 
     Subscriber::operator=(rf);
+    lastUsedProvider = -1;
     
     filename = rf.filename;
     precision = rf.precision;
@@ -478,33 +482,48 @@ bool ReportFile::Distribute(int len)
 // bool Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
-{
+{   
    if (!dstream.is_open())
       if (!OpenReportFile())
          return false;
         
    dstream.precision(precision);
 
-   // get var params
-   Rvector varvals = Rvector(mNumVarParams);
+// DJC 07/29/04 Commented out -- not sure how this works...
+//   // get var params
+//   Rvector varvals = Rvector(mNumVarParams);
 
    if (len == 0)
       return false;
    else {
-//      for (int i = 0; i < len-1; ++i)
-//         dstream << dat[i] << "  ";
-//      dstream << dat[len-1] << std::endl;
-//      
-      for (int i=0; i < mNumVarParams; i++)
-      {
-          varvals[i] = mVarParams[i]->EvaluateReal();
-          dstream << varvals[i] << " ";
-      }   
-      dstream << std::endl;
+      if (lastUsedProvider != currentProvider) {
+         // Write out a line with data labels
+         StringArray sar = 
+             Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
+         for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+            dstream << (*i) << "  ";
+         dstream << "\n";
+      }      
+     
+      for (int i = 0; i < len-1; ++i)
+         dstream << dat[i] << "  ";
+      dstream << dat[len-1] << std::endl;
+      
+// DJC 07/29/04 Commented out -- not sure how this works...
+//      for (int i=0; i < mNumVarParams; i++)
+//      {
+//          varvals[i] = mVarParams[i]->EvaluateReal();
+//          dstream << varvals[i] << " ";
+//      }   
+//      dstream << std::endl;
+
+      lastUsedProvider = currentProvider;
    }
 
    return true;
 }
+
+
 
 //--------------------------------------
 // private methods

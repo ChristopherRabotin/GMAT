@@ -90,6 +90,11 @@ bool Toggle::InterpretAction(void)
     std::string sName = generatingString.substr(loc, end-loc);
     subNames.push_back(sName);
     
+    // Register with the publisher
+   if (publisher == NULL)
+      publisher = Publisher::Instance();
+    streamID = publisher->RegisterPublishedData(subNames, subNames);
+        
     return true;
 }
 
@@ -106,7 +111,7 @@ bool Toggle::Execute(void)
     }
     
     char data[] = "Toggle executed\n\n";
-    publisher->Publish(data, strlen(data));
+    publisher->Publish(streamID, data, strlen(data));
     return true;
 }
 

@@ -91,7 +91,8 @@ public:
    virtual bool        InterpretAction(void);
     
    virtual bool        Initialize(void);
-   virtual void        FillFormation(SpaceObject *so);
+   virtual void        FillFormation(SpaceObject *so, StringArray& owners,
+                                     StringArray& elements);
    virtual bool        Execute(void);
 
 protected:
@@ -143,6 +144,10 @@ protected:
    Real                    secondsToProp;
    /// ID for the temporary parameter
    const Integer           secondsToPropID;
+   
+   virtual void            SetNames(const std::string& name, 
+                                    StringArray& owners, StringArray& elements);
+   
 
 public:    
    // Accessors (Temporary, to support internal prop duration)

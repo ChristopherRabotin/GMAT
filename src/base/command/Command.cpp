@@ -41,7 +41,8 @@ next            (NULL),
 level           (-1),   // Not set
 objectMap       (NULL),
 solarSys        (NULL),
-publisher       (NULL)
+publisher       (NULL),
+streamID        (-1)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -93,7 +94,8 @@ next            (NULL),
 level           (-1),   // Not set
 objectMap       (c.objectMap),
 solarSys        (c.solarSys),
-publisher       (c.publisher)
+publisher       (c.publisher),
+streamID        (c.streamID)
 {
    parameterCount = GmatCommandParamCount;
 }
@@ -133,7 +135,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    solarSys = c.solarSys;
    publisher = c.publisher;
    generatingString = c.generatingString;
-   
+   streamID = c.streamID;   
    return *this;
 }
 

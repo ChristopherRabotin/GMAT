@@ -21,6 +21,8 @@
 
 #include "Subscriber.hpp"
 #include <list>
+#include <vector>
+
 
 class GMAT_API Publisher
 {
@@ -32,23 +34,37 @@ public:
    bool Unsubscribe(Subscriber *s);
    bool UnsubscribeAll();
    
-   bool Publish(Real *data, Integer count);
-   bool Publish(char *data, Integer count = 0);
-   bool Publish(Integer *data, Integer count);
+   bool Publish(Integer id, Real *data, Integer count);
+   bool Publish(Integer id, char *data, Integer count = 0);
+   bool Publish(Integer id, Integer *data, Integer count);
 
    bool FlushBuffers(); //loj: 6/22/04 added
+   
+   // Interface methods used to identify the data sent to the publisher and
+   // subscribers
+   Integer              RegisterPublishedData(const StringArray& owners, 
+                                              const StringArray& elements);
+   const StringArray&   GetStringArrayParameter(const std::string& type);
 
 protected:
    /// The singleton
    static Publisher        *instance;
    /// List of the subscribers
    std::list<Subscriber*>  subs;
+   /// Index used to identify number of registered data providers
+   Integer                 providerCount;
+   /// ID for the current data provider
+   Integer                 currentProvider;
+   /// Arrays used to track objects for published data
+   std::vector<StringArray> objectMap;
+   /// Arrays used to track elements for published data
+   std::vector<StringArray> elementMap;
 
+   void                 UpdateProviderID(Integer newId);
    // default constructor
    Publisher(void);
    // assignment operator
    Publisher& operator=(const Publisher &right);
-
    // destructor
    virtual ~Publisher(void);
 };

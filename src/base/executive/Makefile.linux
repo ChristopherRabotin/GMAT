@@ -20,6 +20,7 @@ GUIHEADERS = -I../../gui/include \
 OBJECTS = FileManager.o \
           Moderator.o \
           Publisher.o \
+          PublisherException.o \
           Sandbox.o \
           SandboxException.o 
 
