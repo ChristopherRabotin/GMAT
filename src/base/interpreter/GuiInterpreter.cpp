@@ -222,6 +222,41 @@ Formation* GuiInterpreter::GetFormation(const std::string &name)
    return f;
 }
 
+// hardware (loj: 1/7/05 Added)
+//------------------------------------------------------------------------------
+// Hardware* CreateHardware(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a hardware object by given name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return hardware object pointer
+ */
+//------------------------------------------------------------------------------
+Hardware* GuiInterpreter::CreateHardware(const std::string &type,
+                                         const std::string &name)
+{
+   moderator->CreateHardware(type, name);
+}
+
+//------------------------------------------------------------------------------
+// Hardware* GetHardware(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a hardware object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a hardware object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Hardware* GuiInterpreter::GetHardware(const std::string &name)
+{
+   return moderator->GetHardware(name);
+}
+
 // Propagator
 //------------------------------------------------------------------------------
 // Propagator* CreatePropagator(const std::string &type, const std::string &name)
@@ -599,7 +634,6 @@ Integer GuiInterpreter::SetPlanetaryFileTypesInUse(const StringArray &filetypes)
    return moderator->SetPlanetaryFileTypesInUse(filetypes);
 }
 
-//loj: 5/21/04 added
 // Potential field files
 //------------------------------------------------------------------------------
 // std::string GetPotentialFileName(const std::string &filetype)
@@ -688,7 +722,6 @@ Function* GuiInterpreter::GetFunction(const std::string &name)
 }
 
 // GmatCommand
-//loj: 10/14/04 set initial value for name
 //------------------------------------------------------------------------------
 // GmatCommand* CreateCommand(const std::string &type,
 //                            const std::string &name = "")
@@ -708,7 +741,6 @@ GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
    return moderator->CreateCommand(type, name);
 }
 
-//loj: 10/14/04 set initial value for name
 //------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
 //                                   const std::string &name = "")
@@ -920,7 +952,6 @@ void GuiInterpreter::SetInputFocus()
 #endif
 }
 
-//loj: 10/28/04 added
 //------------------------------------------------------------------------------
 // void NotifyRunCompleted()
 //------------------------------------------------------------------------------

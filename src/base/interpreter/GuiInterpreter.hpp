@@ -24,6 +24,7 @@
 #include "ForceModel.hpp"
 #include "Propagator.hpp"
 #include "Spacecraft.hpp"
+#include "Hardware.hpp"
 #include "Formation.hpp"
 #include "Parameter.hpp"
 #include "StopCondition.hpp"
@@ -38,7 +39,6 @@
 #include "Function.hpp"
 #include "Interpreter.hpp"
 
-//class Moderator;
 
 class GMAT_API GuiInterpreter : public Interpreter
 {
@@ -71,6 +71,10 @@ public:
                                            const std::string &name);
    Formation* GuiInterpreter::GetFormation(const std::string &name);
    
+   // Hardware (loj: 1/7/05 Added)
+   Hardware* CreateHardware(const std::string &type,
+                            const std::string &name);
+   Hardware* GetHardware(const std::string &name);
 
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
@@ -87,7 +91,7 @@ public:
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
 
-   // AtmosphereModel (loj: 9/14/04 - added)
+   // AtmosphereModel
    AtmosphereModel* CreateAtmosphereModel(const std::string &type,
                                           const std::string &name,
                                           const std::string &body = "Earth");
@@ -138,13 +142,12 @@ public:
                                       const std::string &name);
    StopCondition* GetStopCondition(const std::string &name);
     
-   // Function (loj: 9/27/04 added)
+   // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
    
    // GmatCommand
-   //loj: 10/14/04 set initial value for name
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name = "");
    GmatCommand* CreateDefaultCommand(const std::string &type,
@@ -178,7 +181,7 @@ public:
 
    // GUI control
    void SetInputFocus();
-   void NotifyRunCompleted(); //loj: 10/28/04 added
+   void NotifyRunCompleted();
    void UpdateResourceTree();
    void UpdateMissionTree();
    void CloseCurrentProject();
