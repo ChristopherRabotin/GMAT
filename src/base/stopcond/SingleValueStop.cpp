@@ -17,9 +17,9 @@
  */
 //------------------------------------------------------------------------------
 #include "SingleValueStop.hpp"
-#include "CurrentTimeParam.hpp"
-#include "ElapsedTimeParam.hpp"
-#include "SpacecraftStateParam.hpp"
+//  #include "CurrentTimeParam.hpp"
+//  #include "ElapsedTimeParam.hpp"
+//  #include "SpacecraftStateParam.hpp"
 #include "StopConditionException.hpp"
 
 //---------------------------------
@@ -137,129 +137,131 @@ bool SingleValueStop::Evaluate()
 {
    bool goalMet = false;
 
+   //loj: Need to rework on this
+   
 //     if ((mParameters[0] == NULL) || (mParamDataName == ""))
 //        throw StopConditionException
 //           ("Cannot evaluate the stop condition: Parameter or data name is not "
 //            "set: Parameter = " + (int)mParameters[0] + " Name = " + mParamDataName);
 
-   if (mParameters[0] == NULL)
-      throw StopConditionException
-         ("Cannot evaluate the stop condition: Parameter is not set.");
+//     if (mParameters[0] == NULL)
+//        throw StopConditionException
+//           ("Cannot evaluate the stop condition: Parameter is not set.");
       
-   if (mParamDataName == "")
-      throw StopConditionException
-         ("Cannot evaluate the stop condition: parameter data name is not "
-          "set:  Name = " + mParamDataName);
+//     if (mParamDataName == "")
+//        throw StopConditionException
+//           ("Cannot evaluate the stop condition: parameter data name is not "
+//            "set:  Name = " + mParamDataName);
       
-   //-----------------------------------------------------------------
-   // time related stop condition doesn't need to interpolate stop epoch
-   // *** account for repeat count and tolerance will be implemented
-   //     in the next build.
-   //-----------------------------------------------------------------
-   if (mParamDataName == "CurrentTime")
-   {
-      CurrentTimeParam *param = dynamic_cast<CurrentTimeParam*>(mParameters[0]);
+//     //-----------------------------------------------------------------
+//     // time related stop condition doesn't need to interpolate stop epoch
+//     // *** account for repeat count and tolerance will be implemented
+//     //     in the next build.
+//     //-----------------------------------------------------------------
+//     if (mParamDataName == "CurrentTime")
+//     {
+//        CurrentTimeParam *param = dynamic_cast<CurrentTimeParam*>(mParameters[0]);
       
-      if (param == NULL)
-      {
-         throw StopConditionException
-            ("Parameter is not the type of CurrentTimeParam for retrieving " +
-             mParamDataName);
-      }
+//        if (param == NULL)
+//        {
+//           throw StopConditionException
+//              ("Parameter is not the type of CurrentTimeParam for retrieving " +
+//               mParamDataName);
+//        }
       
-      Integer id = param->GetParameterID(mParamDataName);
-      Real val = param->GetRealParameter(id);
+//        Integer id = param->GetParameterID(mParamDataName);
+//        Real val = param->GetRealParameter(id);
 
-      if (val >= mGoal)
-         goalMet = true;
-   }
-   else if (mParamDataName == "ElapsedTimeInSeconds")
-   {
-      ElapsedTimeParam *param = dynamic_cast<ElapsedTimeParam*>(mParameters[0]);
+//        if (val >= mGoal)
+//           goalMet = true;
+//     }
+//     else if (mParamDataName == "ElapsedTimeInSeconds")
+//     {
+//        ElapsedTimeParam *param = dynamic_cast<ElapsedTimeParam*>(mParameters[0]);
       
-      if (param == NULL)
-      {
-         throw StopConditionException
-            ("Parameter is not the type of ElapsedTimeParam "
-             "for retrieving " + mParamDataName);
-      }
+//        if (param == NULL)
+//        {
+//           throw StopConditionException
+//              ("Parameter is not the type of ElapsedTimeParam "
+//               "for retrieving " + mParamDataName);
+//        }
       
-      Integer id = param->GetParameterID(mParamDataName);
-      Real val = param->GetRealParameter(id);
+//        Integer id = param->GetParameterID(mParamDataName);
+//        Real val = param->GetRealParameter(id);
       
-      if (val >= mGoal)
-         goalMet = true;
-   }
-   //-----------------------------------------------------------------
-   // else future build implementation -
-   //    *** need to interpolate stop epoch
-   //    *** need to convert to RefFrame for certain stop condition type
-   //      
-   //-----------------------------------------------------------------
-   else
-   {
-      if (!mInitialized)
-      {
-         throw StopConditionException
-            ("SingleValueStop::Evaluate(): The stopping condition ring buffer is "
-             "not initialized.");
-      }
+//        if (val >= mGoal)
+//           goalMet = true;
+//     }
+//     //-----------------------------------------------------------------
+//     // else future build implementation -
+//     //    *** need to interpolate stop epoch
+//     //    *** need to convert to RefFrame for certain stop condition type
+//     //      
+//     //-----------------------------------------------------------------
+//     else
+//     {
+//        if (!mInitialized)
+//        {
+//           throw StopConditionException
+//              ("SingleValueStop::Evaluate(): The stopping condition ring buffer is "
+//               "not initialized.");
+//        }
       
-      mNumValidPoints = (mNumValidPoints < mBufferSize) ?
-         mNumValidPoints + 1 : mNumValidPoints;
+//        mNumValidPoints = (mNumValidPoints < mBufferSize) ?
+//           mNumValidPoints + 1 : mNumValidPoints;
       
-      // shift values to make room for newest value
-      for (int i=0; i<mBufferSize-1; i++)
-         mValueBuffer[i] = mValueBuffer[i+1];
+//        // shift values to make room for newest value
+//        for (int i=0; i<mBufferSize-1; i++)
+//           mValueBuffer[i] = mValueBuffer[i+1];
 
-      // check for other single value here
-      if (mParamDataName == "X" ||
-          mParamDataName == "Y" ||
-          mParamDataName == "Z" ||
-          mParamDataName == "Vx" ||
-          mParamDataName == "Vy" ||
-          mParamDataName == "Vz" ||
-          mParamDataName == "MagOfPosition" ||
-          mParamDataName == "MagOfVelocity")
-      {
-         SpacecraftStateParam *param = dynamic_cast<SpacecraftStateParam*>(mParameters[0]);
+//        // check for other single value here
+//        if (mParamDataName == "X" ||
+//            mParamDataName == "Y" ||
+//            mParamDataName == "Z" ||
+//            mParamDataName == "Vx" ||
+//            mParamDataName == "Vy" ||
+//            mParamDataName == "Vz" ||
+//            mParamDataName == "MagOfPosition" ||
+//            mParamDataName == "MagOfVelocity")
+//        {
+//           SpacecraftStateParam *param = dynamic_cast<SpacecraftStateParam*>(mParameters[0]);
          
-         if (param == NULL)
-         {
-            throw StopConditionException
-               ("Parameter is not the type of SpacecraftStateParam "
-                "for retrieving " + mParamDataName);
-         }
+//           if (param == NULL)
+//           {
+//              throw StopConditionException
+//                 ("Parameter is not the type of SpacecraftStateParam "
+//                  "for retrieving " + mParamDataName);
+//           }
 
-         Integer id = param->GetParameterID(mParamDataName);
+//           Integer id = param->GetParameterID(mParamDataName);
 
-         //loj:for the future build:
-         //GmatBase should use constant number instead of -1
-         //if name is not associated with id. (for the future build)
-         if (id == -1)
-         {
-            throw StopConditionException
-               ("Parameter data name: " +  mParamDataName +
-                " has no associated ID in the SpacecraftStateParam ");
-         }
+//           //loj:for the future build:
+//           //GmatBase should use constant number instead of -1
+//           //if name is not associated with id. (for the future build)
+//           if (id == -1)
+//           {
+//              throw StopConditionException
+//                 ("Parameter data name: " +  mParamDataName +
+//                  " has no associated ID in the SpacecraftStateParam ");
+//           }
          
-         Real val = param->GetRealParameter(id);
+//           Real val = param->GetRealParameter(id);
 
-         mValueBuffer[mBufferSize - 1] = val;
+//           mValueBuffer[mBufferSize - 1] = val;
          
-         // Stop if at least 2 points set, and either
-         //   1) last value was more than goal, but current value is less,
-         //   2) last value was less than goal, but current value is more.
-         if (mNumValidPoints >= 2 &&
-             ((mValueBuffer[mBufferSize-2] <= mGoal  &&
-               mGoal <= mValueBuffer[mBufferSize-1]) ||  
-              (mValueBuffer[mBufferSize-2] >= mGoal  &&
-               mGoal >= mValueBuffer[mBufferSize-1]) ))
-         {
-            goalMet = true;
-         }
-      }
-   }
+//           // Stop if at least 2 points set, and either
+//           //   1) last value was more than goal, but current value is less,
+//           //   2) last value was less than goal, but current value is more.
+//           if (mNumValidPoints >= 2 &&
+//               ((mValueBuffer[mBufferSize-2] <= mGoal  &&
+//                 mGoal <= mValueBuffer[mBufferSize-1]) ||  
+//                (mValueBuffer[mBufferSize-2] >= mGoal  &&
+//                 mGoal >= mValueBuffer[mBufferSize-1]) ))
+//           {
+//              goalMet = true;
+//           }
+//        }
+//     }
   
    return goalMet;
 }

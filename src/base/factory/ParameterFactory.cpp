@@ -20,9 +20,20 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "ParameterFactory.hpp"
-#include "ElapsedTimeParam.hpp"       // for ElapsedTimeParam class
-#include "CurrentTimeParam.hpp"       // for CurrentTimeParam class
-#include "SpacecraftStateParam.hpp"   // for SpacecraftStateParam class
+//  #include "ElapsedSecParam.hpp" 
+//  #include "CurrentA1MjdParam.hpp"
+//  #include "CartXParam.hpp"
+//  #include "CartYParam.hpp"
+//  #include "CartZParam.hpp"
+//  #include "CartVxParam.hpp"
+//  #include "CartVyParam.hpp"
+//  #include "CartVzParam.hpp"
+//  #include "KepSmaParam.hpp"
+//  #include "KepEccParam.hpp"
+//  #include "KepIncParam.hpp"
+//  #include "KepRaanParam.hpp"
+//  #include "KepAopParam.hpp"
+//  #include "KepTaParam.hpp"
 
 // add others here for future builds
 
@@ -43,15 +54,37 @@
 Parameter* ParameterFactory::CreateParameter(std::string ofType,
                                              std::string withName)
 {
-   if (ofType == "ElapsedTimeParam")
-      return new ElapsedTimeParam(withName, "", 86400.0);
-   if (ofType == "CurrentTimeParam")
-      return new CurrentTimeParam(withName, "", 0.0);
-   if (ofType == "SpacecraftStateParam")
-      return new SpacecraftStateParam(withName, "");
-   // add others here
-   else
-      return NULL;
+//     if (ofType == "ElapsedSecParam")
+//        return new ElapsedSecParam(withName);
+//     if (ofType == "CurrentA1MjdParam")
+//        return new CurrentA1MjdParam(withName);
+//     if (ofType == "CartXParam")
+//        return new CartXParam(withName);
+//     if (ofType == "CartYParam")
+//        return new CartYParam(withName);
+//     if (ofType == "CartZParam")
+//        return new CartZParam(withName);
+//     if (ofType == "CartVxParam")
+//        return new CartVxParam(withName);
+//     if (ofType == "CartVyParam")
+//        return new CartVyParam(withName);
+//      if (ofType == "CartVzParam")
+//        return new CartVzParam(withName);
+//      if (ofType == "KepSmaParam")
+//        return new KepSmaParam(withName);
+//      if (ofType == "KepEccParam")
+//        return new KepEccParam(withName);
+//      if (ofType == "KepIncParam")
+//        return new KepIncParam(withName);
+//      if (ofType == "KepRaanParam")
+//        return new KepRaanParam(withName);
+//      if (ofType == "KepAopParam")
+//        return new KepAopParam(withName);
+//      if (ofType == "KepTaParam")
+//        return new KepTaParam(withName);
+//      // add others here
+//      else
+        return NULL;
 }
 
 
@@ -68,10 +101,22 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
 ParameterFactory::ParameterFactory() :
 Factory(Gmat::PARAMETER)
 {
-   if (creatables.empty()) {
-      creatables.push_back("ElapsedTimeParam");
-      creatables.push_back("CurrentTimeParam");
-//      creatables.push_back("SpacecraftStateParam");
+   if (creatables.empty())
+   {
+//        creatables.push_back("ElapsedSecParam");
+//        creatables.push_back("CurrentA1MjdParam");
+//        creatables.push_back("CartXParam");
+//        creatables.push_back("CartYParam");
+//        creatables.push_back("CartZParam");
+//        creatables.push_back("CartVxParam");
+//        creatables.push_back("CartVyParam");
+//        creatables.push_back("CartVzParam");
+//        creatables.push_back("KepSmaParam");
+//        creatables.push_back("KepEccParam");
+//        creatables.push_back("KepIncParam");
+//        creatables.push_back("KepRaanParam");
+//        creatables.push_back("KepAopParam");
+//        creatables.push_back("KepTaParam");
    }
 }
 
