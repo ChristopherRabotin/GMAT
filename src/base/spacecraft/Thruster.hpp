@@ -37,6 +37,11 @@ public:
    Thruster&                  operator=(const Thruster& th);
    
    // Parameter access methods - overridden from GmatBase
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name = "");
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
+   
    virtual std::string        GetParameterText(const Integer id) const;
    virtual Integer            GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType

@@ -27,9 +27,9 @@
 const std::string
 Hardware::PARAMETER_TEXT[HardwareParamCount - GmatBaseParamCount] =
 {
-   "X",
-   "Y", 
-   "Z",
+   "X_Direction",
+   "Y_Direction", 
+   "Z_Direction"
 };
 
 

@@ -18,6 +18,12 @@
 
 #include "Thruster.hpp"
 
+//#define DEBUG_THRUSTER
+
+
+#ifdef DEBUG_THRUSTER
+   #include <iostream>
+#endif
 
 //---------------------------------
 // static data
@@ -120,6 +126,10 @@ Thruster::Thruster(const Thruster& th) :
    thrustDirection[0] = th.thrustDirection[0];
    thrustDirection[1] = th.thrustDirection[1];
    thrustDirection[2] = th.thrustDirection[2];
+   
+   tankNames = th.tankNames;
+   tanks.clear();
+   coordinateName = th.coordinateName;
 }
 
 
@@ -146,7 +156,46 @@ Thruster& Thruster::operator=(const Thruster& th)
    thrustDirection[1] = th.thrustDirection[1];
    thrustDirection[2] = th.thrustDirection[2];
 
+   tankNames = th.tankNames;
+   tanks.clear();
+   coordinateName = th.coordinateName;
+
    return *this;
+}
+
+
+bool Thruster::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                            const std::string &name)
+{
+   if (obj->GetTypeName() == "FuelTank") {
+      #ifdef DEBUG_THRUSTER
+         std::cout << "Setting tank \"" << name 
+                   << "\" on thruster \"" << instanceName << "\"\n";
+      #endif
+      
+      if (find(tanks.begin(), tanks.end(), obj) == tanks.end())
+         tanks.push_back((FuelTank*)obj);
+      return true;
+   }
+   
+   return Hardware::SetRefObject(obj, type, name);
+}
+
+ObjectArray& Thruster::GetRefObjectArray(const Gmat::ObjectType type)
+{
+//   if (type == Gmat::HARDWARE)
+//      return tanks;
+      
+   return Hardware::GetRefObjectArray(type);
+}
+
+
+ObjectArray& Thruster::GetRefObjectArray(const std::string& typeString)
+{
+//   if ((typeString == "FuelTank") || (typeString == "Tanks"))
+//      return tanks;
+
+   return Hardware::GetRefObjectArray(typeString);
 }
 
 

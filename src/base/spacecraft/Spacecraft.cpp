@@ -14,7 +14,6 @@
 //
 /**
  * Implements the Spacecraft base class. 
- *
  */
 //------------------------------------------------------------------------------
 
@@ -69,6 +68,9 @@ Spacecraft::Spacecraft() :
     dragAreaID     (parameterCount + DRAG_AREA_ID),
     srpAreaID      (parameterCount + SRP_AREA_ID),
     reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    fuelTankID     (parameterCount + FUEL_TANK_ID),
+    thrusterID     (parameterCount + THRUSTER_ID),
+    totalMassID    (parameterCount + TOTAL_MASS_ID),
     solarSystem    (NULL)
 {
     parameterCount += SC_ParameterIDs;
@@ -103,6 +105,9 @@ Spacecraft::Spacecraft(const std::string &name) :
     dragAreaID     (parameterCount + DRAG_AREA_ID),
     srpAreaID      (parameterCount + SRP_AREA_ID),
     reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    fuelTankID     (parameterCount + FUEL_TANK_ID),
+    thrusterID     (parameterCount + THRUSTER_ID),
+    totalMassID    (parameterCount + TOTAL_MASS_ID),
     solarSystem    (NULL)
 {
     parameterCount += SC_ParameterIDs;
@@ -138,6 +143,9 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
     dragAreaID     (parameterCount + DRAG_AREA_ID),
     srpAreaID      (parameterCount + SRP_AREA_ID),
     reflectCoeffID (parameterCount + REFLECT_COEFF_ID),
+    fuelTankID     (parameterCount + FUEL_TANK_ID),
+    thrusterID     (parameterCount + THRUSTER_ID),
+    totalMassID    (parameterCount + TOTAL_MASS_ID),
     solarSystem    (NULL)
 {
     parameterCount += SC_ParameterIDs;
@@ -179,6 +187,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     dragAreaID     (a.dragAreaID),
     srpAreaID      (a.srpAreaID),
     reflectCoeffID (a.reflectCoeffID),
+    fuelTankID     (a.fuelTankID),
+    thrusterID     (a.thrusterID),
+    totalMassID    (a.totalMassID),
     solarSystem    (a.solarSystem)
 {
     parameterCount = a.parameterCount;
@@ -198,6 +209,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     dragArea = a.dragArea;
     srpArea = a.srpArea;
     reflectCoeff = a.reflectCoeff;
+    
+    tankNames = a.tankNames;
+    thrusterNames = a.thrusterNames;
 }
 
 //---------------------------------------------------------------------------
@@ -208,6 +222,11 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
  */
 Spacecraft::~Spacecraft(void)
 {
+   // Delete the attached hardware (it was set as clones)
+   for (ObjectArray::iterator i = tanks.begin(); i < tanks.end(); ++i)
+      delete *i;
+   for (ObjectArray::iterator i = thrusters.begin(); i < thrusters.end(); ++i)
+      delete *i;
 }
 
 //---------------------------------------------------------------------------
@@ -252,6 +271,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
     srpArea = a.srpArea;
     reflectCoeff = a.reflectCoeff;
 
+    tankNames = a.tankNames;
+    thrusterNames = a.thrusterNames;
+
     return *this;
 }
 
@@ -269,6 +291,167 @@ GmatBase* Spacecraft::Clone(void) const
 {
    return (new Spacecraft(*this));
 }
+
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * This method returns an array with the names of the referenced objects.
+ *
+ * @return a vector with the names of objects of the requested type.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   static StringArray fullList;  // Maintain scope if the full list is requested
+   
+   if (type == Gmat::FUEL_TANK)
+      return tankNames;
+   if (type == Gmat::THRUSTER)
+      return thrusterNames;
+
+   if (type == Gmat::HARDWARE) {
+      fullList.clear();
+      fullList = tankNames;
+      for (StringArray::iterator i = thrusterNames.begin(); i < thrusterNames.end(); ++i)
+         fullList.push_back(*i);
+      return fullList;
+   }
+      
+   return SpaceObject::GetRefObjectNameArray(type);
+}
+
+
+// DJC: Not sure if we need this yet...
+//bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//{
+//   return SpaceObject::SetRefObjectName(type, name)
+//}
+
+
+//---------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//---------------------------------------------------------------------------
+/**
+ * Returns the reference object pointer.
+ *
+ * @param type type of the reference object.
+ * @param name name of the reference object.
+ *
+ * @return reference object pointer.
+ */
+GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type, 
+                                   const std::string &name)
+{
+   // This switch statement intentionally drops through without breaks, so that
+   // the search in the tank and thruster name lists only need to be coded once. 
+   switch (type) {
+      case Gmat::HARDWARE:
+      case Gmat::FUEL_TANK:
+         for (ObjectArray::iterator i = tanks.begin(); 
+              i < tanks.end(); ++i) {
+            if ((*i)->GetName() == name)
+               return *i;
+         }
+      
+      case Gmat::THRUSTER:
+         for (ObjectArray::iterator i = thrusters.begin(); 
+              i < thrusters.end(); ++i) {
+            if ((*i)->GetName() == name)
+               return *i;
+         }
+         
+      // Other Hardware cases go here...
+
+         return NULL;      // Hardware requested, but not in the hardware lists
+         
+      default:
+         break;
+   }
+
+   return SpaceObject::GetRefObject(type, name);
+}
+
+
+bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+                              const std::string &name)
+{
+   if (type == Gmat::HARDWARE) {
+      std::string typeStr = obj->GetTypeName();
+    
+      if (typeStr == "FuelTank") {
+         if (find(tanks.begin(), tanks.end(), obj) == tanks.end()) {
+            tanks.push_back(obj);
+            return true;
+         }
+         return false;
+      }
+      
+      if (typeStr == "Thruster") {
+         if (find(thrusters.begin(), thrusters.end(), obj) == thrusters.end()) {
+            thrusters.push_back(obj);
+            return true;
+         }
+         return false;
+      }
+      
+      return false;
+   }
+
+   return SpaceObject::SetRefObject(obj, type, name);
+}
+
+//bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
+//                              const std::string &name, const Integer index)
+//{
+////   if (type == Gmat::FUEL_TANK)
+////      return tankNames;
+////   if (type == Gmat::THRUSTER)
+////      return thrusterNames;
+//   return SpaceObject::SetRefObject(obj, type, name, index);
+//}
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers by type.
+ * 
+ * @param type The type of objects requested
+ *
+ * @return Reference to the array.
+ */
+ObjectArray& Spacecraft::GetRefObjectArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::FUEL_TANK)
+      return tanks;
+   if (type == Gmat::THRUSTER)
+      return thrusters;
+   return SpaceObject::GetRefObjectArray(type);
+}
+
+
+//---------------------------------------------------------------------------
+//  ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers based on a string (e.g. the typename).
+ * 
+ * @param typeString The string used to find the objects requested.
+ *
+ * @return Reference to the array.
+ */
+ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
+{
+   if ((typeString == "FuelTank") || (typeString == "Tanks"))
+      return tanks;
+   if ((typeString == "Thruster") || (typeString == "Thrusters"))
+      return thrusters;
+   return SpaceObject::GetRefObjectArray(typeString);
+}
+
 
 //---------------------------------------------------------------------------
 //  Integer GetParameterID(const std::string &str) const
@@ -333,6 +516,13 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
         return state4ID;
     }
 
+    // Added for hardware support 9/13/04, djc
+    if (str == "Tanks") return fuelTankID;
+
+    if (str == "Thrusters") return thrusterID;
+    
+    if (str == "TotalMass") return totalMassID;
+    
     return SpaceObject::GetParameterID(str);
 }
 
@@ -361,6 +551,13 @@ std::string Spacecraft::GetParameterText(const Integer id) const
     if (id == srpAreaID) return "SRPArea";
 
     if (id == reflectCoeffID) return "Cr";
+
+    // Added for hardware support 9/13/04, djc
+    if (id == fuelTankID) return "Tanks";
+
+    if (id == thrusterID) return "Thrusters";
+    
+    if (id == totalMassID) return "TotalMass";
 
     return SpaceObject::GetParameterText(id);
 }
@@ -395,6 +592,11 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
     if (id == dragAreaID) return Gmat::REAL_TYPE;
     if (id == srpAreaID) return Gmat::REAL_TYPE;
     if (id == reflectCoeffID) return Gmat::REAL_TYPE;
+    
+    // Added for hardware support 9/13/04, djc
+    if (id == fuelTankID) return Gmat::STRINGARRAY_TYPE;
+    if (id == thrusterID) return Gmat::STRINGARRAY_TYPE;
+    if (id == totalMassID) return Gmat::REAL_TYPE;
  
     return SpaceObject::GetParameterType(id);
 }
@@ -412,7 +614,8 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Spacecraft::GetParameterTypeString(const Integer id) const
 {
-    return SpaceObject::PARAM_TYPE_STRING[GetParameterType(id)];
+//    return SpaceObject::PARAM_TYPE_STRING[GetParameterType(id)];
+    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 //---------------------------------------------------------------------------
@@ -442,6 +645,11 @@ Real Spacecraft::GetRealParameter(const Integer id) const
     if (id == dragAreaID) return dragArea;
     if (id == srpAreaID) return srpArea;
     if (id == reflectCoeffID) return reflectCoeff;
+    
+    if (id == totalMassID) { 
+       return UpdateTotalMass();
+    }
+    
 
     return SpaceObject::GetRealParameter(id);
 }
@@ -482,6 +690,8 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
     if (label == "SRPArea") return srpArea;
 //    if (label == "ReflectivityCoefficient") return reflectCoeff;
     if (label == "Cr") return reflectCoeff;
+
+    if (label == "TotalMass") return UpdateTotalMass();
 
     return SpaceObject::GetRealParameter(label);
 }
@@ -562,8 +772,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
     if (id == coeffDragID) return SetRealParameter("Cd",value);
     if (id == dragAreaID) return SetRealParameter("DragArea",value);
     if (id == srpAreaID) return SetRealParameter("SRPArea",value);
-    if (id == reflectCoeffID) 
-        return SetRealParameter("Cr",value);
+    if (id == reflectCoeffID) return SetRealParameter("Cr",value);
+    
+    if (id == totalMassID) return SetRealParameter("TotalMass",value);
 
     return SpaceObject::SetRealParameter(id, value);
 }
@@ -703,6 +914,8 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
     if (label == "SRPArea") return srpArea = value;
     if (label == "Cr") return reflectCoeff = value;
 
+    if (label == "TotalMass") return totalMass;    // Don't change the total mass
+
     return SpaceObject::SetRealParameter(label, value);
 }
 //---------------------------------------------------------------------------
@@ -736,6 +949,29 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     return SpaceObject::GetStringParameter(id);
 }
 
+
+// Added 11/15/04 to handle tanks and thrusters
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Accesses lists of tank and thruster (and, eventually, other hardware) names.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
+{
+   if (id == fuelTankID)
+      return tankNames;
+   if (id == thrusterID)
+      return thrusterNames;
+   return SpaceObject::GetStringArrayParameter(id);
+}
+
+
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
@@ -750,8 +986,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
     if (id != dateFormatID && id != stateTypeID && id != refBodyID 
-        && id != refFrameID && id != refPlaneID)
-       return GmatBase::SetStringParameter(id, value);
+        && id != refFrameID && id != refPlaneID 
+        && id != fuelTankID && id != thrusterID)
+       return SpaceObject::SetStringParameter(id, value);
 
     if (id == dateFormatID)
     {
@@ -792,10 +1029,69 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
     {  
        refFrame = value;
     }
-    else 
+    else if (id == refPlaneID) {
        refPlane = value;
+    }
+    else if (id == fuelTankID) {
+       // Only add the tank if it is not in the list already
+       if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) {
+          tankNames.push_back(value);
+       }
+    }
+    else { // id == thrusterID
+       // Only add the tank if it is not in the list already
+       if (find(thrusterNames.begin(), thrusterNames.end(), 
+           value) == thrusterNames.end()) {
+          thrusterNames.push_back(value);
+       }
+    }
 
     return true;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool TakeAction(const std::string &action, const std::string &actionData)
+//---------------------------------------------------------------------------
+/**
+ * Set the epoch.
+ * 
+ */
+bool Spacecraft::TakeAction(const std::string &action, 
+                            const std::string &actionData)
+{
+   if (action == "SetupHardware") {
+      // Attach tanks to thrusters
+      StringArray tankNommes;
+      GmatBase *tank;
+
+      for (ObjectArray::iterator i = thrusters.begin(); 
+           i < thrusters.end(); ++i) {
+         tankNommes = (*i)->GetStringArrayParameter("Tank");
+
+         for (StringArray::iterator j = tankNommes.begin(); 
+              j < tankNommes.end(); ++j) {
+
+            // Look up the tank in the hardware list
+            tank = NULL;
+            for (ObjectArray::iterator k = tanks.begin(); k < tanks.end(); ++k)
+               if ((*k)->GetName() == *j) {
+                  tank = *k;
+                  break;
+               }
+
+            if (tank)
+               (*i)->SetRefObject(tank, tank->GetType(), tank->GetName());
+            else
+               throw SpaceObjectException("Cannot find tank \"" + (*j) +
+                                          "\" in spacecraft \"" + instanceName +
+                                          "\"\n");
+         }
+      }
+      return true;
+   }
+   
+   return SpaceObject::TakeAction(action, actionData);
 }
 
 //---------------------------------------------------------------------------
@@ -1273,6 +1569,48 @@ void Spacecraft::SetSolarSystem(SolarSystem *ss)
 //-------------------------------------
 // private methods
 //-------------------------------------
+
+
+//------------------------------------------------------------------------------
+//  void UpdateTotalMass()
+//------------------------------------------------------------------------------
+/**
+ * Updates the total mass by adding all hardware masses to the dry mass.
+ */
+//------------------------------------------------------------------------------
+Real Spacecraft::UpdateTotalMass()
+{
+   totalMass = dryMass;
+   for (ObjectArray::iterator i = tanks.begin(); i < tanks.end(); ++i) {
+      totalMass += (*i)->GetRealParameter("FuelMass");
+   }
+   
+   return totalMass;
+}
+
+
+//------------------------------------------------------------------------------
+//  Real UpdateTotalMass() const
+//------------------------------------------------------------------------------
+/**
+ * Calculates the total mass by adding all hardware masses to the dry mass.
+ * 
+ * This method is const (so const methods can obtain the value), and therefore
+ * does not update the internal data member.
+ * 
+ * @return The mass of the spacecraft plus the mass of the fuel in the tanks.
+ */
+//------------------------------------------------------------------------------
+Real Spacecraft::UpdateTotalMass() const
+{
+   Real tmass = dryMass;
+   for (ObjectArray::const_iterator i = tanks.begin(); i < tanks.end(); ++i) {
+      tmass += (*i)->GetRealParameter("FuelMass");
+   }
+   
+   return tmass;
+}
+
 
 //---------------------------------------------------------------------------
 //  void InitializeValues()

@@ -27,6 +27,9 @@
 #include "TimeConverter.hpp"
 #include "MessageInterface.hpp"
 #include "PropState.hpp"
+#include "FuelTank.hpp"
+#include "Thruster.hpp"
+
 
 class GMAT_API Spacecraft : public SpaceObject
 {
@@ -36,7 +39,13 @@ class GMAT_API Spacecraft : public SpaceObject
       ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
       ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
       DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
-      REFLECT_COEFF_ID, /*NO_NAME,*/ SC_ParameterIDs
+      REFLECT_COEFF_ID, 
+      
+      // Parameters added by DJC, 11/13/04
+      FUEL_TANK_ID, THRUSTER_ID, TOTAL_MASS_ID, 
+      
+      /*NO_NAME,*/    // Someone else did this one -- don't blame me!
+      SC_ParameterIDs
    };
    
 public:
@@ -54,6 +63,22 @@ public:
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
+   
+   //  Tanks and thrusters (and, eventually, other hardware) are owned objects,
+   // and therefore need these methods from GmatBase
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+//   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
+//                                        const std::string &name);
+   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
+                                    const std::string &name);
+   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const std::string &name = "");
+//   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                    const std::string &name,
+//                                    const Integer index);
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    // Parameter accessor methods -- overridden from GmatBase
    virtual Integer GetParameterID(const std::string &str) const;
@@ -62,12 +87,17 @@ public:
    virtual Real SetRealParameter(const Integer id, const Real value);
    virtual Real SetRealParameter(const std::string &label, const Real value);
    virtual std::string GetStringParameter(const Integer id) const;
+   const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
     
    virtual std::string GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
    GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual bool TakeAction(const std::string &action, 
+                           const std::string &actionData = "");
+   
 
    //    virtual PropState& GetState(void); 
 
@@ -150,7 +180,12 @@ protected:
    Integer        dragAreaID;
    Integer        srpAreaID;
    Integer        reflectCoeffID;
-
+   
+   // Parameters added by DJC, 11/13/04
+   Integer        fuelTankID;
+   Integer        thrusterID;
+   Integer        totalMassID;
+   
    // for non-internal spacecraft information
    SolarSystem    *solarSystem;
    StateConverter stateConverter;
@@ -167,6 +202,22 @@ protected:
    std::string    displayCoordType; 
    std::string    displaySubType;
    
+   // Lists of hardware elements added 11/12/04, djc
+   /// Fuel tank names
+   StringArray    tankNames;
+   /// Thruster names
+   StringArray    thrusterNames;
+   /// Pointers to the fuel tanks
+   ObjectArray    tanks;
+   /// Pointers to the spacecraft thrusters
+   ObjectArray    thrusters;
+          
+   /// Dry mass plus fuel masses, a calculated parameter
+   Real           totalMass;
+   
+   Real           UpdateTotalMass();
+   Real           UpdateTotalMass() const;
+   
 private:
    bool        initialDisplay;
    bool        hasElements[6];
@@ -176,7 +227,7 @@ private:
    std::string GetLocalCoordType() const;
    void        SetInitialDisplay();
    std::string ToString(const Real value);
-   
+      
    void        SetInitialState(); //loj: 10/25/04 added
 };
 
