@@ -32,6 +32,7 @@
 #include "Command.hpp"
 #include "Subscriber.hpp"
 #include "Burn.hpp"
+#include "Solver.hpp"
 
 class Moderator;
 
@@ -78,6 +79,10 @@ public:
     // Burn
     Burn* CreateBurn(const std::string &type, const std::string &name);
     Burn* GetBurn(const std::string &name);
+
+    // Solver
+    Solver* CreateSolver(const std::string &type, const std::string &name);
+    Solver* GetSolver(const std::string &name);
 
     // Parameter
     Parameter* CreateParameter(const std::string &type, const std::string &name);

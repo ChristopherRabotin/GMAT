@@ -341,6 +341,41 @@ Burn* GuiInterpreter::GetBurn(const std::string &name)
     return theModerator->GetBurn(name);
 }
 
+// Solver
+//------------------------------------------------------------------------------
+// Solver* CreateSolver(const std::string &type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates a solver object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return a solver object pointer
+ */
+//------------------------------------------------------------------------------
+Solver* GuiInterpreter::CreateSolver(const std::string &type,
+                                     const std::string &name)
+{
+    return theModerator->CreateSolver(type, name);
+}
+
+//------------------------------------------------------------------------------
+// Solver* GetSolver(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a solver object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a solver pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Solver* GuiInterpreter::GetSolver(const std::string &name)
+{
+    return theModerator->GetSolver(name);
+}
+
 // Parameter
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name)
