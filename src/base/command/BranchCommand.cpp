@@ -24,7 +24,7 @@
 
 #include "BranchCommand.hpp"
 
-#define DEBUG_BRANCHCOMMAND_DEALLOCATION
+//#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 
 #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
    #include "MessageInterface.hpp"
@@ -57,11 +57,6 @@ BranchCommand::~BranchCommand()
       current = *node;
       while (current->GetNext() != this) {
          current = current->GetNext();
-         if (current == NULL)
-{
-MessageInterface::ShowMessage("current == NULL\n");
-            break;
-}
       }
          
       // Calling Remove this way just sets the next pointer to NULL
