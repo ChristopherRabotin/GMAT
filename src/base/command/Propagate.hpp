@@ -200,6 +200,10 @@ protected:
                                            std::string& generatingString);
    virtual void            AssemblePropagators(Integer &loc, 
                                                std::string& generatingString);
+   bool                    InterpretParameter(const std::string text, 
+                                              std::string &paramType, 
+                                              std::string &paramObj, 
+                                              std::string &parmSystem);
    virtual bool            TakeAStep(Real propStep = 0.0);
    
    void                    AddTransientForce(StringArray *sats, ForceModel *p);

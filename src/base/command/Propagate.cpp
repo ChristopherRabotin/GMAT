@@ -969,20 +969,34 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       end = i->find("{", loc);
 //      if (end == (Integer)std::string::npos)
 //         throw CommandException("Propagate does not identify stopping condition: looking for {\n");
-   
+
       if (end != (Integer)std::string::npos) {
          loc = end + 1;
          while ((*i)[loc] == ' ')
             ++loc;
-            
-         end = i->find(".", loc);
-      
-         if (end == (Integer)std::string::npos)
-            throw CommandException("Propagate does not identify stopping condition: looking for .\n");
-          
-         std::string paramObj = i->substr(loc, end-loc);
-          
-         loc = end + 1;
+
+         Integer parmEnd = loc;
+         while (((*i)[parmEnd] != ' ') && ((*i)[parmEnd] != '}') && 
+                ((*i)[parmEnd] != ',') && ((*i)[parmEnd] != '=') &&
+                ((*i)[parmEnd] != ')'))
+            ++parmEnd;
+
+         std::string paramType, paramObj, parmSystem;
+         if (!InterpretParameter(i->substr(loc, parmEnd-loc), paramType, paramObj, 
+                            parmSystem))
+            throw CommandException("Propagate::AssemblePropagators: Unable to "
+                                   "parse the parameter string \"" + 
+                                   i->substr(loc, parmEnd-loc) + "\"");
+         loc = parmEnd+1;
+         
+//         end = i->find(".", loc);
+//      
+//         if (end == (Integer)std::string::npos)
+//            throw CommandException("Propagate does not identify stopping condition: looking for .\n");
+//          
+//         std::string paramObj = i->substr(loc, end-loc);
+//         loc = end + 1;
+
          end = i->find("=", loc);
          if (end == (Integer)std::string::npos)
          {
@@ -995,7 +1009,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                throw CommandException("Propagate does not identify stopping condition: looking for }\n");
          }
           
-         std::string paramType = i->substr(loc, end-loc);
+//         std::string paramType = i->substr(loc, end-loc);
       
          unsigned int start = 0;
          for (unsigned int idx=start; idx<paramType.size(); ++idx)
@@ -1016,6 +1030,21 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
          //stopParam->SetStringParameter("Object", paramObj);
          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
+         
+         if (stopParam->IsCoordSysDependent()) {
+            if (parmSystem == "")
+               parmSystem = "EarthMJ2000Eq";
+            /// Which is correct here???
+//            stopParam->SetStringParameter("DepObject", parmSystem);
+            stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
+
+         }
+         
+         if (stopParam->IsOriginDependent()) {
+            if (parmSystem == "")
+               parmSystem = "Earth";
+            stopParam->SetStringParameter("DepObject", parmSystem);
+         }
          
          StopCondition *stopCond =
             theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
@@ -1063,6 +1092,39 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
    if (stopWhen.empty())
       singleStepMode = true;
       //throw CommandException("Propagate does not identify any stopping conditions\n");
+}
+
+
+bool Propagate::InterpretParameter(const std::string text, 
+                                   std::string &paramType, 
+                                   std::string &paramObj, 
+                                   std::string &parmSystem)
+{
+   Integer start = 0, dotLoc = text.find(".", 0);
+   if (dotLoc == (Integer)std::string::npos)
+      throw CommandException("Propagate::InterpretParameter: Unable to "
+               "interpret parameter object in the string " +
+               text);
+               
+   paramObj = text.substr(start, dotLoc - start);
+   start = dotLoc + 1;
+   dotLoc = text.find(".", start);
+   if (dotLoc != (Integer)std::string::npos) {
+      parmSystem = text.substr(start, dotLoc - start);
+      start = dotLoc + 1;
+   }
+   else {
+      parmSystem = "";
+   }
+   
+   paramType = text.substr(start);
+   
+   #ifdef DEBUG_PROPAGATE_INIT
+      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
+         paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
+   #endif
+   
+   return true;
 }
 
 
