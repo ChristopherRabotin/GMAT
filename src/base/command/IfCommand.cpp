@@ -187,6 +187,12 @@ bool IfCommand::Execute()
       commandComplete  = true;
       commandExecuting = false;
    }
+   else if ((Integer)branch.size() > 1)  // for now, there could be an 'Else'
+   {
+      retval = ExecuteBranch(1);
+      commandComplete  = true;
+      commandExecuting = false;
+   }
    
    return retval;
 }
