@@ -33,6 +33,8 @@ XyPlot::PARAMETER_TEXT[XyPlotParamCount] =
     "XAxisTitle",
     "YAxisTitle",
     "DrawGrid"
+    "DataCollectFrequency",
+    "UpdatePlotFrequency"
 }; 
 
 const Gmat::ParameterType
@@ -43,7 +45,9 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount] =
     Gmat::STRING_TYPE,
     Gmat::STRING_TYPE,
     Gmat::STRING_TYPE,
-    Gmat::BOOLEAN_TYPE
+    Gmat::BOOLEAN_TYPE,
+    Gmat::INTEGER_TYPE,
+    Gmat::INTEGER_TYPE
 };
 
 //---------------------------------
@@ -80,8 +84,13 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
     
     mXParam = xParam;
     if (firstYParam != NULL)
-        AddYParameter(xParam);
+        AddYParameter(firstYParam);
 
+    mIsXyPlotWindowSet = false;
+    mFirstXVal = 0.0;
+    
+    mDataCollectFrequency = 1;
+    mUpdatePlotFrequency = 10;
 }
 
 //------------------------------------------------------------------------------
@@ -174,16 +183,18 @@ bool XyPlot::AddYParameter(Parameter *param)
         mYParams.push_back(param);
         mNumYParams = mYParams.size();
 
-        // add to xy plot window
-        //loj: temp code
-        int yOffset = 0; //loj: I don't how this is used
-        Real yMin = -40000.0; //loj: should parameter provide minimum value?
-        Real yMax =  40000.0; //loj: should parameter provide maximum value?
-        std::string curveTitle = param->GetName();
-        std::string penColor = "RED"; //loj: should parameter provide pen color?
-        
-        if (PlotInterface::AddXyPlotCurve(instanceName, yOffset, yMin, yMax,
-                                          curveTitle, penColor))
+        //loj:2/20/04 moved to Distribute(), because XyPlotFrame has not been
+        //created at this point
+//          // add to xy plot window
+//          //loj: temp code
+//          int yOffset = 0; //loj: I don't how this is used
+//          Real yMin = -40000.0; //loj: should parameter provide minimum value?
+//          Real yMax =  40000.0; //loj: should parameter provide maximum value?
+//          std::string curveTitle = param->GetName();
+//          std::string penColor = "RED"; //loj: should parameter provide pen color?
+
+//          if (PlotInterface::AddXyPlotCurve(instanceName, yOffset, yMin, yMax,
+//                                            curveTitle, penColor))
             added = true;
     }
 
@@ -412,11 +423,50 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             {
                 yvals[i] = mYParams[i]->EvaluateReal();
             }
+
+            if (!mIsXyPlotWindowSet)
+            {
+                
+                // Create XyPlotWindow
+                PlotInterface::CreateXyPlotWindow(false, instanceName, mPlotTitle,
+                                                  mXAxisTitle, mYAxisTitle);
+                
+                // add to Y params to XyPlotWindow
+                //loj: temp code
+                int yOffset = 0; //loj: I don't how this is used
+                Real yMin = -40000.0; //loj: should parameter provide minimum value?
+                Real yMax =  40000.0; //loj: should parameter provide maximum value?
+
+                for (int i=0; i<mNumYParams; i++)
+                {
+                    std::string curveTitle = mYParams[i]->GetName();
+                    std::string penColor = "RED"; //loj: should parameter provide pen color?
+
+                    if (PlotInterface::AddXyPlotCurve(instanceName, yOffset, yMin, yMax,
+                                                      curveTitle, penColor))
+                    {
+                        mIsXyPlotWindowSet = true;
+                        mFirstXVal = xval;
+                    }
+                }
+            }
             
             // update xy plot
-            //return PlotInterface::UpdateXyPlot(instanceName, xval, yvals);
-            return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
-                                               mPlotTitle, mXAxisTitle, mYAxisTitle);
+            // X value must start from 0
+            if (mIsXyPlotWindowSet)
+            {
+                mNumData++;
+                
+                if ((mNumData % mDataCollectFrequency) == 0)
+                {
+                    mNumCollected++;
+                    bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
+                    
+                    return PlotInterface::UpdateXyPlot(instanceName, xval-mFirstXVal, yvals,
+                                                       mPlotTitle, mXAxisTitle, mYAxisTitle,
+                                                       update);
+                }
+            }
         }
     }
 

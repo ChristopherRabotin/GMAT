@@ -76,7 +76,15 @@ protected:
     std::string mXAxisTitle;
     std::string mYAxisTitle;
     bool mDrawGrid;
-
+    bool mIsXyPlotWindowSet;
+    double mFirstXVal;
+    
+    Integer mDataCollectFrequency;
+    Integer mUpdatePlotFrequency;
+    
+    Integer mNumData;
+    Integer mNumCollected;
+    
     enum
     {
         X_PARAM_NAME = 0,
@@ -85,6 +93,8 @@ protected:
         X_AXIS_TITLE,
         Y_AXIS_TITLE,
         DRAW_GRID,
+        DATA_COLLECT_FREQUENCY,
+        UPDATE_PLOT_FREQUENCY,
         XyPlotParamCount
     };
     
