@@ -2451,8 +2451,15 @@ void Moderator::CreateDefaultMission()
       // ReportFile
       Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
       sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-      sub->Activate(false);
-    
+      sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
+      sub->SetStringParameter("Add", "DefaultSC.X");
+      sub->SetStringParameter("Add", "DefaultSC.Y");
+      sub->SetStringParameter("Add", "DefaultSC.Z");
+      sub->SetStringParameter("Add", "DefaultSC.VX");
+      sub->SetStringParameter("Add", "DefaultSC.VY");
+      sub->SetStringParameter("Add", "DefaultSC.VZ");
+      sub->Activate(true);
+      
       // XYPlot
       sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
