@@ -21,10 +21,10 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(GmatPanel, wxPanel)
-    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
+   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
+   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
+   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -44,53 +44,49 @@ END_EVENT_TABLE()
 GmatPanel::GmatPanel(wxWindow *parent)
     : wxPanel(parent)
 {
-    int borderSize = 3;
     
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    theGuiManager = GuiItemManager::GetInstance();
-    theParent = parent;
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiManager = GuiItemManager::GetInstance();
+   canClose = true;
     
-    wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
-    wxStaticBox *middleStaticBox = new wxStaticBox( this, -1, wxT("") );
-    wxStaticBox *bottomStaticBox = new wxStaticBox( this, -1, wxT("") );
+   theParent = parent;
     
-    // create sizers
-    thePanelSizer = new wxBoxSizer(wxVERTICAL);
-    theTopSizer = new wxStaticBoxSizer( topStaticBox, wxVERTICAL );
-    theMiddleSizer = new wxStaticBoxSizer( middleStaticBox, wxVERTICAL );
-    theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
-    wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+   int borderSize = 3;
+   wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
+   wxStaticBox *middleStaticBox = new wxStaticBox( this, -1, wxT("") );
+   wxStaticBox *bottomStaticBox = new wxStaticBox( this, -1, wxT("") );
     
-    // create script button
-    theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script", 
-                                   wxDefaultPosition, wxDefaultSize, 0);
+   // create sizers
+   thePanelSizer = new wxBoxSizer(wxVERTICAL);
+   theTopSizer = new wxStaticBoxSizer( topStaticBox, wxVERTICAL );
+   theMiddleSizer = new wxStaticBoxSizer( middleStaticBox, wxVERTICAL );
+   theBottomSizer = new wxStaticBoxSizer( bottomStaticBox, wxVERTICAL );
+   wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
+    
+   // create script button
+   theScriptButton = new wxButton(this, ID_BUTTON_SCRIPT, "Show Script", 
+                                  wxDefaultPosition, wxDefaultSize, 0);
 
-    // create bottom buttons
-    theOkButton =
-        new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
-    theApplyButton =
-        new wxButton(this, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
-    theCancelButton =
-        new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
-    theHelpButton =
-        new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
+   // create bottom buttons
+   theOkButton =
+      new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
+   theApplyButton =
+      new wxButton(this, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
+   theCancelButton =
+      new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
+   theHelpButton =
+      new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
     
-    // add items to top sizer
-    theTopSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
+   // add items to top sizer
+   theTopSizer->Add(theScriptButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
     
-    // adds the buttons to button sizer    
-    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-    theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   // adds the buttons to button sizer    
+   theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     
-//      // adds the buttons to bottom sizer    
-//      theBottomSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-//      theBottomSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-
-    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
+   theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
 }
 
 //-------------------------------
@@ -138,9 +134,10 @@ void GmatPanel::OnOK()
         OnApply();
     
     // Close page from main notebook    
-//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-//    gmatMainNotebook->ClosePage();
-    GmatAppData::GetMainFrame()->CloseActiveChild();
+    // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+    // gmatMainNotebook->ClosePage();
+    if (canClose) //loj: 2/4/05 Added
+       GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------
@@ -152,9 +149,9 @@ void GmatPanel::OnOK()
 //------------------------------------------------------------------------------
 void GmatPanel::OnCancel()
 {
-    // Close page from main notebook
-//    GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-//    gmatMainNotebook->ClosePage();
+   // Close page from main notebook
+   // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
+   // gmatMainNotebook->ClosePage();
    GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
@@ -167,8 +164,8 @@ void GmatPanel::OnCancel()
 //------------------------------------------------------------------------------
 void GmatPanel::OnApply()
 {
-    SaveData();
-    theApplyButton->Disable();
+   SaveData();
+   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -180,7 +177,7 @@ void GmatPanel::OnApply()
 //------------------------------------------------------------------------------
 void GmatPanel::OnHelp()
 {
-    // open separate window to show help?
+   // open separate window to show help?
 }
 
 //------------------------------------------------------------------------------
@@ -192,6 +189,6 @@ void GmatPanel::OnHelp()
 //------------------------------------------------------------------------------
 void GmatPanel::OnScript()
 {
-    // open separate window to show scripts?
+   // open separate window to show scripts?
 }
 

@@ -33,50 +33,52 @@
 class GmatPanel : public wxPanel
 {
 public:
-    // constructors
-    GmatPanel( wxWindow *parent);
+   // constructors
+   GmatPanel( wxWindow *parent);
     
 protected:
-    // member functions
-    virtual void Create() = 0;
-    virtual void Show();
-    virtual void LoadData() = 0;
-    virtual void SaveData() = 0;
+   // member functions
+   virtual void Create() = 0;
+   virtual void Show();
+   virtual void LoadData() = 0;
+   virtual void SaveData() = 0;
     
-    virtual void OnApply();
-    virtual void OnOK();
-    virtual void OnCancel();
-    virtual void OnHelp();
-    virtual void OnScript();
+   virtual void OnApply();
+   virtual void OnOK();
+   virtual void OnCancel();
+   virtual void OnHelp();
+   virtual void OnScript();
 
-    // member data
-    GuiInterpreter *theGuiInterpreter;
-    GuiItemManager *theGuiManager;
-    wxWindow *theParent;
+   // member data
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
+   bool canClose;
+   
+   wxWindow *theParent;
     
-    wxBoxSizer *thePanelSizer;
-    wxStaticBoxSizer *theTopSizer;
-    wxStaticBoxSizer *theMiddleSizer;
-    wxStaticBoxSizer *theBottomSizer;
+   wxBoxSizer *thePanelSizer;
+   wxStaticBoxSizer *theTopSizer;
+   wxStaticBoxSizer *theMiddleSizer;
+   wxStaticBoxSizer *theBottomSizer;
     
-    wxButton *theOkButton;
-    wxButton *theApplyButton;
-    wxButton *theCancelButton;
-    wxButton *theHelpButton;
-    wxButton *theScriptButton;
+   wxButton *theOkButton;
+   wxButton *theApplyButton;
+   wxButton *theCancelButton;
+   wxButton *theHelpButton;
+   wxButton *theScriptButton;
     
-    // any class wishing to process wxWindows events must use this macro
-    DECLARE_EVENT_TABLE();
+   // any class wishing to process wxWindows events must use this macro
+   DECLARE_EVENT_TABLE();
     
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        ID_BUTTON_OK = 8000,
-        ID_BUTTON_APPLY,
-        ID_BUTTON_CANCEL,
-        ID_BUTTON_HELP,
-        ID_BUTTON_SCRIPT,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_BUTTON_OK = 8000,
+      ID_BUTTON_APPLY,
+      ID_BUTTON_CANCEL,
+      ID_BUTTON_HELP,
+      ID_BUTTON_SCRIPT,
+   };
 
 };
 
