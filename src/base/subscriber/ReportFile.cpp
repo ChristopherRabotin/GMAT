@@ -39,7 +39,7 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "Clear",
    "WriteHeaders",
    "ColumnWidth",
-   "WriteStateFile",
+//   "WriteStateFile",
 };
 
 const Gmat::ParameterType
@@ -52,7 +52,7 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 	Gmat::BOOLEAN_TYPE,
 	Gmat::STRING_TYPE,
 	Gmat::INTEGER_TYPE,
-	Gmat::STRING_TYPE,
+//	Gmat::STRING_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName,
    precision       (12),
    columnWidth     (20),
    writeHeaders    (true),
-   writeStateFile  (false),
+//   writeStateFile  (false),
    lastUsedProvider (-1)
 {
 //   if (fileName != "")
@@ -106,7 +106,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    precision       (rf.precision),
    columnWidth     (rf.columnWidth),
    writeHeaders    (rf.writeHeaders),
-   writeStateFile  (true),
+//   writeStateFile  (true),
    lastUsedProvider (-1)
 {
 //   if (filename != "")
@@ -147,7 +147,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
     precision = rf.precision;
     columnWidth = rf.columnWidth;
     writeHeaders = rf.writeHeaders;
-    writeStateFile = rf.writeStateFile;
+//    writeStateFile = rf.writeStateFile;
 
    //ag: what to do with the stream?
 //    dstream = NULL;  // output data stream
@@ -307,13 +307,13 @@ std::string ReportFile::GetStringParameter(const Integer id) const
       else
          return "Off";
    }
-   else if (id == WRITE_STATE_FILE)
-   {
-      if (writeStateFile)
-         return "On";
-      else
-         return "Off";
-   }
+//   else if (id == WRITE_STATE_FILE)
+//   {
+//      if (writeStateFile)
+//         return "On";
+//      else
+//         return "Off";
+//   }
    return Subscriber::GetStringParameter(id);
 }
 
@@ -333,20 +333,20 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
 
       filename = value;
 
-      if (writeStateFile)
-      {
-         if (stateStream.is_open())
-         {
-            stateStream.close();
+//      if (writeStateFile)
+//      {
+//         if (stateStream.is_open())
+//         {
+//            stateStream.close();
+//
+//            char stateFilename[500];
+//            strcpy(stateFilename, filename.c_str());
+//            strcat(stateFilename, ".state");
+//
+//            dstream.open(stateFilename);
+//         }
+//      }
 
-            char stateFilename[500];
-            strcpy(stateFilename, filename.c_str());
-            strcat(stateFilename, ".state");
-
-            dstream.open(stateFilename);
-         }
-      }
-      
       return true;
    }
    else if (id == ADD)
@@ -368,21 +368,21 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       else
          return false;   
    }   
-   else if (id == WRITE_STATE_FILE)
-   {
-      if (strcmp(value.c_str(), "On") == 0)
-      {
-         writeStateFile = true;
-         return true;
-      }
-      else if (strcmp(value.c_str(), "Off") == 0)
-      {
-         writeStateFile = false;
-         return true;
-      }
-      else
-         return false;
-   }
+//   else if (id == WRITE_STATE_FILE)
+//   {
+//      if (strcmp(value.c_str(), "On") == 0)
+//      {
+//         writeStateFile = true;
+//         return true;
+//      }
+//      else if (strcmp(value.c_str(), "Off") == 0)
+//      {
+//         writeStateFile = false;
+//         return true;
+//      }
+//      else
+//         return false;
+//   }
 
       
    return Subscriber::SetStringParameter(id, value);
@@ -514,22 +514,22 @@ bool ReportFile::OpenReportFile(void)
 
    dstream.precision(precision);
 
-   if (writeStateFile)
-   {
-      if (stateStream.is_open())
-        stateStream.close();
+//   if (writeStateFile)
+//   {
+//      if (stateStream.is_open())
+//        stateStream.close();
+//
+//      char stateFilename[500];
+//      strcpy(stateFilename, filename.c_str());
+//      strcat(stateFilename, ".state");
+//
+//      stateStream.open(stateFilename);
+//      if (!stateStream.is_open())
+//         return false;
+//
+//      stateStream.precision(precision);
+//   }
 
-      char stateFilename[500];
-      strcpy(stateFilename, filename.c_str());
-      strcat(stateFilename, ".state");
-
-      stateStream.open(stateFilename);
-      if (!stateStream.is_open())
-         return false;
-
-      stateStream.precision(precision);
-   }
-   
    return true;
 }
 
@@ -577,17 +577,17 @@ bool ReportFile::Distribute(int len)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
 {   
-   if (isEndOfReceive)
-   {
-      dstream.flush();
-      dstream.close();
-      
-      stateStream.flush();
-      stateStream.close();
-      
-      return false;
-   }
-   
+//   if (isEndOfReceive)
+//   {
+//      dstream.flush();
+//      dstream.close();
+
+//      stateStream.flush();
+//      stateStream.close();
+
+//      return false;
+//   }
+
 // DJC 07/29/04 Commented out -- not sure how this works...
    // get var params
    // ag: uncommented 7/30/04
@@ -616,18 +616,18 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 
     dstream << std::endl;
 
-    if (writeStateFile)
-    {
-        if (!stateStream.good())
-           stateStream.clear();
-
-        for (int i = 0; i < len-1; ++i)
-        {
-           stateStream.width(columnWidth);
-           stateStream << dat[i] << "  ";
-        }
-        stateStream << dat[len-1] << std::endl;
-    }
+//    if (writeStateFile)
+//    {
+//        if (!stateStream.good())
+//           stateStream.clear();
+//
+//        for (int i = 0; i < len-1; ++i)
+//        {
+//           stateStream.width(columnWidth);
+//           stateStream << dat[i] << "  ";
+//        }
+//        stateStream << dat[len-1] << std::endl;
+//    }
 // ag: commented out 7/30/04
 //      if (lastUsedProvider != currentProvider) {
 //         // Write out a line with data labels
@@ -687,24 +687,24 @@ void ReportFile::WriteHeaders()
       }   
       dstream << std::endl;
       
-      if (writeStateFile)
-      {
-         if (!stateStream.is_open())
-            return;
-
-         StringArray sar =
-              Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
-         for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
-         {
-             if (!stateStream.good())
-                stateStream.clear();
-
-             stateStream.width(columnWidth);
-             stateStream << (*i) << "  ";
-         }
-
-         stateStream << "\n";
-      }
+//      if (writeStateFile)
+//      {
+//         if (!stateStream.is_open())
+//            return;
+//
+//         StringArray sar =
+//              Publisher::Instance()->GetStringArrayParameter("PublishedDataMap");
+//         for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i)
+//         {
+//             if (!stateStream.good())
+//                stateStream.clear();
+//
+//             stateStream.width(columnWidth);
+//             stateStream << (*i) << "  ";
+//         }
+//
+//         stateStream << "\n";
+//      }
    }
    
    initial = false;

@@ -91,7 +91,7 @@ protected:
    bool                  writeHeaders;
    
    /// Write the headers on the top of the column
-   bool                  writeStateFile;
+//   bool                  writeStateFile;
 
    
    /// ID for the file name
@@ -99,7 +99,7 @@ protected:
    /// ID for the precision information
 //   Integer             precisionID;
    std::ofstream       dstream;  // output data stream
-   std::ofstream       stateStream;  //output data for state
+//   std::ofstream       stateStream;  //output data for state
 
    std::vector<Parameter*> mVarParams; //loj: 6/4/04 remove this later
    std::map<std::string, Parameter*> mVarParamMap;
@@ -129,7 +129,7 @@ private:
       CLEAR,
       WRITE_HEADERS,
       COL_WIDTH,
-      WRITE_STATE_FILE,
+//      WRITE_STATE_FILE,
       ReportFileParamCount  /// Count of the parameters for this class
     };
 
