@@ -1583,6 +1583,16 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
         retval = obj->SetStringParameter(id, valueToUse);
     }
 
+    if (type == Gmat::BOOLEAN_TYPE) {
+       bool tf;
+       if (value == "true")
+          tf = true;
+       else
+          tf = false;
+       obj->SetBooleanParameter(id, tf);
+       retval = true;
+    }
+    
     return retval;
 }
 
