@@ -60,6 +60,7 @@ public:
     virtual std::string GetStringParameter(const Integer id) const;
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
+    virtual bool        GetBooleanParameter(const Integer id) const;
     virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
     virtual bool        SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
@@ -79,10 +80,13 @@ protected:
                         localStore;
     /// Counter to track how deep the Target nesting is
     Integer             nestLevel;
+    /// Flag indicating is the targeter has converged
+    bool                targeterConverged;
     
     // Parameter IDs 
     /// ID for the burn object
     Integer             targeterNameID;
+    Integer             TargeterConvergedID;
     
     // Methods used to save the starting point for the loops
     virtual void        StoreLoopData(void);

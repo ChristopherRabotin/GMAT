@@ -30,13 +30,15 @@
  */
 //------------------------------------------------------------------------------
 Target::Target(void) :
-    BranchCommand   ("Target"),
-    targeterName    (""),
-    targeter        (NULL),
-    nestLevel       (0),
-    targeterNameID  (parameterCount)
+    BranchCommand      ("Target"),
+    targeterName       (""),
+    targeter           (NULL),
+    nestLevel          (0),
+    targeterConverged  (false),
+    targeterNameID     (parameterCount),
+    TargeterConvergedID(parameterCount+1)
 {
-    parameterCount += 1;
+    parameterCount += 2;
 }
 
 
@@ -61,11 +63,12 @@ Target::~Target(void)
  */
 //------------------------------------------------------------------------------
 Target::Target(const Target& t) :
-    BranchCommand   (t),
-    targeterName    (t.targeterName),
-    targeter        (NULL),
-    nestLevel       (0),
-    targeterNameID  (t.parameterCount)
+    BranchCommand       (t),
+    targeterName        (t.targeterName),
+    targeter            (NULL),
+    nestLevel           (0),
+    targeterNameID      (t.targeterNameID),
+    TargeterConvergedID (t.TargeterConvergedID)
 {
     parameterCount = t.parameterCount;
 }
@@ -227,6 +230,8 @@ Integer Target::GetParameterID(const std::string &str) const
 {
     if (str == "Targeter")
         return targeterNameID;
+    if (str == "TargeterConverged")
+        return TargeterConvergedID;
     
     return BranchCommand::GetParameterID(str);
 }
@@ -247,6 +252,8 @@ Gmat::ParameterType Target::GetParameterType(const Integer id) const
 {
     if (id == targeterNameID)
         return Gmat::STRING_TYPE;
+    if (id == TargeterConvergedID)
+        return Gmat::BOOLEAN_TYPE;
     
     return BranchCommand::GetParameterType(id);
 }
@@ -267,6 +274,8 @@ std::string Target::GetParameterTypeString(const Integer id) const
 {
     if (id == targeterNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+    if (id == TargeterConvergedID)
+        return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
     
     return BranchCommand::GetParameterTypeString(id);
 }
@@ -315,11 +324,34 @@ bool Target::SetStringParameter(const Integer id, const std::string &value)
 }
 
 
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ *
+ * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
+ *       parameter accesses.
+ */
+bool Target::GetBooleanParameter(const Integer id) const
+{
+   if (id == TargeterConvergedID)
+      return targeterConverged;
+      
+   return BranchCommand::GetBooleanParameter(id);
+}
+
+
 std::string Target::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
       return targeterName;
-   return "NO_SUCH_REFERENCE_OBJECT";
+   return BranchCommand::GetRefObjectName(type);
 }
 
 
@@ -329,7 +361,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type, const std::string &na
       targeterName = name;
       return true;
    }
-   return GmatCommand::SetRefObjectName(type, name);
+   return BranchCommand::SetRefObjectName(type, name);
 }
 
 
@@ -387,6 +419,7 @@ bool Target::Execute(void)
         case Solver::INITIALIZING:
             // Finalize initialization of the targeter data
             current = branch[0];
+            targeterConverged = false;
             while (current != this)  {
                 std::string type = current->GetTypeName();
                 if ((type == "Target") || (type == "Vary") || (type == "Achieve"))
@@ -422,6 +455,10 @@ bool Target::Execute(void)
         case Solver::FINISHED:
             // Final clean-up
             commandComplete = true;
+            targeterConverged = true;
+            
+            // Run once more to publish the data from the converged state
+            retval = ExecuteBranch();
             break;
             
         case Solver::ITERATING:     // Intentional fall-through
