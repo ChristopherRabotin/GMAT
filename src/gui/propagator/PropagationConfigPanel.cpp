@@ -23,12 +23,13 @@
 #include <wx/string.h>
 
 #include "gmatwxdefs.hpp"
-#include "ViewTextFrame.hpp"
-#include "DocViewFrame.hpp"
-#include "TextEditView.hpp"
-#include "TextDocument.hpp"
-#include "MdiTextEditView.hpp"
-#include "MdiDocViewFrame.hpp"
+//loj: 3/3/04 commented out for build2
+//#include "ViewTextFrame.hpp"
+//#include "DocViewFrame.hpp"
+//#include "TextEditView.hpp"
+//#include "TextDocument.hpp"
+//#include "MdiTextEditView.hpp"
+//#include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
 #include "GmatMainNotebook.hpp"
 #include "CelesBodySelectDialog.hpp"
@@ -91,8 +92,7 @@ END_EVENT_TABLE()
 PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString &propName)
     : wxPanel(parent)
 {
-    propNameString = propName;
-
+    propSetupName = std::string(propName.c_str());
     Initialize();
     Setup(this);
     GetData();
@@ -108,17 +108,22 @@ void PropagationConfigPanel::Initialize()
     numOfForces = 1;  // TBD thePropSetup->GetNumForces();
     numOfGraFields = 4;
     numOfMagFields = 1;  // TBD - Not for Build 2
+    numOfPrimaryBodies = 1; //loj: 3/3/04 added
+    isForceModelChanged = false;
+    newProp = NULL;
+    newPropName = "";
     
     //MessageInterface::ShowMessage("PropagationConfigPanel():Initialize() entered\n");
 
     // waw: TBD - future implementation gets the pri.body from the solar system
     primaryBodyString = SolarSystem::EARTH_NAME.c_str();
+    primaryBodiesArray.Add(primaryBodyString); //loj: 3/3/04 added
     
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
 
     if (theGuiInterpreter != NULL)
     {
-        thePropSetup = theGuiInterpreter->GetPropSetup(propNameString.c_str());
+        thePropSetup = theGuiInterpreter->GetPropSetup(propSetupName);
 
         if (thePropSetup != NULL)
         {
@@ -244,10 +249,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
         wxT("RKF 5(6)")
     };
     
-    wxString strArray2[numOfBodies];
-    if ( !allBodiesArray.IsEmpty() )
-        for (int i = 0; i < numOfBodies; i++)
-            strArray2[i] = allBodiesArray[i].c_str();
+    wxString strArray2[numOfPrimaryBodies];
+    //loj: temp fix to show Earth only
+    strArray2[0] = "Earth";
+    //if ( !allBodiesArray.IsEmpty() )
+    //    for (int i = 0; i < numOfBodies; i++)
+    //        strArray2[i] = allBodiesArray[i].c_str();
     
     wxString strArray3[] = 
     {
@@ -275,7 +282,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
                         strArray1, wxCB_DROPDOWN|wxCB_READONLY );
     bodyComboBox =
         new wxComboBox( parent, ID_CB_BODY, wxT(strArray2[0]),
-                        wxDefaultPosition,  wxSize(100,-1), numOfBodies,
+                        wxDefaultPosition,  wxSize(100,-1), numOfPrimaryBodies,
                         strArray2, wxCB_DROPDOWN|wxCB_READONLY );
     gravityTypeComboBox =
         new wxComboBox( parent, ID_CB_GRAV, wxT(strArray3[1]),
@@ -349,9 +356,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
     flexGridSizer2->Add( setting9StaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
     flexGridSizer2->Add( setting9TextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, 5 );
 
-    boxSizer3->Add( bodyComboBox, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer3->Add( bodyTextCtrl, 0, wxALIGN_CENTRE|wxALL, 5 );
-    boxSizer3->Add( bodyButton, 0, wxALIGN_CENTRE|wxALL, 5 );
+    boxSizer3->Add( bodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
+    boxSizer3->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
+    boxSizer3->Add( bodyButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, 5 );
     
     item36->Add( item42, 0, wxALIGN_CENTRE|wxALL, 5 );
     item36->Add( gravityTypeComboBox, 0, wxALIGN_CENTRE|wxALL, 5 ); 
@@ -425,6 +432,17 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 
 void PropagationConfigPanel::GetData()
 {           
+    std::string propName = thePropagator->GetTypeName();
+    //MessageInterface::ShowMessage("PropagationConfigPanel():GetData() propName = %s\n",
+    //                              propName.c_str());
+    
+    if (propName == "RungeKutta89")
+        integratorComboBox->SetSelection(0);
+    else if (propName == "DormandElMikkawyPrince68")
+        integratorComboBox->SetSelection(1);
+    else if (propName == "RungeKuttaFehlberg56")
+        integratorComboBox->SetSelection(2);
+
     DisplayIntegratorData();
     DisplayForceData();
 }
@@ -437,12 +455,33 @@ void PropagationConfigPanel::SetData()
         
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
-        theRK89->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
-        theRK89->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
-        theRK89->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
-        theRK89->SetRealParameter(Integrator::maximumStepSize, atof(setting4TextCtrl->GetValue()) );
-        theRK89->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::maximumStepSize, atof(setting4TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
     }
+    else if (integratorString.IsSameAs("RKN 6(8)"))
+    {
+        newProp->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::maximumStepSize, atof(setting4TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
+    }
+    else if (integratorString.IsSameAs("RKF 5(6)"))
+    {
+        newProp->SetRealParameter(Propagator::stepSizeParameter, atof(setting1TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::errorControlHold, atof(setting2TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::minimumStepSize, atof(setting3TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::maximumStepSize, atof(setting4TextCtrl->GetValue()) );
+        newProp->SetRealParameter(Integrator::numStepAttempts, atof(setting5TextCtrl->GetValue()) );
+    }
+
+    // setting propagator
+    thePropSetup->SetPropagator(newProp);
+    MessageInterface::ShowMessage("PropagationConfigPanel():SetData() newPropType = %s name = %s\n",
+                                  newProp->GetTypeName().c_str(), newProp->GetName().c_str());
     
     // Saving the primary body data
     if ( primaryBodyString.Cmp(SolarSystem::EARTH_NAME.c_str()) == 0 )
@@ -513,17 +552,17 @@ void PropagationConfigPanel::SetData()
         }
     }
     */
-    if (theForceModel != NULL)
-    {
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving force model\n");
-        thePropSetup->SetForceModel(theForceModel);
-    }
+
     
-    if (theRK89 != NULL)
-    {
-        MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving propagator\n");
-        thePropSetup->SetPropagator(theRK89);
-    }
+//      if (theForceModel != NULL)
+//      {
+//          MessageInterface::ShowMessage("PropagationConfigPanel():SetData() Saving force model\n");
+//          thePropSetup->SetForceModel(theForceModel);
+//      }
+
+    if (isForceModelChanged)
+        UpdateForceModel();
+    
     
     /*  waw: Future implementation   
     else if (integratorString.Cmp("RKN 6(8)") == 0)
@@ -586,12 +625,25 @@ void PropagationConfigPanel::SetData()
 }
 
 void PropagationConfigPanel::DisplayIntegratorData()
-{           
+{    
+
     integratorString = integratorComboBox->GetStringSelection();
     
+    //if (integratorComboBox->GetSelection() == 0)
     if (integratorString.Cmp("RKV 8(9)") == 0)
     {
-        theRK89 = (RungeKutta89 *)thePropagator;
+        newPropName = propSetupName + "RKV89";
+        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
+        //                              newPropName.c_str());
+        
+        newProp = theGuiInterpreter->GetPropagator(newPropName);
+        if (newProp == NULL)
+        {
+            MessageInterface::ShowMessage("Creating RungeKutta89\n");
+            newProp = theGuiInterpreter->CreatePropagator("RungeKutta89", newPropName);
+        }
+        //loj: changed theRK89 to newProp
+        //theRK89 = (RungeKutta89 *)thePropagator;
         
         setting1StaticText->SetLabel("Step Size: ");
         setting2StaticText->SetLabel("Max Int Error: ");
@@ -599,11 +651,11 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting4StaticText->SetLabel("Max Step Size: ");
         setting5StaticText->SetLabel("Max failed steps: ");
         
-        setting1TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Propagator::stepSizeParameter)));
-        setting2TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::errorControlHold)));
-        setting3TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::minimumStepSize)));
-        setting4TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::maximumStepSize)));
-        setting5TextCtrl->SetValue(wxVariant(theRK89->GetRealParameter(Integrator::numStepAttempts)));
+        setting1TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Propagator::stepSizeParameter)));
+        setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::errorControlHold)));
+        setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::minimumStepSize)));
+        setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::maximumStepSize)));
+        setting5TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::numStepAttempts)));
 
         setting6StaticText->Show(false); 
         setting7StaticText->Show(false); 
@@ -615,21 +667,33 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting8TextCtrl->Show(false); 
         setting9TextCtrl->Show(false); 
     }
+    //else if (integratorComboBox->GetSelection() == 1)
     else if (integratorString.Cmp("RKN 6(8)") == 0)
     {
-        //theRK68 = (RungeKutta89 *)thePropagator;
+        newPropName = propSetupName + "RKN68";
+        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
+        //                              newPropName.c_str());
+        newProp = theGuiInterpreter->GetPropagator(newPropName);
+        if (newProp == NULL)
+        {
+            MessageInterface::ShowMessage("Creating DormandElMikkawyPrince68\n");
+            newProp = theGuiInterpreter->CreatePropagator("DormandElMikkawyPrince68", newPropName);
+        }
         
+        //theRK68 = (RungeKutta89 *)thePropagator;
+
+        // use newProp to retrive and set value
         setting1StaticText->SetLabel("Step Size: ");
         setting2StaticText->SetLabel("Max Int Error: ");
         setting3StaticText->SetLabel("Min Step Size: ");
         setting4StaticText->SetLabel("Max Step Size: ");
         setting5StaticText->SetLabel("Max failed steps: ");
         
-        setting1TextCtrl->SetValue(wxVariant()); 
-        setting2TextCtrl->SetValue(wxVariant());
-        setting3TextCtrl->SetValue(wxVariant());
-        setting4TextCtrl->SetValue(wxVariant());
-        setting5TextCtrl->SetValue(wxVariant());
+        setting1TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Propagator::stepSizeParameter)));
+        setting2TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::errorControlHold)));
+        setting3TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::minimumStepSize)));
+        setting4TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::maximumStepSize)));
+        setting5TextCtrl->SetValue(wxVariant(newProp->GetRealParameter(Integrator::numStepAttempts)));
         
         setting6StaticText->Show(false); 
         setting7StaticText->Show(false); 
@@ -641,8 +705,20 @@ void PropagationConfigPanel::DisplayIntegratorData()
         setting8TextCtrl->Show(false); 
         setting9TextCtrl->Show(false);  
     }
+    //else if (integratorComboBox->GetSelection() == 2)
     else if (integratorString.Cmp("RKF 5(6)") == 0)
     {   
+        newPropName = propSetupName + "RKF56";
+        //MessageInterface::ShowMessage("DisplayIntegratorData() newPropName = %s\n",
+        //                              newPropName.c_str());
+        newProp = theGuiInterpreter->GetPropagator(newPropName);
+        if (newProp == NULL)
+        {
+            MessageInterface::ShowMessage("Creating RungeKuttaFehlberg56\n");
+            newProp = theGuiInterpreter->CreatePropagator("RungeKuttaFehlberg56", newPropName);
+        }
+        
+        // use newProp to retrive and set value
         setting1StaticText->SetLabel("Max Relative Error: ");
         setting2StaticText->SetLabel("Min Relative Error: ");
         setting3StaticText->SetLabel("Max Step Size: ");
@@ -715,7 +791,9 @@ void PropagationConfigPanel::DisplayForceData()
 
 void PropagationConfigPanel::DisplayPrimaryBodyData()
 {
-    bodyComboBox->SetValue(primaryBodyString);
+    //loj: 3/3/04 added
+    bodyComboBox->SetValue(primaryBodiesArray[0]);
+    bodyTextCtrl->SetValue(primaryBodiesArray[0]);
     
     /*
     int earthIndex;
@@ -826,6 +904,7 @@ void PropagationConfigPanel::DisplaySRPData()
 
 void PropagationConfigPanel::OnIntegratorSelection()
 {
+    integratorString = integratorComboBox->GetStringSelection();
     DisplayIntegratorData();
     applyButton->Enable(true);
 }
@@ -853,134 +932,136 @@ void PropagationConfigPanel::OnGravitySelection()
     {
         editMassButton->Enable(false);
     }
-    
+
+    isForceModelChanged = true;
     applyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnAtmosphereSelection()
 {
     applyButton->Enable(true);
+    isForceModelChanged = true;
 }
 
 
-//------------------------------------------------------------------------------
-// wxMenuBar* CreateScriptWindowMenu(const std::string &docType)
-//------------------------------------------------------------------------------
-wxMenuBar* PropagationConfigPanel::CreateScriptWindowMenu(const std::string &docType)
-{
-    // Make a menubar
-    wxMenu *fileMenu = new wxMenu;
-    wxMenu *editMenu = (wxMenu *) NULL;
+//  //------------------------------------------------------------------------------
+//  // wxMenuBar* CreateScriptWindowMenu(const std::string &docType)
+//  //------------------------------------------------------------------------------
+//  wxMenuBar* PropagationConfigPanel::CreateScriptWindowMenu(const std::string &docType)
+//  {
+//        // Make a menubar
+//        wxMenu *fileMenu = new wxMenu;
+//      wxMenu *editMenu = (wxMenu *) NULL;
     
-    fileMenu->Append(wxID_NEW, _T("&New..."));
-    fileMenu->Append(wxID_OPEN, _T("&Open..."));
+//      fileMenu->Append(wxID_NEW, _T("&New..."));
+//      fileMenu->Append(wxID_OPEN, _T("&Open..."));
 
-    if (docType == "sdi")
-    {
-        fileMenu->Append(wxID_CLOSE, _T("&Close"));
-        fileMenu->Append(wxID_SAVE, _T("&Save"));
-        fileMenu->Append(wxID_SAVEAS, _T("Save &As..."));
-        fileMenu->AppendSeparator();
-        fileMenu->Append(wxID_PRINT, _T("&Print..."));
-        fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
-        fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
+//      if (docType == "sdi")
+//      {
+//          fileMenu->Append(wxID_CLOSE, _T("&Close"));
+//          fileMenu->Append(wxID_SAVE, _T("&Save"));
+//          fileMenu->Append(wxID_SAVEAS, _T("Save &As..."));
+//          fileMenu->AppendSeparator();
+//          fileMenu->Append(wxID_PRINT, _T("&Print..."));
+//          fileMenu->Append(wxID_PRINT_SETUP, _T("Print &Setup..."));
+//          fileMenu->Append(wxID_PREVIEW, _T("Print Pre&view"));
     
-        editMenu = new wxMenu;
-        editMenu->Append(wxID_UNDO, _T("&Undo"));
-        editMenu->Append(wxID_REDO, _T("&Redo"));
-        editMenu->AppendSeparator();
-        //editMenu->Append(DOCVIEW_CUT, _T("&Cut last segment"));
+//          editMenu = new wxMenu;
+//          editMenu->Append(wxID_UNDO, _T("&Undo"));
+//          editMenu->Append(wxID_REDO, _T("&Redo"));
+//          editMenu->AppendSeparator();
+//          //editMenu->Append(DOCVIEW_CUT, _T("&Cut last segment"));
     
-        docMainFrame->editMenu = editMenu;
-        fileMenu->AppendSeparator();
-    }
+//          docMainFrame->editMenu = editMenu;
+//          fileMenu->AppendSeparator();
+//      }
     
-    fileMenu->Append(wxID_EXIT, _T("E&xit"));
+//      fileMenu->Append(wxID_EXIT, _T("E&xit"));
     
-    // A nice touch: a history of files visited. Use this menu.
-    mDocManager->FileHistoryUseMenu(fileMenu);
+//      // A nice touch: a history of files visited. Use this menu.
+//      mDocManager->FileHistoryUseMenu(fileMenu);
     
-    //wxMenu *help_menu = new wxMenu;
-    //help_menu->Append(DOCVIEW_ABOUT, _T("&About"));
+//      //wxMenu *help_menu = new wxMenu;
+//      //help_menu->Append(DOCVIEW_ABOUT, _T("&About"));
     
-    wxMenuBar *menuBar = new wxMenuBar;
+//        wxMenuBar *menuBar = new wxMenuBar;
     
-    menuBar->Append(fileMenu, _T("&File"));
+//      menuBar->Append(fileMenu, _T("&File"));
     
-    if (editMenu)
-        menuBar->Append(editMenu, _T("&Edit"));
+//      if (editMenu)
+//          menuBar->Append(editMenu, _T("&Edit"));
     
-    //menuBar->Append(help_menu, _T("&Help"));
+//      //menuBar->Append(help_menu, _T("&Help"));
 
-    return menuBar;
-}
+//      return menuBar;
+//  }
 
-void PropagationConfigPanel::CreateScript()
-{
-    //not MAC mode
-    //----------------------------------------------------------------
-/* **** NOTE:  it is temporary until it is fixed for Mac  ***************
-#if !defined __WXMAC__
-******************************* */
-#if 1 
-    // Create a document manager
-    mDocManager = new wxDocManager;
+//  void PropagationConfigPanel::CreateScript()
+//  {
+//      //not MAC mode
+//      //----------------------------------------------------------------
+//  /* **** NOTE:  it is temporary until it is fixed for Mac  ***************
+//  #if !defined __WXMAC__
+//  ******************************* */
+//  #if 1 
+//      // Create a document manager
+//      mDocManager = new wxDocManager;
 
-    // Create a template relating text documents to their views
-    mDocTemplate = 
-        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-                          CLASSINFO(TextDocument), CLASSINFO(MdiTextEditView));
+//      // Create a template relating text documents to their views
+//      mDocTemplate = 
+//          new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+//                            _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+//                            CLASSINFO(TextDocument), CLASSINFO(MdiTextEditView));
     
-    // Create the main frame window    
-    mdiDocMainFrame =
-        new MdiDocViewFrame(mDocManager, mdiDocMainFrame, _T("Script Window (MDI)"),
-                            wxPoint(0, 0), wxSize(600, 500),
-                            (wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE));
+//      // Create the main frame window    
+//      mdiDocMainFrame =
+//          new MdiDocViewFrame(mDocManager, mdiDocMainFrame, _T("Script Window (MDI)"),
+//                              wxPoint(0, 0), wxSize(600, 500),
+//                              (wxDEFAULT_FRAME_STYLE | wxNO_FULL_REPAINT_ON_RESIZE));
     
-    // Give it an icon (this is ignored in MDI mode: uses resources)
-    mdiDocMainFrame->SetIcon(wxIcon(_T("doc")));
+//      // Give it an icon (this is ignored in MDI mode: uses resources)
+//      mdiDocMainFrame->SetIcon(wxIcon(_T("doc")));
     
-    // Make a menubar
-    wxMenuBar *menuBar = CreateScriptWindowMenu("mdi");
+//      // Make a menubar
+//      wxMenuBar *menuBar = CreateScriptWindowMenu("mdi");
        
-    // Associate the menu bar with the frame
-    mdiDocMainFrame->SetMenuBar(menuBar);
+//      // Associate the menu bar with the frame
+//      mdiDocMainFrame->SetMenuBar(menuBar);
     
-    mdiDocMainFrame->Centre(wxBOTH);
-    mdiDocMainFrame->Show(TRUE);
-    //----------------------------------------------------------------
-#else
-    // Create a document manager
-    mDocManager = new wxDocManager;
+//      mdiDocMainFrame->Centre(wxBOTH);
+//      mdiDocMainFrame->Show(TRUE);
+//      //----------------------------------------------------------------
+//  #else
+//      // Create a document manager
+//      mDocManager = new wxDocManager;
 
-    // Create a template relating text documents to their views
-    mDocTemplate = 
-        new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
-                          _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
-                          CLASSINFO(TextDocument), CLASSINFO(TextEditView));
+//      // Create a template relating text documents to their views
+//      mDocTemplate = 
+//          new wxDocTemplate(mDocManager, _T("Text"), _T("*.script"),
+//                            _T(""), _T("script"), _T("Text Doc"), _T("Text View"),
+//                            CLASSINFO(TextDocument), CLASSINFO(TextEditView));
     
-    // Create the main frame window    
-    docMainFrame =
-        new DocViewFrame(mDocManager, this, -1, _T("Script Window"),
-                         wxPoint(0, 0), wxSize(600, 500), wxDEFAULT_FRAME_STYLE);
+//      // Create the main frame window    
+//      docMainFrame =
+//          new DocViewFrame(mDocManager, this, -1, _T("Script Window"),
+//                           wxPoint(0, 0), wxSize(600, 500), wxDEFAULT_FRAME_STYLE);
         
-    // Make a menubar
-    wxMenuBar *menuBar = CreateScriptWindowMenu("sdi");
+//      // Make a menubar
+//      wxMenuBar *menuBar = CreateScriptWindowMenu("sdi");
        
-    // Associate the menu bar with the frame
-    docMainFrame->SetMenuBar(menuBar);
+//      // Associate the menu bar with the frame
+//      docMainFrame->SetMenuBar(menuBar);
     
-    docMainFrame->Centre(wxBOTH);
-    docMainFrame->Show(TRUE);
-#endif
-}
+//      docMainFrame->Centre(wxBOTH);
+//      docMainFrame->Show(TRUE);
+//  #endif
+//  }
 
 // wxButton Events
 void PropagationConfigPanel::OnScriptButton()
 {
-    CreateScript();
-    applyButton->Enable(true);
+//      CreateScript();
+//      applyButton->Enable(true);
 }
 
 void PropagationConfigPanel::OnOKButton()
@@ -1026,29 +1107,37 @@ void PropagationConfigPanel::OnAddButton()
         
     if (bodyDlg.IsBodySelected())
     {        
+        //loj: 3/3/04 added
         wxArrayString &names = bodyDlg.GetBodyNames();
-        
-        bodyTextCtrl->Clear();
-        bodyComboBox->Clear();
-        
-        int index = primaryBodiesArray.GetCount();
-        
-        for (int i = 0; i < names.GetCount(); i++)
+        for(int i=0; i<names.GetCount(); i++)
         {
-           primaryBodiesArray.Insert(names.Item(i), index);
-           index++;
-           
-           bodyTextCtrl->AppendText(primaryBodiesArray.Item(i));
-           bodyTextCtrl->AppendText(" ");
-           
-           bodyComboBox->Append(primaryBodiesArray.Item(i));
-        } 
+            primaryBodiesArray.Add(names[i]);
+            bodyTextCtrl->AppendText(", " + names[i]);
+            bodyComboBox->Append(names[i]);
+        }
+
+        //loj: 3/3/04 commented out
+//          bodyTextCtrl->Clear();
+//          bodyComboBox->Clear();
         
-        int pos = bodyComboBox->FindString(primaryBodyString);
-        if (pos == -1)
-            bodyComboBox->SetSelection(0);
-        else
-            bodyComboBox->SetSelection(pos);       
+//          int index = primaryBodiesArray.GetCount();
+        
+//          for (int i = 0; i < names.GetCount(); i++)
+//          {
+//             primaryBodiesArray.Insert(names.Item(i), index);
+//             index++;
+           
+//             bodyTextCtrl->AppendText(primaryBodiesArray.Item(i));
+//             bodyTextCtrl->AppendText(" ");
+           
+//             bodyComboBox->Append(primaryBodiesArray.Item(i));
+//          } 
+        
+//          int pos = bodyComboBox->FindString(primaryBodyString);
+//          if (pos == -1)
+//              bodyComboBox->SetSelection(0);
+//          else
+//              bodyComboBox->SetSelection(pos);       
             
         applyButton->Enable(true);
     }
@@ -1123,34 +1212,39 @@ void PropagationConfigPanel::OnPMEditButton()
     if (bodyDlg.IsBodySelected())
     {        
         wxArrayString &names = bodyDlg.GetBodyNames();
-        
-        int index = primaryBodiesArray.GetCount();
-        
-        pmEditTextCtrl->Clear();
-        
-        for (int i = 0; i < names.GetCount(); i++)
+        for (int i=0; i<names.GetCount(); i++)
         {
-           pointmassBodiesArray.Insert(names.Item(i), index);
-           index++;
-           pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
-           pmEditTextCtrl->AppendText(" ");
+            pmEditTextCtrl->AppendText(names[i] + " ");
         }
-        // If any primary bodies exist, take them out (just a precaution)
-        if (!pointmassBodiesArray.IsEmpty())
-        {
-            for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
-            {
-                wxString pbStr = primaryBodiesArray.Item(i);
-                for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
-                {
-                    wxString pmStr = pointmassBodiesArray.Item(j);
-                    if (pmStr.CmpNoCase(pbStr))
-                    {
-                        pointmassBodiesArray.Remove(pmStr);
-                    }
-                }
-            } 
-        }
+        
+        //loj: 3/3/04 commented out
+//          int index = primaryBodiesArray.GetCount();
+        
+//          pmEditTextCtrl->Clear();
+        
+//          for (int i = 0; i < names.GetCount(); i++)
+//          {
+//             pointmassBodiesArray.Insert(names.Item(i), index);
+//             index++;
+//             pmEditTextCtrl->AppendText(pointmassBodiesArray.Item(i));
+//             pmEditTextCtrl->AppendText(" ");
+//          }
+//          // If any primary bodies exist, take them out (just a precaution)
+//          if (!pointmassBodiesArray.IsEmpty())
+//          {
+//              for (int i = 0; i < primaryBodiesArray.GetCount(); i++)
+//              {
+//                  wxString pbStr = primaryBodiesArray.Item(i);
+//                  for (int j = 0; j < pointmassBodiesArray.GetCount(); j++)
+//                  {
+//                      wxString pmStr = pointmassBodiesArray.Item(j);
+//                      if (pmStr.CmpNoCase(pbStr))
+//                      {
+//                          pointmassBodiesArray.Remove(pmStr);
+//                      }
+//                  }
+//              } 
+//          }
         applyButton->Enable(true);
     }
 }   
@@ -1221,3 +1315,18 @@ void PropagationConfigPanel::OnSRPCheckBoxChange()
     useSRP = srpCheckBox->GetValue();
     applyButton->Enable(true);
 }
+
+//loj: 3/3/04 added
+ForceModel* PropagationConfigPanel::UpdateForceModel()
+{
+    if (isForceModelChanged)
+    {
+        // create and add force to force model
+        //loj: for example
+        //PhysicalModel *pm = theGuiInterpreter->CreatePhysicalModel("forcename", propName+"forcename");
+        //theForceModel->AddForce(pm);
+    }
+
+    return theForceModel;
+}
+

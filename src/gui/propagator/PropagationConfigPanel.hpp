@@ -27,12 +27,13 @@
 #include <wx/string.h>
 
 #include "gmatwxdefs.hpp"
-#include "ViewTextFrame.hpp"
-#include "DocViewFrame.hpp"
-#include "TextEditView.hpp"
-#include "TextDocument.hpp"
-#include "MdiTextEditView.hpp"
-#include "MdiDocViewFrame.hpp"
+//loj: 3/3/04 commented out for build2
+//#include "ViewTextFrame.hpp"
+//#include "DocViewFrame.hpp"
+//#include "TextEditView.hpp"
+//#include "TextDocument.hpp"
+//#include "MdiTextEditView.hpp"
+//#include "MdiDocViewFrame.hpp"
 #include "CelesBodySelectDialog.hpp"
 
 // base include
@@ -111,14 +112,17 @@ private:
     
     wxString integratorString;
     wxString primaryBodyString;
-    wxString propNameString;
+    std::string propSetupName; //loj: 3/3/04 changed from wxString
+    std::string newPropName;
     
-    wxDocManager *mDocManager;
-    wxDocTemplate *mDocTemplate;
-    ViewTextFrame *mTextFrame;
+    //loj: 3/3/04 commented out for build2
+    //wxDocManager *mDocManager;
+    //wxDocTemplate *mDocTemplate;
+    //ViewTextFrame *mTextFrame;
     
     Integer numOfIntegrators;
     Integer numOfBodies;
+    Integer numOfPrimaryBodies;
     Integer numOfAtmosTypes;
     Integer numOfForces;
     Integer numOfMagFields;
@@ -127,6 +131,7 @@ private:
     Integer degreeID;
     
     bool useSRP;
+    bool isForceModelChanged;
     
     wxArrayString allBodiesArray;
     wxArrayString primaryBodiesArray;
@@ -134,6 +139,7 @@ private:
     
     GuiInterpreter *theGuiInterpreter;
     Propagator     *thePropagator;
+    Propagator     *newProp;
     Integrator     *theIntegrator;
     RungeKutta89   *theRK89;
     PropSetup      *thePropSetup;
@@ -157,8 +163,9 @@ private:
     void DisplayMagneticFieldData();
     void DisplayPointMassData();
     void DisplaySRPData();
-    void CreateScript();
-    wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
+    ForceModel* UpdateForceModel();
+    //void CreateScript();
+    //wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
     
     // Text control event method
     void OnIntegratorTextUpdate();
