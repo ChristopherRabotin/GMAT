@@ -34,14 +34,21 @@
 #include "Burn.hpp"
 #include "Solver.hpp"
 
-class Moderator;
+#include "Interpreter.hpp"
 
-class GMAT_API GuiInterpreter
+//class Moderator;
+
+class GMAT_API GuiInterpreter : public Interpreter
 {
 public:
 
    static GuiInterpreter* Instance();
    ~GuiInterpreter();
+
+   //loj: 6/2/04 temp code until Interpreter is updated
+   // inherited from Interpreter
+   virtual bool Interpret(void) {return false;};
+   virtual bool Build(void) {return false;};
 
    bool IsInitialized();
    void Initialize();
@@ -154,7 +161,7 @@ private:
 
    // member data
    bool isInitialized;
-   Moderator *theModerator;
+   //Moderator *theModerator;
 
    static GuiInterpreter *instance;
 };
