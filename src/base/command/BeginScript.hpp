@@ -44,7 +44,8 @@ class BeginScript : public GmatCommand
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
 
-
+      const std::string GetChildString(const std::string &prefix,
+                                       GmatCommand *child, GmatCommand *parent);
 };
 
 #endif // BeginScript_hpp

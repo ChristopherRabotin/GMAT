@@ -220,6 +220,11 @@ protected:
    bool                          InterpretTextBlock(GmatCommand* cmd,
                                     const std::string block);
    StringArray                   SeparateLines(const std::string block);
+   
+   bool                          ValidateBlock(GmatCommand *cmdStart,
+                                               GmatCommand *cmdEnd = NULL);
+   bool                          ValidateBlock(StringArray &sar);
+
 };
 
 #endif // INTERPRETER_HPP

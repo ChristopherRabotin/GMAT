@@ -2449,6 +2449,13 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
    StringArray sar = SeparateLines(block);
    
    if (cmd->GetTypeName() == "BeginScript") {
+      // First check to be sure that the command block has matched nesting
+      if (!ValidateBlock(sar)) {
+         MessageInterface::PopupMessage(Gmat::WARNING_,
+            "Text block appears to have mismatched begin and end components\n");
+         return false;
+      }
+
       GmatCommand *current, *subsequent = cmd->GetNext();
       while ((subsequent != NULL) &&
              (subsequent->GetTypeName() != "EndScript")) {
@@ -2465,6 +2472,13 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
          delete current;
       }
       
+      // Fancy footwork -- Prep the mission sequence for insertion of new cmds
+      GmatCommand *terminalCommand = cmd->GetNext();
+      if (terminalCommand == NULL)
+         terminalCommand = moderator->CreateCommand("EndScript");
+      // Temporarily set the BeginScript->next pointer to NULL
+      cmd->Remove(cmd);
+      
       // Now build the commands in the block, one line at a time
       current = cmd;
       std::string cmdType;
@@ -2476,8 +2490,12 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
             continue;
          cmdLine << *i;
          cmdLine >> cmdType;
-         if (cmdType == "")
+         if ((cmdType == "") || (cmdType[0] == '%'))
             continue;
+         // Prevent multiple "EndScript" commands
+         if (cmdType == "EndScript")
+            continue;
+//            break;
 
          #ifdef DEBUG_TOKEN_PARSING
             MessageInterface::ShowMessage(
@@ -2491,7 +2509,19 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
                "Interpreter::InterpretTextBlock failed to create a " + cmdType +
                " command; please check the script syntax.");
          subsequent->SetGeneratingString(*i);
-         cmd->Insert(subsequent, current);
+
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   Appending constructed %s command\n", cmdType.c_str());
+         #endif
+
+         cmd->Append(subsequent);
+
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   Assembling %s command with string \"%s\"\n",
+               cmdType.c_str(), subsequent->GetGeneratingString().c_str());
+         #endif
          if (!AssembleCommand(*i, subsequent))
             throw InterpreterException(
                "Interpreter::InterpretTextBlock failed to assemble a " +
@@ -2499,6 +2529,10 @@ bool Interpreter::InterpretTextBlock(GmatCommand* cmd, const std::string block)
                "\nPlease check the script syntax.");
          current = subsequent;
       }
+      // Now reconnect the rest of the mission sequence
+      cmd->Append(terminalCommand);
+      
+      return true;
    }
    
    #ifdef DEBUG_TOKEN_PARSING
@@ -2530,6 +2564,10 @@ StringArray Interpreter::SeparateLines(const std::string block)
    while (end < len) {
       if (block[end] == '\n') {
          text = block.substr(start, end - start);
+         start = text.length()-1;
+         while (text[start] == ' ')
+            --start;
+         text = text.substr(0, start+1);
          sar.push_back(text);
          start = end+1;
       }
@@ -2546,3 +2584,146 @@ StringArray Interpreter::SeparateLines(const std::string block)
    return sar;
 }
 
+
+bool Interpreter::ValidateBlock(GmatCommand *cmdStart, GmatCommand *cmdEnd)
+{
+//   // First check to be sure the command nesting is consistent
+//   GmatCommand *current = cmd, *child;
+//
+////      while ((current != NULL) && (current->GetTypeName() != "EndScript")) {
+////         depth += current->DepthIncrement();
+////
+////         if (depth < 0)
+////            throw InterpreterException(
+////               "Cannot move outside current nesting level in a ScriptEvent.");
+////         current = current->GetNext();
+////      }
+////
+////      if (depth != 0)
+////         throw InterpreterException(
+////            "ScriptEvents must start and end at the same nesting depth.");
+////
+//
+//
+//   while ((current != NULL) && (current != cmd)) {
+//   }
+//
+   return false;
+}
+
+bool Interpreter::ValidateBlock(StringArray &sar)
+{
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Interpreter::ValidateBlock(StringArray) entered\n");
+   #endif
+   
+   std::map<std::string, Integer> depth;
+   std::map<std::string, std::string> startEnd, endStart;
+   
+   startEnd["Target"]   = "EndTarget";
+   startEnd["If"]       = "EndIf";
+   startEnd["For"]      = "EndFor";
+   startEnd["While"]    = "EndWhile";
+   startEnd["Optimize"] = "EndOptimize";
+   startEnd["Case"]     = "EndCase";
+
+   endStart["EndTarget"]   = "Target";
+   endStart["EndIf"]       = "If";
+   endStart["EndFor"]      = "For";
+   endStart["EndWhile"]    = "While";
+   endStart["EndOptimize"] = "Optimize";
+   endStart["EndCase"]     = "Case";
+
+   depth["Target"]   = 0;
+   depth["If"]       = 0;
+   depth["For"]      = 0;
+   depth["While"]    = 0;
+   depth["Optimize"] = 0;
+   depth["Case"]     = 0;
+
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "   Scannning the entries\n");
+   #endif
+
+   std::string cmdName;
+   for (StringArray::iterator i = sar.begin(); i != sar.end(); ++i) {
+      if (*i == "")
+         continue;
+      std::stringstream sstr;
+      sstr.str() = "";
+      sstr << *i;
+      sstr >> cmdName;
+      if (cmdName[0] == '%')
+         continue;
+
+      #ifdef DEBUG_TOKEN_PARSING
+         MessageInterface::ShowMessage("Looking up '%s'\n", cmdName.c_str());
+      #endif
+      
+      if (startEnd.find(cmdName) != startEnd.end()) {
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   startEnd fired for %s\n", cmdName.c_str());
+         #endif
+         depth[cmdName] += 1;
+      }
+      if (endStart.find(cmdName) != endStart.end()) {
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage(
+               "   endStart fired for %s\n", cmdName.c_str());
+         #endif
+         depth[endStart[cmdName]] -= 1;
+         if (depth[endStart[cmdName]] < 0)
+            throw InterpreterException(
+              "Cannot move outside current nesting level in a ScriptEvent.");
+      }
+   }
+   
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "   Checking the results\n");
+   #endif
+
+   // Validate that the depth for each command type is 0
+   /// @todo Replace the individual tests here with a loop
+   bool retval = true;
+   if (depth["Target"] != 0) {
+      MessageInterface::ShowMessage(
+         "Target command depth is mismatched (missing EndTarget?)\n");
+      retval = false;
+   }
+   if (depth["If"] != 0) {
+      MessageInterface::ShowMessage(
+         "If command depth is mismatched (missing EndIf?)\n");
+      retval = false;
+   }
+   if (depth["For"] != 0) {
+      MessageInterface::ShowMessage(
+         "For command depth is mismatched (missing EndFor?)\n");
+      retval = false;
+   }
+   if (depth["While"] != 0) {
+      MessageInterface::ShowMessage(
+         "While command depth is mismatched (missing EndWhile?)\n");
+      retval = false;
+   }
+   if (depth["Optimize"] != 0) {
+      MessageInterface::ShowMessage(
+         "Optimize command depth is mismatched (missing EndOptimize?)\n");
+      retval = false;
+   }
+   if (depth["Case"] != 0) {
+      MessageInterface::ShowMessage(
+         "Case command depth is mismatched (missing EndCase?)\n");
+      retval = false;
+   }
+
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Interpreter::ValidateBlock(StringArray) finished\n");
+   #endif
+
+   return retval;
+}
