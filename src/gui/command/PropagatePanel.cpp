@@ -20,7 +20,7 @@
 #include "PropagatePanel.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "SpaceObjectSelectDialog.hpp"
-#include "PropagatorSelectDialog.hpp" //loj: 10/19/04 added
+#include "PropagatorSelectDialog.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PROPAGATE_PANEL 1
@@ -51,7 +51,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
-   : GmatPanel(parent) //loj: 10/6/04 removed propName
+   : GmatPanel(parent)
 {
 #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage
@@ -251,8 +251,8 @@ void PropagatePanel::Create()
    wxBoxSizer *item12 = new wxBoxSizer(wxHORIZONTAL);
    //wxBoxSizer *item13 = new wxBoxSizer(wxHORIZONTAL);
 
-   propSizer->Add(synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize); //loj: 10/18/04 wxALIGN_LEFT
-   propSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize); //loj: 10/18/04 wxALIGN_LEFT
+   propSizer->Add(synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   propSizer->Add(mPropModeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    propSizer->Add(propGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    stopNameSizer->Add(nameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -469,9 +469,9 @@ void PropagatePanel::SaveData()
       
       // Clear propagator and spacecraft list
       thePropCmd->TakeAction("Clear", "Propagator");
-
+            
       mPropCount = mTempPropCount;
- #if DEBUG_PROPAGATE_PANEL
+#if DEBUG_PROPAGATE_PANEL
          MessageInterface::ShowMessage
             ("PropagatePanel::SaveData() mPropCount=%d\n", mPropCount);
 #endif
@@ -480,12 +480,12 @@ void PropagatePanel::SaveData()
       {
          thePropCmd->SetStringParameter
             (propId, std::string(mTempProp[i].propName.c_str()));
-
+         
          //---------------------------------------
          // Saving spacecraft
          //---------------------------------------
          soCount = mTempProp[i].soNameList.Count();
-            
+         
 #if DEBUG_PROPAGATE_PANEL
          MessageInterface::ShowMessage
             ("PropagatePanel::SaveData() soCount=%d\n", soCount);
@@ -500,6 +500,7 @@ void PropagatePanel::SaveData()
 #endif
             thePropCmd->SetStringParameter
                (scId, std::string(mTempProp[i].soNameList[j].c_str()), i);
+
          }
       }
    } //if (mPropChanged)
@@ -525,12 +526,6 @@ void PropagatePanel::SaveData()
       MessageInterface::ShowMessage
          ("PropagatePanel::SaveData() stopCount=%d\n", stopCount);
 #endif
-
-      //loj: 6/28/04 Do we need to show message?
-      //     if (stopCount == 0)
-      //        MessageInterface::PopupMessage
-      //           (Gmat::ERROR_, "There is no Stopping condition specified for "
-      //            "Propagate command. Please add one or more stopping conditions\n");
       
       //---------------------------------------------
       // if any stoppping condition removed,
@@ -539,7 +534,6 @@ void PropagatePanel::SaveData()
       //---------------------------------------------
       if (stopCount < mStopCondCount)
       {
-         //thePropCmd->ClearObject(Gmat::STOP_CONDITION); //loj: 10/19/04 replace this by TakeAction()
          thePropCmd->TakeAction("Clear", "StopCondition");
          for (int i=0; i<stopCount; i++)
             mTempStopCond[i].isChanged = true;
@@ -754,6 +748,8 @@ void PropagatePanel::RemoveStopCondition()
       }
    }
 
+   mStopCondChanged = true;
+   
    (mCurrStopRow > 0) ? mCurrStopRow = mCurrStopRow-1 : mCurrStopRow = 0;
 
    DisplayStopCondition(mCurrStopRow);
