@@ -19,6 +19,7 @@
 
 
 #include "Vary.hpp"
+#include "DifferentialCorrector.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -32,6 +33,7 @@ Vary::Vary(void) :
     Command                 ("Vary"),
     targeterName            (""),
     targeter                (NULL),
+    variableID              (-1),
     targeterNameID          (parameterCount),
     variableNameID          (parameterCount+1),
     initialValueID          (parameterCount+2),
@@ -68,6 +70,7 @@ Vary::Vary(const Vary& t) :
     Command                 (t),
     targeterName            (t.targeterName),
     targeter                (NULL),
+    variableID              (-1),
     targeterNameID          (t.targeterNameID),
     variableNameID          (t.variableNameID),
     initialValueID          (t.initialValueID),
@@ -383,6 +386,12 @@ void Vary::InterpretAction(void)
     end = generatingString.find("=", loc);
     value = atof(&str[end+1]);
     SetRealParameter(perturbationID, value);
+    
+    // Min, max and step get default values unless they are specified
+    value = 9.999e300;
+    SetRealParameter(variableMinimumID, -value);
+    SetRealParameter(variableMaximumID, value);
+    SetRealParameter(variableMaximumStepID, value);
 }
 
 
@@ -401,7 +410,7 @@ bool Vary::Initialize(void)
 
     // Vary specific initialization (no pun intended) goes here:
     // Find the targeter
-        if (objectMap->find(targeterName) == objectMap->end()) {
+    if (objectMap->find(targeterName) == objectMap->end()) {
         std::string errorString = "Target command cannot find targeter \"";
         errorString += targeterName;
         errorString += "\"";
@@ -412,7 +421,10 @@ bool Vary::Initialize(void)
     Integer id = targeter->GetParameterID("Variables");
     if (!variableName.empty())
         targeter->SetStringParameter(id, variableName[0]);
-    
+
+    // The targeter cannot be finalized until all of the loop is initialized
+    targeterDataFinalized = false;
+
     return retval;
 }
 
@@ -434,6 +446,23 @@ bool Vary::Initialize(void)
 bool Vary::Execute(void)
 {
     bool retval = true;
+    
+    if (!targeterDataFinalized) {
+        // First time through, tell the targeter about the variables
+        Real varData[5];
+//        for (Integer i = 0; i < variableName.size(); ++i) {
+        Integer i = 0;
+        {
+            varData[0] = initialValue[i];           // Initial value
+            varData[1] = perturbation[i];           // pert
+            varData[2] = variableMinimum[i];        // minimum
+            varData[3] = variableMaximum[i];        // maximum
+            varData[4] = variableMaximumStep[i];    // largest allowed step
+            targeter->SetSolverVariables(varData, variableName[i]);
+        }
+        targeterDataFinalized = true;
+        return retval;
+    }
     
     return retval;
 }

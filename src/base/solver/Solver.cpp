@@ -23,7 +23,7 @@
 
 Solver::Solver(std::string type, std::string name) :
     GmatBase        (Gmat::SOLVER, type, name),
-    currentState    (NOMINAL)
+    currentState    (INITIALIZING)
 {
 }
 
@@ -60,6 +60,10 @@ bool Solver::AdvanceState(void)
     bool retval = false;
     
     switch (currentState) {
+        case INITIALIZING:
+            CompleteInitialization();
+            break;
+        
         case NOMINAL:
             RunNominal();
             break;
@@ -92,6 +96,15 @@ bool Solver::AdvanceState(void)
     return retval; 
 }
     
+
+/**
+ * State used to finalize initialization.
+ */
+void Solver::CompleteInitialization(void)
+{
+    currentState = NOMINAL;
+}
+
 
 void Solver::RunNominal(void)
 {
@@ -126,4 +139,3 @@ void Solver::RunComplete(void)
 {
     currentState = FINISHED;
 }
-

@@ -19,6 +19,7 @@
 
 
 #include "Target.hpp"
+#include "Spacecraft.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -323,20 +324,81 @@ bool Target::Initialize(void)
 //------------------------------------------------------------------------------
 bool Target::Execute(void)
 {
-    bool retval = true;
-    BranchCommand::Execute();
+    bool retval = BranchCommand::Execute();
     
-    if (!commandComplete) {
-        // Target logic goes here -- basically the solver state machine calls
-        
-        // If the state machine says to run through the sub-commands, do this: 
-        retval = ExecuteBranch();
-        
-        // For now, just execute the branched command and then continue.  That gets 
-        // enough of the structure in place to validate that the command flow is 
-        // working correctly.
-        commandComplete = true;
+    // Drive through the state machine.
+    Solver::SolverState state = targeter->GetState();
+    Command *current;
+    
+    switch (state) {
+        case Solver::INITIALIZING:
+            // Finalize initialization of the targeter data
+            current = branch[0];
+            while (current != this)  {
+                
+                current = current->GetNext();
+            }
+            break;
+            
+        default:
+            if (!commandComplete) {
+                // Target logic goes here -- basically the solver state machine calls
+                
+                // If the state machine says to run through the sub-commands, do this: 
+                retval = ExecuteBranch();
+                
+                // For now, just execute the branched command and then continue.  That gets 
+                // enough of the structure in place to validate that the command flow is 
+                // working correctly.
+                commandComplete = true;
+            }
+            break;
     }
-    
+
+    targeter->AdvanceState();
     return retval;
+}
+
+
+void Target::StoreLoopData(void)
+{
+    // Make local copies of all of the objects that may be affected by targeter
+    // loop iterations
+    std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
+    GmatBase *obj;
+    
+    // Loop through the object map, looking for objects we'll need to restore. 
+    while (pair != objectMap->end()) {
+        obj = (*pair).second;
+        // Save copies of all of the spacecraft
+        if (obj->GetType() == Gmat::SPACECRAFT)
+            localStore.push_back(new Spacecraft((Spacecraft&)(*obj)));
+        ++pair;
+    }
+}
+
+
+void Target::ResetLoopData(void)
+{
+    Spacecraft *sc;
+    std::string name;
+    
+    for (std::vector<GmatBase *>::iterator i = localStore.begin(); 
+            i != localStore.end(); ++i) {
+        name = (*i)->GetName();
+        GmatBase *gb = (*objectMap)[name];
+        sc = (Spacecraft*)gb;
+        *sc = *((Spacecraft*)(*i));  // Assignment operator better be right!
+    }
+}
+
+
+void Target::FreeLoopData(void)
+{
+    GmatBase *obj;
+    while (!localStore.empty()) {
+       obj = *(--localStore.end());
+       localStore.pop_back();
+       delete obj;
+    }
 }

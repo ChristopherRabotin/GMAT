@@ -32,17 +32,7 @@
  * The Target command manages the targeter loop.  All targeters implement a state
  * machine that evaluates the current state of the targeting process, and provides 
  * data to the command sequence about the next step to be taken in the targeting
- * process.  As far as the Target command is concerned, there are 3 possible steps 
- * to take: 
- *
- * 1.  Fire the Targeter to perform a calculation.
- *
- * 2.  Run through the Commands in the targeter loop.
- *
- * 3.  On convergence, continue with the command sequence following the targeter loop. 
- *
- * 
- *
+ * process.
  */
 class Target : public BranchCommand
 {
@@ -78,11 +68,19 @@ protected:
     std::string         targeterName;
     /// The targeter instance used to manage the targeter state machine
     Solver              *targeter;
+    /// Local store of the objects that we'll need to reset
+    std::vector<GmatBase *>
+                        localStore;
+    
     
     // Parameter IDs 
     /// ID for the burn object
     Integer             targeterNameID;
     
+    // Methods used to save the starting point for the loops
+    virtual void        StoreLoopData(void);
+    virtual void        ResetLoopData(void);
+    virtual void        FreeLoopData(void);
 };
 
 

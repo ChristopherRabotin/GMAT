@@ -53,6 +53,20 @@ public:
     Achieve(const Achieve& t);
     Achieve&             operator=(const Achieve& t);
     
+    // Parameter accessors
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
+    virtual Real        GetRealParameter(const Integer id) const;
+    virtual Real        SetRealParameter(const Integer id,
+                                         const Real value);
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
+
     // Inherited methods overridden from the base class
     virtual void        InterpretAction(void);
     virtual bool        Initialize(void);
@@ -61,13 +75,26 @@ public:
 protected:
     /// The name of the spacecraft that gets maneuvered
     std::string         targeterName;
-    /// The Achieveer instance used to manage the Achieveer state machine
+    /// Name(s) of the variable(s)
+    std::string         goalName;
+    /// Initial variable value(s)
+    Real                goal;
+    /// Current (nominal) variable value(s)
+    Real                tolerance;
+    /// The targeter instance used to manage the targeter state machine
     Solver              *targeter;
+    /// Flag used to finalize the targeter data during execution
+    bool                targeterDataFinalized;
     
     // Parameter IDs 
     /// ID for the burn object
-    Integer             targeterNameID;
-    
+    const Integer       targeterNameID;
+    /// ID for the goal name
+    const Integer       goalNameID;
+    /// ID for the goal
+    const Integer       goalID;
+    /// ID for the tolerance
+    const Integer       toleranceID;
 };
 
 

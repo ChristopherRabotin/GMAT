@@ -61,7 +61,13 @@ public:
     virtual bool        SetStringParameter(const Integer id, 
                                            const std::string &value);
     virtual const StringArray& 
-                        GetStringArrayParameter(const Integer id) const; 
+                        GetStringArrayParameter(const Integer id) const;
+                        
+    // Solver interfaces used to talk to the Vary and Achieve commands
+    virtual Integer     SetSolverVariables(Real *data, std::string name);
+    virtual Real        GetSolverVariable(Integer id);
+    virtual Integer     SetSolverResults(Real *data, std::string name);
+    virtual void        SetResultValue(Integer id, Real value);
 
 protected:
     // Core data members used for the targeter numerics
@@ -129,7 +135,7 @@ protected:
     virtual void                RunPerturbation(void);
     virtual void                CalculateParameters(void);
     virtual void                CheckCompletion(void);
-//    virtual void                RunComplete(void);
+    virtual void                RunComplete(void);
 
     // Methods used to perform differential correction
     void                        CalculateJacobian(void);

@@ -43,7 +43,8 @@ class Solver : public GmatBase
 public:
     /// Enumeration defining the states in the state machine
     enum SolverState {
-        NOMINAL = 10001,
+        INITIALIZING = 10001,
+        NOMINAL,
         PERTURBING,
         ITERATING,
         CALCULATING,
@@ -57,7 +58,12 @@ public:
     Solver(const Solver& sol);
     Solver&             operator=(const Solver& sol);
     
-    virtual bool                AdvanceState(void);
+    SolverState         GetState(void)
+    {
+        return currentState;
+    }
+    
+    virtual bool        AdvanceState(void);
     
     /**
      * Derived classes implement this method to set object pointers and validate
@@ -65,25 +71,68 @@ public:
      * 
      * @return true on success, false (or throws a SolverException) on failure
      */
-    virtual bool                Initialize(void) = 0;
+    virtual bool        Initialize(void) = 0;
+    
+    /**
+     * Derived classes use this method to pass in parameter data specific to
+     * the algorithm implemented.
+     * 
+     * @param <data> An array of data appropriate to the variables used in the 
+     *               algorithm.
+     * @param <name> A label for the data parameter.  Defaults to the empty 
+     *               string.
+     * 
+     * @return The ID used for the variable.
+     */
+    virtual Integer     SetSolverVariables(Real *data, std::string name) = 0;
 
+    /**
+     * Derived classes use this method to pass in parameter data specific to
+     * the algorithm implemented.
+     * 
+     * @param <id> The ID used for the variable.
+     * 
+     * @return The value used for this variable
+     */
+    virtual Real        GetSolverVariable(Integer id) = 0;
+    
+    /**
+     * Sets up the data fields used for the results of an iteration.
+     * 
+     * @param <data> An array of data appropriate to the results used in the 
+     *               algorithm (for instance, tolerances for targeter goals).
+     * @param <name> A label for the data parameter.  Defaults to the empty 
+     *               string.
+     * 
+     * @return The ID used for this variable.
+     */
+    virtual Integer     SetSolverResults(Real *data, std::string name) = 0;
+
+    /**
+     * Passes in the results obtained from a run in the solver loop.
+     * 
+     * @param <id> The ID used for this result.
+     * @param <value> The corresponding result.
+     */
+    virtual void        SetResultValue(Integer id, Real value) = 0;
 
 protected:
     /// Current state for the state machine
-    SolverState                 currentState;
+    SolverState         currentState;
     
     // Methods that correspond to the solver states.  Implement the methods
     // that correspond to the Solver's state machine.  The default 
     // implementation just advances the state to the "next" state in the list. 
-    virtual void                RunNominal(void);
-    virtual void                RunPerturbation(void);
-    virtual void                RunIteration(void);
-    virtual void                CalculateParameters(void);
-    virtual void                CheckCompletion(void);
-    virtual void                RunComplete(void);
-
+    virtual void        CompleteInitialization(void);
+    virtual void        RunNominal(void);
+    virtual void        RunPerturbation(void);
+    virtual void        RunIteration(void);
+    virtual void        CalculateParameters(void);
+    virtual void        CheckCompletion(void);
+    virtual void        RunComplete(void);
+    
     /** Utility function used by the solvers to generate a progress file */
-    virtual void                WriteToTextFile(void) = 0;
+    virtual void        WriteToTextFile(void) = 0;
 };
 
 

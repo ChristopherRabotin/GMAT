@@ -95,6 +95,10 @@ protected:
     std::vector<Real>   variableMaximumStep;
     /// The Targeter instance used to manage the state machine
     Solver              *targeter;
+    /// The integer ID assigned to the variable
+    Integer             variableID;
+    /// Flag used to finalize the targeter data during execution
+    bool                targeterDataFinalized;
     
     // Parameter IDs 
     /// ID for the burn object

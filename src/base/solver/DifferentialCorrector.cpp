@@ -271,13 +271,85 @@ const StringArray& DifferentialCorrector::GetStringArrayParameter(
 }
 
 
+/**
+ * Derived classes use this method to pass in parameter data specific to
+ * the algorithm implemented.
+ * 
+ * @param <data> An array of data appropriate to the variables used in the 
+ *               algorithm.
+ * @param <name> A label for the data parameter.  Defaults to the empty 
+ *               string.
+ * 
+ * @return The ID used for the variable.
+ */
+Integer DifferentialCorrector::SetSolverVariables(Real *data, std::string name)
+{
+    if (variableNames[variableCount] != name)
+        throw SolverException("Mismatch between parsed and configured variable");
+    variable[variableCount] = data[0];
+    perturbation[variableCount] = data[1];
+    variableMinimum[variableCount] = data[2];
+    variableMaximum[variableCount] = data[3];
+    variableMaximumStep[variableCount] = data[4];
+    ++variableCount;
+    return variableCount-1;
+}
+
+
+/**
+ * Derived classes use this method to pass in parameter data specific to
+ * the algorithm implemented.
+ * 
+ * @param <id> The ID used for the variable.
+ * 
+ * @return The value used for this variable
+ */
+Real DifferentialCorrector::GetSolverVariable(Integer id)
+{
+    return variable[id];
+}
+
+
+/**
+ * Sets up the data fields used for the results of an iteration.
+ * 
+ * @param <data> An array of data appropriate to the results used in the 
+ *               algorithm (for instance, tolerances for targeter goals).
+ * @param <name> A label for the data parameter.  Defaults to the empty 
+ *               string.
+ * 
+ * @return The ID used for this variable.
+ */
+Integer DifferentialCorrector::SetSolverResults(Real *data, std::string name)
+{
+    if (goalNames[goalCount] != name)
+        throw SolverException("Mismatch between parsed and configured goal");
+    goal[goalCount] = data[0];
+    tolerance[goalCount] = data[1];
+    ++goalCount;
+    return goalCount-1;
+}
+
+
+/**
+ * Passes in the results obtained from a run in the solver loop.
+ * 
+ * @param <id> The ID used for this result.
+ * @param <value> The corresponding result.
+ */
+void DifferentialCorrector::SetResultValue(Integer id, Real value)
+{
+    nominal[id] = value;
+}
+
+
 bool DifferentialCorrector::Initialize(void)
 {
     // Setup the variable data structures
-    variableCount = variableNames.size();
-    goalCount = goalNames.size();
+    Integer localVariableCount = variableNames.size();
+    Integer localGoalCount = goalNames.size();
     
-    if (goalCount > variableCount) {
+    if (localVariableCount > localVariableCount) {
         std::string errorMessage = "Targeter cannot initialize: ";
         errorMessage += "More goals than variables";
         throw SolverException(errorMessage);
@@ -285,32 +357,33 @@ bool DifferentialCorrector::Initialize(void)
     
     FreeArrays();
     
-    variable            = new Real[variableCount];
-    perturbation        = new Real[variableCount];
-    variableMinimum     = new Real[variableCount];
-    variableMaximum     = new Real[variableCount];
-    variableMaximumStep = new Real[variableCount];
+    variable            = new Real[localVariableCount];
+    perturbation        = new Real[localVariableCount];
+    variableMinimum     = new Real[localVariableCount];
+    variableMaximum     = new Real[localVariableCount];
+    variableMaximumStep = new Real[localVariableCount];
     
     // Setup the goal data structures
-    goal      = new Real[goalCount];
-    tolerance = new Real[goalCount];
-    nominal   = new Real[goalCount];
+    goal      = new Real[localGoalCount];
+    tolerance = new Real[localGoalCount];
+    nominal   = new Real[localGoalCount];
     
     // And the sensitivity matrix
     Integer i;
-    achieved        = new Real*[goalCount];
-    jacobian        = new Real*[variableCount];
-    inverseJacobian = new Real*[variableCount];
-    for (i = 0; i < variableCount; ++i) {
-        jacobian[i] = new Real[variableCount];
-        inverseJacobian[i] = new Real[variableCount];
-        achieved[i] = new Real[variableCount];
+    achieved        = new Real*[localGoalCount];
+    jacobian        = new Real*[localVariableCount];
+    inverseJacobian = new Real*[localVariableCount];
+    for (i = 0; i < localVariableCount; ++i) {
+        jacobian[i] = new Real[localVariableCount];
+        inverseJacobian[i] = new Real[localVariableCount];
+        achieved[i] = new Real[localVariableCount];
         
         // Initialize to the identity matrix
         jacobian[i][i] = 1.0;
         inverseJacobian[i][i] = 1.0;
         
         // Set default values for min and max parameters
+        variable[i]            =  0.0;
         variableMinimum[i]     = -9.999e300;
         variableMaximum[i]     =  9.999e300;
         variableMaximumStep[i] =  9.999e300;
@@ -330,42 +403,102 @@ bool DifferentialCorrector::Initialize(void)
 bool DifferentialCorrector::AdvanceState(void)
 {
     switch (currentState) {
+        case INITIALIZING:
+            WriteToTextFile();
+            CompleteInitialization();
+            break;
+            
         case NOMINAL:
             RunNominal();
             break;
         
         case PERTURBING:
-        case ITERATING:
+            RunPerturbation();
+            break;
+        
         case CALCULATING:
+            CalculateParameters();
+            break;
+        
         case CHECKINGRUN:
+            CheckCompletion();
+            break;
+        
         case FINISHED:
+            RunComplete();
+            break;
+        
+        case ITERATING:             // Intentional drop-through
         default:
             throw SolverException("Solver state not supported for the targeter");
     }
-    
+     
     return false;
 }
 
 
+/**
+ * Run out the nominal data
+ */
 void DifferentialCorrector::RunNominal(void)
 {
     // On success, set the state to the next machine state
-    
+    WriteToTextFile();
+    currentState = CHECKINGRUN;
 }
 
 
 void DifferentialCorrector::RunPerturbation(void)
 {
+    static Integer pertNumber = -1;
+    
+    // Calculate the perts, one at a time
+    if (pertNumber != -1)
+        // Back out the last pert applied
+        variable[pertNumber] -= perturbation[pertNumber];
+    ++pertNumber;
+    if (pertNumber == variableCount) {  // Current set of perts have been run
+        currentState = CALCULATING;
+        pertNumber = -1;
+        return;
+    }
+    variable[pertNumber] += perturbation[pertNumber];
 }
 
 
 void DifferentialCorrector::CalculateParameters(void)
 {
+    // Build and invert the sensitivity matrix
+    CalculateJacobian();
+    InvertJacobian();
+    
+    // Apply the inverse Jacobian to build the next set of variables
+    
+    WriteToTextFile();
+    currentState = NOMINAL;
 }
 
 
 void DifferentialCorrector::CheckCompletion(void)
 {
+    WriteToTextFile();
+    bool converged = true;
+    
+    // check for convergence
+    
+    if (!converged) {
+        // Set to run perts if not converged
+        currentState = PERTURBING;
+    }
+    else
+        // If converged, we're done
+        currentState = FINISHED;
+}
+
+
+void DifferentialCorrector::RunComplete(void)
+{
+    WriteToTextFile();
 }
 
 
@@ -466,22 +599,25 @@ void DifferentialCorrector::WriteToTextFile(void)
 {
     StringArray::iterator current;
     Integer i;
-    
     if (!initialized) {
+        // Variables and goals are not yet fully initialized, so the counts are 
+        // still 0.
+        Integer localVariableCount = variableNames.size(), 
+                localGoalCount = goalNames.size();
         textFile << "********************************************************\n"
                  << "*** Targeter Text File\n"
                  << "*** \n"
                  << "*** Using Differential Correction\n***\n";
                  
         // Write out the setup data
-        textFile << "*** " << variableCount << " variables\n*** "
-                 << goalCount << " goals\n***\n*** Variables:\n***    ";
+        textFile << "*** " << localVariableCount << " variables\n*** "
+                 << localGoalCount << " goals\n***\n*** Variables:\n***    ";
                  
         // Iterate through the variables and goals, writing them to the file
         for (current = variableNames.begin(), i = 0; 
              current != variableNames.end(); ++current) 
         {
-             textFile << *current << " = " << variable[i++] << "\n***    ";
+             textFile << *current << "\n***    ";
         }
         
         textFile << "\n*** Goals:\n***    ";
@@ -489,8 +625,7 @@ void DifferentialCorrector::WriteToTextFile(void)
         for (current = goalNames.begin(), i = 0; 
              current != goalNames.end(); ++current) 
         {
-             textFile << *current << "   Desired value: " 
-                      << goal[i] << "\n***    ";
+             textFile << *current << "\n***    ";
         }
         
         textFile << "\n****************************" 
@@ -499,16 +634,21 @@ void DifferentialCorrector::WriteToTextFile(void)
     }
     else {
         switch (currentState) {
+            case INITIALIZING:
+                // This state is basically a "paused state" used for the Target
+                // command to finalize the initial data for the variables and 
+                // goals.  No output is written here.
+                break;
+            
             case NOMINAL:
                 textFile << "Running Nominal Pass\nVariables:\n   ";
-                // Write out the nominal variable values
-                
                 // Iterate through the variables, writing them to the file
                 for (current = variableNames.begin(), i = 0; 
                      current != variableNames.end(); ++current) 
                 {
-                     textFile << *current << " = " << variable[i++] << "\n   ";
+                    textFile << *current << " = " << variable[i++] << "\n   ";
                 }
+                textFile << std::endl;
                 break;
             
             case PERTURBING:
