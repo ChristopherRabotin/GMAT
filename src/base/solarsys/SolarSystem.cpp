@@ -63,13 +63,29 @@ bodiesInUseID  (parameterCount)
    pE               = NULL;
    
    // create and add the default bodies
-   Star* theSun     = new Star(SUN_NAME);      // need to set default value for these too
-   Planet* theEarth = new Planet(EARTH_NAME, theSun);
-   Moon* theMoon    = new Moon(MOON_NAME, theEarth);
+   Star* theSun     = new Star(SUN_NAME);
+   Planet* theEarth = new Planet(EARTH_NAME,   theSun);
+   Moon* theMoon    = new Moon(MOON_NAME,      theEarth);
+   Planet* mercury  = new Planet(MERCURY_NAME, theSun);
+   Planet* venus    = new Planet(VENUS_NAME,   theSun);
+   Planet* mars     = new Planet(MARS_NAME,    theSun);
+   Planet* jupiter  = new Planet(JUPITER_NAME, theSun);
+   Planet* saturn   = new Planet(SATURN_NAME,  theSun);
+   Planet* uranus   = new Planet(URANUS_NAME,  theSun);
+   Planet* neptune  = new Planet(NEPTUNE_NAME, theSun);
+   Planet* pluto    = new Planet(PLUTO_NAME,   theSun);
 
    AddBody(theSun);
    AddBody(theEarth);
    AddBody(theMoon);
+   AddBody(mercury);
+   AddBody(venus);
+   AddBody(mars);
+   AddBody(jupiter);
+   AddBody(saturn);
+   AddBody(uranus);
+   AddBody(neptune);
+   AddBody(pluto);
 }
 
 //------------------------------------------------------------------------------

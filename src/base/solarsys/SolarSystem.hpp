@@ -17,6 +17,7 @@
  *
  * @note The SolarSystem will contain pointers to all of the celestial bodies
  *       currently in use; NOTE *** for Build 2, this is Sun/Earth/Moon only***
+ *       For Build 3, all planets (except Sedna?) are included.
  * @note It is assumed no classes will be derived from this one.
  */
 //------------------------------------------------------------------------------
