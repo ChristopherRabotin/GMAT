@@ -100,12 +100,11 @@ void UniversePanel::Create()
     item2->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     //loj: 2/24/04 these should not be hardcoded for future build
-    //@todo theGuiInterpreter->GetListOfFactoryItems(Gmat::PLANETARY_SOURCE); need to talk to Wendy
-    wxString availableStrs []= 
+    wxString availableStrs [] = 
     {
-        wxT("SLP"), 
-        wxT("DE405"), 
-        wxT("DE200"), 
+        //wxT("SLP"), 
+        //wxT("DE200"), 
+        //wxT("DE405"), 
     };
 
 //        ag: not needed for build 2
@@ -113,14 +112,14 @@ void UniversePanel::Create()
 //        wxT("High Accuracy Analytic")
 
     availableListBox = new wxListBox( this, ID_AVAILABLE_LIST, wxDefaultPosition, 
-                                       wxSize(140,125), 3, 
-                                       availableStrs, wxLB_SINGLE );
+                                      wxSize(140,125), 0,
+                                      availableStrs, wxLB_SINGLE );
     item2->Add( availableListBox, 0, wxALIGN_CENTRE|wxALL, 5 );
     item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
     wxBoxSizer *item5 = new wxBoxSizer( wxVERTICAL );
     item5->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
     addButton = new wxButton( this, ID_BUTTON_ADD, wxT("Add"), wxDefaultPosition, 
-                                       wxDefaultSize, 0 );
+                              wxDefaultSize, 0 );
     item5->Add( addButton, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     // ag:  changed button from "sort" to "prioritize"
@@ -213,33 +212,51 @@ void UniversePanel::Create()
 void UniversePanel::LoadData()
 {
     // load data from the core engine
-    StringArray sourceList = theGuiInterpreter->GetSolarSystemSourceList();
-
+    
+    //loj: 4/6/04 updated due to GuiInterpreter change
+    StringArray fileTypes = theGuiInterpreter->GetPlanetaryFileTypes();
+    StringArray fileTypesInUse = theGuiInterpreter->GetPlanetaryFileTypesInUse();
+    
+    // available source
+    for (unsigned int i=0; i<fileTypes.size(); i++)
+    {
+        availableListBox->Append(fileTypes[i].c_str());
+    }
+    
     // selected source
-    for (int i=0; i<sourceList.size(); i++)
+    for (unsigned int i=0; i<fileTypesInUse.size(); i++)
     {
-        selectedListBox->Append(sourceList[i].c_str());
-        //MessageInterface::ShowMessage("UniversePanel::LoadData() sourceList = %s\n",
-        //                              sourceList[i].c_str());
+        selectedListBox->Append(fileTypesInUse[i].c_str());
+        //MessageInterface::ShowMessage("UniversePanel::LoadData() filesInUse = %s\n",
+        //                              filesInUse[i].c_str());
     }
 
-    // slp file name
-    StringArray sourceFileList = theGuiInterpreter->GetSolarSystemSourceFileList();
-    for (int i=0; i<sourceFileList.size(); i++)
+    //loj: 4/6/04
+    //@todo - use combobox for DE files
+    for (unsigned int i=0; i<fileTypes.size(); i++)
     {
-        if (sourceList[i] == "SLP")
+        //MessageInterface::ShowMessage("UniversePanel::LoadData() fileNames = %s\n",
+        //                              fileNames[i].c_str());
+        
+        if (fileTypes[i] == "SLP")
         {
-            slpFileTextCtrl->SetValue(sourceFileList[i].c_str());
+            slpFileTextCtrl->SetValue(theGuiInterpreter->
+                                      GetPlanetaryFileName("SLP").c_str());
         }
-        else if (sourceList[i] == "DE405")
+        else if (fileTypes[i] == "DE200")
         {
-            de405FileTextCtrl->SetValue(sourceFileList[i].c_str());
+            de200FileTextCtrl->SetValue(theGuiInterpreter->
+                                        GetPlanetaryFileName("DE200").c_str());
         }
-        else if (sourceList[i] == "DE200")
+        else if (fileTypes[i] == "DE405")
         {
-            de200FileTextCtrl->SetValue(sourceFileList[i].c_str());
+            de405FileTextCtrl->SetValue(theGuiInterpreter->
+                                        GetPlanetaryFileName("DE405").c_str());
         }
     }
+
+    if (fileTypesInUse.size() > 0)
+        removeButton->Enable(true);
 }
 
 
@@ -250,22 +267,37 @@ void UniversePanel::SaveData()
 {
     // save data to core engine
 
-    //loj: 2/26/04 temp code to test SetSlpFileToUse()
-    //if first item in the list is "SLP"
-    if (selectedListBox->GetString(0).IsSameAs("SLP"))
-    {
-        wxString absoluteFilename = slpFileTextCtrl->GetValue();
+    //loj: 4/5/04 updated due to GuiInterpreter change:
+    theFileTypesInUse.clear();
 
-        MessageInterface::ShowMessage("UniversePanel::SaveData() "
-                                      "calling theGuiInterpreter->SetSlpFileToUse()\n");
-        
-        //ag:        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat"); 
-        theGuiInterpreter->SetSlpFileToUse(std::string (absoluteFilename.c_str()));
+    // put planetary file types in the priority order
+    for (int i=0; i<selectedListBox->GetCount(); i++)
+    {
+        theFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
+        MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
+                                      theFileTypesInUse[i].c_str());
     }
+
+    theGuiInterpreter->SetPlanetaryFileTypesInUse(theFileTypesInUse);
+
+    theApplyButton->Enable(false);
+    
+//      //if first item in the list is "SLP"
+//      if (selectedListBox->GetString(0).IsSameAs("SLP"))
+//      {
+//          wxString absoluteFilename = slpFileTextCtrl->GetValue();
+
+//          MessageInterface::ShowMessage("UniversePanel::SaveData() "
+//                                        "calling theGuiInterpreter->SetSlpFileInUse()\n");
+        
+//          //ag:        theGuiInterpreter->SetSlpFileInUse("mn2000-little.dat"); 
+//          //loj: 4/6/04 - use SetPlanetaryFileInUse(....)
+//          theGuiInterpreter->SetSlpFileInUse(std::string (absoluteFilename.c_str()));
+//      }
 }
 
-    //loj: 2/27/04 commented out - becaulse it is calling GmatPanel, it will never
-    // get here
+//loj: 2/27/04 commented out - becaulse it is calling GmatPanel, it will never
+// get here
 //  //------------------------------------------------------------------------------
 //  // virtual void OnHelp()
 //  //------------------------------------------------------------------------------
@@ -322,6 +354,8 @@ void UniversePanel::OnSortButton(wxCommandEvent& event)
       // add string to top
       selectedListBox->Insert(s, 0);
     }
+    
+    theApplyButton->Enable(true);
 }
 
 void UniversePanel::OnRemoveButton(wxCommandEvent& event)
@@ -333,13 +367,15 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
     {
       removeButton->Enable(false);
       prioritizeButton->Enable(false);
-      theApplyButton->Disable();
     }
 
     //loj: 2/26/04 added
     if (availableListBox->GetStringSelection().IsSameAs("SLP"))
       addButton->Enable(true);
+    
+    theApplyButton->Enable(true);
 }
+
 void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 {
     int textCtrlId = event.GetId();
