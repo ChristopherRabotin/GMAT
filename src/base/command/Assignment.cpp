@@ -96,7 +96,6 @@ bool Assignment::Initialize(void)
 }
 
 
-#include <iostream>
 bool Assignment::InterpretAction(void)
 {
     /// @todo: Clean up this hack for the Assignment::InterpretAction method
@@ -119,7 +118,6 @@ bool Assignment::InterpretAction(void)
           --end;
        std::string component = generatingString.substr(loc, end-loc+1);
        ownerName = component;
-std::cout << "lhs Object name is \"" << ownerName << "\"\n";
 
        loc = eqloc;
        while ((str[loc] == ' ') || (str[loc] == '='))
@@ -128,7 +126,6 @@ std::cout << "lhs Object name is \"" << ownerName << "\"\n";
        value     = &str[loc];
        end = value.find(";");
        value = value.substr(0, end);
-std::cout << "rhs Object name is \"" << value << "\"\n";
 
        objToObj = true;
        
