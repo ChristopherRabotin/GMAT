@@ -235,6 +235,7 @@ void ParameterCreateDialog::OnButton(wxCommandEvent& event)
         //loj: for build2 donot append
         //expTextCtrl->AppendText(s);
         expTextCtrl->SetValue(s);
+        nameTextCtrl->SetValue(s); //loj:3/31/04 added to show default name
     }
     else if ( event.GetEventObject() == addParamButton )  
     {
