@@ -12,6 +12,7 @@
 // Author: Linda Jun
 // Created: 1995/10/18 for GSS project (originally GSSDate)
 // Modified: 2003/10/02 Linda Jun - See DateUtil.hpp
+//           2004/05/06 J. Gurganus - See DateUtil.hpp
 //
 /**
  * This class provides conversions among various ways of representing calendar
@@ -45,10 +46,73 @@ Integer DateUtil::JulianDay(YearNumber year, MonthOfYear month,
            ((year + 4900 + L) / 100) /4 );
 }
 
+
+
 //---------------------------------
 // friend
 //---------------------------------
 
+//------------------------------------------------------------------------------
+// Real JulianDate(YearNumber year, MonthOfYear month, DayOfMonth day, 
+//                 Integer hour, Integer minute, Real second)
+//  
+//------------------------------------------------------------------------------
+/**
+ * Friend function.   Converted from calendar date to Julian Date.
+ *
+ * @param <year>    - year of calendar
+ * @param <month>   - month in calendar format
+ * @param <day>     - day of month in calendar format 
+ * @param <hour>    - hour of day 
+ * @param <minute>  - minute of hour
+ * @param <second>  - seconds including millisecond 
+ *
+ * @return           Julian date   
+ * 
+ * @note:   The algorithm is used in the Vallado book.
+ */
+//------------------------------------------------------------------------------
+Real JulianDate(YearNumber year, MonthOfYear month, DayOfMonth day, 
+                Integer hour, Integer minute, Real second)
+{
+   Integer computeYearMon = ( 7*(year + (Integer)(month + 9)/12 ) )/4;
+   Integer computeMonth = (275 * month)/9;
+   Real fractionalDay = ((second/60.0 + minute)/60 + hour)/24.0;
+
+   // Compute the Julian Date
+   return ( 367*year - computeYearMon + computeMonth + day +
+            1721013.5 + fractionalDay);
+}
+
+
+//------------------------------------------------------------------------------
+// Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day, 
+//                         Integer hour, Integer minute, Real second)
+//  
+//------------------------------------------------------------------------------
+/**
+ * Friend function.   Converted from calendar date to Modified Julian Date.
+ *
+ * @param <year>    - year of calendar
+ * @param <month>   - month in calendar format
+ * @param <day>     - day of month in calendar format 
+ * @param <hour>    - hour of day 
+ * @param <minute>  - minute of hour
+ * @param <second>  - seconds including millisecond 
+ *
+ * @return           Modified Julian date   
+ * 
+ */
+//------------------------------------------------------------------------------
+Real ModifiedJulianDate(YearNumber year, MonthOfYear month, DayOfMonth day, 
+                        Integer hour, Integer minute, Real second)
+{
+   Real jd =  JulianDate(year, month, day, hour, minute, second);
+
+   return (jd - GmatTimeUtil::JULIAN_DATE_OF_010541);
+}
+
+                
 //------------------------------------------------------------------------------
 //  void UnpackDate (Real packedDate, Integer& year, Integer& month, Integer& day)
 //------------------------------------------------------------------------------

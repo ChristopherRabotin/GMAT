@@ -12,6 +12,7 @@
 // Author: Linda Jun
 // Created: 1995/10/18 for GSS project (originally GSSDate)
 // Modified: 2003/10/02 Linda Jun - Moved friend functions out of GSSDate.
+//           2004/05/06 J. Gurganus - Added Julian Date and its modified JD.
 //
 /**
  * This class provides conversions among various ways of representing calendar
@@ -29,6 +30,15 @@ class DateUtil
 public:
     static Integer JulianDay(YearNumber year, MonthOfYear month,
                              DayOfMonth day);
+
+    friend Real JulianDate(YearNumber year, MonthOfYear month,
+                           DayOfMonth day, Integer hour, Integer minute,
+                           Real second);
+
+    friend Real ModifiedJulianDate(YearNumber year, MonthOfYear month,
+                                   DayOfMonth day, Integer hour, Integer minute,
+                                   Real second);
+
     friend void UnpackDate(Real packedDate, Integer& year, Integer& month, 
                            Integer& day);        // input in YYYYMMDD. 
     friend void UnpackDateWithDOY(Real packedDate, Integer& year, Integer& day);
