@@ -66,7 +66,7 @@ Spacecraft* Factory::CreateSpacecraft(std::string ofType,
  * objects of type GroundStation.
  */
 //------------------------------------------------------------------------------
-//   GroundStation*ÊFactory::CreateGroundStation(std::string ofType,
+//   GroundStation* Factory::CreateGroundStation(std::string ofType,
 //                                                   std::string withName);
 //{
 //   throw FactoryException("requested object must be of type GroundStation");
@@ -96,6 +96,29 @@ Propagator* Factory::CreatePropagator(std::string ofType,
    throw FactoryException("requested object must be of type Propagator");
 }
 
+
+//------------------------------------------------------------------------------
+//  Parameter* CreateParameter(std::string ofType, std::string withName)
+//------------------------------------------------------------------------------
+/**
+ * Must be implemented by derived classes that create Parameter objects -
+ * in that case, it returns a new Parameter object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Parameter.
+ *
+ * @param <ofType>   specific type of Parameter object to create.
+ * @param <withName> name to give to the newly created Parameter object.
+ *
+ * @return pointer to a new Parameter object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of type Parameter.
+ */
+//------------------------------------------------------------------------------
+Burn* Factory::CreateBurn(std::string ofType, std::string withName)
+{
+   throw FactoryException("requested object must be of type Burn");
+}
 
 //------------------------------------------------------------------------------
 //  Propagator* CreateParameter(std::string ofType, std::string withName)
@@ -314,7 +337,7 @@ StopCondition* Factory::CreateStopCondition(std::string ofType,
  * objects of type  Solver.
  */
 //------------------------------------------------------------------------------
-//   Solver*ÊFactory::CreateSolver(std::string ofType,
+//   Solver*ï¿½Factory::CreateSolver(std::string ofType,
 //                                         std::string withName)
 //{
 //   throw FactoryException("requested object must be of type Solver");

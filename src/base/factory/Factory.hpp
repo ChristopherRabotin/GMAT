@@ -24,6 +24,7 @@
 #include "Spacecraft.hpp"
 //#include "GroundStation.hpp"
 #include "Parameter.hpp"
+#include "Burn.hpp"
 #include "Propagator.hpp"
 #include "ForceModel.hpp"
 #include "PhysicalModel.hpp"
@@ -54,6 +55,8 @@ public:
                                                 std::string withName = "");
    virtual Parameter*           CreateParameter(std::string ofType,
                                                 std::string withName = "");
+   virtual Burn*                CreateBurn(std::string ofType,
+                                           std::string withName = "");
 //   virtual CalculatedParameter* CreateCalculatedParameter(std::string ofType,
 //                                                  std::string withName = "");
    virtual StopCondition*       CreateStopCondition(std::string ofType,

@@ -4,12 +4,12 @@
 HEADERS = -I../include -I../foundation -I../command -I../forcemodel \
           -I../parameter -I../propagator -I../spacecraft -I../stopcond \
           -I../subscriber -I../util -I../refframe -I../interpolator \
-          -I../solarsys
+          -I../solarsys -I../burn
 
 OBJECTS = Factory.o FactoryException.o FactoryManager.o CommandFactory.o \
           ForceModelFactory.o ParameterFactory.o PhysicalModelFactory.o \
           PropagatorFactory.o PropSetupFactory.o SpacecraftFactory.o \
-          StopConditionFactory.o SubscriberFactory.o
+          StopConditionFactory.o SubscriberFactory.o BurnFactory.o
 
 all: libFactory
 	mkdir -p ../lib
