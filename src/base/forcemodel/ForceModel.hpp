@@ -77,6 +77,7 @@ public:
     bool AddSpacecraft(Spacecraft *sc);
     void UpdateSpacecraft(Real newEpoch = -1.0);
     void UpdateFromSpacecraft(void);
+    void RevertSpacecraft(void);
     
     virtual bool Initialize(void);
     virtual void IncrementTime(Real dt);
@@ -123,6 +124,11 @@ protected:
     StringArray forceTypeNames;
     std::vector<PhysicalModel *> forceList; //loj: 2/11/04 added
     
+    /// Buffer that allows quick reversion to the previous state
+    Real *previousState;
+    /// Epoch for the previous state
+    Real previousTime;
+
     enum
     {
         POINT_MASS = PhysicalModelParamCount,

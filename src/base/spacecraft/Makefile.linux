@@ -5,7 +5,8 @@ HEADERS = -I../include -I../foundation -I../util
 OBJECTS = Spacecraft.o \
           Converter.o \
           StateConverter.o \
-          TextTrajectoryFile.o
+          TextTrajectoryFile.o \
+          TimeConverter.o
 
 all: libSpacecraft 
 	mkdir -p ../lib

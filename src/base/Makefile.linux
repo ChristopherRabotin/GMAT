@@ -17,8 +17,8 @@ CPPFLAGS = $(OPTIMIZATIONS) -Wall
 export CPPFLAGS
 export CPP
 
-LIBRARIES = lib/libFoundation.a \
-            lib/libUtilities.a \
+LIBRARIES = lib/libUtilities.a \
+            lib/libFoundation.a \
             lib/libSolarSystem.a \
             lib/libSpacecraft.a \
             lib/libForceModel.a \

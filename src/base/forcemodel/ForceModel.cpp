@@ -108,7 +108,8 @@ ForceModel::ForceModel(const std::string &nomme) :
     PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
     derivatives       (NULL),
     forceCount        (0),  
-    estimationMethod  (2.0)
+    estimationMethod  (2.0),
+    previousState     (NULL)
 {
     numForces = 0;
     dimension = 6;
@@ -127,6 +128,8 @@ ForceModel::~ForceModel(void)
 {
     if (derivatives)
         delete derivatives;
+    if (previousState)
+        delete [] previousState;
 }
 
 //------------------------------------------------------------------------------
@@ -307,12 +310,17 @@ void ForceModel::UpdateSpacecraft(Real newEpoch)
     if (spacecraft.size() > 0) {
         Integer j = 0;
         Integer stateSize = 6;
+        Integer vectorSize = stateSize * sizeof(Real);
         std::vector<Spacecraft *>::iterator sat;
         Real *state;
 
         for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) {
-            state = (*sat)->GetState();           
-            memcpy(state, &modelState[j*stateSize], stateSize * sizeof(Real));
+            state = (*sat)->GetState();
+            memcpy(&previousState[j*stateSize], state, vectorSize);
+            previousTime = 
+                ((*sat)->GetRealParameter((*sat)->GetParameterID("Epoch")) - epoch)
+                * 86400.0;
+            memcpy(state, &modelState[j*stateSize], vectorSize);
             ++j;            
 //            // Update the epoch if it was passed in
 //            if (newEpoch != -1.0)
@@ -354,6 +362,23 @@ void ForceModel::UpdateFromSpacecraft(void)
 
 
 //------------------------------------------------------------------------------
+// void ForceModel::RevertSpacecraft(void)
+//------------------------------------------------------------------------------
+/**
+ * Resets the model state data from the previous spacecraft state.
+ *
+ * @note This method will need to be updated when the multi-step integrators are
+ *       folded into the code
+ */
+//------------------------------------------------------------------------------
+void ForceModel::RevertSpacecraft(void)
+{
+   elapsedTime = previousTime;
+   memcpy(modelState, previousState, dimension*sizeof(Real)); 
+}
+
+
+//------------------------------------------------------------------------------
 // bool ForceModel::Initialize(void)
 //------------------------------------------------------------------------------
 /**
@@ -372,6 +397,7 @@ bool ForceModel::Initialize(void)
     dimension = stateSize * satCount;
     if (!PhysicalModel::Initialize())
         return false;
+    previousState = new Real[dimension];
 
     if (spacecraft.size() == 0) {
         modelState[0] = 7000.0;
@@ -390,6 +416,9 @@ bool ForceModel::Initialize(void)
             ++j;
         }
     }
+    
+    previousTime = 0.0;
+    memcpy(previousState, modelState, dimension*sizeof(Real));
 
     DerivativeList *current = derivatives;
     PhysicalModel *currentPm;

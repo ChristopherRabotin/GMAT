@@ -560,6 +560,8 @@ bool Propagate::Execute(void)
     Integer epochID = sat1->GetParameterID("Epoch");
     baseEpoch = sat1->GetRealParameter(epochID);
 
+//    MessageInterface::ShowMessage("Propagate start; epoch = %f",
+//                                 (baseEpoch + fm->GetTime() / 86400.0));
     //---------------------------------------
     //loj: 3/22/04 new code
     //---------------------------------------
@@ -597,10 +599,17 @@ bool Propagate::Execute(void)
         }
         else
         {
-            fm->UpdateFromSpacecraft();
-            fm->SetTime(elapsedTime);
+            fm->RevertSpacecraft();
+            elapsedTime = fm->GetTime();
+            //fm->UpdateFromSpacecraft();
+            //fm->SetTime(elapsedTime);
         }
+//        MessageInterface::ShowMessage("Propagate intermediate; epoch = %f",
+//                                      (baseEpoch + fm->GetTime() / 86400.0));
     }
+
+//   MessageInterface::ShowMessage("Stopping; epoch = %f, stopTime = %f, elapsedTime = %f",
+//                                 (baseEpoch + fm->GetTime() / 86400.0), stopTime, elapsedTime);
 
     //MessageInterface::ShowMessage("Propagate::Execute() stopTime=%f, elapsedTime=%f\n",
     //                              stopTime, elapsedTime);
@@ -666,6 +675,8 @@ bool Propagate::Execute(void)
     }
     //---------------------------------------
     
+//    MessageInterface::ShowMessage("Propagate complete; epoch = %f",
+//                                  (baseEpoch + fm->GetTime() / 86400.0));
     return true;
 }
 
