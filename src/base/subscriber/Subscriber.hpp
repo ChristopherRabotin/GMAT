@@ -46,7 +46,7 @@ public:
     virtual ~Subscriber(void);
 
     virtual bool        ReceiveData(const char * datastream);
-    virtual bool        ReceiveData(const char * datastream, const Integer len = 0);
+    virtual bool        ReceiveData(const char * datastream, const Integer len);
     virtual bool        ReceiveData(const Real * datastream, const Integer len = 0);
     Subscriber        * Next(void);
     bool                Add(Subscriber * s);
