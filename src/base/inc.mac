@@ -2,7 +2,7 @@
 # Module:     inc.mac for base directory 
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/18
-# Modified:   2004/01/14 - added burn directory
+# Modified:   2004/01/14 - added burn directory and compiler option -Wall
 
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
@@ -37,7 +37,7 @@ INCS = -I$(BURN) -I$(COMMAND) -I$(CONFIGS) -I$(EXECUTIVE) -I$(FACTORY) \
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
 #
-CXXFLAGS = $(INCS) $(TESTFLAGS)
+CXXFLAGS = $(INCS) $(TESTFLAGS) -Wall
 CPP = g++ $(CXXFLAGS)
 #
 # Default suffix rule
