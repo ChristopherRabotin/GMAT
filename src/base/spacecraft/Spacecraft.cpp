@@ -629,7 +629,8 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
        if (id == ELEMENT5_ID) return SetRealParameter("VY",value); 
        if (id == ELEMENT6_ID) return SetRealParameter("VZ",value); 
     }
-    else if (displayCoordType == "Keplerian" || displayCoordType == "ModifiedKeplerian")
+    else if (displayCoordType == "Keplerian" 
+             || displayCoordType == "ModifiedKeplerian")
     {
        if (id == ELEMENT1_ID)
        {
@@ -716,6 +717,8 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        // incase StateType is not specified
        if (label == "SMA") 
           displayCoordType = "Keplerian"; 
+       else if (label == "RadPer")   
+          displayCoordType = "ModifiedKeplerian"; 
        else if (label == "RMAG")   
            // @todo - be careful.. need to check more with stateType (RADEC)
             displayCoordType = "SphericalAZFPA"; 
@@ -738,6 +741,8 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        // incase StateType is not specified
        if (label == "ECC")
           displayCoordType = "Keplerian"; 
+       else if (label == "RadApo")   
+          displayCoordType = "ModifiedKeplerian"; 
        else if (label == "RA")   
            // @todo - be careful.. need to check more with stateType (RADEC)
             displayCoordType = "SphericalAZFPA"; 
@@ -759,7 +764,9 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        hasElements[2] = true;
        // incase StateType is not specified
        if (label == "INC")
-          displayCoordType = "Keplerian"; 
+          if (displayCoordType != "Keplerian" 
+                        && displayCoordType != "ModifiedKeplerian")
+             displayCoordType = "Keplerian"; 
        else if (label == "DEC")  
            // @todo - be careful.. need to check more with stateType (RADEC)
             displayCoordType = "SphericalAZFPA";
@@ -783,7 +790,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        hasElements[3] = true;
        // incase StateType is not specified
        if (label == "RAAN")
-          displayCoordType = "Keplerian"; 
+       { 
+          if (displayCoordType != "Keplerian" 
+                        && displayCoordType != "ModifiedKeplerian")
+             displayCoordType = "Keplerian"; 
+       }
        else if (label == "VMAG")  
            // @todo - be careful.. need to check more with stateType (RADEC)
             displayCoordType = "SphericalAZFPA";
@@ -805,7 +816,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        hasElements[4] = true;
        // incase StateType is not specified
        if (label == "AOP")
-          displayCoordType = "Keplerian"; 
+       { 
+          if (displayCoordType != "Keplerian" 
+                        && displayCoordType != "ModifiedKeplerian")
+             displayCoordType = "Keplerian"; 
+       }
        else if (label == "AZI")  
             displayCoordType = "SphericalAZFPA";
        else if (label == "RAV")  
@@ -828,7 +843,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
        hasElements[5] = true;
        // incase StateType is not specified
        if (label == "TA")
-          displayCoordType = "Keplerian"; 
+       { 
+          if (displayCoordType != "Keplerian" 
+                        && displayCoordType != "ModifiedKeplerian")
+             displayCoordType = "Keplerian"; 
+       }
        else if (label == "FPA")  
             displayCoordType = "SphericalAZFPA";
        else if (label == "DECV")  
@@ -1099,14 +1118,10 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
    newState.Set(instate[0],instate[1],instate[2],
                 instate[3],instate[4],instate[5]);
 
-   if (elementType == "Keplerian")
+   if (elementType != "Cartesian")
    {
       stateType = "Cartesian"; //loj: 10/25/04 added
-      newState = stateConverter.Convert(instate, elementType, "Cartesian");
-   }
-   else if (elementType == "ModifiedKeplerian")
-   {
-      // @todo - add converion from ModifiedKep to Cartesian
+      newState = stateConverter.Convert(instate, elementType, stateType);
    }
     
    cartesianState = newState;
@@ -1162,7 +1177,6 @@ Rvector6 Spacecraft::GetCartesianState()
       cartesianState[i] = tempState[i];
    
    return cartesianState;
-
 }
 
 //---------------------------------------------------------------------------
@@ -1198,20 +1212,9 @@ Rvector6 Spacecraft::GetKeplerianState()
  */
 Rvector6 Spacecraft::GetModifiedKeplerianState() 
 {
-   modifiedKeplerianState = 
-      stateConverter.Convert(state.GetState(),displayCoordType,"ModifiedKeplerian");
-
-#if 0
-   // @todo- this won't work
-   if (modifiedKeplerianState == NULL) 
-   {
-      MessageInterface::ShowMessage("Spacecraft::GetModifiedKeplerianState()\n"
-                                    "Warning:  Unable to get Modified Keplerian"
-                                    " state for the conversion so"); 
-   }
-#endif
+   modifiedKeplerianState = stateConverter.Convert(state.GetState(),stateType,
+                                                   "ModifiedKeplerian");
    return (modifiedKeplerianState);
-            
 }
 
 //---------------------------------------------------------------------------
@@ -1740,7 +1743,7 @@ void Spacecraft::SetInitialState()
    {
 #if DEBUG_SPACECRAFT
       MessageInterface::ShowMessage
-         ("Spacecraft::SetInitialState() Now it has all elements.\n");
+         ("\nSpacecraft::SetInitialState() Now it has all elements.\n");
 #endif
       
       if (displayCoordType == "Cartesian")
@@ -1752,35 +1755,16 @@ void Spacecraft::SetInitialState()
          for (int i=0; i<6; i++)
             state[i] = displayState[i];
       }
-      else if (displayCoordType == "Keplerian")
+      else if (displayCoordType == "Keplerian" ||
+               displayCoordType == "ModifiedKeplerian" ||
+               displayCoordType == "SphericalAZFPA" ||
+               displayCoordType == "SphericalRADEC")
       {
          stateType = "Cartesian";
 
          // Convert elements to Cartesian
          cartesianState =
-            stateConverter.Convert(displayState, "Keplerian", "Cartesian");
-
-         for (int i=0; i<6; i++)
-            state[i] = cartesianState[i];
-      }
-      else if (displayCoordType == "SphericalAZFPA")
-      {
-         stateType = "Cartesian";
-
-         // Convert elements to Cartesian
-         cartesianState =
-            stateConverter.Convert(displayState, "SphericalAZFPA", stateType);
-
-         for (int i=0; i<6; i++)
-            state[i] = cartesianState[i];
-      }
-      else if (displayCoordType == "SphericalRADEC")
-      {
-         stateType = "Cartesian";
-
-         // Convert elements to Cartesian
-         cartesianState =
-            stateConverter.Convert(displayState, "SphericalRADEC", stateType);
+            stateConverter.Convert(displayState, displayCoordType, stateType);
 
          for (int i=0; i<6; i++)
             state[i] = cartesianState[i];
