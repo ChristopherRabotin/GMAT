@@ -349,6 +349,7 @@ public:
     void OnZoomOut( wxCommandEvent& event );
 
     void OnScroll2( wxScrollWinEvent& event );
+    void OnSize( wxSizeEvent& event );
 
     // utilities
     // ---------

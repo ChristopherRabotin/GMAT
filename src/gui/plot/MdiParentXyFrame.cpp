@@ -162,7 +162,7 @@ void MdiParentXyFrame::OnOpenXyPlotFile(wxCommandEvent& WXUNUSED(event) )
                                 _T("XY Plot File"),
                                 _T("Time"),
                                 _T("Spacecraft Position X,Y,Z"),
-                                wxPoint(-1, -1), wxSize(-1, -1),
+                                wxPoint(-1, -1), wxSize(500, 400), //loj: 2/27/04 wxSize(-1, -1),
                                 wxDEFAULT_FRAME_STYLE);
         
         ++MdiXyPlot::numChildren;

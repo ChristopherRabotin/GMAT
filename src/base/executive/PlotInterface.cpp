@@ -75,7 +75,7 @@ bool PlotInterface::CreateGlPlotWindow(bool canvasOnly)
         MdiGlPlot::mdiParentGlFrame =
             new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
                                  //wxPoint(300, 200), wxSize(600, 500),
-                                 wxPoint(600, 400), wxSize(600, 500),
+                                 wxPoint(600, 515), wxSize(600, 500),
                                  wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
         // Give it an icon
 #ifdef __WXMSW__
@@ -206,6 +206,10 @@ bool PlotInterface::CreateXyPlotWindow(bool canvasOnly,
 #endif
         }
     }
+
+    MessageInterface::ShowMessage("PlotInterface::CreateXyPlotWindow() "
+                                  "X Axis Title = %s  Y Axis Title = %s\n",
+                                  xAxisTitle.c_str(), yAxisTitle.c_str());
     
     // create a frame, containing a XY plot canvas
     MdiXyPlot::mdiParentXyFrame->mainSubframe =
@@ -214,7 +218,7 @@ bool PlotInterface::CreateXyPlotWindow(bool canvasOnly,
                             wxString(plotTitle.c_str()),
                             wxString(xAxisTitle.c_str()),
                             wxString(yAxisTitle.c_str()),
-                            wxPoint(-1, -1), wxSize(-1, -1),
+                            wxPoint(-1, -1), wxSize(500, 350), //loj: 2/27/04 wxSize(-1, -1),
                             wxDEFAULT_FRAME_STYLE);
     
     ++MdiXyPlot::numChildren;
@@ -309,8 +313,8 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
     //loj: assume one canvas for now
     //loj: handle multiple plot canvas later
         
-    MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numChildren = %d\n",
-                                  MdiXyPlot::numChildren);
+    //MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numChildren = %d\n",
+    //                              MdiXyPlot::numChildren);
     
     for (int i=0; i<MdiXyPlot::numChildren; i++)
     {
@@ -320,10 +324,10 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
         {
             int numCurves = frame->GetCurveCount();
             
-            MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numCurves = %d\n", numCurves);
+            //MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numCurves = %d\n", numCurves);
             for (int j=0; j<numCurves; j++)
             {
-                MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numCurves j = %d\n", j);
+                //MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() yvals[%d] = %f\n", j,yvals(j));
                 frame->AddDataPoints(j, xval, yvals(j));
             }
 

@@ -20,6 +20,7 @@
 #include "XyPlot.hpp"
 #include "PlotInterface.hpp" // for XY plot
 #include "Moderator.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -413,19 +414,31 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
         if (mXParam != NULL && mNumYParams > 0)
         {
             // get x param
-            Real xval = mXParam->EvaluateReal();
+            //Real xval = mXParam->EvaluateReal();
+            //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
+            Real xval = dat[0]; // loj: temp code to test XY plot dat[0] is time
+            //MessageInterface::ShowMessage("XyPlot::Distribute() xval = %f\n", xval);
             
             // get y params
             Rvector yvals = Rvector(mNumYParams);
-            
+
+            //loj: 2/27/04 why parameters not getting updated value?
+            // because the spacecraft is not updated?
             // put yvals in the order of parameters added
             for (int i=0; i<mNumYParams; i++)
             {
-                yvals[i] = mYParams[i]->EvaluateReal();
+                //yvals[i] = mYParams[i]->EvaluateReal();
+                //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
+                yvals[i] = dat[1]; //loj: temp code to test XY plot dat[1] is pos X
+                //MessageInterface::ShowMessage("XyPlot::Distribute() yvals = %f\n", yvals[i]);
             }
 
             if (!mIsXyPlotWindowSet)
             {
+                
+                //loj: 2/27/04 temp code to set X and Y axis title
+                mXAxisTitle = "Time";
+                mYAxisTitle = "Position X";
                 
                 // Create XyPlotWindow
                 PlotInterface::CreateXyPlotWindow(false, instanceName, mPlotTitle,
@@ -461,10 +474,14 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
                 {
                     mNumCollected++;
                     bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
-                    
-                    return PlotInterface::UpdateXyPlot(instanceName, xval-mFirstXVal, yvals,
+
+                    return PlotInterface::UpdateXyPlot(instanceName, xval, yvals,
                                                        mPlotTitle, mXAxisTitle, mYAxisTitle,
                                                        update);
+                    //loj: 2/27/04 just pass xval instead of xval-mFirstXVal
+//                      return PlotInterface::UpdateXyPlot(instanceName, xval-mFirstXVal, yvals,
+//                                                         mPlotTitle, mXAxisTitle, mYAxisTitle,
+//                                                         update);
                 }
             }
         }

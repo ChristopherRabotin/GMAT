@@ -37,7 +37,7 @@ class MdiChildXyFrame: public wxMDIChildFrame
 {
 public:
     wxPlotWindow   *mXyPlot;
-    wxTextCtrl     *mLog;
+    wxTextCtrl     *mLogTextCtrl;
         
     MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotName,
                     const wxString& title, const wxString& xAxisTitle,
@@ -88,6 +88,7 @@ protected:
     wxString mPlotTitle;
     wxString mXAxisTitle;
     wxString mYAxisTitle;
+    bool mHasFirstXSet;
     
     DECLARE_EVENT_TABLE()
 };

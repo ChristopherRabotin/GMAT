@@ -102,7 +102,7 @@ static wxBitmap *GetDownBitmap();
 namespace GmatPlot
 {
     const int Y_AXIS_AREA_WIDTH = 70;
-    const int X_AXIS_AREA_HEIGHT = 40;
+    const int X_AXIS_AREA_HEIGHT = 60;
 }
 
 //-----------------------------------------------------------------------------
@@ -226,8 +226,9 @@ wxPlotArea::wxPlotArea( wxPlotWindow *parent )
     m_zooming = FALSE;
 
     //loj: 2/27/04 set to gray
-    //SetBackgroundColour( *wxWHITE );
-    SetBackgroundColour( *wxLIGHT_GREY );
+    SetBackgroundColour( *wxWHITE );
+    //SetBackgroundColour( *wxLIGHT_GREY );
+    //Note: if a different color is used, Delet() should should same background color
 }
 
 void wxPlotArea::OnMouse( wxMouseEvent &event )
@@ -488,13 +489,15 @@ END_EVENT_TABLE()
 
 wxPlotXAxisArea::wxPlotXAxisArea( wxPlotWindow *parent )
     //loj: 2/27/04 : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,40), 0, "plotxaxisarea" )
-    : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,GmatPlot::X_AXIS_AREA_HEIGHT),
+    // I had to use 100 for width in order to show x axis area
+    : wxWindow( parent, -1, wxDefaultPosition, wxSize(100,GmatPlot::X_AXIS_AREA_HEIGHT),
                 0, "plotxaxisarea" )
 {
     m_owner = parent;
     
-    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
-    SetBackgroundColour( *wxCYAN );
+    //loj: 2/27/04 set to wxLIGHT_GREY
+    SetBackgroundColour( *wxWHITE );
+    //SetBackgroundColour( *wxLIGHT_GREY );
     SetFont( *wxSMALL_FONT );
 }
 
@@ -626,8 +629,9 @@ wxPlotYAxisArea::wxPlotYAxisArea( wxPlotWindow *parent )
 {
     m_owner = parent;
     
-    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
-    SetBackgroundColour( *wxGREEN );
+    //loj: 2/27/04 set to wxLIGHT_GREY
+    SetBackgroundColour( *wxWHITE );
+    //SetBackgroundColour( *wxLIGHT_GREY );
     SetFont( *wxSMALL_FONT );
 }
 
@@ -744,6 +748,9 @@ BEGIN_EVENT_TABLE(wxPlotWindow, wxScrolledWindow)
   EVT_BUTTON(  ID_ZOOM_OUT,    wxPlotWindow::OnZoomOut)
   
   EVT_SCROLLWIN( wxPlotWindow::OnScroll2)
+
+    // loj: 2/27/04 added
+  EVT_SIZE(wxPlotWindow::OnSize)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -817,8 +824,8 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
     
         wxBoxSizer *vert2 = new wxBoxSizer( wxVERTICAL );
         vert2->Add( m_area, 1, wxEXPAND );
-        vert2->Add( m_xaxis, 0, wxEXPAND );
-        //vert2->Add( m_xaxis, 1, wxEXPAND ); //loj: showed X axis area, but it's too big
+        vert2->Add( m_xaxis, 0, wxEXPAND ); //loj: if 2nd arg is 0, it doesn't show X axis area
+        //vert2->Add( m_xaxis, 1, wxEXPAND ); //loj: if 2nd arg is 1, it showed proportional X axis area
         plotSizer->Add( vert2, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
     }
     else
@@ -832,10 +839,13 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
     SetAutoLayout( TRUE );
     SetSizer( mainSizer );
 
+    //mainSizer->Fit(parent); //loj: 2/27/04 added to see if whole plot shows. It didn't show
+    
     SetTargetWindow( m_area );
 
-    //loj: 2/27/04 SetBackgroundColour( *wxWHITE );
-    SetBackgroundColour( *wxLIGHT_GREY );
+    //loj: 2/27/04 set to wxLIGHT_GREY
+    SetBackgroundColour( *wxWHITE );
+    //SetBackgroundColour( *wxLIGHT_GREY );
     
     m_current = (wxPlotCurve*) NULL;
 }
@@ -853,13 +863,11 @@ wxPlotWindow::~wxPlotWindow()
 //------------------------------------------------------------------------------
 void wxPlotWindow::Add( wxPlotCurve *curve )
 {
-    MessageInterface::ShowMessage("wxPlotWindow::Add() before appending curve... \n");
+    //MessageInterface::ShowMessage("wxPlotWindow::Add() before appending curve... \n");
     m_curves.Append( curve );
     if (!m_current) m_current = curve;
     
-    MessageInterface::ShowMessage("wxPlotWindow::Add() before ResetScrollbar... \n");
     ResetScrollbar();
-    MessageInterface::ShowMessage("wxPlotWindow::Add() exit... \n");
 }
 
 //------------------------------------------------------------------------------
@@ -1102,21 +1110,21 @@ void wxPlotWindow::SetZoom( double zoom )
 //------------------------------------------------------------------------------
 void wxPlotWindow::ResetScrollbar()
 {
-    MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() entered \n");
+    //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() entered \n");
     wxInt32 max = 0;
     wxNode *node = m_curves.First();
     while (node)
     {
-        MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
+        //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
         wxPlotCurve *curve = (wxPlotCurve*) node->Data();
-        MessageInterface::ShowMessage("title = %s \n", curve->GetCurveTitle().c_str());
+        //MessageInterface::ShowMessage("title = %s \n", curve->GetCurveTitle().c_str());
         if (curve->GetEndX() > max)
             max = curve->GetEndX();
         node = node->Next();
-        MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
+        //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() inside while(node) \n");
     }
 
-    MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() before SetScrollbars \n");
+    //MessageInterface::ShowMessage("wxPlotWindow::ResetScrollbar() before SetScrollbars \n");
     SetScrollbars( wxPLOT_SCROLL_STEP, wxPLOT_SCROLL_STEP, 
                    (int)(((max*m_xZoom)/wxPLOT_SCROLL_STEP)+1), 0 );
 }
@@ -1127,7 +1135,7 @@ void wxPlotWindow::ResetScrollbar()
 void wxPlotWindow::RedrawXAxis()
 {
     if (m_xaxis)
-        m_xaxis->Refresh( FALSE );
+        m_xaxis->Refresh( TRUE ); //loj: 2/27/04 try TRUE, it was FALSE
 }
 
 //------------------------------------------------------------------------------
@@ -1215,6 +1223,15 @@ void wxPlotWindow::OnScroll2( wxScrollWinEvent& event )
         wxScrolledWindow::OnScroll( event );
         RedrawXAxis();
     }
+}
+
+//loj: 2/27/04 added
+//------------------------------------------------------------------------------
+// void wxPlotWindow::OnSize( wxSizeEvent& event )
+//------------------------------------------------------------------------------
+void wxPlotWindow::OnSize( wxSizeEvent& event )
+{
+    RedrawEverything();
 }
 
 // ----------------------------------------------------------------------------

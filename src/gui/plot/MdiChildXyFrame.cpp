@@ -17,7 +17,7 @@
 #include "MdiXyPlotData.hpp"
 #include "XyPlotCurve.hpp"
 
-#include <fstream>
+#include <fstream>    // for ifstream (plot input file)
 
 #include "wx/image.h"
 #include "wx/listctrl.h"
@@ -62,6 +62,11 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     mPlotTitle = title;
     mXAxisTitle = xAxisTitle;
     mYAxisTitle = yAxisTitle;
+    mHasFirstXSet = false;
+    
+    MessageInterface::ShowMessage("MdiChildXyFrame::MdiChildXyFrame() "
+                                  "X Axis Title = %s  Y Axis Title = %s\n",
+                                  xAxisTitle.c_str(), yAxisTitle.c_str());
     
     MdiXyPlot::mdiChildren.Append(this);
     
@@ -139,20 +144,32 @@ MdiChildXyFrame::MdiChildXyFrame(wxMDIParentFrame *parent, const wxString &plotN
     mXyPlot->SetUnitsPerValue(0.001); //loj: use this for A1Mjd time only. how about others?
 
     // Create log window
-    //loj: 2/24/04 Do we need this TextCtrl? - Yes, it will crash if MdiChildXyFrame::OnPlotClick()
-    // calls wxLogMessage(), so used wxLogStatus() instead
-    //mLog = new wxTextCtrl( this, -1, "This is the log window.\n",
-    //                       wxPoint(0,0), wxSize(100,50), wxTE_MULTILINE );
-    //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLog ) );
+    //loj: 2/24/04 MdiChildXyFrame::OnPlotClick() calls wxLogMessage(),
+    // so used wxLogStatus() instead
+    // If I don't have this, it doesn't scroll
+    //mLogTextCtrl = new wxTextCtrl( this, -1, "",
+    //                               wxPoint(0,0), wxSize(100,20), wxTE_MULTILINE );
+    //loj: 2/23/04 wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLogTextCtrl ) );
     //delete oldLog;
     
-    //wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
+    wxPanel *panel = new wxPanel(this, -1, wxPoint(0,0), wxSize(100,30));
+    panel->SetBackgroundColour(*wxWHITE);
     
-    //topsizer->Add( mXyPlot, 1, wxEXPAND );
-    //topsizer->Add( mLog, 0, wxEXPAND );
+    wxStaticText *titleText = new wxStaticText(panel, -1, wxT(xAxisTitle + " vs " + yAxisTitle));
     
-    //SetAutoLayout( TRUE );
-    //SetSizer( topsizer );
+    wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
+    panelSizer->Add(titleText, 0, wxALIGN_CENTER | wxALL, 5);
+    panel->SetSizer(panelSizer);
+    
+    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
+    
+    //loj: If mLogTextCtrl or panel is not added, I had to resize the frame to see the plot
+    //topSizer->Add( mLogTextCtrl, 0, wxEXPAND );
+    topSizer->Add(panel, 0, wxALIGN_CENTER | wxEXPAND);
+    topSizer->Add(mXyPlot, 1, wxALIGN_CENTER |wxEXPAND);
+    
+    SetAutoLayout( TRUE );
+    SetSizer( topSizer );
             
     // this should work for MDI frames as well as for normal ones
     SetSizeHints(100, 100);
@@ -253,14 +270,22 @@ void MdiChildXyFrame::OnPlotClick(wxPlotEvent &event)
         double x = (event.GetPosition() * mXyPlot->GetUnitsPerValue()) +
             curve->GetFirstX();
         double y = event.GetCurve()->GetY( event.GetPosition() );
+        
+        //MessageInterface::ShowMessage("MdiChildXyFrame::OnPlotClick() xpos = %d  "
+        //                              "firstx = %f  unitspervalue = %g\n", event.GetPosition(),
+        //                              curve->GetFirstX(), mXyPlot->GetUnitsPerValue());
+        
+        wxString info;
+        info.Printf("%s: %5.3f  %s: %f\n", GetXAxisTitle().c_str(), x,
+                    curve->GetCurveTitle().c_str(), y);
+        
         //loj: 2/26/04 changed to wxLogStatus
-        wxLogStatus(MdiXyPlot::mdiParentXyFrame,
-                    GetXAxisTitle() + ": %5.3f, " +
-                    curve->GetCurveTitle() + ": %f, ", x, y);
-
+        wxLogStatus(MdiXyPlot::mdiParentXyFrame, info);
+        
+        //mLogTextCtrl->AppendText(info);
+        
         //wxLogMessage(GetXAxisTitle() + ": %5.3f, " +
-        //             curve->GetCurveTitle() + ": %f, ", x, y);
-        //" at x: %f, y: %f", x, y );
+        //             curve->GetCurveTitle() + ": %f", x, y);
     }
 }
 
@@ -308,7 +333,7 @@ void MdiChildXyFrame::OnSize(wxSizeEvent& event)
 //      wxLogStatus(MdiXyPlot::mdiChildXyFrame,
 //                  wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
 //                  size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
-    
+
     event.Skip();
 }
 
@@ -336,11 +361,12 @@ void MdiChildXyFrame::AddPlotCurve(int yOffset, double yMin, double yMax,
     MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() yMin = %f, yMax = %f\n",
                                   yMin, yMax);
     
+    mHasFirstXSet = false;
+    
     // Create XyPlotCurve
     XyPlotCurve *curve = new XyPlotCurve(yOffset, yMin, yMax, curveTitle);
     
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() XyPlotCurve created... \n");
-    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() title = %s\n",
+    MessageInterface::ShowMessage("MdiChildXyFrame::AddPlotCurve() curve title = %s\n",
                                   curve->GetCurveTitle().c_str());
     
     // Find the color
@@ -439,22 +465,9 @@ int MdiChildXyFrame::ReadXyPlotFile(const wxString &filename)
             mXyPlot->Add(yCurve);
             mXyPlot->Add(zCurve);
 
-            //loj: moved to constructor
-//              // create log area
-//              mLog = new wxTextCtrl( this, -1, "This is the log window.\n",
-//                                     wxPoint(0,0), wxSize(100,100), wxTE_MULTILINE );
-//              wxLog *oldLog = wxLog::SetActiveTarget( new wxLogTextCtrl( mLog ) );
-//              delete oldLog;
-    
-//              wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
-    
-//              topsizer->Add( mXyPlot, 1, wxEXPAND );
-//              topsizer->Add( mLog, 0, wxEXPAND );
-
-//              SetAutoLayout( TRUE );
-//              SetSizer( topsizer );
-            
         }
+
+        Update();
     }
 
     return numData;
@@ -475,10 +488,18 @@ void MdiChildXyFrame::AddDataPoints(int curveNum, double xData, double yData)
 {
     if (mXyPlot)
     {
-        MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() X = %f"
-                                      "Y = %f\n", xData, yData);
+        //MessageInterface::ShowMessage("MdiChildXyFrame::AddDataPoints() X = %f  "
+        //                              "Y = %f\n", xData, yData);
+        
         XyPlotCurve *curve = (XyPlotCurve*)(mXyPlot->GetAt(curveNum));
-        curve->AddData(xData, yData); //loj: should I check for curve title?
+        
+        if (!mHasFirstXSet)
+        {
+            curve->SetFirstX(xData);
+            mHasFirstXSet = true;
+        }
+    
+        curve->AddData((xData - curve->GetFirstX()), yData); //loj: should I check for curve title?
     }
 }
 
@@ -494,9 +515,9 @@ void MdiChildXyFrame::RedrawCurve()
     if (mXyPlot)
     {
         mXyPlot->SetFocus();
-        mXyPlot->RedrawXAxis(); //loj: should I RedrawEverything()?
-        
-        Update();
+        //mXyPlot->RedrawXAxis(); //loj: should I RedrawEverything()?
+        mXyPlot->RedrawEverything();
+        Update(); //loj: Why it doesn't update the plot as app runs?
     }
 }
 
