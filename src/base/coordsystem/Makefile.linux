@@ -1,5 +1,5 @@
 # Makefile for GMAT Coordinate System library
-# Initial Version - D. Conway - 2003/11/19
+# Initial Version - D. Conway - 2005/01/03
 
 HEADERS = -I../include -I../foundation -I../util -I../forcemodel \
           -I../spacecraft -I../executive -I../solarsys
@@ -8,15 +8,16 @@ OBJECTS = AxisSystem.o \
           CoordinateBase.o \
           CoordinateConverter.o \
           CoordinateSystem.o \
-          CoordinateSystemException.o
-          
+          CoordinateSystemException.o \
+          DynamicAxes.o \
+          InertialAxes.o
 
 all: libCoordinateSystem 
 	mkdir -p ../lib
 	mv libCoordinateSystem.a ../lib
 	
 clean:
-	rm -f *.o ../lib/libSolarSystem.a
+	rm -f *.o ../lib/libCoordinateSystem.a
 
 libCoordinateSystem : ../lib/libCoordinateSystem.a
 
