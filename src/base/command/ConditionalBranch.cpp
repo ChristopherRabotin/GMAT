@@ -415,6 +415,7 @@ bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index)
 {
+   
    switch (type)
    {
       case Gmat::PARAMETER:
@@ -825,8 +826,8 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
    {
       return false;
    }
-   Real        lhsValue;
-   Real        rhsValue;
+   Real        lhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
+   Real        rhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
    bool        lhFound = false, rhFound = false;
    bool        rightIsParm = false;
    std::string theLHSParmName = lhsList.at(which);
