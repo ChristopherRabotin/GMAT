@@ -67,8 +67,8 @@ protected:
         RefFrameParamCount
     };
     
-    static const Gmat::ParameterType PARAMETER_TYPE[RefFrameParamCount];
-    static const std::string PARAMETER_TEXT[RefFrameParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[RefFrameParamCount - GmatBaseParamCount];
+    static const std::string PARAMETER_TEXT[RefFrameParamCount - GmatBaseParamCount];
 
 private:
 

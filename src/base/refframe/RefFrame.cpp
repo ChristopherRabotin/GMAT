@@ -30,13 +30,13 @@
 //---------------------------------
 
 const std::string
-RefFrame::PARAMETER_TEXT[RefFrameParamCount] =
+RefFrame::PARAMETER_TEXT[RefFrameParamCount - GmatBaseParamCount] =
 {
     "CB",
 };
 
 const Gmat::ParameterType
-RefFrame::PARAMETER_TYPE[RefFrameParamCount] =
+RefFrame::PARAMETER_TYPE[RefFrameParamCount - GmatBaseParamCount] =
 {
     Gmat::STRING_TYPE,
 };
@@ -185,8 +185,8 @@ bool RefFrame::operator!= (const RefFrame &right) const
 //------------------------------------------------------------------------------
 std::string RefFrame::GetParameterText(const Integer id) const
 {
-    if (id >= 0 && id < RefFrameParamCount)
-        return PARAMETER_TEXT[id];
+    if (id >= GmatBaseParamCount && id < RefFrameParamCount)
+        return PARAMETER_TEXT[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterText(id);
     
@@ -197,9 +197,9 @@ std::string RefFrame::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer RefFrame::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<RefFrameParamCount; i++)
+   for (int i=GmatBaseParamCount; i<RefFrameParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
           return i;
    }
    
@@ -211,8 +211,8 @@ Integer RefFrame::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType RefFrame::GetParameterType(const Integer id) const
 {
-    if (id >= 0 && id < RefFrameParamCount)
-        return PARAMETER_TYPE[id];
+    if (id >= GmatBaseParamCount && id < RefFrameParamCount)
+        return PARAMETER_TYPE[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterType(id);
 }
@@ -222,7 +222,7 @@ Gmat::ParameterType RefFrame::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string RefFrame::GetParameterTypeString(const Integer id) const
 {
-    if (id >= 0 && id < RefFrameParamCount)
+    if (id >= GmatBaseParamCount && id < RefFrameParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
        return GmatBase::GetParameterTypeString(id);
