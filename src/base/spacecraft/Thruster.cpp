@@ -676,6 +676,11 @@ bool Thruster::GetBooleanParameter(const Integer id) const
 bool Thruster::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == THRUSTER_FIRING) {
+      #ifdef DEBUG_THRUSTER
+         MessageInterface::ShowMessage(
+            "Setting thruster %s firing mode to %s\n", instanceName.c_str(),
+            (value == true ? "true" : "false"));
+      #endif
       thrusterFiring = value;
       return thrusterFiring;
    }
@@ -756,48 +761,54 @@ void Thruster::Copy(const GmatBase* orig)
 //---------------------------------------------------------------------------
 bool Thruster::CalculateThrustAndIsp()
 {
-   if (tanks.empty())
-      throw HardwareException("Thruster \"" + instanceName + 
-                                 "\" does not have a fuel tank");
-   
-   // Require that the tanks all be at the same pressure and temperature
-   Integer pressID = tanks[0]->GetParameterID("Pressure");
-   Integer tempID = tanks[0]->GetParameterID("Temperature");
-   Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
-   
-   pressure = tanks[0]->GetRealParameter(pressID);
-   temperatureRatio = tanks[0]->GetRealParameter(tempID) / 
-                      tanks[0]->GetRealParameter(refTempID);
-   
-   thrust = cCoefficients[0];
-   impulse = kCoefficients[0];
-   
-   if (!constantExpressions) {
-
-      thrust  += pressure*(cCoefficients[1] + pressure*cCoefficients[2]);
-      impulse += pressure*(kCoefficients[1] + pressure*kCoefficients[2]);
-   
-      // For efficiency, if thrust and Isp are simple, don't bother evaluating 
-      // higher order terms
-      if (!simpleExpressions) {
-         thrust  += cCoefficients[3] * pow(pressure, cCoefficients[4]) +
-                    cCoefficients[5] * pow(pressure, cCoefficients[6]) +
-                    cCoefficients[7] * pow(pressure, cCoefficients[8]) +
-                    cCoefficients[9] * pow(cCoefficients[10], 
-                                           pressure * cCoefficients[11]);
-                    
-         impulse += kCoefficients[3] * pow(pressure, kCoefficients[4]) +
-                    kCoefficients[5] * pow(pressure, kCoefficients[6]) +
-                    kCoefficients[7] * pow(pressure, kCoefficients[8]) +
-                    kCoefficients[9] * pow(kCoefficients[10], 
-                                           pressure * kCoefficients[11]);
-      }
+   if (!thrusterFiring) {
+      thrust  = 0.0;
+      impulse = 0.0;
    }
-
-   thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[12] + 
-                  pressure*cCoefficients[13]));
-   impulse *= pow(temperatureRatio, (1.0 + kCoefficients[12] + 
-                  pressure*kCoefficients[13]));
+   else {
+      if (tanks.empty())
+         throw HardwareException("Thruster \"" + instanceName + 
+                                    "\" does not have a fuel tank");
+      
+      // Require that the tanks all be at the same pressure and temperature
+      Integer pressID = tanks[0]->GetParameterID("Pressure");
+      Integer tempID = tanks[0]->GetParameterID("Temperature");
+      Integer refTempID = tanks[0]->GetParameterID("RefTemperature");
+      
+      pressure = tanks[0]->GetRealParameter(pressID);
+      temperatureRatio = tanks[0]->GetRealParameter(tempID) / 
+                         tanks[0]->GetRealParameter(refTempID);
+      
+      thrust = cCoefficients[0];
+      impulse = kCoefficients[0];
+      
+      if (!constantExpressions) {
+   
+         thrust  += pressure*(cCoefficients[1] + pressure*cCoefficients[2]);
+         impulse += pressure*(kCoefficients[1] + pressure*kCoefficients[2]);
+      
+         // For efficiency, if thrust and Isp are simple, don't bother evaluating 
+         // higher order terms
+         if (!simpleExpressions) {
+            thrust  += cCoefficients[3] * pow(pressure, cCoefficients[4]) +
+                       cCoefficients[5] * pow(pressure, cCoefficients[6]) +
+                       cCoefficients[7] * pow(pressure, cCoefficients[8]) +
+                       cCoefficients[9] * pow(cCoefficients[10], 
+                                              pressure * cCoefficients[11]);
+                       
+            impulse += kCoefficients[3] * pow(pressure, kCoefficients[4]) +
+                       kCoefficients[5] * pow(pressure, kCoefficients[6]) +
+                       kCoefficients[7] * pow(pressure, kCoefficients[8]) +
+                       kCoefficients[9] * pow(kCoefficients[10], 
+                                              pressure * kCoefficients[11]);
+         }
+      }
+   
+      thrust  *= pow(temperatureRatio, (1.0 + cCoefficients[12] + 
+                     pressure*cCoefficients[13]));
+      impulse *= pow(temperatureRatio, (1.0 + kCoefficients[12] + 
+                     pressure*kCoefficients[13]));
+   }
    
    return true;
 }
@@ -816,17 +827,18 @@ bool Thruster::CalculateThrustAndIsp()
 //---------------------------------------------------------------------------
 Real Thruster::CalculateMassFlow()
 {
-   if (thrusterFiring == false)
+   if (!thrusterFiring)
       return 0.0;
-      
-   if (!constantExpressions) {
-      if (!CalculateThrustAndIsp())
-         throw HardwareException("Thruster \"" + instanceName + 
-                                 "\" could not calculate dm/dt");
-      if (impulse == 0.0)
-         throw HardwareException("Thruster \"" + instanceName + 
-                                 "\" has specific impulse == 0.0");
-      mDot = thrust / impulse;
+   else {     
+      if (!constantExpressions) {
+         if (!CalculateThrustAndIsp())
+            throw HardwareException("Thruster \"" + instanceName + 
+                                    "\" could not calculate dm/dt");
+         if (impulse == 0.0)
+            throw HardwareException("Thruster \"" + instanceName + 
+                                    "\" has specific impulse == 0.0");
+         mDot = thrust / impulse;
+      }
    }
 
    #ifdef DEBUG_THRUSTER
