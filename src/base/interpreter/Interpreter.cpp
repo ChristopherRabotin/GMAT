@@ -819,6 +819,91 @@ bool Interpreter::AssembleForCommand(const StringArray topLevel, GmatCommand *cm
 }
 
 
+//------------------------------------------------------------------------------
+// bool InterpretFunctionCall()
+//------------------------------------------------------------------------------
+/**
+ * Builds a call to a MATLAB or GMAT function -- i.e. a CallFunction command.
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::InterpretFunctionCall()
+{
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Entered Interpreter::InterpretFunctionCall\n");
+      MessageInterface::ShowMessage(
+         "Treating \"%s\" as a function call with pieces:\n",
+         line.c_str());
+      for (std::vector<std::string*>::iterator c = chunks.begin();
+           c != chunks.end(); ++c)
+         MessageInterface::ShowMessage("   \"%s\"\n", (*c)->c_str());
+   #endif
+
+   // FunctionCalls are built using CallFunction commands.
+   GmatCommand *cmd = moderator->AppendCommand("CallFunction", "");
+   if (cmd == NULL)
+      throw InterpreterException("Unable to assemble function command for \"" +
+               line + "\"");
+               
+   StringArray inputs, outputs;
+   std::string funct;
+   
+   // Split up the pieces based on their types
+   for (std::vector<std::string*>::iterator i = chunks.begin();
+        i != chunks.end(); ++i) {
+      if (((**i) == "GMAT") || ((**i) == "=") || ((**i) == ";"))
+         continue;
+      if ((**i)[0] == '[')
+         outputs = Decompose(**i);
+      else if ((**i)[0] == '(')
+         inputs = Decompose(**i);
+      else
+         funct = **i;
+   }
+   
+   cmd->SetStringParameter("FunctionName", funct);
+   
+   for (StringArray::iterator str = inputs.begin(); str != inputs.end(); ++str) {
+      MessageInterface::ShowMessage("   Adding input %s\n", str->c_str());
+      cmd->SetStringParameter("AddInput", *str);
+   }
+      
+   for (StringArray::iterator str = outputs.begin(); str != outputs.end(); ++str) {
+      MessageInterface::ShowMessage("   Adding output %s\n", str->c_str());
+      cmd->SetStringParameter("AddOutput", *str);
+   }
+      
+   #ifdef DEBUG_TOKEN_PARSING
+      MessageInterface::ShowMessage(
+         "Leaving Interpreter::InterpretFunctionCall\n");
+      MessageInterface::ShowMessage(
+         "Built call function with components:\n   [");
+      StringArray parm = cmd->GetStringArrayParameter("AddOutput");
+      for (StringArray::iterator c = parm.begin();
+           c != parm.end(); ++c) {
+         if (c != parm.begin())
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("\"%s\"", c->c_str());
+      }
+      MessageInterface::ShowMessage("] = %s(",
+         cmd->GetStringParameter("FunctionName").c_str());
+      parm = cmd->GetStringArrayParameter("AddInput");
+      for (StringArray::iterator c = parm.begin();
+           c != parm.end(); ++c) {
+         if (c != parm.begin())
+            MessageInterface::ShowMessage(", ");
+         MessageInterface::ShowMessage("\"%s\"", c->c_str());
+      }
+      MessageInterface::ShowMessage(");\n");
+   #endif
+
+   chunks.clear();
+   return true;
+}
+
+
 GmatBase* Interpreter::AssemblePhrase(StringArray& phrase, GmatCommand *cmd)
 {
    #ifdef DEBUG_TOKEN_PARSING
@@ -1265,10 +1350,12 @@ void Interpreter::ChunkLine()
            ++end;
         }
         else {
-           while ((str[end] != ' ') && (str[end] != '\t') && 
+           while ((str[end] != ' ')  && (str[end] != '\t') &&
                   (str[end] != '\r') && (str[end] != '\n') && 
-                  (str[end] != '%') && (str[end] != '\0') //) {
-                   && (str[end] != '=')) {
+                  (str[end] != '%')  && (str[end] != '\0') &&
+                  (str[end] != '[')  && (str[end] != '(')  &&
+                  (str[end] != '{')  && (str[end] != '=')
+                 ) {
                ++end;
                if ((str[end] == ';') && (semicolonLocation == 0))
                    semicolonLocation = end;
@@ -1831,6 +1918,38 @@ StringArray& Interpreter::SeparateBrackets(const std::string &chunk)
 {
    static StringArray chunkArray;
    chunkArray.clear();
+
+   Integer loc, start = chunk.find("[", 0), stop = chunk.find("]", 0);
+   bool parseComplete = false;
+
+   if (start == (Integer)std::string::npos)
+         parseComplete = true;
+   else if (stop == (Integer)std::string::npos)
+      throw InterpreterException("Missing closing bracket \"]\"");
+
+   if (start > stop)
+      throw InterpreterException("Closing bracket found before opening bracket");
+
+   loc = start;
+
+   std::string token = "Starting", str = chunk;
+
+   while (!parseComplete && (start < stop)) {
+      // skip over white spaces
+      start = loc + 1;
+      start = SkipWhiteSpace(start, str);
+      loc = chunk.find(",", start);
+      if (loc == (Integer)std::string::npos) {
+         loc = stop;
+         parseComplete = true;
+      }
+      token.assign(str, start, loc-start);
+
+      // Prep for the next token
+      if (token != "")
+         chunkArray.push_back(token);
+   }
+
    return chunkArray;
 }
 

@@ -28,6 +28,7 @@
 //#define DEBUG_SCRIPTINTERPRETER
 //#define DEBUG_SCRIPT_READING_AND_WRITING 
 //#define DEBUG_PARAMETER_PARSING
+//#define DEBUG_GMAT_LINE
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -260,7 +261,6 @@ bool ScriptInterpreter::Parse(void)
             ++phrase;
             
             while (phrase != chunks.end()) {
-//            if (phrase != chunks.end())
                 name = **phrase;
                 
                 if ((name == ";") || (name[0] == '%'))
@@ -274,8 +274,35 @@ bool ScriptInterpreter::Parse(void)
         }
         // Next try for object parameter setup or assignment
         else if ((**phrase == "GMAT") && (!sequenceStarted)) {
+
+            #ifdef DEBUG_GMAT_LINE
+               MessageInterface::ShowMessage("Decomposing GMAT line\n\"%s\"\n",
+                                             line.c_str());
+               for (std::vector<std::string *>::iterator c = chunks.begin();
+                    c != chunks.end(); ++c)
+                  MessageInterface::ShowMessage("   \"%s\"\n", (*c)->c_str());
+            #endif
+
             // Look up related object(s)
             ++phrase;
+            
+            bool hasEquals = (line.find("=") != std::string::npos ? true : false);
+            // Check to see if this is a function return
+            if (((**phrase)[0] == '[') || !hasEquals) {
+               // It's one or more return parameters, so line is a function call
+               #ifdef DEBUG_GMAT_LINE
+                  MessageInterface::ShowMessage(
+                     "Sequence not started; hasEquals is %s\n%s",
+                     (hasEquals ? "true" : "false"),
+                     "This line is a function interface\n"
+                     );
+               #endif
+               if (InterpretFunctionCall()) {
+                  sequenceStarted = true;
+                  return true;
+               }
+               return false;
+            }
 
             StringArray sar = SeparateDots(**phrase);
             std::string objName = sar[0];
@@ -434,6 +461,31 @@ bool ScriptInterpreter::Parse(void)
                 }
             }
         }
+        else if ((**phrase == "GMAT") && (sequenceStarted)) {
+            #ifdef DEBUG_GMAT_LINE
+               MessageInterface::ShowMessage(
+                   "Sequence started; Decomposing GMAT line\n\"%s\"\n",
+                   line.c_str());
+               for (std::vector<std::string *>::iterator c = chunks.begin();
+                    c != chunks.end(); ++c)
+                  MessageInterface::ShowMessage("   \"%s\"\n", (*c)->c_str());
+            #endif
+
+            // Look up related object(s)
+            ++phrase;
+
+            bool hasEquals = (line.find("=") != std::string::npos ? true : false);
+            // Check to see if this is a function return
+            if (((**phrase)[0] == '[') || !hasEquals) {
+               // It's one or more return parameters, so line is a function call
+               #ifdef DEBUG_GMAT_LINE
+                  MessageInterface::ShowMessage("This line is a function interface\n",
+                                                line.c_str());
+               #endif
+               return InterpretFunctionCall();
+            }
+        }
+
         // Then check to see if it's a command
         else if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             GmatCommand *cmd = moderator->AppendCommand(**phrase, "");

@@ -268,8 +268,12 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
                gen += ", ";
             
             Parameter *stopParam = (*stp)->GetStopParameter();
-            stopCondDesc << stopParam->GetName() << " = "
-                         << (*stp)->GetRealParameter("Goal");
+            std::string stopName = stopParam->GetName();
+            stopCondDesc << stopName;
+
+            if ((stopName.find("Periapsis") == std::string::npos) &&
+                (stopName.find(".Apoapsis") == std::string::npos))
+               stopCondDesc << " = " << (*stp)->GetRealParameter("Goal");
 
             gen += stopCondDesc.str();
          }
