@@ -378,8 +378,9 @@ bool Sandbox::Execute()
       }
       
       if (!rv) {
-         std::string str = current->GetTypeName() +
-            " Command failed to run to completion";
+         std::string str = "\"" + current->GetTypeName() +
+            "\" Command failed to run to completion\nCommand Text is \"" +
+            current->GetGeneratingString() + "\"";
          throw SandboxException(str);
       }
       current = current->GetNext();
