@@ -188,8 +188,7 @@ ForceModel* PropSetup::GetForceModel()
 //------------------------------------------------------------------------------
 void PropSetup::SetPropagator(Propagator *propagator)
 {
-    //loj: 3/18/04 debug
-    MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
+    //MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
     if (propagator == NULL)
        throw PropSetupException("PropSetup::SetPropagator failed: propagator is NULL");
        
@@ -211,7 +210,7 @@ void PropSetup::SetPropagator(Propagator *propagator)
 //------------------------------------------------------------------------------
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
-    MessageInterface::ShowMessage("PropSetup::SetForceModel() entered \n");
+    //MessageInterface::ShowMessage("PropSetup::SetForceModel() entered \n");
     if (forceModel == NULL)
         throw PropSetupException("PropSetup::SetForceModel failed: ForceModel is NULL");
        
@@ -276,7 +275,7 @@ PhysicalModel* PropSetup::GetForce(Integer index)
 //------------------------------------------------------------------------------
 Integer PropSetup::GetNumForces()
 {
-   return mForceModel->GetNumForces();
+    return mForceModel->GetNumForces();
 }
 
 //------------------------------------------------------------------------------
@@ -288,7 +287,7 @@ Integer PropSetup::GetNumForces()
 //------------------------------------------------------------------------------
 const std::string* PropSetup::GetParameterList() const
 {
-   return PARAMETER_TEXT;
+    return PARAMETER_TEXT;
 }
 
 
@@ -319,15 +318,15 @@ Integer PropSetup::GetParameterCount(void) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
-   case USE_DRAG:
-      return PropSetup::PARAMETER_TYPE[id];
-   default:
-      return GmatBase::GetParameterType(id);
-   }
+    switch (id)
+    {
+    case PROPAGATOR_NAME:
+    case FORCE_MODEL_NAME:
+    case USE_DRAG:
+        return PropSetup::PARAMETER_TYPE[id];
+    default:
+        return GmatBase::GetParameterType(id);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -339,15 +338,15 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PropSetup::GetParameterTypeString(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
-   case USE_DRAG:
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-   default:
-      return GmatBase::GetParameterTypeString(id);
-   }
+    switch (id)
+    {
+    case PROPAGATOR_NAME:
+    case FORCE_MODEL_NAME:
+    case USE_DRAG:
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    default:
+        return GmatBase::GetParameterTypeString(id);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -359,15 +358,15 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PropSetup::GetParameterText(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
-   case USE_DRAG:
-      return PropSetup::PARAMETER_TEXT[id];
-   default:
-      return GmatBase::GetParameterText(id);
-   }
+    switch (id)
+    {
+    case PROPAGATOR_NAME:
+    case FORCE_MODEL_NAME:
+    case USE_DRAG:
+        return PropSetup::PARAMETER_TEXT[id];
+    default:
+        return GmatBase::GetParameterText(id);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -397,23 +396,23 @@ Integer PropSetup::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 std::string PropSetup::GetStringParameter(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-      if (mPropagator)
-          return mPropagator->GetTypeName();
-      return "UndefinedPropagator";
-   case FORCE_MODEL_NAME:
-      if (mForceModel)
-          return mForceModel->GetName();
-      return "InternalForceModel";
-   case USE_DRAG:
-      if (usedrag)
-          return "BodyDefault";
-      return "Off";
-   default:
-      return GmatBase::GetStringParameter(id);
-   }
+    switch (id)
+    {
+    case PROPAGATOR_NAME:
+        if (mPropagator)
+            return mPropagator->GetTypeName();
+        return "UndefinedPropagator";
+    case FORCE_MODEL_NAME:
+        if (mForceModel)
+            return mForceModel->GetName();
+        return "InternalForceModel";
+    case USE_DRAG:
+        if (usedrag)
+            return "BodyDefault";
+        return "Off";
+    default:
+        return GmatBase::GetStringParameter(id);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -518,40 +517,42 @@ bool PropSetup::SetStringParameter(const std::string &label, const std::string &
 void PropSetup::Initialize()
 {
     //MessageInterface::ShowMessage("PropSetup::Initialize() entered \n");
-   mInitialized = true;
+    mInitialized = true;
 
-   if (mPropagator == NULL)
-   {
-       MessageInterface::ShowMessage("PropSetup::Initialize() mPropagator is NULL\n");
-       mInitialized = false;
-   }
+    if (mPropagator == NULL)
+    {
+        MessageInterface::ShowMessage("PropSetup::Initialize() mPropagator is NULL\n");
+        mInitialized = false;
+    }
    
-   if (mForceModel == NULL)
-   {
-       MessageInterface::ShowMessage("PropSetup::Initialize() mForceModel is NULL\n");
-       mInitialized = false;
-   }
-   else if (mForceModel->GetNumForces() == 0)
-   {
-       MessageInterface::ShowMessage("PropSetup::Initialize() NumForces is 0\n");
-       mInitialized = false;
-   }
+    if (mForceModel == NULL)
+    {
+        MessageInterface::ShowMessage("PropSetup::Initialize() mForceModel is NULL\n");
+        mInitialized = false;
+    }
+    else if (mForceModel->GetNumForces() == 0)
+    {
+        MessageInterface::ShowMessage("PropSetup::Initialize() NumForces is 0\n");
+        mInitialized = false;
+    }
    
-   //MessageInterface::ShowMessage("PropSetup::Initialize() initialized = %d\n",
-   //                              mInitialized);
+    //MessageInterface::ShowMessage("PropSetup::Initialize() initialized = %d\n",
+    //                              mInitialized);
    
-   if (mInitialized == true) {
-      if (usedrag) {
-         DragForce *dragForce = new DragForce;
-         mForceModel->AddForce(dragForce);
-      }
+    if (mInitialized == true)
+    {
+        if (usedrag)
+        {
+            DragForce *dragForce = new DragForce;
+            mForceModel->AddForce(dragForce);
+        }
       
-      mPropagator->SetPhysicalModel(mForceModel);
-      //MessageInterface::ShowMessage("PropSetup::Initialize() after SetPhysicalModel(%s) \n",
-      //                              mForceModel->GetName().c_str());
+        mPropagator->SetPhysicalModel(mForceModel);
+        //MessageInterface::ShowMessage("PropSetup::Initialize() after SetPhysicalModel(%s) \n",
+        //                              mForceModel->GetName().c_str());
       
-      mPropagator->Initialize();
-      //MessageInterface::ShowMessage("PropSetup::Initialize() after mPropagator->Initialize() \n");
-   }
+        mPropagator->Initialize();
+        //MessageInterface::ShowMessage("PropSetup::Initialize() after mPropagator->Initialize() \n");
+    }
 }
 

@@ -235,16 +235,16 @@ bool StopCondition::Evaluate()
             mInterpolator->Clear();
             for (int i=0; i<mBufferSize; i++)
             {
-                MessageInterface::ShowMessage("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
-                                              "mEpochBuffer=%f\n", i, mValueBuffer[i],
-                                              mEpochBuffer[i]);
+                //MessageInterface::ShowMessage("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
+                //                              "mEpochBuffer=%f\n", i, mValueBuffer[i],
+                //                              mEpochBuffer[i]);
                 mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
             }
             
             if (mInterpolator->Interpolate(mGoal, &stopEpoch))
                 mStopEpoch = stopEpoch;
             
-            MessageInterface::ShowMessage("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
+            //MessageInterface::ShowMessage("StopCondition::Evaluate() mStopEpoch=%f\n", mStopEpoch);
         }
     }
 
