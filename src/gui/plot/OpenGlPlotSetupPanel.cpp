@@ -27,13 +27,14 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
-    EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
+   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
+   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
+   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
+   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+   EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
 
-    EVT_CHECKBOX(OPENGL_PLOT_CHECKBOX, OpenGlPlotSetupPanel::OnPlotCheckBoxChange)
+   EVT_CHECKBOX(OPENGL_PLOT_CHECKBOX, OpenGlPlotSetupPanel::OnPlotCheckBoxChange)
+   EVT_CHECKBOX(OPENGL_WIREFRAME_CHECKBOX, OpenGlPlotSetupPanel::OnWireFrameCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -52,18 +53,17 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
                                            const wxString &subscriberName)
-    : GmatPanel(parent)
+   : GmatPanel(parent)
 {
-    //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() entering...\n");
-    //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
-    //                              std::string(subscriberName.c_str()) + "\n");
+   //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() entering...\n");
+   //MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
+   //                              std::string(subscriberName.c_str()) + "\n");
     
-    theSubscriber =
-        theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
+   theSubscriber =
+      theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
     
-    Create();
-    Show();
-
+   Create();
+   Show();
 }
 
 //-------------------------------
@@ -75,7 +75,15 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
 {
-    theApplyButton->Enable();
+   theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnWireFrameCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::OnWireFrameCheckBoxChange(wxCommandEvent& event)
+{
+   theApplyButton->Enable();
 }
 
 //----------------------------------
@@ -93,28 +101,32 @@ void OpenGlPlotSetupPanel::OnPlotCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::Create()
 {
-    //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
+   //MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
 
-    pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+   pageBoxSizer = new wxBoxSizer(wxVERTICAL);
 
     //------------------------------------------------------
     // plot option, (1st column)
     //------------------------------------------------------
-    plotCheckBox = new wxCheckBox(this, OPENGL_PLOT_CHECKBOX, wxT("Show Plot"),
-                                  wxDefaultPosition, wxSize(100, -1), 0);
+   plotCheckBox = new wxCheckBox(this, OPENGL_PLOT_CHECKBOX, wxT("Show Plot"),
+                                 wxDefaultPosition, wxSize(100, -1), 0);
     
-    optionBoxSizer = new wxBoxSizer(wxVERTICAL);
-    optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_CENTER|wxALL, 5);
+   wireFrameCheckBox = new wxCheckBox(this, OPENGL_WIREFRAME_CHECKBOX, wxT("Draw WireFrame"),
+                                      wxDefaultPosition, wxSize(100, -1), 0);
+    
+   optionBoxSizer = new wxBoxSizer(wxVERTICAL);
+   optionBoxSizer->Add(plotCheckBox, 0, wxALIGN_CENTER|wxALL, 5);
+   optionBoxSizer->Add(wireFrameCheckBox, 0, wxALIGN_CENTER|wxALL, 5);
             
     //------------------------------------------------------
     // put in the order
     //------------------------------------------------------    
-    pageBoxSizer->Add(optionBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+   pageBoxSizer->Add(optionBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     
-    //------------------------------------------------------
-    // add to parent sizer
-    //------------------------------------------------------
-    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+   //------------------------------------------------------
+   // add to parent sizer
+   //------------------------------------------------------
+   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
 
 }
 
@@ -123,9 +135,9 @@ void OpenGlPlotSetupPanel::Create()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::LoadData()
 {
-    // load data from the core engine
-    plotCheckBox->SetValue(theSubscriber->IsActive());
-
+   // load data from the core engine
+   plotCheckBox->SetValue(theSubscriber->IsActive());
+   wireFrameCheckBox->SetValue(theSubscriber->GetStringParameter("WireFrame") == "On");
 }
 
 //------------------------------------------------------------------------------
@@ -133,6 +145,10 @@ void OpenGlPlotSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::SaveData()
 {
-    // save data to core engine
-    theSubscriber->Activate(plotCheckBox->IsChecked());
+   // save data to core engine
+   theSubscriber->Activate(plotCheckBox->IsChecked());
+   if (wireFrameCheckBox->IsChecked())
+      theSubscriber->SetStringParameter("WireFrame", "On");
+   else
+      theSubscriber->SetStringParameter("WireFrame", "Off");
 }

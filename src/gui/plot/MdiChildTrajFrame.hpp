@@ -21,47 +21,48 @@
 #include "wx/wxprec.h"
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
-    #include "wx/mdi.h"
+#include "wx/wx.h"
+#include "wx/mdi.h"
 #endif
 
 class MdiChildTrajFrame: public wxMDIChildFrame
 {
 public:
-    TrajPlotCanvas *mCanvas;
-    bool mIsMainFrame;
+   TrajPlotCanvas *mCanvas;
+   bool mIsMainFrame;
     
-    MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
-                      const wxString& title, const wxPoint& pos,
-                      const wxSize& size, const long style);
-    ~MdiChildTrajFrame();
+   MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
+                     const wxString& title, const wxPoint& pos,
+                     const wxSize& size, const long style);
+   ~MdiChildTrajFrame();
 
-    bool DeletePlot(); //loj: 3/8/04 added
+   bool DeletePlot();
     
-    void OnClearPlot(wxCommandEvent& event);
-    void OnChangeTitle(wxCommandEvent& event);
-    void OnShowDefaultView(wxCommandEvent& event);
-    void OnZoomIn(wxCommandEvent& event);
-    void OnZoomOut(wxCommandEvent& event);
-    void OnShowWireFrame(wxCommandEvent& event);
-    void OnShowEquatorialPlane(wxCommandEvent& event);
-    void OnHelpView(wxCommandEvent& event);
-    void OnQuit(wxCommandEvent& event);
+   void OnClearPlot(wxCommandEvent& event);
+   void OnChangeTitle(wxCommandEvent& event);
+   void OnShowDefaultView(wxCommandEvent& event);
+   void OnZoomIn(wxCommandEvent& event);
+   void OnZoomOut(wxCommandEvent& event);
+   void OnShowWireFrame(wxCommandEvent& event);
+   void OnShowEquatorialPlane(wxCommandEvent& event);
+   void OnHelpView(wxCommandEvent& event);
+   void OnQuit(wxCommandEvent& event);
     
-    void OnActivate(wxActivateEvent& event);
-    void OnSize(wxSizeEvent& event);
-    void OnMove(wxMoveEvent& event);
-    void OnClose(wxCloseEvent& event);
+   void OnActivate(wxActivateEvent& event);
+   void OnSize(wxSizeEvent& event);
+   void OnMove(wxMoveEvent& event);
+   void OnClose(wxCloseEvent& event);
 
-    void UpdateSpacecraft(const Real &time, const Real &posX,
-                          const Real &posY, const Real &posZ,
-                          bool updateCanvas);
+   //loj: 5/6/04 added drawWireFrame
+   void UpdateSpacecraft(const Real &time, const Real &posX,
+                         const Real &posY, const Real &posZ,
+                         bool updateCanvas, bool drawWireFrame = false);
 protected:
 
-    DECLARE_EVENT_TABLE()
-};
+   DECLARE_EVENT_TABLE()
+      };
 #endif

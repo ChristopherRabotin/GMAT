@@ -26,31 +26,34 @@
 class OpenGlPlotSetupPanel: public GmatPanel
 {
 public:
-    OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
+   OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    Subscriber *theSubscriber;
-    wxString *theParamList;
+   Subscriber *theSubscriber;
+   wxString *theParamList;
     
-    wxBoxSizer *pageBoxSizer;
-    wxBoxSizer *optionBoxSizer;
+   wxBoxSizer *pageBoxSizer;
+   wxBoxSizer *optionBoxSizer;
 
-    wxCheckBox *plotCheckBox;
+   wxCheckBox *plotCheckBox;
+   wxCheckBox *wireFrameCheckBox;
 
-    void OnPlotCheckBoxChange(wxCommandEvent& event);
+   void OnPlotCheckBoxChange(wxCommandEvent& event);
+   void OnWireFrameCheckBoxChange(wxCommandEvent& event);
     
-    // methods inherited from GmatPanel
-    virtual void Create();
-    virtual void LoadData();
-    virtual void SaveData();
+   // methods inherited from GmatPanel
+   virtual void Create();
+   virtual void LoadData();
+   virtual void SaveData();
     
-    DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE();
     
-    // IDs for the controls and the menu commands
-    enum
-    {     
-        OPENGL_PLOT_TEXT = 93000,
-        OPENGL_PLOT_CHECKBOX,
-    };
+   // IDs for the controls and the menu commands
+   enum
+   {     
+      OPENGL_PLOT_TEXT = 93000,
+      OPENGL_PLOT_CHECKBOX,
+      OPENGL_WIREFRAME_CHECKBOX,
+   };
 };
 #endif
