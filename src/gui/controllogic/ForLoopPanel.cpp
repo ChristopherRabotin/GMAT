@@ -82,26 +82,63 @@ void ForLoopPanel::Setup( wxWindow *parent)
 //    item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
 //
 //    theMiddleSizer->Add(item0, 0, wxGROW, 5);
+
+//----------------------------------------------------------------------
+//    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
+//
+//    conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
+//                     wxSize(455,54), wxWANTS_CHARS );
+//    conditionGrid->CreateGrid( 1, 4, wxGrid::wxGridSelectCells );
+//    conditionGrid->SetRowLabelSize(0);
+//    conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
+//    conditionGrid->EnableEditing(false);
+//        
+//    conditionGrid->SetColLabelValue(0, _T(""));
+//    conditionGrid->SetColSize(0, 60);
+//    conditionGrid->SetColLabelValue(1, _T("Start"));
+//    conditionGrid->SetColSize(1, 165);
+//    conditionGrid->SetColLabelValue(2, _T("Increment"));
+//    conditionGrid->SetColSize(2, 60);
+//    conditionGrid->SetColLabelValue(3, _T("End"));
+//    conditionGrid->SetColSize(3, 165);
+//    conditionGrid->SetCellValue(0, 0, "FOR");
+//    
+//    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
+//--------------------------------------------------------------------------
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
+    wxBoxSizer *item1 = new wxBoxSizer( wxHORIZONTAL );
+
+    wxStaticText *item2 = new wxStaticText( parent, ID_TEXT, wxT("For "), 
+         wxDefaultPosition, wxDefaultSize, 0 );
+    item1->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    wxTextCtrl *item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+         wxDefaultPosition, wxSize(150,-1), 0 );
+    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    wxBoxSizer *item4 = new wxBoxSizer( wxVERTICAL );
 
     conditionGrid = new wxGrid( parent, ID_GRID, wxDefaultPosition, 
-                     wxSize(455,54), wxWANTS_CHARS );
-    conditionGrid->CreateGrid( 1, 4, wxGrid::wxGridSelectCells );
+         wxSize(460, 60), wxWANTS_CHARS );
+    conditionGrid->CreateGrid( 1, 3, wxGrid::wxGridSelectCells );
+    
     conditionGrid->SetRowLabelSize(0);
     conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
-    conditionGrid->EnableEditing(false);
+//    conditionGrid->EnableEditing(false);
         
-    conditionGrid->SetColLabelValue(0, _T(""));
-    conditionGrid->SetColSize(0, 60);
-    conditionGrid->SetColLabelValue(1, _T("Start"));
-    conditionGrid->SetColSize(1, 165);
+    conditionGrid->SetColLabelValue(0, _T("Start"));
+    conditionGrid->SetColSize(0, 150);
+    conditionGrid->SetColLabelValue(1, _T("End"));
+    conditionGrid->SetColSize(1, 150);
     conditionGrid->SetColLabelValue(2, _T("Increment"));
-    conditionGrid->SetColSize(2, 60);
-    conditionGrid->SetColLabelValue(3, _T("End"));
-    conditionGrid->SetColSize(3, 165);
-    conditionGrid->SetCellValue(0, 0, "FOR");
+    conditionGrid->SetColSize(2, 150);
     
-    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
+    item4->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    item0->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
+
 
     theMiddleSizer->Add(item0, 0, wxGROW, 5);
    
@@ -120,5 +157,6 @@ void ForLoopPanel::LoadData()
 void ForLoopPanel::SaveData()
 {
 }
+
 
 
