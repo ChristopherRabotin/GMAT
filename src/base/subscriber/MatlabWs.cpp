@@ -50,7 +50,7 @@ MatlabWs::PARAMETER_TYPE[MatlabWsParamCount - SubscriberParamCount] =
 // MatlabWs(const std::string &name, Parameter *firstVarParam)
 //------------------------------------------------------------------------------
 MatlabWs::MatlabWs(const std::string &name, Parameter *firstVarParam) :
-   Subscriber("MatlabWs", name),
+   Subscriber("MatlabWS", name), //loj: 10/28/04 Changed from MatlabWs
    precision(12)
 {
    mNumVarParams = 0;
