@@ -45,8 +45,9 @@ public:
     static void ShowMessage(const std::string &msg);
     static void ShowMessage(const char *msg, ...);
     static void PopupMessage(Gmat::MessageType msgType, const std::string &msg);
-    static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
-                             int interval);
+    static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...);
+    //static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+    //                         int interval);
     static void PopupAbortContinue(const std::string &abortMsg,
                                    const std::string &continueMsg,
                                    const std::string &msg);

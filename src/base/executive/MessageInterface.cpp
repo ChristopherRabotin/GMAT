@@ -187,14 +187,12 @@ void MessageInterface::ShowMessage(const char *msg, ...)
         va_end(marker);
 
         //std::string message(msgBuffer);
-        
     }
     
 #if !defined __CONSOLE_APP__
     if (GmatAppData::theMessageWindow != NULL)
     {
         GmatAppData::theMessageWindow->Show(true);
-        //GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));
         GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));
     }
     else
@@ -206,7 +204,6 @@ void MessageInterface::ShowMessage(const char *msg, ...)
                               20, 20, 600, 350, "Permanent");
         GmatAppData::theMessageWindow->SetMaxLength(600000);
         GmatAppData::theMessageWindow->Show(true);
-        //GmatAppData::theMessageWindow->AppendText(wxString(msg.c_str()));        
         GmatAppData::theMessageWindow->AppendText(wxString(msgBuffer));        
     }
 #else
@@ -268,20 +265,70 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
 } // end PopupMessage()
 
 //------------------------------------------------------------------------------
-//  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
-//                           int interval)
+//  static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 //------------------------------------------------------------------------------
 //  Purpose:
-//     Shows popup message and closes itself.
+//     Shows popup message
 //------------------------------------------------------------------------------
-void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg,
-                                    int interval)
+void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 {
-    MessageInterface::popupMessage = msg;
-    MessageInterface::messageType = msgType;
-    MessageInterface::showIntervalInMilSec = interval;
+    short    ret;
+    short    size;
+    va_list  marker;
+    char     *msgBuffer;
+
+    size = strlen(msg) + MAX_MESSAGE_LENGTH;
+      
+    if( (msgBuffer = (char *)malloc(size)) != NULL )
+    {
+        va_start(marker, msg);      
+        ret = vsprintf(msgBuffer, msg, marker);      
+        va_end(marker);
+
+        popupMessage = std::string(msgBuffer);
+    }
+
+
+#if !defined __CONSOLE_APP__
+    switch (msgType)
+    {
+    case Gmat::ERROR_:
+        wxLogError(wxT(wxString(msgBuffer)));
+        wxLog::FlushActive();
+        break;
+    case Gmat::WARNING_:
+        wxLogWarning(wxT(wxString(msgBuffer)));
+        wxLog::FlushActive();
+        break;
+    case Gmat::INFO_:
+        (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                           wxT("Information"));
+        break;
+        //loj: there should be more
+    default:
+        break;
+    };
+#else
+    LogMessage(msg);
+#endif
    
 } // end PopupMessage()
+
+//  //------------------------------------------------------------------------------
+//  //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+//  //                           int interval)
+//  //------------------------------------------------------------------------------
+//  //  Purpose:
+//  //     Shows popup message and closes itself.
+//  //------------------------------------------------------------------------------
+//  void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg,
+//                                      int interval)
+//  {
+//      MessageInterface::popupMessage = msg;
+//      MessageInterface::messageType = msgType;
+//      MessageInterface::showIntervalInMilSec = interval;
+   
+//  } // end PopupMessage()
 
 //------------------------------------------------------------------------------
 // void void LogMessage(const std::string &msg)
