@@ -24,6 +24,7 @@
 
 #include "BranchCommand.hpp"
 
+
 #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
    #include "MessageInterface.hpp"
 #endif
@@ -44,7 +45,7 @@ BranchCommand::~BranchCommand()
 {
    std::vector<GmatCommand*>::iterator node;
    GmatCommand* current;
-   
+      
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       // Find the end for each branch and disconnect it fron the start
@@ -138,10 +139,14 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    if (which >= (Integer)branch.capacity())
       branch.reserve(which+1);
    
-   if (branch[which] == NULL)
-      branch[which] = cmd;
+   if (which == (Integer)(branch.size()))
+      branch.push_back(cmd);   
+   else if (branch[which] == NULL)
+      branch.at(which) = cmd;
+      //branch[which] = cmd;
    else
-      branch[which]->Append(cmd);
+      (branch.at(which))->Append(cmd);
+      //branch[which]->Append(cmd);
 }
 
 
