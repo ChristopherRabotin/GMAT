@@ -64,68 +64,6 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
     Create();
     Show();
 
-    //===================================================
-    //loj: just for testing CelesBodySelectDialog
-    //===================================================
-
-    //----- no exclusion
-    wxArrayString exclBodies;
-    CelesBodySelectDialog dlg1(this, exclBodies);
-    dlg1.ShowModal();
-
-    if (dlg1.IsBodySelected())
-    {
-        wxArrayString &names = dlg1.GetBodyNames();
-        for (int i=0; i<names.GetCount(); i++)
-            MessageInterface::ShowMessage("OpenGlPlotSetupPanel::**JUST TEST** body name = %s\n",
-                                          names[i].c_str());
-    }
-    
-    //----- exclude Sun
-    exclBodies.Add("Sun");
-    
-    CelesBodySelectDialog dlg2(this, exclBodies);
-    dlg2.ShowModal();
-
-
-    if (dlg2.IsBodySelected())
-    {
-        wxArrayString &names = dlg2.GetBodyNames();
-        for (int i=0; i<names.GetCount(); i++)
-            MessageInterface::ShowMessage("OpenGlPlotSetupPanel::**JUST TEST** body name = %s\n",
-                                          names[i].c_str());
-    }
-    
-    //----- exclude Sun, Earth
-    exclBodies.Add("Earth");
-    
-    CelesBodySelectDialog dlg3(this, exclBodies);
-    dlg3.ShowModal();
-
-
-    if (dlg3.IsBodySelected())
-    {
-        wxArrayString &names = dlg3.GetBodyNames();
-        for (int i=0; i<names.GetCount(); i++)
-            MessageInterface::ShowMessage("OpenGlPlotSetupPanel:: **JUST TEST** body name = %s\n",
-                                          names[i].c_str());
-    }
-
-    //----- exclude Sun, Earth, Luna
-    exclBodies.Add("Luna");
-    
-    CelesBodySelectDialog dlg4(this, exclBodies);
-    dlg4.ShowModal();
-
-    if (dlg4.IsBodySelected())
-    {
-        wxArrayString &names = dlg4.GetBodyNames();
-        for (int i=0; i<names.GetCount(); i++)
-            MessageInterface::ShowMessage("OpenGlPlotSetupPanel:: **JUST TEST** body name = %s\n",
-                                          names[i].c_str());
-    }
-
-
 }
 
 //-------------------------------
