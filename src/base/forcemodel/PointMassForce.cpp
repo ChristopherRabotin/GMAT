@@ -44,13 +44,8 @@
 //                              Changes:
 //                                - All double types to Real types
 //                                - All primitive int types to Integer types
-//                                - EPOCH_PARAMETER to epochParameter
-//                                - MU_PARAMETER to muParameter
-//                                - RADIUS_PARAMETER to radiusParameter
-//                                - FLATTENING_PARAMETER to flatteningParameter
-//                                - POLERADIUS_PARAMETER to poleRadiusParameter
-//                                - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
-//                                - PARAMETER_COUNT to parameterCount
+//                                - GetParameter to GetRealParameter
+//                                - SetParameter to SetRealParameter
 //                              Removals:
 //                                - GetParameterName()
 //                              Additions:
@@ -66,7 +61,6 @@
 
 #include "PointMassForce.hpp"
 #include "MessageInterface.hpp"
-#include "Planet.hpp"
 
 //---------------------------------
 // static data
@@ -123,9 +117,13 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
     epoch                  (21545.0),
     estimationMethod       (1.0)
 {
-    parameterCount = ESTIMATE_METHOD;
+    parameterCount = PointMassParamCount;
     dimension = 6 * satcount;
-    body = NULL;
+
+    if (thePlanet == NULL)
+        SetBody("Earth");
+    
+    //thePlanet = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -137,6 +135,8 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 //------------------------------------------------------------------------------
 PointMassForce::~PointMassForce(void)
 {
+    if (thePlanet->GetName() == "")
+        delete thePlanet;
 }
 
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
     epoch                  (pmf.epoch),
     estimationMethod       (pmf.estimationMethod)
 {
-    parameterCount = ESTIMATE_METHOD;
+    parameterCount = PointMassParamCount;
     dimension = pmf.dimension;
     initialized = false;
 }
@@ -398,6 +398,62 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
 }
 
 
+//------------------------------------------------------------------------------
+// Planet* GetBody()
+//------------------------------------------------------------------------------
+/**
+ * 
+ */
+//------------------------------------------------------------------------------
+Planet* PointMassForce::GetBody()
+{
+    return thePlanet;
+}
+
+//------------------------------------------------------------------------------
+// void SetBody(Planet *body)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+void PointMassForce::SetBody(Planet *body)
+{
+    if (body != NULL)
+    {
+        if (thePlanet != NULL)
+        {
+            if (thePlanet->GetName() == "")
+                delete thePlanet;
+        }
+    }
+    
+    thePlanet = body;
+    mu = thePlanet->GetGravitationalConstant();
+}
+
+//------------------------------------------------------------------------------
+// void SetBody(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ *
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::SetBody(const std::string &name)
+{
+    Planet *body = new Planet(name);
+    if (body != NULL)
+    {
+        //MessageInterface::ShowMessage("PointMassForce::SetBody() name = %s\n",
+        //                              name.c_str());
+
+        SetBody(body);
+        return true;
+    }
+    
+    return false;
+}
+
 //---------------------------------
 // inherited methods from GmatBase
 //---------------------------------
@@ -549,7 +605,7 @@ std::string PointMassForce::GetStringParameter(const Integer id) const
     switch (id)
     {
     case BODY:
-        return body->GetName();
+        return thePlanet->GetTypeName(); //loj: What should we return?
     default:
         return PhysicalModel::GetStringParameter(id);
     }
@@ -568,27 +624,13 @@ std::string PointMassForce::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool PointMassForce::SetStringParameter(const Integer id, const std::string &value)
 {
-    MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
-                                  id, value.c_str());
+    //MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
+    //                              id, value.c_str());
 
     switch (id)
     {
     case BODY:
-        {
-            MessageInterface::ShowMessage("PointMassForce::SetStringParameter() value = %s\n",
-                                          value.c_str());
-            
-            CelestialBody *body = (CelestialBody*)(new Planet(value));
-            if (body != NULL)
-            {
-                MessageInterface::ShowMessage("PointMassForce::SetStringParameter() body = %s\n",
-                                              body->GetTypeName().c_str());
-                
-                mu = body->GetGravitationalConstant();
-                return true;
-            }
-            return false;
-        }
+        return SetBody(value);
     default:
         return PhysicalModel::SetStringParameter(id, value);
     }

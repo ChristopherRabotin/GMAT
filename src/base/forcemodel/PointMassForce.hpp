@@ -41,13 +41,6 @@
 //                              Changes:
 //                                - All double types to Real types
 //                                - All primitive int types to Integer types
-//                                - EPOCH_PARAMETER to epochParameter
-//                                - MU_PARAMETER to muParameter
-//                                - RADIUS_PARAMETER to radiusParameter
-//                                - FLATTENING_PARAMETER to flatteningParameter
-//                                - POLERADIUS_PARAMETER to poleRadiusParameter
-//                                - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
-//                                - PARAMETER_COUNT to parameterCount
 //                                - GetParameter to GetRealParameter
 //                                - SetParameter to SetRealParameter
 //                              Removals:
@@ -68,7 +61,7 @@
 
 #include "gmatdefs.hpp"
 #include "PhysicalModel.hpp"
-#include "CelestialBody.hpp"
+#include "Planet.hpp"
 
 class GMAT_API PointMassForce : public PhysicalModel
 {
@@ -85,6 +78,11 @@ public:
     bool Initialize(void);
     virtual Real EstimateError(Real * diffs, Real * answer) const;
 
+    //waw: added o3/16/04
+    Planet* GetBody();
+    void SetBody(Planet *body);
+    bool SetBody(const std::string &name);
+    
     // Parameter accessor methods -- overridden from GmatBase
     //loj: 3/19/04 why overridden?
     //std::string PointMassForce::GetParameterText(const Integer id);
@@ -99,16 +97,15 @@ public:
     virtual std::string GetParameterTypeString(const Integer id) const;
     virtual Real GetRealParameter(const Integer id) const;
     virtual Real SetRealParameter(const Integer id, const Real value);    
-
+    
     virtual std::string GetStringParameter(const Integer id) const;
     virtual std::string GetStringParameter(const std::string &value) const;
     virtual bool        SetStringParameter(const Integer id,
                                            const std::string &value);
     virtual bool        SetStringParameter(const std::string &label,
                                            const std::string &value);
-protected:
-    // Start with the parameter IDs and associates strings
 
+protected:
     // Parameter IDs
     enum
     {
@@ -131,8 +128,8 @@ protected:
     Real epoch;
     /// Type of error estimate to perform
     Real estimationMethod;
-
-    CelestialBody *body;
+    //waw: added 03/16/04
+    Planet *thePlanet;
 };
 
 #endif  // PointMassForce_hpp
