@@ -27,6 +27,7 @@
 
 #include "Assignment.hpp"
 #include "MessageInterface.hpp"
+#include "Parameter.hpp"
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_PARM_ASSIGNMENT
@@ -37,10 +38,16 @@ Assignment::Assignment  () :
    parmName             (""),
    parmOwner            (NULL),
    rhsObject            (NULL),
+   rhsType              (NUMBER),
+   rhsParmName          (""),
    objToObj             (false),
    parmID               (-1),
    parmType             (Gmat::UNKNOWN_PARAMETER_TYPE),
-   value                ("Not_Set")
+   value                ("Not_Set"),
+   row                  (0),
+   col                  (0),
+   rowObj               (NULL),
+   colObj               (NULL)
 {
 }
 
@@ -56,9 +63,15 @@ Assignment::Assignment  (const Assignment& a) :
    parmName             (a.parmName),
    parmOwner            (a.parmOwner),
    rhsObject            (a.rhsObject),
+   rhsType              (a.rhsType),
+   rhsParmName          (a.rhsParmName),
    parmID               (a.parmID),
    parmType             (a.parmType),
-   value                (a.value)
+   value                (a.value),
+   row                  (a.row),
+   col                  (a.col),
+   rowObj               (NULL),
+   colObj               (NULL)
 {
 }
 
@@ -68,15 +81,21 @@ Assignment& Assignment::operator=(const Assignment& a)
    if (this == &a)
       return *this;
         
-   ownerName = a.ownerName;
-   parmName  = a.parmName;
-   parmOwner = a.parmOwner;
-   rhsObject = a.rhsObject;
-   objToObj  = a.objToObj;
-   parmID    = a.parmID;
-   parmType  = a.parmType;
-   value     = a.value;
-    
+   ownerName   = a.ownerName;
+   parmName    = a.parmName;
+   parmOwner   = a.parmOwner;
+   rhsObject   = a.rhsObject;
+   rhsType     = a.rhsType;
+   rhsParmName = a.rhsParmName;
+   objToObj    = a.objToObj;
+   parmID      = a.parmID;
+   parmType    = a.parmType;
+   value       = a.value;
+   row         = a.row;
+   col         = a.col;
+   rowObj      = NULL;
+   colObj      = NULL;
+
    return *this;
 }
 
@@ -127,13 +146,19 @@ bool Assignment::InterpretAction()
       throw CommandException("Assignment string does not set value");
     
    Integer strend = end;
-   while (str[strend] == ' ')
+   while ((str[strend] == ' ') /*|| (str[strend] == '=')*/)
       --strend;
    component = generatingString.substr(loc, strend-loc-1);
    if (component == "")
       throw CommandException("Assignment string does not identify parameter");
    parmName = component;
-    
+   
+   // Strip off training white space, if any
+   unsigned n = parmName.length() - 1;
+   while ((parmName[n] == ' ') || (parmName[n] == '\t'))
+      --n;
+   parmName = parmName.substr(0, n+1);
+   
    loc = end + 1;
    while (str[loc] == ' ')
       ++loc;
@@ -158,6 +183,7 @@ bool Assignment::Initialize()
    if (objToObj) {
       if (objectMap->find(value) != objectMap->end()) {
          rhsObject = (*objectMap)[value];
+         return true;
       }
       else {
          if (parmOwner->GetTypeName() == "Variable") {
@@ -174,7 +200,8 @@ bool Assignment::Initialize()
                      value + "\" for line \n" + generatingString);
       }
    }
-   return true;
+
+   return InitializeRHS(value);
 }
 
 
@@ -200,10 +227,10 @@ bool Assignment::Execute()
          throw CommandException("Parameter Owner Not Initialized");
        
       if (objToObj) {
-      #ifdef DEBUG_PARM_ASSIGNMENT
-         MessageInterface::ShowMessage("Assignment::Execute running object to "
-            "object\n");
-      #endif
+         #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage(
+               "Assignment::Execute running object to object\n");
+         #endif
          if (!rhsObject)
             throw CommandException("Assignment command cannot find object \"" +
                value + "\"");
@@ -226,12 +253,14 @@ bool Assignment::Execute()
 
       switch (parmType) {
          case Gmat::INTEGER_TYPE:
-            parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
+//            parmOwner->SetIntegerParameter(parmID, atoi(value.c_str()));
+            parmOwner->SetIntegerParameter(parmID, (Integer)EvaluateRHS());
             retval = true;
             break;
                
          case Gmat::REAL_TYPE:
-            parmOwner->SetRealParameter(parmID, atof(value.c_str()));
+//            parmOwner->SetRealParameter(parmID, atof(value.c_str()));
+            parmOwner->SetRealParameter(parmID, EvaluateRHS());
             retval = true;
             break;
                
@@ -333,3 +362,179 @@ GmatBase* Assignment::Clone() const
    return (new Assignment(*this));
 }
 
+
+const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
+                                                   const std::string &prefix,
+                                                   const std::string &useName)
+{
+   std::string gen = "GMAT " + ownerName;
+   if (parmName != "")
+      gen += "." + parmName;
+   gen += " = " + value + ";";
+   
+   #ifdef DEBUG_ASSIGNMENT_SCRIPTING
+      MessageInterface::ShowMessage("Assignment command generator is \"%s\"\n",
+         gen.c_str());
+   #endif
+   generatingString = gen;
+
+   return generatingString;
+}
+
+
+bool Assignment::InitializeRHS(const std::string &rhs)
+{
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage("Assignment::InitializeRHS(%s) entered\n",
+         rhs.c_str());
+   #endif
+   
+   std::string chunk, kind, subchunk;
+   Integer start = 0, end;
+   
+   // Skip leading spaces
+   while (rhs[start] == ' ')
+      ++start;
+   end = start;
+   // Find the next delimiter
+   while ((rhs[end] != ';')  && (rhs[end] != ' ') &&
+          (rhs[end] != '.')  && (rhs[end] != '=') &&
+          (rhs[end] != '(')  && (rhs[end] != ',') &&
+          (rhs[end] != '\t') && (end < (Integer)rhs.length()))
+      ++end;
+      
+   chunk = rhs.substr(start, end - start);
+   subchunk = rhs.substr(end);
+   
+   #ifdef DEBUG_PARM_ASSIGNMENT
+      MessageInterface::ShowMessage(
+         "'%s' was broken into '%s' and '%s'\n", rhs.c_str(), chunk.c_str(),
+         subchunk.c_str());
+   #endif
+   
+   if (objectMap->find(chunk) != objectMap->end()) {
+      rhsObject = (*objectMap)[chunk];
+      kind = rhsObject->GetTypeName();
+
+      #ifdef DEBUG_PARM_ASSIGNMENT
+         MessageInterface::ShowMessage(
+            "Assignment RHS object is a %s named %s\n", kind.c_str(),
+            rhsObject->GetName().c_str());
+      #endif
+
+      // Determine what type of object handling is needed
+      if (kind == "Array") {
+         rhsType = ARRAY_ELEMENT;
+         std::string rowStr, colStr = "1";
+         
+         unsigned openParen, comma, closeParen, index;
+         openParen  = subchunk.find("(");
+         comma      = subchunk.find(",");
+         closeParen = subchunk.find(")");
+         
+         if ((openParen == std::string::npos) ||
+             (closeParen == std::string::npos))
+            throw CommandException(
+                      "Assignment::InitializeRHS encountered mismatched "
+                      "parenthesis\n   Command text is \"" +
+                      (GetGeneratingString()) + "\"");
+         if (comma != std::string::npos) {
+            colStr = subchunk.substr(comma+1, closeParen - (comma+1));
+            closeParen = comma;
+         }
+         rowStr = subchunk.substr(openParen+1, closeParen - (openParen+1));
+            
+         // Trim whitespace
+         index = 0;
+         while ((rowStr[index] == ' ') && (index < rowStr.length()))
+            ++index;
+         rowStr = rowStr.substr(index);
+         index = rowStr.length() - 1;
+         while ((rowStr[index] == ' ') && (index >= 0))
+            --index;
+         rowStr = rowStr.substr(0, index+1);
+
+         index = 0;
+         while ((colStr[index] == ' ') && (index < colStr.length()))
+            ++index;
+         colStr = colStr.substr(index);
+         index = colStr.length() - 1;
+         while ((colStr[index] == ' ') && (index >= 0))
+            --index;
+         colStr = colStr.substr(0, index+1);
+
+         #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage(
+               "   Array element given by ('%s', '%s')\n", rowStr.c_str(),
+               colStr.c_str());
+         #endif
+
+         if (objectMap->find(rowStr) == objectMap->end()) {
+            row = atoi(rowStr.c_str()) - 1;
+         }
+         else
+            throw CommandException(
+               "Assignment commands cannot handle dynamic row indices yet.");
+
+         if (objectMap->find(colStr) == objectMap->end()) {
+            col = atoi(colStr.c_str()) - 1;
+         }
+         else
+            throw CommandException(
+               "Assignment commands cannot handle dynamic column indices yet.");
+      }
+      else {
+         if (kind == "Variable") {
+            throw CommandException(
+               "Assignment commands cannot handle variables yet.");
+         }
+         else if (rhsObject->GetType() == Gmat::PARAMETER) {
+            throw CommandException(
+               "Assignment commands cannot handle Parameters yet.");
+         }
+//         else {
+//            throw CommandException(
+//               "Assignment commands cannot handle object parms yet.");
+//         }
+      }
+   }
+   else {
+      #ifdef DEBUG_PARM_ASSIGNMENT
+         MessageInterface::ShowMessage(
+            "Assignment RHS object is the number %le\n", atof(rhs.c_str()));
+      #endif
+      rhsType = NUMBER;
+   }
+
+   return true;
+}
+
+
+Real Assignment::EvaluateRHS()
+{
+   // RHS could be a parameter, an array element, a variable, or just a number
+   switch (rhsType) {
+      case PARAMETER:
+      case VARIABLE:
+         return ((Parameter*)rhsObject)->EvaluateReal();
+
+      case ARRAY_ELEMENT:
+         if (rowObj != NULL)
+            if (rowObj->GetType() == Gmat::PARAMETER)
+               row = (Integer)((Parameter*)rowObj)->EvaluateReal();
+         if (colObj != NULL)
+            if (colObj->GetType() == Gmat::PARAMETER)
+               col = (Integer)((Parameter*)colObj)->EvaluateReal();
+         #ifdef DEBUG_PARM_ASSIGNMENT
+            MessageInterface::ShowMessage(
+               "   Getting 'SingleValue' for (%d, %d)\n", row, col);
+         #endif
+         return rhsObject->GetRealParameter("SingleValue", row, col);
+
+      default:
+         break;
+   }
+   
+   // It's just a number
+   return atof(value.c_str());
+}

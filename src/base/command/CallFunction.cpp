@@ -657,6 +657,9 @@ bool CallFunction::ExecuteMatlabFunction()
 
       // get the value for the out parameters
       GetOutParams();
+      
+      // DJC, 03/02/05
+      status = true;
 
    #endif
 
