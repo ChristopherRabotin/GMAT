@@ -316,7 +316,8 @@ bool Sandbox::Initialize()
          //loj: 11/9/04
          // Remove if block when all subscribers support GetRefObjectNameArray()
          // and SetRefObject()
-         if (sub->GetTypeName() == "XYPlot")
+         //loj: 11/17/04 added ReportFile
+         if (sub->GetTypeName() == "XYPlot" || sub->GetTypeName() == "ReportFile")
          {
             StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
             for (unsigned int i=0; i<refParamNames.size(); i++)
