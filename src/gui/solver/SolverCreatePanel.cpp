@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                           SolverCreatePanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2004/01/21
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Create window.

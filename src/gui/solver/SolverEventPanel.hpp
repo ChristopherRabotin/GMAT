@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                           SolverEventPanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2003/12/16
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Event window.

@@ -5,7 +5,6 @@
 //
 // Author: Waka Waktola
 // Created: 2004/21/01
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Variables window.

@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                              VariableCreatePanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2003/12/10
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Variable Create window.

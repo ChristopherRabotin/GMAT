@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                           SolverGoalsPanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2004/01/20
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Goals window.
