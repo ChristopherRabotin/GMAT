@@ -39,7 +39,7 @@ PropagatorSelectDialog::PropagatorSelectDialog(wxWindow *parent,
    mNewPropName = "";
    
    Create();
-   Show();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------

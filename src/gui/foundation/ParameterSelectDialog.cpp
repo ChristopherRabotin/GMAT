@@ -44,7 +44,7 @@ ParameterSelectDialog::ParameterSelectDialog(wxWindow *parent, bool showArray)
    mShowArray = showArray;
    
    Create();
-   Show();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------

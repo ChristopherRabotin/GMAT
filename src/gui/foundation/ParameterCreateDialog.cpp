@@ -49,7 +49,7 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
    mColor.Set(0, 0, 0); // initialize to black
    
    Create();
-   Show();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------

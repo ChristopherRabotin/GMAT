@@ -37,12 +37,13 @@ public:
     
 protected:
    // member functions
-   virtual void Show();
+   //loj: 12/21/04 changed from Show(), because it conflicts with wxDialog::Show()
+   virtual void ShowData();   
    virtual void Create() = 0;
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
    virtual void ResetData() = 0;
-    
+   
    virtual void OnOK();
    virtual void OnCancel();
    virtual void OnHelp();
@@ -69,7 +70,8 @@ protected:
    {     
       ID_BUTTON_OK = 8100,
       ID_BUTTON_CANCEL,
-      ID_BUTTON_HELP
+      ID_BUTTON_HELP,
+      ID_GMAT_DIALOG_LAST
    };
 
 };

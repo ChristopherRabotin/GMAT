@@ -45,7 +45,7 @@ SpaceObjectSelectDialog::SpaceObjectSelectDialog(wxWindow *parent,
    mSoExcList = soExcList;
    
    Create();
-   Show();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------

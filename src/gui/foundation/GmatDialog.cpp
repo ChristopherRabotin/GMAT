@@ -81,13 +81,13 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void Show()
+// void ShowData()
 //------------------------------------------------------------------------------
 /**
  * Shows the panel.
  */
 //------------------------------------------------------------------------------
-void GmatDialog::Show()
+void GmatDialog::ShowData()
 {
    // add items to middle sizer
     

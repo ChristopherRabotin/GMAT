@@ -46,7 +46,7 @@ ParameterMultiSelectDialog::ParameterMultiSelectDialog(wxWindow *parent,
    mShowArray = showArray;
 
    Create();
-   Show();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------
