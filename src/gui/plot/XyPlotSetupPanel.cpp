@@ -111,12 +111,25 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 
    if (!oldParam.IsSameAs(newParam))
    {
-      // empty listbox first, only one parameter is allowed
-      mXSelectedListBox->Clear();
-      mXSelectedListBox->Append(newParam);
+      // check if parameter is plottable
+      Parameter *param;
+      param = theGuiInterpreter->GetParameter(std::string(newParam.c_str()));
 
-      mXParamChanged = true;
-      theApplyButton->Enable();
+      if (param->IsPlottable())
+      {
+         // empty listbox first, only one parameter is allowed
+         mXSelectedListBox->Clear();
+         mXSelectedListBox->Append(newParam);
+         mXSelectedListBox->SetStringSelection(newParam);
+
+         mXParamChanged = true;
+         theApplyButton->Enable();
+      }
+      else
+      {
+         wxLogMessage("Selected X parameter:%s is not plottable. Please select "
+                      "another variable\n", newParam.c_str());
+      }
    }
 }
 
@@ -127,17 +140,29 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
 {
    // get string in first list and then search for it
    // in the second list
-   wxString s = mParamListBox->GetStringSelection();
-   int found = mYSelectedListBox->FindString(s);
+   wxString newParam = mParamListBox->GetStringSelection();
+   int found = mYSelectedListBox->FindString(newParam);
     
     // if the string wasn't found in the second list, insert it
    if (found == wxNOT_FOUND)
    {
-      mYSelectedListBox->Append(s);
-      mYSelectedListBox->SetStringSelection(s);
-      ShowParameterOption(s, true);
-      mYParamChanged = true;
-      theApplyButton->Enable();
+      // check if parameter is plottable
+      Parameter *param;
+      param = theGuiInterpreter->GetParameter(std::string(newParam.c_str()));
+
+      if (param->IsPlottable())
+      {
+         mYSelectedListBox->Append(newParam);
+         mYSelectedListBox->SetStringSelection(newParam);
+         ShowParameterOption(newParam, true);
+         mYParamChanged = true;
+         theApplyButton->Enable();
+      }
+      else
+      {
+         wxLogMessage("Selected X parameter:%s is not plottable. Please select "
+                      "another variable\n", newParam.c_str());
+      }
    }
 }
 
@@ -536,9 +561,8 @@ void XyPlotSetupPanel::SaveData()
       }
       else
       {
-         mSubscriber->
-            SetStringParameter("IndVar",
-                               std::string(mXSelectedListBox->GetString(0).c_str()));
+         std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
+         mSubscriber->SetStringParameter("IndVar", selXName);
       }
 
       mXParamChanged = false;
@@ -581,9 +605,8 @@ void XyPlotSetupPanel::SaveData()
             MessageInterface::ShowMessage("XyPlotSetupPanel::SaveData() DepVar = %s\n",
                                           mYSelectedListBox->GetString(i).c_str());
 #endif
-            mSubscriber->
-               SetStringParameter("Add",
-                                  std::string(mYSelectedListBox->GetString(i).c_str()));
+            std::string selYName = std::string(mYSelectedListBox->GetString(i).c_str());
+            mSubscriber->SetStringParameter("Add", selYName);
          }
       }
    }
