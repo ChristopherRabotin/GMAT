@@ -21,7 +21,6 @@
 
 #include "Subscriber.hpp"
 #include "Parameter.hpp"
-#include <map>
 
 class XyPlot : public Subscriber
 {
@@ -32,7 +31,7 @@ public:
           bool drawGrid = false);
    XyPlot(const XyPlot &copy);
    virtual ~XyPlot(void);
-   
+
    // methods inherited from Subscriber
    virtual bool Initialize();
    
@@ -68,6 +67,14 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
+   //loj: 11/9/04 added
+   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+                                  const std::string &name);
+   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name = "");
+
+   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+
 protected:
 
    bool SetXParameter(const std::string &paramName);
@@ -79,13 +86,13 @@ protected:
     
    Parameter *mXParam;
    std::vector<Parameter*> mYParams;
-   std::map<std::string, Parameter*> mYParamMap;
 
    Integer mNumXParams;
    Integer mNumYParams;
 
    std::string mXParamName;
    StringArray mYParamNames;
+   StringArray mAllParamNames;
    
    std::string mPlotTitle;
    std::string mXAxisTitle;

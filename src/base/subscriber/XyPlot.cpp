@@ -18,12 +18,13 @@
 //------------------------------------------------------------------------------
 
 #include "XyPlot.hpp"
+#include "Publisher.hpp"         // for GetRunState()
 #include "PlotInterface.hpp"     // for XY plot
-#include "Moderator.hpp"         // for GetParameter()
 #include "MessageInterface.hpp"  // for ShowMessage()
 
 //#define DEBUG_XYPLOT_INIT 1
 //#define DEBUG_XYPLOT_PARAM 1
+//#define DEBUG_XYPLOT_OBJECT 1
 //#define DEBUG_XYPLOT_UPDATE 1
 //#define DEBUG_ACTION_REMOVE 1
 
@@ -105,8 +106,7 @@ XyPlot::XyPlot(const XyPlot &copy) :
    Subscriber(copy)
 {
    mXParam = copy.mXParam;
-   mYParams = copy.mYParams; //loj: 6/4/04 remove this later
-   mYParamMap = copy.mYParamMap;
+   mYParams = copy.mYParams;
    
    mNumXParams = copy.mNumXParams;
    mNumYParams = copy.mNumYParams;
@@ -140,38 +140,14 @@ XyPlot::~XyPlot(void)
 //------------------------------------------------------------------------------
 bool XyPlot::SetXParameter(const std::string &paramName)
 {
-   //@todo Do not use Moderator
-   
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-   
    if (paramName != "")
    {
-      //-----------------------------------------------------------------
-      //loj: 11/01/04 Until SetRefObject() is implemented, add parameter
-      // if the parameter has been created and configured already
-      //-----------------------------------------------------------------
-      //mXParamName = paramName;
-      //mXParam = NULL;
-      
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
-      {
-         mXParamName = paramName;
-         mXParam = param;
-         mNumXParams = 1; //loj: only 1 X parameter for now
-         status = true;
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("XyPlot::SetXParameter() Unconfigured parameter:%s will not be "
-             "set to X parameter in XYPlot.\n", paramName.c_str());
-      }
+      mXParamName = paramName;
+      mNumXParams = 1; //loj: only 1 X parameter for now
+      return true;
    }
    
-   return status;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -179,39 +155,19 @@ bool XyPlot::SetXParameter(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool XyPlot::AddYParameter(const std::string &paramName, Integer index)
 {
-   bool status = false;
-   Moderator *theModerator = Moderator::Instance();
-   
+#if DEBUG_XYPLOT_PARAM
+      MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
+                                    paramName.c_str());
+#endif
    if (paramName != "" && index == mNumYParams)
    {
-      //-----------------------------------------------------------------
-      //loj: 11/01/04 Until SetRefObject() is implemented, add parameter
-      // if the parameter has been created and configured already
-      //-----------------------------------------------------------------
-      // get parameter pointer
-      Parameter *param = theModerator->GetParameter(paramName);
-      if (param != NULL)
-      {
-#if DEBUG_XYPLOT_PARAM
-         MessageInterface::ShowMessage("XyPlot::AddYParameter() name = %s\n",
-                                       param->GetName().c_str());
-#endif
-         mYParamNames.push_back(paramName);
-         mYParamMap[paramName] = NULL;
-         mNumYParams = mYParamNames.size();
-         mYParamMap[paramName] = param;
-         mYParams.push_back(param);
-         status = true;
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("XyPlot::AddYParameter() Unconfigured parameter:%s will not be "
-             "added to XyPlot.\n", paramName.c_str());
-      }
+      mYParamNames.push_back(paramName);
+      mNumYParams = mYParamNames.size();
+      mYParams.push_back(NULL);
+      return true;
    }
 
-   return status;
+   return false;
 }
 
 //----------------------------------
@@ -229,22 +185,27 @@ bool XyPlot::Initialize()
    {
       if (mNumXParams == 0 || mNumYParams == 0)
       {
+         active = false;
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "XyPlot::Initialize() XYPlot will not be shown."
+             "XyPlot::Initialize() XYPlot will not be shown.\n"
              "No parameters selected for X Axis or Y Axis\n");
+         return false;
+      }
+      
+      if (mXParam == NULL || mYParams[0] == NULL)
+      {
+         active = false;
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,
+             "XyPlot::Initialize() XYPlot will not be shown.\n"
+             "The first parameter selected for X Axis or Y Axis are NULL\n");
          return false;
       }
    }
    
    Subscriber::Initialize();
    
-   //-----------------------------------
-   //@todo
-   // need to set Parameter pointers
-   //-----------------------------------
-   // implement this later
-
 #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage("XyPlot::Initialize() active=%d\n", active);
 #endif
@@ -272,22 +233,20 @@ bool XyPlot::Initialize()
       int yOffset = 0; //loj: I don't know how this is used
       Real yMin = -40000.0; //loj: should parameter provide minimum value?
       Real yMax =  40000.0; //loj: should parameter provide maximum value?
-
+      
       for (int i=0; i<mNumYParams; i++)
       {
-         //if (((Integer)mYParams.size() > i) && mYParams[i]) {
-            std::string curveTitle = mYParams[i]->GetName();
-            UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
-         
+         std::string curveTitle = mYParams[i]->GetName();
+         UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
+            
 #if DEBUG_XYPLOT_INIT
-            MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-                                          curveTitle.c_str());
+         MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
+                                       curveTitle.c_str());
 #endif
-            PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
-                                          curveTitle, penColor);
-            //}
+         PlotInterface::AddXyPlotCurve(instanceName, i, yOffset, yMin, yMax,
+                                       curveTitle, penColor);
       }
-
+      
       PlotInterface::ShowXyPlotLegend(instanceName);
       status = true;
         
@@ -624,6 +583,88 @@ const StringArray& XyPlot::GetStringArrayParameter(const std::string &label) con
    return GetStringArrayParameter(GetParameterID(label));
 }
 
+//loj: 11/9/04 added
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+//                                const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* XyPlot::GetRefObject(const Gmat::ObjectType type,
+                               const std::string &name)
+{
+   // if name is X parameter
+   if (name == mXParamName)
+   {
+      return mXParam;
+   }
+   else
+   {
+      // name is Y parameter
+      for (int i=0; i<mNumYParams; i++)
+      {
+         if (mYParamNames[i] == name)
+            return mYParams[i];
+      }
+   }
+   
+   throw GmatBaseException("XyPlot::GetRefObject() the object name: " + name +
+                           "not found\n");
+}
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "")
+//------------------------------------------------------------------------------
+bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                          const std::string &name)
+{
+   // if name is XParam name
+   if (name == mXParamName)
+   {
+      mXParam = (Parameter*)obj;
+#if DEBUG_XYPLOT_OBJECT
+      MessageInterface::ShowMessage
+         ("XyPlot::SetRefObject() mXParam:%s successfully set\n",
+          obj->GetName().c_str());
+#endif
+      return true;
+   }
+   else
+   {
+      for (int i=0; i<mNumYParams; i++)
+      {
+         if (mYParamNames[i] == name)
+         {
+            mYParams[i] = (Parameter*)obj;
+#if DEBUG_XYPLOT_OBJECT
+            MessageInterface::ShowMessage
+               ("XyPlot::SetRefObject() mYParams[%s] successfully set\n",
+                obj->GetName().c_str());
+#endif
+            return true;
+         }
+      }
+   }
+   
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+const StringArray& XyPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   mAllParamNames.clear();
+   
+   // add x parameter
+   mAllParamNames.push_back(mXParamName);
+   
+   // add y parameters
+   for (int i=0; i<mNumYParams; i++)
+      mAllParamNames.push_back(mYParamNames[i]);
+   
+   return mAllParamNames;
+}
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -715,33 +756,17 @@ bool XyPlot::RemoveYParameter(const std::string &name)
    }
 #endif
    
-   bool canRemove = false;
-   StringArray::iterator pos1 =
-      find(mYParamNames.begin(), mYParamNames.end(), name);
-   std::vector<Parameter*>::iterator pos2 =
-      (std::vector<Parameter*>::iterator)(mYParams.begin());
-   
-   if (pos1 != mYParamNames.end())
+   StringArray::iterator pos1;
+   std::vector<Parameter*>::iterator pos2 = mYParams.begin();
+
+   for (pos1 = mYParamNames.begin(); pos1 != mYParamNames.end(); pos1++)
    {
-      while (pos2 != (std::vector<Parameter*>::iterator)(mYParams.end()))
-      {
-         if ((*pos2)->GetName() != name)
-         {
-            ++pos2;
-         }
-         else
-         {
-            canRemove = true;
-            break;
-         }
-      }
-      
-      if (canRemove)
+      if (*pos1 == name)
       {
          mYParamNames.erase(pos1);
          mYParams.erase(pos2);
          mNumYParams = mYParamNames.size();
-
+         
 #if DEBUG_ACTION_REMOVE
          MessageInterface::ShowMessage("---After remove\n");
          for (int i=0; i<mNumYParams; i++)
@@ -750,13 +775,18 @@ bool XyPlot::RemoveYParameter(const std::string &name)
                                           mYParamNames[i].c_str());
          }
 #endif
-         //------------------------------------------
-         // loj: 9/29/04
-         // Need to remove from PlotCurves also
-         //------------------------------------------
          return true;
       }
+      else
+      {
+         advance(pos2, 1);
+      }
    }
+   
+   //------------------------------------------
+   // loj: 9/29/04
+   // Need to remove from PlotCurves also
+   //------------------------------------------
    
 #if DEBUG_ACTION_REMOVE
    MessageInterface::ShowMessage("XyPlot::RemoveYParameter() name=%s not found\n");
