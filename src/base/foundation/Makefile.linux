@@ -1,7 +1,7 @@
 # Makefile for GMAT Foundation library
 # Initial Version - D. Conway - 2003/11/19
 
-HEADERS = -I../include
+HEADERS = -I../include -I../util
 OBJECTS = GmatBase.o GmatBaseException.o
 
 all: libFoundation 
