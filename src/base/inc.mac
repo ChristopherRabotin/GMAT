@@ -54,8 +54,7 @@ $(LIB): $(OBJ)
 	@chmod -R 755 $(LIBDIR)
 
 .cpp.o:
-	@echo 'Compiling $(SRC)...'
-	@$(CPP) -c $<
+	$(CPP) -c $<
 
 clean:
 	rm -f $(OBJ) core
