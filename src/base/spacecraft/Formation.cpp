@@ -268,6 +268,8 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                throw SpaceObjectException("Epochs are not synchronized in the formation " + instanceName);
          components.push_back(so);
       }
+      
+      return true;
    }
    
    return SpaceObject::SetRefObject(obj, type, name);
