@@ -73,7 +73,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle,
                bool drawGrid) :
-   Subscriber("XyPlot", name)
+   Subscriber("XYPlot", name) //loj: 10/28/04 Changed from XyPlot
 {
    // GmatBase data
    parameterCount = XyPlotParamCount;
