@@ -8,6 +8,7 @@
 #                          Vary 
 #             2004/02/27 - Added Save.cpp
 #             2004/08/10 - W. Shoan - added While
+#             2004/08/11 - W. Shoan - added EndWhile
 #
 #
 # Define the marco for the top-level directories
@@ -16,7 +17,7 @@ PROJECT_ROOT    = ../..
 # Source file for creating new library
 SRC = Achieve.cpp Assignment.cpp BranchCommand.cpp Command.cpp \
 	CommandException.cpp ElseCommand.cpp EndIfCommand.cpp \
-	EndForCommand.cpp EndTarget.cpp ForCommand.cpp IfCommand.cpp \
+	EndForCommand.cpp EndTarget.cpp EndWhile.cpp ForCommand.cpp IfCommand.cpp \
 	Maneuver.cpp NoOp.cpp Propagate.cpp Target.cpp Save.cpp Toggle.cpp \
 	Vary.cpp While.cpp
 #
