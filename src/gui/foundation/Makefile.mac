@@ -4,15 +4,14 @@
 # Date:       2004/02/18
 # Modified:   2004/02/26 - Added GmatDialog.cpp, ParameterCreateDialog.cpp, and 
 #                          ParameterSelectDialog.cpp
+# Modified:   2004/05/21 - Replaced  list of *.cpp with wildcard
 #
 #
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = GmatDialog.cpp GmatPanel.cpp GuiItemManager.cpp \
-	ParameterCreateDialog.cpp ParameterSelectDialog.cpp \
-	ParameterSetupPanel.cpp
+SRC := $(wildcard *.cpp)
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
