@@ -72,7 +72,7 @@ public:
                                            const std::string &name);
    Formation* GuiInterpreter::GetFormation(const std::string &name);
    
-   // Hardware (loj: 1/7/05 Added)
+   // Hardware
    Hardware* CreateHardware(const std::string &type,
                             const std::string &name);
    Hardware* GetHardware(const std::string &name);
@@ -118,11 +118,14 @@ public:
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
 
-   // CoordinateSystem (loj: 1/31/05 Added)
+   // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    CoordinateSystem* GetInternalCoordinateSystem();
    
+   // AxisSystem (loj: 3/07/05 Added)
+   AxisSystem* CreateAxisSystem(const std::string &type,
+                                const std::string &name);
    // Planetary files
    StringArray& GetPlanetaryFileTypes();
    StringArray& GetPlanetaryFileNames();
