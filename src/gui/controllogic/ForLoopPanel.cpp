@@ -11,13 +11,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ForLoopPanel.hpp"
-
-// gui includes
-#include "gmatwxdefs.hpp"
-
-// base includes
-#include "gmatdefs.hpp"
-#include "GmatAppData.hpp"
+#include "ParameterSelectDialog.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -25,6 +19,7 @@
 
 BEGIN_EVENT_TABLE(ForLoopPanel, GmatPanel)
     EVT_TEXT(ID_TEXTCTRL, ForLoopPanel::OnTextUpdate)
+    EVT_BUTTON(ID_BUTTON, ForLoopPanel::OnButtonClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -40,8 +35,13 @@ ForLoopPanel::ForLoopPanel(wxWindow *parent, GmatCommand *cmd)
    theForCommand = (For *)cmd;
    
    mStartValue = 0;
-   mStepSize = 0;
+   mIncrValue = 0;
    mEndValue = 0;   
+   
+   mIndexIsParam = false;
+   mStartIsParam = false;
+   mEndIsParam = false;
+   mIncrIsParam = false;
    
    Create();
    Show();
@@ -68,7 +68,7 @@ void ForLoopPanel::Setup( wxWindow *parent)
    startStaticText =
       new wxStaticText(this, ID_TEXT , wxT("Start"),
                         wxDefaultPosition, wxDefaultSize, 0);
-   stepStaticText =
+   incrStaticText =
       new wxStaticText(this, ID_TEXT , wxT("Increment"), 
                         wxDefaultPosition, wxDefaultSize, 0);
    endStaticText =
@@ -82,30 +82,52 @@ void ForLoopPanel::Setup( wxWindow *parent)
    startTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(250,-1), 0);
-   stepTextCtrl =
+   incrTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(150,-1), 0);
    endTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(250,-1), 0);
+   indexTextCtrl->SetEditable(false);
+                      
+   // wxButton
+   indexButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                    wxDefaultPosition, wxSize(75, -1), 0);
+   startButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                    wxDefaultPosition, wxSize(75, -1), 0);
+   stepButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                    wxDefaultPosition, wxSize(75, -1), 0);
+   endButton =
+      new wxButton(this, ID_BUTTON, wxT("View"),
+                    wxDefaultPosition, wxSize(75, -1), 0);
                       
    Integer bsize = 10; // border size
    
    // wx*Sizers
-   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
+   wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 4, 0, 0 );
    
    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( indexStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( indexTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( indexButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   
    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( startStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( startTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  
+   flexGridSizer1->Add( startTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize); 
+   flexGridSizer1->Add( startButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+    
    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize); 
-   flexGridSizer1->Add( stepStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer1->Add( stepTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( incrStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( incrTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( stepButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   
    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( endStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( endTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( endButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    theMiddleSizer->Add(flexGridSizer1, 0, wxGROW, bsize);
 }
@@ -118,23 +140,96 @@ void ForLoopPanel::LoadData()
     if (theForCommand != NULL)
     {
        Integer paramId;
-       //paramId = theForCommand->GetParameterID("StartValue");
-       //mForName = theForCommand->GetRealParameter(paramId);
-       paramId = theForCommand->GetParameterID("StartValue");
-       mStartValue = theForCommand->GetRealParameter(paramId);
-       paramId = theForCommand->GetParameterID("Step");
-       mStepSize = theForCommand->GetRealParameter(paramId);
-       paramId = theForCommand->GetParameterID("EndValue");
-       mEndValue = theForCommand->GetRealParameter(paramId);
-    
        wxString s1, s2, s3;
-       s1.Printf("%.10f", mStartValue);
-       s2.Printf("%.10f", mStepSize);
-       s3.Printf("%.10f", mEndValue);
+
+       paramId = theForCommand->GetParameterID("IndexName");
+       mIndexString = theForCommand->GetStringParameter(paramId).c_str();
+
+       if (mIndexString.IsEmpty())
+       {
+          mIndexString = "Default set to internal index";
+          mIndexIsSet = false;
+       } 
+       else
+       {
+          mIndexIsSet = true;  
+          
+          paramId = theForCommand->GetParameterID("IndexIsParam");
+          mIndexIsParam = theForCommand->GetBooleanParameter(paramId);
+          
+          if (mIndexIsParam)
+          {
+             Parameter *param = (Parameter*)theForCommand->GetRefObject
+                             (Gmat::PARAMETER, mIndexString.c_str());
+                
+             mIndexString = param->GetName().c_str();
+          }  
+       } 
+       indexTextCtrl->SetValue(mIndexString);     
     
-       startTextCtrl->SetValue(s1);
-       stepTextCtrl->SetValue(s2);
-       endTextCtrl->SetValue(s3);
+       paramId = theForCommand->GetParameterID("StartIsParam");
+       mStartIsParam = theForCommand->GetBooleanParameter(paramId);
+          
+       if (mStartIsParam)
+       {
+           paramId = theForCommand->GetParameterID("StartName");
+           mStartString = theForCommand->GetStringParameter(paramId).c_str();
+ 
+           Parameter *param = (Parameter*)theForCommand->GetRefObject
+                             (Gmat::PARAMETER, mStartString.c_str());
+           
+           mStartString = param->GetName().c_str(); 
+           startTextCtrl->SetValue(mStartString);
+       }
+       else
+       {    
+          paramId = theForCommand->GetParameterID("StartValue");
+          mStartValue = theForCommand->GetRealParameter(paramId);
+          s1.Printf("%.10f", mStartValue);
+          startTextCtrl->SetValue(s1);
+       }    
+       
+       paramId = theForCommand->GetParameterID("IncrIsparam");
+       mIncrIsParam = theForCommand->GetBooleanParameter(paramId);
+
+       if (mIncrIsParam)
+       {
+           paramId = theForCommand->GetParameterID("IncrementName");
+           mIncrString = theForCommand->GetStringParameter(paramId).c_str();
+           
+           Parameter *param = (Parameter*)theForCommand->GetRefObject
+                             (Gmat::PARAMETER, mIncrString.c_str());
+           mIncrString = param->GetName().c_str();
+           incrTextCtrl->SetValue(mIncrString);
+       }
+       else
+       {    
+          paramId = theForCommand->GetParameterID("Step");
+          mIncrValue = theForCommand->GetRealParameter(paramId);
+          s2.Printf("%.10f", mIncrValue);
+          incrTextCtrl->SetValue(s2);
+       }    
+       
+       paramId = theForCommand->GetParameterID("EndIsParam");
+       mEndIsParam = theForCommand->GetBooleanParameter(paramId);
+       
+       if (mEndIsParam)
+       {
+           paramId = theForCommand->GetParameterID("EndName");
+           mEndString = theForCommand->GetStringParameter(paramId).c_str();
+           
+           Parameter *param = (Parameter*)theForCommand->GetRefObject
+                             (Gmat::PARAMETER, mEndString.c_str());
+           mEndString = param->GetName().c_str();
+           endTextCtrl->SetValue(mEndString); 
+       }
+       else
+       {    
+          paramId = theForCommand->GetParameterID("EndValue");
+          mEndValue = theForCommand->GetRealParameter(paramId);
+          s3.Printf("%.10f", mEndValue);
+          endTextCtrl->SetValue(s3); 
+       }   
     }
 }
 
@@ -144,25 +239,148 @@ void ForLoopPanel::LoadData()
 void ForLoopPanel::SaveData()
 {
     Integer paramId;
-    paramId = theForCommand->GetParameterID("StartValue");
-    theForCommand->SetRealParameter(paramId, mStartValue);
-    paramId = theForCommand->GetParameterID("Step");
-    theForCommand->SetRealParameter(paramId, mStepSize);
-    paramId = theForCommand->GetParameterID("EndValue");
-    theForCommand->SetRealParameter(paramId, mEndValue);
+    
+    if (mIndexIsSet)
+    {
+       if (mIndexIsParam)
+       {    
+          paramId = theForCommand->GetParameterID("IndexName");
+          theForCommand->SetStringParameter(paramId, mIndexString.c_str());
+          Parameter* theParam = theGuiInterpreter->GetParameter(mIndexString.c_str());
+          theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIndexString.c_str());
+       }    
+    }    
+    
+    if (mStartIsParam)
+    {
+       paramId = theForCommand->GetParameterID("StartName");
+       theForCommand->SetStringParameter(paramId, mStartString.c_str());
+       Parameter* theParam = theGuiInterpreter->GetParameter(mStartString.c_str());
+       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mStartString.c_str());
+    }
+    else
+    {    
+       paramId = theForCommand->GetParameterID("StartValue");
+       theForCommand->SetRealParameter(paramId, mStartValue);
+    }   
+    
+    if (mIncrIsParam)
+    {
+       paramId = theForCommand->GetParameterID("IncrementName");
+       theForCommand->SetStringParameter(paramId, mIncrString.c_str());
+       Parameter* theParam = theGuiInterpreter->GetParameter(mIncrString.c_str());
+       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mIncrString.c_str());
+    }
+    else
+    {        
+       paramId = theForCommand->GetParameterID("Step");
+       theForCommand->SetRealParameter(paramId, mIncrValue);
+    }    
+    
+    if (mEndIsParam)
+    {
+       paramId = theForCommand->GetParameterID("EndName");
+       theForCommand->SetStringParameter(paramId, mEndString.c_str());
+       Parameter* theParam = theGuiInterpreter->GetParameter(mEndString.c_str());
+       theForCommand->SetRefObject(theParam, Gmat::PARAMETER, mEndString.c_str());
+    }
+    else
+    {    
+       paramId = theForCommand->GetParameterID("EndValue");
+       theForCommand->SetRealParameter(paramId, mEndValue);
+    }    
 }
 
 //------------------------------------------------------------------------------
-// void OnGravityTextUpdate(wxCommandEvent& event)
+// void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ForLoopPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == startTextCtrl)
-      mStartValue = atof(startTextCtrl->GetValue());
-   else if (event.GetEventObject() == stepTextCtrl)
-      mStepSize = atof(stepTextCtrl->GetValue());
+   wxString temp;
+   
+   if (event.GetEventObject() == indexTextCtrl)
+   {
+      temp = indexTextCtrl->GetValue();
+      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
+      
+      if (theParam != NULL)
+      {
+         mIndexString = indexTextCtrl->GetValue();
+         mIndexIsParam = true; 
+         mIndexIsSet = true;   
+      } 
+   }    
+   else if (event.GetEventObject() == startTextCtrl)
+   {
+      temp = startTextCtrl->GetValue();
+      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
+
+      if (theParam == NULL)
+      {
+          mStartValue = atof(startTextCtrl->GetValue());
+          mStartIsParam = false;
+      } 
+      else
+      {
+         mStartString = startTextCtrl->GetValue();
+         mStartIsParam = true;    
+      }    
+   }    
+   else if (event.GetEventObject() == incrTextCtrl)
+   {
+      temp = incrTextCtrl->GetValue();
+      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
+
+      if (theParam == NULL)
+      {
+          mIncrValue = atof(incrTextCtrl->GetValue());
+          mIncrIsParam = false;
+      } 
+      else
+      {
+         mIncrString = incrTextCtrl->GetValue();
+         mIncrIsParam = true;    
+      } 
+   }    
    else if (event.GetEventObject() == endTextCtrl)
-      mEndValue = atof(endTextCtrl->GetValue());
+   {
+      temp = endTextCtrl->GetValue();
+      Parameter* theParam = theGuiInterpreter->GetParameter(temp.c_str());
+
+      if (theParam == NULL)
+      {
+          mEndValue = atof(endTextCtrl->GetValue());
+          mEndIsParam = false;
+      } 
+      else
+      {
+         mEndString = endTextCtrl->GetValue();
+         mEndIsParam = true;    
+      } 
+   }    
    
    theApplyButton->Enable(true);
-}
+}   
+
+//------------------------------------------------------------------------------
+// void OnButtonClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ForLoopPanel::OnButtonClick(wxCommandEvent& event)
+{
+   ParameterSelectDialog paramDlg(this);
+   paramDlg.ShowModal();
+
+   if (paramDlg.IsParamSelected())
+   {
+      wxString newParamName = paramDlg.GetParamName();
+      
+      if (event.GetEventObject() == indexButton)
+         indexTextCtrl->SetValue(newParamName);    
+      else if (event.GetEventObject() == startButton)
+         startTextCtrl->SetValue(newParamName);
+      else if (event.GetEventObject() == stepButton)
+         incrTextCtrl->SetValue(newParamName);
+      else if (event.GetEventObject() == endButton)
+         endTextCtrl->SetValue(newParamName); 
+   }      
+}    

@@ -17,6 +17,8 @@
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
+#include "Parameter.hpp"
+#include "MessageInterface.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -33,20 +35,37 @@ public:
 private:
     For *theForCommand;
     
-    Real mForName;
+    bool mIndexIsSet;
+    bool mIndexIsParam;
+    bool mStartIsParam;
+    bool mEndIsParam;
+    bool mIncrIsParam;
+    
+    wxString mIndexString;
+    wxString mStartString;
+    wxString mEndString;
+    wxString mIncrString;
+    
     Real mStartValue;
-    Real mStepSize;
-    Real mEndValue;    
+    Real mIncrValue;
+    Real mEndValue;  
+    
+    Parameter* mIndexParam;  
     
     wxStaticText *indexStaticText;
     wxStaticText *startStaticText;
-    wxStaticText *stepStaticText;
+    wxStaticText *incrStaticText;
     wxStaticText *endStaticText;
    
     wxTextCtrl *indexTextCtrl;
     wxTextCtrl *startTextCtrl;
-    wxTextCtrl *stepTextCtrl;
+    wxTextCtrl *incrTextCtrl;
     wxTextCtrl *endTextCtrl;
+    
+    wxButton *indexButton;
+    wxButton *startButton;
+    wxButton *stepButton;
+    wxButton *endButton;
    
     // methods inherited from GmatPanel
     virtual void Create();
@@ -55,8 +74,8 @@ private:
 
     // Layout & data handling methods
     void Setup(wxWindow *parent);
-    
     void OnTextUpdate(wxCommandEvent& event); 
+    void OnButtonClick(wxCommandEvent &event);
                
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();
@@ -65,7 +84,8 @@ private:
     enum
     {     
         ID_TEXTCTRL = 46000,
-        ID_TEXT 
+        ID_TEXT,
+        ID_BUTTON,
     };
 };
 
