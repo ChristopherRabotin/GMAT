@@ -14,20 +14,17 @@
 // Modified: 2003/09/16 Linda Jun - See Cartesian.hpp
 //
 /**
- * Contains the definition for the Cartesian class.
+ * Implements Cartesian class.
  */
 //------------------------------------------------------------------------------
 #include <iostream>
 #include <sstream>
 #include "gmatdefs.hpp"
-#include "Linear.hpp"         // for I/O stream operations
 #include "EphemerisUtil.hpp"
 #include "Keplerian.hpp"
 #include "Cartesian.hpp"
 #include "Rvector3.hpp"
 #include "Rvector.hpp"
-
-using namespace GmatRealUtil;
 
 //---------------------------------
 //  static data
@@ -64,6 +61,16 @@ Cartesian::Cartesian(Real posX, Real posY, Real posZ,
 {
    positionD = Rvector3(posX, posY, posZ);
    velocityD = Rvector3(velX, velY, velZ);
+}
+
+//loj: 4/19/04 added
+//------------------------------------------------------------------------------
+//  Cartesian::Cartesian(const Rvector6 &state)
+//------------------------------------------------------------------------------
+Cartesian::Cartesian(const Rvector6 &state)
+{
+   positionD = Rvector3(state[0], state[1], state[2]);
+   velocityD = Rvector3(state[3], state[4], state[5]);
 }
 
 //------------------------------------------------------------------------------
@@ -216,8 +223,7 @@ std::ostream& operator<<(std::ostream& output, Cartesian& c)
     Rvector v(6, c.positionD[0], c.positionD[1], c.positionD[2],
               c.velocityD[0], c.velocityD[1], c.velocityD[2]);
 
-    output << v << std::endl;
-
+    output << v;
     return output;
 }
 
@@ -227,9 +233,8 @@ std::ostream& operator<<(std::ostream& output, Cartesian& c)
 //------------------------------------------------------------------------------
 std::istream& operator>>(std::istream& input, Cartesian& c)
 {
-    input >> c.positionD >> c.velocityD;;
-
-    return input;
+   input >> c.positionD >> c.velocityD;
+   return input;
 }
 
 //------------------------------------------------------------------------------

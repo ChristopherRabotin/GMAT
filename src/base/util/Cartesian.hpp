@@ -26,6 +26,7 @@
 #include "Linear.hpp"
 #include "PhysicalConstants.hpp"
 #include "Rvector3.hpp"
+#include "Rvector6.hpp"
 
 // Forward declaration
 class Keplerian;       
@@ -50,49 +51,50 @@ class Cartesian
  *  this can be done to improve efficiency.
  */
 public:
-    Cartesian();
-    Cartesian(Real posX, Real posY, Real posZ,
-              Real velX, Real velY, Real velZ);
-    Cartesian(const Rvector3 &p, const Rvector3 &v);
-    Cartesian(const Cartesian &Cartesian);
-    Cartesian& operator=(const Cartesian &Cartesian);
-    virtual ~Cartesian();
+   Cartesian();
+   Cartesian(Real posX, Real posY, Real posZ,
+             Real velX, Real velY, Real velZ);
+   Cartesian(const Rvector3 &p, const Rvector3 &v);
+   Cartesian(const Rvector6 &state); // loj: 4/19/04 added
+   Cartesian(const Cartesian &Cartesian);
+   Cartesian& operator=(const Cartesian &Cartesian);
+   virtual ~Cartesian();
 
-    Rvector3 GetPosition() const;
-    Rvector3 GetVelocity() const;
-    Real GetPosition(Integer id) const;
-    Real GetVelocity(Integer id) const;
+   Rvector3 GetPosition() const;
+   Rvector3 GetVelocity() const;
+   Real GetPosition(Integer id) const;
+   Real GetVelocity(Integer id) const;
 
-    void SetPosition(const Rvector3 &pos);
-    void SetVelocity(const Rvector3 &vel);
-    void SetPosition(Integer id, const Real &val);
-    void SetVelocity(Integer id, const Real &val);
-    void SetAll(const Real &posX, const Real &posY, const Real &posZ,
-                const Real &velX, const Real &velY, const Real &velZ);
+   void SetPosition(const Rvector3 &pos);
+   void SetVelocity(const Rvector3 &vel);
+   void SetPosition(Integer id, const Real &val);
+   void SetVelocity(Integer id, const Real &val);
+   void SetAll(const Real &posX, const Real &posY, const Real &posZ,
+               const Real &velX, const Real &velY, const Real &velZ);
 
-    //  Friend functions
-    friend Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
-                                 const Rvector3 &qVector, Real mu=GmatPhysicalConst::mu);
-    friend Cartesian ToCartesian(const Keplerian &k, Real mu=GmatPhysicalConst::mu);
-    friend std::ostream& operator<<(std::ostream& output, Cartesian& c);
-    friend std::istream& operator>>(std::istream& input, Cartesian& c);
+   //  Friend functions
+   friend Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
+                                const Rvector3 &qVector, Real mu=GmatPhysicalConst::mu);
+   friend Cartesian ToCartesian(const Keplerian &k, Real mu=GmatPhysicalConst::mu);
+   friend std::ostream& operator<<(std::ostream& output, Cartesian& c);
+   friend std::istream& operator>>(std::istream& input, Cartesian& c);
 
-    Integer GetNumData() const;
-    const std::string* GetDataDescriptions() const;
-    std::string* ToValueStrings();
+   Integer GetNumData() const;
+   const std::string* GetDataDescriptions() const;
+   std::string* ToValueStrings();
 
-    static const Cartesian ZeroCartesian;
+   static const Cartesian ZeroCartesian;
     
-    enum
-    {
-        X, Y, Z
-    };
+   enum
+   {
+      X, Y, Z
+   };
     
 protected:
 
 private:
-    Rvector3 positionD;               //  Position vector (3 elements)
-    Rvector3 velocityD;               //  Velocity vector (3 elements)
+   Rvector3 positionD;               //  Position vector (3 elements)
+   Rvector3 velocityD;               //  Velocity vector (3 elements)
 
    static const Integer NUM_DATA = 6;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];

@@ -22,14 +22,12 @@
 #include <sstream>
 #include "gmatdefs.hpp"
 #include "RealUtilities.hpp" // for PI, TWO_PI, Sqrt()
-#include "Linear.hpp"        // for I/O stream operations
 #include "Cartesian.hpp"
 #include "EphemerisUtil.hpp"
 #include "Keplerian.hpp"
 #include "Rvector.hpp"
 
 using namespace GmatMathUtil;
-using namespace GmatRealUtil;
 
 //---------------------------------
 // static data
