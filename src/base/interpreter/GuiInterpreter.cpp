@@ -871,6 +871,38 @@ void GuiInterpreter::SetInputFocus()
 #endif
 }
 
+//------------------------------------------------------------------------------
+// void UpdateResourceTree()
+//------------------------------------------------------------------------------
+void GuiInterpreter::UpdateResourceTree()
+{
+#if !defined __CONSOLE_APP__
+   //close the open windows first
+   GmatAppData::GetMainFrame()->CloseAllChildren();
+   GmatAppData::GetResourceTree()->UpdateResource(true);
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void UpdateMissionTree()
+//------------------------------------------------------------------------------
+void GuiInterpreter::UpdateMissionTree()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::GetMissionTree()->UpdateMission(true);
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void CloseCurrentProject()
+//------------------------------------------------------------------------------
+void GuiInterpreter::CloseCurrentProject()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::GetMainFrame()->CloseCurrentProject();
+#endif
+}
+
 //---------------------------------
 // private
 //---------------------------------

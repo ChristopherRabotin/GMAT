@@ -170,6 +170,9 @@ public:
 
    // GUI control
    void SetInputFocus();
+   void UpdateResourceTree();
+   void UpdateMissionTree();
+   void CloseCurrentProject();
    
 private:
 
