@@ -113,7 +113,9 @@ public:
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
    virtual const Rvector3&      GetAngularVelocity();             // rad/sec
-   virtual Real                 GetHourAngle(Real offset);        // radians
+   // get the Hour Angle, in degrees, from Prime Meridian westward
+   // Note: Mean Sidereal Time is -HourAngle
+   virtual Real                 GetHourAngle(A1Mjd atTime); 
    //virtual const Rmatrix&       GetHarmonicCoefficientsSij(); // const??
    //virtual const Rmatrix&       GetHarmonicCoefficientsCij(); // const??
    //virtual const Rmatrix&       GetCoefDriftS();

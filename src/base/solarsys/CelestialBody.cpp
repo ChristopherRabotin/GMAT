@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <fstream>
-//#include <strstream>
 #include <sstream>
 #include <iomanip>
 #include "gmatdefs.hpp"
@@ -37,6 +36,8 @@
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
 #include "UtcDate.hpp"
+#include "TimeTypes.hpp"
+#include "AngleUtil.hpp"
 
 using namespace GmatMathUtil;
 using namespace std; 
@@ -609,31 +610,46 @@ const Rvector3& CelestialBody::GetAngularVelocity()
    return angularVelocity; 
 }
 
+
 //------------------------------------------------------------------------------
-//  Real CelestialBody::GetHourAngle()
+//  Real CelestialBody::GetHourAngle(A1Mjd atTime)
 //------------------------------------------------------------------------------
 /**
- * This method returns the hour angle for the body.
+ * This method returns the hour angle for the body, referenced from the
+ * Prime Meridian, measured westward
  *
- * @return hour angle for the body.
+ * @param <atTime> time for which to compute the hour angle
+ *
+ * @return hour angle for the body, in degrees, from the Prime Meridian
+ *
+ * @note algorithm 15, Vallado p. 192
+ * @todo move this to Planet?  Add generic calculation here.
  *
  */
 //------------------------------------------------------------------------------
-Real  CelestialBody:: GetHourAngle(Real offset) 
+Real  CelestialBody:: GetHourAngle(A1Mjd atTime) 
 {
-   //Real offset = UtcDate::UtcUt1Offset();
-   //UtcDate ud = epoch.toUtcDate();  // assuming epoch is an A1Mjd time
-   //
-   Real ghaEpoch = (/*epoch +*/ offset - 21545.5) / 100.0, gha;
+   // Convert the time to a UT1 MJD
+   Ut1Mjd ut1Time  = atTime.ToUt1Mjd();
+   // Now convert to UT1 Julian Date
+   Real ut1Jd      = ((Real) ut1Time) + GmatTimeUtil::JULIAN_DATE_OF_010541;
+   //cout << "DEBUG::UT1 JD for this date = " << ut1Jd << endl;
+   Real timeUt1    = (ut1Jd - 2451545.0) / 36525;
+   //cout << "DEBUG::timeUt1 = " << timeUt1 << endl;
 
-   gha = fmod(100.4606184 + ghaEpoch * (36000.770053610 +
-         ghaEpoch * (0.000387930 + ghaEpoch * -0.000000026)), 360.0);
+   // compute mean sidereal time, in degrees
+   // according to Vallado Eq. 3-45, converted to degrees, where
+   // 1 hour = 15 degrees and 1 second = 1/240 of a second
 
-   if (gha < 0.0)
-      gha += 360.0;
+   Real mst        = (67310.54841 / 240) +
+      (((876600 * 15) + (8640184.812866 / 240)) * timeUt1) +
+      ((0.093104 / 240) * timeUt1 * timeUt1) -
+      ((6.2e-06 / 240) * timeUt1 * timeUt1 * timeUt1);
 
-   //return gha;
-   hourAngle = gha  * M_PI / 180.0;       // wcs - convert to radians
+   // reduce to a quantity within one day (86400 seconds, 360.0 degrees)
+   hourAngle = AngleUtil::PutAngleInDegRange(mst,0.0,360.0);
+
+   //cout << "DEBUG::hourAngle (to 0-360) = " << hourAngle << endl;
    return hourAngle; 
 }
 
