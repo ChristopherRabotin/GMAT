@@ -465,8 +465,8 @@ void ForceModel::UpdateSpaceObject(Real newEpoch)
          (*sat)->SetRealParameter((*sat)->GetParameterID("Epoch"), newepoch);
 #if DEBUG_FORCEMODEL
          MessageInterface::ShowMessage
-            ("ForceModel::UpdateSpacecraft() prevElapsedTime=%f elapsedTime=%f "
-             "newepoch=%f\n", prevElapsedTime, elapsedTime, newepoch);
+            ("ForceModel::UpdateSpacecraft() on \"%s\" prevElapsedTime=%f elapsedTime=%f "
+             "newepoch=%f\n", (*sat)->GetName().c_str(), prevElapsedTime, elapsedTime, newepoch);
 #endif
          if ((*sat)->GetType() == Gmat::FORMATION)
             ((Formation*)(*sat))->UpdateElements();
