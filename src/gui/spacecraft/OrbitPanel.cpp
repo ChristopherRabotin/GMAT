@@ -479,8 +479,23 @@ void OrbitPanel::OnTextChange()
 //------------------------------------------------------------------------------
 void OrbitPanel::OnStateChange()
 {
-    theApplyButton->Enable();
+    wxString el1 = textCtrl1->GetValue();
+    wxString el2 = textCtrl2->GetValue();
+    wxString el3 = textCtrl3->GetValue();
+    wxString el4 = textCtrl4->GetValue();
+    wxString el5 = textCtrl5->GetValue();
+    wxString el6 = textCtrl6->GetValue(); 
 
+    Real displayState[6];
+    displayState[0] = atof(el1);
+    displayState[1] = atof(el2);
+    displayState[2] = atof(el3);
+    displayState[3] = atof(el4);
+    displayState[4] = atof(el5);
+    displayState[5] = atof(el6);
+    
+    theSpacecraft->SetDisplayState(displayState);
+    
     wxString refFrame = stateComboBox->GetStringSelection();
 //    theSpacecraft->ConvertRepresentation(refFrame.c_str());
     theSpacecraft->SetDisplayCoordType(refFrame.c_str());
@@ -555,6 +570,8 @@ void OrbitPanel::OnStateChange()
        label5->SetLabel("deg");
        label6->SetLabel("deg");
      }
+
+    theApplyButton->Enable();
 }
 
 //------------------------------------------------------------------------------
@@ -566,6 +583,7 @@ void OrbitPanel::OnStateChange()
 //------------------------------------------------------------------------------
 void OrbitPanel::OnEpochChange()
 {
+    SaveData();   
 //    MessageInterface::ShowMessage("Inside epochchange()\n");
     theApplyButton->Enable();
  
@@ -588,7 +606,7 @@ void OrbitPanel::OnEpochChange()
    std::string epochStr = theSpacecraft->GetDisplayEpoch();
 //   MessageInterface::ShowMessage("\nnew value of epoch is %s\n", epochStr.c_str());
    epochValue->SetValue(epochStr.c_str());
-
+   theSpacecraft->SetDisplayEpoch(epochStr.c_str());
 }
 
 void OrbitPanel::SaveData()
