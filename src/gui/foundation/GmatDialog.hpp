@@ -44,6 +44,7 @@ protected:
     virtual void ResetData() = 0;
     
     virtual void OnOK();
+    virtual void OnApply();
     virtual void OnCancel();
     virtual void OnHelp();
 
@@ -57,6 +58,7 @@ protected:
     wxStaticBoxSizer *theBottomSizer;
     
     wxButton *theOkButton;
+    wxButton *theApplyButton;
     wxButton *theCancelButton;
     wxButton *theHelpButton;
     

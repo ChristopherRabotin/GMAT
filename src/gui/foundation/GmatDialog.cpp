@@ -61,13 +61,21 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
     // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
+
+   //---------------------------------------------
+   //loj: Do not create Apply button for dialog 
+   //theApplyButton =
+   //   new wxButton(this, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
+   //---------------------------------------------
+   
    theCancelButton =
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
    theHelpButton =
       new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
         
-    // adds the buttons to button sizer    
+   // adds the buttons to button sizer    
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   //theButtonSizer->Add(theApplyButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
     
@@ -99,15 +107,16 @@ void GmatDialog::Show()
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
 
    CenterOnScreen(wxBOTH);
-    
+   
    LoadData();
 
    theOkButton->Disable();
-   theHelpButton->Disable(); //loj: for build2
+   //theApplyButton->Disable();
+   theHelpButton->Disable(); //loj: for future build
 }
 
 //------------------------------------------------------------------------------
-// void OnOk()
+// void OnOK()
 //------------------------------------------------------------------------------
 /**
  * Saves the data and closes the page
@@ -117,6 +126,18 @@ void GmatDialog::OnOK()
 {
    SaveData();
    Close();
+}
+
+//------------------------------------------------------------------------------
+// void OnApply()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data and ramain unclosed.
+ */
+//------------------------------------------------------------------------------
+void GmatDialog::OnApply()
+{
+   ;
 }
 
 //------------------------------------------------------------------------------

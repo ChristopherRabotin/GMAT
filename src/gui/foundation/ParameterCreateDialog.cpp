@@ -27,11 +27,10 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
-   EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
+   EVT_BUTTON(ID_BUTTON_OK, ParameterCreateDialog::OnOK)
+   //EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, ParameterCreateDialog::OnButton)
-   
    EVT_BUTTON(ID_COLOR_BUTTON, ParameterCreateDialog::OnColorButtonClick)
    EVT_COMBOBOX(ID_COMBO, ParameterCreateDialog::OnComboSelection)
    EVT_TEXT(ID_TEXTCTRL, ParameterCreateDialog::OnTextUpdate)
@@ -49,6 +48,7 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
    
    Create();
    Show();
+   mCreateParamButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -118,13 +118,17 @@ void ParameterCreateDialog::Create()
    indexTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(80,20), 0);
-    
+   
    // wxButton
-   addPropertyButton =
-      new wxButton(this, ID_BUTTON, wxT("Add"),
+   mCreateParamButton =
+      new wxButton(this, ID_BUTTON, wxT("Create"),
                    wxDefaultPosition, wxDefaultSize, 0);
-   addParamButton =
-      new wxButton(this, ID_BUTTON, wxT("Add"),
+   
+   mAddPropertyButton =
+      new wxButton(this, ID_BUTTON, wxT("Paste"),
+                   wxDefaultPosition, wxDefaultSize, 0);
+   mAddParamButton =
+      new wxButton(this, ID_BUTTON, wxT("Paste"),
                    wxDefaultPosition, wxDefaultSize, 0);
    mColorButton =
       new wxButton(this, ID_COLOR_BUTTON, wxT(""),
@@ -133,17 +137,17 @@ void ParameterCreateDialog::Create()
    
    // wxListBox
    objectListBox = 
-      theGuiManager->GetObjectListBox(this, wxSize(150, 200));
+      theGuiManager->GetObjectListBox(this, -1, wxSize(150, 200));
        
    propertyListBox = 
-      theGuiManager->GetParameterListBox(this, wxSize(150, 200),
+      theGuiManager->GetParameterListBox(this, -1, wxSize(150, 200),
                                          objectListBox->GetStringSelection(),
                                          theGuiManager->GetNumSpacecraft());
    parameterListBox =
-      theGuiManager->GetConfigParameterListBox(this, wxSize(150, 200),
+      theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150, 200),
                                                "");
-    
-
+   
+   
    // wxComboBox
    cbodyComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
                                    wxSize(100,-1), 1, strArray3, wxCB_DROPDOWN);
@@ -152,7 +156,7 @@ void ParameterCreateDialog::Create()
    rbodyComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
                                    wxSize(100,-1), 1, strArray5, wxCB_DROPDOWN);
     
-    
+   
    // wxSizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -171,11 +175,13 @@ void ParameterCreateDialog::Create()
    top1FlexGridSizer->Add(expTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
                         
    // 1st row
+   //loj: 7/28/04 added "Create" button so that more than 1 parrm can be created.
+   //objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mCreateParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mAddPropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(addPropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(addParamButton, 0, wxALIGN_CENTER|wxALL, bsize);
-    
+   objPropertyFlexGridSizer->Add(mAddParamButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   
    // 2nd row
    objPropertyFlexGridSizer->Add(objStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(propertyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -237,7 +243,7 @@ void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
       theOkButton->Enable();
    }
 }
-    
+
 //------------------------------------------------------------------------------
 // void OnComboSelection(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -251,15 +257,22 @@ void ParameterCreateDialog::OnComboSelection(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::OnButton(wxCommandEvent& event)
 {    
-   if (event.GetEventObject() == addPropertyButton)  
+   if (event.GetEventObject() == mCreateParamButton)  
+   {
+      SaveData();
+   }
+   else if (event.GetEventObject() == mAddPropertyButton)  
    {
       wxString s = objectListBox->GetStringSelection() + "." +
          propertyListBox->GetStringSelection();
 
       expTextCtrl->SetValue(s);
       nameTextCtrl->SetValue(s);
+
+      mCreateParamButton->Enable();
+      theOkButton->Enable();
    }
-   else if (event.GetEventObject() == addParamButton)  
+   else if (event.GetEventObject() == mAddParamButton)  
    {
       expTextCtrl->AppendText(parameterListBox->GetStringSelection());
    }
@@ -290,7 +303,7 @@ void ParameterCreateDialog::OnColorButtonClick(wxCommandEvent& event)
 void ParameterCreateDialog::LoadData()
 {
    //loj: for build2, disable the button, disable textctrl
-   addParamButton->Disable();
+   mAddParamButton->Disable();
    expTextCtrl->Disable();
 }
 
@@ -327,15 +340,40 @@ void ParameterCreateDialog::SaveData()
          
 #if DEBUG_PARAM_DIALOG
          MessageInterface::ShowMessage
-            ("ParameterCreateDialog::SaveData() user var added\n");
+            ("ParameterCreateDialog::SaveData() user var:%s added\n",
+             varName.c_str());
 #endif
          
          mParamName = wxString(varName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
 
+         parameterListBox->Append(varName.c_str());
+
+         for (int i=0; i<parameterListBox->GetCount(); i++)
+         {
+            if (parameterListBox->GetString(i).IsSameAs(varName.c_str()))
+            {
+               parameterListBox->SetSelection(i);
+               break;
+            }
+         }
+         
          theOkButton->Enable();
+         //loj: once variable is created cannot revert (delete) for now
+         theCancelButton->Disable();
       }
+      else
+      {
+         //loj: 7/28/04 added
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ParameterCreateDialog::SaveData()\nThe variable: %s"
+             " cannot be created. It already exists.", varName.c_str());
+      }
+      
+      mCreateParamButton->Disable();
+      expTextCtrl->SetValue("");
+      nameTextCtrl->SetValue("");
    }
 }
 
@@ -347,3 +385,23 @@ void ParameterCreateDialog::ResetData()
    mIsParamCreated = false;
 }
 
+//------------------------------------------------------------------------------
+// void OnOK()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data and closes the page
+ */
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnOK()
+{
+#if DEBUG_PARAM_DIALOG
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::OnOk() mCreateParamButton->IsEnabled()=%d\n",
+       mCreateParamButton->IsEnabled());
+#endif
+   
+   if (mCreateParamButton->IsEnabled())
+      SaveData();
+   
+   Close();
+}

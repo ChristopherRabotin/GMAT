@@ -40,8 +40,9 @@ private:
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *indexTextCtrl;
 
-   wxButton *addPropertyButton;
-   wxButton *addParamButton;
+   wxButton *mCreateParamButton;
+   wxButton *mAddPropertyButton;
+   wxButton *mAddParamButton;
    wxButton *mColorButton;
    
    wxListBox *objectListBox;
@@ -52,11 +53,13 @@ private:
    wxComboBox *coordComboBox;
    wxComboBox *rbodyComboBox;
 
-   // methods inherited from GmatDialog
+   // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
+   // virtual methods from GmatDialog
+   virtual void OnOK();
 
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
@@ -64,6 +67,7 @@ private:
    void OnButton(wxCommandEvent& event);
    void OnColorButtonClick(wxCommandEvent& event);
 
+   
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands
