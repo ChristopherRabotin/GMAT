@@ -825,7 +825,7 @@ bool GravityField::ReadFile()
    }
    else
    {
-      errMsg = "Gravity file " + filename + " is of unknown format.";
+      errMsg = "Gravity file \"" + filename + "\" is of unknown format.";
       //throw ForceModelException(errMsg);
       isOk = false;
    }
