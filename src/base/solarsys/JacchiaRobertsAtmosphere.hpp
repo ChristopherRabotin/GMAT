@@ -60,7 +60,7 @@ public:
                                                                                                  
 protected:
    JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr);
-   
+   JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
 private:
    CelestialBody *earth;
    SolarSystem *solarSystem;
@@ -76,8 +76,6 @@ private:
    Real t_infinity;
    Real tx;
    Real sum;
-   
-   JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
 };
 
 #endif // Msise90Atmosphere_hpp

@@ -148,46 +148,47 @@ const Real num_dens[5] =
 const Real con_den[5][7] =
 {
                              /// Nitrogen
-      0.1093155e2,
+      {0.1093155e2,
       0.1186783e-2,              /// (1/deg)    
      -0.1677341e-5,              /// (1/deg**2) 
       0.1420228e-8,              /// (1/deg**3) 
      -0.7139785e-12,             /// (1/deg**4) 
       0.1969715e-15,             /// (1/deg**5) 
-     -0.2296182e-19,             /// (1/deg**6) 
-                             /// Argon 
-      0.8049405e1,
+     -0.2296182e-19}             /// (1/deg**6) 
+      ,                       /// Argon 
+      {0.8049405e1,
       0.2382822e-2,              /// (1/deg)    
      -0.3391366e-5,              /// (1/deg**2) 
       0.2909714e-8,              /// (1/deg**3) 
      -0.1481702e-11,             /// (1/deg**4) 
       0.4127600e-15,             /// (1/deg**5) 
-     -0.4837461e-19,             /// (1/deg**6) 
-                             /// Helium 
-      0.7646886e1,
+     -0.4837461e-19}             /// (1/deg**6) 
+      ,                       /// Helium 
+      {0.7646886e1,
      -0.4383486e-3,              /// (1/deg)    
       0.4694319e-6,              /// (1/deg**2) 
      -0.2894886e-9,              /// (1/deg**3) 
       0.9451989e-13,             /// (1/deg**4) 
      -0.1270838e-16,             /// (1/deg**5) 
-      0.0,                       /// (1/deg**6) 
-                             /// Molecular Oxygen 
-      0.9924237e1,
+      0.0}                       /// (1/deg**6) 
+      ,                       /// Molecular Oxygen 
+      {0.9924237e1,
       0.1600311e-2,              /// (1/deg)    
      -0.2274761e-5,              /// (1/deg**2) 
       0.1938454e-8,              /// (1/deg**3) 
      -0.9782183e-12,             /// (1/deg**4) 
       0.2698450e-15,             /// (1/deg**5) 
-     -0.3131808e-19,             /// (1/deg**6) 
-                              /// Atomic Oxygen 
-      0.1097083e2,
+     -0.3131808e-19}             /// (1/deg**6) 
+      ,                        /// Atomic Oxygen 
+      {0.1097083e2,
       0.6118742e-4,              /// (1/deg)    
      -0.1165003e-6,              /// (1/deg**2) 
       0.9239354e-10,             /// (1/deg**3) 
      -0.3490739e-13,             /// (1/deg**4) 
       0.5116298e-17,             /// (1/deg**5) 
-      0.0                        /// (1/deg**6) 
+      0.0}                        /// (1/deg**6) 
 };
+
 
 //---------------------------------
 // public
@@ -1177,10 +1178,6 @@ AtmosphereModel     (jr)
 {
 }
 
-//---------------------------------
-// private
-//---------------------------------
-
 //------------------------------------------------------------------------------
 // JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr)
 //------------------------------------------------------------------------------
@@ -1192,12 +1189,12 @@ AtmosphereModel     (jr)
  * @return A reference to this class, with members set to match the template.
  */
 //------------------------------------------------------------------------------
-JacchiaRobertsAtmosphere& JacchiaRobertsAtmosphere::operator=
-                                            (const JacchiaRobertsAtmosphere& jr)
-{
+//JacchiaRobertsAtmosphere& JacchiaRobertsAtmosphere::operator=
+//                                            (const JacchiaRobertsAtmosphere& jr)
+//{
 //    if (this == &jr)
 //        return *this;
 //        
 //    AtmosphereModel::operator=(jr);        
 //    return *this;
-}
+//}
