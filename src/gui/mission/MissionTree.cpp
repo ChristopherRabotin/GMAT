@@ -39,7 +39,7 @@
 BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
    EVT_UPDATE_UI(-1, DecoratedTree::OnPaint)
-  //   EVT_LEFT_DCLICK(MissionTree::OnItemActivated) 
+   EVT_LEFT_DCLICK(MissionTree::OnDoubleClick) 
 
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
@@ -365,6 +365,24 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 
     mainNotebook->CreatePage(item);
 }
+
+//------------------------------------------------------------------------------
+// void OnDoubleClick(wxMouseEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * On a double click ...
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnDoubleClick(wxMouseEvent &event)
+{
+    MessageInterface::ShowMessage("MissionTree::OnDoubleClick() entered\n");
+    wxPoint position = event.GetPosition();
+    MessageInterface::ShowMessage("Event position is %d %d\n", position.x, position.y );
+    CheckClickIn(event.GetPosition());
+}
+
 
 //------------------------------------------------------------------------------
 // void ShowMenu(wxTreeItemId id, const wxPoint& pt)
@@ -797,6 +815,89 @@ void MissionTree::OnRun()
     theGuiInterpreter->RunMission();
 }
 
+//---------------------------------------------------------------------------
+// bool MissionTree::CheckClickIn(wxPoint position)
+//--------------------------------------------------------------------------
+bool MissionTree::CheckClickIn(wxPoint position)
+{
+    MessageInterface::ShowMessage("Click position is %d %d\n", position.x, position.y );
+    //MissionTreeItemData *missionTreeItem = (MissionTreeItemData*) GetFirstVisibleItem();
+    wxTreeItemId visibleItemId = GetFirstVisibleItem();
+    MissionTreeItemData *missionTreeItemData = 
+            (MissionTreeItemData*) GetItemData(visibleItemId);
+    MessageInterface::ShowMessage("Got first visible");
+
+    // loop through all the visible items on the mission tree
+    // to compare the event click with the position of the box
+    while (missionTreeItemData != NULL)
+    {
+        int dataType = missionTreeItemData->GetDataType();
+        // don't have to open any panels for top folders
+        if ((dataType != GmatTree::MISSIONS_FOLDER)       &&
+            (dataType != GmatTree::MISSION_SEQ_TOP_FOLDER)&&
+            (dataType != GmatTree::MISSION_SEQ_SUB_FOLDER)&&
+            (dataType != GmatTree::MISSION_SEQ_COMMAND))
+        {
+           // get the surrounding box to compare click and commands
+            wxRect bound;
+            int w, h;
+       
+            GetBoundingRect(visibleItemId, bound, TRUE);
+            GetSize(&w, &h);
+       
+           // compare event click to see if it is in the box
+           if ((position.x >= bound.x) &&
+            (position.x <= w-offset) &&
+            (position.y <= bound.y+rowHeight+1) &&
+            (position.y >= bound.y-1))
+           {
+              MessageInterface::ShowMessage("\nInside a rect\n");
+             // now that we know it is in a box, check to see
+             // which box it is in
+             // we only need to compare the left and the right, because
+             // we already know it is within the top and the bottom
+          
+             // get box width
+             int boxWidth = GetParameter(BOXWIDTH);
+ 
+             // box count is 2, rightmost is for variables
+             // next is goals, and the rest is the cmd panel
+             int boxNum = 0;
+          
+             // check if in variables
+             if ((position.x <= w-offset-boxWidth*boxNum) &&
+               (position.x >= w-offset-boxWidth*(++boxNum)))
+             {
+               MessageInterface::ShowMessage("\nInside variables");
+               MissionTreeItemData *item = new MissionTreeItemData(
+                                             wxT("Variables"), 
+                                             GmatTree::VIEW_SOLVER_VARIABLES);
+               mainNotebook->CreatePage(item);
+             }
+             else if ((position.x <= w-offset-boxWidth*boxNum) &&
+                     (position.x >= w-offset-boxWidth*(++boxNum)))
+             {
+               MessageInterface::ShowMessage("\nInside goals");
+               MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
+                                                GmatTree::VIEW_SOLVER_GOALS);
+               mainNotebook->CreatePage(item);
+             }
+             else
+            {
+               MessageInterface::ShowMessage("\nOpen regular panel");
+               mainNotebook->CreatePage(missionTreeItemData);
+            }
+          }
+       }
+//       MessageInterface::ShowMessage("Not equal to null");
+       visibleItemId = GetNextVisible(visibleItemId);
+//       MessageInterface::ShowMessage("Got next visible id");
+       missionTreeItemData = (MissionTreeItemData*) GetItemData(visibleItemId);
+//       MessageInterface::ShowMessage("Got next visible data");
+    }
+
+    return false;
+}
 
 
 

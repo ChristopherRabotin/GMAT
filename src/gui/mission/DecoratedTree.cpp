@@ -57,6 +57,7 @@ DecoratedTree::DecoratedTree(wxWindow* parent, wxWindowID id, const wxPoint& pos
     boxWidth                (20),
     rowHeight               (14)
 {
+    offset = 5;
     int w, h;
     GetSize(&w, &h);
     SetSize(w-80, h);
@@ -273,10 +274,10 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
         dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
 
         // Top and bottom
-        dc.DrawLine(bound.x, bound.y-1, w-5, bound.y-1);
-        dc.DrawLine(bound.x, bound.y+rowHeight+1, w-5, bound.y+rowHeight+1);
+        dc.DrawLine(bound.x, bound.y-1, w-offset, bound.y-1);
+        dc.DrawLine(bound.x, bound.y+rowHeight+1, w-offset, bound.y+rowHeight+1);
         dc.DrawLine(bound.x, bound.y-1, bound.x, bound.y+rowHeight+1);
-        dc.DrawLine(w-5, bound.y+1, w-5, bound.y+rowHeight+1);
+        dc.DrawLine(w-offset, bound.y+1, w-offset, bound.y+rowHeight+1);
 
 //          dc.DrawLine(4, bound.y-1, w-20, bound.y-1);
 //          dc.DrawLine(4, bound.y+rowHeight+1, w-20, bound.y+rowHeight+1);
@@ -318,8 +319,8 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
             for (int i = 0; i < boxCount; ++i) {
 //                  lft = w-20-boxWidth*(i+1);
 //                  rt  = w-20-boxWidth*i;
-                lft = w-5-boxWidth*(i+1);
-                rt  = w-5-boxWidth*i;
+                lft = w-offset-boxWidth*(i+1);
+                rt  = w-offset-boxWidth*i;
                 top = bound.y;
                 btm = bound.y + rowHeight;
                 

@@ -102,6 +102,7 @@ class DecoratedTree : public wxTreeCtrl
 
         // Message overrides
         virtual void        OnPaint(wxPaintEvent& ev);
+        int offset;
 
     protected:
         /// Indicates if the tree has been setup

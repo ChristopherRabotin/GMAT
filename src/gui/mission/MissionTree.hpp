@@ -62,9 +62,11 @@ private:
     // event handlers
     void OnItemRightClick(wxTreeEvent& event);
     void OnItemActivated(wxTreeEvent &event);
+    void OnDoubleClick(wxMouseEvent &event);
     void ShowMenu(wxTreeItemId id, const wxPoint& pt);
     void OnBefore();
     void OnAfter();
+    bool CheckClickIn(wxPoint position);
     
     void OnAddMissionSeq(wxCommandEvent &event);
     
