@@ -13,17 +13,27 @@
  */
 //------------------------------------------------------------------------------
 
-#include "gmatwxdefs.hpp"
+#include <wx/sizer.h>
+#include <wx/control.h>
+#include <wx/textctrl.h>
+#include <wx/combobox.h>
+#include <wx/checkbox.h>
+#include <wx/button.h>
+#include <wx/grid.h>
+
 #include "PropagatorSetupPanel.hpp"
+#include "gmatwxdefs.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(PropagatorSetupPanel, wxPanel)
-    EVT_GRID_CELL_RIGHT_CLICK(PropagatorSetupPanel::OnRightClick)
-    EVT_CLOSE(PropagatorSetupPanel::OnCloseWindow)
     EVT_BUTTON(-1, PropagatorSetupPanel::OnButton)
+    EVT_BUTTON(-1, PropagatorSetupPanel::OnOK)
+    EVT_BUTTON(-1, PropagatorSetupPanel::OnApply)
+    EVT_BUTTON(-1, PropagatorSetupPanel::OnCancel)
+    EVT_GRID_CELL_RIGHT_CLICK(PropagatorSetupPanel::OnRightClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -36,10 +46,10 @@ END_EVENT_TABLE()
 PropagatorSetupPanel::PropagatorSetupPanel( wxWindow *parent )
     :wxPanel(parent)
 {
-        CreateSetupWindow(this);
+    Setup(this);
 }
 
-void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
+void PropagatorSetupPanel::Setup( wxWindow *parent)
 {
     item0 = new wxBoxSizer( wxVERTICAL );
 
@@ -48,7 +58,7 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
     item2 = new wxStaticText( parent, ID_TEXT, wxT("Event Name"), wxDefaultPosition, wxDefaultSize, 0 );
     item1->Add( item2, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
+    item3 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("Propagate"), wxDefaultPosition, wxSize(150,-1), 0 );
     item1->Add( item3, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, 5 );
@@ -107,23 +117,23 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
 
     wxString strs19[] =
     {
-        wxT("MMS1")
+        wxT("Default S/C")
     };
-    item19  = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs19, wxCB_DROPDOWN|wxCB_READONLY );
+    item19  = new wxComboBox( parent, ID_COMBO, wxT("Default S/C"), wxDefaultPosition, wxSize(100,-1), 1, strs19, wxCB_DROPDOWN|wxCB_READONLY );
     item15->Add( item19, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxString strs20[] =
     {
         wxT("Periapsis")
     };
-    item20 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs20, wxCB_DROPDOWN|wxCB_READONLY );
+    item20 = new wxComboBox( parent, ID_COMBO, wxT("Periapsis"), wxDefaultPosition, wxSize(100,-1), 1, strs20, wxCB_DROPDOWN|wxCB_READONLY );
     item15->Add( item20, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxString strs21[] =
     {
         wxT("=")
     };
-    item21 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs21, wxCB_DROPDOWN|wxCB_READONLY );
+    item21 = new wxComboBox( parent, ID_COMBO, wxT("="), wxDefaultPosition, wxSize(100,-1), 1, strs21, wxCB_DROPDOWN|wxCB_READONLY );
     item15->Add( item21, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item22 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
@@ -141,17 +151,18 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
     item26 = new wxStaticText( parent, ID_TEXT, wxT("Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
     item15->Add( item26, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item27 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    item27 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("2"), wxDefaultPosition, wxSize(80,-1), 0 );
     item15->Add( item27, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item28 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    item28 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("0.002"), wxDefaultPosition, wxSize(80,-1), 0 );
     item15->Add( item28, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxString strs29[] =
     {
-        wxT("Earth")
+        wxT("Earth"),
+        wxT("Moon")
     };
-    item29 = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs29, wxCB_DROPDOWN|wxCB_READONLY );
+    item29 = new wxComboBox( parent, ID_COMBO, wxT("Earth"), wxDefaultPosition, wxSize(100,-1), 1, strs29, wxCB_DROPDOWN|wxCB_READONLY );
     item15->Add( item29, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     wxString strs30[] =
@@ -168,7 +179,7 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
     item32 = new wxStaticText( parent, ID_TEXT, wxT("Description"), wxDefaultPosition, wxDefaultSize, 0 );
     item31->Add( item32, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item33 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("Stop at Periapis of orbit for MMS1"), wxDefaultPosition, wxSize(300,-1), 0 );
+    item33 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT("Stop at Periapis of orbit for Default S/C"), wxDefaultPosition, wxSize(300,-1), 0 );
     item31->Add( item33, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item34 = new wxButton( parent, ID_BUTTON, wxT("User Defined"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -191,8 +202,8 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
     item38 = new wxButton( parent, ID_BUTTON, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
     item35->Add( item38, 0, wxALIGN_CENTRE|wxALL, 5 );
 
-    item39 = new wxButton( parent, ID_BUTTON, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
-    item35->Add( item39, 0, wxALIGN_CENTRE|wxALL, 5 );
+    //item39 = new wxButton( parent, ID_BUTTON, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
+    //item35->Add( item39, 0, wxALIGN_CENTRE|wxALL, 5 );
 
     item0->Add( item35, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
@@ -200,53 +211,46 @@ void PropagatorSetupPanel::CreateSetupWindow( wxWindow *parent)
     parent->SetSizer( item0 );
     item0->Fit( parent );
     item0->SetSizeHints( parent );
+    
+    item4->Enable(false);
+    item34->Enable(false);
+    item36->Enable(false);
+    item37->Enable(false);
+    item38->Enable(false);
+    //item39->Enable(false);
 }
 
-void PropagatorSetupPanel::OnRightClick()
+void PropagatorSetupPanel::GetData()
 {
-        return;
+    return;
 }
 
-void PropagatorSetupPanel::OnCloseWindow()
+void PropagatorSetupPanel::SetData()
 {
-        Destroy();
-        Close(TRUE);
+    return;
 }
 
 void PropagatorSetupPanel::OnButton(wxCommandEvent& event)
 {
     if ( event.GetEventObject() == item4 )  // Create Script
-    {
-                // waw - Build 1 development
-                
-        //delete m_btnFocused;
-        //m_btnFocused = NULL;
-
-       // m_btnDelete->Disable();
+    {               
+        ;
     }
     else if ( event.GetEventObject() == item34 )  // User Defined
-    {
-                // waw - Build 1 development
-                
-        //wxGetTextFromUser(_T("Dummy prompt"),
-                         // _T("Modal dialog called from dialog"),
-                         // _T(""), this);
+    {                
+        ;
     }
-        else if ( event.GetEventObject() == item36 )  // OK
+    else if ( event.GetEventObject() == item36 )  // OK
     {
-        OnCloseWindow();
+        OnOK();
     }
-        else if ( event.GetEventObject() == item37 )  // Apply
+    else if ( event.GetEventObject() == item37 )  // Apply
     {
-        // waw - Build 1 development
+        OnApply();
     }
-        else if ( event.GetEventObject() == item38 )  // Cancel
+    else if ( event.GetEventObject() == item38 )  // Cancel
     {
-        OnCloseWindow();
-    }
-        else if ( event.GetEventObject() == item39 )  // Help
-    {
-       // waw - Future development...
+        OnCancel();
     }
     else
     {
@@ -254,4 +258,23 @@ void PropagatorSetupPanel::OnButton(wxCommandEvent& event)
     }
 }
 
+void PropagatorSetupPanel::OnOK()
+{
+    Close(true);
+}
+
+void PropagatorSetupPanel::OnApply()
+{
+    return;
+}
+
+void PropagatorSetupPanel::OnCancel()
+{
+    Close(true);
+}
+
+void PropagatorSetupPanel::OnRightClick()
+{
+    return;
+}
 

@@ -16,8 +16,6 @@
 #ifndef PropagatorSetupPanel_hpp
 #define PropagatorSetupPanel_hpp
 
-#include "gmatwxdefs.hpp"
-
 #include <wx/sizer.h>
 #include <wx/control.h>
 #include <wx/textctrl.h>
@@ -26,23 +24,14 @@
 #include <wx/button.h>
 #include <wx/grid.h>
 
-//loj: to remove warnings about duplicate defines
-//  #define ID_TEXT     10000
-//  #define ID_TEXTCTRL 10001
-//  #define ID_COMBO    10002
-//  #define ID_BUTTON   10003
-//  #define ID_CHECKBOX 10004
-//  #define ID_GRID     10005
+#include "gmatwxdefs.hpp"
 
 class PropagatorSetupPanel : public wxPanel
 {
 public:
     // constructors
     PropagatorSetupPanel( wxWindow *parent );
-    void OnRightClick();
-    void OnCloseWindow();
-    void OnButton(wxCommandEvent& event);
-
+    
 private:
     wxBoxSizer *item0;
     wxBoxSizer *item1;
@@ -81,7 +70,7 @@ private:
     wxButton *item36;
     wxButton *item37;
     wxButton *item38;
-    wxButton *item39;
+    //wxButton *item39;
 
     wxComboBox *item8;
     wxComboBox *item19;
@@ -93,7 +82,14 @@ private:
     wxGrid *item9;
     wxGrid *item12; 
 
-    void CreateSetupWindow( wxWindow *parent );
+    void OnButton(wxCommandEvent& event);
+    void OnRightClick();
+    void OnOK();
+    void OnApply();
+    void OnCancel();
+    void Setup(wxWindow *parent);
+    void GetData();
+    void SetData();
 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

@@ -16,8 +16,6 @@
 #ifndef PropagationConfigPanel_hpp
 #define PropagationConfigPanel_hpp
 
-#include "gmatwxdefs.hpp"
-
 #include <wx/sizer.h>
 #include <wx/control.h>
 #include <wx/textctrl.h>
@@ -25,19 +23,21 @@
 #include <wx/checkbox.h>
 #include <wx/button.h>
 
-//loj: to remove warnings about duplicate defines
-//  #define ID_TEXT     10000
-//  #define ID_TEXTCTRL 10001
-//  #define ID_COMBO    10002
-//  #define ID_BUTTON   10003
-//  #define ID_CHECKBOX 10004
+#include "gmatwxdefs.hpp"
+#include "gmatdefs.hpp"
+#include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
+#include "Propagator.hpp"
+#include "Integrator.hpp"
+#include "RungeKutta89.hpp"
+#include "PhysicalModel.hpp"
 
 class PropagationConfigPanel : public wxPanel
 {
 public:
     // constructors
     PropagationConfigPanel(wxWindow *parent);
-   
+       
 private:
     wxBoxSizer *item0;
     wxBoxSizer *item1;
@@ -52,7 +52,7 @@ private:
     wxStaticBoxSizer *item59;
     wxStaticBoxSizer *item64;
 
-    wxFlexGridSizer *item7;
+    wxFlexGridSizer *integratorGridSizer;
     wxFlexGridSizer *item61;
 
     wxStaticBox *item6;
@@ -66,15 +66,15 @@ private:
                 
     wxStaticText *item2;
     wxStaticText *item8;
-    wxStaticText *item10;
-    wxStaticText *item12;
-    wxStaticText *item14;
-    wxStaticText *item16;
-    wxStaticText *item18;
-    wxStaticText *item20;
-    wxStaticText *item22;
-    wxStaticText *item24;
-    wxStaticText *item26;
+    wxStaticText *setting1StaticText;
+    wxStaticText *setting2StaticText;
+    wxStaticText *setting3StaticText;
+    wxStaticText *setting4StaticText;
+    wxStaticText *setting5StaticText;
+    wxStaticText *setting6StaticText;
+    wxStaticText *setting7StaticText;
+    wxStaticText *setting8StaticText;
+    wxStaticText *setting9StaticText;
     wxStaticText *item38;
     wxStaticText *item40;
     wxStaticText *item42;
@@ -84,15 +84,15 @@ private:
     wxStaticText *item56;
                 
     wxTextCtrl *item3;
-    wxTextCtrl *item11;
-    wxTextCtrl *item13;
-    wxTextCtrl *item15;
-    wxTextCtrl *item17;
-    wxTextCtrl *item19;
-    wxTextCtrl *item21;
-    wxTextCtrl *item23;
-    wxTextCtrl *item25;
-    wxTextCtrl *item27;
+    wxTextCtrl *setting1TextCtrl;
+    wxTextCtrl *setting2TextCtrl;
+    wxTextCtrl *setting3TextCtrl;
+    wxTextCtrl *setting4TextCtrl;
+    wxTextCtrl *setting5TextCtrl;
+    wxTextCtrl *setting6TextCtrl;
+    wxTextCtrl *setting7TextCtrl;
+    wxTextCtrl *setting8TextCtrl;
+    wxTextCtrl *setting9TextCtrl;
     wxTextCtrl *item34;
     wxTextCtrl *item39;
     wxTextCtrl *item41;
@@ -102,7 +102,7 @@ private:
     wxTextCtrl *item57;
     wxTextCtrl *item62;
 
-    wxComboBox *item9;
+    wxComboBox *integratorTypeComboBox;
     wxComboBox *item33;
     wxComboBox *item48;
 
@@ -117,11 +117,23 @@ private:
     wxButton *item69;
     wxButton *item70;
     wxButton *item71;
+    
+    GuiInterpreter *theGuiInterpreter;
+    Propagator *thePropagator;
+    Integrator *theIntegrator;
+    //RungeKutta89 *theRK89;
+    PhysicalModel *thePhysicalModel;
    
-    void CreateConfigWindow(wxWindow *parent);
+    void OnButton(wxCommandEvent& event);
+    void OnOK();
+    void OnApply();
+    void OnCancel();
+    void Setup(wxWindow *parent);
+    void GetData();
+    void SetData();
 
     // any class wishing to process wxWindows events must use this macro
-    //DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
     enum
