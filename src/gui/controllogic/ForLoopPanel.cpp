@@ -130,9 +130,9 @@ void ForLoopPanel::Setup( wxWindow *parent)
         
     conditionGrid->SetColLabelValue(0, _T("Start"));
     conditionGrid->SetColSize(0, 150);
-    conditionGrid->SetColLabelValue(1, _T("End"));
+    conditionGrid->SetColLabelValue(1, _T("Increment"));
     conditionGrid->SetColSize(1, 150);
-    conditionGrid->SetColLabelValue(2, _T("Increment"));
+    conditionGrid->SetColLabelValue(2, _T("End"));
     conditionGrid->SetColSize(2, 150);
     
     item4->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 5 );
