@@ -193,6 +193,8 @@ protected:
    Real epoch;
    /// Number of seconds elapsed from the base epoch
    Real elapsedTime;
+   /// Number of seconds previously elapsed from the base epoch
+   Real prevElapsedTime;
    /// Array containing the most recent derivative calculation, when needed
    Real * deriv;
    /// Threshold for switching between relative and absolute error control

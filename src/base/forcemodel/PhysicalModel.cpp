@@ -137,6 +137,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    modelState                  (NULL),
    epoch                       (21545.0),
    elapsedTime                 (0.0),
+   prevElapsedTime             (0.0),
    deriv                       (NULL),
    relativeErrorThreshold      (0.10),
    solarSystem                 (NULL)
@@ -175,6 +176,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    stateChanged                (pm.stateChanged),
    epoch                       (pm.epoch),
    elapsedTime                 (pm.elapsedTime),
+   prevElapsedTime             (pm.prevElapsedTime),
    relativeErrorThreshold      (pm.relativeErrorThreshold),
    solarSystem                 (pm.solarSystem)
 {
@@ -220,6 +222,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    initialized = pm.initialized;
    epoch       = pm.epoch;
    elapsedTime = pm.elapsedTime;
+   prevElapsedTime = pm.prevElapsedTime;
    
    if (pm.modelState) 
    {
@@ -492,6 +495,7 @@ const Real* PhysicalModel::GetDerivativeArray(void)
 //------------------------------------------------------------------------------
 void PhysicalModel::IncrementTime(Real dt)
 {
+   prevElapsedTime = elapsedTime;
    elapsedTime += dt;
    stateChanged = true;
 }
