@@ -34,7 +34,7 @@ namespace GmatCoordinate
    enum ParameterUsage
    {
       NOT_USED = 0,
-      OPTIONAL,
+      OPTIONAL_USE,
       REQUIRED
    };
 };
