@@ -26,7 +26,7 @@ SRC = GuiInterpreter.cpp InterpreterException.cpp Interpreter.cpp \
 	ScriptInterpreter.cpp
 #
 #TESTFLAGS = -D__CONSOLE_APP__
-TESTFLAGS = $(GUI_INCS) `wx-config --cxxflags`
+TESTFLAGS = $(GUI_INCS) `$(WX_HOME)/wx-config --cxxflags`
 #
 #
 # Define macro for using the included file 
