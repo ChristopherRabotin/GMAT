@@ -17,7 +17,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #ifndef AtmosphereModel_hpp
 #define AtmosphereModel_hpp
 
@@ -39,6 +38,10 @@ public:
     AtmosphereModel(const std::string &typeStr);
     virtual ~AtmosphereModel();
     
+    // copy constructor - needed by child classes (for Clone)
+    AtmosphereModel(const AtmosphereModel& am);
+    AtmosphereModel& operator=(const AtmosphereModel& am);
+    
     /**
      * Calculates the atmospheric density at a specified location.
      * 
@@ -59,12 +62,16 @@ public:
     
     // waw: Added 06/29/04
     void                    SetSolarFluxFile(std::string file);
-    
+    void                    SetFileFlag(bool flag);
 protected:
     /// Solar flux binary file reader
     SolarFluxFileReader *fileReader;
+    /// Solar flux binary file
+    FILE *sfFileName;
     /// Solar flux file name 
     std::string fileName;  // waw: Added 06/29/04
+    /// New file?
+    bool newFile;
     /// Vector from the central body to the sun
     Real                    *sunVector;
     /// Name of the central body
@@ -73,10 +80,6 @@ protected:
     Real                    *centralBodyLocation;
     /// Central body radius
     Real                    cbRadius;
-
-    // copy constructor - needed by child classes (for Clone)
-    AtmosphereModel(const AtmosphereModel& am);
-    AtmosphereModel& operator=(const AtmosphereModel& am);
 
 private:  
     

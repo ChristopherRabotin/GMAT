@@ -17,9 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "AtmosphereModel.hpp"
-
 
 //------------------------------------------------------------------------------
 //  AtmosphereModel()
@@ -38,7 +36,6 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
 {
 }
 
-
 //------------------------------------------------------------------------------
 //  ~AtmosphereModel()
 //------------------------------------------------------------------------------
@@ -50,6 +47,48 @@ AtmosphereModel::~AtmosphereModel()
 {
 }
 
+//------------------------------------------------------------------------------
+//  AtmosphereModel(const AtmosphereModel& am)
+//------------------------------------------------------------------------------
+/**
+ *  Copy constructor.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
+GmatBase            (am),
+fileReader          (NULL),
+sunVector           (NULL),
+centralBody         (am.centralBody),
+centralBodyLocation (NULL),
+cbRadius            (am.cbRadius)
+{
+}
+
+//------------------------------------------------------------------------------
+// AtmosphereModel& operator=(const AtmosphereModel& am)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ * 
+ * @param am AtmosphereModel instance used as a template for this copy.
+ * 
+ * @return A reference to this class, with members set to match the template.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
+{
+    if (this == &am)
+        return *this;
+        
+    fileReader = NULL;
+    sunVector = NULL;
+    centralBodyLocation = NULL;
+    
+    centralBody = am.centralBody;
+    cbRadius = am.cbRadius;
+    
+    return *this;
+}
 
 //------------------------------------------------------------------------------
 //  void SetSunVector(Real *sv)
@@ -93,21 +132,15 @@ void AtmosphereModel::SetSolarFluxFile(std::string file)
 }
 
 //------------------------------------------------------------------------------
-//  AtmosphereModel(const AtmosphereModel& am)
+// void SetFileFlag(bool flag)
 //------------------------------------------------------------------------------
 /**
- *  Copy constructor.
+ * Sets the new file flag
+ * 
+ * @param flag
  */
 //------------------------------------------------------------------------------
-AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
-GmatBase            (am),
-fileReader          (NULL),
-sunVector           (NULL),
-centralBody         (am.centralBody),
-centralBodyLocation (NULL),     // ************ NULL?
-cbRadius            (am.cbRadius)
+void AtmosphereModel::SetFileFlag(bool flag)
 {
-   
+   newFile = flag;
 }
-
-
