@@ -14,6 +14,8 @@
 #include "CallFunctionPanel.hpp"
 #include "MessageInterface.hpp"
 
+#include "Function.hpp"
+
 #define DEBUG_PROPCMD_PANEL 0
 
 //------------------------------------------------------------------------------
@@ -26,6 +28,10 @@ BEGIN_EVENT_TABLE(CallFunctionPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
+
+   EVT_COMBOBOX(ID_COMBO, CallFunctionPanel::OnComboChange)
+   EVT_GRID_CELL_LEFT_CLICK(CallFunctionPanel::OnCellClick)
+   EVT_GRID_CELL_RIGHT_CLICK(CallFunctionPanel::OnCellClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -35,12 +41,18 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-CallFunctionPanel::CallFunctionPanel( wxWindow *parent, const wxString &propName)
+CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
-   Create();
-   Show();
-   theApplyButton->Disable();
+//   theCommand = (CallFunction *)cmd;
+   theCommand = cmd;
+
+   if (theCommand != NULL)
+   {
+      Create();
+      Show();
+      theApplyButton->Disable();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -120,6 +132,8 @@ void CallFunctionPanel::Create()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::LoadData()
 {
+   std::string objectName = theCommand->GetRefObjectName(Gmat::FUNCTION);
+   functionComboBox->SetValue(objectName.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -127,5 +141,37 @@ void CallFunctionPanel::LoadData()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::SaveData()
 {
+   wxString functionName = functionComboBox->GetStringSelection();
+   Function *function = (Function *)theGuiInterpreter->GetConfiguredItem(
+            std::string(functionName));
+   theCommand->SetRefObject(function, Gmat::FUNCTION, function->GetName());
+
 }
 
+//------------------------------------------------------------------------------
+// void OnCellClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+void CallFunctionPanel::OnCellClick(wxGridEvent& event)
+{
+//   int row = event.GetRow();
+//   int col = event.GetCol();
+
+   if (event.GetEventObject() == inputGrid)
+   {
+   }
+   else if (event.GetEventObject() == outputGrid)
+   {
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnComboChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Activates the Apply button when text is changed
+ */
+//------------------------------------------------------------------------------
+void CallFunctionPanel::OnComboChange()
+{
+    theApplyButton->Enable();
+}

@@ -21,10 +21,12 @@ class CallFunctionPanel : public GmatPanel
 {
 public:
    // constructors
-   CallFunctionPanel( wxWindow *parent, const wxString &propName);
+   CallFunctionPanel( wxWindow *parent, GmatCommand *cmd);
    ~CallFunctionPanel();
    
 private:
+   GmatCommand *theCommand;
+
    wxGrid *inputGrid;
    wxGrid *outputGrid;
 
@@ -35,7 +37,10 @@ private:
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-   
+
+   void OnComboChange();
+   void OnCellClick(wxGridEvent& event);
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
    
