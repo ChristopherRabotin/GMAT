@@ -507,8 +507,8 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 
     theGuiManager->UpdateParameter();
     
-    if (size > 0)
-        Expand(itemId);
+//    if (size > 0)
+//        Expand(itemId);
 }
 //------------------------------------------------------------------------------
 // void OnItemRightClick(wxTreeEvent& event)
@@ -720,7 +720,21 @@ void ResourceTree::OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnDelete(wxCommandEvent &event)
 {
-    event.Skip();
+//    event.Skip();
+    wxTreeItemId item = GetSelection();
+    wxTreeItemId parentId = GetPrevVisible(item);
+    this->Collapse(parentId);
+    
+    // delete from gui interpreter
+    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
+//    theGuiInterpreter->RemoveConfiguredItem("Spacecraft", gmatItem->GetDesc());
+    
+    this->Delete(item);
+    
+
+    
+    // need to decrease counter
+    // Should an open tab close too?
 }
 
 //------------------------------------------------------------------------------

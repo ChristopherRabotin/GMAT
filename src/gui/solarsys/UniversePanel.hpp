@@ -64,10 +64,15 @@ private:
 //      wxBoxSizer *item9;
 
     wxTextCtrl *slpFileTextCtrl;
+    wxTextCtrl *de405FileTextCtrl;
+    wxTextCtrl *de200FileTextCtrl;
 
     wxStaticText *item3;
     wxStaticText *item10;
-    wxStaticText *filetypeStaticText;    
+
+    wxStaticText *slpStaticText;  
+    wxStaticText *de405StaticText; 
+    wxStaticText *de200StaticText;   
 
     wxListBox *availableListBox;
     wxListBox *selectedListBox;
@@ -91,7 +96,9 @@ private:
 
         ID_AVAILABLE_LIST,
         ID_TEXT_CTRL,
-        ID_BUTTON_BROWSE,
+        ID_SLP_BUTTON_BROWSE,
+        ID_DE405_BUTTON_BROWSE,
+        ID_DE200_BUTTON_BROWSE,
         ID_SELECTED_LIST,
     };
 };

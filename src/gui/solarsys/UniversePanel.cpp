@@ -34,7 +34,9 @@ BEGIN_EVENT_TABLE(UniversePanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_ADD,       UniversePanel::OnAddButton)
    EVT_BUTTON(ID_BUTTON_SORT,      UniversePanel::OnSortButton)
    EVT_BUTTON(ID_BUTTON_REMOVE,    UniversePanel::OnRemoveButton)
-   EVT_BUTTON(ID_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
+   EVT_BUTTON(ID_SLP_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
+   EVT_BUTTON(ID_DE405_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
+   EVT_BUTTON(ID_DE200_BUTTON_BROWSE,    UniversePanel::OnBrowseButton)
 
    EVT_LISTBOX(ID_AVAILABLE_LIST, UniversePanel::OnAvailableSelectionChange)
    EVT_LISTBOX(ID_SELECTED_LIST, UniversePanel::OnSelectedSelectionChange)
@@ -143,21 +145,53 @@ void UniversePanel::Create()
 
     wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
     // will need to change
-    filetypeStaticText = new wxStaticText( this, ID_TEXT, 
+    slpStaticText = new wxStaticText( this, ID_TEXT, 
                                        wxT("SLP File: "), 
                                        wxDefaultPosition, wxSize(80,-1), 0 );
     slpFileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
                                               wxDefaultPosition, 
                                               wxSize(250, -1),  0);
-    browseButton = new wxButton( this, ID_BUTTON_BROWSE, wxT("Browse"), 
+    browseButton = new wxButton( this, ID_SLP_BUTTON_BROWSE, wxT("Browse"), 
                                               wxDefaultPosition, wxDefaultSize, 0 );
  
-    fileSizer->Add(filetypeStaticText, 0, wxALIGN_CENTER|wxALL, 5);
+    fileSizer->Add(slpStaticText, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(slpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
 
+
+    wxBoxSizer *de405FileSizer = new wxBoxSizer(wxHORIZONTAL);
+    de405StaticText = new wxStaticText( this, ID_TEXT, 
+                                       wxT("DE405 File: "), 
+                                       wxDefaultPosition, wxSize(80,-1), 0 );
+    de405FileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                              wxDefaultPosition, 
+                                              wxSize(250, -1),  0);
+    browseButton = new wxButton( this, ID_DE405_BUTTON_BROWSE, wxT("Browse"), 
+                                              wxDefaultPosition, wxDefaultSize, 0 );
+ 
+    de405FileSizer->Add(de405StaticText, 0, wxALIGN_CENTER|wxALL, 5);
+    de405FileSizer->Add(de405FileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
+    de405FileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
+
+
+    wxBoxSizer *de200FileSizer = new wxBoxSizer(wxHORIZONTAL);
+    de200StaticText = new wxStaticText( this, ID_TEXT, 
+                                       wxT("DE200 File: "), 
+                                       wxDefaultPosition, wxSize(80,-1), 0 );
+    de200FileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+                                              wxDefaultPosition, 
+                                              wxSize(250, -1),  0);
+    browseButton = new wxButton( this, ID_DE200_BUTTON_BROWSE, wxT("Browse"), 
+                                              wxDefaultPosition, wxDefaultSize, 0 );
+ 
+    de200FileSizer->Add(de200StaticText, 0, wxALIGN_CENTER|wxALL, 5);
+    de200FileSizer->Add(de200FileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
+    de200FileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
+
     item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
     item0->Add(fileSizer, 0, wxALIGN_CENTER|wxALL, 5);
+    item0->Add(de405FileSizer, 0, wxALIGN_CENTER|wxALL, 5);
+    item0->Add(de200FileSizer, 0, wxALIGN_CENTER|wxALL, 5);
 
     theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
     //MessageInterface::ShowMessage("UniversePanel::Create() exiting\n");
@@ -194,9 +228,11 @@ void UniversePanel::LoadData()
         }
         else if (sourceList[i] == "DE405")
         {
+            de405FileTextCtrl->SetValue(sourceFileList[i].c_str());
         }
         else if (sourceList[i] == "DE200")
         {
+            de200FileTextCtrl->SetValue(sourceFileList[i].c_str());
         }
     }
 }
@@ -262,6 +298,7 @@ void UniversePanel::OnAddButton(wxCommandEvent& event)
       selectedListBox->SetSelection(0);
       addButton->Enable(false);
       removeButton->Enable(true);
+      prioritizeButton->Enable(true);
       theApplyButton->Enable(); //loj: 2/27/04 added
     }
 }
@@ -290,6 +327,7 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
     if (selectedListBox->GetCount() == 0)
     {
       removeButton->Enable(false);
+      prioritizeButton->Enable(false);
       theApplyButton->Disable();
     }
 
@@ -299,6 +337,7 @@ void UniversePanel::OnRemoveButton(wxCommandEvent& event)
 }
 void UniversePanel::OnBrowseButton(wxCommandEvent& event)
 {
+    int textCtrlId = event.GetId();
     wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     
     if (dialog.ShowModal() == wxID_OK)
@@ -307,7 +346,12 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
         
         filename = dialog.GetPath().c_str();
         
-        slpFileTextCtrl->SetValue(filename); 
+        if (textCtrlId == ID_SLP_BUTTON_BROWSE)
+          slpFileTextCtrl->SetValue(filename); 
+        else if (textCtrlId == ID_DE405_BUTTON_BROWSE)
+          de405FileTextCtrl->SetValue(filename); 
+        else if (textCtrlId == ID_DE200_BUTTON_BROWSE)
+          de200FileTextCtrl->SetValue(filename); 
     }
 }
 
@@ -316,13 +360,10 @@ void UniversePanel::OnAvailableSelectionChange(wxCommandEvent& event)
     // get string
     wxString s = availableListBox->GetStringSelection();
 
-    if ((s.IsSameAs("SLP")) &&
-        (selectedListBox->FindString(s) == wxNOT_FOUND))
+    if (selectedListBox->FindString(s) == wxNOT_FOUND)
     {
          addButton->Enable(true);
     }
-    else
-      addButton->Enable(false);
 }
 void UniversePanel::OnSelectedSelectionChange(wxCommandEvent& event)
 {
