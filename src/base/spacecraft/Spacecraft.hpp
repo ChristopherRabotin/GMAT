@@ -32,10 +32,11 @@ class GMAT_API Spacecraft : public SpaceObject
 {
    enum SC_Param_ID 
    {
-      EPOCH_ID = SpaceObjectParamCount, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
+//      EPOCH_ID = SpaceObjectParamCount, ELEMENT1_ID, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
+      ELEMENT1_ID = SpaceObjectParamCount, ELEMENT2_ID, ELEMENT3_ID, ELEMENT4_ID,
       ELEMENT5_ID, ELEMENT6_ID, STATE_TYPE_ID, BODY_ID, FRAME_ID, PLANE_ID, 
       DRY_MASS_ID,DATE_FORMAT_ID, COEFF_DRAG_ID, DRAG_AREA_ID, SRP_AREA_ID,
-      REFLECT_COEFF_ID, NO_NAME, SC_ParameterIDs
+      REFLECT_COEFF_ID, /*NO_NAME,*/ SC_ParameterIDs
    };
    
 public:
@@ -131,7 +132,7 @@ protected:
     std::string    refBody; 
     std::string    refFrame;   
     std::string    refPlane; 
-    Integer        epochID;
+//    Integer        epochID;
     Integer        state1ID;
     Integer        state2ID;
     Integer        state3ID;

@@ -49,7 +49,7 @@ const std::string Spacecraft::REF_PLANE  = "Equatorial";
  */
 Spacecraft::Spacecraft() : 
     SpaceObject    (Gmat::SPACECRAFT,"Spacecraft",""),
-    epochID        (parameterCount + EPOCH_ID),
+//    epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
     state3ID       (parameterCount + ELEMENT3_ID),
@@ -83,7 +83,7 @@ Spacecraft::Spacecraft() :
  */
 Spacecraft::Spacecraft(const std::string &name) :
     SpaceObject    (Gmat::SPACECRAFT, "Spacecraft", name),
-    epochID        (parameterCount + EPOCH_ID),
+//    epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
     state3ID       (parameterCount + ELEMENT3_ID),
@@ -118,7 +118,7 @@ Spacecraft::Spacecraft(const std::string &name) :
  */
 Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
     SpaceObject    (Gmat::SPACECRAFT, typeStr, name),
-    epochID        (parameterCount + EPOCH_ID),
+//    epochID        (parameterCount + EPOCH_ID),
     state1ID       (parameterCount + ELEMENT1_ID),
     state2ID       (parameterCount + ELEMENT2_ID),
     state3ID       (parameterCount + ELEMENT3_ID),
@@ -138,6 +138,7 @@ Spacecraft::Spacecraft(const std::string &typeStr, const std::string &name) :
     solarSystem    (NULL)
 {
     parameterCount += SC_ParameterIDs;
+//    parameterCount += SC_ParameterIDs;
     InitializeValues();
 }
 
@@ -158,7 +159,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     refBody        (a.refBody),
     refFrame       (a.refFrame),
     refPlane       (a.refPlane),
-    epochID        (a.epochID),
+//    epochID        (a.epochID),
     state1ID       (a.state1ID),
     state2ID       (a.state2ID),
     state3ID       (a.state3ID),
@@ -278,7 +279,7 @@ GmatBase* Spacecraft::Clone(void) const
  */
 Integer Spacecraft::GetParameterID(const std::string &str) const
 {
-    if (str == "Epoch") return epochID;
+//    if (str == "Epoch") return epochID;
 
     if (str == "DateFormat") return dateFormatID;
 
@@ -329,13 +330,13 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
         return state4ID;
     }
 
-    return GmatBase::GetParameterID(str);
+    return SpaceObject::GetParameterID(str);
 }
 
 
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
-    if (id == epochID) return "Epoch";
+//    if (id == epochID) return "Epoch";
 
     if (id == dateFormatID) return "DateFormat";
   
@@ -358,7 +359,7 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 
     if (id == reflectCoeffID) return "Cr";
 
-    return GmatBase::GetParameterText(id);
+    return SpaceObject::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -374,7 +375,7 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 {
-    if (id == epochID) return Gmat::REAL_TYPE;
+//    if (id == epochID) return Gmat::REAL_TYPE;
     if (id == dateFormatID) return Gmat::STRING_TYPE;
     if (id == state1ID) return Gmat::REAL_TYPE;
     if (id == state2ID) return Gmat::REAL_TYPE;
@@ -392,7 +393,7 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
     if (id == srpAreaID) return Gmat::REAL_TYPE;
     if (id == reflectCoeffID) return Gmat::REAL_TYPE;
  
-    return GmatBase::GetParameterType(id);
+    return SpaceObject::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -408,7 +409,7 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Spacecraft::GetParameterTypeString(const Integer id) const
 {
-    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    return SpaceObject::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 //---------------------------------------------------------------------------
@@ -423,8 +424,8 @@ std::string Spacecraft::GetParameterTypeString(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const Integer id) const
 {
-//    if (id == epochID) return epoch;
-    if (id == epochID) return state.GetEpoch();
+//    if (id == epochID) return epoch;//
+//    if (id == epochID) return state.GetEpoch();
     if (id == state1ID) return state[0];
     if (id == state2ID) return state[1];
     if (id == state3ID) return state[2];
@@ -454,9 +455,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const std::string &label) const
 {
-    if (label == "Epoch") 
+//    if (label == "Epoch") 
 //       return epoch;
-       return state.GetEpoch();
+//       return state.GetEpoch();
 
     if (label == "Element1") return state[0];
 
@@ -496,7 +497,7 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
  */
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == epochID) return SetRealParameter("Epoch", value);
+//    if (id == epochID) return SetRealParameter("Epoch", value);
 
     // Check for the coordinate representation then set the value
     if (stateType == "Cartesian")
@@ -579,9 +580,9 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
  */
 Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
-    if (label == "Epoch") 
-//       return epoch = value;
-       return state.SetEpoch(value);
+//    if (label == "Epoch") 
+////       return epoch = value;
+//       return state.SetEpoch(value);
 
     if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
        return state[0] = value;
@@ -638,7 +639,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == refPlaneID)
        return refPlane;
 
-    return GmatBase::GetStringParameter(id);
+    return SpaceObject::GetStringParameter(id);
 }
 
 //---------------------------------------------------------------------------
