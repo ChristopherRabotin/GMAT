@@ -7,7 +7,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC =	AxisSystem.cpp CoordinateBase.cpp CoordinateConverter.cpp \
+SRC =	AxisSystem.cpp BodyFixedAxes.cpp CoordinateBase.cpp CoordinateConverter.cpp \
 	CoordinateSystem.cpp CoordinateSystemException.cpp DynamicAxes.cpp \
 	InertialAxes.cpp ItrfCoefficientsFile.cpp MJ2000EcAxes.cpp MJ2000EqAxes.cpp
 
