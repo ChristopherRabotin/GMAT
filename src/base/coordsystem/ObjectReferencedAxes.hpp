@@ -46,7 +46,12 @@ public:
    virtual void SetXAxis(const std::string &toValue);
    virtual void SetYAxis(const std::string &toValue);
    virtual void SetZAxis(const std::string &toValue);   
-
+   virtual SpacePoint* GetPrimaryObject() const;
+   virtual SpacePoint* GetSecondaryObject() const;
+   virtual std::string GetXAxis() const;
+   virtual std::string GetYAxis() const;
+   virtual std::string GetZAxis() const;
+   
    virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
    virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;

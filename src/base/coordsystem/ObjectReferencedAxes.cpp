@@ -258,6 +258,32 @@ void ObjectReferencedAxes::SetZAxis(const std::string &toValue)
    zAxis = toValue;
 }
 
+SpacePoint* ObjectReferencedAxes::GetPrimaryObject() const
+{
+   return primary;
+}
+
+SpacePoint* ObjectReferencedAxes::GetSecondaryObject() const
+{
+   return secondary;
+}
+
+std::string ObjectReferencedAxes::GetXAxis() const
+{
+   return xAxis;
+}
+
+std::string ObjectReferencedAxes::GetYAxis() const
+{
+   return yAxis;
+}
+
+std::string ObjectReferencedAxes::GetZAxis() const
+{
+   return zAxis;
+}
+
+
 //---------------------------------------------------------------------------
 //  void ObjectReferencedAxes::Initialize()
 //---------------------------------------------------------------------------
