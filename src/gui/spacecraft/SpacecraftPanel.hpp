@@ -23,11 +23,15 @@
 #define SpacecraftPanel_hpp
 
 #include "gmatwxdefs.hpp"
+#include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 
 #include "Spacecraft.hpp"
 #include "PhysicalConstants.hpp"   // for mu
 #include "GmatPanel.hpp"
+#include "BallisticsMassPanel.hpp"
+#include "OrbitPanel.hpp"
+
 
 //loj: to remove warnings about duplicate defines
 // Declare window functions
@@ -64,29 +68,26 @@
 //  #define ID_BUTTON_HELP   20025
 
 
-class SpacecraftPanel: public wxPanel
+class SpacecraftPanel: public GmatPanel
 {
 public:
-    // SpacecraftPanel(wxWindow *parent, bool call_fit = TRUE, bool set_sizer = TRUE);
     SpacecraftPanel(wxWindow *parent, const wxString &scName);
-   
+    ~SpacecraftPanel();   
+       
 private:
     void CreateNotebook(wxWindow *parent, const wxString &scName);
-    void CreateOrbit(wxWindow *parent);
-    void AddElements(wxWindow *parent);
-    void OnCartElements();
-    void OnKepElements();
-    void OnStateChange();
-    void OnEpochChange();
-    void OnTextChange();
-    void UpdateValues();
-    void OnApply();
-    void OnOk();
-    void OnCancel();
+    
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
 
     GuiInterpreter *theGuiInterpreter;
     Spacecraft *theSpacecraft;
-    Spacecraft *savedSpacecraft;
+    Spacecraft *currentSpacecraft;
     
     wxStaticText *description1;
     wxStaticText *description2;
@@ -110,27 +111,16 @@ private:
     wxStaticText *label6;
 
     wxNotebook *mainNotebook;
-    wxNotebookSizer * sizer;
-    wxPanel *orbitPanel;
+    wxNotebookSizer *sizer;
     wxPanel *attitude;
-    wxPanel *properties;
     wxPanel *actuators;
     wxPanel *sensors;
     wxPanel *tanks;
-    wxPanel *visual;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
-    wxPanel *elementsPanel;
-    wxStaticBoxSizer *elementSizer;
-    wxStaticBox *elementBox;
-    wxComboBox *stateCB;
-    wxComboBox *dateCB;
-    wxTextCtrl *epochValue;
+    wxPanel *visuals;
     
-    DECLARE_EVENT_TABLE();
-    
+    BallisticsMassPanel *theBallisticMassPanel;
+    OrbitPanel *theOrbitPanel;
+       
     // IDs for the controls and the menu commands
     enum
     {
