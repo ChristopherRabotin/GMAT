@@ -359,7 +359,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
  */
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
-    return "";
+    return "STRING_PARAMETER_UNDEFINED";
 }
 
 
@@ -624,7 +624,7 @@ void GmatBase::CopyParameters(const GmatBase &a)
     
     for (i = 0; i < parameterCount; ++i) {
         parmType = a.GetParameterType(i);
-	
+        
         if (parmType == Gmat::REAL_TYPE) 
         {
             rVal = a.GetRealParameter(i);
