@@ -314,15 +314,28 @@ bool Moderator::RenameConfiguredItem(Gmat::ObjectType type, const std::string &o
    int sandboxIndex = 0; //handles one sandbox for now
    GmatCommand *cmd = commands[sandboxIndex]->GetNext();
    GmatCommand *child;
+   std::string typeName;
    
    while (renamed && cmd != NULL)
    {
+      typeName = cmd->GetTypeName();
+#if DEBUG_RENAME
+      MessageInterface::ShowMessage("--typeName=%s\n", typeName.c_str());
+#endif
+      
       renamed = cmd->RenameRefObject(type, oldName, newName);
       child = cmd->GetChildCommand(0);
 
       while (renamed && (child != NULL) && (child != cmd))
       {
-         renamed = child->RenameRefObject(type, oldName, newName);
+         typeName = child->GetTypeName();
+#if DEBUG_RENAME
+         MessageInterface::ShowMessage("----typeName=%s\n", typeName.c_str());
+#endif
+         // if command is not End* (loj: 11/22/04 - added)
+         if (typeName.find("End") == typeName.npos)
+            renamed = child->RenameRefObject(type, oldName, newName);
+         
          child = child->GetNext();
       }
       
