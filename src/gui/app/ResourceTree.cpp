@@ -57,7 +57,7 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, ResourceTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, ResourceTree::OnEndLabelEdit)
    EVT_TREE_BEGIN_DRAG(-1, ResourceTree::OnBeginDrag)
-//   EVT_TREE_BEGIN_RDRAG(-1, ResourceTree::OnBeginRDrag)
+   //   EVT_TREE_BEGIN_RDRAG(-1, ResourceTree::OnBeginRDrag)
    EVT_TREE_END_DRAG(-1, ResourceTree::OnEndDrag)
    
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSpacecraft)
@@ -119,26 +119,30 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// void UpdateResource()
+// void UpdateResource(bool resetCounter = true)
 //------------------------------------------------------------------------------
 /**
  * Reset counters, delete all nodes that are not folders, add default nodes
  */
 //------------------------------------------------------------------------------
-void ResourceTree::UpdateResource()
+void ResourceTree::UpdateResource(bool resetCounter)
 {
 #if DEBUG_RESOURCE_TREE
    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
 #endif
-   mNumSpacecraft = 0;
-   mNumPropagator = 0;
-   mNumImpulsiveBurn = 0;
-   mNumReportFile = 0;
-   mNumXyPlot = 0;
-   mNumOpenGlPlot = 0;
-   mNumDiffCorr = 0;
-   mNumVariable = 0;
 
+   if (resetCounter)
+   {
+      mNumSpacecraft = 0;
+      mNumPropagator = 0;
+      mNumImpulsiveBurn = 0;
+      mNumReportFile = 0;
+      mNumXyPlot = 0;
+      mNumOpenGlPlot = 0;
+      mNumDiffCorr = 0;
+      mNumVariable = 0;
+   }
+   
    // ag: collapse, so folder icon is closed
    Collapse(mSpacecraftItem);
    Collapse(mPropagatorItem);
@@ -160,7 +164,7 @@ void ResourceTree::UpdateResource()
    AddDefaultSolvers(mSolverItem);
    AddDefaultSubscribers(mSubscriberItem);
    AddDefaultVariables(mVariableItem);
-      
+   
    theGuiManager->UpdateAll();
 }
 
@@ -1047,20 +1051,23 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
    withName.Printf("Spacecraft%d", ++mNumSpacecraft);
   
    const std::string stdWithName = withName.c_str();
-  
-   Spacecraft *theSpacecraft = theGuiInterpreter->CreateSpacecraft("Spacecraft", 
-                                                                   stdWithName);
 
-   //  theSpacecraft->SetName("Big Daddy");
-  
-   wxString newName = wxT(theSpacecraft->GetName().c_str());
-  
-   AppendItem(item, newName, GmatTree::ICON_SPACECRAFT, -1,
-              new GmatTreeItemData(newName, GmatTree::CREATED_SPACECRAFT));
+   Spacecraft *sc = theGuiInterpreter->
+      CreateSpacecraft("Spacecraft", stdWithName);
 
-   theGuiManager->UpdateSpacecraft();
+   if (sc != NULL)
+   {
+      //sc->SetName("Big Daddy");
   
-   Expand(item);
+      wxString newName = wxT(sc->GetName().c_str());
+  
+      AppendItem(item, newName, GmatTree::ICON_SPACECRAFT, -1,
+                 new GmatTreeItemData(newName, GmatTree::CREATED_SPACECRAFT));
+
+      theGuiManager->UpdateSpacecraft();
+  
+      Expand(item);
+   }
 }
 
 
@@ -1143,7 +1150,8 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
    }
    else
    {
-      //MessageInterface::ShowMessage("ResourceTree::OnAddPropagator() propSetup is NULL\n");
+      MessageInterface::ShowMessage
+         ("ResourceTree::OnAddPropagator() propSetup is NULL\n");
    }
 }
 
@@ -1163,19 +1171,13 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
    wxString name;
    name.Printf("ImpulsiveBurn%d", ++mNumImpulsiveBurn);
   
-   Burn* burn =
-      theGuiInterpreter->CreateBurn("ImpulsiveBurn", std::string(name.c_str()));
-
-   if (burn != NULL)
+   if (theGuiInterpreter->CreateBurn
+       ("ImpulsiveBurn", std::string(name.c_str())) != NULL)
    {
       AppendItem(item, name, GmatTree::ICON_BURN, -1,
                  new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
 
       Expand(item);
-   }
-   else
-   {
-      //MessageInterface::ShowMessage("ResourceTree::OnAddImpulsiveBurn() burn is NULL\n");
    }
 }
 
@@ -1195,13 +1197,14 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
    wxString name;
    name.Printf("DC%d", ++mNumDiffCorr);
 
-   theGuiInterpreter->CreateSolver("DifferentialCorrector", 
-                                   std::string(name.c_str()));
-   
-   AppendItem(item, name, GmatTree::ICON_FILE, -1,
-              new GmatTreeItemData(name, GmatTree::CREATED_DIFF_CORR));
+   if (theGuiInterpreter->CreateSolver
+       ("DifferentialCorrector", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_FILE, -1,
+                 new GmatTreeItemData(name, GmatTree::CREATED_DIFF_CORR));
 
-   Expand(item);
+      Expand(item);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1220,13 +1223,14 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
    wxString name;
    name.Printf("ReportFile%d", ++mNumReportFile);
 
-   theGuiInterpreter->CreateSubscriber("ReportFile", 
-                                       std::string(name.c_str()));
-   
-   AppendItem(item, name, GmatTree::ICON_REPORT, -1,
-              new GmatTreeItemData(name, GmatTree::CREATED_REPORT_FILE));
+   if (theGuiInterpreter->CreateSubscriber
+       ("ReportFile", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(name, GmatTree::CREATED_REPORT_FILE));
 
-   Expand(item);
+      Expand(item);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1245,12 +1249,14 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
    wxString name;
    name.Printf("XYPlot%d", ++mNumXyPlot);
 
-   theGuiInterpreter->CreateSubscriber("XyPlot", std::string(name.c_str()));
-   
-   AppendItem(item, name, GmatTree::ICON_REPORT, -1,
-              new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
-
-   Expand(item);
+   if (theGuiInterpreter->CreateSubscriber
+       ("XyPlot", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
+      
+      Expand(item);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -1269,12 +1275,14 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
    wxString name;
    name.Printf("OpenGlPlot%d", ++mNumOpenGlPlot);
 
-   theGuiInterpreter->CreateSubscriber("OpenGlPlot", std::string(name.c_str()));
-   
-   AppendItem(item, name, GmatTree::ICON_REPORT, -1,
-              new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
+   if (theGuiInterpreter->CreateSubscriber
+       ("OpenGlPlot", std::string(name.c_str())) != NULL)
+   {
+      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+                 new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));
 
-   Expand(item);
+      Expand(item);
+   }
 }
 
 //------------------------------------------------------------------------------
