@@ -399,7 +399,19 @@ bool Sandbox::Initialize()
          }
          
          if (sub->GetTypeName() == "OpenGLPlot")
+         {
+            // set SolarSystem and InternalCoordSystem first
             sub->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
+            sub->SetInternalCoordSystem(internalCoordSys);
+            
+            std::string csName = sub->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+            #if DEBUG_SANDBOX_INIT > 1
+               MessageInterface::ShowMessage
+                  ("Sandbox::Initialize() csName=%s\n", csName.c_str());
+            #endif
+            sub->SetRefObject(GetInternalObject(csName, Gmat::COORDINATE_SYSTEM),
+                              Gmat::COORDINATE_SYSTEM, csName);
+         }
          
          sub->Initialize();
       }
