@@ -16,12 +16,12 @@
 
 #include "gmatwxdefs.hpp"
 
-#include "GmatMainNotebook.hpp"
-
 #include "wx/treectrl.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
 
+#include "GmatMainNotebook.hpp"
+#include "GuiInterpreter.hpp"
 
 class ResourceTree : public wxTreeCtrl
 {
@@ -35,6 +35,7 @@ public:
    GmatMainNotebook *GetMainNotebook();
 
 private:
+   GuiInterpreter *theGuiInterpreter;
    GmatMainNotebook *mainNotebook;
    wxWindow *parent;
 
@@ -46,7 +47,8 @@ private:
    void AddDefaultPropagators(wxTreeItemId propagator);
    void AddDefaultSolvers(wxTreeItemId solver);
    void AddDefaultPlots(wxTreeItemId plot);
-   void AddDefaultInterfaces(wxTreeItemId interface);
+   //loj: why interface causing parse error? changed to interfaceTree
+   void AddDefaultInterfaces(wxTreeItemId interfaceTree);
    void AddIcons();
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
