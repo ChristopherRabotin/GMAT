@@ -29,8 +29,8 @@ using namespace GmatMathUtil;
 const Gmat::BodyType        Moon::BODY_TYPE           = Gmat::MOON;
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
-const Integer               Moon::ORDER               = 4; 
-const Integer               Moon::DEGREE              = 4;  
+const Integer               Moon::ORDER               = 0; 
+const Integer               Moon::DEGREE              = 0;  
 const Real                  Moon::LUNA_EQUATORIAL_RADIUS   = 1738.1;     // km
 const Real                  Moon::LUNA_FLATTENING          = 0.0;
 const Real                  Moon::LUNA_MU                  = 4902.799;      // km^3 / s^2 

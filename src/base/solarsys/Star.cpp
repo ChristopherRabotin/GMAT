@@ -33,8 +33,8 @@ const Gmat::PosVelSource    Star::POS_VEL_SOURCE      = Gmat::SLP;   // for Buil
 const Gmat::AnalyticMethod  Star::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const Integer               Star::BODY_NUMBER         = 3;  
 const Integer               Star::REF_BODY_NUMBER     = 3;    
-const Integer               Star::ORDER               = 4;      
-const Integer               Star::DEGREE              = 4;
+const Integer               Star::ORDER               = 0;      
+const Integer               Star::DEGREE              = 0;
 const Rmatrix               Star::SIJ                 = Rmatrix(5,5); //zeroes
 const Rmatrix               Star::CIJ                 = Rmatrix(5,5,
       1.0, 0.0,             0.0,             0.0,             0.0,
