@@ -25,6 +25,7 @@
  * This class provides the main frame for GMAT.
  */
 //------------------------------------------------------------------------------
+#include "gmatwxrcs.hpp"
 #include "GmatMainFrame.hpp"
 #include "ViewTextFrame.hpp"
 #include "DocViewFrame.hpp"

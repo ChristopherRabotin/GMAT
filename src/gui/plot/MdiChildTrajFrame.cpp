@@ -12,6 +12,7 @@
  * Implements MdiChildTrajFrame for opengl plot.
  */
 //------------------------------------------------------------------------------
+#include "gmatwxrcs.hpp"
 #include "MdiChildTrajFrame.hpp"
 #include "MdiGlPlotData.hpp"
 #include "TrajPlotCanvas.hpp"

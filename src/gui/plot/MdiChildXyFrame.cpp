@@ -12,6 +12,7 @@
  * Implements MdiChildXyFrame class for xy plot.
  */
 //------------------------------------------------------------------------------
+#include "gmatwxrcs.hpp"
 #include "MdiChildXyFrame.hpp"
 #include "MdiXyPlotData.hpp"
 #include "XyPlotCurve.hpp"
