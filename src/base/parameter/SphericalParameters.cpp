@@ -691,7 +691,7 @@ Integer SphElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* SphElem::GetObject(const std::string &objTypeName)
 {
-   return GetRefObject(objTypeName);
+   return RefData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -709,7 +709,7 @@ bool SphElem::SetObject(Gmat::ObjectType objType,
                         GmatBase *obj)
 {
    if (obj != NULL)
-      return SetRefObject(objType, objName, obj);
+      return RefData::SetRefObject(objType, objName, obj);
    else
       return false;
 }

@@ -884,7 +884,7 @@ Integer KepElem::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* KepElem::GetObject(const std::string &objTypeName)
 {
-   return GetRefObject(objTypeName);
+   return RefData::GetRefObject(objTypeName);
 }
 
 //------------------------------------------------------------------------------
@@ -902,7 +902,7 @@ bool KepElem::SetObject(Gmat::ObjectType objType,
                         GmatBase *obj)
 {
    if (obj != NULL)
-      return SetRefObject(objType, objName, obj);
+      return RefData::SetRefObject(objType, objName, obj);
    else
       return false;
 }

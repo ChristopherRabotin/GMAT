@@ -43,11 +43,9 @@ public:
    // The inherited methods from Parameter
    virtual Integer GetNumObjects() const;
    virtual GmatBase* GetObject(const std::string &objTypeName);
-    
    virtual bool SetObject(Gmat::ObjectType objType,
                           const std::string &objName,
                           GmatBase *obj);
-    
    virtual bool AddObject(GmatBase *obj);
    virtual bool Validate();
    virtual void Initialize();

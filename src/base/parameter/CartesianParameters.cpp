@@ -694,7 +694,8 @@ Integer CartState::GetNumObjects() const
 //------------------------------------------------------------------------------
 GmatBase* CartState::GetObject(const std::string &objTypeName)
 {
-   return GetRefObject(objTypeName);
+   return RefData::GetRefObject(objTypeName);
+   // DJC ^^^^^^^^^ added so code will compile
 }
 
 //------------------------------------------------------------------------------
@@ -712,7 +713,8 @@ bool CartState::SetObject(Gmat::ObjectType objType,
                           GmatBase *obj)
 {
    if (obj != NULL)
-      return SetRefObject(objType, objName, obj);
+      return RefData::SetRefObject(objType, objName, obj);
+   // DJC    ^^^^^^^ added so code will compile
    else
       return false;
 }
