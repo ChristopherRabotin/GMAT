@@ -176,7 +176,6 @@ private:
    Integer numOfForces;
    Integer currentBodyId;
       
-   bool useSRP;
    bool useDragForce;
    bool isForceModelChanged;
    bool isGravTextChanged;

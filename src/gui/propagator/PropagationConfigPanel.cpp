@@ -88,7 +88,6 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    magfModelArray.clear();
    
    // Default force model values
-   useSRP              = false;
    useDragForce        = false;
    numOfForces         = 0;
    theForceModel       = NULL;
@@ -350,20 +349,19 @@ void PropagationConfigPanel::SaveData()
          // save SRP data
          //----------------------------------------------------
          // only Earth for B3
-//         if (forceList[i]->useSrp && forceList[i]->bodyName == SolarSystem::EARTH_NAME)
-//         {
-//            theSRP = new SolarRadiationPressure();
-//            forceList[i]->srpf = theSRP;
-//            newFm->AddForce(theSRP);
-//            
-//            Integer paramId= thePropSetup->GetParameterID("SRP");
-//            if (useSRP)
-//               thePropSetup->SetStringParameter(paramId, "On");
-//
-//#if DEBUG_PROP_PANEL
-//      ShowForceList("SaveData() AFTER  saving SRP");
-//#endif 
-//         }
+         if (forceList[i]->useSrp && forceList[i]->bodyName == SolarSystem::EARTH_NAME)
+         {
+            theSRP = new SolarRadiationPressure();
+            forceList[i]->srpf = theSRP;
+            newFm->AddForce(theSRP);
+            
+            paramId= newFm->GetParameterID("SRP");
+            newFm->SetStringParameter(paramId, "On");
+
+#if DEBUG_PROP_PANEL
+      ShowForceList("SaveData() AFTER  saving SRP");
+#endif 
+         }
       }
       
       // save forces to the prop setup
@@ -436,7 +434,7 @@ void PropagationConfigPanel::Initialize()
    dragModelArray.push_back("None");
    dragModelArray.push_back("Exponential");
    dragModelArray.push_back("MSISE90");
-   dragModelArray.push_back("Jacchia-Roberts"); //loj: 10/25/04 match with actual name
+   dragModelArray.push_back("JacchiaRoberts");
    
    // initialize mag. filed model type array
    magfModelArray.push_back("None");
@@ -452,7 +450,19 @@ void PropagationConfigPanel::Initialize()
       Integer paramId;
       std::string bodyName;
       wxString tempStr;
-     
+      wxString useSRP;
+      
+      paramId = theForceModel->GetParameterID("SRP");
+      useSRP = theForceModel->GetStringParameter(paramId).c_str();
+      //waw: Earth only for Build 3
+      if (useSRP.CmpNoCase("On") == 0)
+      {                                   
+         currentBodyId = FindBody(SolarSystem::EARTH_NAME);
+         forceList[currentBodyId]->bodyName = SolarSystem::EARTH_NAME;
+         forceList[currentBodyId]->useSrp = true;
+         forceList[currentBodyId]->srpf = theSRP;
+      }
+              
       for (Integer i = 0; i < numOfForces; i++)
       {
          force = theForceModel->GetForce(i);
@@ -513,25 +523,6 @@ void PropagationConfigPanel::Initialize()
             forceList[currentBodyId]->bodyName = bodyName;
             forceList[currentBodyId]->dragType = atmosModelString;
             forceList[currentBodyId]->dragf = theDragForce;
-         }
-         else if (force->GetTypeName() == "SolarRadiationPressure")
-         {
-//            paramId = thePropSetup->GetParameterID("SRP");
-//            wxString use = thePropSetup->GetStringParameter(paramId).c_str();
-//                    
-//            if (use.CmpNoCase("On") == 0)
-//               useSRP = true;
-//            else
-//               useSRP = false;
-//                        
-//            theSRP = (SolarRadiationPressure*)force;
-//            //loj: 5/28/04 for Earth ONLY for B3
-//            // when GetStringParameter("Body") is availabe use that
-//            forceList[currentBodyId]->bodyName = SolarSystem::EARTH_NAME;
-//            forceList[currentBodyId]->useSrp = useSRP;
-//            forceList[currentBodyId]->srpf = theSRP;
-//            MessageInterface::ShowMessage("SRP currentBodyId=%d, body=%s\n", i,
-//            currentBodyId, forceList[i]->bodyName.c_str());
          }
       }
  
@@ -687,7 +678,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    // wxButton
    bodyButton =
-      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add Body"),
+      new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Add/Remove Body"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchGravityButton =
       new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"),
@@ -696,7 +687,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    editPmfButton =
-      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Edit"),
+      new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Add/Remove Body"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    searchMagneticButton =
       new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"),
@@ -1221,7 +1212,7 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplaySRPData()
 {
-   srpCheckBox->SetValue(useSRP);
+   srpCheckBox->SetValue(forceList[currentBodyId]->useSrp);
 }
 
 //------------------------------------------------------------------------------
@@ -1375,7 +1366,7 @@ void PropagationConfigPanel::OnAddBodyButton()
             // If no previous body selection was made
             if (fl.empty())
             {
-               gravType = gravModelArray[NONE_GM];
+               gravType = gravModelArray[JGM2];
                dragType = dragModelArray[NONE_DM];
                magfType = magfModelArray[NONE_MM];   
                gravDegree = "4";
@@ -1410,7 +1401,7 @@ void PropagationConfigPanel::OnAddBodyButton()
                   }            
                   else
                   {
-                     gravType = gravModelArray[NONE_GM];
+                     gravType = gravModelArray[JGM2];
                      dragType = dragModelArray[NONE_DM];
                      magfType = magfModelArray[NONE_MM];   
                      gravDegree = "4";
@@ -1740,10 +1731,8 @@ void PropagationConfigPanel::OnSRPCheckBoxChange()
    if (primaryBodiesArray.IsEmpty())
       return;
       
-   useSRP = srpCheckBox->GetValue();
-      
    Integer id = FindBody(SolarSystem::EARTH_NAME);
-   forceList[id]->useSrp = useSRP;
+   forceList[id]->useSrp = srpCheckBox->GetValue();
    
    isForceModelChanged = true;
    theApplyButton->Enable(true);
