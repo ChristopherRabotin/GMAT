@@ -273,7 +273,6 @@ void ConfigManager::AddSolver(Solver* solver)
    }
 }
 
-//loj: 9/14/04 - added
 //------------------------------------------------------------------------------
 // void AddAtmosphereModel(AtmosphereModel* atmosModel)
 //------------------------------------------------------------------------------
@@ -295,7 +294,6 @@ void ConfigManager::AddAtmosphereModel(AtmosphereModel* atmosModel)
    }
 }
 
-//loj: 9/27/04 - added
 //------------------------------------------------------------------------------
 // void AddFunction(Function* function)
 //------------------------------------------------------------------------------
@@ -458,7 +456,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             // rename actual parameter name
             oldParamName = param->GetName();
             newParamName = newName + "." + param->GetTypeName();
-            //param->SetName(newParamName);
+
             // rename configured parameter name
             renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
 
@@ -491,17 +489,14 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
             oldParamName = param->GetName();
             newParamName = oldParamName;
             std::string::size_type pos = newParamName.find(oldName);
+            
             if (pos != newParamName.npos)
-            {
                newParamName.replace(pos, oldName.size(), newName);
-               //param->SetName(newParamName);
-            }
-            // rename configured parameter name
-            renamed = RenameItem(Gmat::PARAMETER, oldParamName, newParamName);
         
             // if parameter expression has oldName replace with newName
             std::string newExp = param->GetStringParameter("Expression");
             pos = newExp.find(oldName);
+            
             if (pos != newExp.npos)
             {
                newExp.replace(pos, oldName.size(), newName);
@@ -725,7 +720,6 @@ SolarSystem* ConfigManager::GetDefaultSolarSystem()
 {
    throw ConfigManagerException
       ("ConfigManager::GetDefaultSolarSystem() has not been implemented.\n");
-   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
 
 
@@ -736,7 +730,6 @@ SolarSystem* ConfigManager::GetSolarSystemInUse()
 {
    throw ConfigManagerException
       ("ConfigManager::GetSolarSystemInUse() has not been implemented.\n");
-   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
 
 
@@ -809,7 +802,6 @@ Solver* ConfigManager::GetSolver(const std::string &name)
    return solver;
 }
 
-//loj: 9/14/04 - added
 //------------------------------------------------------------------------------
 // AtmosphereModel* GetAtmosphereModel(const std::string &name)
 //------------------------------------------------------------------------------
@@ -829,7 +821,6 @@ AtmosphereModel* ConfigManager::GetAtmosphereModel(const std::string &name)
    return atmosModel;
 }
 
-//loj: 9/27/04 - added
 //------------------------------------------------------------------------------
 // Function* GetFunction(const std::string &name)
 //------------------------------------------------------------------------------
@@ -857,7 +848,6 @@ Function* ConfigManager::GetFunction(const std::string &name)
 //------------------------------------------------------------------------------
 void ConfigManager::AddCelestialBody(CelestialBody* body)
 {
-   //loj: 9/14/04 - throw an exception
    throw ConfigManagerException
       ("ConfigManager::AddCelestialBody() has not been implemented.\n");
 }
@@ -867,7 +857,6 @@ void ConfigManager::AddCelestialBody(CelestialBody* body)
 //------------------------------------------------------------------------------
 void ConfigManager::AddCommand(GmatCommand *cmd)
 {
-   //loj: 9/14/04 - throw an exception
    throw ConfigManagerException
       ("ConfigManager::AddCommand() has not been implemented.\n");
 }
@@ -879,7 +868,6 @@ CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
 {
    throw ConfigManagerException
       ("ConfigManager::GetCelestialBody() has not been implemented.\n");
-   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
 
 //------------------------------------------------------------------------------
@@ -889,5 +877,4 @@ GmatCommand* ConfigManager::GetCommand(const std::string name)
 {
    throw ConfigManagerException
       ("ConfigManager::GetCommand() has not been implemented.\n");
-   //return NULL; //loj: 9/14/04 - throw an exception instead
 }
