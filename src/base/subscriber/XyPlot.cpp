@@ -25,6 +25,7 @@
 //---------------------------------
 // static data
 //---------------------------------
+
 const std::string
 XyPlot::PARAMETER_TEXT[XyPlotParamCount] =
 {
@@ -282,7 +283,7 @@ bool XyPlot::AddYParameter(Parameter *param)
 //------------------------------------------------------------------------------
 std::string XyPlot::GetParameterText(const Integer id) const
 {
-    if (id >= IND_VAR && id < XyPlotParamCount)
+    if (id >= 0 && id < XyPlotParamCount)
         return PARAMETER_TEXT[id];
     else
         return Subscriber::GetParameterText(id);
@@ -308,7 +309,7 @@ Integer XyPlot::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType XyPlot::GetParameterType(const Integer id) const
 {
-    if (id >= IND_VAR && id < XyPlotParamCount)
+    if (id >= 0 && id < XyPlotParamCount)
         return PARAMETER_TYPE[id];
     else
         return Subscriber::GetParameterType(id);
@@ -319,7 +320,7 @@ Gmat::ParameterType XyPlot::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string XyPlot::GetParameterTypeString(const Integer id) const
 {
-    if (id >= IND_VAR && id < XyPlotParamCount)
+    if (id >= 0 && id < XyPlotParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
        return Subscriber::GetParameterTypeString(id);
@@ -338,6 +339,14 @@ bool XyPlot::GetBooleanParameter(const Integer id) const
     default:
         return Subscriber::GetBooleanParameter(id);
     }
+}
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+bool XyPlot::GetBooleanParameter(const std::string &label) const
+{
+    return GetBooleanParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -361,14 +370,6 @@ bool XyPlot::SetBooleanParameter(const Integer id, const bool value)
     default:
         return Subscriber::SetBooleanParameter(id, value);
     }
-}
-
-//------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-bool XyPlot::GetBooleanParameter(const std::string &label) const
-{
-    return GetBooleanParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
