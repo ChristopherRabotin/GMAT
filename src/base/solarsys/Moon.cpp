@@ -27,11 +27,17 @@ const Real                  Moon::POLAR_RADIUS        = 1736.0;       // km - ne
 const Real                  Moon::MU                  = 4.902794e12;      // m^3 / s^2
 const Gmat::PosVelSource    Moon::POS_VEL_SOURCE      = Gmat::SLP;   // for Build 2, at least
 const Gmat::AnalyticMethod  Moon::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
-const CelestialBody*        Moon::CENTRAL_BODY        = NULL;        // doesn't make sense?
 const Integer               Moon::BODY_NUMBER         = 2; 
 const Integer               Moon::REF_BODY_NUMBER     = 3; 
 const Integer               Moon::ORDER               = 4; 
 const Integer               Moon::DEGREE              = 4;  
+
+const Integer               Moon::COEFFICIENT_SIZE    = 4;
+const Rmatrix               Moon::SIJ                 = Rmatrix(4,4,
+                                                                0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+const Rmatrix               Moon::CIJ                 = Rmatrix(4,4,
+                                                                0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+
 // add other ones as needed
 
 
@@ -52,7 +58,6 @@ const Integer               Moon::DEGREE              = 4;
 Moon::Moon(std::string name) :
 CelestialBody     (name)
 {
-   //parameterCount += 30; -- ???
    InitializeMoon(NULL);  
 }
 
@@ -71,7 +76,6 @@ CelestialBody     (name)
 Moon::Moon(std::string name, CelestialBody* cBody) :
 CelestialBody     (name)
 {
-   //parameterCount += 30; -- ???
    InitializeMoon(cBody); 
 }
 
@@ -123,24 +127,6 @@ Moon::~Moon()
 }
 
 //------------------------------------------------------------------------------
-//  RealArray GetState(A1Mjd atTime)
-//------------------------------------------------------------------------------
-/**
- * This method returns the state (position and velocity) of the body at the
- * requested time.
- *
- * @param <atTime>  time for which state of the body is requested.
- *
- * @return state of the body at the requested time.
- *
- */
-//------------------------------------------------------------------------------
-//RealArray  Moon::GetState(A1Mjd atTime)
-//{
-//   return state; // put in the real stuff based on the PosVelSource flag, etc.****************
-//}
-
-//------------------------------------------------------------------------------
 //  Moon* Clone(void) const
 //------------------------------------------------------------------------------
 /**
@@ -152,8 +138,8 @@ Moon::~Moon()
 //------------------------------------------------------------------------------
 Moon* Moon::Clone(void) const
 {
-   // TBD
-    return NULL;
+   Moon* theClone = new Moon(*this);
+   return theClone;   // huh??????????????????????????????
 }
 
 //------------------------------------------------------------------------------
@@ -180,12 +166,22 @@ void Moon::InitializeMoon(CelestialBody* cBody)
    mu                  = Moon::MU;
    posVelSrc           = Moon::POS_VEL_SOURCE;
    analyticMethod      = Moon::ANALYTIC_METHOD;
-   //centralBody         = Moon::CENTRAL_BODY;
    centralBody         = cBody;
    bodyNumber          = Moon::BODY_NUMBER;
    referenceBodyNumber = Moon::REF_BODY_NUMBER;
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;
+
+   atmManager          = new AtmosphereManager(instanceName);
+   
+   coefficientSize     = Moon::COEFFICIENT_SIZE;
+   sij                 = Moon::SIJ;
+   cij                 = Moon::CIJ;
+   defaultSij          = Moon::SIJ;
+   defaultCij          = Moon::CIJ;
+   defaultMu           = Moon::MU;
+   defaultEqRadius     = Moon::EQUATORIAL_RADIUS;
+   defaultCoefSize     = Moon::COEFFICIENT_SIZE;
 }
 
 //------------------------------------------------------------------------------

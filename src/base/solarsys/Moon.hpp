@@ -13,7 +13,7 @@
 // Created: 2004/01/29
 //
 /**
- * This is the base class for moons.
+ * This is the class for moons.
  *
  */
 //------------------------------------------------------------------------------
@@ -24,11 +24,12 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "Rmatrix.hpp"
 #include "SolarSystem.hpp"
 #include "CelestialBody.hpp"
 
 /**
- * Moon base class, for all moons in the solar system : ).
+ * Moon class, for all moons in the solar system : ).
  *
  * The Moon class will contain all data and methods for any moon that exists in
  * the solar system.
@@ -47,28 +48,6 @@ public:
    // destructor
    virtual ~Moon();
 
-   // method to return the state (position and velocity) of the body at
-   // the specified time, using the specified method
-   //RealArray            GetState(A1Mjd atTime);   // use the CelestialBody one!
-   
-   // Parameter access methods - overridden from GmatBase - do I need any?
-   //std::string    GetParameterText(const Integer id) const;     
-   //Integer        GetParameterID(const std::string &str) const; 
-   //Gmat::ParameterType GetParameterType(const Integer id) const;
-   //std::string    GetParameterTypeString(const Integer id) const;
-
-   //Real           GetRealParameter(const Integer id) const;
-   //Real           SetRealParameter(const Integer id,
-   //                                        const Real value);
-   //Integer        GetIntegerParameter(const Integer id) const; 
-   //Integer        SetIntegerParameter(const Integer id,
-   //                                           const Integer value); 
-   //std::string    GetStringParameter(const Integer id) const; 
-   //bool           SetStringParameter(const Integer id, 
-   //                                          const std::string &value); 
-   //bool           GetBooleanParameter(const Integer id) const; 
-   //bool           SetBooleanParameter(const Integer id,
-   //                                           const bool value); 
 
    //------------------------------------------------------------------------------
    // virtual Moon* Clone(void) const
@@ -92,7 +71,9 @@ public:
    static const Integer               REF_BODY_NUMBER;
    static const Integer               ORDER;
    static const Integer               DEGREE;
-   // add other ones as needed
+   static const Integer               COEFFICIENT_SIZE;
+   static const Rmatrix               SIJ;
+   static const Rmatrix               CIJ;
 
 protected:
 
