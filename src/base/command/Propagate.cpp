@@ -749,7 +749,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          while ((*i)[loc] == ' ')
             ++loc;
          if (end == (Integer)std::string::npos)
-            throw CommandException("Propagate string does not identify spacecraft\n");
+            throw CommandException("Propagate string \"" + (*i) +
+                                   "\" does not identify spacecraft\n");
           
          component = i->substr(loc, end-loc);
          SetObject(component, Gmat::SPACECRAFT);
