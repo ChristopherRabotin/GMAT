@@ -63,7 +63,7 @@ private:
 //      wxBoxSizer *item5;
 //      wxBoxSizer *item9;
 
-    wxTextCtrl *fileTextCtrl;
+    wxTextCtrl *slpFileTextCtrl;
 
     wxStaticText *item3;
     wxStaticText *item10;

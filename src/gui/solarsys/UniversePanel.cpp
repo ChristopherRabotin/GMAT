@@ -82,7 +82,7 @@ void UniversePanel::Create()
    // SetParent(new wxFrame(0,-1,"title"));
    // parent = GetParent();
     
-    MessageInterface::ShowMessage("UniversePanel::Create() entering\n");
+    //MessageInterface::ShowMessage("UniversePanel::Create() entering\n");
     
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
     wxGridSizer *item1 = new wxGridSizer( 3, 0, 0 );
@@ -146,21 +146,21 @@ void UniversePanel::Create()
     filetypeStaticText = new wxStaticText( this, ID_TEXT, 
                                        wxT("SLP File: "), 
                                        wxDefaultPosition, wxSize(80,-1), 0 );
-    fileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
+    slpFileTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
                                               wxDefaultPosition, 
                                               wxSize(250, -1),  0);
     browseButton = new wxButton( this, ID_BUTTON_BROWSE, wxT("Browse"), 
                                               wxDefaultPosition, wxDefaultSize, 0 );
  
     fileSizer->Add(filetypeStaticText, 0, wxALIGN_CENTER|wxALL, 5);
-    fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
+    fileSizer->Add(slpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
 
     item0->Add( item1, 0, wxALIGN_CENTRE|wxALL, 5 );
     item0->Add(fileSizer, 0, wxALIGN_CENTER|wxALL, 5);
 
     theMiddleSizer->Add(item0, 0, wxALIGN_CENTER|wxALL, 5);
-    MessageInterface::ShowMessage("UniversePanel::Create() exiting\n");
+    //MessageInterface::ShowMessage("UniversePanel::Create() exiting\n");
 
 //      parent->SetAutoLayout( TRUE );
 //      parent->SetSizer( item0);
@@ -174,6 +174,31 @@ void UniversePanel::Create()
 void UniversePanel::LoadData()
 {
     // load data from the core engine
+    StringArray sourceList = theGuiInterpreter->GetSolarSystemSourceList();
+
+    // selected source
+    for (int i=0; i<sourceList.size(); i++)
+    {
+        selectedListBox->Append(sourceList[i].c_str());
+        //MessageInterface::ShowMessage("UniversePanel::LoadData() sourceList = %s\n",
+        //                              sourceList[i].c_str());
+    }
+
+    // slp file name
+    StringArray sourceFileList = theGuiInterpreter->GetSolarSystemSourceFileList();
+    for (int i=0; i<sourceFileList.size(); i++)
+    {
+        if (sourceList[i] == "SLP")
+        {
+            slpFileTextCtrl->SetValue(sourceFileList[i].c_str());
+        }
+        else if (sourceList[i] == "DE405")
+        {
+        }
+        else if (sourceList[i] == "DE200")
+        {
+        }
+    }
 }
 
 
@@ -188,12 +213,12 @@ void UniversePanel::SaveData()
     //if first item in the list is "SLP"
     if (selectedListBox->GetString(0).IsSameAs("SLP"))
     {
-        wxString absoluteFilename = fileTextCtrl->GetValue();
+        wxString absoluteFilename = slpFileTextCtrl->GetValue();
 
         MessageInterface::ShowMessage("UniversePanel::SaveData() "
                                       "calling theGuiInterpreter->SetSlpFileToUse()\n");
         
-	//ag:        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat"); 
+        //ag:        theGuiInterpreter->SetSlpFileToUse("mn2000-little.dat"); 
         theGuiInterpreter->SetSlpFileToUse(std::string (absoluteFilename.c_str()));
     }
 }
@@ -282,7 +307,7 @@ void UniversePanel::OnBrowseButton(wxCommandEvent& event)
         
         filename = dialog.GetPath().c_str();
         
-        fileTextCtrl->SetValue(filename); 
+        slpFileTextCtrl->SetValue(filename); 
     }
 }
 
