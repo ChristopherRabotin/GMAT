@@ -37,6 +37,8 @@
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
 #include "MdiXyPlotData.hpp"
+#include "GmatNotebook.hpp"
+#include "GmatMdiChildFrame.hpp"
 
 //------------------------------
 // event tables for wxWindows
@@ -153,6 +155,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    new wxNotebookSizer( projectTree );  
   
    theChild->Maximize();
+   
+   // set the main frame, because there will no longer be right notebook
+   GmatAppData::SetMainFrame(this);
+
 //   splitter = new GmatSplitterWindow(this);
  
    // create the tabs for Resources, Mission, Output
@@ -821,4 +827,169 @@ void GmatMainFrame::OnScriptOpenFileEditor(wxCommandEvent& event)
       mDocManager->OnFileOpen(event);
 }
 
+//------------------------------------------------------------------------------
+// void CreateChild(GmatTreeItemData *item)
+//------------------------------------------------------------------------------
+/**
+ * Adds a page to notebook based on tree item type.
+ *
+ * @param <item> input GmatTreeItemData.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::CreateChild(GmatTreeItemData *item)
+{
+    wxGridSizer *sizer = new wxGridSizer( 1, 0, 0 );
+    wxScrolledWindow *panel = NULL;
+    int dataType = item->GetDataType();
+
+    if (IsChildOpen(item))
+    {
+       GmatMdiChildFrame *newChild = NULL;
+//        curPages->Append( (wxObject *) item);
+//      
+//        if (dataType == GmatTree::UNIVERSE_FOLDER)
+//        {
+//            sizer->Add( new UniversePanel(panel), 0, wxGROW|wxALL, 0 );
+//        }
+//        // invisible for build 2
+//        // else if ((dataType == GmatTree::DEFAULT_BODY)   ||
+//        //           (dataType == GmatTree::CREATED_BODY))
+//        // {
+//        //     sizer->Add( new SolarSystemWindow(panel), 0, wxGROW|wxALL, 0 );      
+//        // }
+//        else if ((dataType == GmatTree::DEFAULT_SPACECRAFT )  ||
+//                 (dataType == GmatTree::CREATED_SPACECRAFT ))
+//        {
+//            sizer->Add( new SpacecraftPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_IMPULSIVE_BURN )  ||
+//                 (dataType == GmatTree::CREATED_IMPULSIVE_BURN ))
+//        {
+//            sizer->Add( new ImpulsiveBurnSetupPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_PROPAGATOR)   ||
+//                 (dataType == GmatTree::CREATED_PROPAGATOR))
+//        {
+//            sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_DIFF_CORR)   ||
+//                 (dataType == GmatTree::CREATED_DIFF_CORR))
+//        {
+//            sizer->Add( new DCSetupPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_REPORT_FILE)   ||
+//                 (dataType == GmatTree::CREATED_REPORT_FILE))
+//        {
+//            sizer->Add( new ReportFileSetupPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
+//                 (dataType == GmatTree::CREATED_XY_PLOT))
+//        {
+//            sizer->Add( new XyPlotSetupPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );          
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_OPENGL_PLOT)   ||
+//                 (dataType == GmatTree::CREATED_OPENGL_PLOT))
+//        {
+//            sizer->Add( new OpenGlPlotSetupPanel(panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
+//        {
+//            MessageInterface::ShowMessage
+//                ("GmatMainNotebook::CreatePage() creating MISSION_SEQ_COMMAND\n");
+//        }
+//        else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
+//        {
+//            //MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating PropagateCommand\n");
+//            sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), item->GetCommand()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::PROPAGATE_COMMAND)
+//        {
+//          sizer->Add( new PropagateCommandPanel(panel, item->GetDesc(), item->GetCommand()),
+//                      0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::MANEUVER_COMMAND)
+//        {
+//            sizer->Add( new ManeuverSetupPanel(panel, item->GetCommand()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::TARGET_COMMAND)
+//        {
+//            sizer->Add ( new SolverEventPanel (panel, item->GetDesc(), item->GetCommand()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
+//        {
+//            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
+//            
+//            sizer->Add ( new SolverGoalsPanel (panel),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
+//        {
+//           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
+//           sizer->Add ( new SolverVariablesPanel (panel),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
+//                 (dataType == GmatTree::CREATED_VARIABLE))
+//        {
+//            sizer->Add (new ParameterSetupPanel (panel, item->GetDesc()),
+//                        0, wxGROW|wxALL, 0 );
+//        }
+//        else
+//        {
+//           // if no panel set up then just exit function
+//           // instead of opening blank panel
+//           return;
+//        }
+//
+//        panel->SetScrollRate( 5, 5 );
+//        panel->SetAutoLayout( TRUE );
+//        panel->SetSizer( sizer );
+//        sizer->Fit( panel );
+//        sizer->SetSizeHints( panel );
+//
+//        AddPage( panel, item->GetDesc(), TRUE, -1);
+
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool IsChildOpen(GmatTreeItemData *item)
+//------------------------------------------------------------------------------
+/**
+ * Determines if page should be opened.  If the page is already opened, sets that
+ * page as the selected page.
+ *
+ * @param <item> input GmatTreeItemData.
+ *
+ * @return True if page should be opened, false if it should not be opened.
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
+{
+  bool result = TRUE;
+  
+//  int sel = curPages->IndexOf((wxObject*) item);
+//
+//  if (sel == -1)   // NOT_FOUND
+//  {
+//    result = TRUE;
+//  }
+//  else
+//  {
+//    this->SetSelection(sel);
+//    result = FALSE;
+//  }
+  
+  return result;
+}
 

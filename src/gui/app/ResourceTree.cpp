@@ -89,9 +89,9 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
     : wxTreeCtrl(parent, id, pos, size, style)
 {
-//    parent = parent;
     mainNotebook = GmatAppData::GetMainNotebook();
-    MessageInterface::ShowMessage("got main notebook\n");
+    mainFrame = GmatAppData::GetMainFrame();
+//    MessageInterface::ShowMessage("got main notebook\n");
   
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     theGuiManager = GuiItemManager::GetInstance();
@@ -121,7 +121,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 //------------------------------------------------------------------------------
 void ResourceTree::UpdateResource()
 {
-    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
+//    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
     
     mNumSpacecraft = 0;
     mNumPropagator = 0;
@@ -711,6 +711,7 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
     GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
 
     mainNotebook->CreatePage(item);
+    mainFrame->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -727,6 +728,7 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
     // Get info from selected item
     GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
     mainNotebook->CreatePage(item);
+    mainFrame->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -743,7 +745,7 @@ void ResourceTree::OnClose(wxCommandEvent &event)
     // make item most current, then close it
     GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
     mainNotebook->CreatePage(item);
-    mainNotebook->ClosePage();
+    mainNotebook->ClosePage(); //need to add for frame
 }
 
 //------------------------------------------------------------------------------
@@ -797,7 +799,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
             break;
         default:
             objType = Gmat::UNKNOWN_OBJECT;
-            MessageInterface::ShowMessage("ResourceTree::OnRename() unknown object.\n");
+//            MessageInterface::ShowMessage("ResourceTree::OnRename() unknown object.\n");
             break;
         }
 
@@ -1112,7 +1114,7 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 {
-    MessageInterface::ShowMessage("ResourceTree::OnAddPropagator() entered\n");
+//    MessageInterface::ShowMessage("ResourceTree::OnAddPropagator() entered\n");
     wxTreeItemId item = GetSelection();
   
     wxString name;
@@ -1130,7 +1132,7 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
     }
     else
     {
-        MessageInterface::ShowMessage("ResourceTree::OnAddPropagator() propSetup is NULL\n");
+//        MessageInterface::ShowMessage("ResourceTree::OnAddPropagator() propSetup is NULL\n");
     }
 }
 
@@ -1162,7 +1164,7 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
     }
     else
     {
-        MessageInterface::ShowMessage("ResourceTree::OnAddImpulsiveBurn() burn is NULL\n");
+//        MessageInterface::ShowMessage("ResourceTree::OnAddImpulsiveBurn() burn is NULL\n");
     }
 }
 
@@ -1182,8 +1184,8 @@ void ResourceTree::OnAddDiffCorr(wxCommandEvent &event)
     wxString name;
     name.Printf("DC%d", ++mNumDiffCorr);
 
-    Solver *solver =
-        theGuiInterpreter->CreateSolver("DifferentialCorrector", std::string(name.c_str()));
+    theGuiInterpreter->CreateSolver("DifferentialCorrector", 
+         std::string(name.c_str()));
    
     AppendItem(item, name, GmatTree::ICON_FILE, -1,
                new GmatTreeItemData(name, GmatTree::CREATED_DIFF_CORR));
@@ -1207,8 +1209,8 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
     wxString name;
     name.Printf("ReportFile%d", ++mNumReportFile);
 
-    Subscriber* subs =
-        theGuiInterpreter->CreateSubscriber("ReportFile", std::string(name.c_str()));
+    theGuiInterpreter->CreateSubscriber("ReportFile", 
+      std::string(name.c_str()));
    
     AppendItem(item, name, GmatTree::ICON_REPORT, -1,
                new GmatTreeItemData(name, GmatTree::CREATED_REPORT_FILE));
@@ -1232,8 +1234,7 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
     wxString name;
     name.Printf("XYPlot%d", ++mNumXyPlot);
 
-    Subscriber* subs =
-        theGuiInterpreter->CreateSubscriber("XyPlot", std::string(name.c_str()));
+    theGuiInterpreter->CreateSubscriber("XyPlot", std::string(name.c_str()));
    
     AppendItem(item, name, GmatTree::ICON_REPORT, -1,
                new GmatTreeItemData(name, GmatTree::CREATED_XY_PLOT));
@@ -1257,8 +1258,7 @@ void ResourceTree::OnAddOpenGlPlot(wxCommandEvent &event)
     wxString name;
     name.Printf("OpenGlPlot%d", ++mNumOpenGlPlot);
 
-    Subscriber* subs =
-        theGuiInterpreter->CreateSubscriber("OpenGlPlot", std::string(name.c_str()));
+    theGuiInterpreter->CreateSubscriber("OpenGlPlot", std::string(name.c_str()));
    
     AppendItem(item, name, GmatTree::ICON_REPORT, -1,
                new GmatTreeItemData(name, GmatTree::CREATED_OPENGL_PLOT));

@@ -19,7 +19,6 @@
 
 #include "ResourceTree.hpp"
 #include "MissionTree.hpp"
-#include "GmatMainNotebook.hpp"
 
 #include "wx/notebook.h"
 

@@ -30,7 +30,6 @@
 #include "ViewTextFrame.hpp"
 #include "GmatSplitterWindow.hpp"
 #include "GuiInterpreter.hpp"
-#include "GmatNotebook.hpp"
 #include "GmatMainNotebook.hpp"
 
 #include "wx/notebook.h"
@@ -60,6 +59,8 @@ public:
     GmatMainFrame(wxWindow *parent, const wxWindowID id, const wxString& title,
             const wxPoint& pos, const wxSize& size, const long style);
     ~GmatMainFrame();
+    void CreateChild(GmatTreeItemData *item);
+    bool IsChildOpen(GmatTreeItemData *item);
 
 protected:
 private:

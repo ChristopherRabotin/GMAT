@@ -151,8 +151,8 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
         {
-            MessageInterface::ShowMessage
-                ("GmatMainNotebook::CreatePage() creating MISSION_SEQ_COMMAND\n");
+//            MessageInterface::ShowMessage
+//                ("GmatMainNotebook::CreatePage() creating MISSION_SEQ_COMMAND\n");
         }
         else if (dataType == GmatTree::DEFAULT_PROPAGATE_COMMAND)
         {
@@ -177,14 +177,14 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
         {
-            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
-            
+//            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
+//            
             sizer->Add ( new SolverGoalsPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
         {
-           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
+//           MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
            sizer->Add ( new SolverVariablesPanel (panel),
                         0, wxGROW|wxALL, 0 );
         }
