@@ -121,7 +121,7 @@ StringArray ParameterDatabase::GetDescsOfParameters() const
 
    for (pos = mStringParamPtrMap->begin(); pos != mStringParamPtrMap->end(); ++pos)
    {
-      paramDescs.push_back(pos->second->GetDesc());
+      paramDescs.push_back(pos->second->GetStringParameter("Description"));
    }
    
    return paramDescs;
@@ -183,7 +183,7 @@ std::string ParameterDatabase::GetDesc(const std::string &name) const
       throw ParameterDatabaseException("Parameter name " + name +
                                        " not found in the database");
    else
-      return pos->second->GetDesc();
+      return pos->second->GetStringParameter("Description");
    
 }
 
