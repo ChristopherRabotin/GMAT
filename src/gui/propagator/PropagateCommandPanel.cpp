@@ -314,10 +314,24 @@ void PropagateCommandPanel::GetData()
 void PropagateCommandPanel::SetData()
 {
     //loj: 2/12/04 added
+    //wxString newGoalStr;
+    
     double newGoal = atof(valueTextCtrl->GetValue());
+    
+    //newGoalStr.Printf("%f", newGoal);
     theStopCond->SetGoal(newGoal);
-    Integer id = thePropagateCommand->GetParameterID("ElapsedSecs");
+    Integer id = thePropagateCommand->GetParameterID("ElapsedSeconds");
+    
+    //MessageInterface::ShowMessage("PropagateCommandPanel::SetData() new Goal = " +
+    //                              std::string(newGoalStr.c_str()) + "\n");
+    
     thePropagateCommand->SetRealParameter(id, newGoal);
+    
+    //newGoal = thePropagateCommand->GetRealParameter(id);
+    //newGoalStr.Printf("%f", newGoal);
+    //MessageInterface::ShowMessage("PropagateCommandPanel::SetData() new Goal = " +
+    //                              std::string(newGoalStr.c_str()) + "\n");
+    
 }
 
 void PropagateCommandPanel::OnTextUpdate(wxCommandEvent& event)
