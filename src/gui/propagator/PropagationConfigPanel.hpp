@@ -21,7 +21,6 @@
 
 // base includes
 #include "gmatdefs.hpp"
-//#include "GuiInterpreter.hpp"
 #include "Propagator.hpp"
 #include "PropSetup.hpp"
 #include "ForceModel.hpp"
@@ -103,25 +102,20 @@ private:
    wxArrayString savedBodiesArray;
    wxArrayString pointmassBodiesArray;    
    wxArrayString primaryBodiesGravityArray;
-   wxArrayString degreeArray;
-   wxArrayString orderArray;
    wxArrayString integratorArray;
     
-   //Integer numOfIntegrators;
    Integer numOfBodies;
    Integer numOfAtmosTypes;
    Integer numOfForces;
    Integer numOfMagFields;
    Integer numOfGraFields;
-   Integer orderID;
-   Integer degreeID;
     
    bool useSRP;
    bool useDragForce;
    bool isForceModelChanged;
+   bool isBodiesChanged;
    bool isIntegratorChanged;
-    
-   //GuiInterpreter                 *theGuiInterpreter;
+
    Propagator                     *thePropagator;
    Propagator                     *newProp;
    PropSetup                      *thePropSetup;
@@ -153,8 +147,8 @@ private:
     
    // Text control event method
    void OnIntegratorTextUpdate();
-   //void OnGravityTextUpdate();
-   void OnMagneticTextUpdate();
+   void OnGravityTextUpdate(wxCommandEvent& event);
+   void OnMagneticTextUpdate(wxCommandEvent& event);
     
    // Checkbox event method
    void OnSRPCheckBoxChange();
@@ -182,10 +176,8 @@ private:
       ID_TEXT = 42000,
       ID_TEXTCTRL,
       ID_TEXTCTRL_PROP,
-      ID_TEXTCTRL_GRAV1,
-      ID_TEXTCTRL_GRAV2,
-      ID_TEXTCTRL_MAGN1,
-      ID_TEXTCTRL_MAGN2,
+      ID_TEXTCTRL_GRAV,
+      ID_TEXTCTRL_MAGN,
       ID_CHECKBOX,
       ID_CB_INTGR,
       ID_CB_BODY,
