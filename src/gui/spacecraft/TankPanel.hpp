@@ -1,4 +1,4 @@
-//$Header:
+//$Header$
 //------------------------------------------------------------------------------
 //                            TankPanel
 //------------------------------------------------------------------------------
@@ -26,6 +26,7 @@
 
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
+#include "Hardware.hpp"
 #include "FuelTank.hpp"
 
 class TankPanel: public wxPanel
@@ -37,75 +38,40 @@ public:
     void SaveData();
     void LoadData();
     
-private:
-    struct Tank
-    {
-        std::string tankName;
-        Real temperature;
-        Real refTemperature;
-        Real fuelMass;
-        Real fuelDensity;
-        Real pressure;
-        Real volume;
-        bool pressureRegulated;
-        FuelTank* fuelTank;
-      
-        Tank(FuelTank* ft, const std::string &name)
-        {
-            fuelTank = ft;
-            tankName = name;
-        }
-    };    
-    
+private:    
     void Create();
+    void DisplayData();
     
     // Event Handling
     DECLARE_EVENT_TABLE();
-    void DisplayData();
-    void OnTextChange();
-    void OnSelect();
+    void OnSelect(wxCommandEvent &event);
     void OnButtonClick(wxCommandEvent &event);
     
     Spacecraft *theSpacecraft;
-    std::vector<Tank *> theTanks;
-    ObjectArray theFuelTanks;
-    StringArray fuelTankNames;
+    GuiInterpreter *theGuiInterpreter;
     
-    Integer tankCount;
-    Integer currentTank;
+    wxArrayString availableTanksArray;
+    wxArrayString selectedTanksArray;
+        
+    Integer availableTankCount;
+    Integer selectedTankCount;
+    
+    Integer currentAvailTank;
+    Integer currentSelectedTank;
     
     wxButton *theApplyButton;
-    wxButton *addButton;
+    wxButton *selectButton;
     wxButton *removeButton;
-
-    wxTextCtrl *temperatureTextCtrl;
-    wxTextCtrl *refTemperatureTextCtrl;
-    wxTextCtrl *fuelMassTextCtrl;
-    wxTextCtrl *fuelDensityTextCtrl;
-    wxTextCtrl *pressureTextCtrl;
-    wxTextCtrl *volumeTextCtrl;
+    wxButton *selectAllButton;
+    wxButton *removeAllButton;
     
-    wxStaticText *temperatureStaticText;
-    wxStaticText *refTemperatureStaticText;
-    wxStaticText *fuelMassStaticText;
-    wxStaticText *fuelDensityStaticText;
-    wxStaticText *pressureStaticText;
-    wxStaticText *volumeStaticText;
-    wxStaticText *unit1StaticText;
-    wxStaticText *unit2StaticText;
-    wxStaticText *unit3StaticText;
-    wxStaticText *unit4StaticText;
-    wxStaticText *unit5StaticText;
-    wxStaticText *unit6StaticText;
-    
-    wxListBox *tankListBox;
+    wxListBox *availableTankListBox;
+    wxListBox *selectedTankListBox;
         
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 30200,
-        ID_TEXTCTRL,
-        ID_LISTBOX,
+        ID_LISTBOX = 30200,
         ID_BUTTON,
     };
 };
