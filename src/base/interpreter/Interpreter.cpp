@@ -603,6 +603,10 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    }
       
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
+      // If we see a comment character, we're done
+      if ((*i)[0] == '%')
+         break;
+         
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
       #ifdef DEBUG_TOKEN_PARSING
