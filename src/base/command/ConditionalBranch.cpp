@@ -325,18 +325,10 @@ bool ConditionalBranch::RemoveCondition(Integer atIndex)
    if ((atIndex < 0) || (atIndex >= numberOfConditions))
       throw CommandException(
             "RemoveCondition error - condition index out of bounds.");
-   std::vector<std::string>::iterator si = lhsList.begin();
-   si += atIndex;
-   lhsList.erase(si);
-   std::vector<std::string>::iterator opi = opStrings.begin();
-   opi += atIndex;
-   opStrings.erase(opi);
-   std::vector<OpType>::iterator opti = opList.begin();
-   opti += atIndex;
-   opList.erase(opti);
-   std::vector<std::string>::iterator ri = rhsList.begin();
-   ri += atIndex;
-   rhsList.erase(ri);
+   lhsList.erase(lhsList.begin() + atIndex);
+   opStrings.erase(opStrings.begin() + atIndex);
+   opList.erase(opList.begin() + atIndex);
+   rhsList.erase(rhsList.begin() + atIndex);
    numberOfConditions--;
    return true;
 }
@@ -355,12 +347,8 @@ bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
    if ((atIndex < 0) || (atIndex >= numberOfLogicalOps))
       throw CommandException(
             "RemoveConditionOperator error - condition index out of bounds.");
-   std::vector<std::string>::iterator   si = logicalOpStrings.begin();
-   std::vector<LogicalOpType>::iterator oi = logicalOpList.begin();
-   si += atIndex;
-   oi += atIndex;
-   logicalOpStrings.erase(si);
-   logicalOpList.erase(oi);
+   logicalOpStrings.erase(logicalOpStrings.begin() + atIndex);
+   logicalOpList.erase(logicalOpList.begin() + atIndex);
    numberOfLogicalOps--;
    return true;
 }
