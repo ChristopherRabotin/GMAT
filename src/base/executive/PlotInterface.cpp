@@ -75,8 +75,8 @@ bool PlotInterface::CreateGlPlotWindow()
     //loj: 3/8/04 added if
     if (MdiGlPlot::mdiParentGlFrame == NULL)
     {
-        //MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
-        //                              "Creating MdiGlPlot::mdiParentGlFrame\n");
+        MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
+                                      "Creating MdiGlPlot::mdiParentGlFrame\n");
         MdiGlPlot::mdiParentGlFrame =
             new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
                                  //wxPoint(300, 200), wxSize(600, 500),
@@ -94,8 +94,8 @@ bool PlotInterface::CreateGlPlotWindow()
     //loj: 3/8/04 added if
     if (MdiGlPlot::mdiParentGlFrame->mainSubframe == NULL)
     {
-        //MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
-        //                              "Creating MdiGlPlot::mdiParentGlFrame->mainSubframe\n");
+        MessageInterface::ShowMessage("PlotInterface::CreateGlPlotWindow() "
+                                      "Creating MdiGlPlot::mdiParentGlFrame->mainSubframe\n");
         MdiGlPlot::mdiParentGlFrame->mainSubframe =
             new MdiChildTrajFrame(MdiGlPlot::mdiParentGlFrame, true,
                                   _T("Main Canvas Frame"),
@@ -118,6 +118,7 @@ bool PlotInterface::CreateGlPlotWindow()
     
     MdiGlPlot::mdiParentGlFrame->Show(true);
     MdiGlPlot::mdiParentGlFrame->UpdateUI();
+
     return true;
 }
 
