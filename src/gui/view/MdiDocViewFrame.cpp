@@ -36,7 +36,9 @@
 
 
 #ifndef __WXMSW__
+#ifndef __WXMAC__
 #include "bitmaps/open.xpm"
+#endif
 #endif
 
 /*
