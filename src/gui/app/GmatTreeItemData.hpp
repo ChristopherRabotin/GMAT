@@ -154,6 +154,8 @@ namespace GmatTree
         DO_CONTROL,
         SWITCH_CONTROL,
         END_CONTROL,
+        ELSE_IF_CONTROL,
+        ELSE_CONTROL,
     };
 }
 #endif // GmatTreeItemData_hpp
