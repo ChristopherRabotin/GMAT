@@ -40,8 +40,8 @@ ForLoopPanel::ForLoopPanel(wxWindow *parent, GmatCommand *cmd)
    theForCommand = (For *)cmd;
    
    mStartValue = 0;
-   mEndValue = 0;
    mStepSize = 0;
+   mEndValue = 0;   
    
    Create();
    Show();
@@ -62,17 +62,23 @@ void ForLoopPanel::Create()
 void ForLoopPanel::Setup( wxWindow *parent)
 {
    // wxStaticText
+   indexStaticText =
+      new wxStaticText(this, ID_TEXT , wxT("Index"),
+                        wxDefaultPosition, wxDefaultSize, 0);
    startStaticText =
-      new wxStaticText(this, -1, wxT("Start"),
+      new wxStaticText(this, ID_TEXT , wxT("Start"),
                         wxDefaultPosition, wxDefaultSize, 0);
    stepStaticText =
-      new wxStaticText(this, -1, wxT("Increment"), 
+      new wxStaticText(this, ID_TEXT , wxT("Increment"), 
                         wxDefaultPosition, wxDefaultSize, 0);
    endStaticText =
-      new wxStaticText(this, -1, wxT("End"), 
+      new wxStaticText(this, ID_TEXT , wxT("End"), 
                         wxDefaultPosition, wxDefaultSize, 0);
                         
    // wxTextCtrl
+   indexTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(250,-1), 0);
    startTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(250,-1), 0);
@@ -88,6 +94,9 @@ void ForLoopPanel::Setup( wxWindow *parent)
    // wx*Sizers
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 3, 0, 0 );
    
+   flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( indexStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer1->Add( indexTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( 20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( startStaticText, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer1->Add( startTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);  
@@ -109,6 +118,8 @@ void ForLoopPanel::LoadData()
     if (theForCommand != NULL)
     {
        Integer paramId;
+       //paramId = theForCommand->GetParameterID("StartValue");
+       //mForName = theForCommand->GetRealParameter(paramId);
        paramId = theForCommand->GetParameterID("StartValue");
        mStartValue = theForCommand->GetRealParameter(paramId);
        paramId = theForCommand->GetParameterID("Step");

@@ -33,14 +33,17 @@ public:
 private:
     For *theForCommand;
     
+    Real mForName;
     Real mStartValue;
-    Real mEndValue;
     Real mStepSize;
+    Real mEndValue;    
     
+    wxStaticText *indexStaticText;
     wxStaticText *startStaticText;
     wxStaticText *stepStaticText;
     wxStaticText *endStaticText;
    
+    wxTextCtrl *indexTextCtrl;
     wxTextCtrl *startTextCtrl;
     wxTextCtrl *stepTextCtrl;
     wxTextCtrl *endTextCtrl;
@@ -62,6 +65,7 @@ private:
     enum
     {     
         ID_TEXTCTRL = 46000,
+        ID_TEXT 
     };
 };
 
