@@ -18,11 +18,11 @@
 #include "SolarSystem.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_JR_DRAG 0     
+//#define DEBUG_JR_DRAG 1
 
-//#ifdef DEBUG_JR_DRAG
-//   #include "MessageInterface.hpp"
-//#endif
+#ifdef DEBUG_JR_DRAG
+   #include "MessageInterface.hpp"
+#endif
 
 const Real pi         = 3.141592653589793238;
 const Real ra         = 6356.766;              /// Average radius of the earth (km) 
@@ -211,7 +211,7 @@ const Real con_den[5][7] =
  */
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere() :
-   AtmosphereModel("JacchiaRoberts") //loj: 10/28/04 Changed from Jacchia-Roberts
+   AtmosphereModel("JacchiaRoberts")
 {
    earth = NULL;
 }
@@ -253,54 +253,65 @@ GmatBase* JacchiaRobertsAtmosphere::Clone(void) const
  *  Calculates the density at each of the states in the input vector, using the 
  *  JacchiaRoberts atmosphere model.
  * 
- *  @param pos       The input vector of spacecraft states
+ *  @param pos       The input vector of spacecraft states (6 elements)
  *  @param density   The array of output densities
  *  @param epoch     The current TAIJulian epoch
  *  @param count     The number of spacecraft contained in pos 
  */
 //------------------------------------------------------------------------------
 bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch, 
-                                Integer count)
+                                       Integer count)
 {
 #ifdef DEBUG_JR_DRAG
-   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density called\n");
+   MessageInterface::ShowMessage
+      ("JacchiaRobertsAtmosphere::Density() epoch=%g, sc count=%d\n", epoch, count);
 #endif
    Real height, rho;
    Real utc_time;
-   A1Mjd *a1mjd_time = new A1Mjd(epoch);
-      
+   //loj: 1/14/05 A1Mjd *a1mjd_time = new A1Mjd(epoch);
+   A1Mjd a1mjd_time(epoch);
+   
    // Compute height of spacecraft
    //  height = sqrt(pos[0]*pos[0] + pos[1]*pos[1]
    //             + pos[2]*pos[2]) - ra;
    
    GetEarth();  
    Real earthRadius = earth->GetEquatorialRadius();
-  
-   height = get_geodetic_height(earthRadius, pos, flat);
-
-   // Obtain density of atmosphere at spacecraft height
-
-   // Compute the correct time first  
-   utc_time = (Real)a1mjd_time->ToUtcMjd() - 0.5;
-
-   //  For heights in the air, use JacchiaRoberts to calculate the density.  For
-   //  heights at or below the surface of the Earth, use the constant value
-   //  used for heights below 90 KM.
-   if (height > 0.0)
-   {         
-      rho = 1.0e12*JacchiaRoberts(height, pos, sunVector, utc_time, newFile);
-   }
-   else
+   
+   //loj: 1/14/05 Added to handle multiple spacecraft
+   for (Integer i=0; i<count; i++)
    {
-      rho = 1.0e12*rho_zero;
-   }
-   // Output density in units of kg/m3
-   *density = 1.0e-9*rho;
-   //MessageInterface::ShowMessage(" Density = %15le\n", *density);
-#ifdef DEBUG_JR_DRAG    
-   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density complete\n");
-#endif
+      height = get_geodetic_height(earthRadius, &pos[i*6], flat);
+      
+      // Obtain density of atmosphere at spacecraft height
 
+      // Compute the correct time first  
+      //loj: utc_time = (Real)a1mjd_time->ToUtcMjd() - 0.5;
+      utc_time = (Real)a1mjd_time.ToUtcMjd() - 0.5;
+
+      //  For heights in the air, use JacchiaRoberts to calculate the density.  For
+      //  heights at or below the surface of the Earth, use the constant value
+      //  used for heights below 90 KM.
+      if (height > 0.0)
+      {         
+         rho = 1.0e12*JacchiaRoberts(height, &pos[i*6], sunVector, utc_time, newFile);
+      }
+      else
+      {
+         rho = 1.0e12*rho_zero;
+      }
+      
+      // Output density in units of kg/m3
+      //loj: 1/14/05 *density = 1.0e-9*rho;
+      density[i] = 1.0e-9*rho;
+      
+#ifdef DEBUG_JR_DRAG    
+      MessageInterface::ShowMessage
+         ("JRDensity(): sat %d pos = %g, %g, %g, height = %g, density = %g\n",
+          i, pos[i*6], pos[i*6+1], pos[i*6+2], height, density[i]);
+#endif
+   }
+   
    return true;
 }
 
@@ -332,10 +343,6 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
 Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3], 
           Real sun[3], Real a1_time, bool new_file)
 {
-#ifdef DEBUG_JR_DRAG
-   MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::JacchiaRoberts() called\n");
-#endif
-
    GEOPARMS geo;
    Real density, temperature, t_500, sun_dec, geo_lat;
    FILE *tkptr;
@@ -405,7 +412,8 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    else
    {
       density = 0.0; 
-   }  
+   }
+   
    return density * rho_cor(height, a1_time, geo_lat, &geo);
 }
 
@@ -1040,7 +1048,8 @@ void JacchiaRobertsAtmosphere::deflate_polynomial(Real c[], Integer n,
  *     computing the cosine directly from r[].      
  */
 //------------------------------------------------------------------------------
-Real JacchiaRobertsAtmosphere::get_geodetic_height(Real R_eq, Real r[3], Real f)
+//Real JacchiaRobertsAtmosphere::get_geodetic_height(Real R_eq, Real r[3], Real f)
+Real JacchiaRobertsAtmosphere::get_geodetic_height(Real R_eq, Real *r, Real f)
 {
     Real phi, d, cos_phi;
 
