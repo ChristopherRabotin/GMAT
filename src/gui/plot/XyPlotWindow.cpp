@@ -1,5 +1,5 @@
 //$Header$
-/////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 // Name:        XyPlotWindow.cpp
 // Purpose:     wxPlotWindow
 // Author:      Robert Roebling
@@ -10,7 +10,7 @@
 // Created:     12/01/2000
 // Copyright:   (c) Robert Roebling
 // Licence:     wxWindows license
-/////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //loj: 5/13/04 sets scroll area to frame instead of plot area. The vertical
@@ -110,10 +110,14 @@ namespace GmatPlot
    const int X_AXIS_AREA_HEIGHT = 60;
 }
 
-//-----------------------------------------------------------------------------
+//======================================
 // wxPlotEvent
-//-----------------------------------------------------------------------------
+//======================================
 
+
+//-----------------------------------------------------------------------------
+// wxPlotEvent::wxPlotEvent( wxEventType commandType, int id )
+//-----------------------------------------------------------------------------
 wxPlotEvent::wxPlotEvent( wxEventType commandType, int id )
    : wxNotifyEvent( commandType, id )
 { 
@@ -122,13 +126,17 @@ wxPlotEvent::wxPlotEvent( wxEventType commandType, int id )
    m_position = 0;
 }
       
-//-----------------------------------------------------------------------------
+//======================================
 // wxPlotCurve
-//-----------------------------------------------------------------------------
+//======================================
 
 IMPLEMENT_ABSTRACT_CLASS(wxPlotCurve, wxObject)
 
 //loj: 2/20/04 added title
+//-----------------------------------------------------------------------------
+// wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY,
+//                           const wxString &title)
+//-----------------------------------------------------------------------------
 wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY,
                           const wxString &title)
 {
@@ -138,15 +146,18 @@ wxPlotCurve::wxPlotCurve( int offsetY, double startY, double endY,
    m_curveTitle = title;
 }
 
-//-----------------------------------------------------------------------------
+//======================================
 // wxPlotOnOffCurve
-//-----------------------------------------------------------------------------
+//======================================
 
 IMPLEMENT_CLASS(wxPlotOnOffCurve, wxObject)
 
 #include "wx/arrimpl.cpp"
 WX_DEFINE_OBJARRAY(wxArrayPlotOnOff);
 
+//-----------------------------------------------------------------------------
+// wxPlotOnOffCurve::wxPlotOnOffCurve( int offsetY )
+//-----------------------------------------------------------------------------
 wxPlotOnOffCurve::wxPlotOnOffCurve( int offsetY )
 {
    m_offsetY = offsetY;
@@ -154,6 +165,9 @@ wxPlotOnOffCurve::wxPlotOnOffCurve( int offsetY )
    m_maxX = -1;
 }
 
+//-----------------------------------------------------------------------------
+// void wxPlotOnOffCurve::Add( wxInt32 on, wxInt32 off, void *clientData )
+//-----------------------------------------------------------------------------
 void wxPlotOnOffCurve::Add( wxInt32 on, wxInt32 off, void *clientData )
 {
    wxASSERT_MSG( on > 0, wxT("plot index < 0") );
@@ -171,49 +185,72 @@ void wxPlotOnOffCurve::Add( wxInt32 on, wxInt32 off, void *clientData )
    m_marks.Add( v );
 }
 
+//-----------------------------------------------------------------------------
+// size_t wxPlotOnOffCurve::GetCount()
+//-----------------------------------------------------------------------------
 size_t wxPlotOnOffCurve::GetCount()
 {
    return m_marks.GetCount();
 }
 
+//-----------------------------------------------------------------------------
+// wxInt32 wxPlotOnOffCurve::GetOn( size_t index )
+//-----------------------------------------------------------------------------
 wxInt32 wxPlotOnOffCurve::GetOn( size_t index )
 {
    wxPlotOnOff *v = &m_marks.Item( index );
    return v->m_on;
 }
 
+//-----------------------------------------------------------------------------
+// wxInt32 wxPlotOnOffCurve::GetOff( size_t index )
+//-----------------------------------------------------------------------------
 wxInt32 wxPlotOnOffCurve::GetOff( size_t index )
 {
    wxPlotOnOff *v = &m_marks.Item( index );
    return v->m_off;
 }
 
+//-----------------------------------------------------------------------------
+// void* wxPlotOnOffCurve::GetClientData( size_t index )
+//-----------------------------------------------------------------------------
 void* wxPlotOnOffCurve::GetClientData( size_t index )
 {
    wxPlotOnOff *v = &m_marks.Item( index );
    return v->m_clientData;
 }
 
+//-----------------------------------------------------------------------------
+// wxPlotOnOff *wxPlotOnOffCurve::GetAt( size_t index )
+//-----------------------------------------------------------------------------
 wxPlotOnOff *wxPlotOnOffCurve::GetAt( size_t index )
 {
    return &m_marks.Item( index );
 }
 
-void wxPlotOnOffCurve::DrawOnLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end, void *WXUNUSED(clientData) )
+//-----------------------------------------------------------------------------
+// void wxPlotOnOffCurve::DrawOnLine( wxDC &dc, wxCoord y, wxCoord start,
+//                                    wxCoord end, void *WXUNUSED(clientData) )
+//-----------------------------------------------------------------------------
+void wxPlotOnOffCurve::DrawOnLine( wxDC &dc, wxCoord y, wxCoord start,
+                                   wxCoord end, void *WXUNUSED(clientData) )
 {
    dc.DrawLine( start, y, start, y-30 );
    dc.DrawLine( start, y-30, end, y-30 );
    dc.DrawLine( end, y-30, end, y );
 }
 
+//-----------------------------------------------------------------------------
+// void wxPlotOnOffCurve::DrawOffLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end )
+//-----------------------------------------------------------------------------
 void wxPlotOnOffCurve::DrawOffLine( wxDC &dc, wxCoord y, wxCoord start, wxCoord end )
 {
    dc.DrawLine( start, y, end, y );
 }
 
-//-----------------------------------------------------------------------------
+//======================================
 // wxPlotArea
-//-----------------------------------------------------------------------------
+//======================================
 
 IMPLEMENT_DYNAMIC_CLASS(wxPlotArea, wxWindow)
 
@@ -223,8 +260,12 @@ BEGIN_EVENT_TABLE(wxPlotArea, wxWindow)
   EVT_LEFT_DCLICK(  wxPlotArea::OnMouse)
 END_EVENT_TABLE()
 
-   wxPlotArea::wxPlotArea( wxPlotWindow *parent )
-      : wxWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, "plotarea" )
+//------------------------------------------------------------------------------
+// wxPlotArea( wxPlotWindow *parent )
+//------------------------------------------------------------------------------
+wxPlotArea::wxPlotArea( wxPlotWindow *parent )
+   : wxWindow( parent, -1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER,
+               "plotarea" )
 {
    m_owner = parent;
     
@@ -233,9 +274,12 @@ END_EVENT_TABLE()
    //loj: 2/27/04 set to gray
    SetBackgroundColour( *wxWHITE );
    //SetBackgroundColour( *wxLIGHT_GREY );
-   //Note: if a different color is used, Delete() should should same background color
+   //Note: if a different color is used, Delete() should have same background color
 }
 
+//------------------------------------------------------------------------------
+// void OnMouse( wxMouseEvent &event )
+//------------------------------------------------------------------------------
 void wxPlotArea::OnMouse( wxMouseEvent &event )
 {
    int client_width;
@@ -294,7 +338,7 @@ void wxPlotArea::OnMouse( wxMouseEvent &event )
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotArea::DeleteCurve( wxPlotCurve *curve, int from, int to )
+// void DeleteCurve( wxPlotCurve *curve, int from, int to )
 //------------------------------------------------------------------------------
 void wxPlotArea::DeleteCurve( wxPlotCurve *curve, int from, int to )
 {
@@ -305,7 +349,7 @@ void wxPlotArea::DeleteCurve( wxPlotCurve *curve, int from, int to )
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotArea::DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
+// void DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
 //------------------------------------------------------------------------------
 void wxPlotArea::DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
 {
@@ -353,7 +397,7 @@ void wxPlotArea::DrawCurve( wxDC *dc, wxPlotCurve *curve, int from, int to )
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotArea::DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, int to )
+// void DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, int to )
 //------------------------------------------------------------------------------
 void wxPlotArea::DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, int to )
 {
@@ -416,7 +460,7 @@ void wxPlotArea::DrawOnOffCurve( wxDC *dc, wxPlotOnOffCurve *curve, int from, in
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
+// void OnPaint( wxPaintEvent &WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
@@ -488,7 +532,7 @@ void wxPlotArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotArea::ScrollWindow( int dx, int dy, const wxRect *rect )
+// void ScrollWindow( int dx, int dy, const wxRect *rect )
 //------------------------------------------------------------------------------
 void wxPlotArea::ScrollWindow( int dx, int dy, const wxRect *rect )
 {
@@ -496,8 +540,10 @@ void wxPlotArea::ScrollWindow( int dx, int dy, const wxRect *rect )
    //m_owner->m_xaxis->ScrollWindow( dx, 0 );
 }
 
+//======================================
 //-----------------------------------------------------------------------------
 // wxPlotXAxisArea
+//======================================
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxPlotXAxisArea, wxWindow)
@@ -507,6 +553,9 @@ BEGIN_EVENT_TABLE(wxPlotXAxisArea, wxWindow)
    EVT_LEFT_DOWN(    wxPlotXAxisArea::OnMouse)
 END_EVENT_TABLE()
 
+//-----------------------------------------------------------------------------
+// wxPlotXAxisArea( wxPlotWindow *parent )
+//-----------------------------------------------------------------------------
 wxPlotXAxisArea::wxPlotXAxisArea( wxPlotWindow *parent )
     //loj: 2/27/04 : wxWindow( parent, -1, wxDefaultPosition, wxSize(-1,40), 0, "plotxaxisarea" )
     // I had to use 100 for width in order to show x axis area
@@ -521,6 +570,9 @@ wxPlotXAxisArea::wxPlotXAxisArea( wxPlotWindow *parent )
    SetFont( *wxSMALL_FONT );
 }
 
+//-----------------------------------------------------------------------------
+// void OnMouse( wxMouseEvent &event )
+//-----------------------------------------------------------------------------
 void wxPlotXAxisArea::OnMouse( wxMouseEvent &event )
 {
    int client_width;
@@ -541,7 +593,7 @@ void wxPlotXAxisArea::OnMouse( wxMouseEvent &event )
 }
 
 //------------------------------------------------------------------------------
-// void wxPlotXAxisArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
+// void OnPaint( wxPaintEvent &WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotXAxisArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
@@ -631,8 +683,10 @@ void wxPlotXAxisArea::OnPaint( wxPaintEvent &WXUNUSED(event) )
    dc.DrawLine( client_width-4, 15, client_width-10, 20 );
 }
 
+//======================================
 //-----------------------------------------------------------------------------
 // wxPlotYAxisArea
+//======================================
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxPlotYAxisArea, wxWindow)
@@ -769,9 +823,6 @@ BEGIN_EVENT_TABLE(wxPlotWindow, wxScrolledWindow)
   
    EVT_SCROLLWIN( wxPlotWindow::OnScroll2)
 
-   //loj: 2/27/04 added
-   //loj: 4/29/04 Do we really need this? Since scrolling on plot area
-   //loj: 5/13/04 Changed back to scrolling on frame
    EVT_SIZE(wxPlotWindow::OnSize)
 END_EVENT_TABLE()
 
@@ -791,36 +842,35 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 
    wxBoxSizer *mainSizer = new wxBoxSizer( wxVERTICAL );
 
-   //loj: 3/11/04 added plot title area
    //----------------------------------------------------------------
    // for plot title area
    //----------------------------------------------------------------
-   wxPanel *topPanel = new wxPanel(this, -1, wxPoint(0,0), wxSize(200,40)); //loj: long title not shown
+   wxPanel *topPanel = new wxPanel(this, -1, wxPoint(0,0), wxSize(400,50));
    //wxPanel *topPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(-1, -1)); //loj: title not shown
    topPanel->SetBackgroundColour(*wxWHITE);
 
-   mPlotTitle = plotTitle; //loj: 5/13/04 added
-   //mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle)); //loj: 5/13/04
+   mPlotTitle = plotTitle;
    mTitleText = new wxStaticText(topPanel, -1, wxT(plotTitle), wxPoint(-1,-1),
-                                 wxSize(200, -1), wxALIGN_CENTRE);
+                                 wxSize(400, 50), wxALIGN_CENTRE);
    mTopPanelSizer = new wxBoxSizer(wxVERTICAL);
 
    topPanel->SetSizer(mTopPanelSizer); //loj: do this before mTopPanelSizer->Add()
-   mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxALL, 10);
-   //mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxEXPAND);
-    
-   //loj: 3/11/04 added legend area
+   mTopPanelSizer->Add(mTitleText, 0, wxALIGN_CENTER | wxALL, 10); 
+   mTopPanelSizer->Fit(mTitleText); //loj: 7/13/04 added
+   
    //----------------------------------------------------------------
    // for plot legend area
    //----------------------------------------------------------------
-   wxPanel *bottomPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(200, 40));
+   wxPanel *bottomPanel = new wxPanel(this, -1, wxPoint(-1,-1), wxSize(400, 50));
    bottomPanel->SetBackgroundColour(*wxWHITE);
     
-   wxStaticText *legendText = new wxStaticText(bottomPanel, -1, wxT("...Legend Area..."));
+   //wxStaticText *legendText = new wxStaticText(bottomPanel, -1, wxT("...Legend Area..."));
+   wxStaticText *legendText =
+      new wxStaticText(bottomPanel, -1, wxT("...Legend Area..."), wxPoint(-1,-1),
+                       wxSize(400, 50), wxALIGN_CENTRE);
    wxBoxSizer *bottomPanelSizer = new wxBoxSizer(wxVERTICAL);
-    
+   
    bottomPanel->SetSizer(bottomPanelSizer);
-   //bottomPanelSizer->Add(legendText, 0, wxALIGN_CENTER | wxEXPAND | wxALL, 5); 
    bottomPanelSizer->Add(legendText, 0, wxALIGN_CENTER | wxALL, 5);
 
    //----------------------------------------------------------------
@@ -894,7 +944,7 @@ wxPlotWindow::wxPlotWindow( wxWindow *parent, wxWindowID id, const wxPoint &pos,
 
    middleSizer->Add( plotSizer, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
 
-   mainSizer->Add( topPanel, 0, wxALIGN_CENTER | wxEXPAND ); //loj: title not shown
+   mainSizer->Add( topPanel, 0, wxALIGN_CENTER | wxEXPAND );
    mainSizer->Add( middleSizer, 1, wxEXPAND ); //loj: if 2nd arg is 0, plot is not showing
    mainSizer->Add( bottomPanel, 0, wxALIGN_CENTER | wxEXPAND );
 
@@ -986,7 +1036,6 @@ void wxPlotWindow::SetCurrent( wxPlotCurve* current )
 //------------------------------------------------------------------------------
 void wxPlotWindow::Delete( wxPlotCurve* curve )
 {
-   //loj: 3/10/04 debug
    //MessageInterface::ShowMessage("wxPlotWindow::Delete() %s\n",
    //                              curve->GetCurveTitle().c_str());
    wxNode *node = m_curves.Find( curve );
@@ -1255,7 +1304,6 @@ void wxPlotWindow::RedrawEverything()
    m_area->Refresh( TRUE );
 }
 
-//loj: 3/10/04 added
 //------------------------------------------------------------------------------
 // void wxPlotWindow::RedrawPlotArea()
 //------------------------------------------------------------------------------
@@ -1264,7 +1312,6 @@ void wxPlotWindow::RedrawPlotArea()
    m_area->Refresh( TRUE );
 }
 
-//loj: 5/13/04 added
 //------------------------------------------------------------------------------
 // wxString wxPlotWindow::GetPlotTitle()
 //------------------------------------------------------------------------------
@@ -1290,7 +1337,7 @@ void wxPlotWindow::SetPlotTitle(const wxString &title)
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 {
-   //SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: set target window to plot frame
    SetZoom( m_xZoom * 1.5 );
 }
 
@@ -1299,7 +1346,7 @@ void wxPlotWindow::OnZoomIn( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnZoomOut( wxCommandEvent& WXUNUSED(event) )
 {
-   //SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: set target window to plot frame
    SetZoom( m_xZoom * 0.6666 );
 }
 
@@ -1308,7 +1355,7 @@ void wxPlotWindow::OnZoomOut( wxCommandEvent& WXUNUSED(event) )
 //------------------------------------------------------------------------------
 void wxPlotWindow::OnEnlarge( wxCommandEvent& WXUNUSED(event) )
 {
-   //SetTargetWindow( m_area ); //loj: 4/29/04 added
+   //SetTargetWindow( m_area ); //loj: set target window to plot frame
    //loj: commented out
    //if (!m_current) return;
    //Enlarge( m_current, 1.5 );
@@ -1356,7 +1403,6 @@ void wxPlotWindow::OnScroll2( wxScrollWinEvent& event )
    }
 }
 
-//loj: 2/27/04 added
 //------------------------------------------------------------------------------
 // void wxPlotWindow::OnSize( wxSizeEvent& event )
 //------------------------------------------------------------------------------

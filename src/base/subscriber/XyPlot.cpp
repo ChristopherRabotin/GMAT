@@ -277,9 +277,11 @@ bool XyPlot::Initialize()
       //MessageInterface::ShowMessage("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
       PlotInterface::CreateXyPlotWindow(instanceName, mPlotTitle,
                                         mXAxisTitle, mYAxisTitle);
+      
+      PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle); //loj: 7/13/04 added
 
       mIsXyPlotWindowSet = true; //loj: 5/12/04 Do I need this flag?
-            
+      
       // add to Y params to XyPlotWindow
       //loj: temp code
       int yOffset = 0; //loj: I don't know how this is used

@@ -286,7 +286,9 @@ void MdiChildXyFrame::SetPlotTitle(const wxString &title)
    //MessageInterface::ShowMessage("MdiChildXyFrame::SetPlotTitle() title = %s\n",
    //                              title.c_str());
    mPlotTitle = title;
-    
+
+   SetTitle(title); //loj: 7/13/04 added
+   
    if (mXyPlot)
       mXyPlot->SetPlotTitle(title);
 }
