@@ -24,7 +24,8 @@
 #include "Command.hpp"
 #include "Function.hpp"
 
-#include "Parameter.hpp"
+#include "Variable.hpp"
+
 //#include <map>
 #include <iostream>
 #include <iomanip>
@@ -81,19 +82,26 @@ public:
     
    virtual bool            Initialize();
    virtual bool            Execute();
-   std::string FormEvalString();
+
+   Integer GetNumInputParams();
+   Integer GetNumOutputParams();
+
 
 protected:
 
 private:
    ObjectArray objectArray;
-   std::vector<Parameter*> mInputList;
-   std::vector<Parameter*> mOutputList;
+   std::vector<Variable*> mInputList;
+   std::vector<Variable*> mOutputList;
+
+   StringArray mInputListNames;
+   StringArray mOutputListNames;
 
    Function *mFunction;
    std::string mFunctionName;
 
    bool ExecuteMatlabFunction();
+   std::string FormEvalString();
 
    enum
    {
