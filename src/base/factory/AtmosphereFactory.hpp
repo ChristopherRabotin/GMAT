@@ -46,8 +46,6 @@ protected:
       // protected data
 
 private:
-      // private data
-      AtmosphereManager atmManager;
 
 
 };

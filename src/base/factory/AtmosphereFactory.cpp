@@ -52,11 +52,11 @@ AtmosphereModel* AtmosphereFactory::CreateAtmosphere(std::string ofType,
                                                      std::string forBody,
                                                      std::string withName)
 {
-   if (ofType == "ExponentialAtmosphere")
+   if (ofType == "Exponential")
       return new ExponentialAtmosphere();
-   else if (ofType == "Msise90Atmosphere")
+   else if (ofType == "Msise90")
       return new Msise90Atmosphere();
-   else if (ofType == "JacchiaRobertsAtmosphere")
+   else if (ofType == "JacchiaRoberts")
       return new JacchiaRobertsAtmosphere();
    return NULL;
 }
@@ -77,9 +77,9 @@ Factory(Gmat::ATMOSPHERE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("ExponentialAtmosphere");
-      creatables.push_back("Msise90Atmosphere");
-      creatables.push_back("JacchiaRobertsAtmosphere");
+      creatables.push_back("Exponential");
+      creatables.push_back("Msise90");
+      creatables.push_back("JacchiaRoberts");
     }
 }
 
