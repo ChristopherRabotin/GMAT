@@ -20,16 +20,34 @@
 #define PlotInterface_hpp
 
 #include "gmatdefs.hpp"
-
+#include "Rvector.hpp"
 
 class PlotInterface
 {
 
 public:
+    // for OpenGL Plot
+    static bool CreateGlPlotWindow(bool canvasOnly); 
+    static bool UpdateGlSpacecraft(const Real &time, const Real &posX,
+                                   const Real &posY, const Real &posZ,
+                                   bool updateCanvas);
 
-    static bool CreatePlotWindow(bool canvasOnly);
-    static bool UpdateSpacecraft(const Real &time, const Real &posX,
-                                 const Real &posY, const Real &posZ);
+    // for XY plot
+    static bool CreateXyPlotWindow(bool canvasOnly,
+                                   const std::string &plotName,
+                                   const std::string &plotTitle,
+                                   const std::string &xAxisTitle,
+                                   const std::string &yAxisTitle);
+    static bool AddXyPlotCurve(const std::string &plotName,
+                               int yOffset, Real yMin, Real yMax,
+                               const std::string &curveTitle,
+                               const std::string &penColor);
+    static bool UpdateXyPlot(const std::string &plotName,
+                             const Real &xval, const Rvector &yvals,
+                             const std::string &plotTitle,
+                             const std::string &xAxisTitle,
+                             const std::string &yAxisTitle);
+                             
     
 private:
     
