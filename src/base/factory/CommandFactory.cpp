@@ -59,9 +59,9 @@ Command* CommandFactory::CreateCommand(std::string ofType,
     else if (ofType == "Target")
         return new Target;
     else if (ofType == "Vary")
-        return new Target;
+        return new Vary;
     else if (ofType == "Achieve")
-        return new Target;
+        return new Achieve;
     else if (ofType == "EndTarget")
         return new EndTarget;
    // add more here .......
