@@ -25,29 +25,31 @@
 class GMAT_API Publisher
 {
 public:
-    static Publisher*
-    Instance(void);
+   static Publisher*
+   Instance(void);
 
-    bool Subscribe(Subscriber * s);
-    bool Unsubscribe(Subscriber * s);
-    bool UnsubscribeAll(); //loj: 3/9/04 added
+   bool Subscribe(Subscriber *s);
+   bool Unsubscribe(Subscriber *s);
+   bool UnsubscribeAll();
+   
+   bool Publish(Real *data, Integer count);
+   bool Publish(char *data, Integer count = 0);
+   bool Publish(Integer *data, Integer count);
 
-    bool Publish(Real * data, Integer count);
-    bool Publish(char * data, Integer count = 0);
-    bool Publish(Integer * data, Integer count);
+   bool FlushBuffers(); //loj: 6/22/04 added
 
 protected:
-    /// The singleton
-    static Publisher        *instance;
-    /// List of the subscribers
-    std::list<Subscriber*>  subs;
+   /// The singleton
+   static Publisher        *instance;
+   /// List of the subscribers
+   std::list<Subscriber*>  subs;
 
-    // default constructor
-    Publisher(void);
-    // assignment operator
-    Publisher& operator=(const Publisher &right);
+   // default constructor
+   Publisher(void);
+   // assignment operator
+   Publisher& operator=(const Publisher &right);
 
-    // destructor
-    virtual ~Publisher(void);
+   // destructor
+   virtual ~Publisher(void);
 };
 #endif // Publisher_hpp

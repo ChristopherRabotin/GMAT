@@ -21,155 +21,204 @@
 #include <string>
 #include "MessageInterface.hpp"
 
+#define DEBUG_SUBSCRIBER 0
+
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
 
-
+//------------------------------------------------------------------------------
+// Publisher* Instance(void)
+//------------------------------------------------------------------------------
 Publisher* Publisher::Instance(void)
 {
-    if (instance == NULL)
-        instance = new Publisher;
-    return instance;
+   if (instance == NULL)
+      instance = new Publisher;
+   return instance;
 }
 
-
+//------------------------------------------------------------------------------
+// Publisher(void)
+//------------------------------------------------------------------------------
 Publisher::Publisher(void)
 {
 }
-/*Publisher::Publisher(void) :
-    subs                (NULL)
-{
-}
-*/
 
+//------------------------------------------------------------------------------
+// ~Publisher(void)
+//------------------------------------------------------------------------------
 Publisher::~Publisher(void)
 {
-    subs.clear();
+   subs.clear();
 }
 
-
-bool Publisher::Subscribe(Subscriber * s)
+//------------------------------------------------------------------------------
+// bool Subscribe(Subscriber *s)
+//------------------------------------------------------------------------------
+bool Publisher::Subscribe(Subscriber *s)
 {
-    //MessageInterface::ShowMessage("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
-    if (!s)
-        return false;
+#if DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
+#endif
+   
+   if (!s)
+      return false;
 
-    subs.push_back(s);
-    return true;
+   subs.push_back(s);
+   return true;
 }
 
-
-bool Publisher::Unsubscribe(Subscriber * s)
+//------------------------------------------------------------------------------
+// bool Unsubscribe(Subscriber *s)
+//------------------------------------------------------------------------------
+bool Publisher::Unsubscribe(Subscriber *s)
 {
-    if (!s)
-        return false;
+   if (!s)
+      return false;
 
-    subs.remove(s);
-    return true;
+   subs.remove(s);
+   return true;
 }
 
-//loj: 3/9/04 added
+//------------------------------------------------------------------------------
+// bool UnsubscribeAll()
+//------------------------------------------------------------------------------
 bool Publisher::UnsubscribeAll()
 {
-    subs.clear();
-    return true;
+   subs.clear();
+   return true;
 }
 
-
-bool Publisher::Publish(Real * data, Integer count)
+//------------------------------------------------------------------------------
+// bool Publish(Real *data, Integer count = false)
+//------------------------------------------------------------------------------
+bool Publisher::Publish(Real *data, Integer count)
 {
-    // No subscribers
-    if (subs.empty()){
-        return false;
-    }
+   // No subscribers
+   if (subs.empty())
+      return false;
 
-    // Convert the data into a string for distribution
-    char stream[4096] = "";
+   // Convert the data into a string for distribution
+   char stream[4096] = "";
     
-    for (Integer i = 0; i < count; ++i) {
-        sprintf(stream, "%s%12lf", stream, data[i]);
-        if (i < count - 1)
-            strcat(stream, ", ");
-        else
-            strcat(stream, "\n");
-    }
+   for (Integer i = 0; i < count; ++i)
+   {
+      sprintf(stream, "%s%12lf", stream, data[i]);
+      if (i < count - 1)
+         strcat(stream, ", ");
+      else
+         strcat(stream, "\n");
+   }
 
-    //MessageInterface::ShowMessage("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
-    //                              subs.size());
-    std::list<Subscriber*>::iterator current = subs.begin();
-    while (current != subs.end())
-    {
-        //MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
-        //                              (*current)->GetName().c_str());
-        if (!(*current)->ReceiveData(stream))
-            return false;
-        if (!(*current)->ReceiveData(data, count))
-            return false;
-        current++;
-    }
+#if DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
+       subs.size());
+#endif
+   
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+#if DEBUG_SUBSCRIBER
+      MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
+                                    (*current)->GetName().c_str());
+#endif
+      if (!(*current)->ReceiveData(stream))
+         return false;
+      if (!(*current)->ReceiveData(data, count))
+         return false;
+      current++;
+   }
 
-    return true;
+   return true;
 }
 
-
-bool Publisher::Publish(char * data, Integer count)
+//------------------------------------------------------------------------------
+// bool Publish(char *data, Integer count = 0)
+//------------------------------------------------------------------------------
+bool Publisher::Publish(char *data, Integer count)
 {
-    Integer i;
+   Integer i;
     
-    // No subscribers
-    if (subs.empty())
-        return false;
+   // No subscribers
+   if (subs.empty())
+      return false;
 
-    // Convert the data into a string for distribution
-    char stream[4096];
+   // Convert the data into a string for distribution
+   char stream[4096];
 
-    if (count) {
-        for (i = 0; i < count; ++i)
-            stream[i] = data[i];
-        stream[i] = '\0';
-    }
-    else
-        strcpy(stream, data);
+   if (count)
+   {
+      for (i = 0; i < count; ++i)
+         stream[i] = data[i];
+      stream[i] = '\0';
+   }
+   else
+   {
+      strcpy(stream, data);
+   }
+   
+   strcat(stream, "\n");
 
-    strcat(stream, "\n");
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      if (!(*current)->ReceiveData(stream))
+         return false;
+      current++;
+   }
 
-    std::list<Subscriber*>::iterator current = subs.begin();
-    while (current != subs.end())
-    {
-        if (!(*current)->ReceiveData(stream))
-            return false;
-        current++;
-    }
-
-    return true;
+   return true;
 }
 
-
-bool Publisher::Publish(Integer * data, Integer count)
+//------------------------------------------------------------------------------
+// bool Publish(Integer *data, Integer count = false)
+//------------------------------------------------------------------------------
+bool Publisher::Publish(Integer *data, Integer count)
 {
-    // No subscribers
-    if (subs.empty())
-        return false;
+   // No subscribers
+   if (subs.empty())
+      return false;
 
-    // Convert the data into a string for distribution
-    char stream[4096];
+   // Convert the data into a string for distribution
+   char stream[4096];
 
-    for(Integer i = 0; i < count; ++i) {
-        sprintf(stream, "%s%d", stream, data[i]);
-        if (i < count - 1)
-            strcat(stream, ", ");
-        else
-            strcat(stream, "\n");
-    }
+   for(Integer i = 0; i < count; ++i)
+   {
+      sprintf(stream, "%s%d", stream, data[i]);
+      if (i < count - 1)
+         strcat(stream, ", ");
+      else
+         strcat(stream, "\n");
+   }
 
-    std::list<Subscriber*>::iterator current = subs.begin();
-    while (current != subs.end())
-    {
-        if (!(*current)->ReceiveData(stream))
-            return false;
-        current++;
-    }
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      if (!(*current)->ReceiveData(stream))
+         return false;
+      current++;
+   }
 
-    return true;
+   return true;
 }
 
+//------------------------------------------------------------------------------
+// bool FlushBuffers()
+//------------------------------------------------------------------------------
+bool Publisher::FlushBuffers()
+{
+   // No subscribers
+   if (subs.empty())
+      return false;
+   
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      if (!(*current)->FlushData())
+         return false;
+      current++;
+   }
+   
+   return true;
+}
