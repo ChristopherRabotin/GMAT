@@ -46,7 +46,8 @@ public:
                              const Real &xval, const Rvector &yvals,
                              const std::string &plotTitle,
                              const std::string &xAxisTitle,
-                             const std::string &yAxisTitle);
+                             const std::string &yAxisTitle,
+                             bool updateCanvas);
                              
     
 private:

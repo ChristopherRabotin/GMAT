@@ -74,7 +74,8 @@ bool PlotInterface::CreateGlPlotWindow(bool canvasOnly)
     {
         MdiGlPlot::mdiParentGlFrame =
             new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-                                 wxPoint(300, 200), wxSize(600, 500),
+                                 //wxPoint(300, 200), wxSize(600, 500),
+                                 wxPoint(600, 400), wxSize(600, 500),
                                  wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
         // Give it an icon
 #ifdef __WXMSW__
@@ -190,16 +191,20 @@ bool PlotInterface::CreateXyPlotWindow(bool canvasOnly,
 #if !defined __CONSOLE_APP__
     if (!canvasOnly)
     {
-        MdiXyPlot::mdiParentXyFrame =
-            new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Plot Window"),
-                                 wxPoint(300, 200), wxSize(600, 500),
-                                 wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-        // Give it an icon
+        if (MdiXyPlot::mdiParentXyFrame == NULL)
+        {
+            MdiXyPlot::mdiParentXyFrame =
+                new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Plot Window"),
+                                     wxPoint(600, 10), wxSize(600, 500),
+                                     //wxPoint(300, 200), wxSize(600, 500),
+                                     wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+            // Give it an icon
 #ifdef __WXMSW__
-        MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
+            MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
 #else
-        MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
+            MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon( mondrian_xpm ));
 #endif
+        }
     }
     
     // create a frame, containing a XY plot canvas
@@ -241,9 +246,13 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName,
     bool added = false;
     
     MessageInterface::ShowMessage("PlotInterface::AddXyPlotCurve() entered."
-                                  "plotName = " + plotName + "\n");
+                                  " plotName = " + plotName + " curveTitle = " + 
+                                  curveTitle + "\n");
     
-    for (int i=0; MdiXyPlot::numChildren; i++)
+    MessageInterface::ShowMessage("PlotInterface::AddXyPlotCurve() numChildren = %d\n",
+                                  MdiXyPlot::numChildren);
+    
+    for (int i=0; i<MdiXyPlot::numChildren; i++)
     {
         MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
         
@@ -266,7 +275,7 @@ bool PlotInterface::AddXyPlotCurve(const std::string &plotName,
 //                   const Real &xval, const Rvector &yvals,
 //                   const std::string &plotTitle,
 //                   const std::string &xAxisTitle,
-//                   const std::string &yAxisTitle)
+//                   const std::string &yAxisTitle, bool updateCanvas)
 //------------------------------------------------------------------------------
 /*
  * Updates XY plot curve.
@@ -280,7 +289,8 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
                                  const Real &xval, const Rvector &yvals,
                                  const std::string &plotTitle,
                                  const std::string &xAxisTitle,
-                                 const std::string &yAxisTitle)
+                                 const std::string &yAxisTitle,
+                                 bool updateCanvas)
 {
 #if !defined __CONSOLE_APP__
     
@@ -289,15 +299,20 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
     
     if (MdiXyPlot::mdiParentXyFrame == NULL)
     {        
-        wxLogWarning("MdiParentXyFrame was not created. Creating a new MDI parent/child frame...");
-        wxLog::FlushActive();
+        //wxLogWarning("MdiParentXyFrame was not created. Creating a new MDI parent/child frame...");
+        //wxLog::FlushActive();
         CreateXyPlotWindow(false, plotName, plotTitle, xAxisTitle, yAxisTitle);
+        MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot()" + plotName + " " +
+                                      plotTitle + " " + xAxisTitle + " " + yAxisTitle + "\n");
     }
 
     //loj: assume one canvas for now
     //loj: handle multiple plot canvas later
+        
+    MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numChildren = %d\n",
+                                  MdiXyPlot::numChildren);
     
-    for (int i=0; MdiXyPlot::numChildren; i++)
+    for (int i=0; i<MdiXyPlot::numChildren; i++)
     {
         MdiChildXyFrame *frame = (MdiChildXyFrame*)(MdiXyPlot::mdiChildren[i]);
             
@@ -305,12 +320,16 @@ bool PlotInterface::UpdateXyPlot(const std::string &plotName,
         {
             int numCurves = frame->GetCurveCount();
             
+            MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numCurves = %d\n", numCurves);
             for (int j=0; j<numCurves; j++)
             {
+                MessageInterface::ShowMessage("PlotInterface::UpdateXyPlot() numCurves j = %d\n", j);
                 frame->AddDataPoints(j, xval, yvals(j));
             }
+
+            if (updateCanvas)
+                frame->RedrawCurve();
             
-            frame->RedrawCurve();
             updated = true;
         }
     }
