@@ -2,10 +2,11 @@
 # Module:     Makefile.mac for gui directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
+# Modified:   2004/05/21 - Added controllogic directory
 #
 #
-SUBS = app burn foundation forcemodel maneuver mission plot propagator \
-	solarsys solver spacecraft view
+SUBS = app burn controllogic foundation forcemodel maneuver mission plot \
+	propagator solarsys solver spacecraft view
 
 # Holding 'resource' directory for later
 

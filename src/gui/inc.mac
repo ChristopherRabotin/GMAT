@@ -2,7 +2,8 @@
 # Module:     inc.mac for gui directory 
 # Created:    Joey Gurgnaus 
 # Date:       2004/02/13
-
+# Modified:   2004/05/21 - Added controllogic directory
+#
 # Program to make (library)
 LIBDIR = $(PROJECT_ROOT)/lib
 LIB = $(LIBDIR)/libgmatgui.a
@@ -32,6 +33,7 @@ B_UTIL       = $(PROJECT_ROOT)/base/util
 # Define macros for the gui directory
 APP        = $(PROJECT_ROOT)/gui/app
 BURN       = $(PROJECT_ROOT)/gui/burn
+CTRLLOGIC  = $(PROJECT_ROOT)/gui/controllogic
 FORCEMODEL = $(PROJECT_ROOT)/gui/forcemodel
 FOUNDATION = $(PROJECT_ROOT)/gui/foundation
 INCLUDE    = $(PROJECT_ROOT)/gui/include
@@ -55,10 +57,10 @@ BASE_INCS = -I$(B_BURN) -I$(B_COMMAND) -I$(B_CONFIGS) -I$(B_EXECUTIVE) \
 	-I$(B_REFFRAME) -I$(B_SOLARSYS) -I$(B_SOLVER) -I$(B_SPACECRAFT) \
 	-I$(B_STOPCOND) -I$(B_SUBSCRIBER) -I$(B_UTIL)
 
-GUI_INCS = -I$(APP) -I$(BURN) -I$(FORCEMODEL) -I$(FOUNDATION) -I$(INCLUDE) \
-	-I$(XPM) -I$(INC_IL) -I$(INC_PLOT) -I$(MANEUVER) -I$(MISSION) \
-	-I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) -I$(SOLARSYS) \
-	-I$(SPACECRAFT) -I$(VIEW) -I.
+GUI_INCS = -I$(APP) -I$(BURN) -I$(CTRLLOGIC) -I$(FORCEMODEL) -I$(FOUNDATION) \
+	-I$(INCLUDE) -I$(XPM) -I$(INC_IL) -I$(INC_PLOT) -I$(MANEUVER) \
+	-I$(MISSION) -I$(PLOT) -I$(PROPAGATOR) -I$(RESOURCE) -I$(SOLVER) \
+	-I$(SOLARSYS) -I$(SPACECRAFT) -I$(VIEW) -I.
 
 # Object modules for library
 OBJ = $(SRC:.cpp=.o)
