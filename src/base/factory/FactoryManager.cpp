@@ -543,6 +543,27 @@ StringArray FactoryManager::GetListOfCommand(void) const
    return GetList(Gmat::COMMAND);
 }
 
+//------------------------------------------------------------------------------
+//  ~FactoryManager()
+//------------------------------------------------------------------------------
+/**
+* Destructs FactoryManager objects.
+ *
+ */
+//------------------------------------------------------------------------------
+FactoryManager::~FactoryManager()
+{
+std::list<Factory*>::iterator f = factoryList.begin();
+   // Factory f = factoryList.begin();
+   while (f != factoryList.end())
+   {
+      delete *f;       // delete each factory first
+      ++f;
+   }
+   //delete factoryList;
+   factoryList.~list<Factory*>();
+};
+
 //---------------------------------
 //  protected methods
 //---------------------------------
@@ -595,27 +616,6 @@ FactoryManager::FactoryManager()
 //factoryList (fact.factoryList)
 //{
 //}
-
-//------------------------------------------------------------------------------
-//  ~FactoryManager()
-//------------------------------------------------------------------------------
-/**
- * Destructs FactoryManager objects.
- *
- */
-//------------------------------------------------------------------------------
-FactoryManager::~FactoryManager()
-{
-   std::list<Factory*>::iterator f = factoryList.begin();
-   // Factory f = factoryList.begin();
-   while (f != factoryList.end())
-   {
-      delete *f;       // delete each factory first
-      ++f;
-   }
-   //delete factoryList;
-   factoryList.~list<Factory*>();
-};
 
 //------------------------------------------------------------------------------
 // Factory* FindFactory(Gmat::ObjectType ofType, std::string forType)

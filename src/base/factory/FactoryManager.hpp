@@ -104,8 +104,10 @@ public:
 //    StringArray            GetListofSolver(void) const;
     StringArray            GetListOfSubscriber(void) const;
     StringArray            GetListOfCommand(void) const;
-    
 
+    // class destructor
+    ~FactoryManager();
+    
 protected:
 
 private:
@@ -116,9 +118,7 @@ private:
     FactoryManager(const FactoryManager& fact);
     // assignment operator
     FactoryManager& operator= (const FactoryManager& fact);
-    // class destructor
-    ~FactoryManager();
-
+    
     // private class data
     /// the list of factories that have been registered and which are available
     /// to create objects
