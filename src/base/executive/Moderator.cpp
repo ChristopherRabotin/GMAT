@@ -21,7 +21,7 @@
 #include "NoOp.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_SETUP_RUN 1
+//#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_DEFAULT_MISSION 1
 //#define DEBUG_PLANETARY_FILE 1
@@ -1899,26 +1899,31 @@ Integer Moderator::RunMission(Integer sandboxNum)
          AddPropSetupToSandbox(sandboxNum-1);
          AddBurnToSandbox(sandboxNum-1);        
          AddSolverToSandbox(sandboxNum-1);
+         
          // Add Subscriber after Publisher. AddPublisherToSandbox() clears subscribers
          AddSubscriberToSandbox(sandboxNum-1); 
          AddParameterToSandbox(sandboxNum-1);
          AddCommandToSandbox(sandboxNum-1);
-         //MessageInterface::ShowMessage
-         //   ("Moderator::RunMission() after AddCommandToSandbox() \n");
-        
+         
+#if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() after AddCommandToSandbox() \n");
+#endif
          InitializeSandbox(sandboxNum-1);
-         //MessageInterface::ShowMessage
-         //   ("Moderator::RunMission() after InitializeSanbox() \n");
-
-         SetupRun(sandboxNum);
-         //MessageInterface::ShowMessage
-         //   ("Moderator::RunMission() after SetupRun() \n");
+         
+#if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() after InitializeSanbox() \n");
+#endif
 
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
          runState = Gmat::IDLE;
-         //MessageInterface::ShowMessage
-         //   ("Moderator::RunMission() after ExecuteSandbox() \n");
+         
+#if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator::RunMission() after ExecuteSandbox() \n");
+#endif
       }
       catch (BaseException &e)
       {
@@ -2217,7 +2222,7 @@ void Moderator::CreateDefaultMission()
       GetDefaultBurn();
       
       // Time parameters
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD"); //loj: 9/24/04 changed from CurrentTime
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
@@ -2255,6 +2260,12 @@ void Moderator::CreateDefaultMission()
 
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.SemilatusRectum");
+
+      // User variable (9/22/04 added)
+      Parameter *var = CreateParameter("Variable", "DefaultSC.Xx2");
+      var->SetStringParameter("Expression", "DefaultSC.X * 2.0");
+      var->SetRefObjectName(Gmat::PARAMETER, "DefaultSC.X");
+      
 #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default parameters created\n");
 #endif   
@@ -2265,15 +2276,22 @@ void Moderator::CreateDefaultMission()
       for (unsigned int i=0; i<params.size(); i++)
       {
          param = GetParameter(params[i]);
-         param->SetStringParameter("Description", param->GetName());
-         param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-         //loj: 9/13/04 param->SetStringParameter("Object", "DefaultSC");
+
+         // need spacecraft if system parameter (loj: 9/22/04)
+         if (param->GetKey() == Parameter::SYSTEM_PARAM)
+         {
+            //param->SetStringParameter("Description", param->GetName());
+            //loj: 9/22/04 set user Expression from now on
+            param->SetStringParameter("Expression", param->GetName());
+            param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
+            //loj: 9/13/04 param->SetStringParameter("Object", "DefaultSC");
+         }
       }
     
       // StopCondition
       StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
-      stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+      stopOnElapsedSecs->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnElapsedSecs->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
       stopOnElapsedSecs->SetRealParameter("Goal", 8640.0);
 #if DEBUG_DEFAULT_MISSION
@@ -2287,7 +2305,7 @@ void Moderator::CreateDefaultMission()
     
       // XyPlot
       sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
-      sub->SetStringParameter("IndVar", "DefaultSC.CurrentTime");
+      sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
       sub->SetStringParameter("Add", "DefaultSC.X");
       sub->Activate(true);
     
@@ -2314,7 +2332,7 @@ void Moderator::CreateDefaultMission()
       //----- StopCondition 2
       StopCondition *stopOnX =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.X");
-      stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
+      stopOnX->SetStringParameter("EpochVar", "DefaultSC.CurrA1MJD");
       stopOnX->SetStringParameter("StopVar", "DefaultSC.X");
       stopOnX->SetRealParameter("Goal", 5000.0);
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
@@ -2337,116 +2355,6 @@ void Moderator::CreateDefaultMission()
                                      "occurred during default mission creation. "
                                      "Default mission will not run");
    }
-}
-
-//------------------------------------------------------------------------------
-// void SetupRun(Integer sandboxNum)
-//------------------------------------------------------------------------------
-void Moderator::SetupRun(Integer sandboxNum)
-{
-   MessageInterface::ShowMessage("Moderator setting up for a run...\n");
-//     std::string objName;
-//     std::string objTypeName;
-  
-//     //--------------------------------------------
-//     // get/set internal objects for parameters
-//     //--------------------------------------------
-//     //MessageInterface::ShowMessage("Moderator::SetupRun() Set internal objects to parameters\n");
-//     //GmatBase *obj;
-//     StringArray objTypeList;
-    
-//     // for configured parameters use internal copy of Spacecraft
-//     StringArray &params = GetListOfConfiguredItems(Gmat::PARAMETER);
-//     Parameter *param;
-//     Spacecraft *sc;
-    
-//     for (unsigned int i=0; i<params.size(); i++)
-//     {
-//        try
-//        {
-//           param = GetParameter(params[i]);
-
-//  #if DEBUG_SETUP_RUN
-//           MessageInterface::ShowMessage
-//              ("Moderator::SetupRun() ParamType = %s, "
-//               "ParamName = %s\n", param->GetTypeName().c_str(),
-//               param->GetName().c_str());
-//  #endif
-
-//           //loj: 6/24/04 setting SolarSystem on parameters done in Sandbox
-//           //-----------------------------------------------------------
-//           // set SolarSystem to orbit related parameters
-//           //if (!param->IsTimeParameter())
-//           //   param->AddObject(theDefaultSolarSystem);
-//           //-----------------------------------------------------------
-//           //param->SetSolarSystem(theDefaultSolarSystem);
-//           //-----------------------------------------------------------
-         
-//           // set internal Spacecraft to parameters
-//           //@todo
-//           //loj: 6/24/04 move the code to Sandbox later
-//           //objTypeList = param->GetObjectTypeNames();
-//           //for (unsigned int j=0; j<objTypeList.size(); j++)
-//           for (int j=0; j<param->GetNumRefObjects(); j++)
-//           {
-//              //obj = param->GetObject(objTypeList[j]);
-//              //objName = obj->GetName();
-//              //if (objTypeList[j] == "Spacecraft")
-//              //{
-//              //   sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-//              //   param->SetObject(Gmat::SPACECRAFT, objName, sc);
-//              //}
-
-//              //loj: 9/10/04 new code
-//              objName = param->GetRefObjectName(Gmat::SPACECRAFT);
-//              if (objName != "UNKNOWN_OBJECT_TYPE")
-//              {
-//                 sc = sandboxes[sandboxNum-1]->GetSpacecraft(objName);
-//                 param->SetRefObject(sc, Gmat::SPACECRAFT, objName);
-//              }
-            
-//  #if DEBUG_SETUP_RUN
-//              MessageInterface::ShowMessage
-//                 ("Moderator::SetupRun() SetObject ParamName = %s, "
-//                  "objName = %s\n", param->GetName().c_str(),
-//                  objName.c_str());
-//  #endif
-//           }
-
-//           param->Initialize();
-
-//        }
-//        catch (BaseException &e)
-//        {
-//           MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-//                                         e.GetMessage().c_str());
-//        }
-//     }
-   
-//     //--------------------------------------------
-//     // create plot window
-//     //--------------------------------------------
-//     //@todo
-//     //loj: 6/24/04 move the code to Sandbox later
-//     StringArray &subs = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
-//     Subscriber *sub;
-
-//     //MessageInterface::ShowMessage("Moderator::SetupRun() Initialize subscribers()\n");
-//     for (unsigned int i=0; i<subs.size(); i++)
-//     {
-//        sub = GetSubscriber(subs[i]);
-//        objTypeName = sub->GetTypeName();
-//        objName = sub->GetName();
-//  #if DEBUG_SETUP_RUN
-//        MessageInterface::ShowMessage
-//           ("Moderator::SetupRun() objTypeName = %s, objName = %s\n",
-//            objTypeName.c_str(), objName.c_str());
-//  #endif
-//        sub->Initialize();
-//        //MessageInterface::ShowMessage("Moderator::SetupRun() subscriber initialized\n");
-//     }
-   
-   MessageInterface::ShowMessage("Moderator successfully set up for a run...\n");
 }
 
 //------------------------------------------------------------------------------
@@ -2621,11 +2529,11 @@ StopCondition* Moderator::CreateDefaultStopCondition()
    StopCondition *stopCond = NULL;
    
    Spacecraft *sc = GetDefaultSpacecraft();
-   std::string epochVar = sc->GetName() + ".CurrentTime";
+   std::string epochVar = sc->GetName() + ".CurrA1MJD";
    std::string stopVar = sc->GetName() + ".ElapsedSecs";
 
    if (GetParameter(epochVar) == NULL)
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
+      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
 
    if (GetParameter(stopVar) == NULL)
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
@@ -2646,10 +2554,10 @@ StopCondition* Moderator::CreateDefaultStopCondition()
 Parameter* Moderator::GetDefaultX()
 {
    Spacecraft *sc = GetDefaultSpacecraft();
-   Parameter* param = GetParameter(sc->GetName() + ".CurrentTime");
+   Parameter* param = GetParameter(sc->GetName() + ".CurrA1MJD");
    
    if (param == NULL)
-      CreateParameter("CurrA1MJD", sc->GetName() + ".CurrentTime");
+      CreateParameter("CurrA1MJD", sc->GetName() + ".CurrA1MJD");
 
    return param;
 }

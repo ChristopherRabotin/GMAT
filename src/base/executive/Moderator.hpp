@@ -237,7 +237,6 @@ private:
    // initialization
    void InitializePlanetarySource();
    void CreateDefaultMission();
-   void SetupRun(Integer sandboxNum);
    bool CreateSlpFile(const std::string &fileName);
    bool CreateDeFile(const Integer id, const std::string &fileName,
                      Gmat::DeFileFormat format = Gmat::DE_BINARY);
