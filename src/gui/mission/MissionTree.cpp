@@ -104,6 +104,13 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
     AddIcons();
     AddDefaultMission();
 
+    // Put "G" for goals and "V" for variables
+    // does it right-to-left
+    // should spaces be put in for those that don't have
+    // any text?
+    SetString(-1, "V");                                   
+    SetString(-1, "G");  
+
 //    Initialize();
 //    SetNodes();
 //    ExpandAll();
@@ -523,7 +530,7 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
             AppendItem(item, name, GmatTree::ICON_FILE, -1,
                        new MissionTreeItemData(name, GmatTree::MANEUVER_COMMAND, 
                                                name, cmd));
-            
+
             Expand(item);
         }
     }
@@ -898,10 +905,3 @@ bool MissionTree::CheckClickIn(wxPoint position)
 
     return false;
 }
-
-
-
-
-
-
-

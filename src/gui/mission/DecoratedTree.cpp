@@ -25,6 +25,8 @@
 
 #include "DecoratedTree.hpp" // class's header file
 
+#include "MessageInterface.hpp"
+
 
 BEGIN_EVENT_TABLE(DecoratedTree, wxTreeCtrl)
    EVT_PAINT(DecoratedTree::OnPaint)
@@ -298,6 +300,8 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
  */
 void DecoratedTree::DrawBoxes(wxTreeItemId id)
 {
+//    MessageInterface::ShowMessage("DecoratedTree::DrawBoxes() entered\n");
+
     // Add the new decorations
     wxRect bound;
     int w, h;
@@ -329,12 +333,24 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
                 dc.DrawLine(lft, top, rt, top);
                 dc.DrawLine(lft, btm, rt, btm);
                 if (!boxData.empty())
+                {
+//                    MessageInterface::ShowMessage("Box not empty\n");
                     // Should be DrawText, but the wx build for Dev-C++ has a
                     // bug with that method
 //                    dc.DrawRotatedText("Ready", lft+2, top, 0);
-                    if (boxData[i+lineNumber*boxCount])
-                        dc.DrawRotatedText(boxData[i+lineNumber*boxCount]->c_str(),
-                                           lft+2, top, 0);
+                    int boxDataNumber = i+lineNumber*boxCount;
+//                    MessageInterface::ShowMessage("Box data number %d\n", boxDataNumber);
+                    
+                    if (boxDataNumber < boxData.size())
+                    {
+                      if (boxData[boxDataNumber])
+                      {
+                          dc.DrawRotatedText(boxData[i+lineNumber*boxCount]->c_str(),
+                                             lft+2, top, 0);
+//                          MessageInterface::ShowMessage("Drew text\nline number=%d\nboxcount=%d\ni=%d\n", lineNumber, boxCount, i);
+                      }
+                    }
+                }
             }
         }
         
@@ -347,6 +363,7 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
         current = GetNextChild(id, cookie);
         ++lineNumber;
     }
+//    MessageInterface::ShowMessage("end drawing\n");
     dc.EndDrawing();
 }
 
@@ -438,11 +455,15 @@ int DecoratedTree::GetParameter(int id)
  */
 void DecoratedTree::SetString(int line, std::string value)
 {
+    MessageInterface::ShowMessage("DecoratedTree::SetString() entered\n");
+
     if (line < 0)
         boxData.push_back(new std::string(value));
     else {
         std::string *str = boxData[line];
         *str = value;
     }
+   MessageInterface::ShowMessage("DecoratedTree::SetString() exit\n");
+
 }
 
