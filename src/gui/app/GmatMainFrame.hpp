@@ -126,6 +126,10 @@ private:
    void OnSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
 
+   bool OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
+   bool OnScriptBuildAndRun(wxCommandEvent& WXUNUSED(event));
+   bool OnScriptRun(wxCommandEvent& WXUNUSED(event));
+
    // IDs for the controls and the menu commands
    enum
    {
