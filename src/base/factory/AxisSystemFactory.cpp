@@ -25,6 +25,7 @@
 #include "MJ2000EqAxes.hpp"
 #include "MJ2000EcAxes.hpp"
 #include "BodyFixedAxes.hpp"
+#include "EquatorAxes.hpp"
 
 //---------------------------------
 //  public methods
@@ -111,9 +112,7 @@ AxisSystemFactory::CreateAxisSystem(const std::string &ofType,
    }
    else if (ofType == "Equator")
    {
-      MessageInterface::ShowMessage(                // *** temporary
-         "EquatorAxes not yet imnplemented.\n");
-      //withAxes = new EquatorAxes(withName);
+      withAxes = new EquatorAxes(withName);
    }
    else if (ofType == "BodyFixed")
    {
