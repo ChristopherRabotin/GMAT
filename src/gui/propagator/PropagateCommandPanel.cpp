@@ -31,8 +31,8 @@ BEGIN_EVENT_TABLE(PropagateCommandPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
     
-   //EVT_TEXT(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
-   EVT_TEXT_ENTER(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
+   EVT_TEXT(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
+   //EVT_TEXT_ENTER(ID_TEXTCTRL, PropagateCommandPanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, PropagateCommandPanel::OnButton)
    EVT_COMBOBOX(ID_COMBO, PropagateCommandPanel::OnComboSelection)
    EVT_GRID_CELL_LEFT_CLICK(PropagateCommandPanel::OnCellLeftClick)
@@ -786,6 +786,7 @@ void PropagateCommandPanel::ShowDetailedStopCond(int row)
 void PropagateCommandPanel::ActivateUpdateButton()
 {
    //loj: assume single selection
+   stopCondGrid->SelectRow(0);
    wxArrayInt rows = stopCondGrid->GetSelectedRows();
    int row = rows[0];
 
