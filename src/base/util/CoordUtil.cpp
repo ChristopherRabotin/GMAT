@@ -9,14 +9,12 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: Rodger Abel
-// Created: 1995/07/18 for GSS project.
+// Author: Linda Jun
 // Modified:
-//   2003/09/16 Linda Jun - Reused for GMAT project
+//   2004/04/19 Linda Jun - Modified Swnigby code to reuse for GMAT project
 //
 /**
- * Defines ephemeris exceptions and constants and conversions between
- * Cartesian and Keplerian elements.
+ * Impements conversion functions between Cartesian and Keplerian elements.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
