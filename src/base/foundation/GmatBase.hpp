@@ -83,6 +83,19 @@ public:
     virtual bool        SetBooleanParameter(const Integer id,
                                             const bool value);
     
+    virtual Real        GetRealParameter(const std::string label) const;
+    virtual Real        SetRealParameter(const std::string label,
+                                         const Real value);
+    virtual Integer     GetIntegerParameter(const std::string label) const;
+    virtual Integer     SetIntegerParameter(const std::string label,
+                                            const Integer value);
+    virtual std::string GetStringParameter(const std::string label) const;
+    virtual bool        SetStringParameter(const std::string label, 
+                                           const std::string &value);
+    virtual bool        GetBooleanParameter(const std::string label) const;
+    virtual bool        SetBooleanParameter(const std::string label,
+                                            const bool value);
+    
     /// Return value used if the parameter is not accessible as a Real
     static const Real    REAL_PARAMETER_UNDEFINED;
     /// Return value used if the parameter is not accessible as an Integer
