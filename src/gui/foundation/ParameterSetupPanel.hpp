@@ -17,6 +17,7 @@
 
 #include "GmatPanel.hpp"
 #include "Parameter.hpp"
+#include "Rmatrix.hpp"
 
 class ParameterSetupPanel: public GmatPanel
 {
@@ -29,24 +30,19 @@ private:
    Parameter *mParam;
    bool mIsColorChanged;
    bool mIsExpChanged;
-   
+  
    wxColour mColor;
    wxString mVarName;
    
    wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mVarExpTextCtrl;
-   wxTextCtrl *mArrNameTextCtrl;
-   wxTextCtrl *mArrRowTextCtrl;
-   wxTextCtrl *mArrColTextCtrl;
    
    wxButton *mColorButton;
    
    wxComboBox *mCoordComboBox;
-   
    wxBoxSizer *mPageBoxSizer;
    wxStaticBoxSizer *mVarStaticBoxSizer;
-   wxStaticBoxSizer *mArrStaticBoxSizer;
-    
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -54,7 +50,7 @@ private:
     
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
-   void OnComboSelection(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
    void OnColorButtonClick(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();

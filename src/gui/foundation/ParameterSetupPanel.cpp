@@ -31,7 +31,7 @@ BEGIN_EVENT_TABLE(ParameterSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    
    EVT_BUTTON(ID_COLOR_BUTTON, ParameterSetupPanel::OnColorButtonClick)
-   EVT_COMBOBOX(ID_COMBO, ParameterSetupPanel::OnComboSelection)
+   EVT_COMBOBOX(ID_COMBO, ParameterSetupPanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, ParameterSetupPanel::OnTextUpdate)
 END_EVENT_TABLE()
 
@@ -65,12 +65,12 @@ void ParameterSetupPanel::Create()
    //-------------------------------------------------------
    // wxString
    wxString strCoordArray[] = { wxT("") };
-
+   
    //wxStaticText
    wxStaticText *coordStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Coordinate System"),
                        wxDefaultPosition, wxDefaultSize, 0);
-    
+   
    wxStaticText *nameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Name"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -108,7 +108,6 @@ void ParameterSetupPanel::Create()
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
    wxBoxSizer *detailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);   
-   //wxStaticBox *variableStaticBox = new wxStaticBox(this, -1, wxT("Variable"));
    wxStaticBox *variableStaticBox = new wxStaticBox(this, -1, wxT(""));
    mVarStaticBoxSizer = new wxStaticBoxSizer(variableStaticBox, wxVERTICAL);
    
@@ -132,66 +131,14 @@ void ParameterSetupPanel::Create()
 
    mVarStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mVarStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   //-------------------------------------------------------
-   // for Array Setup
-   //-------------------------------------------------------
-   wxStaticText *arrNameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *arr1RowStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Row"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *arr1ColStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Column"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *arrEqualSignStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("="),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *arrTimesStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(" X"),
-                       wxDefaultPosition, wxDefaultSize, 0);
    
-   mArrNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(120,20), 0);
-   mArrRowTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
-   mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
+   mPageBoxSizer->Add(mVarStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   //wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
-   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT(""));
-   mArrStaticBoxSizer = new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
-   wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-   
-   // 1st row
-   arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arr1RowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arr1ColStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   // 2nd row
-   arr1FlexGridSizer->Add(mArrNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arrEqualSignStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mArrRowTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arrTimesStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   mArrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
-   
-   mPageBoxSizer->Add(mVarStaticBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
-   mPageBoxSizer->Add(mArrStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(mPageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(mPageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
-   
-   mPageBoxSizer->Show(mVarStaticBoxSizer, false);
-   mPageBoxSizer->Show(mArrStaticBoxSizer, false);
-   mPageBoxSizer->Layout();
 }
 
 //------------------------------------------------------------------------------
@@ -211,37 +158,15 @@ void ParameterSetupPanel::LoadData()
 
       try
       {
-         if (mParam->GetTypeName() == "Variable")
-         {
-            //std::string varDesc = mParam->GetStringParameter("Description");
-            // Show expression (loj: 9/23/04)
-            std::string varExp = mParam->GetStringParameter("Expression");
-            mVarNameTextCtrl->SetValue(mVarName);
-            mVarExpTextCtrl->SetValue(varExp.c_str());
+         // show expression
+         std::string varExp = mParam->GetStringParameter("Expression");
+         mVarNameTextCtrl->SetValue(mVarName);
+         mVarExpTextCtrl->SetValue(varExp.c_str());
 
-            UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
-            RgbColor color(intColor);
-            mColor.Set(color.Red(), color.Green(), color.Blue());
-            mColorButton->SetBackgroundColour(mColor);
-
-            mPageBoxSizer->Show(mVarStaticBoxSizer, true);
-            mPageBoxSizer->Show(mArrStaticBoxSizer, false);
-            mPageBoxSizer->Layout();
-         }
-         else if(mParam->GetTypeName() == "Array")
-         {
-            mArrNameTextCtrl->SetValue(mVarName);
-            wxString str;
-            str << mParam->GetIntegerParameter("NumRows");
-            mArrRowTextCtrl->SetValue(str);
-            str = "";
-            str << mParam->GetIntegerParameter("NumCols");
-            mArrColTextCtrl->SetValue(str);
-            
-            mPageBoxSizer->Show(mVarStaticBoxSizer, false);
-            mPageBoxSizer->Show(mArrStaticBoxSizer, true);
-            mPageBoxSizer->Layout();
-         }
+         UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
+         RgbColor color(intColor);
+         mColor.Set(color.Red(), color.Green(), color.Blue());
+         mColorButton->SetBackgroundColour(mColor);
       }
       catch (BaseException &e)
       {
@@ -249,7 +174,7 @@ void ParameterSetupPanel::LoadData()
          wxLog::FlushActive();
       }
    }
-
+   
    // if expression is just a number, enable editing
    double realVal;
    if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
@@ -258,9 +183,6 @@ void ParameterSetupPanel::LoadData()
       mVarExpTextCtrl->Disable();
    
    mVarNameTextCtrl->Disable();
-   mArrNameTextCtrl->Disable();
-   mArrRowTextCtrl->Disable();
-   mArrColTextCtrl->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -296,11 +218,10 @@ void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
 }
 
 //------------------------------------------------------------------------------
-// void OnComboSelection(wxCommandEvent& event)
+// void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterSetupPanel::OnComboSelection(wxCommandEvent& event)
+void ParameterSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
 }
 
 //------------------------------------------------------------------------------
