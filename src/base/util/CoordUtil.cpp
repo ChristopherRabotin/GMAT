@@ -617,6 +617,35 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
 }
 
 //------------------------------------------------------------------------------
+// friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, 
+//                                      const Real grav, Anomaly &anomaly)
+//------------------------------------------------------------------------------
+Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, const Real grav, 
+                              Anomaly &anomaly)
+{
+    Real ma;
+    Rvector6 newKepl = CartesianToKeplerian(cartVec, grav, &ma); 
+
+    anomaly.SetSMA(newKepl[0]);
+    anomaly.SetECC(newKepl[1]);
+    anomaly.SetValue(newKepl[5]);
+   
+    if (anomaly.GetType() == "MA")
+    {
+       newKepl[5] = ma;
+       anomaly.SetValue(ma); 
+    }
+    else if (anomaly.GetType() == "EA")
+    {
+        Anomaly tempAnomaly(newKepl[0],newKepl[1],newKepl[5]);
+        newKepl[5] = tempAnomaly.GetEccentricAnomaly();
+        anomaly.SetValue(newKepl[5]); 
+    }
+
+    return newKepl;
+}
+
+//------------------------------------------------------------------------------
 // friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav,
 //                                      Real *ma);
 //------------------------------------------------------------------------------
@@ -682,6 +711,27 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 //---------------------------------
 // friend functions
 //---------------------------------
+
+//------------------------------------------------------------------------------
+// friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
+//                                      const Real grav, Anomaly anomaly)
+//------------------------------------------------------------------------------
+Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
+                              const Real grav, Anomaly anomaly)
+{
+   if (anomaly.GetType() == "EA")
+   {
+      Rvector6 temp = keplVec;
+      temp[5] = anomaly.GetTrueAnomaly();
+      return KeplerianToCartesian(temp, grav, CoordUtil::TA);
+   }
+   else if (anomaly.GetType() == "TA")
+      return KeplerianToCartesian(keplVec, grav, CoordUtil::TA);
+
+   else   //  mean anomaly
+      return KeplerianToCartesian(keplVec, grav, CoordUtil::MA);
+         
+}
 
 //------------------------------------------------------------------------------
 // friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
