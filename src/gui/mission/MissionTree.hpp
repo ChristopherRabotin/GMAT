@@ -142,7 +142,7 @@ private:
    
    // for Debug
    void ShowCommands(const wxString &msg = "");
-   void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd);
+   void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd, Integer level);
    
    DECLARE_EVENT_TABLE();
    

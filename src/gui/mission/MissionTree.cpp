@@ -2324,46 +2324,56 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
 //------------------------------------------------------------------------------
 void MissionTree::ShowCommands(const wxString &msg)
 {
-   MessageInterface::ShowMessage("--------------------%s\n", msg.c_str());
+   MessageInterface::ShowMessage("-------------------->%s\n", msg.c_str());
    
    GmatCommand *cmd = theGuiInterpreter->GetNextCommand();
    GmatCommand *child;
    
    while (cmd != NULL)
    {
-      MessageInterface::ShowMessage("--- cmd=%s\n", cmd->GetTypeName().c_str());
+      MessageInterface::ShowMessage("----- %s\n", cmd->GetTypeName().c_str());
       child = cmd->GetChildCommand(0);
 
       if (child != NULL)
       {
-         ShowSubCommands(cmd, child);
+         ShowSubCommands(cmd, child, 0);
       }
       
       cmd = cmd->GetNext();
    }
+   
+   MessageInterface::ShowMessage("<--------------------\n");
 }
 
+
 //------------------------------------------------------------------------------
-// void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd)
+// void ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd, Integer level)
 //------------------------------------------------------------------------------
-void MissionTree::ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd)
+void MissionTree::ShowSubCommands(GmatCommand *baseCmd, GmatCommand *cmd,
+                                  Integer level)
 {
    GmatCommand *childCmd;
-   Integer i = 0;
+   Integer childNo = 0;
 
+   if (cmd != baseCmd)
+      ++level;
+   
    while (cmd != baseCmd)
    {
-      MessageInterface::ShowMessage("------- cmd=%s\n", cmd->GetTypeName().c_str());
-      childCmd = cmd->GetChildCommand(i);
-
+      for (int i=0; i<level; i++)
+         MessageInterface::ShowMessage("-----");
+      
+      MessageInterface::ShowMessage("----- %s\n", cmd->GetTypeName().c_str());
+      childCmd = cmd->GetChildCommand(childNo);
+      
       while (childCmd != NULL)
       {
-         ShowSubCommands(cmd, childCmd);
-         ++i;
-         childCmd = cmd->GetChildCommand(i);
+         ShowSubCommands(cmd, childCmd, level);
+         ++childNo;
+         childCmd = cmd->GetChildCommand(childNo);
       }
-
+      
       cmd = cmd->GetNext();
-      i = 0;
+      childNo = 0;
    }
 }
