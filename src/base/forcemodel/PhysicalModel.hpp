@@ -115,8 +115,8 @@ public:
     PhysicalModel& operator=(const PhysicalModel&);
 
     // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetParameterText(const Integer id);
-    virtual Integer GetParameterID(const std::string str);
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer GetParameterID(const std::string str) const;
     //DJC:  Should be a reference: ......^^^^^^^^^^^^^^^^^^^^^ const std::string &str
     virtual Gmat::ParameterType GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;

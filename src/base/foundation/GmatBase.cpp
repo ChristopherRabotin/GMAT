@@ -46,7 +46,7 @@ const std::string GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
       {
         "Integer", "Real", "String", "Boolean",
         "Rvector3", "Rvector6", "Rmatrix33", "Cartesian", "Keplerian",
-        "A1Mjd", "UtcDate"
+        "A1Mjd", "UtcDate", "Object"
       }; 
 
 

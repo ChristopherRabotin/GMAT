@@ -40,6 +40,10 @@
 //				Changes:
 //				  - All double types to Real types
 //				  - All primitive int types to Integer types
+//
+//                           : 11/9/2003 - D. Conway, Thinking Systems, Inc.
+//                             Overrode GetParameterCount so the count 
+//                             increases based on the member forces
 // **************************************************************************
 
 #include "ForceModel.hpp"
@@ -76,6 +80,7 @@
 ForceModel::ForceModel(const std::string &nomme) :
     PhysicalModel     (Gmat::FORCE_MODEL, "ForceModel", nomme),
     derivatives       (NULL),
+    forceCount        (0),  
     estimationMethod  (2.0)
 {
     dimension = 6;
@@ -167,6 +172,8 @@ void ForceModel::AddForce(PhysicalModel *pPhysicalModel)
     derivatives->AddForce(pPhysicalModel);
     if (initialized)
         pPhysicalModel->Initialize();
+
+    ++forceCount;  
 }
 
 
@@ -488,5 +495,103 @@ Real ForceModel::EstimateError(Real *diffs, Real *answer) const
     }
 
     return retval;
+}
+
+
+Integer ForceModel::GetParameterCount(void) const
+{
+    Integer count = parameterCount;
+    
+    DerivativeList *current = derivatives;
+    while (current) 
+    {
+//        count += current->GetDerivative()->GetParameterCount() + 1;
+        ++count;
+        current = current->Next();
+    }
+    
+    return count;
+}
+
+
+// Access methods 
+std::string ForceModel::GetParameterText(const Integer id) const
+{
+    Integer count = parameterCount + forceCount, i;
+      
+    if ((id < count) && (id > 0)) {
+        if (id >= parameterCount) {
+            DerivativeList *current = derivatives;
+            for (i = parameterCount; i < id; ++i)
+                current = current->Next();
+            return current->GetDerivative()->GetTypeName();
+        }
+    }
+    
+    return PhysicalModel::GetParameterText(id);
+}
+
+Integer ForceModel::GetParameterID(const std::string &str) const
+{
+    Integer i;
+    Integer retval = PhysicalModel::GetParameterID(str);
+    if (retval == -1) {
+        // could be a member force
+        i = parameterCount;
+        DerivativeList *current = derivatives;
+        while (current) {
+            if (current->GetDerivative()->GetTypeName() == str) {
+                retval = i;
+                break;
+            }
+            current = current->Next();
+            ++i;
+        }
+    }
+    return retval;
+}
+
+Gmat::ParameterType ForceModel::GetParameterType(const Integer id) const
+{
+    if ((id >= parameterCount) && (id < parameterCount + forceCount)) 
+        return Gmat::OBJECT_TYPE;
+    return PhysicalModel::GetParameterType(id);
+}
+
+std::string ForceModel::GetParameterTypeString(const Integer id) const
+{
+    if ((id > parameterCount) && (id < parameterCount + forceCount)) 
+        return PARAM_TYPE_STRING[Gmat::OBJECT_TYPE];
+    return PhysicalModel::GetParameterTypeString(id);
+}
+
+std::string ForceModel::GetStringParameter(const Integer id) const
+{
+    Integer count = parameterCount + forceCount, i;
+      
+    if ((id < count) && (id > 0)) {
+        if (id >= parameterCount) {
+            DerivativeList *current = derivatives;
+            for (i = parameterCount; i < id; ++i)
+                current = current->Next();
+            return current->GetDerivative()->GetTypeName();
+        }
+    }
+    
+    return PhysicalModel::GetStringParameter(id);
+
+}
+
+bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
+{
+    Integer count = parameterCount + forceCount, i;
+      
+    if ((id < count) && (id > 0)) {
+        if (id >= parameterCount) {     // Cannot set these yet
+            return false;
+        }
+    }
+    
+    return PhysicalModel::SetStringParameter(id, value);
 }
 

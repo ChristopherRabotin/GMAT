@@ -12,6 +12,12 @@
 // Author: Darrel J. Conway
 // Created: 2003/09/25
 //
+//
+// Modification History:
+//
+// 11/9/2003 D. Conway
+//   Made GetParameterCount virtual so PropSetup can override it, returning the
+//   count for the member ForceModel, Forces, and Propagator.
 /**
  * Definition for the base class for all GMAT extensible objects
  *
@@ -53,7 +59,7 @@ public:
     // Access methods called on the base class
     Gmat::ObjectType    GetType(void) const;
     std::string         GetTypeName(void) const;
-    Integer             GetParameterCount(void) const;
+    virtual Integer     GetParameterCount(void) const;
     std::string         GetName(void) const;
     bool                SetName(const std::string &who);
 

@@ -38,9 +38,9 @@ class ScriptInterpreter : public Interpreter
         static ScriptInterpreter*   Instance();
 
         virtual bool                Interpret(void);
-        virtual bool                Interpret(std::string &scriptfile);
+        virtual bool                Interpret(const std::string &scriptfile);
         virtual bool                Build(void);
-        virtual bool                Build(std::string &scriptfile);
+        virtual bool                Build(const std::string &scriptfile);
         
     protected:
         static ScriptInterpreter    *instance;

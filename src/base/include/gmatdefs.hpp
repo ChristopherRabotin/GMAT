@@ -16,6 +16,8 @@
 //                             Source code not yet transferred to GSFC
 //                           : 2003/09/16 - W. Shoan/GSFC/583
 //                             added ObjectTypes enum type in namespace Gmat
+//                           : 11/9/2003 - D. Conway, Thinking Systems, Inc.
+//                             Added OBJECT_TYPE for member objects
 // **************************************************************************
 
 #ifndef GMATDEFS_HPP
@@ -95,6 +97,7 @@ namespace Gmat
       KEPLERIAN_TYPE,
       A1MJD_TYPE,
       UTCDATE_TYPE,
+      OBJECT_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };

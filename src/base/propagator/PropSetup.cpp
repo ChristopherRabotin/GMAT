@@ -19,6 +19,9 @@
 #include "PropSetup.hpp"
 #include "PropSetupException.hpp"
 #include "PhysicalModel.hpp"
+#include "PointMassForce.hpp"
+#include "RungeKutta89.hpp"
+
 
 //---------------------------------
 // static data
@@ -26,8 +29,9 @@
 const std::string
 PropSetup::PARAMETER_TEXT[PropSetupParamCount] =
 {
-   "PropagatorName",
-   "ForceModelName"
+//   "PropagatorName",
+   "ForceModelName",
+   "Type"               // To match the script spec
 };
 
 const Gmat::ParameterType
@@ -58,8 +62,20 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    parameterCount = PropSetupParamCount;
 
    // PropSetup data
-   mPropagator = propagator;
-   mForceModel = forceModel;
+   /// @note: For build 1, the PropSetup internal objects are defaulted
+   if (propagator != NULL)
+       mPropagator = propagator;
+   else {
+       mPropagator = new RungeKutta89;
+   }
+   
+   if (forceModel != NULL)
+       mForceModel = forceModel;
+   else {
+       mForceModel = new ForceModel("InternalForceModel");
+       PhysicalModel *pmf = new PointMassForce;
+       mForceModel->AddForce(pmf);
+   }
    Initialize();
 }
 
@@ -160,6 +176,8 @@ ForceModel* PropSetup::GetForceModel()
 //------------------------------------------------------------------------------
 void PropSetup::SetPropagator(Propagator *propagator)
 {
+   if (mPropagator)
+      delete mPropagator;
    mPropagator = propagator;
    Initialize();
 }
@@ -175,6 +193,12 @@ void PropSetup::SetPropagator(Propagator *propagator)
 //------------------------------------------------------------------------------
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
+   if (forceModel == NULL)
+       throw PropSetupException("PropSetup::SetForceModel failed: ForceModel is NULL");
+//       return;
+       
+   if (mForceModel->GetName() == "InternalForceModel")
+       delete mForceModel;
    mForceModel = forceModel;
    Initialize();
 }
@@ -258,6 +282,21 @@ const std::string* PropSetup::GetParameterList() const
    return PARAMETER_TEXT;
 }
 
+
+Integer PropSetup::GetParameterCount(void) const
+{
+    Integer count = parameterCount;
+
+    // Increase the parameter count by the number of parameters in the members
+//    if (mForceModel) 
+//        count += mForceModel->GetParameterCount();
+//    if (mPropagator)
+//        count += mPropagator->GetParameterCount();
+
+    return count;
+}
+
+
 //------------------------------------
 // Inherited methods from GmatBase
 //------------------------------------
@@ -326,7 +365,7 @@ std::string PropSetup::GetParameterText(const Integer id) const
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer PropSetup::GetParameterID(const std::string str)
+Integer PropSetup::GetParameterID(const std::string &str) const
 {
    for (int i=0; i<PropSetupParamCount; i++)
    {
@@ -344,14 +383,18 @@ Integer PropSetup::GetParameterID(const std::string str)
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string PropSetup::GetStringParameter(const Integer id)
+std::string PropSetup::GetStringParameter(const Integer id) const
 {
    switch (id)
    {
    case PROPAGATOR_NAME:
-      return mPropagator->GetName();
+      if (mPropagator)
+          return mPropagator->GetTypeName();
+      return "Undefined";
    case FORCE_MODEL_NAME:
-      return mForceModel->GetName();
+      if (mForceModel)
+          return mForceModel->GetName();
+      return "InternalForceModel";
    default:
       return GmatBase::GetStringParameter(id);
    }
@@ -368,6 +411,8 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
 {
    switch (id)
    {
+   /** @todo Check behavior of PropSetup::SetStringParm -- should be used to 
+       change members, not just their names */
    case PROPAGATOR_NAME:
       return mPropagator->SetName(value);
    case FORCE_MODEL_NAME:

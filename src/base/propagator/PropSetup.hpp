@@ -49,11 +49,13 @@ public:
    virtual const std::string* GetParameterList() const;
 
    // The inherited methods from GmatBase
+   virtual Integer GetParameterCount(void) const;
+
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string str);
-   virtual std::string GetStringParameter(const Integer id);
+   virtual Integer GetParameterID(const std::string &str) const;
+   virtual std::string GetStringParameter(const Integer id) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
 
 private:
@@ -66,8 +68,8 @@ private:
 
    enum
    {
-      PROPAGATOR_NAME = 0,
-      FORCE_MODEL_NAME,
+      FORCE_MODEL_NAME = 0,
+      PROPAGATOR_NAME,
       PropSetupParamCount
    };
 

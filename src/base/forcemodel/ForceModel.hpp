@@ -40,6 +40,10 @@
 //				Changes:
 //				  - All double types to Real types
 //				  - All primitive int types to Integer types
+//
+//                           : 11/9/2003 - D. Conway, Thinking Systems, Inc.
+//                             Overrode GetParameterCount so the count 
+//                             increases based on the member forces
 // **************************************************************************
 /**
  * Container for forces acting on spacecraft.
@@ -90,9 +94,23 @@ public:
       { return NULL; }
     Integer GetNumForces() // should return the correct number of force
       { return 1; }
+      
+   virtual Integer GetParameterCount(void) const;
+   
+    // Access methods derived classes can override
+    virtual std::string GetParameterText(const Integer id) const;
+    virtual Integer     GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+    virtual std::string GetParameterTypeString(const Integer id) const;
+
+    virtual std::string GetStringParameter(const Integer id) const;
+    virtual bool        SetStringParameter(const Integer id, 
+                                           const std::string &value);
 
 protected:
     DerivativeList * derivatives;
+    Integer          forceCount;
     Real estimationMethod;
     /// List of spacecraft that get propagated
     std::vector<Spacecraft *> spacecraft;

@@ -35,7 +35,8 @@ Propagate::Propagate(void) :
     prop                        (NULL),
     // Set the parameter IDs
     propCoupledID               (parameterCount),
-    interruptCheckFrequencyID   (parameterCount+1)
+    interruptCheckFrequencyID   (parameterCount+1),
+    secondsToProp               (8640.0)
 {
     // Increase the number of parms by the 2 new ones
     parameterCount += 2;
@@ -71,7 +72,8 @@ Propagate::Propagate(const Propagate &p) :
     prop                        (NULL),
     // Set the parameter IDs
     propCoupledID               (p.propCoupledID),
-    interruptCheckFrequencyID   (p.interruptCheckFrequencyID)
+    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
+    secondsToProp               (p.secondsToProp)
 {
     // Increase the number of parms by the 2 new ones
     parameterCount = p.parameterCount;
@@ -231,6 +233,53 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
 }
 
 
+void Propagate::InterpretAction(void)
+{
+/// @todo: Clean up this hack for the Propagate::InterpretAction method
+    // Sample string:  "Propagate RK89(Sat1, {Duration = 86400.0});"
+    Integer loc = generatingString.find("Propagate", 0) + 9, end;
+    const char *str = generatingString.c_str();
+    while (str[loc] == ' ')
+        ++loc;
+        
+    end = generatingString.find("(", loc);
+    if (end == std::string::npos)
+        throw CommandException("Propagate string does not identify propagator");
+
+    std::string component = generatingString.substr(loc, end-loc);
+    SetObject(component, Gmat::PROP_SETUP);
+
+    loc = end + 1;
+    end = generatingString.find(",", loc);
+    if (end == std::string::npos)
+        throw CommandException("Propagate string does not identify spacecraft");
+    
+    component = generatingString.substr(loc, end-loc);
+    SetObject(component, Gmat::SPACECRAFT);
+
+    loc = end + 1;
+    end = generatingString.find(",", loc);
+    if (end != std::string::npos)
+        throw CommandException("Propagate does not yet support multiple spacecraft");
+
+    end = generatingString.find("{", loc);
+    if (end == std::string::npos)
+        throw CommandException("Propagate does not identify stopping condition");
+
+    end = generatingString.find("Duration", loc);
+    if (end == std::string::npos)
+        throw CommandException("'Duration' is the only supported stopping condition");
+
+    loc = end + 8;
+    end = generatingString.find("=", loc);
+    if (end == std::string::npos)
+        throw CommandException("Format: 'Duration = xxx'");
+
+    loc = end + 1;
+    secondsToProp = atof(&str[loc]);    
+}
+
+
 bool Propagate::Initialize(void)
 {
     Command::Initialize();
@@ -265,7 +314,7 @@ bool Propagate::Initialize(void)
  */
 bool Propagate::Execute(void)
 {
-    Real elapsedTime = 0.0, desiredTime = 86400.0;
+    Real elapsedTime = 0.0;
     if (initialized == false)
         throw CommandException("Propagate Command was not Initialized");
 
@@ -276,11 +325,11 @@ bool Propagate::Execute(void)
     Real *state = fm->GetState();
     Integer dim = fm->GetDimension();
 
-    while (elapsedTime < desiredTime) {
+    while (elapsedTime < secondsToProp) {
         if (!p->Step())
             throw CommandException("Propagator Failed to Step");
         // Not at stop condition yet
-        if (fm->GetTime() < desiredTime) {
+        if (fm->GetTime() < secondsToProp) {
             elapsedTime = fm->GetTime();
             fm->UpdateSpacecraft();
             /// @todo Update epoch on spacecraft
@@ -294,8 +343,8 @@ bool Propagate::Execute(void)
         publisher->Publish(state, dim);
     }
     
-    if (desiredTime - elapsedTime > 0.0) {
-        if (!p->Step(desiredTime - elapsedTime))
+    if (secondsToProp - elapsedTime > 0.0) {
+        if (!p->Step(secondsToProp - elapsedTime))
             throw CommandException("Propagator Failed to Step fixed interval");
         // Publish the final data point here
         publisher->Publish(state, dim);

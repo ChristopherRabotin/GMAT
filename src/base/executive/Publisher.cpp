@@ -71,8 +71,9 @@ bool Publisher::Unsubscribe(Subscriber * s)
 bool Publisher::Publish(Real * data, Integer count)
 {
     // No subscribers
-    if (subs.empty())
+    if (subs.empty()){
         return false;
+    }
 
     // Convert the data into a string for distribution
     char stream[4096] = "";

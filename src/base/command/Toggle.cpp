@@ -27,6 +27,7 @@
 
 // class constructor
 Toggle::Toggle() :
+    toggleState     (true),
     Command         ("Toggle"),
     subscriberID    (parameterCount)
 {
@@ -54,8 +55,46 @@ Toggle& Toggle::operator=(const Toggle& t)
 }
 
 
+void Toggle::InterpretAction(void)
+{
+/// @todo: Clean up this hack for the Toggle::InterpretAction method
+    // Sample string:  "Toggle Report On"
+    
+    Integer loc = generatingString.find("Toggle", 0) + 6, end;
+    const char *str = generatingString.c_str();
+    while (str[loc] == ' ')
+        ++loc;
+    
+    Integer cmd = generatingString.find_last_of("On", generatingString.length());
+    
+    if (cmd == std::string::npos) {
+        cmd = generatingString.find_last_of("Off", generatingString.length());
+        if (cmd == std::string::npos)
+            throw CommandException("Must Toggle either 'On' or 'Off'");
+        if (cmd > generatingString.length() - 5)
+            toggleState = false;
+    }
+    else
+        if (cmd > generatingString.length() - 4)
+            toggleState = true;
+            
+    // Find the Subscriber list
+    end = generatingString.find(" ", loc, cmd);
+    std::string sName = generatingString.substr(loc, end);
+    
+    subNames.push_back(sName);
+}
+
+
 bool Toggle::Execute(void)
 {
+    Subscriber *sub;
+    for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) {
+        sub = (Subscriber *)(*objectMap)[*s];
+        if (sub)
+            sub->Activate(toggleState);
+    }
+    
     char data[] = "Toggle executed\n\n";
     publisher->Publish(data, strlen(data));
     return true;

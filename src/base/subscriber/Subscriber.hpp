@@ -51,6 +51,8 @@ public:
     Subscriber        * Next(void);
     bool                Add(Subscriber * s);
     bool                Remove(Subscriber * s, const bool del);
+    
+    void                Activate(bool state = true);
 
 protected:
     const char        * data;

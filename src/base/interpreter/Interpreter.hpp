@@ -134,6 +134,9 @@ protected:
     // props and force models are named, the following Create method should use
     // the names rather than the object pointers
     PropSetup*                      CreatePropSetup(std::string name);
+    
+    bool                            InterpretPropSetupParameter(GmatBase *obj, 
+                                     std::vector<std::string*>::iterator phrase);
                                                 
     // Methods used to break apart lines of script
     void                            ChunkLine(void);

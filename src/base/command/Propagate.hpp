@@ -64,6 +64,8 @@ public:
                                             const bool value);
 
     // Methods used to run the command
+    virtual void            InterpretAction(void);
+    
     virtual bool            Initialize(void);
     virtual bool            Execute(void);
 
@@ -103,6 +105,9 @@ protected:
     const Integer           propCoupledID;
     /// ID for the number of iterations before calling to check for interrupts
     const Integer           interruptCheckFrequencyID;
+    
+    /// Temporary parameter used to stop on time
+    Real                    secondsToProp;
     
 private:
     

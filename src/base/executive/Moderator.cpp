@@ -381,12 +381,14 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
                                       const std::string &propagatorName,
                                       const std::string &forceModelName)
 {
-    // assumes propagatorName and forceModelName exist alreay.
+    // assumes propagatorName and forceModelName exist already.
     Propagator *prop = theConfigManager->GetPropagator(propagatorName);
     ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
     PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
-    propSetup->SetPropagator(prop);
-    propSetup->SetForceModel(fm);
+    if (prop)
+        propSetup->SetPropagator(prop);
+    if (fm)
+        propSetup->SetForceModel(fm);
     theConfigManager->AddPropSetup(propSetup);
     return propSetup;
 }
@@ -466,6 +468,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
 {
     Subscriber *subs = theFactoryManager->CreateSubscriber(type, name, filename);
     theConfigManager->AddSubscriber(subs);
+    thePublisher->Subscribe(subs);
     return subs;
 }
 

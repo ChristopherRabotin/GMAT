@@ -60,7 +60,7 @@ bool ScriptInterpreter::Interpret(void)
 }
 
 
-bool ScriptInterpreter::Interpret(std::string &scriptfile)
+bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 {
     bool retval = false;
     
@@ -86,7 +86,7 @@ bool ScriptInterpreter::Build(void)
 }
 
 
-bool ScriptInterpreter::Build(std::string &scriptfile)
+bool ScriptInterpreter::Build(const std::string &scriptfile)
 {
     bool retval = false;
     
@@ -170,29 +170,38 @@ bool ScriptInterpreter::Parse(void)
                 errstr += ": Object was not found";
                 throw InterpreterException(errstr);
             }
-
-            // Set object associations
-            std::string objParm = GetToken();
-            Integer id = obj->GetParameterID(objParm);
-
-            if (id == Gmat::UNKNOWN_PARAMETER_TYPE)
-            {
-                // Could be a member object -- check that first
-                
-                /// @todo Fill in the parsing for multipart strings
-                std::string subparm = GetToken();
-                if (subparm == "")
-                    throw InterpreterException("Assignment string does not parse");
-                // Find the owned object
-                // Set the parm on the owned object
+            
+            // PropSetup has configuration info for the member objects, so it 
+            // gets special treatment
+            if (obj->GetType() == Gmat::PROP_SETUP) {
+                if (!InterpretPropSetupParameter(obj, phrase))
+                    throw InterpreterException("PropSetup Parameter was not recognized");
             }
-            else
+            else 
             {
-                // Set parameter data
-                ++phrase;
-                if (**phrase == "=")
+                // Set object associations
+                std::string objParm = GetToken();
+                Integer id = obj->GetParameterID(objParm);
+    
+                if (obj->GetParameterType(id) == Gmat::UNKNOWN_PARAMETER_TYPE)
+                {
+                    // Could be a member object -- check that first
+                    
+                    /// @todo Fill in the parsing for multipart strings
+                    std::string subparm = GetToken();
+                    if (subparm == "")
+                        throw InterpreterException("Assignment string does not parse");
+                    // Find the owned object
+                    // Set the parm on the owned object
+                }
+                else
+                {
+                    // Set parameter data
                     ++phrase;
-                SetParameter(obj, id, **phrase);
+                    if (**phrase == "=")
+                        ++phrase;
+                    SetParameter(obj, id, **phrase);
+                }
             }
         }
         
@@ -200,6 +209,7 @@ bool ScriptInterpreter::Parse(void)
         if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
             Command *cmd = moderator->AppendCommand(**phrase, "");
             cmd->SetGeneratingString(line);
+            cmd->InterpretAction();
         }
 
         // Clear the array of words found in the line
@@ -223,7 +233,13 @@ bool ScriptInterpreter::WriteScript(void)
     for (current = objs.begin(); current != objs.end(); ++current)
         if (!BuildObject(*current))
             return false;
-    
+            
+    // Force Models
+    objs = moderator->GetListOfConfiguredItems(Gmat::FORCE_MODEL);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+            
     // Propagator setups
     objs = moderator->GetListOfConfiguredItems(Gmat::PROP_SETUP);
     for (current = objs.begin(); current != objs.end(); ++current)

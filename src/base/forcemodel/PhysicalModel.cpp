@@ -96,7 +96,8 @@
 const std::string
 PhysicalModel::PARAMETER_TEXT[PhysicalModelParamCount] =
 {
-    "Elapsed Time (sec)"
+//    "Elapsed Time (sec)"
+    "ElapsedSeconds"            // DJC changed to make script parsing work
 };
 
 const Gmat::ParameterType
@@ -249,7 +250,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-std::string PhysicalModel::GetParameterText(const Integer id)
+std::string PhysicalModel::GetParameterText(const Integer id) const
 {
     switch (id)
     {
@@ -267,7 +268,7 @@ std::string PhysicalModel::GetParameterText(const Integer id)
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Integer PhysicalModel::GetParameterID(const std::string str)
+Integer PhysicalModel::GetParameterID(const std::string str) const
 {
     for (int i = 0; i < PhysicalModelParamCount; i++)
     {
@@ -320,7 +321,7 @@ std::string PhysicalModel::GetParameterTypeString(const Integer id) const
  * @see GmatBase
  */
 //------------------------------------------------------------------------------
-Real PhysicalModel::GetRealParameter(const Integer id) const\
+Real PhysicalModel::GetRealParameter(const Integer id) const
 {
     if (id == elapsedTimeParameter)
         return elapsedTime;

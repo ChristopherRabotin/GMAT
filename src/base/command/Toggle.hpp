@@ -52,9 +52,13 @@ class Toggle : public Command
         virtual bool        SetStringParameter(const Integer id,
                                                const std::string &value);
 
+        // Methods used to run the command
+        virtual void        InterpretAction(void);
         virtual bool        Execute(void);
         
     protected:
+        /// State for the toggle
+        bool                toggleState;
         /// Subscriber list for the toggle
         StringArray         subNames;
         /// Corresponding subscribers

@@ -158,6 +158,7 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
     if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
                                                           subscribermap.end()) {
         moderator->CreateSubscriber(objecttype, objectname);
+        
         return true;
     }
 
@@ -202,7 +203,8 @@ void Interpreter::WriteParameterValue(GmatBase *obj, Integer id)
     Gmat::ParameterType tid = obj->GetParameterType(id);
     
     switch (tid) {
-        case Gmat::STRING_TYPE:
+        case Gmat::OBJECT_TYPE:
+        case Gmat::STRING_TYPE:     // Strings and objects write out a string
             *outstream << obj->GetStringParameter(id);
             break;
             
@@ -296,11 +298,74 @@ PropSetup* Interpreter::CreatePropSetup(std::string name)
 }
 
 
+bool Interpreter::InterpretPropSetupParameter(GmatBase *obj, 
+                                     std::vector<std::string*>::iterator phrase)
+{
+    bool retval = true;
+    
+    // Set object associations
+    std::string objParm = GetToken();
+    Integer id = obj->GetParameterID(objParm);
+    
+    Gmat::ParameterType parmType = obj->GetParameterType(id);
+
+    if ((parmType != Gmat::UNKNOWN_PARAMETER_TYPE) &&
+        (parmType != Gmat::OBJECT_TYPE))
+    {
+        // Set parameter data
+        ++phrase;
+
+        if (**phrase == "=")
+            ++phrase;
+        SetParameter(obj, id, **phrase);
+    }
+    else
+    {
+        if (objParm == "Type") {
+            ++phrase;
+    
+            if (**phrase == "=")
+                ++phrase;
+            else
+                throw InterpreterException("Syntax error creating Propagator");
+            Propagator *prop = moderator->CreatePropagator(**phrase, "");
+            if (prop)
+                ((PropSetup*)obj)->SetPropagator(prop);
+            else
+                throw InterpreterException("Propagator could not be created");
+        }
+        else if (objParm == "ForceModelName") {
+            ++phrase;
+    
+            if (**phrase == "=")
+                ++phrase;
+            else
+                throw InterpreterException("Syntax error accessing Force Model");
+            ForceModel *fm = moderator->GetForceModel(**phrase);
+            if (fm)
+                ((PropSetup*)obj)->SetForceModel(fm);
+            else
+                throw InterpreterException("Force model does not exist");
+        }    
+        else {
+        // Could be a subitem
+//        std::string subparm = GetToken();
+//        if (subparm == "")
+//            throw InterpreterException("Assignment string does not parse");
+//        // Find the owned object
+//        // Set the parm on the owned object
+            throw InterpreterException("Assignment string does not parse");
+        }
+    }
+    
+    return retval;
+}
+
 
 void Interpreter::ChunkLine(void)
 {
     // Break the line into pieces based on while space and special characters
-    Integer start = 0, end;
+    Integer start = 0, end, semicolonLocation = 0;
     const char *str = line.c_str();
     std::string phrase;
 
@@ -310,10 +375,17 @@ void Interpreter::ChunkLine(void)
         while ((str[end] != ' ') && (str[end] != '\t') && (str[end] != '\r') &&
                (str[end] != '\n') && (str[end] != '%') && (str[end] != '\0')) {
             ++end;
+            if ((str[end] == ';') && (semicolonLocation == 0))
+                semicolonLocation = end;
         }
-        phrase.assign(line, start, (end-start));
+        if (semicolonLocation == 0)
+            semicolonLocation = end;
+        
+        phrase.assign(line, start, (semicolonLocation-start));
+        
         chunks.push_back(new std::string(phrase));
         start = SkipWhiteSpace(end);
+        semicolonLocation = 0;
     }
 }
 
@@ -398,6 +470,10 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
         obj->SetRealParameter(id, atof(value.c_str()));
         retval = true;
     }
+    if (type == Gmat::STRING_TYPE) {
+        obj->SetStringParameter(id, value);
+        retval = true;
+    }
 
     return retval;
 }
@@ -407,3 +483,4 @@ bool Interpreter::SetParameter(GmatBase *obj, Integer id, std::string value)
 //{
 //    return false;
 //}
+

@@ -124,6 +124,11 @@ bool Subscriber::Remove(Subscriber * s, const bool del)
 }
 
 
+void Subscriber::Activate(bool state)
+{
+    active = state;
+}
+
 bool Subscriber::Distribute(const double * dat, int len)
 {
     return true;
