@@ -123,10 +123,15 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("StateType"); //loj: 6/24/04 changed to "StateType"
+   Integer id = mSpacecraft->GetParameterID("StateType"); 
    std::string elemType = mSpacecraft->GetStringParameter(id);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
-
+   
+#if DEBUG_ORBITDATA
+   MessageInterface::ShowMessage
+      ("OrbitData::GetCartState() stateType=%s\n", elemType.c_str());
+#endif
+   
    if (elemType == "Cartesian")
    {
       PropState statePtr = mSpacecraft->GetState(); // should be cartesian state
@@ -140,7 +145,6 @@ Rvector6 OrbitData::GetCartState()
                                     mCartState[0], mCartState[1], mCartState[2],
                                     mCartState[3], mCartState[4], mCartState[5]);
 #endif
-      
    }
    else if (elemType == "Keplerian")
    {
@@ -163,14 +167,19 @@ Rvector6 OrbitData::GetCartState()
       Rvector6 keplState = Rvector6(kepl);
       Rvector6 cartState;
 
-      cartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA); //loj: 6/23/04 changed from MA
+#if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage("OrbitData::GetCartState() keplState=%s\n",
+                                    keplState.ToString().c_str());
+#endif
+      
+      cartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA);
       mCartState = cartState;
    }
    else
    {
       throw ParameterException
          ("OrbitData::GetCartState() input state types other than Cartesian "
-          "and Keplerian are not supported at this time.\n");
+          "and Keplerian are not supported at this time." + elemType + "\n");
    }
    
    return mCartState;
@@ -189,7 +198,7 @@ Rvector6 OrbitData::GetKepState()
       InitializeRefObjects();
    
    //loj: 4/19/04 system crashes when I use the new method.
-   //Rvector6 mKepState = mSpacecraft->GetKeplerianState(); //loj: 4/19/04 new method from Spacecraft
+   //Rvector6 mKepState = mSpacecraft->GetKeplerianState();
 
    Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
@@ -221,9 +230,11 @@ Rvector6 OrbitData::GetKepState()
       Rvector6 cartState = Rvector6(cart);
       Rvector6 keplState;
 
-      //MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s",
-      //                              cartState.ToString().c_str());
-            
+#if DEBUG_ORBITDATA
+      MessageInterface::ShowMessage("OrbitData::GetKepState() cartState=%s\n",
+                                    cartState.ToString().c_str());
+#endif
+      
       Real ma;
       keplState = CartesianToKeplerian(cartState, grav, &ma);
 
