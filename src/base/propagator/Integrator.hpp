@@ -112,28 +112,27 @@ class GMAT_API Integrator : public Propagator
 {
 public:
     Integrator(const std::string &typeStr, const std::string &nomme = "");
-    virtual ~Integrator(void);
-
     Integrator(const Integrator&);
     Integrator& operator=(const Integrator& i);
+    virtual ~Integrator(void);
+        
+    // Parameter accessor methods -- overridden from GmatBase
+    virtual std::string         GetParameterText(const Integer id) const;
+    virtual Integer             GetParameterID(const std::string &str) const;
+    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+    virtual std::string         GetParameterTypeString(const Integer id) const;
+    virtual Real                GetRealParameter(const Integer id) const;
+    virtual Real                GetRealParameter(const std::string &label) const;
+    virtual Real                SetRealParameter(const Integer id, const Real value);
+    virtual Real                SetRealParameter(const std::string &label, const Real value);
+    virtual Integer             GetIntegerParameter(const Integer id) const;
+    virtual Integer             GetIntegerParameter(const std::string &label) const;
+    virtual Integer             SetIntegerParameter(const Integer id, const Integer value);
+    virtual Integer             SetIntegerParameter(const std::string &label, const Integer value);
 
     virtual Integer GetPropagatorOrder(void) const;
     virtual void SetPhysicalModel(PhysicalModel *pPhysicalModel);
-        
-    // Parameter accessor methods -- overridden from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
-    virtual Real GetRealParameter(const Integer id) const;
-    virtual Real GetRealParameter(const std::string &label) const;
-    virtual Real SetRealParameter(const Integer id, const Real value);
-    virtual Real SetRealParameter(const std::string &label, const Real value);
-    virtual Integer GetIntegerParameter(const Integer id) const;
-    virtual Integer GetIntegerParameter(const std::string &label) const;
-    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
-    virtual Integer SetIntegerParameter(const std::string &label, const Integer value);
-
+    
     //------------------------------------------------------------------------------
     // virtual void Initialize(void)
     //------------------------------------------------------------------------------
