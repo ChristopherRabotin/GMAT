@@ -192,12 +192,24 @@ Parameter::ParameterKey Parameter::GetKey() const
 // bool IsTimeParameter() const
 //------------------------------------------------------------------------------
 /**
- * @return parameter description.
+ * @return true if parameter is time related.
  */
 //------------------------------------------------------------------------------
 bool Parameter::IsTimeParameter() const
 {
    return mIsTimeParam;
+}
+
+//------------------------------------------------------------------------------
+// bool IsPlottable() const
+//------------------------------------------------------------------------------
+/**
+ * @return true if parameter is plottble.
+ */
+//------------------------------------------------------------------------------
+bool Parameter::IsPlottable() const
+{
+   return mIsPlottable;
 }
 
 //------------------------------------------------------------------------------
@@ -256,7 +268,8 @@ bool Parameter::operator!=(const Parameter &right) const
 std::string Parameter::ToString()
 {
    throw ParameterException
-      ("Parameter: GetReal() derived class must implement this.\n");
+      ("Parameter: ToString(): " + this->GetTypeName() + " has no "
+       "implementation of ToString().\n");
 }
 
 //------------------------------------------------------------------------------
@@ -271,7 +284,9 @@ std::string Parameter::ToString()
 Real Parameter::GetReal()
 {
    throw ParameterException
-      ("Parameter: GetReal() derived class must implement this.\n");
+      ("Parameter: GetReal(): " + this->GetTypeName() + " has no "
+       "implementation of GetReal().\nMay be an invalid call to this "
+       "function.\n");
 }
 
 //------------------------------------------------------------------------------
@@ -286,7 +301,9 @@ Real Parameter::GetReal()
 Rvector6 Parameter::GetRvector6()
 {
    throw ParameterException
-      ("Parameter: GetRvector6() derived class must implement this.\n");
+      ("Parameter: GetRvector6(): " + this->GetTypeName() + " has no "
+       "implementation of GetRvector6().\nMay be an invalid call to this "
+       "function.\n");
 }
 
 //------------------------------------------------------------------------------
@@ -301,7 +318,9 @@ Rvector6 Parameter::GetRvector6()
 Real Parameter::EvaluateReal()
 {
    throw ParameterException
-      ("Parameter: EvaluateReal() derived class must implement this.\n");
+      ("Parameter: EvaluateReal(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateReal().\nMay be an invalid call to this "
+       "function.\n");
 }
 
 //------------------------------------------------------------------------------
@@ -316,7 +335,9 @@ Real Parameter::EvaluateReal()
 Rvector6 Parameter::EvaluateRvector6()
 {
    throw ParameterException
-      ("Parameter: EvaluateRvector6() derived class must implement this.\n");
+      ("Parameter: EvaluateRvector6(): " + this->GetTypeName() + " has no "
+       "implementation of EvaluateRvector6().\nMay be an invalid call to this "
+       "function.\n");
 }
 
 //------------------------------------------------------------------------------
