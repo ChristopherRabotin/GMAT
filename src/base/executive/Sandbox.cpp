@@ -224,25 +224,62 @@ bool Sandbox::Initialize()
                ->SetSolarSystem(solarSys);
             //((PropSetup*)(omi->second))->Initialize();
          }
-         else if((omi->second)->GetType() == Gmat::SPACECRAFT) //loj: 6/24/04 added
+         else if((omi->second)->GetType() == Gmat::SPACECRAFT)
          {
             ((Spacecraft*)(omi->second))->SetSolarSystem(solarSys);
          }
-         else if((omi->second)->GetType() == Gmat::PARAMETER) //loj: 6/24/04 added
+         else if((omi->second)->GetType() == Gmat::PARAMETER)
          {
             //loj: 9/13/04 moved code from Moderator::SetupRun()
             Parameter *param = (Parameter*)(omi->second);
-            std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
-            param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
-            param->SetSolarSystem(solarSys);
-            param->Initialize();
-            //((Parameter*)(omi->second))->SetRefObject(sc, Gmat::SPACECRAFT, scName);
-            //((Parameter*)(omi->second))->SetSolarSystem(solarSys);
+
+            // Set reference object for system parameters (loj: 9/22/04)
+            if (param->GetKey() == Parameter::SYSTEM_PARAM)
+            {
+               std::string scName = param->GetRefObjectName(Gmat::SPACECRAFT);            
+               param->SetRefObject(GetSpacecraft(scName), Gmat::SPACECRAFT, scName);
+               param->SetSolarSystem(solarSys);
+               param->Initialize();
+            }
          }
       }
    }
    else
       throw SandboxException("No solar system defined in the Sandbox!");
+
+
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Variables...\n");
+#endif
+   // Note: All system parameters need to be initialized first
+   // Set reference object for user parameters (loj: 9/22/04)
+   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+      if((omi->second)->GetType() == Gmat::PARAMETER)
+      {
+         Parameter *param = (Parameter*)(omi->second);
+         GmatBase *refParam;
+                  
+         if (param->GetKey() == Parameter::USER_PARAM)
+         {
+#if DEBUG_SANDBOX
+            MessageInterface::ShowMessage
+               ("Sandbox::Initialize() userParamName=%s\n", param->GetName().c_str());
+#endif
+            StringArray refParamNames = param->GetStringArrayParameter("RefParams");
+            for (unsigned int i=0; i<refParamNames.size(); i++)
+            {
+               refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
+               param->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
+               param->Initialize();
+            }
+         }
+      }
+   }
+
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Subscribers...\n");
+#endif
 
    // Initialize subscribers (loj: 9/13/04 moved code from Moderator::SetupRun())
    //std::map<std::string, GmatBase *>::iterator omi;
@@ -254,6 +291,9 @@ bool Sandbox::Initialize()
       }
    }
    
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage("Sandbox::Initialize() Initializing Commands...\n");
+#endif
    // Initialize commands
    while (current)
    {
@@ -264,7 +304,11 @@ bool Sandbox::Initialize()
          return false;
       current = current->GetNext();
    }
-    
+   
+#if DEBUG_SANDBOX
+   MessageInterface::ShowMessage("Sandbox::Initialize() Successfully initialized\n");
+#endif
+   
    return rv;
 }
 
