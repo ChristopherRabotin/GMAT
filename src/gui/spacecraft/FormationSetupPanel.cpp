@@ -173,7 +173,8 @@ void FormationSetupPanel::LoadData()
 void FormationSetupPanel::SaveData()
 {
    Formation *form = (Formation*)(theGuiInterpreter->GetFormation(mFormationName));
-
+   form->SetBooleanParameter("Clear", true);
+   
    int soCount = mSoSelectedListBox->GetCount();
    for (int i=0; i<soCount; i++)
    {
