@@ -16,7 +16,6 @@
 #include "JacchiaRobertsAtmosphere.hpp"
 #include "AtmosphereException.hpp"
 
-#include "gmatwxdefs.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_JR_DRAG 0     
@@ -312,9 +311,7 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
    // Output density in units of kg/m3
    *density = 1.0e-9*rho;
   
-   wxString densityString;
-   densityString.Printf("%.15f", *density);
-   MessageInterface::ShowMessage("JR Density = %s\n", densityString.c_str());
+   MessageInterface::ShowMessage("JR Density = %15le\n", *density);
    
 #ifdef DEBUG_JR_DRAG    
    MessageInterface::ShowMessage("JacchiaRobertsAtmosphere::Density complete\n");
