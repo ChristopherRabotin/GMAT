@@ -71,9 +71,9 @@ void GmatInterface::ClearScript()
 void GmatInterface::PutScript(char *str)
 {
    mStringStream << std::string(str) << std::endl;
-#if DEBUG_GMAT_INTERFACE
+   #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage("GmatInterface::PutScript() str=%s\n", str);
-#endif
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -89,13 +89,13 @@ void GmatInterface::BuildObject()
    // redirect mInStringStream into mStringStream
    RedirectBuffer(mInStringStream, streamBuf);
    
-#if DEBUG_GMAT_INTERFACE
+   #if DEBUG_GMAT_INTERFACE
    //loj: 8/31/04 Why this causes problem for long scripts? buffer overflow?
    //MessageInterface::ShowMessage
    //   ("GmatInterface::BuildObject() mStringStream.str=\n%s", mStringStream.str().c_str());
    //MessageInterface::ShowMessage
    //   ("GmatInterface::BuildObject() mInStringStream.str=\n%s\n", mInStringStream->str().c_str());
-#endif
+   #endif
    
    // flag to clear objects and mission sequence
    moderator->InterpretScript(mInStringStream, true);
@@ -120,13 +120,13 @@ void GmatInterface::UpdateObject()
    // redirect mInStringStream into mStringStream
    RedirectBuffer(mInStringStream, streamBuf);
    
-#if DEBUG_GMAT_INTERFACE
+   #if DEBUG_GMAT_INTERFACE
    //loj: 8/31/04 Why this causes problem for long scripts? buffer overflow?
    //MessageInterface::ShowMessage
    //   ("GmatInterface::UpdateObject() mStringStream.str=\n%s", mStringStream.str().c_str());
    //MessageInterface::ShowMessage
    //   ("GmatInterface::UpdateObject() mInStringStream.str=\n%s\n", mInStringStream->str().c_str());
-#endif
+   #endif
 
    // flag not to clear objects and mission sequence
    moderator->InterpretScript(mInStringStream, false);
@@ -142,9 +142,9 @@ void GmatInterface::UpdateObject()
 //------------------------------------------------------------------------------
 void GmatInterface::RunScript()
 {
-#if DEBUG_GMAT_INTERFACE
+   #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage("GmatInterface::RunScript() entered\n");
-#endif
+   #endif
    
    Moderator::Instance()->RunScript();
 }
@@ -154,10 +154,10 @@ void GmatInterface::RunScript()
 //------------------------------------------------------------------------------
 char* GmatInterface::GetParameterData(const std::string &name)
 {
-#if DEBUG_GMAT_INTERFACE
+   #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::GetParameterData() name=%s\n", name.c_str());
-#endif
+   #endif
 
    static char dataString[MAX_DATA_STRING];
    static char *undefindString = "-123456789.123456789\0";
@@ -169,17 +169,24 @@ char* GmatInterface::GetParameterData(const std::string &name)
    param = Moderator::Instance()->GetParameter(name);
    if (param != NULL)
    {
-      param->Evaluate();
-      std::string str = param->ToString();
+      #if DEBUG_GMAT_INTERFACE
+      MessageInterface::ShowMessage
+         ("Now evaluate the parameter:%s, type=%s\n",
+          param->GetName().c_str(), param->GetTypeName().c_str());
+      #endif
+      
+      //loj: 2/16/05 param->Evaluate() causes system to crash!!
+      // so just get the last value without evaluting
+      //param->Evaluate(); 
+      std::string str = param->ToString(); // returns last value
       str = "[" + str + "]";
       
-#if DEBUG_GMAT_INTERFACE
+      #if DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage("str=%s\n", str.c_str());
-#endif
+      #endif
       
       sprintf(dataString, "%s", str.c_str());
-      
-   }
+   }      
    
    return dataString;
 }
