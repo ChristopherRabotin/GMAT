@@ -407,9 +407,11 @@ void PropagateCommandPanel::SetData()
             ((SingleValueStop*)tempStopCond[i].stopCondPtr)->
                 SetSingleParameter(theGuiInterpreter->GetParameter(tempStopCond[i].varName.c_str()));
             tempStopCond[i].stopCondPtr->SetGoal(tempStopCond[i].goal);
+            MessageInterface::ShowMessage("PropagateCommandPanel::SetData() goal = %f\n",
+                                          tempStopCond[i].goal);
             tempStopCond[i].stopCondPtr->SetTolerance(tempStopCond[i].tol);  
             tempStopCond[i].stopCondPtr->SetRepeatCount(tempStopCond[i].repeat);
-            thePropagateCommand->SetObject(tempStopCond[i].stopCondPtr, Gmat::STOP_CONDITION);
+            //thePropagateCommand->SetObject(tempStopCond[i].stopCondPtr, Gmat::STOP_CONDITION);
         }
     }
     
