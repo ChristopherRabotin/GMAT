@@ -15,7 +15,7 @@
 /**
  * This is the class that handles access to a DE file.
  *
- * @note
+ * @todo : complete Convert method for converting to binary
  *
  * @note For Build 2, conversion from ASCII to Binary not done
  *       (assume  preprocessed).  Also, only 200 and 405 formats are handled.
