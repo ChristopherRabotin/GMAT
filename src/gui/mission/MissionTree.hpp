@@ -99,9 +99,11 @@ private:
    void OnAddVary(wxCommandEvent &event);
    void OnAddFunction(wxCommandEvent &event);
    void OnAddAssignment(wxCommandEvent &event);
+   void OnAddToggle(wxCommandEvent &event);
    void OnAddTarget(wxCommandEvent &event);
 
    void OnAddIfStatement(wxCommandEvent &event);
+   void OnAddIfElseStatement(wxCommandEvent &event);
    void OnAddWhileLoop(wxCommandEvent &event);
    void OnAddForLoop(wxCommandEvent &event);
    void OnAddDoWhile(wxCommandEvent &event);
@@ -115,6 +117,7 @@ private:
    void OnInsertVary(wxCommandEvent &event);
    void OnInsertFunction(wxCommandEvent &event);
    void OnInsertAssignment(wxCommandEvent &event);
+   void OnInsertToggle(wxCommandEvent &event);
    void OnInsertTarget(wxCommandEvent &event);
 
    void OnInsertIfStatement(wxCommandEvent &event);
@@ -170,6 +173,7 @@ private:
       POPUP_ADD_ACHIEVE,
       POPUP_ADD_FUNCTION,
       POPUP_ADD_ASSIGNMENT,
+      POPUP_ADD_TOGGLE,
       
       POPUP_INSERT_COMMAND,
       POPUP_INSERT_PROPAGATE,
@@ -179,6 +183,7 @@ private:
       POPUP_INSERT_ACHIEVE,
       POPUP_INSERT_FUNCTION,
       POPUP_INSERT_ASSIGNMENT,
+      POPUP_INSERT_TOGGLE,
       
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 
@@ -191,6 +196,7 @@ private:
       POPUP_DO_CONTROL,
       
       POPUP_ADD_IF_STATEMENT,
+      POPUP_ADD_IF_ELSE_STATEMENT,
       POPUP_ADD_WHILE_LOOP,
       POPUP_ADD_FOR_LOOP,
       POPUP_ADD_D0_WHILE,
@@ -199,6 +205,7 @@ private:
       POPUP_ADD_ELSE_STATEMENT,
       
       POPUP_INSERT_IF_STATEMENT,
+      POPUP_INSERT_IF_ELSE_STATEMENT,
       POPUP_INSERT_WHILE_LOOP,
       POPUP_INSERT_FOR_LOOP,
       POPUP_INSERT_D0_WHILE,
