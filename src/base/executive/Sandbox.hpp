@@ -46,6 +46,8 @@ public:
     bool          AddObject(GmatBase *obj);
     bool          AddSpacecraft(Spacecraft *obj);
     bool          AddPropSetup(PropSetup *propSetup);
+    bool          AddPropagator(Propagator *prop);
+    bool          AddForceModel(ForceModel *forces);
     bool          AddBurn(Burn *burn);
     bool          AddSolver(Solver *s);
     bool          AddCommand(GmatCommand *cmd);

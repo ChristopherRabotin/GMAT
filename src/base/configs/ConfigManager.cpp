@@ -56,13 +56,13 @@ ConfigManager::~ConfigManager()
     RemoveAllItems();
 }
 
-
 //------------------------------------------------------------------------------
 // void AddForceModel(ForceModel *fm)
 //------------------------------------------------------------------------------
 void ConfigManager::AddForceModel(ForceModel *fm)
 {
     std::string name = fm->GetName();
+
     if (name == "")
         throw ConfigManagerException("Unnamed objects cannot be managed");
     if (mapping.find(name) != mapping.end()) {
@@ -541,7 +541,7 @@ PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
     if (mapping.find(name) != mapping.end()) {
         if (mapping[name]->GetType() != Gmat::PHYSICAL_MODEL) {
             std::string str = mapping[name]->GetName() +
-                              " is not a Propagator";
+                              " is not a PhysicalModel";
             throw ConfigManagerException(str);
         }
         physicalModel = (PhysicalModel *)mapping[name];

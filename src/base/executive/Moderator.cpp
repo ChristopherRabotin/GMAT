@@ -1595,6 +1595,8 @@ Integer Moderator::RunMission(Integer sandboxNum, bool isFromGui)
          AddSolarSysToSandbox(sandboxNum-1);
          AddPublisherToSandbox(sandboxNum-1);
          AddSpacecraftToSandbox(sandboxNum-1);
+         AddForceModelToSandbox(sandboxNum-1);
+         AddPropagatorToSandbox(sandboxNum-1);
          AddPropSetupToSandbox(sandboxNum-1);
          AddBurnToSandbox(sandboxNum-1);        
          AddSolverToSandbox(sandboxNum-1);        
@@ -2038,6 +2040,36 @@ void Moderator::AddPropSetupToSandbox(Integer index)
    {
       propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
       sandboxes[index]->AddPropSetup(propSetup);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void AddPropagatorToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddPropagatorToSandbox(Integer index)
+{
+   Propagator *prop;
+   StringArray propNames = theConfigManager->GetListOfItems(Gmat::PROPAGATOR);
+    
+   for (Integer i=0; i<(Integer)propNames.size(); i++)
+   {
+      prop = theConfigManager->GetPropagator(propNames[i]);
+      sandboxes[index]->AddPropagator(prop);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void AddForceModelToSandbox(Integer index)
+//------------------------------------------------------------------------------
+void Moderator::AddForceModelToSandbox(Integer index)
+{
+   ForceModel *forces;
+   StringArray fmNames = theConfigManager->GetListOfItems(Gmat::FORCE_MODEL);
+    
+   for (Integer i=0; i<(Integer)fmNames.size(); i++)
+   {
+      forces = theConfigManager->GetForceModel(fmNames[i]);
+      sandboxes[index]->AddForceModel(forces);
    }
 }
 

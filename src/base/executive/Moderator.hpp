@@ -231,6 +231,8 @@ private:
    void AddSubscriberToSandbox(Integer index);
    void AddSpacecraftToSandbox(Integer index);
    void AddPropSetupToSandbox(Integer index);
+   void AddPropagatorToSandbox(Integer index);
+   void AddForceModelToSandbox(Integer index);
    void AddBurnToSandbox(Integer index);
    void AddSolverToSandbox(Integer index);
    void AddPublisherToSandbox(Integer index);

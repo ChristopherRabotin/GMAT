@@ -52,6 +52,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
     useCentralDifferencingID(parameterCount+4)
 {
     parameterCount += 5;
+    // textFileMode = "Verbose";
 }
 
 

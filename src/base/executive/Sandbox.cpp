@@ -269,6 +269,18 @@ bool Sandbox::AddPropSetup(PropSetup *propSetup)
 }
 
 
+bool Sandbox::AddPropagator(Propagator *prop)
+{
+    return AddObject(prop);
+}
+
+
+bool Sandbox::AddForceModel(ForceModel *forces)
+{
+    return AddObject(forces);
+}
+
+
 bool Sandbox::AddBurn(Burn *burn)
 {
     return AddObject(burn);
