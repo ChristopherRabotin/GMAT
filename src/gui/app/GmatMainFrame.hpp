@@ -31,6 +31,7 @@
 #include "GuiInterpreter.hpp"
 //#include "GmatMainNotebook.hpp"
 #include "GmatTreeItemData.hpp"
+#include "GmatServer.hpp"
 
 #include "wx/notebook.h"
 #include "wx/toolbar.h"
@@ -53,13 +54,18 @@ public:
    void RemoveChild(wxString item);
    void CloseActiveChild();
    void CloseAllChildren();
+   void CloseCurrentProject(); //loj: 9/8/04 added
+   void StartServer();
+   void StopServer();
    wxToolBar* GetMainFrameToolBar();
-   
+
+   // public data
    bool scriptMdiShown;
     
 protected:
 private:
    
+   GmatServer *mServer; //loj: 8/27/04 added
    std::string scriptFilename;
    GuiInterpreter *theGuiInterpreter;
    
@@ -100,11 +106,14 @@ private:
    
    //void OnNewScript(wxCommandEvent &event);
    
+   void OnStartServer(wxCommandEvent& event);
+   void OnStopServer(wxCommandEvent& event);
+   
    void OnSashDrag(wxSashEvent &event);
    void OnMsgSashDrag(wxSashEvent &event);
    void OnSize(wxSizeEvent &event);
    void OnFocus(wxFocusEvent &event);
-   
+
    // IDs for the controls and the menu commands
    enum
    {
@@ -146,16 +155,7 @@ private:
     
       MENU_VARIABLES_CREATE,
       MENU_VARIABLES_EVALUATE,
-    
-      MENU_VIEWS_COORD_FRAME,
-      MENU_VIEWS_TARG_OUTPUT,
-      MENU_VIEWS_CASCADE,
-      MENU_VIEWS_TILE,
-      MENU_VIEWS_CLEAR,
-      MENU_VIEWS_MIN,
-      MENU_VIEWS_RESTORE,
-      MENU_VIEWS_CLOSE,
-    
+        
       MENU_TOOLS_SWINGBY,
 
       MENU_HELP_TOPICS,
@@ -168,6 +168,9 @@ private:
       TOOL_CLOSE_TABS,
       TOOL_SCRIPT,
         
+      MENU_START_SERVER,
+      MENU_STOP_SERVER,
+      
       ID_SASH_WINDOW,
       ID_MSG_SASH_WINDOW,
         

@@ -62,6 +62,7 @@
 #include "FormationSetupPanel.hpp"
 
 #include <wx/gdicmn.h>
+#include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
 
 //loj: 8/5/04 moved from GmatMainFrame.hpp
 #include "bitmaps/new.xpm"
@@ -110,6 +111,9 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
 
    EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnScriptOpenNewEditor)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnScriptOpenFileEditor)
+   
+   EVT_MENU(MENU_START_SERVER, GmatMainFrame::OnStartServer)
+   EVT_MENU(MENU_STOP_SERVER, GmatMainFrame::OnStopServer)
    
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
@@ -225,6 +229,16 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
    // set the flag to say mdi is not open
    scriptMdiShown = false;
 
+//   splitter = new GmatSplitterWindow(this);
+ 
+   // create the tabs for Resources, Mission, Output
+//   leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
+//                                wxDefaultSize, wxCLIP_CHILDREN);
+
+   //   splitter->SplitVertically( leftTabs, rightTabs, 200 );
+
+   mServer = NULL;
+   
 #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
 #endif
@@ -235,6 +249,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
+   if (mServer)
+      delete mServer;
+   
    if (GmatAppData::GetMessageWindow() != NULL)
       GmatAppData::GetMessageWindow()->Close();
 
@@ -604,14 +621,84 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseAllChildren()
 {
-  wxNode *node = mdiChildren->GetFirst();
-  while (node)
-  {
-    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-    delete theChild;
-    delete node;
-    node = node->GetNext();
-  }
+   wxNode *node = mdiChildren->GetFirst();
+   while (node)
+   {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      delete theChild;
+      delete node;
+      node = node->GetNext();
+   }
+}
+
+//loj: 9/8/04 added
+//------------------------------------------------------------------------------
+// void CloseCurrentProject()
+//------------------------------------------------------------------------------
+void GmatMainFrame::CloseCurrentProject()
+{
+   //close all windows
+   CloseAllChildren();
+   
+   theGuiInterpreter->ClearResource();
+   theGuiInterpreter->ClearCommandSeq();
+   MessageInterface::ClearMessage();
+
+   // close plot windows 
+   if (MdiGlPlot::mdiParentGlFrame != NULL)
+      MdiGlPlot::mdiParentGlFrame->Close();
+    
+   if (MdiXyPlot::mdiParentXyFrame != NULL)
+      MdiXyPlot::mdiParentXyFrame->Close();
+    
+   GmatAppData::GetResourceTree()->UpdateResource(true);
+   GmatAppData::GetMissionTree()->UpdateMission(true);
+}
+
+//------------------------------------------------------------------------------
+// void GmatMainFrame::StartServer()
+//------------------------------------------------------------------------------
+void GmatMainFrame::StartServer()
+{
+   if (!mServer)
+   {
+      // service name (DDE classes) or port number (TCP/IP based classes)
+      wxString service = IPC_SERVICE;
+      
+      // Create a new server
+      mServer = new GmatServer;
+      mServer->Create(service);
+      MessageInterface::ShowMessage("Server started.\n");
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Server has already started.\n");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void GmatMainFrame::StopServer()
+//------------------------------------------------------------------------------
+void GmatMainFrame::StopServer()
+{
+   if (mServer)
+   {
+      delete mServer;
+      MessageInterface::ShowMessage("Server terminated.\n");
+      mServer = NULL;
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Server has not started.\n");
+   }
+}
+
+//------------------------------------------------------------------------------
+// wxToolBar* GmatMainFrame::GetMainFrameToolBar()
+//------------------------------------------------------------------------------
+wxToolBar* GmatMainFrame::GetMainFrameToolBar()
+{
+   return GetToolBar();
 }
 
 //-------------------------------
@@ -629,19 +716,21 @@ void GmatMainFrame::CloseAllChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 {
-   theGuiInterpreter->ClearResource();
-   theGuiInterpreter->ClearCommandSeq();
-   MessageInterface::ClearMessage();
+   CloseCurrentProject();
+   
+//     theGuiInterpreter->ClearResource();
+//     theGuiInterpreter->ClearCommandSeq();
+//     MessageInterface::ClearMessage();
 
-   // close plot window on new project
-   if (MdiGlPlot::mdiParentGlFrame != NULL)
-      MdiGlPlot::mdiParentGlFrame->Close();
+//     // close plot window on new project
+//     if (MdiGlPlot::mdiParentGlFrame != NULL)
+//        MdiGlPlot::mdiParentGlFrame->Close();
     
-   if (MdiXyPlot::mdiParentXyFrame != NULL)
-      MdiXyPlot::mdiParentXyFrame->Close();
+//     if (MdiXyPlot::mdiParentXyFrame != NULL)
+//        MdiXyPlot::mdiParentXyFrame->Close();
     
-   GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-   GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
+//     GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
+//     GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
 }
 
 //------------------------------------------------------------------------------
@@ -663,24 +752,26 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
       return;
    }
 
-   theGuiInterpreter->ClearResource();
-   theGuiInterpreter->ClearCommandSeq();
-    MessageInterface::ClearMessage();
+   CloseCurrentProject();
+   
+//     theGuiInterpreter->ClearResource();
+//     theGuiInterpreter->ClearCommandSeq();
+//     MessageInterface::ClearMessage();
     
-   //close all windows
-   CloseAllChildren();
+//     //close all windows
+//     CloseAllChildren();
        
-   //close plot window on new project
-   if (MdiGlPlot::mdiParentGlFrame != NULL)
-      MdiGlPlot::mdiParentGlFrame->Close();
+//     //close plot window on new project
+//     if (MdiGlPlot::mdiParentGlFrame != NULL)
+//        MdiGlPlot::mdiParentGlFrame->Close();
     
-   if (MdiXyPlot::mdiParentXyFrame != NULL)
-      MdiXyPlot::mdiParentXyFrame->Close();
+//     if (MdiXyPlot::mdiParentXyFrame != NULL)
+//        MdiXyPlot::mdiParentXyFrame->Close();
 
    theGuiInterpreter->LoadDefaultMission();
 
-   GmatAppData::GetResourceTree()->UpdateResource(true); //loj: 6/29/04 added true
-   GmatAppData::GetMissionTree()->UpdateMission(true); //loj: 6/29/04 added true
+   GmatAppData::GetResourceTree()->UpdateResource(true);
+   GmatAppData::GetMissionTree()->UpdateMission(true);
 }
 
 //------------------------------------------------------------------------------
@@ -951,41 +1042,16 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    wxMenu *editMenu = new wxMenu;
    wxMenu *parametersMenu = new wxMenu;
    wxMenu *orbitFileMenu = new wxMenu;
-//   wxMenu *variablesMenu = new wxMenu;
-//   wxMenu *viewsMenu = new wxMenu;
    wxMenu *toolsMenu = new wxMenu;
    wxMenu *helpMenu = new wxMenu;
-//   wxMenu *scriptMenu = new wxMenu;
  
-   wxMenu *propagatorMenu;
-//   wxMenu *openMenu, *saveMenu, *saveAsMenu, *propagatorMenu;
-   
-//   fileMenu->Append(MENU_PROJECT_NEW, wxT("New Project"), wxT(""), FALSE);
-//   fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Load Default Mission"), wxT(""), FALSE);
+   wxMenu *propagatorMenu;  
 
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("New Script"));  
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("Open Script"), wxT(""), FALSE);  
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("Save Script"), wxT(""), FALSE);  
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save Script As"), 
                      wxT(""), FALSE);  
-
-//   openMenu = new wxMenu;
-//   openMenu->Append(MENU_PROJECT_OPEN_BINARY, wxT("Binary"), wxT(""), FALSE);
-//   openMenu->Append(MENU_PROJECT_OPEN_ASCII, wxT("ASCII"), wxT(""), FALSE);
-//   fileMenu->Append(MENU_PROJECT_OPEN, wxT("Open Project"), openMenu, wxT(""));
-//   
-//   saveMenu = new wxMenu;
-//   saveMenu->Append(MENU_PROJECT_SAVE_BINARY, wxT("Binary"), wxT(""), FALSE);
-//   saveMenu->Append(MENU_PROJECT_SAVE_ASCII, wxT("ASCII"), wxT(""), FALSE);
-//   fileMenu->Append(MENU_PROJECT_SAVE, wxT("Save Project"), saveMenu, wxT(""));
-//   
-//   saveAsMenu = new wxMenu;
-//   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_BINARY, wxT("Binary"), wxT(""),
-//                      FALSE);
-//   saveAsMenu->Append(MENU_PROJECT_SAVE_AS_ASCII, wxT("ASCII"), wxT(""),
-//                      FALSE);
-//   fileMenu->Append(MENU_PROJECT_SAVE_AS, wxT("Save Project As"), saveAsMenu,
-//                    wxT(""));
    
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
@@ -1006,10 +1072,6 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
-
-
-//   scriptMenu->Append(MENU_SCRIPT_OPEN_EDITOR, wxT("Open Editor"), wxT(""), FALSE);
-//   scriptMenu->Append(MENU_SCRIPT_BUILD, wxT("Build Script from Object"), wxT(""), FALSE);
     
    editMenu->Append(MENU_EDIT_CUT, wxT("Cut"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_COPY, wxT("Copy"), wxT(""), FALSE);
@@ -1067,30 +1129,17 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    orbitFileMenu->Enable(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, FALSE);
    orbitFileMenu->Enable(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, FALSE);
    orbitFileMenu->Enable(MENU_ORBIT_FILES_EPHEM_FILE, FALSE);
-      
-//   variablesMenu->Append(MENU_VARIABLES_CREATE, wxT("Create"), wxT(""), FALSE); 
-//   variablesMenu->Append(MENU_VARIABLES_EVALUATE, wxT("Evaluate"), wxT(""),
-//                         FALSE);
-//
-//   viewsMenu->Append(MENU_VIEWS_COORD_FRAME, wxT("Coordinate Frame"), wxT(""),
-//                     FALSE);
-//   viewsMenu->AppendSeparator();
-//   viewsMenu->Append(MENU_VIEWS_TARG_OUTPUT, wxT("Targeter Output"), wxT(""),
-//                     FALSE);
-//   viewsMenu->AppendSeparator();
-//   viewsMenu->Append(MENU_VIEWS_CASCADE, wxT("Cascade Plots"), wxT(""), FALSE); 
-//   viewsMenu->Append(MENU_VIEWS_TILE, wxT("Tile Plots"), wxT(""), FALSE); 
-//   viewsMenu->AppendSeparator();
-//   viewsMenu->Append(MENU_VIEWS_CLEAR, wxT("Clear Plots"), wxT(""), FALSE); 
-//   viewsMenu->Append(MENU_VIEWS_MIN, wxT("Minimize Plots"), wxT(""), FALSE); 
-//   viewsMenu->Append(MENU_VIEWS_RESTORE, wxT("Restore Plots"), wxT(""), FALSE); 
-//   viewsMenu->Append(MENU_VIEWS_CLOSE, wxT("Close Plots"), wxT(""), FALSE); 
-
+   
+   // Tools
    toolsMenu->Append(MENU_TOOLS_SWINGBY, wxT("Swingby"), wxT(""), FALSE); 
-
    toolsMenu->Enable(MENU_TOOLS_SWINGBY, FALSE);
 
-    
+   // Server
+   wxMenu *serverMenu = new wxMenu;
+   serverMenu->Append(MENU_START_SERVER, _T("Start"), _T("Start server"));
+   serverMenu->Append(MENU_STOP_SERVER, _T("Stop"), _T("Stop server"));
+
+   // Help
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
@@ -1098,14 +1147,11 @@ wxMenuBar *GmatMainFrame::CreateMainMenu()
    helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
   
    menuBar->Append(fileMenu, wxT("File"));
-//   menuBar->Append(scriptMenu, wxT("Script"));
    menuBar->Append(editMenu, wxT("Edit"));
    menuBar->Append(parametersMenu, wxT("Parameters"));
    menuBar->Append(orbitFileMenu, wxT("Orbit Files"));
-   //menuBar->Append(variablesMenu, wxT("Variables"));
-   //menuBar->Append(viewsMenu, wxT("Views"));
    menuBar->Append(toolsMenu, wxT("Tools"));
-    
+   menuBar->Append(serverMenu, wxT("Server"));
    menuBar->Append(helpMenu, wxT("Help"));
     
    return menuBar;
@@ -1263,6 +1309,44 @@ void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
+// void OnScriptOpenNewEditor(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
+{
+   if (scriptMdiShown == false)
+      OnScriptOpenEditor(event);
+//   else
+//      mdiDocMainFrame->Iconize(false);
+   
+   if (mDocManager != NULL)
+      mDocManager->OnFileNew(event);
+}
+
+//------------------------------------------------------------------------------
+// void OnScriptOpenFileEditor(wxCommandEvent& WXUNUSED(event))
+//------------------------------------------------------------------------------
+/**
+ * Handles script file from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnScriptOpenFileEditor(wxCommandEvent& event)
+{
+   if (scriptMdiShown == false)
+     OnScriptOpenEditor(event);
+
+   if (mDocManager != NULL)
+      mDocManager->OnFileOpen(event);
+}
+
+//------------------------------------------------------------------------------
 // void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -1324,49 +1408,31 @@ void GmatMainFrame::OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
 }
 
 //------------------------------------------------------------------------------
-// void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
+// void OnStartServer(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
- * Handles script file from the menu bar.
+ * Handles starting server from the menu bar.
  *
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptOpenNewEditor(wxCommandEvent& event)
+void GmatMainFrame::OnStartServer(wxCommandEvent& event)
 {
-   if (scriptMdiShown == false)
-      OnScriptOpenEditor(event);
-//   else
-//      mdiDocMainFrame->Iconize(false);
-   
-   if (mDocManager != NULL)
-      mDocManager->OnFileNew(event);
+   StartServer();
 }
 
 //------------------------------------------------------------------------------
-// void OnScriptOpenEditor(wxCommandEvent& WXUNUSED(event))
+// void OnStopServer(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
- * Handles script file from the menu bar.
+ * Handles terminating server from the menu bar.
  *
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptOpenFileEditor(wxCommandEvent& event)
+void GmatMainFrame::OnStopServer(wxCommandEvent& event)
 {
-   if (scriptMdiShown == false)
-     OnScriptOpenEditor(event);
-
-   if (mDocManager != NULL)
-      mDocManager->OnFileOpen(event);
-}
-
-//------------------------------------------------------------------------------
-// wxToolBar* GmatMainFrame::GetMainFrameToolBar()
-//------------------------------------------------------------------------------
-wxToolBar* GmatMainFrame::GetMainFrameToolBar()
-{
-   return GetToolBar();
+   StopServer();
 }
 
 //------------------------------------------------------------------------------
