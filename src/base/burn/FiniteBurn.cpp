@@ -30,6 +30,7 @@ const std::string
 FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 {
    "Thrusters",
+   "FuelTanks",
    "BurnScaleFactor"
 };
 
@@ -37,6 +38,7 @@ FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 const Gmat::ParameterType
 FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 {
+   Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::REAL_TYPE,
 };
@@ -217,6 +219,12 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
          
+   if (id == FUEL_TANK) {
+      if (find(tanks.begin(), tanks.end(), value) == tanks.end())
+         tanks.push_back(value);
+      return true;
+   }
+         
    return Burn::SetStringParameter(id, value);
 }
 
@@ -240,6 +248,9 @@ const StringArray& FiniteBurn::GetStringArrayParameter(const Integer id) const
 {
    if (id == THRUSTER)
       return thrusters;
+      
+   if (id == FUEL_TANK)
+      return tanks;
 
    return Burn::GetStringArrayParameter(id);
 }
@@ -296,14 +307,103 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
  * BeginManeuver/EndManeuver commands replace the actions that fire would 
  * perform.
  * 
- * @param burnData Not currently used for finite burns.
+ * @param burnData Pointer to a state that will be filled with the acceleration
+ *                 and mass flow data.  The data returned in burnData has the 
+ *                 format
+ *                     burnData[0]  dVx/dt
+ *                     burnData[1]  dVy/dt
+ *                     burnData[2]  dVz/dt
+ *                     burnData[3]  dM/dt
  *
  * @return false, indicating that Fire() doesn't do anything.
  */
 //------------------------------------------------------------------------------
 bool FiniteBurn::Fire(Real *burnData)
 {
-   return false;
+   #ifdef DEBUG_FINITE_BURN
+      MessageInterface::ShowMessage("FiniteBurn::Fire entered for %s\n",
+         instanceName.c_str());
+   #endif
+
+   frame = frameman->GetFrameInstance(coordFrame);
+   if (frame == NULL)
+      throw BurnException("Maneuver frame undefined");
+    
+   PropState *state;
+   if (sc)    
+      state = &sc->GetState();
+   else
+      throw BurnException("Maneuver initial state undefined (No spacecraft?)");
+   
+   // Set the state 6-vector from the associated spacecraft
+   frame->SetState(state->GetState());
+   // Calculate the maneuver basis vectors
+   frame->CalculateBasis(frameBasis);
+   
+   // Accumulate the individual accelerations from the thrusters
+   Real dm, tMass, tOverM, *dir, norm;
+   deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
+   Thruster *current;
+   
+   tMass = sc->GetRealParameter("TotalMass");
+
+   #ifdef DEBUG_FINITE_BURN
+      MessageInterface::ShowMessage(
+         "   Maneuvering spacecraft %s\n",
+         sc->GetName().c_str());
+      MessageInterface::ShowMessage(
+         "   Position for burn:    %18le  %18le  %18le\n",
+         (*state)[0], (*state)[1], (*state)[2]);
+      MessageInterface::ShowMessage(
+         "   Velocity for burn: %18le  %18le  %18le\n   Mass = %18le kg\n",
+         (*state)[3], (*state)[4], (*state)[5], tMass);
+   #endif
+   
+   for (StringArray::iterator i = thrusters.begin(); 
+        i != thrusters.end(); ++i) {
+
+      #ifdef DEBUG_FINITE_BURN
+         MessageInterface::ShowMessage("   Accessing thruster %s\n", 
+            (*i).c_str());
+      #endif
+
+      current = (Thruster *)sc->GetRefObject(Gmat::THRUSTER, *i);
+      if (!current)
+         throw BurnException("FiniteBurn::Fire requires thruster named " +
+            (*i) + " on spacecraft " + sc->GetName());
+            
+      dir = current->direction;
+      norm = sqrt(dir[0]*dir[0] + dir[1]*dir[1] + dir[2]*dir[2]);
+      if (norm == 0.0)
+         throw BurnException("FiniteBurn::Fire thruster " + (*i) +
+                             " on spacecraft " + sc->GetName() +
+                             " has no direction.");
+            
+      dm = current->CalculateMassFlow();
+      tOverM = current->thrust * current->thrustScaleFactor / (tMass * norm);
+      deltaV[0] += dir[0] * tOverM;
+      deltaV[1] += dir[1] * tOverM;
+      deltaV[2] += dir[2] * tOverM;
+   }
+
+   // Build the acceleration
+   burnData[0] = deltaV[0]*frameBasis[0][0] +
+                 deltaV[1]*frameBasis[0][1] +
+                 deltaV[2]*frameBasis[0][2];
+   burnData[1] = deltaV[0]*frameBasis[1][0] +
+                 deltaV[1]*frameBasis[1][1] +
+                 deltaV[2]*frameBasis[1][2];
+   burnData[2] = deltaV[0]*frameBasis[2][0] +
+                 deltaV[1]*frameBasis[2][1] +
+                 deltaV[2]*frameBasis[2][2];
+
+   #ifdef DEBUG_FINITE_BURN
+      MessageInterface::ShowMessage(
+         "   Acceleration from burn:  %18le  %18le  %18le\n   dm/dt: %18le\n",
+         burnData[0], burnData[1], burnData[2], burnData[3]);
+   #endif
+
+   return true;
 }
 
 

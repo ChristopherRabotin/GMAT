@@ -48,13 +48,15 @@ public:
    virtual Real            SetRealParameter(const Integer id, const Real value);
 
 
-   virtual bool            Fire(Real *burnData = NULL);
+   virtual bool            Fire(Real *burnData);
    
    GmatBase*               Clone() const;
    
 protected:
    /// List of thrusters used in the maneuver
    StringArray             thrusters;
+   /// List of fuel tanks used in the maneuver
+   StringArray             tanks;
    /// Overall thrust scale factor for this burn
    Real                    burnScaleFactor;
 
@@ -62,6 +64,7 @@ protected:
    enum
    {
       THRUSTER = BurnParamCount,
+      FUEL_TANK, 
       BURN_SCALE_FACTOR,
       FiniteBurnParamCount
    };
@@ -72,7 +75,6 @@ protected:
    /// Thruster parameter types
    static const Gmat::ParameterType 
                         PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount];
-                        
 };
 
 #endif // FiniteBurn_hpp
