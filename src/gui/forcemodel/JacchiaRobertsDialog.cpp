@@ -272,9 +272,9 @@ void JacchiaRobertsDialog::SaveData()
         {
            inputSourceString = wxT("File");
            theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-           MessageInterface::ShowMessage("Saved input source string\n");
            theForce->SetStringParameter(solarFluxFileID, fileNameTextCtrl->GetValue().c_str() );
-           MessageInterface::ShowMessage("Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
+           
+           //MessageInterface::ShowMessage("Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
         }
         else
         {
