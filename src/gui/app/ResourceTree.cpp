@@ -925,7 +925,9 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
-   if ( !newName.IsEmpty())
+
+   //loj: 12/7/04 - added if newName != oldName
+   if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
       Gmat::ObjectType objType;
       
@@ -1514,21 +1516,29 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
 
    wxString withName;
-   withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
+   //withName.Printf("MatlabFunction%d", ++mNumMatlabFunct);
 
-   const std::string stdWithName = withName.c_str();
+   //loj: 12/7/04 - Get name from the user first
+   withName = wxGetTextFromUser(wxT("Name: "), wxT("MATLAB function"),
+                                withName, this);
 
-   if (GmatAppData::GetGuiInterpreter()->
-      CreateFunction("MatlabFunction", stdWithName))
+   if (!withName.IsEmpty())
    {
-      AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
-                 new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
+      ++mNumMatlabFunct;
+      const std::string stdWithName = withName.c_str();
 
-      Expand(item);
+      if (GmatAppData::GetGuiInterpreter()->
+          CreateFunction("MatlabFunction", stdWithName))
+      {
+         AppendItem(item, withName, GmatTree::ICON_MATLAB_FUNCTION, -1,
+                    new GmatTreeItemData(withName, GmatTree::CREATED_MATLAB_FUNCT));
+
+         Expand(item);
+      }
+
+      SelectItem(GetLastChild(item));
    }
-
-   SelectItem(GetLastChild(item));
-   OnRename(event);
+   //OnRename(event); //loj: 12/7/04 commented out
 }
 
 //------------------------------------------------------------------------------
