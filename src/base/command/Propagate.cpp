@@ -184,7 +184,7 @@ void Propagate::ClearObject(const Gmat::ObjectType type)
 {
    switch (type)
    {
-   case Gmat::SPACECRAFT: //loj: 6/9/04 added
+   case Gmat::SPACECRAFT:
    case Gmat::FORMATION:
       satName.clear();
       break;
@@ -278,7 +278,6 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
    return GmatCommand::SetRefObjectName(type, name);
 }
 
-//loj: 6/25/04 added
 // Reference object accessor methods
 //------------------------------------------------------------------------------
 // GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
@@ -608,7 +607,7 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool Propagate::SetStringParameter(const Integer id, const std::string &value,
                                    const Integer index)
-{
+{   
    if (id == satNameID) {
       if (index < (Integer)propName.size())
          satName[index]->push_back(value);
@@ -665,19 +664,27 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id,
 bool Propagate::TakeAction(const std::string &action, 
                            const std::string &actionData)
 {
-   if (action == "Clear") {
-      for (Integer i = 0; i < (Integer)satName.size(); ++i)
-         delete satName[i];
-      satName.clear();
-      stopSatNames.clear();
-      propName.clear();
-      prop.clear();
-      sats.clear();
-      for (unsigned int i=0; i<stopWhen.size(); i++)
-         delete stopWhen[i];
-      stopWhen.clear();
-      stopSats.clear();
-      return true;
+   //loj: 10/20/04 added actionData   
+   if (action == "Clear")
+   {
+      if (actionData == "Propagator")
+      {
+         for (Integer i = 0; i < (Integer)satName.size(); ++i)
+            delete satName[i];
+         satName.clear();
+         stopSatNames.clear();
+         propName.clear();
+         prop.clear();
+         sats.clear();
+      }
+      else if (actionData == "StopCondition")
+      {
+         for (unsigned int i=0; i<stopWhen.size(); i++)
+            delete stopWhen[i];
+         stopWhen.clear();
+         stopSats.clear();
+         return true;
+      }
    }
    
    return GmatCommand::TakeAction(action, actionData);
@@ -887,7 +894,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          // This will be deleted when system shuts down
          Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
          //stopParam->SetStringParameter("Object", paramObj);
-         stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj); //loj: 9/13/04 added
+         stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
          
          StopCondition *stopCond =
             theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
@@ -1406,7 +1413,7 @@ bool Propagate::Execute(void)
           secsToStep, (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
 #endif
    
-      publisher->FlushBuffers(); //loj: 6/22/04 added
+      publisher->FlushBuffers();
       delete [] pubdata;
     
       for (unsigned int i=0; i<stopWhen.size(); i++)
