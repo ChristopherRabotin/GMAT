@@ -76,7 +76,7 @@ namespace Gmat
 };
 
 /**
- * CelestialBody base class, from which all types of celestial bodeis will derive.
+ * CelestialBody base class, from which all types of celestial bodies will derive.
  *
  * The CelestialBody class is primarily a base class, from which all types of
  * celestial bodies will derive.  CelestialBody itself derives from GmatBase.
@@ -84,8 +84,6 @@ namespace Gmat
 class GMAT_API CelestialBody : public GmatBase
 {
 public:
-   // default constructor, with optional name
-   //CelestialBody(std::string name = "Earth");
    // additional constructor, specifying body type (as string) and name
    CelestialBody(std::string itsBodyType, std::string name);
    // additional constructor, specifying type (as Gmat::BodyType) and name
@@ -104,7 +102,7 @@ public:
    // methods to return the body type, central body, gravitational constant,
    // radius, mass, posvel source, and analytic method 
    virtual Gmat::BodyType       GetBodyType() const;
-   virtual CelestialBody*       GetCentralBody() const;
+   virtual const std::string&   GetCentralBody() const;
    virtual Real                 GetGravitationalConstant();
    virtual Real                 GetEquatorialRadius();
    virtual Real                 GetPolarRadius() const;
@@ -128,7 +126,7 @@ public:
    // methods to return the body type, central body,
    // posvel source, and analytic method
    virtual bool           SetBodyType(Gmat::BodyType bType);
-   virtual bool           SetCentralBody(CelestialBody* cBody);
+   virtual bool           SetCentralBody(const std::string &cBody);
    virtual bool           SetGravitationalConstant(Real newMu);
    virtual bool           SetEquatorialRadius(Real newEqRadius);
    virtual bool           SetPolarRadius(Real newPolarRadius);
@@ -263,7 +261,7 @@ protected:
    //Integer                degree;     // are these the same as coefficientSize?
 
    /// central body around which this body revolves
-   CelestialBody          *centralBody;
+   std::string            centralBody;
    /// body number for the SLP file
    Integer                bodyNumber;
    /// body number of origin of coordinate system for file

@@ -86,7 +86,7 @@ Gmat::RVECTOR_TYPE,
 Gmat::A1MJD_TYPE,
 //Gmat::INTEGER_TYPE,
 //Gmat::INTEGER_TYPE,
-Gmat::OBJECT_TYPE,
+Gmat::STRING_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::INTEGER_TYPE,
 Gmat::STRING_TYPE,
@@ -121,24 +121,6 @@ const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCou
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-//  CelestialBody(std::string name)
-//------------------------------------------------------------------------------
-/**
- * This method creates an object of the CelestialBody class
- * (default constructor).
- *
- * @param <name> optional parameter indicating the name of the celestial
- *               body (default is "Earth").
- */
-//------------------------------------------------------------------------------
-//CelestialBody::CelestialBody(std::string name) :
-//GmatBase            (Gmat::CELESTIAL_BODY, "Planet", name)
-//{
-//   parameterCount = CelestialBodyParamCount;
-//   Initialize("Planet");  
-//}
-
 //------------------------------------------------------------------------------
 //  CelestialBody(std::string itsBodyType, std::string name)
 //------------------------------------------------------------------------------
@@ -209,15 +191,18 @@ potentialFileName   (cb.potentialFileName),
 //dSbar               (cb.dSbar),
 //sij                 (cb.sij),
 //cij                 (cb.cij),
-hourAngle           (cb.hourAngle),
-atmManager          (cb.atmManager),  
-atmModel            (cb.atmModel)
+hourAngle           (cb.hourAngle)//,
+//atmManager          (cb.atmManager),  
+//atmModel            (cb.atmModel)
 {
    state                  = cb.state;
    stateTime              = cb.stateTime;
    angularVelocity        = cb.angularVelocity;
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
+   atmManager             = new AtmosphereManager(instanceName);
+   atmModel               = atmManager->GetAtmosphere(
+                                    cb.atmModel->GetTypeName());
    //defaultCoefSize        = cb.defaultCoefSize;
    //defaultSij             = cb.defaultSij;
    //defaultCij             = cb.defaultCij;
@@ -266,8 +251,11 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
    //dCbar               = cb.dCbar;
    //dSbar               = cb.dSbar;
    hourAngle           = cb.hourAngle;
-   atmModel            = cb.atmModel;
-   atmManager          = cb.atmManager; // do I want to do this??????
+   //atmModel            = cb.atmModel;
+   //atmManager          = cb.atmManager; // do I want to do this??????
+   atmManager             = new AtmosphereManager(instanceName);
+   atmModel               = atmManager->GetAtmosphere(
+                                                      cb.atmModel->GetTypeName());
    defaultMu              = cb.defaultMu;
    defaultEqRadius        = cb.defaultEqRadius;
       
@@ -283,7 +271,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cb)
 //------------------------------------------------------------------------------
 CelestialBody::~CelestialBody()
 {
-   if (atmModel != NULL)   atmModel = NULL; 
+   //atmModel will be destroyed by the atmManager 
    if (atmManager != NULL) delete atmManager;
    // don't delete the central body
    // should I delete the source file?
@@ -381,16 +369,16 @@ Gmat::BodyType CelestialBody::GetBodyType() const
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody* GetCentralBody() const
+//  const std::string& GetCentralBody() const
 //------------------------------------------------------------------------------
 /**
- * This method returns a pointer to the central body of the body.
+ * This method returns the name of the central body of the body.
  *
- * @return pointer to the central body of the body.
+ * @return name of the central body of the body.
  *
  */
 //------------------------------------------------------------------------------
-CelestialBody* CelestialBody::GetCentralBody() const
+const std::string& CelestialBody::GetCentralBody() const
 {
    return centralBody;
 }
@@ -418,10 +406,10 @@ Real CelestialBody::GetGravitationalConstant()
          {
             if (firstTimeMu)
             {
-            MessageInterface::ShowMessage
-               ("Cannot read file %s, so using default value for mu\n",
-                potentialFileName.c_str());
-            firstTimeMu = false;
+               MessageInterface::ShowMessage(
+               "Cannot read file \"%s\", so using default value (%lf) for mu\n",
+               potentialFileName.c_str(), defaultMu);
+               firstTimeMu = false;
             }
          
             mu = defaultMu;
@@ -459,9 +447,9 @@ Real CelestialBody::GetEquatorialRadius()
       {
          if (firstTimeRadius)
          {
-            MessageInterface::ShowMessage
-               ("Cannot read file %s, so using default value for radius\n",
-                potentialFileName.c_str());
+             MessageInterface::ShowMessage(
+              "Cannot read file \"%s\", so using default value (%lf) for radius\n",
+               potentialFileName.c_str(), defaultEqRadius);
             firstTimeRadius = false;
          }
          equatorialRadius = defaultEqRadius;
@@ -574,27 +562,12 @@ const Rvector3& CelestialBody::GetAngularVelocity()
  *
  */
 //------------------------------------------------------------------------------
-// *** File Name : utilityfuncts.cpp
-// *** Created   : February 7, 2003
-// **************************************************************************
-// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
-// ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
-// ***  Under Contract:  P.O.  GSFC S-67521-G                             ***
-// ***  Copyright U.S. Government 2003                                    ***
-// ***                                                                    ***
-// ***  Header Version: July 12, 2002                                     ***
-// **************************************************************************
-// Module Type               : ANSI C/C++ Source
-// Development Environment   : Borland C++ 5.02
-// Modification History      : 2/7/2003 - D. Conway, Thinking Systems, Inc.
-//                             Original delivery
-// **************************************************************************
 Real  CelestialBody:: GetHourAngle(Real offset) 
 {
    Real ghaEpoch = (/*epoch +*/ offset - 21545.5) / 100.0, gha;
 
    gha = fmod(100.4606184 + ghaEpoch * (36000.770053610 +
-                                        ghaEpoch * (0.000387930 + ghaEpoch * -0.000000026)), 360.0);
+         ghaEpoch * (0.000387930 + ghaEpoch * -0.000000026)), 360.0);
 
    if (gha < 0.0)
       gha += 360.0;
@@ -749,6 +722,9 @@ Real  CelestialBody:: GetHourAngle(Real offset)
 //------------------------------------------------------------------------------
 const StringArray&   CelestialBody::GetSupportedAtmospheres() const
 {
+   if (!atmManager) throw SolarSystemException("Atmosphere Manager for body "
+       + instanceName +
+       " must be set before supported atmospheres can be determined.");
    return atmManager->GetSupportedAtmospheres();
 }
 
@@ -773,11 +749,12 @@ std::string  CelestialBody::GetAtmosphereModelType()
 }
 
 //------------------------------------------------------------------------------
-//  AtmosphereModel* GetAtmosphereModel()
+//  AtmosphereModel* GetAtmosphereModel(const std::string &type)
 //------------------------------------------------------------------------------
 /**
  * This method returns a pointer to the current atmosphere model for the body.
  *
+ * @param <type> type of atmosphere model
  * @return a pointer to the current atmosphere model for the body.
  *
  */
@@ -809,20 +786,21 @@ bool CelestialBody::SetBodyType(Gmat::BodyType bType)
 }
 
 //------------------------------------------------------------------------------
-//  bool SetCentralBody(CelestialBody* cBody)
+//  bool SetCentralBody(const std::string &cBody)
 //------------------------------------------------------------------------------
 /**
  * This method sets the central body for the body.
  *
- * @param <cBody> central body pointer for the body.
+ * @param <cBody> central body name for the body.
  *
  * @return flag indicating success of the method.
  *
  */
 //------------------------------------------------------------------------------
-bool CelestialBody::SetCentralBody(CelestialBody *cBody)
+bool CelestialBody::SetCentralBody(const std::string &cBody)
 {
-   return (centralBody = cBody);  
+   centralBody = cBody;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -996,7 +974,9 @@ bool CelestialBody::SetUsePotentialFile(bool useIt)
 bool CelestialBody::SetAtmosphereModel(std::string toAtmModel)
 {
    atmModel = atmManager->GetAtmosphere(toAtmModel);
-   if (atmModel == NULL) return false;  // error creating a new atmosphere model
+   //if (atmModel == NULL) return false; // error creating a new atmos. model
+   if (atmModel == NULL) throw SolarSystemException(
+            "Error creating a new atmosphere model for " + instanceName + ".");
    return true;
 }
 
@@ -1275,6 +1255,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
       if (atmModel == NULL) return "";
       return atmModel->GetTypeName();
    }
+   if (id == CENTRAL_BODY)          return centralBody;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -1340,6 +1321,11 @@ bool        CelestialBody::SetStringParameter(const Integer id,
    if (id == ATMOS_MODEL_NAME)
    {
       return SetAtmosphereModel(value);
+   }
+   if (id == CENTRAL_BODY)
+   {
+      centralBody = value;
+      return true;
    }
    
    return GmatBase::SetStringParameter(id, value);
@@ -1628,7 +1614,7 @@ void CelestialBody::Initialize(std::string withBodyType)
 }
 
 //------------------------------------------------------------------------------
-//  bool  PotentialFile()
+//  bool  ReadPotentialFile()
 //------------------------------------------------------------------------------
 /**
  * This method reads the potential file, if requested, and gets the mu, radius,
@@ -1649,21 +1635,24 @@ bool CelestialBody::ReadPotentialFile()
    {
       if (!ReadDatFile())
          throw SolarSystemException(
-            "Error reading mu and equatorial radius from " + potentialFileName);
+            "Error reading mu and equatorial radius of " + instanceName
+                                    + " from "+ potentialFileName);
    }
    else if ((potentialFileName.find(".grv",0) != std::string::npos) ||
             (potentialFileName.find(".GRV",0) != std::string::npos) )
    {
       if (!ReadGrvFile())
          throw SolarSystemException(
-            "Error reading mu and equatorial radius from " + potentialFileName);
+            "Error reading mu and equatorial radius of " + instanceName
+                                    + " from " + potentialFileName);
    }
    else if ((potentialFileName.find(".cof",0) != std::string::npos) ||
             (potentialFileName.find(".COF",0) != std::string::npos) )
    {
       if (!ReadCofFile())
          throw SolarSystemException(
-           "Error reading mu and equatorial radius from " + potentialFileName);
+           "Error reading mu and equatorial radius of " + instanceName
+                                    + " from " + potentialFileName);
    }
    else
    {
