@@ -50,12 +50,12 @@ Converter::Converter(const std::string &type) :
 }
 
 //---------------------------------------------------------------------------
-//  Converter(const Converter &a)
+//  Converter(const Converter &converter)
 //---------------------------------------------------------------------------
 /**
  * Copy Constructor for base Converter structures.
  *
- * @param <a> The original that is being copied.
+ * @param <converter> The original that is being copied.
  */
 Converter::Converter(const Converter &converter) :
     type (converter.type)
