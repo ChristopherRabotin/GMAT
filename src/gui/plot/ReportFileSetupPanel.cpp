@@ -18,7 +18,6 @@
 #include "ReportFileSetupPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
-#include "GuiItemManager.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -38,6 +37,10 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
     EVT_BUTTON(ID_BROWSE_BUTTON, ReportFileSetupPanel::OnBrowseButton)
     EVT_TEXT(ID_TEXT_CTRL, ReportFileSetupPanel::OnTextChange)
     EVT_TEXT(ID_TEXT, ReportFileSetupPanel::OnTextChange)
+    
+   EVT_BUTTON(ADD_VAR_BUTTON, ReportFileSetupPanel::OnAddVariable)
+   EVT_BUTTON(REMOVE_VAR_BUTTON, ReportFileSetupPanel::OnRemoveVariable)
+   EVT_BUTTON(CLEAR_VAR_BUTTON, ReportFileSetupPanel::OnClearVariable)
 
 END_EVENT_TABLE()
 
@@ -135,12 +138,75 @@ void ReportFileSetupPanel::Create()
     fileSizer->Add(fileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5);
     fileSizer->Add(browseButton, 0, wxALIGN_CENTER|wxALL, 5);
 
+    Integer bsize = 3; // border size
+    wxString emptyList[] = {};
+
+    wxBoxSizer *variablesBoxSizer = new wxBoxSizer(wxVERTICAL);
+    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
+           
+   //------------------------------------------------------
+   // available variables list (1st column)
+   //------------------------------------------------------
+   mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
+    
+   wxStaticText *titleAvailable =
+      new wxStaticText(this, -1, wxT("Variables"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxArrayString empty;
+   
+   mVarListBox = 
+       theGuiManager->GetConfigParameterListBox(this, wxSize(150,200));
+    
+   mVarBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mVarBoxSizer->Add(mVarListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+    
+   //------------------------------------------------------
+   // add, remove, clear parameter buttons (2nd column)
+   //------------------------------------------------------
+   wxButton *addScButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
+                              wxDefaultPosition, wxSize(20,20), 0);
+
+   wxButton *removeScButton = new wxButton(this, REMOVE_VAR_BUTTON, wxT("<--"),
+                                 wxDefaultPosition, wxSize(20,20), 0);
+    
+   wxButton *clearScButton = new wxButton(this, CLEAR_VAR_BUTTON, wxT("<="),
+                                wxDefaultPosition, wxSize(20,20), 0);
+    
+   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
+   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+    
+   //------------------------------------------------------
+   // selected spacecraft list (4th column)
+   //------------------------------------------------------
+   wxStaticText *titleSelected =
+      new wxStaticText(this, -1, wxT("Selected Variables"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+
+   mVarSelectedListBox =
+      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
+                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+        
+   wxBoxSizer *mVarSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
+   mVarSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mVarSelectedBoxSizer->Add(mVarSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+    
+   //------------------------------------------------------
+   // put in the order
+   //------------------------------------------------------    
+   mFlexGridSizer->Add(mVarBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mFlexGridSizer->Add(mVarSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   variablesBoxSizer->Add(mFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+
     //------------------------------------------------------
     // add to parent sizer
     //------------------------------------------------------
     theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
     theMiddleSizer->Add(fileSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-
+    theMiddleSizer->Add(variablesBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
 //------------------------------------------------------------------------------
@@ -156,6 +222,26 @@ void ReportFileSetupPanel::LoadData()
     std::string filename = theSubscriber->GetStringParameter(filenameId);
     fileTextCtrl->SetValue(wxT(filename.c_str()));
     
+    StringArray varParamList = theSubscriber->GetStringArrayParameter("VarList");
+    mNumVarParams = varParamList.size();
+
+    if (mNumVarParams > 0)
+    {
+
+       wxString *varParamNames = new wxString[mNumVarParams];
+       Parameter *param;
+         
+       for (int i=0; i<mNumVarParams; i++)
+       {
+          varParamNames[i] = varParamList[i].c_str();
+          param = theGuiInterpreter->GetParameter(varParamList[i]);
+       }
+    
+       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
+       mVarSelectedListBox->SetSelection(0);
+       delete varParamNames;
+    }    
+
 }
 
 //------------------------------------------------------------------------------
@@ -171,6 +257,21 @@ void ReportFileSetupPanel::SaveData()
     int filenameId = theSubscriber->GetParameterID("Filename");
     theSubscriber->SetStringParameter(filenameId, 
                   std::string (filename.c_str()));
+                 
+            
+    mNumVarParams = mVarSelectedListBox->GetCount();
+    
+    if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
+    {
+         theSubscriber->SetBooleanParameter("Clear", true);
+         for (int i=0; i<mNumVarParams; i++)
+         {
+            theSubscriber->
+               SetStringParameter("Add",
+                                  std::string(mVarSelectedListBox->GetString(i).c_str()));
+         }
+      }
+
 }
 
 //------------------------------------------------------------------------------
@@ -200,4 +301,53 @@ void ReportFileSetupPanel::OnTextChange()
 {
     theApplyButton->Enable();
 }
+
+//------------------------------------------------------------------------------
+// void OnAddSpacecraft(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
+{
+   // get string in first list and then search for it
+   // in the second list
+   wxString s = mVarListBox->GetStringSelection();
+   int found = mVarSelectedListBox->FindString(s);
+    
+   // if the string wasn't found in the second list, insert it
+   if (found == wxNOT_FOUND)
+   {
+      mVarSelectedListBox->Append(s);
+      mVarSelectedListBox->SetStringSelection(s);
+      theApplyButton->Enable();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnRemoveSpacecraft(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
+{
+   int sel = mVarSelectedListBox->GetSelection();
+   mVarSelectedListBox->Delete(sel);
+
+   if (sel-1 < 0)
+   {
+      mVarSelectedListBox->SetSelection(0);
+   }
+   else
+   {
+      mVarSelectedListBox->SetSelection(sel-1);
+   }
+   
+   theApplyButton->Enable();
+}
+
+//------------------------------------------------------------------------------
+// void OnClearSpacecraft(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
+{
+   mVarSelectedListBox->Clear();
+   theApplyButton->Enable();
+}
+
 

@@ -22,6 +22,7 @@
 #include "GmatPanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
+#include "ReportFile.hpp"
 
 class ReportFileSetupPanel: public GmatPanel
 {
@@ -29,9 +30,8 @@ public:
     ReportFileSetupPanel(wxWindow *parent, const wxString &subscriberName);
    
 protected:
-    GuiItemManager *theGuiManager; //loj: move this to GmatPanel later
-    Subscriber *theSubscriber;
-    wxString *theParamList;
+    Subscriber *theSubscriber;   
+    int  mNumVarParams;
     
     wxBoxSizer *pageBoxSizer;
     wxBoxSizer *optionBoxSizer;
@@ -41,11 +41,19 @@ protected:
     wxStaticText *fileStaticText;
     wxTextCtrl *fileTextCtrl;
     wxButton *browseButton; 
-
+    
+    wxBoxSizer *mVarBoxSizer;
+    wxListBox *mVarListBox;
+    wxListBox *mVarSelectedListBox;
 
     void OnWriteCheckBoxChange(wxCommandEvent& event);
     void OnBrowseButton(wxCommandEvent& event);
     void OnTextChange();
+    
+    void OnAddVariable(wxCommandEvent& event);
+    void OnRemoveVariable(wxCommandEvent& event);
+    void OnClearVariable(wxCommandEvent& event);
+
 
     // methods inherited from GmatPanel
     virtual void Create();
@@ -63,6 +71,11 @@ protected:
         ID_TEXT,
         ID_TEXT_CTRL,
         ID_BROWSE_BUTTON,
+        
+        ADD_VAR_BUTTON,
+        REMOVE_VAR_BUTTON,
+        CLEAR_VAR_BUTTON,
+        VAR_SEL_LISTBOX
     };
 };
 #endif
