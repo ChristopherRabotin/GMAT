@@ -703,16 +703,16 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
    // Need to manage because SetupRun() needs to set SolarSystem
    // pointer for parameters used in stopping condition
    //-----------------------------------------------------------------
-   try
-   {
-      if (stopCond->GetName() != "")
-         theConfigManager->AddStopCondition(stopCond);
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
-                                    e.GetMessage());
-   }
+//     try
+//     {
+//        if (stopCond->GetName() != "")
+//           theConfigManager->AddStopCondition(stopCond);
+//     }
+//     catch (BaseException &e)
+//     {
+//        MessageInterface::ShowMessage("Moderator::CreateStopCondition()\n" +
+//                                      e.GetMessage());
+//     }
     
    return stopCond;
 }
@@ -1812,6 +1812,9 @@ void Moderator::CreateDefaultMission()
       CreateDefaultPropSetup("DefaultProp");
       //MessageInterface::ShowMessage("-->default PropSetup created\n");
 
+      // Burn
+      GetDefaultBurn();
+      
       // Time parameters
       CreateParameter("CurrA1MJD", "DefaultSC.CurrentTime");
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
@@ -1865,7 +1868,8 @@ void Moderator::CreateDefaultMission()
       }
     
       // StopCondition
-      StopCondition *stopCond = CreateStopCondition("StopCondition", "StopOnElapsedSecs");
+      StopCondition *stopCond =
+         CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
       stopCond->SetStringParameter("EpochVar", "DefaultSC.CurrentTime");
       stopCond->SetStringParameter("StopVar", "DefaultSC.ElapsedSecs");
       stopCond->SetRealParameter("Goal", 8640.0);
@@ -1985,48 +1989,33 @@ void Moderator::SetupRun(Integer sandboxNum, bool isFromGui)
    // set SolarSystem on stopping condition
    //--------------------------------------------
 
-   //loj: 6/15/04 the future code to set SolarSystem to StopCondition
-   // In this way, StopCondition need not be configured.
+   //loj: 6/15/04 now Propagate command sets SolarSystem on StopCondition and Initialize
+   // so don't need to configure StopCondition
    
-   //GmatCommand *cmd = commands[sandboxNum]->GetNext();
-   //while (current)
-   //{
-   //   if (current->GetName() == "Propagate")
-   //   {
-   //      std::vector<StopCondition*> &stopArray = current->GetStopConditions();
-   //      int stopCount = stopArray.size();
-   //      for (int i=0; i<stopCount; i++)
-   //      {
-   //         stopArray[0]->SetSolarSystem(theDefaultSolarSystem);
-   //      }
-   //   }
-   //   current = current->GetNext();
-   //}
-   
-   StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
-   StopCondition *stopCond;
+//     StringArray &stopconds = GetListOfConfiguredItems(Gmat::STOP_CONDITION);
+//     StopCondition *stopCond;
     
-   //MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
-   for (unsigned int i=0; i<stopconds.size(); i++)
-   {
-      try
-      {
-         stopCond = GetStopCondition(stopconds[i]);
-         stopCond->SetSolarSystem(theDefaultSolarSystem);
-         stopCond->Initialize();
-#if DEBUG_MODERATOR
-         objName = stopCond->GetName();
-         MessageInterface::ShowMessage
-            ("Moderator::SetupRun() %s:goal = %f\n",
-             objName.c_str(), stopCond->GetRealParameter("Goal"));
-#endif
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
-                                       e.GetMessage().c_str());
-      }
-   }    
+//     //MessageInterface::ShowMessage("Moderator::SetupRun() initialize stopping condition\n");
+//     for (unsigned int i=0; i<stopconds.size(); i++)
+//     {
+//        try
+//        {
+//           stopCond = GetStopCondition(stopconds[i]);
+//           stopCond->SetSolarSystem(theDefaultSolarSystem);
+//           stopCond->Initialize();
+//  #if DEBUG_MODERATOR
+//           objName = stopCond->GetName();
+//           MessageInterface::ShowMessage
+//              ("Moderator::SetupRun() %s:goal = %f\n",
+//               objName.c_str(), stopCond->GetRealParameter("Goal"));
+//  #endif
+//        }
+//        catch (BaseException &e)
+//        {
+//           MessageInterface::ShowMessage("Moderator::SetupRun() Exception thrown: %s\n",
+//                                         e.GetMessage().c_str());
+//        }
+//     }    
 
    //--------------------------------------------
    // create plot window
@@ -2220,8 +2209,6 @@ Burn* Moderator::GetDefaultBurn()
 //------------------------------------------------------------------------------
 StopCondition* Moderator::CreateDefaultStopCondition()
 {
-   // Propagate command starts with 0
-   static Integer stopCondCount = 100;
    StopCondition *stopCond = NULL;
    
    Spacecraft *sc = GetDefaultSpacecraft();
@@ -2236,17 +2223,7 @@ StopCondition* Moderator::CreateDefaultStopCondition()
 
    std::string stopCondName = "StopOn" + stopVar;
    
-   if (GetStopCondition(stopCondName) == NULL)
-   {
-      stopCond = CreateStopCondition("StopCondition", "StopOn" + stopVar);
-   }
-   else
-   {
-      stopCondCount++;
-      std::stringstream ss("");
-      ss << stopCondName << stopCondCount;
-      stopCond = CreateStopCondition("StopCondition", ss.str());
-   }
+   stopCond = CreateStopCondition("StopCondition", "StopOn" + stopVar);
    
    stopCond->SetStringParameter("EpochVar", epochVar);
    stopCond->SetStringParameter("StopVar", stopVar);
