@@ -460,7 +460,7 @@ Function* Factory::CreateFunction(const std::string &ofType,
 //                           const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * Creates tanks, thrusters, and other hardware attached to the GMAT spacecraft.
+* Creates tanks, thrusters, and other hardware attached to the GMAT spacecraft.
  * 
  * Must be implemented by derived classes that create Hardware objects -
  * in that case, it returns a new Hardware object.  Otherwise, it
@@ -480,7 +480,36 @@ Hardware* Factory::CreateHardware(const std::string &ofType,
                                   const std::string &withName)
 {
    throw FactoryException
-      ("Factory::CreateHardware() must be implemented by the Factory\n");
+   ("Factory::CreateHardware() must be implemented by the Factory\n");
+}
+
+//wcs: 2004.12.23 - added
+//------------------------------------------------------------------------------
+//  AxisSystem* CreateAxisSystem(const std::string &ofType,
+//                               const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates as AxisSystem object.
+ * 
+ * Must be implemented by derived classes that create AxisSystem objects -
+ * in that case, it returns a new AxisSystem object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type AxisSystem.
+ *
+ * @param <ofType>   specific type of AxisSystem object to create.
+ * @param <withName> name to give to the newly created AxisSystem object.
+ *
+ * @return pointer to a new AxisSystem object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type AxisSystem.
+ */
+//------------------------------------------------------------------------------
+AxisSystem* Factory::CreateAxisSystem(const std::string &ofType,
+                                      const std::string &withName)
+{
+   throw FactoryException
+   ("Factory::CreateAxisSystem() must be implemented by the Factory\n");
 }
 
 //------------------------------------------------------------------------------

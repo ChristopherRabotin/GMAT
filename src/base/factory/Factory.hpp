@@ -37,6 +37,7 @@
 #include "AtmosphereModel.hpp" //loj: 9/14/04 - added
 #include "Function.hpp"        //loj: 9/27/04 - added
 #include "Hardware.hpp"
+#include "AxisSystem.hpp"      // wcs: 2004/12/23 - added
 
 class GMAT_API Factory
 {
@@ -76,6 +77,8 @@ public:
                                            const std::string &withName = "");
    virtual Hardware*        CreateHardware(const std::string &ofType,
                                            const std::string &withName = "");
+   virtual AxisSystem*      CreateAxisSystem(const std::string &ofType,
+                                             const std::string &withName = "");
 
    
    // method to return list of types of objects that this factory can create

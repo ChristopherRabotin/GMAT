@@ -428,6 +428,31 @@ Hardware* FactoryManager::CreateHardware(const std::string &ofType,
    return NULL;
 }
 
+//wcs: 2004/12/09 added
+//------------------------------------------------------------------------------
+//  AxisSystem* CreateAxisSystem(const std::string &ofType,
+//                               const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an AxisSystem object of type ofType, with the name withName.
+ *
+ * @param <ofType>   type name of the AxisSystem.
+ * @param <withName> name of the new AxisSystem object.
+ *
+ * @return pointer to the newly-created AxisSystem object
+ */
+//------------------------------------------------------------------------------
+AxisSystem* 
+FactoryManager::CreateAxisSystem(const std::string &ofType,
+                                 const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::AXIS_SYSTEM, ofType);
+   if (f != NULL)
+      return f->CreateAxisSystem(ofType, withName);
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 // StringArray  GetListOfItems(Gmat::ObjectType byType)
 //------------------------------------------------------------------------------
@@ -658,14 +683,28 @@ StringArray  FactoryManager::GetListOfFunction()
 // StringArray  GetListOfHardware()
 //------------------------------------------------------------------------------
 /**
- * Return a list of items of type Function that can be created.
+* Return a list of items of type Hardware that can be created.
  *
- * @return list of creatable items of type Function.
+ * @return list of creatable items of type Hardware.
  */
 //------------------------------------------------------------------------------
 StringArray  FactoryManager::GetListOfHardware()
 {
    return GetList(Gmat::HARDWARE);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfAxisSystem()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type AxisSystem that can be created.
+ *
+ * @return list of creatable items of type AxisSystem.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfAxisSystem()
+{
+   return GetList(Gmat::AXIS_SYSTEM);
 }
 
 //------------------------------------------------------------------------------
