@@ -30,6 +30,8 @@ const Gmat::AnalyticMethod  Planet::ANALYTIC_METHOD     = Gmat::TWO_BODY; // ??
 const CelestialBody*        Planet::CENTRAL_BODY        = NULL;        // doesn't make sense?
 const Integer               Planet::BODY_NUMBER         = 2;           // don't know this!!!!!!
 const Integer               Planet::REF_BODY_NUMBER     = 2;           // don't know this!!!!!!
+const Integer               Planet::ORDER               = 4;           // don't know this!!!!!!
+const Integer               Planet::DEGREE              = 4;           // don't know this!!!!!!
 // add other ones as needed
 
 
@@ -150,7 +152,7 @@ RealArray  Planet::GetState(A1Mjd atTime)
 //------------------------------------------------------------------------------
 Planet* Planet::Clone(void) const
 {
-   // TBD
+   return NULL;  // TBD
 }
 
 //------------------------------------------------------------------------------
@@ -181,6 +183,8 @@ void Planet::InitializePlanet(CelestialBody* cBody)
    centralBody         = cBody;
    bodyNumber          = Planet::BODY_NUMBER;
    referenceBodyNumber = Planet::REF_BODY_NUMBER;
+   order               = Planet::ORDER;
+   degree              = Planet::DEGREE;
 }
 
 //------------------------------------------------------------------------------
