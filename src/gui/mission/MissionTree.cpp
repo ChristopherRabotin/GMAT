@@ -438,6 +438,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    if (dataType == GmatTree::MISSION_SEQ_TOP_FOLDER)
    {
       menu.Append(POPUP_ADD_MISSION_SEQ, wxT("Add Mission Sequence"));
+      menu.Enable(POPUP_ADD_MISSION_SEQ, FALSE);
    }
    else if (dataType == GmatTree::TARGET_COMMAND)
    {   
@@ -449,6 +450,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                   CreateInsertPopupMenu());
       menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
+      menu.Enable(POPUP_RENAME, FALSE);
       menu.AppendSeparator();
       menu.Append(POPUP_VIEW_VARIABLES, wxT("View Variables"));
       menu.Append(POPUP_VIEW_GOALS, wxT("View Goals")); 
@@ -467,6 +469,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                   CreateInsertPopupMenu());
       menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
+      menu.Enable(POPUP_RENAME, FALSE);
    } 
    else if (dataType == GmatTree::IF_CONTROL) 
    {
@@ -478,6 +481,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                   CreateInsertPopupMenu());
       menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
+      menu.Enable(POPUP_RENAME, FALSE);
    } 
 
    else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
@@ -486,6 +490,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       // ag: can't delete because sys. doesn't handle multiple sequences yet
       // menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
+      menu.Enable(POPUP_RENAME, FALSE);
       menu.AppendSeparator();
       menu.Append(POPUP_RUN, wxT("Run"));
    }
@@ -498,6 +503,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
                   CreateInsertPopupMenu());
       menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
+      menu.Enable(POPUP_RENAME, FALSE);
    }
 
 
@@ -1343,6 +1349,7 @@ wxMenu* MissionTree::CreatePopupMenu()
       else if (items[i] == "Target")
       {
          menu->Append(POPUP_ADD_TARGET, wxT("Target"));
+         menu->Enable(POPUP_ADD_TARGET, FALSE);
       }            
    }
 
@@ -1377,6 +1384,7 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
       else if (items[i] == "Target")
       {
          menu->Append(POPUP_INSERT_TARGET, wxT("Target"));
+         menu->Enable(POPUP_INSERT_TARGET, FALSE);
       }
    }
 
@@ -1440,6 +1448,11 @@ wxMenu* MissionTree::CreateAddControlLogicPopupMenu()
    menu->Append(POPUP_ADD_FOR_LOOP, wxT("For"));
 //   menu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
    menu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch")); 
+   
+   menu->Enable(POPUP_ADD_IF_STATEMENT, FALSE);
+   menu->Enable(POPUP_ADD_WHILE_LOOP, FALSE);
+   menu->Enable(POPUP_ADD_FOR_LOOP, FALSE);
+   menu->Enable(POPUP_ADD_SWITCH_CASE, FALSE);
        
    //    if (items[i] == "Propagate")
    //    {
@@ -1538,6 +1551,11 @@ wxMenu* MissionTree::CreateInsertControlLogicPopupMenu()
    menu->Append(POPUP_INSERT_FOR_LOOP, wxT("For"));
 //   menu->Append(POPUP_INSERT_D0_WHILE, wxT("Do While"));
    menu->Append(POPUP_INSERT_SWITCH_CASE, wxT("Switch")); 
+   
+   menu->Enable(POPUP_INSERT_IF_STATEMENT, FALSE);
+   menu->Enable(POPUP_INSERT_WHILE_LOOP, FALSE);
+   menu->Enable(POPUP_INSERT_FOR_LOOP, FALSE);
+   menu->Enable(POPUP_INSERT_SWITCH_CASE, FALSE);
        
    //    if (items[i] == "Propagate")
    //    {
