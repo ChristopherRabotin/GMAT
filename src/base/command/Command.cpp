@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  Command
+//                                  GmatCommand
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -13,7 +13,7 @@
 // Created: 2003/09/23
 //
 /**
- * Implementation code for the Command base class
+ * Implementation code for the GmatCommand base class
  */
 //------------------------------------------------------------------------------
 
@@ -27,13 +27,13 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  Command(const std::string &typeStr)
+//  GmatCommand(const std::string &typeStr)
 //------------------------------------------------------------------------------
 /**
- * Constructs Command core structures (default constructor).
+ * Constructs GmatCommand core structures (default constructor).
  */
 //------------------------------------------------------------------------------
-Command::Command(const std::string &typeStr) :
+GmatCommand::GmatCommand(const std::string &typeStr) :
     GmatBase        (Gmat::COMMAND, typeStr),
     generatingString(""),
     initialized     (false),
@@ -47,42 +47,42 @@ Command::Command(const std::string &typeStr) :
 
 
 //------------------------------------------------------------------------------
-//  ~Command()
+//  ~GmatCommand()
 //------------------------------------------------------------------------------
 /**
- * Destructs Command core structures.
+ * Destructs GmatCommand core structures.
  *
- * The Command destructor calls the destructor for the next command in the 
- * sequence.  Therefore, when a command sequence is cleared, all the Sandbox
- * needs to do is call the destructor on the first command in the sequence, and
- * the remaining commands are all destructed.  
+ * The GmatCommand destructor calls the destructor for the next GmatCommand in the 
+ * sequence.  Therefore, when a GmatCommand sequence is cleared, all the Sandbox
+ * needs to do is call the destructor on the first GmatCommand in the sequence, and
+ * the remaining GmatCommands are all destructed.  
  *
- * @note The branching commands will also destroy all of the commands in the 
+ * @note The branching GmatCommands will also destroy all of the GmatCommands in the 
  *       subbranch(es)
  */
 //------------------------------------------------------------------------------
-Command::~Command()
+GmatCommand::~GmatCommand()
 {
-    // Delete the subsequent commands
+    // Delete the subsequent GmatCommands
     if (next)
         delete next;   
 }
 
 
 //------------------------------------------------------------------------------
-//  Command(const Command &c)
+//  GmatCommand(const GmatCommand &c)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor.
  *
- * The copy constructor for commands copies the object lists and associations
- * from the "original" command, c, but not its navigation parameters (next, 
- * level), nor does it initialize the command.
+ * The copy constructor for GmatCommands copies the object lists and associations
+ * from the "original" GmatCommand, c, but not its navigation parameters (next, 
+ * level), nor does it initialize the GmatCommand.
  *
- * @param <c> Command object whose values to use to make "this" copy.
+ * @param <c> GmatCommand object whose values to use to make "this" copy.
  */
 //------------------------------------------------------------------------------
-Command::Command(const Command &c) :
+GmatCommand::GmatCommand(const GmatCommand &c) :
     GmatBase        (c),
     generatingString(c.generatingString),
     association     (c.association),
@@ -98,22 +98,22 @@ Command::Command(const Command &c) :
 
 
 //------------------------------------------------------------------------------
-//  Command operator=(const Command &c)
+//  GmatCommand operator=(const GmatCommand &c)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator.
  *
- * The assignment operator for commands copies the object lists and associations
- * from the "other" command, c, but not its navigation parameters (next, level).
+ * The assignment operator for GmatCommands copies the object lists and associations
+ * from the "other" GmatCommand, c, but not its navigation parameters (next, level).
  * This operator clears all object associations, and leaves "this" object in an 
  * uninitialized state.
  *
- * @param <c> Command object whose values to use to set "this" Command object.
+ * @param <c> GmatCommand object whose values to use to set "this" GmatCommand object.
  *
- * @return Command object.
+ * @return GmatCommand object.
  */
 //------------------------------------------------------------------------------
-Command& Command::operator=(const Command &c)
+GmatCommand& GmatCommand::operator=(const GmatCommand &c)
 {
     if (&c == this)
         return *this;
@@ -139,16 +139,16 @@ Command& Command::operator=(const Command &c)
 //  void SetGeneratingString(const std::string &gs)
 //------------------------------------------------------------------------------
 /**
- * Method used to store the string that was parsed to build this command.
+ * Method used to store the string that was parsed to build this GmatCommand.
  *
- * This method is used to store the command string so that the script can be
+ * This method is used to store the GmatCommand string so that the script can be
  * written to a file without inverting the steps used to set up the internal
  * object data.
  *
- * @param <gs> The script line that was interpreted to define this command.
+ * @param <gs> The script line that was interpreted to define this GmatCommand.
  */
 //------------------------------------------------------------------------------
-void Command::SetGeneratingString(const std::string &gs)
+void GmatCommand::SetGeneratingString(const std::string &gs)
 {
     generatingString = gs;
 }
@@ -157,18 +157,18 @@ void Command::SetGeneratingString(const std::string &gs)
 //  const std::string GetGeneratingString(void)
 //------------------------------------------------------------------------------
 /**
- * Method used to retrieve the string that was parsed to build this command.
+ * Method used to retrieve the string that was parsed to build this GmatCommand.
  *
- * This method is used to retrieve the command string from the script that was
- * parsed to build the command.  It is used to save the script line, so that
+ * This method is used to retrieve the GmatCommand string from the script that was
+ * parsed to build the GmatCommand.  It is used to save the script line, so that
  * the script can be written to a file without inverting the steps taken to set
  * up the internal object data.  As a side benefit, the script line is
- * available in the command structure for debugging purposes.
+ * available in the GmatCommand structure for debugging purposes.
  *
- * @return The script line that was interpreted to define this command.
+ * @return The script line that was interpreted to define this GmatCommand.
  */
 //------------------------------------------------------------------------------
-const std::string& Command::GetGeneratingString(void)
+const std::string& GmatCommand::GetGeneratingString(void)
 {
     return generatingString;
 }
@@ -180,11 +180,11 @@ const std::string& Command::GetGeneratingString(void)
 //                 const Gmat::ObjectType associateType)
 //------------------------------------------------------------------------------
 /**
- * Stores the object names and types required for the command.
+ * Stores the object names and types required for the GmatCommand.
  *
- * Objects associated with a command are not necessarily available at the time
- * the command is parsed from the script.  This command builds the data store of
- * object names that will be used to execute the command when the script is run.
+ * Objects associated with a GmatCommand are not necessarily available at the time
+ * the GmatCommand is parsed from the script.  This GmatCommand builds the data store of
+ * object names that will be used to execute the GmatCommand when the script is run.
  * 
  * @param <name> The name of the object.
  * @param <type> The (enumerated) base type assigned to the object.
@@ -197,13 +197,13 @@ const std::string& Command::GetGeneratingString(void)
  *         with the same type, false otherwise.
  *
  * @note associate and associateType are provided to allow derived classes to
- *       override this method for commands that link two types of objects
- *       together -- for example, the Propagate command links a propagator
+ *       override this method for GmatCommands that link two types of objects
+ *       together -- for example, the Propagate GmatCommand links a propagator
  *       setup to a spacecraft.  These parameters are not used in this default
  *       implementation.
  */
 //------------------------------------------------------------------------------
-bool Command::SetObject(const std::string &name, const Gmat::ObjectType type,
+bool GmatCommand::SetObject(const std::string &name, const Gmat::ObjectType type,
                         const std::string &associate,
                         const Gmat::ObjectType associateType)
 {
@@ -229,11 +229,11 @@ bool Command::SetObject(const std::string &name, const Gmat::ObjectType type,
 //  GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
 //------------------------------------------------------------------------------
 /**
- * Retrieves the objects used by the command.
+ * Retrieves the objects used by the GmatCommand.
  *
- * Objects associated with a command are not necessarily available at the time
- * the command is parsed from the script.  This command builds the data store of
- * object names that will be used to execute the command when the script is run.
+ * Objects associated with a GmatCommand are not necessarily available at the time
+ * the GmatCommand is parsed from the script.  This GmatCommand builds the data store of
+ * object names that will be used to execute the GmatCommand when the script is run.
  * 
  * @param <type>    The (enumerated) base type assigned to the object.
  * @param <objName> The name of the object.
@@ -243,7 +243,7 @@ bool Command::SetObject(const std::string &name, const Gmat::ObjectType type,
  *         is an internal object.
  */
 //------------------------------------------------------------------------------
-GmatBase* Command::GetObject(const Gmat::ObjectType type, 
+GmatBase* GmatCommand::GetObject(const Gmat::ObjectType type, 
                              const std::string objName)
 {
     return NULL;
@@ -254,11 +254,11 @@ GmatBase* Command::GetObject(const Gmat::ObjectType type,
 //  bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
- * Stores pointers to objects required exclusively for the current command.
+ * Stores pointers to objects required exclusively for the current GmatCommand.
  *
- * Some commands require helper objects to execute successfully -- for example,
- * the propagate command uses a StoppingCondition object to evaluate when the
- * command finishes execution.  Use this method to assign these command
+ * Some GmatCommands require helper objects to execute successfully -- for example,
+ * the propagate GmatCommand uses a StoppingCondition object to evaluate when the
+ * GmatCommand finishes execution.  Use this method to assign these GmatCommand
  * specific objects.
  *
  * @param <obj> Pointer to the object.
@@ -267,7 +267,7 @@ GmatBase* Command::GetObject(const Gmat::ObjectType type,
  * @return true when object is stored successfully, false otherwise.
  */
 //------------------------------------------------------------------------------
-bool Command::SetObject(GmatBase *obj, const Gmat::ObjectType type)
+bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 {
     return false;
 }
@@ -277,12 +277,12 @@ bool Command::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //  void SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 /**
- * Called by the Sandbox to set the local solar system for the command
+ * Called by the Sandbox to set the local solar system for the GmatCommand
  * 
  * @param <ss> Pointer to the local solar system
  */
 //------------------------------------------------------------------------------
-void Command::SetSolarSystem(SolarSystem *ss)
+void GmatCommand::SetSolarSystem(SolarSystem *ss)
 {
     solarSys = ss;
 }
@@ -292,12 +292,12 @@ void Command::SetSolarSystem(SolarSystem *ss)
 //  void SetAssetMap(std::map<std::string, Asset *> *map)
 //------------------------------------------------------------------------------
 /**
- * Called by the Sandbox to set the local asset store used by the Command
+ * Called by the Sandbox to set the local asset store used by the GmatCommand
  * 
  * @param <map> Pointer to the local asset map
  */
 //------------------------------------------------------------------------------
-void Command::SetObjectMap(std::map<std::string, GmatBase *> *map)
+void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
     objectMap = map;
 }
@@ -307,12 +307,12 @@ void Command::SetObjectMap(std::map<std::string, GmatBase *> *map)
 //  void SetPublisher(Publisher *p)
 //------------------------------------------------------------------------------
 /**
- * Sets the Publisher used for data generated by the Command
+ * Sets the Publisher used for data generated by the GmatCommand
  * 
  * @param <p> Pointer to the Publisher
  */
 //------------------------------------------------------------------------------
-void Command::SetPublisher(Publisher *p)
+void GmatCommand::SetPublisher(Publisher *p)
 {
     publisher = p;
 }
@@ -322,21 +322,21 @@ void Command::SetPublisher(Publisher *p)
 //  bool Initialize(void)
 //------------------------------------------------------------------------------
 /**
- * Initializes the Command structures at the start of a run.
+ * Initializes the GmatCommand structures at the start of a run.
  *
- * This method is called by the Sandbox when it receives a run command from the 
+ * This method is called by the Sandbox when it receives a run GmatCommand from the 
  * Moderator.  This method calls AssignObjects to set the local object pointers
  * prior to execution.
  *
- * Derived Command objects can use this method to set up any internal data 
- * structures needed to run the command.  If this method is overridden, the base
+ * Derived GmatCommand objects can use this method to set up any internal data 
+ * structures needed to run the GmatCommand.  If this method is overridden, the base
  * class method provided here should be called to ensure that AssignObjects is
  * called at the start of the run.
  *
- * @return true if the Command is initialized, false if an error occurs.
+ * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Command::Initialize(void)
+bool GmatCommand::Initialize(void)
 {
     // Check to be sure the basic infrastructure is in place
     if (objectMap == NULL) {
@@ -349,7 +349,7 @@ bool Command::Initialize(void)
 //    if (solarSys == NULL) {
 //        std::string errorstr("Solar system has not been initialized for ");
 //        errorstr += GetTypeName();
-//        throw CommandException(errorstr);
+//        throw GmatCommandException(errorstr);
 //    }
 
 
@@ -361,33 +361,33 @@ bool Command::Initialize(void)
 
 
 //------------------------------------------------------------------------------
-//  Command* GetNext(void)
+//  GmatCommand* GetNext(void)
 //------------------------------------------------------------------------------
 /**
- * Accesses the next command to be executed in the command sequence
+ * Accesses the next GmatCommand to be executed in the GmatCommand sequence
  * 
- * @return Pointer to the next command
+ * @return Pointer to the next GmatCommand
  */
 //------------------------------------------------------------------------------
-Command* Command::GetNext(void)
+GmatCommand* GmatCommand::GetNext(void)
 {
     return next;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * Adds command at the end of the command sequence
+ * Adds GmatCommand at the end of the GmatCommand sequence
  * 
- * @param <cmd> Pointer to command that is added at the end
+ * @param <cmd> Pointer to GmatCommand that is added at the end
  */
 //------------------------------------------------------------------------------
-bool Command::Append(Command *cmd)
+bool GmatCommand::Append(GmatCommand *cmd)
 {
     if (cmd == this)
-        throw CommandException("Attempting to add command already in list");
+        throw CommandException("Attempting to add GmatCommand already in list");
     if (next)
         next->Append(cmd);
     else
@@ -398,19 +398,19 @@ bool Command::Append(Command *cmd)
 
 
 //------------------------------------------------------------------------------
-//  bool Insert(Command *cmd, Command *prev)
+//  bool Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 /**
- * Inserts command into the command sequence
+ * Inserts GmatCommand into the GmatCommand sequence
  * 
- * @param <cmd> Pointer to command that is inserted
- * @param <prev> Pointer to command preceding this command
+ * @param <cmd> Pointer to GmatCommand that is inserted
+ * @param <prev> Pointer to GmatCommand preceding this GmatCommand
  */
 //------------------------------------------------------------------------------
-bool Command::Insert(Command *cmd, Command *prev)
+bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
     if (this == prev) {
-        Command *temp = next;
+        GmatCommand *temp = next;
         next = cmd;
         return next->Append(temp);
     }
@@ -423,17 +423,17 @@ bool Command::Insert(Command *cmd, Command *prev)
 
 
 //------------------------------------------------------------------------------
-//  Command* Remove(Command *cmd)
+//  GmatCommand* Remove(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
- * Removes command from the command sequence
+ * Removes GmatCommand from the GmatCommand sequence
  * 
- * @param <cmd> Pointer to command that is inserted
+ * @param <cmd> Pointer to GmatCommand that is inserted
  * 
- * @return Pointer to the removed command or NULL if the command was not found.
+ * @return Pointer to the removed GmatCommand or NULL if the GmatCommand was not found.
  */
 //------------------------------------------------------------------------------
-Command* Command::Remove(Command *cmd)
+GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 {
     if (this == cmd) {  // NULL the next pointer
         next = NULL;
@@ -444,7 +444,7 @@ Command* Command::Remove(Command *cmd)
         return NULL;
         
     if (next == cmd) {
-        Command *temp = next;
+        GmatCommand *temp = next;
         next = next->GetNext();
         temp->Remove(cmd);
         return temp;            
@@ -463,13 +463,13 @@ Command* Command::Remove(Command *cmd)
  * This default implementation doesn't do anything.  
  *
  * Derived classes should override this method to set the internal data pointers 
- * needed to execute the command by accessing the various maps of objects and 
+ * needed to execute the GmatCommand by accessing the various maps of objects and 
  * setting corresponding internal pointers.
  * 
  * @return true if the pointers are assigned "correctly", false otherwise.
  */
 //------------------------------------------------------------------------------
-bool Command::AssignObjects(void)
+bool GmatCommand::AssignObjects(void)
 {
     return true;
 }
@@ -484,12 +484,12 @@ bool Command::AssignObjects(void)
  * This default implementation doesn't do anything.  
  *
  * Derived classes should override this method to "uninitialize" internal 
- * pointers when the assignment operator is called on this command.
+ * pointers when the assignment operator is called on this GmatCommand.
  * 
  * @return true if the pointers are assigned "correctly", false otherwise.
  */
 //------------------------------------------------------------------------------
-bool Command::ClearObjects(void)
+bool GmatCommand::ClearObjects(void)
 {
     return true;
 }

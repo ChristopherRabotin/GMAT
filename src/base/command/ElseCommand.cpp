@@ -90,7 +90,7 @@ ElseCommand& ElseCommand::operator=(const ElseCommand& ic)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool ElseCommand::Append(Command *cmd)
+bool ElseCommand::Append(GmatCommand *cmd)
 {
     if (!BranchCommand::Append(cmd))
         return false;

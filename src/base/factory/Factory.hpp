@@ -70,7 +70,7 @@ public:
    virtual Subscriber*          CreateSubscriber(std::string ofType,
                                                  std::string withname = "",
                                                  std::string fileName = "");
-   virtual Command*             CreateCommand(std::string ofType,
+   virtual GmatCommand*             CreateCommand(std::string ofType,
                                               std::string withName = "");
 
    // method to return list of types of objects that this factory can create

@@ -31,7 +31,7 @@
 #include "StopCondition.hpp"
 
 
-class GMAT_API Propagate : public Command
+class GMAT_API Propagate : public GmatCommand
 {
 public:
     Propagate(void);

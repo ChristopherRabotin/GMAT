@@ -32,7 +32,7 @@
 /**
  * Command used to turn subscribers on and off
  */
-class Toggle : public Command
+class Toggle : public GmatCommand
 {
     public:
         Toggle();

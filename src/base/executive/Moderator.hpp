@@ -144,19 +144,19 @@ public:
                                  const std::string &filename = "");
     Subscriber* GetSubscriber(const std::string &name);
 
-    // Command
-    Command* CreateCommand(const std::string &type, const std::string &name = "");
+    // GmatCommand
+    GmatCommand* CreateCommand(const std::string &type, const std::string &name = "");
 
     // Command sequence
-    bool AppendCommand(Command *cmd, Integer sandboxNum = 1);
-    Command* AppendCommand(const std::string &type, const std::string &name,
+    bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+    GmatCommand* AppendCommand(const std::string &type, const std::string &name,
                            Integer sandboxNum = 1);
-    bool InsertCommand(Command *cmd, Command *prevCmd,
+    bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                        Integer sandboxNum = 1);
-    Command* InsertCommand(const std::string &type, const std::string &currName,
+    GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
                            const std::string &prevName, Integer sandboxNum = 1);
-    Command* DeleteCommand(Command *cmd, Integer sandboxNum = 1);
-    Command* GetNextCommand(Integer sanboxNum = 1);
+    GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+    GmatCommand* GetNextCommand(Integer sanboxNum = 1);
 
     // Sandbox
     void ClearAllSandboxes();
@@ -191,7 +191,7 @@ private:
     // member data
     bool isInitialized;
     std::vector<Sandbox*> sandboxes;
-    std::vector<Command*> commands;
+    std::vector<GmatCommand*> commands;
 
     static Moderator *instance;
     static ConfigManager *theConfigManager;

@@ -29,7 +29,7 @@
 
 
 Assignment::Assignment() :
-    Command         ("GMAT"),
+    GmatCommand         ("GMAT"),
     ownerName       (""),
     parmName        (""),    
     parmOwner       (NULL),
@@ -46,7 +46,7 @@ Assignment::~Assignment()
 
 
 Assignment::Assignment(const Assignment& a) :
-    Command         (a),
+    GmatCommand         (a),
     ownerName       (a.ownerName),
     parmName        (a.parmName),    
     parmOwner       (a.parmOwner),
@@ -132,7 +132,7 @@ void Assignment::InterpretAction(void)
  * Derived classes implement this method to perform their actions on 
  * GMAT objects.
  *
- * @return true if the Command runs to completion, false if an error 
+ * @return true if the GmatCommand runs to completion, false if an error 
  *         occurs. 
  */
 bool Assignment::Execute(void)

@@ -50,7 +50,7 @@ public:
     bool                AddPropSetup(PropSetup *propSetup);
     bool                AddBurn(Burn *burn);
     bool                AddSolver(Solver *s);
-    bool				AddCommand(Command *cmd);
+    bool				AddCommand(GmatCommand *cmd);
     bool				AddSolarSystem(SolarSystem *ss);
     bool                AddSubscriber(Subscriber *sub);
     bool				SetPublisher(Publisher *pub = NULL);
@@ -82,9 +82,9 @@ private:
     /// GMAT Publisher singleton
     Publisher           *publisher;
     /// Command sequence for the run
-    Command             *sequence;
+    GmatCommand         *sequence;
     /// The executing Command
-    Command             *current;
+    GmatCommand         *current;
     /// Execution mode for the sandbox
     runMode				state;
 

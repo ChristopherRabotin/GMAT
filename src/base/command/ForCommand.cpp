@@ -79,7 +79,7 @@ ForCommand& ForCommand::operator=(const ForCommand& f)
 
 
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Adds a command to the for loop.
@@ -92,7 +92,7 @@ ForCommand& ForCommand::operator=(const ForCommand& f)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool ForCommand::Append(Command *cmd)
+bool ForCommand::Append(GmatCommand *cmd)
 {
     if (!BranchCommand::Append(cmd))
         return false;
@@ -113,7 +113,7 @@ bool ForCommand::Append(Command *cmd)
 /**
  * Performs the initialization needed to run the targeter.
  *
- * @return true if the Command is initialized, false if an error occurs.
+ * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool ForCommand::Initialize(void)
@@ -134,7 +134,7 @@ bool ForCommand::Initialize(void)
  * determine the variable values needed to achieve the user specified 
  * goals.
  *
- * @return true if the Command runs to completion, false if an error
+ * @return true if the GmatCommand runs to completion, false if an error
  *         occurs.
  */
 //------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ class ManeuverSetupPanel : public wxPanel
 {
 public:
     // constructors
-    ManeuverSetupPanel(wxWindow *parent, Command *cmd);
+    ManeuverSetupPanel(wxWindow *parent, GmatCommand *cmd);
     
 private:
     // member functions
@@ -39,7 +39,7 @@ private:
 
     // member data
     GuiInterpreter *theGuiInterpreter;
-    Command *theCommand;
+    GmatCommand *theCommand;
     Burn *theBurn;
 
     wxButton *okButton;

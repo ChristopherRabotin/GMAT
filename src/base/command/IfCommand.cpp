@@ -77,7 +77,7 @@ IfCommand& IfCommand::operator=(const IfCommand& ic)
 
 
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Adds a command to the IF statement.
@@ -90,7 +90,7 @@ IfCommand& IfCommand::operator=(const IfCommand& ic)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool IfCommand::Append(Command *cmd)
+bool IfCommand::Append(GmatCommand *cmd)
 {
     if (!BranchCommand::Append(cmd))
         return false;

@@ -29,7 +29,7 @@
  */
 //------------------------------------------------------------------------------
 Achieve::Achieve(void) :
-    Command         ("Achieve"),
+    GmatCommand     ("Achieve"),
     targeterName    (""),
     targeter        (NULL),
     targeterNameID  (parameterCount),
@@ -62,7 +62,7 @@ Achieve::~Achieve(void)
  */
 //------------------------------------------------------------------------------
 Achieve::Achieve(const Achieve& t) :
-    Command         (t),
+    GmatCommand     (t),
     targeterName    (t.targeterName),
     targeter        (NULL),
     targeterNameID  (t.targeterNameID),
@@ -108,7 +108,7 @@ std::string Achieve::GetParameterText(const Integer id) const
     if (id == toleranceID)
         return "Tolerance";
     
-    return Command::GetParameterText(id);
+    return GmatCommand::GetParameterText(id);
 }
 
 
@@ -126,7 +126,7 @@ Integer Achieve::GetParameterID(const std::string &str) const
     if (str == "Tolerance")
         return toleranceID;
     
-    return Command::GetParameterID(str);
+    return GmatCommand::GetParameterID(str);
 }
 
 
@@ -144,7 +144,7 @@ Gmat::ParameterType Achieve::GetParameterType(const Integer id) const
     if (id == toleranceID)
         return Gmat::REAL_TYPE;
     
-    return Command::GetParameterType(id);
+    return GmatCommand::GetParameterType(id);
 }
 
 
@@ -162,7 +162,7 @@ std::string Achieve::GetParameterTypeString(const Integer id) const
     if (id == toleranceID)
         return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
     
-    return Command::GetParameterTypeString(id);
+    return GmatCommand::GetParameterTypeString(id);
 }
 
 
@@ -174,7 +174,7 @@ Real Achieve::GetRealParameter(const Integer id) const
     if (id == toleranceID)
         return tolerance;
     
-    return Command::GetRealParameter(id);
+    return GmatCommand::GetRealParameter(id);
 }
 
 
@@ -190,7 +190,7 @@ Real Achieve::SetRealParameter(const Integer id, const Real value)
         return tolerance;
     }
     
-    return Command::SetRealParameter(id, value);
+    return GmatCommand::SetRealParameter(id, value);
 }
 
 
@@ -202,7 +202,7 @@ std::string Achieve::GetStringParameter(const Integer id) const
     if (id == goalNameID)
         return goalName;
         
-    return Command::GetStringParameter(id);
+    return GmatCommand::GetStringParameter(id);
 }
 
 
@@ -218,7 +218,7 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
         return true;
     }
 
-    return Command::SetStringParameter(id, value);
+    return GmatCommand::SetStringParameter(id, value);
 }
 
 
@@ -298,12 +298,12 @@ void Achieve::InterpretAction(void)
 /**
  * Performs the initialization needed to run the Achieveer.
  *
- * @return true if the Command is initialized, false if an error occurs.
+ * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
 bool Achieve::Initialize(void)
 {
-    bool retval = Command::Initialize();
+    bool retval = GmatCommand::Initialize();
 
     // Achieve specific initialization goes here:
     
@@ -367,7 +367,7 @@ bool Achieve::Initialize(void)
  * determine the variable values needed to achieve the user specified 
  * goals.
  *
- * @return true if the Command runs to completion, false if an error
+ * @return true if the GmatCommand runs to completion, false if an error
  *         occurs.
  */
 //------------------------------------------------------------------------------

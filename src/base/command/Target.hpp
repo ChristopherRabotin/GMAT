@@ -44,7 +44,7 @@ public:
     Target&             operator=(const Target& t);
     
     // Inherited methods that need some enhancement from the base class
-    virtual bool        Append(Command *cmd);
+    virtual bool        Append(GmatCommand *cmd);
     
     // Parameter access methods
     virtual std::string GetParameterText(const Integer id) const;
@@ -85,3 +85,4 @@ protected:
 
 
 #endif  // Target_hpp
+

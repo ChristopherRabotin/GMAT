@@ -30,7 +30,7 @@ class SolverEventPanel : public wxPanel
 {
 public:
     // constructor
-    SolverEventPanel(wxWindow *parent, const wxString &name, Command *cmd);
+    SolverEventPanel(wxWindow *parent, const wxString &name, GmatCommand *cmd);
        
 private:   
     wxStaticText *item6;
@@ -49,7 +49,7 @@ private:
     wxComboBox *item11;
     
     GuiInterpreter *theGuiInterpreter;
-    Command *theCommand;
+    GmatCommand *theCommand;
     
     // Layout & data handling methods
     void Setup(wxWindow *parent);

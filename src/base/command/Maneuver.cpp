@@ -22,7 +22,7 @@
 
 
 Maneuver::Maneuver(void) :
-    Command     ("Maneuver"),
+    GmatCommand     ("Maneuver"),
     burnName    (""),
     burn        (NULL),
     satName     (""),
@@ -45,7 +45,7 @@ Maneuver::~Maneuver(void)
 
 
 Maneuver::Maneuver(const Maneuver& m) :
-    Command     (m),
+    GmatCommand     (m),
     burnName    (m.burnName),
     burn        (NULL),
     satName     (m.satName),
@@ -70,12 +70,12 @@ bool Maneuver::SetObject(const std::string &name, const Gmat::ObjectType type,
                          const std::string &associate,
                          const Gmat::ObjectType associateType)
 {
-    return Command::SetObject(name, type, associate, associateType);
+    return GmatCommand::SetObject(name, type, associate, associateType);
 }
 
 bool Maneuver::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 {
-    return Command::SetObject(obj, type);
+    return GmatCommand::SetObject(obj, type);
 }
 
 
@@ -89,7 +89,7 @@ std::string Maneuver::GetParameterText(const Integer id) const
         return "Spacecraft";
     }
     
-    return Command::GetParameterText(id);
+    return GmatCommand::GetParameterText(id);
 }
 
 
@@ -103,7 +103,7 @@ Integer Maneuver::GetParameterID(const std::string &str) const
         return satNameID;
     }
 
-    return Command::GetParameterID(str);
+    return GmatCommand::GetParameterID(str);
 }
 
 
@@ -117,7 +117,7 @@ Gmat::ParameterType Maneuver::GetParameterType(const Integer id) const
         return Gmat::STRING_TYPE;
     }
     
-    return Command::GetParameterType(id);
+    return GmatCommand::GetParameterType(id);
 }
 
 
@@ -129,7 +129,7 @@ std::string Maneuver::GetParameterTypeString(const Integer id) const
     if (id == satNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
     
-    return Command::GetParameterTypeString(id);
+    return GmatCommand::GetParameterTypeString(id);
 }
 
 
@@ -141,7 +141,7 @@ std::string Maneuver::GetStringParameter(const Integer id) const
     if (id == satNameID)
         return satName;
     
-    return Command::GetStringParameter(id);
+    return GmatCommand::GetStringParameter(id);
 }
 
 
@@ -157,7 +157,7 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
         return true;
     }
     
-    return Command::SetStringParameter(id, value);
+    return GmatCommand::SetStringParameter(id, value);
 }
 
 
@@ -193,7 +193,7 @@ void Maneuver::InterpretAction(void)
 
 bool Maneuver::Initialize(void)
 {
-    Command::Initialize();
+    GmatCommand::Initialize();
 
     if (objectMap->find(burnName) == objectMap->end())
         throw CommandException("Maneuver command cannot find Burn");

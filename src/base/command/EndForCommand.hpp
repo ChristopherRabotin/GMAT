@@ -25,14 +25,14 @@
 #include "Command.hpp"
 
 
-class EndForCommand : public Command
+class EndForCommand : public GmatCommand
 {
 public:
     EndForCommand(void);
     virtual ~EndForCommand(void);
     
     EndForCommand(const EndForCommand& ef);
-    EndForCommand&              operator=(const EndForCommand& ef);
+    EndForCommand&          operator=(const EndForCommand& ef);
     
     virtual bool            Initialize(void);
     virtual bool            Execute(void);

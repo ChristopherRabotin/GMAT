@@ -500,9 +500,9 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
     return theModerator->GetSubscriber(name);
 }
 
-// Command
+// GmatCommand
 //------------------------------------------------------------------------------
-// Command* CreateCommand(const std::string &type, const std::string &name)
+// GmatCommand* CreateCommand(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a command object by given type and name.
@@ -513,7 +513,7 @@ Subscriber* GuiInterpreter::GetSubscriber(const std::string &name)
  * @return a command object pointer
  */
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::CreateCommand(const std::string &type,
+GmatCommand* GuiInterpreter::CreateCommand(const std::string &type,
                                        const std::string &name)
 {
     return theModerator->CreateCommand(type, name);
@@ -521,7 +521,7 @@ Command* GuiInterpreter::CreateCommand(const std::string &type,
 
 // command sequence
 //------------------------------------------------------------------------------
-// bool AppendCommand(Command *cmd, Integer sandboxNum)
+// bool AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 /**
  * Appends a command.
@@ -531,50 +531,50 @@ Command* GuiInterpreter::CreateCommand(const std::string &type,
  * @return a command object pointer, return null if not appended
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::AppendCommand(Command *cmd, Integer sandboxNum)
+bool GuiInterpreter::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
     return theModerator->AppendCommand(cmd, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
-// Command* AppendCommand(const std::string &type, const std::string &name,
+// GmatCommand* AppendCommand(const std::string &type, const std::string &name,
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
+GmatCommand* GuiInterpreter::AppendCommand(const std::string &type, const std::string &name,
                                   Integer sandboxNum)
 {
     return theModerator->AppendCommand(type, name, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
-// bool InsertCommand(Command *cmd, Command *prevCmd, Integer sandboxNum)
+// bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::InsertCommand(Command *cmd, Command *prevCmd,
+bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                                    Integer sandboxNum)
 {
     return theModerator->InsertCommand(cmd, prevCmd, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string &type, const std::string &currName,
+// GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
 //                        const std::string &prevName, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::InsertCommand(const std::string &type, const std::string &currName,
+GmatCommand* GuiInterpreter::InsertCommand(const std::string &type, const std::string &currName,
                                   const std::string &prevName, Integer sandboxNum)
 {
     return theModerator->InsertCommand(type, currName, prevName, sandboxNum);
 }
 
 //------------------------------------------------------------------------------
-// Command* DeleteCommand(Command *cmd, Integer sandboxNum)
+// GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::DeleteCommand(Command *cmd, Integer snadboxNum)
+GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 {
     return theModerator->DeleteCommand(cmd, snadboxNum);
 }
 
 //------------------------------------------------------------------------------
-// Command* GetNextCommand(Integer sandboxNum)
+// GmatCommand* GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a next command object.
@@ -584,7 +584,7 @@ Command* GuiInterpreter::DeleteCommand(Command *cmd, Integer snadboxNum)
  * @return a next command object pointer, return null if no command found
  */
 //------------------------------------------------------------------------------
-Command* GuiInterpreter::GetNextCommand(Integer sandboxNum)
+GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
 {
     return theModerator->GetNextCommand(sandboxNum);
 }

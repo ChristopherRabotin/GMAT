@@ -20,7 +20,7 @@
 
 //------------------------------------------------------------------------------
 // MissionTreeItemData(wxString desc, int type, const wxString &name,
-//                     Command *cmd)
+//                     GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Constructs MissionTreeItemData object.
@@ -34,7 +34,7 @@
  */
 //------------------------------------------------------------------------------
 MissionTreeItemData::MissionTreeItemData(wxString desc, int type,
-                                         const wxString &name, Command *cmd)
+                                         const wxString &name, GmatCommand *cmd)
     : GmatTreeItemData(desc, type)
 {
     theCommand = cmd;
@@ -42,13 +42,13 @@ MissionTreeItemData::MissionTreeItemData(wxString desc, int type,
 }
 
 //------------------------------------------------------------------------------
-// Command* GetCommand()
+// GmatCommand* GetCommand()
 //------------------------------------------------------------------------------
 /**
  * @return Command pointer
  */
 //------------------------------------------------------------------------------
-Command* MissionTreeItemData::GetCommand()
+GmatCommand* MissionTreeItemData::GetCommand()
 {
     return theCommand;
 }

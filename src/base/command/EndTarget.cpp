@@ -22,7 +22,7 @@
 
 
 EndTarget::EndTarget(void) :
-    Command         ("EndTarget")
+    GmatCommand         ("EndTarget")
 {}
 
 
@@ -31,7 +31,7 @@ EndTarget::~EndTarget(void)
     
 
 EndTarget::EndTarget(const EndTarget& et) :
-    Command         (et)
+    GmatCommand         (et)
 {}
 
 

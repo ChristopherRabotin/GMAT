@@ -30,7 +30,7 @@
  */
 //------------------------------------------------------------------------------
 Vary::Vary(void) :
-    Command                 ("Vary"),
+    GmatCommand                 ("Vary"),
     targeterName            (""),
     targeter                (NULL),
     variableID              (-1),
@@ -67,7 +67,7 @@ Vary::~Vary(void)
  */
 //------------------------------------------------------------------------------
 Vary::Vary(const Vary& t) :
-    Command                 (t),
+    GmatCommand                 (t),
     targeterName            (t.targeterName),
     targeter                (NULL),
     variableID              (-1),
@@ -125,7 +125,7 @@ std::string Vary::GetParameterText(const Integer id) const
     if (id == variableMaximumStepID)
         return "MaximumChange";
 
-    return Command::GetParameterText(id);
+    return GmatCommand::GetParameterText(id);
 }
 
 
@@ -152,7 +152,7 @@ Integer Vary::GetParameterID(const std::string &str) const
     if (str == "MaximumChange")
         return variableMaximumStepID;
 
-    return Command::GetParameterID(str);
+    return GmatCommand::GetParameterID(str);
 }
 
 
@@ -179,7 +179,7 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
     if (id == variableMaximumStepID)
         return Gmat::REAL_TYPE;
 
-    return Command::GetParameterType(id);
+    return GmatCommand::GetParameterType(id);
 }
 
 
@@ -210,7 +210,7 @@ std::string Vary::GetParameterTypeString(const Integer id) const
         return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
 
 
-    return Command::GetParameterTypeString(id);
+    return GmatCommand::GetParameterTypeString(id);
 }
 
 
@@ -236,7 +236,7 @@ Real Vary::GetRealParameter(const Integer id) const
         if (!variableMaximumStep.empty())
             return variableMaximumStep[0];
 
-    return Command::GetRealParameter(id);
+    return GmatCommand::GetRealParameter(id);
 }
 
 
@@ -283,7 +283,7 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
         return variableMaximumStep[0];
     }
 
-    return Command::SetRealParameter(id, value);
+    return GmatCommand::SetRealParameter(id, value);
 }
 
 
@@ -296,7 +296,7 @@ std::string Vary::GetStringParameter(const Integer id) const
         if (!variableName.empty())
             return variableName[0];
     
-    return Command::GetStringParameter(id);
+    return GmatCommand::GetStringParameter(id);
 }
 
 
@@ -315,7 +315,7 @@ bool Vary::SetStringParameter(const Integer id, const std::string &value)
         return true;
     }
     
-    return Command::SetStringParameter(id, value);
+    return GmatCommand::SetStringParameter(id, value);
 }
 
 
@@ -407,7 +407,7 @@ void Vary::InterpretAction(void)
 //------------------------------------------------------------------------------
 bool Vary::Initialize(void)
 {
-    bool retval = Command::Initialize();
+    bool retval = GmatCommand::Initialize();
 
     // Vary specific initialization (no pun intended) goes here:
     // Find the targeter

@@ -26,7 +26,7 @@
 class GMAT_API CommandFactory : public Factory
 {
 public:
-   Command*  CreateCommand(std::string ofType, std::string withName = "");
+   GmatCommand*  CreateCommand(std::string ofType, std::string withName = "");
 
    // default constructor
    CommandFactory();

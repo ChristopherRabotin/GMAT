@@ -209,7 +209,7 @@ bool ScriptInterpreter::Parse(void)
 */
         // Check to see if it's a command
         if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
-            Command *cmd = moderator->AppendCommand(**phrase, "");
+            GmatCommand *cmd = moderator->AppendCommand(**phrase, "");
             cmd->SetGeneratingString(line);
             cmd->InterpretAction();
         }
@@ -267,7 +267,7 @@ bool ScriptInterpreter::WriteScript(void)
             return false;
 
     // Command sequence
-    Command *cmd = moderator->GetNextCommand();
+    GmatCommand *cmd = moderator->GetNextCommand();
     while (cmd != NULL) {
         *outstream << (cmd->GetGeneratingString()) << "\n";
         cmd = cmd->GetNext();
@@ -277,7 +277,7 @@ bool ScriptInterpreter::WriteScript(void)
 }
 
 
-bool ScriptInterpreter::ConfigureCommand(Command *)
+bool ScriptInterpreter::ConfigureCommand(GmatCommand *)
 {
     return false;
 }

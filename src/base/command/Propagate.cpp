@@ -28,7 +28,7 @@
  */
 //------------------------------------------------------------------------------
 Propagate::Propagate(void) :
-    Command                     ("Propagate"),
+    GmatCommand                     ("Propagate"),
     propName                    (""),
     propCoupled                 (true),
     interruptCheckFrequency     (30),
@@ -67,7 +67,7 @@ Propagate::~Propagate(void)
  */
 //------------------------------------------------------------------------------
 Propagate::Propagate(const Propagate &p) :
-    Command                     (p),
+    GmatCommand                     (p),
     propName                    (p.propName),
     propCoupled                 (true),
     interruptCheckFrequency     (30),
@@ -101,7 +101,7 @@ Propagate& Propagate::operator=(const Propagate &p)
         return *this;
 
     // Call the base assignment operator
-    Command::operator=(p);
+    GmatCommand::operator=(p);
     initialized = false;
     
     return *this;
@@ -127,7 +127,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
     }
 
     // Not handled here -- invoke the next higher SetObject call
-    return Command::SetObject(name, type, associate, associateType);
+    return GmatCommand::SetObject(name, type, associate, associateType);
 }
 
 
@@ -144,7 +144,7 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
     }
 
     // Not handled here -- invoke the next higher SetObject call
-    return Command::SetObject(obj, type);
+    return GmatCommand::SetObject(obj, type);
 }
 
 
@@ -157,7 +157,7 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
         else
             return stopWhen[0];
             
-    return Command::GetObject(type, objName);
+    return GmatCommand::GetObject(type, objName);
 }
 
 
@@ -179,7 +179,7 @@ std::string Propagate::GetParameterText(const Integer id) const
     if (id == stopWhenID)
         return "StoppingConditions";
 
-    return Command::GetParameterText(id);
+    return GmatCommand::GetParameterText(id);
 }
 
 
@@ -197,7 +197,7 @@ Integer Propagate::GetParameterID(const std::string &str) const
     if (str == "Propagator")
         return propNameID;
     
-    return Command::GetParameterID(str);
+    return GmatCommand::GetParameterID(str);
 }
 
 
@@ -215,7 +215,7 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
     if (id == propNameID)
         return Gmat::STRING_TYPE;
     
-    return Command::GetParameterType(id);
+    return GmatCommand::GetParameterType(id);
 }
 
 
@@ -233,7 +233,7 @@ std::string Propagate::GetParameterTypeString(const Integer id) const
     if (id == propNameID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
 
-    return Command::GetParameterTypeString(id);
+    return GmatCommand::GetParameterTypeString(id);
 }
 
 
@@ -242,7 +242,7 @@ Integer Propagate::GetIntegerParameter(const Integer id) const
     if (id == interruptCheckFrequencyID)
         return interruptCheckFrequency;
 
-    return Command::GetIntegerParameter(id);
+    return GmatCommand::GetIntegerParameter(id);
 }
 
 
@@ -254,7 +254,7 @@ Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
         return interruptCheckFrequency;
     }
 
-    return Command::SetIntegerParameter(id, value);
+    return GmatCommand::SetIntegerParameter(id, value);
 }
 
 
@@ -263,7 +263,7 @@ bool Propagate::GetBooleanParameter(const Integer id) const
     if (id == propCoupledID)
         return propCoupled;
 
-    return Command::GetBooleanParameter(id);
+    return GmatCommand::GetBooleanParameter(id);
 }
 
 
@@ -274,16 +274,16 @@ bool Propagate::SetBooleanParameter(const Integer id, const bool value)
         return propCoupled;
     }
 
-    return Command::SetBooleanParameter(id, value);
+    return GmatCommand::SetBooleanParameter(id, value);
 }
 
 
 std::string Propagate::GetStringParameter(const Integer id) const
 {
     if (id == propNameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+        return propName;
 
-    return Command::GetStringParameter(id);
+    return GmatCommand::GetStringParameter(id);
 }
 
 
@@ -300,7 +300,7 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
     if (id == propNameID)
         propName = value;
  
-    return Command::SetStringParameter(id, value);
+    return GmatCommand::SetStringParameter(id, value);
 }
 
 
@@ -309,7 +309,7 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
     if (id == satNameID)
         return satName;
  
-    return Command::GetStringArrayParameter(id);
+    return GmatCommand::GetStringArrayParameter(id);
 }
 
 
@@ -362,7 +362,7 @@ void Propagate::InterpretAction(void)
 
 bool Propagate::Initialize(void)
 {
-    Command::Initialize();
+    GmatCommand::Initialize();
     if (objectMap->find(propName) == objectMap->end())
         throw CommandException("Propagate command cannot find Propagator Setup");
     prop = (PropSetup *)((*objectMap)[propName]);

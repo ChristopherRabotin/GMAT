@@ -26,7 +26,7 @@
 #include <vector>
 
 
-class BranchCommand : public Command
+class BranchCommand : public GmatCommand
 {
 public:
     BranchCommand(const std::string &typeStr);
@@ -34,13 +34,13 @@ public:
     BranchCommand(const BranchCommand& bc);
     BranchCommand&          operator=(const BranchCommand& bc);
     
-    void                    AddBranch(Command *cmd, Integer which = 0);
+    void                    AddBranch(GmatCommand *cmd, Integer which = 0);
     bool                    ExecuteBranch(Integer which = 0);
     
     // Inherited methods that need refinements to handle the branching
-    virtual bool            Append(Command *cmd);
-    virtual bool            Insert(Command *cmd, Command *prev);
-    virtual Command*        Remove(Command *cmd);
+    virtual bool            Append(GmatCommand *cmd);
+    virtual bool            Insert(GmatCommand *cmd, GmatCommand *prev);
+    virtual GmatCommand*        Remove(GmatCommand *cmd);
     
     virtual void            SetSolarSystem(SolarSystem *ss);
     virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
@@ -48,13 +48,13 @@ public:
     virtual const std::string&  
                             GetGeneratingString(void);
     
-    virtual Command*        GetNext(void);
+    virtual GmatCommand*        GetNext(void);
     virtual bool            Initialize(void);
     virtual bool            Execute(void);
     
 protected:
     /// The managed branch(es).  A vector so Case can use it unchanged in build 3.
-    std::vector <Command *> branch;
+    std::vector <GmatCommand *> branch;
     /// Flag used to indicate if the command is finished executing
     bool                    commandComplete;
     /// Flag used to indicate a run is being executed

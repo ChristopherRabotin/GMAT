@@ -52,7 +52,7 @@ FactoryManager* FactoryManager::Instance()
  *
  * All factories that are needed to create objects needed for the system to run
  * must be registered with the FactoryManager.  The Moderator should register
- * all predefined factories (e.g. Propagator, Command, etc.); a user-defined
+ * all predefined factories (e.g. Propagator, GmatCommand, etc.); a user-defined
  * class must have a corresponding factory, which must be registered in order
  * for objects of that class to be created in GMAT.
  *
@@ -349,17 +349,17 @@ Solver* FactoryManager::CreateSolver(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  Command* CreateCommand(std::string ofType, std::string withName)
+//  GmatCommand* CreateCommand(std::string ofType, std::string withName)
 //------------------------------------------------------------------------------
 /**
- * Create an object of type Command, with the name withName.
+ * Create an object of type GmatCommand, with the name withName.
  *
- * @param <withName> name of the new Command object.
+ * @param <withName> name of the new GmatCommand object.
  *
- * @return pointer to the newly-created Command object
+ * @return pointer to the newly-created GmatCommand object
  */
 //------------------------------------------------------------------------------
-Command* FactoryManager::CreateCommand(std::string ofType, std::string withName)
+GmatCommand* FactoryManager::CreateCommand(std::string ofType, std::string withName)
 {
    Factory* f = FindFactory(Gmat::COMMAND, ofType);
    if (f != NULL)
@@ -574,9 +574,9 @@ StringArray FactoryManager::GetListOfSubscriber(void)// const
 // StringArray GetListOfCommand(void) const;
 //------------------------------------------------------------------------------
 /**
- * Return a list of items of type Command that can be created.
+ * Return a list of items of type GmatCommand that can be created.
  *
- * @return list of creatable items of type Command.
+ * @return list of creatable items of type GmatCommand.
  */
 //------------------------------------------------------------------------------
 StringArray FactoryManager::GetListOfCommand(void)// const

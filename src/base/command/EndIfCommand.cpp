@@ -22,7 +22,7 @@
 
 
 EndIfCommand::EndIfCommand(void) :
-    Command         ("EndIf")
+    GmatCommand         ("EndIf")
 {}
 
 
@@ -31,7 +31,7 @@ EndIfCommand::~EndIfCommand(void)
     
 
 EndIfCommand::EndIfCommand(const EndIfCommand& ic) :
-    Command         (ic)
+    GmatCommand         (ic)
 {}
 
 

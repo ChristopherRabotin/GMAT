@@ -804,34 +804,34 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
     return theConfigManager->GetSubscriber(name);
 }
 
-// Command
+// GmatCommand
 //------------------------------------------------------------------------------
-// Command* CreateCommand(const std::string &type,const std::string &name )
+// GmatCommand* CreateCommand(const std::string &type,const std::string &name )
 //------------------------------------------------------------------------------
-Command* Moderator::CreateCommand(const std::string &type, const std::string &name)
+GmatCommand* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
-    Command *cmd = theFactoryManager->CreateCommand(type, name);
+    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
     return cmd;
 }
 
-// Command sequence
+// GmatCommand sequence
 //------------------------------------------------------------------------------
-// bool AppendCommand(Command *cmd, Integer sandboxNum)
+// bool AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool Moderator::AppendCommand(Command *cmd, Integer sandboxNum)
+bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 {
     return commands[sandboxNum-1]->Append(cmd);
 }
 
 //------------------------------------------------------------------------------
-// Command* AppendCommand(const std::string &type, const std::string &name,
+// GmatCommand* AppendCommand(const std::string &type, const std::string &name,
 //                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::AppendCommand(const std::string &type, const std::string &name,
+GmatCommand* Moderator::AppendCommand(const std::string &type, const std::string &name,
                                   Integer sandboxNum)
 {
     bool status;
-    Command *cmd = theFactoryManager->CreateCommand(type, name);
+    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
 
     if (cmd != NULL)
     {
@@ -845,24 +845,24 @@ Command* Moderator::AppendCommand(const std::string &type, const std::string &na
 }
 
 //------------------------------------------------------------------------------
-// bool InsertCommand(Command *cmd, Command *prevCmd, Integer sandboxNum)
+// bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool Moderator::InsertCommand(Command *cmd, Command *prevCmd,
+bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                               Integer sandboxNum)
 {
     return commands[sandboxNum-1]->Insert(cmd, prevCmd);
 }
 
 //------------------------------------------------------------------------------
-// Command* InsertCommand(const std::string &type, const std::string &currName,
+// GmatCommand* InsertCommand(const std::string &type, const std::string &currName,
 //                        const std::string &prevName, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::InsertCommand(const std::string &type, const std::string &currName,
+GmatCommand* Moderator::InsertCommand(const std::string &type, const std::string &currName,
                                   const std::string &prevName, Integer sandboxNum)
 {
 //      bool status = false;
-//      Command *currCmd = theFactoryManager->CreateCommand(type, currName);
-//      Command *prevCmd = NULL;
+//      GmatCommand *currCmd = theFactoryManager->CreateCommand(type, currName);
+//      GmatCommand *prevCmd = NULL;
 
 //      if (currCmd != NULL)
 //      {
@@ -880,17 +880,17 @@ Command* Moderator::InsertCommand(const std::string &type, const std::string &cu
 }
 
 //------------------------------------------------------------------------------
-// Command* DeleteCommand(Command *cmd, Integer sandboxNum)
+// GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::DeleteCommand(Command *cmd, Integer sandboxNum)
+GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 {
     return commands[sandboxNum-1]->Remove(cmd);
 }
 
 //------------------------------------------------------------------------------
-// Command* GetNextCommand(Integer sandboxNum)
+// GmatCommand* GetNextCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
-Command* Moderator::GetNextCommand(Integer sandboxNum)
+GmatCommand* Moderator::GetNextCommand(Integer sandboxNum)
 {
     return commands[sandboxNum-1]->GetNext();
 }
@@ -1135,7 +1135,7 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
-    Command *cmd = commands[index]->GetNext();
+    GmatCommand *cmd = commands[index]->GetNext();
 
     //   while (cmd != NULL)
     if (cmd != NULL)

@@ -49,7 +49,7 @@ END_EVENT_TABLE()
  * @note Creates the maneuver dialog box
  */
 //------------------------------------------------------------------------------
-ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent, Command *cmd)
+ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent, GmatCommand *cmd)
     :wxPanel(parent)
 {
     theCommand = cmd;
@@ -62,7 +62,7 @@ ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent, Command *cmd)
 //-------------------------------
 
 //------------------------------------------------------------------------------
-// void CreateImpulsive(wxWindow *parent, Command *cmd)
+// void CreateImpulsive(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * @param <parent> input parent.

@@ -87,7 +87,7 @@ void GmatTreeItemData::SetDesc(wxString description)
  * @return Command pointer
  */
 //------------------------------------------------------------------------------
-Command* GmatTreeItemData::GetCommand()
+GmatCommand* GmatTreeItemData::GetCommand()
 {
     return NULL;
 }

@@ -52,7 +52,7 @@ class ScriptInterpreter : public Interpreter
         
         bool                        WriteScript(void);
 
-        bool                        ConfigureCommand(Command *);
+        bool                        ConfigureCommand(GmatCommand *);
         bool                        ConfigureMathematics(void);
         
         ScriptInterpreter();

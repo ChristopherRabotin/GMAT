@@ -38,7 +38,7 @@ class PhysicalModel;
 class SolarSystem;
 class CelestialBody;
 class Parameter;
-class Command;
+class GmatCommand;
 class Publisher;
 class Subscriber;
 class Burn;
@@ -120,7 +120,7 @@ protected:
     // The "Create" methods make calls, through the Moderator, to the Factories
     // to get new instances of the requested objects
     Spacecraft*                     CreateSpacecraft(std::string satname);
-    Command*                        CreateCommand(std::string commandtype);
+    GmatCommand*                    CreateCommand(std::string commandtype);
     Propagator*                     CreatePropagator(std::string proptype);
     ForceModel*                     CreateForceModel(std::string modelname);
     PhysicalModel*                  CreatePhysicalModel(std::string forcetype);

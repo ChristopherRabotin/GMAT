@@ -26,7 +26,7 @@
  * Default command used to initialize the command sequence lists in the 
  * Moderator
  */
-class NoOp : public Command
+class NoOp : public GmatCommand
 {
 	public:
 		NoOp();

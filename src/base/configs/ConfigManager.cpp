@@ -444,12 +444,12 @@ Propagator* ConfigManager::GetPropagator(const std::string &name)
 }
 
 
-void ConfigManager::AddCommand(Command *cmd)
+void ConfigManager::AddCommand(GmatCommand *cmd)
 {
 }
 
 
-Command* ConfigManager::GetCommand(const std::string name)
+GmatCommand* ConfigManager::GetCommand(const std::string name)
 {
     return NULL;
 }

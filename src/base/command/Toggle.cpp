@@ -27,7 +27,7 @@
 
 // class constructor
 Toggle::Toggle() :
-    Command         ("Toggle"),
+    GmatCommand         ("Toggle"),
     toggleState     (true),
     subscriberID    (parameterCount)
 {
@@ -42,7 +42,7 @@ Toggle::~Toggle()
 
 
 Toggle::Toggle(const Toggle& t) :
-    Command         (t),
+    GmatCommand         (t),
     subscriberID    (t.subscriberID)
 {
     parameterCount = t.parameterCount;
@@ -113,7 +113,7 @@ std::string Toggle::GetParameterText(const Integer id) const
 {
     if (id == subscriberID)
         return "Subscriber";
-    return Command::GetParameterText(id);
+    return GmatCommand::GetParameterText(id);
 }
 
 
@@ -121,7 +121,7 @@ Integer Toggle::GetParameterID(const std::string &str) const
 {
     if (str == "Subscriber")
         return subscriberID;
-    return Command::GetParameterID(str);
+    return GmatCommand::GetParameterID(str);
 }
 
 
@@ -129,7 +129,7 @@ Gmat::ParameterType Toggle::GetParameterType(const Integer id) const
 {
     if (id == subscriberID)
         return Gmat::STRING_TYPE;
-    return Command::GetParameterType(id);
+    return GmatCommand::GetParameterType(id);
 }
 
 
@@ -137,7 +137,7 @@ std::string Toggle::GetParameterTypeString(const Integer id) const
 {
     if (id == subscriberID)
         return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-    return Command::GetParameterTypeString(id);
+    return GmatCommand::GetParameterTypeString(id);
 }
 
 
@@ -145,7 +145,7 @@ std::string Toggle::GetStringParameter(const Integer id) const
 {
     if (id == subscriberID)
         return "List of subscribers";
-    return Command::GetStringParameter(id);
+    return GmatCommand::GetStringParameter(id);
 }
 
 
@@ -158,6 +158,6 @@ bool Toggle::SetStringParameter(const Integer id, const std::string &value)
         }
         return false;
     }
-    return Command::SetStringParameter(id, value);
+    return GmatCommand::SetStringParameter(id, value);
 }
 

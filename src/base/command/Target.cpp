@@ -88,7 +88,7 @@ Target& Target::operator=(const Target& t)
 
 
 //------------------------------------------------------------------------------
-//  bool Append(Command *cmd)
+//  bool Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Adds a command to the targeter loop.
@@ -101,7 +101,7 @@ Target& Target::operator=(const Target& t)
  * @return true if the Command is appended, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool Target::Append(Command *cmd)
+bool Target::Append(GmatCommand *cmd)
 {
     if (!BranchCommand::Append(cmd))
         return false;
@@ -329,7 +329,7 @@ bool Target::Execute(void)
     
     // Drive through the state machine.
     Solver::SolverState state = targeter->GetState();
-    Command *current;
+    GmatCommand *current;
     
     switch (state) {
         case Solver::INITIALIZING:
@@ -388,11 +388,8 @@ std::cout << "Target Command State:  Solver::FINISHED\n";
 }
 
 
-#include <iostream>
 void Target::StoreLoopData(void)
 {
-std::cout << "Storing loop data\n";   
-
     // Make local copies of all of the objects that may be affected by targeter
     // loop iterations
     std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
@@ -411,20 +408,16 @@ std::cout << "Storing loop data\n";
 
 void Target::ResetLoopData(void)
 {
-std::cout << "Restoring loop data\n";   
     Spacecraft *sc;
     std::string name;
     
     for (std::vector<GmatBase *>::iterator i = localStore.begin(); 
             i != localStore.end(); ++i) {
         name = (*i)->GetName();
-std::cout << name << std::endl;
         GmatBase *gb = (*objectMap)[name];
         if (gb != NULL) {
             sc = (Spacecraft*)gb;
             *sc = *((Spacecraft*)(*i));  // Assignment operator better be right!
-Real * state = sc->GetState();
-std::cout << "State: " << state[0] << " " << state[1] << " " << state[2] << " " << state[3] << " " << state[4] << " " << state[5] << "\n";   
         }
     }
 }
@@ -439,3 +432,4 @@ void Target::FreeLoopData(void)
        delete obj;
     }
 }
+

@@ -53,7 +53,7 @@ private:
 
     // member data
     GuiInterpreter *theGuiInterpreter;
-    Command *theManeuver;
+    GmatCommand *theManeuver;
     Burn *theBurn;
 
     wxButton *okButton;

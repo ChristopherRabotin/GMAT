@@ -44,7 +44,7 @@
  * 
  *
  */
-class Achieve : public Command
+class Achieve : public GmatCommand
 {
 public:
     Achieve(void);

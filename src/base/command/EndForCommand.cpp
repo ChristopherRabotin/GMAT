@@ -22,7 +22,7 @@
 
 
 EndForCommand::EndForCommand(void) :
-    Command         ("EndFor")
+    GmatCommand         ("EndFor")
 {}
 
 
@@ -31,7 +31,7 @@ EndForCommand::~EndForCommand(void)
     
 
 EndForCommand::EndForCommand(const EndForCommand& ef) :
-    Command         (ef)
+    GmatCommand         (ef)
 {}
 
 

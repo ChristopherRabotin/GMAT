@@ -267,7 +267,7 @@ Spacecraft* Interpreter::CreateSpacecraft(std::string satname)
 }
 
 
-Command* Interpreter::CreateCommand(std::string commandtype)
+GmatCommand* Interpreter::CreateCommand(std::string commandtype)
 {
     return moderator->CreateCommand(commandtype, "");
 }

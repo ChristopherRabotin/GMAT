@@ -44,7 +44,7 @@
  * 
  *
  */
-class Vary : public Command
+class Vary : public GmatCommand
 {
 public:
     Vary(void);

@@ -53,7 +53,7 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-Command* CommandFactory::CreateCommand(std::string ofType,
+GmatCommand* CommandFactory::CreateCommand(std::string ofType,
                                        std::string withName)
 {
     if (ofType == "Propagate")

@@ -25,7 +25,7 @@
 #include "Command.hpp"
 
 
-class EndTarget : public Command
+class EndTarget : public GmatCommand
 {
 public:
     EndTarget(void);

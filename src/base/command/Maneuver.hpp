@@ -37,7 +37,7 @@
  *     ...
  *     Maneuver burn(Sat1);
  */
-class Maneuver : public Command
+class Maneuver : public GmatCommand
 {
 public:
     Maneuver(void);

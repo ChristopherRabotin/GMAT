@@ -86,7 +86,7 @@ public:
     Subscriber *          CreateSubscriber(std::string ofType,
                                            std::string withName = "",
                                            std::string fileName = "");
-    Command *             CreateCommand(std::string ofType,
+    GmatCommand *         CreateCommand(std::string ofType,
                                         std::string withName = "");
     Burn *                CreateBurn(std::string ofType,
                                      std::string withName = "");

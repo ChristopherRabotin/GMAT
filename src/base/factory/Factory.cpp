@@ -370,28 +370,28 @@ Subscriber* Factory::CreateSubscriber(std::string ofType,
 }
 
 //------------------------------------------------------------------------------
-//  Command* CreateCommand(std::string ofType,
+//  GmatCommand* CreateCommand(std::string ofType,
 //                         std::string withName)
 //------------------------------------------------------------------------------
 /**
  * Must be implemented by derived classes that create  Command objects -
- * in that case, it returns a new  Command object.  Otherwise, it
+ * in that case, it returns a new  GmatCommand object.  Otherwise, it
  * throws an exception indicating that the class does not create objects of
- * type  Command.
+ * type  GmatCommand.
  *
- * @param <ofType>   specific type of  Command object to create.
- * @param <withName> name to give to the newly created  Command object.
+ * @param <ofType>   specific type of  GmatCommand object to create.
+ * @param <withName> name to give to the newly created  GmatCommand object.
  *
- * @return pointer to a new  Command object.
+ * @return pointer to a new  GmatCommand object.
  *
  * @exception <FactoryException> thrown if the factory does not create
- * objects of type  Command.
+ * objects of type  GmatCommand.
  */
 //------------------------------------------------------------------------------
-Command* Factory::CreateCommand(std::string ofType,
+GmatCommand* Factory::CreateCommand(std::string ofType,
                                         std::string withName)
 {
-   throw FactoryException("requested object must be of type Command");
+   throw FactoryException("requested object must be of type GmatCommand");
 }
 
 //------------------------------------------------------------------------------

@@ -47,9 +47,9 @@ class PropagateCommandPanel : public wxPanel
 {
 public:
     // constructors
-    //PropagateCommandPanel( wxWindow *parent, Command *propCommand );
+    //PropagateCommandPanel( wxWindow *parent, GmatCommand *propCommand );
     //loj: 2/9/04 PropagateCommandPanel( wxWindow *parent, const wxString &propName );
-    PropagateCommandPanel( wxWindow *parent, const wxString &propName, Command *cmd);
+    PropagateCommandPanel( wxWindow *parent, const wxString &propName, GmatCommand *cmd);
     
 private:
     wxStaticText *synchStaticText;
@@ -98,7 +98,7 @@ private:
     StringArray scList;
     
     GuiInterpreter *theGuiInterpreter;
-    Command        *theCommand;
+    GmatCommand    *theCommand;
     Propagate      *thePropagateCommand;
     GmatBase       *theStopCondBase;
     StopCondition  *theStopCond;
@@ -157,3 +157,4 @@ private:
 };
 
 #endif // PropagateCommandPanel_hpp
+

@@ -65,7 +65,7 @@ bool Sandbox::AddObject(GmatBase *obj)
 }
 
 
-bool Sandbox::AddCommand(Command *cmd)
+bool Sandbox::AddCommand(GmatCommand *cmd)
 {
     if (state == INITIALIZED)
         state = IDLE;

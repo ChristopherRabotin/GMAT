@@ -87,8 +87,8 @@ public:
     PhysicalModel*      GetPhysicalModel(const std::string &name);
     Propagator*         GetPropagator(const std::string &name);
         
-    void                AddCommand(Command *cmd);
-    Command*            GetCommand(const std::string name);
+    void                AddCommand(GmatCommand *cmd);
+    GmatCommand*        GetCommand(const std::string name);
 private:
     /// The singleton instance
     static ConfigManager*   theConfigManager;

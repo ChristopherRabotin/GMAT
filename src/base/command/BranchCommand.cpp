@@ -23,7 +23,7 @@
 
 
 BranchCommand::BranchCommand(const std::string &typeStr) :
-    Command         (typeStr),
+    GmatCommand         (typeStr),
     branch          (1),
     commandComplete (false),
     commandExecuting(false),
@@ -34,7 +34,7 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
 
 BranchCommand::~BranchCommand()
 {
-    std::vector<Command*>::iterator node;
+    std::vector<GmatCommand*>::iterator node;
     for (node = branch.begin(); node != branch.end(); ++node) {
         if (*node)
             delete *node;
@@ -43,7 +43,7 @@ BranchCommand::~BranchCommand()
 
 
 BranchCommand::BranchCommand(const BranchCommand& bc) :
-    Command         (bc),
+    GmatCommand         (bc),
     branch          (1),
     commandComplete (false),
     commandExecuting(false),
@@ -61,7 +61,7 @@ BranchCommand& BranchCommand::operator=(const BranchCommand& bc)
 }
 
 
-Command* BranchCommand::GetNext(void)
+GmatCommand* BranchCommand::GetNext(void)
 {
     // Return the next pointer in the command sequence if this command -- 
     // includng its branches -- has finished executing.
@@ -74,8 +74,8 @@ Command* BranchCommand::GetNext(void)
 
 bool BranchCommand::Initialize(void)
 {
-    std::vector<Command*>::iterator node;
-    Command *current;
+    std::vector<GmatCommand*>::iterator node;
+    GmatCommand *current;
     bool retval = true;
 
     for (node = branch.begin(); node != branch.end(); ++node) {
@@ -92,7 +92,7 @@ bool BranchCommand::Initialize(void)
 }
 
 
-void BranchCommand::AddBranch(Command *cmd, Integer which)
+void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
     // Increase the size of the vector if it's not big enough
     if (which >= (Integer)branch.capacity())
@@ -105,7 +105,7 @@ void BranchCommand::AddBranch(Command *cmd, Integer which)
 }
 
 
-bool BranchCommand::Append(Command *cmd)
+bool BranchCommand::Append(GmatCommand *cmd)
 {
     // If we are still filling in a branch, append on that branch
     if (branchToFill >= 0) {
@@ -114,13 +114,13 @@ bool BranchCommand::Append(Command *cmd)
     }
     
     // Otherwise, just call the base class method
-    return Command::Append(cmd);
+    return GmatCommand::Append(cmd);
 }
 
 
-bool BranchCommand::Insert(Command *cmd, Command *prev)
+bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
-    Command *current = NULL;
+    GmatCommand *current = NULL;
     
     // If we have branches, try to insert there first
     for (Integer which = 0; which < (Integer)branch.size(); ++which) {
@@ -131,17 +131,17 @@ bool BranchCommand::Insert(Command *cmd, Command *prev)
     }
     
     // Otherwise, just call the base class method
-    return Command::Insert(cmd, prev);
+    return GmatCommand::Insert(cmd, prev);
 }
 
 
-Command* BranchCommand::Remove(Command *cmd)
+GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
     if (cmd == this)
-        return Command::Remove(cmd);    // Use base method to remove this cmd
+        return GmatCommand::Remove(cmd);    // Use base method to remove this cmd
 
-    Command *fromBranch = NULL;
-    Command *current = NULL;
+    GmatCommand *fromBranch = NULL;
+    GmatCommand *current = NULL;
     
     // If we have branches, try to insert there first
     for (Integer which = 0; which < (Integer)branch.size(); ++which) {
@@ -154,14 +154,14 @@ Command* BranchCommand::Remove(Command *cmd)
     }
     
     // Not in the branches, so continue with the sequence
-    return Command::Remove(cmd);
+    return GmatCommand::Remove(cmd);
 }
 
 
 void BranchCommand::SetSolarSystem(SolarSystem *ss)
 {
-    Command::SetSolarSystem(ss);
-    Command *current = NULL;
+    GmatCommand::SetSolarSystem(ss);
+    GmatCommand *current = NULL;
     
     // Set it for all of the branch nodes
     // If we have branches, try to insert there first
@@ -188,8 +188,8 @@ void BranchCommand::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
-    Command::SetObjectMap(map);
-    Command *current = NULL;
+    GmatCommand::SetObjectMap(map);
+    GmatCommand *current = NULL;
     
     // Set it for all of the branch nodes
     // If we have branches, try to insert there first
@@ -206,7 +206,7 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 const std::string& BranchCommand::GetGeneratingString(void)
 {
     fullString = generatingString;
-    Command *current;
+    GmatCommand *current;
     
     // Loop through the branches, appending the strings from commands in each
     for (Integer which = 0; which < (Integer)branch.size(); ++which) {
@@ -233,7 +233,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
 {
     bool retval = true;
     
-    Command *current = branch[which];
+    GmatCommand *current = branch[which];
     while ((current != NULL) && (current != this)) {
         if (current->Execute() == false) {
             retval = false;

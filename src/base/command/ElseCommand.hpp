@@ -50,7 +50,7 @@ public:
     ElseCommand&             operator=(const ElseCommand& ec);
     
     // Inherited methods that need some enhancement from the base class
-    virtual bool        Append(Command *cmd);
+    virtual bool        Append(GmatCommand *cmd);
     
     // Methods used to run the command
     virtual bool        Initialize(void);

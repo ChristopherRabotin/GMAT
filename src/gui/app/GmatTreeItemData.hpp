@@ -31,7 +31,7 @@ public:
     int GetDataType();
     void SetDesc(wxString description);
     
-    virtual Command* GetCommand();
+    virtual GmatCommand* GetCommand();
     virtual wxString GetCommandName();
     
 protected:

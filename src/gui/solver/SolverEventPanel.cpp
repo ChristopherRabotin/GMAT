@@ -47,11 +47,11 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 SolverEventPanel::SolverEventPanel(wxWindow *parent, const wxString &name,
-                                   Command *cmd)
+                                   GmatCommand *cmd)
     : wxPanel(parent)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    //loj: 2/9/04 Command *theCommand = theGuiInterpreter->GetCommand(name.c_str());
+    //loj: 2/9/04 GmatCommand *theCommand = theGuiInterpreter->GetCommand(name.c_str());
     theCommand = cmd;
     
     Initialize();

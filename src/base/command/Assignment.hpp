@@ -30,7 +30,7 @@
 
 #include "Command.hpp"
 
-class Assignment : public Command
+class Assignment : public GmatCommand
 {
 public:
 	Assignment();
