@@ -149,6 +149,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
    
       case Gmat::PROP_SETUP:
          propName.push_back(name);
+         direction.push_back(1.0);
          satName.push_back(new StringArray);
          return true;
    
@@ -261,6 +262,7 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
    switch (type) {
       // Propagator setups
       case Gmat::PROP_SETUP:
+         direction.push_back(1.0);
          propName.push_back(name);
          satName.push_back(new StringArray);
          return true;
@@ -622,6 +624,7 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == propNameID) {
       propName.push_back(value);
+      direction.push_back(1.0);
       satName.push_back(new StringArray);
       return true;
    }
@@ -1143,6 +1146,10 @@ bool Propagate::Initialize(void)
 #if DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage("Propagate::Initialize() entered.\n%s\n",
                                     generatingString.c_str());
+      MessageInterface::ShowMessage("  Size of propName is %d\n",
+                                    propName.size());
+      MessageInterface::ShowMessage("  Size of direction is %d\n",
+                                    direction.size());
 #endif
 
    GmatCommand::Initialize();
