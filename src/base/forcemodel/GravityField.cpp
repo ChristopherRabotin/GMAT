@@ -786,6 +786,7 @@ bool GravityField::gravity_init(void)
       {
          // try to get default coefficients from the body
          MessageInterface::ShowMessage("Using default coefficients from the body.\n");
+         PrepareArrays(); // reset the arrays first
          mu     = body->GetGravitationalConstant();
          a      = body->GetEquatorialRadius();
          Rmatrix sij = body->GetHarmonicCoefficientsSij();
