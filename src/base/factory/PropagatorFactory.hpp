@@ -17,7 +17,7 @@
  */
 //------------------------------------------------------------------------------
 #ifndef PropagatorFactory_hpp
-#define PropagatortFactory_hpp
+#define PropagatorFactory_hpp
 
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
