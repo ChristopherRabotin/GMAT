@@ -33,6 +33,8 @@ Assignment::Assignment() :
     ownerName       (""),
     parmName        (""),    
     parmOwner       (NULL),
+    rhsObject       (NULL),
+    objToObj        (false),
     parmID          (-1),
     parmType        (Gmat::UNKNOWN_PARAMETER_TYPE),
     value           ("Not_Set")
@@ -50,6 +52,7 @@ Assignment::Assignment(const Assignment& a) :
     ownerName       (a.ownerName),
     parmName        (a.parmName),    
     parmOwner       (a.parmOwner),
+    rhsObject       (a.rhsObject),
     parmID          (a.parmID),
     parmType        (a.parmType),
     value           (a.value)
@@ -65,6 +68,8 @@ Assignment& Assignment::operator=(const Assignment& a)
     ownerName = a.ownerName;
     parmName  = a.parmName;    
     parmOwner = a.parmOwner;
+    rhsObject = a.rhsObject;
+    objToObj  = a.objToObj;
     parmID    = a.parmID;
     parmType  = a.parmType;
     value     = a.value;
@@ -77,25 +82,58 @@ bool Assignment::Initialize(void)
 {
     // Find the object
     if (objectMap->find(ownerName) == objectMap->end())
-        throw CommandException("Assignment command cannot find object");
+        throw CommandException("Assignment command cannot find object \"" +
+                               ownerName + "\"");
     
     parmOwner = (*objectMap)[ownerName];
+    if (objToObj) {
+       rhsObject = (*objectMap)[value];
+       if (!rhsObject)
+          throw CommandException("Assignment command cannot find object \"" +
+                                 value + "\"");
+    }
     return true;
 }
 
 
+#include <iostream>
 bool Assignment::InterpretAction(void)
 {
-    /// @todo: Clean up this hack for the Maneuver::InterpretAction method
-    // Assignment lines have the form GMAT Sat.Element1 = 7654.321;
+    /// @todo: Clean up this hack for the Assignment::InterpretAction method
+    // Assignment lines have the form GMAT Sat.Element1 = 7654.321; or
+    // GMAT object1 = object2;
     Integer loc = generatingString.find("GMAT", 0) + 4, end;
     const char *str = generatingString.c_str();
     while (str[loc] == ' ')
         ++loc;
     
     end = generatingString.find(".", loc);
-    if (end == (Integer)std::string::npos)
-        throw CommandException("Assignment string does not identify object");
+    if (end == (Integer)std::string::npos) {
+//        throw CommandException("Assignment string does not identify object");
+       // Must be object = object assignment
+       Integer eqloc = generatingString.find("=", loc);
+       if (eqloc == (Integer)std::string::npos)
+          throw CommandException("Assignment string does not contain an '='");
+       end = eqloc;
+       while ((str[end] == ' ') || (str[end] == '='))
+          --end;
+       std::string component = generatingString.substr(loc, end-loc+1);
+       ownerName = component;
+std::cout << "lhs Object name is \"" << ownerName << "\"\n";
+
+       loc = eqloc;
+       while ((str[loc] == ' ') || (str[loc] == '='))
+          ++loc;
+       end = loc;
+       value     = &str[loc];
+       end = value.find(";");
+       value = value.substr(0, end);
+std::cout << "rhs Object name is \"" << value << "\"\n";
+
+       objToObj = true;
+       
+       return true;
+    }
     
     std::string component = generatingString.substr(loc, end-loc);
     if (component == "")
@@ -143,11 +181,23 @@ bool Assignment::Execute(void)
 
     // Get the parameter ID and ID type
     try {
-       parmID    = parmOwner->GetParameterID(parmName);
-       parmType  = parmOwner->GetParameterType(parmID);
-       
        if (parmOwner == NULL)
            throw CommandException("Parameter Owner Not Initialized");
+       
+       if (objToObj) {
+          if (!rhsObject)
+             throw CommandException("Assignment command cannot find object \"" +
+                                    value + "\"");
+          if (parmOwner->GetTypeName() != rhsObject->GetTypeName())
+             throw CommandException("Mismatched object types between \"" +
+                                    parmOwner->GetName() + "\" and \"" +
+                                    rhsObject->GetName() + "\"");
+          parmOwner->Copy(rhsObject);
+          return true;
+       }
+
+       parmID    = parmOwner->GetParameterID(parmName);
+       parmType  = parmOwner->GetParameterType(parmID);
        
        switch (parmType) {
            case Gmat::INTEGER_TYPE:

@@ -95,6 +95,9 @@ public:
    // required method for all subclasses
    virtual GmatBase*   Clone() const = 0;
    
+   // required method for all subclasses that can be copied in a script
+   virtual void        Copy(const GmatBase*);
+   
    // Access methods derived classes can override
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;

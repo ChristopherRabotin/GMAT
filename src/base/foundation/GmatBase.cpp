@@ -187,8 +187,10 @@ GmatBase::GmatBase(const GmatBase &a) :
  *
  * @return Reference to this object
  */
+#include <iostream>
 GmatBase& GmatBase::operator=(const GmatBase &a)
 {
+std::cout << "Calling GmatBase::operator= for " << instanceName << "\n";
    // Don't do anything if copying self
    if (&a == this)
       return *this;
@@ -535,6 +537,23 @@ GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 Integer GmatBase::GetInstanceCount()
 {
    return GmatBase::instanceCount;
+}
+
+
+//---------------------------------------------------------------------------
+//  void Copy(GmatBase *inst)
+//---------------------------------------------------------------------------
+/**
+ * Set this instance to match the one passed in.
+ * 
+ * The default throws an exception.  Users must override this method for classes
+ * that allow copying from a script.
+ *
+ * @param <inst> The object that is being copied.
+ */
+void GmatBase::Copy(const GmatBase*)
+{
+   throw GmatBaseException("Cannot copy objects of type " + typeName);
 }
 
 
