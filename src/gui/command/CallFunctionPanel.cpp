@@ -227,6 +227,7 @@ void CallFunctionPanel::LoadData()
       wxString *inputNames = new wxString[mNumInput];
       GmatBase *param;
       wxString cellValue = "";
+      wxString delimiter = ", ";
 
       for (int i=0; i<mNumInput; i++)
       {
@@ -235,7 +236,11 @@ void CallFunctionPanel::LoadData()
             MessageInterface::ShowMessage("   Looking up " + inputList[i] + "\n");
          #endif
          param = theGuiInterpreter->GetConfiguredItem(inputList[i]);
-         cellValue = cellValue + param->GetName().c_str() + "  ";
+
+         if (i == mNumInput-1)
+            delimiter = "";
+
+         cellValue = cellValue + param->GetName().c_str() + delimiter;
          inputStrings.Add(param->GetName().c_str());
       }
 
@@ -260,6 +265,7 @@ void CallFunctionPanel::LoadData()
       wxString *outputNames = new wxString[mNumOutput];
       GmatBase *param;
       wxString cellValue = "";
+      wxString delimiter = ", ";
 
       for (int i=0; i<mNumOutput; i++)
       {
@@ -268,7 +274,11 @@ void CallFunctionPanel::LoadData()
             MessageInterface::ShowMessage("   Looking up " + outputList[i] + "\n");
          #endif
          param = theGuiInterpreter->GetConfiguredItem(outputList[i]);
-         cellValue = cellValue + param->GetName().c_str() + "  ";
+
+         if (i == mNumOutput-1)
+            delimiter = "";
+
+         cellValue = cellValue + param->GetName().c_str() + delimiter;
          outputStrings.Add(param->GetName().c_str());
       }
 
@@ -324,7 +334,6 @@ void CallFunctionPanel::LoadData()
 //   }
 //   else
 //      outputGrid->SetCellValue(0, 0, "");
-
 }
 
 //------------------------------------------------------------------------------
@@ -406,14 +415,15 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       
       inputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
-      
+      wxString delimiter = ", ";
+
       if (inputStrings.Count() > 0)
       {
          cellValue = cellValue + inputStrings[0];
 
          for (unsigned int i=1; i<inputStrings.Count(); i++)
          {
-            cellValue = cellValue + "  " + inputStrings[i];
+            cellValue = cellValue + delimiter + inputStrings[i];
          }
 
          inputGrid->SetCellValue(row, col, cellValue);
@@ -433,14 +443,15 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       
       outputStrings = paramDlg.GetParamNameArray();
       wxString cellValue = "";
-      
+      wxString delimiter = ", ";
+
       if (outputStrings.Count() > 0)
       {
          cellValue = cellValue + outputStrings[0];
 
          for (unsigned int i=1; i<outputStrings.Count(); i++)
          {
-            cellValue = cellValue + "  " + outputStrings[i];
+            cellValue = cellValue + delimiter + outputStrings[i];
          }
 
          outputGrid->SetCellValue(row, col, cellValue);
