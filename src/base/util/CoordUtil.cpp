@@ -511,7 +511,7 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    
    ret = 0;
    
-   if (anomalyType == CoordUtil::TA)
+   if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
    {
       ma = elem[5]; 
       ecc = elem[1];
@@ -534,7 +534,7 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    c = DegToRad(elem[4]);
    q = DegToRad(elem[5]);
    
-   if (anomalyType == CoordUtil::TA)
+   if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
    {
       q = DegToRad(ta);
    }
