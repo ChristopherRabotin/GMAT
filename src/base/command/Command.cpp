@@ -34,15 +34,16 @@
  */
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const std::string &typeStr) :
-    GmatBase        (Gmat::COMMAND, typeStr),
-    generatingString(""),
-    initialized     (false),
-    next            (NULL),
-    level           (-1),   // Not set
-    objectMap       (NULL),
-    solarSys        (NULL),
-    publisher       (NULL)
+GmatBase        (Gmat::COMMAND, typeStr),
+generatingString(""),
+initialized     (false),
+next            (NULL),
+level           (-1),   // Not set
+objectMap       (NULL),
+solarSys        (NULL),
+publisher       (NULL)
 {
+   parameterCount = GmatCommandParamCount;
 }
 
 
@@ -63,9 +64,9 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
 //------------------------------------------------------------------------------
 GmatCommand::~GmatCommand()
 {
-    // Delete the subsequent GmatCommands
-    if (next)
-        delete next;   
+   // Delete the subsequent GmatCommands
+   if (next)
+      delete next;   
 }
 
 
@@ -83,17 +84,18 @@ GmatCommand::~GmatCommand()
  */
 //------------------------------------------------------------------------------
 GmatCommand::GmatCommand(const GmatCommand &c) :
-    GmatBase        (c),
-    generatingString(c.generatingString),
-    association     (c.association),
-    objects         (c.objects),
-    initialized     (false),
-    next            (NULL),
-    level           (-1),   // Not set
-    objectMap       (c.objectMap),
-    solarSys        (c.solarSys),
-    publisher       (c.publisher)
+GmatBase        (c),
+generatingString(c.generatingString),
+association     (c.association),
+objects         (c.objects),
+initialized     (false),
+next            (NULL),
+level           (-1),   // Not set
+objectMap       (c.objectMap),
+solarSys        (c.solarSys),
+publisher       (c.publisher)
 {
+   parameterCount = GmatCommandParamCount;
 }
 
 
@@ -115,23 +117,24 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
 //------------------------------------------------------------------------------
 GmatCommand& GmatCommand::operator=(const GmatCommand &c)
 {
-    if (&c == this)
-        return *this;
+   if (&c == this)
+      return *this;
 
-    initialized = false;
-    objects.clear();
-    association.clear();
-    ClearObjects();             // Drop any previously set object pointers
-
-    objects = c.objects;
-    association = c.association;
-
-    objectMap = c.objectMap;
-    solarSys = c.solarSys;
-    publisher = c.publisher;
-    generatingString = c.generatingString;
-
-    return *this;
+   GmatBase::operator=(c);
+   initialized = false;
+   objects.clear();
+   association.clear();
+   ClearObjects();             // Drop any previously set object pointers
+   
+   objects = c.objects;
+   association = c.association;
+   
+   objectMap = c.objectMap;
+   solarSys = c.solarSys;
+   publisher = c.publisher;
+   generatingString = c.generatingString;
+   
+   return *this;
 }
 
 
@@ -150,11 +153,11 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
 //------------------------------------------------------------------------------
 void GmatCommand::SetGeneratingString(const std::string &gs)
 {
-    generatingString = gs;
+   generatingString = gs;
 }
 
 //------------------------------------------------------------------------------
-//  const std::string GetGeneratingString(void)
+//  const std::string GetGeneratingString()
 //------------------------------------------------------------------------------
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
@@ -168,9 +171,9 @@ void GmatCommand::SetGeneratingString(const std::string &gs)
  * @return The script line that was interpreted to define this GmatCommand.
  */
 //------------------------------------------------------------------------------
-const std::string& GmatCommand::GetGeneratingString(void)
+const std::string& GmatCommand::GetGeneratingString()
 {
-    return generatingString;
+   return generatingString;
 }
 
 
@@ -207,21 +210,21 @@ bool GmatCommand::SetObject(const std::string &name, const Gmat::ObjectType type
                         const std::string &associate,
                         const Gmat::ObjectType associateType)
 {
-    // Check to see if it is already in the object list
-    StringArray::iterator item = std::find(objects.begin(), objects.end(), name);
-    if (item != objects.end()) 
-    {
-        if (type != association[*item])  // make sure the types match
-            return false;
-    }
-    else
-    {
-        // Add it to the lists
-        objects.push_back(name);
-        association[name] = type; 
-    }
-
-    return true;
+   // Check to see if it is already in the object list
+   StringArray::iterator item = std::find(objects.begin(), objects.end(), name);
+   if (item != objects.end()) 
+   {
+      if (type != association[*item])  // make sure the types match
+         return false;
+   }
+   else
+   {
+      // Add it to the lists
+      objects.push_back(name);
+      association[name] = type; 
+   }
+   
+   return true;
 }
 
 
@@ -246,7 +249,7 @@ bool GmatCommand::SetObject(const std::string &name, const Gmat::ObjectType type
 GmatBase* GmatCommand::GetObject(const Gmat::ObjectType type, 
                              const std::string objName)
 {
-    return NULL;
+   return NULL;
 }
 
 
@@ -269,7 +272,7 @@ GmatBase* GmatCommand::GetObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 {
-    return false;
+   return false;
 }
 
 
@@ -284,7 +287,7 @@ bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 void GmatCommand::SetSolarSystem(SolarSystem *ss)
 {
-    solarSys = ss;
+   solarSys = ss;
 }
 
 
@@ -299,7 +302,7 @@ void GmatCommand::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
-    objectMap = map;
+   objectMap = map;
 }
 
 
@@ -314,12 +317,12 @@ void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 //------------------------------------------------------------------------------
 void GmatCommand::SetPublisher(Publisher *p)
 {
-    publisher = p;
+   publisher = p;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Initializes the GmatCommand structures at the start of a run.
@@ -336,32 +339,33 @@ void GmatCommand::SetPublisher(Publisher *p)
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool GmatCommand::Initialize(void)
+bool GmatCommand::Initialize()
 {
-    // Check to be sure the basic infrastructure is in place
-    if (objectMap == NULL) {
-        std::string errorstr("Object map has not been initialized for ");
-        errorstr += GetTypeName();
-        throw CommandException(errorstr);
-    }
-  
-// Uncomment the following when we have a solar system to initialize
-//    if (solarSys == NULL) {
-//        std::string errorstr("Solar system has not been initialized for ");
-//        errorstr += GetTypeName();
-//        throw GmatCommandException(errorstr);
-//    }
-
-
-    initialized = AssignObjects();
-    if (publisher == NULL)
-        publisher = Publisher::Instance();
-    return initialized;
+   // Check to be sure the basic infrastructure is in place
+   if (objectMap == NULL)
+   {
+      std::string errorstr("Object map has not been initialized for ");
+      errorstr += GetTypeName();
+      throw CommandException(errorstr);
+   }
+   
+   // Uncomment the following when we have a solar system to initialize
+   //    if (solarSys == NULL) {
+   //        std::string errorstr("Solar system has not been initialized for ");
+   //        errorstr += GetTypeName();
+   //        throw GmatCommandException(errorstr);
+   //    }
+   
+   
+   initialized = AssignObjects();
+   if (publisher == NULL)
+      publisher = Publisher::Instance();
+   return initialized;
 }
 
 
 //------------------------------------------------------------------------------
-//  GmatCommand* GetNext(void)
+//  GmatCommand* GetNext()
 //------------------------------------------------------------------------------
 /**
  * Accesses the next GmatCommand to be executed in the GmatCommand sequence
@@ -369,9 +373,9 @@ bool GmatCommand::Initialize(void)
  * @return Pointer to the next GmatCommand
  */
 //------------------------------------------------------------------------------
-GmatCommand* GmatCommand::GetNext(void)
+GmatCommand* GmatCommand::GetNext()
 {
-    return next;
+   return next;
 }
 
 
@@ -386,14 +390,14 @@ GmatCommand* GmatCommand::GetNext(void)
 //------------------------------------------------------------------------------
 bool GmatCommand::Append(GmatCommand *cmd)
 {
-    if (cmd == this)
-        throw CommandException("Attempting to add GmatCommand already in list");
-    if (next)
-        next->Append(cmd);
-    else
-        next = cmd;
-        
-    return true;
+   if (cmd == this)
+      throw CommandException("Attempting to add GmatCommand already in list");
+   if (next)
+      next->Append(cmd);
+   else
+      next = cmd;
+      
+   return true;
 }
 
 
@@ -409,16 +413,17 @@ bool GmatCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
-    if (this == prev) {
-        GmatCommand *temp = next;
-        next = cmd;
-        return next->Append(temp);
-    }
-    
-    if (next == NULL)
-        return false;
-    
-    return next->Insert(cmd, prev);
+   if (this == prev)
+   {
+      GmatCommand *temp = next;
+      next = cmd;
+      return next->Append(temp);
+   }
+   
+   if (next == NULL)
+      return false;
+   
+   return next->Insert(cmd, prev);
 }
 
 
@@ -435,27 +440,29 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 {
-    if (this == cmd) {  // NULL the next pointer
-        next = NULL;
-        return this;
-    }
-    
-    if (next == NULL)
-        return NULL;
-        
-    if (next == cmd) {
-        GmatCommand *temp = next;
-        next = next->GetNext();
-        temp->Remove(cmd);
-        return temp;            
-    }
-    
-    return next->Remove(cmd);
+   if (this == cmd)
+   {  // NULL the next pointer
+      next = NULL;
+      return this;
+   }
+   
+   if (next == NULL)
+      return NULL;
+      
+   if (next == cmd)
+   {
+      GmatCommand *temp = next;
+      next = next->GetNext();
+      temp->Remove(cmd);
+      return temp;            
+   }
+   
+   return next->Remove(cmd);
 }
 
 
 //------------------------------------------------------------------------------
-//  bool AssignObjects(void)
+//  bool AssignObjects()
 //------------------------------------------------------------------------------
 /**
  * Sets the internal object pointers prior to a run.
@@ -469,14 +476,14 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
  * @return true if the pointers are assigned "correctly", false otherwise.
  */
 //------------------------------------------------------------------------------
-bool GmatCommand::AssignObjects(void)
+bool GmatCommand::AssignObjects()
 {
-    return true;
+   return true;
 }
 
 
 //------------------------------------------------------------------------------
-//  bool ClearObjects(void)
+//  bool ClearObjects()
 //------------------------------------------------------------------------------
 /**
  * Clears the internal object pointers.
@@ -489,9 +496,9 @@ bool GmatCommand::AssignObjects(void)
  * @return true if the pointers are assigned "correctly", false otherwise.
  */
 //------------------------------------------------------------------------------
-bool GmatCommand::ClearObjects(void)
+bool GmatCommand::ClearObjects()
 {
-    return true;
+   return true;
 }
 
 
