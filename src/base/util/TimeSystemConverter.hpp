@@ -74,7 +74,8 @@ namespace TimeConverterUtil
 
    Real Convert(const Real origValue,
                       const std::string &fromType,
-                      const std::string &toType);
+                      const std::string &toType,
+                      Real refJd = GmatTimeUtil::JD_NOV_17_1858);
 
    Real ConvertToTaiMjd(std::string fromType, Real origValue,
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);

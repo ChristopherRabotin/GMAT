@@ -37,12 +37,13 @@ using namespace GmatMathUtil;
  */
 Real TimeConverterUtil::Convert(const Real origValue,
                         const std::string &fromType,
-                        const std::string &toType)
+                        const std::string &toType,
+                        Real refJd)
 {
    Real newTime =
-      TimeConverterUtil::ConvertToTaiMjd(fromType, origValue);
+      TimeConverterUtil::ConvertToTaiMjd(fromType, origValue, refJd);
    Real returnTime =
-      TimeConverterUtil::ConvertFromTaiMjd(toType, origValue);
+      TimeConverterUtil::ConvertFromTaiMjd(toType, newTime, refJd);
    return returnTime;
 }
 
@@ -72,7 +73,8 @@ Real TimeConverterUtil::ConvertToTaiMjd(std::string fromType, Real origValue,
       Real ut1Offset = theEopFile->GetUt1UtcOffset(origValue);
       Real utcOffset = theEopFile->GetUt1UtcOffset(origValue - ut1Offset);
 
-      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue - utcOffset)));
+      return (TimeConverterUtil::ConvertToTaiMjd("UtcMjd", (origValue - utcOffset),
+               refJd));
 
    }
    // tdb
@@ -132,7 +134,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
                "EopFile is unknown");
 
       // convert origValue to utc
-      Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd("UtcMjd", origValue);
+      Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd("UtcMjd", origValue,
+            refJd);
       Real numOffset = 0;
 
       numOffset = theEopFile->GetUt1UtcOffset(utcMjd);
@@ -160,7 +163,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
    else if (toType == TIME_SYSTEM_TEXT[4])
    {
       // convert time to tdb
-      Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue);
+      Real tdbMjd = TimeConverterUtil::ConvertFromTaiMjd("TdbMjd", origValue,
+         refJd);
       return ((L_B * (origValue - TCB_JD_MJD_OFFSET) * NUM_SECS) + tdbMjd);
    }
    // tt
