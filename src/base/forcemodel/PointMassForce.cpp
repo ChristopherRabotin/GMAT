@@ -1,0 +1,517 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                             PointMassForce
+//------------------------------------------------------------------------------
+// *** File Name : PointMassForce.cpp
+// *** Created   : October 1, 2002
+// **************************************************************************
+// ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
+// ***  For:  Flight Dynamics Analysis Branch (Code 572)                  ***
+// ***  Under Contract:  P.O.  GSFC S-66617-G                             ***
+// ***                                                                    ***
+// ***  Copyright U.S. Government 2002                                    ***
+// ***  Copyright United States Government as represented by the          ***
+// ***  Administrator of the National Aeronautics and Space               ***
+// ***  Administration                                                    ***
+// ***                                                                    ***
+// ***  This software is subject to the Sofware Usage Agreement described ***
+// ***  by NASA Case Number GSC-14735-1.  The Softare Usage Agreement     ***
+// ***  must be included in any distribution.  Removal of this header is  ***
+// ***  strictly prohibited.                                              ***
+// ***                                                                    ***
+// ***                                                                    ***
+// ***  Header Version: July 12, 2002                                     ***
+// **************************************************************************
+// Module Type               : ANSI C++ Source
+// Development Environment   : Visual C++ 7.0
+// Modification History      : 11/26/2002 - D. Conway, Thinking Systems, Inc.
+//                             Original delivery
+//
+//                           : 1/8/2003 - D. Conway, Thinking Systems, Inc.
+//                             Updated interfaces based on GSFC feedback
+//
+//                           : 1/21/2003 - D. Conway, Thinking Systems, Inc.
+//                             Updated interfaces to support Nystrom code
+//
+//                           : 3/3/2003 - D. Conway, Thinking Systems, Inc.
+//                             Updated parameter strings to include units
+//
+//                           : 10/01/2003 - W. Waktola, Missions Applications Branch
+//				Changes:
+//				  - Updated style using GMAT cpp style guide
+//
+//                           : 10/20/2003 - W. Waktola, Missions Applications Branch
+//				Changes:
+//				  - All double types to Real types
+//				  - All primitive int types to Integer types
+//				  - EPOCH_PARAMETER to epochParameter
+//				  - MU_PARAMETER to muParameter
+//				  - RADIUS_PARAMETER to radiusParameter
+//				  - FLATTENING_PARAMETER to flatteningParameter
+//				  - POLERADIUS_PARAMETER to poleRadiusParameter
+//				  - ESTIMATEMETHOD_PARAMETER to estimateMethodParameter
+//				  - PARAMETER_COUNT to parameterCount
+//				Removals:
+//				  - GetParameterName()
+//				Additions:
+//				  - PARAMTER_TEXT[]
+//				  - PARAMETER_TYPE[]
+//				  - GetParameterText()
+//				  - GetParameterID()
+//				  - GetParameterType()
+//				  - GetParameterTypeString()
+//				  - GetRealParameter()
+//				  - SetRealParameter()
+// **************************************************************************
+
+#include "PointMassForce.hpp"
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
+{
+    "Base Epoch (A.1 Modified Julian)",
+    "Gravitational Constant (mu, km^3/s^2)",
+    "Equatorial Radius (km)",
+    "Flattening Factor",
+    "Polar Radius (km)",
+    "Error Estimation Method"
+};
+
+const Gmat::ParameterType
+PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
+{
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE,
+    Gmat::REAL_TYPE
+};
+
+//---------------------------------
+// public
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// PointMassForce::PointMassForce(Integer satcount)
+//------------------------------------------------------------------------------
+/**
+ * Constructor for point mass gravitational model
+ */
+//------------------------------------------------------------------------------
+PointMassForce::PointMassForce(Integer satcount) :
+    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce"),
+    mu                     (398600.4415),
+    epoch                  (21545.0),
+    estimationMethod       (1.0)
+{
+    parameterCount = estimateMethodParameter;
+    dimension = 6 * satcount;
+}
+
+//------------------------------------------------------------------------------
+// PointMassForce::~PointMassForce(void)
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the point mass gravitational model
+ */
+//------------------------------------------------------------------------------
+PointMassForce::~PointMassForce(void)
+{
+}
+
+//------------------------------------------------------------------------------
+// PointMassForce::PointMassForce(const PointMassForce& pmf)
+//------------------------------------------------------------------------------
+/**
+ * The copy constructor
+ * Note that the actual states are not copied over for this implementation.
+ *
+ * @param pmf	The original that is being copied
+ */
+//------------------------------------------------------------------------------
+PointMassForce::PointMassForce(const PointMassForce& pmf) :
+    PhysicalModel          (pmf),
+    mu                     (pmf.mu),
+    epoch                  (pmf.epoch),
+    estimationMethod       (pmf.estimationMethod)
+{
+    parameterCount = estimateMethodParameter;
+    dimension = pmf.dimension;
+    initialized = false;
+}
+
+//------------------------------------------------------------------------------
+// PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
+//------------------------------------------------------------------------------
+/**
+ * The assignment operator
+ * Note that the actual states are not copied over for this implementation.
+ *
+ * @param pmf	The original that is being copied
+ */
+//------------------------------------------------------------------------------
+PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
+{
+    if (&pmf == this)
+        return *this;
+
+    epoch = pmf.epoch;
+    mu = pmf.mu;
+    dimension = pmf.dimension;
+    initialized = false;
+    elapsedTime = pmf.elapsedTime;
+    estimationMethod = pmf.estimationMethod;
+
+    return *this;
+}
+
+//------------------------------------------------------------------------------
+// std::string PointMassForce::GetParameterText(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetParameterText(const Integer id)
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PointMassForce::PARAMETER_TEXT[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterText(id);
+}
+
+//------------------------------------------------------------------------------
+// Integer PointMassForce::GetParameterID(const std::string str)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Integer PointMassForce::GetParameterID(const std::string str)
+{
+    for (Integer i = PhysicalModelParamCount; i < PointMassParamCount; i++)
+    {
+        if (str == PointMassForce::PARAMETER_TEXT[i - PhysicalModelParamCount])
+            return i + PhysicalModelParamCount;
+    }
+    return PhysicalModel::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PointMassForce::PARAMETER_TYPE[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string PointMassForce::GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+std::string PointMassForce::GetParameterTypeString(const Integer id) const
+{
+    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+        return PointMassForce::PARAMETER_TEXT[id - PhysicalModelParamCount];
+    return PhysicalModel::GetParameterTypeString(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PointMassForce::GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to obtain a parameter value 
+ *
+ * @param id	Integer ID for the requested parameter
+ */
+//------------------------------------------------------------------------------
+Real PointMassForce::GetRealParameter(const Integer id) const
+{
+    if (id == epochParameter)
+        return epoch + elapsedTime / 86400.0;
+
+    if (id == muParameter)
+        return mu;
+    
+    if (id == radiusParameter)
+        return 0.0;     // Not used in this implementation
+
+    if (id == flatteningParameter)
+        return 0.0;     // Not used in this implementation
+
+    if (id == poleRadiusParameter)
+        return 0.0;     // Not used in this implementation
+
+    if (id == estimateMethodParameter)
+        return estimationMethod;
+
+    return PhysicalModel::GetRealParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// Real PointMassForce::SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to set a parameter value 
+ * 
+ * @param    id  Integer ID for the parameter
+ * @param    val The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+Real PointMassForce::SetRealParameter(const Integer id, const Real value)
+{
+    if (id == epochParameter) 
+    {
+        epoch = value;
+        elapsedTime = 0.0;
+        return true;
+    }
+
+    if (id == muParameter) 
+    {
+        mu = value;
+        return true;
+    }
+
+    if (id == radiusParameter)
+        return false;   // Not used in this implementation
+
+    if (id == flatteningParameter)
+        return false;   // Not used in this implementation
+
+    if (id == poleRadiusParameter)
+        return false;   // Not used in this implementation
+
+    if (id == estimateMethodParameter) 
+    {
+        if ((value == 1.0) || (value == 2.0)) 
+        {
+            estimationMethod = value;
+            return true;
+        }
+        return false;
+    }
+
+    return GmatBase::SetRealParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+// bool PointMassForce::Initialize(void)
+//------------------------------------------------------------------------------
+/**
+ * Method used to ititialize the state data
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::Initialize(void)
+{
+    PhysicalModel::Initialize();
+
+    Integer satCount = (Integer)(dimension / 6);
+    if (dimension != satCount * 6) 
+    {
+        initialized = false;
+        return false;
+    }
+
+    Integer i6;
+    for (Integer i = 0; i < satCount; i++) 
+    {
+        i6 = i*6;
+        modelState[i6]   = 7000.0 + 200.0 * i;
+        modelState[i6+1] = 300.0 * i;
+        modelState[i6+2] = 1000.0 - 100.0 * i;
+        modelState[i6+3] = 0.0;
+        modelState[i6+4] = 8.0 + 0.1 * i;    // 7.61 km/s makes first one circular
+        modelState[i6+5] = 0.0;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
+//------------------------------------------------------------------------------
+/**
+ * Method used to apply the point mass force model to the state
+ * 
+ * This method sets the first derivative for 1 or more spacecraft.  The model
+ * applies point mass gravity, with the gravitating point located at position
+ * \f$(0, 0, 0)\f$.  A later implementation may allow for locations other than 
+ * the origin.
+ * 
+ * The first derivatives map as follows:
+ * 
+ * \f[ {{d}\over{dt}} \pmatrix{\vec r \cr\vec v\cr} = 
+ *     \pmatrix{\vec v \cr -{{GM\vec r}\over{r^3}}\cr} \f] 
+ * 
+ * @param state  The current state vector
+ * @param dt     The time offset for the calculations
+ * @param order  Order of the derivative being calculated
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
+{
+    if (order > 2)
+        return false;
+
+    if ((state == NULL) || (deriv == NULL))
+        // throw("Arrays not yet initialized -- exiting");
+        return false;
+
+    // Calculate how many spacecraft are in the model
+    Integer satCount = (Integer)(dimension / 6);
+    if (dimension != satCount * 6) 
+        return false;
+
+    Real radius, r3, mu_r;
+    Integer i6;
+
+    for (Integer i = 0; i < satCount; i++) 
+    {
+        i6 = i * 6;
+        r3 = state[ i6 ]*state[ i6 ] + 
+             state[1+i6]*state[1+i6] + 
+             state[2+i6]*state[2+i6];
+        radius = sqrt(r3);
+        r3 *= radius;
+        mu_r = - mu / r3;
+
+        if (order == 1) 
+        {
+            // Do dv/dt first, in case deriv = state
+            deriv[3 + i6] = state[i6]     * mu_r;
+            deriv[4 + i6] = state[1 + i6] * mu_r;
+            deriv[5 + i6] = state[2 + i6] * mu_r;
+            // dr/dt = v
+            deriv[i6]     = state[3 + i6];
+            deriv[1 + i6] = state[4 + i6];
+            deriv[2 + i6] = state[5 + i6];
+        }
+        else 
+        {
+            // Feed accelerations to corresponding components directly for RKN
+            deriv[ i6 ] = state[ i6 ] * mu_r; 
+            deriv[i6+1] = state[i6+1] * mu_r; 
+            deriv[i6+2] = state[i6+2] * mu_r; 
+            deriv[i6+3] = 0.0; 
+            deriv[i6+4] = 0.0; 
+            deriv[i6+5] = 0.0; 
+        }
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
+//------------------------------------------------------------------------------
+/**
+ * Used to get the mapping in the state variable between components 
+ * 
+ * This method is used to obtain a mapping between the elements of the state
+ * vector.  It is used, for instance, to map the velocity components to the
+ * position components for a spacecraft state vector, for the 
+ * Runge-Kutta-Nystrom integrators.  The default implementation simply returns 
+ * false.
+ * 
+ * @param map    Array that will contain the mapping of the elements
+ * @param order  The order for the mapping (1 maps 1st derivatives to their base 
+ *               components, 2 maps 2nd derivatives, and so on)
+ * 
+ * @return Returns true if a mapping was made, false otherwise.  A false return 
+ *         value can be used to indicate that the requested map is not 
+ *         available, and verefore that the model may not be appropriate for the
+ *         requested operations.
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
+{
+    Integer i6;
+
+    if (order != 1)
+        return false;
+
+    // Calculate how many spacecraft are in the model
+    Integer satCount = (Integer)(dimension / 6);
+    for (Integer i = 0; i < satCount; i++) 
+    {
+        i6 = i * 6;
+
+        map[ i6 ] = i6 + 3;
+        map[i6+1] = i6 + 4;
+        map[i6+2] = i6 + 5;
+        map[i6+3] = -1;
+        map[i6+4] = -1;
+        map[i6+5] = -1;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
+//------------------------------------------------------------------------------
+/**
+ * Interface used to estimate the error in the current step
+ *
+ * The method calculates the largest local estimate of the error from the 
+ * integration given the components of the differences calculated bt the 
+ * integrator.  It returns the largest error estimate found.  
+ *  
+ * The default implementation returns the largest single relative error 
+ * component found based on the input arrays.  In other words, the 
+ * implementation provided here returns the largest component of the following
+ * vector:
+ *
+ * \f[\vec \epsilon = |{{{EE}_n}\over{x_n^f - x_n^i}}|\f]
+ *  
+ * There are several alternatives that users of this class can implement: the 
+ * error could be calculated based on the largest error in the individual 
+ * components of the state vector, as the magnitude of the state vector (that 
+ * is, the L2 (rss) norm of the error estimate vector).  The estimated error 
+ * should never be negative, so a return value less than 0.0 can be used to 
+ * indicate an error condition.
+ *    
+ * @param diffs  Array of differences calculated by the integrator.  This array 
+ *                must be the same size as the state vector
+ * @param answer Candidate new state from the integrator
+ *
+ */
+//------------------------------------------------------------------------------
+Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
+{
+    if (estimationMethod == 1.0)
+        return PhysicalModel::EstimateError(diffs, answer);
+
+    Real retval = 0.0, err, mag, vec[3];
+
+    for (Integer i = 0; i < dimension; i += 3) 
+    {
+        vec[0] = answer[ i ] - modelState[ i ];
+        vec[1] = answer[i+1] - modelState[i+1];
+        vec[2] = answer[i+2] - modelState[i+2];
+
+        mag = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];        
+        err = diffs[i]*diffs[i] + diffs[i+1]*diffs[i+1] + diffs[i+2]*diffs[i+2];
+        if (mag > 0.0)
+            err = sqrt(err / mag);
+        else
+            err = sqrt(err);
+        if (err > retval)
+            retval = err;
+    }
+
+    return retval;
+}
