@@ -125,9 +125,11 @@ protected:
    //---------------------------------------------------------------------------
    virtual void CalculateRotationMatrix() = 0;
    
-   /// rotation matrix
+   /// rotation matrix - 
+   /// default constructor creates a 3x3 zero-matrix
    Rmatrix33   rotMatrix;
-   /// derivative of rotation matrix
+   /// derivative of rotation matrix - 
+   /// default constructor creates a 3x3 zero-matrix
    Rmatrix33   rotDotMatrix;
    
 };
