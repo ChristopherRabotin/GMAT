@@ -21,6 +21,7 @@
 #include "MissionTreeItemData.hpp"
 
 #include "GmatAppData.hpp"
+#include "GmatMainFrame.hpp"
 #include "MessageInterface.hpp"
 
 //------------------------------
@@ -98,7 +99,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
     : DecoratedTree(parent, id, pos, size, style)
 {
     parent = parent;
-    mainNotebook = GmatAppData::GetMainNotebook();
+//    mainNotebook = GmatAppData::GetMainNotebook();
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
 //    SetNodes();
@@ -130,35 +131,6 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 //    SetNodes();
 //    ExpandAll();
 }
-
-// ag:  Removed because GmatAppData stores MainNotebook
-////------------------------------------------------------------------------------
-//// void SetMainNotebook (GmatMainNotebook *mainNotebook)
-////------------------------------------------------------------------------------
-///**
-// * Sets GmatMainNotebook object.
-// *
-// * @param <mainNotebook> input GmatMainNotebook.
-// */
-////------------------------------------------------------------------------------
-//void MissionTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
-//{
-//  mainNotebook = mainNotebook;
-//}
-//
-////------------------------------------------------------------------------------
-//// GmatMainNotebook *GetMainNotebook()
-////------------------------------------------------------------------------------
-///**
-// * Gets the GmatMainNotebook object.
-// *
-// * @return GmatMainNotebook object.
-// */
-////------------------------------------------------------------------------------
-//GmatMainNotebook *MissionTree::GetMainNotebook()
-//{
-//   return mainNotebook;
-//}
 
 //------------------------------------------------------------------------------
 // void UpdateMission()
@@ -390,7 +362,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
     wxTreeItemId itemId = event.GetItem();
     MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
 
-    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -1236,7 +1208,7 @@ void MissionTree::OnViewVariables()
 {
     MissionTreeItemData *item = new MissionTreeItemData(wxT("Variables"), 
                                                         GmatTree::VIEW_SOLVER_VARIABLES);
-    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -1246,7 +1218,7 @@ void MissionTree::OnViewGoals()
 {
     MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
                                                         GmatTree::VIEW_SOLVER_GOALS);
-    mainNotebook->CreatePage(item);
+    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
 //---------------------------------------------------------------------------
@@ -1319,7 +1291,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
                MissionTreeItemData *item = new MissionTreeItemData(
                                              wxT("Variables"), 
                                              GmatTree::VIEW_SOLVER_VARIABLES);
-               mainNotebook->CreatePage(item);
+               GmatAppData::GetMainFrame()->CreateChild(item);
              }
              else if ((position.x <= w-offset-boxWidth*boxNum) &&
                      (position.x >= w-offset-boxWidth*(++boxNum)))
@@ -1327,12 +1299,13 @@ bool MissionTree::CheckClickIn(wxPoint position)
 //               MessageInterface::ShowMessage("\nInside goals");
                MissionTreeItemData *item = new MissionTreeItemData(wxT("Goals"),
                                                 GmatTree::VIEW_SOLVER_GOALS);
-               mainNotebook->CreatePage(item);
+               GmatAppData::GetMainFrame()->CreateChild(item);
              }
              else
             {
 //               MessageInterface::ShowMessage("\nOpen regular panel");
-               mainNotebook->CreatePage(missionTreeItemData);
+//               mainNotebook->CreatePage(missionTreeItemData);
+               GmatAppData::GetMainFrame()->CreateChild(missionTreeItemData);
             }
             
             // get out of while loop

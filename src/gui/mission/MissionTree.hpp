@@ -19,9 +19,8 @@
 #include "wx/image.h"
 #include "wx/imaglist.h"
 
-#include "GmatMainNotebook.hpp"
+//#include "GmatMainNotebook.hpp"
 #include "DecoratedTree.hpp"
-
 #include "GuiInterpreter.hpp"
 
 class MissionTree : public DecoratedTree
@@ -40,7 +39,7 @@ protected:
 
 private:
     GuiInterpreter *theGuiInterpreter;
-    GmatMainNotebook *mainNotebook;
+//    GmatMainNotebook *mainNotebook;
     wxWindow *parent;
     
     wxTreeItemId mMissionSeqTopItem;
