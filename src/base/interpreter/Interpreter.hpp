@@ -55,7 +55,7 @@ class Moderator;
  * execution in GMAT.  It also provides the interfaces to write text files out, 
  * either to the file system, the screen, or the GUI.
  */
-class Interpreter
+class GMAT_API Interpreter
 {
 public:
    Interpreter();

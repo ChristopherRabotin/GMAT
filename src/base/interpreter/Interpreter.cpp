@@ -23,8 +23,12 @@
 
 
 //#define DEBUG_TOKEN_PARSING 1
+//#define DEBUG_TOKEN_PARSING_DETAILS 1
 //#define DEBUG_RHS_PARSING 1
 
+#ifdef DEBUG_TOKEN_PARSING
+   #include "MessageInterface.hpp"
+#endif
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -586,7 +590,7 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
    if (cmdCase == "For") 
       return AssembleForCommand(topLevel, cmd);
    
-   // Handle all other comamnds here
+   // Handle all other commands here
    for (StringArray::iterator i = topLevel.begin()+1; i != topLevel.end(); ++i) {
       // If we see a comment character, we're done
       if ((*i)[0] == '%')
@@ -595,15 +599,28 @@ bool Interpreter::AssembleCommand(const std::string& scriptline, GmatCommand *cm
       // Walk through the rest of the command, setting it up
       sublevel[cl] = Decompose(*i);
       #ifdef DEBUG_TOKEN_PARSING
-         std::cout << "Decomposing \"" << (*i) << "\"\n";
+         MessageInterface::ShowMessage("Decomposing \"%s\"; found %d elements\n", 
+                                       i->c_str(), sublevel[cl].size());
+         for (StringArray::iterator z = sublevel[cl].begin(); 
+              z != sublevel[cl].end(); ++z)
+            MessageInterface::ShowMessage("   \"%s\"\n", z->c_str());
       #endif
+
       if (sublevel[cl].size() == 1) {
          // Size 1 implies an object reference or parm string
-         object[ol] = moderator->GetConfiguredItem(*i);
+         #ifdef DEBUG_TOKEN_PARSING
+            MessageInterface::ShowMessage("Looking for \"%s\"\n", 
+                                          sublevel[cl][0].c_str());
+         #endif
+         object[ol] = moderator->GetConfiguredItem(sublevel[cl][0]);
          if (object[ol]) {
+            #ifdef DEBUG_TOKEN_PARSING
+               MessageInterface::ShowMessage("   Found a \"%s\"\n", 
+                                          (object[ol]->GetTypeName()).c_str());
+            #endif
             type = object[ol]->GetType();
             try {
-               if (!cmd->SetRefObjectName(type, *i))
+               if (!cmd->SetRefObjectName(type, object[ol]->GetName()))
                   throw InterpreterException("Cannot set object " + (*i) + 
                                              " for command " + (cmd->GetTypeName()));
             }
@@ -1285,7 +1302,7 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
    std::string token;
    Integer pos = 0, end;
 
-   #ifdef DEBUG_TOKEN_PARSING
+   #ifdef DEBUG_TOKEN_PARSING_DETAILS
       std::cout << "In SeparateSpaces: string = \"" << chunk << "\"\n   ";
    #endif
 
@@ -1294,7 +1311,7 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
    strcpy(str, chunk.c_str());
    for (unsigned i = 0; i < chunk.length(); ++i) {
       if ((str[i] == '{') || (str[i] == '(') || (str[i] == '[')) {
-         #ifdef DEBUG_TOKEN_PARSING
+         #ifdef DEBUG_TOKEN_PARSING_DETAILS
             std::cout << " found \"" << str[i] << "\" ";
          #endif
          token.assign(str, pos, i-pos);
@@ -1318,7 +1335,7 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
          pos = i+1;
       }
       else if ((str[i] == '<') || (str[i] == '>') || (str[i] == '~')) {
-         #ifdef DEBUG_TOKEN_PARSING
+         #ifdef DEBUG_TOKEN_PARSING_DETAILS
             std::cout << " found \"" << str[i] << "\" ";
          #endif
          if (str[i+1] == '=') {
@@ -1331,7 +1348,7 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
       }
       else if ((str[i] == ' ') || (str[i] == ',') ||
                (str[i] == '=') || (str[i] == ':') ) {
-         #ifdef DEBUG_TOKEN_PARSING
+         #ifdef DEBUG_TOKEN_PARSING_DETAILS
             std::cout << " found \"" << str[i] << "\" ";
          #endif
          token.assign(str, pos, i-pos);
@@ -1344,7 +1361,7 @@ StringArray& Interpreter::SeparateSpaces(const std::string &chunk)
 //         ++i;
          pos = i+1;
       }
-      #ifdef DEBUG_TOKEN_PARSING
+      #ifdef DEBUG_TOKEN_PARSING_DETAILS
          std::cout << "str[i] = \"" << str[i] << "\"; \"" << token 
                    << "\" found\n   ";
       #endif
@@ -1428,6 +1445,42 @@ StringArray& Interpreter::SeparateParens(const std::string &chunk)
 {
    static StringArray chunkArray;
    chunkArray.clear();
+
+   Integer loc, start = chunk.find("(", 0), stop = chunk.find(")", 0), strStop;
+   bool parseComplete = false;
+   
+   if (start == (Integer)std::string::npos) 
+         parseComplete = true;
+   else if (stop == (Integer)std::string::npos) 
+      throw InterpreterException("Missing closing paren \"}\"");
+
+   if (start > stop)
+      throw InterpreterException("Closing paren found before opening paren");
+      
+   loc = start;
+      
+   std::string token = "Starting", str = chunk;
+   
+   while (!parseComplete && (start < stop)) {
+      // skip over white spaces
+      start = loc + 1;
+      start = SkipWhiteSpace(start, str);
+      loc = chunk.find(",", start);
+      if (loc == (Integer)std::string::npos) {
+         loc = stop;
+         parseComplete = true;
+      }
+      
+      strStop = loc;
+      while (chunk[strStop-1] == ' ')
+         --strStop;
+      token.assign(str, start, strStop-start);
+      
+      // Prep for the next token
+      if (token != "")
+         chunkArray.push_back(token);
+   }
+      
    return chunkArray;
 }
 
