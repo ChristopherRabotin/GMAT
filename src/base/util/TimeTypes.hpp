@@ -79,6 +79,9 @@ namespace GmatTimeUtil
    const Real TIME_OF_J2000 = 883655990.850000; // 2000/01/01 43167.85
    const Real A1MJD_OF_J2000 = 21545.0;         // 2000/01/01 11:59:27.965622
    const Real MJDSEC_TO_WHOLE_NUM = 1.0e6;      // Convert mjd seconds to whole number
+   const Real JD_MJD_OFFSET = 2400000.5;        // Vallado page 187
+   const Real TT_TAI_OFFSET = 32.184;           // GMAT Math Spec section 2.3
+   const Real A1_TAI_OFFSET = 0.0343817;        // GMAT Math Spec section 2.1
 
    const Integer DAYS_BEFORE_MONTH[12] =
    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
