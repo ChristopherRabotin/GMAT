@@ -30,7 +30,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITDATA 1
-//#define DEBUG_ORBITDATA_CONVERT 1
+#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_RUN 1
 
 using namespace GmatMathUtil;
@@ -157,13 +157,17 @@ Rvector6 OrbitData::GetCartState()
             ("OrbitData::GetCartState() internal or output CoordinateSystem is NULL.\n");
       }
       
-      // convert to output CoordinateSystem (loj: 1/21/05)
+      // convert to output CoordinateSystem
       if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
       {
          #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\n"
-             "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
+            ("OrbitData::GetCartState() ===> mOutCoordSystem:%s Axis=%s\n",
+             mOutCoordSystem->GetName().c_str(),
+             mOutCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetName().c_str());
+         MessageInterface::ShowMessage
+            ("OrbitData::GetCartState() Before convert: mCartEpoch=%f\nstate = %s\n", 
+             mCartEpoch, mCartState.ToString().c_str());
          #endif
 
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
@@ -171,8 +175,8 @@ Rvector6 OrbitData::GetCartState()
          
          #if DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() After convert: mCartEpoch=%f\n"
-             "state = %s\n", mCartEpoch, outState.ToString().c_str());
+            ("OrbitData::GetCartState() --After convert: mCartEpoch=%f\n"
+             "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
          #endif
          
       }
@@ -341,8 +345,7 @@ Rvector6 OrbitData::GetSphRaDecState()
 
    if (elemType == "Cartesian")
    {
-      //loj: 1/26/05 Call GetCartState() since it provides the Coord Sys conversion
-      //Rvector6 cartState = mSpacecraft->GetCartesianState(); 
+      //Call GetCartState() since it provides the Coord System conversion
       Rvector6 cartState = GetCartState();
       
       #if DEBUG_ORBITDATA
@@ -656,7 +659,7 @@ Real OrbitData::GetAngularReal(const std::string &str)
       else
          return (h / grav) * h;      // B M W; eq. 1.6-1
    }
-   else if (str == "HMAG") //loj: 12/8/04 - added HMAG, HX, HY, HZ
+   else if (str == "HMAG")
    {
       return h; 
    }
