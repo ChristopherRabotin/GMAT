@@ -250,7 +250,7 @@ void ParameterMultiSelectDialog::OnButton(wxCommandEvent& event)
       if (found == wxNOT_FOUND)
       {
          // Create a paramete if it does not exist
-         CreateParameter(newParam);
+          CreateParameter(newParam);
 
 //        if (param->IsPlottable())
 //        {
