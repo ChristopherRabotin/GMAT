@@ -458,6 +458,7 @@ bool Target::Execute(void)
             targeterConverged = true;
             
             // Run once more to publish the data from the converged state
+            ResetLoopData();
             retval = ExecuteBranch();
             break;
             
