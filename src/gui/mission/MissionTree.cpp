@@ -54,7 +54,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_INSERT_TARGET, MissionTree::OnInsertTarget)
 
    EVT_MENU(POPUP_VIEW_VARIABLES, MissionTree::OnViewVariables)
-   EVT_MENU(POPUP_VIEW_VARIABLES, MissionTree::OnViewGoals)
+   EVT_MENU(POPUP_VIEW_GOALS, MissionTree::OnViewGoals)
 
 END_EVENT_TABLE()
 
@@ -339,6 +339,8 @@ void MissionTree::OnAddPropagate(wxCommandEvent &event)
     name.Printf("Propagate%d", ++mNumPropagate);
 
     //loj: create Propagate command here
+    //loj: Why it doesn't compile?
+    //Command *cmd = theGuiInterpreter->AddCommand("Propagate", name);
     
     this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
                      new GmatTreeItemData(name, GmatTree::PROPAGATE_COMMAND));
@@ -429,7 +431,7 @@ void MissionTree::OnInsertTarget(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 wxMenu* MissionTree::CreatePopupMenu()
 {
-    MessageInterface::ShowMessage("MissionTree::CreatePopupMenu() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::CreatePopupMenu() entered\n");
     unsigned int i;
     wxMenu *menu = new wxMenu;
 
@@ -438,7 +440,7 @@ wxMenu* MissionTree::CreatePopupMenu()
 
     for (i=0; i<items.size(); i++)
     {
-        MessageInterface::ShowMessage("command = " + items[i] + "\n");
+        //MessageInterface::ShowMessage("command = " + items[i] + "\n");
         
         if (items[i] == "Propagate")
         {
@@ -462,7 +464,7 @@ wxMenu* MissionTree::CreatePopupMenu()
 //------------------------------------------------------------------------------
 wxMenu* MissionTree::CreateInsertPopupMenu()
 {
-    MessageInterface::ShowMessage("MissionTree::CreatePopupMenu() entered\n");
+    //MessageInterface::ShowMessage("MissionTree::CreatePopupMenu() entered\n");
     unsigned int i;
     wxMenu *menu = new wxMenu;
 
@@ -470,7 +472,7 @@ wxMenu* MissionTree::CreateInsertPopupMenu()
 
     for (i=0; i<items.size(); i++)
     {
-        MessageInterface::ShowMessage("command = " + items[i] + "\n");
+        //MessageInterface::ShowMessage("command = " + items[i] + "\n");
 
         if (items[i] == "Propagate")
         {

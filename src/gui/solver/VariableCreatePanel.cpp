@@ -46,13 +46,14 @@ BEGIN_EVENT_TABLE(VariableCreatePanel, wxPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// VariableCreateDialog()
+// VariableCreatePanel()
 //------------------------------------------------------------------------------
 /**
  * A constructor.
  */
 //------------------------------------------------------------------------------
-VariableCreatePanel::VariableCreatePanel( wxWindow *parent )
+VariableCreatePanel::VariableCreatePanel( wxWindow *parent, const wxString &name )
+    : wxPanel(parent)
 {
     Initialize();
     Setup(this);

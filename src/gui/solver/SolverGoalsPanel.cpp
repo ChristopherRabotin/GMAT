@@ -47,6 +47,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 SolverGoalsPanel::SolverGoalsPanel(wxWindow *parent)
+    : wxPanel(parent)
 {
     Initialize();
     Setup(this);

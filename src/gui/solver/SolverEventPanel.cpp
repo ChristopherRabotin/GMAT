@@ -26,6 +26,7 @@
 
 // base includes
 #include "gmatdefs.hpp"
+#include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 
 //------------------------------------------------------------------------------
@@ -45,8 +46,12 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-SolverEventPanel::SolverEventPanel(wxWindow *parent)
+SolverEventPanel::SolverEventPanel(wxWindow *parent, const wxString &name)
+    : wxPanel(parent)
 {
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
+    Command *theCommand = theGuiInterpreter->GetCommand(name.c_str());
+    
     Initialize();
     Setup(this);
     GetData();

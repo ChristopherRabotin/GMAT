@@ -45,6 +45,7 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 SolverCreatePanel::SolverCreatePanel(wxWindow *parent)
+    : wxPanel(parent)
 {
     Initialize();
     Setup(this);

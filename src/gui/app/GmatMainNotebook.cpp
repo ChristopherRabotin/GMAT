@@ -132,8 +132,8 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
                  (dataType == GmatTree::CREATED_REPORT_FILE))
         {
             //loj: ReportFileSetupPanel is not ready yet.
-//              sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()),
-//                          0, wxGROW|wxALL, 0 );
+            // sizer->Add( new ReportFileSetupPanel(panel item->GetDesc()),
+            //             0, wxGROW|wxALL, 0 );
         }
         else if ((dataType == GmatTree::DEFAULT_XY_PLOT)   ||
                  (dataType == GmatTree::CREATED_XY_PLOT))
@@ -145,8 +145,8 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
                  (dataType == GmatTree::CREATED_OPENGL_PLOT))
         {
             //loj: OpenGlSetupPanel is not ready yet.
-//              sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()),
-//                          0, wxGROW|wxALL, 0 );
+            // sizer->Add( new OpenGlPlotSetupPanel(panel item->GetDesc()),
+            //             0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::MISSION_SEQ_COMMAND)
         {
@@ -171,27 +171,29 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         }
         else if (dataType == GmatTree::TARGET_COMMAND)
         {
-	  // doesn't show up but gets to this line
-            sizer->Add ( new SolverEventPanel (panel) );
+            sizer->Add ( new SolverEventPanel (panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::VIEW_SOLVER_GOALS)
         {
-	    MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
-	    
-	    // ag: keeps hanging when i add this in
-	    // sizer->Add ( new SolverGoalsPanel (panel) );
+            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Goals\n");
+            
+            // ag: keeps hanging when i add this in
+            sizer->Add ( new SolverGoalsPanel (panel),
+                        0, wxGROW|wxALL, 0 );
         }
         else if (dataType == GmatTree::VIEW_SOLVER_VARIABLES)
         {
            MessageInterface::ShowMessage("GmatMainNotebook::CreatePage() creating Variables\n");
-	   // ag: keeps hanging when i add this in
-	   // sizer->Add ( new SolverVariablesPanel (panel) );
+           sizer->Add ( new SolverVariablesPanel (panel),
+                        0, wxGROW|wxALL, 0 );
         }
-	else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
-		 (dataType == GmatTree::CREATED_VARIABLE))
-	{
-	    sizer->Add (new VariableCreatePanel (panel) );
-	}
+        else if ((dataType == GmatTree::DEFAULT_VARIABLE) ||
+                 (dataType == GmatTree::CREATED_VARIABLE))
+        {
+            sizer->Add (new VariableCreatePanel (panel, item->GetDesc()),
+                        0, wxGROW|wxALL, 0 );
+        }
 
         panel->SetScrollRate( 5, 5 );
         panel->SetAutoLayout( TRUE );

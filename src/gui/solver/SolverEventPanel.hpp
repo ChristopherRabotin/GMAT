@@ -23,16 +23,13 @@
 #include <wx/button.h>
 
 #include "gmatwxdefs.hpp"
-
-// base include
-#include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 
 class SolverEventPanel : public wxPanel
 {
 public:
     // constructors
-    SolverEventPanel(wxWindow *parent);
+    SolverEventPanel(wxWindow *parent, const wxString &name);
        
 private:   
     wxStaticText *item2;

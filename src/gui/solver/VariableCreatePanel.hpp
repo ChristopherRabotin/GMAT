@@ -46,7 +46,7 @@ class VariableCreatePanel: public wxPanel
 {
 public:
     // constructors
-    VariableCreatePanel(wxWindow *parent); 
+    VariableCreatePanel(wxWindow *parent, const wxString &name); 
     
 private:   
     wxStaticText *nameStaticText;
