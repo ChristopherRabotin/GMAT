@@ -11,7 +11,9 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = BallisticsMassPanel.cpp FormationSetupPanel.cpp OrbitPanel.cpp SpacecraftPanel.cpp SpacecraftSelectDialog.cpp SpaceObjectSelectDialog.cpp
+SRC = BallisticsMassPanel.cpp FormationSetupPanel.cpp OrbitPanel.cpp \
+	SpacecraftPanel.cpp SpaceObjectSelectDialog.cpp TankPanel.cpp \
+	ThrusterCoefficientDialog.cpp ThrusterPanel.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/gui/inc.mac
