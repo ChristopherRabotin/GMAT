@@ -417,7 +417,7 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
 
 
 //---------------------------------------------------------------------------
-//  Real GetRealParameter(const std::string label) const
+//  Real GetRealParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the value for a Real parameter.
@@ -426,7 +426,7 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
  *
  * @return The parameter's value.
  */
-Real GmatBase::GetRealParameter(const std::string label) const
+Real GmatBase::GetRealParameter(const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetRealParameter(id);
@@ -434,7 +434,7 @@ Real GmatBase::GetRealParameter(const std::string label) const
 
 
 //---------------------------------------------------------------------------
-//  Real SetRealParameter(const std::string label, const Real value)
+//  Real SetRealParameter(const std::string &label, const Real value)
 //---------------------------------------------------------------------------
 /**
  * Set the value for a Real parameter.
@@ -446,7 +446,7 @@ Real GmatBase::GetRealParameter(const std::string label) const
  *         REAL_PARAMETER_UNDEFINED if the parameter id is invalid or the 
  *         parameter type is not Real.
  */
-Real GmatBase::SetRealParameter(const std::string label, const Real value)
+Real GmatBase::SetRealParameter(const std::string &label, const Real value)
 {
     Integer id = GetParameterID(label);
     return SetRealParameter(id, value);
@@ -454,7 +454,7 @@ Real GmatBase::SetRealParameter(const std::string label, const Real value)
 
 
 //---------------------------------------------------------------------------
-//  Real GetIntegerParameter(const std::string label) const
+//  Real GetIntegerParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the value for an Integer parameter.
@@ -463,7 +463,7 @@ Real GmatBase::SetRealParameter(const std::string label, const Real value)
  *
  * @return The parameter's value.
  */
-Integer GmatBase::GetIntegerParameter(const std::string label) const
+Integer GmatBase::GetIntegerParameter(const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetIntegerParameter(id);
@@ -471,7 +471,7 @@ Integer GmatBase::GetIntegerParameter(const std::string label) const
 
 
 //---------------------------------------------------------------------------
-//  Integer SetIntegerParameter(const std::string label, const Integer value)
+//  Integer SetIntegerParameter(const std::string &label, const Integer value)
 //---------------------------------------------------------------------------
 /**
  * Set the value for an Integer parameter.
@@ -483,7 +483,7 @@ Integer GmatBase::GetIntegerParameter(const std::string label) const
  *         INTEGER_PARAMETER_UNDEFINED if the parameter id is invalid or the 
  *         parameter type is not an Integer.
  */
-Integer GmatBase::SetIntegerParameter(const std::string label, 
+Integer GmatBase::SetIntegerParameter(const std::string &label, 
                                       const Integer value)
 {
     Integer id = GetParameterID(label);
@@ -491,7 +491,7 @@ Integer GmatBase::SetIntegerParameter(const std::string label,
 }
 
 //---------------------------------------------------------------------------
-//  std::string GetStringParameter(const std::string label) const
+//  std::string GetStringParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve a string parameter.
@@ -501,14 +501,14 @@ Integer GmatBase::SetIntegerParameter(const std::string label,
  * @return The string stored for this parameter, or the empty string if there
  *         is no string association.
  */
-std::string GmatBase::GetStringParameter(const std::string label) const
+std::string GmatBase::GetStringParameter(const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetStringParameter(id);
 }
 
 //---------------------------------------------------------------------------
-//  bool SetStringParameter(const std::string label, const std::string &value)
+//  bool SetStringParameter(const std::string &label, const std::string &value)
 //---------------------------------------------------------------------------
 /**
  * Change the value of a string parameter.
@@ -518,7 +518,7 @@ std::string GmatBase::GetStringParameter(const std::string label) const
  *
  * @return true if the string is stored, false if not.
  */
-bool GmatBase::SetStringParameter(const std::string label, 
+bool GmatBase::SetStringParameter(const std::string &label, 
                                   const std::string &value)
 {
     Integer id = GetParameterID(label);
@@ -527,7 +527,7 @@ bool GmatBase::SetStringParameter(const std::string label,
 
 
 //---------------------------------------------------------------------------
-//  bool GetBooleanParameter(const std::string label) const
+//  bool GetBooleanParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve a boolean parameter.
@@ -540,7 +540,7 @@ bool GmatBase::SetStringParameter(const std::string label,
  * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
  *       parameter accesses.
  */
-bool GmatBase::GetBooleanParameter(const std::string label) const
+bool GmatBase::GetBooleanParameter(const std::string &label) const
 {
     Integer id = GetParameterID(label);
     return GetBooleanParameter(id);
@@ -548,7 +548,7 @@ bool GmatBase::GetBooleanParameter(const std::string label) const
 
 
 //---------------------------------------------------------------------------
-//  bool SetBooleanParameter(const std::string label, const bool value)
+//  bool SetBooleanParameter(const std::string &label, const bool value)
 //---------------------------------------------------------------------------
 /**
  * Sets the value for a boolean parameter.
@@ -558,7 +558,7 @@ bool GmatBase::GetBooleanParameter(const std::string label) const
  * @return the boolean value for this parameter, or false if the parameter is
  *         not boolean.
  */
-bool GmatBase::SetBooleanParameter(const std::string label, const bool value)
+bool GmatBase::SetBooleanParameter(const std::string &label, const bool value)
 {
     Integer id = GetParameterID(label);
     return SetBooleanParameter(id, value);
