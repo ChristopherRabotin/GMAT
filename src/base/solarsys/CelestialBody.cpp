@@ -35,6 +35,7 @@
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "PhysicalConstants.hpp"
+#include "TimeSystemConverter.hpp"
 #include "UtcDate.hpp"
 #include "TimeTypes.hpp"
 #include "AngleUtil.hpp"
@@ -2044,6 +2045,14 @@ bool CelestialBody::IsBlank(char* aLine)
       if (!isspace(aLine[i])) return false;
    }
    return true;
+}
+
+Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
+{
+   Real mjdTCB = TimeConverterUtil::Convert(forTime.Get(),
+                 "A1Mjd", "TcbMjd", GmatTimeUtil::JD_JAN_5_1941);      
+   Real jdTCB  = mjdTCB + GmatTimeUtil::JD_JAN_5_1941; 
+   return (jdTCB - JD_EPOCH_2000_TCB);
 }
 
 //------------------------------------------------------------------------------

@@ -264,6 +264,7 @@ protected:
    static const std::string PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount];
+   static const Real JD_EPOCH_2000_TCB = 2451545.0;
    
    // body type of the body
    Gmat::BodyType         bodyType;
@@ -348,6 +349,7 @@ protected:
    bool          ReadDatFile();
    
    bool          IsBlank(char* aLine);
+   virtual Real  GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const;
    
 private:
 
