@@ -94,7 +94,7 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new EndIf;
     else if (ofType == "GMAT")
         return new Assignment;
-    else if (ofType == "save")
+    else if (ofType == "Save")
         return new Save;
     else if (ofType == "CallFunction")
         return new CallFunction;
@@ -146,7 +146,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("While");
       creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
-      creatables.push_back("save");
+      creatables.push_back("Save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
       creatables.push_back("BeginFiniteBurn");
@@ -202,7 +202,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("While");
       creatables.push_back("EndWhile");
       creatables.push_back("GMAT");
-      creatables.push_back("save");
+      creatables.push_back("Save");
       creatables.push_back("CallFunction");
       creatables.push_back("Assignment");
       creatables.push_back("BeginFiniteBurn");

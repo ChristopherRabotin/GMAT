@@ -25,7 +25,7 @@
 /**
  * Command used to write objects to ASCII files.
  */
-class Save : public GmatCommand
+class GMAT_API Save : public GmatCommand
 {
 public:
    Save();
@@ -50,24 +50,19 @@ protected:
    /// Name of the save file -- for now, it is objectName.objectType
    std::string            filename;
    /// Toggle to allow multiple writes
-   bool                   append;
-   /// Toggle to tell is file was written this run
-   bool                   written;
-//   /// Name of the object that is written
-//   std::string            objName;
+   bool                   appendData;
+   /// Toggle to tell if file was written this run
+   bool                   wasWritten;
    /// Name of the objects that are written
    StringArray            objName;
-//   /// Pointer to the object
-//   GmatBase               *obj;
-   /// Pointer to the object
-   std::vector<GmatBase*> obj;
+   /// Pointer to the objects
+   ObjectArray            obj;
    /// Toggle to show or hide emply fields
-   bool                   verbose;
+   bool                   writeVerbose;
    /// File stream used for the output
    std::ofstream          file;
 
    void                   WriteObject(GmatBase *o);
-//   void                   WriteParameterValue(std::ofstream &file, Integer id);
    void                   WriteParameterValue(GmatBase *o, std::ofstream &file, 
                                               Integer id);
 };
