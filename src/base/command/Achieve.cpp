@@ -471,12 +471,16 @@ bool Achieve::ConstructGoal(const char* str)
          dot = end;
       ++end;
    }
-   
+
    std::string sstr = str, owner, parm;
    
+   goalString = sstr.substr(start, end-start);
+
    #ifdef DEBUG_ACHIEVE
       MessageInterface::ShowMessage("%s%s\"\n",
                            "Achieve::ConstructGoal called with string \"", str);
+      MessageInterface::ShowMessage("%s%s\"\n",
+                 "Achieve::ConstructGoal goalString is \"", goalString.c_str());
       MessageInterface::ShowMessage("%s%s\"\n",
                            "   Examining the substring \"", 
                            sstr.substr(start, end-start).c_str());
