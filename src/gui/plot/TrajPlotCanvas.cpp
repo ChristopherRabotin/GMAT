@@ -16,6 +16,7 @@
 #include "gmatdefs.hpp"
 #include "TrajPlotCanvas.hpp"
 #include "TextTrajectoryFile.hpp"
+#include "FileManager.hpp"        // for Earth texture file
 #include <math.h>
 
 #include "wx/glcanvas.h"
@@ -506,10 +507,15 @@ bool TrajPlotCanvas::InitGL()
  */
 //------------------------------------------------------------------------------
 bool TrajPlotCanvas::LoadGLTextures()
-{     
+{
+    //loj: 4/7/04 added to use FileManager to retrieve texture file name
+    FileManager *fm = FileManager::Instance();
+    std::string earthTextureFile = fm->GetStringParameter("FULL_EARTH_TEXTURE_FILE");
+    
 #ifdef __WXMSW__
     // always load Earth texture
-    ILboolean status = ilLoadImage("earth-0512.jpg");
+    //ILboolean status = ilLoadImage("earth-0512.jpg");
+    ILboolean status = ilLoadImage((char*)earthTextureFile.c_str());
    
     if (status != 1)
         return false;
