@@ -126,7 +126,7 @@ private:
    void OnTextChange(wxCommandEvent &event);
    void OnComboBoxChange(wxCommandEvent &event);
    void OnButtonClick(wxCommandEvent &event);
-//   void OnCellLeftClick(wxGridEvent &event);
+   void OnCellLeftClick(wxGridEvent &event);
    void OnCellRightClick(wxGridEvent &event);
    void OnCellValueChange(wxGridEvent &event);
 
