@@ -32,13 +32,21 @@
 //#define DEBUG_STOPPING_CONDITIONS 1
 //#define DEBUG_RENAME 1
 
-std::string Propagate::PropModeList[PROP_MODE_COUNT] =
+//---------------------------------
+// static data
+//---------------------------------
+std::string Propagate::PropModeList[PropModeCount] =
 {
    "", "Synchronized"
 };
 
+
+//---------------------------------
+// public members
+//---------------------------------
+
 //------------------------------------------------------------------------------
-//  Propagate(void)
+//  Propagate()
 //------------------------------------------------------------------------------
 /**
  * Constructs the Propagate Command (default constructor).
@@ -55,18 +63,15 @@ Propagate::Propagate() :
    interruptCheckFrequencyID   (parameterCount+2),
    satNameID                   (parameterCount+3),
    propNameID                  (parameterCount+4),
-   secondsToProp               (8640.0),
-   secondsToPropID             (parameterCount+5),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT)
 {
-   // Increase the number of parms by the 2 new ones
-   parameterCount += 6;
+   parameterCount += 5;
 }
 
 
 //------------------------------------------------------------------------------
-//  ~Propagate(void)
+//  ~Propagate()
 //------------------------------------------------------------------------------
 /**
  * Destroys the Propagate Command.
@@ -74,18 +79,18 @@ Propagate::Propagate() :
 //------------------------------------------------------------------------------
 Propagate::~Propagate()
 {
-   /// todo: clean memory for satName.push_back(new StringArray);
+   /// @todo: clean memory for satName.push_back(new StringArray);
  
-   for (unsigned int i=0; i<stopWhen.size(); i++)
+   for (UnsignedInt i=0; i<stopWhen.size(); i++)
       delete stopWhen[i];
 }
 
 
 //------------------------------------------------------------------------------
-//  Propagate(void)
+//  Propagate(const Propagate &p)
 //------------------------------------------------------------------------------
 /**
- * Constructs the Propagate Command based on another instance (copy constructor).
+ * Constructs a Propagate Command based on another instance (copy constructor).
  *
  * @param <p> Original we are copying
  */
@@ -101,12 +106,9 @@ Propagate::Propagate(const Propagate &p) :
    interruptCheckFrequencyID   (p.interruptCheckFrequencyID),
    satNameID                   (p.satNameID),
    propNameID                  (p.propNameID),
-   secondsToProp               (p.secondsToProp),
-   secondsToPropID             (p.secondsToPropID),
    singleStepMode              (p.singleStepMode),
    currentMode                 (p.currentMode)
 {
-   // Increase the number of parms by the 2 new ones
    parameterCount = p.parameterCount;
    initialized = false;
 }
@@ -118,6 +120,8 @@ Propagate::Propagate(const Propagate &p) :
 /**
  * Assignment operator for the Propagate Command.
  *
+ * @param <p> Original we are copying
+ *
  * @return reference to this copy
  */
 //------------------------------------------------------------------------------
@@ -128,6 +132,12 @@ Propagate& Propagate::operator=(const Propagate &p)
 
    // Call the base assignment operator
    GmatCommand::operator=(p);
+
+   currentPropMode         = p.currentPropMode;
+   interruptCheckFrequency = p.interruptCheckFrequency;
+   inProgress              = false;
+   singleStepMode          = p.singleStepMode;
+   currentMode             = p.currentMode;
    initialized = false;
     
    return *this;
@@ -135,7 +145,19 @@ Propagate& Propagate::operator=(const Propagate &p)
 
 
 //------------------------------------------------------------------------------
-// bool SetObject(const std::string &name, const Gmat::ObjectType type, ...
+// bool SetObject(const std::string &name, const Gmat::ObjectType type,
+//         const std::string &associate, const Gmat::ObjectType associateType)
+//------------------------------------------------------------------------------
+/**
+ * Sets objects referenced by the Propagate command
+ *
+ * @param <name> Name of the reference object.
+ * @param <type> Type of the reference object.
+ * @param <associate> Object associated with this reference object.
+ * @param <associateType> Type of the associated object.
+ *
+ * @return true if the reference was set, false if not.
+ */
 //------------------------------------------------------------------------------
 bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
                           const std::string &associate,
@@ -170,6 +192,15 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 // bool SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
+/**
+ * Sets objects referenced by the Propagate command
+ *
+ * @param <name> Name of the reference object.
+ * @param <type> Type of the reference object.
+ *
+ * @return true if the reference was set, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 {
    switch (type)
@@ -188,6 +219,12 @@ bool Propagate::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 
 //------------------------------------------------------------------------------
 // void ClearObject(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Clears the lists of objects referenced by the Propagate command.
+ *
+ * @param <type> Type of the objects to clear.
+ */
 //------------------------------------------------------------------------------
 void Propagate::ClearObject(const Gmat::ObjectType type)
 {
@@ -208,9 +245,18 @@ void Propagate::ClearObject(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const Gmat::ObjectType type, ...
+// GmatBase* GetObject(const Gmat::ObjectType type, const std::string objName)
 //------------------------------------------------------------------------------
-GmatBase* Propagate::GetObject(const Gmat::ObjectType type, 
+/**
+ * Accesses objects referenced by the Propagate command.
+ *
+ * @param <type> Type of the reference object.
+ * @param <objName> Name of the reference object.
+ *
+ * @return true if the reference was set, false if not.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
                                const std::string objName)
 {
    if (type == Gmat::STOP_CONDITION)
@@ -228,13 +274,20 @@ GmatBase* Propagate::GetObject(const Gmat::ObjectType type,
 /**
  * Method used to retrieve the string that was parsed to build this GmatCommand.
  *
- * This method is used to retrieve the GmatCommand string from the script that was
- * parsed to build the GmatCommand.  It is used to save the script line, so that
- * the script can be written to a file without inverting the steps taken to set
- * up the internal object data.  As a side benefit, the script line is
+ * This method is used to retrieve the GmatCommand string from the script that
+ * was parsed to build the GmatCommand.  It is used to save the script line, so
+ * that the script can be written to a file without inverting the steps taken to
+ * set up the internal object data.  As a side benefit, the script line is
  * available in the GmatCommand structure for debugging purposes.
  *
- * @return The script line that was interpreted to define this GmatCommand.
+ * @param <mode>    Specifies the type of serialization requested (Not yet used
+ *                  in commands).
+ * @param <prefix>  Optional prefix appended to the object's name (Not yet used
+ *                  in commands).
+ * @param <useName> Name that replaces the object's name (Not yet used
+ *                  in commands).
+ *
+ * @return The script line that defines this GmatCommand.
  */
 //------------------------------------------------------------------------------
 const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
@@ -296,21 +349,31 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the Propagate.
  *
  * @return clone of the Propagate.
- *
  */
 //------------------------------------------------------------------------------
-GmatBase* Propagate::Clone(void) const
+GmatBase* Propagate::Clone() const
 {
    return (new Propagate(*this));
 }
 
 
+//------------------------------------------------------------------------------
+//  std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to find the names of referenced objects.
+ *
+ * @param <type> reference object type.
+ *
+ * @return The name of the reference object.
+ */
+//------------------------------------------------------------------------------
 std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
 {
    /// @todo Figure out how to send back the arrays of names
@@ -333,6 +396,18 @@ std::string Propagate::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 
+//------------------------------------------------------------------------------
+//  bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Accessor used to set the names of referenced objects.
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
 bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
                                  const std::string &name)
 {
@@ -365,6 +440,16 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
 // GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name,
 //                        const Integer index
 //------------------------------------------------------------------------------
+/**
+ * Accessor for reference object pointers.
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ * @param <index> Index into the object array.
+ *
+ * @return reference object pointer.
+ */
+//------------------------------------------------------------------------------
 GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name, const Integer index)
 {
@@ -393,82 +478,72 @@ GmatBase* Propagate::GetRefObject(const Gmat::ObjectType type,
 /**
  * Sets reference object pointer.
  *
+ * @param <obj> Pointer to the reference object.
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ * @param <index> Index into the object array.
+ *
  * @return true if object successfully set, false otherwise
  */
 //------------------------------------------------------------------------------
 bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name, const Integer index)
 {
-#if DEBUG_PROPAGATE_OBJ
-   MessageInterface::ShowMessage
-      ("Propagate::SetRefObject() type=%s name=%s, index=%d\n",
-       obj->GetTypeName().c_str(), name.c_str(), index);
-#endif
+   #if DEBUG_PROPAGATE_OBJ
+      MessageInterface::ShowMessage
+         ("Propagate::SetRefObject() type=%s name=%s, index=%d\n",
+          obj->GetTypeName().c_str(), name.c_str(), index);
+   #endif
    
    switch (type)
    {
-   case Gmat::STOP_CONDITION:
-      {
-         //-----------------------------------------------------------
-         // loj: 11/30/04
-         // Notes: Need to parse the expression if stop variable is
-         // a user variable which doesn't use Object.Property name
-         // convention.
-         //-----------------------------------------------------------
-         std::string satName = obj->GetName();
-         Integer strt = satName.find("StopOn") + 6;
-         if (strt == (Integer)std::string::npos)
-            strt = 0;
-         Integer ndx = satName.find(".",0);
-         if (ndx != (Integer)std::string::npos)
-            satName = satName.substr(strt, ndx-strt);
+      case Gmat::STOP_CONDITION:
+         {
+            std::string satName = obj->GetName();
+            Integer strt = satName.find("StopOn") + 6;
+            if (strt == (Integer)std::string::npos)
+               strt = 0;
+            Integer ndx = satName.find(".",0);
+            if (ndx != (Integer)std::string::npos)
+               satName = satName.substr(strt, ndx-strt);
 
-         Integer size = stopWhen.size();
+            Integer size = stopWhen.size();
+
+            if (stopWhen.empty() && index == 0)
+            {
+               stopWhen.push_back((StopCondition *)obj);
+               stopSatNames.push_back(satName);
+            }
+            else if (index == size)
+            {
+               stopWhen.push_back((StopCondition *)obj);
+               stopSatNames.push_back(satName);
+            }
+            else if (index < size)
+            {
+               stopWhen[index] = (StopCondition *)obj;
+               stopSatNames[index] = satName;
+            }
+            else
+            {
+               MessageInterface::ShowMessage
+                  ("Propagate::SetRefObject() index=%d is not next available "
+                   "index=%d. Setting %s:%s failed\n", index, size,
+                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+               return false;
+            }
+
+            #if DEBUG_PROPAGATE_OBJ
+               for (UnsignedInt  j=0; j<stopSatNames.size(); j++)
+                  MessageInterface::ShowMessage(
+                     "Propagate::SetRefObject() stopSatNames=%s\n",
+                     stopSatNames[j].c_str());
+            #endif
+            return true;
+         }
          
-         if (stopWhen.empty() && index == 0)
-         {
-            stopWhen.push_back((StopCondition *)obj);
-            stopSatNames.push_back(satName);
-         }
-         else if (index == size)
-         {
-            stopWhen.push_back((StopCondition *)obj);
-            stopSatNames.push_back(satName);
-         }
-         else if (index < size)
-         {
-            stopWhen[index] = (StopCondition *)obj;
-            stopSatNames[index] = satName;
-         }
-         else
-         {
-            MessageInterface::ShowMessage
-               ("Propagate::SetRefObject() index=%d is not next available "
-                "index=%d. Setting %s:%s failed\n", index, size,
-                obj->GetTypeName().c_str(), obj->GetName().c_str());
-            return false;
-         }
-
-         //loj: 11/30/04 moved to top
-         //std::string satName = obj->GetName();
-         //Integer strt = satName.find("StopOn") + 6;
-         //if (strt == (Integer)std::string::npos)
-         //   strt = 0;
-         //Integer ndx = satName.find(".",0);
-         //if (ndx != (Integer)std::string::npos)
-         //   satName = satName.substr(strt, ndx-strt);
-
-         //stopSatNames.push_back(satName);
-
-#if DEBUG_PROPAGATE_OBJ
-         for (unsigned int j=0; j<stopSatNames.size(); j++)
-            MessageInterface::ShowMessage("Propagate::SetRefObject() stopSatNames=%s\n",
-                                          stopSatNames[j].c_str());
-#endif
-         return true;
-      }
-   default:
-      break;
+      default:
+         break;
    }
 
    // Not handled here -- invoke the next higher SetRefObject call
@@ -478,20 +553,27 @@ bool Propagate::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 // virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
+/**
+ * Obtains an array of GmatBase pointers by type.
+ *
+ * @param type The type of objects requested.
+ *
+ * @return Reference to the array.
+ */
+//------------------------------------------------------------------------------
 ObjectArray& Propagate::GetRefObjectArray(const Gmat::ObjectType type)
 {
    objectArray.clear();
    
    switch (type)
    {
-   case Gmat::STOP_CONDITION:
+      case Gmat::STOP_CONDITION:
+         for (UnsignedInt i=0; i<stopWhen.size(); i++)
+            objectArray.push_back(stopWhen[i]);
+         return objectArray;
       
-      for (unsigned int i=0; i<stopWhen.size(); i++)
-         objectArray.push_back(stopWhen[i]);
-      
-      return objectArray;
-   default:
-      break;
+      default:
+         break;
    }
 
    // Not handled here -- invoke the next higher SetReferenceObject call
@@ -500,8 +582,17 @@ ObjectArray& Propagate::GetRefObjectArray(const Gmat::ObjectType type)
 
 
 // Parameter accessor methods
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the description for the parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return String description for the requested parameter.
+ */
 //------------------------------------------------------------------------------
 std::string Propagate::GetParameterText(const Integer id) const
 {
@@ -519,9 +610,8 @@ std::string Propagate::GetParameterText(const Integer id) const
     
    if (id == stopWhenID)
       return "StoppingConditions";
-        
-   if (id == secondsToPropID)
-      return "ElapsedSeconds";
+
+   /// @todo See if we need ‘if (id == stopWhenID) return “StoppingConditions”;‘
 
    return GmatCommand::GetParameterText(id);
 }
@@ -529,6 +619,14 @@ std::string Propagate::GetParameterText(const Integer id) const
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the ID for the parameter given its description.
+ *
+ * @param <str> Description for the parameter.
+ *
+ * @return the parameter ID.
+ */
 //------------------------------------------------------------------------------
 Integer Propagate::GetParameterID(const std::string &str) const
 {
@@ -547,15 +645,22 @@ Integer Propagate::GetParameterID(const std::string &str) const
    if (str == "Propagator")
       return propNameID;
     
-   if (str == "ElapsedSeconds")
-      return secondsToPropID;
-    
+   /// @todo See if we need ‘if (str==“StoppingConditions”) return stopWhenID;’
+
    return GmatCommand::GetParameterID(str);
 }
 
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the enumerated type of the object.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The enumeration for the type of the parameter.
+ */
 //------------------------------------------------------------------------------
 Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 {
@@ -574,15 +679,20 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
    if (id == propNameID)
       return Gmat::STRING_TYPE;
     
-   if (id == secondsToPropID)
-      return Gmat::REAL_TYPE;
-    
    return GmatCommand::GetParameterType(id);
 }
 
 
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the string associated with a parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return Text description for the type of the parameter.
+ */
 //------------------------------------------------------------------------------
 std::string Propagate::GetParameterTypeString(const Integer id) const
 {
@@ -601,40 +711,20 @@ std::string Propagate::GetParameterTypeString(const Integer id) const
    if (id == propNameID)
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
 
-   if (id == secondsToPropID)
-      return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-
    return GmatCommand::GetParameterTypeString(id);
 }
 
-// Temporary method -- remove once StopConditions are hooked up
-//------------------------------------------------------------------------------
-// Real GetRealParameter(const Integer id) const
-//------------------------------------------------------------------------------
-Real Propagate::GetRealParameter(const Integer id) const
-{
-   if (id == secondsToPropID)
-      return secondsToProp;
-        
-   return GmatCommand::GetRealParameter(id);
-}
-
-// Temporary method -- remove once StopConditions are hooked up
-//------------------------------------------------------------------------------
-// Real SetRealParameter(const Integer id, const Real value)
-//------------------------------------------------------------------------------
-Real Propagate::SetRealParameter(const Integer id, const Real value)
-{
-   if (id == secondsToPropID) {
-      secondsToProp = value;
-      return secondsToProp;
-   }
-        
-   return GmatCommand::SetRealParameter(id, value);
-}
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the value for an Integer parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
 //------------------------------------------------------------------------------
 Integer Propagate::GetIntegerParameter(const Integer id) const
 {
@@ -647,6 +737,15 @@ Integer Propagate::GetIntegerParameter(const Integer id) const
 
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Set the value for an Integer parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new parameter value.
+ *
+ * @return the parameter value at the end of this call.
+ */
 //------------------------------------------------------------------------------
 Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
 {
@@ -663,12 +762,16 @@ Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
 std::string Propagate::GetStringParameter(const Integer id) const
 {
-   /// @todo Remove this deprecated option
-   if (id == propNameID)
-      return propName[0];
-   
    if (id == propCoupledID)
       return currentPropMode;
 
@@ -679,13 +782,22 @@ std::string Propagate::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored.
+ */
+//------------------------------------------------------------------------------
 bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == propCoupledID) {
       const StringArray pmodes = GetStringArrayParameter(availablePropModesID);
       if (find(pmodes.begin(), pmodes.end(), value) != pmodes.end()) {
          currentPropMode = value;
-         for (Integer i = 0; i < PROP_MODE_COUNT; ++i)
+         for (Integer i = 0; i < PropModeCount; ++i)
             if (value == pmodes[i]) {
                currentMode = (PropModes)i;
                return true;
@@ -714,6 +826,17 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 // bool SetStringParameter(const Integer id, const std::string &value,
 //                         const Integer index)
 //------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
 bool Propagate::SetStringParameter(const Integer id, const std::string &value,
                                    const Integer index)
 {   
@@ -732,13 +855,21 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value,
 //------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The requested StringArray.
+ */
+//------------------------------------------------------------------------------
 const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 {
    static StringArray modeList;
    
    if (id == availablePropModesID) {
       modeList.clear();
-      for (Integer i = 0; i < PROP_MODE_COUNT; ++i)
+      for (Integer i = 0; i < PropModeCount; ++i)
          modeList.push_back(PropModeList[i]);
       return modeList;
    }
@@ -757,7 +888,16 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 // const StringArray& GetStringArrayParameter(const Integer id, 
 //                                            const Integer index) const
 //------------------------------------------------------------------------------
-const StringArray& Propagate::GetStringArrayParameter(const Integer id, 
+/**
+ * Access an array of string data.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index The index when multiple StringArrays are supported.
+ *
+ * @return The requested StringArray.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Propagate::GetStringArrayParameter(const Integer id,
                                                const Integer index) const
 {
    if (id == satNameID)
@@ -770,7 +910,16 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id,
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
 //------------------------------------------------------------------------------
-bool Propagate::TakeAction(const std::string &action, 
+/**
+ * Interface used to support user actions.
+ *
+ * @param <action> The string descriptor for the requested action.
+ * @param <actionData> Optional data used for the action.
+ *
+ * @return true if the action was performed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::TakeAction(const std::string &action,
                            const std::string &actionData)
 {
    if (action == "Clear")
@@ -780,20 +929,16 @@ bool Propagate::TakeAction(const std::string &action,
          for (Integer i = 0; i < (Integer)satName.size(); ++i)
             delete satName[i];
          satName.clear();
-         //stopSatNames.clear(); //loj: 11/30/04 - commented out
+
          propName.clear();
          prop.clear();
          sats.clear();
       }
       else if (actionData == "StopCondition")
       {
-         //11/30/04 - commented out
-         //for (unsigned int i=0; i<stopWhen.size(); i++)
-         //   delete stopWhen[i];
-         
          stopWhen.clear();
          stopSats.clear();
-         stopSatNames.clear(); //loj: 11/30/04 - added
+         stopSatNames.clear();
          return true;
       }
    }
@@ -807,10 +952,20 @@ bool Propagate::TakeAction(const std::string &action,
 }
 
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Renames referenced objects.
+ *
+ * @param type Type of the object that is renamed.
+ * @param oldName The current name for the object.
+ * @param newName The name the object has when this operation is complete.
+ *
+ * @return true on success.
+ */
+//------------------------------------------------------------------------------
 bool Propagate::RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
                                 const std::string &newName)
@@ -829,13 +984,13 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    StringArray::iterator sat;
 
    // rename space object name used in prop setup
-   for (unsigned int prop = 0; prop < propName.size(); ++prop)
+   for (UnsignedInt prop = 0; prop < propName.size(); ++prop)
       for (sat = satName[prop]->begin(); sat != satName[prop]->end(); ++sat)
          if (*sat == oldName)
             *sat = newName;
    
    // rename space object name used in stopping condition
-   for (unsigned int i = 0; i < stopSatNames.size(); ++i)
+   for (UnsignedInt i = 0; i < stopSatNames.size(); ++i)
       if (stopSatNames[i] == oldName)
          stopSatNames[i] = newName;
    
@@ -845,19 +1000,39 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    #endif
    
    // rename stop condition parameter
-   for (unsigned int i=0; i<stopWhen.size(); i++)
+   for (UnsignedInt i=0; i<stopWhen.size(); i++)
       stopWhen[i]->RenameRefObject(type, oldName, newName);
    
    return true;
 }
 
 //------------------------------------------------------------------------------
-// void InterpretAction(void)
+// bool InterpretAction()
 //------------------------------------------------------------------------------
-bool Propagate::InterpretAction(void)
+/**
+ * Parses the command string and builds the corresponding command structures.
+ *
+ * The Propagate command has the following syntax:
+ *
+ *     Propagate prop(Sat1, ... , {Sat1.ElapsedDays = 700}) ...;
+ *
+ * where prop is a PropSetup, "Sat1, ... ," is the list of SpaceObjects that are
+ * propagated, and the items in curly braces are the (optional) stopping
+ * conditions.  The Propagate command supports simultaneous propagation of
+ * multiple spacecraft, either in a single PropSetup or in a list of PropSetups
+ * on the same Propagate command line.
+ *
+ * This method breaks the script line into the corresponding pieces, and stores
+ * the names of the PropSetups, SpaceObjects, and StoppingConditions so they can
+ * be set to point to the correct objects during initialization.
+ *
+ * @return true on successful parsing of the command.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::InterpretAction()
 {
-   // DJC: Uncomment the following when working Interpreter
-   //return false;
+   // DJC: Uncomment the following when working on the Interpreter
+   // return false;
    
    /// @todo: Clean up this hack for the Propagate::InterpretAction method
    // Sample string:  "Propagate RK89(Sat1, {Duration = 86400.0});"
@@ -877,14 +1052,21 @@ bool Propagate::InterpretAction(void)
 
 
 //------------------------------------------------------------------------------
-// void CheckForOptions(Integer &loc, std::string& generatingString)
+// void CheckForOptions(Integer &loc, std::string &generatingString)
 //------------------------------------------------------------------------------
-void Propagate::CheckForOptions(Integer &loc, std::string& generatingString)
+/**
+ * Looks for propagator options that exist prior to any PropSetup names.
+ *
+ * @param <loc>               The current location in the generating string.
+ * @param <generatingString>  The generating string.
+ */
+//------------------------------------------------------------------------------
+void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
 {
    std::string modeStr;
    currentMode = INDEPENDENT;
    
-   for (Integer modeId = INDEPENDENT+1; modeId != PROP_MODE_COUNT; ++modeId) {
+   for (Integer modeId = INDEPENDENT+1; modeId != PropModeCount; ++modeId) {
       modeStr = PropModeList[modeId];
       modeStr += " ";
       
@@ -912,6 +1094,13 @@ void Propagate::CheckForOptions(Integer &loc, std::string& generatingString)
 //------------------------------------------------------------------------------
 // void AssemblePropagators(Integer &loc, std::string& generatingString)
 //------------------------------------------------------------------------------
+/**
+ * Parses the PropSetup portion of the Propagate command.
+ *
+ * @param <loc>               The current location in the generating string.
+ * @param <generatingString>  The generating string.
+ */
+//------------------------------------------------------------------------------
 void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 {
    // At this point we are set with loc pointing to the start of the list of
@@ -937,7 +1126,6 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                                 " string does not identify propagator\n");
       
       if (generatingString[currentLoc] == '-') {
-//         ++currentLoc;
          direction.push_back(-1.0);
       }
       else
@@ -945,6 +1133,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       
       pieces.push_back(generatingString.substr(currentLoc, end-currentLoc));
       currentLoc = end+1;
+
       // Skip trailing comma or white space
       while ((str[currentLoc] == ',') || (str[currentLoc] == ' '))
          ++currentLoc;
@@ -957,7 +1146,7 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
                                     " Propagator strings Identified:\n");
       std::vector<Real>::iterator j = direction.begin();
-      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i, ++j) 
+      for (StringArray::iterator i = pieces.begin(); i != pieces.end(); ++i,++j)
          MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
          ((*j) > 0.0 ? "forwards" : "backwards"));
    #endif
@@ -968,7 +1157,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       loc = 0;
       end = i->find("(", loc);
       if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate string does not identify propagator\n");
+         throw CommandException(
+            "Propagate string does not identify propagator\n");
 
       std::string component = i->substr(loc, end-loc);
       SetObject(component, Gmat::PROP_SETUP);
@@ -982,7 +1172,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       if (satEnd == (Integer)std::string::npos)
          satEnd = i->find(")", loc);
       if (satEnd == (Integer)std::string::npos)
-         throw CommandException("Propagate string terminating paren \")\" missing\n");
+         throw CommandException(
+            "Propagate string terminating paren \")\" missing\n");
 
       if (end == (Integer)std::string::npos)
          end = satEnd;
@@ -999,13 +1190,10 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
          #ifdef DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage("i = \"%s\", loc = %d and end = %d\n",
                                  i->c_str(), loc, end);
-         #endif
-          
-         // Strip off trailing spaces
-         #ifdef DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage("Last char ((*i)[end]) is '%c'\n",
                                  (*i)[end]);
          #endif
+         // Strip off trailing spaces
          endchar = end-1;
          while ((*i)[endchar] == ' ')
             --endchar;
@@ -1024,8 +1212,6 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       } while (end < satEnd);
 
       end = i->find("{", loc);
-//      if (end == (Integer)std::string::npos)
-//         throw CommandException("Propagate does not identify stopping condition: looking for {\n");
 
       if (end != (Integer)std::string::npos) {
          loc = end + 1;
@@ -1039,19 +1225,20 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             ++parmEnd;
 
          std::string paramType, paramObj, parmSystem;
-         if (!InterpretParameter(i->substr(loc, parmEnd-loc), paramType, paramObj, 
-                            parmSystem))
+         if (!InterpretParameter(i->substr(loc, parmEnd-loc), paramType,
+             paramObj, parmSystem))
             throw CommandException("Propagate::AssemblePropagators: Unable to "
                                    "parse the parameter string \"" + 
                                    i->substr(loc, parmEnd-loc) + "\"");
-         loc = parmEnd;//+1;
+         loc = parmEnd;
          
          end = i->find("=", loc);
          if (end == (Integer)std::string::npos)
          {
             end = i->find(",", loc);
             if (end != (Integer)std::string::npos)
-               throw CommandException("Propagate does not yet support multiple stopping condition\n");
+               throw CommandException("Propagate does not yet support multiple "
+                  "stopping conditions\n");
               
             end = i->find("}", loc);
             if (end == (Integer)std::string::npos)
@@ -1059,8 +1246,8 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
                   " does not identify stopping condition: looking for }\n");
          }
           
-         unsigned int start = 0;
-         for (unsigned int idx=start; idx<paramType.size(); ++idx)
+         UnsignedInt start = 0;
+         for (UnsignedInt idx=start; idx<paramType.size(); ++idx)
          {
             if (paramType[idx] == ' ')
             {
@@ -1071,17 +1258,16 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
           
          Moderator *theModerator = Moderator::Instance();
           
-          // create parameter
+         // create parameter
          std::string paramName = paramObj + "." + paramType;
-         //loj: if we want to see parameter via the GUI, use named parameter
-         // This will be deleted when system shuts down
-         Parameter *stopParam = theModerator->CreateParameter(paramType, paramName);
+         Parameter *stopParam = theModerator->CreateParameter(paramType,
+                                   paramName);
          stopParam->SetRefObjectName(Gmat::SPACECRAFT, paramObj);
          
          if (stopParam->IsCoordSysDependent()) {
             if (parmSystem == "")
                parmSystem = "EarthMJ2000Eq";
-            // Which is correct here???
+
             stopParam->SetStringParameter("DepObject", parmSystem);
             stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, parmSystem);
 
@@ -1093,19 +1279,19 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             stopParam->SetStringParameter("DepObject", parmSystem);
             if (stopParam->NeedCoordSystem())
                /// @todo Update coordinate system to better value for body parms
-               stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+               stopParam->SetRefObjectName(Gmat::COORDINATE_SYSTEM,
+                             "EarthMJ2000Eq");
          }
          
          StopCondition *stopCond =
-            theModerator->CreateStopCondition("StopCondition", "StopOn" + paramName);
+            theModerator->CreateStopCondition("StopCondition", "StopOn" +
+                             paramName);
          
          stopCond->SetStringParameter("StopVar", paramName);
          
          SetObject(stopCond, Gmat::STOP_CONDITION);
          // Store the spacecraft name for use when setting the epoch data
-//         stopSatNames.push_back(paramObj);
          TakeAction("SetStopSpacecraft", paramObj);
-   //      stopSatNames[index] = paramObj;
       
          if (paramType != "Apoapsis" && paramType != "Periapsis")
          {
@@ -1115,19 +1301,21 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
             
             #ifdef DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage("Propagate::AssemblePropagators()"
-                                             " propStopVal = %f\n", propStopVal);
+                  " propStopVal = %f\n", propStopVal);
             #endif
       
             loc = end + 1;
             end = i->find(",", loc);
             if (end != (Integer)std::string::npos)
-               throw CommandException("Propagate does not yet support multiple stopping condition\n");
+               throw CommandException("Propagate does not yet support multiple "
+                  "stopping condition\n");
           
             loc = end + 1;
             end = i->find("}", loc);
               
             if (end == (Integer)std::string::npos)
-               throw CommandException("Propagate does not identify stopping condition: looking for }\n");
+               throw CommandException("Propagate does not identify stopping "
+                  "condition: looking for }\n");
          }
          loc = end + 1;
       }
@@ -1136,12 +1324,12 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
       end = i->find(")", loc);
           
       if (end == (Integer)std::string::npos)
-         throw CommandException("Propagate does not end correctly: looking for )\n");
+         throw CommandException(
+                  "Propagate does not end correctly: looking for )\n");
    }
    // NOW test to be sure there is at least one stop cond.
    if (stopWhen.empty())
-      singleStepMode = true;
-      //throw CommandException("Propagate does not identify any stopping conditions\n");
+      singleStepMode = true;  // If not, run in single step mode
 
    #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage("Propagate::AssemblePropagators():"
@@ -1162,12 +1350,12 @@ void Propagate::AssemblePropagators(Integer &loc, std::string& generatingString)
 /**
  * Breaks apart a parameter declaration into its component pieces
  *
- * @param text The string that gets decomposed.
- * @param paramType Type of parameter that is needed.
- * @param paramObj The Object used for the parameter calculations.
- * @param parmSystem The coordinate system or body used for the parameter
- *                   calculations (or the empty string if this piece is
- *                   unspecified).
+ * @param <text>       The string that gets decomposed.
+ * @param <paramType>  Type of parameter that is needed.
+ * @param <paramObj>   The Object used for the parameter calculations.
+ * @param <parmSystem> The coordinate system or body used for the parameter
+ *                     calculations (or the empty string if this piece is
+ *                     unspecified).
  *
  * @return true if the decomposition worked.
  */
@@ -1197,7 +1385,8 @@ bool Propagate::InterpretParameter(const std::string text,
    paramType = text.substr(start);
    
    #ifdef DEBUG_PROPAGATE_INIT
-      MessageInterface::ShowMessage("Built parameter %s for object %s with CS %s",
+      MessageInterface::ShowMessage(
+         "Built parameter %s for object %s with CS %s",
          paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
    #endif
    
@@ -1207,6 +1396,14 @@ bool Propagate::InterpretParameter(const std::string text,
 
 //------------------------------------------------------------------------------
 // bool TakeAStep(Real propStep)
+//------------------------------------------------------------------------------
+/**
+ * Advances each of the contained PropSetups by one step.
+ *
+ * @param <propStep> The requested size of the step.
+ *
+ * @return true if the step succeeded.
+ */
 //------------------------------------------------------------------------------
 bool Propagate::TakeAStep(Real propStep)
 {
@@ -1226,7 +1423,8 @@ bool Propagate::TakeAStep(Real propStep)
             #endif
             while (current != p.end()) { 
                if (!(*current)->Step())
-                  throw CommandException("Propagator failed to take a good step\n");
+                  throw CommandException(
+                     "Propagator failed to take a good step\n");
                ++current;
             }
             retval = true;
@@ -1256,8 +1454,8 @@ bool Propagate::TakeAStep(Real propStep)
          default:
             #ifdef DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
-                  ("Propagate::TakeAStep() runnning in undefined mode (mode = %d)\n",
-                   currentMode);
+                  ("Propagate::TakeAStep() runnning in undefined mode "
+                  "(mode = %d)\n", currentMode);
             #endif
             retval = false;
       }
@@ -1276,6 +1474,16 @@ bool Propagate::TakeAStep(Real propStep)
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Sets the array of transient forces, so it can be passed to the PropSetups.
+ *
+ * @param <tf> The array of transient forces.
+ */
+//------------------------------------------------------------------------------
 void Propagate::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    transientForces = tf;
@@ -1283,9 +1491,15 @@ void Propagate::SetTransientForces(std::vector<PhysicalModel*> *tf)
 
 
 //------------------------------------------------------------------------------
-// bool Initialize(void)
+// bool Initialize()
 //------------------------------------------------------------------------------
-bool Propagate::Initialize(void)
+/**
+ * Performs the initialization needed to run the Propagate command.
+ *
+ * @return true if the GmatCommand is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::Initialize()
 {
    #if DEBUG_PROPAGATE_INIT
       MessageInterface::ShowMessage("Propagate::Initialize() entered.\n%s\n",
@@ -1299,7 +1513,7 @@ bool Propagate::Initialize(void)
    GmatCommand::Initialize();
    
    inProgress = false;
-   unsigned int index = 0;
+   UnsignedInt index = 0;
    prop.clear();
    SpaceObject *so;
    std::string pName;
@@ -1320,7 +1534,8 @@ bool Propagate::Initialize(void)
 
       if (objectMap->find(pName) == objectMap->end())
          throw CommandException(
-            "Propagate command cannot find Propagator Setup\"" + (pName) + "\"\n");
+            "Propagate command cannot find Propagator Setup\"" + (pName) +
+            "\"\n");
    
       if (satName[index]->empty())
          throw CommandException(
@@ -1389,7 +1604,7 @@ bool Propagate::Initialize(void)
    
    initialized = true;
 
-   stopSats.clear(); //loj: 11/30/04 - added
+   stopSats.clear();
    // Setup spacecraft array used for stopping conditions
    for (StringArray::iterator sc = stopSatNames.begin(); 
         sc != stopSatNames.end(); ++sc) {
@@ -1404,7 +1619,7 @@ bool Propagate::Initialize(void)
    }
 
    #if DEBUG_PROPAGATE_INIT
-      for (unsigned int i=0; i<stopSats.size(); i++)
+      for (UnsignedInt i=0; i<stopSats.size(); i++)
          MessageInterface::ShowMessage(
             "Propagate::Initialize() stopSats[%d]=%s\n", i, 
             stopSats[i]->GetName().c_str());
@@ -1415,7 +1630,7 @@ bool Propagate::Initialize(void)
    
    if (solarSys != NULL)
    {
-      for (unsigned int i=0; i<stopWhen.size(); i++)
+      for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          stopWhen[i]->SetSolarSystem(solarSys);
          stopWhen[i]->Initialize();
@@ -1461,7 +1676,7 @@ bool Propagate::Initialize(void)
 /**
  * Fill in the components of a formation (recursively).
  *
- * @param so The SpaceObject that needs to be filled.
+ * @param <so> The SpaceObject that needs to be filled.
  */
 //------------------------------------------------------------------------------
 void Propagate::FillFormation(SpaceObject *so, StringArray& owners, 
@@ -1501,14 +1716,13 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
 //------------------------------------------------------------------------------
 GmatCommand* Propagate::GetNext()
 {
- 
    if (!inProgress)
       return next;
    return this;
 }
 
 //------------------------------------------------------------------------------
-// bool Execute(void)
+// bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Propagate the assigned members to the desired stopping condition
@@ -1517,11 +1731,11 @@ GmatCommand* Propagate::GetNext()
  *         occurs.
  */
 //------------------------------------------------------------------------------
-bool Propagate::Execute(void)
+bool Propagate::Execute()
 {
-#if DEBUG_PROPAGATE_EXE
-      MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
-#endif
+   #if DEBUG_PROPAGATE_EXE
+         MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
+   #endif
 
    if (initialized == false)
       throw CommandException("Propagate Command was not Initialized\n");
@@ -1561,7 +1775,7 @@ bool Propagate::Execute(void)
                MessageInterface::ShowMessage
                   ("SpaceObject Count = %d\n", satName[n]->size());
                StringArray *sar = satName[n];
-               for (int i=0; i < (Integer)satName[n]->size(); i++)
+               for (Integer i=0; i < (Integer)satName[n]->size(); i++)
                {
                   MessageInterface::ShowMessage
                      ("   SpaceObjectName[%d] = %s\n", i, (*sar)[i].c_str());
@@ -1575,27 +1789,30 @@ bool Propagate::Execute(void)
             Integer epochID = sat1->GetParameterID("Epoch");
             baseEpoch.push_back(sat1->GetRealParameter(epochID));
             elapsedTime[n] = fm[n]->GetTime();
-            currEpoch[n] = baseEpoch[n] + elapsedTime[n] / 86400.0;
-#if DEBUG_PROPAGATE_DIRECTION
-      MessageInterface::ShowMessage("Propagate::Execute() running %s %s.\n",
-         prop[n]->GetName().c_str(),
-         (prop[n]->GetPropagator()->GetRealParameter("StepSize") > 0.0 ?
-         "forwards" : "backwards"));
-      MessageInterface::ShowMessage("   direction =  %lf.\n", direction[n]);
-#endif
+            currEpoch[n] = baseEpoch[n] + elapsedTime[n] /
+               GmatTimeUtil::SECS_PER_DAY;
+            #if DEBUG_PROPAGATE_DIRECTION
+               MessageInterface::ShowMessage(
+                  "Propagate::Execute() running %s %s.\n",
+                  prop[n]->GetName().c_str(),
+                  (prop[n]->GetPropagator()->GetRealParameter("StepSize") > 0.0
+                     ? "forwards" : "backwards"));
+                MessageInterface::ShowMessage("   direction =  %lf.\n",
+                  direction[n]);
+            #endif
          }
          // Now setup the stopping condition elements
          #if DEBUG_PROPAGATE_EXE
             MessageInterface::ShowMessage
                ("Propagate::Execute() Propagate start; epoch = %f\n",
-             (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
+             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
             MessageInterface::ShowMessage
                ("Propagate::Execute() Propagate start; fm epoch = %f\n",
                (fm[0]->GetRealParameter(fm[0]->GetParameterID("Epoch"))));
-            int stopCondCount = stopWhen.size();
+            Integer stopCondCount = stopWhen.size();
             MessageInterface::ShowMessage
                ("Propagate::Execute() stopCondCount = %d\n", stopCondCount);
-            for (int i=0; i<stopCondCount; i++)
+            for (Integer i=0; i<stopCondCount; i++)
             {
                MessageInterface::ShowMessage
                   ("Propagate::Execute() stopCondName[%d]=%s\n", i,
@@ -1610,7 +1827,7 @@ bool Propagate::Execute(void)
          Real stopEpochBase;
          
          try {
-            for (unsigned int i = 0; i<stopWhen.size(); i++)
+            for (UnsignedInt i = 0; i<stopWhen.size(); i++)
             {
                if (i >= stopSats.size())
                   throw CommandException("Stopping condition " + 
@@ -1624,8 +1841,10 @@ bool Propagate::Execute(void)
 
                epochID = stopSats[i]->GetParameterID("Epoch");
                stopEpochBase = stopSats[i]->GetRealParameter(epochID);
+               
                // StopCondition need new base epoch
                stopWhen[i]->SetRealParameter("BaseEpoch", stopEpochBase);
+
                // ElapsedTime parameters need new initial epoch
                stopVar = stopWhen[i]->GetStringParameter("StopVar");
                if (stopVar.find("Elapsed") != stopVar.npos)
@@ -1652,20 +1871,21 @@ bool Propagate::Execute(void)
 
 
       /// @todo Find a more elegant way to update epoch during propagation
-      for (unsigned int i = 0; i < fm.size(); ++i)
+      for (UnsignedInt i = 0; i < fm.size(); ++i)
          fm[i]->UpdateInitialData();
       
-      Integer epochID = sats[0]->GetParameterID("Epoch");;
+      Integer epochID = sats[0]->GetParameterID("Epoch");
       
       while (!stopCondMet)
       {
          if (!TakeAStep())
             throw CommandException(
                "Propagate::Execute() Propagator Failed to Step\n");
-         for (unsigned int i = 0; i < fm.size(); ++i) {
+         for (UnsignedInt i = 0; i < fm.size(); ++i) {
             // orbit related parameters use spacecraft for data
             elapsedTime[i] = fm[i]->GetTime();
-            currEpoch[i] = baseEpoch[i] + elapsedTime[i] / 86400.0;
+            currEpoch[i] = baseEpoch[i] + elapsedTime[i] /
+               GmatTimeUtil::SECS_PER_DAY;
             
             // Update spacecraft epoch, without argument the spacecraft epoch
             // won't get updated for consecutive Propagate command
@@ -1681,7 +1901,7 @@ bool Propagate::Execute(void)
          #ifdef DEBUG_STOPPING_CONDITIONS
          try {
          #endif
-            for (unsigned int i=0; i<stopWhen.size(); i++)
+            for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
                // StopCondition need epoch for the Interpolator
                stopWhen[i]->SetRealParameter("Epoch", 
@@ -1726,10 +1946,11 @@ bool Propagate::Execute(void)
          }
          else
          {  
-            for (unsigned int i = 0; i < fm.size(); ++i) {
+            for (UnsignedInt i = 0; i < fm.size(); ++i) {
                fm[i]->RevertSpaceObject();
                elapsedTime[i] = fm[i]->GetTime();
-               currEpoch[i] = baseEpoch[i] + elapsedTime[i] / 86400.0;
+               currEpoch[i] = baseEpoch[i] +
+                  elapsedTime[i] / GmatTimeUtil::SECS_PER_DAY;
             }
          }
          
@@ -1765,7 +1986,8 @@ bool Propagate::Execute(void)
    #endif
    
    
-   Real secsToStep = (stopEpoch - currEpoch[trigger]) * 86400.0;
+   Real secsToStep = (
+      stopEpoch - currEpoch[trigger]) * GmatTimeUtil::SECS_PER_DAY;
    #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
          ("Propagate::Execute() secsToStep at stop = %15lf\n",
@@ -1779,41 +2001,41 @@ bool Propagate::Execute(void)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(
-            "Propagate::Execute() before Step(%f) epoch = %f\n",
-            secsToStep, (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
+            "Propagate::Execute() before Step(%f) epoch = %f\n", secsToStep,
+            (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
-//      if (!p->Step(secsToStep))
+
       if (!TakeAStep(secsToStep))
          throw CommandException("Propagator Failed to Step fixed interval\n");
 
-      for (unsigned int i = 0; i < fm.size(); ++i) {
-         fm[i]->UpdateSpaceObject(baseEpoch[i] + fm[i]->GetTime() / 86400.0);
+      for (UnsignedInt i = 0; i < fm.size(); ++i) {
+         fm[i]->UpdateSpaceObject(
+            baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
       }
       // Publish the final data point here
-      pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / 86400.0;
+      pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY;
       memcpy(&pubdata[1], state, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
          
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
-            ("Propagate::Execute() after Step(%f) epoch = %f\n",
-             secsToStep, (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
+            ("Propagate::Execute() after Step(%f) epoch = %f\n", secsToStep,
+            (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    
       publisher->FlushBuffers();
       delete [] pubdata;
     
-      for (unsigned int i=0; i<stopWhen.size(); i++)
+      for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          if (stopWhen[i]->GetName() == "")
             delete stopWhen[i];
       }
-      //---------------------------------------
-   
+      
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage
             ("Propagate::Execute() complete; epoch = %f\n",
-             (baseEpoch[0] + fm[0]->GetTime() / 86400.0));
+             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
    }
    
@@ -1821,6 +2043,16 @@ bool Propagate::Execute(void)
 }
 
 
+//------------------------------------------------------------------------------
+// void AddTransientForce(StringArray *sats, ForceModel *p)
+//------------------------------------------------------------------------------
+/**
+ * Passes transient forces into the ForceModel(s).
+ *
+ * @param <sats> The array of satellites used in the ForceModel.
+ * @param <p>    The current ForceModel that is receiving the forces.
+ */
+//------------------------------------------------------------------------------
 void Propagate::AddTransientForce(StringArray *sats, ForceModel *p)
 {
    // Find any transient force that is active and add it to the force model
@@ -1863,6 +2095,13 @@ void Propagate::AddTransientForce(StringArray *sats, ForceModel *p)
 }
 
 
+//------------------------------------------------------------------------------
+// void ClearTransientForce()
+//------------------------------------------------------------------------------
+/**
+ * Removes transient forces from the ForceModel(s) after propagation.
+ */
+//------------------------------------------------------------------------------
 void Propagate::ClearTransientForces()
 {
    ForceModel *fm;
@@ -1879,7 +2118,6 @@ void Propagate::ClearTransientForces()
          pm = fm->GetForce(i);
          if (pm->IsTransient()) {
             fm->DeleteForce(pm->GetName());
-//            break;
          }
       }
    }
@@ -1906,7 +2144,19 @@ void Propagate::ClearTransientForces()
 }
 
 
-void Propagate::SetNames(const std::string& name, StringArray& owners, 
+//------------------------------------------------------------------------------
+// void SetNames(const std::string& name, StringArray& owners,
+//               StringArray& elements)
+//------------------------------------------------------------------------------
+/**
+ * Sets the parameter names used when publishing Spacecraft data.
+ *
+ * @param <name>     Name of the Spacecraft that is referenced.
+ * @param <owners>   Array of published data identifiers.
+ * @param <elements> Individual elements of the published data.
+ */
+//------------------------------------------------------------------------------
+void Propagate::SetNames(const std::string& name, StringArray& owners,
                          StringArray& elements)
 {
    // Add satellite labels
@@ -1920,4 +2170,3 @@ void Propagate::SetNames(const std::string& name, StringArray& owners,
    elements.push_back(name+".Vy");
    elements.push_back(name+".Vz");
 }
-

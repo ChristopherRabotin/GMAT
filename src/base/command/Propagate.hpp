@@ -18,8 +18,8 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef PROPAGATE_HPP
-#define PROPAGATE_HPP
+#ifndef Propagate_hpp
+#define Propagate_hpp
 
 #include "Command.hpp"
 #include <list>
@@ -63,12 +63,12 @@ public:
    virtual GmatBase* Clone(void) const;
    
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                        GetGeneratingString(Gmat::WriteMode mode =
+                                               Gmat::SCRIPTING,
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
 
    // Reference object accessor methods
-   //loj: 6/25/04 added
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
                                     const std::string &name,
                                     const Integer index);
@@ -115,7 +115,7 @@ protected:
    /// Name of the propagator setup(s) used in this command
    StringArray             propName;
    /// Step direction multipliers used to switch btwn forwards & backwards prop
-   std::vector<Real>       direction;
+   RealArray               direction;
    /// The (1 or more) spacecraft associated with this propagation, grouped by
    /// propagator
    std::vector<StringArray *>  
@@ -157,15 +157,15 @@ protected:
    const Integer           stopWhenID;
     
    /// Temporary parameter used to stop on time
-   Real                    secondsToProp;
+//   Real                    secondsToProp;
    /// ID for the temporary parameter
-   const Integer           secondsToPropID;
+//   const Integer           secondsToPropID;
    
    // Parameters moved from Execute so that it can be reentrant
    /// Time elapsed during this Propagate
-   std::vector<Real>       elapsedTime;
+   RealArray               elapsedTime;
    /// Start epoch for the step
-   std::vector<Real>       currEpoch;
+   RealArray               currEpoch;
    /// The Propagator
    std::vector<Propagator*> p;
    /// The ForceModel
@@ -189,15 +189,16 @@ protected:
                            *transientForces;
    
    /// Allowed modes of propagation
-   enum PropModes {
-                     INDEPENDENT, 
-                     SYNCHRONIZED,
-                     PROP_MODE_COUNT
+   enum PropModes
+   {
+      INDEPENDENT,
+      SYNCHRONIZED,
+      PropModeCount
    };
    /// Variable that tracks the current propagation mode
-   PropModes         currentMode;
+   PropModes               currentMode;
    /// Array of allowed propagation modes
-   static std::string      PropModeList[PROP_MODE_COUNT];
+   static std::string      PropModeList[PropModeCount];
    
    virtual void            SetNames(const std::string& name, 
                                     StringArray& owners, StringArray& elements);
@@ -213,16 +214,10 @@ protected:
    
    void                    AddTransientForce(StringArray *sats, ForceModel *p);
    void                    ClearTransientForces();
-
-public:    
-   // Accessors (Temporary, to support internal prop duration)
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value);
     
 private:
     
 };
 
 
-#endif // PROPAGATE_HPP
+#endif // Propagate_hpp
