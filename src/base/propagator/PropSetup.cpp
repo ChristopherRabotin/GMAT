@@ -32,7 +32,7 @@
 //---------------------------------
 
 const std::string
-PropSetup::PARAMETER_TEXT[PropSetupParamCount] =
+PropSetup::PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount] =
 
 {
    "FM",
@@ -43,7 +43,7 @@ PropSetup::PARAMETER_TEXT[PropSetupParamCount] =
 
 
 const Gmat::ParameterType
-PropSetup::PARAMETER_TYPE[PropSetupParamCount] =
+PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -354,7 +354,7 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
    case FORCE_MODEL_NAME:
    case USE_DRAG:
    case USE_SRP:
-      return PropSetup::PARAMETER_TYPE[id];
+      return PropSetup::PARAMETER_TYPE[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterType(id);
    }
@@ -396,7 +396,7 @@ std::string PropSetup::GetParameterText(const Integer id) const
    case FORCE_MODEL_NAME:
    case USE_DRAG:
    case USE_SRP:
-      return PropSetup::PARAMETER_TEXT[id];
+      return PropSetup::PARAMETER_TEXT[id - GmatBaseParamCount];
    default:
       return GmatBase::GetParameterText(id);
    }
@@ -413,7 +413,7 @@ Integer PropSetup::GetParameterID(const std::string &str) const
 {
    for (int i=0; i<PropSetupParamCount; i++)
    {
-      if (str == PropSetup::PARAMETER_TEXT[i])
+      if (str == PropSetup::PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    

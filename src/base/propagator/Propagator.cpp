@@ -78,7 +78,7 @@
 // static data
 //---------------------------------
 const std::string
-Propagator::PARAMETER_TEXT[PropagatorParamCount] =
+Propagator::PARAMETER_TEXT[PropagatorParamCount - GmatBaseParamCount] =
 {
     //loj: 3/18/04 field name should not have blank spaces
     //"Step Size (sec)"
@@ -86,7 +86,7 @@ Propagator::PARAMETER_TEXT[PropagatorParamCount] =
 };
 
 const Gmat::ParameterType
-Propagator::PARAMETER_TYPE[PropagatorParamCount] =
+Propagator::PARAMETER_TYPE[PropagatorParamCount - GmatBaseParamCount] =
 {
     Gmat::REAL_TYPE
 };
@@ -184,7 +184,7 @@ Propagator& Propagator::operator=(const Propagator& p)
 std::string Propagator::GetParameterText(const Integer id) const
 {
     if (id >= STEP_SIZE && id < PropagatorParamCount)
-        return PARAMETER_TEXT[id];
+        return PARAMETER_TEXT[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterText(id);
     
@@ -209,7 +209,7 @@ Integer Propagator::GetParameterID(const std::string &str) const
 {
     for (Integer i = STEP_SIZE; i < PropagatorParamCount; i++)
     {
-        if (str == PARAMETER_TEXT[i])
+        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
             return i;
     }
         
@@ -226,7 +226,7 @@ Integer Propagator::GetParameterID(const std::string &str) const
 Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
 {
     if (id >= STEP_SIZE && id < PropagatorParamCount)
-        return PARAMETER_TYPE[id];
+        return PARAMETER_TYPE[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterType(id);
 

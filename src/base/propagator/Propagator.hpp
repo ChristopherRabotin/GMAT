@@ -148,8 +148,8 @@ public:
 protected:
     
     // Start with the parameter IDs and associated strings
-    static const std::string PARAMETER_TEXT[PropagatorParamCount];
-    static const Gmat::ParameterType PARAMETER_TYPE[PropagatorParamCount];
+    static const std::string PARAMETER_TEXT[PropagatorParamCount - GmatBaseParamCount];
+    static const Gmat::ParameterType PARAMETER_TYPE[PropagatorParamCount - GmatBaseParamCount];
         
     /// Size of the default time step
     Real stepSize;

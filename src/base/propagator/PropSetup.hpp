@@ -85,8 +85,8 @@ private:
       PropSetupParamCount
    };
 
-   static const std::string PARAMETER_TEXT[PropSetupParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[PropSetupParamCount];
+   static const std::string PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount];
 
 };
 
