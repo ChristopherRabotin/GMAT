@@ -640,9 +640,15 @@ void PropagatePanel::DisplayStopCondition(int selRow)
    repeatTextCtrl->SetValue(wxVariant((long)(mTempStopCond[selRow].repeat)));
    goalTextCtrl->SetValue(wxVariant(mTempStopCond[selRow].goal));
    toleranceTextCtrl->SetValue(wxVariant(mTempStopCond[selRow].tol));
-    
+   
    stopCondGrid->SelectRow(selRow);
    varNameTextCtrl->Disable();
+   
+   if (mTempStopCond[selRow].varName.Contains(".Periapsis") ||
+       mTempStopCond[selRow].varName.Contains(".Apoapsis"))
+   {
+      goalTextCtrl->Disable();
+   }
 }
 
 //------------------------------------------------------------------------------
