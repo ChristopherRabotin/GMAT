@@ -179,6 +179,20 @@ void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
     //    this->AppendItem(item, wxT(objName), GmatTree::ICON_FOLDER, -1,
     //                     new MissionTreeItemData(wxT(objName), GmatTree::MISSION_SEQ_COMMAND));
     //};
+
+    wxString name;
+    
+    name.Printf("Sequence%d", ++mNumMissionSeq);
+  
+    wxTreeItemId mMissionSeq = this->AppendItem(item, name, 
+                               GmatTree::ICON_FOLDER, -1,
+                               new MissionTreeItemData(name, 
+                                 GmatTree::MISSION_SEQ_SUB_FOLDER));
+    
+    SetItemImage(mMissionSeq, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
+
+    Expand(item);
 }
 
 //------------------------------------------------------------------------------
@@ -326,9 +340,14 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
     
     name.Printf("Sequence%d", ++mNumMissionSeq);
   
-    this->AppendItem(item, name,GmatTree::ICON_FOLDER, -1,
-                     new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
+    wxTreeItemId mMissionSeq = this->AppendItem(item, name, 
+                               GmatTree::ICON_FOLDER, -1,
+                               new MissionTreeItemData(name, 
+                                 GmatTree::MISSION_SEQ_SUB_FOLDER));
     
+    SetItemImage(mMissionSeq, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
+
     Expand(item);
 }
 
@@ -375,8 +394,8 @@ void MissionTree::OnAddManeuver(wxCommandEvent &event)
         if (cmd != NULL)
         {
             this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
-                             new MissionTreeItemData(name, GmatTree::MANEUVER_COMMAND,
-                                                     name, cmd));
+                  new MissionTreeItemData(name, GmatTree::MANEUVER_COMMAND, 
+                  name, cmd));
             
             Expand(item);
         }
@@ -398,10 +417,12 @@ void MissionTree::OnAddTarget(wxCommandEvent &event)
     
         if (cmd != NULL)
         {
-            this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+            wxTreeItemId mTarget = this->AppendItem(item, name, GmatTree::ICON_FOLDER, -1,
                              new MissionTreeItemData(name, GmatTree::TARGET_COMMAND,
                                                      name, cmd));
-            
+            SetItemImage(mTarget, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);            
+
             Expand(item);
         }
     }
@@ -498,8 +519,13 @@ void MissionTree::OnInsertTarget(wxCommandEvent &event)
  
   item = GetPrevSibling(item);
   
-  this->InsertItem(itemParent, item, name, GmatTree::ICON_FOLDER, -1,
-        new MissionTreeItemData(name, GmatTree::TARGET_COMMAND));
+  wxTreeItemId mTarget = this->InsertItem(itemParent, item, name, 
+                         GmatTree::ICON_FOLDER, -1,
+                         new MissionTreeItemData(name, 
+                             GmatTree::TARGET_COMMAND));
+
+  SetItemImage(mTarget, GmatTree::ICON_OPENFOLDER, 
+                 wxTreeItemIcon_Expanded);
 }
 
 

@@ -62,6 +62,8 @@ namespace GmatTree
         
         ICON_REPORT,
         ICON_NETWORK,
+        ICON_BURN,
+        ICON_MOON,
     };
     
     enum ItemType

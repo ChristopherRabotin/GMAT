@@ -18,7 +18,7 @@
 #include "bitmaps/spacecraft.xpm"
 #include "bitmaps/sun.xpm"
 #include "bitmaps/mercury.xpm"
-#include "bitmaps/triton.xpm"    //couldn't find venus, use this for now
+#include "bitmaps/venus.xpm"    
 #include "bitmaps/earth.xpm"
 #include "bitmaps/mars.xpm"
 #include "bitmaps/jupiter.xpm"
@@ -28,6 +28,8 @@
 #include "bitmaps/pluto.xpm"
 #include "bitmaps/report.xpm"
 #include "bitmaps/network.xpm"
+#include "bitmaps/burn.xpm"
+#include "bitmaps/moon.xpm"
 
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
@@ -154,7 +156,7 @@ void ResourceTree::UpdateResources()
         objName = wxString(itemNames[i].c_str());
         objType = (theGuiInterpreter->GetConfiguredItem(itemNames[i]))->GetTypeName();
         if (objType == "ImpulsiveBurn")
-            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_REPORT,
+            this->AppendItem(mBurnItem, wxT(objName), GmatTree::ICON_BURN,
                              -1, new GmatTreeItemData(wxT(objName),
                              GmatTree::DEFAULT_IMPULSIVE_BURN));
     };
@@ -353,7 +355,7 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
 
     wxTreeItemId earth = this->AppendItem(universe, wxT("Earth"), GmatTree::ICON_EARTH, -1,
                      new GmatTreeItemData(wxT("Earth"), GmatTree::DEFAULT_BODY));
-    this->AppendItem(earth, wxT("Moon"), GmatTree::ICON_EARTH, -1,
+    this->AppendItem(earth, wxT("Moon"), GmatTree::ICON_MOON, -1,
                      new GmatTreeItemData(wxT("Moon"), GmatTree::DEFAULT_BODY));
 
     this->AppendItem(universe, wxT("Mars"), GmatTree::ICON_MARS, -1,
@@ -806,7 +808,7 @@ void ResourceTree::AddIcons()
   wxImageList *images = new wxImageList ( size, size, true );
   
   wxBusyCursor wait;
-  wxIcon icons[16];
+  wxIcon icons[18];
 
   icons[0] = wxIcon ( folder_xpm );
   icons[1] = wxIcon ( file_xpm );
@@ -814,7 +816,7 @@ void ResourceTree::AddIcons()
   icons[3] = wxIcon ( spacecrapt_xpm );
   icons[4] = wxIcon ( sun_xpm );
   icons[5] = wxIcon ( mercury_xpm );
-  icons[6] = wxIcon ( triton_xpm );
+  icons[6] = wxIcon ( venus_xpm );
   icons[7] = wxIcon ( earth_xpm );
   icons[8] = wxIcon ( mars_xpm );
   icons[9] = wxIcon ( jupiter_xpm );
@@ -824,7 +826,9 @@ void ResourceTree::AddIcons()
   icons[13] = wxIcon ( pluto_xpm );
   icons[14] = wxIcon ( report_xpm );
   icons[15] = wxIcon ( network_xpm );
-  
+  icons[16] = wxIcon ( burn_xpm );
+  icons[17] = wxIcon ( moon_xpm );
+ 
   int sizeOrig = icons[0].GetWidth();
     for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
@@ -952,7 +956,7 @@ void ResourceTree::OnAddImpulsiveBurn(wxCommandEvent &event)
     Burn* burn =
         theGuiInterpreter->CreateBurn("ImpulsiveBurn", std::string(name.c_str()));
     
-    this->AppendItem(item, name, GmatTree::ICON_FILE, -1,
+    this->AppendItem(item, name, GmatTree::ICON_BURN, -1,
                      new GmatTreeItemData(name, GmatTree::CREATED_IMPULSIVE_BURN));
 
     Expand(item);
