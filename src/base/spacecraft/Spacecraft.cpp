@@ -134,8 +134,20 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
     epoch    (a.epoch),
     refBody  (a.refBody),
     refFrame (a.refFrame),
-    refPlane (a.refPlane)
+    refPlane (a.refPlane),
+    epochID      (a.epochID),
+    state1ID     (a.state1ID),
+    state2ID     (a.state2ID),
+    state3ID     (a.state3ID),
+    state4ID     (a.state4ID),
+    state5ID     (a.state5ID),
+    state6ID     (a.state6ID),
+    refBodyID    (a.refBodyID),
+    refFrameID   (a.refFrameID),
+    refPlaneID   (a.refPlaneID),
+    massID       (a.massID)
 {
+    parameterCount = a.parameterCount;
     for (int i = 0; i < 6; ++i)
        state[i] = a.state[i];
 
@@ -167,9 +179,17 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
     // Don't do anything if copying self
     if (&a == this)
         return *this;
-        
-    // Currently nothing to do from the base class; this may change in a later 
-    // build
+
+    // Duplicate the member data        
+    epoch    = a.epoch;
+    refBody  = a.refBody;
+    refFrame = a.refFrame;
+    refPlane = a.refPlane;
+
+    for (Integer i = 0; i < 6; ++i)
+       state[i] = a.state[i];
+
+    mass = a.mass;
 
     return *this;
 }
