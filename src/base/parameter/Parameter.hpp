@@ -27,88 +27,90 @@ class GMAT_API Parameter : public GmatBase
 {
 public:
 
-    enum ParameterKey
-    {
-        SYSTEM_PARAM, USER_PARAM, KeyCount
-    };
+   enum ParameterKey
+   {
+      SYSTEM_PARAM, USER_PARAM, KeyCount
+   };
 
-    Parameter(const std::string &name, const std::string &typeStr,
-              ParameterKey key, GmatBase *obj,
-              const std::string &desc, const std::string &unit,
-              bool isTimeParam);
-    Parameter(const Parameter &copy);
-    Parameter& operator= (const Parameter& right);
-    virtual ~Parameter();
+   Parameter(const std::string &name, const std::string &typeStr,
+             ParameterKey key, GmatBase *obj,
+             const std::string &desc, const std::string &unit,
+             bool isTimeParam);
+   Parameter(const Parameter &copy);
+   Parameter& operator= (const Parameter& right);
+   virtual ~Parameter();
 
-    ParameterKey GetKey() const;
-    std::string GetDesc() const;
-    std::string GetUnit() const;
-    std::string GetColor() const;
-    bool IsTimeParameter() const;
+   ParameterKey GetKey() const;
+   std::string GetDesc() const;
+   std::string GetUnit() const;
+   std::string GetColor() const;
+   bool IsTimeParameter() const;
     
-    void SetKey(const ParameterKey &key);
-    void SetDesc(const std::string &desc);
-    void SetUnit(const std::string &unit);
+   void SetKey(const ParameterKey &key);
+   void SetDesc(const std::string &desc);
+   void SetUnit(const std::string &unit);
     
-    bool operator==(const Parameter &right) const;
-    bool operator!=(const Parameter &right) const;
+   bool operator==(const Parameter &right) const;
+   bool operator!=(const Parameter &right) const;
 
-    virtual bool EvaluateBoolean(); //loj: 3/25/04 added
-    virtual Real EvaluateReal();
-    virtual Rvector6 EvaluateRvector6();
-    
-    virtual const std::string* GetParameterList() const;
+   virtual Real GetReal();
+   
+   virtual Real EvaluateReal();
+   virtual Rvector6 EvaluateRvector6();
+   
+   virtual const std::string* GetParameterList() const;
 
-    virtual StringArray& GetObjectTypeNames();
-    virtual StringArray& GetObjectNames();
-    virtual GmatBase* GetObject(const std::string &objTypeName);
-    virtual bool SetObject(Gmat::ObjectType objType,
-                           const std::string &objName,
-                           GmatBase *obj);
+   virtual StringArray& GetObjectTypeNames();
+   virtual StringArray& GetObjectNames();
+   virtual GmatBase* GetObject(const std::string &objTypeName);
+   virtual bool SetObject(Gmat::ObjectType objType,
+                          const std::string &objName,
+                          GmatBase *obj);
 
-    // methods all SYSTEM_PARAM should implement
-    virtual bool AddObject(const std::string &name);
-    virtual bool AddObject(GmatBase *object);
-    virtual Integer GetNumObjects() const;
-    virtual bool Evaluate();
-    virtual bool Validate();
-    
-    // methods inherited from GmatBase
-    virtual std::string GetParameterText(const Integer id) const;
-    virtual Integer GetParameterID(const std::string &str) const;
-    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-    virtual std::string GetParameterTypeString(const Integer id) const;
+   // methods all SYSTEM_PARAM should implement
+   virtual bool AddObject(const std::string &name);
+   virtual bool AddObject(GmatBase *object);
+   virtual Integer GetNumObjects() const;
+   virtual bool Evaluate();
+   virtual bool Validate();
+   virtual void Initialize();
+   
+   // methods inherited from GmatBase
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
 
-    virtual std::string GetStringParameter(const Integer id) const;
-    virtual std::string GetStringParameter(const std::string &label) const;
-    virtual bool SetStringParameter(const Integer id, const std::string &value);
-    virtual bool SetStringParameter(const std::string &label,
-                                    const std::string &value);
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value);
 protected:
 
-    void ManageObject(GmatBase *obj);
+   void ManageObject(GmatBase *obj);
     
-    static const std::string PARAMETER_KEY_STRING[KeyCount];
+   static const std::string PARAMETER_KEY_STRING[KeyCount];
 
-    ParameterKey  mKey;
-    std::string   mDesc;
-    std::string   mUnit;
-    std::string   mColorName;
-    bool mIsTimeParam;
+   ParameterKey  mKey;
+   std::string   mDesc;
+   std::string   mUnit;
+   std::string   mColorName;
+   bool mIsTimeParam;
 
-    StringArray mObjectTypeNames;
-    StringArray mObjectNames;
-    Integer mNumObjects;
+   StringArray mObjectTypeNames;
+   StringArray mObjectNames;
+   Integer mNumObjects;
     
-    enum
-    {
-        OBJECT = 0,
-        COLOR,
-        ParameterParamCount
-    };
+   enum
+   {
+      OBJECT = 0,
+      COLOR,
+      ParameterParamCount
+   };
     
-    static const Gmat::ParameterType PARAMETER_TYPE[ParameterParamCount];
-    static const std::string PARAMETER_TEXT[ParameterParamCount];
+   static const Gmat::ParameterType PARAMETER_TYPE[ParameterParamCount];
+   static const std::string PARAMETER_TEXT[ParameterParamCount];
 };
 #endif // Parameter_hpp
 

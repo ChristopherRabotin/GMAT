@@ -38,15 +38,15 @@ Parameter::PARAMETER_KEY_STRING[KeyCount] =
 const std::string
 Parameter::PARAMETER_TEXT[ParameterParamCount] =
 {
-    "Object",
-    "Color",
+   "Object",       //loj: 4/23/04 this will be removed later (need for current script)
+   "Color",
 };
 
 const Gmat::ParameterType
 Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
-    Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -75,26 +75,36 @@ Parameter::PARAMETER_TYPE[ParameterParamCount] =
 Parameter::Parameter(const std::string &name, const std::string &typeStr,
                      ParameterKey key, GmatBase *obj, const std::string &desc,
                      const std::string &unit, bool isTimeParam)
-    : GmatBase(Gmat::PARAMETER, typeStr, name)
+   : GmatBase(Gmat::PARAMETER, typeStr, name)
 {  
-    mKey = key;
-
-    //loj: should "" or " " be allowed?
-    if ((name != "" && name != " "))
-    {
-        //if name has blank spaces
-        if (name.find(' ') < name.npos)
-            throw ParameterException
-                ("Parameter: parameter name cannot have blank space: " + name);
-    }
+   mKey = key;
    
-    if (desc == "")
-        mDesc = std::string(name);
-    else
-        mDesc = desc;
+   //if ((name != "" && name != " "))
+   if (name != "")
+   {
+      //loj: 4/26/04
+      //if constructor throws an exception, it isn't caught in the caller code.
+      //so replace blank space with underscore "_"
+      std::string tempName = name;
+      std::string replaceStr = "_";
+      for (unsigned int i=0; i<tempName.size(); i++)
+         if (tempName[i] == ' ')
+            tempName.replace(i, 1, replaceStr);
 
-    mUnit = unit;
-    mIsTimeParam = isTimeParam;
+      instanceName = tempName;
+      
+      //if (name.find(' ') < name.npos)
+      //     throw ParameterException
+      //         ("Parameter: parameter name cannot have blank space: " + name);
+   }
+   
+   if (desc == "")
+      mDesc = instanceName;
+   else
+      mDesc = desc;
+
+   mUnit = unit;
+   mIsTimeParam = isTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -107,12 +117,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
  */
 //------------------------------------------------------------------------------
 Parameter::Parameter(const Parameter &copy)
-    : GmatBase(copy)
+   : GmatBase(copy)
 {
-    mKey = copy.mKey;
-    mDesc = copy.mDesc;
-    mUnit = copy.mUnit;
-    mIsTimeParam = copy.mIsTimeParam;
+   mKey = copy.mKey;
+   mDesc = copy.mDesc;
+   mUnit = copy.mUnit;
+   mIsTimeParam = copy.mIsTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -128,15 +138,15 @@ Parameter::Parameter(const Parameter &copy)
 //------------------------------------------------------------------------------
 Parameter& Parameter::operator= (const Parameter& right)
 {
-    if (this != &right)
-    {
-        GmatBase::operator=(right);
-        mKey = right.mKey;
-        mDesc = right.mDesc;
-        mIsTimeParam = right.mIsTimeParam;
-    }
+   if (this != &right)
+   {
+      GmatBase::operator=(right);
+      mKey = right.mKey;
+      mDesc = right.mDesc;
+      mIsTimeParam = right.mIsTimeParam;
+   }
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +171,7 @@ Parameter::~Parameter()
 //------------------------------------------------------------------------------
 Parameter::ParameterKey Parameter::GetKey() const
 {
-    return mKey;
+   return mKey;
 }
 
 //------------------------------------------------------------------------------
@@ -175,7 +185,7 @@ Parameter::ParameterKey Parameter::GetKey() const
 //------------------------------------------------------------------------------
 std::string Parameter::GetDesc() const
 {
-    return mDesc;
+   return mDesc;
 }
 
 //------------------------------------------------------------------------------
@@ -189,7 +199,7 @@ std::string Parameter::GetDesc() const
 //------------------------------------------------------------------------------
 std::string Parameter::GetUnit() const
 {
-    return mUnit;
+   return mUnit;
 }
 
 //------------------------------------------------------------------------------
@@ -203,7 +213,7 @@ std::string Parameter::GetUnit() const
 //------------------------------------------------------------------------------
 bool Parameter::IsTimeParameter() const
 {
-    return mIsTimeParam;
+   return mIsTimeParam;
 }
 
 //------------------------------------------------------------------------------
@@ -217,7 +227,7 @@ bool Parameter::IsTimeParameter() const
 //------------------------------------------------------------------------------
 void Parameter::SetKey(const ParameterKey &key)
 {
-    mKey = key;
+   mKey = key;
 }
 
 //------------------------------------------------------------------------------
@@ -231,7 +241,7 @@ void Parameter::SetKey(const ParameterKey &key)
 //------------------------------------------------------------------------------
 void Parameter::SetDesc(const std::string &desc)
 {
-    mDesc = desc;
+   mDesc = desc;
 }
 
 //------------------------------------------------------------------------------
@@ -245,7 +255,7 @@ void Parameter::SetDesc(const std::string &desc)
 //------------------------------------------------------------------------------
 void Parameter::SetUnit(const std::string &unit)
 {
-    mUnit = unit;
+   mUnit = unit;
 }
 
 //------------------------------------------------------------------------------
@@ -257,13 +267,13 @@ void Parameter::SetUnit(const std::string &unit)
 //------------------------------------------------------------------------------
 bool Parameter::operator==(const Parameter &right) const
 {
-    if (typeName != right.typeName)
-        return false;
+   if (typeName != right.typeName)
+      return false;
 
-    if (instanceName.compare(right.instanceName) != 0)
-        return false;
+   if (instanceName.compare(right.instanceName) != 0)
+      return false;
 
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -275,21 +285,7 @@ bool Parameter::operator==(const Parameter &right) const
 //------------------------------------------------------------------------------
 bool Parameter::operator!=(const Parameter &right) const
 {
-    return !(*this == right);
-}
-
-//------------------------------------------------------------------------------
-// bool EvaluateBoolean()
-//------------------------------------------------------------------------------
-/**
- * Evaluates parameter value.
- *
- * @return false if derived class doesn't implement this
- */
-//------------------------------------------------------------------------------
-bool Parameter::EvaluateBoolean()
-{
-    return false;
+   return !(*this == right);
 }
 
 //------------------------------------------------------------------------------
@@ -303,7 +299,21 @@ bool Parameter::EvaluateBoolean()
 //------------------------------------------------------------------------------
 Real Parameter::EvaluateReal()
 {
-    return REAL_PARAMETER_UNDEFINED;
+   return REAL_PARAMETER_UNDEFINED;
+}
+
+//------------------------------------------------------------------------------
+// Real GetReal()
+//------------------------------------------------------------------------------
+/**
+ * retrieves parameter value without evaluating.
+ *
+ * @return REAL_PARAMETER_UNDEFINED if derived class has no implemention
+ */
+//------------------------------------------------------------------------------
+Real Parameter::GetReal()
+{
+   return REAL_PARAMETER_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
@@ -312,12 +322,12 @@ Real Parameter::EvaluateReal()
 /**
  * Evaluates parameter value.
  *
- * @return RVECTOR6_PARAMETER_UNDEFINED if derived class doesn't implement this
+ * @return RVECTOR6_PARAMETER_UNDEFINED if derived class has no implemention
  */
 //------------------------------------------------------------------------------
 Rvector6 Parameter::EvaluateRvector6()
 {
-    return Rvector6::RVECTOR6_UNDEFINED;
+   return Rvector6::RVECTOR6_UNDEFINED;
 }
 
 //------------------------------------------------------------------------------
@@ -325,7 +335,7 @@ Rvector6 Parameter::EvaluateRvector6()
 //------------------------------------------------------------------------------
 const std::string* Parameter::GetParameterList() const
 {
-    return NULL;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -333,7 +343,7 @@ const std::string* Parameter::GetParameterList() const
 //------------------------------------------------------------------------------
 StringArray& Parameter::GetObjectTypeNames()
 {
-    return mObjectTypeNames;
+   return mObjectTypeNames;
 }
 
 //------------------------------------------------------------------------------
@@ -341,7 +351,7 @@ StringArray& Parameter::GetObjectTypeNames()
 //------------------------------------------------------------------------------
 StringArray& Parameter::GetObjectNames()
 {
-    return mObjectNames;
+   return mObjectNames;
 }
 
 //------------------------------------------------------------------------------
@@ -349,7 +359,7 @@ StringArray& Parameter::GetObjectNames()
 //------------------------------------------------------------------------------
 GmatBase* Parameter::GetObject(const std::string &objTypeName)
 {
-    return NULL;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -359,7 +369,7 @@ GmatBase* Parameter::GetObject(const std::string &objTypeName)
 bool Parameter::SetObject(Gmat::ObjectType objType,
                           const std::string &objName, GmatBase *obj)
 {
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -367,31 +377,31 @@ bool Parameter::SetObject(Gmat::ObjectType objType,
 //------------------------------------------------------------------------------
 bool Parameter::AddObject(const std::string &name)
 {
-    bool status = false;
+   bool status = false;
 
 #if !defined __UNIT_TEST__
     
-    Moderator *theModerator = Moderator::Instance();
+   Moderator *theModerator = Moderator::Instance();
     
-    //MessageInterface::ShowMessage("Parameter::AddObject entered: "
-    //                              "name = %s typename = %s\n", name.c_str());
+   //MessageInterface::ShowMessage("Parameter::AddObject entered: "
+   //                              "name = %s typename = %s\n", name.c_str());
                                     
-    if (name != "")
-    {
-        //loj: should check name first to see if it's already added - do this later
+   if (name != "")
+   {
+      //loj: should check name first to see if it's already added - do this later
         
-        GmatBase *obj = theModerator->GetConfiguredItem(name);
-        if (obj != NULL)
-        {
-            //mObjectNames.push_back(name);
-            //mObjectTypeNames.push_back(obj->GetTypeName());
-            //mNumObjects = mObjectNames.size();
-            AddObject(obj);
-            status = true;
-        }
-    }
+      GmatBase *obj = theModerator->GetConfiguredItem(name);
+      if (obj != NULL)
+      {
+         //mObjectNames.push_back(name);
+         //mObjectTypeNames.push_back(obj->GetTypeName());
+         //mNumObjects = mObjectNames.size();
+         AddObject(obj);
+         status = true;
+      }
+   }
 #endif
-    return status;
+   return status;
 }
 
 //------------------------------------------
@@ -403,11 +413,11 @@ bool Parameter::AddObject(const std::string &name)
 //------------------------------------------------------------------------------
 bool Parameter::AddObject(GmatBase *object)
 {
-    if (mKey == SYSTEM_PARAM)
-        throw ParameterException("Parameter: AddObject() should be implemented "
-                                 "for Parameter Type:" + GetTypeName());
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: AddObject() should be implemented "
+                               "for Parameter Type:" + GetTypeName());
 
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -415,11 +425,11 @@ bool Parameter::AddObject(GmatBase *object)
 //------------------------------------------------------------------------------
 Integer Parameter::GetNumObjects() const
 {
-    if (mKey == SYSTEM_PARAM)
-        throw ParameterException("Parameter: GetNumObjects() should be implemented"
-                                 "for Parameter Type: " + GetTypeName());
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: GetNumObjects() should be implemented"
+                               "for Parameter Type: " + GetTypeName());
 
-    return 0;
+   return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -427,11 +437,11 @@ Integer Parameter::GetNumObjects() const
 //------------------------------------------------------------------------------
 bool Parameter::Evaluate()
 {
-    if (mKey == SYSTEM_PARAM)
-        throw ParameterException("Parameter: Evaluate() should be implemented "
-                                 "for Parameter Type: " + GetTypeName());
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: Evaluate() should be implemented "
+                               "for Parameter Type: " + GetTypeName());
 
-    return false;
+   return false;
 }
 
 //------------------------------------------------------------------------------
@@ -439,11 +449,21 @@ bool Parameter::Evaluate()
 //------------------------------------------------------------------------------
 bool Parameter::Validate()
 {
-    if (mKey == SYSTEM_PARAM)
-        throw ParameterException("Parameter: Validate() should be implemented "
-                                 "for Parameter Type: " + GetTypeName());
+   if (mKey == SYSTEM_PARAM)
+      throw ParameterException("Parameter: Validate() should be implemented "
+                               "for Parameter Type: " + GetTypeName());
 
-    return false;
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// virtual void Initialize()
+//------------------------------------------------------------------------------
+void Parameter::Initialize()
+{
+   //if (mKey == SYSTEM_PARAM)
+   //   throw ParameterException("Parameter: Initialize() should be implemented "
+   //                            "for Parameter Type: " + GetTypeName());
 }
 
 //---------------------------------
@@ -455,10 +475,10 @@ bool Parameter::Validate()
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterText(const Integer id) const
 {
-    if (id >= OBJECT && id < ParameterParamCount)
-        return PARAMETER_TEXT[id];
-    else
-        return GmatBase::GetParameterText(id);
+   if (id >= OBJECT && id < ParameterParamCount)
+      return PARAMETER_TEXT[id];
+   else
+      return GmatBase::GetParameterText(id);
     
 }
 
@@ -470,7 +490,7 @@ Integer Parameter::GetParameterID(const std::string &str) const
    for (int i=0; i<ParameterParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i])
-          return i;
+         return i;
    }
    
    return GmatBase::GetParameterID(str);
@@ -481,10 +501,10 @@ Integer Parameter::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 {
-    if (id >= OBJECT && id < ParameterParamCount)
-        return PARAMETER_TYPE[id];
-    else
-        return GmatBase::GetParameterType(id);
+   if (id >= OBJECT && id < ParameterParamCount)
+      return PARAMETER_TYPE[id];
+   else
+      return GmatBase::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -492,10 +512,10 @@ Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterTypeString(const Integer id) const
 {
-    if (id >= OBJECT && id < ParameterParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-    else
-       return GmatBase::GetParameterTypeString(id);
+   if (id >= OBJECT && id < ParameterParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return GmatBase::GetParameterTypeString(id);
     
 }
 
@@ -504,18 +524,18 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetStringParameter(const Integer id) const
 {
-    switch (id)
-    {
-    case OBJECT: //loj: return first object name for now
-        if (mNumObjects > 0)
-            return mObjectNames[0];
-        else
-            return GmatBase::GetStringParameter(id);
-    case COLOR:
-        return mColorName;
-    default:
-        return GmatBase::GetStringParameter(id);
-    }
+   switch (id)
+   {
+   case OBJECT: //loj: return first object name for now
+      if (mNumObjects > 0)
+         return mObjectNames[0];
+      else
+         return GmatBase::GetStringParameter(id);
+   case COLOR:
+      return mColorName;
+   default:
+      return GmatBase::GetStringParameter(id);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -523,7 +543,7 @@ std::string Parameter::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetStringParameter(const std::string &label) const
 {
-    return GetStringParameter(GetParameterID(label));
+   return GetStringParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -531,16 +551,16 @@ std::string Parameter::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 {
-    switch (id)
-    {
-    case OBJECT:
-        return AddObject(value);
-    case COLOR:
-        mColorName = value;
-        return true;
-    default:
-        return GmatBase::SetStringParameter(id, value);
-    }
+   switch (id)
+   {
+   case OBJECT:
+      return AddObject(value);
+   case COLOR:
+      mColorName = value;
+      return true;
+   default:
+      return GmatBase::SetStringParameter(id, value);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -550,9 +570,9 @@ bool Parameter::SetStringParameter(const Integer id, const std::string &value)
 bool Parameter::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-//      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
-//                                    "label = " + label + ", value = " + value + "\n");
-    return SetStringParameter(GetParameterID(label), value);
+   //      MessageInterface::ShowMessage("Parameter::SetStringParameter() entered: "
+   //                                    "label = " + label + ", value = " + value + "\n");
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------
@@ -564,10 +584,10 @@ bool Parameter::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 void Parameter::ManageObject(GmatBase *obj)
 {
-    mObjectNames.push_back(obj->GetName());
-    mObjectTypeNames.push_back(obj->GetTypeName());
-    mNumObjects = mObjectNames.size();
-    //MessageInterface::ShowMessage("Parameter::ManageObject() param name = %s mNumObjects = %d\n",
-    //                              obj->GetName().c_str(), mNumObjects);
+   mObjectNames.push_back(obj->GetName());
+   mObjectTypeNames.push_back(obj->GetTypeName());
+   mNumObjects = mObjectNames.size();
+   //MessageInterface::ShowMessage("Parameter::ManageObject() param name = %s mNumObjects = %d\n",
+   //                              obj->GetName().c_str(), mNumObjects);
 }
 
