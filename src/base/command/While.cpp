@@ -159,11 +159,8 @@ bool While::Initialize()
 //  bool Execute()
 //------------------------------------------------------------------------------
 /**
- * Target the variables defined for this for While statement.
- *
- * This method (will eventually) runs the state machine in order to
- * determine the variable values needed to achieve the user specified 
- * goals.
+ * Run the branch for this While statement, based on the condition
+ * evaluation.
  *
  * @return true if the Command runs to completion, false if an error
  *         occurs.
@@ -173,13 +170,16 @@ bool While::Execute()
 {
    bool retval = true;
    
-   BranchCommand::Execute(); // ??
-   commandComplete  = false;
-   commandExecuting = true;
+   BranchCommand::Execute();
+   //commandComplete  = false;
+   //commandExecuting = true;
    
    if (EvaluateCondition(0)) // must deal with multiple conditions later
    {
       retval = ExecuteBranch();
+   }
+   else  // fails condition, so while loop is done
+   {
       commandComplete  = true;
       commandExecuting = false;
    }
