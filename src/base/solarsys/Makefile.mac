@@ -3,12 +3,13 @@
 # Created:    Joey Gurgnaus 
 # Date:       2003/11/13
 # Modified:   2004/02/06 - Added Moon.cpp, Planet.cpp, and Star.cpp
+# Modified:   2004/02/19 - Added SlpFile.cpp PlanetaryEphem.cpp PlanetaryEphemException.cpp
 
 # Define the marco for the top-level directories
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = CelestialBody.cpp Moon.cpp Planet.cpp SolarSystem.cpp Star.cpp
+SRC = CelestialBody.cpp Moon.cpp Planet.cpp PlanetaryEphemException.cpp PlanetaryEphem.cpp SlpFile.cpp SolarSystem.cpp Star.cpp
 #
 # Define macro for using the included file 
 INCMK = $(PROJECT_ROOT)/base/inc.mac
