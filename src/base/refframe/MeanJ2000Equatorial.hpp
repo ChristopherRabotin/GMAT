@@ -36,6 +36,9 @@ public:
 
     // conversion to other frames (future build implementation)
 
+    // inherited from GmatBase
+    virtual GmatBase* Clone(void) const;
+
 protected:
 
 private:

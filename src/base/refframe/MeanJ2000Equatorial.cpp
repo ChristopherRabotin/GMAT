@@ -82,3 +82,19 @@ MeanJ2000Equatorial& MeanJ2000Equatorial::operator= (const MeanJ2000Equatorial &
 MeanJ2000Equatorial::~MeanJ2000Equatorial()
 {
 }
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the MeanJ2000Equatorial.
+ *
+ * @return clone of the MeanJ2000Equatorial.
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* MeanJ2000Equatorial::Clone(void) const
+{
+   return (new MeanJ2000Equatorial(*this));
+}
+

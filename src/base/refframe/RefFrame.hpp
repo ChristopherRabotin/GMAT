@@ -63,7 +63,7 @@ protected:
 
     enum
     {
-        CENTRAL_BODY = 0,
+        CENTRAL_BODY = GmatBaseParamCount,
         RefFrameParamCount
     };
     
