@@ -41,6 +41,8 @@
 #include "Assignment.hpp"     // for Assignment command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
+#include "BeginScript.hpp"    // for BeginScript command
+#include "EndScript.hpp"      // for EndScript command
 
 
 //---------------------------------
@@ -102,6 +104,10 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new BeginFiniteBurn;
     else if (ofType == "EndFiniteBurn")
          return new EndFiniteBurn;
+    else if (ofType == "BeginScript")
+        return new BeginScript;
+    else if (ofType == "EndScript")
+         return new EndScript;
    // add more here .......
    else {
       return NULL;   // doesn't match any known type of command
@@ -145,6 +151,8 @@ CommandFactory::CommandFactory() :
       creatables.push_back("Assignment");
       creatables.push_back("BeginFiniteBurn");
       creatables.push_back("EndFiniteBurn");
+      creatables.push_back("BeginScript");
+      creatables.push_back("EndScript");
    }
 }
 
@@ -199,6 +207,8 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("Assignment");
       creatables.push_back("BeginFiniteBurn");
       creatables.push_back("EndFiniteBurn");
+      creatables.push_back("BeginScript");
+      creatables.push_back("EndScript");
    }
 }
 
