@@ -30,6 +30,7 @@
 //#define DEBUG_USER_INTERRUPT 1
 //#define DEBUG_ACTION_REMOVE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
+//#define DEBUG_SEQUENCE_CLEARING 1
 
 //---------------------------------
 // static data
@@ -2030,10 +2031,23 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    //djc: Maybe set to NULL if you plan to do something completely different from
    // the way GMAT acts from a script?  I think you want to do this, though:
    // commands[sandboxNum-1] = NULL;
-   GmatCommand *cmd = commands[sandboxNum-1];
+   GmatCommand *cmd = commands[sandboxNum-1], *oldcmd;
+   oldcmd = cmd->GetNext();
    DeleteCommand(cmd);
-    
-   //djc: if you plan on adding the gui commands to the sandbox next, using 
+   if (oldcmd) {
+      #ifdef DEBUG_SEQUENCE_CLEARING
+         GmatCommand *current = oldcmd;
+         MessageInterface::ShowMessage("Clearing this command list:\n   ");
+         while (current) {
+            MessageInterface::ShowMessage("%s\n   ", current->GetTypeName().c_str());
+            current = current->GetNext();
+         }
+         MessageInterface::ShowMessage("\n");
+      #endif
+      delete oldcmd;
+   }
+          
+   // djc: if you plan on adding the gui commands to the sandbox next, using 
    // the same approach used when running a script.
    cmd = new NoOp; 
     
