@@ -24,30 +24,42 @@
 class ViewTextFrame: public wxFrame
 {
 public:
+   
     // constructors
-    ViewTextFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h);
-
+    ViewTextFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h,
+                  const wxString &mode = "Temporary");
+    ~ViewTextFrame();
+    
     // operations
-    void WriteText(const wxString& text);
-
+    void AppendText(const wxString& text);
+    void ClearText()
+        { mTextCtrl->Clear(); };
+    void SetWindowMode(const wxString &mode)
+        { mWindowMode = mode; };
+    wxString GetWindowMode()
+        { return mWindowMode; };
+    
 private:
 
     wxMenuBar *CreateMainMenu();
 
     DECLARE_EVENT_TABLE();
     // callbacks
-    void OnClose(wxCommandEvent& event);
     void OnClear(wxCommandEvent& event);
+    void OnExit(wxCommandEvent& event);
 
     // IDs for the controls and the menu commands
     enum
     {
         VIEW_TEXT_CLEAR = 1,
-        VIEW_TEXT_CLOSE
+        VIEW_TEXT_EXIT
     };
-    
-    // just some place to put our messages in
+
+    /// just some place to put our messages in
     wxTextCtrl *mTextCtrl;
+
+    /// window mode ("Permanent", "Temporary")
+    wxString mWindowMode;
 };
 
 #endif

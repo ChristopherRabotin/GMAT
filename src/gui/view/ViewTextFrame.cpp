@@ -18,10 +18,11 @@
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
+#include "GmatAppData.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextFrame, wxFrame)
     EVT_MENU(VIEW_TEXT_CLEAR, ViewTextFrame::OnClear)
-    EVT_MENU(VIEW_TEXT_CLOSE, ViewTextFrame::OnClose)
+    EVT_MENU(VIEW_TEXT_EXIT, ViewTextFrame::OnExit)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -30,39 +31,38 @@ END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // ViewTextFrame(wxFrame *frame, const wxString& title,
-//              int x, int y, int w, int h)
+//              int x, int y, int w, int h, const wxString &mode)
 //------------------------------------------------------------------------------
 ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
-                             int x, int y, int w, int h)
+                             int x, int y, int w, int h, const wxString &mode)
     : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h))
 {
     CreateStatusBar(2);
-    
+    mWindowMode = mode;
     mTextCtrl = new wxTextCtrl(this, -1, _T(""), wxPoint(0, 0), wxSize(0, 0),
                                wxTE_MULTILINE | wxTE_READONLY);
 #if wxUSE_MENUS
     // create a menu bar 
     SetMenuBar(CreateMainMenu());
 #endif // wxUSE_MENUS
-    
+
 }
 
-//------------------------------------------------------------------------------
-// void WriteText(const wxString& text)
-//------------------------------------------------------------------------------
-void ViewTextFrame::WriteText(const wxString& text)
+ViewTextFrame::~ViewTextFrame()
 {
-    mTextCtrl->WriteText(text);
+    if (mWindowMode != "Temporary")
+    {
+        GmatAppData::SetMessageWindow(NULL);
+    }
 }
 
 //------------------------------------------------------------------------------
-// void OnClose(wxCommandEvent& WXUNUSED(event) )
+// void AppendText(const wxString& text)
 //------------------------------------------------------------------------------
-void ViewTextFrame::OnClose(wxCommandEvent& WXUNUSED(event) )
+void ViewTextFrame::AppendText(const wxString& text)
 {
-    Close(TRUE);
+    mTextCtrl->AppendText(text);
 }
-
 
 //------------------------------------------------------------------------------
 // void OnClear(wxCommandEvent& WXUNUSED(event))
@@ -70,6 +70,17 @@ void ViewTextFrame::OnClose(wxCommandEvent& WXUNUSED(event) )
 void ViewTextFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 {
     mTextCtrl->Clear();
+}
+
+//------------------------------------------------------------------------------
+// void OnExit(wxCommandEvent& WXUNUSED(event) )
+//------------------------------------------------------------------------------
+void ViewTextFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
+{
+    if (mWindowMode == "Temporary")
+        Close(true);
+    else
+        Show(false);
 }
 
 //-------------------------------
@@ -87,7 +98,7 @@ wxMenuBar* ViewTextFrame::CreateMainMenu()
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(VIEW_TEXT_CLEAR, _T("&Clear\tCtrl-L"));
     menuFile->AppendSeparator();
-    menuFile->Append(VIEW_TEXT_CLOSE, _T("E&xit\tAlt-X"));
+    menuFile->Append(VIEW_TEXT_EXIT, _T("E&xit\tAlt-X"));
     menuBar->Append(menuFile, _T("&File"));
 
     return menuBar;
