@@ -25,7 +25,7 @@
 
 // base includes
 #include "MessageInterface.hpp"
-
+#include "PropagatorException.hpp"
 
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
@@ -220,6 +220,17 @@ void PropagationConfigPanel::SaveData()
       ShowPropData("SaveData() BEFORE saving Integrator");
 #endif
       isIntegratorChanged = false;
+      
+      Real min = atof(setting3TextCtrl->GetValue());
+      Real max = atof(setting4TextCtrl->GetValue());
+      
+      if (max < min)
+      {
+         MessageInterface::PopupMessage
+         (Gmat::WARNING_, "PropagationConfigPanel::SaveData -- \n"
+         "Maximum Step can not be less than Minimum Step.");
+         return;
+      }    
         
       newProp->SetRealParameter("StepSize", atof(setting1TextCtrl->GetValue()));
       newProp->SetRealParameter("Accuracy", atof(setting2TextCtrl->GetValue()));
@@ -1083,7 +1094,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
     Integer i5 = (long)newProp->GetIntegerParameter("MaxStepAttempts");
 
     s1.Printf("%.10f", i1);
-    s2.Printf("%.10f", i2);
+    s2.Printf("%le", i2);
     s3.Printf("%.10f", i3);
     s4.Printf("%.10f", i4);
     s5.Printf("%d", i5);
