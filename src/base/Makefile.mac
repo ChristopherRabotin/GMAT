@@ -6,7 +6,7 @@
 #             2004/09/23 - W. Shoan - added interface and function directories
 #             2004/09/24 - J. Gurganus - added new target 'testing'
 
-SUBS = burn command configs executive factory forcemodel foundation function \
+SUBS = burn command configs coordsystem executive factory forcemodel foundation function \
 	interface interpolator interpreter parameter propagator refframe \
 	solarsys solver spacecraft stopcond subscriber util
 
