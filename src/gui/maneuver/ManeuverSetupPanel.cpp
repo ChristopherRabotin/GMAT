@@ -47,11 +47,8 @@ ManeuverSetupPanel::ManeuverSetupPanel(wxWindow *parent, GmatCommand *cmd)
     :GmatPanel(parent)
 
 {
-//    theParent = parent;
     theCommand = cmd;
 
-    theGuiManager = GuiItemManager::GetInstance();
-    
     Create();
     Show();
 }
@@ -185,7 +182,7 @@ void ManeuverSetupPanel::Create()
     {
        // show error message
     }
-
+    
 }
 
 //------------------------------------------------------------------------------
@@ -194,9 +191,41 @@ void ManeuverSetupPanel::Create()
 void ManeuverSetupPanel::LoadData()
 {
     // load data from the core engine
-    // default values for now
+    Integer id;
+    int index;
+    
+    // default values
     burnCB->SetSelection(0);
     satCB->SetSelection(0);
+
+    // burn 
+    id = theCommand->GetParameterID("Burn");
+    std::string burn = theCommand->GetStringParameter(id);
+//    StringArray burnList = theCommand->GetStringArrayParameter(id);
+    StringArray burnList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::BURN);
+    index = 0;
+    for (StringArray::iterator iter = burnList.begin(); 
+        iter != burnList.end(); ++iter) 
+    {
+        if (burn == *iter) 
+            burnCB->SetSelection(index);
+        else
+            ++index;
+    }
+
+    // spacecraft
+    id = theCommand->GetParameterID("Spacecraft");
+    std::string sat = theCommand->GetStringParameter(id);
+    StringArray satList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    index = 0;
+    for (StringArray::iterator iter = satList.begin(); 
+        iter != satList.end(); ++iter) 
+    {
+        if (sat == *iter) 
+            satCB->SetSelection(index);
+        else
+            ++index;
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -205,6 +234,21 @@ void ManeuverSetupPanel::LoadData()
 void ManeuverSetupPanel::SaveData()
 {
     // save data to core engine
+    Integer id;
+    wxString elemString;
+
+    // save burn
+    wxString burnString = burnCB->GetStringSelection();
+    id = theCommand->GetParameterID("Burn");
+    std::string burn = std::string (burnString.c_str());
+    theCommand->SetStringParameter(id, burn);
+
+    // save spacecraft
+    wxString satString = satCB->GetStringSelection();
+    id = theCommand->GetParameterID("Spacecraft");
+    std::string spacecraft = std::string (satString.c_str());
+    theCommand->SetStringParameter(id, spacecraft);
+
 }
 
 
