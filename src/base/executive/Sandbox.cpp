@@ -178,6 +178,7 @@ bool Sandbox::Initialize(void)
 
     while (current) {
         current->SetObjectMap(&objectMap);
+        current->SetSolarSystem(solarSys); //loj: 6/16/04 added
         rv = current->Initialize();
         if (!rv)
             return false;
