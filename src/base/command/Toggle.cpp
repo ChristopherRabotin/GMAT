@@ -70,9 +70,9 @@ Toggle& Toggle::operator=(const Toggle& t)
 
 
 //------------------------------------------------------------------------------
-// bool InterpretAction(void)
+// bool InterpretAction()
 //------------------------------------------------------------------------------
-bool Toggle::InterpretAction(void)
+bool Toggle::InterpretAction()
 {
    /// @todo: Clean up this hack for the Toggle::InterpretAction method
    // Sample string:  "Toggle Report On"
@@ -117,17 +117,45 @@ bool Toggle::InterpretAction(void)
 
 
 //------------------------------------------------------------------------------
-// bool Execute(void)
+// bool Initialize()
 //------------------------------------------------------------------------------
-bool Toggle::Execute(void)
+bool Toggle::Initialize()
 {
+   #ifdef DEBUG_TOGGLE
+      MessageInterface::ShowMessage("Toggle::Initialize() entered\n");
+   #endif
    Subscriber *sub;
+   
+   subs.clear();
     
    for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) {
-      sub = (Subscriber *)(*objectMap)[*s];
-      if (sub) {
-         sub->Activate(toggleState);
+      if ((*objectMap).find(*s) != objectMap->end()) {
+         sub = (Subscriber *)(*objectMap)[*s];
+         if (sub) {
+            subs.push_back(sub);
+         }
       }
+      else {
+         MessageInterface::ShowMessage
+            ("Toggle command cannot find subscriber %s; command has no effect for that object\n",
+             s->c_str());
+      }
+   }
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
+bool Toggle::Execute()
+{
+   #ifdef DEBUG_TOGGLE
+      MessageInterface::ShowMessage("Toggle::Execute() entered\n");
+   #endif
+
+   for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s) {
+      (*s)->Activate(toggleState);
    }
     
    char data[] = "Toggle executed\n\n";

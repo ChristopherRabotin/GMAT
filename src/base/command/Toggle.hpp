@@ -58,8 +58,9 @@ public:
                                           const std::string &value);
 
    // Methods used to run the command
-   virtual bool        InterpretAction(void);
-   virtual bool        Execute(void);
+   virtual bool        InterpretAction();
+   virtual bool        Initialize();
+   virtual bool        Execute();
         
 protected:
    /// State for the toggle
