@@ -20,7 +20,7 @@
 #include "MdiTextEditView.hpp"
 #include "MdiDocViewFrame.hpp"
 #include "GmatAppData.hpp"
-#include "GmatMainNotebook.hpp"
+//#include "GmatMainNotebook.hpp"
 #include "VariableCreatePanel.hpp"
 
 // base includes
