@@ -36,7 +36,8 @@ private:
    {
       wxString  solverName;
       wxString  goalName;
-      Real      goalValue;
+      wxString  goalValue;
+      //Real      goalValue;
       Real      tolerance;
       Parameter *goalParam;
    };
@@ -46,6 +47,7 @@ private:
    wxTextCtrl *mToleranceTextCtrl;
    
    wxButton *mViewGoalButton;
+   wxButton *mViewGoalValueButton;
    
    wxComboBox *mSolverComboBox;
    
@@ -63,7 +65,7 @@ private:
    // event handling method
    void OnTextChange(wxCommandEvent& event);    
    void OnSolverSelection();
-   void OnButton(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
