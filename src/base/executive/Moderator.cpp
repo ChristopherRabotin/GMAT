@@ -26,6 +26,7 @@
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
+//#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 1
 //#define DEBUG_USER_INTERRUPT 1
@@ -1425,6 +1426,17 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                sub->SetStringParameter("Add", GetDefaultY()->GetName(), 0);
                sub->Activate(true);
             }
+            else if (type == "ReportFile") //loj: 1/5/04 Added
+            {
+               // add default parameters to ReportFile
+               sub->SetStringParameter(sub->GetParameterID("Filename"),
+                                       name + ".txt");
+               sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
+               sub->SetStringParameter("Add", "DefaultSC.X");
+               sub->SetStringParameter("Add", "DefaultSC.Y");
+               sub->SetStringParameter("Add", "DefaultSC.Z");
+               sub->Activate(true);
+            }
          }
       }
       catch (BaseException &e)
@@ -1573,12 +1585,15 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
    Integer id;
    
-   if (type == "Propagate")
+   if (type == "Toggle") //loj: 1/5/05 Added
+   {
+      cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
+                              GetDefaultSubscriber()->GetName());
+   }
+   else if (type == "Propagate")
    {
       cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
       cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
-      //cmd->SetObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION);
-      //loj: 12/6/04 call SetRefObject() instead of SetObject() on StopCondition
       cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
       cmd->SetSolarSystem(theDefaultSolarSystem);
    }
@@ -2528,6 +2543,9 @@ void Moderator::CreateDefaultMission()
       CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
       CreateParameter("ElapsedDays", "DefaultSC.ElapsedDays");
 
+      //loj: 1/3/05 Added CentralBody info
+      // CoordinateSystem info is not ready yet
+      
       // Cartesian parameters
       CreateParameter("X", "DefaultSC.X");
       CreateParameter("Y", "DefaultSC.Y");
@@ -2537,44 +2555,44 @@ void Moderator::CreateDefaultMission()
       CreateParameter("VZ", "DefaultSC.VZ");
 
       // Keplerian parameters
-      CreateParameter("SMA", "DefaultSC.SMA");
-      CreateParameter("ECC", "DefaultSC.ECC");
-      CreateParameter("INC", "DefaultSC.INC");
-      CreateParameter("RAAN", "DefaultSC.RAAN");
+      CreateParameter("SMA", "DefaultSC.Earth.SMA");
+      CreateParameter("ECC", "DefaultSC.Earth.ECC");
+      CreateParameter("INC", "DefaultSC.Earth.INC");
+      CreateParameter("RAAN", "DefaultSC.Earth.RAAN");
       CreateParameter("AOP", "DefaultSC.AOP");
-      CreateParameter("TA", "DefaultSC.TA");
-      CreateParameter("MA", "DefaultSC.MA");
-      CreateParameter("MM", "DefaultSC.MM");
+      CreateParameter("TA", "DefaultSC.Earth.TA");
+      CreateParameter("MA", "DefaultSC.Earth.MA");
+      CreateParameter("MM", "DefaultSC.Earth.MM");
 
       // Orbital parameters
-      CreateParameter("VelApoapsis", "DefaultSC.VelApoapsis");
-      CreateParameter("VelPeriapsis", "DefaultSC.VelPeriapsis");
-      CreateParameter("Apoapsis", "DefaultSC.Apoapsis");
-      CreateParameter("Periapsis", "DefaultSC.Periapsis");
+      CreateParameter("VelApoapsis", "DefaultSC.Earth.VelApoapsis");
+      CreateParameter("VelPeriapsis", "DefaultSC.Earth.VelPeriapsis");
+      CreateParameter("Apoapsis", "DefaultSC.Earth.Apoapsis");
+      CreateParameter("Periapsis", "DefaultSC.Earth.Periapsis");
 
       // Spherical parameters
-      CreateParameter("RMAG", "DefaultSC.RMAG");
-      CreateParameter("RA", "DefaultSC.RA");
+      CreateParameter("RMAG", "DefaultSC.Earth.RMAG");
+      CreateParameter("RA", "DefaultSC.Earth.RA");
       CreateParameter("DEC", "DefaultSC.DEC");
       CreateParameter("VMAG", "DefaultSC.VMAG");
       CreateParameter("RAV", "DefaultSC.RAV");
       CreateParameter("DECV", "DefaultSC.DECV");
 
       // Angular parameters
-      CreateParameter("SemilatusRectum", "DefaultSC.SemilatusRectum");
-      CreateParameter("HMAG", "DefaultSC.HMAG"); //loj: 12/10/04 added HMAG, HX, HY, HZ
+      CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
+      CreateParameter("HMAG", "DefaultSC.HMAG");
       CreateParameter("HX", "DefaultSC.HX");
       CreateParameter("HY", "DefaultSC.HY");
       CreateParameter("HZ", "DefaultSC.HZ");
 
-      // Environmental parameters (loj: 12/10/04 Added)
-      CreateParameter("AtmosDensity", "DefaultSC.AtmosDensity");
+      // Environmental parameters
+      CreateParameter("AtmosDensity", "DefaultSC.Earth.AtmosDensity");
 
-      // Planet parameters (loj: 12/14/04 Added)
-      CreateParameter("GHA", "DefaultSC.GHA");
-      CreateParameter("Longitude", "DefaultSC.Longitude");
-      CreateParameter("Latitude", "DefaultSC.Latitude");
-      CreateParameter("LST", "DefaultSC.LST");
+      // Planet parameters
+      CreateParameter("GHA", "DefaultSC.Earth.GHA");
+      CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
+      CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
+      CreateParameter("LST", "DefaultSC.Earth.LST");
       CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
       
       // User variable
@@ -2594,10 +2612,12 @@ void Moderator::CreateDefaultMission()
          param = GetParameter(params[i]);
 
          // need spacecraft if system parameter
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM) //loj: 12/10/04 Changed from Parameter::
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             param->SetStringParameter("Expression", param->GetName());
             param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
+            if (param->IsOriginDependent())
+               param->SetStringParameter("DepObject", "Earth"); // Earth is the default
          }
       }
       
@@ -2610,21 +2630,25 @@ void Moderator::CreateDefaultMission()
 #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->default StopCondition created\n");
 #endif
+      
       // Subscribers
       // ReportFile
-      Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
-      sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
-      sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.X");
-      sub->SetStringParameter("Add", "DefaultSC.Y");
-      sub->SetStringParameter("Add", "DefaultSC.Z");
-      sub->SetStringParameter("Add", "DefaultSC.VX");
-      sub->SetStringParameter("Add", "DefaultSC.VY");
-      sub->SetStringParameter("Add", "DefaultSC.VZ");
-      sub->Activate(true);
+      GetDefaultSubscriber();
+
+      //loj: 1/5/05 Moved the code to GetDefaultSubscriber()
+//        Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+//        sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+//        sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
+//        sub->SetStringParameter("Add", "DefaultSC.X");
+//        sub->SetStringParameter("Add", "DefaultSC.Y");
+//        sub->SetStringParameter("Add", "DefaultSC.Z");
+//        sub->SetStringParameter("Add", "DefaultSC.VX");
+//        sub->SetStringParameter("Add", "DefaultSC.VY");
+//        sub->SetStringParameter("Add", "DefaultSC.VZ");
+//        sub->Activate(true);
       
       // XYPlot
-      sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
+      Subscriber *sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
       sub->SetStringParameter("Add", "DefaultSC.X", 0);
 #if DEBUG_ACTION_REMOVE
@@ -2852,6 +2876,35 @@ Burn* Moderator::GetDefaultBurn()
 }
 
 //------------------------------------------------------------------------------
+// Subscriber* GetDefaultSubscriber()
+//------------------------------------------------------------------------------
+Subscriber* Moderator::GetDefaultSubscriber()
+{
+   StringArray &configList = GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+   
+   if (configList.size() > 0)
+   {
+      // return 1st Subscriber from the list
+      return GetSubscriber(configList[0]);
+   }
+   else
+   {
+      // create default ReportFile
+      Subscriber *sub = CreateSubscriber("ReportFile", "DefaultReportFile");
+      sub->SetStringParameter(sub->GetParameterID("Filename"), "DefaultReportFile.txt");
+      sub->SetStringParameter("Add", "DefaultSC.CurrA1MJD");
+      sub->SetStringParameter("Add", "DefaultSC.X");
+      sub->SetStringParameter("Add", "DefaultSC.Y");
+      sub->SetStringParameter("Add", "DefaultSC.Z");
+      sub->SetStringParameter("Add", "DefaultSC.VX");
+      sub->SetStringParameter("Add", "DefaultSC.VY");
+      sub->SetStringParameter("Add", "DefaultSC.VZ");
+      sub->Activate(true);
+      return sub;
+   }
+}
+
+//------------------------------------------------------------------------------
 // Solver* GetDefaultSolver()
 //------------------------------------------------------------------------------
 Solver* Moderator::GetDefaultSolver()
@@ -2876,17 +2929,38 @@ Solver* Moderator::GetDefaultSolver()
 StopCondition* Moderator::CreateDefaultStopCondition()
 {
    StopCondition *stopCond = NULL;
+   Parameter *param;
    
    Spacecraft *sc = GetDefaultSpacecraft();
-   std::string epochVar = sc->GetName() + ".CurrA1MJD";
-   std::string stopVar = sc->GetName() + ".ElapsedSecs";
+   std::string scName = sc->GetName();
+   
+   std::string epochVar = scName + ".CurrA1MJD";
+   std::string stopVar = scName + ".ElapsedSecs";
+
+#ifdef DEBUG_DEFAULT_COMMAND
+   MessageInterface::ShowMessage
+      ("Moderator::CreateDefaultStopCondition() scName=%s, epochVar=%s, stopVar=%s\n",
+       scName.c_str(), epochVar.c_str(), stopVar.c_str());
+#endif
+   
+//     if (GetParameter(epochVar) == NULL)
+//        CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
+
+//     if (GetParameter(stopVar) == NULL)
+//        CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
 
    if (GetParameter(epochVar) == NULL)
-      CreateParameter("CurrA1MJD", "DefaultSC.CurrA1MJD");
-
+   {
+      param = CreateParameter("CurrA1MJD", epochVar);
+      param->SetRefObjectName(Gmat::SPACECRAFT, scName);
+   }
+   
    if (GetParameter(stopVar) == NULL)
-      CreateParameter("ElapsedSecs", "DefaultSC.ElapsedSecs");
-
+   {
+      param = CreateParameter("ElapsedSecs", stopVar);
+      param->SetRefObjectName(Gmat::SPACECRAFT, scName);
+   }
+   
    std::string stopCondName = "StopOn" + stopVar;
    
    stopCond = CreateStopCondition("StopCondition", "StopOn" + stopVar);

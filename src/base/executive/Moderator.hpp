@@ -119,7 +119,7 @@ public:
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
 
-   // AtmosphereModel (loj: 9/13/04 - added)
+   // AtmosphereModel
    AtmosphereModel* CreateAtmosphereModel(const std::string &type,
                                           const std::string &name,
                                           const std::string &body = "Earth");
@@ -183,7 +183,7 @@ public:
                                 bool createDefault = false);
    Subscriber* GetSubscriber(const std::string &name);
 
-   // Function (loj: 9/27/04 added)
+   // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
@@ -243,7 +243,7 @@ public:
 
    // Script
    bool InterpretScript(const std::string &scriptFileName);
-   bool InterpretScript(std::istringstream *ss, bool clearObjs); //loj: 9/8/04 added
+   bool InterpretScript(std::istringstream *ss, bool clearObjs);
    bool SaveScript(const std::string &scriptFileName);
    Integer RunScript(Integer sandboxNum = 1);
    
@@ -260,7 +260,8 @@ private:
    Spacecraft* GetDefaultSpacecraft();
    PropSetup* GetDefaultPropSetup();
    Burn* GetDefaultBurn();
-   Solver* GetDefaultSolver(); //11/16/04 loj: added
+   Solver* GetDefaultSolver();
+   Subscriber* GetDefaultSubscriber();
    StopCondition* CreateDefaultStopCondition();
    Parameter* GetDefaultX();
    Parameter* GetDefaultY();
@@ -313,8 +314,8 @@ private:
    StopConditionFactory *theStopConditionFactory;
    SubscriberFactory *theSubscriberFactory;
    SolverFactory *theSolverFactory;
-   AtmosphereFactory *theAtmosphereFactory; //loj: 9/14/04 - added
-   FunctionFactory *theFunctionFactory; //loj: 9/27/04 - added
+   AtmosphereFactory *theAtmosphereFactory;
+   FunctionFactory *theFunctionFactory;
    
    SolarSystem *theDefaultSolarSystem;
    SlpFile *theDefaultSlpFile;
@@ -323,9 +324,6 @@ private:
    StringArray thePlanetaryFileNames;
    StringArray thePlanetaryFileTypesInUse;
    StringArray theTempFileList;
-
-   //loj: 9/10/04 commented out
-   //static const std::string OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1];
 
    enum
    {
