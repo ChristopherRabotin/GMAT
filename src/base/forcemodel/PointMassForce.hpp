@@ -102,6 +102,9 @@ public:
                                           const std::string &value);
    virtual bool        SetStringParameter(const std::string &label,
                                           const std::string &value);
+   virtual bool           GetBooleanParameter(const Integer id) const;
+   virtual bool           SetBooleanParameter(const Integer id,
+                                              const bool value);  
 
 protected:
    // Parameter IDs
@@ -118,6 +121,7 @@ protected:
       //poleRadiusParameter,  
       /// Error estimate type: 1.0 for component estimate, 2.0 for vector
       ESTIMATE_METHOD,  
+      PRIMARY_BODY,
       //BODY,    
       PointMassParamCount
    };
@@ -133,7 +137,8 @@ protected:
    Real estimationMethod;
    //CelestialBody *theBody; // wcs - 2004/06/21 - exists in PhysicalModel
    //std::string theBodyName; //loj: 5/6/04 added // wcs - 2004/06/21 - exists in PhysicalModel
-
+   bool isPrimaryBody;
+   
    // for Debug
    void ShowBodyState(const std::string &header, Real time, Rvector6 &rv);
    void ShowDerivative(const std::string &header, Real *state, Integer satCount);

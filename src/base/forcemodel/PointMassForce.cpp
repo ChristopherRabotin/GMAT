@@ -75,6 +75,7 @@ PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
    "GravConst",
    "Radius",
    "EstimateMethod",
+   "PrimaryBody",
 //   "Body",
 };
 
@@ -85,6 +86,7 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
 //   Gmat::STRING_TYPE,
 };
 
@@ -106,7 +108,8 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
    mu                     (398600.4415),
    epoch                  (21545.0),
-   estimationMethod       (1.0)
+   estimationMethod       (1.0),
+   isPrimaryBody          (true)
 {
    parameterCount = PointMassParamCount;
    dimension = 6 * satcount;
@@ -674,6 +677,47 @@ bool PointMassForce::SetStringParameter(const std::string &label,
                                         const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+//  bool  GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  bool value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::GetBooleanParameter(const Integer id) const
+{
+   if (id == PRIMARY_BODY)       return isPrimaryBody;
+
+   return GmatBase::GetBooleanParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  bool  SetBooleanParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the bool parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> bool value for the requested parameter.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+bool PointMassForce::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == PRIMARY_BODY)   return (isPrimaryBody = value); 
+
+   return GmatBase::SetBooleanParameter(id,value);
 }
 
 //---------------------------------
