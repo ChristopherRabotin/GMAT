@@ -136,9 +136,9 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
 
       if (refJd != GmatTimeUtil::JD_NOV_17_1858)
       {
-         offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
       }
-
       Real taiLeapSecs =
          theLeapSecsFileReader->NumberOfLeapSecondsFrom(origValue + offsetValue);
 
@@ -162,9 +162,9 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
 
       if (refJd != GmatTimeUtil::JD_NOV_17_1858)
       {
-         offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         //offsetValue = GmatTimeUtil::JD_NOV_17_1858 - refJd;
+         offsetValue = refJd - GmatTimeUtil::JD_NOV_17_1858;
       }
-
       // convert origValue to utc
       Real utcMjd = TimeConverterUtil::ConvertFromTaiMjd("UtcMjd", origValue,
             refJd);
@@ -173,7 +173,8 @@ Real TimeConverterUtil::ConvertFromTaiMjd(std::string toType, Real origValue,
       numOffset = theEopFile->GetUt1UtcOffset(utcMjd + offsetValue);
 
       // add delta ut1 read from eop file
-      return (utcMjd + numOffset);
+      //return (utcMjd + numOffset);
+      return (utcMjd + (numOffset/GmatTimeUtil::SECS_PER_DAY));
    }
    // tdb
    else if (toType == TIME_SYSTEM_TEXT[3])
