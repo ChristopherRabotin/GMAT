@@ -14,6 +14,7 @@
 //------------------------------------------------------------------------------
 
 #include "JacchiaRobertsAtmosphere.hpp"
+#include "AtmosphereException.hpp"
 
 const Real pi         = 3.141592653589793238;
 const Real ra         = 6356.766;              /// Average radius of the earth (km) 
@@ -249,6 +250,19 @@ GmatBase* JacchiaRobertsAtmosphere::Clone(void) const
 bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
+//    Real mass;
+//    Real dragCoeff;
+//    Real area;    
+//
+//    Real scVel[3];
+//    Real sunUnit[3];
+//    Real accel[3];
+//    
+//     if ( GetJacchiaRobertsDrag(epoch, pos, scVel, sunUnit, area, mass, 
+//          dragCoeff, sfFileName, newFile, density, accel) )
+//        return true;
+//     else
+//        return false;
     return true;
 }
 
@@ -328,13 +342,13 @@ bool JacchiaRobertsAtmosphere::GetJacchiaRobertsDrag(Real time,
       if (fileReader->OpenSolarFluxFile(fileName))
          tkptr = fileReader->GetSolarFluxFile();
       else
-         return false;
+         throw AtmosphereException("Error opening solar flux file for JacchiaRoberts.");
          
       rho = 1.0e12*JacchiaRoberts(height, sc_pos, sun_unit, utc_time, tkptr, 
                                   new_file, istat);
       // waw: Added for checking                            
       if (!fileReader->CloseSolarFluxFile())
-         return false;
+         throw AtmosphereException("Error closing solar flux file for JacchiaRoberts.");
    }
    else
    {
@@ -1148,16 +1162,15 @@ void JacchiaRobertsAtmosphere::SetSolarSystem(SolarSystem *ss)
 }
 
 //------------------------------------------------------------------------------
-// CelestialBody* GetEarth()
+// void GetEarth()
 //------------------------------------------------------------------------------
 /**
  * 
  */
 //------------------------------------------------------------------------------
-CelestialBody* JacchiaRobertsAtmosphere::GetEarth()
+void JacchiaRobertsAtmosphere::GetEarth()
 { 
    earth = solarSystem->GetBody(SolarSystem::EARTH_NAME);
-   return earth;
 }
 
 //---------------------------------

@@ -54,18 +54,16 @@ public:
    
    Real length_of(Real v[3]);
    Real dot_product(Real a[3] , Real b[3]);
-   
-   void SetSolarSystem(SolarSystem *ss);
-   CelestialBody* GetEarth();                               
+   void SetSolarSystem(SolarSystem *solsys);
+   void GetEarth();                             
                                                                                                  
 protected:
    JacchiaRobertsAtmosphere(const JacchiaRobertsAtmosphere& jr);
    JacchiaRobertsAtmosphere& operator=(const JacchiaRobertsAtmosphere& jr);
 private:
    CelestialBody *earth;
+   /// Solarsystem
    SolarSystem *solarSystem;
-   FILE *sfFileName;
-   
    ///  Auxiliary temperature related quantities
    Real root1;
    Real root2;
