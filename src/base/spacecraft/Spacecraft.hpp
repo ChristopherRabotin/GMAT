@@ -21,13 +21,8 @@
 #define Spacecraft_hpp
 
 #include "GmatBase.hpp"
-#include "A1Date.hpp"
-#include "A1Mjd.hpp"
-#include "UtcDate.hpp"
-#include "Cartesian.hpp"
-#include "Keplerian.hpp"
-#include "SphericalOne.hpp"
-#include "SphericalTwo.hpp"
+#include "Rvector6.hpp"
+#include "StateConverter.hpp"
 
 class GMAT_API Spacecraft : public GmatBase
 {
@@ -58,12 +53,29 @@ public:
                         GetParameterType(const Integer id) const;
     virtual std::string GetParameterTypeString(const Integer id) const;
 
-    virtual Real* GetState(void); // { return state; }
-    void SetState(Real s1, Real s2, Real s3, Real s4, Real s5, Real s6);
+    virtual Real* GetState(void); 
 
-    void  ConvertDateFormat(const std::string &dateType);
-    void  ConvertRepresentation(const std::string &elementType);
+    void SetState(const std::string &elementType, Real *instate);
+    void SetState(const Real s1, const Real s2, const Real s3, 
+                  const Real s4, const Real s5, const Real s6);
 
+    Rvector6 GetCartesianState();
+    Rvector6 GetKeplerianState();
+//    Will add more methods below later
+//    Rvector6 GetModifiedKeplerianState() const;
+//    Rvector6 GetSphericalOneState() const;
+//    Rvector6 GetSphericalTwoState() const;
+
+    bool GetDisplay() const;
+    void SetDisplay(const bool displayFlag);
+    std::string GetDisplayCoordType() const;
+    void SetDisplayCoordType(const std::string &coordType);
+
+    Real* GetDisplayState();
+    void SetDisplayState(const Real *s);
+    void SetDisplayState(const Rvector6 s);
+    void SaveDisplay();
+   
     // Default values for spacecraft 
     static const Real EPOCH; 
     static const Real ELEMENT1; 
@@ -78,37 +90,55 @@ public:
     static const std::string REF_PLANE; 
 
 protected:
-    // Declare protetced method data of spacecraft information
-    Real         epoch;
-    Real         state[6];  
-    Real         mass;
-    Real         coeffDrag;
-    Real         incidentArea;
-    Real         reflectCoeff;
-    std::string  dateFormat;
-    std::string  refBody; 
-    std::string  refFrame;   
-    std::string  refPlane; 
-    Integer      epochID;
-    Integer      state1ID;
-    Integer      state2ID;
-    Integer      state3ID;
-    Integer      state4ID;
-    Integer      state5ID;
-    Integer      state6ID;       
-    Integer      refBodyID; 
-    Integer      refFrameID; 
-    Integer      refPlaneID; 
-    Integer      massID;
-    Integer      dateFormatID;
-    Integer      coeffDragID;
-    Integer      incidentAreaID;
-    Integer      reflectCoeffID;
+    // Declare protetced method data of internal spacecraft information
+    Real           epoch;
+    Real           state[6];  
+    Real           mass;
+    Real           coeffDrag;
+    Real           incidentArea;
+    Real           reflectCoeff;
+    std::string    subType;      // @todo will add it later
+    std::string    dateFormat;
+    std::string    refBody; 
+    std::string    refFrame;   
+    std::string    refPlane; 
+    Integer        epochID;
+    Integer        state1ID;
+    Integer        state2ID;
+    Integer        state3ID;
+    Integer        state4ID;
+    Integer        state5ID;
+    Integer        state6ID;       
+    Integer        subTypeID;     // @todo will add it later
+    Integer        refBodyID; 
+    Integer        refFrameID; 
+    Integer        refPlaneID; 
+    Integer        massID;
+    Integer        dateFormatID;
+    Integer        coeffDragID;
+    Integer        incidentAreaID;
+    Integer        reflectCoeffID;
 
+    // for non-internal spacecraft information
+    StateConverter stateConverter;
+    Rvector6       cartesianState;
+    Rvector6       keplerianState;
+    Rvector6       modifiedKeplerainState;
+    Rvector6       sphericalOneState;
+    Rvector6       sphericalTwoState;
+    Real           cartesianEpoch;
+    Real           keplerianEpoch;
+    bool           isForDisplay;
+    Real           displayState[6];
+    std::string    displayCoordType; 
+    std::string    displaySubType;
 private:
     void        InitializeValues();
     std::string GetElementName(const Integer id) const; 
+    std::string GetLocalCoordType() const;
+    void        SetInitialDisplay();
 
+    bool        initialDisplay;
 };
 
 #endif // Spacecraft_hpp
