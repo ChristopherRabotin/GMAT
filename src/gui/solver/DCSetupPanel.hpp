@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                           DCSetupPanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2004/01/21
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Create window.
@@ -32,9 +32,13 @@ class DCSetupPanel : public wxPanel
 {
 public:
     // constructors
-    DCSetupPanel(wxWindow *parent);
+    DCSetupPanel(wxWindow *parent, const wxString &name);
        
-private:   
+protected:
+
+    GuiInterpreter *theGuiInterpreter;
+    Solver *theSolver;
+    
     // Main notebook
     wxNotebook *solverNotebook;
     
@@ -53,8 +57,6 @@ private:
     
     wxTextCtrl *nameTextCtrl;
     wxTextCtrl *maxTextCtrl;
-    
-    GuiInterpreter *theGuiInterpreter;
    
     // Layout & data handling methods
     void Setup(wxWindow *parent);
@@ -75,7 +77,7 @@ private:
     // IDs for the controls and the menu commands
     enum
     {     
-        ID_TEXT = 10000,
+        ID_TEXT = 55000,
         ID_TEXTCTRL,
         ID_BUTTON,
         ID_NOTEBOOK

@@ -1,3 +1,4 @@
+//$Header$
 //------------------------------------------------------------------------------
 //                           SolverCreatePanel
 //------------------------------------------------------------------------------
@@ -5,7 +6,6 @@
 //
 // Author: Waka Waktola
 // Created: 2004/01/21
-// Copyright: (c) 2003 NASA/GSFC. All rights reserved.
 //
 /**
  * This class contains the Solver Create window.
@@ -38,17 +38,27 @@ BEGIN_EVENT_TABLE(DCSetupPanel, wxPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// SolverEventPanel()
+// DCSetupPanel()
 //------------------------------------------------------------------------------
 /**
  * A constructor.
  */
 //------------------------------------------------------------------------------
-DCSetupPanel::DCSetupPanel(wxWindow *parent)
+DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
+    : wxPanel(parent)
 {
-    Initialize();
-    Setup(this);
-    GetData();
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+    
+    theSolver =
+        theGuiInterpreter->GetSolver(std::string(name.c_str()));
+
+    //loj added
+    if (theSolver != NULL)
+    {
+        Initialize();
+        Setup(this);
+        GetData();
+    }
 }
 
 void DCSetupPanel::Initialize()
