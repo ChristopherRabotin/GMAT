@@ -100,9 +100,10 @@ protected:
     // Declare protetced method data of internal spacecraft information
     Real           epoch;
     Real           state[6];  
-    Real           mass;
+    Real           dryMass;
     Real           coeffDrag;
-    Real           incidentArea;
+    Real           dragArea;
+    Real           srpArea;
     Real           reflectCoeff;
     std::string    subType;      // @todo will add it later
     std::string    dateFormat;
@@ -120,10 +121,11 @@ protected:
     Integer        refBodyID; 
     Integer        refFrameID; 
     Integer        refPlaneID; 
-    Integer        massID;
+    Integer        dryMassID;
     Integer        dateFormatID;
     Integer        coeffDragID;
-    Integer        incidentAreaID;
+    Integer        dragAreaID;
+    Integer        srpAreaID;
     Integer        reflectCoeffID;
 
     // for non-internal spacecraft information
