@@ -446,9 +446,7 @@ Gmat::ParameterType HarmonicField::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string HarmonicField::GetParameterTypeString(const Integer id) const
 {
-   if ((id >= PhysicalModelParamCount) && (id < HarmonicFieldParamCount))
-      return PARAMETER_TEXT[id - PhysicalModelParamCount];
-   return PhysicalModel::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];   
 }
 
 //------------------------------------------------------------------------------

@@ -511,10 +511,7 @@ GravityField::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string GravityField::GetParameterTypeString(const Integer id) const
 {
-   if ((id >= HarmonicFieldParamCount) && (id < GravityFieldParamCount))
-      return PARAMETER_TEXT[id - HarmonicFieldParamCount];
-   return HarmonicField::GetParameterTypeString(id);
-   
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];   
 }
 
 //------------------------------------------------------------------------------
