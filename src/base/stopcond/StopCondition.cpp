@@ -191,8 +191,8 @@ bool StopCondition::Evaluate()
       }
       else
       {
-         if (mStopParamType == "KepTA" || mStopParamType == "KepMA" ||
-             mStopParamType == "KepEA")
+         if (mStopParamType == "TA" || mStopParamType == "MA" ||
+             mStopParamType == "EA")
          {
             goalMet = CheckOnAnomaly(rval);
          }

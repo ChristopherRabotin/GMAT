@@ -22,7 +22,7 @@
 #include "MeanJ2000Equatorial.hpp"
 #include "CubicSplineInterpolator.hpp"
 #include "KeplerianParameters.hpp"     // for KepEcc()
-#include "SphericalParameters.hpp"     // for RMag()
+#include "SphericalParameters.hpp"     // for SphRMag()
 #include "MessageInterface.hpp"
 
 #if !defined __UNIT_TEST__
@@ -608,12 +608,12 @@ bool BaseStopCondition::Validate()
             mEccParam->AddObject(mSolarSystem); //loj: 4/29/04 added
          }
             
-         // check on RMag parameter if "Periapsis"
+         // check on SphRMag parameter if "Periapsis"
          if (mStopParam->GetTypeName() == "Periapsis")
          {
             if (mRmagParam == NULL)
             {
-               mRmagParam = new RMag("");
+               mRmagParam = new SphRMag("");
                mRmagParam->AddObject(mStopParam->GetObject("Spacecraft"));
                mRmagParam->AddObject(mSolarSystem); //loj: 4/29/04 added
             }
