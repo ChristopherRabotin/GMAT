@@ -27,7 +27,7 @@ namespace GmatPhysicalConst
     const Real c = 299792458.0;  // m/s
     
     // gravitational constant
-    const Real UNIVERSAL_GRAVITATIONAL_CONSTANT = 6.672E10-11;  //  N.m2/kg2
+    const Real UNIVERSAL_GRAVITATIONAL_CONSTANT = 6.673e-20; // (units: km^3/(kg s^2))
 
     //Astronomical Constants
     const Real MOON_GRAVITATION_CONSTANT = 4.902794e12;  // m^3/s^2
