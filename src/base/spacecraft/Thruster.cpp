@@ -38,6 +38,7 @@ Thruster::PARAMETER_TEXT[ThrusterParamCount - HardwareParamCount] =
    "C8",  "C9", "C10", "C11", "C12", "C13", "C14", 
    "K1",  "K2",  "K3",  "K4",  "K5",  "K6",  "K7", 
    "K8",  "K9", "K10", "K11", "K12", "K13", "K14", 
+   "IsFiring",
    "CoordinateSystem"
 };
 
@@ -54,6 +55,7 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
    Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
    Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE, Gmat::REAL_TYPE,
    Gmat::REAL_TYPE, Gmat::REAL_TYPE,
+   Gmat::BOOLEAN_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -68,9 +70,17 @@ Thruster::PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount] =
  */
 //------------------------------------------------------------------------------
 Thruster::Thruster(std::string nomme) :
-   Hardware          (Gmat::HARDWARE, "Thruster", nomme),
-   coordinateName    ("MJ2000EarthEquator")
-   // theCoordinates    (NULL)
+   Hardware             (Gmat::HARDWARE, "Thruster", nomme),
+   coordinateName       ("MJ2000EarthEquator"),
+   // theCoordinates       (NULL),
+   thrusterFiring       (false),
+   pressure             (1500.0),
+   temperatureRatio     (1.0),
+   thrust               (500.0),
+   impulse              (2150.0),
+   constantExpressions  (true),
+   simpleExpressions    (true),
+   mDot                 (0.0)
 {
    parameterCount = ThrusterParamCount;
    
@@ -116,7 +126,18 @@ Thruster::~Thruster()
  */
 //------------------------------------------------------------------------------
 Thruster::Thruster(const Thruster& th) :
-   Hardware          (th)
+   Hardware             (th),
+   tankNames            (th.tankNames),
+   coordinateName       (th.coordinateName),
+   // theCoordinates       (th.theCoordinates), // Assumes CS's are globally accessed
+   thrusterFiring       (th.thrusterFiring),
+   pressure             (th.pressure),
+   temperatureRatio     (th.temperatureRatio),
+   thrust               (th.thrust),
+   impulse              (th.impulse),
+   constantExpressions  (th.constantExpressions),
+   simpleExpressions    (th.simpleExpressions),
+   mDot                 (th.mDot)
 {
    parameterCount = th.parameterCount;
    
@@ -127,9 +148,7 @@ Thruster::Thruster(const Thruster& th) :
    thrustDirection[1] = th.thrustDirection[1];
    thrustDirection[2] = th.thrustDirection[2];
    
-   tankNames = th.tankNames;
    tanks.clear();
-   coordinateName = th.coordinateName;
 }
 
 
@@ -149,6 +168,8 @@ Thruster& Thruster::operator=(const Thruster& th)
    if (&th == this)
       return *this;
       
+   Hardware::operator=(th);
+
    memcpy(cCoefficients, th.cCoefficients, 14 * sizeof(Real));
    memcpy(kCoefficients, th.kCoefficients, 14 * sizeof(Real));
    
@@ -159,6 +180,16 @@ Thruster& Thruster::operator=(const Thruster& th)
    tankNames = th.tankNames;
    tanks.clear();
    coordinateName = th.coordinateName;
+
+   // theCoordinates = th.theCoordinates; // Assumes CS's are globally accessed
+   thrusterFiring = th.thrusterFiring;
+   pressure = th.pressure;
+   temperatureRatio = th.temperatureRatio;
+   thrust = th.thrust;
+   impulse = th.impulse;
+   constantExpressions = th.constantExpressions;
+   simpleExpressions = th.simpleExpressions;
+   mDot = th.mDot;
 
    return *this;
 }
@@ -508,12 +539,58 @@ bool Thruster::SetStringParameter(const Integer id, const std::string &value)
  * @return The requested StringArray; throws if the parameter is not a 
  *         StringArray.
  */
+//---------------------------------------------------------------------------
 const StringArray& Thruster::GetStringArrayParameter(const Integer id) const
 {
-    if (id == TANK)
-       return tankNames;
+   if (id == TANK)
+      return tankNames;
     
-    return Hardware::GetStringArrayParameter(id);
+   return Hardware::GetStringArrayParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter access in invalid.
+ */
+//---------------------------------------------------------------------------
+bool Thruster::GetBooleanParameter(const Integer id) const
+{
+   if (id == THRUSTER_FIRING)
+      return thrusterFiring;
+      
+   return Hardware::GetBooleanParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value)
+//---------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ * 
+ * @return the boolean value for this parameter, or throw an exception if the 
+ *         parameter is invalid or not boolean.
+ */
+//---------------------------------------------------------------------------
+bool Thruster::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == THRUSTER_FIRING) {
+      thrusterFiring = value;
+      return thrusterFiring;
+   }
+
+   return Hardware::SetBooleanParameter(id, value);
 }
 
 
@@ -529,4 +606,96 @@ const StringArray& Thruster::GetStringArrayParameter(const Integer id) const
 GmatBase* Thruster::Clone() const
 {
    return new Thruster(*this);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool CalculateThrustAndIsp()
+//---------------------------------------------------------------------------
+/**
+ * Evaluates the thrust and specific impulse polynomials.
+ *
+ * GMAT uses polynomial expressions for the thrust and specific impulse
+ * imparted to the spacecraft by thrusters attached to the spacecraft.
+ * Both thrust and specific impulse are expressed as functions of pressure
+ * and temperature. The pressure and temperature are values obtained
+ * from fuel tanks containing the fuel. All measurements in GMAT are
+ * expressed in metric units. The thrust, in Newtons, applied by a spacecraft
+ * engine is given by
+ * 
+   \f[\begin{eqnarray}
+    F_{T}(P,T) & = & \left\{ C_{1}+C_{2}P+C_{3}P^{2}+C_{4}P^{C_{5}}+
+                   C_{6}P^{C_{7}}+C_{8}P^{C_{9}}\right. \\
+    &  & \left.+C_{10}C_{11}^{C_{12}P}\right\} \left(\frac{T}{T_{ref}}
+         \right)^{1+C_{13}+C_{14}P}\end{eqnarray} \f]
+ *
+ * Pressures are expressed in kilopascals, and temperatures in degrees
+ * centigrade. The coefficients C1 - C14 are set by the user. Each coefficient
+ * is expressed in units commiserate with the final expression in Newtons;
+ * for example, C1 is expressed in Newtons, C2 in Newtons per kilopascal,
+ * and so forth.
+ * 
+ * Specific Impulse, measured in m/s (or, equivalently, Newton Seconds/kilogram)
+ * is expressed using a similar equation:
+ * 
+   \f[\begin{eqnarray}
+    I_{sp}(P,T) & = & \left\{ K_{1}+K_{2}P+K_{3}P^{2}+K_{4}P^{K_{5}}+
+                    K_{6}P^{K_{7}}+K_{8}P^{K_{9}}\right. \\
+    &  & \left.+K_{10}K_{11}^{K_{12}P}\right\} \left(\frac{T}{T_{ref}}
+         \right)^{1+K_{13}+K_{14}P}\end{eqnarray}\f]
+ * 
+ * @return true on successful evaluation.
+ */
+//---------------------------------------------------------------------------
+bool Thruster::CalculateThrustAndIsp()
+{
+   if (tanks.empty())
+      throw HardwareException("Thruster \"" + instanceName + 
+                                 "\" does not have a fuel tank");
+                          
+   if (!constantExpressions) {
+      
+          
+      // For efficiency, if thrust and Isp are simple, don't bother evaluating 
+      // higher order terms
+      if (!simpleExpressions) {
+         
+      }
+   }
+   
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
+//  Real CalculateMassFlow()
+//---------------------------------------------------------------------------
+/**
+ * Evaluates the time rate of change of mass due to a thruster firing.
+ * 
+ *  \f[\frac{dm}{dt} = \frac{F_T}{I_{sp}} \f]
+ * 
+ * @return the mass flow rate from this thruster, used in integration.
+ */
+//---------------------------------------------------------------------------
+Real Thruster::CalculateMassFlow()
+{
+   if (thrusterFiring == false)
+      return 0.0;
+      
+   if (!constantExpressions) {
+      if (!CalculateThrustAndIsp())
+         throw HardwareException("Thruster \"" + instanceName + 
+                                 "\" could not calculate dm/dt");
+      if (thrust == 0.0)
+         mDot = 0.0;
+      else {
+         if (impulse == 0.0)
+            throw HardwareException("Thruster \"" + instanceName + 
+                                 "\" has specific impulse == 0.0");
+         mDot = thrust / impulse;
+      }
+   }
+   
+   return mDot;
 }

@@ -37,7 +37,7 @@ public:
    Thruster&                  operator=(const Thruster& th);
    
    // Parameter access methods - overridden from GmatBase
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name = "");
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
@@ -59,8 +59,11 @@ public:
 //   virtual bool        SetStringParameter(const Integer id, 
 //                                          const std::string &value,
 //                                          const Integer index);
-   virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id) const; 
+   virtual bool               GetBooleanParameter(const Integer id) const;
+   virtual bool               SetBooleanParameter(const Integer id,
+                                                  const bool value);
+   
+   virtual const StringArray& GetStringArrayParameter(const Integer id) const; 
 
    // required method for all subclasses
    virtual GmatBase*          Clone() const;
@@ -79,8 +82,24 @@ protected:
    /// Array of specific impulse coefficients
    Real                       kCoefficients[14];
    
+   /// Flag used to turn thrusters on or off
+   bool                       thrusterFiring;
    /// Thrust direction projected into the specified coordinate system
    Real                       thrustDirection[3];
+   /// Current tank pressure
+   Real                       pressure;
+   /// Current tank temperature divided by reference temperature
+   Real                       temperatureRatio;
+   /// Most recently calculated thrust
+   Real                       thrust;
+   /// Most recently calculated specific impulse
+   Real                       impulse;
+   /// Flag used for constant thrust and Isp
+   bool                       constantExpressions;
+   /// Flag used for thrust and Isp that only use the first 3 coefficients
+   bool                       simpleExpressions;
+   /// Most recently calculated mass flow rate
+   Real                       mDot;
 
    /// Published parameters for thrusters
    enum
@@ -90,6 +109,7 @@ protected:
       C8,    C9,   C10,   C11,   C12,   C13,   C14, 
       K1,    K2,    K3,    K4,    K5,    K6,    K7, 
       K8,    K9,   K10,   K11,   K12,   K13,   K14,
+      THRUSTER_FIRING,
       COORDINATE_SYSTEM, 
       ThrusterParamCount
    };
@@ -100,6 +120,9 @@ protected:
    /// Thruster parameter types
    static const Gmat::ParameterType 
                         PARAMETER_TYPE[ThrusterParamCount - HardwareParamCount];
+                        
+   bool                       CalculateThrustAndIsp();
+   Real                       CalculateMassFlow();
    
 };
 
