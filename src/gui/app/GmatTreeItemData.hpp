@@ -85,6 +85,7 @@ namespace GmatTree
         MISSION_ICON_OPENFOLDER,
         MISSION_ICON_SPACECRAFT,
 
+        MISSION_NO_ICON,
     };
 
     enum ItemType
