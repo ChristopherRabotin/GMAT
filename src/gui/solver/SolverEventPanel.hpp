@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2003/12/16
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Solver Event window.
  */
@@ -15,34 +15,24 @@
 #ifndef SolverEventPanel_hpp
 #define SolverEventPanel_hpp
 
-// gui includes
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Command.hpp"
+#include "GmatPanel.hpp"
 
-class SolverEventPanel : public wxPanel
+class SolverEventPanel : public GmatPanel
 {
 public:
     // constructor
     SolverEventPanel(wxWindow *parent, const wxString &name, GmatCommand *cmd);
+    ~SolverEventPanel();   
        
 private:   
     wxStaticText *item6;
     wxStaticText *item8;
     wxStaticText *item10;
     
-    wxButton *scriptButton;
     wxButton *correctionsButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton ;
-    wxButton *helpButton;
     
     wxComboBox *item7;
     wxComboBox *item9;
@@ -51,20 +41,23 @@ private:
     GuiInterpreter *theGuiInterpreter;
     GmatCommand *theCommand;
     
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
+    
     // Layout & data handling methods
     void Setup(wxWindow *parent);
     void Initialize();
-    void GetData();
-    void SetData();
     
     // Text control event method
     void OnTextUpdate(wxCommandEvent& event);
     
     // Combobox event method
     void OnComboSelection(wxCommandEvent& event);
-    
-    // Button event methods
-    void OnButton(wxCommandEvent& event);
 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2004/21/01
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Solver Variables window.
  */
@@ -15,26 +15,20 @@
 #ifndef SolverVariablesPanel_hpp
 #define SolverVariablesPanel_hpp
 
-// gui includes
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-#include <wx/grid.h>
-
 #include "gmatwxdefs.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GmatPanel.hpp"
 
-class SolverVariablesPanel : public wxPanel
+class SolverVariablesPanel : public GmatPanel
 {
 public:
     // constructors
     SolverVariablesPanel(wxWindow *parent);
-
+    ~SolverVariablesPanel(); 
+    
 private:             
     wxGrid *varsGrid;
     
@@ -55,10 +49,6 @@ private:
     
     wxButton *editButton;
     wxButton *updateButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
     
     wxComboBox *solverComboBox;
     
@@ -69,11 +59,17 @@ private:
     Integer numOfVars;
     Integer nextRow;
         
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
+
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void GetData();
-    void SetData();
     
     // Grid table event method
     void OnCellValueChanged();

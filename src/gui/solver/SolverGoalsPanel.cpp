@@ -7,19 +7,11 @@
 // Author: Waka Waktola
 // Created: 2004/01/20
 // Copyright: (c) 2003 NASA/GSFC. All rights reserved.
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Solver Event window.
  */
 //------------------------------------------------------------------------------
-
-// gui includes
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-#include <wx/grid.h>
 
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
@@ -34,7 +26,7 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(SolverGoalsPanel, wxPanel)
+BEGIN_EVENT_TABLE(SolverGoalsPanel, GmatPanel)
     EVT_BUTTON(ID_BUTTON, SolverGoalsPanel::OnButton)
     EVT_TEXT(ID_TEXTCTRL, SolverGoalsPanel::OnTextUpdate)
     EVT_COMBOBOX(ID_COMBO, SolverGoalsPanel::OnSolverSelection)
@@ -49,11 +41,41 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 SolverGoalsPanel::SolverGoalsPanel(wxWindow *parent)
-    : wxPanel(parent)
+    : GmatPanel(parent)
+{
+    Create();
+    Show();
+}
+
+SolverGoalsPanel::~SolverGoalsPanel()
+{
+}
+
+//-------------------------------
+// private methods
+//-------------------------------
+void SolverGoalsPanel::Create()
 {
     Initialize();
     Setup(this);
-    GetData();
+}
+
+void SolverGoalsPanel::LoadData()
+{
+    // explicitly disable apply button
+    // it is turned on in each of the panels
+    theApplyButton->Disable();
+    
+    return;
+}
+
+void SolverGoalsPanel::SaveData()
+{
+    // explicitly disable apply button
+    // it is turned on in each of the panels
+    theApplyButton->Disable();
+    
+    return;
 }
 
 void SolverGoalsPanel::Initialize()
@@ -76,17 +98,26 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     goalsGrid->SetRowLabelSize(0);
  
     // wxStaticText
-    descStaticText = new wxStaticText( parent, ID_TEXT, wxT("Description"), wxDefaultPosition, wxDefaultSize, 0 );
-    solverStaticText = new wxStaticText( parent, ID_TEXT, wxT("Solver"), wxDefaultPosition, wxDefaultSize, 0 );
-    varStaticText = new wxStaticText( parent, ID_TEXT, wxT("Variable"), wxDefaultPosition, wxDefaultSize, 0 );
-    valueStaticText = new wxStaticText( parent, ID_TEXT, wxT("Desired Value"), wxDefaultPosition, wxDefaultSize, 0 );
-    tolStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol."), wxDefaultPosition, wxDefaultSize, 0 );
+    descStaticText = new wxStaticText( parent, ID_TEXT, wxT("Description"), 
+         wxDefaultPosition, wxDefaultSize, 0 );
+    solverStaticText = new wxStaticText( parent, ID_TEXT, wxT("Solver"), 
+         wxDefaultPosition, wxDefaultSize, 0 );
+    varStaticText = new wxStaticText( parent, ID_TEXT, wxT("Variable"), 
+         wxDefaultPosition, wxDefaultSize, 0 );
+    valueStaticText = new wxStaticText( parent, ID_TEXT, wxT("Desired Value"), 
+         wxDefaultPosition, wxDefaultSize, 0 );
+    tolStaticText = new wxStaticText( parent, ID_TEXT, wxT("Tol."), 
+         wxDefaultPosition, wxDefaultSize, 0 );
     
     // wxTextCtrl
-    descTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(400,-1), 0 );
-    varTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(400,-1), 0 );
-    valueTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    tolTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+    descTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+         wxDefaultPosition, wxSize(400,-1), 0 );
+    varTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+         wxDefaultPosition, wxSize(400,-1), 0 );
+    valueTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+         wxDefaultPosition, wxSize(80,-1), 0 );
+    tolTextCtrl = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), 
+         wxDefaultPosition, wxSize(80,-1), 0 );
     
     // wxString
     wxString strArray1[] = 
@@ -100,10 +131,6 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     // wxButton
     editButton = new wxButton( parent, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );
     updateButton = new wxButton( parent, ID_BUTTON, wxT("Update"), wxDefaultPosition, wxDefaultSize, 0 );
-    okButton = new wxButton( parent, ID_BUTTON, wxT("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-    applyButton = new wxButton( parent, ID_BUTTON, wxT("Apply"), wxDefaultPosition, wxDefaultSize, 0 );
-    cancelButton = new wxButton( parent, ID_BUTTON, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-    helpButton = new wxButton( parent, ID_BUTTON, wxT("Help"), wxDefaultPosition, wxDefaultSize, 0 );
 
     // wx*Sizers
     wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
@@ -115,7 +142,6 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     wxStaticBox *item15 = new wxStaticBox( parent, -1, wxT("Settings") );
     wxStaticBoxSizer *item14 = new wxStaticBoxSizer( item15, wxHORIZONTAL );
     wxFlexGridSizer *item16 = new wxFlexGridSizer( 4, 0, 0 );
-    wxBoxSizer *item22 = new wxBoxSizer( wxHORIZONTAL );
     
     // Add to wx*Sizers
     item1->Add( goalsGrid, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -144,44 +170,20 @@ void SolverGoalsPanel::Setup( wxWindow *parent)
     item4->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
     item4->Add( updateButton, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     
-    item22->Add( okButton, 0, wxALIGN_CENTER|wxALL, 5 );
-    item22->Add( applyButton, 0, wxALIGN_CENTER|wxALL, 5 );
-    item22->Add( cancelButton, 0, wxALIGN_CENTER|wxALL, 5 );
-    item22->Add( helpButton, 0, wxALIGN_CENTER|wxALL, 5 );
-   
     item0->Add( item1, 0, wxALIGN_CENTER|wxALL, 5 );
     item0->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
-    item0->Add( item22, 0, wxALIGN_CENTER|wxALL, 5 );
-    
-    parent->SetAutoLayout( true );
-    parent->SetSizer( item0 );
-    item0->Fit( parent );
-    item0->SetSizeHints( parent );
-    
-    applyButton->Enable(false);
-    
-    // Future implementation
-    helpButton->Enable(false);
-}
 
-void SolverGoalsPanel::GetData()
-{    
-    return;
-}
-
-void SolverGoalsPanel::SetData()
-{
-    return;
+    theMiddleSizer->Add(item0, 0, wxGROW, 5);
 }
 
 void SolverGoalsPanel::OnTextUpdate(wxCommandEvent& event)
 {
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 void SolverGoalsPanel::OnSolverSelection()
 {
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }
 
 void SolverGoalsPanel::OnButton(wxCommandEvent& event)
@@ -189,43 +191,27 @@ void SolverGoalsPanel::OnButton(wxCommandEvent& event)
     if ( event.GetEventObject() == editButton )  
     {       
         // Bring up the VariableCreatePanel
-        applyButton->Enable(true);
+        theApplyButton->Enable(true);
     }
     else if ( event.GetEventObject() == updateButton )
-    {      
-        solverString = solverComboBox->GetStringSelection();
-        propertyString = varTextCtrl->GetValue();
-        descriptionString = descTextCtrl->GetValue();
-        
-        goalsGrid->SetCellValue(nextRow, SOL_COL, solverString);
-        goalsGrid->SetCellValue(nextRow, PRO_COL, propertyString);
-        goalsGrid->SetCellValue(nextRow, DES_COL, descriptionString);
-        
-        nextRow++;
+    {   
+       // ag: crashed on update, so commented out for now   
+//        solverString = solverComboBox->GetStringSelection();
+//        propertyString = varTextCtrl->GetValue();
+//        descriptionString = descTextCtrl->GetValue();
+//        
+//        goalsGrid->SetCellValue(nextRow, SOL_COL, solverString);
+//        goalsGrid->SetCellValue(nextRow, PRO_COL, propertyString);
+//        goalsGrid->SetCellValue(nextRow, DES_COL, descriptionString);
+//        
+//        nextRow++;
+        theApplyButton->Enable(true);
     }
-    else if ( event.GetEventObject() == okButton )  
-    {
-        SetData(); 
-        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-        gmatMainNotebook->ClosePage();       
-    }
-    else if ( event.GetEventObject() == applyButton )
-    {
-        SetData();
-        applyButton->Enable(false);
-    } 
-    else if ( event.GetEventObject() == cancelButton )
-    {
-        GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-        gmatMainNotebook->ClosePage();
-    }      
-    else if ( event.GetEventObject() == helpButton )           
-        ; 
     else
         event.Skip();
 }
 
 void SolverGoalsPanel::OnCellValueChanged()
 { 
-    applyButton->Enable(true);
+    theApplyButton->Enable(true);
 }

@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2003/09/08
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Propagator command setup window.
  */
@@ -15,16 +15,6 @@
 #ifndef PropagateCommandPanel_hpp
 #define PropagateCommandPanel_hpp
 
-// gui includes
-#include <wx/window.h>
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-#include <wx/grid.h>
-//#include <wx/docview.h>
-#include <wx/menu.h>
 #include <wx/variant.h>
 
 #include "gmatwxdefs.hpp"
@@ -43,13 +33,16 @@
 #include "Command.hpp"
 #include "Propagate.hpp"
 #include "StopCondition.hpp"
+#include "GmatPanel.hpp"
 
-class PropagateCommandPanel : public wxPanel
+class PropagateCommandPanel : public GmatPanel
 {
 public:
     // constructors
-    PropagateCommandPanel( wxWindow *parent, const wxString &propName, GmatCommand *cmd);
-    
+    PropagateCommandPanel( wxWindow *parent, const wxString &propName, 
+                           GmatCommand *cmd);
+    ~PropagateCommandPanel();  
+
 private:
 
     static const int MAX_PROP_ROW = 10;
@@ -93,14 +86,9 @@ private:
     wxTextCtrl *toleranceTextCtrl;
     wxTextCtrl *repeatTextCtrl;
 
-    wxButton *scriptButton;
     wxButton *updateButton;
     wxButton *deleteButton;
     wxButton *viewButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
 
     wxComboBox *synchComboBox;
     wxComboBox *equalityComboBox;
@@ -141,11 +129,17 @@ private:
     
     //std::vector<StopCondition *> theStopCondVector;
 
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
+
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void LoadData();
-    void SaveData();
     void DisplayPropagator();
     void DisplayStopCondition();
     void UpdateStopCondition();

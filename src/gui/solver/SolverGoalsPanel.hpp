@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2004/01/20
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Solver Goals window.
  */
@@ -15,26 +15,20 @@
 #ifndef SolverGoalsPanel_hpp
 #define SolverGoalsPanel_hpp
 
-// gui includes
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-#include <wx/grid.h>
-
 #include "gmatwxdefs.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
+#include "GmatPanel.hpp"
 
-class SolverGoalsPanel : public wxPanel
+class SolverGoalsPanel : public GmatPanel
 {
 public:
     // constructors
     SolverGoalsPanel(wxWindow *parent);
-
+    ~SolverGoalsPanel(); 
+    
 private:             
     wxGrid *goalsGrid;
     
@@ -53,10 +47,6 @@ private:
     
     wxButton *editButton;
     wxButton *updateButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
     
     wxString solverString;
     wxString propertyString;
@@ -65,11 +55,17 @@ private:
     Integer numOfGoals;
     Integer nextRow;
     
+    // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
+    
     // Layout & data handling methods
     void Initialize();
     void Setup(wxWindow *parent);
-    void GetData();
-    void SetData();
     
     // Grid table event method
     void OnCellValueChanged();
@@ -80,8 +76,9 @@ private:
     // Combobox event method
     void OnSolverSelection();
     
-    // Button event methods
+    // Button event method
     void OnButton(wxCommandEvent& event);
+
 
     // any class wishing to process wxWindows events must use this macro
     DECLARE_EVENT_TABLE();

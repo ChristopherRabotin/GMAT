@@ -6,7 +6,7 @@
 //
 // Author: Waka Waktola
 // Created: 2003/12/10
-//
+// Modified: 2004/05/06 by Allison Greene to inherit from GmatPanel
 /**
  * This class contains the Variable Create window.
  */
@@ -14,21 +14,6 @@
 
 #ifndef VariableCreatePanel_hpp
 #define VariableCreatePanel_hpp
-
-#include <wx/sizer.h>
-#include <wx/control.h>
-#include <wx/textctrl.h>
-#include <wx/combobox.h>
-#include <wx/button.h>
-#include <wx/listbox.h>
-#include <wx/docview.h>
-#include <wx/menu.h>
-
-//#include <wx/statline.h>
-//#include <wx/spinbutt.h>
-//#include <wx/spinctrl.h>
-//#include <wx/splitter.h>
-//#include <wx/listctrl.h>
 
 #include "gmatwxdefs.hpp"
 #include "ViewTextFrame.hpp"
@@ -41,12 +26,14 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "GmatAppData.hpp"
+#include "GmatPanel.hpp"
 
-class VariableCreatePanel: public wxPanel
+class VariableCreatePanel: public GmatPanel
 {
 public:
     // constructors
     VariableCreatePanel(wxWindow *parent, const wxString &name); 
+    ~VariableCreatePanel(); 
     
 private:   
     wxStaticText *objStaticText;
@@ -60,12 +47,6 @@ private:
     wxTextCtrl *epochTextCtrl;
     wxTextCtrl *indexTextCtrl;
     
-    wxButton *scriptButton;
-    wxButton *okButton;
-    wxButton *applyButton;
-    wxButton *cancelButton;
-    wxButton *helpButton;
-   
     wxListBox *objListBox;
     wxListBox *propListBox;
     
@@ -77,12 +58,18 @@ private:
     wxDocTemplate *mDocTemplate;
     ViewTextFrame *mTextFrame;
  
+     // methods inherited from GmatPanel
+    virtual void Create();
+    virtual void LoadData();
+    virtual void SaveData();
+    //loj: 2/27/04 commented out
+    //virtual void OnHelp();
+    //virtual void OnScript();
+
     // Layout & data handling methods
     void Setup(wxWindow *parent);
     void Initialize();
-    void GetData();
-    void SetData();
-    void CreateScript();
+//    void CreateScript();
 
     wxMenuBar* CreateScriptWindowMenu(const std::string &docType);
 
@@ -93,7 +80,7 @@ private:
     void OnComboSelection(wxCommandEvent& event);
 
     // Button event methods
-    void OnButton(wxCommandEvent& event);
+//    void OnButton(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE();
 
