@@ -29,7 +29,6 @@
 #include "GmatBase.hpp"
 #include "A1Mjd.hpp"
 #include "PlanetaryEphem.hpp"
-//#include "ForceModel.hpp"  // what about Drag?
 #include "AtmosphereManager.hpp"
 #include "AtmosphereModel.hpp"
 #include "Rmatrix.hpp"
@@ -43,13 +42,14 @@ namespace Gmat
    {
       ANALYTIC = 0,
       SLP,
-      DE_102,
+//      DE_102,
       DE_200,
-      DE_202,
-      DE_403,
+//      DE_202,
+//      DE_403,
       DE_405,
-      DE_406,
-      EPHEMERIS           // do we need more?
+//      DE_406,
+//      EPHEMERIS,           // do we need more?
+      PosVelSourceCount
    };
 
    // if using an analytical method, which one?
@@ -59,7 +59,8 @@ namespace Gmat
       TWO_BODY,
       EARTH_ANALYTIC,
       MOON_ANALYTIC,
-      NUM_ANALYTIC
+      NUM_ANALYTIC,
+      AnalyticMethodCount
    };
 
    // possible types of celestial bodies
@@ -84,7 +85,7 @@ class GMAT_API CelestialBody : public GmatBase
 {
 public:
    // default constructor, with optional name
-   CelestialBody(std::string name = "Earth");
+   //CelestialBody(std::string name = "Earth");
    // additional constructor, specifying body type (as string) and name
    CelestialBody(std::string itsBodyType, std::string name);
    // additional constructor, specifying type (as Gmat::BodyType) and name
@@ -111,10 +112,14 @@ public:
    virtual Gmat::PosVelSource   GetPosVelSource() const;
    virtual Gmat::AnalyticMethod GetAnalyticMethod() const;
    virtual bool                 GetUsePotentialFile() const;
-   virtual Real*                GetAngularVelocity();             // rad/sec
+   virtual const Rvector3&      GetAngularVelocity();             // rad/sec
    virtual Real                 GetHourAngle(Real offset);        // radians
-   virtual Rmatrix&             GetHarmonicCoefficientsSij(); // const??
-   virtual Rmatrix&             GetHarmonicCoefficientsCij(); // const??
+   //virtual const Rmatrix&       GetHarmonicCoefficientsSij(); // const??
+   //virtual const Rmatrix&       GetHarmonicCoefficientsCij(); // const??
+   //virtual const Rmatrix&       GetCoefDriftS();
+   //virtual const Rmatrix&       GetCoefDriftC();
+   //virtual Integer              GetDegree();
+   //virtual Integer              GetOrder();
    virtual const StringArray&   GetSupportedAtmospheres() const;
    virtual std::string          GetAtmosphereModelType();
    virtual AtmosphereModel*     GetAtmosphereModel(const std::string& type = "");
@@ -124,16 +129,21 @@ public:
    // posvel source, and analytic method
    virtual bool           SetBodyType(Gmat::BodyType bType);
    virtual bool           SetCentralBody(CelestialBody* cBody);
+   virtual bool           SetGravitationalConstant(Real newMu);
+   virtual bool           SetEquatorialRadius(Real newEqRadius);
+   virtual bool           SetPolarRadius(Real newPolarRadius);
+   virtual bool           SetMass(Real newMass);
    virtual bool           SetSource(Gmat::PosVelSource pvSrc);
    virtual bool           SetSourceFile(PlanetaryEphem *src);
    virtual bool           SetAnalyticMethod(Gmat::AnalyticMethod aM);
    virtual bool           SetUsePotentialFile(bool useIt);
    
    virtual bool           SetAtmosphereModel(std::string toAtmModel);
-   virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
-                                                Real bodyPolarRad, Real bodyMu,
-                                                Integer coeffSize, Rmatrix& bodySij,
-                                                Rmatrix& bodyCij);
+   virtual bool           SetPotentialFilename(const std::string &fn);
+   //virtual bool           SetPhysicalParameters(Real bodyMass, Real bodyEqRad,
+   //                                             Real bodyPolarRad, Real bodyMu,
+   //                                             Integer coeffSize, Rmatrix& bodySij,
+   //                                             Rmatrix& bodyCij);
 
    
    // Parameter access methods - overridden from GmatBase
@@ -155,13 +165,21 @@ public:
    virtual bool           GetBooleanParameter(const Integer id) const; // const?
    virtual bool           SetBooleanParameter(const Integer id,
                                               const bool value); // const?
-   virtual const Rmatrix&    GetRmatrixParameter(const Integer id) const;
-   virtual const Rmatrix&    SetRmatrixParameter(const Integer id,
-                                                 const Rmatrix &value);
-   virtual const Rmatrix&    GetRmatrixParameter(const std::string &label) const;
-   virtual const Rmatrix&    SetRmatrixParameter(const std::string &label,
-                                                 const Rmatrix &value);
+   virtual const Rvector&    GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&    SetRvectorParameter(const Integer id,
+                                                 const Rvector &value);
+   virtual const Rvector&    GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&    SetRvectorParameter(const std::string &label,
+                                                 const Rvector &value);
+   //virtual const Rmatrix&    GetRmatrixParameter(const Integer id) const;
+   //virtual const Rmatrix&    SetRmatrixParameter(const Integer id,
+   //                                              const Rmatrix &value);
+   //virtual const Rmatrix&    GetRmatrixParameter(const std::string &label) const;
+   //virtual const Rmatrix&    SetRmatrixParameter(const std::string &label,
+   //                                              const Rmatrix &value);
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
+
+   // need methods to get/set stateTime (a1MJD type)?
 
    
    //------------------------------------------------------------------------------
@@ -177,8 +195,49 @@ public:
 
    // strings representing the possible celestial body types
    static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
+   static const std::string POS_VEL_STRINGS[Gmat::PosVelSourceCount];
+   static const std::string ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount];
+
+   // local constants
+   //static const Integer MAX_DEGREE            = 360;
+   //static const Integer MAX_ORDER             = 360;
+   //static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
+   static const Integer BUFSIZE               = 256;
 
 protected:
+
+   enum
+   {
+      BODY_TYPE = 0, // need Gmatbase::BaseParameterCount, in case something added to GmatBase
+      MASS,
+      EQUATORIAL_RADIUS,
+      POLAR_RADIUS,
+      MU,
+      POS_VEL_SOURCE,
+      ANALYTIC_METHOD,
+      STATE,
+      STATE_TIME,
+      //ORDER,
+      //DEGREE,
+      CENTRAL_BODY,
+      BODY_NUMBER,
+      REF_BODY_NUMBER,
+      SOURCE_FILENAME,
+      SOURCE_FILE,
+      USE_POTENTIAL_FILE_FLAG,
+      POTENTIAL_FILE_NAME,
+      ANGULAR_VELOCITY,
+      //COEFFICIENT_SIZE,
+      //SIJ,
+      //CIJ,
+      HOUR_ANGLE,
+      ATMOS_MODEL_NAME,
+      SUPPORTED_ATMOS_MODELS,
+      CelestialBodyParamCount
+   };
+   static const std::string PARAMETER_TEXT[CelestialBodyParamCount];
+
+   static const Gmat::ParameterType PARAMETER_TYPE[CelestialBodyParamCount];
    
    // body type of the body
    Gmat::BodyType         bodyType;
@@ -199,9 +258,9 @@ protected:
    // time of the state
    A1Mjd                  stateTime;
    // order of the gravity model
-   Integer                order;     // are these the same as coefficientSize?
+   //Integer                order;     // are these the same as coefficientSize?
    // degree of the gravity model
-   Integer                degree;     // are these the same as coefficientSize?
+   //Integer                degree;     // are these the same as coefficientSize?
 
    /// central body around which this body revolves
    CelestialBody          *centralBody;
@@ -212,70 +271,46 @@ protected:
    /// name of file that is the source of position and velocity for this body
    std::string            sourceFilename;
    /// date and time of start of source file
-   A1Mjd                  sourceStart;      // currently unused
+   //A1Mjd                  sourceStart;      // currently unused
    /// date and time of end of sourcce file
-   A1Mjd                  sourceEnd;        // currently unused  
+   //A1Mjd                  sourceEnd;        // currently unused  
    // the source file
    PlanetaryEphem*        theSourceFile;
 
    bool                   usePotentialFile;
-   std::string            potentialFileName;   // do I need a pointer to a file type/class for the potential file?
-   Real                   angularVelocity[3];
-   Integer                coefficientSize;      // n   // same as degree, order above?
-   Rmatrix                sij;                  // n x n
-   Rmatrix                cij;                  // n x n
+   std::string            potentialFileName;
+   Rvector3               angularVelocity;
+   //Integer                coefficientSize;      // n   // same as degree, order above?
+   //Rmatrix                Cbar, Sbar;
+   //Rmatrix                dCbar, dSbar; // from original GravityField
+   //Rmatrix                sij;                  // n x n
+   //Rmatrix                cij;                  // n x n
    Real                   hourAngle;
    AtmosphereManager*     atmManager;
    AtmosphereModel*       atmModel;
 
-   /// IDs for the parameters
-   Integer                bodyTypeID;
-   Integer                massID;
-   Integer                eqRadiusID;
-   Integer                polarRadiusID;
-   Integer                muID;
-   Integer                posVelSourceID;
-   Integer                analyticMethodID;
-   Integer                state1ID;
-   Integer                state2ID;
-   Integer                state3ID;
-   Integer                state4ID;
-   Integer                state5ID;
-   Integer                state6ID;
-   Integer                stateTimeID;
-   Integer                orderID;
-   Integer                degreeID;
-   Integer                bodyNumberID;
-   Integer                refBodyNumberID;
-   Integer                sourceFilenameID;
-   Integer                sourceStartID; 
-   Integer                sourceEndID;  
-   Integer                usePotentialFileID;
-   Integer                potentialFileNameID;
-   Integer                angularVelocityID1;
-   Integer                angularVelocityID2;
-   Integer                angularVelocityID3;
-   Integer                coefficientSizeID;
-   Integer                sijID;       
-   Integer                cijID;      
-   Integer                hourAngleID;
-   Integer                atmModelID;
-   Integer                supportedAtmModelsID;
-
-   // initialze the body
+    // initialze the body
    void Initialize(std::string withBodyType = "Planet");
    // read the potential file, if requested
-   bool ReadPotentialFile();
-
+   bool          ReadPotentialFile();
+   bool          ReadCofFile();
+   bool          ReadGrvFile();
+   bool          ReadDatFile();
+   //bool          ReadCofFile(Integer& fileDeg, Integer& fileOrd);
+   //bool          ReadGrvFile(Integer& fileDeg, Integer& fileOrd);
+   //bool          ReadDatFile(Integer& fileDeg, Integer& fileOrd);
+   
+   bool          IsBlank(char* aLine);
+   
    // has the potential file been read already?
-   bool                   potentialFileRead;
+   bool          potentialFileRead;
 
    // defaults if potential file is not used
-   Real                   defaultMu;
-   Real                   defaultEqRadius;
-   Integer                defaultCoefSize;
-   Rmatrix                defaultSij;
-   Rmatrix                defaultCij;
+   Real          defaultMu;
+   Real          defaultEqRadius;
+   //Integer       defaultCoefSize;
+   //Rmatrix       defaultSij;
+   //Rmatrix       defaultCij;
 
 private:
 
