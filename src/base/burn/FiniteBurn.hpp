@@ -50,7 +50,7 @@ public:
    virtual Real            GetRealParameter(const Integer id) const;
    virtual Real            SetRealParameter(const Integer id, const Real value);
 
-
+   void                    Initialize();
    virtual bool            Fire(Real *burnData);
    
    GmatBase*               Clone() const;
@@ -62,7 +62,9 @@ protected:
    StringArray             tanks;
    /// Overall thrust scale factor for this burn
    Real                    burnScaleFactor;
-
+   /// Flag used to determine if the configuration needs updating
+   bool                    initialized;
+   
    /// Published parameters for thrusters
    enum
    {

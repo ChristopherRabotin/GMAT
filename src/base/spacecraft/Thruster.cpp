@@ -737,6 +737,39 @@ bool Thruster::SetBooleanParameter(const Integer id, const bool value)
 
 
 //---------------------------------------------------------------------------
+//  bool TakeAction(const std::string &action, const std::string &actionData)
+//---------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ * 
+ * Thrusters use this method to clear the pointers and names of tanks used for
+ * a burn, prior to reassigning the tanks.
+ *
+ * @param <action> The string descriptor for the requested action.
+ * @param <actionData> Optional data used for the action.
+ * 
+ * @return true if the action was performed, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Thruster::TakeAction(const std::string &action, 
+                          const std::string &actionData)
+{
+   if (action == "ClearTanks") {
+//      if (thrusterFiring)
+//         throw HardwareException("Thruster " + instanceName + 
+//            " is attempting to remove fuel tank access during a finite burn");
+      
+      tankNames.clear();
+      tanks.clear();
+      
+      return true;
+   }
+   
+   return Hardware::TakeAction(action, actionData);
+}
+
+
+//---------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //---------------------------------------------------------------------------
 /**
@@ -877,7 +910,12 @@ Real Thruster::CalculateMassFlow()
    if (!thrusterFiring)
       return 0.0;
    else {     
-      if (!constantExpressions) {
+      if (tanks.empty())
+         throw HardwareException("Thruster \"" + instanceName + 
+                                    "\" does not have a fuel tank");
+
+      // For now, always calculate T and I_sp
+      //if (!constantExpressions) {
          if (!CalculateThrustAndIsp())
             throw HardwareException("Thruster \"" + instanceName + 
                                     "\" could not calculate dm/dt");
@@ -885,7 +923,7 @@ Real Thruster::CalculateMassFlow()
             throw HardwareException("Thruster \"" + instanceName + 
                                     "\" has specific impulse == 0.0");
          mDot = (thrust/thrustScaleFactor) / impulse;
-      }
+      //}
    }
 
    #ifdef DEBUG_THRUSTER

@@ -66,6 +66,10 @@ public:
    
    virtual const StringArray& GetStringArrayParameter(const Integer id) const; 
 
+   virtual bool               TakeAction(const std::string &action,  
+                                 const std::string &actionData = "");
+   
+
    // required method for all subclasses
    virtual GmatBase*          Clone() const;
    virtual void               Copy(const GmatBase* inst);

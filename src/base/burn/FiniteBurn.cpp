@@ -30,7 +30,7 @@ const std::string
 FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 {
    "Thrusters",
-   "FuelTanks",
+   "Tanks",
    "BurnScaleFactor"
 };
 
@@ -59,7 +59,8 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(std::string nomme) :
    Burn              ("FiniteBurn", nomme),
-   burnScaleFactor   (1.0)
+   burnScaleFactor   (1.0),
+   initialized       (false)
 {
    parameterCount = FiniteBurnParamCount;
 }
@@ -89,7 +90,8 @@ FiniteBurn::~FiniteBurn()
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
    Burn              (fb),
    thrusters         (fb.thrusters),
-   burnScaleFactor   (fb.burnScaleFactor)
+   burnScaleFactor   (fb.burnScaleFactor),
+   initialized       (false)
 {
    parameterCount = fb.parameterCount;
 }
@@ -114,6 +116,7 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
    Burn::operator=(fb);
    thrusters = fb.thrusters;
    burnScaleFactor = fb.burnScaleFactor;
+   initialized = false;
       
    return *this;
 }
@@ -216,12 +219,14 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
    if (id == THRUSTER) {
       if (find(thrusters.begin(), thrusters.end(), value) == thrusters.end())
          thrusters.push_back(value);
+      initialized = false;
       return true;
    }
          
    if (id == FUEL_TANK) {
       if (find(tanks.begin(), tanks.end(), value) == tanks.end())
          tanks.push_back(value);
+      initialized = false;
       return true;
    }
          
@@ -325,12 +330,16 @@ bool FiniteBurn::Fire(Real *burnData)
          instanceName.c_str());
    #endif
 
+   if (initialized == false)
+      Initialize();
+
+
    frame = frameman->GetFrameInstance(coordFrame);
    if (frame == NULL)
       throw BurnException("Maneuver frame undefined");
     
    PropState *state;
-   if (sc)    
+   if (sc)
       state = &sc->GetState();
    else
       throw BurnException("Maneuver initial state undefined (No spacecraft?)");
@@ -384,6 +393,17 @@ bool FiniteBurn::Fire(Real *burnData)
       deltaV[0] += dir[0] * tOverM;
       deltaV[1] += dir[1] * tOverM;
       deltaV[2] += dir[2] * tOverM;
+
+      #ifdef DEBUG_FINITE_BURN
+         MessageInterface::ShowMessage("   Thruster %s = %s details:\n", 
+            (*i).c_str(), current->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "      dM    = %16.13le\n      Mass  = %16.13lf\n"
+            "      TSF   = %16.13lf\n      |Acc| = %16.13le\n      "
+            "Acc   = [%16.13le   %16.13le   %16.13le]\n", dm, tMass, 
+            current->thrustScaleFactor, tOverM,
+            deltaV[0], deltaV[1], deltaV[2]);
+      #endif
    }
 
    // Build the acceleration
@@ -421,3 +441,60 @@ GmatBase* FiniteBurn::Clone(void) const
    return (new FiniteBurn(*this));
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * This method assigns tanks to thrusters.
+ *
+ * @return clone of the ImpulsiveBurn.
+ */
+//------------------------------------------------------------------------------
+void FiniteBurn::Initialize()
+{
+   if (!sc)
+      throw BurnException("FiniteBurn::Initialize() cannot access spacecraft");
+   
+   ObjectArray tankArray = sc->GetRefObjectArray(Gmat::FUEL_TANK);
+   ObjectArray thrusterArray = sc->GetRefObjectArray(Gmat::THRUSTER);
+
+   // Now set tank pointers for thrusters associated with this burn
+   if (!tanks.empty()) {
+      // Look up the thruster(s)
+      for (ObjectArray::iterator th = thrusterArray.begin(); 
+           th != thrusterArray.end(); ++th) {
+         for (StringArray::iterator thName = thrusters.begin();
+              thName != thrusters.end(); ++thName) {
+            // Only act on thrusters assigned to this burn
+            if ((*th)->GetName() == *thName) {
+               // Setup the tanks
+               (*th)->TakeAction("ClearTanks");
+               // Loop through each tank for the burn
+               for (StringArray::iterator tankName = tanks.begin();
+                    tankName != tanks.end(); ++tankName) {
+                  ObjectArray::iterator tnk = tankArray.begin();
+                  // Find the tank on the spacecraft
+                  while (tnk != tankArray.end()) {
+                     if ((*tnk)->GetName() == *tankName) {
+                        // Make the assignment
+                        (*th)->SetStringParameter("Tank", *tankName);
+                        (*th)->SetRefObject(*tnk, (*tnk)->GetType(), 
+                                            (*tnk)->GetName());
+                        break;
+                     }
+                     // Not found; keep looking 
+                     ++tnk;
+                     if (tnk == tankArray.end())
+                        throw BurnException("FiniteBurn::Initialize() "
+                           "cannot find tank " + (*tankName) + " for burn " +
+                           instanceName);
+                  }
+               }
+            }
+         }
+      }
+   }
+   
+   initialized = true;
+}
