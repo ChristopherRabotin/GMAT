@@ -41,6 +41,7 @@ private:
 //    GmatMainFrame *mainFrame;
 
 //    wxWindow *parent;
+    wxTreeItemId mDraggedItem;
     wxTreeItemId mSpacecraftItem;
     wxTreeItemId mPropagatorItem;
     wxTreeItemId mReportItem;
@@ -80,6 +81,10 @@ private:
     void OnDelete(wxCommandEvent &event);
     void OnEndLabelEdit(wxTreeEvent &event);
     void OnBeginLabelEdit(wxTreeEvent &event);
+
+    void OnBeginDrag(wxTreeEvent &event);
+//    void OnBeginRDrag(wxTreeEvent &event);
+    void OnEndDrag(wxTreeEvent &event);    
 
     void AddIcons();   
     void OnAddBody(wxCommandEvent &event);

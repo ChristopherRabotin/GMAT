@@ -54,6 +54,9 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, ResourceTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, ResourceTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, ResourceTree::OnEndLabelEdit)
+   EVT_TREE_BEGIN_DRAG(-1, ResourceTree::OnBeginDrag)
+//   EVT_TREE_BEGIN_RDRAG(-1, ResourceTree::OnBeginRDrag)
+   EVT_TREE_END_DRAG(-1, ResourceTree::OnEndDrag)
    
    EVT_MENU(POPUP_ADD_SC, ResourceTree::OnAddSpacecraft)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
@@ -1357,3 +1360,61 @@ wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
     
     return menu;
 }
+
+void ResourceTree::OnBeginDrag(wxTreeEvent& event)
+{
+    // need to explicitly allow drag
+    if ( event.GetItem() != GetRootItem() )
+    {
+        mDraggedItem = event.GetItem();
+        
+        // Get info from selected item
+        GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(mDraggedItem);
+        int draggedId = theItem->GetDataType();
+        
+        if ((draggedId == GmatTree::DEFAULT_SPACECRAFT )  ||
+            (draggedId == GmatTree::CREATED_SPACECRAFT ))
+        {
+          event.Allow();
+        }
+        else
+        {
+           event.Skip();
+        }      
+    }
+}
+
+void ResourceTree::OnEndDrag(wxTreeEvent& event)
+{
+    wxTreeItemId itemSrc = mDraggedItem,
+                 itemDst = event.GetItem();
+    mDraggedItem = (wxTreeItemId)0l;
+
+    if ( !itemDst.IsOk())
+    {
+        // error
+        return;
+    }
+    
+
+    // Get info from selected item
+    GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(itemDst);
+    int destId = theItem->GetDataType();
+
+    if ((destId == GmatTree::DEFAULT_FORMATION_FOLDER )  ||
+        (destId == GmatTree::CREATED_FORMATION_FOLDER ))
+    {
+      wxString text = GetItemText(itemSrc);
+
+      AppendItem(itemDst, text, GmatTree::ICON_SPACECRAFT, -1,
+               new GmatTreeItemData(text, GmatTree::CREATED_SPACECRAFT));
+               
+      if (GetChildrenCount(mSpacecraftItem) <= 1)
+      {           
+        Collapse(mSpacecraftItem);
+      }
+    
+      Delete(itemSrc);
+    }   
+}
+
