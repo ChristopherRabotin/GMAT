@@ -54,7 +54,6 @@ GuiItemManager* GuiItemManager::GetInstance()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateAll()
 {
-   //UpdateSpaceObject();
    UpdateFormation();
    UpdateSpacecraft();
    UpdateParameter();
@@ -167,11 +166,16 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
 
    if (namesToExclude.IsEmpty())
    {
-      //MessageInterface::ShowMessage("GuiItemManager::GetSpaceObjectListBox() namesToExclude=0\n");
-      if (theNumSpacecraft > 0)
+      
+#if DEBUG_GUI_ITEM
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetSpaceObjectListBox() namesToExclude=0\n");
+#endif
+      
+      if (theNumSpaceObject > 0)
       {       
          theSpaceObjectListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, theNumSpacecraft,
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumSpaceObject,
                           theSpaceObjectList, wxLB_SINGLE|wxLB_SORT);
       }
       else
@@ -184,9 +188,13 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    else
    {
       int exclCount = namesToExclude.GetCount();
-      int newSpaceObjCount = theNumSpacecraft - exclCount;
-      //MessageInterface::ShowMessage("GuiItemManager::GetSpaceObjectListBox() newSpaceObjCount = %d\n",
-      //                              newSpaceObjCount);
+      int newSpaceObjCount = theNumSpaceObject - exclCount;
+      
+#if DEBUG_GUI_ITEM
+      MessageInterface::ShowMessage
+         ("GuiItemManager::GetSpaceObjectListBox() newSpaceObjCount = %d\n",
+          newSpaceObjCount);
+#endif
 
       if (newSpaceObjCount > 0)
       {
@@ -194,7 +202,7 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
          bool excludeName;
          int numSpaceObj = 0;
         
-         for (int i=0; i<theNumSpacecraft; i++)
+         for (int i=0; i<theNumSpaceObject; i++)
          {
             excludeName = false;
             for (int j=0; j<exclCount; j++)
@@ -217,7 +225,10 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
       }
       else
       {
-         //MessageInterface::ShowMessage("GuiItemManager::GetSpaceObjectListBox() emptyList\n");
+#if DEBUG_GUI_ITEM
+         MessageInterface::ShowMessage
+            ("GuiItemManager::GetSpaceObjectListBox() emptyList\n");
+#endif
          theSpaceObjectListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
@@ -484,15 +495,17 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
    int numSc = scList.size();
    int numFm = fmList.size();
    int numObj = 0;
+   int soCount = 0;
    
 #if DEBUG_GUI_ITEM
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSpaceObjectList()\nnumSc=%d, scList=", numSc);
+      ("GuiItemManager::UpdateSpaceObjectList() entered==========>\n");
+   MessageInterface::ShowMessage("numSc=%d, scList=", numSc);
    for (int i=0; i<numSc; i++)
-      MessageInterface::ShowMessage("%s", scList[i].c_str());
+      MessageInterface::ShowMessage("%s ", scList[i].c_str());
    MessageInterface::ShowMessage("\nnumFm=%d, fmList=", numFm);
    for (int i=0; i<numFm; i++)
-      MessageInterface::ShowMessage("%s", fmList[i].c_str());
+      MessageInterface::ShowMessage("%s ", fmList[i].c_str());
    MessageInterface::ShowMessage("\n");   
 #endif
 
@@ -505,7 +518,7 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
       if (numFm > 0)
       {
          StringArray fmscListAll;
-
+         
          //------------------------------------------
          // Merge spacecrafts in Formation
          //------------------------------------------
@@ -515,44 +528,60 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
             StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
             fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
          }
-
+         
          sort(scList.begin(), scList.end());
          sort(fmscListAll.begin(), fmscListAll.end());
-      
+         
          //------------------------------------------
          // Make list of spacecrafts not in Formation
          //------------------------------------------
          StringArray result;
          set_difference(scList.begin(), scList.end(), fmscListAll.begin(),
                         fmscListAll.end(), back_inserter(result));
-
+         
          numObj = result.size();
-
+         
          //------------------------------------------
-         // Save new list to theSpaceObjectList
+         // Add new list to theSpaceObjectList
          //------------------------------------------
          if (numObj > 0)  // check to see if any objects exist
          {
             for (int i=0; i<numObj; i++)
             {
-               theSpaceObjectList[i] = wxString(result[i].c_str());
+               theSpaceObjectList[soCount] = wxString(result[i].c_str());
+               soCount++;
 #if DEBUG_GUI_ITEM
                MessageInterface::ShowMessage
-                  ("theSpaceObjectList[%d]=%s", i, theSpaceObjectList[i].c_str());
+                  ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                   theSpaceObjectList[soCount-1].c_str());
 #endif
             }
+         }
+         
+         //------------------------------------------
+         // Add formation to theSpaceObjectList
+         //------------------------------------------
+         for (int i=0; i<numFm; i++)
+         {
+            theSpaceObjectList[soCount] = wxString(fmList[i].c_str());
+            soCount++;
+#if DEBUG_GUI_ITEM
+            MessageInterface::ShowMessage
+               ("theSpaceObjectList[%d]=%s\n", soCount-1,
+                theSpaceObjectList[soCount-1].c_str());
+#endif
          }
       }
       // no formation, Save scList to theSpaceObjectList
       else
       {
-         numObj = numSc;
-         for (int i=0; i<numObj; i++)
+         soCount = numSc;
+         for (int i=0; i<soCount; i++)
          {
             theSpaceObjectList[i] = wxString(scList[i].c_str());
 #if DEBUG_GUI_ITEM
             MessageInterface::ShowMessage
-               ("theSpaceObjectList[%d]=%s", i, theSpaceObjectList[i].c_str());
+               ("theSpaceObjectList[%d]=%s\n", i, theSpaceObjectList[i].c_str());
 #endif
          }
       }
@@ -565,7 +594,12 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
       theSpaceObjectList[0] = wxString("-- None --");
    }
    
-   theNumSpaceObject = numObj;
+#if DEBUG_GUI_ITEM
+   MessageInterface::ShowMessage
+      ("<==========GuiItemManager::UpdateSpaceObjectList() exiting\n");
+#endif
+
+   theNumSpaceObject = soCount;
 }
 
 //------------------------------------------------------------------------------
