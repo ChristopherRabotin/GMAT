@@ -71,21 +71,21 @@
 const std::string
 PointMassForce::PARAMETER_TEXT[PointMassParamCount - PhysicalModelParamCount] =
 {
-    "Epoch",
-    "GravConst",
-    "Radius",
-    "EstimateMethod",
-    "Body",
+   "Epoch",
+   "GravConst",
+   "Radius",
+   "EstimateMethod",
+   "Body",
 };
 
 const Gmat::ParameterType
 PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
 {
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::REAL_TYPE,
-    Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -100,23 +100,23 @@ PointMassForce::PARAMETER_TYPE[PointMassParamCount - PhysicalModelParamCount] =
  */
 //------------------------------------------------------------------------------
 PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
-    PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
-    mu                     (398600.4415),
-    epoch                  (21545.0),
-    estimationMethod       (1.0)
+   PhysicalModel          (Gmat::PHYSICAL_MODEL, "PointMassForce", name),
+   mu                     (398600.4415),
+   epoch                  (21545.0),
+   estimationMethod       (1.0)
 {
-    parameterCount = PointMassParamCount;
-    dimension = 6 * satcount;
-    theBody = NULL;
+   parameterCount = PointMassParamCount;
+   dimension = 6 * satcount;
+   theBody = NULL;
     
-    // create default body
-    theBodyName = "Earth"; //loj: 5/7/04 added
+   // create default body
+   theBodyName = "Earth"; //loj: 5/7/04 added
 
-    // temp fix, will be removed when default mission sets initial data
-    //if (solarSystem != NULL)
-    //{
-    //   SetBodyName("Earth");
-    //}
+   // temp fix, will be removed when default mission sets initial data
+   //if (solarSystem != NULL)
+   //{
+   //   SetBodyName("Earth");
+   //}
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ PointMassForce::PointMassForce(const std::string &name, Integer satcount) :
 //------------------------------------------------------------------------------
 PointMassForce::~PointMassForce(void)
 {
-    delete theBody;
+   //delete theBody;
 }
 
 //------------------------------------------------------------------------------
@@ -142,14 +142,14 @@ PointMassForce::~PointMassForce(void)
  */
 //------------------------------------------------------------------------------
 PointMassForce::PointMassForce(const PointMassForce& pmf) :
-    PhysicalModel          (pmf),
-    mu                     (pmf.mu),
-    epoch                  (pmf.epoch),
-    estimationMethod       (pmf.estimationMethod)
+   PhysicalModel          (pmf),
+   mu                     (pmf.mu),
+   epoch                  (pmf.epoch),
+   estimationMethod       (pmf.estimationMethod)
 {
-    parameterCount = PointMassParamCount;
-    dimension = pmf.dimension;
-    initialized = false;
+   parameterCount = PointMassParamCount;
+   dimension = pmf.dimension;
+   initialized = false;
 }
 
 //------------------------------------------------------------------------------
@@ -164,17 +164,17 @@ PointMassForce::PointMassForce(const PointMassForce& pmf) :
 //------------------------------------------------------------------------------
 PointMassForce& PointMassForce::operator= (const PointMassForce& pmf)
 {
-    if (&pmf == this)
-        return *this;
+   if (&pmf == this)
+      return *this;
 
-    epoch = pmf.epoch;
-    mu = pmf.mu;
-    dimension = pmf.dimension;
-    initialized = false;
-    elapsedTime = pmf.elapsedTime;
-    estimationMethod = pmf.estimationMethod;
+   epoch = pmf.epoch;
+   mu = pmf.mu;
+   dimension = pmf.dimension;
+   initialized = false;
+   elapsedTime = pmf.elapsedTime;
+   estimationMethod = pmf.estimationMethod;
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -266,64 +266,64 @@ bool PointMassForce::Initialize(void)
 //------------------------------------------------------------------------------
 bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 {
-    if (order > 2)
-        return false;
+   if (order > 2)
+      return false;
 
-    if ((state == NULL) || (deriv == NULL))
-        // throw("Arrays not yet initialized -- exiting");
-        return false;
+   if ((state == NULL) || (deriv == NULL))
+      // throw("Arrays not yet initialized -- exiting");
+      return false;
 
-    // Calculate how many spacecraft are in the model
-    Integer satCount = (Integer)(dimension / 6);
-    if (dimension != satCount * 6) 
-        return false;
+   // Calculate how many spacecraft are in the model
+   Integer satCount = (Integer)(dimension / 6);
+   if (dimension != satCount * 6) 
+      return false;
 
-    Real radius, r3, mu_r;
-    Integer i6;
+   Real radius, r3, mu_r;
+   Integer i6;
     
-    //waw: 04/27/04
-    Real now = epoch + dt/86400.0;
-    Rvector6 rv = theBody->GetState(now), relativePosition;
+   //waw: 04/27/04
+   Real now = epoch + dt/86400.0;
+   Rvector6 rv = theBody->GetState(now), relativePosition;
 
-    for (Integer i = 0; i < satCount; i++) 
-    {
-       i6 = i * 6;
+   for (Integer i = 0; i < satCount; i++) 
+   {
+      i6 = i * 6;
        
-       relativePosition[0] = rv[0] - state[ i6 ];
-       relativePosition[1] = rv[1] - state[i6+1];
-       relativePosition[2] = rv[2] - state[i6+2];
+      relativePosition[0] = rv[0] - state[ i6 ];
+      relativePosition[1] = rv[1] - state[i6+1];
+      relativePosition[2] = rv[2] - state[i6+2];
 
-       r3 = relativePosition[ i6 ]*relativePosition[ i6 ] + 
+      r3 = relativePosition[ i6 ]*relativePosition[ i6 ] + 
          relativePosition[1+i6]*relativePosition[1+i6] + 
          relativePosition[2+i6]*relativePosition[2+i6];
-       radius = sqrt(r3);
-       r3 *= radius;
-       //mu_r = - mu / r3;  waw: 05/06/04
-       mu_r = mu / r3;
+      radius = sqrt(r3);
+      r3 *= radius;
+      //mu_r = - mu / r3;  waw: 05/06/04
+      mu_r = mu / r3;
 
-       if (order == 1) 
-       {
-          // Do dv/dt first, in case deriv = state
-          deriv[3 + i6] = relativePosition[i6]     * mu_r;
-          deriv[4 + i6] = relativePosition[1 + i6] * mu_r;
-          deriv[5 + i6] = relativePosition[2 + i6] * mu_r;
-          // dr/dt = v
-          deriv[i6]     = state[3 + i6];
-          deriv[1 + i6] = state[4 + i6];
-          deriv[2 + i6] = state[5 + i6];
-       } 
-       else 
-       {
-          // Feed accelerations to corresponding components directly for RKN
-          deriv[ i6 ] = relativePosition[ i6 ] * mu_r; 
-          deriv[i6+1] = relativePosition[i6+1] * mu_r; 
-          deriv[i6+2] = relativePosition[i6+2] * mu_r; 
-          deriv[i6+3] = 0.0; 
-          deriv[i6+4] = 0.0; 
-          deriv[i6+5] = 0.0; 
-       }
-    }
-    return true;
+      if (order == 1) 
+      {
+         // Do dv/dt first, in case deriv = state
+         deriv[3 + i6] = relativePosition[i6]     * mu_r;
+         deriv[4 + i6] = relativePosition[1 + i6] * mu_r;
+         deriv[5 + i6] = relativePosition[2 + i6] * mu_r;
+         // dr/dt = v
+         deriv[i6]     = state[3 + i6];
+         deriv[1 + i6] = state[4 + i6];
+         deriv[2 + i6] = state[5 + i6];
+      } 
+      else 
+      {
+         // Feed accelerations to corresponding components directly for RKN
+         deriv[ i6 ] = relativePosition[ i6 ] * mu_r; 
+         deriv[i6+1] = relativePosition[i6+1] * mu_r; 
+         deriv[i6+2] = relativePosition[i6+2] * mu_r; 
+         deriv[i6+3] = 0.0; 
+         deriv[i6+4] = 0.0; 
+         deriv[i6+5] = 0.0; 
+      }
+   }
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -350,28 +350,28 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 //------------------------------------------------------------------------------
 bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 {
-    Integer i6;
+   Integer i6;
 
-    //MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
+   //MessageInterface::ShowMessage("PointMassForce::GetComponentMap() order = %d\n", order);
     
-    if (order != 1)
-        return false;
+   if (order != 1)
+      return false;
 
-    // Calculate how many spacecraft are in the model
-    Integer satCount = (Integer)(dimension / 6);
-    for (Integer i = 0; i < satCount; i++) 
-    {
-        i6 = i * 6;
+   // Calculate how many spacecraft are in the model
+   Integer satCount = (Integer)(dimension / 6);
+   for (Integer i = 0; i < satCount; i++) 
+   {
+      i6 = i * 6;
 
-        map[ i6 ] = i6 + 3;
-        map[i6+1] = i6 + 4;
-        map[i6+2] = i6 + 5;
-        map[i6+3] = -1;
-        map[i6+4] = -1;
-        map[i6+5] = -1;
-    }
+      map[ i6 ] = i6 + 3;
+      map[i6+1] = i6 + 4;
+      map[i6+2] = i6 + 5;
+      map[i6+3] = -1;
+      map[i6+4] = -1;
+      map[i6+5] = -1;
+   }
 
-    return true;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -406,28 +406,28 @@ bool PointMassForce::GetComponentMap(Integer * map, Integer order) const
 //------------------------------------------------------------------------------
 Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
 {
-    if (estimationMethod == 1.0)
-        return PhysicalModel::EstimateError(diffs, answer);
+   if (estimationMethod == 1.0)
+      return PhysicalModel::EstimateError(diffs, answer);
 
-    Real retval = 0.0, err, mag, vec[3];
+   Real retval = 0.0, err, mag, vec[3];
 
-    for (Integer i = 0; i < dimension; i += 3) 
-    {
-        vec[0] = answer[ i ] - modelState[ i ];
-        vec[1] = answer[i+1] - modelState[i+1];
-        vec[2] = answer[i+2] - modelState[i+2];
+   for (Integer i = 0; i < dimension; i += 3) 
+   {
+      vec[0] = answer[ i ] - modelState[ i ];
+      vec[1] = answer[i+1] - modelState[i+1];
+      vec[2] = answer[i+2] - modelState[i+2];
 
-        mag = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];        
-        err = diffs[i]*diffs[i] + diffs[i+1]*diffs[i+1] + diffs[i+2]*diffs[i+2];
-        if (mag > 0.0)
-            err = sqrt(err / mag);
-        else
-            err = sqrt(err);
-        if (err > retval)
-            retval = err;
-    }
+      mag = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];        
+      err = diffs[i]*diffs[i] + diffs[i+1]*diffs[i+1] + diffs[i+2]*diffs[i+2];
+      if (mag > 0.0)
+         err = sqrt(err / mag);
+      else
+         err = sqrt(err);
+      if (err > retval)
+         retval = err;
+   }
 
-    return retval;
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -439,7 +439,7 @@ Real PointMassForce::EstimateError(Real * diffs, Real * answer) const
 //------------------------------------------------------------------------------
 CelestialBody* PointMassForce::GetBody()
 {
-    return theBody;
+   return theBody;
 }
 
 //------------------------------------------------------------------------------
@@ -451,7 +451,7 @@ CelestialBody* PointMassForce::GetBody()
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetBodyName()
 {
-    return theBodyName;
+   return theBodyName;
 }
 
 //------------------------------------------------------------------------------
@@ -522,9 +522,9 @@ void PointMassForce::SetBodyName(const std::string &name)
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetParameterText(const Integer id) const
 {
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PARAMETER_TEXT[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterText(id);
+   if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+      return PARAMETER_TEXT[id - PhysicalModelParamCount];
+   return PhysicalModel::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -536,13 +536,13 @@ std::string PointMassForce::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer PointMassForce::GetParameterID(const std::string &str) const
 {
-    for (Integer i = PhysicalModelParamCount; i < PointMassParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
-            return i;
-            //loj: 3/19/04 return i + PhysicalModelParamCount;
-    }
-    return PhysicalModel::GetParameterID(str);
+   for (Integer i = PhysicalModelParamCount; i < PointMassParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - PhysicalModelParamCount])
+         return i;
+      //loj: 3/19/04 return i + PhysicalModelParamCount;
+   }
+   return PhysicalModel::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -554,9 +554,9 @@ Integer PointMassForce::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
 {
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PARAMETER_TYPE[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterType(id);
+   if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+      return PARAMETER_TYPE[id - PhysicalModelParamCount];
+   return PhysicalModel::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -568,9 +568,9 @@ Gmat::ParameterType PointMassForce::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetParameterTypeString(const Integer id) const
 {
-    if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
-        return PARAMETER_TEXT[id - PhysicalModelParamCount];
-    return PhysicalModel::GetParameterTypeString(id);
+   if ((id >= PhysicalModelParamCount) && (id < PointMassParamCount))
+      return PARAMETER_TEXT[id - PhysicalModelParamCount];
+   return PhysicalModel::GetParameterTypeString(id);
 }
 
 //------------------------------------------------------------------------------
@@ -584,25 +584,25 @@ std::string PointMassForce::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real PointMassForce::GetRealParameter(const Integer id) const
 {
-    if (id == EPOCH)
-        return epoch + elapsedTime / 86400.0;
+   if (id == EPOCH)
+      return epoch + elapsedTime / 86400.0;
 
-    if (id == MU)
-        return mu;
+   if (id == MU)
+      return mu;
     
-    if (id == RADIUS)
-        return 0.0;     // Not used in this implementation
+   if (id == RADIUS)
+      return 0.0;     // Not used in this implementation
 
-    //if (id == flatteningParameter)
-    //    return 0.0;     // Not used in this implementation
+   //if (id == flatteningParameter)
+   //    return 0.0;     // Not used in this implementation
 
-    //if (id == poleRadiusParameter)
-    //    return 0.0;     // Not used in this implementation
+   //if (id == poleRadiusParameter)
+   //    return 0.0;     // Not used in this implementation
 
-    if (id == ESTIMATE_METHOD)
-        return estimationMethod;
+   if (id == ESTIMATE_METHOD)
+      return estimationMethod;
 
-    return PhysicalModel::GetRealParameter(id);
+   return PhysicalModel::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -617,39 +617,39 @@ Real PointMassForce::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real PointMassForce::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == EPOCH) 
-    {
-        epoch = value;
-        elapsedTime = 0.0;
-        return true;
-    }
+   if (id == EPOCH) 
+   {
+      epoch = value;
+      elapsedTime = 0.0;
+      return true;
+   }
 
-    if (id == MU) 
-    {
-        mu = value;
-        return true;
-    }
+   if (id == MU) 
+   {
+      mu = value;
+      return true;
+   }
 
-    if (id == RADIUS)
-        return false;   // Not used in this implementation
+   if (id == RADIUS)
+      return false;   // Not used in this implementation
 
-    //if (id == flatteningParameter)
-    //    return false;   // Not used in this implementation
+   //if (id == flatteningParameter)
+   //    return false;   // Not used in this implementation
 
-    //if (id == poleRadiusParameter)
-    //    return false;   // Not used in this implementation
+   //if (id == poleRadiusParameter)
+   //    return false;   // Not used in this implementation
 
-    if (id == ESTIMATE_METHOD) 
-    {
-        if ((value == 1.0) || (value == 2.0)) 
-        {
-            estimationMethod = value;
-            return true;
-        }
-        return false;
-    }
+   if (id == ESTIMATE_METHOD) 
+   {
+      if ((value == 1.0) || (value == 2.0)) 
+      {
+         estimationMethod = value;
+         return true;
+      }
+      return false;
+   }
 
-    return GmatBase::SetRealParameter(id, value);
+   return GmatBase::SetRealParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -672,7 +672,7 @@ std::string PointMassForce::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PointMassForce::GetStringParameter(const std::string &label) const
 {
-    return GetStringParameter(GetParameterID(label));
+   return GetStringParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -680,17 +680,17 @@ std::string PointMassForce::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool PointMassForce::SetStringParameter(const Integer id, const std::string &value)
 {
-    //MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
-    //                              id, value.c_str());
+   //MessageInterface::ShowMessage("PointMassForce::SetStringParameter() id = %d, value = %s\n",
+   //                              id, value.c_str());
 
-    switch (id)
-    {
-    case BODY:
-        SetBodyName(value);
-        return true;
-    default:
-        return PhysicalModel::SetStringParameter(id, value);
-    }
+   switch (id)
+   {
+   case BODY:
+      SetBodyName(value);
+      return true;
+   default:
+      return PhysicalModel::SetStringParameter(id, value);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -700,6 +700,6 @@ bool PointMassForce::SetStringParameter(const Integer id, const std::string &val
 bool PointMassForce::SetStringParameter(const std::string &label,
                                         const std::string &value)
 {
-    return SetStringParameter(GetParameterID(label), value);
+   return SetStringParameter(GetParameterID(label), value);
 }
 
