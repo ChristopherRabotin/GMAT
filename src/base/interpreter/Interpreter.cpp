@@ -153,6 +153,13 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
         CreateForceModel(objectname);
         return true;
     }
+    
+    // Handle Subscribers
+    if (find(subscribermap.begin(), subscribermap.end(), objecttype) != 
+                                                          subscribermap.end()) {
+        moderator->CreateSubscriber(objecttype, objectname);
+        return true;
+    }
 
     return false;
 }
@@ -162,6 +169,9 @@ bool Interpreter::InterpretObject(std::string objecttype, std::string objectname
 bool Interpreter::BuildObject(std::string &objectname)
 {
     GmatBase *obj = FindObject(objectname);
+    
+    if (obj == NULL)
+        return true; //false;
     
     (*outstream).precision(18);        /// @todo Make output precision generic
     
@@ -368,6 +378,8 @@ GmatBase* Interpreter::FindObject(std::string objName)
         obj = moderator->GetForceModel(objName);
     if (obj == NULL)
         obj = moderator->GetPropSetup(objName);
+    if (obj == NULL)
+        obj = moderator->GetSubscriber(objName);
 
     return obj;
 }

@@ -37,8 +37,10 @@ ReportFile::ReportFile(const std::string &name, const std::string &fileName) :
 {
     if (fileName != "")
         dstream.open(fileName.c_str());
-    else
+    else {
         dstream.open("ReportFile.txt");
+        filename = "ReportFile.txt";
+    }
 
     // Added 1 parameter
     parameterCount += 2;

@@ -231,7 +231,17 @@ PropSetup* ConfigManager::GetPropSetup(const std::string &name)
 
 Subscriber* ConfigManager::GetSubscriber(const std::string &name)
 {
-    return NULL;
+    Subscriber *sub = NULL;
+    if (mapping.find(name) != mapping.end()) {
+        if (mapping[name]->GetType() != Gmat::SUBSCRIBER) {
+            //std::string str = mapping[name]->GetName() +
+            //                  " is not a PropSetup";
+            //throw ConfigManagerException(str);
+            return NULL;
+        }
+        sub = (Subscriber *)mapping[name];
+    }
+    return sub;
 }
 
 

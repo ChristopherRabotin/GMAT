@@ -195,6 +195,12 @@ bool ScriptInterpreter::Parse(void)
                 SetParameter(obj, id, **phrase);
             }
         }
+        
+        // Check to see if it's a command
+        if (find(cmdmap.begin(), cmdmap.end(), **phrase) != cmdmap.end()) {
+            Command *cmd = moderator->AppendCommand(**phrase, "");
+            cmd->SetGeneratingString(line);
+        }
 
         // Clear the array of words found in the line
         chunks.clear();
@@ -224,7 +230,18 @@ bool ScriptInterpreter::WriteScript(void)
         if (!BuildObject(*current))
             return false;
             
+    // Subscriber setups
+    objs = moderator->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+    for (current = objs.begin(); current != objs.end(); ++current)
+        if (!BuildObject(*current))
+            return false;
+
     // Command sequence
+    Command *cmd = moderator->GetNextCommand();
+    while (cmd != NULL) {
+        *outstream << (cmd->GetGeneratingString()) << "\n";
+        cmd = cmd->GetNext();
+    }
     
     return true;
 }
