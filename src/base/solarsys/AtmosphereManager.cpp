@@ -45,6 +45,7 @@ AtmosphereManager::AtmosphereManager(const std::string& body) :
     // Add the name of each supported frame to this list
     atmospheres.push_back("Exponential");
     atmospheres.push_back("MSISE90");
+    atmospheres.push_back("JacchiaRoberts");
     BuildBodyAtmospheres();
 }
 
@@ -115,7 +116,7 @@ AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType,
          model = new ExponentialAtmosphere;
       if (atmType == "MSISE90")
          model = new Msise90Atmosphere;
-      if (atmType == "Jacchia-Roberts")
+      if (atmType == "JacchiaRoberts")
          model = new JacchiaRobertsAtmosphere;
           
       if (model == NULL)
