@@ -9,7 +9,7 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = DormandElMikkawyPrince68.cpp Integrator.cpp PropSetup.cpp \
+SRC = DormandElMikkawyPrince68.cpp Integrator.cpp PrinceDormand78.cpp PropSetup.cpp \
 	Propagator.cpp RungeKutta.cpp RungeKuttaFehlberg56.cpp \
 	RungeKuttaNystrom.cpp RungeKutta89.cpp
 #
