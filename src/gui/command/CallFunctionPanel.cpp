@@ -301,7 +301,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
 
    if (event.GetEventObject() == inputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, inputStrings);
+      ParameterMultiSelectDialog paramDlg(this, inputStrings, true);
       paramDlg.ShowModal();
 
       inputStrings = paramDlg.GetParamNames();
@@ -325,7 +325,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
    }
    else if (event.GetEventObject() == outputGrid)
    {
-      ParameterMultiSelectDialog paramDlg(this, outputStrings);
+      ParameterMultiSelectDialog paramDlg(this, outputStrings, true);
       paramDlg.ShowModal();
 
       outputStrings = paramDlg.GetParamNames();
