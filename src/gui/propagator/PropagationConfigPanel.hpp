@@ -55,7 +55,15 @@ public:
     // constructor
     PropagationConfigPanel(wxWindow *parent, const wxString &propName);
     
-private:             
+private:
+
+    enum
+    {
+        RKV89_ID = 0,
+        RKN68_ID,
+        RKF56_ID
+    };
+    
     wxStaticText *integratorStaticText;
     wxStaticText *setting1StaticText;
     wxStaticText *setting2StaticText;
@@ -132,7 +140,8 @@ private:
     
     bool useSRP;
     bool isForceModelChanged;
-    
+
+    wxArrayString integratorArray;
     wxArrayString primaryBodiesArray;
     wxArrayString pointmassBodiesArray;
     wxArrayString allBodiesArray;
@@ -157,7 +166,7 @@ private:
     void Setup(wxWindow *parent);
     void LoadData();
     void SaveData();
-    void DisplayIntegratorData();
+    void DisplayIntegratorData(bool integratorChanged);
     void DisplayPrimaryBodyData();
     void DisplayForceData(); //loj: 2/11/04 added
     void DisplayGravityFieldData();
