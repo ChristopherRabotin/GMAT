@@ -27,12 +27,14 @@
 class GMAT_API MeanJ2000Equatorial : public RefFrame
 {
 public:
-   MeanJ2000Equatorial(const CelestialBody &centralBody);
-   MeanJ2000Equatorial(const MeanJ2000Equatorial &mj2000eq);
-   MeanJ2000Equatorial& operator= (const MeanJ2000Equatorial &right);
-   ~MeanJ2000Equatorial();
+    //MeanJ2000Equatorial(const CelestialBody &centralBody);
+    MeanJ2000Equatorial(const std::string &name = "",
+                        CelestialBody *centralBody = NULL);
+    MeanJ2000Equatorial(const MeanJ2000Equatorial &mj2000eq);
+    MeanJ2000Equatorial& operator= (const MeanJ2000Equatorial &right);
+    ~MeanJ2000Equatorial();
 
-   // conversion to other frames (future build implementation)
+    // conversion to other frames (future build implementation)
 
 protected:
 

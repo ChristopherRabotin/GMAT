@@ -19,13 +19,32 @@
 #include "RefFrame.hpp"
 #include "CelestialBody.hpp"
 #include "A1Mjd.hpp"
+#include "SolarSystem.hpp"
+#include "Moderator.hpp"
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+RefFrame::PARAMETER_TEXT[RefFrameParamCount] =
+{
+    "CB",
+};
+
+const Gmat::ParameterType
+RefFrame::PARAMETER_TYPE[RefFrameParamCount] =
+{
+    Gmat::STRING_TYPE,
+};
+
 
 //---------------------------------
 // public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// CelestialBody GetCentralBody() const
+// CelestialBody* GetCentralBody() const
 //------------------------------------------------------------------------------
 /*
  * Retrieves the central body object
@@ -33,9 +52,49 @@
  * @return the central body object
  */
 //------------------------------------------------------------------------------
-const CelestialBody* RefFrame::GetCentralBody() const
+CelestialBody* RefFrame::GetCentralBody() const
 {
-   return mCentralBody;
+    return mCentralBody;
+}
+
+//------------------------------------------------------------------------------
+// void SetCentralBody(CelestialBody *centralBody) const
+//------------------------------------------------------------------------------
+/*
+ * Sets the central body object
+ */
+//------------------------------------------------------------------------------
+void RefFrame::SetCentralBody(CelestialBody *centralBody)
+{
+    mCentralBody = centralBody;
+}
+
+//------------------------------------------------------------------------------
+// bool SetCentralBody(const std::string &name) const
+//------------------------------------------------------------------------------
+/*
+ * Sets the central body object
+ *
+ * @return true if central body object successfully set, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool RefFrame::SetCentralBody(const std::string &name)
+{
+    bool status = false;
+
+    Moderator *theModerator = Moderator::Instance();
+    
+    if (name != "")
+    {
+        SolarSystem *ss = theModerator->GetDefaultSolarSystem();
+        CelestialBody *body = ss->GetBody(name);
+        if (body != NULL)
+        {
+            SetCentralBody(body);
+        }
+    }
+
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -49,7 +108,7 @@ const CelestialBody* RefFrame::GetCentralBody() const
 //------------------------------------------------------------------------------
 std::string RefFrame::GetCentralBodyName() const
 {
-   return mCentralBody->GetName();
+    return mCentralBody->GetName();
 }
 
 //------------------------------------------------------------------------------
@@ -63,21 +122,7 @@ std::string RefFrame::GetCentralBodyName() const
 //------------------------------------------------------------------------------
 A1Mjd RefFrame::GetRefDate() const
 {
-   return mRefDate;
-}
-
-//------------------------------------------------------------------------------
-// std::string GetFrameName() const
-//------------------------------------------------------------------------------
-/*
- * Retrieves the frame name.
- *
- * @return the frame name.
- */
-//------------------------------------------------------------------------------
-std::string RefFrame::GetFrameName() const
-{
-   return mFrameName;
+    return mRefDate;
 }
 
 //------------------------------------------------------------------------------
@@ -96,13 +141,13 @@ std::string RefFrame::GetFrameName() const
 //------------------------------------------------------------------------------
 bool RefFrame::operator== (const RefFrame &right) const
 {
-   if (mCentralBody->GetName() != right.mCentralBody->GetName())
-      return false;
+    if (mCentralBody->GetName() != right.mCentralBody->GetName())
+        return false;
 
-   if (mRefDate != right.mRefDate)
-      return false;
+    if (mRefDate != right.mRefDate)
+        return false;
    
-   return true;
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -121,7 +166,115 @@ bool RefFrame::operator== (const RefFrame &right) const
 //------------------------------------------------------------------------------
 bool RefFrame::operator!= (const RefFrame &right) const
 {
-   return !(operator==(right));
+    return !(operator==(right));
+}
+
+
+//---------------------------------
+// methods inherited from GmatBase
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+std::string RefFrame::GetParameterText(const Integer id) const
+{
+    if (id >= 0 && id < RefFrameParamCount)
+        return PARAMETER_TEXT[id];
+    else
+        return GmatBase::GetParameterText(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer RefFrame::GetParameterID(const std::string &str) const
+{
+   for (int i=0; i<RefFrameParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i])
+          return i;
+   }
+   
+   return GmatBase::GetParameterID(str);
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType RefFrame::GetParameterType(const Integer id) const
+{
+    if (id >= 0 && id < RefFrameParamCount)
+        return PARAMETER_TYPE[id];
+    else
+        return GmatBase::GetParameterType(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string RefFrame::GetParameterTypeString(const Integer id) const
+{
+    if (id >= 0 && id < RefFrameParamCount)
+        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+    else
+       return GmatBase::GetParameterTypeString(id);
+    
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string RefFrame::GetStringParameter(const Integer id) const
+{
+    switch (id)
+    {
+    case CENTRAL_BODY:
+        return mCentralBody->GetName();
+    default:
+        return GmatBase::GetStringParameter(id);
+    }
+}
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string RefFrame::GetStringParameter(const std::string &label) const
+{
+    //MessageInterface::ShowMessage("RefFrame::GetStringParameter() label = %s\n",
+    //                              label.c_str());
+
+    return GetStringParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool RefFrame::SetStringParameter(const Integer id, const std::string &value)
+{
+    //MessageInterface::ShowMessage("RefFrame::SetStringParameter() id = %d, "
+    //                              "value = %s \n", id, value.c_str());
+    switch (id)
+    {
+    case CENTRAL_BODY:
+        return SetCentralBody(value);
+    default:
+        return GmatBase::SetStringParameter(id, value);
+    }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool RefFrame::SetStringParameter(const std::string &label,
+                                const std::string &value)
+{
+    //MessageInterface::ShowMessage("RefFrame::SetStringParameter() label = %s, "
+    //                              "value = %s \n", label.c_str(), value.c_str());
+
+    return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------
@@ -129,23 +282,50 @@ bool RefFrame::operator!= (const RefFrame &right) const
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RefFrame(const CelestialBody &centralBody, const A1Mjd &refDate,
-//          const std::string &frameName)
+// RefFrame(const std::string &name, const std::string &typeStr,
+//          const A1Mjd &refDate, CelestialBody *centralBody)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
- * @param <centralBody> reference to central body object
- * @param <refData> reference to reference date object.
- * @param <frameName> reference frame name
+ * @param <name> reference frame name
+ * @param <typeStr> reference frame type
+ * @param <refDate> reference to reference date object.
+ * @param <centralBody> pointer to central body object
  */
 //------------------------------------------------------------------------------
-RefFrame::RefFrame(const CelestialBody &centralBody, const A1Mjd &refDate,
-                   const std::string &frameName)
+RefFrame::RefFrame(const std::string &name, const std::string &typeStr,
+                   const A1Mjd &refDate, CelestialBody *centralBody)
+    : GmatBase(Gmat::REF_FRAME, typeStr, name)
 {
-   mCentralBody = &centralBody;
-   mRefDate = refDate;
-   mFrameName = frameName;
+    //loj: 3/22/04 mCentralBody = &centralBody;
+    mCentralBody = centralBody;
+    mRefDate = refDate;
+}
+
+//------------------------------------------------------------------------------
+// RefFrame(const RefFrame &copy)
+//------------------------------------------------------------------------------
+RefFrame::RefFrame(const RefFrame &copy)
+    : GmatBase(copy)
+{
+    mCentralBody = copy.mCentralBody;
+    mRefDate = copy.mRefDate;
+}
+
+//------------------------------------------------------------------------------
+// RefFrame& operator= (const RefFrame &right)
+//------------------------------------------------------------------------------
+RefFrame& RefFrame::operator= (const RefFrame &right)
+{
+    if (this != &right)
+    {
+        GmatBase::operator=(right);
+        mCentralBody = right.mCentralBody;
+        mRefDate = right.mRefDate;
+    }
+
+    return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -156,17 +336,6 @@ RefFrame::RefFrame(const CelestialBody &centralBody, const A1Mjd &refDate,
  */
 //------------------------------------------------------------------------------
 RefFrame::~RefFrame()
-{
-}
-
-//------------------------------------------------------------------------------
-// RefFrame()
-//------------------------------------------------------------------------------
-/**
- * Default constructor.
- */
-//------------------------------------------------------------------------------
-RefFrame::RefFrame()
 {
 }
 

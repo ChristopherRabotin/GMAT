@@ -24,7 +24,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// MeanJ2000Equatorial(const CelestialBody &centralBody)
+// MeanJ2000Equatorial(const std::string &name, CelestialBody *centralBody)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
@@ -33,9 +33,15 @@
  * @param <refDate> reference date
  */
 //------------------------------------------------------------------------------
-MeanJ2000Equatorial::MeanJ2000Equatorial(const CelestialBody &centralBody)
-   : RefFrame(centralBody, A1Mjd::J2000, "MeanJ2000Equatorial")
+MeanJ2000Equatorial::MeanJ2000Equatorial(const std::string &name,
+                                         CelestialBody *centralBody)
+   : RefFrame(name, "MeanJ2000Equatorial", A1Mjd::J2000, centralBody)
 {
+    // Set Earth if centralBody is not set
+    if (centralBody == NULL)
+    {
+        SetCentralBody("Earth");
+    }
 }
 
 //------------------------------------------------------------------------------
