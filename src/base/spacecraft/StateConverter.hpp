@@ -20,40 +20,55 @@
 #ifndef StateConverter_hpp
 #define StateConverter_hpp
 
-#include "Converter.hpp"
+// #include "Converter.hpp"
+#include "SolarSystem.hpp"     // include new heaaer
+#include "CelestialBody.hpp"
 #include "A1Date.hpp"
 #include "A1Mjd.hpp"
 #include "UtcDate.hpp"
-#include "Cartesian.hpp"
-#include "Keplerian.hpp"
+// #include "Cartesian.hpp"
+// #include "Keplerian.hpp"
+#include "CoordUtil.hpp"      // include new heaaer
 #include "SphericalOne.hpp"
 #include "SphericalTwo.hpp"
 #include "Rvector6.hpp"
 #include "Rvector3.hpp"
 
-class GMAT_API StateConverter : public Converter
+class GMAT_API StateConverter 
 {
 public:
-    // Default constructor
-    StateConverter();
-    StateConverter(const std::string &name);
-    StateConverter(const std::string &typeStr, const std::string &name);
-    // Copy constructor
-    StateConverter(const StateConverter &state);
-    // Assignment operator
-    StateConverter& operator=(const StateConverter &state);
+   // Default constructor
+   StateConverter();
+   StateConverter(const std::string &newType);
+   StateConverter(const std::string &newType, const Real newMu);
+//   StateConverter(SolarSystem *solarSystem, const std::string &type);
 
-    // Destructor
-    virtual ~StateConverter();
+   // Copy constructor
+   StateConverter(const StateConverter &state);
+   // Assignment operator
+   StateConverter& operator=(const StateConverter &state);
 
-    // public method 
-    Rvector6 Convert(const Real *state, const std::string &fromElementType,
-                     const std::string &toElementType);
+   // Destructor
+   virtual ~StateConverter();
 
+   // public method 
+   Real     GetMu() const;
+   bool     SetMu(SolarSystem *solarSystem, const std::string &body);
+
+   Rvector6 Convert(const Real *state, const std::string &fromElementType,
+                    const std::string &toElementType);
+
+   Rvector6 Convert(const Real *state, const std::string &toElementType);
+   
+   // Constant variable
+   static const Real DEFAULT_MU = 0.3986004415e+06;  // km^3/s^2
+ 
 protected:
-    // Declare protetced method data 
+   // Declare protetced method data 
 
 private:
+   std::string  type;
+   Real         mu;
 
 };
 

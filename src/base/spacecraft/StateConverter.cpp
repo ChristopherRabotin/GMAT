@@ -30,23 +30,42 @@
  * Creates default constructor.
  *
  */
-StateConverter::StateConverter() :
-   Converter("Cartesian") 
+StateConverter::StateConverter()
+// :   Converter("Cartesian") 
 {
+   type = "Cartesian";
+   mu = DEFAULT_MU;
 }
 
 //---------------------------------------------------------------------------
-//  StateConverter(std::string &type)
+//  StateConverter(const std::string &newTtype)
 //---------------------------------------------------------------------------
 /**
  * Creates constructors with parameters.
  *
- * @param <typeStr> GMAT script string associated with this type of object.
+ * @param <newType> Element type of coordinate system.
  *
  */
-StateConverter::StateConverter(const std::string &type) :
-   Converter(type) 
+StateConverter::StateConverter(const std::string &newType) 
+// :   Converter(type) 
 {
+   type = newType;
+   mu = DEFAULT_MU;
+}
+
+//---------------------------------------------------------------------------
+//  StateConverter(const std::string &newTtype, const Real newMu)
+//---------------------------------------------------------------------------
+/**
+ * Creates constructors with parameters.
+ *
+ * @param <newType> Element type of coordinate system.
+ *
+ */
+StateConverter::StateConverter(const std::string &newType, const Real newMu) 
+{
+   type = newType;
+   mu = newMu;
 }
 
 //---------------------------------------------------------------------------
@@ -57,9 +76,11 @@ StateConverter::StateConverter(const std::string &type) :
  *
  * @param <stateConverter> The original that is being copied.
  */
-StateConverter::StateConverter(const StateConverter &stateConverter) :
-    Converter (stateConverter.type)
+StateConverter::StateConverter(const StateConverter &stateConverter) 
+//    : Converter (stateConverter.type)
 {
+   type = stateConverter.type;
+   mu   = stateConverter.mu; 
 }
 
 //---------------------------------------------------------------------------
@@ -93,6 +114,63 @@ StateConverter& StateConverter::operator=(const StateConverter &converter)
 }
 
 //---------------------------------------------------------------------------
+//  Real StateConverter::GetMu() const
+//---------------------------------------------------------------------------
+/**
+ * Get the mu 
+ *
+ * @return mu's value
+ */
+Real StateConverter::GetMu() const
+{
+   return mu;
+}
+
+//---------------------------------------------------------------------------
+//  bool StateConverter::SetMu(const SolarSystem *solarSystem, 
+//                             const std::string &body)
+//---------------------------------------------------------------------------
+/**
+ * Set the mu from the Celestial body's gravitational constant
+ *
+ * @return true if successful; otherwise, return false
+ *
+ */
+bool StateConverter::SetMu(SolarSystem *solarSystem, 
+                           const std::string &body)
+{
+   if (solarSystem == NULL) return false;
+
+   CelestialBody *centralBody = solarSystem->GetBody(body);
+   if (centralBody == NULL) return false;
+
+   // Get the gravitational constant and set new value for mu
+   mu = centralBody->GetGravitationalConstant();
+
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
+//  Rvector6 StateConverter::Convert(const Real *state,   
+//                                   const std::string &fromElementType,
+//                                   const std::string &toElementType)
+//---------------------------------------------------------------------------
+/**
+ * Assignment operator for StateConverter structures.
+ *
+ * @param <state> Element states 
+ * @param <toElementType> Element Type
+ *
+ * @return Converted states from the specific element type 
+ */
+Rvector6 StateConverter::Convert(const Real *state,
+                                 const std::string &toElementType)
+{
+   return Convert(state,type,toElementType);
+}
+
+//---------------------------------------------------------------------------
 //  Rvector6 StateConverter::Convert(const Real *state,   
 //                                   const std::string &fromElementType,
 //                                   const std::string &toElementType)
@@ -116,47 +194,16 @@ Rvector6 StateConverter::Convert(const Real *state,
     // Determine the input of coordinate representation 
     if (fromElementType == "Cartesian" && toElementType != "Cartesian")
     {
-       Cartesian *cartesian = new Cartesian(newState.GetR(),newState.GetV());
-
        if (toElementType == "Keplerian")
        {
-          Keplerian *keplerian = new Keplerian(ToKeplerian(*cartesian,
-                                                  GmatPhysicalConst::mu));
-         
-          // Set the states values 
-          newState.Set(keplerian->GetSemimajorAxis(),
-                       keplerian->GetEccentricity(),
-                       keplerian->GetInclination(),
-                       keplerian->GetRAAscendingNode(),
-                       keplerian->GetArgumentOfPeriapsis(),
-                       keplerian->GetMeanAnomaly() );
-                   
-          delete keplerian;           
-       }
-       delete cartesian;
+          Real meanAnomaly;   // why use MeanAnomaly?
+          return(CartesianToKeplerian(newState,mu,&meanAnomaly));
+       } 
     }
     else if (fromElementType == "Keplerian" && toElementType != "Keplerian")
     {
-       Keplerian *keplerian = new Keplerian(state[0],state[1],state[2],
-                                            state[3],state[4],state[5]);
-   
-       Cartesian *cartesian = new Cartesian(ToCartesian(*keplerian,
-                                               GmatPhysicalConst::mu));
-
-       delete keplerian;
-
        if (toElementType == "Cartesian")
-       {
-          // Get the position and velocity from Cartesian and then
-          // set the states values
-          Rvector3 position = cartesian->GetPosition();
-          Rvector3 velocity = cartesian->GetVelocity();
-
-          newState.Set(position.Get(0),position.Get(1),position.Get(2),
-                       velocity.Get(0),velocity.Get(1),velocity.Get(2));
-
-       }
-       delete cartesian;
+          return(KeplerianToCartesian(newState,mu,CoordUtil::TA));
     }
  
     return newState;
