@@ -48,27 +48,17 @@ public:
                           const std::string &actionData = "");
 
    // Methods used for configuration
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
    StringArray         GetRefObjectNameArray(const Gmat::ObjectType type) const;
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                            const std::string &name);
-   
+
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
 
-   virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
-   virtual GmatBase*   GetObject(const Gmat::ObjectType type,
-                                 const std::string objName = "");
-   virtual void        ClearObject(const Gmat::ObjectType type);
-
    // Reference object accessor methods
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index=0);
+                                    const std::string &name);
    virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index=0);
+                                    const std::string &name = "");
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
 
    // Parameter accessor methods -- overridden from GmatBase
@@ -97,8 +87,6 @@ public:
    virtual bool            Initialize();
    virtual bool            Execute();
 
-   Integer GetNumInputParams();
-   Integer GetNumOutputParams();
    std::string FormEvalString();
    
    bool AddInputParameter(const std::string &paramName, Integer index);
@@ -110,11 +98,9 @@ private:
    ObjectArray objectArray;
    std::vector<Parameter*> mInputList;
    std::vector<Parameter*> mOutputList;
-   std::vector<Parameter*> mParamList;
 
    StringArray mInputListNames;
    StringArray mOutputListNames;
-   StringArray mParamListNames;
 
    Integer mNumInputParams;
    Integer mNumOutputParams;
