@@ -128,6 +128,24 @@ public:
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
    
+   // DJC Added, 12/16/04
+   virtual std::string     GetStringParameter(const Integer id, 
+                                              const Integer index) const;
+   virtual bool            SetStringParameter(const Integer id, 
+                                              const std::string &value, 
+                                              const Integer index);
+   virtual std::string     GetStringParameter(const std::string &label, 
+                                              const Integer index) const;
+   virtual bool            SetStringParameter(const std::string &label, 
+                                              const std::string &value, 
+                                              const Integer index);
+   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
+                                        const std::string &name, 
+                                        const Integer index);
+   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                        const std::string &name, 
+                                        const Integer index);
+   
    
 protected:
 

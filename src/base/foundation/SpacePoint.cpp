@@ -388,3 +388,140 @@ bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+// DJC Added, 12/16/04
+// This seems like it should NOT be needed, but GCC seems to be confused about 
+// the overloaded versions of the following six methods:
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value from a vector of strings, 
+ * given the input parameter ID and the index into the vector. 
+ *
+ * @param id ID for the requested parameter.
+ * @param index index for the particular string requested.
+ * 
+ * @return The requested string.
+ */
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetStringParameter(const Integer id, 
+                                           const Integer index) const
+{
+   return GmatBase::GetStringParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value, 
+//                         const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a value on a string parameter value in a vector of strings, 
+ * given the input parameter ID, the value, and the index into the vector. 
+ *
+ * @param id ID for the requested parameter.
+ * @param value The new string.
+ * @param index index for the particular string requested.
+ * 
+ * @return true if successful; otherwise, false.
+ */
+//------------------------------------------------------------------------------
+bool SpacePoint::SetStringParameter(const Integer id, 
+                                    const std::string &value, 
+                                    const Integer index)
+{
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label, 
+//                                const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value from a vector of strings, 
+ * given the label associated with the input parameter and the index into the 
+ * vector. 
+ *
+ * @param label String identifier for the requested parameter.
+ * @param index index for the particular string requested.
+ * 
+ * @return The requested string.
+ */
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetStringParameter(const std::string &label, 
+                                           const Integer index) const
+{
+   return GmatBase::GetStringParameter(label, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value, 
+//                         const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a value on a string parameter value in a vector of strings, 
+ * given the label associated with the input parameter and the index into the 
+ * vector. 
+ *
+ * @param label String identifier for the requested parameter.
+ * @param value The new string.
+ * @param index index for the particular string requested.
+ * 
+ * @return true if successful; otherwise, false.
+ */
+//------------------------------------------------------------------------------
+bool SpacePoint::SetStringParameter(const std::string &label, 
+                                    const std::string &value, 
+                                    const Integer index)
+{
+   return GmatBase::SetStringParameter(label, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name, 
+//                        const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method returns a pointer to a reference object contained in a vector of
+ * objects in the SpacePoint class.
+ *
+ * @param type type of the reference object requested
+ * @param name name of the reference object requested
+ * @param index index for the particular object requested.
+ *
+ * @return pointer to the reference object requested.
+ */
+//------------------------------------------------------------------------------
+GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
+                                   const std::string &name, 
+                                   const Integer index)
+{
+   return GmatBase::GetRefObject(type, name, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a pointer to a reference object in a vector of objects in 
+ * the SpacePoint class.
+ *
+ * @param obj The reference object.
+ * @param type type of the reference object requested
+ * @param name name of the reference object requested
+ * @param index index for the particular object requested.
+ *
+ * @return true if successful; otherwise, false.
+ */
+//------------------------------------------------------------------------------
+bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                              const std::string &name, const Integer index)
+{
+   return GmatBase::SetRefObject(obj, type, name, index);
+}

@@ -2,7 +2,9 @@
 # Initial Version - D. Conway - 2003/11/19
 
 HEADERS = -I../include -I../util
-OBJECTS = GmatBase.o GmatBaseException.o
+OBJECTS = GmatBase.o \
+          GmatBaseException.o \
+          SpacePoint.o
 
 all: libFoundation 
 	mkdir -p ../lib
