@@ -42,7 +42,7 @@ public:
     
    Rvector();
    Rvector(int size);
-   Rvector(int size, Real a1, ... );  
+   Rvector(int size, Real a1, ... );  //Note: . is required for Real value. eg) 123., 100.
    Rvector(const Rvector &v); 
    virtual ~Rvector();
 
