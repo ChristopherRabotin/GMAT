@@ -25,24 +25,8 @@
 #include "CartesianParameters.hpp"
 #include "KeplerianParameters.hpp"
 #include "SphericalParameters.hpp"
+#include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
-
-//loj: 3/18/04 grouped relevant classes into one file
-//  #include "ElapsedDaysParam.hpp" 
-//  #include "ElapsedSecsParam.hpp" 
-//  #include "CurrentA1MjdParam.hpp"
-//  #include "CartXParam.hpp"
-//  #include "CartYParam.hpp"
-//  #include "CartZParam.hpp"
-//  #include "CartVxParam.hpp"
-//  #include "CartVyParam.hpp"
-//  #include "CartVzParam.hpp"
-//  #include "KepSmaParam.hpp"
-//  #include "KepEccParam.hpp"
-//  #include "KepIncParam.hpp"
-//  #include "KepRaanParam.hpp"
-//  #include "KepAopParam.hpp"
-//  #include "KepTaParam.hpp"
 
 #include "SMA.hpp"
 #include "Ecc.hpp"
@@ -123,7 +107,17 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
         return new SphRA(withName);
     if (ofType == "SphDec")
         return new SphDec(withName);
-    
+
+    // Orbital parameters
+    if (ofType == "VelApoapsis")
+        return new VelApoapsis(withName);
+    if (ofType == "VelPeriapsis")
+        return new VelPeriapsis(withName);
+    if (ofType == "Apoapsis")
+        return new Apoapsis(withName);
+    if (ofType == "Periapsis")
+        return new Periapsis(withName);
+
     // Angular parameters
     if (ofType == "SemilatusRectum")
         return new SemilatusRectum(withName);
@@ -174,8 +168,12 @@ ParameterFactory::ParameterFactory()
         creatables.push_back("Inc");
         creatables.push_back("KepMA");
         creatables.push_back("KepMM");
+
+        // Orbital parameters
         creatables.push_back("VelApoapsis");
         creatables.push_back("VelPeriapsis");
+        creatables.push_back("Apoapsis");
+        creatables.push_back("Periapsis");
 
         // Spherical parameters
         creatables.push_back("SphRA");
