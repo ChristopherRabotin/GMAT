@@ -26,6 +26,7 @@ OBJECTS = Parameter.o \
           RefData.o \
           Rvec6Var.o \
           SphericalParameters.o \
+          StringVar.o \
           TimeData.o \
           TimeParameters.o \
           TimeReal.o \
