@@ -25,6 +25,7 @@
 // Supported models
 #include "ExponentialAtmosphere.hpp"
 #include "Msise90Atmosphere.hpp"
+#include "JacchiaRobertsAtmosphere.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -114,6 +115,8 @@ AtmosphereModel* AtmosphereManager::GetAtmosphere(const std::string& atmType,
          model = new ExponentialAtmosphere;
       if (atmType == "MSISE90")
          model = new Msise90Atmosphere;
+      if (atmType == "Jacchia-Roberts")
+         model = new JacchiaRobertsAtmosphere;
           
       if (model == NULL)
          throw AtmosphereException("Cannot create requested atmosphere model");
