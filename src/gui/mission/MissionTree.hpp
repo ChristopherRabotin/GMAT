@@ -82,6 +82,8 @@ private:
    void OnAddForLoop(wxCommandEvent &event);
    void OnAddDoWhile(wxCommandEvent &event);
    void OnAddSwitchCase(wxCommandEvent &event);
+   void OnAddElseIfStatement(wxCommandEvent &event);
+   void OnAddElseStatement(wxCommandEvent &event);
     
    void OnInsertPropagate(wxCommandEvent &event);
    void OnInsertManeuver(wxCommandEvent &event);
@@ -107,8 +109,8 @@ private:
    wxMenu* CreateInsertPopupMenu();
    // wxMenu* CreateControlLogicPopupMenu();
    wxMenu* CreateAddControlLogicPopupMenu();
+   wxMenu* CreateAddIfPopupMenu();
    wxMenu* CreateInsertControlLogicPopupMenu();
-
     
    DECLARE_EVENT_TABLE();
        
@@ -144,12 +146,14 @@ private:
       POPUP_WHILE_CONTROL,
       POPUP_FOR_CONTROL,
       POPUP_DO_CONTROL,
-        
+
       POPUP_ADD_IF_STATEMENT,
       POPUP_ADD_WHILE_LOOP,
       POPUP_ADD_FOR_LOOP,
       POPUP_ADD_D0_WHILE,
       POPUP_ADD_SWITCH_CASE,
+      POPUP_ADD_ELSE_IF_STATEMENT,
+      POPUP_ADD_ELSE_STATEMENT,
         
       POPUP_INSERT_IF_STATEMENT,
       POPUP_INSERT_WHILE_LOOP,

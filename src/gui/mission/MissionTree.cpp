@@ -62,6 +62,9 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_FOR_LOOP, MissionTree::OnAddForLoop)
    EVT_MENU(POPUP_ADD_D0_WHILE, MissionTree::OnAddDoWhile)
    EVT_MENU(POPUP_ADD_SWITCH_CASE, MissionTree::OnAddSwitchCase)
+   EVT_MENU(POPUP_ADD_ELSE_IF_STATEMENT, MissionTree::OnAddElseIfStatement)
+   EVT_MENU(POPUP_ADD_ELSE_STATEMENT, MissionTree::OnAddElseStatement)
+
 
    EVT_MENU(POPUP_INSERT_MANEUVER, MissionTree::OnInsertManeuver)
    EVT_MENU(POPUP_INSERT_PROPAGATE, MissionTree::OnInsertPropagate)
@@ -450,10 +453,11 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_VIEW_VARIABLES, wxT("View Variables"));
       menu.Append(POPUP_VIEW_GOALS, wxT("View Goals")); 
    } 
-   else if ((dataType == GmatTree::IF_CONTROL)    ||
-            (dataType == GmatTree::WHILE_CONTROL) ||
+   else if ((dataType == GmatTree::WHILE_CONTROL) ||
             (dataType == GmatTree::DO_CONTROL) ||
-            (dataType == GmatTree::FOR_CONTROL))   
+            (dataType == GmatTree::FOR_CONTROL) ||
+            (dataType == GmatTree::ELSE_IF_CONTROL) ||
+            (dataType == GmatTree::ELSE_CONTROL))   
    {
       menu.Append(POPUP_OPEN, wxT("Open"));
       menu.Append(POPUP_CLOSE, wxT("Close"));
@@ -464,6 +468,18 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_DELETE, wxT("Delete"));
       menu.Append(POPUP_RENAME, wxT("Rename"));
    } 
+   else if (dataType == GmatTree::IF_CONTROL) 
+   {
+      menu.Append(POPUP_OPEN, wxT("Open"));
+      menu.Append(POPUP_CLOSE, wxT("Close"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreateAddIfPopupMenu());
+      menu.Append(POPUP_INSERT_COMMAND, wxT("Insert"), 
+                  CreateInsertPopupMenu());
+      menu.Append(POPUP_DELETE, wxT("Delete"));
+      menu.Append(POPUP_RENAME, wxT("Rename"));
+   } 
+
    else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
    {
       menu.Append(POPUP_ADD_COMMAND, wxT("Add"), CreatePopupMenu());
@@ -766,6 +782,77 @@ void MissionTree::OnAddSwitchCase(wxCommandEvent &event)
    AppendItem(item, name, GmatTree::ICON_FILE, -1,
               new MissionTreeItemData(name, GmatTree::SWITCH_CONTROL, 
                                       name, NULL));
+
+   Expand(item);
+   //        }
+   //    }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddElseIfStatement(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnAddElseIfStatement(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   wxTreeItemId parent = GetItemParent(item);
+
+   wxString name;
+   wxString endName;
+   name.Printf("Else If%d", ++mNumIfStatement);
+   //    endName.Printf("End If%d", mNumIfStatement);
+   //    ++mNumIfStatement;
+   // ag: need gui interpreter to get control logic
+   //    GmatCommand *cmd =
+   //        theGuiInterpreter->CreateCommand("Maneuver", std::string(name.c_str()));
+   //    
+   //    if (cmd != NULL)
+   //    {
+   //        if (theGuiInterpreter->AppendCommand(cmd))
+   //        {   
+   wxTreeItemId targetId =
+      InsertItem(parent, item, name, GmatTree::ICON_FOLDER, -1,
+                 new MissionTreeItemData(name, GmatTree::ELSE_IF_CONTROL, 
+                                         name, NULL));
+   SetItemImage(targetId, GmatTree::ICON_OPENFOLDER, 
+                wxTreeItemIcon_Expanded);    
+   //            AppendItem(item, endName, GmatTree::ICON_FILE, -1,
+   //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
+   //                                               endName, NULL));
+
+   Expand(item);
+   //        }
+   //    }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddElseStatement(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnAddElseStatement(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   wxTreeItemId parent = GetItemParent(item);
+   wxString name;
+   wxString endName;
+   name.Printf("Else%d", ++mNumIfStatement);
+   //    endName.Printf("End If%d", mNumIfStatement);
+   //    ++mNumIfStatement;
+   // ag: need gui interpreter to get control logic
+   //    GmatCommand *cmd =
+   //        theGuiInterpreter->CreateCommand("Maneuver", std::string(name.c_str()));
+   //    
+   //    if (cmd != NULL)
+   //    {
+   //        if (theGuiInterpreter->AppendCommand(cmd))
+   //        {   
+   wxTreeItemId targetId =
+      InsertItem(parent, item, name, GmatTree::ICON_FOLDER, -1,
+                 new MissionTreeItemData(name, GmatTree::ELSE_CONTROL, 
+                                         name, NULL));
+   SetItemImage(targetId, GmatTree::ICON_OPENFOLDER, 
+                wxTreeItemIcon_Expanded);    
+   //            AppendItem(item, endName, GmatTree::ICON_FILE, -1,
+   //                       new MissionTreeItemData(endName, GmatTree::END_CONTROL, 
+   //                                               endName, NULL));
 
    Expand(item);
    //        }
@@ -1301,11 +1388,11 @@ wxMenu* MissionTree::CreateAddControlLogicPopupMenu()
     // {
         //MessageInterface::ShowMessage("command = " + items[i] + "\n");
 
-   menu->Append(POPUP_ADD_IF_STATEMENT, wxT("If Statement"));
-   menu->Append(POPUP_ADD_WHILE_LOOP, wxT("While Loop")); 
-   menu->Append(POPUP_ADD_FOR_LOOP, wxT("For Loop"));
-   menu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
-   menu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch Case")); 
+   menu->Append(POPUP_ADD_IF_STATEMENT, wxT("If"));
+   menu->Append(POPUP_ADD_WHILE_LOOP, wxT("While")); 
+   menu->Append(POPUP_ADD_FOR_LOOP, wxT("For"));
+//   menu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
+   menu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch")); 
        
    //    if (items[i] == "Propagate")
    //    {
@@ -1322,6 +1409,69 @@ wxMenu* MissionTree::CreateAddControlLogicPopupMenu()
 }
 
 //------------------------------------------------------------------------------
+// wxMenu* CreateAddControlIfLogicPopupMenu()
+//------------------------------------------------------------------------------
+wxMenu* MissionTree::CreateAddIfPopupMenu()
+{
+   //MessageInterface::ShowMessage("MissionTree::CreateControlLogicMenu() entered\n");
+   //unsigned int i;
+   unsigned int i;
+   wxMenu *menu = new wxMenu;
+   
+   StringArray items = theGuiInterpreter->GetListOfFactoryItems(Gmat::COMMAND);
+
+   for (i=0; i<items.size(); i++)
+   {
+      //MessageInterface::ShowMessage("command = " + items[i] + "\n");
+        
+      if (items[i] == "Propagate")
+      {
+         menu->Append(POPUP_ADD_PROPAGATE, wxT("Propagate")); //wxT(items[i].c_str()));
+      }
+      else if (items[i] == "Maneuver")
+      {
+         menu->Append(POPUP_ADD_MANEUVER, wxT("Maneuver"));
+      }
+      else if (items[i] == "Target")
+      {
+         menu->Append(POPUP_ADD_TARGET, wxT("Target"));
+      }            
+   }
+
+   //-----------------------------------------------------------  
+   wxMenu *popupMenu = new wxMenu;
+
+   //    StringArray items = theGuiInterpreter->GetListOfFactoryItems(Gmat::COMMAND);
+
+    // for (i=0; i<items.size(); i++)
+    // {
+        //MessageInterface::ShowMessage("command = " + items[i] + "\n");
+   popupMenu->Append(POPUP_ADD_ELSE_IF_STATEMENT, wxT("Else If"));
+   popupMenu->Append(POPUP_ADD_ELSE_STATEMENT, wxT("Else"));
+   popupMenu->AppendSeparator();
+   popupMenu->Append(POPUP_ADD_IF_STATEMENT, wxT("If"));
+   popupMenu->Append(POPUP_ADD_WHILE_LOOP, wxT("While")); 
+   popupMenu->Append(POPUP_ADD_FOR_LOOP, wxT("For"));
+//   popupMenu->Append(POPUP_ADD_D0_WHILE, wxT("Do While"));
+   popupMenu->Append(POPUP_ADD_SWITCH_CASE, wxT("Switch")); 
+       
+   //    if (items[i] == "Propagate")
+   //    {
+   //    }
+   //    else if (items[i] == "Maneuver")
+   //     {
+   //    }
+   //    else if (items[i] == "Target")
+   //    {
+   //    }
+   // }
+   menu->Append(POPUP_CONTROL_LOGIC, "Control Logic", popupMenu);
+
+   return menu;
+}
+
+
+//------------------------------------------------------------------------------
 // wxMenu* CreateInsertControlLogicPopupMenu()
 //------------------------------------------------------------------------------
 wxMenu* MissionTree::CreateInsertControlLogicPopupMenu()
@@ -1336,11 +1486,11 @@ wxMenu* MissionTree::CreateInsertControlLogicPopupMenu()
     // {
         //MessageInterface::ShowMessage("command = " + items[i] + "\n");
 
-   menu->Append(POPUP_INSERT_IF_STATEMENT, wxT("If Statement"));
-   menu->Append(POPUP_INSERT_WHILE_LOOP, wxT("While Loop")); 
-   menu->Append(POPUP_INSERT_FOR_LOOP, wxT("For Loop"));
-   menu->Append(POPUP_INSERT_D0_WHILE, wxT("Do While"));
-   menu->Append(POPUP_INSERT_SWITCH_CASE, wxT("Switch Case")); 
+   menu->Append(POPUP_INSERT_IF_STATEMENT, wxT("If"));
+   menu->Append(POPUP_INSERT_WHILE_LOOP, wxT("While")); 
+   menu->Append(POPUP_INSERT_FOR_LOOP, wxT("For"));
+//   menu->Append(POPUP_INSERT_D0_WHILE, wxT("Do While"));
+   menu->Append(POPUP_INSERT_SWITCH_CASE, wxT("Switch")); 
        
    //    if (items[i] == "Propagate")
    //    {
