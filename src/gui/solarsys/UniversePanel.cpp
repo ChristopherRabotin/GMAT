@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              Universe
+//                              UniversePanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -14,19 +14,19 @@
 //------------------------------------------------------------------------------
 #include "UniversePanel.hpp"
 
-BEGIN_EVENT_TABLE(Universe, wxPanel)
-   EVT_BUTTON(ID_BUTTON_ADD,       Universe::OnAddButton)
-   EVT_BUTTON(ID_BUTTON_SORT,      Universe::OnSortButton)
-   EVT_BUTTON(ID_BUTTON_REMOVE,    Universe::OnRemoveButton)
+BEGIN_EVENT_TABLE(UniversePanel, wxPanel)
+   EVT_BUTTON(ID_BUTTON_ADD,       UniversePanel::OnAddButton)
+   EVT_BUTTON(ID_BUTTON_SORT,      UniversePanel::OnSortButton)
+   EVT_BUTTON(ID_BUTTON_REMOVE,    UniversePanel::OnRemoveButton)
 END_EVENT_TABLE()
 //SolarSystem::SolarSystem(wxWindow *parent):wxDialog(parent,-1, wxString("Solar System"))
 
-Universe::Universe(wxWindow *parent):wxPanel(parent)
+UniversePanel::UniversePanel(wxWindow *parent):wxPanel(parent)
 {
    CreateUniverse(this);
 }
 
-void Universe::CreateUniverse(wxWindow *parent)
+void UniversePanel::CreateUniverse(wxWindow *parent)
 {
    // SetParent(new wxFrame(0,-1,"title"));
    // parent = GetParent();
@@ -95,7 +95,7 @@ void Universe::CreateUniverse(wxWindow *parent)
    
 }
 
-void Universe::OnAddButton(wxCommandEvent& event)
+void UniversePanel::OnAddButton(wxCommandEvent& event)
 {
     //int n = item4->GetSelection();
     wxString s = item4->GetStringSelection();
@@ -103,12 +103,12 @@ void Universe::OnAddButton(wxCommandEvent& event)
     
 }
 
-void Universe::OnSortButton(wxCommandEvent& event)
+void UniversePanel::OnSortButton(wxCommandEvent& event)
 {
 
 }
 
-void Universe::OnRemoveButton(wxCommandEvent& event)
+void UniversePanel::OnRemoveButton(wxCommandEvent& event)
 {
      wxString m = item11->GetStringSelection();
      item11->SetStringSelection(m,FALSE);

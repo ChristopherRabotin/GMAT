@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                              Universe
+//                              UniversePanel
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -12,8 +12,8 @@
  * coming from
  */
 //------------------------------------------------------------------------------
-#ifndef Universe_hpp
-#define Universe_hpp
+#ifndef UniversePanel_hpp
+#define UniversePanel_hpp
 
 #include "gmatwxdefs.hpp"
 #include "wx/sizer.h"
@@ -30,44 +30,55 @@
 #include <wx/grid.h>
 
 // Declare window functions
+//loj: commented out
+//  #define ID_TEXT          10003
+//  #define ID_LISTBOX       10004
+//  #define ID_BUTTON        10005
+//  #define ID_BUTTON_ADD    10008
+//  #define ID_BUTTON_SORT   10009
+//  #define ID_BUTTON_REMOVE 10010
 
-#define ID_TEXT          10003
-#define ID_LISTBOX       10004
-#define ID_BUTTON        10005
-#define ID_BUTTON_ADD    10008
-#define ID_BUTTON_SORT   10009
-#define ID_BUTTON_REMOVE 10010
-
-class Universe: public wxPanel
+class UniversePanel: public wxPanel
 {
 public:
-  Universe(wxWindow *parent);
-  //wxSizer *CreateSolarSystem(wxWindow *parent, bool call_fit=TRUE, bool set_sizer=TRUE);
+    UniversePanel(wxWindow *parent);
+    //wxSizer *CreateSolarSystem(wxWindow *parent, bool call_fit=TRUE, bool set_sizer=TRUE);
 
  
    
 private:
-   wxBoxSizer *item0;
-   wxGridSizer *item1;
-   wxBoxSizer *item2;
-   wxBoxSizer *item5;
-   wxBoxSizer *item9;
-   
-   wxStaticText *item3;
-   wxStaticText *item10;
-   
-   wxListBox *item4;
-   wxListBox *item11;
-   
-   wxButton *item6;
-   wxButton *item7;
-   wxButton *item8;
+    wxBoxSizer *item0;
+    wxGridSizer *item1;
+    wxBoxSizer *item2;
+    wxBoxSizer *item5;
+    wxBoxSizer *item9;
     
-   void CreateUniverse(wxWindow *parent);
-   void OnAddButton(wxCommandEvent& event);
-   void OnSortButton(wxCommandEvent& event);
-   void OnRemoveButton(wxCommandEvent& event);
-   
-   DECLARE_EVENT_TABLE();
+    wxStaticText *item3;
+    wxStaticText *item10;
+    
+    wxListBox *item4;
+    wxListBox *item11;
+    
+    wxButton *item6;
+    wxButton *item7;
+    wxButton *item8;
+    
+    void CreateUniverse(wxWindow *parent);
+    void OnAddButton(wxCommandEvent& event);
+    void OnSortButton(wxCommandEvent& event);
+    void OnRemoveButton(wxCommandEvent& event);
+    
+    DECLARE_EVENT_TABLE();
+    
+    // IDs for the controls and the menu commands
+    enum
+    {     
+        ID_TEXT = 10003,
+        ID_LISTBOX,
+        ID_BUTTON,
+        ID_BUTTON_ADD,
+        ID_BUTTON_SORT,
+        ID_BUTTON_REMOVE
+    };
 };
 #endif
