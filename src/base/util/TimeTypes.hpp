@@ -6,6 +6,9 @@
 //
 // **Legal**
 //
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: K. Mueller, L. Jun
 // Created: 1995/08/28 for GSS project
 // Modified:
@@ -67,23 +70,23 @@ namespace GmatTimeUtil
    Real    seconds;
    };
 
-   static const Real SECS_PER_DAY = 86400.0;
-   static const Real SECS_PER_HOUR = 3600.0;
-   static const Real SECS_PER_MINUTE = 60.0;
+   const Real SECS_PER_DAY = 86400.0;
+   const Real SECS_PER_HOUR = 3600.0;
+   const Real SECS_PER_MINUTE = 60.0;
    
-   static const Real TIME_OF_J2000 = 883655990.850000; // 2000/01/01 43167.85
-   static const Real A1MJD_OF_J2000 = 21545.0;         // 2000/01/01 11:59:27.965622
-   static const Real MJDSEC_TO_WHOLE_NUM = 1.0e6;      // Convert mjd seconds to whole number
+   const Real TIME_OF_J2000 = 883655990.850000; // 2000/01/01 43167.85
+   const Real A1MJD_OF_J2000 = 21545.0;         // 2000/01/01 11:59:27.965622
+   const Real MJDSEC_TO_WHOLE_NUM = 1.0e6;      // Convert mjd seconds to whole number
 
-   static const Integer DAYS_BEFORE_MONTH[12] =
+   const Integer DAYS_BEFORE_MONTH[12] =
    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-   static const Integer LEAP_YEAR_DAYS_BEFORE_MONTH[12] =
+   const Integer LEAP_YEAR_DAYS_BEFORE_MONTH[12] =
    {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335};
-   static const Integer DAYS_IN_MONTH[12] =
+   const Integer DAYS_IN_MONTH[12] =
    {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-   static const Integer LEAP_YEAR_DAYS_IN_MONTH[12] =
+   const Integer LEAP_YEAR_DAYS_IN_MONTH[12] =
    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-   static const Integer JULIAN_DATE_OF_010541 = 2430000;
+   const Integer JULIAN_DATE_OF_010541 = 2430000;
    
    enum DayName {SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY};
 
