@@ -136,6 +136,15 @@ RungeKutta& RungeKutta::operator=(const RungeKutta& rk)
     sigma = rk.sigma;
     incPower = rk.incPower;
     decPower = rk.decPower;
+    
+    ki = NULL;
+    ai = NULL;
+    bij = NULL;
+    cj = NULL;
+    ee = NULL;
+    stageState = NULL;
+    candidateState = NULL;
+    
     initialized = false;
 
     return *this;

@@ -188,6 +188,11 @@ Integrator& Integrator::operator=(const Integrator& i)
     maxStepAttempts = i.maxStepAttempts;
     
     derivativeOrder = i.derivativeOrder;
+    
+    smallestTime = i.smallestTime;  
+    ddt = NULL;
+    errorEstimates = NULL;
+    errorThreshold = i.errorThreshold;
 
     return *this;
 }
