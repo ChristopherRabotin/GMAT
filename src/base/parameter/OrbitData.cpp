@@ -30,7 +30,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ORBITDATA 1
-#define DEBUG_ORBITDATA_CONVERT 1
+//#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_RUN 1
 
 using namespace GmatMathUtil;
