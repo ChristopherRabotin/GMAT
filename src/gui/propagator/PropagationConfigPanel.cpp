@@ -101,7 +101,8 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent, const wxString 
 void PropagationConfigPanel::Initialize()
 {  
     theGuiInterpreter = GmatAppData::GetGuiInterpreter(); 
-    thePropSetup = theGuiInterpreter->CreateDefaultPropSetup(propNameString.c_str());
+    //loj:thePropSetup = theGuiInterpreter->CreateDefaultPropSetup(propNameString.c_str());
+    thePropSetup = theGuiInterpreter->GetPropSetup(propNameString.c_str()); //loj: added
     
     thePropagator = thePropSetup->GetPropagator();
     theForceModel = thePropSetup->GetForceModel();
