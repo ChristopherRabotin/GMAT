@@ -73,8 +73,8 @@ Parameter* ParameterFactory::CreateParameter(std::string ofType,
         return new ElapsedDays(withName);
     if (ofType == "ElapsedSecs")
         return new ElapsedSecs(withName);
-    if (ofType == "CurrA1Mjd")
-        return new CurrA1Mjd(withName);
+    if (ofType == "CurrA1MJD")
+        return new CurrA1MJD(withName);
 
     // Cartesian paramters
     if (ofType == "CartX")
@@ -152,7 +152,7 @@ ParameterFactory::ParameterFactory()
         // Time parameters
         creatables.push_back("ElapsedDays");
         creatables.push_back("ElapsedSecs");
-        creatables.push_back("CurrA1Mjd");
+        creatables.push_back("CurrA1MJD");
 
         // Cartesian parameters
         creatables.push_back("CartX");
