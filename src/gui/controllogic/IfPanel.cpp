@@ -45,6 +45,8 @@ IfPanel::IfPanel(wxWindow *parent, GmatCommand *cmd) : GmatPanel(parent)
    mRhsList.clear();
    mLogicalOpStrings.clear();
    
+   newCommand = false; 
+   
    Create();
    Show();
 }
@@ -119,13 +121,13 @@ void IfPanel::LoadData()
        {
           conditionGrid->SetCellValue(index, LHS_COL, mLhsList[index].c_str()); 
           conditionGrid->SetCellValue(index, COND_COL, mOpStrings[index].c_str()); 
-          conditionGrid->SetCellValue(index, RHS_COL, mRhsList[index].c_str());   
+          conditionGrid->SetCellValue(index, RHS_COL, mRhsList[index].c_str());  
+          
+          newCommand = false; 
        }    
+       else
+          newCommand = true;
     }     
-    else
-    {
-       theIfCommand = (If*)theGuiInterpreter->CreateDefaultCommand("If", "If");
-    } 
 }
 
 //------------------------------------------------------------------------------
@@ -139,15 +141,28 @@ void IfPanel::SaveData()
    wxString s1 = conditionGrid->GetCellValue(index,LHS_COL);
    wxString s2 = conditionGrid->GetCellValue(index,COND_COL);
    wxString s3 = conditionGrid->GetCellValue(index,RHS_COL);
-
-   mLhsList[index] = s1.c_str();
-   mOpStrings[index] = s2.c_str();
-   mRhsList[index] = s3.c_str();
-
-   theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
-
-   theIfCommand->SetCondition(mLhsList[index], mOpStrings[index],mRhsList[index],index);     
-   theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index], index);
+   
+   if (newCommand)
+   {
+       mLhsList.push_back(s1.c_str());
+       mOpStrings.push_back(s2.c_str());
+       mRhsList.push_back(s3.c_str());
+   }
+   else
+   {
+       mLhsList[index] = s1.c_str();
+       mOpStrings[index] = s2.c_str();
+       mRhsList[index] = s3.c_str();
+   }    
+ 
+   try {
+      theParameter = theGuiInterpreter->GetParameter(mLhsList[index]);
+      theIfCommand->SetCondition(mLhsList[index].c_str(), mOpStrings[index].c_str(),mRhsList[index].c_str(),index);     
+      theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER, mLhsList[index].c_str(), index);
+   }
+   catch (BaseException &ex) {
+      throw CommandException("Invalid parameters for If Command.");
+   }   
           
 // Build 4
 //   Integer paramId;

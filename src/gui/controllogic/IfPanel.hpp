@@ -72,6 +72,8 @@ private:
         MENU_CLEAR_P
     };
     
+    bool newCommand;
+    
    Integer mNumberOfConditions;
    Integer mNumberOfLogicalOps;
    
