@@ -125,6 +125,7 @@ private:
    bool ExecuteMatlabFunction();
    void SendInParam(Parameter *param);
    void GetOutParams();
+   void EvalMatlabString(std::string evalString);
    void ClearInputParameters();
    void ClearOutputParameters();
 

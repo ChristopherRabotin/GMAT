@@ -735,7 +735,7 @@ bool CallFunction::ExecuteMatlabFunction()
    Integer pathId = mFunction->GetParameterID("FunctionPath");
    std::string thePath = mFunction->GetStringParameter(pathId);
    std::string setPath = "path(path ,'" + thePath + "')";
-   status =  MatlabInterface::EvalString(setPath);
+   EvalMatlabString(setPath);
 
     // send the in parameters
    for (unsigned int i=0; i<mInputList.size(); i++)
@@ -746,11 +746,8 @@ bool CallFunction::ExecuteMatlabFunction()
 
    //  Eval String
    std::string evalString = FormEvalString();
-#if DEBUG_UPDATE_VAR
-   MessageInterface::ShowMessage("Eval string is %s\n", evalString.c_str());
-#endif
-   status =  MatlabInterface::EvalString(evalString);
-   
+   EvalMatlabString(evalString);
+
    // get the value for the out parameters
    GetOutParams();
 
@@ -797,8 +794,7 @@ void CallFunction::SendInParam(Parameter *param)
 #if DEBUG_USE_ARRAY
      MessageInterface::ShowMessage("The string to send = %s\n", inParamString.c_str());
 #endif
-     //status =  
-     MatlabInterface::EvalString(inParamString);
+     EvalMatlabString(inParamString);
   }
   else if (param->GetTypeName() == "String")
   {
@@ -814,8 +810,7 @@ void CallFunction::SendInParam(Parameter *param)
            inParamString.c_str());
 #endif
 
-     //status =  
-     MatlabInterface::EvalString(inParamString);
+      EvalMatlabString(inParamString);
   }
   else
   {
@@ -833,8 +828,7 @@ void CallFunction::SendInParam(Parameter *param)
      MessageInterface::ShowMessage("Got param real\n");
 #endif
         std::string inParamString = param->GetName() +" = " + os.str() +";";
-        //status =  
-        MatlabInterface::EvalString(inParamString);
+        EvalMatlabString(inParamString);
 
 #if DEBUG_UPDATE_VAR
   MessageInterface::ShowMessage("Sent string %s to matlab\n",
@@ -896,7 +890,7 @@ void CallFunction::GetOutParams()
 //         MatlabInterface::GetVariable(varName, 128, buffer);         
          // need to output string value to buffer
          MatlabInterface::OutputBuffer((char *)buffer, 128);
-         MatlabInterface::EvalString(varName);
+        EvalMatlabString(varName);
          
          // get rid of "var ="
          char *ptr = strtok((char *)buffer, "=");
@@ -935,6 +929,33 @@ void CallFunction::GetOutParams()
 #endif  //__USE_MATLAB__
 }
 
+
+void CallFunction::EvalMatlabString(std::string evalString)
+{
+#if DEBUG_UPDATE_VAR
+   MessageInterface::ShowMessage("Eval string is %s\n", evalString.c_str());
+#endif
+
+   // try to call the function
+   evalString = "try,\n" + evalString + "catch\n errormsg = lasterr;\n end";
+   MatlabInterface::EvalString(evalString);
+
+   double errormsg[128];
+   // if there was an error throw an exception
+   if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
+   {
+      double buffer[128];
+
+      MatlabInterface::OutputBuffer((char *)buffer, 128);
+      MatlabInterface::EvalString("errormsg");
+
+      // get rid of "errormsg ="
+      char *ptr = strtok((char *)buffer, "=");
+      ptr = strtok(NULL, "\n");
+
+      throw CommandException(ptr);
+   }
+}
 
 //------------------------------------------------------------------------------
 // std::string FormEvalString()
