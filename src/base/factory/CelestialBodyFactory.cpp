@@ -50,7 +50,8 @@ CelestialBody* CelestialBodyFactory::CreateCelestialBody(std::string ofType,
    else if (ofType == "Moon")
       return new Moon(withName);
    // add more here .......
-   else {
+   else
+   {
       return NULL;   // doesn't match any known type of command
    }
 }
@@ -99,7 +100,7 @@ Factory(createList,Gmat::CELESTIAL_BODY)
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBodyFactory(const CelestialBodyFactory& fact)
+//  CelestialBodyFactory(const CelestialBodyFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * This method creates an object of the class CelestialBodyFactory
@@ -108,7 +109,7 @@ Factory(createList,Gmat::CELESTIAL_BODY)
  * @param <fact> the factory object to copy to "this" factory.
  */
 //------------------------------------------------------------------------------
-CelestialBodyFactory::CelestialBodyFactory(const CelestialBodyFactory& fact) :
+CelestialBodyFactory::CelestialBodyFactory(const CelestialBodyFactory &fact) :
 Factory(fact)
 {
    if (creatables.empty())
@@ -120,7 +121,7 @@ Factory(fact)
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBodyFactory& operator= (const CelestialBodyFactory& fact)
+//  CelestialBodyFactory& operator= (const CelestialBodyFactory &fact)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for the CelestialBodyFactory class.
@@ -132,7 +133,7 @@ Factory(fact)
  */
 //------------------------------------------------------------------------------
 CelestialBodyFactory& CelestialBodyFactory::operator= (
-                                             const CelestialBodyFactory& fact)
+                                             const CelestialBodyFactory &fact)
 {
    Factory::operator=(fact);
    if (creatables.empty())

@@ -34,9 +34,9 @@ public:
    // constructor
    CelestialBodyFactory(StringArray createList);
    // copy constructor
-   CelestialBodyFactory(const CelestialBodyFactory& fact);
+   CelestialBodyFactory(const CelestialBodyFactory &fact);
    // assignment operator
-   CelestialBodyFactory& operator= (const CelestialBodyFactory& fact);
+   CelestialBodyFactory& operator= (const CelestialBodyFactory &fact);
 
    // destructor
    ~CelestialBodyFactory();
