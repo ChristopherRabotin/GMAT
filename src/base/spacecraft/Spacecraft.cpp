@@ -174,6 +174,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
        state[i] = a.state[i];
        displayState[i] = a.displayState[i];
     }
+    displayEpoch = a.displayEpoch;
+    displayDateFormat = a.displayDateFormat;
     displayCoordType = a.displayCoordType;
     initialDisplay = a.initialDisplay;
     isForDisplay = a.isForDisplay;
@@ -223,6 +225,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
        state[i] = a.state[i];
        displayState[i] = a.displayState[i];
     }
+    displayEpoch = a.displayEpoch; 
+    displayDateFormat = a.displayDateFormat; 
     displayCoordType = a.displayCoordType;
     initialDisplay = a.initialDisplay;
     isForDisplay = a.isForDisplay;
