@@ -14,12 +14,14 @@
 // Modified:
 //   2003/09/12 Linda Jun - Added member data: descs, stringValues.
 //              Replaced GSSString with std::string.
+//   2004/05/06 J. Gurganus - See UtcDate.hpp for details.
 //
 /**
  * Provides conversions among various ways representing UTC calendar
  * dates and times.
  */
 //------------------------------------------------------------------------------
+#include <cmath>
 #include "gmatdefs.hpp"
 #include "A1Mjd.hpp"     // for A1Mjd
 #include "UtcDate.hpp"   // for UtcDate
@@ -201,7 +203,6 @@ UtcDate::~UtcDate ()
 //      *this = utcDate;
 //      return *this;
 //  }
-
 //------------------------------------------------------------------------------
 //  A1Date ToA1Date()
 //------------------------------------------------------------------------------
@@ -225,3 +226,39 @@ UtcDate::~UtcDate ()
 //      return utcMjd.ToA1Date();
     
 //  }
+
+
+//------------------------------------------------------------------------------
+//  Real ToA1Mjd() const
+//------------------------------------------------------------------------------
+/**
+ * Converts from UtcDate to A1 Modified Julian date. 
+ *
+ * @return A1 Modified Julian Date
+ */
+//------------------------------------------------------------------------------
+Real UtcDate::ToA1Mjd() const
+{
+   Integer year   = GetYear();
+   Integer month  = GetMonth();
+   Integer day    = GetDay();
+   Integer hour   = GetHour();
+   Integer minute = GetMinute();
+   Real second    = GetSecond();
+   Real utcmjd;
+
+
+   // Convert to Modified Julian date
+   utcmjd = ModifiedJulianDate(year,month,day,hour,minute,second);
+
+   A1Mjd newA1Mjd; 
+   utcmjd = newA1Mjd.UtcMjdToA1Mjd(utcmjd);
+   Real testUtc = fabs(utcmjd - ((Integer)utcmjd + (Real)(.9999999)));
+
+   // Check for the tolerance then round-off 
+   if (testUtc > 1.0e-08) 
+      utcmjd = round(utcmjd);
+      
+   return utcmjd;
+
+}

@@ -12,6 +12,8 @@
 // Author: Linda Jun
 // Created: 1995/10/18 for GSS project
 // Modified: 2003/09/12 Linda Jun - Added member data: descs, stringValues
+//           2004/05/06 J. Gurganus - Added ToA1Mjd method for converting to
+//                                    A1 Modified Julian date. 
 //
 /**
  * Provides conversions among various ways representing UTC calendar
@@ -25,7 +27,9 @@
 #include "TimeTypes.hpp"
 #include "Date.hpp"
 //#include "A1Date.hpp"
+#include "DateUtil.hpp"
 
+ class DateUtil;
 //class A1Date;
 
 class UtcDate : public Date
@@ -50,6 +54,8 @@ public:
 //      UtcDate  operator- (const Real seconds) const;
 //      UtcDate& operator-=(const Real seconds);
 //      A1Date ToA1Date();
+
+    Real  ToA1Mjd() const;
 
 protected:
 private:
