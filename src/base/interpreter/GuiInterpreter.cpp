@@ -323,6 +323,32 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
    return theModerator->RunMission(sandboxNum);
 }
 
+// Script
+//------------------------------------------------------------------------------
+// bool InterpretScript(const std::string &scriptFilename)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
+{
+   return theModerator->InterpretScript(scriptFilename);
+}
+
+//------------------------------------------------------------------------------
+// bool SaveScript(const std::string &scriptFilename)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::SaveScript(const std::string &scriptFilename)
+{
+   return theModerator->SaveScript(scriptFilename);
+}
+
+//------------------------------------------------------------------------------
+// Integer RunScript(Integer sandboxNum)
+//------------------------------------------------------------------------------
+Integer GuiInterpreter::RunScript(Integer sandboxNum)
+{
+   return theModerator->RunMission(sandboxNum);
+}
+
+
 //---------------------------------
 // private
 //---------------------------------

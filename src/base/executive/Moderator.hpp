@@ -143,6 +143,11 @@ public:
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
 
+    // Script
+    bool InterpretScript(const std::string &scriptFilename);
+    bool SaveScript(const std::string &scriptFilename);
+    Integer RunScript(Integer sandboxNum = 1);
+    
 private:
 
    // sandbox

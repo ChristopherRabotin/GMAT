@@ -49,6 +49,7 @@
 #include "BaseException.hpp"
 #include "NoOp.hpp"
 #include "Moderator.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -65,20 +66,20 @@ ConfigManager* Moderator::theConfigManager = NULL;
 const std::string
 Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 {
-   "Spacecraft",
-   "GroundStation",
-   "Command",
-   "Propagator",
-   "ForceModel",
-   "PhysicalModel",
-   "Interpolator",
-   "SolarSystem",
-   "CelestialBody",
-   "Parameter",
-   "StopCondition",
-   "Solver",
-   "Subscriber",
-   "PropSetup"
+    "Spacecraft",
+    "GroundStation",
+    "Command",
+    "Propagator",
+    "ForceModel",
+    "PhysicalModel",
+    "Interpolator",
+    "SolarSystem",
+    "CelestialBody",
+    "Parameter",
+    "StopCondition",
+    "Solver",
+    "Subscriber",
+    "PropSetup"
 };
 
 //---------------------------------
@@ -101,9 +102,9 @@ Moderator::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT-Gmat::SPACECRAFT+1] =
 //------------------------------------------------------------------------------
 Moderator* Moderator::Instance()
 {
-   if (instance == NULL)
-      instance = new Moderator;
-   return instance;
+    if (instance == NULL)
+        instance = new Moderator;
+    return instance;
 }
 
 //------------------------------------------------------------------------------
@@ -166,10 +167,10 @@ bool Moderator::Initialize()
 //------------------------------------------------------------------------------
 std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 {
-   if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
-      return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
-   else
-      return "UnknownObject";
+    if (type >= Gmat::SPACECRAFT && type <= Gmat::PROP_SETUP)
+        return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
+    else
+        return "UnknownObject";
 }
 
 //----- interpreter
@@ -178,7 +179,7 @@ std::string Moderator::GetObjectTypeString(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 GuiInterpreter* Moderator::GetGuiInterpreter()
 {
-   return theGuiInterpreter;
+    return theGuiInterpreter;
 }
 
 //------------------------------------------------------------------------------
@@ -186,7 +187,7 @@ GuiInterpreter* Moderator::GetGuiInterpreter()
 //------------------------------------------------------------------------------
 ScriptInterpreter* Moderator::GetScriptInterpreter()
 {
-   return theScriptInterpreter;
+    return theScriptInterpreter;
 }
 
 //------------------------------------------------------------------------------
@@ -194,9 +195,9 @@ ScriptInterpreter* Moderator::GetScriptInterpreter()
 //------------------------------------------------------------------------------
 void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 {
-   //loj: allow setting only for the first time?
-   if (theGuiInterpreter == NULL)
-      theGuiInterpreter = guiInterp;
+    //loj: allow setting only for the first time?
+    if (theGuiInterpreter == NULL)
+        theGuiInterpreter = guiInterp;
 }
 
 //------------------------------------------------------------------------------
@@ -204,9 +205,9 @@ void Moderator::SetGuiInterpreter(GuiInterpreter *guiInterp)
 //------------------------------------------------------------------------------
 void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 {
-   //loj: allow setting only for the first time?
-   if (theScriptInterpreter == NULL)
-      theScriptInterpreter = scriptInterp;
+    //loj: allow setting only for the first time?
+    if (theScriptInterpreter == NULL)
+        theScriptInterpreter = scriptInterp;
 }
 
 //----- factory
@@ -215,7 +216,7 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 //------------------------------------------------------------------------------
 StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 {
-   return theFactoryManager->GetListOfItems(type);
+    return theFactoryManager->GetListOfItems(type);
 }
 
 //----- configuration
@@ -224,7 +225,7 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &name)
 {
-   return theConfigManager->RemoveItem(type, name);
+    return theConfigManager->RemoveItem(type, name);
 }
 
 //------------------------------------------------------------------------------
@@ -232,7 +233,7 @@ bool Moderator::RemoveConfiguredItem(Gmat::ObjectType type, const std::string &n
 //------------------------------------------------------------------------------
 StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 {
-   return theConfigManager->GetListOfItems(type);
+    return theConfigManager->GetListOfItems(type);
 }
 
 // Spacecraft
@@ -241,10 +242,10 @@ StringArray Moderator::GetListOfConfiguredItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::string &name)
 {
-   Spacecraft *sc =
-      theFactoryManager->CreateSpacecraft(type, name);
-   theConfigManager->AddSpacecraft(sc);
-   return sc;
+    Spacecraft *sc =
+        theFactoryManager->CreateSpacecraft(type, name);
+    theConfigManager->AddSpacecraft(sc);
+    return sc;
 }
 
 //------------------------------------------------------------------------------
@@ -252,7 +253,7 @@ Spacecraft* Moderator::CreateSpacecraft(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 {
-   return theConfigManager->GetSpacecraft(name);
+    return theConfigManager->GetSpacecraft(name);
 }
 
 // Propagator
@@ -261,9 +262,9 @@ Spacecraft* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 Propagator* Moderator::CreatePropagator(const std::string &type, const std::string &name)
 {
-   Propagator *prop = theFactoryManager->CreatePropagator(type, name);
-//   theConfigManager->AddPropagator(prop);
-   return prop;
+    Propagator *prop = theFactoryManager->CreatePropagator(type, name);
+    //   theConfigManager->AddPropagator(prop);
+    return prop;
 }
 
 //------------------------------------------------------------------------------
@@ -271,7 +272,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Propagator* Moderator::GetPropagator(const std::string &name)
 {
-   return theConfigManager->GetPropagator(name);
+    return theConfigManager->GetPropagator(name);
 }
 
 // PhysicalModel
@@ -281,9 +282,9 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
                                               const std::string &name)
 {
-   PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
-//   theConfigManager->AddPhysicalModel(physicalModel);
-   return physicalModel;
+    PhysicalModel *physicalModel = theFactoryManager->CreatePhysicalModel(type, name);
+    //   theConfigManager->AddPhysicalModel(physicalModel);
+    return physicalModel;
 }
 
 //------------------------------------------------------------------------------
@@ -291,7 +292,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
 //------------------------------------------------------------------------------
 PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 {
-   return theConfigManager->GetPhysicalModel(name);
+    return theConfigManager->GetPhysicalModel(name);
 }
 
 // Parameter
@@ -300,12 +301,12 @@ PhysicalModel* Moderator::GetPhysicalModel(const std::string &name)
 //------------------------------------------------------------------------------
 Parameter* Moderator::CreateParameter(const std::string &type, const std::string &name)
 {
-   Parameter *parameter = theFactoryManager->CreateParameter(type, name);
-   // Manage it if it is a named parameter
-   if (parameter->GetName() != "")
-      theConfigManager->AddParameter(parameter);
-   return parameter;
-   return NULL;
+    Parameter *parameter = theFactoryManager->CreateParameter(type, name);
+    // Manage it if it is a named parameter
+    if (parameter->GetName() != "")
+        theConfigManager->AddParameter(parameter);
+    return parameter;
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -313,7 +314,7 @@ Parameter* Moderator::CreateParameter(const std::string &type, const std::string
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetParameter(const std::string &name)
 {
-   return theConfigManager->GetParameter(name);
+    return theConfigManager->GetParameter(name);
 }
 
 // ForceModel
@@ -322,10 +323,10 @@ Parameter* Moderator::GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* Moderator::CreateForceModel(const std::string &name)
 {
-   ForceModel *fm = theFactoryManager->CreateForceModel(name);
-   if (name != "")
-       theConfigManager->AddForceModel(fm);
-   return fm;
+    ForceModel *fm = theFactoryManager->CreateForceModel(name);
+    if (name != "")
+        theConfigManager->AddForceModel(fm);
+    return fm;
 }
 
 //------------------------------------------------------------------------------
@@ -333,7 +334,7 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
 //------------------------------------------------------------------------------
 ForceModel* Moderator::GetForceModel(const std::string &name)
 {
-   return theConfigManager->GetForceModel(name);
+    return theConfigManager->GetForceModel(name);
 }
 
 //------------------------------------------------------------------------------
@@ -342,11 +343,11 @@ ForceModel* Moderator::GetForceModel(const std::string &name)
 bool Moderator::AddToForceModel(const std::string &forceModelName,
                                 const std::string &forceName)
 {
-   bool status = true;
-   ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
-   PhysicalModel *physicalModel = theConfigManager->GetPhysicalModel(forceName);
-   fm->AddForce(physicalModel);
-   return status;
+    bool status = true;
+    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
+    PhysicalModel *physicalModel = theConfigManager->GetPhysicalModel(forceName);
+    fm->AddForce(physicalModel);
+    return status;
 }
 
 //------------------------------------------------------------------------------
@@ -355,9 +356,9 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
-   StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
-//   theConfigManager->AddStopCondition(stopCond);
-   return stopCond;
+    StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
+    //   theConfigManager->AddStopCondition(stopCond);
+    return stopCond;
 }
 
 //------------------------------------------------------------------------------
@@ -365,7 +366,7 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
 //------------------------------------------------------------------------------
 StopCondition* Moderator::GetStopCondition(const std::string &name)
 {
-   return theConfigManager->GetStopCondition(name);
+    return theConfigManager->GetStopCondition(name);
 }
 
 //------------------------------------------------------------------------------
@@ -376,14 +377,14 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
                                       const std::string &propagatorName,
                                       const std::string &forceModelName)
 {
-   // assumes propagatorName and forceModelName exist alreay.
-   Propagator *prop = theConfigManager->GetPropagator(propagatorName);
-   ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
-   PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
-   propSetup->SetPropagator(prop);
-   propSetup->SetForceModel(fm);
-   theConfigManager->AddPropSetup(propSetup);
-   return propSetup;
+    // assumes propagatorName and forceModelName exist alreay.
+    Propagator *prop = theConfigManager->GetPropagator(propagatorName);
+    ForceModel *fm = theConfigManager->GetForceModel(forceModelName);
+    PropSetup *propSetup = theFactoryManager->CreatePropSetup(name);
+    propSetup->SetPropagator(prop);
+    propSetup->SetForceModel(fm);
+    theConfigManager->AddPropSetup(propSetup);
+    return propSetup;
 }
 
 //------------------------------------------------------------------------------
@@ -391,7 +392,7 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetPropSetup(const std::string &name)
 {
-   return theConfigManager->GetPropSetup(name);
+    return theConfigManager->GetPropSetup(name);
 }
 
 // celestial body
@@ -401,10 +402,10 @@ PropSetup* Moderator::GetPropSetup(const std::string &name)
 CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
                                               const std::string &name)
 {
-   // type is such as "Earth", "Moon" - we need const string EarthString etc.
-   CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
-   theConfigManager->AddCelestialBody(body);
-   return body;
+    // type is such as "Earth", "Moon" - we need const string EarthString etc.
+    CelestialBody *body = theFactoryManager->CreateCelestialBody(type, name);
+    theConfigManager->AddCelestialBody(body);
+    return body;
 }
 
 //------------------------------------------------------------------------------
@@ -412,7 +413,7 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 {
-   return theConfigManager->GetCelestialBody(name);
+    return theConfigManager->GetCelestialBody(name);
 }
 
 // solar system
@@ -421,7 +422,7 @@ CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetDefaultSolarSystem()
 {
-   return theConfigManager->GetDefaultSolarSystem();
+    return theConfigManager->GetDefaultSolarSystem();
 }
 
 //------------------------------------------------------------------------------
@@ -429,9 +430,9 @@ SolarSystem* Moderator::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 {
-   SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
-   theConfigManager->AddSolarSystem(solarSys);
-   return solarSys;
+    SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
+    theConfigManager->AddSolarSystem(solarSys);
+    return solarSys;
 }
 
 //------------------------------------------------------------------------------
@@ -439,7 +440,7 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 //------------------------------------------------------------------------------
 bool Moderator::SetSolarSystemInUse(const std::string &name)
 {
-   return theConfigManager->SetSolarSystemInUse(name);
+    return theConfigManager->SetSolarSystemInUse(name);
 }
 
 //------------------------------------------------------------------------------
@@ -447,7 +448,7 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::GetSolarSystemInUse()
 {
-   return theConfigManager->GetSolarSystemInUse();
+    return theConfigManager->GetSolarSystemInUse();
 }
 
 // subscriber
@@ -456,9 +457,9 @@ SolarSystem* Moderator::GetSolarSystemInUse()
 //------------------------------------------------------------------------------
 Subscriber* Moderator::CreateSubscriber(const std::string &type, const std::string &name)
 {
-   Subscriber *subs = theFactoryManager->CreateSubscriber(type, name);
-   theConfigManager->AddSubscriber(subs);
-   return subs;
+    Subscriber *subs = theFactoryManager->CreateSubscriber(type, name);
+    theConfigManager->AddSubscriber(subs);
+    return subs;
 }
 
 //------------------------------------------------------------------------------
@@ -466,7 +467,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type, const std::stri
 //------------------------------------------------------------------------------
 Subscriber* Moderator::GetSubscriber(const std::string &name)
 {
-   return theConfigManager->GetSubscriber(name);
+    return theConfigManager->GetSubscriber(name);
 }
 
 // command
@@ -475,9 +476,9 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 //------------------------------------------------------------------------------
 Command* Moderator::CreateCommand(const std::string &type, const std::string &name)
 {
-   Command *cmd = theFactoryManager->CreateCommand(type, name);
-//   theConfigManager->AddCommand(cmd);
-   return cmd;
+    Command *cmd = theFactoryManager->CreateCommand(type, name);
+    //   theConfigManager->AddCommand(cmd);
+    return cmd;
 }
 
 //------------------------------------------------------------------------------
@@ -485,7 +486,7 @@ Command* Moderator::CreateCommand(const std::string &type, const std::string &na
 //------------------------------------------------------------------------------
 Command* Moderator::GetCommand(const std::string &name)
 {
-   return theConfigManager->GetCommand(name);
+    return theConfigManager->GetCommand(name);
 }
 
 // command sequence
@@ -494,7 +495,7 @@ Command* Moderator::GetCommand(const std::string &name)
 //------------------------------------------------------------------------------
 Command* Moderator::GetNextCommand(Integer sandboxNum)
 {
-   return commands[sandboxNum-1]->GetNext();
+    return commands[sandboxNum-1]->GetNext();
 }
 
 //loj: future build implementation
@@ -505,9 +506,9 @@ Command* Moderator::GetNextCommand(Integer sandboxNum)
 bool Moderator::DeleteCommand(const std::string &name, Integer position,
                               Integer sandboxNum)
 {
-   // delete command from default sandbox 1
-   //commands[sandboxNum-1]->DeleteCommand(name, position);
-   return false;
+    // delete command from default sandbox 1
+    //commands[sandboxNum-1]->DeleteCommand(name, position);
+    return false;
 }
 
 //loj: future build implementation
@@ -519,11 +520,11 @@ Command* Moderator::InsertCommand(const std::string &type, const std::string &na
                                   Integer position, bool addAbove,
                                   Integer sandboxNum)
 {
-//     bool status = false;
-//     Command *cmd = theFactoryManager->CreateCommand(type, name);
-//     status = commands[sandboxNum-1]->Insert(cmd, position, addAbove);
-//     return cmd;
-   return NULL;
+    //     bool status = false;
+    //     Command *cmd = theFactoryManager->CreateCommand(type, name);
+    //     status = commands[sandboxNum-1]->Insert(cmd, position, addAbove);
+    //     return cmd;
+    return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -533,10 +534,10 @@ Command* Moderator::InsertCommand(const std::string &type, const std::string &na
 Command* Moderator::AppendCommand(const std::string &type, const std::string &name,
                                   Integer sandboxNum)
 {
-   bool status;
-   Command *cmd = theFactoryManager->CreateCommand(type, name);
-   status = commands[sandboxNum-1]->Append(cmd);
-   return cmd;
+    bool status;
+    Command *cmd = theFactoryManager->CreateCommand(type, name);
+    status = commands[sandboxNum-1]->Append(cmd);
+    return cmd;
 }
 
 // sandbox
@@ -545,8 +546,8 @@ Command* Moderator::AppendCommand(const std::string &type, const std::string &na
 //------------------------------------------------------------------------------
 void Moderator::ClearAllSandboxes()
 {
-   for (int i=0; i<Gmat::MAX_SANDBOX; i++)
-      sandboxes[i]->Clear();
+    for (int i=0; i<Gmat::MAX_SANDBOX; i++)
+        sandboxes[i]->Clear();
 }
 
 //------------------------------------------------------------------------------
@@ -554,36 +555,72 @@ void Moderator::ClearAllSandboxes()
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum)
 {
-   Integer status = 0;
+    Integer status = 0;
 
-   // check sandbox number
-   if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
-      sandboxes[sandboxNum-1]->Clear();
-   else
-      ;// assign status
+    // check sandbox number
+    if (sandboxNum > 0 && sandboxNum <= Gmat::MAX_SANDBOX)
+    {
+        sandboxes[sandboxNum-1]->Clear();
+    }
+    else
+    {
+        status = -1;
+        MessageInterface::PopupMessage(Gmat::ERROR_,
+                                       "Invalid Sandbox number" + sandboxNum);
+    }
+    
+    try
+    {
+        AddSolarSysToSandbox(sandboxNum-1);
+        AddSpacecraftToSandbox(sandboxNum-1);
+        AddPropSetupToSandbox(sandboxNum-1);
+        AddSubscriberToSandbox(sandboxNum-1);
+        AddCommandToSandbox(sandboxNum-1);
+        InitializeSandbox(sandboxNum-1);
+        ExecuteSandbox(sandboxNum-1);
+    }
+    catch (BaseException &e)
+    {
+        MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+        // assign status
+        // status = ?
+    }
+    catch (...)
+    {
+        // assign status
+        throw;
+    }
 
-   try
-   {
-      AddSolarSysToSandbox(sandboxNum-1);
-      AddSpacecraftToSandbox(sandboxNum-1);
-      AddPropSetupToSandbox(sandboxNum-1);
-      AddSubscriberToSandbox(sandboxNum-1);
-      AddCommandToSandbox(sandboxNum-1);
-      InitializeSandbox(sandboxNum-1);
-      ExecuteSandbox(sandboxNum-1);
-   }
-   catch (BaseException &e)
-   {
-      // assign status
-      throw;
-   }
-   catch (...)
-   {
-      // assign status
-      throw;
-   }
+    return status;
+}
 
-   return status;
+// Script
+//------------------------------------------------------------------------------
+// bool InterpretScript(const std::string &scriptFilename)
+//------------------------------------------------------------------------------
+bool Moderator::InterpretScript(const std::string &scriptFilename)
+{
+    //loj:return theScriptInterpreter->Interpret(scriptFilename);
+    MessageInterface::PopupMessage(Gmat::INFO_, "BuildObject coming up soon.");
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// bool SaveScript(const std::string &scriptFilename)
+//------------------------------------------------------------------------------
+bool Moderator::SaveScript(const std::string &scriptFilename)
+{
+    //loj:return theScriptInterpreter->Build(scriptFilename);
+    MessageInterface::PopupMessage(Gmat::INFO_, "SaveScript function coming up soon.");
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// Integer RunScript(Integer sandboxNum)
+//------------------------------------------------------------------------------
+Integer Moderator::RunScript(Integer sandboxNum)
+{
+    return RunMission(sandboxNum);
 }
 
 //---------------------------------
@@ -596,9 +633,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::AddSolarSysToSandbox(Integer index)
 {
-   //loj: Do I get clone of SolarSystem from ConfigManager?
-   SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
-   sandboxes[index]->AddSolarSystem(solarSys);
+    //loj: Do I get clone of SolarSystem from ConfigManager?
+    SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
+    sandboxes[index]->AddSolarSystem(solarSys);
 }
 
 //------------------------------------------------------------------------------
@@ -606,14 +643,14 @@ void Moderator::AddSolarSysToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSpacecraftToSandbox(Integer index)
 {
-   Spacecraft *sc;
-   StringArray scNames = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
+    Spacecraft *sc;
+    StringArray scNames = theConfigManager->GetListOfItems(Gmat::SPACECRAFT);
 
-   for (int i=0; i<scNames.size(); i++)
-   {
-      sc = theConfigManager->GetSpacecraft(scNames[i]);
-      sandboxes[index]->AddSpacecraft(sc);
-   }
+    for (int i=0; i<scNames.size(); i++)
+    {
+        sc = theConfigManager->GetSpacecraft(scNames[i]);
+        sandboxes[index]->AddSpacecraft(sc);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -621,14 +658,14 @@ void Moderator::AddSpacecraftToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddPropSetupToSandbox(Integer index)
 {
-   PropSetup *propSetup;
-   StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
+    PropSetup *propSetup;
+    StringArray propSetupNames = theConfigManager->GetListOfItems(Gmat::PROP_SETUP);
    
-   for (int i=0; i<propSetupNames.size(); i++)
-   {
-      propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
-      sandboxes[index]->AddPropSetup(propSetup);
-   }
+    for (int i=0; i<propSetupNames.size(); i++)
+    {
+        propSetup = theConfigManager->GetPropSetup(propSetupNames[i]);
+        sandboxes[index]->AddPropSetup(propSetup);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -636,14 +673,14 @@ void Moderator::AddPropSetupToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddSubscriberToSandbox(Integer index)
 {
-   Subscriber *subs;
-   StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
+    Subscriber *subs;
+    StringArray subsNames = theConfigManager->GetListOfItems(Gmat::SUBSCRIBER);
    
-   for (int i=0; i<subsNames.size(); i++)
-   {
-      subs = theConfigManager->GetSubscriber(subsNames[i]);
-      sandboxes[index]->AddSubscriber(subs);
-   }
+    for (int i=0; i<subsNames.size(); i++)
+    {
+        subs = theConfigManager->GetSubscriber(subsNames[i]);
+        sandboxes[index]->AddSubscriber(subs);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -651,14 +688,14 @@ void Moderator::AddSubscriberToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::AddCommandToSandbox(Integer index)
 {
-   Command *cmd = commands[index]->GetNext();
+    Command *cmd = commands[index]->GetNext();
 
-//   while (cmd != NULL)
-   if (cmd != NULL)
-   {
-      sandboxes[index]->AddCommand(cmd);
-//      cmd = cmd->GetNext();
-   }
+    //   while (cmd != NULL)
+    if (cmd != NULL)
+    {
+        sandboxes[index]->AddCommand(cmd);
+        //      cmd = cmd->GetNext();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -666,7 +703,7 @@ void Moderator::AddCommandToSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::InitializeSandbox(Integer index)
 {
-   sandboxes[index]->Initialize();
+    sandboxes[index]->Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -674,7 +711,7 @@ void Moderator::InitializeSandbox(Integer index)
 //------------------------------------------------------------------------------
 void Moderator::ExecuteSandbox(Integer index)
 {
-   sandboxes[index]->Execute();
+    sandboxes[index]->Execute();
 }
 
 //---------------------------------
@@ -686,15 +723,15 @@ void Moderator::ExecuteSandbox(Integer index)
 //------------------------------------------------------------------------------
 Moderator::Moderator()
 {
-   isInitialized = false;
-   theFactoryManager = FactoryManager::Instance();
-   theConfigManager = ConfigManager::Instance();
-   sandboxes.reserve(Gmat::MAX_SANDBOX);
-   commands.reserve(Gmat::MAX_SANDBOX);
+    isInitialized = false;
+    theFactoryManager = FactoryManager::Instance();
+    theConfigManager = ConfigManager::Instance();
+    sandboxes.reserve(Gmat::MAX_SANDBOX);
+    commands.reserve(Gmat::MAX_SANDBOX);
 
-   // create atleast 1 Sandbox and Command
-   sandboxes.push_back(new Sandbox());
-   commands.push_back(new NoOp());
+    // create atleast 1 Sandbox and Command
+    sandboxes.push_back(new Sandbox());
+    commands.push_back(new NoOp());
 }
 
 //------------------------------------------------------------------------------
