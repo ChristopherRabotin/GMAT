@@ -12,7 +12,8 @@
 PROJECT_ROOT    = ../..
 #
 # Source file for creating new library
-SRC = AtmosphereFactory.cpp BurnFactory.cpp CelestialBodyFactory.cpp \
+SRC = AtmosphereFactory.cpp AxisSystemFactory.cpp BurnFactory.cpp \
+	CelestialBodyFactory.cpp \
 	CommandFactory.cpp Factory.cpp \
 	FactoryException.cpp FactoryManager.cpp ForceModelFactory.cpp \
 	FunctionFactory.cpp HardwareFactory.cpp ParameterFactory.cpp \
