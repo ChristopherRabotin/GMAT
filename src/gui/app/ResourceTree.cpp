@@ -11,14 +11,17 @@
  * This class provides the resource tree and event handlers.
  */
 //------------------------------------------------------------------------------
-
-#include "ResourceTree.hpp"
-
+#include "gmatwxdefs.hpp"
 #include "bitmaps/folder.xpm"
 #include "bitmaps/openfolder.xpm"
 #include "bitmaps/file.xpm"
 #include "bitmaps/spacecraft.xpm"
 #include "bitmaps/earth.xpm"
+
+#include "GuiInterpreter.hpp"
+#include "GmatAppData.hpp"
+#include "ResourceTree.hpp"
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -56,10 +59,14 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
               :wxTreeCtrl(parent, id, pos, size, style)
 {
     this->parent = parent;
+    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     AddIcons();
     AddDefaultResources();
 }
 
+//------------------------------------------------------------------------------
+//  void AddDefaultResources()
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultResources()
 {
     wxTreeItemId resource = this->AddRoot(wxT("Resources"), -1, -1,
@@ -123,6 +130,9 @@ void ResourceTree::AddDefaultResources()
     AddDefaultInterfaces(interfaceItem);
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultBodies(wxTreeItemId universe)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
 {
     this->AppendItem(universe, wxT("Sun"), ICON_EARTH, -1,
@@ -151,14 +161,29 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
                      new GmatTreeItemData(wxT("Pluto"), DEFAULT_BODY));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultSpacecraft(wxTreeItemId spacecraft)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSpacecraft(wxTreeItemId spacecraft)
 {
+    StringArray scNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    int size = scNames.size();
+    for (int i = 0; i<size; i++)
+    {
+        wxString scname = wxString(scNames[i].c_str());
+        this->AppendItem(spacecraft, wxT(scname), ICON_SPACECRAFT, -1,
+                         new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
+    };
+
     this->AppendItem(spacecraft, wxT("Sat1"), ICON_SPACECRAFT, -1,
                      new GmatTreeItemData(wxT("Sat1"), DEFAULT_SPACECRAFT));
     this->AppendItem(spacecraft, wxT("Sat2"), ICON_SPACECRAFT, -1,
                      new GmatTreeItemData(wxT("Sat2"), DEFAULT_SPACECRAFT));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultFormations(wxTreeItemId formation)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultFormations(wxTreeItemId formation)
 {
     wxTreeItemId mms = this->AppendItem(formation, wxT("MMS"), -1, -1,
@@ -175,6 +200,9 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId formation)
                      new GmatTreeItemData(wxT("MMS4"), DEFAULT_FORMATION_SPACECRAFT));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultConstellations(wxTreeItemId constellation)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultConstellations(wxTreeItemId constellation)
 {
     wxTreeItemId gps = this->AppendItem(constellation, wxT("GPS"), -1, -1,
@@ -191,6 +219,9 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId constellation)
                      new GmatTreeItemData(wxT("GPS4"), DEFAULT_CONSTELLATION_SATELLITE));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultPropagators(wxTreeItemId propagator)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
 {
     this->AppendItem(propagator, wxT("RKV89"), -1, -1,
@@ -201,6 +232,9 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
           new GmatTreeItemData(wxT("Cowell"), DEFAULT_PROPAGATOR));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultSolvers(wxTreeItemId solver)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSolvers(wxTreeItemId solver)
 {
     this->AppendItem(solver, wxT("DC"), -1, -1,
@@ -211,6 +245,9 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId solver)
           new GmatTreeItemData(wxT("Monte Carlo"), DEFAULT_SOLVER));
 }
 
+//------------------------------------------------------------------------------
+// void AddDefaultPlots(wxTreeItemId plot)
+//------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPlots(wxTreeItemId plot)
 {
     this->AppendItem(plot, wxT("Polar"), -1, -1,
@@ -223,18 +260,28 @@ void ResourceTree::AddDefaultPlots(wxTreeItemId plot)
           new GmatTreeItemData(wxT("XY"), DEFAULT_PLOT));
 }
 
-void ResourceTree::AddDefaultInterfaces(wxTreeItemId interface)
+//------------------------------------------------------------------------------
+// void AddDefaultInterfaces(wxTreeItemId interfaceTree)
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultInterfaces(wxTreeItemId interfaceTree)
 {
-    this->AppendItem(interface, wxT("TCP/IP"), -1, -1,
+    this->AppendItem(interfaceTree, wxT("TCP/IP"), -1, -1,
           new GmatTreeItemData(wxT("TCP/IP"), DEFAULT_INTERFACE));
-    this->AppendItem(interface, wxT("Mex"), -1, -1,
+    this->AppendItem(interfaceTree, wxT("Mex"), -1, -1,
           new GmatTreeItemData(wxT("Mex"), DEFAULT_INTERFACE));
 }
+
+//------------------------------------------------------------------------------
+// void OnItemRightClick(wxTreeEvent& event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 {
     ShowMenu(event.GetItem(), event.GetPoint());
 }
 
+//------------------------------------------------------------------------------
+// void ShowMenu(wxTreeItemId id, const wxPoint& pt)
+//------------------------------------------------------------------------------
 void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 {
     GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(id);
@@ -285,6 +332,9 @@ void ResourceTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 #endif // wxUSE_MENUS
 }
 
+//------------------------------------------------------------------------------
+// void OnItemActivated(wxTreeEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnItemActivated(wxTreeEvent &event)
 {
     // get some info about this item
@@ -294,16 +344,25 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
     mainNotebook->CreatePage(item);
 }
 
+//------------------------------------------------------------------------------
+// void SetMainNotebook (GmatMainNotebook *mainNotebook)
+//------------------------------------------------------------------------------
 void ResourceTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
 {
   this->mainNotebook = mainNotebook;
 }
 
+//------------------------------------------------------------------------------
+// GmatMainNotebook *GetMainNotebook()
+//------------------------------------------------------------------------------
 GmatMainNotebook *ResourceTree::GetMainNotebook()
 {
    return this->mainNotebook;
 }
 
+//------------------------------------------------------------------------------
+// void OnOpen(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnOpen(wxCommandEvent &event)
 {
  // Get info from selected item
@@ -311,6 +370,9 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
  mainNotebook->CreatePage(item);
 }
 
+//------------------------------------------------------------------------------
+// void OnClose(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnClose(wxCommandEvent &event)
 {
  // make item most current, then close it
@@ -319,6 +381,9 @@ void ResourceTree::OnClose(wxCommandEvent &event)
  mainNotebook->ClosePage();
 }
 
+//------------------------------------------------------------------------------
+// void OnAddSc(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddSc(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
@@ -327,6 +392,9 @@ void ResourceTree::OnAddSc(wxCommandEvent &event)
 }
 
 
+//------------------------------------------------------------------------------
+// void OnAddFormation(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddFormation(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
@@ -342,6 +410,9 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
                      new GmatTreeItemData(wxT("MMS2"), CREATED_FORMATION_SPACECRAFT));
 }
 
+//------------------------------------------------------------------------------
+// void OnAddConstellation(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddConstellation(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
@@ -357,6 +428,9 @@ void ResourceTree::OnAddConstellation(wxCommandEvent &event)
                      new GmatTreeItemData(wxT("GPS2"), CREATED_CONSTELLATION_SATELLITE));
 }
 
+//------------------------------------------------------------------------------
+// void OnAddPropagator(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
@@ -365,6 +439,9 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
 
 }
 
+//------------------------------------------------------------------------------
+// void OnAddBody(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnAddBody(wxCommandEvent &event)
 {
   wxTreeItemId item = GetSelection();
@@ -372,6 +449,9 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
         new GmatTreeItemData(wxT("New Body"), CREATED_BODY));
 }
 
+//------------------------------------------------------------------------------
+// void OnRename(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
 //  static wxString sText;
@@ -386,11 +466,17 @@ void ResourceTree::OnRename(wxCommandEvent &event)
   (void) this->EditLabel(GetSelection());
 }
 
+//------------------------------------------------------------------------------
+// void OnDelete(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnDelete(wxCommandEvent &event)
 {
   event.Skip();
 }
 
+//------------------------------------------------------------------------------
+// void OnBeginLabelEdit(wxTreeEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
 {
   
@@ -429,6 +515,9 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
   }
 }
 
+//------------------------------------------------------------------------------
+// void OnEndLabelEdit(wxTreeEvent &event)
+//------------------------------------------------------------------------------
 void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
 {
   wxString label = event.GetLabel();
@@ -446,6 +535,9 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
   }
 }
 
+//------------------------------------------------------------------------------
+// void AddIcons()
+//------------------------------------------------------------------------------
 void ResourceTree::AddIcons()
 {
   int size = 16;
