@@ -322,6 +322,7 @@ bool Target::Initialize(void)
  *         occurs.
  */
 //------------------------------------------------------------------------------
+#include <iostream>
 bool Target::Execute(void)
 {
     bool retval = BranchCommand::Execute();
@@ -332,27 +333,53 @@ bool Target::Execute(void)
     
     switch (state) {
         case Solver::INITIALIZING:
+std::cout << "Target Command State:  Solver::INITIALIZING\n";
             // Finalize initialization of the targeter data
             current = branch[0];
             while (current != this)  {
-                
+                std::string type = current->GetTypeName();
+                if ((type == "Target") || (type == "Vary") || (type == "Achieve"))
+                    current->Execute();
                 current = current->GetNext();
             }
             break;
             
-        default:
+        case Solver::NOMINAL:
+std::cout << "Target Command State:  Solver::NOMINAL\n";
+            // Execute the nominal sequence
             if (!commandComplete) {
-                // Target logic goes here -- basically the solver state machine calls
-                
-                // If the state machine says to run through the sub-commands, do this: 
+                ResetLoopData();
                 retval = ExecuteBranch();
-                
-                // For now, just execute the branched command and then continue.  That gets 
-                // enough of the structure in place to validate that the command flow is 
-                // working correctly.
-                commandComplete = true;
             }
             break;
+            
+        case Solver::CHECKINGRUN:
+std::cout << "Target Command State:  Solver::CHECKINGRUN\n";
+            // Check for convergence; this is done in the targeter state 
+            // machine, so this case is a NoOp for the Target command
+            break;
+            
+        case Solver::PERTURBING:
+std::cout << "Target Command State:  Solver::PERTURBING\n";
+            ResetLoopData();
+            retval = ExecuteBranch();
+            break;
+            
+        case Solver::CALCULATING:
+std::cout << "Target Command State:  Solver::CALCULATING\n";
+            // Calculate the next set of variables to use; this is performed in
+            // the targeter -- nothing to be done here
+            break;
+            
+        case Solver::FINISHED:
+std::cout << "Target Command State:  Solver::FINISHED\n";
+            // Final clean-up
+            commandComplete = true;
+            break;
+            
+        case Solver::ITERATING:     // Intentional fall-through
+        default:
+            throw CommandException("Invalid state in the Targeter state machine");
     }
 
     targeter->AdvanceState();

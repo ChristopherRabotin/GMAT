@@ -400,7 +400,7 @@ bool DifferentialCorrector::Initialize(void)
 }
 
 
-bool DifferentialCorrector::AdvanceState(void)
+Solver::SolverState DifferentialCorrector::AdvanceState(void)
 {
     switch (currentState) {
         case INITIALIZING:
@@ -433,7 +433,7 @@ bool DifferentialCorrector::AdvanceState(void)
             throw SolverException("Solver state not supported for the targeter");
     }
      
-    return false;
+    return currentState;
 }
 
 
@@ -485,7 +485,7 @@ void DifferentialCorrector::CheckCompletion(void)
     bool converged = true;
     
     // check for convergence
-    
+   
     if (!converged) {
         // Set to run perts if not converged
         currentState = PERTURBING;
@@ -659,13 +659,14 @@ void DifferentialCorrector::WriteToTextFile(void)
             
             case CHECKINGRUN:
                 // Iterate through the goals, writing them to the file
-                textFile << "\n*** Goals and achieved values:\n***    ";
+                textFile << "\nGoals and achieved values:\n    ";
                 
                 for (current = goalNames.begin(), i = 0; 
                      current != goalNames.end(); ++current) 
                 {
-                     textFile << *current << "   Desired value: " << goal[i] 
-                              << "Current value: " << nominal[i++] << "\n***    ";
+                     textFile << *current << "  Desired: " << goal[i] 
+                              << " Achieved: " << nominal[i] << "\n    ";
+                     ++i;
                 }
                 
                 textFile << "\n*****************************" 

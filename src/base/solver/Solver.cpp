@@ -53,12 +53,10 @@ Solver& Solver::operator=(const Solver& sol)
  * The method used to iterate until a solution is found.  Derived classes 
  * use this method to implement their solution technique.
  * 
- * @retval Returns true if the process is complete, false if not.
+ * @return solver state at the end of the process.
  */
-bool Solver::AdvanceState(void)
+Solver::SolverState Solver::AdvanceState(void)
 {
-    bool retval = false;
-    
     switch (currentState) {
         case INITIALIZING:
             CompleteInitialization();
@@ -86,14 +84,13 @@ bool Solver::AdvanceState(void)
         
         case FINISHED:
             RunComplete();
-            retval = true;
             break;
         
         default:
             throw SolverException("Undefined Solver state");
     };
     
-    return retval; 
+    return currentState; 
 }
     
 

@@ -42,7 +42,7 @@ public:
     DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
     
     virtual bool                Initialize(void);
-    virtual bool                AdvanceState(void);
+    virtual SolverState         AdvanceState(void);
 
     // Access methods overriden from the base class
     virtual std::string GetParameterText(const Integer id) const;

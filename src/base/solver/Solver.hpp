@@ -63,7 +63,7 @@ public:
         return currentState;
     }
     
-    virtual bool        AdvanceState(void);
+    virtual SolverState AdvanceState(void);
     
     /**
      * Derived classes implement this method to set object pointers and validate

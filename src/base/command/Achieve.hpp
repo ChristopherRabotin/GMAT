@@ -75,12 +75,16 @@ public:
 protected:
     /// The name of the spacecraft that gets maneuvered
     std::string         targeterName;
-    /// Name(s) of the variable(s)
+    /// Name of the goal
     std::string         goalName;
-    /// Initial variable value(s)
+    /// Target value for the goal
     Real                goal;
-    /// Current (nominal) variable value(s)
+    /// Accuracy needed for the goal
     Real                tolerance;
+    /// Pointer to the object that owns the goal
+    GmatBase            *goalObject;
+    /// ID for the parameter 
+    Integer             goalId;
     /// The targeter instance used to manage the targeter state machine
     Solver              *targeter;
     /// Flag used to finalize the targeter data during execution

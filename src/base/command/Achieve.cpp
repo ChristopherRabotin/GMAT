@@ -317,6 +317,39 @@ bool Achieve::Initialize(void)
     targeter = (Solver *)((*objectMap)[targeterName]);
     Integer id = targeter->GetParameterID("Goals");
     targeter->SetStringParameter(id, goalName);
+    
+
+    // Break component into the object and its parameter
+    std::string objectName, parmName;
+    Integer loc = goalName.find(".");
+    objectName = goalName.substr(0, loc);
+    parmName = goalName.substr(loc+1, goalName.length() - (loc+1));
+    GmatBase *obj = (*objectMap)[objectName];
+    if (obj == NULL) {
+        std::string errorstr = "Could not find object ";
+        errorstr += objectName;
+        throw CommandException(errorstr);
+    }
+    id = obj->GetParameterID(parmName);
+    if (id == -1) {
+        std::string errorstr = "Could not find parameter ";
+        errorstr += parmName;
+        errorstr += " on object ";
+        errorstr += objectName;
+        throw CommandException(errorstr);
+    }
+    Gmat::ParameterType type = obj->GetParameterType(id);
+    if (type != Gmat::REAL_TYPE) {
+        std::string errorstr = "The targeter goal ";
+        errorstr += parmName;
+        errorstr += " on object ";
+        errorstr += objectName;
+        errorstr += " is not Real.";
+        throw CommandException(errorstr);
+    }
+    
+    goalObject = obj;
+    goalId = id;
 
     // The targeter cannot be finalized until all of the loop is initialized
     targeterDataFinalized = false;
@@ -341,7 +374,6 @@ bool Achieve::Initialize(void)
 bool Achieve::Execute(void)
 {
     bool retval = true;
-    
     if (!targeterDataFinalized) {
         // Tell the targeter about the goals and tolerances
         Real goalData[2];
@@ -353,5 +385,8 @@ bool Achieve::Execute(void)
         return retval;
     }
     
+    // Evaluate goal and pass it to the targeter
+    Real val = goalObject->GetRealParameter(goalId);
+    targeter->SetResultValue(goalId, val);
     return retval;
 }

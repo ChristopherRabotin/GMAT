@@ -93,6 +93,12 @@ protected:
     std::vector<Real>   variableMaximum;
     /// Maximum step allowed
     std::vector<Real>   variableMaximumStep;
+    /// Targeter ID for the parameters
+    std::vector<Integer> variableId;
+    /// Pointers to the objects that the variables affect
+    std::vector<GmatBase*> pobject;
+    /// Object ID for the parameters
+    std::vector<Integer> parmId;
     /// The Targeter instance used to manage the state machine
     Solver              *targeter;
     /// The integer ID assigned to the variable

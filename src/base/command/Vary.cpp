@@ -374,7 +374,8 @@ void Vary::InterpretAction(void)
     
     component = generatingString.substr(loc, strend-loc+1);
     variableName.push_back(component);
-
+    variableId.push_back(-1);
+    
     // Find the variable
     loc = end + 1;
     
@@ -421,6 +422,39 @@ bool Vary::Initialize(void)
     Integer id = targeter->GetParameterID("Variables");
     if (!variableName.empty())
         targeter->SetStringParameter(id, variableName[0]);
+        
+    // Break component into the object and its parameter
+    std::string objectName, parmName, varName;
+    varName = variableName[0];
+    Integer loc = varName.find(".");
+    objectName = varName.substr(0, loc);
+    parmName = varName.substr(loc+1, varName.length() - (loc+1));
+    GmatBase *obj = (*objectMap)[objectName];
+    if (obj == NULL) {
+        std::string errorstr = "Could not find object ";
+        errorstr += objectName;
+        throw CommandException(errorstr);
+    }
+    id = obj->GetParameterID(parmName);
+    if (id == -1) {
+        std::string errorstr = "Could not find parameter ";
+        errorstr += parmName;
+        errorstr += " on object ";
+        errorstr += objectName;
+        throw CommandException(errorstr);
+    }
+    Gmat::ParameterType type = obj->GetParameterType(id);
+    if (type != Gmat::REAL_TYPE) {
+        std::string errorstr = "The targeter variable ";
+        errorstr += parmName;
+        errorstr += " on object ";
+        errorstr += objectName;
+        errorstr += " is not Real.";
+        throw CommandException(errorstr);
+    }
+    
+    pobject.push_back(obj);
+    parmId.push_back(id);
 
     // The targeter cannot be finalized until all of the loop is initialized
     targeterDataFinalized = false;
@@ -458,11 +492,14 @@ bool Vary::Execute(void)
             varData[2] = variableMinimum[i];        // minimum
             varData[3] = variableMaximum[i];        // maximum
             varData[4] = variableMaximumStep[i];    // largest allowed step
-            targeter->SetSolverVariables(varData, variableName[i]);
+            variableId[i] = targeter->SetSolverVariables(varData, variableName[i]);
         }
         targeterDataFinalized = true;
         return retval;
     }
+    
+    Real var = targeter->GetSolverVariable(variableId[0]);
+    pobject[0]->SetRealParameter(parmId[0], var);
     
     return retval;
 }
