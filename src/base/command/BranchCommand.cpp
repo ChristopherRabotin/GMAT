@@ -139,6 +139,14 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    GmatCommand *current = NULL;
    
+   // See if we're supposed to put it at the top of the first branch
+   if (prev == this)
+   {
+      current = branch[0];
+      branch[0] = cmd;
+      cmd->Append(current);
+      return true;
+   }
    // If we have branches, try to insert there first
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
@@ -175,6 +183,17 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
    
    // Not in the branches, so continue with the sequence
    return GmatCommand::Remove(cmd);
+}
+
+bool BranchCommand::InsertRightAfter(GmatCommand *cmd)
+{
+   if (!next) 
+   {
+      next = cmd;
+      return true;
+   }
+   
+   return GmatCommand::Insert(cmd,this);
 }
 
 
@@ -273,3 +292,6 @@ bool BranchCommand::ExecuteBranch(Integer which)
    
    return retval;
 }
+
+
+

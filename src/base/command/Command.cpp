@@ -499,16 +499,15 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    if (this == prev)
    {
       GmatCommand *temp = next;
+      if (!next) return Append(cmd);
       next = cmd;
-      return next->Append(temp);
+      return next->Append(temp); // this assumes cmd->next is NULL and next != NULL
    }
    
    if (next == NULL)
       return false;
-   
    return next->Insert(cmd, prev);
 }
-
 
 //------------------------------------------------------------------------------
 //  GmatCommand* Remove(GmatCommand *cmd)
@@ -604,6 +603,8 @@ bool GmatCommand::ClearObjects()
 {
    return true;
 }
+
+
 
 
 
