@@ -45,9 +45,6 @@ namespace GmatTree
 {
     enum IconType
     {
-        ICON_PROPAGATE_EVENT,
-        ICON_TARGET,
-
         ICON_FOLDER,
         ICON_FILE,
         ICON_OPENFOLDER,
@@ -76,6 +73,18 @@ namespace GmatTree
         ICON_PROPAGATOR,
         ICON_VARIABLE,
         ICON_XY_PLOT,
+    };
+
+    enum MissionIconType
+    {
+        MISSION_ICON_PROPAGATE_EVENT,
+        MISSION_ICON_TARGET,
+
+        MISSION_ICON_FOLDER,
+        MISSION_ICON_FILE,
+        MISSION_ICON_OPENFOLDER,
+        MISSION_ICON_SPACECRAFT,
+
     };
 
     enum ItemType
