@@ -25,6 +25,10 @@
 //---------------------------------
 //  static data
 //---------------------------------
+const Rvector6
+Rvector6::RVECTOR6_UNDEFINED = Rvector6(UTIL_REAL_UNDEFINED, UTIL_REAL_UNDEFINED,
+                                        UTIL_REAL_UNDEFINED, UTIL_REAL_UNDEFINED,
+                                        UTIL_REAL_UNDEFINED, UTIL_REAL_UNDEFINED);
 
 const std::string Rvector6::DATA_DESCRIPTIONS[NUM_DATA] =
 {

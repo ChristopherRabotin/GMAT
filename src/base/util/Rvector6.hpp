@@ -62,6 +62,9 @@ public:
     const std::string* GetDataDescriptions() const;
     std::string* ToValueStrings();
 
+    static const Real UTIL_REAL_UNDEFINED = -987654321.0123e-45;
+    static const Rvector6 RVECTOR6_UNDEFINED;
+    
 protected:
 private:
    static const Integer NUM_DATA = 6;
