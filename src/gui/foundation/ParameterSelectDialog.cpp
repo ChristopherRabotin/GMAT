@@ -92,10 +92,11 @@ void ParameterSelectDialog::Create()
    
    // wxListBox
    mUserParamListBox =
-      theGuiManager->GetUserParameterListBox(this, ID_LISTBOX, wxSize(150, 50));
+      theGuiManager->GetUserVariableListBox(this, ID_LISTBOX, wxSize(150, 50));
    
+   //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = theGuiManager->
-      GetParameterListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
+      GetPropertyListBox(this, ID_LISTBOX, wxSize(150, 100), "Spacecraft");
    
    mParamSelectedListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
                                          wxSize(150, 250), 0, emptyList, wxLB_SINGLE);
@@ -256,8 +257,9 @@ void ParameterSelectDialog::OnButton(wxCommandEvent& event)
       
       if (paramDlg.IsParamCreated())
       {
-         mUserParamListBox->Set(theGuiManager->GetNumUserParameter(),
-                                theGuiManager->GetUserParameterList());
+         //loj: 9/30/04 chagnged *UserParameter() to *UserVariable()
+         mUserParamListBox->Set(theGuiManager->GetNumUserVariable(),
+                                theGuiManager->GetUserVariableList());
          mAddParamButton->Disable();
       }
    }

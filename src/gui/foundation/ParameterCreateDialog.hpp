@@ -26,42 +26,49 @@ public:
     
    ParameterCreateDialog(wxWindow *parent);
 
-   //wxString GetParamName()
-   //   { return mParamName; }
    wxArrayString& GetParamNames() //loj: 9/27/04 return wxArrayString&
       { return mParamNames; }
    bool IsParamCreated()
       { return mIsParamCreated; }
     
 private:
-   //wxString mParamName;
    wxArrayString mParamNames;
    bool mIsParamCreated;
+   bool mCreateVariable;
+   bool mCreateArray;
    
    wxColour mColor;
-   wxTextCtrl *mNameTextCtrl;
+   wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mExprTextCtrl;
-   wxTextCtrl *mEpochTextCtrl;
-   wxTextCtrl *mIndexTextCtrl;
+   wxTextCtrl *mArrNameTextCtrl;
+   wxTextCtrl *mArrRowTextCtrl;
+   wxTextCtrl *mArrColTextCtrl;
+   wxTextCtrl *mArrValueTextCtrl;
 
-   wxButton *mCreateParamButton;
-   wxButton *mAddPropertyButton;
-   wxButton *mAddParamButton;
+   wxButton *mCreateVariableButton;
+   wxButton *mPastePropertyButton;
+   wxButton *mPasteUserVarButton;
    wxButton *mColorButton;
+   wxButton *mCreateArrayButton;
+   wxButton *mAssignArrayButton;
+   wxButton *mInitArrayButton;
    
    wxListBox *mObjectListBox;
    wxListBox *mPropertyListBox;
-   wxListBox *mUserParamListBox;
-    
-   wxComboBox *cbodyComboBox;
-   wxComboBox *coordComboBox;
-   wxComboBox *rbodyComboBox;
-
+   wxListBox *mUserVarListBox;
+   wxListBox *mUserArrayListBox;
+   
+   wxComboBox *mCoordComboBox;
+   
+   void CreateVariable();
+   void CreateArray();
+   
    // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
+   
    // virtual methods from GmatDialog
    virtual void OnOK();
 
@@ -71,7 +78,6 @@ private:
    void OnButton(wxCommandEvent& event);
    void OnColorButtonClick(wxCommandEvent& event);
 
-   
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands

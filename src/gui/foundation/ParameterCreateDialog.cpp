@@ -29,7 +29,6 @@
 
 BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, ParameterCreateDialog::OnOK)
-   //EVT_BUTTON(ID_BUTTON_APPLY, GmatDialog::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, ParameterCreateDialog::OnButton)
    EVT_BUTTON(ID_COLOR_BUTTON, ParameterCreateDialog::OnColorButtonClick)
@@ -43,14 +42,14 @@ END_EVENT_TABLE()
 ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
 {
-   //mParamName = "";
    mParamNames.Clear();
    mIsParamCreated = false;
+   mCreateVariable = false;
+   mCreateArray = false;
    mColor.Set(0, 0, 0); // initialize to black
    
    Create();
    Show();
-   mCreateParamButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -59,46 +58,25 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
 void ParameterCreateDialog::Create()
 {
    int bsize = 2;
-    
+   
    // wxString
-   wxString strArray3[] = { wxT("") };
-   wxString strArray4[] = { wxT("") };
-   wxString strArray5[] = { wxT("") };
+   wxString strCoordArray[] = { wxT("") };
 
    //wxStaticText
+   wxStaticText *varNameStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Name"),
+                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *objStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Object"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *propertyStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Property"),
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *paramStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("User Variables"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *cbodyStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Central Body"),
+   wxStaticText *configVarStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Variables"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *coordStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Coordinate System"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *rbodyStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Reference Body"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *epochStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Reference Epoch"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *indexStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Index"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-    
-   wxStaticText *nameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *emptyStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("  "),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *equalSignStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *expStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Expression (Available Operators: +-*/^ )"),
@@ -106,130 +84,161 @@ void ParameterCreateDialog::Create()
    wxStaticText *colorStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Color"),
                        wxDefaultPosition, wxDefaultSize, 0);
-    
+   wxStaticText *varEqualSignStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("="),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxStaticText *arrNameStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Name"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *arr1RowStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Row"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *arr1ColStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Column"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *emptyStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("  "),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *arrEqualSignStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("="),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *arrTimesStaticText =
+      new wxStaticText(this, ID_TEXT, wxT(" X"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *configArrStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Arrays"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
    // wxTextCtrl
-   mNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(150,20), 0);
-   mExprTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(300,20), 0);
-   mEpochTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(80,20), 0);
-   mIndexTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(80,20), 0);
+   mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(130,20), 0);
+   mExprTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                  wxDefaultPosition, wxSize(280,20), 0);
+   
+   mArrNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(102,20), 0);
+   mArrRowTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                    wxDefaultPosition, wxSize(35,20), 0);
+   mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                                    wxDefaultPosition, wxSize(35,20), 0);
    
    // wxButton
-   mCreateParamButton =
-      new wxButton(this, ID_BUTTON, wxT("Create"),
-                   wxDefaultPosition, wxDefaultSize, 0);
-   
-   mAddPropertyButton =
-      new wxButton(this, ID_BUTTON, wxT("Paste"),
-                   wxDefaultPosition, wxDefaultSize, 0);
-   mAddParamButton =
-      new wxButton(this, ID_BUTTON, wxT("Paste"),
-                   wxDefaultPosition, wxDefaultSize, 0);
-   mColorButton =
-      new wxButton(this, ID_COLOR_BUTTON, wxT(""),
-                   wxDefaultPosition, wxSize(25, 20), 0);
+   mCreateVariableButton = new wxButton(this, ID_BUTTON, wxT("Create"),
+                                        wxDefaultPosition, wxDefaultSize, 0);
+   mPastePropertyButton = new wxButton(this, ID_BUTTON, wxT("Paste"),
+                                     wxDefaultPosition, wxDefaultSize, 0);
+   mPasteUserVarButton = new wxButton(this, ID_BUTTON, wxT("Paste"),
+                                  wxDefaultPosition, wxDefaultSize, 0);
+   mColorButton =  new wxButton(this, ID_COLOR_BUTTON, wxT(""),
+                                wxDefaultPosition, wxSize(25, 20), 0);
    mColorButton->SetBackgroundColour(mColor);
+   
+   mCreateArrayButton = new wxButton(this, ID_BUTTON, wxT("Create"),
+                                     wxDefaultPosition, wxDefaultSize, 0);
+   
    
    // wxListBox
    wxArrayString emptyArray;
    mObjectListBox = 
-      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(150, 150), emptyArray);
+      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 120), emptyArray);
    
+   //loj: 10/1/04 changed GetParameterListBox() to GetPropertyListBox()
    mPropertyListBox = 
-      theGuiManager->GetParameterListBox(this, -1, wxSize(150, 150),
-                                         "Spacecraft"); //loj: 9/22/04 Spacecraft for now
-                                         //mObjectListBox->GetStringSelection());
-
-//     mUserParamListBox = 
-//        theGuiManager->GetConfigParameterListBox(this, -1, wxSize(150, 200),
-//                                                 "");
-   //loj: 9/24/04 use GetUserParameterListBox()
-   mUserParamListBox =
-      theGuiManager->GetUserParameterListBox(this, -1, wxSize(150, 150), "");
-    
+      theGuiManager->GetPropertyListBox(this, -1, wxSize(135, 120), "Spacecraft");
    
+   //loj: 9/24/04 use GetUserVariableListBox()
+   mUserVarListBox =
+      theGuiManager->GetUserVariableListBox(this, -1, wxSize(135, 120), "");
+   
+   mUserArrayListBox =
+      theGuiManager->GetUserArrayListBox(this, -1, wxSize(135, 50), "");
+   
+
+
    // wxComboBox
-   cbodyComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                   wxSize(100,-1), 1, strArray3, wxCB_DROPDOWN);
-   coordComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                   wxSize(100,-1), 1, strArray4, wxCB_DROPDOWN);
-   rbodyComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                   wxSize(100,-1), 1, strArray5, wxCB_DROPDOWN);
+   mCoordComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
+                                  wxSize(100,-1), 1, strCoordArray, wxCB_DROPDOWN);
     
    
    // wxSizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
    wxFlexGridSizer *objPropertyFlexGridSizer = new wxFlexGridSizer(4, 0, 0);
-   wxFlexGridSizer *detailsBoxSizer = new wxFlexGridSizer(5, 0, 0);
-   wxStaticBox *detailStaticBox = new wxStaticBox(this, -1, wxT("Details"));
-   wxStaticBoxSizer *detailsStaticBoxSizer = new wxStaticBoxSizer(detailStaticBox, wxVERTICAL);
+   wxBoxSizer *detailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);   
+
+   wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(7, 0, 0);
+
+   wxStaticBox *variableStaticBox = new wxStaticBox(this, -1, wxT("Variable"));
+   wxStaticBoxSizer *variableStaticBoxSizer =
+      new wxStaticBoxSizer(variableStaticBox, wxVERTICAL);
+
+   wxStaticBox *arrayStaticBox = new wxStaticBox(this, -1, wxT("Array"));
+   wxStaticBoxSizer *arrayStaticBoxSizer =
+      new wxStaticBoxSizer(arrayStaticBox, wxVERTICAL);
+
    
    // Add to wx*Sizers
-   top1FlexGridSizer->Add(nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   // for Variable
+   top1FlexGridSizer->Add(varNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    top1FlexGridSizer->Add(expStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-    
-   top1FlexGridSizer->Add(mNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   top1FlexGridSizer->Add(equalSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   top1FlexGridSizer->Add(mVarNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(varEqualSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(mExprTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-                        
+   
    // 1st row
-   objPropertyFlexGridSizer->Add(mCreateParamButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mAddPropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mCreateVariableButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mPastePropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mAddParamButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mPasteUserVarButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // 2nd row
    objPropertyFlexGridSizer->Add(objStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(propertyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(paramStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   objPropertyFlexGridSizer->Add(configVarStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   
    // 3rd row
    objPropertyFlexGridSizer->Add(mObjectListBox, 0, wxALIGN_CENTER|wxALL, bsize);
    objPropertyFlexGridSizer->Add(mPropertyListBox, 0, wxALIGN_CENTER|wxALL, bsize);
    objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mUserParamListBox, 0, wxALIGN_CENTER|wxALL, bsize);
-
-   // detail
-   detailsBoxSizer->Add(cbodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(coordStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(rbodyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(colorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   objPropertyFlexGridSizer->Add(mUserVarListBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   detailsBoxSizer->Add(cbodyComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(coordComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(rbodyComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(coordStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(mCoordComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   detailsBoxSizer->Add(colorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(epochStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(indexStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   variableStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   variableStaticBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   variableStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   // for Array Creation
+   // 1st row
+   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(arr1RowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(arr1ColStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(configArrStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(mEpochTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   detailsBoxSizer->Add(mIndexTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   // 2nd row
+   arr1FlexGridSizer->Add(mCreateArrayButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(arrEqualSignStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrRowTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(arrTimesStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(mUserArrayListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-   detailsStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);    
-    
-   pageBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
-   pageBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(detailsStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   arrayStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   
+   pageBoxSizer->Add(variableStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(arrayStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
@@ -238,95 +247,25 @@ void ParameterCreateDialog::Create()
 }
 
 //------------------------------------------------------------------------------
-// void OnTextUpdate(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
-{
-   if (mNameTextCtrl->GetValue() != "" && mNameTextCtrl->GetValue() != " " &&
-       mExprTextCtrl->GetValue() != "" && mExprTextCtrl->GetValue() != " ")
-   {
-      mCreateParamButton->Enable();
-      theOkButton->Enable();
-   }
-}
-
-//------------------------------------------------------------------------------
-// void OnComboSelection(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::OnComboSelection(wxCommandEvent& event)
-{
-   ;
-}
-
-//------------------------------------------------------------------------------
-// void OnButton(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::OnButton(wxCommandEvent& event)
-{    
-   if (event.GetEventObject() == mCreateParamButton)  
-   {
-      SaveData();
-   }
-   else if (event.GetEventObject() == mAddPropertyButton)  
-   {
-      wxString s = mObjectListBox->GetStringSelection() + "." +
-         mPropertyListBox->GetStringSelection();
-
-      mExprTextCtrl->AppendText(s);
-      //mNameTextCtrl->SetValue(s); //loj: 9/23/04
-
-      if (mNameTextCtrl->GetValue() != "" &&
-          mNameTextCtrl->GetValue() != " ")
-      {
-         mCreateParamButton->Enable();
-         theOkButton->Enable();
-      }
-   }
-   else if (event.GetEventObject() == mAddParamButton)  
-   {
-      mExprTextCtrl->AppendText(mUserParamListBox->GetStringSelection());
-   }
-}
-
-//------------------------------------------------------------------------------
-// void OnColorButtonClick(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void ParameterCreateDialog::OnColorButtonClick(wxCommandEvent& event)
-{    
-   wxColourData data;
-   data.SetColour(mColor);
-
-   wxColourDialog dialog(this, &data);
-   //dialog.CenterOnParent();
-   dialog.Center();
-   
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      mColor = dialog.GetColourData().GetColour();
-      mColorButton->SetBackgroundColour(mColor);
-   }
-}
-
-//------------------------------------------------------------------------------
 // virtual void LoadData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::LoadData()
 {
-   //mAddParamButton->Disable();
-   //mExprTextCtrl->Disable();
+   mCreateVariableButton->Disable();
+   mCreateArrayButton->Disable();
 }
 
 //------------------------------------------------------------------------------
-// virtual void SaveData()
+// void CreateVariable()
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::SaveData()
+void ParameterCreateDialog::CreateVariable()
 {
-   std::string varName = std::string(mNameTextCtrl->GetValue().c_str());
+   std::string varName = std::string(mVarNameTextCtrl->GetValue().c_str());
    std::string varExpr = std::string(mExprTextCtrl->GetValue().c_str());
 
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage
-      ("ParameterCreateDialog::SaveData() varName = "  + varName +
+      ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
        " varExpr = " + varExpr + "\n");
 #endif
    
@@ -361,22 +300,21 @@ void ParameterCreateDialog::SaveData()
          
 #if DEBUG_PARAM_DIALOG
          MessageInterface::ShowMessage
-            ("ParameterCreateDialog::SaveData() user var:%s added\n",
+            ("ParameterCreateDialog::CreateVariable() user var:%s added\n",
              varName.c_str());
 #endif
          
-         //mParamName = wxString(varName.c_str());
          mParamNames.Add(varName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
 
-         mUserParamListBox->Append(varName.c_str());
+         mUserVarListBox->Append(varName.c_str());
 
-         for (int i=0; i<mUserParamListBox->GetCount(); i++)
+         for (int i=0; i<mUserVarListBox->GetCount(); i++)
          {
-            if (mUserParamListBox->GetString(i).IsSameAs(varName.c_str()))
+            if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
             {
-               mUserParamListBox->SetSelection(i);
+               mUserVarListBox->SetSelection(i);
                break;
             }
          }
@@ -387,16 +325,87 @@ void ParameterCreateDialog::SaveData()
       }
       else
       {
-         //loj: 7/28/04 added
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ParameterCreateDialog::SaveData()\nThe variable: %s"
+            (Gmat::WARNING_, "ParameterCreateDialog::CreateVariable()\nThe variable: %s"
              " cannot be created. It already exists.", varName.c_str());
       }
-      
-      mCreateParamButton->Disable();
+
+      mCreateVariable = false;
+      mCreateVariableButton->Disable();
       mExprTextCtrl->SetValue("");
-      mNameTextCtrl->SetValue("");
+      mVarNameTextCtrl->SetValue("");
    }
+}
+
+//------------------------------------------------------------------------------
+// void CreateArray()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::CreateArray()
+{
+   long row, col;
+
+   if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
+       !(mArrColTextCtrl->GetValue().ToLong(&col)))
+   {
+      wxLogError(wxT("Row or Column is not a number"));
+      wxLog::FlushActive();
+   }
+   else
+   {
+      std::string arrName = std::string(mArrNameTextCtrl->GetValue().c_str());
+      
+      // if new user array to create
+      if (theGuiInterpreter->GetParameter(arrName) == NULL)
+      {
+         Parameter *param;
+         
+         param = theGuiInterpreter->CreateParameter("Array", arrName);
+         param->SetIntegerParameter("NumRows", row);
+         param->SetIntegerParameter("NumCols", col);
+         
+         mParamNames.Add(arrName.c_str());
+         mIsParamCreated = true;
+         theGuiManager->UpdateParameter();
+
+         mUserArrayListBox->Append(arrName.c_str());
+
+         for (int i=0; i<mUserArrayListBox->GetCount(); i++)
+         {
+            if (mUserArrayListBox->GetString(i).IsSameAs(arrName.c_str()))
+            {
+               mUserArrayListBox->SetSelection(i);
+               break;
+            }
+         }
+         
+         theOkButton->Enable();
+         //loj: once array is created cannot revert (delete) for now
+         theCancelButton->Disable();
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ParameterCreateDialog::CreateArray()\nThe array: %s"
+             " cannot be created. It already exists.", arrName.c_str());
+      }
+      
+      mCreateArray = false;
+      mCreateArrayButton->Disable();
+      mArrNameTextCtrl->SetValue("");
+      mArrRowTextCtrl->SetValue("");
+      mArrColTextCtrl->SetValue("");
+   }
+}
+
+//------------------------------------------------------------------------------
+// virtual void SaveData()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::SaveData()
+{
+   if (mCreateVariable)
+      CreateVariable();
+   else if (mCreateArray)
+      CreateArray();
 }
 
 //------------------------------------------------------------------------------
@@ -418,12 +427,106 @@ void ParameterCreateDialog::OnOK()
 {
 #if DEBUG_PARAM_DIALOG
    MessageInterface::ShowMessage
-      ("ParameterCreateDialog::OnOk() mCreateParamButton->IsEnabled()=%d\n",
-       mCreateParamButton->IsEnabled());
+      ("ParameterCreateDialog::OnOk() mCreateVariableButton->IsEnabled()=%d\n",
+       mCreateVariableButton->IsEnabled());
 #endif
    
-   if (mCreateParamButton->IsEnabled())
-      SaveData();
+   if (mCreateVariableButton->IsEnabled())
+      mCreateVariable = true;
+   else if (mCreateArrayButton->IsEnabled())
+      mCreateArray = true;
    
+   SaveData();
    Close();
 }
+
+//---------------------------------
+// event handling
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// void OnTextUpdate(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
+{
+   if (mVarNameTextCtrl->GetValue().Trim() != "" &&
+       mVarNameTextCtrl->GetValue().Trim() != " " &&
+       mExprTextCtrl->GetValue().Trim() != "")
+   {
+      mCreateVariableButton->Enable();
+      theOkButton->Enable();
+   }
+   else if (mArrNameTextCtrl->GetValue().Trim() != "" &&
+            mArrRowTextCtrl->GetValue().Trim() != "" &&
+            mArrColTextCtrl->GetValue().Trim() != "")
+   {
+      mCreateArrayButton->Enable();
+      theOkButton->Enable();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnComboSelection(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnComboSelection(wxCommandEvent& event)
+{
+   ;
+}
+
+//------------------------------------------------------------------------------
+// void OnButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnButton(wxCommandEvent& event)
+{    
+   if (event.GetEventObject() == mCreateVariableButton)  
+   {
+      mCreateVariable = true;
+      mCreateArray = false;
+      SaveData();
+   }
+   else if (event.GetEventObject() == mCreateArrayButton)  
+   {
+      mCreateArray = true;
+      mCreateVariable = false;
+      SaveData();
+   }
+   else if (event.GetEventObject() == mPastePropertyButton)  
+   {
+      wxString s = mObjectListBox->GetStringSelection() + "." +
+         mPropertyListBox->GetStringSelection();
+
+      mExprTextCtrl->AppendText(s);
+      //mVarNameTextCtrl->SetValue(s); //loj: 9/23/04
+
+      if (mVarNameTextCtrl->GetValue() != "" &&
+          mVarNameTextCtrl->GetValue() != " ")
+      {
+         mCreateVariableButton->Enable();
+         theOkButton->Enable();
+      }
+   }
+   else if (event.GetEventObject() == mPasteUserVarButton)  
+   {
+      mExprTextCtrl->AppendText(mUserVarListBox->GetStringSelection());
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnColorButtonClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnColorButtonClick(wxCommandEvent& event)
+{    
+   wxColourData data;
+   data.SetColour(mColor);
+
+   wxColourDialog dialog(this, &data);
+   //dialog.CenterOnParent();
+   dialog.Center();
+   
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      mColor = dialog.GetColourData().GetColour();
+      mColorButton->SetBackgroundColour(mColor);
+   }
+}
+

@@ -20,6 +20,7 @@
 #include <algorithm>              // for sort(), set_difference()
 
 //#define DEBUG_GUI_ITEM 1
+//#define DEBUG_GUI_ITEM_PROPERTY 1
 
 //------------------------------
 // static data
@@ -55,6 +56,9 @@ GuiItemManager* GuiItemManager::GetInstance()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateAll()
 {
+   if (theNumScProperty == 0)
+      UpdatePropertyList("Spacecraft");
+   
    UpdateFormation();
    UpdateSpacecraft();
    UpdateParameter();
@@ -106,10 +110,9 @@ void GuiItemManager::UpdateSpacecraft()
  * Updates parameter related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateParameter(const wxString &objName)
+void GuiItemManager::UpdateParameter()
 {
-   UpdateParameterList(objName);
-   UpdateConfigParameterList(objName);
+   UpdateParameterList();
 }
 
 //------------------------------------------------------------------------------
@@ -122,6 +125,37 @@ void GuiItemManager::UpdateParameter(const wxString &objName)
 void GuiItemManager::UpdateSolarSystem()
 {
    UpdateConfigBodyList();
+}
+
+//------------------------------------------------------------------------------
+// int GetNumProperty(const wxString &objName)
+//------------------------------------------------------------------------------
+/*
+ * @return number of properties associated with objName
+ */
+//------------------------------------------------------------------------------
+int GuiItemManager::GetNumProperty(const wxString &objName)
+{
+   if (objName == "Spacecraft")
+      return theNumScProperty;
+   else
+      return 0;
+}
+
+//------------------------------------------------------------------------------
+// wxString* GetPropertyList(const wxString &objName)
+//------------------------------------------------------------------------------
+/*
+ * @return propertie string array associated with objName
+ */
+//------------------------------------------------------------------------------
+wxString* GuiItemManager::GetPropertyList(const wxString &objName)
+{
+   if (objName != "Spacecraft")
+      throw GmatBaseException("There are no properties associated with " +
+                              std::string(objName.c_str()));
+   
+   return theScPropertyList;
 }
 
 //------------------------------------------------------------------------------
@@ -322,113 +356,116 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetParameterListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
+// wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id, const wxSize &size,
 //                                const wxString &objName)
 //------------------------------------------------------------------------------
 /**
  * @return Available Parameter ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetParameterListBox(wxWindow *parent, wxWindowID id,
-                                               const wxSize &size,
-                                               const wxString &objName)
+wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
+                                              const wxSize &size,
+                                              const wxString &objName)
 {
+   if (objName != "Spacecraft")
+      throw GmatBaseException("There are no properties associated with " +
+                              std::string(objName.c_str()));
+   
    wxString emptyList[] = {};
    int numObj = 0;
    
-   if (objName == "Spacecraft")
-      numObj = theNumSpacecraft;
+   numObj = theNumSpacecraft;
    
    if (numObj > 0)
    {       
-      theParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, theNumParam,
-                       theParamList, wxLB_SINGLE|wxLB_SORT);
+      theScPropertyListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumScProperty,
+                       theScPropertyList, wxLB_SINGLE|wxLB_SORT);
    }
    else
    {       
-      theParamListBox =
+      theScPropertyListBox =
          new wxListBox(parent, id, wxDefaultPosition, size, 0,
                        emptyList, wxLB_SINGLE|wxLB_SORT);
    }
    
-   return theParamListBox;
+   return theScPropertyListBox;
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetConfigParameterListBox(wxWindow *parent, wxWindowID id,
-//                                      const wxSize &size,
-//                                      const wxString &nameToExclude = "")
+// wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
+//                                         const wxSize &size,
+//                                         const wxString &nameToExclude = "")
 //------------------------------------------------------------------------------
 /**
- * @return Configured ConfigParameterListBox pointer
+ * @return Configured PlottableParameterListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetConfigParameterListBox(wxWindow *parent,
-                                                     wxWindowID id,
-                                                     const wxSize &size,
-                                                     const wxString &nameToExclude)
+wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
+                                                        wxWindowID id,
+                                                        const wxSize &size,
+                                                        const wxString &nameToExclude)
 {       
    wxString emptyList[] = {};
-   wxString *newConfigParamList;
+   wxString *newPlottableParamList;
    int numParams = 0;
     
-   if (nameToExclude != "" && theNumConfigParam >= 2)
+   if (nameToExclude != "" && theNumPlottableParam >= 2)
    {
-      newConfigParamList = new wxString[theNumConfigParam-1];
+      newPlottableParamList = new wxString[theNumPlottableParam-1];
         
-      for (int i=0; i<theNumConfigParam; i++)
+      for (int i=0; i<theNumPlottableParam; i++)
       {
-         if (theConfigParamList[i] != nameToExclude)
-            newConfigParamList[numParams++] = theConfigParamList[i];
+         if (thePlottableParamList[i] != nameToExclude)
+            newPlottableParamList[numParams++] = thePlottableParamList[i];
       }
       
-      theConfigParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigParam,
-                       newConfigParamList, wxLB_SINGLE|wxLB_SORT);
+      thePlottableParamListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumPlottableParam,
+                       newPlottableParamList, wxLB_SINGLE|wxLB_SORT);
       
-      delete newConfigParamList;
+      delete newPlottableParamList;
    }
    else
    {
-      if (theNumConfigParam > 0)
+      if (theNumPlottableParam > 0)
       {       
-         theConfigParamListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, theNumConfigParam,
-                          theConfigParamList, wxLB_SINGLE|wxLB_SORT);
+         thePlottableParamListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumPlottableParam,
+                          thePlottableParamList, wxLB_SINGLE|wxLB_SORT);
       }
       else
       {       
-         theConfigParamListBox =
+         thePlottableParamListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
    
-   return theConfigParamListBox;
+   return thePlottableParamListBox;
 }
 
 //------------------------------------------------------------------------------
-//  wxComboBox* GetUserParameterComboBox(wxWindow *parent, const wxSize &size)
+//  wxComboBox* GetUserVariableComboBox(wxWindow *parent, const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return configured user parameter combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox*
-GuiItemManager::GetUserParameterComboBox(wxWindow *parent, wxWindowID id,
-                                         const wxSize &size)
+GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
+                                        const wxSize &size)
 {
    // combo box for configured user parameters
 
-   int numUserVar = theNumUserParam;
+   int numUserVar = theNumUserVariable;
     
-   if (theNumUserParam == 0)
+   if (theNumUserVariable == 0)
       numUserVar = 1;
     
    theUserParamComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     numUserVar, theUserParamList, wxCB_DROPDOWN);
+                     numUserVar, theUserVarList, wxCB_DROPDOWN);
    
    // show first spacecraft
    theUserParamComboBox->SetSelection(0);
@@ -437,56 +474,107 @@ GuiItemManager::GetUserParameterComboBox(wxWindow *parent, wxWindowID id,
 }
 
 //------------------------------------------------------------------------------
-// wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
-//                                    const wxSize &size,
-//                                    const wxString &nameToExclude = "")
+// wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
+//                                   const wxSize &size,
+//                                   const wxString &nameToExclude = "")
 //------------------------------------------------------------------------------
 /**
- * @return Configured User Parameter ListBox pointer
+ * @return Configured User Valiable ListBox pointer
  */
 //------------------------------------------------------------------------------
-wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent,
-                                                   wxWindowID id,
-                                                   const wxSize &size,
-                                                   const wxString &nameToExclude)
+wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID id,
+                                                  const wxSize &size,
+                                                  const wxString &nameToExclude)
 {       
    wxString emptyList[] = {};
-   wxString *newUserParamList;
+   wxString *newUserVarList;
    int numParams = 0;
     
-   if (nameToExclude != "" && theNumUserParam >= 2)
+   if (nameToExclude != "" && theNumUserVariable >= 2)
    {
-      newUserParamList = new wxString[theNumUserParam-1];
+      newUserVarList = new wxString[theNumUserVariable-1];
         
-      for (int i=0; i<theNumUserParam; i++)
+      for (int i=0; i<theNumUserVariable; i++)
       {
-         if (theUserParamList[i] != nameToExclude)
-            newUserParamList[numParams++] = theUserParamList[i];
+         if (theUserVarList[i] != nameToExclude)
+            newUserVarList[numParams++] = theUserVarList[i];
       }
       
-      theUserParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserParam,
-                       newUserParamList, wxLB_SINGLE|wxLB_SORT);
+      theUserVarListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserVariable,
+                       newUserVarList, wxLB_SINGLE|wxLB_SORT);
       
-      delete newUserParamList;
+      delete newUserVarList;
    }
    else
    {
-      if (theNumUserParam > 0)
+      if (theNumUserVariable > 0)
       {       
-         theUserParamListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, theNumUserParam,
-                          theUserParamList, wxLB_SINGLE|wxLB_SORT);
+         theUserVarListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumUserVariable,
+                          theUserVarList, wxLB_SINGLE|wxLB_SORT);
       }
       else
       {       
-         theUserParamListBox =
+         theUserVarListBox =
             new wxListBox(parent, id, wxDefaultPosition, size, 0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
    
-   return theUserParamListBox;
+   return theUserVarListBox;
+}
+
+//------------------------------------------------------------------------------
+// wxListBox* GetUserArrayListBox(wxWindow *parent, wxWindowID id,
+//                                const wxSize &size,
+//                                const wxString &nameToExclude = "")
+//------------------------------------------------------------------------------
+/**
+ * @return Configured User Array ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
+                                               const wxSize &size,
+                                               const wxString &nameToExclude)
+{       
+   wxString emptyList[] = {};
+   wxString *newUserArrayList;
+   int numParams = 0;
+    
+   if (nameToExclude != "" && theNumUserArray >= 2)
+   {
+      newUserArrayList = new wxString[theNumUserArray-1];
+        
+      for (int i=0; i<theNumUserArray; i++)
+      {
+         if (theUserVarList[i] != nameToExclude)
+            newUserArrayList[numParams++] = theUserArrayList[i];
+      }
+      
+      theUserArrayListBox =
+         new wxListBox(parent, id, wxDefaultPosition, size, theNumUserArray,
+                       newUserArrayList, wxLB_SINGLE|wxLB_SORT);
+      
+      delete newUserArrayList;
+   }
+   else
+   {
+      if (theNumUserArray > 0)
+      {       
+         theUserArrayListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, theNumUserArray,
+                          theUserArrayList, wxLB_SINGLE|wxLB_SORT);
+      }
+      else
+      {       
+         theUserArrayListBox =
+            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+                          emptyList, wxLB_SINGLE|wxLB_SORT);
+      }
+   }
+   
+   return theUserArrayListBox;
 }
 
 //------------------------------------------------------------------------------
@@ -573,13 +661,13 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
 //-------------------------------
 
 //------------------------------------------------------------------------------
-//  void UpdateSpaceObjectList(bool firstTime)
+//  void UpdateSpaceObjectList()
 //------------------------------------------------------------------------------
 /**
  * updates spacecraft list
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
+void GuiItemManager::UpdateSpaceObjectList()
 {
    StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    StringArray fmList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
@@ -697,13 +785,13 @@ void GuiItemManager::UpdateSpaceObjectList(bool firstTime)
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateFormationList(bool firstTime)
+//  void UpdateFormationList()
 //------------------------------------------------------------------------------
 /**
  * updates spacecraft list
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateFormationList(bool firstTime)
+void GuiItemManager::UpdateFormationList()
 {
    StringArray listForm = theGuiInterpreter->GetListOfConfiguredItems(Gmat::FORMATION);
    int numForm = listForm.size();
@@ -729,13 +817,13 @@ void GuiItemManager::UpdateFormationList(bool firstTime)
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateSpacecraftList(bool firstTime)
+//  void UpdateSpacecraftList()
 //------------------------------------------------------------------------------
 /**
  * updates spacecraft list
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpacecraftList(bool firstTime)
+void GuiItemManager::UpdateSpacecraftList()
 {
    StringArray scList = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
    int numSc = scList.size();
@@ -761,33 +849,45 @@ void GuiItemManager::UpdateSpacecraftList(bool firstTime)
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateParameterList(const wxString &objName, bool firstTime = false)
+//  void UpdatePropertyList(const wxString &objName)
 //------------------------------------------------------------------------------
 /**
- * Updates available parameter list associated with objName.
+ * Updates available parameter list associated with objName. Currently it
+ * assumes all parameters are associated with Spacecraft.
  *
  * @note Only plottable parameters (returning single value) are added to the list.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime)
+void GuiItemManager::UpdatePropertyList(const wxString &objName)
 {
-   //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
-   //                              std::string(objName.c_str()) + "\n");
-    
-   //loj: How do I know which parameter belong to which object type?
-   //loj: for B2 show all paramters
+   //-----------------------------------------------------------------
+   //Note: How do I know which parameter belong to which object type?
+   //      Currently all paramters are associated with spacecraft.
+   //-----------------------------------------------------------------
+   
+#if DEBUG_GUI_ITEM_PROPERTY
+   MessageInterface::ShowMessage("GuiItemManager::UpdatePropertyList() " +
+                                 std::string(objName.c_str()) + "\n");
+#endif
+   
+   if (objName != "Spacecraft")
+      throw GmatBaseException("There are no properties associated with " +
+                              std::string(objName.c_str()));
+   
    StringArray items =
       theGuiInterpreter->GetListOfFactoryItems(Gmat::PARAMETER);
    int numParams = items.size();
    
-   //MessageInterface::ShowMessage
-   //   ("GuiItemManager::UpdateParameterList() numParams=%d\n", numParams);
+#if DEBUG_GUI_ITEM_PROPERTY
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePropertyList() numParams=%d\n", numParams);
+#endif
 
-   theNumParam = 0;
+   theNumScProperty = 0;
    
    for (int i=0; i<numParams; i++)
    {
-      if (theNumParam < MAX_PARAM_SIZE)
+      if (theNumScProperty < MAX_PARAM_SIZE)
       {
          // add to list only system parameters returning single value (loj: 9/22/04)
          if (items[i].find("CartState") == std::string::npos &&
@@ -796,8 +896,8 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
              items[i].find("Variable") == std::string::npos &&
              items[i].find("Array") == std::string::npos)
          {
-            theParamList[theNumParam] = items[i].c_str();
-            theNumParam++;
+            theScPropertyList[theNumScProperty] = items[i].c_str();
+            theNumScProperty++;
          }
       }
       else
@@ -807,78 +907,87 @@ void GuiItemManager::UpdateParameterList(const wxString &objName, bool firstTime
              MAX_PARAM_SIZE);
       }
    }
-   //MessageInterface::ShowMessage
-   //   ("GuiItemManager::UpdateParameterList() theNumParam=%d\n", theNumParam);
+   
+#if DEBUG_GUI_ITEM_PROPERTY
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePropertyList() theNumScProperty=%d\n", theNumScProperty);
+#endif
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateConfigParameterList(const wxString &objName = "", bool firstTime = false)
+//  void UpdateParameterList()
 //------------------------------------------------------------------------------
 /**
- * Updates confugured parameter list (theConfigParamList, theSystemParamList,
- * and theUserParamList).
+ * Updates confugured parameter list (thePlottableParamList, theSystemParamList,
+ * theUserVarList, theUserArrayList).
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateConfigParameterList(const wxString &objName, bool firstTime)
-{
-   //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigParameterList() " +
-   //                              std::string(objName.c_str()) + "\n");
-    
+void GuiItemManager::UpdateParameterList()
+{    
    StringArray items =
       theGuiInterpreter->GetListOfConfiguredItems(Gmat::PARAMETER);
-   theNumConfigParam = items.size();
+   int numParamCount = items.size();
 
    Parameter *param;
 
-   int userParamCount = 0;
+   int plottableParamCount = 0;
+   int userVarCount = 0;
+   int userArrayCount = 0;
    int systemParamCount = 0;
    
-   for (int i=0; i<theNumConfigParam; i++)
+   for (int i=0; i<numParamCount; i++)
    {
       param = theGuiInterpreter->GetParameter(items[i]);
       
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())
       {
-         // All configured parameters
-         if (objName == "")
-            theConfigParamList[systemParamCount] = items[i].c_str();
-         else
-            theConfigParamList[systemParamCount] = objName + "." + items[i].c_str();
-
-         // Identify sytem and user parameters
-         if (param->GetKey() == Parameter::USER_PARAM)
+         thePlottableParamList[systemParamCount] = items[i].c_str();
+         plottableParamCount++;
+         
+         // system Parameter (object property)
+         if (param->GetKey() == Parameter::SYSTEM_PARAM)
          {
-            theUserParamList[userParamCount] = items[i].c_str();
-            userParamCount++;
-         }
-         else
-         {
-            if (objName == "")
-               theSystemParamList[systemParamCount] = items[i].c_str();
-            else
-               theSystemParamList[systemParamCount] = objName + "." + items[i].c_str();
-
+            theSystemParamList[systemParamCount] = items[i].c_str();
             systemParamCount++;
          }
+         else
+         {
+            // user Variable
+            if (param->GetTypeName() == "Variable")
+            {
+               theUserVarList[userVarCount] = items[i].c_str();
+               userVarCount++;
+            }
+         }
       }
-      
-      //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigParameterList() " +
-      //                             std::string(theConfigParamList[i].c_str()) + "\n");
+      else
+      {
+         // user Array
+         if (param->GetTypeName() == "Array")
+         {
+            theUserArrayList[userArrayCount] = items[i].c_str();
+            userArrayCount++;
+         }
+      }
+      //MessageInterface::ShowMessage("GuiItemManager::UpdateParameterList() " +
+      //                             std::string(thePlottableParamList[i].c_str()) + "\n");
    }
 
+   theNumPlottableParam = plottableParamCount;
    theNumSystemParam = systemParamCount;
-   theNumUserParam = userParamCount;
+   theNumUserVariable = userVarCount;
+   theNumUserArray = userArrayCount;
 }
 
 //------------------------------------------------------------------------------
-//  void UpdateConfigBodyList(bool firstTime = false)
+//  void UpdateConfigBodyList()
 //------------------------------------------------------------------------------
 /**
  * Updates confugured celestial body list
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateConfigBodyList(bool firstTime)
+void GuiItemManager::UpdateConfigBodyList()
 {
    //MessageInterface::ShowMessage("GuiItemManager::UpdateConfigBodyList() entered\n");
         
@@ -901,19 +1010,25 @@ GuiItemManager::GuiItemManager()
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theSolarSystem = theGuiInterpreter->GetDefaultSolarSystem();
+   UpdatePropertyList("Spacecraft");
 
    theNumSpaceObject = 0;
    theNumFormation = 0;
    theNumSpacecraft = 0;
-   theNumParam = 0;
-   theNumConfigParam = 0;
+   theNumScProperty = 0;
+   theNumPlottableParam = 0;
    theNumConfigBody = 0;
 
    theSpacecraftComboBox = NULL;
+   theUserParamComboBox = NULL;
    theSpacecraftListBox = NULL;
    theSpaceObjectListBox = NULL;
-   theParamListBox = NULL;
-   theConfigParamListBox = NULL;
+   theFormationListBox = NULL;
+   theScPropertyListBox = NULL;
+   thePlottableParamListBox = NULL;
+   theSystemParamListBox = NULL;
+   theUserVarListBox = NULL;
+   theUserArrayListBox = NULL;
    theConfigBodyListBox = NULL;
 }
 

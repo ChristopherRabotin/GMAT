@@ -30,18 +30,21 @@ private:
    bool mIsColorChanged;
    
    wxColour mColor;
-   wxString theVarName;
+   wxString mVarName;
     
-   wxTextCtrl *nameTextCtrl;
-   wxTextCtrl *expTextCtrl;
-   wxTextCtrl *epochTextCtrl;
-   wxTextCtrl *indexTextCtrl;
-    
+   wxTextCtrl *mVarNameTextCtrl;
+   wxTextCtrl *mVarExpTextCtrl;
+   wxTextCtrl *mArrNameTextCtrl;
+   wxTextCtrl *mArrRowTextCtrl;
+   wxTextCtrl *mArrColTextCtrl;
+   
    wxButton *mColorButton;
    
-   wxComboBox *cbodyComboBox;
-   wxComboBox *coordComboBox;
-   wxComboBox *rbodyComboBox;
+   wxComboBox *mCoordComboBox;
+   
+   wxBoxSizer *mPageBoxSizer;
+   wxStaticBoxSizer *mVarStaticBoxSizer;
+   wxStaticBoxSizer *mArrStaticBoxSizer;
     
    // methods inherited from GmatPanel
    virtual void Create();
