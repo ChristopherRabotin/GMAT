@@ -38,6 +38,7 @@ GmatConnection::GmatConnection()
    theGmatConnection = this;
 }
 
+
 //------------------------------------------------------------------------------
 // ~GmatConnection()
 //------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ GmatConnection::~GmatConnection()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // bool OnExecute(const wxString& WXUNUSED(topic),
 //------------------------------------------------------------------------------
@@ -57,12 +59,14 @@ bool GmatConnection::OnExecute(const wxString& WXUNUSED(topic),
                                int WXUNUSED(size),
                                wxIPCFormat WXUNUSED(format))
 {
-#if DEBUG_CONNECTION
+   #if DEBUG_CONNECTION
    MessageInterface::ShowMessage
       ("GmatConnection::OnExecute() command: %s\n", data);
-#endif
+   #endif
+   
    return TRUE;
 }
+
 
 //------------------------------------------------------------------------------
 // bool OnPoke(const wxString& WXUNUSED(topic),
@@ -73,10 +77,10 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
                             int WXUNUSED(size),
                             wxIPCFormat WXUNUSED(format))
 {
-#if DEBUG_CONNECTION
+   #if DEBUG_CONNECTION
    MessageInterface::ShowMessage
       ("GmatConnection::OnPoke() %s = %s\n", item.c_str(), data);
-#endif
+   #endif
 
    //------------------------------
    // save data to string stream
@@ -115,27 +119,51 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
    return TRUE;
 }
 
+
 //------------------------------------------------------------------------------
-// wxChar* OnRequest(const wxString& WXUNUSED(topic),
+// wxChar* OnRequest(const wxString& WXUNUSED(topic), const wxString& item,
+//                   int * WXUNUSED(size), wxIPCFormat WXUNUSED(format))
 //------------------------------------------------------------------------------
-//  wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
-//                                    const wxString& WXUNUSED(item),
-//                                    int * WXUNUSED(size),
-//                                    wxIPCFormat WXUNUSED(format))
+/*
+ * This method responds to the client application to request data from the server.
+ *
+ * @param <topic>  Unused
+ * @param <item>   Object or parameter name to retrive value from
+ * @param <size>   Unused
+ * @param <format> Unused
+ *
+ * @return Object or parameter value string.
+ */
+//------------------------------------------------------------------------------
 wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
                                   const wxString& item,
                                   int * WXUNUSED(size),
                                   wxIPCFormat WXUNUSED(format))
 {
-#if DEBUG_CONNECTION
+   #if DEBUG_CONNECTION
    MessageInterface::ShowMessage
       ("GmatConnection::OnRequest() %s\n", item.c_str());
-#endif
-  
+   #endif
+
+   //loj: 3/2/05
+   // How can I tell whether item is an object or a parameter?
+   // For now GetGMATObject.m appends '.' for object name.
+   
    char *data;
-   data = GmatInterface::Instance()->GetParameterData(std::string(item.c_str()));
+   if (item.Last() == '.')
+   {
+      wxString tempItem = item;
+      tempItem.RemoveLast();
+      data = GmatInterface::Instance()->GetObject(std::string(tempItem.c_str()));
+   }
+   else
+   {
+      data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
+   }
+   
    return _T(data);
 }
+
 
 //------------------------------------------------------------------------------
 // bool OnStartAdvise(const wxString& WXUNUSED(topic),
