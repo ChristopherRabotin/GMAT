@@ -30,11 +30,6 @@
 
 #define DEBUG_ORBITDATA 0
 
-#if !defined __UNIT_TEST__
-#include "SolarSystem.hpp"
-#include "CelestialBody.hpp"
-#endif
-
 using namespace GmatMathUtil;
 
 //---------------------------------
@@ -128,7 +123,7 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("CoordinateRepresentation");
+   Integer id = mSpacecraft->GetParameterID("StateType"); //loj: 6/24/04 changed to "StateType"
    std::string elemType = mSpacecraft->GetStringParameter(id);
    mCartEpoch = mSpacecraft->GetRealParameter("Epoch");
 
@@ -165,13 +160,14 @@ Rvector6 OrbitData::GetCartState()
       Rvector6 keplState = Rvector6(kepl);
       Rvector6 cartState;
 
-      cartState = KeplerianToCartesian(keplState, grav, CoordUtil::MA);
+      cartState = KeplerianToCartesian(keplState, grav, CoordUtil::TA); //loj: 6/23/04 changed from MA
       mCartState = cartState;
    }
    else
    {
-      throw ParameterException("OrbitData::GetCartState() input state types other than "
-                               "Cartesian and Keplerian are not supported at this time");
+      throw ParameterException
+         ("OrbitData::GetCartState() input state types other than Cartesian "
+          "and Keplerian are not supported at this time.\n");
    }
    
    return mCartState;
@@ -192,7 +188,7 @@ Rvector6 OrbitData::GetKepState()
    //loj: 4/19/04 system crashes when I use the new method.
    //Rvector6 mKepState = mSpacecraft->GetKeplerianState(); //loj: 4/19/04 new method from Spacecraft
 
-   Integer id = mSpacecraft->GetParameterID("CoordinateRepresentation");
+   Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
          
    if (elemType == "Keplerian")
@@ -233,8 +229,9 @@ Rvector6 OrbitData::GetKepState()
    }
    else
    {
-      throw ParameterException("OrbitData::GetKepState() input state types other than "
-                               "Cartesian and Keplerian are not supported at this time");
+      throw ParameterException
+         ("OrbitData::GetKepState() input state types other than Cartesian "
+          "and Keplerian are not supported at this time.\n");
    }
    
    return mKepState;
@@ -252,7 +249,7 @@ Rvector6 OrbitData::GetSphState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   Integer id = mSpacecraft->GetParameterID("CoordinateRepresentation");
+   Integer id = mSpacecraft->GetParameterID("StateType");
    std::string elemType = mSpacecraft->GetStringParameter(id);
 
    if (elemType == "Cartesian")
@@ -289,8 +286,9 @@ Rvector6 OrbitData::GetSphState()
    }
    else
    {
-      throw ParameterException("OrbitData::GetSphState() input state types other than "
-                               "Cartesian are not supported at this time");
+      throw ParameterException
+         ("OrbitData::GetSphState() input state types other than Cartesian "
+          "are not supported at this time\n");
    }
 
    return mSphState;
