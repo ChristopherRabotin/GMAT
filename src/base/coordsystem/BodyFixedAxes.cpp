@@ -720,7 +720,7 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch)
    {
       // this method will return alpha (deg), delta (deg), 
       // and W (deg/day)
-      Rvector3 cartCoord  = ((CelestialBody*)origin)->
+      Rvector cartCoord  = ((CelestialBody*)origin)->
                               GetBodyCartographicCoordinates(atEpoch);
       Real rot1           = GmatMathUtil::PI_OVER_TWO + Rad(cartCoord(0));
       Real rot2           = GmatMathUtil::PI_OVER_TWO - Rad(cartCoord(1));
