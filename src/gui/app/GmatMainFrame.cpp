@@ -104,15 +104,21 @@ GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos, const wx
   
     splitter = new GmatSplitterWindow(this);
 
+    // need to do before leftTabs, because they use MainNotebook
+    rightTabs = new GmatMainNotebook( splitter, -1, wxDefaultPosition,
+                                      wxDefaultSize, wxCLIP_CHILDREN);
+
+    // set to GmatAppData
+    GmatAppData::SetMainNotebook(rightTabs);
+    
     // create the tabs for Resources, Mission, Output
     leftTabs = new GmatNotebook( splitter, -1, wxDefaultPosition,
                                  wxDefaultSize, wxCLIP_CHILDREN);
 
-    rightTabs = new GmatMainNotebook( splitter, -1, wxDefaultPosition,
-                                      wxDefaultSize, wxCLIP_CHILDREN);
+    //ag : Removed to use GmatAppData::SetMainNotebook
+//    // add the left and right side to splitter
+//    leftTabs->SetMainNotebook(rightTabs);
 
-    // add the left and right side to splitter
-    leftTabs->SetMainNotebook(rightTabs);
     splitter->SplitVertically( leftTabs, rightTabs, 175 );
 }
 

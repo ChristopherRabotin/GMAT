@@ -72,6 +72,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
     : wxTreeCtrl(parent, id, pos, size, style)
 {
     this->parent = parent;
+    this->mainNotebook = GmatAppData::GetMainNotebook();
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
     AddIcons();
     AddDefaultResources();
@@ -476,21 +477,22 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
     mainNotebook->CreatePage(item);
 }
 
-//------------------------------------------------------------------------------
-// void SetMainNotebook (GmatMainNotebook *mainNotebook)
-//------------------------------------------------------------------------------
-void ResourceTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
-{
-  this->mainNotebook = mainNotebook;
-}
-
-//------------------------------------------------------------------------------
-// GmatMainNotebook *GetMainNotebook()
-//------------------------------------------------------------------------------
-GmatMainNotebook *ResourceTree::GetMainNotebook()
-{
-   return this->mainNotebook;
-}
+// ag:  Removed - can use GmatAppData::Set/Get MainNotebook
+////------------------------------------------------------------------------------
+//// void SetMainNotebook (GmatMainNotebook *mainNotebook)
+////------------------------------------------------------------------------------
+//void ResourceTree::SetMainNotebook (GmatMainNotebook *mainNotebook)
+//{
+//  this->mainNotebook = mainNotebook;
+//}
+//
+////------------------------------------------------------------------------------
+//// GmatMainNotebook *GetMainNotebook()
+////------------------------------------------------------------------------------
+//GmatMainNotebook *ResourceTree::GetMainNotebook()
+//{
+//   return this->mainNotebook;
+//}
 
 //------------------------------------------------------------------------------
 // void OnOpen(wxCommandEvent &event)

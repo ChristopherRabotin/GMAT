@@ -50,36 +50,36 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
   AddPage( panel, wxT("Output") );
 
 }
-
-//------------------------------------------------------------------------------
-// void SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
-//------------------------------------------------------------------------------
-/**
- * Sets the main notebook for GmatNotebook, ResourceTree, and MissionTree
- *
- * @param <gmatMainNotebook> input GmatMainNotebook.
- */
-//------------------------------------------------------------------------------
-void GmatNotebook::SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
-{
-   this->mainNotebook = gmatMainNotebook;
-   resourceTree->SetMainNotebook(this->mainNotebook);
-   missionTree->SetMainNotebook(this->mainNotebook);
-}
-
-//------------------------------------------------------------------------------
-// GmatMainNotebook *GetMainNotebook()
-//------------------------------------------------------------------------------
-/**
- * Gets current instance of GmatMainNotebook.
- *
- * @return GmatMainNotebook object.
- */
-//------------------------------------------------------------------------------
-GmatMainNotebook *GmatNotebook::GetMainNotebook()
-{
-   return this->mainNotebook;
-}
+// ag: Removed because GmatMainNotebook is added to GmatAppData
+////------------------------------------------------------------------------------
+//// void SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
+////------------------------------------------------------------------------------
+///**
+// * Sets the main notebook for GmatNotebook, ResourceTree, and MissionTree
+// *
+// * @param <gmatMainNotebook> input GmatMainNotebook.
+// */
+////------------------------------------------------------------------------------
+//void GmatNotebook::SetMainNotebook (GmatMainNotebook *gmatMainNotebook)
+//{
+//   this->mainNotebook = gmatMainNotebook;
+//   resourceTree->SetMainNotebook(this->mainNotebook);
+//   missionTree->SetMainNotebook(this->mainNotebook);
+//}
+//
+////------------------------------------------------------------------------------
+//// GmatMainNotebook *GetMainNotebook()
+////------------------------------------------------------------------------------
+///**
+// * Gets current instance of GmatMainNotebook.
+// *
+// * @return GmatMainNotebook object.
+// */
+////------------------------------------------------------------------------------
+//GmatMainNotebook *GmatNotebook::GetMainNotebook()
+//{
+//   return this->mainNotebook;
+//}
 
 //-------------------------------
 // private methods
@@ -134,7 +134,7 @@ wxPanel *GmatNotebook::CreateMissionPage()
     wxPanel *panel = new wxPanel(this);
 
     long style = wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|
-                wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT;
+                wxSUNKEN_BORDER|wxTR_SINGLE|wxTR_FULL_ROW_HIGHLIGHT |wxTR_EXTENDED;
 
     missionTree = new MissionTree(panel, -1, wxDefaultPosition,
                   wxDefaultSize, style);

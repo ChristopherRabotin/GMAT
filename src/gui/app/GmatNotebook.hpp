@@ -30,13 +30,13 @@ public:
     GmatNotebook( wxWindow *parent, wxWindowID id = -1,
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize, long style = 0 );
-    void SetMainNotebook (GmatMainNotebook *gmatMainNotebook);
-    GmatMainNotebook *GetMainNotebook();
+//    void SetMainNotebook (GmatMainNotebook *gmatMainNotebook);
+//    GmatMainNotebook *GetMainNotebook();
 
 protected:
 private:
     wxWindow *parent;
-    GmatMainNotebook *mainNotebook;
+//    GmatMainNotebook *mainNotebook;
     ResourceTree *resourceTree;
     MissionTree *missionTree;
 

@@ -31,8 +31,8 @@ public:
     ResourceTree(wxWindow *parent, const wxWindowID id,
                  const wxPoint& pos, const wxSize& size,
                  long style);
-    void SetMainNotebook (GmatMainNotebook *mainNotebook);
-    GmatMainNotebook *GetMainNotebook();
+//    void SetMainNotebook (GmatMainNotebook *mainNotebook);
+//    GmatMainNotebook *GetMainNotebook();
 
     void UpdateResources();
     
