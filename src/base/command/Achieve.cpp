@@ -291,7 +291,9 @@ void Achieve::InterpretAction(void)
     std::string parmName;
     loc = goalName.find(".");
     parmName = goalName.substr(loc+1, goalName.length() - (loc+1));
-    goalParm = mod->CreateParameter(parmName, "");
+    //loj: 5/11/04 replaced blank parm name to parmName so that SolarSystem
+    // can be set during run setup.
+    goalParm = mod->CreateParameter(parmName, parmName);
     
     // Find the value
     loc = end + 1;
