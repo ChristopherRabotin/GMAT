@@ -56,7 +56,8 @@
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
-#include "SolverEventPanel.hpp"
+//nclude "SolverEventPanel.hpp" /loj: 10/20/04 renamed to TargetPanel
+#include "TargetPanel.hpp"
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
 #include "SavePanel.hpp" //loj: 10/20/04 added
@@ -435,8 +436,10 @@ void GmatMainFrame::CreateChild(GmatTreeItemData *item)
                                           wxPoint(-1,-1), wxSize(-1,-1),
                                           wxMAXIMIZE  | wxDEFAULT_FRAME_STYLE);
          panel = new wxScrolledWindow(newChild);
-         //loj: 10/6/04 removed item->GetDesc() from the arg. list
-         sizer->Add(new SolverEventPanel(panel, item->GetCommand()),
+         //loj: 11/4/04 used TargetPanel
+         //sizer->Add(new SolverEventPanel(panel, item->GetCommand()),
+         //           0, wxGROW|wxALL, 0);
+         sizer->Add(new TargetPanel(panel, item->GetCommand()),
                     0, wxGROW|wxALL, 0);
       }
       else if (dataType == GmatTree::ACHIEVE_COMMAND)
