@@ -218,7 +218,6 @@ bool Sandbox::Initialize()
    // Set the solar system on each force model, spacecraft, parameter
    if (solarSys)
    {
-      //std::map<std::string, GmatBase *>::iterator omi;
       for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
       {
 #if DEBUG_SANDBOX
@@ -287,8 +286,9 @@ bool Sandbox::Initialize()
             {
                refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
                param->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
-               param->Initialize();
             }
+            
+            param->Initialize();
          }
       }
    }
@@ -298,12 +298,32 @@ bool Sandbox::Initialize()
 #endif
 
    // Initialize subscribers
-   //std::map<std::string, GmatBase *>::iterator omi;
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
       if((omi->second)->GetType() == Gmat::SUBSCRIBER)
       {
-         ((Subscriber*)(omi->second))->Initialize();
+         Subscriber *sub = (Subscriber*)(omi->second);
+         GmatBase *refParam;
+         
+#if DEBUG_SANDBOX
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() subType=%s, subName=%s\n",
+             sub->GetTypeName().c_str(), sub->GetName().c_str());
+#endif
+         //loj: 11/9/04
+         // Remove if block when all subscribers support GetRefObjectNameArray()
+         // and SetRefObject()
+         if (sub->GetTypeName() == "XYPlot")
+         {
+            StringArray refParamNames = sub->GetRefObjectNameArray(Gmat::PARAMETER);
+            for (unsigned int i=0; i<refParamNames.size(); i++)
+            {
+               refParam = GetInternalObject(refParamNames[i], Gmat::PARAMETER);
+               sub->SetRefObject(refParam, Gmat::PARAMETER, refParamNames[i]);
+            }
+         }
+         
+         sub->Initialize();
       }
    }
    
