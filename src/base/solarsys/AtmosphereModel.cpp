@@ -24,8 +24,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr) :
     GmatBase            (Gmat::ATMOSPHERE, typeStr),
     sunVector           (NULL),
     centralBody         ("Earth"),
-    cbRadius            (6378.14),
-    centralBodyLocation (NULL)
+    centralBodyLocation (NULL),
+    cbRadius            (6378.14)
 {
 }
 
@@ -39,3 +39,4 @@ void AtmosphereModel::SetSunVector(Real *sv)
 {
     sunVector = sv;
 }
+

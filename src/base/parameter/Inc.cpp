@@ -73,7 +73,9 @@ bool Inc::AddObject(GmatBase *object)
         throw ParameterException("Inc Parameter class only supports spacecraft");
 
     source.push_back((Spacecraft*)(object));
+    return true;
 }
+
 
 
 Integer Inc::GetNumObjects() const

@@ -798,7 +798,7 @@ void DifferentialCorrector::WriteToTextFile(void)
 void DifferentialCorrector::LUDecompose(void)
 {
     // Implementation as in Numerical Recipes -- needs to be reworked to real C
-    Integer i, j, imax, k;
+    Integer i, j, imax = 0, k;
     Real big, dum, sum, temp, d;
     Real *vv = new Real[variableCount];
     

@@ -75,7 +75,9 @@ bool Ecc::AddObject(GmatBase *object)
         throw ParameterException("Ecc Parameter class only supports spacecraft");
 
     source.push_back((Spacecraft*)(object));
+    return true;
 }
+
 
 
 Integer Ecc::GetNumObjects() const
@@ -94,7 +96,7 @@ bool Ecc::Evaluate()
 
     Integer i = 0, id;
     std::vector<Spacecraft *>::iterator current;
-    Real mag, rCrossV[3], vCrossRCrossV[3], *state, dist[3], unitR[3], eVect[3];
+    Real mag, rCrossV[3], vCrossRCrossV[3], *state, dist[3], eVect[3];
     
     for (current = source.begin(); current != source.end(); ++current) {
         id = (*current)->GetParameterID("CoordinateRepresentation");

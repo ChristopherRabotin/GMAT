@@ -53,3 +53,4 @@ private:
 };
 
 #endif // AtmosphereModel_hpp
+

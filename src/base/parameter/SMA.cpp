@@ -77,6 +77,7 @@ bool SMA::AddObject(GmatBase *object)
         throw ParameterException("SMA Parameter class only supports spacecraft");
 
     source.push_back((Spacecraft*)(object));
+    return true;
 }
 
 
