@@ -56,7 +56,8 @@ public:
     void OnClose(wxCloseEvent& event);
 
     void UpdateSpacecraft(const Real &time, const Real &posX,
-                          const Real &posY, const Real &posZ);
+                          const Real &posY, const Real &posZ,
+                          bool updateCanvas);
 protected:
 
     DECLARE_EVENT_TABLE()

@@ -17,15 +17,15 @@
 #include "TrajPlotCanvas.hpp"
 
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, wxMDIChildFrame)
-    EVT_MENU(GmatPlot::MDI_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
-    EVT_MENU(GmatPlot::MDI_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
-    EVT_MENU(GmatPlot::MDI_CLEAR_PLOT, MdiChildTrajFrame::OnClearPlot)
-    EVT_MENU(GmatPlot::MDI_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
-    EVT_MENU(GmatPlot::MDI_ZOOM_IN, MdiChildTrajFrame::OnZoomIn)
-    EVT_MENU(GmatPlot::MDI_ZOOM_OUT, MdiChildTrajFrame::OnZoomOut)
-    EVT_MENU(GmatPlot::MDI_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnShowWireFrame)
-    EVT_MENU(GmatPlot::MDI_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnShowEquatorialPlane)
-    EVT_MENU(GmatPlot::MDI_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
+    EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
+    EVT_MENU(GmatPlot::MDI_GL_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
+    EVT_MENU(GmatPlot::MDI_GL_CLEAR_PLOT, MdiChildTrajFrame::OnClearPlot)
+    EVT_MENU(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
+    EVT_MENU(GmatPlot::MDI_GL_ZOOM_IN, MdiChildTrajFrame::OnZoomIn)
+    EVT_MENU(GmatPlot::MDI_GL_ZOOM_OUT, MdiChildTrajFrame::OnZoomOut)
+    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnShowWireFrame)
+    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnShowEquatorialPlane)
+    EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
 
     EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
     EVT_SIZE(MdiChildTrajFrame::OnSize)
@@ -56,44 +56,44 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
     // File menu
     wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(GmatPlot::MDI_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
-    fileMenu->Append(GmatPlot::MDI_QUIT, _T("&Exit"));
+    fileMenu->Append(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, _T("&Open Trajectory File"));
+    fileMenu->Append(GmatPlot::MDI_GL_QUIT, _T("&Exit"));
 
     // Plot menu
     wxMenu *plotMenu = new wxMenu;
 
-    plotMenu->Append(GmatPlot::MDI_CLEAR_PLOT, _T("Clear Plot"));
-    plotMenu->Append(GmatPlot::MDI_CHILD_QUIT, _T("&Close"), _T("Close this window"));
+    plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
+    plotMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close"), _T("Close this window"));
     plotMenu->AppendSeparator();
-    plotMenu->Append(GmatPlot::MDI_CHANGE_TITLE, _T("Change &title..."));
+    plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
 
     // View menu
     wxMenu *viewMenu = new wxMenu;
-    viewMenu->Append(GmatPlot::MDI_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
+    viewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
                      _("Reset to default view"));
-    viewMenu->Append(GmatPlot::MDI_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
-    viewMenu->Append(GmatPlot::MDI_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
+    viewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
+    viewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
     viewMenu->AppendSeparator();
 
     // View Option submenu
     wxMenu *viewOptionMenu = new wxMenu;
     wxMenuItem *item =
-        new wxMenuItem(viewMenu, GmatPlot::MDI_VIEW_OPTION, _T("Option"),
+        new wxMenuItem(viewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
                        _T("Show bodies in wire frame"), wxITEM_NORMAL, viewOptionMenu);
-    viewOptionMenu->Append(GmatPlot::MDI_SHOW_WIRE_FRAME,
+    viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
                            _T("Show Wire Frame"),
                            _T("Show bodies in wire frame"), wxITEM_CHECK);
-    viewOptionMenu->Append(GmatPlot::MDI_SHOW_EQUATORIAL_PLANE,
+    viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
                            _T("Show Equatorial Plane"),
                            _T("Show equatorial plane lines"), wxITEM_CHECK);
 
-    viewOptionMenu->Check(GmatPlot::MDI_SHOW_EQUATORIAL_PLANE, true);
+    viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
         
     viewMenu->Append(item);
 
     // Help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(GmatPlot::MDI_HELP_VIEW, _T("View"), _T("View mouse control"));
+    helpMenu->Append(GmatPlot::MDI_GL_HELP_VIEW, _T("View"), _T("View mouse control"));
 
     // menu bar
     wxMenuBar *menuBar = new wxMenuBar;
@@ -275,12 +275,12 @@ void MdiChildTrajFrame::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 {
-    MdiGlPlot::numChildFrames--;
+    MdiGlPlot::numChildren--;
     
     if (mIsMainFrame)
         MdiGlPlot::mdiParentGlFrame->mainSubframe = NULL;
     
-    if (MdiGlPlot::numChildFrames == 0)
+    if (MdiGlPlot::numChildren == 0)
         MdiGlPlot::mdiParentGlFrame->subframe = NULL;
     
     MdiGlPlot::mdiParentGlFrame->UpdateUI();
@@ -289,16 +289,18 @@ void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
 
 //------------------------------------------------------------------------------
 // void UpdateSpacecraft(const Real &time, const Real &posX,
-//                       const Real &posY, const Real &posZ)
+//                       const Real &posY, const Real &posZ, bool updateCanvas)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::UpdateSpacecraft(const Real &time, const Real &posX,
-                                         const Real &posY, const Real &posZ)
+                                         const Real &posY, const Real &posZ,
+                                         bool updateCanvas)
 {
     if (mCanvas)
     {
         mCanvas->SetFocus();
-        mCanvas->UpdateSpacecraft(time, posX, posY, posZ);
-        Update();
+        mCanvas->UpdateSpacecraft(time, posX, posY, posZ, updateCanvas);
+        if (updateCanvas)
+            Update();
     }
 }
 
