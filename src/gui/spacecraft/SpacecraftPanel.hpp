@@ -26,6 +26,9 @@
 #include "wx/grid.h"
 
 #include "Spacecraft.hpp"
+#include "Keplerian.hpp"            // for coversion of number
+#include "Cartesian.hpp"            // for conversion of number
+#include "PhysicalConstants.hpp"   // for mu
 
 //loj: to remove warnings about duplicate defines
 // Declare window functions
@@ -70,39 +73,60 @@ public:
    
 private:
     void CreateNotebook(wxWindow *parent, const wxString &scName);
-    wxPanel *CreateOrbit(wxWindow *parent);
-    void CartElements(wxWindow *parent);
-    void KapElements(wxWindow *parent);
+    void CreateOrbit(wxWindow *parent);
+    void AddElements(wxWindow *parent);
+    void OnCartElements();
+    void OnKepElements();
+    void OnStateChange();
+    void UpdateValues();
+    void OnApply();
+    void OnOk();
+    void OnCancel();
 
     GuiInterpreter *theGuiInterpreter;
     Spacecraft *theSpacecraft;
     
-//   wxBoxSizer *item;
-    wxPanel *elements;
+    wxStaticText *description1;
+    wxStaticText *description2;
+    wxStaticText *description3;
+    wxStaticText *description4;
+    wxStaticText *description5;
+    wxStaticText *description6;
+    
+    wxTextCtrl *textCtrl1;
+    wxTextCtrl *textCtrl2;
+    wxTextCtrl *textCtrl3;
+    wxTextCtrl *textCtrl4;
+    wxTextCtrl *textCtrl5;
+    wxTextCtrl *textCtrl6;
+    
+    wxStaticText *label1;
+    wxStaticText *label2;
+    wxStaticText *label3;
+    wxStaticText *label4;
+    wxStaticText *label5;
+    wxStaticText *label6;
+
     wxNotebook *mainNotebook;
     wxNotebookSizer * sizer;
-    wxPanel *orbit;
+    wxPanel *orbitPanel;
     wxPanel *attitude;
     wxPanel *properties;
     wxPanel *actuators;
     wxPanel *sensors;
     wxPanel *tanks;
     wxPanel *visual;
-    wxStaticText *coordinateLabel;
     wxButton *okButton;
     wxButton *applyButton;
     wxButton *cancelButton;
-    //wxButton *helpButton;
+    wxButton *helpButton;
+    wxPanel *elementsPanel;
+    wxStaticBoxSizer *elementSizer;
+    wxStaticBox *elementBox;
+    wxComboBox *stateCB;
+    wxComboBox *dateCB;
+    wxTextCtrl *epochValue;
     
-    void OnBodyChoice(wxCommandEvent& event);
-    void OnFrameChoice(wxCommandEvent& event);
-    void OnEpochChoice(wxCommandEvent& event);
-    void OnStateChoice(wxCommandEvent& event);
-    void OnOkButton(wxCommandEvent& event);
-    void OnApplyButton(wxCommandEvent& event);
-    void OnCancelButton(wxCommandEvent& event);
-    void OnHelpButton(wxCommandEvent& event);
-   
     DECLARE_EVENT_TABLE();
     
     // IDs for the controls and the menu commands
@@ -127,17 +151,22 @@ private:
         ID_ELEMENT_VALUE5,
         ID_ELEMENT_VALUE6,
         
-        ID_CHOICE_BODY,
-        ID_CHOICE_FRAME,
-        ID_CHOICE_EPOCH,
-        ID_CHOICE_STATE,
+        ID_STATIC_COORD,
+        ID_STATIC_ORBIT,
+        ID_STATIC_ELEMENT,
+        
+        ID_CB_BODY,
+        ID_CB_FRAME,
+        ID_CB_EPOCH,
+        ID_CB_STATE,
         
         ID_EPOCH_VALUE,
         
         ID_BUTTON_OK,
         ID_BUTTON_APPLY,
-        ID_SC_BUTTON_CANCEL,
+        ID_BUTTON_CANCEL,
         ID_BUTTON_HELP
     };
 };
 #endif
+

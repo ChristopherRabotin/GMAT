@@ -7,6 +7,7 @@
 // Author: Monisha Butler
 // Created: 2003/09/10
 // Modified: 2003/09/29
+// Modified: 2003/12/15 by Allison Greene for event handling
 /**
  * This class contains information needed to setup users spacecraft through GUI
  * 
@@ -19,25 +20,52 @@
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 
+#include <stdlib.h>
+
+//------------------------------
+// event tables for wxWindows
+//------------------------------
 BEGIN_EVENT_TABLE(SpacecraftPanel, wxPanel)
-   EVT_CHOICE(ID_CHOICE_BODY,        SpacecraftPanel::OnBodyChoice)
-   EVT_CHOICE(ID_CHOICE_FRAME,       SpacecraftPanel::OnFrameChoice)
-   EVT_CHOICE(ID_CHOICE_EPOCH,       SpacecraftPanel::OnEpochChoice)
-   EVT_CHOICE(ID_CHOICE_STATE,       SpacecraftPanel::OnStateChoice)
-   EVT_BUTTON(ID_BUTTON_OK,          SpacecraftPanel::OnOkButton)
-   EVT_BUTTON(ID_BUTTON_APPLY,       SpacecraftPanel::OnApplyButton)
-   EVT_BUTTON(ID_SC_BUTTON_CANCEL,   SpacecraftPanel::OnCancelButton)
-  // EVT_BUTTON(ID_BUTTON_HELP,      SpacecraftPanel::OnHelpButton)  
+   EVT_COMBOBOX(ID_CB_STATE, SpacecraftPanel::OnStateChange)
+   EVT_BUTTON(ID_BUTTON_OK, SpacecraftPanel::OnOk) 
+   EVT_BUTTON(ID_BUTTON_APPLY, SpacecraftPanel::OnApply) 
+   EVT_BUTTON(ID_BUTTON_CANCEL, SpacecraftPanel::OnCancel) 
 END_EVENT_TABLE()
 
-
-
+//------------------------------
+// public methods
+//------------------------------
+//------------------------------------------------------------------------------
+// SpacecraftPanel(wxWindow *parent, const wxString &scName)
+//------------------------------------------------------------------------------
+/**
+ * Constructs SpacecraftPanel object.
+ *
+ * @param <parent> input parent.
+ * @param <scName> input spacecraft name.
+ *
+ * @note Creates the spacecraft GUI
+ */
+//------------------------------------------------------------------------------
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
     :wxPanel(parent)
 {
    CreateNotebook(this, scName);
 }
 
+//-------------------------------
+// private methods
+//-------------------------------
+//------------------------------------------------------------------------------
+// void CreateNotebook(wxWindow *parent, const wxString &scName)
+//------------------------------------------------------------------------------
+/**
+ * @param <parent> input parent.
+ * @param <scName> input spacecraft name.
+ *
+ * @note Creates the notebook for spacecraft information
+ */
+//------------------------------------------------------------------------------
 void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
 {
     theGuiInterpreter = GmatAppData::GetGuiInterpreter();
@@ -47,14 +75,16 @@ void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
     
     if (theSpacecraft != NULL)
     {
+        // use a grid sizer so that it expands both horizonatally and
+        // vertically
         wxGridSizer *item = new wxGridSizer( 1, 0, 0 );
-        //   item = new wxBoxSizer( wxVERTICAL );
 
         mainNotebook = new wxNotebook( parent, ID_NOTEBOOK, wxDefaultPosition, wxSize(350,300), 0 );
         sizer = new wxNotebookSizer( mainNotebook );
-    
-        wxPanel *orbitPanel = (wxPanel *)NULL;
-        orbitPanel = CreateOrbit( mainNotebook );
+ 
+        // set orbitPanel to null   
+        orbitPanel = (wxPanel *)NULL;
+        CreateOrbit( mainNotebook );
         mainNotebook->AddPage( orbitPanel, wxT("Orbit") );
 
         attitude = new wxPanel( mainNotebook, -1 );
@@ -76,7 +106,7 @@ void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
         mainNotebook->AddPage( visual, wxT("Visualization") );
 
         item->Add( sizer, 0, wxGROW|wxALL, 5 );
-    
+        
         parent->SetAutoLayout( TRUE );
         parent->SetSizer( item );
         item->Fit( parent );
@@ -88,55 +118,71 @@ void SpacecraftPanel::CreateNotebook(wxWindow *parent, const wxString &scName)
     }
 }
 
-wxPanel *SpacecraftPanel::CreateOrbit(wxWindow *parent)
+//------------------------------------------------------------------------------
+// void CreateOrbit(wxWindow *parent)
+//------------------------------------------------------------------------------
+/**
+ * @param <parent> input parent.
+ *
+ * @note Creates the panel for the Orbit notebook page
+ * @note Use orbitPanel as the parent of all the objects
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::CreateOrbit(wxWindow *parent)
 {
     //loj: since Spacecraft class is not complete,
     //loj: use theSpacecraft->GetRealParameter(0) for epoch
     //loj: use theSpacecraft->GetRealParameter(1) for state[0], etc
 
-    Real epoch = theSpacecraft->GetRealParameter(0);
-    
-    wxPanel *panel = new wxPanel(parent);
+    orbitPanel = new wxPanel(parent);
 
-    wxFlexGridSizer *orbitSizer = new wxFlexGridSizer( 1, 0, 0 );
+    wxFlexGridSizer *orbitSizer = new wxFlexGridSizer(1, 0, 0 );
     orbitSizer->AddGrowableCol( 0 );
     orbitSizer->AddGrowableCol( 1 );
     orbitSizer->AddGrowableRow( 0 );
     orbitSizer->AddGrowableRow( 1 );
 
-    wxStaticBox *item2 = new wxStaticBox( panel, -1, wxT("Coordinate System") );
+    // static box for the Coordinate System
+    wxStaticBox *item2 = new wxStaticBox( orbitPanel, ID_STATIC_COORD, 
+                         wxT("Coordinate System") );
     wxStaticBoxSizer *item1 = new wxStaticBoxSizer( item2, wxVERTICAL );
 
+    // gridsizer for inside the Coordinate System static box
     wxGridSizer *item3 = new wxGridSizer( 2, 0, 0 );
 
-    wxStaticText *item4 = new wxStaticText( item2, ID_TEXT, wxT("Reference Body"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText *item4 = new wxStaticText( orbitPanel, ID_TEXT, 
+                          wxT("Reference Body"), wxDefaultPosition, 
+                          wxDefaultSize, 0 );
     item3->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxStaticText *item5 = new wxStaticText( item2, ID_TEXT, wxT("Reference Frame"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText *item5 = new wxStaticText( orbitPanel, ID_TEXT, wxT("Reference Frame"), wxDefaultPosition, wxDefaultSize, 0 );
     item3->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxString strs6[] =
     {
         wxT("ComboItem")
     };
-    wxComboBox *item6 = new wxComboBox( item2, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs6, wxCB_DROPDOWN );
+    wxComboBox *item6 = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs6, wxCB_DROPDOWN );
     item3->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxString strs7[] =
     {
         wxT("ComboItem")
     };
-    wxComboBox *item7 = new wxComboBox( item2, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs7, wxCB_DROPDOWN );
+    wxComboBox *item7 = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 1, strs7, wxCB_DROPDOWN );
     item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item1->Add( item3, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-    wxStaticBox *item9 = new wxStaticBox( panel, -1, wxT("Orbit State") );
+    //static box for the orbit state
+    wxStaticBox *item9 = new wxStaticBox( orbitPanel, ID_STATIC_ORBIT, 
+                         wxT("Orbit State") );
     wxStaticBoxSizer *item8 = new wxStaticBoxSizer( item9, wxVERTICAL );
 
+    // gridsizer for inside the orbit state static box
     wxGridSizer *item10 = new wxGridSizer( 2, 0, 0 );
 
-    wxStaticText *item11 = new wxStaticText( panel, ID_TEXT, wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText *item11 = new wxStaticText( orbitPanel, ID_TEXT, wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
     item10->Add( item11, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -148,15 +194,21 @@ wxPanel *SpacecraftPanel::CreateOrbit(wxWindow *parent)
         wxT("TAI Julian"),
         wxT("Gregorian")
     };
-    wxComboBox *item12 = new wxComboBox( panel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 4, strs12, wxCB_DROPDOWN );
-    item10->Add( item12, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    // combo box for the date type
+    dateCB = new wxComboBox( orbitPanel, ID_COMBO, wxT(""), 
+             wxDefaultPosition, wxSize(100,-1), 4, strs12, 
+             wxCB_DROPDOWN );
+    item10->Add( dateCB, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxTextCtrl *item13 = new wxTextCtrl( panel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item10->Add( item13, 0, wxALIGN_CENTER|wxALL, 5 );
-
+    // textfield for the epochvalue
+    epochValue = new wxTextCtrl( orbitPanel, ID_TEXTCTRL, wxT(""), 
+                 wxDefaultPosition, wxSize(150,-1), 0 );
+   
+    item10->Add( epochValue, 0, wxALIGN_CENTER|wxALL, 5 );
     item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    wxStaticText *item14 = new wxStaticText( panel, ID_TEXT, wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
+    wxStaticText *item14 = new wxStaticText( orbitPanel, ID_TEXT, wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
     item10->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item10->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
@@ -169,256 +221,403 @@ wxPanel *SpacecraftPanel::CreateOrbit(wxWindow *parent)
         wxT("Spherical"),
         wxT("Equinotical")
     };
-    wxComboBox *item15 = new wxComboBox( panel, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(100,-1), 5, strs15, wxCB_DROPDOWN );
-    item10->Add( item15, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    // combo box for the state
+    stateCB = new wxComboBox( orbitPanel, ID_CB_STATE, wxT(""), 
+              wxDefaultPosition, wxSize(100,-1), 5, strs15, wxCB_DROPDOWN );
+    item10->Add( stateCB, 0, wxALIGN_CENTER|wxALL, 5 );
 
     item8->Add( item10, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-    elements = new wxPanel( panel );
-    //should do on change
-    KapElements(elements);
-    item8->Add( elements, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+    // static box for the elements
+    elementBox = new wxStaticBox(orbitPanel, ID_STATIC_ELEMENT, wxT("Elements"));
+    elementSizer = new wxStaticBoxSizer(elementBox, wxVERTICAL);
+
+    // panel that has the labels and text fields for the elements
+    // set it to null
+    elementsPanel = (wxPanel *)NULL; 
+    // adds default descriptors/labels 
+    AddElements(orbitPanel);
+    elementSizer->Add(elementsPanel, 0, wxGROW|wxALIGN_CENTER|wxALL, 5);
+
+    item8->Add( elementSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+    // adds the buttons
+    wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    okButton = new wxButton(orbitPanel, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
+    applyButton = new wxButton(orbitPanel, ID_BUTTON_APPLY, "Apply", wxDefaultPosition, wxDefaultSize, 0);
+    cancelButton = new wxButton(orbitPanel, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
+    helpButton = new wxButton(orbitPanel, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
+    
+    buttonSizer->Add(okButton, 0, wxALL|wxALIGN_CENTER, 5);
+    buttonSizer->Add(applyButton, 0, wxALL|wxALIGN_CENTER, 5);
+    buttonSizer->Add(cancelButton, 0, wxALL|wxALIGN_CENTER, 5);
+    buttonSizer->Add(helpButton, 0, wxALL|wxALIGN_CENTER, 5);
 
     orbitSizer->Add( item1, 0, wxGROW|wxALL, 5 );
     orbitSizer->Add( item8, 0, wxGROW|wxALL, 5 );
+    orbitSizer->Add( buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, 5 );
 
-    panel->SetAutoLayout( TRUE );
-    panel->SetSizer( orbitSizer );
-    orbitSizer->Fit( panel );
-    orbitSizer->SetSizeHints( panel );
+    orbitPanel->SetAutoLayout( TRUE );
+    orbitPanel->SetSizer( orbitSizer );
+    orbitSizer->Fit( orbitPanel );
+    orbitSizer->SetSizeHints( orbitPanel );
     
-    return panel;
+    // gets the values from theSpacecraft
+    UpdateValues();
 }
 
-void SpacecraftPanel::OnBodyChoice(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+// void AddElements(wxWindow *parent)
+//------------------------------------------------------------------------------
+/**
+ * @param <parent> input parent.
+ *
+ * @note Creates the default objects to put in the element static box
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::AddElements(wxWindow *parent)
 {
+    elementsPanel = new wxPanel(parent);
+    wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
+
+    wxFlexGridSizer *item3 = new wxFlexGridSizer( 6, 3, 0, 0 );
+    item3->AddGrowableCol( 0 );
+    item3->AddGrowableCol( 1 );
+    item3->AddGrowableCol( 2 );
+
+    description1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor1     "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description1, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl1 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl1, 0, wxALIGN_CENTER|wxALL, 5 );
+    label1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label1"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label1, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    description2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor2    "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description2, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl2 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl2, 0, wxALIGN_CENTER|wxALL, 5 );
+    label2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label2"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label2, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    description3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor3    "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description3, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl3 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl3, 0, wxALIGN_CENTER|wxALL, 5 );
+    label3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label3"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label3, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    description4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor4    "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description4, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl4 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl4, 0, wxALIGN_CENTER|wxALL, 5 );
+    label4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label4"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label4, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    description5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor5    "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description5, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl5 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl5, 0, wxALIGN_CENTER|wxALL, 5 );
+    label5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label5"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label5, 0, wxALIGN_CENTER|wxALL, 5 );
+    
+    description6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Descriptor6    "), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( description6, 0, wxALIGN_CENTER|wxALL, 5 );
+    textCtrl6 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+    item3->Add( textCtrl6, 0, wxALIGN_CENTER|wxALL, 5 );
+    label6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label6"), wxDefaultPosition, wxDefaultSize, 0 );
+    item3->Add( label6, 0, wxALIGN_CENTER|wxALL, 5 );
+
+    item0->Add( item3, 0, wxGROW|wxALL|wxALIGN_CENTER, 5 );
+
+    elementsPanel->SetAutoLayout( TRUE );
+    elementsPanel->SetSizer( item0 );
+
+    item0->Fit( elementsPanel );
+    item0->SetSizeHints( elementsPanel );
 
 }
 
-void SpacecraftPanel::OnFrameChoice(wxCommandEvent& event)
-{
 
-}
-
-void SpacecraftPanel::OnEpochChoice(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+// void OnKepElements()
+//------------------------------------------------------------------------------
+/**
+ * @note Sets the descriptors and labels for kepelerian elements
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnKepElements()
 {
-  /* int n;
-   wxString coord;
-   //choice3->SetStringSelection(wxT("Keplerian"));
-   if(coord->GetString(n->GetSelection())strcmp(wxT( TAIJulian))))
-   {
-   epochText->WriteText(wxT("22000"));
-   }
-   else
-     epochText->WriteText(wxT(""));*/
-}
+    description1->SetLabel("Semi-Major Axis");
+    description2->SetLabel("Eccentricity");
+    description3->SetLabel("Inclination");
+    description4->SetLabel("R.A. of Ascending Node");
+    description5->SetLabel("Arguement of Perigee");
+    description6->SetLabel("True Anomaly");
+    
+    label1->SetLabel("Km");
+    label2->SetLabel("");
+    label3->SetLabel("deg");
+    label4->SetLabel("deg");
+    label5->SetLabel("deg");
+    label6->SetLabel("deg");
+    
+    // convert values to Kepelarian values
+    
+    // get current cartesian values
+    Real el1 = atof(textCtrl1->GetValue());
+    Real el2 = atof(textCtrl2->GetValue());
+    Real el3 = atof(textCtrl3->GetValue());
+    Real el4 = atof(textCtrl4->GetValue());
+    Real el5 = atof(textCtrl5->GetValue());
+    Real el6 = atof(textCtrl6->GetValue()); 
+    
+    // create cartesian object
+    Cartesian *cartesian = new Cartesian(el1, el2, el3, el4, el5, el6);
+    // convert into keplerian values
+    Keplerian keplerian = ToKeplerian(*cartesian, GmatPhysicalConst::mu);
 
-void SpacecraftPanel::OnStateChoice(wxCommandEvent& event)
-{
-  //wxST_NO_AUTORESIZE = false; Don't know if this is the right way to say don't
-   //             automatically resize labels.
-   
-  /* int n;
-   wxString coord;
-   
-   
-   if(GetString(strcmp(n->GetSelection()),(wxT( Keplerian)))
-   {
-     describeLabel->SetLabel(wxT("A"));
-     describeLabel2->SetLabel(wxT("E"));
-     describleLabel3->SetLabel(wxT("I"));
-     describleLabel4->SetLabel(wxT("AOP"));
-     describeLabel5->SatLabel(wxT("RAAN"));
-     describeLabel6->SatLabel(wxT("TA"));
-   }*/
-}
+    // create a keplerian object
+    Keplerian *kepObj = new Keplerian(keplerian);
 
-void SpacecraftPanel::OnOkButton(wxCommandEvent& event)
-{
-}
+    // get the new values
+    Real kepEl1 = kepObj->GetSemimajorAxis();
+    Real kepEl2 = kepObj->GetEccentricity();
+    Radians kepEl3 = kepObj->GetInclination();
+    Radians kepEl4 = kepObj->GetRAAscendingNode();
+    Radians kepEl5 = kepObj->GetArgumentOfPeriapsis();
+    Radians kepEl6 = kepObj->GetMeanAnomaly();
 
-void SpacecraftPanel::OnApplyButton(wxCommandEvent& event)
-{
-}
-
-void SpacecraftPanel::OnCancelButton(wxCommandEvent& event)
-{
-   //wxMessageBox(wxT("This is some message - everything is ok so far.")); //used for testing
-   Close();
-}
-
-void SpacecraftPanel::OnHelpButton(wxCommandEvent& event)
-{
+    wxString element1;
+    element1.Printf("%f", kepEl1);
+    textCtrl1->SetValue(element1);
+    
+    wxString element2;
+    element2.Printf("%f", kepEl2);
+    textCtrl2->SetValue(element2);
+    
+    wxString element3;
+    element3.Printf("%f", kepEl3);
+    textCtrl3->SetValue(element3);
+    
+    wxString element4;
+    element4.Printf("%f", kepEl4);
+    textCtrl4->SetValue(element4);
+    
+    wxString element5;
+    element5.Printf("%f", kepEl5);
+    textCtrl5->SetValue(element5);
+    
+    wxString element6;
+    element6.Printf("%f", kepEl6);
+    textCtrl6->SetValue(element6);
   
 }
 
-void SpacecraftPanel::KapElements(wxWindow *parent)
+//------------------------------------------------------------------------------
+// void OnCartElements()
+//------------------------------------------------------------------------------
+/**
+ * @note Sets the descriptors and labels for cartesian elements
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnCartElements()
 {
+    description1->SetLabel("X");
+    description2->SetLabel("Y");
+    description3->SetLabel("Z");
+    description4->SetLabel("Vx");
+    description5->SetLabel("Vy");
+    description6->SetLabel("Vz");
+    
+    label1->SetLabel("Km");
+    label2->SetLabel("Km");
+    label3->SetLabel("Km");
+    label4->SetLabel("Km/s");
+    label5->SetLabel("Km/s");
+    label6->SetLabel("Km/s");
 
-    wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
+    // convert values to Cartesian values
+    
+    // get current cartesian values
+    Real el1 = atof(textCtrl1->GetValue());
+    Real el2 = atof(textCtrl2->GetValue());
+    Real el3 = atof(textCtrl3->GetValue());
+    Real el4 = atof(textCtrl4->GetValue());
+    Real el5 = atof(textCtrl5->GetValue());
+    Real el6 = atof(textCtrl6->GetValue()); 
+    
+    // create keplerian object
+    Keplerian *keplerian = new Keplerian(el1, el2, el3, el4, el5, el6);
+    // convert into cartesian values
+    Cartesian cartesian = ToCartesian(*keplerian, GmatPhysicalConst::mu);
 
-    wxStaticBox *item2 = new wxStaticBox( parent, -1, wxT("Elements") );
-    wxStaticBoxSizer *item1 = new wxStaticBoxSizer( item2, wxVERTICAL );
+    // create a cartesian object
+    Cartesian *cartObj = new Cartesian(cartesian);
 
-    wxFlexGridSizer *item3 = new wxFlexGridSizer( 3, 0, 0 );
-    item3->AddGrowableCol( 0 );
-    item3->AddGrowableCol( 1 );
-    item3->AddGrowableCol( 2 );
+    // get the new values
+    Real cartEl1 = cartObj->GetPosition(0);
+    Real cartEl2 = cartObj->GetPosition(1);
+    Real cartEl3 = cartObj->GetPosition(2);
+    Real cartEl4 = cartObj->GetVelocity(0);
+    Real cartEl5 = cartObj->GetVelocity(1);
+    Real cartEl6 = cartObj->GetVelocity(2);
 
-    wxStaticText *item4 = new wxStaticText( parent, ID_TEXT, wxT("Semi-Major Axis"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item5 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item6 = new wxStaticText( parent, ID_TEXT, wxT("Km"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item7 = new wxStaticText( parent, ID_TEXT, wxT("Eccentricity"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item8 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item8, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item9 = new wxStaticText( parent, ID_TEXT, wxT("Inclination"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item9, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item10 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item10, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item11 = new wxStaticText( parent, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item11, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item12 = new wxStaticText( parent, ID_TEXT, wxT("R.A. of Ascending Node"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item12, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item13 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item13, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item14 = new wxStaticText( parent, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item15 = new wxStaticText( parent, ID_TEXT, wxT("Arguement of Perigee"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item15, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item16 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item16, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item17 = new wxStaticText( parent, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item17, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item18 = new wxStaticText( parent, ID_TEXT, wxT("True Anomaly"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item18, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item19 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item19, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item20 = new wxStaticText( parent, ID_TEXT, wxT("deg"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item0->Add( item1, 0, wxGROW|wxALL, 5 );
-
-
-    parent->SetAutoLayout( TRUE );
-    parent->SetSizer( item0 );
-
-    item0->Fit( parent );
-    item0->SetSizeHints( parent );
-
+    wxString element1;
+    element1.Printf("%f", cartEl1);
+    textCtrl1->SetValue(element1);
+    
+    wxString element2;
+    element2.Printf("%f", cartEl2);
+    textCtrl2->SetValue(element2);
+    
+    wxString element3;
+    element3.Printf("%f", cartEl3);
+    textCtrl3->SetValue(element3);
+    
+    wxString element4;
+    element4.Printf("%f", cartEl4);
+    textCtrl4->SetValue(element4);
+    
+    wxString element5;
+    element5.Printf("%f", cartEl5);
+    textCtrl5->SetValue(element5);
+    
+    wxString element6;
+    element6.Printf("%f", cartEl6);
+    textCtrl6->SetValue(element6);
 }
 
-void SpacecraftPanel::CartElements(wxWindow *parent)
+//------------------------------------------------------------------------------
+// void UpdateValues()
+//------------------------------------------------------------------------------
+/**
+ * @note Gets the values from theSpacecraft and puts them in the text fields
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::UpdateValues()
 {
-    wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
+    // default values for now
+    // do this first, otherwise on state change will
+    // change the element value
+    stateCB->SetSelection(0);
+    OnStateChange();
+    dateCB->SetSelection(2);
 
-    wxStaticBox *item2 = new wxStaticBox( parent, -1, wxT("Elements") );
-    wxStaticBoxSizer *item1 = new wxStaticBoxSizer( item2, wxVERTICAL );
+    Real epoch = theSpacecraft->GetRealParameter(0);
+    Real element1 = theSpacecraft->GetRealParameter(1);
+    Real element2 = theSpacecraft->GetRealParameter(2);
+    Real element3 = theSpacecraft->GetRealParameter(3);
+    Real element4 = theSpacecraft->GetRealParameter(4);
+    Real element5 = theSpacecraft->GetRealParameter(5);
+    Real element6 = theSpacecraft->GetRealParameter(6);
 
-    wxFlexGridSizer *item3 = new wxFlexGridSizer( 4, 0, 0 );
-    item3->AddGrowableCol( 0 );
-    item3->AddGrowableCol( 1 );
-    item3->AddGrowableCol( 2 );
-    item3->AddGrowableCol( 3 );
+    wxString epochStr;
+    epochStr.Printf("%f", epoch);
+    epochValue->SetValue(epochStr);
+    
+    wxString el1;
+    el1.Printf("%f", element1);
+    textCtrl1->SetValue(el1);
+    
+    wxString el2;
+    el2.Printf("%f", element2);
+    textCtrl2->SetValue(el2);
 
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxString el3;
+    el3.Printf("%f", element3);
+    textCtrl3->SetValue(el3);
 
-    wxStaticText *item4 = new wxStaticText( parent, ID_TEXT, wxT("X"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item4, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxString el4;
+    el4.Printf("%f", element4);
+    textCtrl4->SetValue(el4);
 
-    wxTextCtrl *item5 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item5, 0, wxALIGN_CENTER|wxALL, 5 );
+    wxString el5;
+    el5.Printf("%f", element5);
+    textCtrl5->SetValue(el5);
 
-    wxStaticText *item6 = new wxStaticText( parent, ID_TEXT, wxT("Km"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item6, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item7 = new wxStaticText( parent, ID_TEXT, wxT("Y"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item7, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item8 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item8, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item9 = new wxStaticText( parent, ID_TEXT, wxT("Km"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item9, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item10 = new wxStaticText( parent, ID_TEXT, wxT("Z"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item10, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item11 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item11, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item12 = new wxStaticText( parent, ID_TEXT, wxT("Km"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item12, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item13 = new wxStaticText( parent, ID_TEXT, wxT("Vx"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item13, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item14 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item14, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item15 = new wxStaticText( parent, ID_TEXT, wxT("Km/s"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item15, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item16 = new wxStaticText( parent, ID_TEXT, wxT("Vy"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item16, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item17 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item17, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item18 = new wxStaticText( parent, ID_TEXT, wxT("Km/s"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item18, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item3->Add( 20, 20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item19 = new wxStaticText( parent, ID_TEXT, wxT("Vz"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item19, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxTextCtrl *item20 = new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-    item3->Add( item20, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    wxStaticText *item21 = new wxStaticText( parent, ID_TEXT, wxT("Km/s"), wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( item21, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item1->Add( item3, 0, wxALIGN_CENTER|wxALL, 5 );
-
-    item0->Add( item1, 0, wxGROW|wxALL, 5 );
-
-    parent->SetAutoLayout( TRUE );
-    parent->SetSizer( item0 );
-    item0->Fit( parent );
-    item0->SetSizeHints( parent );
-
+    wxString el6;
+    el6.Printf("%f", element6);
+    textCtrl6->SetValue(el6);  
+    
 }
 
+//------------------------------------------------------------------------------
+// void OnOk()
+//------------------------------------------------------------------------------
+/**
+ * 
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnOk()
+{
+    OnApply();
+    
+    // need to figure out the best way to close
+    // the notebook page
+    this->Destroy();
+}
+
+//------------------------------------------------------------------------------
+// void OnCancel()
+//------------------------------------------------------------------------------
+/**
+ * @note Does not save entered data and destroys the notebook
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnCancel()
+{
+    // need to figure out the best way to close
+    // the notebook page
+    this->Destroy();
+}
+
+//------------------------------------------------------------------------------
+// void OnApply()
+//------------------------------------------------------------------------------
+/**
+ * @note Saves the data to theSpacecraft
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnApply()
+{
+    wxString epochStr = epochValue->GetValue();
+    wxString el1 = textCtrl1->GetValue();
+    wxString el2 = textCtrl2->GetValue();
+    wxString el3 = textCtrl3->GetValue();
+    wxString el4 = textCtrl4->GetValue();
+    wxString el5 = textCtrl5->GetValue();
+    wxString el6 = textCtrl6->GetValue(); 
+    
+    theSpacecraft->SetRealParameter(0, atof(epochStr));
+    theSpacecraft->SetRealParameter(1, atof(el1));
+    theSpacecraft->SetRealParameter(2, atof(el2));
+    theSpacecraft->SetRealParameter(3, atof(el3));
+    theSpacecraft->SetRealParameter(4, atof(el4));
+    theSpacecraft->SetRealParameter(5, atof(el5));
+    theSpacecraft->SetRealParameter(6, atof(el6));
+}
+
+//------------------------------------------------------------------------------
+// void OnStateChange()
+//------------------------------------------------------------------------------
+/**
+ * @note Changes the element descriptors and labels based on the state combo box
+ */
+//------------------------------------------------------------------------------
+void SpacecraftPanel::OnStateChange()
+{
+    if (stateCB->GetSelection() == 0)
+    {
+       OnCartElements();
+    }
+    else if (stateCB->GetSelection() == 1)
+    {
+       OnKepElements();
+    }
+    else  //do nothing
+    {
+        ;
+    }
+}
 
