@@ -1,0 +1,647 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                              RealUtilities
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: M. Weippert, Chu-chi Li, E. Corderman, W. Shoan
+// Created: 1995/07/21 for GSS project
+// Modified:
+//   2003/09/15 Linda Jun - Used namespace GmatRealUtil
+//
+/**
+ *  This file provides Math Utilities that are not provided in the C++ Library 
+ *  or provides call-throughs to the routines of the C++ (C) math.h
+ */
+//------------------------------------------------------------------------------
+#include <math.h>             // for fabs()
+//#include <time.h>
+#include "RealTypes.hpp"
+#include "RealUtilities.hpp"
+
+using namespace GmatMathUtil;
+
+//------------------------------------------------------------------------------
+//  Integer Abs(Integer theNumber)
+//------------------------------------------------------------------------------
+Integer GmatMathUtil::Abs(Integer theNumber)
+{
+//    return abs(theNumber);   // cannot find abs prototype?  temporarily ...
+   if (theNumber < 0)
+   {
+      return (-theNumber);
+   }
+   return theNumber;
+}
+
+//------------------------------------------------------------------------------
+//  Real Abs(Real theNumber)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Abs(Real theNumber)
+{
+   return fabs(theNumber);
+}
+
+//------------------------------------------------------------------------------
+//  Real NearestInt(Real theNumber)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::NearestInt(Real theNumber)
+{
+   Real retVal;
+
+   if (theNumber < 0.0)
+      retVal = ceil(theNumber - 0.5);
+   else
+      retVal = floor(theNumber + 0.5);
+   
+   return retVal;
+}
+
+//------------------------------------------------------------------------------
+//  Integer Round(Real theNumber)
+//------------------------------------------------------------------------------
+Integer GmatMathUtil::Round(Real theNumber)
+{
+   return (Integer) floor(theNumber + 0.5 );
+}
+
+//------------------------------------------------------------------------------
+//  Integer Floor(Real theNumber)
+//------------------------------------------------------------------------------
+Integer GmatMathUtil::Floor(Real theNumber)
+{
+   return (Integer) floor(theNumber);
+}
+
+//------------------------------------------------------------------------------
+//  Integer Ceiling(Real theNumber)
+//------------------------------------------------------------------------------
+Integer GmatMathUtil::Ceiling(Real theNumber)
+{
+   return (Integer) ceil(theNumber);
+}
+
+//------------------------------------------------------------------------------
+//  Real Mod (Real left, Real right)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Mod (Real left, Real right)
+{
+   if (right == 0.0)  
+   {
+      throw RealUtilitiesExceptions::ArgumentError();
+   };
+   return (left - Real(floor(left/right)*right));
+}
+
+//------------------------------------------------------------------------------
+//  Real Rem (Real left, Real right)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Rem (Real left, Real right)
+{
+   if (right == 0.0) 
+   {
+      throw RealUtilitiesExceptions::ArgumentError();
+   }; 
+   return((left-Real(Integer(left/right))*right));
+}
+
+//------------------------------------------------------------------------------
+//  void Quotient (Real top, Real bottom, Integer &result)
+//------------------------------------------------------------------------------
+void GmatMathUtil::Quotient (Real top, Real bottom, Integer &result)
+{ 
+    if (bottom == 0.0) 
+    {
+        throw RealUtilitiesExceptions::ArgumentError();
+    }; 
+    result=Integer(top/bottom);
+}
+
+//------------------------------------------------------------------------------
+//  void Quotient (Real top, Real bottom, Real &result)
+//------------------------------------------------------------------------------
+void GmatMathUtil::Quotient (Real top, Real bottom, Real &result)
+{
+   if (bottom == 0.0) 
+   {
+      throw RealUtilitiesExceptions::ArgumentError();
+   }; 
+
+   result= Real(Integer(top/bottom));
+}
+
+//------------------------------------------------------------------------------
+//  Real Min (Real left, Real right)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Min (Real left, Real right)
+{
+   return ( (left > right) ? right : left );
+}
+
+//------------------------------------------------------------------------------
+//  Real Max (Real left, Real right)    
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Max (Real left, Real right)    
+{
+   return ( (left > right) ? left : right );
+}
+
+//------------------------------------------------------------------------------
+//  bool IsPositive(Real theNumber)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsPositive(Real theNumber)
+{
+   return (bool(theNumber>0.0));
+}
+
+//------------------------------------------------------------------------------
+//  bool IsNegative(Real theNumber)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsNegative(Real theNumber)
+{
+   return bool(theNumber<0.0);
+}
+
+//------------------------------------------------------------------------------
+//  bool IsNonNegative(Real theNumber)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsNonNegative(Real theNumber)
+{
+   return bool(theNumber>=0.0);
+}
+
+//------------------------------------------------------------------------------
+//  bool IsZero (Real theNumber, Real accuracy)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsZero (Real theNumber, Real accuracy)
+{
+   return bool(fabs(theNumber)<accuracy);
+}
+
+//------------------------------------------------------------------------------
+//  bool IsEqual (Real left, Real right, Real accuracy)
+//------------------------------------------------------------------------------
+bool GmatMathUtil::IsEqual (Real left, Real right, Real accuracy)
+{
+   return bool(fabs(left-right)<accuracy);
+}
+
+//------------------------------------------------------------------------------
+//  Integer SignOf (Real theNumber)
+//------------------------------------------------------------------------------
+Integer GmatMathUtil::SignOf (Real theNumber)
+{
+   if (IsZero(theNumber)) 
+      return 0;
+   else if (GmatMathUtil::IsPositive(theNumber)) 
+      return 1;
+
+   return -1;
+}
+
+//------------------------------------------------------------------------------
+//  Real Rad (Real angleInDeg, bool modBy2Pi)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Rad (Real angleInDeg, bool modBy2Pi)
+{
+   Real x = RAD_PER_DEG * angleInDeg;
+
+   return (modBy2Pi ? x - floor(x/TWO_PI)*TWO_PI
+           : x);
+}
+
+//------------------------------------------------------------------------------
+//  Real Deg(Real angleInRad, bool modBy360)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Deg(Real angleInRad, bool modBy360)
+{
+   Real x = DEG_PER_RAD * angleInRad;
+
+   return (modBy360 ? x - floor(x/360.0)*360.0 : x);
+}
+
+//------------------------------------------------------------------------------
+//  Real Sin (Real angleInRad, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Sin (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+
+   return sin( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+//  Real SinXOverX (Real angleInRad, Real cycleInRad)
+//------------------------------------------------------------------------------
+//  Real GmatMathUtil::SinXOverX (Real angleInRad, Real cycleInRad)
+//  {
+//     if ( fabs(angleInRad) > pow(10.0,(-(GmatRealConst::REAL_DIG/2)))) 
+//     {
+//        Real sinValue = GmatMathUtil::Sin(angleInRad, cycleInRad);
+//        return sinValue/angleInRad;
+//     }
+//     return 1.0;
+//  }
+
+//------------------------------------------------------------------------------
+//  Real Cos (Real angleInRad, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Cos (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return cos( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+//  Real Tan (Real angleInRad, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Tan (Real angleInRad, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (IsEqual(GmatMathUtil::Cos(angleInRad,cycleInRad),0.0)) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return tan( (TWO_PI/cycleInRad)*angleInRad);
+}
+
+//------------------------------------------------------------------------------
+//  Real ASin (Real x, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ASin (Real x, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (fabs(x)>1.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return (cycleInRad/TWO_PI)*asin(x);
+}
+
+//------------------------------------------------------------------------------
+//  Real ACos (Real x, Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ACos (Real x, Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if (fabs(x)>1.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return (cycleInRad/TWO_PI)*acos(x);
+}
+
+//------------------------------------------------------------------------------
+//  Real ATan (Real y, Real x , Real cycleInRad)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
+{
+   if (cycleInRad<=0.0) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   else if ((x==0.0)&&(y==0.0)) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return (cycleInRad/TWO_PI)*atan2(y,x);
+}
+
+//------------------------------------------------------------------------------
+//  Real Log(Real x,Real base)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Log(Real x,Real base)
+{
+   if ( (x<=0.0) || (base<=0.0) ) 
+      throw RealUtilitiesExceptions::ArgumentError();
+
+   return (log(x)/log(base));
+}
+
+//------------------------------------------------------------------------------
+//  Real Log (Real x, Integer base)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Log (Real x, Integer base)
+{
+   if ( (x<=0.0) || (base<=0) ) 
+      throw RealUtilitiesExceptions::ArgumentError();
+   
+   return GmatMathUtil::Log(x, Real(base));
+}
+
+static Integer Seed[2]= {30001,15001};
+
+//------------------------------------------------------------------------------
+//  void SetSeed(Integer initialSeed1,
+//------------------------------------------------------------------------------
+/**
+ * @note 30_031 = 2*3*5*7*11*13+1
+ *       67_831 = 2*3*5*7*17*19+1;
+ */
+//------------------------------------------------------------------------------
+void GmatMathUtil::SetSeed(Integer initialSeed1, Integer initialSeed2) 
+{
+   Seed[0] = initialSeed1 % 67831;
+   Seed[1] = initialSeed2 % 30031;
+}
+
+//------------------------------------------------------------------------------
+//  void GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+//------------------------------------------------------------------------------
+void GmatMathUtil::GetSeed(Integer& initialSeed1, Integer& initialSeed2)
+{
+   initialSeed1 = Seed[0];
+   initialSeed2 = Seed[1];
+}
+
+//------------------------------------------------------------------------------
+//  void SetSeedByClock() 
+//------------------------------------------------------------------------------
+//void  GmatMathUtil::SetSeedByClock() 
+//{
+//  struct timeval tv;
+//  struct timezone tz;
+//
+//  if (gettimeofday(&tv,&tz)==0) 
+//  {
+//
+//    Seed[0] = (Integer) (643*tv.tv_usec) % 67831;
+//    Seed[1] = (Integer) (481* tv.tv_usec) % 30031;
+//  } 
+//  else 
+//  {
+//    throw RealUtilitiesExceptions::IllegalTime();
+//  };
+//
+//};
+
+//------------------------------------------------------------------------------
+//  Real Number (Real lowerBound, Real upperBound)
+//------------------------------------------------------------------------------
+/**
+ * @note 211 = 2*3*5*7+1
+ *       2311 = 2*3*5*7*11 + 1
+ *       30031 = 2*3*5*7*11*13+1
+ *       67831 = 2*3*5*7*17*19+1
+ *       2037032760 = (30031 * 67831) -1
+ */
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Number (Real lowerBound, Real upperBound)
+{
+   Real X,Y;
+
+   Seed[1] = (211 * Seed[1]+2311) % 30031;
+
+   Seed[0] = 30031* Seed[0] +Seed[1];
+   X = Real(Seed[0] % 2037032760) / Real(2037032760);
+   
+   Seed[0] = Seed[0] % 67831;
+
+   Y = (upperBound-lowerBound)*X + lowerBound;
+    
+   return Y;
+}
+
+//------------------------------------------------------------------------------
+//  Real GaussianNumber(Real mu, Real sigma)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::GaussianNumber(Real mu, Real sigma)
+{
+   Integer i=0;
+   Real Z = -6.0;
+   
+   for (i=0;i<12;i++) 
+      Z = Z+Number();
+   
+   return mu+Z*sigma;
+}
+
+struct key
+{
+static Integer x;
+static Integer y;
+static Integer z;
+};
+
+Integer key::x = 10001;
+Integer key::y = 20001;
+Integer key::z = 30001;
+
+//------------------------------------------------------------------------------
+//  Real Ran () 
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Ran () 
+{
+   Real w;
+   key::x = 171 * (key::x%177-177) - 2 * (key::x/177);
+   if (key::x<0) 
+   {
+      key::x = key::x + 30269;
+   };
+   
+   key::y = 172 * (key::y%176-176)-35 * (key::y/176);
+   if (key::y<0) 
+   {
+      key::y = key::y + 30307;
+   };
+   
+   key::z = 170 * (key::z%178-178) -63* (key::z/178);
+   if (key::z<0) 
+   {
+      key::z = key::z +30323;
+   };
+
+   w = Real(key::x)/30269.0 + Real(key::y)/30307.0 + Real(key::z)/30323.0;
+   
+   return (w - Real(Integer(w-0.5)));  
+}
+
+//------------------------------------------------------------------------------
+//  void SetRanKey(Real k) 
+//------------------------------------------------------------------------------
+void GmatMathUtil::SetRanKey(Real k) 
+{
+   Real dummy = 0.0;
+   if (k==0) 
+   {
+      key::x = 10001;
+      key::y = 20001;
+      key::z = 30001;
+   } 
+   else 
+   {
+      Integer i;
+      Integer loop = Integer(k-Real(Integer(fabs(k)/31270.0)*31270.0))%31270;
+      
+      for (i=1; i<=loop;i++) 
+         dummy = GmatMathUtil::Ran();
+   }
+}
+
+//------------------------------------------------------------------------------
+//  R(Real g, Real f)
+//
+//  Description: function needed for Cot that produces the actual
+//               result value
+//  Arguments:                                                                
+//  <g>     <-  first input value
+//  <f>     <-  second input value
+//
+//  Returns:  <Real>  magnitude of cot
+//---------------------------------------------------------------------------
+//  Real GmatMathUtil::R (Real g, Real f) 
+//  {
+//     if (GmatRealConst::REAL_DIG<11) 
+//     {
+//        const Real p0 =1.0;
+//        const Real p1 = -0.1113614403566;
+//        const Real p2 = 0.1075154738488e-2;
+//        const Real q0 = 1.0;
+//        const Real q1 = -0.4446947720281;
+//        const Real q2 = 0.15973392133003-1;
+//        return ((p2*g+p1)*g*f+f)/
+//           (((q2*g+q1)*g+0.5)+0.5);
+//     } 
+//     else 
+//     {
+//        const Real p0 = 1.0;
+//        const Real p1 = -0.13338350006421960681e+0;
+//        const Real p2 = 0.34248878235890589960e-2;
+//        const Real p3 = -0.17861707342254426711e-4;
+//        const Real q0 = 1.0;
+//        const Real q1 = -0.46671683339755294240e+0;
+//        const Real q2 = 0.25663832289440112864e-1;
+//        const Real q3 = -0.31181531907010027307e-3;
+//        const Real q4 = 0.49819433993786512270e-6;
+//        return (((p3*g+p2)*g+p1)*g*f+f)/
+//           (((((q4*g+q3) *g+ q2) * g+ q1) *g +0.5) +0.5);
+//     }
+
+//  }
+
+//------------------------------------------------------------------------------
+//  Real Cot(Real x) 
+//------------------------------------------------------------------------------
+//  Real GmatMathUtil::Cot(Real x) 
+//  {
+//     static Real Epsilon = pow(GmatRealConst::SHORT_REAL_RADIX, 
+//                               -(GmatRealConst::REAL_MANT_DIG/2));
+//     static Real YMax = Real(Integer(PI *
+//                                     pow(2, (GmatRealConst::REAL_MANT_DIG/2))));
+//     Real y;
+//     Integer n;
+//     Real    xn;
+//     Real    f,g,x1,x2;
+//     Real    result;
+//     const Real epsilon1 = 1/GmatRealConst::REAL_MAX;
+//     const Real c1 = 1.57080078125;
+//     const Real c2 = -0.4454455103380768678308e-5;
+
+//     y = fabs(x);
+    
+//     if (y<epsilon1) 
+//        throw RealUtilitiesExceptions::ArgumentError();
+
+//     if (y>YMax/2) 
+//        throw RealUtilitiesExceptions::ArgumentError();
+
+//     n  = Integer(x*2/PI);
+//     xn = n;
+//     x1 = Integer(x);
+//     x2 = x-x1;
+
+//     f = ((x1-xn*c1) + x2)-xn*c2;
+
+//     if (fabs(f) < Epsilon) 
+//     { 
+//        result = f;
+//     } 
+//     else 
+//     {
+//        g = f*f;
+//        result = R(g,f);
+//     }
+    
+//     if (n%2) 
+//        return -result;
+
+//     return 1/result;
+//  }
+
+//------------------------------------------------------------------------------
+//  Real Cbrt(Real x) 
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Cbrt(Real x) 
+{
+   Real result;
+   
+   if (IsZero(x)) 
+   {
+      result = 0.0;
+   } 
+   else 
+   {
+      Real F,Y;
+      Integer M,N;
+      const Real Cbrt_C1  = 0.5874009;
+      const Real Cbrt_C2  = 0.4125990;
+      const Real Cbrt_C3  = 0.6299605249;
+      const Real Cbrt_C4  = 0.7937005260;
+
+      F=frexp(x,&N);
+      F=fabs(F);
+      Y= Cbrt_C1 + Cbrt_C2*F;
+      
+      switch(N%3) 
+      {
+      case 0:
+         break;
+      case 1: 
+         Y = Cbrt_C3*Y;
+         F = F /2;
+         N = N+2;
+         break;
+      case 2:    
+         Y = Cbrt_C4*Y;
+         F = F/2;
+         N = N+1;
+      }
+ 
+      M = N/3;
+      Y = Y - (Y/3 -((F/3)/(Y*Y)));
+      Y = Y - (Y/3 -((F/3)/(Y*Y)));
+      Y = Y - (Y/3 -((F/3)/(Y*Y)));
+      Y = Y - (Y/3 -((F/3)/(Y*Y)));
+
+      if (GmatMathUtil::IsNegative(x)) 
+         Y = -Y;
+
+      result = ldexp(Y,M);
+   }
+    
+   return result;
+}
+
+//------------------------------------------------------------------------------
+//  Real Sqrt(Real x) 
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Sqrt(Real x) 
+{
+   if (x < 0.0)
+        throw RealUtilitiesExceptions::ArgumentError();
+
+   return sqrt(x);
+}
+
+//------------------------------------------------------------------------------
+//  Real Pow(Real x, Real y)
+//------------------------------------------------------------------------------
+Real GmatMathUtil::Pow(Real x, Real y)
+{
+   return pow(x,y);
+}
