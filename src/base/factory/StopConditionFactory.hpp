@@ -26,8 +26,8 @@
 class GMAT_API StopConditionFactory : public Factory
 {
 public:
-   StopCondition*  CreateStopCondition(std::string ofType,
-                                       std::string withName = "");
+   StopCondition*  CreateStopCondition(const std::string &ofType,
+                                       const std::string &withName = "");
 
    // default constructor
    StopConditionFactory();

@@ -29,7 +29,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreatePropSetup(std::string ofType, std::string withName)
+//  CreatePropSetup(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
 * This method creates and returns an object of the requested PropSetup class
@@ -41,8 +41,8 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-PropSetup* PropSetupFactory::CreatePropSetup(std::string ofType,
-                                             std::string withName)
+PropSetup* PropSetupFactory::CreatePropSetup(const std::string &ofType,
+                                             const std::string &withName)
 {
    return new PropSetup(withName);
 }

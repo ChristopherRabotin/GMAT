@@ -31,7 +31,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreatePhysicalModel(std::string ofType, std::string withName)
+//  CreatePhysicalModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested PhysicalModel class
@@ -43,16 +43,16 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(std::string ofType,
-                                                         std::string withName)
+PhysicalModel* PhysicalModelFactory::CreatePhysicalModel(const std::string &ofType,
+                                                         const std::string &withName)
 {
    if (ofType == "PointMassForce")
-       return new PointMassForce(withName); //loj: 3/12/04 pass the name
-   else if (ofType == "SolarRadiationPressure")  // waw: 04/22/04 added to handle SRP
+       return new PointMassForce(withName);
+   else if (ofType == "SolarRadiationPressure")
        return new SolarRadiationPressure(withName);
-   else if (ofType == "DragForce")  // waw: 05/05/04 added to handle DragForce
+   else if (ofType == "DragForce")
        return new DragForce(withName);
-   else if (ofType == "GravityField") // djc: 06/25/04 Added for full field model
+   else if (ofType == "GravityField")
        return new GravityField(withName, "Earth");
    return NULL;
 }

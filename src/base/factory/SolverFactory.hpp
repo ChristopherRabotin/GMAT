@@ -29,18 +29,20 @@
 class SolverFactory : public Factory
 {
 public:
-	SolverFactory();
-    // constructor
-    SolverFactory(StringArray createList);
-    // copy constructor
-    SolverFactory(const SolverFactory& fact);
-    // assignment operator
-    SolverFactory&              operator=(const SolverFactory& fact);
+   virtual Solver* CreateSolver(const std::string &ofType,
+                                const std::string &withName /* = "" */);
+   
+   // default constructor
+   SolverFactory();
+   // constructor
+   SolverFactory(StringArray createList);
+   // copy constructor
+   SolverFactory(const SolverFactory& fact);
+   // assignment operator
+   SolverFactory& operator=(const SolverFactory& fact);
 
-	virtual ~SolverFactory();
-
-    virtual Solver*             CreateSolver(std::string ofType,
-                                             std::string withName /* = "" */); 
+   virtual ~SolverFactory();
+   
 };
 
 #endif // SolverFactory_hpp

@@ -28,7 +28,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateStopCondition(std::string ofType, std::string withName)
+//  CreateStopCondition(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested StopCondition class
@@ -40,10 +40,9 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-StopCondition* StopConditionFactory::CreateStopCondition(std::string ofType,
-                                                         std::string withName)
+StopCondition* StopConditionFactory::CreateStopCondition(const std::string &ofType,
+                                                         const std::string &withName)
 {
-    //loj: 3/22/04 changed to StopCondition
     if (ofType == "StopCondition")
         return new StopCondition(withName);
     return NULL;

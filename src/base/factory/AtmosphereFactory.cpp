@@ -31,8 +31,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateAtmosphere(std::string ofType, std::string forBody,
-//                   std::string withName)
+//  CreateAtmosphere(std::string ofType, std::string withName, std::string forBody)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Atmosphere class
@@ -48,15 +47,16 @@
  *       be useful in the future.
  */
 //------------------------------------------------------------------------------
-AtmosphereModel* AtmosphereFactory::CreateAtmosphere(std::string ofType,
-                                                     std::string forBody,
-                                                     std::string withName)
+AtmosphereModel*
+AtmosphereFactory::CreateAtmosphereModel(const std::string &ofType,
+                                         const std::string &withName,
+                                         const std::string &forBody)
 {
    if (ofType == "Exponential")
       return new ExponentialAtmosphere();
-   else if (ofType == "Msise90")
+   else if (ofType == "MSISE90")
       return new Msise90Atmosphere();
-   else if (ofType == "JacchiaRoberts")
+   else if (ofType == "Jacchia-Roberts")
       return new JacchiaRobertsAtmosphere();
    return NULL;
 }
@@ -78,9 +78,9 @@ Factory(Gmat::ATMOSPHERE)
    if (creatables.empty())
    {
       creatables.push_back("Exponential");
-      creatables.push_back("Msise90");
-      creatables.push_back("JacchiaRoberts");
-    }
+      creatables.push_back("MSISE90");
+      creatables.push_back("Jacchia-Roberts");
+   }
 }
 
 //------------------------------------------------------------------------------

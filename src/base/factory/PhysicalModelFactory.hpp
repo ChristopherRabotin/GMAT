@@ -26,8 +26,8 @@
 class GMAT_API PhysicalModelFactory : public Factory
 {
 public:
-   PhysicalModel*  CreatePhysicalModel(std::string ofType,
-                                       std::string withName = "");
+   PhysicalModel*  CreatePhysicalModel(const std::string &ofType,
+                                       const std::string &withName = "");
 
    // default constructor
    PhysicalModelFactory();

@@ -26,7 +26,8 @@
 class GMAT_API ForceModelFactory : public Factory
 {
 public:
-   ForceModel*  CreateForceModel(std::string ofType, std::string withName = "");
+   ForceModel*  CreateForceModel(const std::string &ofType,
+                                 const std::string &withName = "");
 
    // default constructor
    ForceModelFactory();

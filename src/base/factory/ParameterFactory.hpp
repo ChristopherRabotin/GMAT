@@ -26,7 +26,8 @@
 class GMAT_API ParameterFactory : public Factory
 {
 public:
-   Parameter*  CreateParameter(std::string ofType, std::string withName = "");
+   Parameter*  CreateParameter(const std::string &ofType,
+                               const std::string &withName = "");
 
    // default constructor
    ParameterFactory();

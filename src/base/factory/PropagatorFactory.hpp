@@ -26,7 +26,8 @@
 class GMAT_API PropagatorFactory : public Factory
 {
 public:
-   Propagator*  CreatePropagator(std::string ofType, std::string withName = "");
+   Propagator*  CreatePropagator(const std::string &ofType,
+                                 const std::string &withName = "");
 
    // default constructor
    PropagatorFactory();

@@ -40,8 +40,8 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-SpaceObject* SpacecraftFactory::CreateSpacecraft(std::string ofType,
-                                                std::string withName)
+SpaceObject* SpacecraftFactory::CreateSpacecraft(const std::string &ofType,
+                                                 const std::string &withName)
 {
    if (ofType == "Spacecraft")
       return new Spacecraft(withName);

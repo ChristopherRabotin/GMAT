@@ -26,8 +26,8 @@
 class GMAT_API SolarSystemFactory : public Factory
 {
 public:
-   SolarSystem*  CreateSolarSystem(std::string ofType,
-                                   std::string withName = "");
+   SolarSystem*  CreateSolarSystem(const std::string &ofType,
+                                   const std::string &withName = "");
 
    // default constructor
    SolarSystemFactory();

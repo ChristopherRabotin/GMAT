@@ -29,7 +29,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateBurn(std::string ofType, std::string withName)
+//  CreateBurn(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Burn class 
@@ -37,7 +37,7 @@
  * @param <ofType> the burn object to create and return.
  */
 //------------------------------------------------------------------------------
-Burn* BurnFactory::CreateBurn(std::string ofType, std::string withName)
+Burn* BurnFactory::CreateBurn(const std::string &ofType, const std::string &withName)
 {
    if (ofType == "ImpulsiveBurn")
       return new ImpulsiveBurn(withName);

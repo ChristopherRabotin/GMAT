@@ -28,13 +28,14 @@
 class BurnFactory : public Factory
 {
 public:
-	BurnFactory();
-	virtual ~BurnFactory();
-    BurnFactory(StringArray createList);
-    BurnFactory(const BurnFactory& fact);
-    BurnFactory&    operator= (const BurnFactory& fact);
+   Burn* CreateBurn(const std::string &ofType, const std::string &withName = "");
 
-    Burn*           CreateBurn(std::string ofType, std::string withName = "");
+   BurnFactory();
+   virtual ~BurnFactory();
+   BurnFactory(StringArray createList);
+   BurnFactory(const BurnFactory& fact);
+   BurnFactory& operator= (const BurnFactory& fact);
+
 };
 
 

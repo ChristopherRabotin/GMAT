@@ -26,8 +26,8 @@
 class GMAT_API PropSetupFactory : public Factory
 {
 public:
-   PropSetup*  CreatePropSetup(std::string ofType,
-                               std::string withName = "");
+   PropSetup*  CreatePropSetup(const std::string &ofType,
+                               const std::string &withName = "");
 
    // default constructor
    PropSetupFactory();

@@ -29,6 +29,28 @@
 //  public methods
 //---------------------------------
 
+//------------------------------------------------------------------------------
+//  Solver* CreateSolver(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates and returns an object of the requested Solver class. 
+ *
+ * @param <ofType> type of Solver object to create and return.
+ * @param <withName> the name for the newly-created Solver object.
+ * 
+ * @return A pointer to the created object.
+ */
+//------------------------------------------------------------------------------
+Solver* SolverFactory::CreateSolver(const std::string &ofType,
+                                    const std::string &withName)
+{
+   if (ofType == "DifferentialCorrector")
+      return new DifferentialCorrector(withName);
+   // Add other solvers here    
+    
+   return NULL;
+}
+
 
 //------------------------------------------------------------------------------
 //  SolverFactory()
@@ -114,27 +136,6 @@ SolverFactory& SolverFactory::operator=(const SolverFactory& fact)
 }
     
   
-//------------------------------------------------------------------------------
-//  Solver* CreateSolver(std::string ofType, std::string withName)
-//------------------------------------------------------------------------------
-/**
- * This method creates and returns an object of the requested Solver class. 
- *
- * @param <ofType> type of Solver object to create and return.
- * @param <withName> the name for the newly-created Solver object.
- * 
- * @return A pointer to the created object.
- */
-//------------------------------------------------------------------------------
-Solver* SolverFactory::CreateSolver(std::string ofType, std::string withName)
-{
-    if (ofType == "DifferentialCorrector")
-        return new DifferentialCorrector(withName);
-    // Add other solvers here    
-    
-    return NULL;
-}
-
 
 //---------------------------------
 //  protected methods

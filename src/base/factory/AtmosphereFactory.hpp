@@ -26,9 +26,9 @@
 class GMAT_API AtmosphereFactory : public Factory
 {
 public:
-   AtmosphereModel*  CreateAtmosphere(std::string ofType,
-                                 std::string forBody = "Earth",
-                                 std::string withName = "");
+   AtmosphereModel*  CreateAtmosphereModel(const std::string &ofType,
+                                           const std::string &withName = "",
+                                           const std::string &forBody = "Earth");
 
    // default constructor
    AtmosphereFactory();

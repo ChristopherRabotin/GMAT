@@ -44,7 +44,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateCommand(std::string ofType, std::string withName)
+//  CreateCommand(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested command class 
@@ -55,8 +55,8 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-GmatCommand* CommandFactory::CreateCommand(std::string ofType,
-                                       std::string withName)
+GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
+                                           const std::string &withName)
 {
     if (ofType == "Propagate")
         return new Propagate;

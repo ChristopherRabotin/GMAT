@@ -33,7 +33,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateParameter(std::string ofType, std::string withName)
+//  CreateParameter(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Parameter class
@@ -42,8 +42,8 @@
  * @param <withName> the name to give the newly-created Parameter object.
  */
 //------------------------------------------------------------------------------
-Parameter* ParameterFactory::CreateParameter(std::string ofType,
-                                             std::string withName)
+Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
+                                             const std::string &withName)
 {
    // Time parameters
    if (ofType == "ElapsedDays")

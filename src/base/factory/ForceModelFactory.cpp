@@ -28,7 +28,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateForceModel(std::string ofType, std::string withName)
+//  CreateForceModel(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested ForceModel class 
@@ -42,8 +42,8 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-ForceModel* ForceModelFactory::CreateForceModel(std::string ofType,
-                                                std::string withName)
+ForceModel* ForceModelFactory::CreateForceModel(const std::string &ofType,
+                                                const std::string &withName)
 {
    return new ForceModel(withName);
 }

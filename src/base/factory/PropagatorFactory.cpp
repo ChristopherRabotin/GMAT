@@ -34,7 +34,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreatePropagator(std::string ofType, std::string withName)
+//  CreatePropagator(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Propagator class 
@@ -46,10 +46,9 @@
  *       parameter may be added later.
  */
 //------------------------------------------------------------------------------
-Propagator* PropagatorFactory::CreatePropagator(std::string ofType,
-                                                std::string withName)
+Propagator* PropagatorFactory::CreatePropagator(const std::string &ofType,
+                                                const std::string &withName)
 {
-   //loj: 3/4/04 passed withName and used correct name for RungeKuttaFehlberg56
    if (ofType == "RungeKutta89")
       return new RungeKutta89(withName);
    if (ofType == "PrinceDormand45")

@@ -31,19 +31,21 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateSubscriber(std::string ofType, std::string withName)
+//  CreateSubscriber(const std::string &ofType, const std::string &withName,
+//                   const std::string &fileName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested Subscriber class
  *
- * @param <ofType> the Subscriber object to create and return.
+ * @param <ofType>   the Subscriber object to create and return.
  * @param <withName> the name to give the newly-created Subscriber object.
+ * @param <fileName> the file name if subscriber is ReportFile, ignored otherwise
  *
  */
 //------------------------------------------------------------------------------
-Subscriber* SubscriberFactory::CreateSubscriber(std::string ofType,
-                                                std::string withName,
-                                                std::string fileName)
+Subscriber* SubscriberFactory::CreateSubscriber(const std::string &ofType,
+                                                const std::string &withName,
+                                                const std::string &fileName)
 {
    if (ofType == "ReportFile")
       return new ReportFile(withName, fileName);

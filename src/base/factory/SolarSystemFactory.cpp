@@ -27,7 +27,7 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  CreateSolarSystem(std::string ofType, std::string withName)
+//  CreateSolarSystem(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**
  * This method creates and returns an object of the requested SolarSystem class
@@ -39,8 +39,8 @@
  *       Use of this parameter may be added later.
  */
 //------------------------------------------------------------------------------
-SolarSystem* SolarSystemFactory::CreateSolarSystem(std::string ofType,
-                                                   std::string withName)
+SolarSystem* SolarSystemFactory::CreateSolarSystem(const std::string &ofType,
+                                                   const std::string &withName)
 {
    return new SolarSystem(withName);
 }
