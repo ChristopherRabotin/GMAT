@@ -27,6 +27,7 @@
 //#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 1
 //#define DEBUG_USER_INTERRUPT 1
+//#define DEBUG_ACTION_REMOVE 1
 
 //---------------------------------
 // static data
@@ -1219,14 +1220,14 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          {
             if (type == "OpenGlPlot")
             {
-               // add default spacecraft to OpenGlPlot
-               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName());
+               // add default spacecraft to OpenGlPlot (loj: 9/28/04 added index)
+               sub->SetStringParameter("Add", GetDefaultSpacecraft()->GetName(), 0); 
             }
             else if (type == "XyPlot")
             {
-               // add default x,y parameter to XyPlot
+               // add default x,y parameter to XyPlot (loj: 9/29/04 added index)
                sub->SetStringParameter("IndVar", GetDefaultX()->GetName());
-               sub->SetStringParameter("Add", GetDefaultY()->GetName());
+               sub->SetStringParameter("Add", GetDefaultY()->GetName(), 0);
                sub->Activate(true);
             }
          }
@@ -2331,12 +2332,21 @@ void Moderator::CreateDefaultMission()
       // XyPlot
       sub = CreateSubscriber("XyPlot", "DefaultXyPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.CurrA1MJD");
-      sub->SetStringParameter("Add", "DefaultSC.X");
+      sub->SetStringParameter("Add", "DefaultSC.X", 0); //loj: 9/29/04 added index
+#if DEBUG_ACTION_REMOVE
+      sub->SetStringParameter("Add", "DefaultSC.Y", 1);
+      sub->SetStringParameter("Add", "DefaultSC.Z", 2);
+      sub->TakeAction("Remove", "DefaultSC.Y");
+#endif
       sub->Activate(true);
-    
+      
       // OpenGlPlot
       sub = CreateSubscriber("OpenGlPlot", "DefaultOpenGl");
-      sub->SetStringParameter("Add", "DefaultSC");
+      sub->SetStringParameter("Add", "DefaultSC", 0); //loj: 9/28/04 added index
+#if DEBUG_ACTION_REMOVE
+      sub->SetStringParameter("Add", "Spacecraft1", 1);
+      sub->TakeAction("Remove", "Spacecraft1");
+#endif
       sub->Activate(true);
       
 #if DEBUG_DEFAULT_MISSION
@@ -2373,12 +2383,13 @@ void Moderator::CreateDefaultMission()
 
       isRunReady = true;
    }
-   catch (...)
+   catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_,
-                                     "Moderator::CreateDefaultMission() Error "
-                                     "occurred during default mission creation. "
-                                     "Default mission will not run");
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "Moderator::CreateDefaultMission() Error occurred during default "
+          "mission creation. Default mission will not run.\n Message: " +
+          e.GetMessage());
    }
 }
 
