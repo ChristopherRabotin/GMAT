@@ -42,6 +42,7 @@ private:
     wxWindow *parent;
     wxTreeItemId mSpacecraftItem;
     wxTreeItemId mPropagatorItem;
+    wxTreeItemId mReportItem;
     
     void AddDefaultResources();
     void AddDefaultBodies(wxTreeItemId universe);
@@ -51,6 +52,8 @@ private:
     void AddDefaultPropagators(wxTreeItemId propagator);
     void AddDefaultSolvers(wxTreeItemId solver);
     void AddDefaultPlots(wxTreeItemId plot);
+    void AddDefaultReports(wxTreeItemId subs);
+    
     //loj: why interface causing parse error? changed to interfaceTree
     void AddDefaultInterfaces(wxTreeItemId interfaceTree);
     void AddIcons();
@@ -73,8 +76,8 @@ private:
    
     enum
     {
-        ICON_FILE,
         ICON_FOLDER,
+        ICON_FILE,
         ICON_OPENFOLDER,
         ICON_SPACECRAFT,
         ICON_EARTH

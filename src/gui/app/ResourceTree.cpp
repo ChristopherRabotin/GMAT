@@ -73,31 +73,42 @@ void ResourceTree::UpdateResources()
     MessageInterface::ShowMessage(" In ResourceTree::UpdateResources()\n");
 
     // update spacecraft
-    StringArray scNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-    int size = scNames.size();
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    int size = itemNames.size();
 
     this->DeleteChildren(mSpacecraftItem);
     
     for (int i = 0; i<size; i++)
     {
-        wxString scname = wxString(scNames[i].c_str());
-        MessageInterface::ShowMessage(" SC name: " + scNames[i] + "\n");
-        this->AppendItem(mSpacecraftItem, wxT(scname), ICON_SPACECRAFT, -1,
-                         new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(mSpacecraftItem, wxT(objname), ICON_SPACECRAFT, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_SPACECRAFT));
     };
     
     // update propagator
-    StringArray propSetupNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
-    size = propSetupNames.size();
+    itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+    size = itemNames.size();
 
     this->DeleteChildren(mPropagatorItem);
     
     for (int i = 0; i<size; i++)
     {
-        wxString scname = wxString(propSetupNames[i].c_str());
-        MessageInterface::ShowMessage(" Propagator name: " + propSetupNames[i] + "\n");
-        this->AppendItem(mPropagatorItem, wxT(scname), -1, -1,
-                         new GmatTreeItemData(wxT(scname), DEFAULT_PROPAGATOR));
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(mPropagatorItem, wxT(objname), ICON_FILE, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_PROPAGATOR));
+    };
+
+    // update reports
+    itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+    size = itemNames.size();
+
+    this->DeleteChildren(mReportItem);
+    
+    for (int i = 0; i<size; i++)
+    {
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(mReportItem, wxT(objname), ICON_FILE, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_REPORT));
     };
 
     // update other tree items
@@ -161,13 +172,15 @@ void ResourceTree::AddDefaultResources()
                      -1, -1, new GmatTreeItemData(wxT("Plots"), PLOTS_FOLDER));
     SetItemImage(plotItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
+    mReportItem = this->AppendItem(resource, wxT("Reports"),
+                     -1, -1, new GmatTreeItemData(wxT("Reports"), REPORTS_FOLDER));
+    SetItemImage(mReportItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
+
     wxTreeItemId interfaceItem = this->AppendItem(resource, wxT("Interfaces"), -1, -1,
                      new GmatTreeItemData(wxT("Interfaces"), INTERFACES_FOLDER));
     SetItemImage(interfaceItem, ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
-    this->AppendItem(resource, wxT("Reports"), -1, -1,
-                     new GmatTreeItemData(wxT("Reports"), REPORTS_FOLDER));
-    this->AppendItem(resource, wxT("Subscripts"), -1, -1,
+    wxTreeItemId subscriptItem =  this->AppendItem(resource, wxT("Subscripts"), -1, -1,
                      new GmatTreeItemData(wxT("Subscripts"), SUBSCRIPTS_FOLDER));
     this->AppendItem(resource, wxT("Variables"), -1, -1,
                      new GmatTreeItemData(wxT("Variables"), VARIABLES_FOLDER));
@@ -183,6 +196,7 @@ void ResourceTree::AddDefaultResources()
     AddDefaultPropagators(mPropagatorItem);
     AddDefaultSolvers(solverItem);
     AddDefaultPlots(plotItem);
+    AddDefaultReports(mReportItem);
     AddDefaultInterfaces(interfaceItem);
 }
 
@@ -222,15 +236,13 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId universe)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSpacecraft(wxTreeItemId spacecraft)
 {
-    MessageInterface::ShowMessage(" In ResourceTree::AddDefaultSpacecraft()\n");
-    StringArray scNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
-    int size = scNames.size();
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SPACECRAFT);
+    int size = itemNames.size();
     for (int i = 0; i<size; i++)
     {
-        wxString scname = wxString(scNames[i].c_str());
-        MessageInterface::ShowMessage(" SC name: " + scNames[i] + "\n");
-        this->AppendItem(spacecraft, wxT(scname), ICON_SPACECRAFT, -1,
-                         new GmatTreeItemData(wxT(scname), DEFAULT_SPACECRAFT));
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(spacecraft, wxT(objname), ICON_SPACECRAFT, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_SPACECRAFT));
     };
 
     //loj: commented out
@@ -284,15 +296,13 @@ void ResourceTree::AddDefaultConstellations(wxTreeItemId constellation)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
 {
-    MessageInterface::ShowMessage(" In ResourceTree::AddDefaultPropagators()\n");
-    StringArray propSetupNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
-    int size = propSetupNames.size();
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::PROP_SETUP);
+    int size = itemNames.size();
     for (int i = 0; i<size; i++)
     {
-        wxString scname = wxString(propSetupNames[i].c_str());
-        MessageInterface::ShowMessage(" SC name: " + propSetupNames[i] + "\n");
-        this->AppendItem(propagator, wxT(scname), -1, -1,
-                         new GmatTreeItemData(wxT(scname), DEFAULT_PROPAGATOR));
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(propagator, wxT(objname), -1, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_PROPAGATOR));
     };
 
     //loj: commented out
@@ -309,11 +319,11 @@ void ResourceTree::AddDefaultPropagators(wxTreeItemId propagator)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultSolvers(wxTreeItemId solver)
 {
-    this->AppendItem(solver, wxT("DC"), -1, -1,
+    this->AppendItem(solver, wxT("DC"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("DC"), DEFAULT_SOLVER));
-    this->AppendItem(solver, wxT("Optimizers"), -1, -1,
+    this->AppendItem(solver, wxT("Optimizers"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Optimizers"), DEFAULT_SOLVER));
-    this->AppendItem(solver, wxT("Monte Carlo"), -1, -1,
+    this->AppendItem(solver, wxT("Monte Carlo"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Monte Carlo"), DEFAULT_SOLVER));
 }
 
@@ -322,14 +332,29 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId solver)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultPlots(wxTreeItemId plot)
 {
-    this->AppendItem(plot, wxT("Polar"), -1, -1,
+    this->AppendItem(plot, wxT("Polar"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Polar"), DEFAULT_PLOT));
-    this->AppendItem(plot, wxT("3D"), -1, -1,
+    this->AppendItem(plot, wxT("3D"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("3D"), DEFAULT_PLOT));
-    this->AppendItem(plot, wxT("Ground Track"), -1, -1,
+    this->AppendItem(plot, wxT("Ground Track"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Ground Track"), DEFAULT_PLOT));
-    this->AppendItem(plot, wxT("XY"), -1, -1,
+    this->AppendItem(plot, wxT("XY"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("XY"), DEFAULT_PLOT));
+}
+
+//------------------------------------------------------------------------------
+// void AddDefaultReports(wxTreeItemId subs)
+//------------------------------------------------------------------------------
+void ResourceTree::AddDefaultReports(wxTreeItemId subs)
+{
+    StringArray itemNames = theGuiInterpreter->GetListOfConfiguredItems(Gmat::SUBSCRIBER);
+    int size = itemNames.size();
+    for (int i = 0; i<size; i++)
+    {
+        wxString objname = wxString(itemNames[i].c_str());
+        this->AppendItem(subs, wxT(objname), -1, -1,
+                         new GmatTreeItemData(wxT(objname), DEFAULT_REPORT));
+    };
 }
 
 //------------------------------------------------------------------------------
@@ -337,9 +362,9 @@ void ResourceTree::AddDefaultPlots(wxTreeItemId plot)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultInterfaces(wxTreeItemId interfaceTree)
 {
-    this->AppendItem(interfaceTree, wxT("TCP/IP"), -1, -1,
+    this->AppendItem(interfaceTree, wxT("TCP/IP"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("TCP/IP"), DEFAULT_INTERFACE));
-    this->AppendItem(interfaceTree, wxT("Mex"), -1, -1,
+    this->AppendItem(interfaceTree, wxT("Mex"), ICON_FILE, -1,
           new GmatTreeItemData(wxT("Mex"), DEFAULT_INTERFACE));
 }
 

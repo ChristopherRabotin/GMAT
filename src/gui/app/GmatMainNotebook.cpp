@@ -108,6 +108,11 @@ void GmatMainNotebook::CreatePage(GmatTreeItemData *item)
         sizer->Add( new PropagationConfigPanel(panel, item->GetDesc()), 0,
                     wxGROW|wxALL, 0 );
       }
+      else if ((dataType == DEFAULT_REPORT)   ||
+               (dataType == CREATED_REPORT))
+      {
+          //loj: add Report Panel here
+      }
       else if (dataType == DEFAULT_PROPAGATE_COMMAND)
       {
         sizer->Add( new PropagatorSetupPanel(panel),
@@ -172,6 +177,8 @@ bool GmatMainNotebook::OpenPage(GmatTreeItemData *item)
       (dataType == PROPAGATORS_FOLDER)   ||
       (dataType == SOLVERS_FOLDER)       ||
       (dataType == PLOTS_FOLDER)         ||
+      (dataType == REPORTS_FOLDER)       ||
+      (dataType == SUBSCRIPTS_FOLDER)    ||
       (dataType == INTERFACES_FOLDER))
   {
     result = FALSE;
