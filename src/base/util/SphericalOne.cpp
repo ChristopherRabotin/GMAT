@@ -22,8 +22,6 @@
 
 #include "SphericalOne.hpp"
 
-using namespace GmatRealUtil;
-
 //---------------------------------
 //  static data
 //---------------------------------
@@ -70,7 +68,7 @@ SphericalOne::SphericalOne(Real rMag,  Real ra, Real dec, Real vMag,
 //   SphericalOne::SphericalOne(const SphericalOne &spherical)
 //------------------------------------------------------------------------------
 SphericalOne::SphericalOne(const SphericalOne &spherical) :
-    Spherical        (spherical.radicalMagnitude, spherical.rightAscension,
+    Spherical        (spherical.positionMagnitude, spherical.rightAscension,
                       spherical.declination, spherical.velocityMagnitude),
     azimuth          (spherical.azimuth),
     flightPathAngle  (spherical.flightPathAngle)
@@ -84,7 +82,7 @@ SphericalOne& SphericalOne::operator=(const SphericalOne &spherical)
 {
    if (this != &spherical)
    {
-      SetRadicalMagnitude( spherical.GetRadicalMagnitude() );
+      SetPositionMagnitude( spherical.GetPositionMagnitude() );
       SetRightAscension( spherical.GetRightAscension() );
       SetDeclination( spherical.GetDeclination() );
       SetVelocityMagnitude( spherical.GetVelocityMagnitude() );
@@ -106,7 +104,7 @@ SphericalOne::~SphericalOne()
 //------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& output, SphericalOne &s)
 {
-    Rvector v(6, s.radicalMagnitude, s.rightAscension, s.declination,
+    Rvector v(6, s.positionMagnitude, s.rightAscension, s.declination,
               s.velocityMagnitude, s.azimuth, s.flightPathAngle);
 
     output << v << std::endl;
@@ -120,7 +118,7 @@ std::ostream& operator<<(std::ostream& output, SphericalOne &s)
 //------------------------------------------------------------------------------
 std::istream& operator>>(std::istream& input, SphericalOne &s )
 {
-    input >> s.radicalMagnitude >> s.rightAscension 
+    input >> s.positionMagnitude >> s.rightAscension 
           >> s.declination >> s.velocityMagnitude
           >> s.azimuth >> s.flightPathAngle;
 
@@ -132,7 +130,7 @@ std::istream& operator>>(std::istream& input, SphericalOne &s )
 //------------------------------------------------------------------------------
 Real SphericalOne::GetAzimuth() const
 {
-	return azimuth;
+        return azimuth;
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +138,7 @@ Real SphericalOne::GetAzimuth() const
 //------------------------------------------------------------------------------
 void SphericalOne::SetAzimuth(const Real az)
 {
-	azimuth = az;
+        azimuth = az;
 }
 
 //------------------------------------------------------------------------------
@@ -148,7 +146,7 @@ void SphericalOne::SetAzimuth(const Real az)
 //------------------------------------------------------------------------------
 Real SphericalOne::GetFlightPathAngle() const
 {
-	return flightPathAngle;
+        return flightPathAngle;
 }
 
 //------------------------------------------------------------------------------
@@ -156,7 +154,7 @@ Real SphericalOne::GetFlightPathAngle() const
 //------------------------------------------------------------------------------
 void SphericalOne::SetFlightPathAngle(const Real fPA) 
 {
-	flightPathAngle = fPA;
+        flightPathAngle = fPA;
 }
 
 //------------------------------------------------------------------------------
@@ -260,7 +258,7 @@ void SphericalOne::CalculateLocalPlaneCoord(const Rvector3 position,
     // Get the position vector magnitude
     Real r_mag = position.GetMagnitude();
 
-	// Get x, y, and z from the position
+        // Get x, y, and z from the position
     Real posX = position.Get(0);
     Real posY = position.Get(1);
     Real posZ = position.Get(2);
@@ -302,7 +300,7 @@ std::string* SphericalOne::ToValueStrings(void)
 {
    std::stringstream ss("");
 
-   ss << GetRadicalMagnitude();
+   ss << GetPositionMagnitude();
    stringValues[0] = ss.str();
    
    ss.str("");

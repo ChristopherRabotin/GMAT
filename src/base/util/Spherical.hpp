@@ -14,7 +14,7 @@
 //
 /**
  * Definition for the Spherical Base class to support the spherical elements
- * containing Radical Magnitude, Right Ascension, Declination, and Velocity
+ * containing Position Magnitude, Right Ascension, Declination, and Velocity
  * Magnitude.
  *
  * @note:   This code is revived from the original argosy and swingby
@@ -47,8 +47,8 @@ public:
     friend std::istream& operator>>(std::istream& input, Spherical& s);
 
     // public method 
-    Real GetRadicalMagnitude() const;
-    void SetRadicalMagnitude(const Real rMag);
+    Real GetPositionMagnitude() const;
+    void SetPositionMagnitude(const Real rMag);
 
     Real GetRightAscension() const;
     void SetRightAscension(const Real ra);
@@ -67,7 +67,7 @@ public:
     static const Real ORBIT_TOLERANCE = 1.0E-10;
 
 protected:
-    Real     radicalMagnitude;     //  Position vector magnitude
+    Real     positionMagnitude;    //  Position vector magnitude
     Real     rightAscension;       //  RA measured of vernal equinox 
     Real     declination;          //  Declination measured north from equator
     Real     velocityMagnitude;    //  Velocity vector magnitude

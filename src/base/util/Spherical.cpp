@@ -14,7 +14,7 @@
 //
 /**
  * Implements Spherical Base class to contains the spherical elements including
- * Radical Magnitude, Right Ascension, Declination, and Velocity Magnitude.
+ * Position Magnitude, Right Ascension, Declination, and Velocity Magnitude.
  *
  * @note:   This code is revived from the original argosy and swingby 
  */
@@ -22,14 +22,12 @@
 
 #include "Spherical.hpp"
 
-using namespace GmatRealUtil;
-
 //---------------------------------
 //  static data
 //---------------------------------
 const std::string Spherical::DATA_DESCRIPTIONS[NUM_DATA] =
 {
-   "Radical Magnitude",
+   "Position Magnitude",
    "Right Ascension",
    "Declination",
    "Velocity Magnitude"
@@ -46,7 +44,7 @@ const std::string Spherical::DATA_DESCRIPTIONS[NUM_DATA] =
  * Constructs base Spherical structures 
  */
 Spherical::Spherical() :
-    radicalMagnitude  (0.0),
+    positionMagnitude  (0.0),
     rightAscension    (0.0),
     declination       (0.0),
     velocityMagnitude (0.0)
@@ -57,7 +55,7 @@ Spherical::Spherical() :
 //  Spherical::Spherical(Real rMag,  Real ra, Real dec, Real vMag)
 //------------------------------------------------------------------------------
 Spherical::Spherical(Real rMag,  Real ra, Real dec, Real vMag) :
-    radicalMagnitude  (rMag),
+    positionMagnitude  (rMag),
     rightAscension    (ra),
     declination       (dec),
     velocityMagnitude (vMag)
@@ -68,7 +66,7 @@ Spherical::Spherical(Real rMag,  Real ra, Real dec, Real vMag) :
 //   Spherical::Spherical(const Spherical &spherical)
 //------------------------------------------------------------------------------
 Spherical::Spherical(const Spherical &spherical) :
-    radicalMagnitude  (spherical.radicalMagnitude),
+    positionMagnitude  (spherical.positionMagnitude),
     rightAscension    (spherical.rightAscension),
     declination       (spherical.declination),
     velocityMagnitude (spherical.velocityMagnitude)
@@ -82,7 +80,7 @@ Spherical& Spherical::operator=(const Spherical &spherical)
 {
    if (this != &spherical)
    {
-      SetRadicalMagnitude( spherical.GetRadicalMagnitude() );
+      SetPositionMagnitude( spherical.GetPositionMagnitude() );
       SetRightAscension( spherical.GetRightAscension() );
       SetDeclination( spherical.GetDeclination() );
       SetVelocityMagnitude( spherical.GetVelocityMagnitude() );
@@ -102,7 +100,7 @@ Spherical::~Spherical()
 //------------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& output, Spherical& s)
 {
-    Rvector v(4, s.radicalMagnitude, s.rightAscension, s.declination,
+    Rvector v(4, s.positionMagnitude, s.rightAscension, s.declination,
               s.velocityMagnitude);
 
     output << v << std::endl;
@@ -116,26 +114,26 @@ std::ostream& operator<<(std::ostream& output, Spherical& s)
 //------------------------------------------------------------------------------
 std::istream& operator>>(std::istream& input, Spherical& s)
 {
-    input >> s.radicalMagnitude >> s.rightAscension 
+    input >> s.positionMagnitude >> s.rightAscension 
           >> s.declination >> s.velocityMagnitude;
 
     return input;
 }
 
 //------------------------------------------------------------------------------
-// Real Spherical::GetRadicalMagnitude() const
+// Real Spherical::GetPositionMagnitude() const
 //------------------------------------------------------------------------------
-Real Spherical::GetRadicalMagnitude() const
+Real Spherical::GetPositionMagnitude() const
 {
-	return radicalMagnitude;
+        return positionMagnitude;
 }
 
 //------------------------------------------------------------------------------
-// void Spherical::SetRadicalMagnitude(const Real rMag) 
+// void Spherical::SetPositionMagnitude(const Real rMag) 
 //------------------------------------------------------------------------------
-void Spherical::SetRadicalMagnitude(const Real rMag)
+void Spherical::SetPositionMagnitude(const Real rMag)
 {
-	radicalMagnitude = rMag;
+        positionMagnitude = rMag;
 }
 
 //------------------------------------------------------------------------------
@@ -143,7 +141,7 @@ void Spherical::SetRadicalMagnitude(const Real rMag)
 //------------------------------------------------------------------------------
 Real Spherical::GetRightAscension() const
 {
-	return rightAscension;
+        return rightAscension;
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +149,7 @@ Real Spherical::GetRightAscension() const
 //------------------------------------------------------------------------------
 void Spherical::SetRightAscension(const Real ra) 
 {
-	rightAscension = ra;
+        rightAscension = ra;
 }
 
 //------------------------------------------------------------------------------
@@ -159,7 +157,7 @@ void Spherical::SetRightAscension(const Real ra)
 //------------------------------------------------------------------------------
 Real Spherical::GetDeclination() const
 {
-	return declination;
+        return declination;
 }
 
 //------------------------------------------------------------------------------
@@ -167,7 +165,7 @@ Real Spherical::GetDeclination() const
 //------------------------------------------------------------------------------
 void Spherical::SetDeclination(const Real dec) 
 {
-	declination = dec;
+        declination = dec;
 }
 
 //------------------------------------------------------------------------------
@@ -175,7 +173,7 @@ void Spherical::SetDeclination(const Real dec)
 //------------------------------------------------------------------------------
 Real Spherical::GetVelocityMagnitude() const
 {
-	return velocityMagnitude;
+        return velocityMagnitude;
 }
 
 //------------------------------------------------------------------------------
@@ -183,7 +181,7 @@ Real Spherical::GetVelocityMagnitude() const
 //------------------------------------------------------------------------------
 void Spherical::SetVelocityMagnitude(const Real vMag) 
 {
-	velocityMagnitude = vMag;
+        velocityMagnitude = vMag;
 }
 
 //------------------------------------------------------------------------------
@@ -194,17 +192,17 @@ bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
     Rvector3 position = cartesian.GetPosition();
     Rvector3 velocity = cartesian.GetVelocity();
 
-    // Get radical and velocity vector magnitudes
+    // Get position and velocity vector magnitudes
     Real r_mag = position.GetMagnitude();
 
-    // Check if input of radical magnitude is not valid then return false
+    // Check if input of position magnitude is not valid then return false
     if (fabs(r_mag) <= ORBIT_TOLERANCE)
     {
        return false;
     }
 
-    // Set the radical magnitude
-    SetRadicalMagnitude(r_mag); 
+    // Set the position magnitude
+    SetPositionMagnitude(r_mag); 
 
     // Get position (X, Y, Z)
     Real posX = position.Get(0); 
@@ -239,8 +237,8 @@ bool Spherical::ToSpherical(const Cartesian &cartesian, const bool isPartOne)
 Rvector3 Spherical::GetPosition()
 {
     
-    // Check if input of radical magnitude is not valid then return false
-    if (fabs(GetRadicalMagnitude()) <= ORBIT_TOLERANCE)
+    // Check if input of position magnitude is not valid then return false
+    if (fabs(GetPositionMagnitude()) <= ORBIT_TOLERANCE)
     {
        return Rvector3(0,0,0);
     }
@@ -250,10 +248,10 @@ Rvector3 Spherical::GetPosition()
     Real dec = GmatMathUtil::Rad( GetDeclination() );
 
     // Calculate X, Y, and Z 
-    Real x = GetRadicalMagnitude() * 
+    Real x = GetPositionMagnitude() * 
                GmatMathUtil::Cos(dec) * GmatMathUtil::Cos(ra);
     Real y = x * GmatMathUtil::Tan(ra);
-    Real z = GetRadicalMagnitude() * GmatMathUtil::Sin(dec);
+    Real z = GetPositionMagnitude() * GmatMathUtil::Sin(dec);
  
     // Return new position
     return Rvector3(x,y,z);
@@ -301,7 +299,7 @@ std::string* Spherical::ToValueStrings(void)
 {
    std::stringstream ss("");
 
-   ss << GetRadicalMagnitude();
+   ss << GetPositionMagnitude();
    stringValues[0] = ss.str();
    
    ss.str("");
